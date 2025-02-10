@@ -101,4 +101,4 @@ bool operator>=(const Duration& rhs, const Duration& lhs);
 
 } // namespace ecf
 
-#endif // ECFLOW_CHRONO_HPP
+#endif /* ecflow_core_Chrono_HPP */

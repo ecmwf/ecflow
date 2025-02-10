@@ -182,4 +182,4 @@ inline void Certificate::write_to_disk(EVP_PKEY* pkey, X509* x509) {
     }
 }
 
-#endif /* #ifndef ecflow_http_test_Certificate_HPP */
+#endif /* ecflow_http_test_Certificate_HPP */

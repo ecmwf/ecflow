@@ -57,7 +57,10 @@ std::string stringize_rtt(Functor const& f) {
     f(out);
     return out.str();
 }
+
 #define STRINGIZE_RTT(EXPRESSION) (ecf::stringize_rtt([](std::ostringstream& os) { os << EXPRESSION };))
 #define RTT(EXPRESSION) ecf::rtt(STRINGIZE_RTT(EXPRESSION))
+
 } // namespace ecf
-#endif
+
+#endif /* ecflow_client_Rtt_HPP */

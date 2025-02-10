@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ECFLOW_CORE_FILESYSTEM_HPP
-#define ECFLOW_CORE_FILESYSTEM_HPP
+#ifndef ecflow_core_Filesystem_HPP
+#define ecflow_core_Filesystem_HPP
 
 #include <cassert>
 
@@ -17,4 +17,4 @@
 
 namespace fs = boost::filesystem;
 
-#endif
+#endif /* ecflow_core_Filesystem_HPP */

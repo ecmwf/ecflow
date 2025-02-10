@@ -225,4 +225,5 @@ private:
         ar & query_;
     }
 };
-#endif
+
+#endif /* ecflow_base_Stats_HPP */

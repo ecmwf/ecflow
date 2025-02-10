@@ -36,4 +36,4 @@ private:
 
 } // namespace ecf::test
 
-#endif // test_ecflow_service_aviso_TestContentProvider_HPP
+#endif /* test_ecflow_service_aviso_TestContentProvider_HPP */

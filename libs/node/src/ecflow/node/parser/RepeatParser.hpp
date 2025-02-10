@@ -27,4 +27,4 @@ private:
     bool get_value(const std::vector<std::string>& lineTokens, ecf::Instant& value) const;
 };
 
-#endif
+#endif /* ecflow_node_parser_RepeatParser_HPP */

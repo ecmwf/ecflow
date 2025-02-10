@@ -27,4 +27,4 @@ private:
     SslTcpServer server_;
 };
 
-#endif
+#endif /* ecflow_server_SslServer_HPP */

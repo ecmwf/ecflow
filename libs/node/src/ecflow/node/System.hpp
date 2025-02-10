@@ -105,4 +105,4 @@ private:
 
 } // namespace ecf
 
-#endif
+#endif /* ecflow_node_System_HPP */
