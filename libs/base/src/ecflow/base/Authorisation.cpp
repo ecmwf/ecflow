@@ -16,11 +16,11 @@
 namespace ecf {
 
 authorisation_t is_authorised(const ClientToServerCmd& command, AbstractServer& server) {
-    if (server.permissions().good()) {
+    if (server.authorisation().good()) {
         return command.authorise(server);
     }
 
-    // By default, i.e. when permissions are not set, a command is always allowed
+    // By default, i.e. when authorisations are not set, a command is always allowed
     return authorisation_t::success(true);
 }
 

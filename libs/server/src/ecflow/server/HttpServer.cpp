@@ -11,9 +11,8 @@
 #include "ecflow/server/HttpServer.hpp"
 
 #include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/Identification.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
-#include "ecflow/base/cts/task/TaskCmd.hpp"
-#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/ecflow_version.h"
@@ -24,11 +23,14 @@ inline void log_error(char const* where, boost::beast::error_code ec) {
     LOG(Log::ERR, where << ": " << ec.message());
 }
 
-#define LOG_ERROR(WHERE, MESSAGE)                                       \
-    {                                                                   \
-        using namespace ecf;                                            \
-        std::cout << "ERR (" << WHERE << "): " << MESSAGE << std::endl; \
+#define LOG_LEVEL(LEVEL, WHERE, MESSAGE)                                      \
+    {                                                                         \
+        using namespace ecf;                                                  \
+        std::cout << LEVEL << " (" << WHERE << "): " << MESSAGE << std::endl; \
     }
+
+#define LOG_ERROR(WHERE, MESSAGE) LOG_LEVEL("ERR", WHERE, MESSAGE)
+#define LOG_DEBUG(WHERE, MESSAGE) LOG_LEVEL("DBG", WHERE, MESSAGE)
 
 static const std::string CONTENT_TYPE = "application/json";
 
@@ -63,23 +65,25 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
     ecf::restore_from_string(request.body(), inbound_request);
 
     {
-        // TODO: retrieve Identity from request header fields
-        ecf::Identity identity;
+        ecf::Identity identity = ecf::Identity::make_none();
+
+        // If possible, the Identify is retrieved from request header fields
+        bool identity_headers = false;
         for (const auto& field : request) {
-            LOG_ERROR("HttpServer::handle_request", field.name_string() << ": " << field.value());
+            LOG_DEBUG("HttpServer::handle_request", field.name_string() << ": " << field.value());
+            if (field.name_string() == "X-Auth-Username") {
+                identity_headers = true;
+                LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request");
+                identity = ecf::Identity::make_user(field.value(), "<unable-to-extract-from-http-header>");
+            }
         }
 
-        // TODO: consider 'in command' fields into the identity
-        auto cmd = inbound_request.get_cmd();
-        if (auto user_cmd = dynamic_cast<UserCmd*>(cmd.get()); user_cmd != nullptr) {
-            identity = ecf::Identity::make_user(user_cmd->is_custom_user(), user_cmd->user(), user_cmd->passwd());
+        // Otherwise, the Identity is retrieved from the 'in command' fields
+        if (!identity_headers) {
+            auto cmd = inbound_request.get_cmd();
+            identity = ecf::identify(cmd);
         }
-        else if (auto task_cmd = dynamic_cast<TaskCmd*>(cmd.get()); task_cmd != nullptr) {
-            identity = ecf::Identity::make_task();
-        }
-        else {
-            assert(false);
-        }
+
         inbound_request.get_cmd()->set_identity(std::move(identity));
     }
 
