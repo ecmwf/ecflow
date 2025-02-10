@@ -48,4 +48,4 @@ private:
     bool parsing_defs_;
 };
 
-#endif
+#endif /* ecflow_node_parser_VariableParser_HPP */

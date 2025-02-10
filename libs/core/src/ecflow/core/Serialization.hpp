@@ -88,4 +88,4 @@ void restore_from_string(const std::string& archive_data, T& restored) {
                                                           std::uint32_t const /*version*/); \
     template void T::serialize<cereal::JSONInputArchive>(cereal::JSONInputArchive&, std::uint32_t const /*version*/)
 
-#endif
+#endif /* ecflow_core_Serialization_HPP */

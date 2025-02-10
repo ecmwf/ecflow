@@ -29,4 +29,4 @@ struct InvalidArgument : public Exception
 
 } // namespace ecf
 
-#endif // ecflow_core_exceptions_Exceptions_HPP
+#endif /* ecflow_core_exceptions_Exceptions_HPP */
