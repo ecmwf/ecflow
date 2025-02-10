@@ -10,7 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/base/Permissions.hpp"
+#include "ecflow/server/AuthorisationService.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_loading_perms) {
     ECF_NAME_THIS_TEST();
 
     std::string content =
-R"---({
+        R"---({
   "rules": [
     {
       "path": "/.*",
@@ -75,17 +75,17 @@ R"---({
 })---";
 
     WithTestFile file{AutomaticTestFile{}, content};
-    auto permissions = ecf::Permissions::load_permissions_from_file(file.path());
-    BOOST_REQUIRE(permissions.ok());
-    BOOST_REQUIRE(permissions.value().good());
-    BOOST_REQUIRE(permissions.value().allows(ecf::Identity::make_user("user1"), std::string{"/"}, "read"));
-    BOOST_REQUIRE(permissions.value().allows(ecf::Identity::make_user("user2"), std::string{"/s/f/t"}, "read"));
-    BOOST_REQUIRE(permissions.value().allows(ecf::Identity::make_user("user1"), std::string{"/"}, "write"));
-    BOOST_REQUIRE(permissions.value().allows(ecf::Identity::make_user("user2"), std::string{"/s/f/t"}, "write"));
-    BOOST_REQUIRE(permissions.value().allows(ecf::Identity::make_user("user3"), std::string{"/"}, "read"));
-    BOOST_REQUIRE(permissions.value().allows(ecf::Identity::make_user("user4"), std::string{"/s/f/t"}, "read"));
-    BOOST_REQUIRE(permissions.value().allows(ecf::Identity::make_user("user3"), std::string{"/"}, "write"));
-    BOOST_REQUIRE(permissions.value().allows(ecf::Identity::make_user("user4"), std::string{"/s/f/t"}, "write"));
+    auto service = ecf::AuthorisationService::load_permissions_from_file(file.path());
+    BOOST_REQUIRE(service.ok());
+    BOOST_REQUIRE(service.value().good());
+    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user1", "secret"), std::string{"/"}, "read"));
+    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user2", "secret"), std::string{"/s/f/t"}, "read"));
+    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user1", "secret"), std::string{"/"}, "write"));
+    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user2", "secret"), std::string{"/s/f/t"}, "write"));
+    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user3", "secret"), std::string{"/"}, "read"));
+    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user4", "secret"), std::string{"/s/f/t"}, "read"));
+    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user3", "secret"), std::string{"/"}, "write"));
+    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user4", "secret"), std::string{"/s/f/t"}, "write"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

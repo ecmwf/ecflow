@@ -8,14 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/base/Permissions.hpp"
+#include "ecflow/server/AuthorisationService.hpp"
 
 #include <fstream>
 #include <iostream>
+#include <regex>
 
 #include <nlohmann/json.hpp>
-
-#include "ecflow/core/WhiteListFile.hpp"
 
 namespace ecf {
 
@@ -78,7 +77,7 @@ struct Unrestricted
 {
 };
 
-struct Permissions::Impl
+struct AuthorisationService::Impl
 {
     Impl() : permissions_(Unrestricted{}) {}
     explicit Impl(Rules&& rules) : permissions_(std::move(rules)) {}
@@ -86,36 +85,36 @@ struct Permissions::Impl
     std::variant<Unrestricted, Rules> permissions_;
 };
 
-Permissions::Permissions() = default;
+AuthorisationService::AuthorisationService() = default;
 
-Permissions::Permissions(std::unique_ptr<Impl>&& impl) : impl_{std::move(impl)} {
+AuthorisationService::AuthorisationService(std::unique_ptr<Impl>&& impl) : impl_{std::move(impl)} {
 }
 
-Permissions::Permissions(Permissions&& rhs) noexcept : impl_{std::move(rhs.impl_)} {
+AuthorisationService::AuthorisationService(AuthorisationService&& rhs) noexcept : impl_{std::move(rhs.impl_)} {
 }
 
-Permissions::~Permissions() = default;
+AuthorisationService::~AuthorisationService() = default;
 
-Permissions& Permissions::operator=(Permissions&& rhs) noexcept {
+AuthorisationService& AuthorisationService::operator=(AuthorisationService&& rhs) noexcept {
     if (this != &rhs) {
         impl_ = std::move(rhs.impl_);
     }
     return *this;
 }
 
-bool Permissions::good() const {
+bool AuthorisationService::good() const {
     return impl_ != nullptr;
 }
 
-bool Permissions::allows(const Identity& identity, const std::string& permission) const {
+bool AuthorisationService::allows(const Identity& identity, const std::string& permission) const {
     return allows(identity, paths_t{ROOT}, permission);
 }
 
-bool Permissions::allows(const Identity& identity, const path_t& path, const std::string& permission) const {
+bool AuthorisationService::allows(const Identity& identity, const path_t& path, const std::string& permission) const {
     return allows(identity, paths_t{path}, permission);
 }
 
-bool Permissions::allows(const Identity& identity, const paths_t& paths, const std::string& permission) const {
+bool AuthorisationService::allows(const Identity& identity, const paths_t& paths, const std::string& permission) const {
     if (!good()) {
         // When no rules are loaded, we allow everything...
         // Dangerous, but backward compatible!
@@ -140,7 +139,7 @@ bool Permissions::allows(const Identity& identity, const paths_t& paths, const s
     return allowed;
 }
 
-Permissions::result_t Permissions::load_permissions_from_file(const fs::path& cfg) {
+AuthorisationService::result_t AuthorisationService::load_permissions_from_file(const fs::path& cfg) {
     using json = nlohmann::json;
 
     std::ifstream f(cfg.c_str());
@@ -176,7 +175,7 @@ Permissions::result_t Permissions::load_permissions_from_file(const fs::path& cf
             }
             rules.rules_.emplace_back(pattern, allowed_users, allowed_roles, permissions);
         }
-        return result_t::success(Permissions(std::make_unique<Impl>(std::move(rules))));
+        return result_t::success(AuthorisationService(std::make_unique<Impl>(std::move(rules))));
     }
     catch (const json::parse_error& e) {
         return result_t::failure("Failed to load JSON: " + std::string(e.what()));
