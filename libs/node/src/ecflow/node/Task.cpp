@@ -597,7 +597,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
         // Locate the ecf files corresponding to the task. Pre-process
         // them(i.e expand includes, remove comments,manual) and perform
         // variable substitution. This will then form the jobs file.
-        // If the job file already exist it is overridden
+        // If the job file already exists it is overridden
         submit_job_only(jobsParam);
     }
     else {

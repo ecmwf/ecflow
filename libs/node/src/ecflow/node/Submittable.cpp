@@ -603,7 +603,7 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
 
         // Pre-process ecf file (i.e. expand includes, remove comments,manual) and perform
         // variable substitution. This will then form the '.job' files.
-        // If the job file already exist it is overridden
+        // If the job file already exists it is overridden
         // The job file SHOULD be referenced in ECF_JOB_CMD
         try {
             const std::string& job_size = jobsParam.ecf_file().create_job(jobsParam);
