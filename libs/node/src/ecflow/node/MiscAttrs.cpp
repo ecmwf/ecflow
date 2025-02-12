@@ -243,7 +243,7 @@ void MiscAttrs::add_generic(const GenericAttr& z) {
 void MiscAttrs::addVerify(const VerifyAttr& v) {
     if (findVerify(v)) {
         std::stringstream ss;
-        ss << "Add Verify failed: Duplicate '" << v.toString() << "' already exist for node " << node_->debugNodePath();
+        ss << "Add Verify failed: Duplicate '" << v.toString() << "' already exists for node " << node_->debugNodePath();
         throw std::runtime_error(ss.str());
     }
     verifys_.push_back(v);
