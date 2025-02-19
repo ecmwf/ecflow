@@ -158,7 +158,7 @@ bool DateAttr::checkForRequeue(const ecf::Calendar& calendar) const {
     }
 
     // checkForRequeue is called when we are deciding whether to re-queue the node.
-    // If this date is in the future, they we should re-queue
+    // If this date is in the future, we should re-queue
     if (day_ != 0 && month_ != 0 && year_ != 0) {
         date theDate(year_, month_, day_);
         if (theDate > calendar.date()) {
@@ -368,7 +368,7 @@ void DateAttr::getDate(const std::string& date, int& day, int& month, int& year)
 }
 
 boost::gregorian::date DateAttr::next_matching_date(const ecf::Calendar& c) const {
-    boost::gregorian::date next_matching_date = c.date(); // todays date
+    boost::gregorian::date next_matching_date = c.date(); // today's date
 
     boost::gregorian::date_duration one_day(1);
 

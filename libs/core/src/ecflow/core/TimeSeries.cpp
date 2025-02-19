@@ -180,7 +180,7 @@ void TimeSeries::reset(const ecf::Calendar& c) {
 
         // only used when we have a series, and *NOT* relative. A relative time series does not care about midnight.
         if (!relativeToSuiteStart_) {
-            suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
+            suiteTimeAtRequeue_ = TimeSlot(c.suiteTime().time_of_day());
         }
 
         while (current_time > nextTimeSlot_.duration()) {
@@ -245,13 +245,13 @@ void TimeSeries::requeue(const ecf::Calendar& c, bool reset_next_time_slot) {
 
     // Only used when we have a series, and NOT relative. A relative time series does not care about midnight
     if (!relativeToSuiteStart_) {
-        suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
+        suiteTimeAtRequeue_ = TimeSlot(c.suiteTime().time_of_day());
     }
 
     // the nextTimeSlot_ needs to be set to a multiple of incr
     // However the nextTimeSlot_ cannot just be incremented by incr
-    // since we can't assume that a task completes within the given time slots
-    // *hence increments to NEXT TIME SLOT large than calendar time.
+    // since we can't assume that a task completes within the given time slots,
+    // hence, increments to NEXT TIME SLOT larger than calendar time.
     // time 10::00 20:00 01:00
     //                       --------------------------------------------------------nextTimeSlot_ must greater than
     //                       current time. |                                               --------isValid = false V V
@@ -267,7 +267,7 @@ void TimeSeries::requeue(const ecf::Calendar& c, bool reset_next_time_slot) {
 
     if (nextTimeSlot_ > finish_) {
         isValid_          = false;      // time has expired
-        suiteTimeAtReque_ = TimeSlot(); // expire for new requeue
+        suiteTimeAtRequeue_ = TimeSlot(); // expire for new requeue
 #ifdef DEBUG_TIME_SERIES
         log(Log::DBG, "TimeSeries::requeue  HOLDING TIME EXPIRED (nextTimeSlot_ > finish_) " + dump());
 #endif
@@ -431,7 +431,7 @@ bool TimeSeries::checkForRequeue(const ecf::Calendar& calendar,
 #endif
 
     if (!isValid_) {
-        // time has expired, hence can no longer re-queues, i.e no future time dependency
+        // time has expired, hence can no longer re-queues, i.e. no future time dependency
 #ifdef DEBUG_TIME_SERIES
         // cout << " TimeSeries::checkForRequeue " << calendar.suite_time_str() << "  HOLDING\n";
         log(Log::DBG, "TimeSeries::checkForRequeue HOLDING !isValid_  " + dump());
@@ -457,15 +457,15 @@ bool TimeSeries::checkForRequeue(const ecf::Calendar& calendar,
         }
 
         // ECFLOW-130 jobs that start before midnight and finish after midnight should not re-queue
-        // This should ONLY apply to non relative time series, since a relative time series does care about midnight
-        if (!relativeToSuiteStart_ && !suiteTimeAtReque_.isNULL()) {
+        // This should ONLY apply to non-relative time series, since a relative time series does care about midnight
+        if (!relativeToSuiteStart_ && !suiteTimeAtRequeue_.isNULL()) {
             TimeSlot suiteTimeNow(calendar.suiteTime().time_of_day());
             // cout << "TimeSeries::checkForRequeue suiteTimeNow = " << suiteTimeNow << "
             // =====================================================\n";
             //  we use >= specifically for unit test, to pass.
-            if (suiteTimeNow >= suiteTimeAtReque_) {
-                // normal flow, i.e same day
-                suiteTimeAtReque_ = TimeSlot(); // make NULL, allow requeuing to reset.
+            if (suiteTimeNow >= suiteTimeAtRequeue_) {
+                // normal flow, i.e. same day
+                suiteTimeAtRequeue_ = TimeSlot(); // make NULL, allow requeuing to reset.
             }
             else {
                 // The day changed between (requeue/reset):->queued->submitted->active->complete->(checkForRequeue)
@@ -500,10 +500,10 @@ bool TimeSeries::checkForRequeue(const ecf::Calendar& calendar,
     }
 
     // *** When we have a single time slots we cannot make a decision, whether
-    // *** we should re-queue based on this attribute *alone*. (i.e when we have > 1 time/today attributes)
+    // *** we should re-queue based on this attribute *alone*. (i.e. when we have > 1 time/today attributes)
     // *** Hence we pass min and max time slots, over all the time bases attributes of the same kind.
     // *** In our case we only do this for Time and Today attributes.
-    // *** The the_min/the_max have been computed for all attribute (i.e single time slots and ranges)
+    // *** The the_min/the_max have been computed for all attribute (i.e. single time slots and ranges)
 
     // We have a single time slot, *OR* multiple with same time slot
     if (the_min == the_max) {
@@ -671,7 +671,7 @@ std::string TimeSeries::dump() const {
     ss << " nextTimeSlot_(" << nextTimeSlot_.toString() << ")";
     ss << " relativeDuration_(" << to_simple_string(relativeDuration_) << ")";
     ss << " lastTimeSlot_(" << to_simple_string(lastTimeSlot_) << ")";
-    ss << " suiteTimeAtReque_(" << suiteTimeAtReque_.toString() << ")";
+    ss << " suiteTimeAtRequeue_(" << suiteTimeAtRequeue_.toString() << ")";
     return ss.str();
 }
 

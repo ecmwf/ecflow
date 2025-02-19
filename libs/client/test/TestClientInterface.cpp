@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
     BOOST_REQUIRE_MESSAGE(theClient.force(event_paths[1], "clear") == 0, " should return 0\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.force(event_paths, "set") == 0, " should return 0\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.force(event_paths, "clear") == 0, " should return 0\n" << theClient.errorMsg());
-    std::vector<std::string> validStates = NState::allStates(); // HPUX barfs if use NState::allStates() directly
+    std::vector<std::string> validStates = NState::allStates(); // HPUX barfs, if NState::allStates() is used directly
     for (const string& state : validStates) {
         BOOST_REQUIRE_MESSAGE(theClient.force("/s", state, true, true) == 0,
                               "force " << state << " should return 0\n"
@@ -516,7 +516,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
         BOOST_REQUIRE_MESSAGE(theClient.ch_auto_add(1, false) == 0, "--ch_auto_add \n" << theClient.errorMsg());
 
         // need test interface that allows client handle to set on ClinetInvoker
-        // ch1_add needs a non zero handle
+        // ch1_add needs a non-zero handle
         BOOST_REQUIRE_MESSAGE(theClient.ch1_register(true, suites) == 0, "--ch1_drop \n" << theClient.errorMsg());
         auto& svr = const_cast<ServerReply&>(theClient.server_reply());
         svr.set_client_handle(1);
@@ -1512,7 +1512,7 @@ BOOST_AUTO_TEST_CASE(test_client_task_interface_for_fail) {
         theClient.testInterface(); // stops submission to server
         theClient.taskPath("/a/made/up/path");
         theClient.set_jobs_password(
-            ""); // The password(ECF_PASS) will be READ from the environment. Hence set to empty here
+            ""); // The password(ECF_PASS) will be READ from the environment. Hence, set to empty here
 
         BOOST_REQUIRE_THROW(theClient.initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()), std::runtime_error);
         BOOST_REQUIRE_THROW(theClient.abortTask("reason for abort"), std::runtime_error);

@@ -46,7 +46,7 @@ ClockAttr::ClockAttr(int day, int month, int year, bool hybrid)
       state_change_no_(Ecf::incr_state_change_no()),
       hybrid_(hybrid) {
     // Will throw std::out_of_range exception
-    DateAttr::checkDate(day, month, year, false /* for calendars we don't allow wild carding */);
+    DateAttr::checkDate(day, month, year, false /* disable wild cards */);
 }
 
 ClockAttr::ClockAttr(bool hybrid) : state_change_no_(Ecf::incr_state_change_no()), hybrid_(hybrid) {
@@ -153,7 +153,7 @@ bool ClockAttr::operator==(const ClockAttr& rhs) const {
 
 void ClockAttr::date(int day, int month, int year) {
     // Will throw std::out_of_range exception
-    DateAttr::checkDate(day, month, year, false /* for calendars we don't allow wild carding */);
+    DateAttr::checkDate(day, month, year, false /* disable wild cards */);
     day_             = day;
     month_           = month;
     year_            = year;

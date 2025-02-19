@@ -20,9 +20,9 @@ class CommandLine;
 ///
 /// The environment must be read in before the program options. The program options
 /// will construct the commands, some of which require the environment
-/// We could have just done this as last part of constructor. However we need a
+/// We could have just done this as last part of constructor. However, we need a
 /// separation between reading the environment and reading the option for:
-/// a/ testing purposes. i.e as this allows us to inject/override the task path
+/// a/ testing purposes. i.e. as this allows us to inject/override the task path
 ///    read in from the environment.
 /// b/ override host and port number.
 /// will throw std::runtime_error for invalid arguments

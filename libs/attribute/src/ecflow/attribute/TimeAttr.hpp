@@ -13,35 +13,35 @@
 
 ///
 /// \brief isFree is called when a node is queued. If it returns true, Task can be submitted
-/// checkForReque: is called when a node has completed, and need to determine if it should run again.
+/// checkForRequeue: is called when a node has completed, and need to determine if it should run again.
 /// These are different/orthogonal concerns.
 /// There is a *separate* issue of whether nodes should be queued when a node is *manually*
 ///    a/ Set complete
 ///    b/ Runs and then completes
 ///
 /// For a *single* time slot we can't requeue.
-/// Hence we checkForReque that takes as parameters max/min time slots, so we **treat**
+/// Hence, we checkForRequeue that takes as parameters max/min time slots, so we **treat**
 /// Multiple single slot as a series.
 ///
 ///                                               isFree:hhhhhhhhhhhhhhhhh
 ///                                               Begin:
 ///                                               V
-/// checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh   10:00
-/// checkForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   11:00
-/// checkForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   for both 10:00 and 11:000 together
-///       isFree:hhhhhhhhhhhhhhhhffffffffffffffffffffffffffffffffffff   *once* free we stay free (single slot *only*)
-///       begin :                |                           |
-///        V                     |                           |
-/// Time   ======================0============0==============0=============
-///                            10:00        11:00              Midnight
+/// checkForRequeue:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh   10:00
+/// checkForRequeue:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   11:00
+/// checkForRequeue:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   for both 10:00 and 11:000 together
+///          isFree:hhhhhhhhhhhhhhhhffffffffffffffffffffffffffffffffffff   *once* free we stay free (single slot *only*)
+///          begin :                |                           |
+///           V                     |                           |
+///    Time   ======================0============0==============0=============
+///                               10:00        11:00         Midnight
 ///
 ///                                                     isFree:hhhhhhhhhhhhhhhhhh
 ///                                                      V
-///   CheckForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-///          isFree:hhhhhhhFhhhhFhhhhFhhhhFhhhhFhhhhFhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-///            V           |    |    |    |    |    |        |
-/// Time   ================o====|====|====|====|====0========0====================
-///                      10:00  1    2    3    4  15:00    Midnight
+///   CheckForRequeue:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+///            isFree:hhhhhhhFhhhhFhhhhFhhhhFhhhhFhhhhFhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+///              V           |    |    |    |    |    |        |
+///   Time   ================o====|====|====|====|====0========0====================
+///                      10:00  1    2    3    4  15:00     Midnight
 ///
 /// If the job starts at 10:00 but takes more than 1 hour, then it will miss the 11:00 slot
 /// and will have to start at 12:00
@@ -110,8 +110,8 @@ public:
     bool checkInvariants(std::string& errormsg) const { return ts_.checkInvariants(errormsg); }
 
     // The state_change_no is never reset. Must be incremented if it can affect equality
-    // Note: changes in state of ts_, i.e affect the equality operator (used in test)
-    //       must be captured. i.e things like relative duration & next_time_slot are
+    // Note: changes in state of ts_, i.e. affect the equality operator (used in test)
+    //       must be captured. i.e. things like relative duration & next_time_slot are
     //       reported by the Why command, & hence need to be synced.
     unsigned int state_change_no() const { return state_change_no_; }
 

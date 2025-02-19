@@ -162,7 +162,7 @@ T get(const char* name) {
 }
 
 /**
- * @brief Retrieves the environment variable value and returns it (wrapped in an std::optional<>).
+ * @brief Retrieves the environment variable value and returns it (wrapped in a std::optional<>).
  *        If the environment variable is not found, std::nullopt is returned.
  *
  *        In case of integral types, the environment variable is converted to the corresponding type.

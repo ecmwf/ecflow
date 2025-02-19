@@ -34,11 +34,11 @@ namespace ecf {
 ///                 but this is treated as an inherited attribute.
 ///                 late attribute lower down the hierarchy overrides it.
 /// ************************************************************************
-/// The late late attribute will not work correctly when the suites clock
+/// The late _late_ attribute will not work correctly when the suites clock
 /// start and stops with the server. Since the late relies on real time
 /// for some of its functionality.
 /// -s submitted: The time node can stay submitted (format [+]hh:mm). submitted is always
-///               relative, so + is simple ignored, if present. If the node stays submitted
+///               relative, so + is simply ignored, if present. If the node stays submitted
 ///               longer than the time specified, the late flag is set
 /// -a Active   : The time of day the node must have become active (format hh:mm). If the node
 ///               is still queued or submitted, the late flag is set
@@ -86,7 +86,7 @@ public:
     /// To be called at begin and re-queue time
     void reset() { setLate(false); }
 
-    // Overide this late attributes with the settings form the input.
+    // Override this late attributes with the settings form the input.
     void override_with(LateAttr*);
 
     // The state_change_no is never reset. Must be incremented if it can affect equality

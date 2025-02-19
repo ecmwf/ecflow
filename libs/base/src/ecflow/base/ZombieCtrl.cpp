@@ -30,7 +30,7 @@ using namespace boost::posix_time;
 /// *** PATH *** Zombies is created with: process(node path, password, pid/rid , try_no) ***
 /// *** USER *** Zombies is created with:    TASK(node path, password, pid/rid , try_no) ***
 ///
-/// There are several places where we hold path,password,pid/rid,etc
+/// There are several places where we hold path, password, pid/rid, etc.
 ///                        Task Cmd/
 ///            Node Tree   Process(n)   USER Zombie         PATH/ECF Zombie
 ///  Path                               same as node tree   same as process
@@ -42,11 +42,11 @@ using namespace boost::posix_time;
 ///
 /// Zombie Finding:
 /// For a given Task, we could have multiple zombie process, i.e. with different password/process id
-/// We can't assume that there is only one zombie process. Hence search/zombie matching
+/// We can't assume that there is only one zombie process. Hence, search zombie matching
 /// should involve matching with password/process id first and then resort to path matching
 ///
 /// Note: Only the init child command is required pass the process id. The other child command may
-//        or may *not* provide this. In the test scenario we do.
+///       or may *not* provide this. In the test scenario we do.
 static bool match(const Zombie& z,
                   const std::string& path_to_task,
                   const std::string& process_or_remote_id,
@@ -328,7 +328,7 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
         // when a task a script is killed(i,e with kill -15), it will typically be trapped
         // This will then typically call abort. We have a choice:
         //    a/ If we remove the zombie, the action taken will be lost, when the abort arises, hence default action is
-        //    block b/ Change the action type to be fob, so that the abort does not block c/ Continue killing until
+        //    block b/ Change the action type to `fob`, so that the abort does not block c/ Continue killing until
         //    process terminate. Up to use to remove zombies
         // Opted for option b/ however we do *NOT* change action type, we just fob
         if (task) {
@@ -388,7 +388,7 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
 #ifdef DEBUG_ZOMBIE
     std::cout << ": BLOCKING\n";
 #endif
-    // i.e it will make several attempts , and then start contacting servers in the hosts file.
+    // i.e. it will make several attempts , and then start contacting servers in the hosts file.
     action_taken += "block";
     theReply = PreAllocatedReply::block_client_zombie_cmd(theZombie.type());
     return false;

@@ -64,9 +64,9 @@ public:
     bool last_day_of_the_month() const { return last_day_of_month_; }
 
     // The state_change_no is never reset. Must be incremented if it can affect equality
-    // Note: changes in state of timeSeries_, i.e affect the equality operator (used in test)
-    //       must be captured. i.e things like relative duration & next_time_slot are
-    //       reported by the Why command, & hence need to be synced.
+    // Note: changes in state of timeSeries_, i.e. affect the equality operator (used in test)
+    //       must be captured. This means that things like relative duration & next_time_slot are
+    //       reported by the Why command and, hence, need to be synced.
     unsigned int state_change_no() const { return state_change_no_; }
 
     bool checkInvariants(std::string& errormsg) const;
@@ -88,7 +88,7 @@ public:
     std::string toString() const;
     std::string dump() const;
 
-    /// parse the line tokens an create a cron attribute. Can throw std::runtime_error
+    /// parse the line tokens and create a cron attribute. Can throw std::runtime_error
     /// The index parameter allows us to parse:
     /// cron -w 0,1 10:00      // index = 1
     /// -w 0,1 10:00           // index = 0

@@ -35,13 +35,13 @@ public:
     ZombieCtrl& operator=(ZombieCtrl&&)      = delete;
 
     /// Handle the zombie, and return back to the client
-    bool handle_zombie(Submittable*,              // Must be NON NULL
+    bool handle_zombie(Submittable*,              // Must be NON-NULL
                        const TaskCmd* task_cmd,   // The child command
                        std::string& action_taken, // action taken
                        STC_Cmd_ptr& theReply      // Reply varies according to User Action
     );
 
-    bool handle_path_zombie(AbstractServer* as,        // Find closest matching node
+    bool handle_path_zombie(AbstractServer* as,        // Find the closest matching node
                             const TaskCmd* task_cmd,   // The child command
                             std::string& action_taken, // action taken
                             STC_Cmd_ptr& theReply      // Reply varies according to User Action
@@ -72,7 +72,7 @@ public:
     void fobCli(const std::string& path_to_task, Submittable*);
 
     /// Similar to a fob, But will ask the child command to terminate, with an error.
-    /// Typically this will raise a trap in the job file, and hence raise an abort
+    /// Typically, this will raise a trap in the job file, and hence raise an abort
     /// However the abort will also be a zombie, and will also be auto-terminated
     /// Hence the job file must be careful to use 'set -e' to avoid infinite recursion
     /// Since we can have many child commands(init,event,meter, label,complete) in a job
@@ -95,9 +95,8 @@ public:
     void killCli(const std::string& path_to_task, Submittable*);
 
     /// Remove the zombie corresponding to the Task path. Should only be one
-    /// Since we can have many child commands(init,event,meter, label,complete) in a job
-    /// the zombies may get re-added, should we rember this.
-    /// If path not found does nothing.
+    /// Since we can have many child commands (init, event ,meter, label, complete) in a job
+    /// the zombies may get re-added, should we remember this -- If the path is not found, do nothing.
     /// For Command Line Interface only the task_path is provided. Just have to make do.
     bool remove(Submittable*);
     bool remove(const std::string& path_to_task, const std::string& process_or_remote_id, const std::string& password);

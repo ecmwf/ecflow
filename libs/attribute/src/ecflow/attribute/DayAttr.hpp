@@ -45,10 +45,10 @@ public:
     void reset();
     void reset(const ecf::Calendar& c);
 
-    // called when we need a reque based on a time attribute. Should *NOT* clear expired flag.
+    // called when we need a requeue based on a time attribute. Should *NOT* clear expired flag.
     void requeue_time();
 
-    // called when re-queing because of:
+    // called when re-queueing because of:
     //    - automatic re-queue due to repeat increment
     //    - manual re-queue
     // Clears expired flag, and sets day attribute to a next matching *FUTURE* day or current day
@@ -72,7 +72,7 @@ public:
     // old/buggy: check_for_requeue() { return (day_ > calendar.day_of_week() );}
     // The old check for re-queue would determine if this day is in the future, with reference to calendar day.
     // Hence day_(Saturday) is would always re-queue, day_(Sunday) is would never re-queue
-    // When multiple days were involved, it would get even more buggier.
+    // When multiple days were involved, it would get even buggier.
     // By using a real date, we fix the issue, the real date is updated during manual re-queue, or automatically vi
     // repeat increment.
     bool checkForRequeue(const ecf::Calendar&) const;

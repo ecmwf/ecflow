@@ -258,7 +258,8 @@ int ClientInvoker::invoke(int argc, char* argv[]) const {
 }
 
 int ClientInvoker::invoke(const CommandLine& cl) const {
-    // Allow request to logged & allow logging of round trip time, Hence must be placed *before* RoundTripRecorder
+    // Enable logging of request, and allow logging of round trip time.
+    // RequestLogger must be placed *before* RoundTripRecorder.
     RequestLogger request_logger(this);
 
     // initialise start_time_ and rtt_,
@@ -271,7 +272,7 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
     } // success
 
     // Clear error message. For test. Don't keep previous error.
-    // i.e If next test passes when it shouldn't the wrong message is output
+    // i.e. if next test passes when it shouldn't the wrong message is output
     server_reply_.get_error_msg().clear();
 
     Cmd_ptr cts_cmd;
@@ -281,7 +282,7 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
     if (!cts_cmd)
         return 0; // For --help and --debug, --load defs check_only,  no command is created
 
-    // Under debug we display round trip time for each request
+    // Under debug, we display round trip time for each request
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
@@ -366,7 +367,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
         bool report_block_client_server_halted   = false;
         bool report_block_client_zombie_detected = false;
         // We do not want to loop over the sms host list indefinitely hence we use a timer.
-        // The time out period is supplied via ClientEnvironment
+        // The timeout period is supplied via ClientEnvironment
         bool never_polled = true; // don't wait for the first host only subsequent ones
 
         while (true) {
@@ -426,7 +427,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                         try {
                             /// will return false if further action required
                             if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
-                                // The normal response.  RoundTriprecorder will record in rtt_
+                                // The normal response.  RoundTripRecorder will record in rtt_
                                 return 0; // the normal exit path
                             }
                         }
@@ -452,7 +453,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                         try {
                             /// will return false if further action required
                             if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
-                                // The normal response.  RoundTriprecorder will record in rtt_
+                                // The normal response.  RoundTripRecorder will record in rtt_
                                 return 0; // the normal exit path
                             }
                         }
@@ -465,7 +466,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 #endif
 
                     if (server_reply_.block_client_on_home_server()) {
-                        // Valid reply from server. Typically waiting on a expression
+                        // Valid reply from server, typically waiting on an expression
                         // Ok _Block_ on _current_ server, and continue waiting, until server reply is ok
                         if (!report_block_client_on_home_server || clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: " << cts_cmd->print_short() << " : "
@@ -528,8 +529,8 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     }
                 }
                 catch (std::exception& e) {
-                    // *Some kind of connection error*: fall through and try again. Avoid this message when pinging, i.e
-                    // to see if server is alive.
+                    // *Some kind of connection error*: fall through and try again. Avoid this message when pinging,
+                    // i.e. to see if server is alive.
                     if (clientEnv_.debug()) {
                         cerr << TimeStamp::now() << "ClientInvoker: Connection error: (" << e.what() << ")" << endl;
                     }
@@ -711,7 +712,7 @@ int ClientInvoker::news_local() const {
             CSyncCmd::NEWS, server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no()));
     }
 
-    // There is no local defs, i.e first time call, The default client handle should be 0.
+    // There is no local defs, i.e. first time call, The default client handle should be 0.
     // go with defaults for state and modify change numbers
     // User is expected to call sync_local(), which will update local defs.
     if (testInterface_)
@@ -730,7 +731,7 @@ int ClientInvoker::loadDefs(const std::string& filePath,
                             bool force,      /* true means overwrite suite of same name */
                             bool check_only, /* client side, true means don't send to server, just check only */
                             bool print,      /* client side, print the defs */
-                            bool stats       /* client side, print the defs statitics */
+                            bool stats       /* client side, print the defs statistics */
 ) const {
     if (testInterface_)
         return invoke(CtsApi::loadDefs(filePath, force, check_only, print));

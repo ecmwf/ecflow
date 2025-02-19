@@ -52,7 +52,7 @@ public:
     void hybrid(bool f);
     void set_end_clock() { end_clock_ = true; }
 
-    // clear local attributes so, than when we re-queue suite, we sync with computer clock
+    // clear local attributes so that, when the suite is requeued, the computer clock is synced
     void sync();
 
     void init_calendar(ecf::Calendar&);

@@ -24,12 +24,12 @@
 /// The strongest hint we can give th OS to actually write to the physical medium
 /// is to close the file. (This does not guarantee it, but is the closest we can achieve)
 ///
-/// Why is this an issue? Testing on cross platform HPUX/linux, requires that
+/// Why is this an issue? Testing on cross-platform HPUX/linux, requires that
 /// testing has access to the ECF log file. Initially the log file held an
-/// ofstream of log file as a data member. However this meant that flushing
+/// ofstream of log file as a data member. However, this meant that flushing
 /// did not guarantee writing ECF log file to disk. Testing requires that we
 /// are able to clear and copy the log file for comparison.
-/// Hence we use another level of indirection, so that we able to close the
+/// Hence, we use another level of indirection, so that we are able to close the
 /// log file, and hence can ensure that it gets written to disk
 ///
 
@@ -69,7 +69,7 @@ public:
     /// Single line message is placed in log file without a newline
     bool log_no_newline(LogType, const std::string& message);
 
-    /// Append to log file file and add newline
+    /// Append to log file and add newline
     bool append(const std::string& message);
 
     /// Set the time stamp once for each request.
@@ -79,7 +79,7 @@ public:
     const std::string& get_cached_time_stamp() const;
 
     /// returns the contents of the log file, or the last n lines
-    /// Will throw an std::runtime_error if the log file cannot be opened
+    /// Will throw a std::runtime_error if the log file cannot be opened
     /// Will close the file.
     static int get_last_n_lines_default() { return 100; }
     std::string contents(int get_last_n_lines);
@@ -151,7 +151,7 @@ private:
     DurationTimer timer_;
 };
 
-/// The LogImpl allows the ofstream object to be closed, and so provide strongest
+/// The LogImpl allows the ofstream object to be closed, and so provide the strongest
 /// hint to OS that we want file to be written to physical medium.
 /// This is required for testing purposes, as each test run needs to clear/copy
 /// the log file

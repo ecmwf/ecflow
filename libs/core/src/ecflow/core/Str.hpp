@@ -148,13 +148,13 @@ public:
     static boost::split_iterator<std::string::const_iterator>
     make_split_iterator(const std::string& str, const std::string& delimiters = " \t");
 
-    /// case in sensitive string comparison
+    /// case-insensitive string comparison
     static bool caseInsCompare(const std::string&, const std::string&);
 
-    /// case insensitive less
+    /// case-insensitive less
     static bool caseInsLess(const std::string&, const std::string&);
 
-    /// case insensitive Greater
+    /// case-insensitive Greater
     static bool caseInsGreater(const std::string&, const std::string&);
 
     /// Used for checking node names

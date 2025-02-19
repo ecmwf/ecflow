@@ -20,11 +20,11 @@
 ///      Task(path,password,process_id)
 ///      Zombie(path,password,process_id)
 /// Issues:
-///   At the extreme we can have *2* Jobs running at one go. Typically user commands
-///   that have a force parameter, will create 'user' zombies.
-///   ** the command can be invoked at any time, i.e we could invoke
+///   At the extreme we can have *2* Jobs running at one go. Typically, user commands
+///   that have a force parameter will create 'user' zombies.
+///   ** the command can be invoked at any time, i.e. we could invoke
 ///   ** the user command, whilst the task is in SUBMITTED state
-///   ** This will go through and create user zombie. However at this stage we have *NO* process_id
+///   ** This will go through and create user zombie. However, at this stage we have *NO* process_id
 ///   ** since the job has not started. Zombie(path,password)
 ///   When the Task init command is called, we get given a process_id.
 ///   ** HOWEVER ** need to determine if this is from the real child cmd or from the zombie
@@ -38,7 +38,7 @@
 ///
 ///   IMPORTANT:: For command line interface we just have the task path.
 ///               i,e we don't want to expose password, and user will not easily
-///               know the process or remote id. Hence we will make do with the
+///               know the process or remote id. Hence, we will make do with the
 ///               task path. We just find the first zombie, and act up on it
 ///
 

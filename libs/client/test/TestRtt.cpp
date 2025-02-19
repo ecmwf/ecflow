@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
     std::string root_path = File::test_data("libs/client/test/data/", "libs/client");
 
     /// Open file rtt.dat and compute average round trip times
-    std::string result = Rtt::analyis(root_path + "rtt.dat");
+    std::string result = Rtt::analysis(root_path + "rtt.dat");
     // cout << result << "\n";
 
     /// generated a file with results

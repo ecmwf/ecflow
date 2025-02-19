@@ -424,7 +424,7 @@ bool Str::valid_name(const std::string& name, std::string& msg) {
                 msg += "Windows line ending ? ";
             msg += "'";
             msg += name;
-            msg += "'"; // use '<name>' to show if PC format. i.e carriage return
+            msg += "'"; // use '<name>' to show if PC format, i.e. carriage return
         }
     }
 

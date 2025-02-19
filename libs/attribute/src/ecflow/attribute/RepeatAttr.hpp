@@ -41,7 +41,7 @@ public:
     RepeatBase() = default;
     virtual ~RepeatBase();
 
-    /// make non virtual so that it can be in-lined. Called millions of times
+    /// make non-virtual so that it can be in-lined. Called millions of times
     const std::string& name() const { return name_; }
     virtual int start() const = 0;
     virtual int end() const   = 0;
@@ -70,9 +70,9 @@ public:
     // RepeatDate       -> value
     // RepeatDateTime   -> value
     // RepeatDateList   -> value
-    // RepeatString     -> index  ( will always return a index)
+    // RepeatString     -> index  ( will always return an index)
     // RepeatInteger    -> value
-    // RepeatEnumerated -> index  ( will always return a index)
+    // RepeatEnumerated -> index  ( will always return an index)
     // RepeatDay        -> value
     virtual long index_or_value() const = 0;
     virtual void increment()            = 0;
@@ -546,24 +546,24 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
-/// The current repeat day is not that well defined or deterministic.
+/// The current repeat day is not that well-defined or deterministic.
 ///  **** Currently I have not come across any suites that use an end-date ****
 ///   o If the suite has defined a real clock
 ///     then number of repeats is deterministic
 ///     However if the end-date is less than suite clock this should be reported as error
 ///   o Currently under the hybrid clock the date is not updated, this raises
-///     a whole lot of issues. (We don't wont a separate calendar, just for this).
+///     a whole-lot of issues. (We don't want a separate calendar, just for this).
 ///   o If there is _no_ suite clock, then we must use the current day
 ///     now the number of repeats  varies, and if end-date is less than the current
 ///     day we need to report an error
-///  Its not clear what behaviour is required here, hence I will not implement
+///  It is not clear what behaviour is required here, hence I will not implement
 ///  the end-date functionality. Until there is clear requirement is this area.
 ///  end-date will be treated as a parser error.
 ///  The minimum deterministic functionality here is to implement the infinite
 ///  repeat that has no end date
 ///
 /// RepeatDay do not really have a name: However we need maintain invariant that all NON-empty repeats
-/// have a name. Hence the name will be as day
+/// have a name. Hence, the name will be as day
 /// Note: this applies to the clone as well
 class RepeatDay final : public RepeatBase {
 public:

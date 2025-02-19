@@ -17,7 +17,7 @@
 namespace ecf {
 /// Helper struct that will aid the deletion of Pointer from a container
 template <typename T>
-struct TSeqDeletor
+struct TSeqDeleter
 {
     void operator()(T pointer) const {
         // std::cout << "Destroy of this pointer" << std::endl;
@@ -26,20 +26,20 @@ struct TSeqDeletor
     }
 };
 /// This function can be used to delete the pointers in a container
-/// i.e int main (int argc, char **argv) {
-///        std::vector <std::string *> vect;
-///        vect.push_back (new std::string ("Stephane"));
-///        DeletePtrs (vect);
-///     }
+/// i.e. int main (int argc, char **argv) {
+///         std::vector <std::string *> vect;
+///         vect.push_back (new std::string ("Stephane"));
+///         DeletePtrs (vect);
+///      }
 template <typename Container>
 void DeletePtrs(Container& pContainer) {
-    std::for_each(pContainer.begin(), pContainer.end(), TSeqDeletor<typename Container::value_type>());
+    std::for_each(pContainer.begin(), pContainer.end(), TSeqDeleter<typename Container::value_type>());
     pContainer.clear();
 }
 
-/// Helper struct that will aid the deletion of Pointer from a Associative container
+/// Helper struct that will aid the deletion of Pointer from an Associative container
 template <typename TPair>
-struct TAsoDeletor
+struct TAsoDeleter
 {
     void operator()(TPair& tElem) const {
         if (tElem.second) {
@@ -47,15 +47,15 @@ struct TAsoDeletor
         }
     }
 };
-/// This function can be used to delete the pointers in a Assoc container
-/// i.e int main (int argc, char **argv) {
-///        std::map <int,std::string *> theMap;
-///        theMap[0] =  new std::string ("Stephane");
-///        AssoDeletePtrs(theMap);
-///     }
+/// This function can be used to delete the pointers in an Associative container
+/// i.e. int main (int argc, char **argv) {
+///         std::map <int,std::string *> theMap;
+///         theMap[0] =  new std::string ("Stephane");
+///         AssoDeletePtrs(theMap);
+///      }
 template <typename Container>
 void AssoDeletePtrs(Container& pContainer) {
-    std::for_each(pContainer.begin(), pContainer.end(), TAsoDeletor<typename Container::value_type>());
+    std::for_each(pContainer.begin(), pContainer.end(), TAsoDeleter<typename Container::value_type>());
     pContainer.clear();
 }
 

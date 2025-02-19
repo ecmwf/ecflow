@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(test_migration_restore) {
 
 // The following test shows that CEREAL ignores new data members it does not recognise.
 // This allows new data members, which will be ignored by the old client.
-// OLD server to NEW Client(GUI), will not be a problem, since the the new data members are conditional.
+// OLD server to NEW Client(GUI), will not be a problem, since the new data members are conditional.
 // In ecflow 5.4.0/5.5.0 we added a new data members to the DayAttribute class.
 // This test shows that when NEW SERVER send DayAttr to OLD Client(GUI), this new data member is ignored.
 namespace version_old {
@@ -272,7 +272,7 @@ private:
 BOOST_AUTO_TEST_CASE(test_day_migration) {
     ECF_NAME_THIS_TEST();
 
-    // OLD -> NEW  i.e OLD SERVER --> NEW CLIENT
+    // OLD -> NEW  i.e. OLD SERVER --> NEW CLIENT
     {
         const version_old::DayAttr t = version_old::DayAttr();
         ecf::save("test_day_migration", t);
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(test_day_migration) {
         BOOST_CHECK_MESSAGE(t == version_new_data_member::DayAttr(), "Should be the same");
     }
 
-    // NEW->OLD  i.e NEW SERVER --> OLD CLIENT
+    // NEW->OLD  i.e. NEW SERVER --> OLD CLIENT
     // IMPORTANT: This shows that CEREAL ignore data members is does NOT RECOGNIZE.
     {
         version_new_data_member::DayAttr def;
