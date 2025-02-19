@@ -193,7 +193,7 @@ public:
     // Allows string to be returned by reference
     static const std::string& EMPTY();
     static const std::string& ROOT_PATH();      // "/"
-    static const std::string& PATH_SEPERATOR(); // "/"
+    static const std::string& PATH_SEPARATOR(); // "/"
     static const std::string& COLON();          // ":"
 
     static const std::string& STATE_CHANGE();

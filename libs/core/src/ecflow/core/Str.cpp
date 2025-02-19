@@ -39,7 +39,7 @@ const std::string& Str::ROOT_PATH() {
     static std::string root_path = "/";
     return root_path;
 }
-const std::string& Str::PATH_SEPERATOR() {
+const std::string& Str::PATH_SEPARATOR() {
     static std::string path_sep = "/";
     return path_sep;
 }
