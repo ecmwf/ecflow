@@ -57,6 +57,7 @@ set(srcs
   # Base -- Headers
   base/src/ecflow/base/AbstractClientEnv.hpp
   base/src/ecflow/base/AbstractServer.hpp
+  base/src/ecflow/base/Algorithms.hpp
   base/src/ecflow/base/Authentication.hpp
   base/src/ecflow/base/AuthenticationDetails.hpp
   base/src/ecflow/base/Authorisation.hpp
