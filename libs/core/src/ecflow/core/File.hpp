@@ -112,8 +112,8 @@ public:
     /// Create missing directories. This is *NOT* the same as boost::create_directories
     /// as that only works with directories. This function assumes that if a "." exist
     /// in the string it represents a file.
-    /// Hence this function handles:
-    ///   /tmp/some/dir/fred.job       // i.e the directories  /tmp/some/dir/ will be created
+    /// Hence, this function handles:
+    ///   /tmp/some/dir/fred.job       // i.e. the directories  /tmp/some/dir/ will be created
     ///   /tmp/some/dir
     ///   fred                         // will create the directory fred
     ///   fred.job                     // just return true
@@ -131,7 +131,7 @@ public:
                             bool ignoreBlanksLine = true);
 
     /// Do a backward search of rootPath + nodePath + fileExtn
-    /// If task path if of the form /suite/family/family2/task, then we keep
+    /// If the task path is of the form /suite/family/family2/task, then we keep
     /// on consuming the first path token this should leave:
     ///     <root-path>/suite/family/family2/task.ecf
     ///     <root-path>/family/family2/task.ecf
@@ -142,7 +142,7 @@ public:
     backwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn);
 
     /// Do a forward search of rootPath + nodePath + fileExtn
-    /// If task path if of the form /suite/family/family2/task, then we keep
+    /// If the task path is of the form /suite/family/family2/task, then we keep
     /// on consuming the last path token this should leave:
     ///     <root-path>/suite/family/family2/task.ecf
     ///     <root-path>/suite/family/task.ecf

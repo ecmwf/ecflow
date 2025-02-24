@@ -275,7 +275,7 @@ def linktask(name, real="get", add=None, fam=None, task=True):
     name: original name
     real: script/task wrapper name
     add: attributes that shall be added to the leaf task,
-         eg Label, Event, Meter
+         e.g. Label, Event, Meter
     """
     if fam is None:
         fam = name

@@ -64,7 +64,7 @@ Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_
         throw std::runtime_error("Event::Event: Invalid event name : name must be specified if no number supplied");
     }
 
-    // If the eventName is a integer, then treat it as such, by setting number_ and clearing n_
+    // If the eventName is an integer, then treat it as such, by setting number_ and clearing n_
     // This was added after migration failed, since *python* api allowed:
     //       ta.add_event(1);
     //       ta.add_event("1");

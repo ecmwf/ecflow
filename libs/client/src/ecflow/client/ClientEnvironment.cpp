@@ -66,7 +66,7 @@ ClientEnvironment::ClientEnvironment(bool gui, const std::string& host, const st
       zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),
       gui_(gui) {
     init();
-    set_host_port(host, port); // assumes we NOT going to read host file
+    set_host_port(host, port); // assumes we are NOT going to read host file
 }
 
 // test constructor
@@ -171,7 +171,7 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
 
     // Caution:
     //
-    //   We don't (re)enable SSL immediatelly after setting host/port, as this might happen multiple times
+    //   We don't (re)enable SSL immediattelly after setting host/port, as this might happen multiple times
     //   during the execution (e.g. when loading environment variables, and later processing command line options).
     //
     //   It is up to the user of this class to enable SSL if needed.

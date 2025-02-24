@@ -139,7 +139,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     if (ecf_checkpt_file_[0] != '/') {
         // Prepend with ECF_HOME
         std::string check_pt = ecf_home();
-        check_pt += Str::PATH_SEPERATOR();
+        check_pt += Str::PATH_SEPARATOR();
         check_pt += ecf_checkpt_file_;
         ecf_checkpt_file_ = check_pt;
     }
@@ -149,7 +149,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
         ecf_backup_checkpt_file_ = host_name_.prefix_host_and_port(port, ecf_backup_checkpt_file_);
     if (ecf_backup_checkpt_file_[0] != '/') {
         std::string check_pt = ecf_home();
-        check_pt += Str::PATH_SEPERATOR();
+        check_pt += Str::PATH_SEPARATOR();
         check_pt += ecf_backup_checkpt_file_;
         ecf_backup_checkpt_file_ = check_pt;
     }
@@ -163,15 +163,17 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     if (ecf_passwd_custom_file_ == ecf::environment::ECF_CUSTOM_PASSWD)
         ecf_passwd_custom_file_ = host_name_.prefix_host_and_port(port, ecf_passwd_custom_file_);
 
-    // Change directory to ECF_HOME and check thats its accessible
+    // Change directory to ECF_HOME and check that it is accessible
     change_dir_to_ecf_home_and_check_accesibility();
 
     // LOG FILE ================================================================================
     if (log_file_name == Ecf::LOG_FILE())
         log_file_name = host_name_.prefix_host_and_port(port, log_file_name);
 
-    // Create the Log file. The log file is obtained from the environment. Hence **must** be done last.
-    // From ecflow version 4.9.0 we no longer flush for each command. This can enabled/disabled
+    // Create the Log file.
+    //
+    // The log file is obtained from the environment, hence, **must** be done last.
+    // From ecflow version 4.9.0 we no longer flush for each command.
     Log::create(log_file_name);
 
     // Init log file:
@@ -328,12 +330,14 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         }
     }
 
-    // If the white list file is empty or does not exist, *ON* server start, its perfectly valid
-    // i.e any user is free to access the server
-    if (ecf_white_list_file_.empty())
+    // *WHEN* the server starts, it is possible that the white list file is empty or simply does not exist, since any
+    // user is free to access the server.
+    if (ecf_white_list_file_.empty()) {
         return true;
-    if (!fs::exists(ecf_white_list_file_))
+    }
+    if (!fs::exists(ecf_white_list_file_)) {
         return true;
+    }
 
     /// read in the ecf white list file that specifies valid users and their access rights
     /// If the file can't be opened returns false and an error message and false;
@@ -352,7 +356,7 @@ std::string ServerEnvironment::the_port() const {
 void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string>>& theRetVec) const {
     // Variables read in from the environment
     // Need to setup client environment.
-    // The server sets these variable for use by the client. i.e when creating the jobs
+    // The server sets these variable for use by the client, i.e. when creating the jobs
     // The clients then uses them to communicate back with the server.
     theRetVec.emplace_back(ecf::environment::ECF_PORT, the_port());
     theRetVec.emplace_back(ecf::environment::ECF_HOST, serverHost_);
@@ -420,10 +424,10 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
 bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     // Only override valid users if we successfully opened and parsed file
     if (white_list_file_.load(ecf_white_list_file_, debug(), errorMsg)) {
-        // If user accidentally remove the server/user from white list,
-        // they will not be able reload white list, since it requires write access.
+        // If the user accidentally removes the server/user from whitelist,
+        // they will not be able to reload the whitelist, since it requires write access.
         // (Requires terminate, modify white list, restart to fix)
-        // Hence always allow server user write access *IF* required for non empty file
+        // Hence always allow server user write access *IF* required for non-empty file
         white_list_file_.allow_write_access_for_server_user();
         return true;
     }
@@ -652,8 +656,8 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
         }
         catch (const ecf::bad_conversion&) {
             std::stringstream ss;
-            ss << "ServerEnviroment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an integer, "
-                  "But found: "
+            ss << "ServerEnvironment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an "
+                  "integer, but found: "
                << var.value();
             throw ServerEnvironmentException(ss.str());
         }

@@ -30,7 +30,7 @@ public:
     const SState& operator=(const SState&) = delete;
 
     /// Given an integer return the server state as a string.
-    /// if int is not  0,1,2 return "UNKNOWN
+    /// If status is not 0, 1, or 2, returns "UNKNOWN".
     static std::string to_string(int status);
     static std::string to_string(SState::State);
 

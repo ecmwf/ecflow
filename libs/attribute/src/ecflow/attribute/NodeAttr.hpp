@@ -157,7 +157,7 @@ public:
 
     void print(std::string&) const;
     void reset() { set_value(min_); }
-    void set_value(int v); // can throw throw std::runtime_error if out of range
+    void set_value(int v); // can throw std::runtime_error if out of range
     bool empty() const { return n_.empty(); }
 
     const std::string& name() const { return n_; }

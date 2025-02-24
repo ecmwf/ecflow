@@ -80,7 +80,7 @@ void DayAttr::calendarChanged(const ecf::Calendar& c, bool clear_at_midnight) {
     //	   day monday
     //	   time 23:00
     //	   task t1             # Task t1 took longer than 1 hour
-    //	   task t2             # allow task t2 to continue to the next day, i.e clear_at_midnight = False
+    //	   task t2             # allow task t2 to continue to the next day, i.e. clear_at_midnight = False
     //	      trigger t1 == complete
 
 #ifdef DEBUG_DAYS
@@ -250,7 +250,7 @@ void DayAttr::check_for_expiration(const ecf::Calendar& c) {
     cout << "DayAttr::check_for_expiration " << dump() << " calendar:" << c.suite_time_str() << "\n";
 #endif
     // This function is called when a Node has COMPLETED. Avoid running again on same day date <= calendar, expire the
-    // date Note: time attribute, they get handled before. i.e allowing multiple re-queues on the same date This
+    // date Note: time attribute, they get handled before. i.e. allowing multiple re-queues on the same date This
     // function *MUST* be called before checkForRequeue.
 
     if (date_.is_special()) {
@@ -283,8 +283,8 @@ bool DayAttr::checkForRequeue(const ecf::Calendar& c) const {
     }
 
     // checkForRequeue is called when we are deciding whether to re-queue the node
-    // Hence we *MUST* have completed. Also crons,time,today have all returned false.
-    // *IF* this date is in the future, they we should re-queue
+    // Hence we *MUST* have completed. Also, all cron, time, and today attributes have returned false.
+    // *IF* this date is in the future, we should re-queue
 
     assert(!date_.is_special());
 
@@ -517,7 +517,7 @@ std::vector<std::string> DayAttr::allDays() {
 
 boost::gregorian::date DayAttr::matching_date(const ecf::Calendar& c) const {
     boost::gregorian::date_duration one_day(1);
-    boost::gregorian::date matching_date = c.date(); // todays date
+    boost::gregorian::date matching_date = c.date(); // today's date
 
     for (int i = 0; i < 7; i++) {
         if (matching_date.day_of_week().as_number() == day_) {
@@ -531,7 +531,7 @@ boost::gregorian::date DayAttr::matching_date(const ecf::Calendar& c) const {
 
 boost::gregorian::date DayAttr::next_matching_date(const ecf::Calendar& c) const {
     boost::gregorian::date_duration one_day(1);
-    boost::gregorian::date the_next_matching_date = c.date(); // todays date
+    boost::gregorian::date the_next_matching_date = c.date(); // today's date
 
     for (int i = 0; i < 7; i++) {
         the_next_matching_date += one_day;

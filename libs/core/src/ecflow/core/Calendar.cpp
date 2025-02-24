@@ -188,7 +188,7 @@ void Calendar::update(const ecf::CalendarUpdateParams& calUpdateParams) {
     }
 
     // Day change required for both REAL and HYBRID. See TimeDependencies.ddoc for reason
-    // This must be done before change date back. (i.e in hybrid case, below)
+    // This must be done before change date back. (i.e. in hybrid case, below)
     int new_day_of_week = suiteTime_.date().day_of_week().as_number();
     if (theDayOfWeek != new_day_of_week)
         dayChanged_ = true;
@@ -279,8 +279,8 @@ void Calendar::update(const boost::posix_time::time_duration& serverPollPeriod) 
 }
 
 void Calendar::update(const boost::posix_time::ptime& time_now) {
-    // Used for test even though for_test is false, as we want to test that path in UNIT tests
-    // Tests: path 1. shown above. Note: we pass minutes(1), to ensure path 1. is taken
+    // Used for tests even though for_test is false, as we want to test that path in UNIT tests
+    // Test path `1.` shown above. Note: we pass minutes(1), to ensure path `1.` is taken
     CalendarUpdateParams p(time_now, minutes(1), true /* server running */, false /* for Test*/);
     update(p);
 }

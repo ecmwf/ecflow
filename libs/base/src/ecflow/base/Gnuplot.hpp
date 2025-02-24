@@ -60,7 +60,7 @@ private:
     };
 
     /// Returns that path to file created by this function.
-    /// The create file is to be used by gnuplot to show the server load.
+    /// The file is used by gnuplot to show the server load.
     ///  Can throw exceptions
     std::string create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, const std::string& input_data) const;
 

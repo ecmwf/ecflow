@@ -12,7 +12,7 @@
 #define ecflow_core_EcfPortLock_HPP
 
 ///
-/// \brief This class enables the creation of a lock file file, so that different processes
+/// \brief This class enables the creation of a lock file, so that different processes
 ///        avoid creating server with same port number.
 ///
 ///        IMPORTANT: This functionality is used in TESTS only.

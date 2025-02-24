@@ -39,7 +39,7 @@ bool Openssl::enable_no_throw(std::string host, const std::string& port, const s
     if (ecf_ssl_env.empty() || ecf_ssl_env == "1") {
         // LOOK for      $HOME/.ecflowrc/ssl/server.crt
         // THEN LOOK for $HOME/.ecflowrc/ssl/<host>.<port>.crt
-        // Look for the certificate that HAVE to exist on both client and server. i.e Self signed certificate (CRT)
+        // Look for the certificate that HAS to exist on both client and server, i.e. self-signed certificate (CRT)
         // Needed for testing, avoid <host>.<port>.crt when ports numbers are auto generated
         ssl_ = "1";
         if (!fs::exists(crt())) { // crt() uses ssl_

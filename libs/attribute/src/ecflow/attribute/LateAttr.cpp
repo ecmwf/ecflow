@@ -111,11 +111,11 @@ bool LateAttr::check_for_lateness(const std::pair<NState, boost::posix_time::tim
             //          return;
             //       }
             // This is incorrect since calendar.duration() is essentially duration until
-            // the last call to Calendar::init() i.e suite duration time. Hence late was
+            // the last call to Calendar::init() i.e suite duration time. Hence, late was
             // set straight away.
             //
-            // to check for submitted, we need the duration *after* state went into submitted state
-            // state.second is when state went SUBMITTED, relative to suite start
+            // To check for submitted, we need the duration *after* state went into submitted state.
+            // `state.second` is when state went SUBMITTED, relative to suite start
             boost::posix_time::time_duration time_in_submitted_state = calendar.duration() - state.second;
             if (time_in_submitted_state >= s_.duration()) {
                 return true;
@@ -129,8 +129,8 @@ bool LateAttr::check_for_lateness(const std::pair<NState, boost::posix_time::tim
     }
     else if (state.first == NState::ACTIVE && !c_.isNULL()) {
         if (c_is_rel_) {
-            // to check for complete, we need the duration when state went into active state
-            // state.second is when state went ACTIVE, relative to suite start
+            // To check for complete, we need the duration when state went into active state.
+            // `state.second` is when state went ACTIVE, relative to suite start
             boost::posix_time::time_duration runtime = calendar.duration() - state.second;
             if (runtime >= c_.duration()) {
                 return true;

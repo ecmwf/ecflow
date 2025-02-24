@@ -43,8 +43,10 @@ SslClient::SslClient(boost::asio::io_context& io,
     if (!cmd_ptr.get())
         throw std::runtime_error("SslClient::SslClient: No request specified !");
 
-    // The timeout can be set externally for testing, however when its not set the timeout is obtained from the command
-    // Vary the timeout, according to the command, hence loading the definition has longer timeout than ping
+    // The timeout can be set externally for testing.
+    // When the timeout is not set it is obtained from the command.
+    // The timeout is defined per command -- this allows, for example, loading the definition to have a longer timeout
+    // than ping.
     if (0 == timeout_) {
         timeout_ = cmd_ptr->timeout();
     }
@@ -238,7 +240,7 @@ void SslClient::handle_write(const boost::system::error_code& e) {
 #endif
         // Check to see if the server was happy with our request.
         // If all is OK, the server may choose not to reply(cuts down on network traffic)
-        // In which case handle_read will get a End of File error.
+        // In which case handle_read will get an End of File error.
         start_read();
     }
     else {
@@ -309,8 +311,8 @@ void SslClient::handle_read(const boost::system::error_code& e) {
             return;
         }
 
-        // If we get back Invalid argument. It means server could *NOT* decode client message. Equally client could not
-        // decode server reply
+        // If we get back Invalid argument it means server could *NOT* decode client message, and, the client
+        // could not decode server reply
         //   - Could be boost version of client/server are incompatible
         //   - 4 series ecflow cannot talk to 5 series ecflow or vice versa
         // We treat this specially
@@ -345,7 +347,7 @@ void SslClient::stop() {
 bool SslClient::handle_server_response(ServerReply& server_reply, bool debug) const {
     if (debug)
         std::cout << "  SslClient::handle_server_response" << std::endl;
-    server_reply.set_host_port(host_, port_); // client context, needed by some commands, ie. SServerLoadCmd
+    server_reply.set_host_port(host_, port_); // client context, needed by some commands, i.e. SServerLoadCmd
     return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
 }
 

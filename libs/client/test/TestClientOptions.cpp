@@ -882,7 +882,7 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_handle_begin) {
     }
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--begin", "--force");
-        // This is an invalid, as --begin only takes a single argument (potentialy with --force as second value)
+        // This is an invalid, as --begin only takes a single argument (potentially with --force as second value)
     }
 }
 

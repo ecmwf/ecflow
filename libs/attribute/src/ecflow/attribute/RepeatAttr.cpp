@@ -485,9 +485,9 @@ void RepeatDate::changeValue(long the_new_date) {
 void RepeatDate::set_value(long the_new_date) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     value_ = the_new_date;
     update_repeat_genvar_value();
     incr_state_change_no();
@@ -807,9 +807,9 @@ void RepeatDateTime::changeValue(long the_new_date) {
 void RepeatDateTime::set_value(long the_new_date) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     value_ = coerce_to_instant(the_new_date);
     update_repeat_genvar_value();
     incr_state_change_no();
@@ -1058,7 +1058,7 @@ std::string RepeatDateList::prev_value_as_string() const {
 }
 
 void RepeatDateList::change(const std::string& newValue) {
-    // See if if matches one of the dates
+    // See if it matches one of the dates
     int new_val = 0;
     try {
         new_val = ecf::convert_to<int>(newValue);
@@ -1103,9 +1103,9 @@ void RepeatDateList::set_value(long the_new_index) {
 
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     currentIndex_ = the_new_index;
     update_repeat_genvar_value();
     incr_state_change_no();
@@ -1229,9 +1229,9 @@ void RepeatInteger::set_value(long the_new_value) {
     // To be used by Memento only. as it does no checking
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     value_ = the_new_value;
     incr_state_change_no();
 }
@@ -1509,7 +1509,7 @@ std::string RepeatEnumerated::prev_value_as_string() const {
 }
 
 void RepeatEnumerated::change(const std::string& newValue) {
-    // See if if matches one of the enums
+    // See if it matches one of the enums
     for (size_t i = 0; i < theEnums_.size(); i++) {
         if (theEnums_[i] == newValue) {
             currentIndex_ = i;
@@ -1547,9 +1547,9 @@ void RepeatEnumerated::changeValue(long the_new_value) {
 void RepeatEnumerated::set_value(long the_new_value) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     currentIndex_ = the_new_value;
     incr_state_change_no();
 }
@@ -1697,7 +1697,7 @@ std::string RepeatString::value_as_string(int index) const {
 }
 
 void RepeatString::change(const std::string& newValue) {
-    // See if if matches one of the strings
+    // See if it matches one of the strings
     for (size_t i = 0; i < theStrings_.size(); i++) {
         if (theStrings_[i] == newValue) {
             currentIndex_ = i;
@@ -1735,9 +1735,9 @@ void RepeatString::changeValue(long the_new_value) {
 void RepeatString::set_value(long the_new_value) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     currentIndex_ = the_new_value;
     incr_state_change_no();
 }

@@ -94,13 +94,13 @@ public:
     /// before trying again. ( i.e. to get round glitches in the network.)
     /// For the ping command this is set as 1 second
     /// This wait between connection attempts can be configured here.
-    /// i.e for the GUI & python interface this can be reduced to increase responsiveness.
+    /// i.e. for the GUI & python interface this can be reduced to increase responsiveness.
     /// Default: In debug this period in set to 1 second and in release mode 10 seconds
     void set_retry_connection_period(unsigned int period) { retry_connection_period_ = period; }
 
     /// Set the number of times to connect to server, in case of failure
     /// The period between connection attempts is handled by set_retry_connection_period
-    /// i.e for the GUI & python interface this can be reduced to increase responsiveness.
+    /// i.e. for the GUI & python interface this can be reduced to increase responsiveness.
     /// Default value is set as 2. Setting a value less than 1 is ignored, will default to 1 in this case
     void set_connection_attempts(unsigned int attempts);
 
@@ -112,18 +112,18 @@ public:
 
     /// If testing, overwrite the task path set in the environment, required for
     /// testing the task based commands.
-    /// By allowing environment to be changed, we allow smsinit,smscomplete, etc to be replaced
+    /// By allowing environment to be changed, we allow `smsinit`, `smscomplete`, etc. to be replaced
     /// with ECF_CLIENT path executable
     /// The following functions are only used for testing purposes.
-    /// Override task paths,env' & job creation at begin time
+    /// Override task paths, environment & job creation at begin time
     void taskPath(const std::string& s);
     void set_jobs_password(const std::string&);
     void setEnv(const std::vector<std::pair<std::string, std::string>>& e);
-    void testInterface(); // allow cmd construction to be aware thats it under test
+    void testInterface(); // allow command construction to be aware that it is under test
     const std::string& process_or_remote_id() const;
 
     /// record each request its arguments and the round trip time to and from server
-    /// If the file cannot opened for create/append then an runtime error exception is thrown
+    /// If the file cannot be opened for create/append, a runtime error exception is thrown
     void enable_logging(const std::string& log_file_name);
     void disable_logging();
 
@@ -200,7 +200,7 @@ public:
     void child_label(const std::string& label_name, const std::string& label_value);
     void child_wait(const std::string& on_expression);
     std::string child_queue(const std::string& queue_name,
-                            const std::string& ation,
+                            const std::string& action,
                             const std::string& step,
                             const std::string& path_to_node_with_queue = "");
     void child_complete();
@@ -212,7 +212,7 @@ public:
                  bool force      = false, /* true means overwrite suite of same name */
                  bool check_only = false, /* client side only, true means don't send to server, just check only */
                  bool print      = false, /* client side only, print the defs */
-                 bool stats      = false  /* client side only, print the defs statitics */
+                 bool stats      = false  /* client side only, print the defs statistics */
     ) const;
     int load(const defs_ptr& defs, bool force = false /*true means overwrite suite of same name*/) const {
         return load_in_memory_defs(defs, force);
@@ -318,7 +318,7 @@ public:
     int order(const std::string& absNodePath, const std::string& order) const; // slow
     int order(const std::string& absNodePath, NOrder::Order) const;            // fast
 
-    // Note: if *ALL* arguments are defaulted only then do we do a explicit save.
+    // Note: if *ALL* arguments are defaulted only then do we do an explicit save.
     int checkPtDefs(ecf::CheckPt::Mode m         = ecf::CheckPt::UNDEFINED,
                     int check_pt_interval        = 0,
                     int check_pt_save_time_alarm = 0) const;
@@ -414,8 +414,9 @@ private:
     int invoke(Cmd_ptr) const; // assumes clients of Cmd_ptr constructor has caught exceptions
 
     int do_invoke_cmd(Cmd_ptr) const;
-    int load_in_memory_defs(const defs_ptr& clientDefs,
-                            bool force) const; /// For clients that want to load a in memory definition into the server.
+
+    /// For clients that want to load an in-memory definition into the server.
+    int load_in_memory_defs(const defs_ptr& clientDefs, bool force) const;
     std::string client_env_host_port() const;
     void check_child_parameters() const;
 

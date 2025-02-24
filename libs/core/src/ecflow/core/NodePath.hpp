@@ -28,9 +28,9 @@ public:
     /// '/suite//family///task' will be extracted as 'suite','family','task'
     static void split(const std::string& path, std::vector<std::string>&);
 
-    /// If the path name if form:
-    ///     //<host>:<port>/suite/family/task
-    /// The extract the host and port, return OK if successful
+    /// If the path has form:
+    ///     <host>:<port>/suite/family/task
+    /// extract the host and port. Return OK, if successful
     static bool extractHostPort(const std::string& path, std::string& host, std::string& port);
 
     /// Given a vector of strings , create a path. "suite","family", returns /suite/family

@@ -61,7 +61,7 @@ public:
 
     static std::vector<Child::CmdType> list();
 
-    /// Expect a , separated string
+    /// Expect a comma-separated string
     static bool valid_child_cmds(const std::string&);
     static bool valid_child_cmd(const std::string&);
 };

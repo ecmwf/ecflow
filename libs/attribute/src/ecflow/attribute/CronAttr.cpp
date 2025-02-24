@@ -240,7 +240,7 @@ void CronAttr::calendarChanged(const ecf::Calendar& c) {
     if (isFree(c)) {
         setFree();
     }
-    // A cron is always re-queable, hence we use isFree to control when it can actually run.
+    // A cron is always re-queueable, hence we use isFree to control when it can actually run.
 }
 
 void CronAttr::resetRelativeDuration() {
@@ -274,14 +274,14 @@ void CronAttr::miss_next_time_slot() {
 }
 
 // **************************************************************************************
-// FOR DEBUG THIS IS THE MAIN FUNCTION, AS THIS DECIDES WHETHER WE CONTINE OR STOP
+// FOR DEBUG THIS IS THE MAIN FUNCTION, AS THIS DECIDES WHETHER WE CONTINUE OR STOP
 // **************************************************************************************
 bool CronAttr::checkForRequeue(const ecf::Calendar& calendar) const {
     // checkForRequeue is called when a task/family has reach the complete state
     // This simple checks if node should be put in re-queued state
-    // A cron is always re-queable
+    // A cron is always re-queueable
 
-    // Hence: In order to use this it should be used in conjunction with a
+    // Hence, in order to use this it should be used in conjunction
     // with a parent node that has complete  expression, (& maybe a dummy task)
     // This will allow its use with a parent repeat somewhere in the hierarchy
     return true;
@@ -321,7 +321,7 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
     //  2/ Logical *AND* of day of week, day of month, or month returned false
     theReasonWhy += "is cron dependent";
 
-    // Lets say that the time series was NOT free.
+    // Let's start by assuming that the time series was NOT free.
     // First check if week day, day of month, month, matches
     if (is_day_of_week_day_of_month_and_month_free(c)) {
 
@@ -407,8 +407,8 @@ bool CronAttr::isFree(const ecf::Calendar& c) const {
     // Ok time series is Free
 
     // ********************************************************************
-    // IMPORTANT: when we have multiple week days, days of month and months
-    // Then we are *ONLY* free, if *ALL* are free, i.e we need AND behaviour
+    // IMPORTANT: When there are multiple week days, days of month and months,
+    // the attribute is *ONLY* free, if *ALL* are free, i.e. we need Boolean AND behaviour
     // ********************************************************************
     return is_day_of_week_day_of_month_and_month_free(c);
 }
@@ -508,10 +508,10 @@ bool CronAttr::checkInvariants(std::string& errormsg) const {
 
 boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const {
     // Find the next date that matches, day of week, day of year, and month
-    // that is greater than todays date. This *ASSUMES* day of week, day of month,
-    // and month is *ANDED* together
+    // that is greater than today's date.
+    // This *ASSUMES* day of week, day of month, and month are evaluated with _AND_ together
     boost::gregorian::date_duration one_day(1);
-    boost::gregorian::date future_date = calendar.date(); // todays date
+    boost::gregorian::date future_date = calendar.date(); // today's date
 
 #ifdef DEBUG_CRON_SIM
     cout << "cron : " << toString() << "\n";
@@ -580,7 +580,7 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const 
         cout << "future_date " << to_simple_string(future_date) << "\n";
 #endif
     }
-    return future_date; // should never happen, i.e we can find future date that matches
+    return future_date; // should never happen, i.e. we can find future date that matches
 }
 
 //=========================================================================================================

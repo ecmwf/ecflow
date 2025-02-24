@@ -12,7 +12,7 @@
 #define ecflow_attribute_TodayAttr_HPP
 
 ///
-/// \brief The Today attribute is heavily tied to the begin command
+/// \brief The Today attribute is heavily tied to the `begin` command
 ///
 /// Real Clock:
 ///   1/ Suite Begin time > Today time
@@ -30,9 +30,9 @@
 ///                                                isFree:-----free-----
 ///                                                 begin:
 ///                                                 V
-/// checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-///         isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff  *once* free we stay free (single slot
-///         *only*) begin:
+/// checkForRequeue:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+///          isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff  *once* free we stay free
+///          (single slot *only*) begin:
 ///          V
 ///   Today  ======================0=====================0=================
 ///                               10:00              Midnight
@@ -43,8 +43,8 @@
 /// When we have a today time series:
 ///     today 10:00 20:00 01:00
 ///
-///  *** If the begin time is past 10:00  in the case above then the
-///  *** node should is free to run once. However for a range its different
+///  *** If the beginning time is past 10:00 as in the case above then the
+///  *** node should is free to run once. However, for a range its different
 ///  *** if suite begin time is past 20:00 then the node is held.
 ///
 ///  At 10am the Node is free, when node completes, it is re-queued
@@ -53,7 +53,7 @@
 ///  At 20pm the Node is free, when node completes, it is *NOT* re-queued.
 ///
 /// isFree is called when a node is queued. if it returns true, Task can be submitted
-/// checkForReque: is called when a node has completed, and need to determine if it should run again.
+/// checkForRequeue: is called when a node has completed, and need to determine if it should run again.
 /// These are different/orthogonal concerns.
 /// There is a *separate* issue of whether nodes should be queued when a node is *manually*
 ///    a/ Set complete
@@ -65,19 +65,19 @@
 ///                                               isFree:ffffffffffffffff
 ///                                               Begin:
 ///                                               V
-/// checkForReque:hhhhhhhhhhhhhhhhhrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-///       isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff
-///       begin :
-///        V
-/// Today  ======================0========0===========0====================
-///                            10:00    11:00      Midnight
-///                                                     isFree:hhhhhhhhhhhhhhhhhh
-///                                                      V
-///   CheckForReque:hhhhhhhrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-///          isFree:hhhhhhhFhhhhFhhhhFhhhhFhhhhFhhhhFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-///            V           |    |    |    |    |    |        |
-/// Today  ================o====|====|====|====|====0========0====================
-///                      10:00  1    2    3    4  15:00    Midnight
+/// checkForRequeue:hhhhhhhhhhhhhhhhhrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+///          isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff
+///          begin :
+///           V
+///    Today  ======================0========0===========0====================
+///                               10:00    11:00      Midnight
+///                                                        isFree:hhhhhhhhhhhhhhhhhh
+///                                                         V
+///   CheckForRequeue:hhhhhhhrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+///            isFree:hhhhhhhFhhhhFhhhhFhhhhFhhhhFhhhhFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+///              V           |    |    |    |    |    |        |
+///   Today  ================o====|====|====|====|====0========0====================
+///                        10:00  1    2    3    4  15:00    Midnight
 ///
 /// If the job starts at 10:00 but takes more than 1 hour, then it will miss the 11:00 slot
 /// and will have to start at 12:00
@@ -160,8 +160,8 @@ public:
     bool checkInvariants(std::string& errormsg) const { return ts_.checkInvariants(errormsg); }
 
     // The state_change_no is never reset. Must be incremented if it can affect equality
-    // Note: changes in state of ts_, i.e affect the equality operator (used in test)
-    //       must be captured. i.e things like relative duration & next_time_slot are
+    // Note: changes in state of ts_, i.e. affect the equality operator (used in test)
+    //       must be captured. i.e. things like relative duration & next_time_slot are
     //       reported by the Why command, & hence need to be synced.
     unsigned int state_change_no() const { return state_change_no_; }
 

@@ -67,7 +67,7 @@ private:
     std::string passwd() const;
 
 private:
-    std::string ssl_;                                        // Non empty if ssl has been enabled
+    std::string ssl_;                                        // Non-empty if ssl has been enabled
     std::unique_ptr<boost::asio::ssl::context> ssl_context_; // create on demand, otherwise non-ssl context takes a hit.
     bool init_for_client_{false};
 };

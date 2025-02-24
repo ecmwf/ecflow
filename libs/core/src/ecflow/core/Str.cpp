@@ -39,7 +39,7 @@ const std::string& Str::ROOT_PATH() {
     static std::string root_path = "/";
     return root_path;
 }
-const std::string& Str::PATH_SEPERATOR() {
+const std::string& Str::PATH_SEPARATOR() {
     static std::string path_sep = "/";
     return path_sep;
 }
@@ -424,7 +424,7 @@ bool Str::valid_name(const std::string& name, std::string& msg) {
                 msg += "Windows line ending ? ";
             msg += "'";
             msg += name;
-            msg += "'"; // use '<name>' to show if PC format. i.e carriage return
+            msg += "'"; // use '<name>' to show if PC format, i.e. carriage return
         }
     }
 

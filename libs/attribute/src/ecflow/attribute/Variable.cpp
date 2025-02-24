@@ -44,7 +44,7 @@ void Variable::set_name(const std::string& v) {
 }
 
 int Variable::value() const {
-    // see if the value is convertible to a integer
+    // see if the value is convertible to an integer
     return Str::to_int(v_, 0 /* value to return if conversion fails*/);
 }
 

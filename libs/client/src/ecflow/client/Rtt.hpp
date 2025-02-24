@@ -33,7 +33,7 @@ public:
     void log(const std::string& message);
 
     /// Open the file, and create average times for all client invoker round trip times
-    static std::string analyis(const std::string& filename);
+    static std::string analysis(const std::string& filename);
 
     /// Used in output and parsing, when computing averages
     static const char* tag() { return "rtt:"; }

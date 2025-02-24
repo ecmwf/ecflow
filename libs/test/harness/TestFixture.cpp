@@ -176,7 +176,7 @@ void TestFixture::init(const std::string& project_test_dir) {
 
         // Create a unique port number, allowing debug and release to run at the same time
         // Note: linux64 and linux64intel, can run on same machine, on different workspace
-        // Hence the lock file is not sufficient. Hence we will make a client server call.
+        // Hence the lock file is not sufficient. Hence, we will make a client server call.
         cout << "Find free port to start server, starting with port " << port_ << "\n";
         auto the_port = ecf::convert_to<int>(port_);
         while (!EcfPortLock::is_free(the_port))
@@ -184,7 +184,7 @@ void TestFixture::init(const std::string& project_test_dir) {
         port_ = ClientInvoker::find_free_port(the_port, true /*show debug output */);
         EcfPortLock::create(port_);
 
-        // host_ is empty update to localhost, **since** port may have changed, update ClinetInvoker
+        // host_ is empty update to localhost, **since** port may have changed, update ClientInvoker
         client().set_host_port(host_, port_);
 
         // Remove the generated check point files, at start of test, otherwise server will load check point file
@@ -279,7 +279,7 @@ TestFixture::~TestFixture() {
 
         cout << "\nTiming: *NOTE*: The child commands *NOT* recorded. Since its a separate exe(ecflow_client), called "
                 "via .ecf script\n";
-        cout << Rtt::analyis(rtt_filename); // report round trip times
+        cout << Rtt::analysis(rtt_filename); // report round trip times
         fs::remove(rtt_filename);
     }
     catch (std::exception& ex) {
@@ -403,8 +403,7 @@ std::string TestFixture::includes() {
     return includes_path;
 }
 
-/// Given a task name like "a" find the find the first task matching that name
-/// and returns is abs node path
+/// Given a task name like "a" find the first task matching that name and return the absolute node path
 std::string TestFixture::taskAbsNodePath(const Defs& theDefs, const std::string& taskName) {
     std::vector<Task*> vec;
     theDefs.getAllTasks(vec);
