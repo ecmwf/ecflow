@@ -11,6 +11,8 @@
   <a href="https://github.com/ecmwf/ecflow/releases"><img src="https://img.shields.io/github/v/release/ecmwf/ecflow?color=blue&label=Release&style=flat-square" alt="Latest Release"></a>
   &nbsp;
   <a href="https://ecflow.readthedocs.io/en/latest/?badge=latest"><img src="https://readthedocs.org/projects/ecflow/badge/?version=latest" alt="Documentation Status"></a>
+  &nbsp;
+  <a href="https://codecov.io/gh/ecmwf/ecflow"><img src="https://codecov.io/gh/ecmwf/ecflow/branch/develop/graph/badge.svg" alt="Code Coverage"></a>
 </div>
 
 
