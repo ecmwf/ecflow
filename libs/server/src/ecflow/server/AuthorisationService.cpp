@@ -10,67 +10,14 @@
 
 #include "ecflow/server/AuthorisationService.hpp"
 
-#include <fstream>
-#include <iostream>
-#include <regex>
-
-#include <nlohmann/json.hpp>
+#include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/Algorithms.hpp"
+#include "ecflow/core/Overload.hpp"
 
 namespace ecf {
 
-template <typename... Ts>
-struct Overload : Ts...
-{
-    using Ts::operator()...;
-};
-
-template <class... Ts>
-Overload(Ts...) -> Overload<Ts...>;
-
-struct Rule
-{
-    Rule(std::string pattern,
-         std::vector<std::string> allowed_users,
-         std::vector<std::string> allowed_roles,
-         std::vector<std::string> permissions)
-        : pattern_{std::move(pattern)},
-          regex_{pattern_},
-          allowed_users_{std::move(allowed_users)},
-          allowed_roles_{std::move(allowed_roles)},
-          permissions_{std::move(permissions)} {}
-
-    [[nodiscard]] const std::string& pattern() const { return pattern_; }
-    [[nodiscard]] const std::vector<std::string>& allowed_users() const { return allowed_users_; }
-    [[nodiscard]] const std::vector<std::string>& allowed_roles() const { return allowed_roles_; }
-    [[nodiscard]] const std::vector<std::string>& permissions() const { return permissions_; }
-
-    [[nodiscard]] bool matches(const std::string& path) const { return std::regex_match(path, regex_); }
-    [[nodiscard]] bool matches(const std::vector<std::string>& paths) const {
-        bool found = true;
-        for (const auto& path : paths) {
-            found = found && std::regex_match(path, regex_);
-        }
-        return found;
-    }
-    [[nodiscard]] bool applies_to(const Identity& identity) const {
-        return std::find(std::begin(allowed_users_), std::end(allowed_users_), identity.username()) !=
-               std::end(allowed_users_);
-    }
-    [[nodiscard]] bool allows(const std::string& required) const {
-        return std::find(std::begin(permissions_), std::end(permissions_), required) != std::end(permissions_);
-    }
-
-private:
-    std::string pattern_;
-    std::regex regex_;
-    std::vector<std::string> allowed_users_;
-    std::vector<std::string> allowed_roles_;
-    std::vector<std::string> permissions_;
-};
-
 struct Rules
 {
-    std::vector<Rule> rules_;
 };
 
 struct Unrestricted
@@ -106,15 +53,23 @@ bool AuthorisationService::good() const {
     return impl_ != nullptr;
 }
 
-bool AuthorisationService::allows(const Identity& identity, const std::string& permission) const {
-    return allows(identity, paths_t{ROOT}, permission);
+bool AuthorisationService::allows(const Identity& identity,
+                                  const AbstractServer& server,
+                                  const std::string& permission) const {
+    return allows(identity, server, paths_t{ROOT}, permission);
 }
 
-bool AuthorisationService::allows(const Identity& identity, const path_t& path, const std::string& permission) const {
-    return allows(identity, paths_t{path}, permission);
+bool AuthorisationService::allows(const Identity& identity,
+                                  const AbstractServer& server,
+                                  const path_t& path,
+                                  const std::string& permission) const {
+    return allows(identity, server, paths_t{path}, permission);
 }
 
-bool AuthorisationService::allows(const Identity& identity, const paths_t& paths, const std::string& permission) const {
+bool AuthorisationService::allows(const Identity& identity,
+                                  const AbstractServer& server,
+                                  const paths_t& paths,
+                                  const std::string& permission) const {
     if (!good()) {
         // When no rules are loaded, we allow everything...
         // Dangerous, but backward compatible!
@@ -122,64 +77,59 @@ bool AuthorisationService::allows(const Identity& identity, const paths_t& paths
     }
 
     bool allowed = false;
-    std::visit(Overload{[&allowed](const Unrestricted&) {
-                            // when no rules are loaded, we allow everything...
-                            // Dangerous, but backward compatible!
-                            allowed = true;
-                        },
-                        [&identity, &paths, &permission, &allowed](const Rules& rules) {
-                            for (const auto& rule : rules.rules_) {
-                                if (rule.matches(paths) && rule.applies_to(identity) && rule.allows(permission)) {
-                                    allowed = true;
-                                }
-                            }
-                        }},
-               impl_->permissions_);
+    std::visit(
+        overload{[&allowed](const Unrestricted&) {
+                     // when no rules are loaded, we allow everything...
+                     // Dangerous, but backward compatible!
+                     allowed = true;
+                 },
+                 [&server, &identity, &paths, &permission, &allowed](const Rules& rules) {
+                     for (auto&& path : paths) {
+
+                         auto u = identity.as_string();
+                         auto a = permission;
+
+                         struct Visitor
+                         {
+                             void operator()(const Defs& defs) {
+                                 auto p      = defs.server_state().permissions();
+                                 permissions = p.is_empty() ? permissions : p;
+                             }
+                             void operator()(const Node& s) {
+                                 auto p      = s.permissions();
+                                 permissions = p.is_empty() ? permissions : p;
+                             }
+
+                             Permissions permissions = Permissions::make_empty();
+                         };
+
+                         auto d = server.defs();
+                         auto p = Path::make(path).value();
+                         auto v = Visitor{};
+                         ecf::visit(*d, p, v);
+
+                         if (v.permissions.is_empty()) {
+                             std::cout << "Allowed! No custom permissions found for: " << p.to_string() << std::endl;
+                             allowed = true;
+                         }
+                         else if (v.permissions.allows(identity.username())) {
+                             std::cout << "Allowed! Specific permissions found for: " << p.to_string() << std::endl;
+                             allowed = true;
+                         }
+                         else {
+                             std::cout << "Not allowed! Specific permissions found for: " << p.to_string() << std::endl;
+                             allowed = false;
+                             break;
+                         }
+                     }
+                 }},
+        impl_->permissions_);
 
     return allowed;
 }
 
-AuthorisationService::result_t AuthorisationService::load_permissions_from_file(const fs::path& cfg) {
-    using json = nlohmann::json;
-
-    std::ifstream f(cfg.c_str());
-
-    if (!f.good()) {
-        return result_t::failure("Could not open file: " + cfg.string());
-    }
-
-    std::string l;
-    std::getline(f, l);
-
-    f.seekg(0, std::ios::beg);
-
-    try {
-        json data = json::parse(f);
-
-        std::cout << "loaded data: " << data << std::endl;
-
-        Rules rules;
-        for (const auto& rule : data["rules"]) {
-            std::string pattern = rule.contains("path") ? rule["path"] : "/.*";
-            std::vector<std::string> allowed_users;
-            if (rule.contains("allowed-users")) {
-                allowed_users = rule["allowed-users"];
-            }
-            std::vector<std::string> allowed_roles;
-            if (rule.contains("allowed-roles")) {
-                allowed_users = rule["allowed-roles"];
-            }
-            std::vector<std::string> permissions;
-            if (rule.contains("permissions")) {
-                permissions = rule["permissions"];
-            }
-            rules.rules_.emplace_back(pattern, allowed_users, allowed_roles, permissions);
-        }
-        return result_t::success(AuthorisationService(std::make_unique<Impl>(std::move(rules))));
-    }
-    catch (const json::parse_error& e) {
-        return result_t::failure("Failed to load JSON: " + std::string(e.what()));
-    }
+AuthorisationService::result_t AuthorisationService::load_permissions_from_nodes() {
+    return result_t::success(AuthorisationService(std::make_unique<Impl>(Rules{})));
 }
 
 } // namespace ecf

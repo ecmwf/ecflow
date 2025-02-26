@@ -80,8 +80,12 @@ private:
 template <typename PREDICATE>
 void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
 
-    // a. Visit the server 'definitions'
+    // a. Visit the 'definitions' (which includes the server state)
     predicate(defs);
+
+    if (path.empty()) {
+        return;
+    }
 
     // b. Visit each one of the 'nodes' along the given path
 
@@ -97,20 +101,6 @@ void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
     }
 
 }
-
-template <typename PREDICATE>
-void visit(const AbstractServer& server, const Path& path, PREDICATE& predicate) {
-
-    // Visit the 'server'
-    predicate(server);
-
-    if (path.empty()) {
-        return;
-    }
-
-    visit(*server.defs(), path, predicate);
-}
-
 
 } // namespace ecf
 
