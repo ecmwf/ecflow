@@ -15,6 +15,8 @@
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Result.hpp"
 
+class AbstractServer;
+
 namespace ecf {
 
 class AuthorisationService {
@@ -35,9 +37,13 @@ public:
 
     ~AuthorisationService();
 
-    [[nodiscard]] bool good() const;
+    [[nodiscard]]
+    bool good() const;
 
-    [[nodiscard]] bool authenticate(const Identity& identity) const { return true; }
+    [[nodiscard]]
+    bool authenticate(const Identity& identity) const {
+        return true;
+    }
 
     /**
      * Verify if the identity is allowed to perform the action on the give paths.
@@ -47,11 +53,23 @@ public:
      * @param permission the required permission to perform the action
      * @return true if the identity is allowed to perform the action, false otherwise
      */
-    [[nodiscard]] bool allows(const Identity& identity, const std::string& permission) const;
-    [[nodiscard]] bool allows(const Identity& identity, const path_t& path, const std::string& permission) const;
-    [[nodiscard]] bool allows(const Identity& identity, const paths_t& paths, const path_t& permission) const;
+    [[nodiscard]]
+    bool allows(const Identity& identity, const AbstractServer& server, const std::string& permission) const;
 
-    [[nodiscard]] static result_t load_permissions_from_file(const fs::path& cfg);
+    [[nodiscard]]
+    bool allows(const Identity& identity,
+                const AbstractServer& server,
+                const path_t& path,
+                const std::string& permission) const;
+
+    [[nodiscard]]
+    bool allows(const Identity& identity,
+                const AbstractServer& server,
+                const paths_t& paths,
+                const std::string& permission) const;
+
+    [[nodiscard]]
+    static result_t load_permissions_from_nodes();
 
 private:
     struct Impl;
