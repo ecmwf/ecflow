@@ -7,6 +7,8 @@
   <a href="https://github.com/ecmwf/codex/raw/refs/heads/main/Project%20Maturity"><img src="https://github.com/ecmwf/codex/raw/refs/heads/main/Project%20Maturity/graduated_badge.svg" alt="Static Badge"></a>
   &nbsp;
   <a href="https://opensource.org/licenses/apache-2-0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0"></a>
+  &nbsp;
+  <a href="https://github.com/ecmwf/ecflow/releases"><img src="https://img.shields.io/github/v/release/ecmwf/ecflow?color=blue&label=Release&style=flat-square" alt="Latest Release"></a>
 </div>
 
 
