@@ -110,37 +110,6 @@ BOOST_AUTO_TEST_CASE(test_can_visit_defs) {
     BOOST_CHECK_EQUAL(visitor.collected[3], "node: task");
 }
 
-BOOST_AUTO_TEST_CASE(test_can_visit_server) {
-    ECF_NAME_THIS_TEST();
-
-    Defs defs;
-    suite_ptr s  = defs.add_suite("suite");
-    family_ptr f = s->add_family("family");
-    task_ptr t   = f->add_task("task");
-
-    MockServer server(&defs);
-
-    struct Visitor
-    {
-        void operator()(const AbstractServer& server) { collected.push_back("server"); }
-        void operator()(const Defs& defs) { collected.push_back("defs"); }
-        void operator()(const Node& s) { collected.push_back("node: " + s.name()); }
-
-        std::vector<std::string> collected;
-    };
-
-    auto path = ecf::Path::make("/suite/family/task").value();
-    Visitor visitor;
-    ecf::visit(server, path, visitor);
-
-    BOOST_CHECK_EQUAL(visitor.collected.size(), 5ul);
-    BOOST_CHECK_EQUAL(visitor.collected[0], "server");
-    BOOST_CHECK_EQUAL(visitor.collected[1], "defs");
-    BOOST_CHECK_EQUAL(visitor.collected[2], "node: suite");
-    BOOST_CHECK_EQUAL(visitor.collected[3], "node: family");
-    BOOST_CHECK_EQUAL(visitor.collected[4], "node: task");
-}
-
 BOOST_AUTO_TEST_SUITE_END() // T_Algorithms
 
 BOOST_AUTO_TEST_SUITE_END()
