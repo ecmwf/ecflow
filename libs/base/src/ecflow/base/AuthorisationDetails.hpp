@@ -110,8 +110,9 @@ authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractS
                       "The command must be either a TaskCmd or a UserCmd");
     }
 
-    const std::string permission = command.isWrite() ? "write" : "read";
-    if (base->authorisation().allows(command.identity(), paths, permission)) {
+    const std::string required_permission = command.isWrite() ? "write" : "read";
+
+    if (base->authorisation().allows(command.identity(), *base, paths, required_permission)) {
         return authorisation_t::success("Authorisation (user) granted");
     }
 
