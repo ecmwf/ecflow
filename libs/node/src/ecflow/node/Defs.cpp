@@ -1355,7 +1355,7 @@ void Defs::write_to_checkpt_file(const std::string& filepath) const {
     // only_save_edit_history_when_check_pointing or if explicitly requested
     save_edit_history_ = true; // this is reset after edit_history is saved
 
-    // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
+    // Speed up check-pointing by avoiding indentation. i.e. run_time and disk space
     // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
     write_to_file(filepath, PrintStyle::MIGRATE);
 }

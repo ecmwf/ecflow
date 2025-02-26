@@ -56,36 +56,7 @@ BOOST_AUTO_TEST_CASE(test_file_automatic_prefix_name_exists) {
 BOOST_AUTO_TEST_CASE(test_loading_perms) {
     ECF_NAME_THIS_TEST();
 
-    std::string content =
-        R"---({
-  "rules": [
-    {
-      "path": "/.*",
-      "allowed-users": ["user1", "user2"],
-      "allowed-roles": ["role1", "role2"],
-      "permissions": ["read"]
-    },
-    {
-      "path": "/.*",
-      "allowed-users": ["user3", "user4"],
-      "allowed-roles": ["role3", "role4"],
-      "permissions": ["read", "write"]
-    }
-  ]
-})---";
-
-    WithTestFile file{AutomaticTestFile{}, content};
-    auto service = ecf::AuthorisationService::load_permissions_from_file(file.path());
-    BOOST_REQUIRE(service.ok());
-    BOOST_REQUIRE(service.value().good());
-    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user1", "secret"), std::string{"/"}, "read"));
-    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user2", "secret"), std::string{"/s/f/t"}, "read"));
-    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user1", "secret"), std::string{"/"}, "write"));
-    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user2", "secret"), std::string{"/s/f/t"}, "write"));
-    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user3", "secret"), std::string{"/"}, "read"));
-    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user4", "secret"), std::string{"/s/f/t"}, "read"));
-    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user3", "secret"), std::string{"/"}, "write"));
-    BOOST_REQUIRE(service.value().allows(ecf::Identity::make_user("user4", "secret"), std::string{"/s/f/t"}, "write"));
+    BOOST_CHECK_MESSAGE(false, "test to be removed");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
