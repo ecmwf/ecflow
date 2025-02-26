@@ -1283,7 +1283,7 @@ bool VServer::substituteVariableValue(std::string& val) const {
     if (!defs)
         return false;
 
-    return defs->server().variableSubsitution(val);
+    return defs->server().variableSubstitution(val);
 }
 
 //----------------------------------------------

@@ -27,6 +27,7 @@ Identity identify(const Cmd_ptr& cmd) {
             task_cmd->process_or_remote_id(), task_cmd->jobs_password(), std::to_string(task_cmd->try_no()));
     }
     assert(false);
+    return ecf::Identity::make_none();
 }
 
 } // namespace ecf

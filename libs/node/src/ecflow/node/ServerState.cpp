@@ -289,7 +289,7 @@ bool ServerState::variable_exists(const std::string& name) const {
     return false;
 }
 
-bool ServerState::variableSubsitution(std::string& cmd) const {
+bool ServerState::variableSubstitution(std::string& cmd) const {
     // scan the command for variables, and substitute
     // We can also have
     //
