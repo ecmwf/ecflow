@@ -49,17 +49,23 @@ BOOST_AUTO_TEST_CASE(test_server_version) {
 
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
     BOOST_REQUIRE_MESSAGE(theClient.server_version() == 0, "server version\n" << theClient.errorMsg());
+
+    auto client_version = theClient.get_string();
+    auto server_version = Version::full();
+
+    // Important:
+    //   The test only requires a specific server version when both client and server are local.
+    //   When contacting a remote server, only a warning is issued if the versions do not match.
+
     if (ClientEnvironment::hostSpecified().empty()) {
-        // This check only valid if server was invoked locally. Ignore for remote servers
-        BOOST_REQUIRE_MESSAGE(theClient.get_string() == Version::raw(),
-                              "Expected client version(" << Version::raw() << ") to match server version("
-                                                         << theClient.get_string() << ")");
+        BOOST_REQUIRE_MESSAGE(client_version == server_version,
+                              "Client version (" << client_version << ") does not match server version ("
+                                                 << server_version << ")");
     }
     else {
-        // remote server, version may be different
-        BOOST_WARN_MESSAGE(theClient.get_string() == Version::raw(),
-                           "Client version(" << Version::raw() << ") does not match server version("
-                                             << theClient.get_string() << ")");
+        BOOST_WARN_MESSAGE(client_version == server_version,
+                           "Client version (" << client_version << ") does not match server version (" << server_version
+                                              << ")");
     }
 }
 

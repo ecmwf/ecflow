@@ -74,16 +74,18 @@ struct TestFixture
     /// When local just returns ecf.log, when remote return path to log file
     static std::string pathToLogFile();
 
-    /// Given a task name like "a" find the find the first task matching that name
+    /// Given a task name like "a" find the first task matching that name
     /// and returns is abs node path
     static std::string taskAbsNodePath(const Defs& theDefs, const std::string& taskName);
 
     /// Location of the includes used in the ecf file
     static std::string includes();
 
-    /// returns the server version as an integer.
-    /// This allows as to ignore some tests, when testing old servers.(with new clients).
-    static int server_version();
+    /// Retrieve the server version
+    ///
+    /// This allows to ignore some tests, which is useful when testing old servers using new clients
+    ///
+    static const std::string& server_version();
 
     // Use for all comms with server
     static ClientInvoker& client();

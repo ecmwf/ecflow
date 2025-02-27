@@ -16,6 +16,7 @@
 #define ECFLOW_RELEASE   "@ecflow_VERSION_MAJOR@"
 #define ECFLOW_MAJOR     "@ecflow_VERSION_MINOR@"
 #define ECFLOW_MINOR     "@ecflow_VERSION_PATCH@"
+#define ECFLOW_SUFFIX    "@ecflow_VERSION_SUFFIX@"
 
 // available but not used
 // PROJECT_VERSION=@PROJECT_VERSION@
