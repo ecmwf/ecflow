@@ -31,7 +31,7 @@ find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CUR
 # Project
 # =========================================================================================
 
-project( ecflow LANGUAGES CXX VERSION 5.13.7 )
+project( ecflow LANGUAGES CXX VERSION 5.14.0 )
 #
 # Important:
 #   The CMake project version is used, as generated CMake variables, to filter .../ecflow/core/ecflow_version.h.in
@@ -47,7 +47,7 @@ ecbuild_declare_project()
 # Set the version suffix (for alpha/beta/rc releases)
 #
 
-set(ecflow_VERSION_SUFFIX "")
+set(ecflow_VERSION_SUFFIX "-attempt1")
 set(ecflow_VERSION "${ecflow_VERSION}${ecflow_VERSION_SUFFIX}")
 
 ecbuild_info( "CMAKE_MODULE_PATH          : ${CMAKE_MODULE_PATH}" )
