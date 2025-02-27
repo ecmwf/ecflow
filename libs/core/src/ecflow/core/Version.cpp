@@ -20,9 +20,24 @@
 
 namespace ecf {
 
+std::string Version::major() {
+    return ECFLOW_VERSION_MAJOR;
+}
+
+std::string Version::minor() {
+    return ECFLOW_VERSION_MINOR;
+}
+
+std::string Version::patch() {
+    return ECFLOW_VERSION_PATCH;
+}
+
+std::string Version::suffix() {
+    return ECFLOW_VERSION_SUFFIX;
+};
+
 std::string Version::description() {
     std::stringstream ss;
-
     ss << "Ecflow ";
 #ifdef DEBUG
     ss << "(debug) ";
@@ -38,41 +53,18 @@ std::string Version::description() {
     return ss.str();
 }
 
-std::string Version::version() {
-    std::string ret = "ecflow_";
-    ret += ecf::convert_to<std::string>(ECFLOW_RELEASE);
-    ret += "_";
-    ret += ecf::convert_to<std::string>(ECFLOW_MAJOR);
-    ret += "_";
-    ret += ecf::convert_to<std::string>(ECFLOW_MINOR);
-    return ret;
-}
-
-std::string Version::raw() {
-    std::string ret = ecf::convert_to<std::string>(ECFLOW_RELEASE);
+std::string Version::base() {
+    std::string ret = major();
     ret += ".";
-    ret += ecf::convert_to<std::string>(ECFLOW_MAJOR);
+    ret += minor();
     ret += ".";
-    ret += ecf::convert_to<std::string>(ECFLOW_MINOR);
+    ret += patch();
     return ret;
 }
 
 std::string Version::full() {
-    return Version::raw() + Version::suffix();
+    return Version::base() + Version::suffix();
 }
-
-std::string Version::major() {
-    return ecf::convert_to<std::string>(ECFLOW_RELEASE);
-}
-std::string Version::minor() {
-    return ecf::convert_to<std::string>(ECFLOW_MAJOR);
-}
-std::string Version::patch() {
-    return ecf::convert_to<std::string>(ECFLOW_MINOR);
-}
-std::string Version::suffix() {
-    return ecf::convert_to<std::string>(ECFLOW_SUFFIX);
-};
 
 std::string Version::boost() {
     std::stringstream ss;

@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_version) {
 BOOST_AUTO_TEST_CASE(test_version_raw_components) {
     ECF_NAME_THIS_TEST();
 
-    auto actual   = Version::raw();
+    auto actual   = Version::base();
     auto expected = Version::major() + "." + Version::minor() + "." + Version::patch();
     BOOST_CHECK_EQUAL(actual, expected);
 }
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_version_against_cmake) {
     auto actual_version = find_cmake_version(lines);
     BOOST_CHECK_MESSAGE(!actual_version.empty(), "Unable to find CMake version in file " << version_cmake_file);
 
-    auto expected_version = Version::raw();
+    auto expected_version = Version::base();
     BOOST_CHECK_EQUAL(actual_version, expected_version);
 }
 

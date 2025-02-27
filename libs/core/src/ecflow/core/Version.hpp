@@ -31,6 +31,11 @@ public:
     Version(const Version&)                  = delete;
     const Version& operator=(const Version&) = delete;
 
+    static std::string major();
+    static std::string minor();
+    static std::string patch();
+    static std::string suffix();
+
     ///
     /// Creates a string with a descriptive version information,
     /// including the version of ecFlow and relevant dependencies.
@@ -41,24 +46,14 @@ public:
     static std::string description();
 
     ///
-    /// Creates the ecFlow version, following the template: `ecflow_<release>_<major>_<minor>`
+    /// Creates the ecFlow version, following the template: `<major>.<minor>.<patch>`
     ///
-    static std::string version();
+    static std::string base();
 
     ///
-    /// Creates the ecFlow version, following the template: `<release>.<major>.<minor>`
-    ///
-    static std::string raw();
-
-    ///
-    /// Creates the ecFlow version, following the template: `<release>.<major>.<minor>[<suffix>]`
+    /// Creates the ecFlow version, following the template: `<major>.<minor>.<patch>[<suffix>]`
     ///
     static std::string full();
-
-    static std::string major();
-    static std::string minor();
-    static std::string patch();
-    static std::string suffix();
 
 private:
     /// Create a string containing the version of the Boost library
