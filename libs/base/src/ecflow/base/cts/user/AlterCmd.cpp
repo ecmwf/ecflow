@@ -17,6 +17,8 @@
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Enumerate.hpp"
@@ -238,6 +240,14 @@ bool AlterCmd::equals(ClientToServerCmd* rhs) const {
         return false;
     }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t AlterCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t AlterCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void AlterCmd::alter_and_attr_type(std::string& alter_type, std::string& attr_type) const {
@@ -595,9 +605,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
     return doJobSubmission(as);
 }
 
-bool AlterCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, paths_);
-}
+// bool AlterCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, paths_);
+// }
 
 const char* AlterCmd::arg() {
     return CtsApi::alterArg();
@@ -618,7 +628,8 @@ const char* AlterCmd::desc() {
            "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
            "         the change to take effect fully.\n"
            "       For add:\n"
-           "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label | aviso | mirror ]\n"
+           "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label | aviso | mirror "
+           "]\n"
            "       For set_flag and clear_flag:\n"
            "         [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed \n"
            "           statuscmd_failed | killcmd_failed | no_script | killed | status | late | message | \n"
@@ -638,7 +649,8 @@ const char* AlterCmd::desc() {
            "When adding or updating aviso and mirror attributes, the value (arg4) is expected to be a quoted list of\n"
            "  configuration options. For example:\n"
            "   * for aviso, \"--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)\"\n"
-           "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } }'\n"
+           "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } "
+           "}'\n"
            "                  --url http://aviso/ --schema /path/to/schema --polling 60\"\n"
            "\n"
            "For both aviso and mirror, the special value \"reload\" can be used to force reloading the configuration.\n"

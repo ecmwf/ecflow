@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -36,6 +38,14 @@ bool MeterCmd::equals(ClientToServerCmd* rhs) const {
     if (value_ != the_rhs->value())
         return false;
     return TaskCmd::equals(rhs);
+}
+
+ecf::authentication_t MeterCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t MeterCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void MeterCmd::print(std::string& os) const {

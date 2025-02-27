@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "ecflow/base/Identification.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"         // required to enforce cereal registration
 #include "ecflow/base/cts/task/CompleteCmd.hpp"      // required to enforce cereal registration
 #include "ecflow/base/cts/task/CtsWaitCmd.hpp"       // required to enforce cereal registration
@@ -74,6 +75,10 @@ void TcpBaseServer::handle_request() {
     // See what kind of message we got from the client
     if (serverEnv_.debug())
         std::cout << "   TcpBaseServer::handle_request  : client request " << inbound_request_ << endl;
+
+    // Provide Identity to the command, to enable authentication
+    auto cmd = inbound_request_.get_cmd();
+    cmd->set_identity(ecf::identify(cmd));
 
     try {
         // Service the in bound request, handling the request will populate the outbound_response_
