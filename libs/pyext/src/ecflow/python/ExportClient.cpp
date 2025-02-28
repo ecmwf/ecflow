@@ -37,7 +37,7 @@ void set_host_port(ClientInvoker* self, const std::string& host, int port) {
 }
 
 std::string version(ClientInvoker* self) {
-    return ecf::Version::raw();
+    return ecf::Version::full();
 }
 std::string server_version(ClientInvoker* self) {
     self->server_version();

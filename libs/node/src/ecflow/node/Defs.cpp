@@ -693,7 +693,7 @@ void Defs::print(std::string& os) const {
     else
         os.reserve(4096);
     os += "#";
-    os += ecf::Version::raw();
+    os += ecf::Version::full();
     os += "\n";
 
     if (!PrintStyle::defsStyle())

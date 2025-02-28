@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution) {
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
     cmd      = "%ECF_VERSION%";
-    expected = Version::raw();
+    expected = Version::full();
     BOOST_CHECK_MESSAGE(s->variableSubstitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
@@ -438,7 +438,7 @@ BOOST_AUTO_TEST_CASE(test_server_variable_substitution) {
         cmd += "%";
         BOOST_CHECK_MESSAGE(s->variableSubstitution(cmd), " substitution failed for " << i << " : " << cmd);
         if (i == "ECF_VERSION") {
-            BOOST_CHECK_MESSAGE(cmd == Version::raw(), "expected '" << Version::raw() << "' but found '" << cmd << "'");
+            BOOST_CHECK_MESSAGE(cmd == Version::full(), "expected '" << Version::full() << "' but found '" << cmd << "'");
         }
     }
 }

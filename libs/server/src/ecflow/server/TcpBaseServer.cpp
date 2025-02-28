@@ -108,7 +108,7 @@ void TcpBaseServer::handle_read_error(const boost::system::error_code& e) {
     msg += "@";
     msg += host_port.second;
     msg += " (";
-    msg += Version::raw();
+    msg += Version::full();
     msg += ") replied with: ";
     msg += e.message();
     outbound_response_.set_cmd(PreAllocatedReply::error_cmd(msg));

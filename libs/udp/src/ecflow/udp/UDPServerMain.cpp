@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-#include "ecflow/core/ecflow_version.h"
+#include "ecflow/core/Version.hpp"
 #include "ecflow/udp/RequestHandler.hpp"
 #include "ecflow/udp/Trace.hpp"
 #include "ecflow/udp/UDPServer.hpp"
@@ -25,7 +25,7 @@ static std::string ecflow_udp_server_version() {
 #endif
 
     std::ostringstream oss;
-    oss << "Ecflow UDP" << TAG << "version(" << ECFLOW_RELEASE << "." << ECFLOW_MAJOR << "." << ECFLOW_MINOR << ")";
+    oss << "Ecflow UDP" << TAG << "version(" << ecf::Version::full() << ")";
     return oss.str();
 }
 

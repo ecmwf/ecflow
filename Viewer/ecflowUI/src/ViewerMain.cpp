@@ -45,7 +45,7 @@
 int main(int argc, char** argv) {
     if (argc == 2) {
         if (strcmp(argv[1], "--version") == 0) {
-            std::cout << ecf::Version::raw() << std::endl;
+            std::cout << ecf::Version::full() << std::endl;
             return 0;
         }
     }

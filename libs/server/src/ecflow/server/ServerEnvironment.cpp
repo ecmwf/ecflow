@@ -389,8 +389,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
     theRetVec.emplace_back(std::string("ECF_MICRO"), ecf_micro_);
 
     // Reference variable, these should be read only
-    theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_);           // server PID
-    theRetVec.emplace_back(std::string("ECF_VERSION"), Version::raw()); // server version
+    theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_);            // server PID
+    theRetVec.emplace_back(std::string("ECF_VERSION"), Version::full()); // server version
 
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {

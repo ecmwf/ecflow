@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
     cmd      = "%ECF_VERSION%";
-    expected = Version::raw();
+    expected = Version::full();
     BOOST_CHECK_MESSAGE(defs.variableSubsitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 

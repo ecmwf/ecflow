@@ -11,20 +11,18 @@
 #ifndef ecflow_core_Version_HPP
 #define ecflow_core_Version_HPP
 
-///
-/// \brief Holds the version of ECFlow. Checked against definition file.
-///         For each major release the major number should be incremented.
-///
-/// If the parsing comes across a construct it does not recognize, then
-/// an exception is thrown. i.e if a construct added in release 2.0 of ECF
-/// is read in by version 1.0 of ECF. The exception should indicate the
-/// current release
-///
-
 #include <string>
 
 namespace ecf {
 
+///
+/// \brief Provides information regarding the version of ecFlow.
+///
+/// The ecFlow version format is of the form `<major>.<minor>.<patch>[<suffix>]`,
+/// following the semantic versioning scheme.
+///
+/// The version is defined in the CMakeLists.txt file.
+///
 class Version {
 public:
     // Disable default construction
@@ -33,24 +31,38 @@ public:
     Version(const Version&)                  = delete;
     const Version& operator=(const Version&) = delete;
 
-    /// Outputs a string of the form:
-    /// ECF <tag> version release_.major_.minor_
+    static std::string major();
+    static std::string minor();
+    static std::string patch();
+    static std::string suffix();
+
+    ///
+    /// Creates a string with a descriptive version information,
+    /// including the version of ecFlow and relevant dependencies.
+    ///
+    /// This provides user facing version information
+    /// (shown by ecflow_client --help, and in the server info panel on ecflow_ui).
+    ///
     static std::string description();
 
-    /// Outputs string of form: ecflow_<release>_<major>_<minor>
-    /// This could be used by install
-    static std::string version();
+    ///
+    /// Creates the ecFlow version, following the template: `<major>.<minor>.<patch>`
+    ///
+    static std::string base();
 
-    /// Outputs string of form: <release>.<major>.<minor>
-    static std::string raw();
+    ///
+    /// Creates the ecFlow version, following the template: `<major>.<minor>.<patch>[<suffix>]`
+    ///
+    static std::string full();
 
 private:
-    static const std::string TAG; // alpha, beta, release
-
-    /// return version of the boost library
+    /// Create a string containing the version of the Boost library
     static std::string boost();
 
-    // Return the version of the compiler. Can return empty string
+    /// Create a string containing the version of the Cereal library
+    static std::string cereal();
+
+    /// Create a string containing the version of the Compiler used to build ecFlow
     static std::string compiler();
 };
 

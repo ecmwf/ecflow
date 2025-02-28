@@ -41,7 +41,7 @@ const char* ServerVersionCmd::theArg() const {
 
 STC_Cmd_ptr ServerVersionCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().server_version_++;
-    return PreAllocatedReply::string_cmd(Version::raw());
+    return PreAllocatedReply::string_cmd(Version::full());
 }
 
 static const char* arg_desc() {

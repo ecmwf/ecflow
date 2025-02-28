@@ -449,7 +449,7 @@ void ServerState::setup_default_server_variables(std::vector<Variable>& server_v
     // in a job can fail easily, but re-running the job will often work
     server_variables.emplace_back(ecf::environment::ECF_TRIES, string("2"));
 
-    server_variables.emplace_back(string("ECF_VERSION"), Version::raw()); // server version
+    server_variables.emplace_back(string("ECF_VERSION"), Version::full()); // server version
 
     // Needed to setup client environment.
     // The server sets these variable for use by the client. i.e when creating the jobs

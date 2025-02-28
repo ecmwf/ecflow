@@ -369,12 +369,12 @@ BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
 BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
     ECF_NAME_THIS_TEST();
 
-    DurationTimer timer;
-    int the_server_version = TestFixture::server_version();
-    if (the_server_version == 403) {
-        cout << " SKIPPING, This test does not work with 403, current server version is " << the_server_version << "\n";
+    if (auto server_version = TestFixture::server_version(); server_version == "4.0.3") {
+        std::cout << " SKIPPED! This test does not work with server version " << server_version << "\n";
         return;
     }
+
+    DurationTimer timer;
 
     TestClean clean_at_start_and_end;
 
