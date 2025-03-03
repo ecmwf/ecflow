@@ -43,7 +43,14 @@ include( ecbuild_system NO_POLICY_SCOPE )
 ecbuild_requires_macro_version( 1.6 )
 ecbuild_declare_project()
 
-ecbuild_info( "CMAKE_MODULE_PATH          : ${CMAKE_MODULE_PATH}")
+#
+# Set the version suffix (for alpha/beta/rc releases)
+#
+
+set(ecflow_VERSION_SUFFIX "")
+set(ecflow_VERSION "${ecflow_VERSION}${ecflow_VERSION_SUFFIX}")
+
+ecbuild_info( "CMAKE_MODULE_PATH          : ${CMAKE_MODULE_PATH}" )
 ecbuild_info( "CMAKE_INSTALL_PREFIX       : ${CMAKE_INSTALL_PREFIX}" )
 ecbuild_info( "ecflow_BINARY_DIR          : ${ecflow_BINARY_DIR}" )
 ecbuild_info( "ecflow_SOURCE_DIR          : ${ecflow_SOURCE_DIR}" )

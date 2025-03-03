@@ -545,11 +545,11 @@ set(srcs
 
 ecbuild_add_library(
   TARGET
-  ecflow_all
+    ecflow_all
   NOINSTALL
   TYPE STATIC
   SOURCES
-  ${srcs}
+    ${srcs}
   PUBLIC_INCLUDES
     attribute/src
     base/src
