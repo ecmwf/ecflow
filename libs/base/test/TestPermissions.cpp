@@ -53,12 +53,6 @@ BOOST_AUTO_TEST_CASE(test_file_automatic_prefix_name_exists) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_loading_perms) {
-    ECF_NAME_THIS_TEST();
-
-    BOOST_CHECK_MESSAGE(false, "test to be removed");
-}
-
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
