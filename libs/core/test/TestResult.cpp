@@ -16,9 +16,9 @@
 #include "ecflow/core/Result.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-enum class error_t { io_error, unknown_error };
+enum class some_error_t { io_error, unknown_error };
 
-inline std::ostream& operator<<(std::ostream& os, const error_t& error) {
+inline std::ostream& operator<<(std::ostream& os, const some_error_t& error) {
     os << "error_t(" << static_cast<int>(error) << ")";
     return os;
 }
@@ -30,12 +30,12 @@ BOOST_AUTO_TEST_SUITE(T_Result)
 BOOST_AUTO_TEST_CASE(test_create_successful_result) {
     ECF_NAME_THIS_TEST();
     {
-        const auto result = ecf::Result<int, error_t>::success(42);
+        const auto result = ecf::Result<int, some_error_t>::success(42);
         BOOST_CHECK(result.ok());
         BOOST_CHECK_EQUAL(result.value(), 42);
     }
     {
-        const auto result = ecf::Result<std::string, error_t>::success("hello");
+        const auto result = ecf::Result<std::string, some_error_t>::success("hello");
         BOOST_CHECK(result.ok());
         BOOST_CHECK_EQUAL(result.value(), std::string("hello"));
     }
@@ -44,14 +44,14 @@ BOOST_AUTO_TEST_CASE(test_create_successful_result) {
 BOOST_AUTO_TEST_CASE(test_create_unsuccessful_result) {
     ECF_NAME_THIS_TEST();
     {
-        const auto result = ecf::Result<int, error_t>::failure(error_t::io_error);
+        const auto result = ecf::Result<int, some_error_t>::failure(some_error_t::io_error);
         BOOST_CHECK(!result.ok());
-        BOOST_CHECK_EQUAL(result.reason(), error_t::io_error);
+        BOOST_CHECK_EQUAL(result.reason(), some_error_t::io_error);
     }
     {
-        const auto result = ecf::Result<std::string, error_t>::failure(error_t::unknown_error);
+        const auto result = ecf::Result<std::string, some_error_t>::failure(some_error_t::unknown_error);
         BOOST_CHECK(!result.ok());
-        BOOST_CHECK_EQUAL(result.reason(), error_t::unknown_error);
+        BOOST_CHECK_EQUAL(result.reason(), some_error_t::unknown_error);
     }
 
     {
