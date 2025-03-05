@@ -78,7 +78,7 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
             });
             if (found != std::end(request)) {
                 identity_headers = true;
-                username         = found->value();
+                username         = std::string{found->value()};
             }
         }
         {
@@ -87,7 +87,7 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
             });
             if (found != std::end(request)) {
                 identity_headers = true;
-                password         = found->value();
+                password         = std::string{found->value()};
             }
         }
         {
