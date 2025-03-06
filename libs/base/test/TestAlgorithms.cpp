@@ -93,8 +93,9 @@ BOOST_AUTO_TEST_CASE(test_can_visit_defs) {
 
     struct Visitor
     {
-        void operator()(const Defs& defs) { collected.push_back("defs"); }
-        void operator()(const Node& s) { collected.push_back("node: " + s.name()); }
+        void handle(const Defs& defs) { collected.push_back("defs"); }
+        void handle(const Node& s) { collected.push_back("node: " + s.name()); }
+        void not_found() {}
 
         std::vector<std::string> collected;
     };

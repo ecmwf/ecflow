@@ -19,7 +19,8 @@ public:
     OrderNodeCmd(const std::string& absNodepath, NOrder::Order op) : absNodepath_(absNodepath), option_(op) {}
     OrderNodeCmd() = default;
 
-    const std::string& absNodePath() const { return absNodepath_; }
+    [[deprecated]] const std::string& absNodePath() const { return absNodepath_; }
+    const std::string& pathToNode() const { return absNodepath_; }
     NOrder::Order option() const { return option_; }
 
     bool isWrite() const override { return true; }
