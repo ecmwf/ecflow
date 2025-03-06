@@ -77,53 +77,52 @@ bool AuthorisationService::allows(const Identity& identity,
     }
 
     bool allowed = false;
-    std::visit(
-        overload{[&allowed](const Unrestricted&) {
-                     // when no rules are loaded, we allow everything...
-                     // Dangerous, but backward compatible!
-                     allowed = true;
-                 },
-                 [&server, &identity, &paths, &permission, &allowed](const Rules& rules) {
-                     for (auto&& path : paths) {
+    std::visit(overload{[&allowed](const Unrestricted&) {
+                            // when no rules are loaded, we allow everything...
+                            // Dangerous, but backward compatible!
+                            allowed = true;
+                        },
+                        [&server, &identity, &paths, &permission, &allowed](const Rules& rules) {
+                            for (auto&& path : paths) {
 
-                         auto u = identity.as_string();
-                         auto a = permission;
+                                auto u = identity.as_string();
+                                auto a = permission;
 
-                         struct Visitor
-                         {
-                             void operator()(const Defs& defs) {
-                                 auto p      = defs.server().permissions();
-                                 permissions = p.is_empty() ? permissions : p;
-                             }
-                             void operator()(const Node& s) {
-                                 auto p      = s.permissions();
-                                 permissions = p.is_empty() ? permissions : p;
-                             }
+                                struct Visitor
+                                {
+                                    void handle(const Defs& defs) {
+                                        auto p      = defs.server().permissions();
+                                        permissions = p.is_empty() ? permissions : p;
+                                    }
+                                    void handle(const Node& s) {
+                                        auto p      = s.permissions();
+                                        permissions = p.is_empty() ? permissions : p;
+                                    }
 
-                             Permissions permissions = Permissions::make_empty();
-                         };
+                                    void not_found() { permissions = Permissions::make_empty(); }
 
-                         auto d = server.defs();
-                         auto p = Path::make(path).value();
-                         auto v = Visitor{};
-                         ecf::visit(*d, p, v);
+                                    Permissions permissions = Permissions::make_empty();
+                                };
 
-                         if (v.permissions.is_empty()) {
-                             std::cout << "Allowed! No custom permissions found for: " << p.to_string() << std::endl;
-                             allowed = true;
-                         }
-                         else if (v.permissions.allows(identity.username())) {
-                             std::cout << "Allowed! Specific permissions found for: " << p.to_string() << std::endl;
-                             allowed = true;
-                         }
-                         else {
-                             std::cout << "Not allowed! Specific permissions found for: " << p.to_string() << std::endl;
-                             allowed = false;
-                             break;
-                         }
-                     }
-                 }},
-        impl_->permissions_);
+                                auto d = server.defs();
+                                auto p = Path::make(path).value();
+                                auto v = Visitor{};
+
+                                ecf::visit(*d, p, v);
+
+                                if (v.permissions.is_empty()) {
+                                    allowed = true;
+                                }
+                                else if (v.permissions.allows(identity.username())) {
+                                    allowed = true;
+                                }
+                                else {
+                                    allowed = false;
+                                    break;
+                                }
+                            }
+                        }},
+               impl_->permissions_);
 
     return allowed;
 }
