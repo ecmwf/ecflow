@@ -91,14 +91,16 @@ bool AuthorisationService::allows(const Identity& identity,
 
                          struct Visitor
                          {
-                             void operator()(const Defs& defs) {
+                             void handle(const Defs& defs) {
                                  auto p      = defs.server_state().permissions();
                                  permissions = p.is_empty() ? permissions : p;
                              }
-                             void operator()(const Node& s) {
+                             void handle(const Node& s) {
                                  auto p      = s.permissions();
                                  permissions = p.is_empty() ? permissions : p;
                              }
+
+                             void not_found() { permissions = Permissions::make_empty(); }
 
                              Permissions permissions = Permissions::make_empty();
                          };
@@ -106,6 +108,7 @@ bool AuthorisationService::allows(const Identity& identity,
                          auto d = server.defs();
                          auto p = Path::make(path).value();
                          auto v = Visitor{};
+
                          ecf::visit(*d, p, v);
 
                          if (v.permissions.is_empty()) {
