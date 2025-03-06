@@ -21,6 +21,7 @@ public:
 
     Node* source() const;
     const std::string& src_node() const { return src_node_; }
+    const std::string& src_path() const { return src_path_; }
     const std::string& dest() const { return dest_; }
 
     bool handleRequestIsTestable() const override { return false; }

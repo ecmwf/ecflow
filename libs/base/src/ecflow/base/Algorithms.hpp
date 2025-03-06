@@ -81,7 +81,7 @@ template <typename PREDICATE>
 void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
 
     // a. Visit the 'definitions' (which includes the server state)
-    predicate(defs);
+    predicate.handle(defs);
 
     if (path.empty()) {
         return;
@@ -97,7 +97,12 @@ void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
         else {
             current = current->find_immediate_child(token);
         }
-        predicate(*current);
+        if (current == nullptr) {
+            predicate.not_found();
+            return;
+        }
+
+        predicate.handle(*current);
     }
 
 }
