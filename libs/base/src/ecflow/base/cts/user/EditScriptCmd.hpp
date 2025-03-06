@@ -49,7 +49,8 @@ public:
     EditScriptCmd() = default;
 
     // Uses by equals only
-    const std::string& path_to_node() const { return path_to_node_; }
+    [[deprecated]] const std::string& path_to_node() const { return path_to_node_; }
+    const std::string& pathToNode() const { return path_to_node_; }
     EditType edit_type() const { return edit_type_; }
     bool alias() const { return alias_; }
     bool run() const { return run_; }
