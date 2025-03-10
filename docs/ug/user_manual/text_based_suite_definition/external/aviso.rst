@@ -19,8 +19,11 @@ notification. The options defining the attribute can be provided in any order.
         #     --auth %ECF_AVISO_AUTH%
         #     --polling %ECF_AVISO_POLLING%
 
-Notice that the :code:`--listener` option must be surrounded by single quotes,
-and is composed as a single line `JSON`. The `JSON` must define two fields:
+.. note::
+
+   The `listener` parameter is expected to be a valid single line JSON string, enclosed in single quotes.
+
+The listener must define two fields (as per the `Aviso Listerner <https://pyaviso.readthedocs.io/en/latest/guide/define_my_listener.html>`_ definition):
 
  - :code:`event`, specifies the type of Aviso event
  - :code:`request`, specifies a dictionary with the parameters used to check for matches of Aviso notifications
@@ -34,7 +37,7 @@ The following are some examples:
     '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "abcd", "step": 0 } }'
 
 The Authentication credentials, provided via option :code:`--auth`, are
-provided in a `JSON` file with the following content:
+provided in a `JSON` file with the content following the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_:
 
 .. code-block:: json
 

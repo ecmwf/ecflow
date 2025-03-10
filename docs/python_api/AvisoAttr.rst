@@ -22,16 +22,21 @@ Constructor::
       string polling: The polling interval used to contact the Aviso server
       string auth: The path to the Aviso Authentication credentials
 
+.. note::   The `listener` parameter is expected to be a valid single line JSON string, enclosed in single quotes.
+   As a convenience, missing surrounding single quotes are detected and will automatically be added.
+
+Details regarding the format of `listener` are in the section describing the :term:`aviso` attribute.
+
 
 Usage:
 
 .. code-block:: python
 
    t1 = Task('t1',
-             AvisoAttr('name', '{...}', 'http://aviso.com', '60', '/path/to/auth'))
+             AvisoAttr('name', "'{...}'", 'http://aviso.com', '60', '/path/to/auth'))
 
    t2 = Task('t2')
-   t2.add_aviso('name', '{...}', 'http://aviso.com', '60', '/path/to/auth')
+   t2.add_aviso('name', "'{...}'", 'http://aviso.com', '60', '/path/to/auth')
 
 The parameters `url`, `schema`, `polling`, and `auth` are optional
 

@@ -66,6 +66,10 @@
         - :code:`polling`, the value (in seconds) used to periodically contact the Aviso server
         - :code:`auth`, the location to the Aviso authentication credentials file
 
+      .. note::
+
+         The `listener` parameter is expected to be a valid single line JSON string, enclosed in single quotes.
+
       The value of the properties :code:`url`, :code:`schema`, :code:`polling`,
       and :code:`auth` can be composed of :term:`Variables<variable>`. When
       these properties are not provided, the following default values are used:
