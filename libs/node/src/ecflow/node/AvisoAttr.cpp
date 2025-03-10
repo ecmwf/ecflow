@@ -21,28 +21,42 @@
 
 namespace ecf {
 
+namespace implementation {
+
+std::string ensure_single_quotes(const AvisoAttr::listener_t listener) {
+    using namespace std::string_literals;
+    if (!listener.empty() && listener.front() == '\'' && listener.back() == '\'') {
+        return listener;
+    }
+    else {
+        return "'"s + listener + "'"s;
+    }
+}
+
+} // namespace implementation
+
 bool AvisoAttr::is_valid_name(const std::string& name) {
     return ecf::Str::valid_name(name);
 }
 
 AvisoAttr::AvisoAttr(Node* parent,
                      name_t name,
-                     listener_t listener,
+                     const listener_t& listener,
                      url_t url,
                      schema_t schema,
                      polling_t polling,
                      revision_t revision,
                      auth_t auth,
-                     reason_t reason)
+                     const reason_t& reason)
     : parent_{parent},
       parent_path_{parent ? parent->absNodePath() : ""},
       name_{std::move(name)},
-      listener_{std::move(listener)},
+      listener_{implementation::ensure_single_quotes(listener)},
       url_{std::move(url)},
       schema_{std::move(schema)},
       polling_{std::move(polling)},
       auth_{std::move(auth)},
-      reason_{std::move(reason)},
+      reason_{implementation::ensure_single_quotes(reason)},
       revision_{revision},
       controller_{nullptr} {
     if (!ecf::Str::valid_name(name_)) {
@@ -112,7 +126,9 @@ bool AvisoAttr::isFree() const {
 
     if (notifications.empty()) {
         // No notifications, nothing to do -- task continues to wait
-        SLOG(D, "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_ << "): no notifications found");
+        SLOG(D,
+             "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_
+                                  << "): no notifications found");
         return false;
     }
 
@@ -151,7 +167,9 @@ bool AvisoAttr::isFree() const {
 
     ecf::visit_parents(*parent_, [n = this->state_change_no_](Node& node) { node.set_state_change_no(n); });
 
-    SLOG(D, "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_ << ") " << std::string{(is_free ? "" : "no ")} + "notifications found");
+    SLOG(D,
+         "AvisoAttr: (path: " << this->path() << ", name: " << name_ << ", listener: " << listener_ << ") "
+                              << std::string{(is_free ? "" : "no ")} + "notifications found");
 
     return is_free;
 }
