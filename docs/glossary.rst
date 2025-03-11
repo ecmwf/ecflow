@@ -110,6 +110,10 @@
 
       Only the fields :code:`url`, :code:`key`, and :code:`email` are required; any additional fields are ignored.
 
+      The Aviso schema file is a JSON file that defines the event listener schema. This is used by both Aviso server
+      and client (thus, by ecFlow) to define the valid event types and request parameters used when polling for
+      notifications. The schema file path must be provided to the `schema` option (or via the `ECF_AVISO_SCHEMA` variable).
+
    check point 
       The check point file is like the :term:`suite definition`, but includes all the state information.
       

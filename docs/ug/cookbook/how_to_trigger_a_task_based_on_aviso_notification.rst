@@ -66,6 +66,15 @@ is conventionally located at `$HOME/.ecmwfapirc`, with the following content:
      "email" : "<your-email>"
    }
 
+The Aviso schema file is a JSON file that defines the event listener schema. This is used by
+both Aviso server and client (thus, by ecFlow) to define the valid event types and request
+parameters used when polling for notifications. The schema file path must be provided to the
+`--schema` option (or via the `ECF_AVISO_SCHEMA` variable).
+
+The Aviso schema, `event_listener_schema.json`, used by ECMWF is available at `<https://github.com/ecmwf/aviso-deployment/tree/main/schema>`_,
+and is specific to the Aviso server being used (access is currently restricted; if necessary, please contact
+support to request the files).
+
 Define a Suite with an `Aviso` dependent Task
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
