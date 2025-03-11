@@ -96,7 +96,9 @@
         can be reloaded (without unqueuing the Task) by issuing an Alter change command with
         the value :code:`reload` to the relevant Aviso attribute.
 
-      The authentication credentials file is expected to be in JSON format, following the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_:
+      The authentication credentials file is expected to be in JSON format, following
+      the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_
+      (this is conventionally stored in a file located at `$HOME/.ecmwfapirc`):
 
         .. code-block:: json
 

@@ -37,12 +37,14 @@ The following are some examples:
     '{ "event": "mars", "request": { "class": "od", "expver": "0001", "domain": "g", "stream": "abcd", "step": 0 } }'
 
 The Authentication credentials, provided via option :code:`--auth`, are
-provided in a `JSON` file with the content following the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_:
+provided in a `JSON` file with the content following the
+`ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_
+(this is conventionally stored in a file located at `$HOME/.ecmwfapirc`):
 
 .. code-block:: json
 
     {
-      "url": "http://host.int:1234",
-      "key": "*******************************************************************",
-      "email": "user@host.int"
+      "url" : "https://api.ecmwf.int/v1",
+      "key" : "<your-api-key>",
+      "email" : "<your-email>"
     }

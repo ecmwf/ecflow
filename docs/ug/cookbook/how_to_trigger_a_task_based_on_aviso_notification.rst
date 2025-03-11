@@ -53,6 +53,19 @@ Follow the recommended practice of defining ecFlow :term:`variables<variable>` a
       endfamily
     endsuite
 
+To enable Aviso authentication, set the `--auth` option (directly or via the `ECF_AVISO_AUTH`
+variable) to the path of the JSON file containing the authentication credentials, which follows the
+`ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_. The credentials file
+is conventionally located at `$HOME/.ecmwfapirc`, with the following content:
+
+.. code-block:: json
+
+   {
+     "url" : "https://api.ecmwf.int/v1",
+     "key" : "<your-api-key>",
+     "email" : "<your-email>"
+   }
+
 Define a Suite with an `Aviso` dependent Task
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
