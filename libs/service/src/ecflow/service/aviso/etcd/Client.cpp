@@ -52,6 +52,8 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
             .dump();
     std::string content_type = "application/json";
 
+    SLOG(D, "EtcdClient: Requesting notifications from " << address_ << "/" << endpoint_path);
+
     httplib::Result result = client_.Post(endpoint_path, headers, request_body, content_type);
     if (!result) {
         throw std::runtime_error(Message("EtcdClient: Unable to retrieve result, due to ", result.error()).str());

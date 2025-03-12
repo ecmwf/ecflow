@@ -12,6 +12,7 @@ set(test_srcs
   # Sources
   test/TestAttributes_main.cpp
   test/TestAttrSerialization.cpp
+  test/TestAvisoAttr.cpp
   test/TestCron.cpp
   test/TestDateAttr.cpp
   test/TestDayAttr.cpp

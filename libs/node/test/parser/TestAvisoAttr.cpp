@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(can_parse_aviso_attribute_on_task_with_all_parameters) {
         suite s1
           family f1
             task t1
-              aviso --name A --listener '{ "event": "mars", "request": { "class": "od"} }' --url http://host:port --schema /path/to/schema --auth /path/to/auth --polling 60
+              aviso --name A --listener '{ "event": "mars", "request": { "class": "od"} }' --url http://host:port --schema /path/to/schema --auth /path/to/auth --polling 60 --reason 'this is a reason'
           endfamily
     )";
 
