@@ -21,28 +21,42 @@
 
 namespace ecf {
 
+namespace implementation {
+
+std::string ensure_single_quotes(const AvisoAttr::listener_t listener) {
+    using namespace std::string_literals;
+    if (!listener.empty() && listener.front() == '\'' && listener.back() == '\'') {
+        return listener;
+    }
+    else {
+        return "'"s + listener + "'"s;
+    }
+}
+
+} // namespace implementation
+
 bool AvisoAttr::is_valid_name(const std::string& name) {
     return ecf::Str::valid_name(name);
 }
 
 AvisoAttr::AvisoAttr(Node* parent,
                      name_t name,
-                     listener_t listener,
+                     const listener_t& listener,
                      url_t url,
                      schema_t schema,
                      polling_t polling,
                      revision_t revision,
                      auth_t auth,
-                     reason_t reason)
+                     const reason_t& reason)
     : parent_{parent},
       parent_path_{parent ? parent->absNodePath() : ""},
       name_{std::move(name)},
-      listener_{std::move(listener)},
+      listener_{implementation::ensure_single_quotes(listener)},
       url_{std::move(url)},
       schema_{std::move(schema)},
       polling_{std::move(polling)},
       auth_{std::move(auth)},
-      reason_{std::move(reason)},
+      reason_{implementation::ensure_single_quotes(reason)},
       revision_{revision},
       controller_{nullptr} {
     if (!ecf::Str::valid_name(name_)) {

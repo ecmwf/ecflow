@@ -69,13 +69,13 @@ public:
     AvisoAttr() = default;
     AvisoAttr(Node* parent,
               name_t name,
-              listener_t handle,
+              const listener_t& handle,
               url_t url,
               schema_t schema,
               polling_t polling,
               revision_t revision,
               auth_t auth,
-              reason_t reason);
+              const reason_t& reason);
     AvisoAttr(const AvisoAttr& rhs) = default;
 
     AvisoAttr& operator=(const AvisoAttr& rhs) = default;

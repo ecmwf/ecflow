@@ -9,16 +9,23 @@
 #
 
 import os
+import io
 import ecflow as ecf
 import itertools as it
 
 import ecflow_test_util as Test
 
 
+def to_str(defs):
+    buffer = io.StringIO()
+    print(defs, file=buffer)
+    return buffer.getvalue()
+
+
 def can_create_aviso_from_parameters():
     aviso = ecf.AvisoAttr("name", "listener", "url", "schema", "polling", "auth")
     assert aviso.name() == "name"
-    assert aviso.listener() == "listener"
+    assert aviso.listener() == "'listener'"
     assert aviso.url() == "url"
     assert aviso.schema() == "schema"
     assert aviso.polling() == "polling"
@@ -36,7 +43,7 @@ def can_create_aviso_from_default_parameters_0():
 
     actual = list(task.avisos)[0]
     assert actual.name() == "name"
-    assert actual.listener() == "listener"
+    assert actual.listener() == "'listener'"
     assert actual.url() == "%ECF_AVISO_URL%"
     assert actual.schema() == "%ECF_AVISO_SCHEMA%"
     assert actual.polling() == "%ECF_AVISO_POLLING%"
@@ -54,7 +61,7 @@ def can_create_aviso_from_default_parameters_1():
 
     actual = list(task.avisos)[0]
     assert actual.name() == "name"
-    assert actual.listener() == "listener"
+    assert actual.listener() == "'listener'"
     assert actual.url() == "url"
     assert actual.schema() == "%ECF_AVISO_SCHEMA%"
     assert actual.polling() == "%ECF_AVISO_POLLING%"
@@ -72,7 +79,7 @@ def can_create_aviso_from_default_parameters_2():
 
     actual = list(task.avisos)[0]
     assert actual.name() == "name"
-    assert actual.listener() == "listener"
+    assert actual.listener() == "'listener'"
     assert actual.url() == "url"
     assert actual.schema() == "schema"
     assert actual.polling() == "%ECF_AVISO_POLLING%"
@@ -90,11 +97,35 @@ def can_create_aviso_from_default_parameters_3():
 
     actual = list(task.avisos)[0]
     assert actual.name() == "name"
-    assert actual.listener() == "listener"
+    assert actual.listener() == "'listener'"
     assert actual.url() == "url"
     assert actual.schema() == "schema"
     assert actual.polling() == "polling"
     assert actual.auth() == "%ECF_AVISO_AUTH%"
+
+
+def can_create_aviso_with_listener_details():
+    defs = ecf.Defs()
+    suite = defs.add_suite("s")
+    family = ecf.Family("f")
+    suite.add_family(family)
+    task = ecf.Task('t',
+                    ecf.AvisoAttr('aviso',
+                                  '{ "event": "dissemination", "request": { "destination": "CL1", "class": "od", "expver": "1", "stream": "oper", "step": [0, 12] } }',
+                                  'https://aviso.ecmwf.int',
+                                  'schema.json',
+                                  '60',
+                                  '/.ecmwfapirc'))
+    family.add_task(task)
+
+    content = to_str(defs)
+
+    assert f"aviso" in content
+    assert f'--listener \'{{ "event": "dissemination", "request": {{ "destination": "CL1", "class": "od", "expver": "1", "stream": "oper", "step": [0, 12] }} }}\'' in content
+    assert f"--url https://aviso.ecmwf.int" in content
+    assert f"--schema schema.json" in content
+    assert f"--polling 60" in content
+    assert f"--auth /.ecmwfapirc" in content
 
 
 def can_add_aviso_to_task():
@@ -112,7 +143,7 @@ def can_add_aviso_to_task():
 
     actual = list(task.avisos)[0]
     assert actual.name() == "name"
-    assert actual.listener() == "listener"
+    assert actual.listener() == "'listener'"
     assert actual.url() == "url"
     assert actual.schema() == "schema"
     assert actual.polling() == "polling"
@@ -130,7 +161,7 @@ def can_embed_aviso_into_task():
 
     actual = list(task.avisos)[0]
     assert actual.name() == "name"
-    assert actual.listener() == "listener"
+    assert actual.listener() == "'listener'"
     assert actual.url() == "url"
     assert actual.schema() == "schema"
     assert actual.polling() == "polling"
@@ -177,6 +208,7 @@ if __name__ == "__main__":
     can_create_aviso_from_default_parameters_1()
     can_create_aviso_from_default_parameters_2()
     can_create_aviso_from_default_parameters_3()
+    can_create_aviso_with_listener_details()
     can_add_aviso_to_task()
     can_embed_aviso_into_task()
     cannot_have_multiple_avisos_in_single_task()

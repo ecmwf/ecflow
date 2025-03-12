@@ -66,6 +66,10 @@
         - :code:`polling`, the value (in seconds) used to periodically contact the Aviso server
         - :code:`auth`, the location to the Aviso authentication credentials file
 
+      .. note::
+
+         The `listener` parameter is expected to be a valid single line JSON string, enclosed in single quotes.
+
       The value of the properties :code:`url`, :code:`schema`, :code:`polling`,
       and :code:`auth` can be composed of :term:`Variables<variable>`. When
       these properties are not provided, the following default values are used:
@@ -92,7 +96,9 @@
         can be reloaded (without unqueuing the Task) by issuing an Alter change command with
         the value :code:`reload` to the relevant Aviso attribute.
 
-      The authentication credentials file is expected to be in JSON format, following the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_:
+      The authentication credentials file is expected to be in JSON format, following
+      the `ECMWF Web API <https://www.ecmwf.int/en/computing/software/ecmwf-web-api>`_
+      (this is conventionally stored in a file located at `$HOME/.ecmwfapirc`):
 
         .. code-block:: json
 
@@ -103,6 +109,10 @@
            }
 
       Only the fields :code:`url`, :code:`key`, and :code:`email` are required; any additional fields are ignored.
+
+      The Aviso schema file is a JSON file that defines the event listener schema. This is used by both Aviso server
+      and client (thus, by ecFlow) to define the valid event types and request parameters used when polling for
+      notifications. The schema file path must be provided to the `schema` option (or via the `ECF_AVISO_SCHEMA` variable).
 
    check point 
       The check point file is like the :term:`suite definition`, but includes all the state information.

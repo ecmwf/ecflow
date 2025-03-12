@@ -6,6 +6,26 @@ Version 5.13 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.13.8
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2025-03-12
+
+General
+-------
+
+- **Fix** correct Aviso notification retrieval after automatic requeueing :jiraissue:`ECFLOW-2010`
+
+Python
+------
+
+- **Fix** correct quote handling for ecflow.AvisoAttr listener :jiraissue:`ECFLOW-2011`
+
+Documentation
+-------------
+
+- **Improvement** clarify use of schema for ecFlow Aviso attribute :jiraissue:`ECFLOW-2008`
+- **Improvement** clarify how to define ecFlow Aviso authentication :jiraissue:`ECFLOW-2008`
 
 Version 5.13.7
 ==============

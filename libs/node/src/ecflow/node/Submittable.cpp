@@ -89,7 +89,12 @@ void Submittable::init(const std::string& the_process_or_remote_id) {
 }
 
 void Submittable::complete() {
-    // cout << "Completed " << debugNodePath() << " at " << suite()->calendar().toString() << "\n";
+
+    //
+    // Completing the node might trigger an immediate Node requeue, so we must first finish the Aviso background thread.
+    //
+    std::for_each(std::begin(avisos()), std::end(avisos()), [](auto&& aviso) { aviso.finish(); });
+
     set_state(NState::COMPLETE);
     flag().clear(ecf::Flag::ZOMBIE);
 
@@ -100,23 +105,21 @@ void Submittable::complete() {
     /// Hence to reduce network bandwidth we chose to clear the strings
     clear(); // jobs password, process_id, aborted_reason
 
-    for (auto&& aviso : avisos()) {
-        aviso.finish();
-    }
-
 #ifdef DEBUG_STATE_CHANGE_NO
     std::cout << "Submittable::complete()\n";
 #endif
 }
 
 void Submittable::aborted(const std::string& reason) {
+
+    //
+    // Aborting the node might trigger an immediate Node requeue, so we must first finish the Aviso background thread.
+    //
+    std::for_each(std::begin(avisos()), std::end(avisos()), [](auto&& aviso) { aviso.finish(); });
+
     // Called during *abnormal* child termination
     // This will bubble the state, and decrement any limits
     set_aborted_only(reason);
-
-    for (auto&& aviso : avisos()) {
-        aviso.finish();
-    }
 }
 
 void Submittable::set_process_or_remote_id(const std::string& id) {
