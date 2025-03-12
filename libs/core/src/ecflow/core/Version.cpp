@@ -34,7 +34,7 @@ std::string Version::patch() {
 
 std::string Version::suffix() {
     return ECFLOW_VERSION_SUFFIX;
-};
+}
 
 std::string Version::description() {
     std::stringstream ss;
