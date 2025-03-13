@@ -260,8 +260,7 @@ void RepeatDate::update_repeat_genvar_value() const {
             dow_.set_value(ecf::convert_to<std::string>(day_of_week));
 
             long last_value = last_valid_value();
-            long julian     = ecf::calendar_date_to_julian_day(last_value);
-            julian_.set_value(ecf::convert_to<std::string>(julian));
+            julian_.set_value(ecf::convert_to<std::string>(ecf::CalendarDate(last_value).as_julian_day().value()));
         }
         catch (std::exception& e) {
             std::stringstream ss;
@@ -304,17 +303,13 @@ long RepeatDate::valid_value(long value) const {
 }
 
 long RepeatDate::last_valid_value_minus(int val) const {
-    long last_value = last_valid_value();
-    long julian     = ecf::calendar_date_to_julian_day(last_value);
-    julian -= val;
-    return ecf::julian_day_to_calendar_date(julian);
+    auto result = ecf::CalendarDate(last_valid_value()) - val;
+    return result.value();
 }
 
 long RepeatDate::last_valid_value_plus(int val) const {
-    long last_value = last_valid_value();
-    long julian     = ecf::calendar_date_to_julian_day(last_value);
-    julian += val;
-    return ecf::julian_day_to_calendar_date(julian);
+    auto result = ecf::CalendarDate(last_valid_value()) + val;
+    return result.value();
 }
 
 void RepeatDate::reset() {
@@ -384,11 +379,8 @@ std::string RepeatDate::value_as_string(int index) const {
 }
 
 std::string RepeatDate::next_value_as_string() const {
-    long val = last_valid_value();
-
-    long julian = ecf::calendar_date_to_julian_day(val);
-    julian += delta_;
-    val = ecf::julian_day_to_calendar_date(julian);
+    auto result = ecf::CalendarDate(last_valid_value()) + delta_;
+    long val    = result.value();
 
     try {
         return ecf::convert_to<std::string>(valid_value(val));
@@ -399,11 +391,8 @@ std::string RepeatDate::next_value_as_string() const {
 }
 
 std::string RepeatDate::prev_value_as_string() const {
-    long val = last_valid_value();
-
-    long julian = ecf::calendar_date_to_julian_day(val);
-    julian -= delta_;
-    val = ecf::julian_day_to_calendar_date(julian);
+    auto result = ecf::CalendarDate(last_valid_value()) - delta_;
+    long val    = result.value();
 
     try {
         return ecf::convert_to<std::string>(valid_value(val));
@@ -414,9 +403,8 @@ std::string RepeatDate::prev_value_as_string() const {
 }
 
 void RepeatDate::increment() {
-    long julian = ecf::calendar_date_to_julian_day(value_);
-    julian += delta_;
-    set_value(ecf::julian_day_to_calendar_date(julian));
+    auto result = ecf::CalendarDate(last_valid_value()) + delta_;
+    set_value(result.value());
 }
 
 void RepeatDate::change(const std::string& newdate) {
@@ -469,8 +457,8 @@ void RepeatDate::changeValue(long the_new_date) {
     }
 
     // Check new value is in step. ECFLOW-325 repeat date 7
-    long julian_new_date = ecf::calendar_date_to_julian_day(the_new_date);
-    long julian_start    = ecf::calendar_date_to_julian_day(start_);
+    long julian_new_date = ecf::CalendarDate(the_new_date).as_julian_day().value();
+    long julian_start    = ecf::CalendarDate(start_).as_julian_day().value();
     long diff            = julian_new_date - julian_start;
     if (diff % delta_ != 0) {
         std::stringstream ss;
@@ -913,8 +901,7 @@ void RepeatDateList::update_repeat_genvar_value() const {
             dom_.set_value(ecf::convert_to<std::string>(day_of_month));
             dow_.set_value(ecf::convert_to<std::string>(day_of_week));
 
-            long last_value = last_valid_value();
-            long julian     = ecf::calendar_date_to_julian_day(last_value);
+            long julian = CalendarDate(last_valid_value()).as_julian_day().value();
             julian_.set_value(ecf::convert_to<std::string>(julian));
         }
         catch (std::exception& e) {
@@ -1001,9 +988,7 @@ long RepeatDateList::last_valid_value_minus(int val) const {
     if (last_value == 0)
         return 0;
 
-    long julian = ecf::calendar_date_to_julian_day(last_value);
-    julian -= val;
-    return ecf::julian_day_to_calendar_date(julian);
+    return (CalendarDate(last_value) - val).value();
 }
 
 long RepeatDateList::last_valid_value_plus(int val) const {
@@ -1011,9 +996,7 @@ long RepeatDateList::last_valid_value_plus(int val) const {
     if (last_value == 0)
         return 0;
 
-    long julian = ecf::calendar_date_to_julian_day(last_value);
-    julian += val;
-    return ecf::julian_day_to_calendar_date(julian);
+    return (CalendarDate(last_value) + val).value();
 }
 
 void RepeatDateList::setToLastValue() {

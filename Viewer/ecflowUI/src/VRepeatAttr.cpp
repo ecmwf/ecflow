@@ -195,8 +195,8 @@ int VRepeatDateAttr::endIndex() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
         if (r.step() > 0) {
-            long jStart = ecf::calendar_date_to_julian_day(r.start());
-            long jEnd   = ecf::calendar_date_to_julian_day(r.end());
+            long jStart = ecf::CalendarDate(r.start()).as_julian_day().value();
+            long jEnd   = ecf::CalendarDate(r.end()).as_julian_day().value();
 
             int index = (jEnd - jStart) / r.step();
             long val  = jStart + index * r.step();
@@ -213,7 +213,9 @@ int VRepeatDateAttr::endIndex() const {
 int VRepeatDateAttr::currentIndex() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        int cur         = (ecf::calendar_date_to_julian_day(r.index_or_value()) - ecf::calendar_date_to_julian_day(r.start())) / r.step();
+        int cur         = (ecf::CalendarDate(r.index_or_value()).as_julian_day().value() -
+                   ecf::CalendarDate(r.start()).as_julian_day().value()) /
+                  r.step();
         return cur;
     }
     return 0;
@@ -239,7 +241,8 @@ std::string VRepeatDateAttr::value(int index) const {
     std::stringstream ss;
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        ss << (ecf::julian_day_to_calendar_date(ecf::calendar_date_to_julian_day(r.start()) + index * r.step()));
+        auto date       = ecf::CalendarDate(r.start()) + (index * r.step());
+        ss << date.value();
     }
 
     return ss.str();
@@ -252,7 +255,7 @@ int VRepeatDateAttr::currentPosition() const {
             return -1;
         else if (r.value() == r.start())
             return 0;
-        else if (r.value() == r.end() || ecf::calendar_date_to_julian_day(r.value()) + r.step() > ecf::calendar_date_to_julian_day(r.end()))
+        else if (r.value() == r.end() || ecf::CalendarDate(r.value()) + r.step() > ecf::CalendarDate(r.end()))
             return 2;
         else
             return 1;
@@ -272,7 +275,7 @@ int VRepeatDateTimeAttr::endIndex() const {
         auto& r  = node->repeat();
         auto rng = ecf::make_range<RepeatDateTime>(r);
         auto idx = rng.end();
-        idx = std::min(idx, rng.size() - 1); // ensure idx is within range [0, size-1]
+        idx      = std::min(idx, rng.size() - 1); // ensure idx is within range [0, size-1]
         return idx;
     }
     return 0;

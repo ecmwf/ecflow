@@ -32,18 +32,12 @@ auto values = std::array{
     std::make_pair(2451545, 20000101),
 };
 
-BOOST_AUTO_TEST_CASE(test_calendar_conversion_from_julian_day_to_calendar_date) {
-
-
+BOOST_AUTO_TEST_CASE(test_calendar_conversion_between_julian_day_and_calendar_date) {
     for (auto&& value : values) {
-        BOOST_CHECK_EQUAL(ecf::julian_day_to_calendar_date(value.first), value.second);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(test_calendar_conversion_from_calendar_date_to_julian_day) {
-
-    for (auto&& value : values) {
-        BOOST_CHECK_EQUAL(ecf::calendar_date_to_julian_day(value.second), value.first);
+        BOOST_CHECK_EQUAL(ecf::JulianDay(value.first).as_calendar_date().value(), value.second);
+        BOOST_CHECK_EQUAL(ecf::JulianDay(value.first).as_calendar_date(), ecf::CalendarDate(value.second));
+        BOOST_CHECK_EQUAL(ecf::JulianDay(value.first), ecf::CalendarDate(value.second).as_julian_day());
+        BOOST_CHECK_EQUAL(value.first, ecf::CalendarDate(value.second).as_julian_day().value());
     }
 }
 
@@ -519,7 +513,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_julian) {
 
         std::string iso_string = to_iso_string(cal_date);
         auto date_as_long      = ecf::convert_to<long>(iso_string);
-        long ecmwf_julian      = ecf::calendar_date_to_julian_day(date_as_long);
+        long ecmwf_julian      = ecf::CalendarDate(date_as_long).as_julian_day().value();
 
         BOOST_CHECK_MESSAGE(boost_julian == ecmwf_julian,
                             "boost julian " << boost_julian << " != ecmwf julian " << ecmwf_julian << " for "

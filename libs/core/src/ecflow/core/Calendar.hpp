@@ -89,9 +89,76 @@ class access;
 
 namespace ecf {
 
-long calendar_date_to_julian_day(long calendar_date);
+class JulianDay;
 
-long julian_day_to_calendar_date(long julian_day);
+class CalendarDate {
+public:
+    using value_t = long;
+
+    CalendarDate() = delete;
+    explicit CalendarDate(value_t value) : value_(value) {}
+
+    value_t value() const { return value_; }
+
+    JulianDay as_julian_day() const;
+
+    friend CalendarDate& operator+=(CalendarDate&, CalendarDate::value_t rhs);
+    friend CalendarDate& operator-=(CalendarDate&, CalendarDate::value_t rhs);
+
+private:
+    value_t value_;
+};
+
+std::ostream& operator<<(std::ostream& os, const CalendarDate&);
+
+bool operator==(const CalendarDate&, const CalendarDate&);
+
+bool operator<(const CalendarDate&, const CalendarDate&);
+bool operator<=(const CalendarDate&, const CalendarDate&);
+bool operator>(const CalendarDate&, const CalendarDate&);
+bool operator>=(const CalendarDate&, const CalendarDate&);
+
+CalendarDate operator+(const CalendarDate&, CalendarDate::value_t);
+CalendarDate operator-(const CalendarDate&, CalendarDate::value_t);
+
+CalendarDate& operator+=(CalendarDate&, CalendarDate::value_t);
+CalendarDate& operator-=(CalendarDate&, CalendarDate::value_t);
+
+class JulianDay {
+public:
+    using value_t = long;
+
+    JulianDay() = delete;
+    explicit JulianDay(value_t value) : value_(value) {}
+
+    value_t value() const { return value_; }
+
+    CalendarDate as_calendar_date() const;
+
+    friend JulianDay& operator+=(JulianDay&, JulianDay::value_t rhs);
+    friend JulianDay& operator-=(JulianDay&, JulianDay::value_t rhs);
+
+private:
+    value_t value_;
+};
+
+std::ostream& operator<<(std::ostream& os, const JulianDay&);
+
+bool operator==(const JulianDay&, const JulianDay&);
+
+bool operator<(const JulianDay&, const JulianDay&);
+bool operator<=(const JulianDay&, const JulianDay&);
+bool operator>(const JulianDay&, const JulianDay&);
+bool operator>=(const JulianDay&, const JulianDay&);
+
+JulianDay operator+(const JulianDay&, JulianDay::value_t);
+JulianDay operator-(const JulianDay&, JulianDay::value_t);
+
+JulianDay& operator+=(JulianDay&, JulianDay::value_t);
+JulianDay& operator-=(JulianDay&, JulianDay::value_t);
+
+bool operator==(const CalendarDate&, const JulianDay&);
+bool operator==(const JulianDay&, const CalendarDate&);
 
 class CalendarUpdateParams; // forward declare
 

@@ -55,16 +55,16 @@ struct Range<RepeatDate>
 
     iterator begin() const { return 0; }
     iterator end() const {
-        int i = ecf::calendar_date_to_julian_day(r_.start());
-        int j = ecf::calendar_date_to_julian_day(r_.end());
+        int i = ecf::CalendarDate(r_.start()).as_julian_day().value();
+        int j = ecf::CalendarDate(r_.end()).as_julian_day().value();
         int s = r_.step();
         int d = (j - i) + 1;
         return (d / s) + ((d % s == 0) ? 0 : 1);
     }
     iterator current_index() const {
-        auto i   = ecf::calendar_date_to_julian_day(r_.start());
+        auto i   = ecf::CalendarDate(r_.start()).as_julian_day().value();
         auto s   = r_.step();
-        auto v   = ecf::calendar_date_to_julian_day(r_.value());
+        auto v   = ecf::CalendarDate(r_.value()).as_julian_day().value();
         auto idx = (v - i) / s;
         return idx;
     }
@@ -72,8 +72,8 @@ struct Range<RepeatDate>
     value_type current_value() const { return r_.value(); }
 
     value_type at(iterator i) const {
-        int j = ecf::calendar_date_to_julian_day(r_.start());
-        return ecf::julian_day_to_calendar_date(j + i * r_.step());
+        int j = ecf::CalendarDate(r_.start()).as_julian_day().value();
+        return ecf::JulianDay(j + i * r_.step()).as_calendar_date().value();
     }
 
     size_type size() const { return end() - begin(); }

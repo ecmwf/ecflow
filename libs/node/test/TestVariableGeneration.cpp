@@ -102,7 +102,8 @@ BOOST_AUTO_TEST_CASE(test_generated_variables) {
     findParentVariableValue(t, "YMD_MM", "1");
     findParentVariableValue(t, "YMD_DD", "1");
     findParentVariableValue(t, "YMD_DOW", "4");
-    findParentVariableValue(t, "YMD_JULIAN", ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20090101)));
+    findParentVariableValue(
+        t, "YMD_JULIAN", ecf::convert_to<std::string>(ecf::CalendarDate(20090101).as_julian_day().value()));
     findParentVariableValue(t, "RepeatInteger", "10");
 }
 

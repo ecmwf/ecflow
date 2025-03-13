@@ -1202,10 +1202,10 @@ int AstFunction::value() const {
                 arg_eval = arg_eval / 100;
             else if (integer_digits != 8)
                 return 0;
-            return ecf::calendar_date_to_julian_day(arg_eval);
+            return ecf::CalendarDate(arg_eval).as_julian_day().value();
         }
         case AstFunction::JULIAN_TO_DATE:
-            return ecf::julian_day_to_calendar_date(arg_eval);
+            return ecf::JulianDay(arg_eval).as_calendar_date().value();
         default:
             assert(false);
     }

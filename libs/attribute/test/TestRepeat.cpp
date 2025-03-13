@@ -530,7 +530,7 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
     {
         const Variable& var = rep.find_gen_variable("YMD_JULIAN");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_JULIAN");
-        std::string expected = ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20090916));
+        std::string expected = ecf::convert_to<std::string>(ecf::CalendarDate(20090916).as_julian_day().value());
         BOOST_CHECK_MESSAGE(var.theValue() == expected, "expected " << expected << " but found " << var.theValue());
     }
 }
@@ -597,13 +597,13 @@ BOOST_AUTO_TEST_CASE(more_generated_variables) {
     expected_day_of_week.emplace_back("5");
 
     std::vector<std::string> expected_julian;
-    expected_julian.push_back(ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20161231)));
-    expected_julian.push_back(ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20170101)));
-    expected_julian.push_back(ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20170102)));
-    expected_julian.push_back(ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20170103)));
-    expected_julian.push_back(ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20170104)));
-    expected_julian.push_back(ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20170105)));
-    expected_julian.push_back(ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20170106)));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20161231).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170101).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170102).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170103).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170104).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170105).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170106).as_julian_day().value()));
 
     for (int i = 0; i < 7; i++) {
 
