@@ -15,7 +15,7 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "ecflow/attribute/RepeatRange.hpp"
-#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Calendar.hpp"
 
 std::string VRepeatDateAttr::subType_("date");
 std::string VRepeatDateTimeAttr::subType_("datetime");
@@ -195,8 +195,8 @@ int VRepeatDateAttr::endIndex() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
         if (r.step() > 0) {
-            long jStart = Cal::date_to_julian(r.start());
-            long jEnd   = Cal::date_to_julian(r.end());
+            long jStart = ecf::calendar_date_to_julian_day(r.start());
+            long jEnd   = ecf::calendar_date_to_julian_day(r.end());
 
             int index = (jEnd - jStart) / r.step();
             long val  = jStart + index * r.step();
@@ -213,7 +213,7 @@ int VRepeatDateAttr::endIndex() const {
 int VRepeatDateAttr::currentIndex() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        int cur         = (Cal::date_to_julian(r.index_or_value()) - Cal::date_to_julian(r.start())) / r.step();
+        int cur         = (ecf::calendar_date_to_julian_day(r.index_or_value()) - ecf::calendar_date_to_julian_day(r.start())) / r.step();
         return cur;
     }
     return 0;
@@ -239,7 +239,7 @@ std::string VRepeatDateAttr::value(int index) const {
     std::stringstream ss;
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        ss << (Cal::julian_to_date(Cal::date_to_julian(r.start()) + index * r.step()));
+        ss << (ecf::julian_day_to_calendar_date(ecf::calendar_date_to_julian_day(r.start()) + index * r.step()));
     }
 
     return ss.str();
@@ -252,7 +252,7 @@ int VRepeatDateAttr::currentPosition() const {
             return -1;
         else if (r.value() == r.start())
             return 0;
-        else if (r.value() == r.end() || Cal::date_to_julian(r.value()) + r.step() > Cal::date_to_julian(r.end()))
+        else if (r.value() == r.end() || ecf::calendar_date_to_julian_day(r.value()) + r.step() > ecf::calendar_date_to_julian_day(r.end()))
             return 2;
         else
             return 1;

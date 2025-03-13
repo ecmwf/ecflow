@@ -29,7 +29,6 @@
 #include <vector>
 
 #include "ecflow/attribute/Variable.hpp"
-#include "ecflow/core/Cal.hpp"
 #include "ecflow/core/Chrono.hpp"
 
 /////////////////////////////////////////////////////////////////////////

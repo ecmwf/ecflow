@@ -12,7 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_generated_variables) {
     findParentVariableValue(t, "YMD_MM", "1");
     findParentVariableValue(t, "YMD_DD", "1");
     findParentVariableValue(t, "YMD_DOW", "4");
-    findParentVariableValue(t, "YMD_JULIAN", ecf::convert_to<std::string>(Cal::date_to_julian(20090101)));
+    findParentVariableValue(t, "YMD_JULIAN", ecf::convert_to<std::string>(ecf::calendar_date_to_julian_day(20090101)));
     findParentVariableValue(t, "RepeatInteger", "10");
 }
 

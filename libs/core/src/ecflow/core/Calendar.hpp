@@ -89,6 +89,10 @@ class access;
 
 namespace ecf {
 
+long calendar_date_to_julian_day(long calendar_date);
+
+long julian_day_to_calendar_date(long julian_day);
+
 class CalendarUpdateParams; // forward declare
 
 class Calendar {

@@ -13,7 +13,6 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/core/Cal.hpp"
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
@@ -25,6 +24,30 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
+
+BOOST_AUTO_TEST_SUITE(T_CalendarConversion)
+
+auto values = std::array{
+    std::make_pair(2451544, 19991231),
+    std::make_pair(2451545, 20000101),
+};
+
+BOOST_AUTO_TEST_CASE(test_calendar_conversion_from_julian_day_to_calendar_date) {
+
+
+    for (auto&& value : values) {
+        BOOST_CHECK_EQUAL(ecf::julian_day_to_calendar_date(value.first), value.second);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_calendar_conversion_from_calendar_date_to_julian_day) {
+
+    for (auto&& value : values) {
+        BOOST_CHECK_EQUAL(ecf::calendar_date_to_julian_day(value.second), value.first);
+    }
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(T_Calendar)
 
@@ -496,7 +519,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_julian) {
 
         std::string iso_string = to_iso_string(cal_date);
         auto date_as_long      = ecf::convert_to<long>(iso_string);
-        long ecmwf_julian      = Cal::date_to_julian(date_as_long);
+        long ecmwf_julian      = ecf::calendar_date_to_julian_day(date_as_long);
 
         BOOST_CHECK_MESSAGE(boost_julian == ecmwf_julian,
                             "boost julian " << boost_julian << " != ecmwf julian " << ecmwf_julian << " for "
