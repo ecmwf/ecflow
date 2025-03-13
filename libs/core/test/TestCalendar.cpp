@@ -10,10 +10,12 @@
 
 #include <string>
 
+#include <boost/chrono/duration.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"
@@ -41,9 +43,298 @@ BOOST_AUTO_TEST_CASE(test_calendar_conversion_between_julian_day_and_calendar_da
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_calendar_date_ctor_and_operations) {
+    auto a0 = ecf::CalendarDate(19991231);
+    auto a  = ecf::CalendarDate(19991231);
+    auto b  = ecf::CalendarDate(20000101);
+    auto c  = ecf::CalendarDate(20000102);
+
+    auto x = ecf::JulianDay(2451544);
+    auto y = ecf::JulianDay(2451545);
+    auto z = ecf::JulianDay(2451546);
+
+    BOOST_CHECK(a == a0);
+    BOOST_CHECK(a == a);
+    BOOST_CHECK(a != b);
+    BOOST_CHECK(a != c);
+    BOOST_CHECK(a < b);
+    BOOST_CHECK(a <= b);
+    BOOST_CHECK(b <= b);
+    BOOST_CHECK(c > b);
+    BOOST_CHECK(b >= b);
+    BOOST_CHECK(c >= b);
+
+    BOOST_CHECK(a == x.as_calendar_date());
+    BOOST_CHECK(b == y.as_calendar_date());
+    BOOST_CHECK(c == z.as_calendar_date());
+
+    BOOST_CHECK(a == x);
+    BOOST_CHECK(b == y);
+    BOOST_CHECK(c == z);
+    BOOST_CHECK(a != y);
+    BOOST_CHECK(b != z);
+    BOOST_CHECK(c != x);
+
+    BOOST_CHECK(a + 1 == b);
+    BOOST_CHECK(b + 1 == c);
+    BOOST_CHECK(b - 1 == a);
+    BOOST_CHECK(c - 1 == b);
+
+    auto aa = a;
+    aa += 1;
+    BOOST_CHECK(aa == b);
+    auto bb = b;
+    bb -= 1;
+    BOOST_CHECK(bb == a);
+
+    std::ostringstream os;
+    os << a;
+    BOOST_CHECK_EQUAL(os.str(), "19991231");
+}
+
+BOOST_AUTO_TEST_CASE(test_julian_date_ctor_and_operations) {
+    auto a0 = ecf::JulianDay(2451544);
+    auto a  = ecf::JulianDay(2451544);
+    auto b  = ecf::JulianDay(2451545);
+    auto c  = ecf::JulianDay(2451546);
+
+    auto x = ecf::CalendarDate(19991231);
+    auto y = ecf::CalendarDate(20000101);
+    auto z = ecf::CalendarDate(20000102);
+
+    BOOST_CHECK(a == a0);
+    BOOST_CHECK(a == a);
+    BOOST_CHECK(a != b);
+    BOOST_CHECK(a != c);
+    BOOST_CHECK(a < b);
+    BOOST_CHECK(a <= b);
+    BOOST_CHECK(b <= b);
+    BOOST_CHECK(c > b);
+    BOOST_CHECK(b >= b);
+    BOOST_CHECK(c >= b);
+
+    BOOST_CHECK(a == x.as_julian_day());
+    BOOST_CHECK(b == y.as_julian_day());
+    BOOST_CHECK(c == z.as_julian_day());
+
+    BOOST_CHECK(a == x);
+    BOOST_CHECK(b == y);
+    BOOST_CHECK(c == z);
+    BOOST_CHECK(a != y);
+    BOOST_CHECK(b != z);
+    BOOST_CHECK(c != x);
+
+    BOOST_CHECK(a + 1 == b);
+    BOOST_CHECK(b + 1 == c);
+    BOOST_CHECK(b - 1 == a);
+    BOOST_CHECK(c - 1 == b);
+
+    auto aa = a;
+    aa += 1;
+    BOOST_CHECK(aa == b);
+    auto bb = b;
+    bb -= 1;
+    BOOST_CHECK(bb == a);
+
+    std::ostringstream os;
+    os << a;
+    BOOST_CHECK_EQUAL(os.str(), "2451544");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(T_Calendar)
+
+BOOST_AUTO_TEST_CASE(test_calendar_ctor_and_operations) {
+    ECF_NAME_THIS_TEST();
+
+    auto a = ecf::Calendar();
+    BOOST_CHECK(!a.hybrid());
+
+    auto base = boost::posix_time::ptime(date(2000, 1, 1));
+    a.init(base, Calendar::HYBRID);
+    BOOST_CHECK(a.hybrid());
+    BOOST_CHECK(a.year() == 2000);
+    BOOST_CHECK(a.month() == 1);
+    BOOST_CHECK(a.day_of_month() == 1);
+    BOOST_CHECK_EQUAL(a.begin_time(), a.begin_time());
+
+    auto b = a;
+    BOOST_CHECK(b.hybrid());
+    BOOST_CHECK(b.year() == 2000);
+    BOOST_CHECK(b.month() == 1);
+    BOOST_CHECK(b.day_of_month() == 1);
+
+    auto c = ecf::Calendar();
+    c      = a;
+    BOOST_CHECK(c.hybrid());
+    BOOST_CHECK(c.year() == 2000);
+    BOOST_CHECK(c.month() == 1);
+    BOOST_CHECK(c.day_of_month() == 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_calendar_equality) {
+    ECF_NAME_THIS_TEST();
+
+    auto a     = ecf::Calendar();
+    auto base0 = boost::posix_time::ptime(date(2000, 1, 1));
+    a.init(base0, Calendar::REAL);
+
+    { // ecf::Calendar::ctype_
+        auto x    = ecf::Calendar();
+        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        x.init(base, Calendar::HYBRID);
+        BOOST_CHECK(!(x == a));
+    }
+
+    { // ecf::Calendar::initTime_
+        auto x    = ecf::Calendar();
+        auto base = boost::posix_time::ptime(date(2000, 1, 2));
+        x.init(base, Calendar::REAL);
+        BOOST_CHECK(!(x == a));
+    }
+    { // ecf::Calendar::suiteTime_
+        auto x    = ecf::Calendar();
+        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        x.init(base, Calendar::REAL);
+        auto now      = boost::posix_time::ptime(date(2000, 1, 2));
+        auto interval = boost::posix_time::minutes(1);
+        x.update(ecf::CalendarUpdateParams(now, interval, false, true));
+        BOOST_CHECK(!(x == a));
+    }
+    { // ecf::Calendar::duration_
+        auto x    = ecf::Calendar();
+        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        x.init(base, Calendar::REAL);
+        auto now = boost::posix_time::second_clock::universal_time() + boost::posix_time::minutes(1);
+        x.update_duration_only(now);
+        BOOST_CHECK(!(x == a));
+    }
+    { // ecf::Calendar::dayChanged_ (interval < 60 seconds)
+        auto x    = ecf::Calendar();
+        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        x.init(base, Calendar::REAL);
+        auto now      = boost::posix_time::second_clock::universal_time() + boost::posix_time::hours(24);
+        auto interval = boost::posix_time::seconds(30);
+        x.update(ecf::CalendarUpdateParams(now, interval, false));
+        BOOST_CHECK(!(x == a));
+    }
+    { // ecf::Calendar::dayChanged_ (interval >= 60 seconds)
+        auto x    = ecf::Calendar();
+        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        x.init(base, Calendar::REAL);
+        auto now      = boost::posix_time::second_clock::universal_time() + boost::posix_time::hours(24);
+        auto interval = boost::posix_time::minutes(2);
+        x.update(ecf::CalendarUpdateParams(now, interval, false));
+        BOOST_CHECK(!(x == a));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_calendar_default_uninitiated_values) {
+    ECF_NAME_THIS_TEST();
+
+    {
+        auto a = ecf::Calendar();
+        auto x = a.day_of_week();
+        BOOST_CHECK(x == -1);
+        BOOST_CHECK(a.is_special());
+    }
+    {
+        auto a = ecf::Calendar();
+        auto x = a.day_of_year();
+        BOOST_CHECK(x == -1);
+    }
+    {
+        auto a = ecf::Calendar();
+        auto x = a.day_of_month();
+        BOOST_CHECK(x == -1);
+    }
+    {
+        auto a = ecf::Calendar();
+        auto x = a.month();
+        BOOST_CHECK(x == -1);
+    }
+    {
+        auto a = ecf::Calendar();
+        auto x = a.year();
+        BOOST_CHECK(x == -1);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_calendar_default_uninitiated_values_invariants) {
+    ECF_NAME_THIS_TEST();
+
+    auto a = ecf::Calendar();
+    std::string buffer;
+    a.write_state(buffer);
+    BOOST_CHECK(buffer.empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_calendar_default_uninitiated_values_write_state) {
+    ECF_NAME_THIS_TEST();
+
+    auto a = ecf::Calendar();
+    std::string message;
+    BOOST_CHECK(a.checkInvariants(message));
+    BOOST_CHECK(message.empty());
+}
+
+BOOST_AUTO_TEST_CASE(test_calendar_setting_clock_type) {
+    ECF_NAME_THIS_TEST();
+
+    auto a = ecf::Calendar();
+    a.set_clock_type(ecf::Calendar::HYBRID);
+    BOOST_CHECK(a.hybrid());
+    a.set_clock_type(ecf::Calendar::REAL);
+    BOOST_CHECK(!a.hybrid());
+}
+
+BOOST_AUTO_TEST_CASE(test_calendar_get_day_of_week) {
+    ECF_NAME_THIS_TEST();
+
+    auto generate = [](int year, int month, int day) {
+        auto a    = ecf::Calendar();
+        auto base = boost::posix_time::ptime(date(year, month, day));
+        a.init(base, Calendar::HYBRID);
+        return a;
+    };
+
+    {
+        auto a = generate(2000, 1, 2);
+        BOOST_CHECK(a.suite_time_str().find("SUNDAY") != std::string::npos);
+        BOOST_CHECK(a.toString().find("SUNDAY") != std::string::npos);
+    }
+    {
+        auto a = generate(2000, 1, 3);
+        BOOST_CHECK(a.suite_time_str().find("MONDAY") != std::string::npos);
+        BOOST_CHECK(a.toString().find("MONDAY") != std::string::npos);
+    }
+    {
+        auto a = generate(2000, 1, 4);
+        BOOST_CHECK(a.suite_time_str().find("TUESDAY") != std::string::npos);
+        BOOST_CHECK(a.toString().find("TUESDAY") != std::string::npos);
+    }
+    {
+        auto a = generate(2000, 1, 5);
+        BOOST_CHECK(a.suite_time_str().find("WEDNESDAY") != std::string::npos);
+        BOOST_CHECK(a.toString().find("WEDNESDAY") != std::string::npos);
+    }
+    {
+        auto a = generate(2000, 1, 6);
+        BOOST_CHECK(a.suite_time_str().find("THURSDAY") != std::string::npos);
+        BOOST_CHECK(a.toString().find("THURSDAY") != std::string::npos);
+    }
+    {
+        auto a = generate(2000, 1, 7);
+        BOOST_CHECK(a.suite_time_str().find("FRIDAY") != std::string::npos);
+        BOOST_CHECK(a.toString().find("FRIDAY") != std::string::npos);
+    }
+    {
+        auto a = generate(2000, 1, 8);
+        BOOST_CHECK(a.suite_time_str().find("SATURDAY") != std::string::npos);
+        BOOST_CHECK(a.toString().find("SATURDAY") != std::string::npos);
+    }
+}
 
 BOOST_AUTO_TEST_CASE(test_calendar_default_ptime) {
     ECF_NAME_THIS_TEST();

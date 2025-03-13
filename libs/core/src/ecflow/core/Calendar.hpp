@@ -112,6 +112,9 @@ private:
 std::ostream& operator<<(std::ostream& os, const CalendarDate&);
 
 bool operator==(const CalendarDate&, const CalendarDate&);
+inline bool operator!=(const CalendarDate& lhs, const CalendarDate& rhs) {
+    return !(lhs == rhs);
+}
 
 bool operator<(const CalendarDate&, const CalendarDate&);
 bool operator<=(const CalendarDate&, const CalendarDate&);
@@ -145,6 +148,9 @@ private:
 std::ostream& operator<<(std::ostream& os, const JulianDay&);
 
 bool operator==(const JulianDay&, const JulianDay&);
+inline bool operator!=(const JulianDay& lhs, const JulianDay& rhs) {
+    return !(lhs == rhs);
+}
 
 bool operator<(const JulianDay&, const JulianDay&);
 bool operator<=(const JulianDay&, const JulianDay&);
@@ -159,6 +165,12 @@ JulianDay& operator-=(JulianDay&, JulianDay::value_t);
 
 bool operator==(const CalendarDate&, const JulianDay&);
 bool operator==(const JulianDay&, const CalendarDate&);
+inline bool operator!=(const CalendarDate& lhs, const JulianDay& rhs) {
+    return !(lhs == rhs);
+}
+inline bool operator!=(const JulianDay& lhs, const CalendarDate& rhs) {
+    return !(lhs == rhs);
+}
 
 class CalendarUpdateParams; // forward declare
 
@@ -229,7 +241,7 @@ public:
     boost::gregorian::date date() const;
 
     /// The calendar type. For hybrid clocks the date does not update.
-    bool hybrid() const { return (ctype_ == Calendar::HYBRID) ? true : false; }
+    bool hybrid() const { return ctype_ == Calendar::HYBRID; }
 
     /// for debug,  must link with boost date and time library
     void dump(const std::string& title) const;
@@ -295,6 +307,7 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const /*version*/);
 };
+
 } // namespace ecf
 
 #endif /* ecflow_core_Calendar_HPP */

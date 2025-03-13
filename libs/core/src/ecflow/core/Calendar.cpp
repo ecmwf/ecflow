@@ -216,45 +216,21 @@ bool Calendar::operator==(const Calendar& rhs) const {
     //       Otherwise For migration testing, it will fail
 
     if (ctype_ != rhs.ctype_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== ctypes don't match\n";
-#endif
         return false;
     }
     if (initTime_ != rhs.initTime_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== initTime_ don't match\n";
-#endif
         return false;
     }
     if (suiteTime_ != rhs.suiteTime_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== suiteTime_  don't match\n";
-#endif
         return false;
     }
     if (duration_ != rhs.duration_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== duration_  don't match\n";
-#endif
         return false;
     }
     if (dayChanged_ != rhs.dayChanged_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== dayChanged_  don't match\n";
-#endif
         return false;
     }
     if (increment_ != rhs.increment_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== increment_  don't match\n";
-#endif
         return false;
     }
 
