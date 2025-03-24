@@ -89,6 +89,89 @@ class access;
 
 namespace ecf {
 
+class JulianDay;
+
+class CalendarDate {
+public:
+    using value_t = long;
+
+    CalendarDate() = delete;
+    explicit CalendarDate(value_t value) : value_(value) {}
+
+    value_t value() const { return value_; }
+
+    JulianDay as_julian_day() const;
+
+    friend CalendarDate& operator+=(CalendarDate&, CalendarDate::value_t rhs);
+    friend CalendarDate& operator-=(CalendarDate&, CalendarDate::value_t rhs);
+
+private:
+    value_t value_;
+};
+
+std::ostream& operator<<(std::ostream& os, const CalendarDate&);
+
+bool operator==(const CalendarDate&, const CalendarDate&);
+inline bool operator!=(const CalendarDate& lhs, const CalendarDate& rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator<(const CalendarDate&, const CalendarDate&);
+bool operator<=(const CalendarDate&, const CalendarDate&);
+bool operator>(const CalendarDate&, const CalendarDate&);
+bool operator>=(const CalendarDate&, const CalendarDate&);
+
+CalendarDate operator+(const CalendarDate&, CalendarDate::value_t);
+CalendarDate operator-(const CalendarDate&, CalendarDate::value_t);
+
+CalendarDate& operator+=(CalendarDate&, CalendarDate::value_t);
+CalendarDate& operator-=(CalendarDate&, CalendarDate::value_t);
+
+class JulianDay {
+public:
+    using value_t = long;
+
+    JulianDay() = delete;
+    explicit JulianDay(value_t value) : value_(value) {}
+
+    value_t value() const { return value_; }
+
+    CalendarDate as_calendar_date() const;
+
+    friend JulianDay& operator+=(JulianDay&, JulianDay::value_t rhs);
+    friend JulianDay& operator-=(JulianDay&, JulianDay::value_t rhs);
+
+private:
+    value_t value_;
+};
+
+std::ostream& operator<<(std::ostream& os, const JulianDay&);
+
+bool operator==(const JulianDay&, const JulianDay&);
+inline bool operator!=(const JulianDay& lhs, const JulianDay& rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator<(const JulianDay&, const JulianDay&);
+bool operator<=(const JulianDay&, const JulianDay&);
+bool operator>(const JulianDay&, const JulianDay&);
+bool operator>=(const JulianDay&, const JulianDay&);
+
+JulianDay operator+(const JulianDay&, JulianDay::value_t);
+JulianDay operator-(const JulianDay&, JulianDay::value_t);
+
+JulianDay& operator+=(JulianDay&, JulianDay::value_t);
+JulianDay& operator-=(JulianDay&, JulianDay::value_t);
+
+bool operator==(const CalendarDate&, const JulianDay&);
+bool operator==(const JulianDay&, const CalendarDate&);
+inline bool operator!=(const CalendarDate& lhs, const JulianDay& rhs) {
+    return !(lhs == rhs);
+}
+inline bool operator!=(const JulianDay& lhs, const CalendarDate& rhs) {
+    return !(lhs == rhs);
+}
+
 class CalendarUpdateParams; // forward declare
 
 class Calendar {
@@ -158,7 +241,7 @@ public:
     boost::gregorian::date date() const;
 
     /// The calendar type. For hybrid clocks the date does not update.
-    bool hybrid() const { return (ctype_ == Calendar::HYBRID) ? true : false; }
+    bool hybrid() const { return ctype_ == Calendar::HYBRID; }
 
     /// for debug,  must link with boost date and time library
     void dump(const std::string& title) const;
@@ -224,6 +307,7 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const /*version*/);
 };
+
 } // namespace ecf
 
 #endif /* ecflow_core_Calendar_HPP */

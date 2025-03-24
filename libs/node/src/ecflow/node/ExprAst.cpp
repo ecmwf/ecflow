@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
@@ -1202,10 +1202,10 @@ int AstFunction::value() const {
                 arg_eval = arg_eval / 100;
             else if (integer_digits != 8)
                 return 0;
-            return Cal::date_to_julian(arg_eval);
+            return ecf::CalendarDate(arg_eval).as_julian_day().value();
         }
         case AstFunction::JULIAN_TO_DATE:
-            return Cal::julian_to_date(arg_eval);
+            return ecf::JulianDay(arg_eval).as_calendar_date().value();
         default:
             assert(false);
     }

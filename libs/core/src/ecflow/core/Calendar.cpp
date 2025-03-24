@@ -32,6 +32,173 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
+namespace implementation {
+
+CalendarDate::value_t julian_day_to_calendar_date(long jdate) {
+    long x = 0, y = 0, d = 0, m = 0, e = 0;
+    long day = 0, month = 0, year = 0;
+
+    x = 4 * jdate - 6884477;
+    y = (x / 146097) * 100;
+    e = x % 146097;
+    d = e / 4;
+
+    x = 4 * d + 3;
+    y = (x / 1461) + y;
+    e = x % 1461;
+    d = e / 4 + 1;
+
+    x = 5 * d - 3;
+    m = x / 153 + 1;
+    e = x % 153;
+    d = e / 5 + 1;
+
+    if (m < 11)
+        month = m + 2;
+    else
+        month = m - 10;
+
+    day  = d;
+    year = y + m / 11;
+
+    return year * 10000 + month * 100 + day;
+}
+
+JulianDay::value_t calendar_date_to_julian_day(long ddate) {
+    long m1 = 0, y1 = 0, a = 0, b = 0, c = 0, d = 0, j1 = 0;
+
+    long month = 0, day = 0, year = 0;
+
+    year = ddate / 10000;
+    ddate %= 10000;
+    month = ddate / 100;
+    ddate %= 100;
+    day = ddate;
+
+    if (month > 2) {
+        m1 = month - 3;
+        y1 = year;
+    }
+    else {
+        m1 = month + 9;
+        y1 = year - 1;
+    }
+    a  = 146097 * (y1 / 100) / 4;
+    d  = y1 % 100;
+    b  = 1461 * d / 4;
+    c  = (153 * m1 + 2) / 5 + day + 1721119;
+    j1 = a + b + c;
+
+    return j1;
+}
+
+} // namespace implementation
+
+JulianDay CalendarDate::as_julian_day() const {
+    return JulianDay(implementation::calendar_date_to_julian_day(value_));
+}
+
+CalendarDate JulianDay::as_calendar_date() const {
+    return CalendarDate(implementation::julian_day_to_calendar_date(value_));
+}
+
+bool operator==(const CalendarDate& lhs, const CalendarDate& rhs) {
+    return lhs.value() == rhs.value();
+}
+
+bool operator==(const CalendarDate& lhs, const JulianDay& rhs) {
+    return lhs.as_julian_day() == rhs;
+}
+
+bool operator==(const JulianDay& lhs, const CalendarDate& rhs) {
+    return lhs == rhs.as_julian_day();
+}
+
+bool operator==(const JulianDay& lhs, const JulianDay& rhs) {
+    return lhs.value() == rhs.value();
+}
+
+bool operator<(const CalendarDate& lhs, const CalendarDate& rhs) {
+    return lhs.as_julian_day() < rhs.as_julian_day();
+}
+
+bool operator<=(const CalendarDate& lhs, const CalendarDate& rhs) {
+    return lhs.as_julian_day() <= rhs.as_julian_day();
+}
+
+bool operator>(const CalendarDate& lhs, const CalendarDate& rhs) {
+    return lhs.as_julian_day() > rhs.as_julian_day();
+}
+
+bool operator>=(const CalendarDate& lhs, const CalendarDate& rhs) {
+    return lhs.as_julian_day() >= rhs.as_julian_day();
+}
+
+bool operator<(const JulianDay& lhs, const JulianDay& rhs) {
+    return lhs.value() < rhs.value();
+}
+
+bool operator<=(const JulianDay& lhs, const JulianDay& rhs) {
+    return lhs.value() <= rhs.value();
+}
+
+bool operator>(const JulianDay& lhs, const JulianDay& rhs) {
+    return lhs.value() > rhs.value();
+}
+
+bool operator>=(const JulianDay& lhs, const JulianDay& rhs) {
+    return lhs.value() >= rhs.value();
+}
+
+CalendarDate& operator+=(CalendarDate& lhs, CalendarDate::value_t rhs) {
+    auto jd    = lhs.as_julian_day() + rhs;
+    lhs.value_ = jd.as_calendar_date().value();
+    return lhs;
+}
+
+CalendarDate& operator-=(CalendarDate& lhs, CalendarDate::value_t rhs) {
+    auto jd    = lhs.as_julian_day() - rhs;
+    lhs.value_ = jd.as_calendar_date().value();
+    return lhs;
+}
+
+CalendarDate operator+(const CalendarDate& lhs, CalendarDate::value_t rhs) {
+    auto result = lhs;
+    return result += rhs;
+}
+
+CalendarDate operator-(const CalendarDate& lhs, CalendarDate::value_t rhs) {
+    auto result = lhs;
+    return result -= rhs;
+}
+
+JulianDay& operator+=(JulianDay& lhs, JulianDay::value_t rhs) {
+    lhs.value_ += rhs;
+    return lhs;
+}
+
+JulianDay& operator-=(JulianDay& lhs, JulianDay::value_t rhs) {
+    lhs.value_ -= rhs;
+    return lhs;
+}
+
+JulianDay operator+(const JulianDay& lhs, JulianDay::value_t rhs) {
+    return JulianDay(lhs.value() + rhs);
+}
+
+JulianDay operator-(const JulianDay& lhs, JulianDay::value_t rhs) {
+    return JulianDay(lhs.value() - rhs);
+}
+
+std::ostream& operator<<(std::ostream& os, const CalendarDate& cd) {
+    os << cd.value();
+    return os;
+}
+std::ostream& operator<<(std::ostream& os, const JulianDay& jd) {
+    os << jd.value();
+    return os;
+}
+
 Calendar::Calendar() = default;
 
 Calendar::Calendar(const Calendar& rhs) {
@@ -49,45 +216,21 @@ bool Calendar::operator==(const Calendar& rhs) const {
     //       Otherwise For migration testing, it will fail
 
     if (ctype_ != rhs.ctype_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== ctypes don't match\n";
-#endif
         return false;
     }
     if (initTime_ != rhs.initTime_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== initTime_ don't match\n";
-#endif
         return false;
     }
     if (suiteTime_ != rhs.suiteTime_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== suiteTime_  don't match\n";
-#endif
         return false;
     }
     if (duration_ != rhs.duration_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== duration_  don't match\n";
-#endif
         return false;
     }
     if (dayChanged_ != rhs.dayChanged_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== dayChanged_  don't match\n";
-#endif
         return false;
     }
     if (increment_ != rhs.increment_) {
-#ifdef DEBUG
-        if (Ecf::debug_equality())
-            std::cout << "Calendar::operator== increment_  don't match\n";
-#endif
         return false;
     }
 
