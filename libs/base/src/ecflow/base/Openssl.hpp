@@ -55,6 +55,8 @@ public:
     void print(std::ostream& os) const { os << ssl_; }
     std::string info() const;
 
+    std::string selected_crt() const;
+
 private:
     void check_server_certificates() const;
     void load_verify_file(boost::asio::ssl::context&); /// load server.crt file into the ssl context
