@@ -665,12 +665,6 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
 
     ecf::environment::get("ECF_DEBUG_SERVER", debug_);
 
-#ifdef ECF_OPENSSL
-    // IF ECF_SSL= 1 search server.crt
-    // ELSE          search <host>.<port>.crt
-    ssl_.enable_if_defined(serverHost_, the_port());
-#endif
-
     if (auto var = ecf::environment::fetch("ECF_TASK_THRESHOLD"); var) {
         std::string task_threshold = var.value();
         try {
