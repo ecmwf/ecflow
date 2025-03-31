@@ -679,12 +679,6 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
         debug_ = true; // can also be enabled via --debug option
     }
 
-#ifdef ECF_OPENSSL
-    // IF ECF_SSL= 1 search server.crt
-    // ELSE          search <host>.<port>.crt
-    ssl_.enable_if_defined(serverHost_, the_port());
-#endif
-
     char* threshold = getenv("ECF_TASK_THRESHOLD");
     if (threshold) {
         std::string task_threshold = threshold;
