@@ -122,6 +122,7 @@ set(u_tests
 set(s_tests
   s_TestClientApi
   s_TestPythonChildApi
+  s_TestSslSetup
 )
 
 if (Python3_FOUND AND (Boost_PYTHON3_FOUND OR Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_FOUND))

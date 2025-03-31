@@ -28,19 +28,24 @@ std::string Openssl::info() const {
     return ssl_ + " : enabled : uses server/port specific ssl certificates";
 }
 
+std::string Openssl::selected_crt() const {
+    if (enabled()) {
+        return ssl_ == "1" ? "server.crt" : ssl_ + ".crt";
+    }
+
+    return "";
+}
+
 bool Openssl::enable_no_throw(std::string host, const std::string& port, const std::string& ecf_ssl_env) {
     if (host == Str::LOCALHOST())
         host = Host().name();
-
-    //   if (Ecf::server()) cout << "Openssl::enable(SERVER) ---> input host:" << host << " port:" << port << " ECF_SSL
-    //   = " << ecf_ssl_env << "\n"; else               cout << "Openssl::enable(CLIENT) ---> input host:" << host << "
-    //   port:" << port << " ECF_SSL = " << ecf_ssl_env << "\n";
 
     if (ecf_ssl_env.empty() || ecf_ssl_env == "1") {
         // LOOK for      $HOME/.ecflowrc/ssl/server.crt
         // THEN LOOK for $HOME/.ecflowrc/ssl/<host>.<port>.crt
         // Look for the certificate that HAS to exist on both client and server, i.e. self-signed certificate (CRT)
         // Needed for testing, avoid <host>.<port>.crt when ports numbers are auto generated
+
         ssl_ = "1";
         if (!fs::exists(crt())) { // crt() uses ssl_
 
@@ -63,7 +68,7 @@ bool Openssl::enable_no_throw(std::string host, const std::string& port, const s
             return false;
         }
     }
-    // cout << "Openssl::enable input ssl_:'" << ssl_ << "'\n";
+
     return true;
 }
 
