@@ -697,9 +697,9 @@ void export_Client() {
         .def("debug", &ClientInvoker::debug, "enable/disable client api debug")
 
 #ifdef ECF_OPENSSL
-        .def("enable_ssl", client_invoker_enable_ssl, ecf::Openssl::ssl_info())
-        .def("disable_ssl", &ClientInvoker::disable_ssl, ecf::Openssl::ssl_info())
-        .def("get_certificate", &ClientInvoker::get_certificate)
+        .def("enable_ssl", client_invoker_enable_ssl, ClientDoc::enable_ssl())
+        .def("disable_ssl", &ClientInvoker::disable_ssl, ClientDoc::disable_ssl())
+        .def("get_certificate", &ClientInvoker::get_certificate, ClientDoc::get_certificate())
 #endif
         .def("zombie_get", &zombieGet, return_value_policy<copy_const_reference>())
         .def("zombie_fob", &ClientInvoker::zombieFobCli)
