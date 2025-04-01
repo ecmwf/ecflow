@@ -841,19 +841,20 @@
                export ECF_DENIED=1
 
          * - ECF_SSL
-           - For secure socket communication with server. Requires client/server built with openssl libs.
+           - For secure communication between server and client -- requires build with SSL enabled.
            - No
            - .. code-block:: shell
               
-               # Use same certificate for multiple server
-               export ECF_SSL=1
-               # Use server specific certificates
-               export ECF_SSL=<host>.<port>
+               # To share a certificate amongst multiple servers
+               export ECF_SSL=1 # or empty value
+               # To use specific server certificate
+               export ECF_SSL=<any non-empty value, except '1'>
 
-             Alternatively to avoid setting environmental variables we can use :code:`ecflow_client --ssl ...`.
-             
-             The client will first look for:  $HOME/.ecflowrc/ssl/server.crt then $HOME/.ecflowrc/ssl/<host>.<port>.crt 
-      
+             When `ECF_SSL=1`, ecflow will search for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
+             and then fallback to the server specific certificate at `$HOME/.ecflowrc/ssl/<host>.<port>.crt`.
+
+             Secure communication can also be activated using the :code:`ecflow_client --ssl ...` option.
+             When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
 
       .. list-table:: Environment variables for child commands
          :header-rows: 1
@@ -987,21 +988,21 @@
                
              Prune node log history older than 40 days, upon reload of :term:`check point` file.
          * - ECF_SSL
-           - For secure socket communication with client.Requires client/server built with openssl libs
+           - For secure communication between server and client -- requires build with SSL enabled.
            - .. code-block:: shell
               
-               #Use same certificate for multiple servers
-               export ECF_SSL=1
-               # Use server specific certificates
-               export ECF_SSL=<host>.<port> 
-               
-             Alternatively to avoid setting environmental variables we can use:
+               # To share a certificate amongst multiple servers
+               export ECF_SSL=1 # or empty value
+               # To use specific server certificate
+               export ECF_SSL=<any non-empty value, except '1'>
 
-             .. code-block:: shell
-               
-               ecflow_server --ssl ... || ecflow_start.sh -s
-              
-             The server will then first look for $HOME/.ecflowrc/ssl/server.crt then $HOME/.ecflowrc/ssl/<host>.<port>.crt
+             When `ECF_SSL=1`, ecflow will search for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
+             and then fallback to the server specific certificate at `$HOME/.ecflowrc/ssl/<host>.<port>.crt`.
+
+             Secure communication can also be activated using the :code:`ecflow_server --ssl ...` option.
+             When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
+
+             Consider using `ecflow_start.sh -s` to start the server with SSL support.
 
 
       The server can be in several states. The default when first started is :term:`halted`, See :term:`server states`

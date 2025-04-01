@@ -123,6 +123,10 @@ ClientInvoker::ClientInvoker(const std::string& host, int port)
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
 }
 
+std::string ClientInvoker::get_certificate() const {
+    return clientEnv_.openssl().selected_crt();
+}
+
 void ClientInvoker::set_host_port(const std::string& host, const std::string& port) {
     // Allow host and port to be overridden.
     // o Override environment setting

@@ -20,6 +20,7 @@ import fcntl
 import datetime,time
 import shutil   # used to remove directory tree
 import platform # for python version info
+import inspect
 
 from ecflow import Client, debug_build, File
 
@@ -253,3 +254,75 @@ class Server(object):
                 clean_up_server(str(self.the_port))
                 clean_up_data(str(self.the_port))
         return False
+
+
+# ===============================================================================
+class MockEnvironment:
+    def __init__(self, env):
+        self.expected_env = env
+
+    def __enter__(self):
+        self.original_env = {};
+        for (name, value) in self.expected_env.items():
+            if name in os.environ:
+                self.original_env[name] = os.environ[name]
+            else:
+                self.original_env[name] = None
+            os.environ[name] = value
+
+    def __exit__(self, exception_type, exception_value, exception_traceback):
+        for (name, value) in self.original_env.items():
+            if value is None:
+                del os.environ[name]
+            else:
+                os.environ[name] = value
+
+    def __str__(self):
+        return f"Test.MockEnvironment({self.expected_env})"
+
+
+# ===============================================================================
+class MockFile:
+    def __init__(self, fname, fcontent=""):
+        self.name = fname
+        self.content = fcontent
+
+    def __enter__(self):
+        with open(self.name, "w") as file:
+            file.write(self.content)
+
+    def __exit__(self, exception_type, exception_value, exception_traceback):
+        os.remove(self.name)
+        pass
+
+    def __str__(self):
+        return f"Test.MockFile({self.name}, {self.content})"
+
+
+# ==============================================================================
+def name_this_test():
+    """Set the name of the test based on the current function name"""
+    test_name = inspect.stack()[1].function
+    print(f"Test: {test_name}")
+
+
+# ==============================================================================
+def test_started():
+    print_test_start(inspect.stack()[1].filename)
+
+
+# ==============================================================================
+def test_success():
+    print("#######################################################################################")
+    print(" All Tests passed")
+    print("#######################################################################################")
+
+
+def execute_all(clazz):
+    test_started()
+
+    for name, test in inspect.getmembers(clazz):
+        if inspect.isfunction(test):
+            test()
+
+    test_success()

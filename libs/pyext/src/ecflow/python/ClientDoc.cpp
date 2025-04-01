@@ -44,16 +44,27 @@ const char* ClientDoc::class_client() {
            "* ECF_HOST  <string>   : The host name of the main server. defaults to 'localhost'\n"
            "* ECF_PORT  <int>      : The TCP/IP port to call on the server. Must be unique to a server\n\n"
            "The ECF_HOST and ECF_PORT can be overridden by using the Constructor or set_host_port() member function.\n"
-           "For optimal usage it is best to reuse the same Client rather than recreating for each client server "
-           "interaction\n"
            "By default the Client interface will throw exceptions for error's.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
            "       ci = Client('localhost:3150')   # for errors will throw RuntimeError\n"
-           "       ci.terminate_server()\n"
+           "       ci.ping()\n"
            "   except RuntimeError, e:\n"
-           "       print(str(e))\n\n";
+           "       print(str(e))\n\n"
+           "To optimize resources consider reusing the same Client instance, rather than creating a new instance,"
+           "for each client/server interaction\n\n"
+           "Secure communication between client and server can be enabled when creating of a new Client, by "
+           "defining the environment variable `ECF_SSL`:\n\n"
+           "* When `ECF_SSL=1`, or is set to an empty value, the Client will search for a shared server certificate "
+           "at `~/.ecflowrc/ssl/server.crt`, falling back to the specific server certificate "
+           "(`~/.ecflowrc/ssl/<host>.<port>.crt`), in case the first doesn't exist;\n"
+           "* When `ECF_SSL=<any non-empty value, except '1'>`, the Client will only attempt to find the specific "
+           "server certificate.\n\n"
+           "A secure connection can also be enabled/disabled using the `Client.enable_ssl()/.disable_ssl()` methods. "
+           "The behaviour of `Client.enable_ssl()` follows the Client initialisation described above "
+           "(assuming `ECF_SSL=1` when `ECF_SSL` is not defined).\n"
+           "\n";
 }
 
 const char* ClientDoc::set_host_port() {
@@ -1482,6 +1493,42 @@ const char* ClientDoc::delete_all() {
            "       ci.get_server_defs()\n"
            "   except RuntimeError, e:\n"
            "       print(str(e));    # expect failure since all nodes deleted";
+}
+
+const char* ClientDoc::enable_ssl() {
+    return "Enable secure communication between client and server.\n\n"
+           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   try:\n"
+           "       ci = Client('localhost', '31415')\n"
+           "       ci.enable_ssl()\n"
+           "   except RuntimeError, e:\n"
+           "       print(str(e))\n";
+}
+
+const char* ClientDoc::disable_ssl() {
+    return "Disable secure communication between client and server.\n\n"
+           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   try:\n"
+           "       ci = Client('localhost', '31415')\n"
+           "       ci.disable_ssl()\n"
+           "   except RuntimeError, e:\n"
+           "       print(str(e))\n";
+}
+
+const char* ClientDoc::get_certificate() {
+    return "Retrieves the full path to the secure communication certificate currently used by the client.\n\n"
+           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   try:\n"
+           "       ci = Client('localhost', '31415')\n"
+           "       print(ci.get_certificate())\n"
+           "   except RuntimeError, e:\n"
+           "       print(str(e))\n";
 }
 
 const char* ClientDoc::check() {
