@@ -59,7 +59,7 @@ const char* client_env_description =
     "| ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |\n"
     "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
 #ifdef ECF_OPENSSL
-    "| ECF_SSL  |  <any>   | Optional*  | Enable encrypted communication with SSL enabled server.           |\n"
+    "| ECF_SSL  |  <any>   | Optional*  | Enable secure communication between client and server.            |\n"
 #endif
     "|----------|----------|------------|-------------------------------------------------------------------|"
     "\n\n"

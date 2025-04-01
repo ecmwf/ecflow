@@ -43,7 +43,6 @@ The following environment variables are used by the python interface and child c
 * ECF_PORT  <int>      : The TCP/IP port to call on the server. Must be unique to a server
 
 The ECF_HOST and ECF_PORT can be overridden by using the Constructor or set_host_port() member function.
-For optimal usage it is best to reuse the same Client rather than recreating for each client server interaction
 By default the Client interface will throw exceptions for error's.
 
 Usage:
@@ -52,9 +51,18 @@ Usage:
 
    try:
        ci = Client('localhost:3150')   # for errors will throw RuntimeError
-       ci.terminate_server()
+       ci.ping()
    except RuntimeError, e:
        print(str(e))
+
+To optimize resources consider reusing the same Client instance, rather than creating a new instance,for each client/server interaction
+
+Secure communication between client and server can be enabled when creating of a new Client, by defining the environment variable `ECF_SSL`:
+
+* When `ECF_SSL=1`, or is set to an empty value, the Client will search for a shared server certificate at `~/.ecflowrc/ssl/server.crt`, falling back to the specific server certificate (`~/.ecflowrc/ssl/<host>.<port>.crt`), in case the first doesn't exist;
+* When `ECF_SSL=<any non-empty value, except '1'>`, the Client will only attempt to find the specific server certificate.
+
+A secure connection can also be enabled/disabled using the `Client.enable_ssl()/.disable_ssl()` methods. The behaviour of `Client.enable_ssl()` follows the Client initialisation described above (assuming `ECF_SSL=1` when `ECF_SSL` is not defined).
 
 
 .. py:method:: Client.alter( (Client)arg1, (list)paths, (str)alter_type, (str)attribute_type [, (str)name='' [, (str)value='']]) -> None :
@@ -830,67 +838,19 @@ Usage:
 .. py:method:: Client.disable_ssl( (Client)arg1) -> None :
    :module: ecflow
 
-ecFlow client and server are SSL enabled. To use SSL choose between:
-  1. export ECF_SSL=1              # search for server.crt otherwise <host>.<port>.crt
-  2. export ECF_SSL=<host>.<port>  # Use server specific certificates <host>.<port>.***
-  3. use --ssl           # argument on ecflow_client/ecflow_server, same as option 1.
-                         # Typically ssl server can be started with ecflow_start.sh -s
-  4. Client.enable_ssl() # for python client
+Disable secure communication between client and server.
 
-ecFlow expects the certificates to be in directory $HOME/.ecflowrc/ssl
-The certificates can be shared if you have multiple servers running on
-the same machine. In this case use ECF_SSL=1, then
-ecflow_server expects the following files in $HOME/.ecflowrc/ssl
+See `ecflow.Client`_ initialisation for details regarding secure communication configuration.
 
-   - dh2048.pem
-   - server.crt
-   - server.key
-   - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key
+Usage:
 
-ecflow_client expects the following files in : $HOME/.ecflowrc/ssl
+.. code-block:: python
 
-   - server.crt (this must be the same as server)
-
-Alternatively you can have different setting for each server ECF_SSL=<host>.<port>
-Then server expect files of the type:
-
-   - <host>.<port>.pem
-   - <host>.<port>.crt
-   - <host>.<port>.key
-   - <host>.<port>.passwd (optional)
-
-and client expect files of the type:
-
-   - <host>.<port>.crt  # as before this must be same as the server
-
-The server/client will automatically check existence of both variants,
-but will give preference to NON <host>.<port>.*** variants first, when ECF_SSL=1
-The following steps, show you how to create the certificate files.
-This may need to be adapted if you want to use <host>.<port>.***
-
-- Generate a password protected private key. This will request a pass phrase.
-  This key is a 1024 bit RSA key which is encrypted using Triple-DES and stored
-  in a PEM format so that it is readable as ASCII text
-
-     > openssl genrsa -des3 -out server.key 1024   # Password protected private key
-- Additional security.
-  If you want additional security, create a file called 'server.passwd' and add the pass phrase to the file.
-  Then set the file permission so that file is only readable by the server process.
-  Or you can choose to remove password requirement. In that case we don't need server.passwd file.
-
-     > cp server.key server.key.secure
-     > openssl rsa -in server.key.secure -out server.key  # remove password requirement
-- Sign certificate with private key (self signed certificate).Generate Certificate Signing Request(CSR).
-  This will prompt with a number of questions.
-  However please ensure 'common name' matches the host where your server is going to run.
-
-     > openssl req -new -key server.key -out server.csr # Generate Certificate Signing Request(CSR)
-- Generate a self signed certificate CRT, by using the CSR and private key.
-
-     > openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
-
-- Generate dhparam file. ecFlow expects 2048 key.
-     > openssl dhparam -out dh2048.pem 2048
+   try:
+       ci = Client('localhost', '31415')
+       ci.disable_ssl()
+   except RuntimeError, e:
+       print(str(e))
 
 
 .. py:method:: Client.edit_script_edit( (Client)arg1, (str)arg2) -> str :
@@ -927,67 +887,19 @@ to run as alias or not:
 .. py:method:: Client.enable_ssl( (Client)arg1) -> None :
    :module: ecflow
 
-ecFlow client and server are SSL enabled. To use SSL choose between:
-  1. export ECF_SSL=1              # search for server.crt otherwise <host>.<port>.crt
-  2. export ECF_SSL=<host>.<port>  # Use server specific certificates <host>.<port>.***
-  3. use --ssl           # argument on ecflow_client/ecflow_server, same as option 1.
-                         # Typically ssl server can be started with ecflow_start.sh -s
-  4. Client.enable_ssl() # for python client
+Enable secure communication between client and server.
 
-ecFlow expects the certificates to be in directory $HOME/.ecflowrc/ssl
-The certificates can be shared if you have multiple servers running on
-the same machine. In this case use ECF_SSL=1, then
-ecflow_server expects the following files in $HOME/.ecflowrc/ssl
+See `ecflow.Client`_ initialisation for details regarding secure communication configuration.
 
-   - dh2048.pem
-   - server.crt
-   - server.key
-   - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key
+Usage:
 
-ecflow_client expects the following files in : $HOME/.ecflowrc/ssl
+.. code-block:: python
 
-   - server.crt (this must be the same as server)
-
-Alternatively you can have different setting for each server ECF_SSL=<host>.<port>
-Then server expect files of the type:
-
-   - <host>.<port>.pem
-   - <host>.<port>.crt
-   - <host>.<port>.key
-   - <host>.<port>.passwd (optional)
-
-and client expect files of the type:
-
-   - <host>.<port>.crt  # as before this must be same as the server
-
-The server/client will automatically check existence of both variants,
-but will give preference to NON <host>.<port>.*** variants first, when ECF_SSL=1
-The following steps, show you how to create the certificate files.
-This may need to be adapted if you want to use <host>.<port>.***
-
-- Generate a password protected private key. This will request a pass phrase.
-  This key is a 1024 bit RSA key which is encrypted using Triple-DES and stored
-  in a PEM format so that it is readable as ASCII text
-
-     > openssl genrsa -des3 -out server.key 1024   # Password protected private key
-- Additional security.
-  If you want additional security, create a file called 'server.passwd' and add the pass phrase to the file.
-  Then set the file permission so that file is only readable by the server process.
-  Or you can choose to remove password requirement. In that case we don't need server.passwd file.
-
-     > cp server.key server.key.secure
-     > openssl rsa -in server.key.secure -out server.key  # remove password requirement
-- Sign certificate with private key (self signed certificate).Generate Certificate Signing Request(CSR).
-  This will prompt with a number of questions.
-  However please ensure 'common name' matches the host where your server is going to run.
-
-     > openssl req -new -key server.key -out server.csr # Generate Certificate Signing Request(CSR)
-- Generate a self signed certificate CRT, by using the CSR and private key.
-
-     > openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
-
-- Generate dhparam file. ecFlow expects 2048 key.
-     > openssl dhparam -out dh2048.pem 2048
+   try:
+       ci = Client('localhost', '31415')
+       ci.enable_ssl()
+   except RuntimeError, e:
+       print(str(e))
 
 
 .. py:method:: Client.flush_log( (Client)arg1) -> int :
@@ -1232,6 +1144,24 @@ Free :term:`trigger` :term:`dependencies` for a :term:`node`
     
 
 free_trigger_dep( (Client)arg1, (list)arg2) -> None
+
+
+.. py:method:: Client.get_certificate( (Client)arg1) -> str :
+   :module: ecflow
+
+Retrieves the full path to the secure communication certificate currently used by the client.
+
+See `ecflow.Client`_ initialisation for details regarding secure communication configuration.
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client('localhost', '31415')
+       print(ci.get_certificate())
+   except RuntimeError, e:
+       print(str(e))
 
 
 .. py:method:: Client.get_defs( (Client)arg1) -> Defs :
