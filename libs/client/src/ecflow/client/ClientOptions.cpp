@@ -145,7 +145,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     if (vm.count("host")) {
         host = vm["host"].as<std::string>();
         if (env->debug())
-            std::cout << "   host " << host << " overridden at the command line\n";
+            std::cout << "  host " << host << " overridden at the command line\n";
     }
     if (!host.empty() || !port.empty()) {
         if (host.empty())
@@ -195,7 +195,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
             if (env->debug()) {
                 std::cout << "  ssl explicitly enabled via command line, but also enabled via environment variable\n";
             }
-            env->enable_ssl();
+            env->enable_ssl_if_defined();
         }
 
         if (env->debug()) {

@@ -70,6 +70,10 @@ public:
     ecf::Openssl& openssl() { return ssl_; }
     const ecf::Openssl& openssl() const { return ssl_; }
     bool ssl() const { return ssl_.enabled(); }
+    void enable_ssl_if_defined() {
+        ssl_.enable_if_defined(serverHost_, the_port());
+    } // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
+    void enable_ssl(const std::string& ecf_ssl) { ssl_.enable_if_defined(serverHost_, the_port()); }
     void enable_ssl() { ssl_.enable(serverHost_, the_port()); } // search server.crt first, then <host>.<port>.crt
 #endif
 

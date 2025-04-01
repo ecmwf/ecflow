@@ -71,9 +71,12 @@ public:
     bool cli() const { return clientEnv_.get_cli(); }
 
 #ifdef ECF_OPENSSL
+    /// Enable SSL if defined in the environment(ECF_SSL)
+    void enable_ssl_if_defined() { clientEnv_.enable_ssl_if_defined(); }
     /// Override any ssl read from environment(ECF_SSL) or command line args(-ssl)
     void enable_ssl() { clientEnv_.enable_ssl(); }
     void disable_ssl() { clientEnv_.disable_ssl(); } // override environment setting for ECF_SSL
+    std::string get_certificate() const;
 #endif
 
     /// This will override the environment setting.
@@ -433,9 +436,9 @@ private:
     friend void export_Client();
 
 private:
-    mutable ClientEnvironment
-        clientEnv_;              // Will read the environment *once* on construction. Must be before Client options
-    mutable ClientOptions args_; // Used for argument parsing & creating client request
+    mutable ClientEnvironment clientEnv_;
+    // Important: the environment is loaded *once* upon construction. This *must* be before Client options
+    mutable ClientOptions args_;           // Used for argument parsing & creating client request
     mutable ServerReply server_reply_;     // stores the local defs, client_handle, & all server replies
     unsigned int connection_attempts_{2};  // No of attempts to establish connection with the server
     unsigned int retry_connection_period_; // No of seconds to wait before trying to connect in case of failure.

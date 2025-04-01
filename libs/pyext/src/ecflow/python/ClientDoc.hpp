@@ -87,6 +87,9 @@ public:
     static const char* job_gen();
     static const char* delete_node();
     static const char* delete_all();
+    static const char* enable_ssl();
+    static const char* disable_ssl();
+    static const char* get_certificate();
     static const char* archive();
     static const char* restore();
     static const char* set_child_path();
