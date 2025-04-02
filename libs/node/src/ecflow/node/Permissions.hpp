@@ -12,13 +12,82 @@
 #define ecflow_node_Permissions_HPP
 
 #include <algorithm>
+#include <set>
 #include <string>
 #include <vector>
 
-class Node;
+#include "ecflow/core/Identity.hpp"
+
 class Variable;
 
 namespace ecf {
+
+enum class Allowed : std::uint8_t {
+    NONE    = 0,
+    READ    = 1 << 0,
+    WRITE   = 1 << 1,
+    EXECUTE = 1 << 2,
+    OWNER   = 1 << 3,
+};
+
+inline Allowed operator|(Allowed lhs, Allowed rhs) {
+    using allowed_t = std::underlying_type<Allowed>::type;
+
+    return Allowed{static_cast<Allowed>(static_cast<allowed_t>(lhs) | static_cast<allowed_t>(rhs))};
+}
+
+inline Allowed operator&(Allowed lhs, Allowed rhs) {
+    using allowed_t = std::underlying_type<Allowed>::type;
+
+    return Allowed{static_cast<Allowed>(static_cast<allowed_t>(lhs) & static_cast<allowed_t>(rhs))};
+}
+
+inline std::string to_string(Allowed allowed) {
+    std::string s;
+    if ((allowed & Allowed::READ) != Allowed::NONE) {
+        s += "r";
+    }
+    if ((allowed & Allowed::WRITE) != Allowed::NONE) {
+        s += "w";
+    }
+    if ((allowed & Allowed::EXECUTE) != Allowed::NONE) {
+        s += "x";
+    }
+    if ((allowed & Allowed::OWNER) != Allowed::NONE) {
+        s += "o";
+    }
+    return s;
+}
+
+inline Allowed& operator|=(Allowed& lhs, Allowed rhs) {
+    lhs = lhs | rhs;
+    return lhs;
+}
+
+inline Allowed& operator&=(Allowed& lhs, Allowed rhs) {
+    lhs = lhs & rhs;
+    return lhs;
+}
+
+inline bool contains(Allowed lhs, Allowed rhs) {
+    return (lhs & rhs) == rhs;
+}
+
+class Permission {
+public:
+    Permission(Username user, Allowed allowed) : username_{std::move(user)}, allowed_{allowed} {}
+
+    [[nodiscard]] bool allows(const Username& user, Allowed requested) const {
+        return user == username_ && (contains(allowed_, requested));
+    }
+
+    Username username() const { return username_; }
+    Allowed allowed() const { return allowed_; }
+
+private:
+    Username username_;
+    Allowed allowed_;
+};
 
 class Permissions {
 public:
@@ -29,17 +98,18 @@ public:
 
     [[nodiscard]] bool is_empty() const { return allowed_.empty(); }
 
-    [[nodiscard]] bool allows(const std::string& user) const {
-        auto found =
-            std::find_if(std::begin(allowed_), std::end(allowed_), [&user](auto&& current) { return user == current; });
+    [[nodiscard]] bool allows(const Username& username, Allowed permission) const {
+        auto found = std::find_if(std::begin(allowed_), std::end(allowed_), [&](auto&& current) {
+            return current.allows(username, permission);
+        });
         return found != std::end(allowed_);
     }
 
 private:
     Permissions() : allowed_{} {}
-    explicit Permissions(std::vector<std::string> allowed) : allowed_{std::move(allowed)} {}
+    explicit Permissions(std::vector<Permission> allowed) : allowed_{std::move(allowed)} {}
 
-    std::vector<std::string> allowed_;
+    std::vector<Permission> allowed_;
 };
 
 } // namespace ecf
