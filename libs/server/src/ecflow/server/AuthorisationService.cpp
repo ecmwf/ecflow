@@ -53,23 +53,21 @@ bool AuthorisationService::good() const {
     return impl_ != nullptr;
 }
 
-bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
-                                  const std::string& permission) const {
-    return allows(identity, server, paths_t{ROOT}, permission);
+bool AuthorisationService::allows(const Identity& identity, const AbstractServer& server, Allowed required) const {
+    return allows(identity, server, paths_t{ROOT}, required);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
                                   const AbstractServer& server,
                                   const path_t& path,
-                                  const std::string& permission) const {
-    return allows(identity, server, paths_t{path}, permission);
+                                  Allowed required) const {
+    return allows(identity, server, paths_t{path}, required);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
                                   const AbstractServer& server,
                                   const paths_t& paths,
-                                  const std::string& permission) const {
+                                  Allowed required) const {
     if (!good()) {
         // When no rules are loaded, we allow everything...
         // Dangerous, but backward compatible!
@@ -77,56 +75,49 @@ bool AuthorisationService::allows(const Identity& identity,
     }
 
     bool allowed = false;
-    std::visit(
-        overload{[&allowed](const Unrestricted&) {
-                     // when no rules are loaded, we allow everything...
-                     // Dangerous, but backward compatible!
-                     allowed = true;
-                 },
-                 [&server, &identity, &paths, &permission, &allowed](const Rules& rules) {
-                     for (auto&& path : paths) {
+    std::visit(overload{[&allowed](const Unrestricted&) {
+                            // when no rules are loaded, we allow everything...
+                            // Dangerous, but backward compatible!
+                            allowed = true;
+                        },
+                        [&server, &identity, &paths, &required, &allowed](const Rules& rules) {
+                            for (auto&& path : paths) {
 
-                         auto u = identity.as_string();
-                         auto a = permission;
+                                struct Visitor
+                                {
+                                    void handle(const Defs& defs) {
+                                        auto p      = defs.server_state().permissions();
+                                        permissions = p.is_empty() ? permissions : p;
+                                    }
+                                    void handle(const Node& s) {
+                                        auto p      = s.permissions();
+                                        permissions = p.is_empty() ? permissions : p;
+                                    }
 
-                         struct Visitor
-                         {
-                             void handle(const Defs& defs) {
-                                 auto p      = defs.server_state().permissions();
-                                 permissions = p.is_empty() ? permissions : p;
-                             }
-                             void handle(const Node& s) {
-                                 auto p      = s.permissions();
-                                 permissions = p.is_empty() ? permissions : p;
-                             }
+                                    void not_found() { permissions = Permissions::make_empty(); }
 
-                             void not_found() { permissions = Permissions::make_empty(); }
+                                    Permissions permissions = Permissions::make_empty();
+                                };
 
-                             Permissions permissions = Permissions::make_empty();
-                         };
+                                auto d = server.defs();
+                                auto p = Path::make(path).value();
+                                auto v = Visitor{};
 
-                         auto d = server.defs();
-                         auto p = Path::make(path).value();
-                         auto v = Visitor{};
+                                ecf::visit(*d, p, v);
 
-                         ecf::visit(*d, p, v);
-
-                         if (v.permissions.is_empty()) {
-                             std::cout << "Allowed! No custom permissions found for: " << p.to_string() << std::endl;
-                             allowed = true;
-                         }
-                         else if (v.permissions.allows(identity.username())) {
-                             std::cout << "Allowed! Specific permissions found for: " << p.to_string() << std::endl;
-                             allowed = true;
-                         }
-                         else {
-                             std::cout << "Not allowed! Specific permissions found for: " << p.to_string() << std::endl;
-                             allowed = false;
-                             break;
-                         }
-                     }
-                 }},
-        impl_->permissions_);
+                                if (v.permissions.is_empty()) {
+                                    allowed = true;
+                                }
+                                else if (v.permissions.allows(identity.username(), required)) {
+                                    allowed = true;
+                                }
+                                else {
+                                    allowed = false;
+                                    break;
+                                }
+                            }
+                        }},
+               impl_->permissions_);
 
     return allowed;
 }

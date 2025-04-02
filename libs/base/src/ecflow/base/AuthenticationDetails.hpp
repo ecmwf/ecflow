@@ -72,7 +72,9 @@ inline authentication_t verify_user_authentication_rules(const AbstractServer& s
         return authentication_t::success("Authentication (user command) successful");
     }
 
-    return authentication_t::failure("Authentication (user command) failed, due to: Incorrect credentials for (" + command.identity().username() + " / " + command.identity().password() + ") is not authentic");
+    return authentication_t::failure(
+        "Authentication (user command) failed, due to: Incorrect credentials, unable to authenticate user '" +
+        command.identity().username().value() + "'");
 }
 
 template <typename COMMAND>
@@ -160,6 +162,14 @@ struct Authenticator<QueueCmd>
     }
 };
 
+template <>
+struct Authenticator<CtsWaitCmd>
+{
+    static authentication_t accept(const CtsWaitCmd& command, AbstractServer& server) {
+        return verify_authentication_rules(command, server);
+    }
+};
+
 // User commands
 
 template <>
@@ -225,14 +235,6 @@ template <>
 struct Authenticator<CtsNodeCmd>
 {
     static authentication_t accept(const CtsNodeCmd& command, AbstractServer& server) {
-        return verify_authentication_rules(command, server);
-    }
-};
-
-template <>
-struct Authenticator<CtsWaitCmd>
-{
-    static authentication_t accept(const CtsWaitCmd& command, AbstractServer& server) {
         return verify_authentication_rules(command, server);
     }
 };
@@ -393,8 +395,6 @@ struct Authenticator<ZombieCmd>
         return verify_authentication_rules(command, server);
     }
 };
-
-// Entry point for the accept() function
 
 } // namespace implementation
 
