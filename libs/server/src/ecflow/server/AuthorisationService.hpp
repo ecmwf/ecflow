@@ -14,6 +14,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Result.hpp"
+#include "ecflow/node/Permissions.hpp"
 
 class AbstractServer;
 
@@ -54,19 +55,13 @@ public:
      * @return true if the identity is allowed to perform the action, false otherwise
      */
     [[nodiscard]]
-    bool allows(const Identity& identity, const AbstractServer& server, const std::string& permission) const;
+    bool allows(const Identity& identity, const AbstractServer& server, Allowed required) const;
 
     [[nodiscard]]
-    bool allows(const Identity& identity,
-                const AbstractServer& server,
-                const path_t& path,
-                const std::string& permission) const;
+    bool allows(const Identity& identity, const AbstractServer& server, const path_t& path, Allowed required) const;
 
     [[nodiscard]]
-    bool allows(const Identity& identity,
-                const AbstractServer& server,
-                const paths_t& paths,
-                const std::string& permission) const;
+    bool allows(const Identity& identity, const AbstractServer& server, const paths_t& paths, Allowed required) const;
 
     [[nodiscard]]
     static result_t load_permissions_from_nodes();
