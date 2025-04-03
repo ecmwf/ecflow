@@ -41,9 +41,11 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/InLimitMgr.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 namespace ecf {
@@ -57,8 +59,6 @@ namespace ecf {
 class Calendar;
 class NodeTreeVisitor;
 class LateAttr;
-class AvisoAttr;
-class MirrorAttr;
 } // namespace ecf
 
 class Node : public std::enable_shared_from_this<Node> {
