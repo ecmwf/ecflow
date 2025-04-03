@@ -15,23 +15,7 @@
 
 namespace ecf {
 
-class User {
-public:
-    enum Action { FOB, FAIL, ADOPT, REMOVE, BLOCK, KILL };
-
-    // Disable default construction
-    User(const User&) = delete;
-    // Disable copy (and move) semantics
-    const User& operator=(const User&) = delete;
-    User()                             = delete;
-
-    static bool valid_user_action(const std::string&);
-    static Action user_action(const std::string&);
-    static std::string to_string(Action);
-
-    // return login name: will throw if there are any errors
-    static std::string login_name();
-};
+std::string get_login_name();
 
 } // namespace ecf
 

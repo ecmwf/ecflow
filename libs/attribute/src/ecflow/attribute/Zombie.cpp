@@ -90,22 +90,22 @@ std::string Zombie::type_str() const {
     return Child::to_string(zombie_type_);
 }
 
-ecf::User::Action Zombie::user_action() const {
+ZombieCtrlAction Zombie::user_action() const {
     // User action needs to take into account, last child command and setting on attr_
     if (fob())
-        return User::FOB;
+        return ZombieCtrlAction::FOB;
     else if (block())
-        return User::BLOCK;
+        return ZombieCtrlAction::BLOCK;
     else if (fail())
-        return User::FAIL;
+        return ZombieCtrlAction::FAIL;
     else if (remove())
-        return User::REMOVE;
+        return ZombieCtrlAction::REMOVE;
     else if (kill())
-        return User::KILL;
+        return ZombieCtrlAction::KILL;
     else if (adopt())
-        return User::ADOPT;
+        return ZombieCtrlAction::ADOPT;
 
-    return User::BLOCK; // the default action
+    return ZombieCtrlAction::BLOCK; // the default action
 }
 
 std::string Zombie::user_action_str() const {
@@ -114,39 +114,45 @@ std::string Zombie::user_action_str() const {
         ret = "manual-";
     else
         ret = "auto-";
-    ret += User::to_string(user_action());
+    ret += ecf::to_string(user_action());
     return ret;
 }
 
 /// accessors
+
 bool Zombie::fob() const {
     if (user_action_set_)
-        return user_action_ == User::FOB;
+        return user_action_ == ZombieCtrlAction::FOB;
     return attr_.fob(last_child_cmd_);
 }
+
 bool Zombie::fail() const {
     if (user_action_set_)
-        return user_action_ == User::FAIL;
+        return user_action_ == ZombieCtrlAction::FAIL;
     return attr_.fail(last_child_cmd_);
 }
+
 bool Zombie::adopt() const {
     if (user_action_set_)
-        return user_action_ == User::ADOPT;
+        return user_action_ == ZombieCtrlAction::ADOPT;
     return attr_.adopt(last_child_cmd_);
 }
+
 bool Zombie::block() const {
     if (user_action_set_)
-        return user_action_ == User::BLOCK;
+        return user_action_ == ZombieCtrlAction::BLOCK;
     return attr_.block(last_child_cmd_);
 }
+
 bool Zombie::remove() const {
     if (user_action_set_)
-        return user_action_ == User::REMOVE;
+        return user_action_ == ZombieCtrlAction::REMOVE;
     return attr_.remove(last_child_cmd_);
 }
+
 bool Zombie::kill() const {
     if (user_action_set_)
-        return user_action_ == User::KILL;
+        return user_action_ == ZombieCtrlAction::KILL;
     return attr_.kill(last_child_cmd_);
 }
 
@@ -155,23 +161,26 @@ int Zombie::allowed_age() const {
 }
 
 void Zombie::set_fob() {
-    user_action_     = User::FOB;
+    user_action_     = ZombieCtrlAction::FOB;
     user_action_set_ = true;
 }
+
 void Zombie::set_fail() {
-    user_action_     = User::FAIL;
+    user_action_     = ZombieCtrlAction::FAIL;
     user_action_set_ = true;
 }
+
 void Zombie::set_adopt() {
-    user_action_     = User::ADOPT;
+    user_action_     = ZombieCtrlAction::ADOPT;
     user_action_set_ = true;
 }
+
 void Zombie::set_block() {
-    user_action_     = User::BLOCK;
+    user_action_     = ZombieCtrlAction::BLOCK;
     user_action_set_ = true;
 }
 void Zombie::set_kill() {
-    user_action_     = User::KILL;
+    user_action_     = ZombieCtrlAction::KILL;
     user_action_set_ = true;
 }
 

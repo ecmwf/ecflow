@@ -293,8 +293,10 @@ bool PasswdFile::createWithAccess(const std::string& pathToFile,
 
     lines.emplace_back("4.5.0");
 
+    auto username = get_login_name();
+
     string line;
-    line += User::login_name();
+    line += username;
     line += " ";
     line += host;
     line += " ";
@@ -304,7 +306,7 @@ bool PasswdFile::createWithAccess(const std::string& pathToFile,
     lines.push_back(line);
 
     line.clear();
-    line += User::login_name();
+    line += username;
     line += " ";
     line += Str::LOCALHOST();
     line += " ";

@@ -26,22 +26,22 @@ namespace po = boost::program_options;
 
 void ZombieCmd::print(std::string& os) const {
     switch (user_action_) {
-        case User::FOB:
+        case ZombieCtrlAction::FOB:
             user_cmd(os, CtsApi::to_string(CtsApi::zombieFob(paths_, process_id_, password_)));
             break;
-        case User::FAIL:
+        case ZombieCtrlAction::FAIL:
             user_cmd(os, CtsApi::to_string(CtsApi::zombieFail(paths_, process_id_, password_)));
             break;
-        case User::ADOPT:
+        case ZombieCtrlAction::ADOPT:
             user_cmd(os, CtsApi::to_string(CtsApi::zombieAdopt(paths_, process_id_, password_)));
             break;
-        case User::REMOVE:
+        case ZombieCtrlAction::REMOVE:
             user_cmd(os, CtsApi::to_string(CtsApi::zombieRemove(paths_, process_id_, password_)));
             break;
-        case User::BLOCK:
+        case ZombieCtrlAction::BLOCK:
             user_cmd(os, CtsApi::to_string(CtsApi::zombieBlock(paths_, process_id_, password_)));
             break;
-        case User::KILL:
+        case ZombieCtrlAction::KILL:
             user_cmd(os, CtsApi::to_string(CtsApi::zombieKill(paths_, process_id_, password_)));
             break;
         default:
@@ -51,22 +51,22 @@ void ZombieCmd::print(std::string& os) const {
 
 void ZombieCmd::print_only(std::string& os) const {
     switch (user_action_) {
-        case User::FOB:
+        case ZombieCtrlAction::FOB:
             os += CtsApi::to_string(CtsApi::zombieFob(paths_, process_id_, password_));
             break;
-        case User::FAIL:
+        case ZombieCtrlAction::FAIL:
             os += CtsApi::to_string(CtsApi::zombieFail(paths_, process_id_, password_));
             break;
-        case User::ADOPT:
+        case ZombieCtrlAction::ADOPT:
             os += CtsApi::to_string(CtsApi::zombieAdopt(paths_, process_id_, password_));
             break;
-        case User::REMOVE:
+        case ZombieCtrlAction::REMOVE:
             os += CtsApi::to_string(CtsApi::zombieRemove(paths_, process_id_, password_));
             break;
-        case User::BLOCK:
+        case ZombieCtrlAction::BLOCK:
             os += CtsApi::to_string(CtsApi::zombieBlock(paths_, process_id_, password_));
             break;
-        case User::KILL:
+        case ZombieCtrlAction::KILL:
             os += CtsApi::to_string(CtsApi::zombieKill(paths_, process_id_, password_));
             break;
         default:
@@ -89,22 +89,22 @@ bool ZombieCmd::equals(ClientToServerCmd* rhs) const {
 
 STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const {
     switch (user_action_) {
-        case User::FOB:
+        case ZombieCtrlAction::FOB:
             as->update_stats().zombie_fob_++;
             break;
-        case User::FAIL:
+        case ZombieCtrlAction::FAIL:
             as->update_stats().zombie_fail_++;
             break;
-        case User::ADOPT:
+        case ZombieCtrlAction::ADOPT:
             as->update_stats().zombie_adopt_++;
             break;
-        case User::REMOVE:
+        case ZombieCtrlAction::REMOVE:
             as->update_stats().zombie_remove_++;
             break;
-        case User::BLOCK:
+        case ZombieCtrlAction::BLOCK:
             as->update_stats().zombie_block_++;
             break;
-        case User::KILL:
+        case ZombieCtrlAction::KILL:
             as->update_stats().zombie_kill_++;
             break;
     }
@@ -120,22 +120,22 @@ STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const {
             if (node.get())
                 task = node->isTask();
             switch (user_action_) {
-                case User::FOB:
+                case ZombieCtrlAction::FOB:
                     as->zombie_ctrl().fobCli(path, task);
                     break;
-                case User::FAIL:
+                case ZombieCtrlAction::FAIL:
                     as->zombie_ctrl().failCli(path, task);
                     break;
-                case User::ADOPT:
+                case ZombieCtrlAction::ADOPT:
                     as->zombie_ctrl().adoptCli(path, task);
                     break;
-                case User::REMOVE:
+                case ZombieCtrlAction::REMOVE:
                     as->zombie_ctrl().removeCli(path, task);
                     break;
-                case User::BLOCK:
+                case ZombieCtrlAction::BLOCK:
                     as->zombie_ctrl().blockCli(path, task);
                     break;
-                case User::KILL:
+                case ZombieCtrlAction::KILL:
                     as->zombie_ctrl().killCli(path, task);
                     break;
             }
@@ -145,22 +145,22 @@ STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const {
         // expect a single path, process_id and password only apply for a single task
         if (paths_.size() == 1) {
             switch (user_action_) {
-                case User::FOB:
+                case ZombieCtrlAction::FOB:
                     as->zombie_ctrl().fob(paths_[0], process_id_, password_);
                     break;
-                case User::FAIL:
+                case ZombieCtrlAction::FAIL:
                     as->zombie_ctrl().fail(paths_[0], process_id_, password_);
                     break;
-                case User::ADOPT:
+                case ZombieCtrlAction::ADOPT:
                     as->zombie_ctrl().adopt(paths_[0], process_id_, password_);
                     break;
-                case User::REMOVE:
+                case ZombieCtrlAction::REMOVE:
                     as->zombie_ctrl().remove(paths_[0], process_id_, password_);
                     break;
-                case User::BLOCK:
+                case ZombieCtrlAction::BLOCK:
                     as->zombie_ctrl().block(paths_[0], process_id_, password_);
                     break;
-                case User::KILL:
+                case ZombieCtrlAction::KILL:
                     as->zombie_ctrl().kill(paths_[0], process_id_, password_);
                     break;
             }
@@ -177,22 +177,22 @@ STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const {
 const char* ZombieCmd::theArg() const {
 
     switch (user_action_) {
-        case User::FOB:
+        case ZombieCtrlAction::FOB:
             return CtsApi::zombieFobArg();
             break;
-        case User::FAIL:
+        case ZombieCtrlAction::FAIL:
             return CtsApi::zombieFailArg();
             break;
-        case User::ADOPT:
+        case ZombieCtrlAction::ADOPT:
             return CtsApi::zombieAdoptArg();
             break;
-        case User::REMOVE:
+        case ZombieCtrlAction::REMOVE:
             return CtsApi::zombieRemoveArg();
             break;
-        case User::BLOCK:
+        case ZombieCtrlAction::BLOCK:
             return CtsApi::zombieBlockArg();
             break;
-        case User::KILL:
+        case ZombieCtrlAction::KILL:
             return CtsApi::zombieKillArg();
             break;
         default:
@@ -205,7 +205,7 @@ const char* ZombieCmd::theArg() const {
 void ZombieCmd::addOption(boost::program_options::options_description& desc) const {
     switch (user_action_) {
 
-        case User::FOB: {
+        case ZombieCtrlAction::FOB: {
             desc.add_options()(
                 CtsApi::zombieFobArg(),
                 po::value<vector<string>>()->multitoken(),
@@ -219,7 +219,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
                 "  --zombie_fob=/path/to/task1 /path/to/task2");
             break;
         }
-        case User::FAIL: {
+        case ZombieCtrlAction::FAIL: {
             desc.add_options()(CtsApi::zombieFailArg(),
                                po::value<vector<string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets to fail.\n"
@@ -233,7 +233,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
                                "  --zombie_fail=/path/to/task  /path/to/task2");
             break;
         }
-        case User::ADOPT: {
+        case ZombieCtrlAction::ADOPT: {
             desc.add_options()(CtsApi::zombieAdoptArg(),
                                po::value<vector<string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets to adopt.\n"
@@ -245,7 +245,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
                                "  --zombie_adopt=/path/to/task  /path/to/task2");
             break;
         }
-        case User::REMOVE: {
+        case ZombieCtrlAction::REMOVE: {
             desc.add_options()(
                 CtsApi::zombieRemoveArg(),
                 po::value<vector<string>>()->multitoken(),
@@ -256,7 +256,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
                 "  --zombie_remove=/path/to/task  /path/to/task2");
             break;
         }
-        case User::BLOCK: {
+        case ZombieCtrlAction::BLOCK: {
             desc.add_options()(CtsApi::zombieBlockArg(),
                                po::value<vector<string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets flags to block it.\n"
@@ -268,7 +268,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
                                "  --zombie_block=/path/to/task  /path/to/task2");
             break;
         }
-        case User::KILL: {
+        case ZombieCtrlAction::KILL: {
             desc.add_options()(CtsApi::zombieKillArg(),
                                po::value<vector<string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets flags to kill\n"

@@ -61,9 +61,9 @@ BOOST_AUTO_TEST_CASE(test_suite_assignment_operator) {
     s1.add_task("t1");
     s1.add_family("f1");
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
-    s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB, 10));
-    s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL, 100));
-    s1.addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK, 100));
+    s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 10));
+    s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
+    s1.addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::ZombieCtrlAction::BLOCK, 100));
 
     ecf::CronAttr cronAttr;
     ecf::TimeSlot start(0, 0);
@@ -116,9 +116,9 @@ BOOST_AUTO_TEST_CASE(test_task_assignment_operator) {
     s1.addAutoCancel(ecf::AutoCancelAttr(2));
     s1.addVariable(Variable("VAR", "value"));
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
-    s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB, 10));
-    s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL, 100));
-    s1.addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK, 100));
+    s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 10));
+    s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
+    s1.addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::ZombieCtrlAction::BLOCK, 100));
 
     ecf::CronAttr cronAttr;
     ecf::TimeSlot start(0, 0);

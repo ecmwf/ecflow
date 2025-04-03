@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
     }
 
     // When this test is run in Bamboo/Docker, the users is root, hence the chmod below will not work and test will fail
-    if (User::login_name() == "root") {
+    if (get_login_name() == "root") {
         cout << "Ignoring test when user is root." << endl;
         return;
     }

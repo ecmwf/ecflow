@@ -899,104 +899,121 @@ int ClientInvoker::zombieFob(const Zombie& z) const {
     if (testInterface_)
         return invoke(CtsApi::zombieFob(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
-    return invoke(std::make_shared<ZombieCmd>(
-        User::FOB, std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FOB,
+                                              std::vector<std::string>(1, z.path_to_task()),
+                                              z.process_or_remote_id(),
+                                              z.jobs_password()));
 }
 int ClientInvoker::zombieFail(const Zombie& z) const {
     if (testInterface_)
         return invoke(CtsApi::zombieFail(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
-    return invoke(std::make_shared<ZombieCmd>(
-        User::FAIL, std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FAIL,
+                                              std::vector<std::string>(1, z.path_to_task()),
+                                              z.process_or_remote_id(),
+                                              z.jobs_password()));
 }
 int ClientInvoker::zombieAdopt(const Zombie& z) const {
     if (testInterface_)
         return invoke(CtsApi::zombieAdopt(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
-    return invoke(std::make_shared<ZombieCmd>(
-        User::ADOPT, std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::ADOPT,
+                                              std::vector<std::string>(1, z.path_to_task()),
+                                              z.process_or_remote_id(),
+                                              z.jobs_password()));
 }
 int ClientInvoker::zombieBlock(const Zombie& z) const {
     if (testInterface_)
         return invoke(CtsApi::zombieBlock(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
-    return invoke(std::make_shared<ZombieCmd>(
-        User::BLOCK, std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::BLOCK,
+                                              std::vector<std::string>(1, z.path_to_task()),
+                                              z.process_or_remote_id(),
+                                              z.jobs_password()));
 }
 int ClientInvoker::zombieRemove(const Zombie& z) const {
     if (testInterface_)
         return invoke(CtsApi::zombieRemove(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
-    return invoke(std::make_shared<ZombieCmd>(
-        User::REMOVE, std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::REMOVE,
+                                              std::vector<std::string>(1, z.path_to_task()),
+                                              z.process_or_remote_id(),
+                                              z.jobs_password()));
 }
 int ClientInvoker::zombieKill(const Zombie& z) const {
     if (testInterface_)
         return invoke(CtsApi::zombieKill(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
-    return invoke(std::make_shared<ZombieCmd>(
-        User::KILL, std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::KILL,
+                                              std::vector<std::string>(1, z.path_to_task()),
+                                              z.process_or_remote_id(),
+                                              z.jobs_password()));
 }
 int ClientInvoker::zombieFobCli(const std::string& absNodePath) const {
     if (testInterface_)
         return invoke(CtsApi::zombieFobCli(absNodePath));
-    return invoke(std::make_shared<ZombieCmd>(User::FOB, std::vector<std::string>(1, absNodePath), "", ""));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FOB, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieFailCli(const std::string& absNodePath) const {
     if (testInterface_)
         return invoke(CtsApi::zombieFailCli(absNodePath));
-    return invoke(std::make_shared<ZombieCmd>(User::FAIL, std::vector<std::string>(1, absNodePath), "", ""));
+    return invoke(
+        std::make_shared<ZombieCmd>(ZombieCtrlAction::FAIL, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieAdoptCli(const std::string& absNodePath) const {
     if (testInterface_)
         return invoke(CtsApi::zombieAdoptCli(absNodePath));
-    return invoke(std::make_shared<ZombieCmd>(User::ADOPT, std::vector<std::string>(1, absNodePath), "", ""));
+    return invoke(
+        std::make_shared<ZombieCmd>(ZombieCtrlAction::ADOPT, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieBlockCli(const std::string& absNodePath) const {
     if (testInterface_)
         return invoke(CtsApi::zombieBlockCli(absNodePath));
-    return invoke(std::make_shared<ZombieCmd>(User::BLOCK, std::vector<std::string>(1, absNodePath), "", ""));
+    return invoke(
+        std::make_shared<ZombieCmd>(ZombieCtrlAction::BLOCK, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieRemoveCli(const std::string& absNodePath) const {
     if (testInterface_)
         return invoke(CtsApi::zombieRemoveCli(absNodePath));
-    return invoke(std::make_shared<ZombieCmd>(User::REMOVE, std::vector<std::string>(1, absNodePath), "", ""));
+    return invoke(
+        std::make_shared<ZombieCmd>(ZombieCtrlAction::REMOVE, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieKillCli(const std::string& absNodePath) const {
     if (testInterface_)
         return invoke(CtsApi::zombieKillCli(absNodePath));
-    return invoke(std::make_shared<ZombieCmd>(User::KILL, std::vector<std::string>(1, absNodePath), "", ""));
+    return invoke(
+        std::make_shared<ZombieCmd>(ZombieCtrlAction::KILL, std::vector<std::string>(1, absNodePath), "", ""));
 }
 
 int ClientInvoker::zombieFobCliPaths(const std::vector<std::string>& paths) const {
     if (testInterface_)
         return invoke(CtsApi::zombieFobCli(paths));
-    return invoke(std::make_shared<ZombieCmd>(User::FOB, paths, "", ""));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FOB, paths, "", ""));
 }
 int ClientInvoker::zombieFailCliPaths(const std::vector<std::string>& paths) const {
     if (testInterface_)
         return invoke(CtsApi::zombieFailCli(paths));
-    return invoke(std::make_shared<ZombieCmd>(User::FAIL, paths, "", ""));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FAIL, paths, "", ""));
 }
 int ClientInvoker::zombieAdoptCliPaths(const std::vector<std::string>& paths) const {
     if (testInterface_)
         return invoke(CtsApi::zombieAdoptCli(paths));
-    return invoke(std::make_shared<ZombieCmd>(User::ADOPT, paths, "", ""));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::ADOPT, paths, "", ""));
 }
 int ClientInvoker::zombieBlockCliPaths(const std::vector<std::string>& paths) const {
     if (testInterface_)
         return invoke(CtsApi::zombieBlockCli(paths));
-    return invoke(std::make_shared<ZombieCmd>(User::BLOCK, paths, "", ""));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::BLOCK, paths, "", ""));
 }
 int ClientInvoker::zombieRemoveCliPaths(const std::vector<std::string>& paths) const {
     if (testInterface_)
         return invoke(CtsApi::zombieRemoveCli(paths));
-    return invoke(std::make_shared<ZombieCmd>(User::REMOVE, paths, "", ""));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::REMOVE, paths, "", ""));
 }
 int ClientInvoker::zombieKillCliPaths(const std::vector<std::string>& paths) const {
     if (testInterface_)
         return invoke(CtsApi::zombieKillCli(paths));
-    return invoke(std::make_shared<ZombieCmd>(User::KILL, paths, "", ""));
+    return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::KILL, paths, "", ""));
 }
 
 // ======================================================================================================

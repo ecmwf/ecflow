@@ -51,17 +51,17 @@ BOOST_AUTO_TEST_CASE(test_zombies) {
     // ADD
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
     {
-        s->addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB, 10));
+        s->addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 10));
         BOOST_REQUIRE_MESSAGE(s->zombies().size() == 1, "Expected 1 zombie but found " << s->zombies().size());
-        s->addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL, 100));
+        s->addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
         BOOST_REQUIRE_MESSAGE(s->zombies().size() == 2, "Expected 2 zombie but found " << s->zombies().size());
-        s->addZombie(ZombieAttr(ecf::Child::ECF_PID, child_cmds, ecf::User::FAIL, 100));
+        s->addZombie(ZombieAttr(ecf::Child::ECF_PID, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
         BOOST_REQUIRE_MESSAGE(s->zombies().size() == 3, "Expected 3 zombie but found " << s->zombies().size());
-        s->addZombie(ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::User::FAIL, 100));
+        s->addZombie(ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
         BOOST_REQUIRE_MESSAGE(s->zombies().size() == 4, "Expected 4 zombie but found " << s->zombies().size());
-        s->addZombie(ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::User::FAIL, 100));
+        s->addZombie(ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
         BOOST_REQUIRE_MESSAGE(s->zombies().size() == 5, "Expected 5 zombie but found " << s->zombies().size());
-        s->addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK, 100));
+        s->addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::ZombieCtrlAction::BLOCK, 100));
         BOOST_REQUIRE_MESSAGE(s->zombies().size() == 6, "Expected 6 zombie but found " << s->zombies().size());
     }
 

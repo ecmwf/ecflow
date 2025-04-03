@@ -482,7 +482,7 @@ create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::s
     TestFixture::client().zombieGet();
     if (!TestFixture::client().server_reply().zombies().empty()) {
         (void)ZombieUtil::do_zombie_user_action(
-            User::REMOVE, TestFixture::client().server_reply().zombies().size(), timeout);
+            ZombieCtrlAction::REMOVE, TestFixture::client().server_reply().zombies().size(), timeout);
     }
 
     if (ecf_debug_enabled)
@@ -680,7 +680,7 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation) {
     // Hence after this command, the number of fobed zombies may *NOT* be the same
     // as the number of tasks. Since the fobed zombies are auto deleted when a complete
     // child command is received.
-    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
+    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
     // Wait for zombies to be deleted in the server
@@ -719,7 +719,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fob) {
     // Hence after this command, the number of fobed zombies may *NOT* be the same
     // as the number of tasks. Since the fobed zombies are auto deleted when a complete
     // child command is recieved.
-    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
+    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
     // Wait for zombies to be deleted in the server
@@ -752,7 +752,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fail) {
     check_at_least_one_zombie();
 
     // Fail all the zombies. This will UNBLOCK and terminate the child commands allowing them to finish
-    int no_of_failed_zombies = ZombieUtil::do_zombie_user_action(User::FAIL, NUM_OF_TASKS, timeout);
+    int no_of_failed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FAIL, NUM_OF_TASKS, timeout);
     BOOST_CHECK_MESSAGE(no_of_failed_zombies > 0, "*error* Expected > 0 Failed zombies but found none");
 
     check_at_least_one_zombie();
@@ -797,7 +797,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_begin) {
     // child command is received.
     //
     /// When we have two sets of completes, we just fob, automatically. See TaskCmd::authenticate
-    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, no_of_zombies, timeout);
+    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, no_of_zombies, timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
     // Fobing does *NOT* alter node tree state, however child COMPLETE should auto delete the zombie
@@ -878,7 +878,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_adopt) {
 
     /// Adopt all the zombies. This will UNBLOCK the child commands allowing them to finish
     /// This test below fail on AIX, its too fast , task's may already be adopted and hence don't fail
-    int no_of_adopted_zombied = ZombieUtil::do_zombie_user_action(User::ADOPT, NUM_OF_TASKS, timeout);
+    int no_of_adopted_zombied = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::ADOPT, NUM_OF_TASKS, timeout);
     if (ecf_debug_enabled)
         cout << "   found " << no_of_adopted_zombied << " zombies for adoption\n";
 
@@ -960,7 +960,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombie_creation_via_complete) {
     check_at_least_one_zombie();
 
     // Fob all the zombies child commands allowing them to finish
-    (void)ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
+    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
 
     // Wait for zombies to complete, they should get removed automatically
     wait_for_no_zombies(timeout);
@@ -986,7 +986,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombie_creation_via_abort) {
     check_at_least_one_zombie();
 
     // Fob all the zombies child commands allowing them to finish
-    (void)ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
+    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
 
     // Wait for zombies to complete, they should get removed automatically
     wait_for_no_zombies(timeout);
@@ -1009,12 +1009,15 @@ BOOST_AUTO_TEST_CASE(test_zombie_inheritance) {
     Defs theDefs;
     populate_defs(theDefs, suite_name);
     suite_ptr suite = theDefs.findSuite(suite_name);
-    suite->addZombie(ZombieAttr(ecf::Child::USER, std::vector<ecf::Child::CmdType>(), ecf::User::FOB, -1));
-    suite->addZombie(ZombieAttr(ecf::Child::ECF, std::vector<ecf::Child::CmdType>(), ecf::User::FOB, -1));
-    suite->addZombie(ZombieAttr(ecf::Child::ECF_PID, std::vector<ecf::Child::CmdType>(), ecf::User::FOB, -1));
-    suite->addZombie(ZombieAttr(ecf::Child::ECF_PID_PASSWD, std::vector<ecf::Child::CmdType>(), ecf::User::FOB, -1));
-    suite->addZombie(ZombieAttr(ecf::Child::ECF_PASSWD, std::vector<ecf::Child::CmdType>(), ecf::User::FOB, -1));
-    suite->addZombie(ZombieAttr(ecf::Child::PATH, std::vector<ecf::Child::CmdType>(), ecf::User::FOB, -1));
+    suite->addZombie(ZombieAttr(ecf::Child::USER, std::vector<ecf::Child::CmdType>(), ecf::ZombieCtrlAction::FOB, -1));
+    suite->addZombie(ZombieAttr(ecf::Child::ECF, std::vector<ecf::Child::CmdType>(), ecf::ZombieCtrlAction::FOB, -1));
+    suite->addZombie(
+        ZombieAttr(ecf::Child::ECF_PID, std::vector<ecf::Child::CmdType>(), ecf::ZombieCtrlAction::FOB, -1));
+    suite->addZombie(
+        ZombieAttr(ecf::Child::ECF_PID_PASSWD, std::vector<ecf::Child::CmdType>(), ecf::ZombieCtrlAction::FOB, -1));
+    suite->addZombie(
+        ZombieAttr(ecf::Child::ECF_PASSWD, std::vector<ecf::Child::CmdType>(), ecf::ZombieCtrlAction::FOB, -1));
+    suite->addZombie(ZombieAttr(ecf::Child::PATH, std::vector<ecf::Child::CmdType>(), ecf::ZombieCtrlAction::FOB, -1));
 
     create_and_start_test(theDefs, suite_name, "complete");
 
@@ -1025,9 +1028,9 @@ BOOST_AUTO_TEST_CASE(test_zombie_inheritance) {
     std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
     BOOST_CHECK_MESSAGE(!zombies.empty(), "No zombies found");
     for (const Zombie& z : zombies) {
-        BOOST_CHECK_MESSAGE(z.user_action() == ecf::User::FOB,
+        BOOST_CHECK_MESSAGE(z.user_action() == ecf::ZombieCtrlAction::FOB,
                             "*error* Expected zombies with user action of type FOB but found "
-                                << User::to_string(z.user_action()));
+                                << ecf::to_string(z.user_action()));
         break;
     }
 
@@ -1084,7 +1087,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_kill) {
 
     // kill all the zombies, i.e kill -15 on the script
     // This will be trapped by the signal and hence will call abort
-    (void)ZombieUtil::do_zombie_user_action(User::KILL, NUM_OF_TASKS, timeout);
+    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::KILL, NUM_OF_TASKS, timeout);
 
     // wait for kill zombies. This should eventually lead to process terminating
     int killed = wait_for_killed_zombies(NUM_OF_TASKS, timeout);
@@ -1146,7 +1149,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_kill) {
     }
 
     // remove the killed zombies
-    (void)ZombieUtil::do_zombie_user_action(User::REMOVE, NUM_OF_TASKS, timeout, false);
+    (void)ZombieUtil::do_zombie_user_action(ZombieCtrlAction::REMOVE, NUM_OF_TASKS, timeout, false);
 
     wait_for_no_zombies(timeout);
 
@@ -1210,7 +1213,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_zombie_type_creation) {
     // wait of at least *ONE* zombie of type *ECF*
     wait_for_zombies_of_type(Child::ECF, NUM_OF_TASKS, timeout);
 
-    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
+    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
     // Fobing does *NOT* alter node tree state, however child COMPLETE should auto delete the zombie
