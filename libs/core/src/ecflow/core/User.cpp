@@ -18,51 +18,9 @@
 #include <stdexcept>
 #include <unistd.h> // ofr getuid()
 
-#include "ecflow/core/Enumerate.hpp"
-
 namespace ecf {
 
-namespace detail {
-
-template <>
-struct EnumTraits<User::Action>
-{
-    using underlying_t = std::underlying_type_t<User::Action>;
-
-    static constexpr std::array map = std::array{
-        // clang-format off
-        std::make_pair(User::Action::FOB, "fob"),
-        std::make_pair(User::Action::FAIL, "fail"),
-        std::make_pair(User::Action::ADOPT, "adopt"),
-        std::make_pair(User::Action::REMOVE, "remove"),
-        std::make_pair(User::Action::BLOCK, "block"),
-        std::make_pair(User::Action::KILL, "kill"),
-        // clang-format on
-    };
-    static constexpr size_t size = map.size();
-
-    static_assert(EnumTraits<User::Action>::size == map.back().first + 1);
-};
-
-} // namespace detail
-
-bool User::valid_user_action(const std::string& s) {
-    return Enumerate<User::Action>::is_valid(s);
-}
-
-User::Action User::user_action(const std::string& s) {
-    return Enumerate<User::Action>::to_enum(s).value_or(User::BLOCK);
-}
-
-std::string User::to_string(User::Action uc) {
-    if (auto found = Enumerate<User::Action>::to_string(uc); found) {
-        return std::string{found.value()};
-    }
-    assert(false);
-    return std::string();
-}
-
-std::string User::login_name() {
+std::string get_login_name() {
     static std::string the_user_name;
     if (the_user_name.empty()) {
 

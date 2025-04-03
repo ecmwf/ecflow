@@ -159,7 +159,7 @@ bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv) {
     }
 
     // User name is same as login name, if ECF_PASSWD is defined on server side *ALL* user must provide a password.
-    std::string the_user      = User::login_name();
+    std::string the_user      = get_login_name();
     const std::string& passwd = clientEnv.get_user_password(the_user);
     setup_user_authentification(the_user, passwd);
     return true;
@@ -167,7 +167,7 @@ bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv) {
 
 void UserCmd::setup_user_authentification() {
     if (user_.empty()) {
-        setup_user_authentification(User::login_name(), Str::EMPTY());
+        setup_user_authentification(get_login_name(), Str::EMPTY());
     }
 }
 

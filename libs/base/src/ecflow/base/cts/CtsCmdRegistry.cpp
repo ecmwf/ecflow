@@ -93,12 +93,12 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd) {
     vec_.push_back(std::make_shared<PathsCmd>(PathsCmd::EDIT_HISTORY));
     vec_.push_back(std::make_shared<PathsCmd>(PathsCmd::ARCHIVE));
     vec_.push_back(std::make_shared<PathsCmd>(PathsCmd::RESTORE));
-    vec_.push_back(std::make_shared<ZombieCmd>(ecf::User::FOB));
-    vec_.push_back(std::make_shared<ZombieCmd>(ecf::User::FAIL));
-    vec_.push_back(std::make_shared<ZombieCmd>(ecf::User::ADOPT));
-    vec_.push_back(std::make_shared<ZombieCmd>(ecf::User::BLOCK));
-    vec_.push_back(std::make_shared<ZombieCmd>(ecf::User::REMOVE));
-    vec_.push_back(std::make_shared<ZombieCmd>(ecf::User::KILL));
+    vec_.push_back(std::make_shared<ZombieCmd>(ecf::ZombieCtrlAction::FOB));
+    vec_.push_back(std::make_shared<ZombieCmd>(ecf::ZombieCtrlAction::FAIL));
+    vec_.push_back(std::make_shared<ZombieCmd>(ecf::ZombieCtrlAction::ADOPT));
+    vec_.push_back(std::make_shared<ZombieCmd>(ecf::ZombieCtrlAction::BLOCK));
+    vec_.push_back(std::make_shared<ZombieCmd>(ecf::ZombieCtrlAction::REMOVE));
+    vec_.push_back(std::make_shared<ZombieCmd>(ecf::ZombieCtrlAction::KILL));
     vec_.push_back(std::make_shared<CtsCmd>(CtsCmd::GET_ZOMBIES));
     vec_.push_back(std::make_shared<CtsCmd>(CtsCmd::SUITES));
     vec_.push_back(std::make_shared<ClientHandleCmd>(ClientHandleCmd::REGISTER));

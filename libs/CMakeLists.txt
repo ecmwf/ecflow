@@ -272,6 +272,7 @@ set(srcs
   core/src/ecflow/core/User.hpp
   core/src/ecflow/core/Version.hpp
   core/src/ecflow/core/WhiteListFile.hpp
+  core/src/ecflow/core/ZombieCtrlAction.hpp
   core/src/ecflow/core/cereal_boost_time.hpp
   core/src/ecflow/core/cereal_optional_nvp.hpp
   core/src/ecflow/core/perf_timer.hpp

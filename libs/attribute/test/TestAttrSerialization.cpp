@@ -344,12 +344,12 @@ BOOST_AUTO_TEST_CASE(test_zombie_attr_serialisation) {
 
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 
-    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB, 10));
-    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::FAIL, 10));
-    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::BLOCK, 10));
-    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PID, child_cmds, ecf::User::REMOVE, 10));
-    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::User::KILL, 10));
-    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::User::ADOPT, 10));
+    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 10));
+    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::PATH, child_cmds, ecf::ZombieCtrlAction::FAIL, 10));
+    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF, child_cmds, ecf::ZombieCtrlAction::BLOCK, 10));
+    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PID, child_cmds, ecf::ZombieCtrlAction::REMOVE, 10));
+    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PID_PASSWD, child_cmds, ecf::ZombieCtrlAction::KILL, 10));
+    doSaveAndRestore(fileName, ZombieAttr(ecf::Child::ECF_PASSWD, child_cmds, ecf::ZombieCtrlAction::ADOPT, 10));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

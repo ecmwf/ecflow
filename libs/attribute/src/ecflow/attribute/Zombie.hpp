@@ -88,7 +88,7 @@ public:
     const std::string& host() const { return host_; }
     int try_no() const { return try_no_; }
     int duration() const { return duration_; }
-    ecf::User::Action user_action() const;
+    ecf::ZombieCtrlAction user_action() const;
     std::string user_action_str() const;
     std::string explanation() const;
 
@@ -131,9 +131,9 @@ public:
     static Zombie& EMPTY_();
 
 private:
-    ecf::User::Action user_action_{ecf::User::BLOCK};      // [ fob, fail, remove, adopt, block, kill ]
-    int try_no_{0};                                        // task try number, set on construction
-    int duration_{0};                                      // How long zombie been alive
+    ecf::ZombieCtrlAction user_action_{ecf::ZombieCtrlAction::BLOCK}; // [ fob, fail, remove, adopt, block, kill ]
+    int try_no_{0};                                                   // task try number, set on construction
+    int duration_{0};                                                 // How long zombie been alive
     int calls_{0};                                         // Number of times we have communicated with server.
     ecf::Child::ZombieType zombie_type_{ecf::Child::USER}; // [ ecf, ecf_pid, ecf_pid_passwd, ecf_passwd, path, user ]
     ecf::Child::CmdType last_child_cmd_{

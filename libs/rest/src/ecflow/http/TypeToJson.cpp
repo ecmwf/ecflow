@@ -12,7 +12,6 @@
 
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/SState.hpp"
-#include "ecflow/core/User.hpp"
 
 using ecf::http::ojson;
 
@@ -254,7 +253,7 @@ void to_json(ojson& j, const ::QueueAttr& a) {
 
 void to_json(ojson& j, const ::ZombieAttr& a) {
     j["type"]           = ecf::Child::to_string(a.zombie_type());
-    j["action"]         = ecf::User::to_string(a.action());
+    j["action"]         = ecf::to_string(a.action());
     j["child_commands"] = ecf::Child::to_string(a.child_cmds());
     j["lifetime"]       = a.zombie_lifetime();
 }
