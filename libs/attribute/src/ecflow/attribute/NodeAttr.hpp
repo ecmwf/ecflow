@@ -97,6 +97,8 @@ public:
     explicit Event(const std::string& eventName, bool initial_val = false);
     Event() = default;
 
+    static Event make_from_value(const std::string& name, const std::string& value);
+
     std::string name_or_number() const; // if name present return, else return number
     const std::string& name() const { return n_; }
     void print(std::string&) const;
@@ -154,6 +156,8 @@ public:
           int value       = std::numeric_limits<int>::max(),
           bool check      = true);
     Meter() = default;
+
+    static Meter make_from_value(const std::string& name, const std::string& value);
 
     void print(std::string&) const;
     void reset() { set_value(min_); }

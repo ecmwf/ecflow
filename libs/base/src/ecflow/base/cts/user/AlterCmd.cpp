@@ -110,7 +110,9 @@ struct EnumTraits<AlterCmd::Add_attr_type>
         std::make_pair(AlterCmd::ADD_INLIMIT, "inlimit"),
         std::make_pair(AlterCmd::ADD_LABEL, "label"),
         std::make_pair(AlterCmd::ADD_AVISO, "aviso"),
-        std::make_pair(AlterCmd::ADD_MIRROR, "mirror")
+        std::make_pair(AlterCmd::ADD_MIRROR, "mirror"),
+        std::make_pair(AlterCmd::ADD_EVENT, "event"),
+        std::make_pair(AlterCmd::ADD_METER, "meter")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -530,6 +532,12 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::ADD_LABEL:
                     node->addLabel(Label(name_, value_));
                     break;
+                case AlterCmd::ADD_EVENT:
+                    node->addEvent(Event::make_from_value(name_, value_));
+                    break;
+                case AlterCmd::ADD_METER:
+                    node->addMeter(Meter::make_from_value(name_, value_));
+                    break;
                 case AlterCmd::ADD_LIMIT: {
                     int int_value = 0;
                     try {
@@ -618,7 +626,8 @@ const char* AlterCmd::desc() {
            "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
            "         the change to take effect fully.\n"
            "       For add:\n"
-           "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label | aviso | mirror ]\n"
+           "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label | aviso | mirror "
+           "]\n"
            "       For set_flag and clear_flag:\n"
            "         [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed \n"
            "           statuscmd_failed | killcmd_failed | no_script | killed | status | late | message | \n"
@@ -638,7 +647,8 @@ const char* AlterCmd::desc() {
            "When adding or updating aviso and mirror attributes, the value (arg4) is expected to be a quoted list of\n"
            "  configuration options. For example:\n"
            "   * for aviso, \"--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)\"\n"
-           "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } }'\n"
+           "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } "
+           "}'\n"
            "                  --url http://aviso/ --schema /path/to/schema --polling 60\"\n"
            "\n"
            "For both aviso and mirror, the special value \"reload\" can be used to force reloading the configuration.\n"
@@ -766,7 +776,7 @@ AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type
 
 void AlterCmd::createAdd(Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const {
     // options[0] - add
-    // options[1] - [ time | today | date | day | zombie | variable | late | limit | inlimit | label ]
+    // options[1] - [ time | today | date | day | zombie | variable | late | limit | inlimit | label | meter | event ]
     // options[2] - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name |
     //                path_to_limit ]
     // options[3] - variable_value
@@ -840,6 +850,34 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
             }
             if (options.size() < 4) {
                 ss << "AlterCmd: add: Expected 'add label <name> <value> <paths>. Not enough arguments\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            value = options[3];
+            break;
+        }
+        case AlterCmd::ADD_EVENT: {
+            if (options.size() == 3 && paths.size() > 1) {
+                // event value may be a path, hence it will be in the paths parameter
+                options.push_back(paths[0]);
+                paths.erase(paths.begin());
+            }
+            if (options.size() < 4) {
+                ss << "AlterCmd: add: Expected 'add event <name> (set|clear) <paths>. Not enough arguments\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            value = options[3];
+            break;
+        }
+        case AlterCmd::ADD_METER: {
+            if (options.size() == 3 && paths.size() > 1) {
+                // meter value may be a path, hence it will be in the paths parameter
+                options.push_back(paths[0]);
+                paths.erase(paths.begin());
+            }
+            if (options.size() < 4) {
+                ss << "AlterCmd: add: Expected 'add event <name> <min,max,value> <paths>. Not enough arguments\n"
                    << dump_args(options, paths) << "\n";
                 throw std::runtime_error(ss.str());
             }
@@ -939,6 +977,14 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
         case AlterCmd::ADD_LABEL: {
             // Create a Label to check valid names
             Label check(name, value);
+            break;
+        }
+        case AlterCmd::ADD_EVENT: {
+            Event::make_from_value(name, value);
+            break;
+        }
+        case AlterCmd::ADD_METER: {
+            Meter::make_from_value(name, value);
             break;
         }
         case AlterCmd::ADD_LIMIT: {
