@@ -530,7 +530,10 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(ecf::environment::ECF_PASSWD), "Path name to passwd file")
             ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(ecf::environment::ECF_CUSTOM_PASSWD), "Path name to custom passwd file, for user who don't use login name")
             ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
-            ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
+            ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded")
+            ("PERMISSIONS",po::value<std::string>(&permissions_)->default_value(""), "")
+        ;
+
         // clang-format on
 
         ifstream ifs(path_to_config_file.c_str());
@@ -726,6 +729,7 @@ std::vector<std::string> ServerEnvironment::expected_variables() {
     expected_variables.emplace_back("ECF_INTERVAL");
     expected_variables.emplace_back(ecf::environment::ECF_PASSWD);
     expected_variables.emplace_back(ecf::environment::ECF_CUSTOM_PASSWD);
+    expected_variables.emplace_back(ecf::environment::PERMISSIONS);
 #ifdef ECF_OPENSSL
     if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         expected_variables.emplace_back(ecf::environment::ECF_SSL);
