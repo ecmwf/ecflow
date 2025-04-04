@@ -226,6 +226,7 @@ private:
     int checkpt_save_time_alarm_;
     int submitJobsInterval_;
     int ecf_prune_node_log_;
+    std::string permissions_;
     bool jobGeneration_; // used in debug/test mode only
     ecf::Protocol protocol_;
     bool debug_;
