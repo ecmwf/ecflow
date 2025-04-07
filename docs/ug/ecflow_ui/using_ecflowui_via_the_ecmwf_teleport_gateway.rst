@@ -35,13 +35,13 @@ The next step is to start dynamic port forwarding using the SOCKS
 (Secure Socket) protocol. Let us suppose the target host you want to
 access is hpc-login. In a terminal on your End User device type::
 
-    ssh -v -C -N -D 9050 -J myecuser@jump.ecmwf.int myecuser@hpc-login
+    ssh -v -C -N -D 9050 myecuser@hpc-login
 
 and keep it running. This will forward all network traffic from local
-port 9050 to the target SOCKS host (hpc-login). The proxy jump option
-(-J) was chosen according to the
-`Teleport <https://confluence.ecmwf.int/display/UDOC/Teleport+SSH+Access>`__
-setup. The port does not have to be 9050, but this is the default port
+port 9050 to the target SOCKS host (hpc-login). This assumes
+`Teleport <https://confluence.ecmwf.int/display/UDOC/Teleport+SSH+Access>`_
+has been configured correctly as described in the ECMWF User Documentation.
+The port does not have to be 9050, but this is the default port
 used by the proxychains tool (see below) so it is the most convenient
 option for us.
 
