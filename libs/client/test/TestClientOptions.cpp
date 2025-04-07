@@ -593,6 +593,61 @@ BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_add) {
                 });
             }
         }
+
+        /*
+         * --alter add event <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "add", "event", "name", "set", paths);
+            test_user_command<AlterCmd>(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "set");
+                BOOST_REQUIRE_EQUAL(command.add_attr_type(), Expected::ADD_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "add", "event", "name", "clear", paths);
+            test_user_command<AlterCmd>(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "clear");
+                BOOST_REQUIRE_EQUAL(command.add_attr_type(), Expected::ADD_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+
+        /*
+         * --alter add meter <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "add", "meter", "name", "0,100,50", paths);
+            test_user_command<AlterCmd>(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "0,100,50");
+                BOOST_REQUIRE_EQUAL(command.add_attr_type(), Expected::ADD_METER);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
     } // paths
 }
 

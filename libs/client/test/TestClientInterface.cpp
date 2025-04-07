@@ -696,6 +696,17 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
                           "--alter should return 0\n"
                               << theClient.errorMsg());
 
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "event1", "set") == 0,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "event1", "clear") == 0,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "meter", "name", "0,100,0") == 0,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+
     for (const string& day : DayAttr::allDays()) {
         BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "day", day) == 0,
                               "--alter should return 0\n"
@@ -1127,6 +1138,26 @@ BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
                           "--alter should return 0\n"
                               << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "label", " 1 2") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "meter", "m", "a,b,c") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "meter", "m", "1,5,a") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "meter", "m", "1, 5, 3") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "e", "x") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "e", "CLEAR") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "e", "SET") == 1,
                           "--alter should return 0\n"
                               << theClient.errorMsg());
 
