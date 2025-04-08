@@ -23,6 +23,7 @@ public:
 
     const std::string& user() const { return user_; }
     const std::string& passwd() const { return pswd_; }
+    bool is_custom_user() const { return cu_; }
 
     void setup_user_authentification(const std::string& user, const std::string& passwd) override;
     bool setup_user_authentification(AbstractClientEnv&) override;
@@ -30,9 +31,9 @@ public:
 
 protected:
     bool equals(ClientToServerCmd*) const override;
-    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
-    bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const;
-    bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const;
+    // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+    // bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const;
+    // bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const;
 
     /// Prompt the user for confirmation: If user responds with no, will exit client
     static void prompt_for_confirmation(const std::string& prompt);

@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -85,6 +87,14 @@ bool ZombieCmd::equals(ClientToServerCmd* rhs) const {
     if (password_ != the_rhs->password())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t ZombieCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t ZombieCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const {
