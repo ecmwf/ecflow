@@ -271,7 +271,7 @@
             "menu"           : "Node",
             "name"           : "Force",
             "type"           : "Submenu",
-            "visible_for"    : "node and admin",
+            "visible_for"    : "node and (admin or oper)",
             "command"        : "None"
         },
 
@@ -795,7 +795,7 @@
         {
             "menu"           : "Force",
             "name"           : "Unknown",
-            "visible_for"    : "node",
+            "visible_for"    : "node and admin",
             "enabled_for"    : "not unknown",
             "command"        : "ecflow_client --force unknown recursive <full_name>",
             "status_tip"     : "__cmd__"
@@ -803,7 +803,7 @@
         {
             "menu"           : "Force",
             "name"           : "Complete",
-            "visible_for"    : "node",
+            "visible_for"    : "node and admin",
             "enabled_for"    : "not complete and not active and not submitted",
             "command"        : "ecflow_client --force=complete recursive <full_name>",
             "question"       : "Check running/queued jobs and Confirm force complete of <full_name>",
@@ -814,7 +814,7 @@
         {
             "menu"           : "Force",
             "name"           : "Queued",
-            "visible_for"    : "node",
+            "visible_for"    : "node and (admin or oper)",
             "enabled_for"    : "not queued and not active and not submitted",
             "command"        : "ecflow_client --force queued recursive <full_name>",
             "status_tip"     : "__cmd__"
@@ -822,7 +822,7 @@
         {
             "menu"           : "Force",
             "name"           : "Submitted",
-            "visible_for"    : "node",
+            "visible_for"    : "node and admin",
             "enabled_for"    : "not submitted and not active",
             "command"        : "ecflow_client --force submitted recursive <full_name>",
             "status_tip"     : "__cmd__"
@@ -830,7 +830,7 @@
         {
             "menu"           : "Force",
             "name"           : "Active",
-            "visible_for"    : "node",
+            "visible_for"    : "node and admin",
             "enabled_for"    : "not active",
             "command"        : "ecflow_client --force active recursive <full_name>",
             "status_tip"     : "__cmd__"
@@ -838,7 +838,7 @@
         {
             "menu"           : "Force",
             "name"           : "Aborted",
-            "visible_for"    : "node",
+            "visible_for"    : "node and admin",
             "enabled_for"    : "not active",
             "command"        : "ecflow_client --force=aborted recursive <full_name>",
             "question"       : "Check running/queued jobs and Confirm force aborted of <full_name>",
