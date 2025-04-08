@@ -52,7 +52,7 @@ Event::Event(int number, const std::string& eventName, bool iv, bool check_name)
       v_(iv),
       iv_(iv) {
     if (!eventName.empty() && check_name) {
-        string msg;
+        std::string msg;
         if (!Str::valid_name(eventName, msg)) {
             throw std::runtime_error("Event::Event: Invalid event name : " + msg);
         }
@@ -85,7 +85,7 @@ Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_
         }
     }
 
-    string msg;
+    std::string msg;
     if (!Str::valid_name(eventName, msg)) {
         throw std::runtime_error("Event::Event: Invalid event name : " + msg);
     }
@@ -444,6 +444,9 @@ void Label::parse(const std::string& line, std::vector<std::string>& lineTokens,
     parse(line, lineTokens, parse_state, n_, v_, new_v_);
 }
 
+#define LABEL_PARSE_NEW_STRATEGY // instead of, LABEL_PARSE_OLD_STRATEGY
+
+#if defined(LABEL_PARSE_OLD_STRATEGY)
 void Label::parse(const std::string& line,
                   std::vector<std::string>& lineTokens,
                   bool parse_state,
@@ -489,7 +492,7 @@ void Label::parse(const std::string& line,
 
         // state
         if (parse_state) {
-            // label name "value" # "new  value"
+            // label name "value" # "new value"
             bool comment_fnd                 = false;
             size_t first_quote_after_comment = 0;
             size_t last_quote_after_comment  = 0;
@@ -517,6 +520,49 @@ void Label::parse(const std::string& line,
         }
     }
 }
+#elif defined(LABEL_PARSE_NEW_STRATEGY)
+void Label::parse(const std::string& line,
+                  [[maybe_unused]] std::vector<std::string>& unused,
+                  bool parse_state,
+                  std::string& the_name,
+                  std::string& the_default_value,
+                  std::string& the_actual_value) {
+
+    std::vector<std::string_view> tokens = ecf::algorithm::tokenize_quotation(line);
+
+    if (tokens.size() < 3) {
+        throw std::runtime_error("Label::parse: Invalid label :" + line);
+    }
+
+    the_name = tokens[1];
+    if (tokens.size() >= 3) {
+        the_default_value = tokens[2];
+        Str::removeQuotes(the_default_value);
+        Str::removeSingleQuotes(the_default_value);
+        if (the_default_value.find("\\n") != std::string::npos) {
+            Str::replaceall(the_default_value, "\\n", "\n");
+        }
+    }
+
+    if (parse_state) {
+        if (tokens.size() >= 5) {
+
+            if (tokens[4] == "#") {
+                throw std::runtime_error("Label::parse: Unexpected state separator :" + line);
+            }
+
+            the_actual_value = tokens[4];
+            Str::removeQuotes(the_actual_value);
+            Str::removeSingleQuotes(the_actual_value);
+            if (the_actual_value.find("\\n") != std::string::npos) {
+                Str::replaceall(the_actual_value, "\\n", "\n");
+            }
+        }
+    }
+}
+#else
+    #error "#define either LABEL_PARSE_OLD_STRATEGY or LABEL_PARSE_NEW_STRATEGY"
+#endif
 
 template <class Archive>
 void Label::serialize(Archive& ar) {

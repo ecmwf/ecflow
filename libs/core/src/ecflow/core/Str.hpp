@@ -61,6 +61,13 @@ inline std::string tolower(std::string s) {
     return s;
 }
 
+/***
+ * This is a specialized version of the tokenize function that handles quoted strings.
+ *
+ * The intended use is to make part of the parsing functionality for the value of Label attributes.
+ **/
+std::vector<std::string_view> tokenize_quotation(const std::string& s, std::string_view quotes = "'\"");
+
 } // namespace algorithm
 
 class Str {
