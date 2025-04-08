@@ -16,6 +16,51 @@ using namespace std;
 
 namespace ecf {
 
+namespace algorithm {
+
+std::vector<std::string_view> tokenize_quotation(const std::string& s, std::string_view quotes) {
+
+    std::vector<std::string_view> tokens;
+
+    std::string levels;
+
+    const char* current = &s[0];
+    const char* start   = current;
+    while (*current != 0) {
+        if (*current == ' ' && levels.empty()) {
+            if (start != current) {
+                tokens.push_back(std::string_view(start, static_cast<size_t>(current - start)));
+            }
+            start = current + 1;
+        }
+        else {
+            if (std::any_of(
+                    std::begin(quotes), std::end(quotes), [&current](char quote) { return *current == quote; })) {
+                if (!levels.empty() && (levels.back() == *current)) {
+                    levels.pop_back();
+                }
+                else {
+                    if (levels.empty()) {
+                        start = current;
+                    }
+                    levels.push_back(*current);
+                }
+            }
+        }
+        ++current;
+    }
+
+    //    if (!token.empty()) {
+    if (start != current) {
+        //        tokens.push_back(token);
+        tokens.push_back(std::string_view(start, static_cast<size_t>(current - start)));
+    }
+
+    return tokens;
+}
+
+} // namespace algorithm
+
 const char* VALID_NODE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.";
 
 const char* Str::CHILD_CMD() {
