@@ -110,7 +110,9 @@ struct EnumTraits<AlterCmd::Add_attr_type>
         std::make_pair(AlterCmd::ADD_INLIMIT, "inlimit"),
         std::make_pair(AlterCmd::ADD_LABEL, "label"),
         std::make_pair(AlterCmd::ADD_AVISO, "aviso"),
-        std::make_pair(AlterCmd::ADD_MIRROR, "mirror")
+        std::make_pair(AlterCmd::ADD_MIRROR, "mirror"),
+        std::make_pair(AlterCmd::ADD_EVENT, "event"),
+        std::make_pair(AlterCmd::ADD_METER, "meter")
         // clang-format on
     };
     static constexpr size_t size = map.size();
@@ -530,6 +532,12 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                 case AlterCmd::ADD_LABEL:
                     node->addLabel(Label(name_, value_));
                     break;
+                case AlterCmd::ADD_EVENT:
+                    node->addEvent(Event::make_from_value(name_, value_));
+                    break;
+                case AlterCmd::ADD_METER:
+                    node->addMeter(Meter::make_from_value(name_, value_));
+                    break;
                 case AlterCmd::ADD_LIMIT: {
                     int int_value = 0;
                     try {
@@ -603,72 +611,108 @@ const char* AlterCmd::arg() {
     return CtsApi::alterArg();
 }
 const char* AlterCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Alter the node according to the options.\n"
-           "To add/delete/change server variables use '/' for the path.\n"
-           "arg1 =   [ delete | change | add | set_flag | clear_flag | sort ]\n"
-           "         one option must be specified\n"
-           "arg2 = For delete:\n"
-           "         [ variable | time | today | date  | day | cron | event | meter | late | generic | queue |\n"
-           "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie | aviso | mirror ]\n"
-           "       For change:\n"
-           "         [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-           "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late | time |\n"
-           "           today | aviso | mirror ]\n"
-           "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
-           "         the change to take effect fully.\n"
-           "       For add:\n"
-           "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label | aviso | mirror ]\n"
-           "       For set_flag and clear_flag:\n"
-           "         [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed \n"
-           "           statuscmd_failed | killcmd_failed | no_script | killed | status | late | message | \n"
-           "           complete | queue_limit | task_waiting | locked | zombie | archived | restored |\n"
-           "           threshold | log_error | checkpt_error]\n"
-           "       For sort:\n"
-           "         [ event | meter | label | variable| limit | all ]\n"
-           "arg3 = name/value\n"
-           "arg4 = new_value\n"
-           "arg5 = paths : At least one node path required.The paths must start with a leading '/' character\n"
-           "\n"
-           "When adding or updating attributes, such as variable, meter, event, label, limits, or late,\n"
-           "  the name (arg3) and value (arg4) must be quoted.\n"
-           "\n"
-           "When sorting attributes, 'recursive' can be used as the value (arg3)\n"
-           "\n"
-           "When adding or updating aviso and mirror attributes, the value (arg4) is expected to be a quoted list of\n"
-           "  configuration options. For example:\n"
-           "   * for aviso, \"--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)\"\n"
-           "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } }'\n"
-           "                  --url http://aviso/ --schema /path/to/schema --polling 60\"\n"
-           "\n"
-           "For both aviso and mirror, the special value \"reload\" can be used to force reloading the configuration.\n"
-           "  n.b. This is typically useful after updating variables used to configure these kind of attributes.\n"
-           "\n"
-           "Usage:\n\n"
-           "   ecflow_client --alter=add variable GLOBAL \"value\" /           # add server variable\n"
-           "   ecflow_client --alter=add variable FRED \"value\" /path/to/node # add node variable\n"
-           "   ecflow_client --alter=add time \"+00:20\" /path/to/node\n"
-           "   ecflow_client --alter=add date \"01.*.*\" /path/to/node\n"
-           "   ecflow_client --alter=add day \"sunday\"  /path/to/node\n"
-           "   ecflow_client --alter=add label name \"label_value\" /path/to/node\n"
-           "   ecflow_client --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node\n"
-           "   ecflow_client --alter=add limit mars \"100\" /path/to/node\n"
-           "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node\n"
-           "   # zombie attributes have the following structure:\n"
-           "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n"
-           "      zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | "
-           "\"ecf_pid_passwd\"\n"
-           "      client_side_action = \"fob\" | \"fail\" | \"block\"\n"
-           "      server_side_action = \"adopt\" | \"delete\" | \"kill\"\n"
-           "      child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | "
-           "\"complete\" | \"queue\"\n"
-           "      zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60\n"
-           "   ecflow_client --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail\n"
-           "   ecflow_client --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail\n"
-           "   ecflow_client --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail\n\n"
-           "   ecflow_client --alter=delete variable FRED /path/to/node    # delete variable FRED\n"
-           "   ecflow_client --alter=delete variable      /path/to/node    # delete *ALL* variables on the specified "
-           "node\n";
+
+    return
+        /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8//////////9
+        "Alter the node according to the options.\n"
+        "\n"
+        "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]\n"
+        "\n"
+        "arg2 = For delete:\n"
+        "       [ variable | time | today | date  | day | cron | event | meter | late | generic |\n"
+        "         queue | label | trigger | complete | repeat | limit | inlimit | limit_path |\n"
+        "         zombie | aviso | mirror ]\n"
+        "\n"
+        "       For change:\n"
+        "       [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter |\n"
+        "         label | trigger  | complete | repeat | limit_max | limit_value | defstatus |\n"
+        "         late | time | today | aviso | mirror ]\n"
+        "\n"
+        "       For add:\n"
+        "       [ variable | time | today | date | day | zombie | event | meter | late | limit |\n"
+        "         inlimit | label | aviso | mirror ]\n"
+        "\n"
+        "       For set_flag or clear_flag:\n"
+        "       [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed |\n"
+        "         statuscmd_failed | killcmd_failed | no_script | killed | status | late |\n"
+        "         message complete | queue_limit | task_waiting | locked | zombie | archived |\n"
+        "         restored | threshold | log_error | checkpt_error ]\n"
+        "\n"
+        "       For sort:\n"
+        "       [ event | meter | label | variable| limit | all ]\n"
+        "\n"
+        "arg3 = [ <name> | <value> ]\n"
+        "\n"
+        "arg4 = <new-value>\n"
+        "\n"
+        "arg5 = <path> (<path> (...)) - at least one node path required.\n"
+        "\n"
+        "*Important Notes*\n"
+        "\n"
+        " * All paths must start with a leading '/' character.\n"
+        "\n"
+        " * To update, create or remove server variables use '/' for path.\n"
+        "\n"
+        " * After changing the clock the suite needs to be re-queued for the change to take effect.\n"
+        "\n"
+        " * When adding or updating node attributes (e.g. variable, meter, event, label, limits, late)\n"
+        "   the name (arg3) and value (arg4) must be quoted.\n"
+        "\n"
+        " * When sorting attributes, 'recursive' can be used as the value (arg3).\n"
+        "\n"
+        " * When adding a meter, the value (arg4) is expected to be a comma-separated triplet\n"
+        "   of numerical values the form \"<min>,<max>,<value>\" (n.b. no spaces are allowed).\n"
+        "\n"
+        " * When adding an event, the non-optional value (arg4) must be either \"set\" or \"clear\".\n"
+        "\n"
+        " * When adding or updating aviso and mirror attributes, the value (arg4) is expected to be\n"
+        "   a quoted list of configuration options. For example:\n"
+        "   * for aviso, \"--remote_path /s1/f1/t2 --remote_host host --polling 20 --remote_port 3141 --ssl)\"\n"
+        "   * for mirror, \"--listener '{ \\\"event\\\": \\\"mars\\\", \\\"request\\\": { \\\"class\\\": \"od\" } "
+        "}'\n"
+        "                  --url http://aviso/ --schema /path/to/schema --polling 60\"\n"
+        "\n"
+        " * For both aviso and mirror, the special value \"reload\" forces reloading the configuration.\n"
+        "   This is typically useful after updating variables used to configure these kind of attributes.\n"
+        "\n"
+        "Usage:\n"
+        "\n"
+        "   ecflow_client --alter=add variable <variable-name> \"value\" /             # add server variable\n"
+        "   ecflow_client --alter=add variable <variable-name> \"value\" /path/to/node # add node variable\n"
+        "\n"
+        "   ecflow_client --alter=add time \"+00:20\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add date \"01.*.*\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add day \"sunday\"  /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add label <label-name> \"label_value\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add event <event-name> \"set\"|\"clear\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add meter <meter-name> \"<min>,<max>,value\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add limit mars \"100\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node\n"
+        "\n"
+        "   # zombie attributes have the following structure:\n"
+        "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n"
+        "      zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | \"ecf_pid_passwd\"\n"
+        "      client_side_action = \"fob\" | \"fail\" | \"block\"\n"
+        "      server_side_action = \"adopt\" | \"delete\" | \"kill\"\n"
+        "      child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | \"complete\" "
+        "| \"queue\"\n"
+        "      zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60\n"
+        "\n"
+        "   ecflow_client --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail\n"
+        "   ecflow_client --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail\n"
+        "   ecflow_client --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail\n"
+        "\n"
+        "   ecflow_client --alter=delete variable FRED /path/to/node  # delete variable FRED\n"
+        "   ecflow_client --alter=delete variable      /path/to/node  # delete *ALL* variables on the given snode\n";
 }
 
 void AlterCmd::addOption(boost::program_options::options_description& desc) const {
@@ -766,7 +810,7 @@ AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type
 
 void AlterCmd::createAdd(Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const {
     // options[0] - add
-    // options[1] - [ time | today | date | day | zombie | variable | late | limit | inlimit | label ]
+    // options[1] - [ time | today | date | day | zombie | variable | late | limit | inlimit | label | meter | event ]
     // options[2] - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name |
     //                path_to_limit ]
     // options[3] - variable_value
@@ -840,6 +884,34 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
             }
             if (options.size() < 4) {
                 ss << "AlterCmd: add: Expected 'add label <name> <value> <paths>. Not enough arguments\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            value = options[3];
+            break;
+        }
+        case AlterCmd::ADD_EVENT: {
+            if (options.size() == 3 && paths.size() > 1) {
+                // event value may be a path, hence it will be in the paths parameter
+                options.push_back(paths[0]);
+                paths.erase(paths.begin());
+            }
+            if (options.size() < 4) {
+                ss << "AlterCmd: add: Expected 'add event <name> (set|clear) <paths>. Not enough arguments\n"
+                   << dump_args(options, paths) << "\n";
+                throw std::runtime_error(ss.str());
+            }
+            value = options[3];
+            break;
+        }
+        case AlterCmd::ADD_METER: {
+            if (options.size() == 3 && paths.size() > 1) {
+                // meter value may be a path, hence it will be in the paths parameter
+                options.push_back(paths[0]);
+                paths.erase(paths.begin());
+            }
+            if (options.size() < 4) {
+                ss << "AlterCmd: add: Expected 'add event <name> <min,max,value> <paths>. Not enough arguments\n"
                    << dump_args(options, paths) << "\n";
                 throw std::runtime_error(ss.str());
             }
@@ -939,6 +1011,14 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
         case AlterCmd::ADD_LABEL: {
             // Create a Label to check valid names
             Label check(name, value);
+            break;
+        }
+        case AlterCmd::ADD_EVENT: {
+            Event::make_from_value(name, value);
+            break;
+        }
+        case AlterCmd::ADD_METER: {
+            Meter::make_from_value(name, value);
             break;
         }
         case AlterCmd::ADD_LIMIT: {

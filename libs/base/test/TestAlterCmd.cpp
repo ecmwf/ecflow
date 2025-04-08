@@ -601,56 +601,101 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
 
     { // test add event
         TestStateChanged changed(s);
-        s->addEvent(Event(1, "event1"));
-        s->addEvent(Event(2, "event2"));
-        s->addEvent(Event(3, "event3"));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "first", "set")));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "second", "set")));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "third", "clear")));
         BOOST_CHECK_MESSAGE(s->events().size() == 3, "expected 3  but found " << s->events().size());
 
+        {
+            const auto& first = s->findEventByNameOrNumber("first");
+            BOOST_CHECK_EQUAL(first.name(), "first");
+            BOOST_CHECK_EQUAL(first.value(), true);
+        }
+        {
+            const auto& second = s->findEventByNameOrNumber("second");
+            BOOST_CHECK_EQUAL(second.name(), "second");
+            BOOST_CHECK_EQUAL(second.value(), true);
+        }
+        {
+            const auto& third = s->findEventByNameOrNumber("third");
+            BOOST_CHECK_EQUAL(third.name(), "third");
+            BOOST_CHECK_EQUAL(third.value(), false);
+        }
+
         // test delete event
-        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_EVENT, "event1")));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_EVENT, "first")));
         BOOST_CHECK_MESSAGE(s->events().size() == 2, "expected 2  but found " << s->events().size());
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_EVENT)));
         BOOST_CHECK_MESSAGE(s->events().size() == 0, "expected 0  but found " << s->events().size());
 
         // test change event
-        s->addEvent(Event(1, "event1"));
-        s->addEvent(Event(2, "event2"));
         TestHelper::invokeRequest(&defs,
-                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "event1", Event::SET())));
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "some_event", "clear")));
+        TestHelper::invokeRequest(
+            &defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "another_event", "clear")));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "some_event", Event::SET())));
         {
-            const Event& v = s->findEventByNameOrNumber("event1");
+            const Event& v = s->findEventByNameOrNumber("some_event");
             BOOST_CHECK_MESSAGE(v.value() == 1, "expected to find  event with value set");
         }
 
-        TestHelper::invokeRequest(&defs,
-                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "event1", Event::CLEAR())));
+        TestHelper::invokeRequest(
+            &defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "some_event", Event::CLEAR())));
         {
-            const Event& v = s->findEventByNameOrNumber("event1");
+            const Event& v = s->findEventByNameOrNumber("some_event");
             BOOST_CHECK_MESSAGE(!v.empty() && v.value() == 0, "expected to find  event with value cleared");
         }
 
-        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "event1", "")));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "some_event", "")));
         {
-            const Event& v = s->findEventByNameOrNumber("event1");
+            const Event& v = s->findEventByNameOrNumber("some_event");
             BOOST_CHECK_MESSAGE(v.value() == 1, "expected to find  event with value set");
         }
     }
 
     { // test add meter
-        // TestStateChanged changed(s);
-        s->addMeter(Meter("meter", 0, 100, 100));
-        s->addMeter(Meter("meter1", 0, 100, 100));
-        s->addMeter(Meter("meter2", 0, 100, 100));
+        TestStateChanged changed(s);
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_METER, "first", "0,100,100")));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_METER, "second", "-10,10,5")));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_METER, "third", "0,50,0")));
         BOOST_CHECK_MESSAGE(s->meters().size() == 3, "expected 3  but found " << s->meters().size());
 
+        {
+            const auto& first = s->findMeter("first");
+            BOOST_CHECK_EQUAL(first.name(), "first");
+            BOOST_CHECK_EQUAL(first.min(), 0);
+            BOOST_CHECK_EQUAL(first.max(), 100);
+            BOOST_CHECK_EQUAL(first.value(), 100);
+        }
+        {
+            const auto& second = s->findMeter("second");
+            BOOST_CHECK_EQUAL(second.name(), "second");
+            BOOST_CHECK_EQUAL(second.min(), -10);
+            BOOST_CHECK_EQUAL(second.max(), 10);
+            BOOST_CHECK_EQUAL(second.value(), 5);
+        }
+        {
+            const auto& third = s->findMeter("third");
+            BOOST_CHECK_EQUAL(third.name(), "third");
+            BOOST_CHECK_EQUAL(third.min(), 0);
+            BOOST_CHECK_EQUAL(third.max(), 50);
+            BOOST_CHECK_EQUAL(third.value(), 0);
+        }
+
         // test delete meter
-        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_METER, "meter")));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_METER, "first")));
         BOOST_CHECK_MESSAGE(s->meters().size() == 2, "expected 2  but found " << s->meters().size());
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_METER)));
         BOOST_CHECK_MESSAGE(s->meters().size() == 0, "expected 0 meters but found " << s->meters().size());
 
         // test change meter value
-        s->addMeter(Meter("meter", 0, 100, 100));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_METER, "meter", "0,100,100")));
         BOOST_CHECK_MESSAGE(s->meters().size() == 1, "expected 1 meter but found " << s->meters().size());
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::METER, "meter", "10")));
         const Meter& v = s->findMeter("meter");

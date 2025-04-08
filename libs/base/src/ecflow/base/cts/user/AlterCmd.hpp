@@ -78,6 +78,8 @@ public:
         ADD_LABEL,
         ADD_AVISO,
         ADD_MIRROR,
+        ADD_EVENT,
+        ADD_METER,
     };
 
     // Python

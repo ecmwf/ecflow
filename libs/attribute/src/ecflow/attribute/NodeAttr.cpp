@@ -91,6 +91,16 @@ Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_
     }
 }
 
+Event Event::make_from_value(const std::string& name, const std::string& value) {
+
+    // value is expected to be either "set" or "clear"
+
+    if (!isValidState(value)) {
+        throw std::runtime_error("Event::Event: Invalid state : " + value);
+    }
+    return Event(name, value == Event::SET());
+}
+
 void Event::set_value(bool b) {
     v_               = b;
     state_change_no_ = Ecf::incr_state_change_no();
@@ -212,11 +222,7 @@ std::string Event::dump() const {
 }
 
 bool Event::isValidState(const std::string& state) {
-    if (state == Event::SET())
-        return true;
-    if (state == Event::CLEAR())
-        return true;
-    return false;
+    return state == Event::SET() || state == Event::CLEAR();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,6 +255,31 @@ Meter::Meter(const std::string& name, int min, int max, int colorChange, int val
         ss << "Meter::Meter: Invalid Meter(name,min,max,color_change) color_change(" << cc_ << ") must be between min("
            << min_ << ") and max(" << max_ << ")";
         throw std::out_of_range(ss.str());
+    }
+}
+
+Meter Meter::make_from_value(const std::string& name, const std::string& value) {
+
+    // value is expected to be of the form "min,max,value", where min, max and value are integers
+
+    std::vector<std::string> tokens;
+    ecf::algorithm::split(tokens, value, ",");
+    if (tokens.size() != 3) {
+        throw std::runtime_error("Meter::make_from_value: Expect three comma-separated values, but found: '" + value +
+                                 "'");
+    }
+
+    try {
+        auto min   = ecf::convert_to<int>(tokens[0]);
+        auto max   = ecf::convert_to<int>(tokens[1]);
+        auto value = ecf::convert_to<int>(tokens[2]);
+        return Meter(name, min, max, max, value, false);
+    }
+    catch (const ecf::bad_conversion&) {
+        std::stringstream ss;
+        ss << "Meter::make_from_value: Expect three comma-separated values, but found: (" << tokens[0] << ", "
+           << tokens[1] << ", " << tokens[2] << ")";
+        throw std::runtime_error(ss.str());
     }
 }
 
