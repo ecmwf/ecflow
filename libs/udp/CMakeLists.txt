@@ -67,11 +67,17 @@ set(TEST_TARGET s_udp)
 
 list(APPEND ${TEST_TARGET}_srcs
   # HEADERS
+  test/Process.hpp
   test/TestSupport.hpp
   # SOURCES
+  test/Process.cpp
   test/TestUDP_main.cpp
   test/TestUDPServer.cpp
 )
+
+if(${SELECTED_BOOST_VERSION} VERSION_GREATER_EQUAL 1.86.0)
+  set(ADDITIONAL_BOOST_COMPONENTS Boost::process)
+endif()
 
 ecbuild_add_test(
   TARGET
@@ -86,6 +92,7 @@ ecbuild_add_test(
     test_scaffold
     Boost::boost
     Boost::unit_test_framework
+    ${ADDITIONAL_BOOST_COMPONENTS}
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   DEPENDS
     ecflow_server # the server is launched to support tests

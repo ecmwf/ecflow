@@ -37,7 +37,7 @@ project( ecflow LANGUAGES CXX VERSION 5.13.8 )
 #   The CMake project version is used, as generated CMake variables, to filter .../ecflow/core/ecflow_version.h.in
 #
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 include( ecbuild_system NO_POLICY_SCOPE )
 ecbuild_requires_macro_version( 1.6 )

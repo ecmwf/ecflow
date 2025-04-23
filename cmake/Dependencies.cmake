@@ -166,6 +166,10 @@ if (ENABLE_PYTHON)
   endif()
   set(ECFLOW_BOOST_PYTHON_COMPONENT "python${_python_base_version}")
 
+  if ( Boost_MINOR_VERSION GREATER_EQUAL 86 )
+    list(APPEND _boost_needed_libs process)
+  endif()
+
   list(APPEND _boost_needed_libs ${ECFLOW_BOOST_PYTHON_COMPONENT})
 endif()
 
@@ -175,11 +179,14 @@ endif()
 
 find_package( Boost ${ECFLOW_BOOST_VERSION} QUIET REQUIRED COMPONENTS ${_boost_needed_libs})
 
+set(SELECTED_BOOST_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+
 ecbuild_info( " * Boost_FOUND                : ${Boost_FOUND}" )
 ecbuild_info( " * Boost_NO_BOOST_CMAKE       : ${Boost_NO_BOOST_CMAKE}" )
 ecbuild_info( " * Boost_USE_MULTITHREADED    : ${Boost_USE_MULTITHREADED}" )
 ecbuild_info( " * Boost_NO_SYSTEM_PATHS      : ${Boost_NO_SYSTEM_PATHS}" )
 ecbuild_info( " * Boost_DETAILED_FAILURE_MSG : ${Boost_DETAILED_FAILURE_MSG}" )
+ecbuild_info( " * Boost_VERSION              : ${Boost_VERSION}" )
 ecbuild_info( " * Boost_MAJOR_VERSION        : ${Boost_MAJOR_VERSION}" )
 ecbuild_info( " * Boost_MINOR_VERSION        : ${Boost_MINOR_VERSION}" )
 ecbuild_info( " * Boost_SUBMINOR_VERSION     : ${Boost_SUBMINOR_VERSION}" )
