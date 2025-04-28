@@ -300,7 +300,7 @@
             "menu"           : "Node",
             "name"           : "Begin",
             "visible_for"    : "suite and (oper or admin)",
-            "enabled_for"    : "unknown or complete",
+            "enabled_for"    : "unknown or complete or suspended",
             "command"        : "ecflow_client --begin <node_name>",
             "status_tip"     : "__cmd__"
         },
