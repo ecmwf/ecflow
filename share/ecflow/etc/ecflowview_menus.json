@@ -128,32 +128,6 @@
 
         {
             "menu"           : "Node",
-            "name"           : "Set complete",
-            "visible_for"    : "task or alias",
-            "enabled_for"    : "(submitted or active or unknown or queued or aborted or suspended) and (not has_mirror)",
-            "command"        : "ecflow_client --force=complete <full_name>",
-            "question_for"   : "submitted or active",
-            "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
-            "question_control" : "menu.confirm.confirmSetComplete",
-            "default_answer" : "Yes",
-            "status_tip"     : "__cmd__"
-        },
-
-        {
-            "menu"           : "Node",
-            "name"           : "Set aborted",
-            "visible_for"    : "task or alias",
-            "enabled_for"    : "(submitted or active or unknown or queued or complete or suspended) and (not has_mirror)",
-            "command"        : "ecflow_client --force=aborted <full_name>",
-            "question_for"   : "submitted or active",
-            "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
-            "question_control" : "menu.confirm.confirmSetAborted",
-            "default_answer" : "Yes",
-            "status_tip"     : "__cmd__"
-        },
-
-        {
-            "menu"           : "Node",
             "name"           : "Execute",
             "visible_for"    : "task or alias",
             "enabled_for"    : "(not active) and (not submitted) and (not has_mirror)",
@@ -187,13 +161,43 @@
             "status_tip"     : "__cmd__"
         },
 
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Set complete",
+            "visible_for"    : "task or alias",
+            "enabled_for"    : "(submitted or active or unknown or queued or aborted or suspended) and (not has_mirror)",
+            "command"        : "ecflow_client --force=complete <full_name>",
+            "question_for"   : "submitted or active",
+            "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
+            "question_control" : "menu.confirm.confirmSetComplete",
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Set aborted",
+            "visible_for"    : "task or alias",
+            "enabled_for"    : "(submitted or active or unknown or queued or complete or suspended) and (not has_mirror)",
+            "command"        : "ecflow_client --force=aborted <full_name>",
+            "question_for"   : "submitted or active",
+            "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
+            "question_control" : "menu.confirm.confirmSetAborted",
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
+        },
 
         {
             "menu"           : "Node",
             "name"           : "Unlock",
             "visible_for"    : "server and (oper or admin) and locked",
             "command"        : "unlock -y",
-            "question"       : "Before going further, please check why the server was locked.",           
+            "question"       : "Before going further, please check why the server was locked.",
             "default_answer" : "No",
             "status_tip"     : "__cmd__"
         },
@@ -241,9 +245,6 @@
             "default_answer" : "No",
             "status_tip"     : "__cmd__"
         },
-
-
-
 
         {
             "menu"           : "Node",
