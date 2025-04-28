@@ -15,6 +15,16 @@ The command to start the application on the ECMWF HPC::
 
    This version should only be for testing the new user interface and not for running a server!
 
+.. important::
+
+   Users that configure a high number of servers should ensure that Operating System limits (e.g. maximum open file)
+   are adequate, and thus avoid an unexpected termination of ecFlow UI followed by the message: "Too many open files".
+
+   Before launching ecFlow UI, consider adjusting the OS limits using the following command:
+
+    :code:`$> ulimit -n 8192`
+
+
 Starting ecFlowUI for the first time
 ====================================
 
