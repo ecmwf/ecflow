@@ -10,7 +10,7 @@ Any node can be **repeated** in a number of different ways. Only suites can be r
 
   repeat day step # only for suites
   repeat integer VARIABLE start end [step]
-  repeat enumerated date VARIABLE first [second [third ...]]
+  repeat enumerated VARIABLE first [second [third ...]]
   repeat string VARIABLE str1 [str2 ...]
   repeat file VARIABLE filename
   repeat date VARIABLE yyyymmdd yyyymmdd [step]
@@ -38,6 +38,7 @@ end time.
   repeat string INPUT str1 str2 str3
   repeat integer HOUR 6 24 6
   repeat date YMD 20200130 20200203
+  repeat enumerated ENUM one two three
 
 .. note:: 
   

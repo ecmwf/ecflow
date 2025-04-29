@@ -410,18 +410,40 @@ QString VRepeatDateListAttr::allValues() const {
     return vals;
 }
 
+namespace {
+
+/**
+ * This helper function determines the position of the repeat value in the list,
+ * indicating if the value is the first, middle, or last in the list.
+ *
+ * @tparam REPEAT
+ * @param repeat
+ * @return 0 == First, 1 == Middle, 2 == Last, -1 == Invalid
+ */
+template <typename REPEAT>
+static int get_repeat_position(const REPEAT& repeat) {
+    if (repeat.indexNum() < 2) {
+        return -1; // == Invalid
+    }
+
+    if (repeat.index_or_value() == 0) {
+        return 0; // == First
+    }
+
+    if (repeat.index_or_value() == repeat.indexNum()) {
+        return 2; // == Last
+    }
+
+    return 1; // == Middle
+}
+
+} // namespace
+
 int VRepeatDateListAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
         if (auto* rdl = static_cast<RepeatDateList*>(r.repeatBase())) {
-            if (rdl->indexNum() < 2)
-                return -1;
-            else if (rdl->index_or_value() == 0)
-                return 0;
-            else if (rdl->index_or_value() == rdl->indexNum() - 1)
-                return 2;
-            else
-                return 1;
+            return get_repeat_position(*rdl);
         }
     }
     return -1;
@@ -487,13 +509,13 @@ int VRepeatIntAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
         if (r.start() == r.end())
-            return -1;
+            return -1; // == Invalid
         else if (r.value() == r.start())
-            return 0;
+            return 0; // == First
         else if (r.value() == r.end() || r.value() + r.step() > r.end())
-            return 2;
+            return 2; // == Last
         else
-            return 1;
+            return 1; // == Middle
     }
     return -1;
 }
@@ -586,15 +608,8 @@ QString VRepeatEnumAttr::allValues() const {
 int VRepeatEnumAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (auto* rdl = static_cast<RepeatEnumerated*>(r.repeatBase())) {
-            if (rdl->indexNum() < 2)
-                return -1;
-            else if (rdl->index_or_value() == 0)
-                return 0;
-            else if (rdl->index_or_value() == rdl->indexNum() - 1)
-                return 2;
-            else
-                return 1;
+        if (auto* repeat = static_cast<RepeatEnumerated*>(r.repeatBase()); repeat) {
+            return get_repeat_position(*repeat);
         }
     }
     return -1;
@@ -666,14 +681,7 @@ int VRepeatStringAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
         if (auto* rdl = static_cast<RepeatString*>(r.repeatBase())) {
-            if (rdl->indexNum() < 2)
-                return -1;
-            else if (rdl->index_or_value() == 0)
-                return 0;
-            else if (rdl->index_or_value() == rdl->indexNum() - 1)
-                return 2;
-            else
-                return 1;
+            return get_repeat_position(*rdl);
         }
     }
     return -1;
