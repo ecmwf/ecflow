@@ -13,6 +13,7 @@
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Log.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
@@ -32,6 +33,10 @@ void Node::changeVariable(const std::string& name, const std::string& value) {
     if (found == std::end(vars_)) {
         throw std::runtime_error("Node::changeVariable: Could not find variable " + name);
     }
+
+    LOG(Log::MSG,
+        "Variable at " + this->absNodePath() + ":" + found->name() + " updating from '" + found->theValue() + "' to '" +
+            value + "'");
 
     found->set_value(value);
     variable_change_no_ = Ecf::incr_state_change_no();
@@ -222,12 +227,22 @@ void Node::changeMirror(const std::string& name, const std::string& value) {
 
 void Node::changeTrigger(const std::string& expression) {
     (void)parse_and_check_expressions(expression, true /*trigger*/, "Node::changeTrigger:"); // will throw for errors
+
+    LOG(Log::MSG,
+        "Trigger at " + this->absNodePath() + " updating from '" + this->basicTriggerExpression() + "' to '" +
+            expression + "'");
+
     deleteTrigger();
     add_trigger(expression);
 }
 
 void Node::changeComplete(const std::string& expression) {
     (void)parse_and_check_expressions(expression, false /*complete*/, "Node::changeComplete:"); // will throw for errors
+
+    LOG(Log::MSG,
+        "Complete at " + this->absNodePath() + " updating from '" + this->basicCompleteExpression() + "' to '" +
+            expression + "'");
+
     deleteComplete();
     add_complete(expression);
 }
