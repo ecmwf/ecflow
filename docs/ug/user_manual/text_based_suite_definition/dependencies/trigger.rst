@@ -48,17 +48,14 @@ numeric (otherwise its numeric value would be used in the expression.)
     task another
       trigger ./00z == complete # the previous task 
 
-For events it is convenient to use a plain name, since an event can only have values **clear** or **set**, numerically 0 or 1. So triggers of the form:
+For events it is convenient to use a plain name, since an event can only have values **clear** or **set**, numerically 0 or 1.
+Notice that the following triggers will hold as long as the event is not set, with the second line considered a clearer alternative.
 
 .. code-block:: shell
 
   trigger taskname:event
   trigger taskname:event == set
 
-
-Will hold as long as the event is not set. The second line shows a    
-clearer alternative equivalent way to write the same trigger.         
-                                                                    
 Meters can be used in triggers the same as events, except that their  
 value should be compared against numerical expression. It is          
 important to remember to use **greater or equal** instead of **equals** . In the following  
@@ -69,12 +66,27 @@ suspended while **foo** sets it meter to first 120 and then to 130. **bar** will
 
   task foo
     meter hour 0 240
-    task bar
+  task bar
     trigger foo:hour >= 120
-    task foobar
+  task foobar
     trigger foo:hour == 120 # dangerous !!!
-    
-There is no automatic checking for deadlocks, which can be difficult to detect. However, if your suite is known to complete (i.e. it does not run forever), then simulation can be used to check for deadlocks.
+
+The conversion between date values (formated as :code:`DDMMYYYY`) and Julian Day can be done using
+the functions :code:`cal::date_to_julian` and :code:`cal::julian_to_date`. The following example shows how to use these functions:
+
+.. code-block:: shell
+
+  family foo
+    task first
+      edit YMD 20000101
+      edit JULIAN 2451545
+    task second
+      trigger cal::date_to_julian(./first:YMD) == 2451546
+    task third
+      trigger cal::julian_to_date(./first:JULIAN) == 20000102
+
+There is no automatic checking for deadlocks, which can be difficult to detect. However, if your suite is known to complete
+(i.e. it does not run forever), then simulation can be used to check for deadlocks.
 
 The following example is a simple case:
 
