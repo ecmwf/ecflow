@@ -47,6 +47,23 @@ using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
+namespace {
+
+/**
+ * This helper function logs the update of a repeat attribute for the given node.
+ *
+ * @param node The node containing the repeat attribute.
+ */
+void log_repeat_value_update(const Node& node) {
+    if (const auto& repeat = node.repeat(); !repeat.empty()) {
+        LOG(ecf::Log::MSG,
+            "Repeat at " << node.absNodePath() << ":" << repeat.name() << " set to value: '" << repeat.valueAsString()
+                         << "'");
+    }
+}
+
+} // namespace
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 // #define DEBUG_DEPENDENCIES 1
 // #define DEBUG_REQUEUE 1
@@ -325,8 +342,10 @@ void Node::requeue(Requeue_args& args) {
     clearTrigger();
     clearComplete();
 
-    if (args.resetRepeats_)
+    if (args.resetRepeats_) {
         repeat_.reset(); // if repeat is empty reset() does nothing
+        log_repeat_value_update(*this);
+    }
 
     /// If a job takes longer than it slots, then that slot is missed, and next slot is used
     /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
@@ -630,6 +649,8 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
                     "requeueOrSetMostSignificantStateUpNodeTree() VALID for requeue "
                         << debugNodePath() << " for repeat at " << repeat_.toString());
 #endif
+
+                log_repeat_value_update(*this);
 
                 // Remove effects of RUN and Force complete interactive commands
                 // For automated re-queue *DUE* to Repeats, *CLEAR* any user interaction that would miss the next time
