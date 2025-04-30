@@ -250,12 +250,21 @@ locally and remotely. They are:
 
   * ECF_CHECK_CMD:
 
+    This command was used to check the status of a job, and was designed to be called by ecFlowUI.
+
     .. code-block:: shell 
 
-     edit ECF_CHECK_CMD '%ps --sid %ECF_RID% -f'
+      edit ECF_CHECK_CMD '%ps --sid %ECF_RID% -f'
 
-  * ECF_URL_CMD (for html man pages for tasks, plots display, products
-    arrival html page):
+    .. warning::
+
+      :code:`ECF_CHECK_CMD` is currently deprecated and no longer in use, but can still be defined for backward compatibility.
+
+  * ECF_URL_CMD:
+
+    This command is used by ecFlowUI to open a Web Browser with the specified URL. This allows,
+    depending on the Suite designer, to open manual pages for tasks, plots display, or products
+    arrival pages.
 
     .. code-block:: shell
   
@@ -368,4 +377,3 @@ message. Error can be understood running it with pdb or gdb:
   > set args suite.def
   > run
   > bt
-
