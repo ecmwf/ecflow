@@ -382,6 +382,12 @@ Some pages about CLI specific details can be found here:
     * - :ref:`host_cli`
       - When specified overrides the environment variable ECF_HOST and default host: 'localhost'
 
+    * - :ref:`http_cli`
+      - Enables communication over HTTP between client/server.
+
+    * - :ref:`https_cli`
+      - Enables communication over HTTPS between client/server.
+
     * - :ref:`password_cli`
       - Specifies the password used to contact the server. Must be used in combination with option --user.
 
@@ -485,6 +491,8 @@ Some pages about CLI specific details can be found here:
     add (option) <api/add.rst>
     debug (option) <api/debug.rst>
     host (option) <api/host.rst>
+    http (option) <api/http.rst>
+    https (option) <api/https.rst>
     password (option) <api/password.rst>
     port (option) <api/port.rst>
     rid (option) <api/rid.rst>

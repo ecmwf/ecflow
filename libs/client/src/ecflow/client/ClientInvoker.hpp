@@ -79,6 +79,9 @@ public:
     std::string get_certificate() const;
 #endif
 
+    void enable_http() { clientEnv_.enable_http(); }
+    void enable_https() { clientEnv_.enable_https(); }
+
     /// This will override the environment setting.
     /// In particular setting host explicitly will avoid cycling through server list,
     /// if connection fails. hence will bomb out earlier
@@ -224,9 +227,6 @@ public:
     int sync_local(bool sync_suite_clock = false) const;
     int news(defs_ptr& client_defs) const;
     int news_local() const;
-
-    // find free port on local host. Not 100% accurate, use in test
-    static std::string find_free_port(int seed_port_number, bool debug = false);
 
     bool wait_for_server_reply(int time_out = 60) const; // wait for server reply, returning false means timed out.
     bool wait_for_server_death(

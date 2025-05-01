@@ -22,7 +22,7 @@
 // To avoid Address in use errors, we can have client/server use a different port number
 // This is more important when doing instrumentation in HP-UX, as that can take a long time.
 //
-// The Server is started/stopped by use of the Global text Fixture
+// The Server is started/stopped by use of the Global test Fixture
 // See class TestFixture.hpp
 //
 class ServerTestHarness {

@@ -13,6 +13,8 @@
 #include <fstream> // for ofstream
 #include <iostream>
 
+#include "LocalServerLauncher.hpp"
+#include "SCPort.hpp"
 #include "TestHelper.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/client/ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
@@ -31,7 +33,7 @@ std::string rtt_filename = "rtt.dat";
 #else
 std::string rtt_filename = "rtt_d.dat";
 #endif
-std::string TestFixture::scratchSmsHome_ = "";
+std::unique_ptr<ScratchDir> TestFixture::scratch_dir_;
 std::string TestFixture::host_;
 std::string TestFixture::port_;
 std::string TestFixture::test_dir_;
@@ -40,14 +42,31 @@ std::string TestFixture::project_test_dir_ = "libs/test";
 using namespace std;
 using namespace ecf;
 
+namespace /* anonymous */ {
+
+bool is_external_server_running_remotelly(std::string_view host) {
+    return !host.empty() && host != Str::LOCALHOST();
+}
+
+bool is_external_server_running_locally(std::string_view host) {
+    return !host.empty() && host == Str::LOCALHOST();
+}
+
+bool is_local_server(std::string_view host) {
+    return host.empty() || host == Str::LOCALHOST();
+}
+
+} // namespace
+
 // ************************************************************************************************
 // For test purpose the server can be started:
-//  1/ By this test fixture
-//  2/ Externally but on the same machine. by defining env variable: export ECF_HOST=localhost
-//     WHY? To test for memory leak. (i.e. with valgrind)
-//  3/ Externally but on a different platform. by defining env variable: export ECF_HOST=itanium
-//     In this case we NEED to copy the test data, so that it is
-//     accessible by the client AND server
+//
+//  (1) Externally but on a different platform. by defining env variable: export ECF_HOST=itanium
+//      In this case we NEED to copy the test data, so that it is
+//      accessible by the client AND server
+//  (2) Externally but on the same machine. by defining env variable: export ECF_HOST=localhost
+//      WHY? To test for memory leak. (i.e. with valgrind)
+//  (3) By this test fixture
 //
 //  When invoking the server Externally _MUST_ use   .
 //     ./Server/bin/gcc.<version>/debug/server --ecfinterval=2
@@ -76,7 +95,6 @@ void TestFixture::init(const std::string& project_test_dir) {
     auto test_dir                  = local_ecf_home();
     std::cout << "TestFixture::TestFixture() project_test_dir      :" << project_test_dir << "\n";
     std::cout << "TestFixture::TestFixture() local_ecf_home        :" << test_dir << "\n";
-    std::cout << "TestFixture::TestFixture() jobSubmissionInterval :" << job_submission_interval() << "\n";
     std::cout << "TestFixture::TestFixture() cwd                   :" << fs::current_path() << "\n";
 
     if (!fs::exists(test_dir)) {
@@ -102,48 +120,60 @@ void TestFixture::init(const std::string& project_test_dir) {
         std::cout << "   Openssl enabled\n";
     }
 #endif
-    if (!host_.empty() && host_ != Str::LOCALHOST()) {
+    if (is_external_server_running_remotelly(host_)) {
+
+        // Option (1)
+        //
+        // Going to perform the tests using an external server, running on a remote machine.
+        // We require the external server file system to be mounted locally,
+        // and use the $SCRATCH environment variable to locate the mount point of the server data.
+        // This allows to deploy the necessary test data, reset ECF_HOME, and configure the server.
 
         client().set_host_port(host_, port_);
-        std::cout << "   EXTERNAL SERVER running on _ANOTHER_ PLATFORM, assuming " << host_ << ":" << port_
-                  << " copying test data ...\n";
 
-        // Must use a file system accessible from the server. Use $SCRATCH
-        // Duplicate test data, required to scratch area and reset ECF_HOME
-        auto scratchEnv = ecf::environment::fetch("SCRATCH");
-        assert(scratchEnv);
-        std::string theSCRATCHArea(scratchEnv.value());
-        assert(!theSCRATCHArea.empty());
+        std::cout << "   _EXTERNAL_ SERVER running on a _REMOTE_ platform";
+        std::cout << " (" << host_ << ":" << port_ << ").\n";
 
-        theSCRATCHArea += "/test_dir";
-        test_dir_ = theSCRATCHArea; // test_dir_ needed in destructor
-        if (fs::exists(test_dir_)) {
-            fs::remove_all(test_dir_);
+        scratch_dir_ = std::make_unique<ScratchDir>();
+
+        if (const auto& d = scratch_dir_->test_dir(); fs::exists(d)) {
+            fs::remove_all(d);
         }
-        theSCRATCHArea += "/ECF_HOME";
-        scratchSmsHome_ = theSCRATCHArea;
 
-        BOOST_REQUIRE_MESSAGE(File::createDirectories(theSCRATCHArea),
-                              "File::createDirectories(theSCRATCHArea) failed");
-        BOOST_REQUIRE_MESSAGE(fs::exists(theSCRATCHArea), "theSCRATCHArea does not exist");
+        {
+            auto success = File::createDirectories(scratch_dir_->home_dir());
+            BOOST_REQUIRE_MESSAGE(success, "Create the home directory inside the $SCRATCH");
+        }
+        {
+            auto success = fs::exists(scratch_dir_->home_dir());
+            BOOST_REQUIRE_MESSAGE(success, "The home directory inside the $SCRATCH exists");
+        }
+        { // Ensure that local includes data exists, before attempting to copy it into $SCRATCH
+            auto success = fs::exists(includes());
+            BOOST_REQUIRE_MESSAGE(success, "The includes directory exists");
+        }
 
-        // Ensure that local includes data exists. This needs to be copied to SCRATCH
-        BOOST_REQUIRE_MESSAGE(fs::exists(includes()), "The includes dir does not exist does not exist");
-
+        std::cout << " Copying test data ...\n";
         // Copy over the includes directory to the SCRATCH area.
-        std::string scratchIncludes = test_dir_ + "/";
+        std::string scratchIncludes = scratch_dir_->test_dir() + "/";
         std::string do_copy         = "cp -r " + includes() + " " + scratchIncludes;
-        if (system(do_copy.c_str()) != 0)
+        if (system(do_copy.c_str()) != 0) {
             assert(false);
+        }
 
         // clear log file
         clearLog();
     }
-    else if (!host_.empty() && host_ == Str::LOCALHOST()) {
+    else if (is_external_server_running_locally(host_)) {
+
+        // Option (2)
+        //
+        // Going to perform the tests using an external server, running on the local machine.
 
         client().set_host_port(host_, port_);
-        std::cout << "   EXTERNAL SERVER running on _SAME_ PLATFORM. Assuming " << client().host() << ":"
-                  << client().port() << "\n";
+
+        std::cout << "   _EXTERNAL_ SERVER running on the _LOCAL_ platform";
+        std::cout << " (" << client().host() << ":" << client().port() << ").\n";
 
         // Print the server stats before we start + checks if it is up and running::
         client().set_cli(true); // so server stats are written to standard out
@@ -166,41 +196,38 @@ void TestFixture::init(const std::string& project_test_dir) {
                 cout << "   Log file " << TestFixture::pathToLogFile() << " creation failed " << client().errorMsg()
                      << "\n";
         }
-        else
+        else {
             cout << "   Log file " << the_log_file << " already exists\n";
+        }
     }
     else {
-        // For local host start by removing log file. Server invocation should create a new log file
-        fs::remove(fs::path(pathToLogFile()));
+
+        // Option (3)
+        //
+        // Going to perform the tests using a server launched as part of the test setup.
+
+        // Update ClientInvoker with local host and port
         host_ = Str::LOCALHOST();
-
-        // Create a unique port number, allowing debug and release to run at the same time
-        // Note: linux64 and linux64intel, can run on same machine, on different workspace
-        // Hence the lock file is not sufficient. Hence, we will make a client server call.
-        cout << "Find free port to start server, starting with port " << port_ << "\n";
-        auto the_port = ecf::convert_to<int>(port_);
-        while (!EcfPortLock::is_free(the_port))
-            the_port++;
-        port_ = ClientInvoker::find_free_port(the_port, true /*show debug output */);
-        EcfPortLock::create(port_);
-
-        // host_ is empty update to localhost, **since** port may have changed, update ClientInvoker
+        port_ = ecf::SCPort::find_available_port(port_);
         client().set_host_port(host_, port_);
 
-        // Remove the generated check point files, at start of test, otherwise server will load check point file
-        Host h;
-        fs::remove(h.ecf_checkpt_file(port_));
-        fs::remove(h.ecf_backup_checkpt_file(port_));
+        std::cout << "   _LOCAL_ SERVER running on the _LOCAL_ platform";
+        std::cout << " (" << host_ << ":" << port_ << ").\n";
 
-        std::string theServerInvokePath = File::find_ecf_server_path();
-        assert(!theServerInvokePath.empty());
-        theServerInvokePath += " --port=" + port_;
-        theServerInvokePath += " --ecfinterval=" + ecf::convert_to<std::string>(job_submission_interval());
-        theServerInvokePath += "&";
-        if (system(theServerInvokePath.c_str()) != 0)
-            assert(false); // " Server invoke failed "
+        bool use_http = false;
+        if (auto found = ecf::environment::fetch("ECF_TEST_USING_HTTP"); found) {
+            use_http = found.value() == "1";
+            client().enable_http();
+            client().debug(true);
+        }
 
-        std::cout << "   ECF_HOST not specified, starting LOCAL " << theServerInvokePath << "\n";
+        // clang-format off
+        LocalServerLauncher{}
+            .with_host(host_)
+            .with_port(port_)
+            .using_http(use_http)
+            .launch();
+        // clang-format on
     }
 
     /// Ping the server to see if its running
@@ -293,37 +320,33 @@ TestFixture::~TestFixture() {
 }
 
 int TestFixture::job_submission_interval() {
-    int jobSubmissionInterval = 3;
-#if defined(HPUX) || defined(_AIX)
-    jobSubmissionInterval += 3;
-#endif
-    return jobSubmissionInterval;
+    return LocalServerLauncher::job_submission_interval();
 }
 
 std::string TestFixture::smshome() {
-    if (serverOnLocalMachine()) {
+    if (is_local_server(TestFixture::host_)) {
         return local_ecf_home();
     }
-    return scratchSmsHome_;
-}
-
-bool TestFixture::serverOnLocalMachine() {
-    return (host_.empty() || host_ == Str::LOCALHOST());
+    return scratch_dir_->home_dir();
 }
 
 std::string TestFixture::theClientExePath() {
-    if (serverOnLocalMachine()) {
-        return File::find_ecf_client_path();
+    std::string extra_options = "";
+    if (auto var = ecf::environment::fetch("ECF_TEST_USING_HTTP"); var) {
+        extra_options = " --http";
     }
 
-    if (auto client_path_p = ecf::environment::fetch("ECF_CLIENT_EXE_PATH"); client_path_p) {
-        return client_path_p.value();
+    if (is_local_server(TestFixture::host_)) {
+        return File::find_ecf_client_path() + extra_options;
+    }
+    else if (auto client_path_p = ecf::environment::fetch("ECF_CLIENT_EXE_PATH"); client_path_p) {
+        return client_path_p.value() + extra_options;
     }
     else {
         // Try this before complaining
         std::string path = "/usr/local/apps/ecflow/current/bin/ecflow_client";
         if (fs::exists(path)) {
-            return path;
+            return path + extra_options;
         }
 
         cout << "Please set ECF_CLIENT_EXE_PATH. This needs to be set to path to the client executable\n";
@@ -340,7 +363,7 @@ void TestFixture::clearLog() {
 }
 
 std::string TestFixture::pathToLogFile() {
-    if (serverOnLocalMachine()) {
+    if (is_local_server(TestFixture::host_)) {
         Host host;
         return host.ecf_log_file(port_);
     }
@@ -382,7 +405,9 @@ std::string TestFixture::local_ecf_home() {
     build_type = "release";
 #endif
 
-    std::string rel_path = "data/ECF_HOME_" + build_type + "_" + compiler;
+    auto pid = getpid();
+    std::string rel_path =
+        "data/ECF_HOME__" + build_type + "__" + compiler + "__pid" + ecf::convert_to<std::string>(pid) + "__";
 
     // Allow post-fix to be added, to allow test to run in parallel
     if (auto custom_postfix = ecf::environment::fetch("TEST_ECF_HOME_POSTFIX"); custom_postfix) {

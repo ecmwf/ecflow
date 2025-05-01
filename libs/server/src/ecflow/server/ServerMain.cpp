@@ -11,9 +11,6 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/server/Server.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
-#ifdef ECF_OPENSSL
-    #include "ecflow/server/SslServer.hpp"
-#endif
 
 using namespace ecf;
 using namespace std;
@@ -49,6 +46,41 @@ int run_server(boost::asio::io_context& io, const ServerEnvironment& server_envi
     return 0;
 }
 
+namespace {
+
+int run_boost_services(boost::asio::io_context& io, const ServerEnvironment& server_environment) {
+    for (;;) {
+        try {
+            /// Start the server
+            /// The io_service::run() call will block until all asynchronous operations
+            /// have finished. While the server is running, there is always at least one
+            /// asynchronous operation outstanding: the asynchronous accept call waiting
+            /// for new incoming connections.
+            io.run();
+            if (server_environment.debug())
+                cout << "Normal exit from server\n";
+            break;
+        }
+        catch (std::exception& e) {
+            // deal with errors from the handlers
+            std::string msg = "run_server:: ";
+            msg += e.what();
+            std::cerr << msg << endl;
+            ecf::log(Log::ERR, msg);
+        }
+        if (server_environment.debug())
+            cout << "Server EXITING: <------------------------------------------------ port:"
+                 << server_environment.port() << endl;
+    }
+    return 0;
+}
+
+} // namespace
+
+int run(BaseServer& server) {
+    return run_boost_services(server.io_, server.serverEnv_);
+}
+
 int main(int argc, char* argv[]) {
 
     try {
@@ -70,19 +102,25 @@ int main(int argc, char* argv[]) {
                  << server_environment.port() << endl;
 
         boost::asio::io_context io;
-#ifdef ECF_OPENSSL
-        if (server_environment.ssl()) {
-            SslServer theServer(io, server_environment); // This can throw exception, bind address in use.
-            return run_server(io, server_environment);
+
+        // Launching Http server
+        if (ecf::is_any_variation_of_http(server_environment.protocol())) {
+            // On the server side, we actually only support HTTP
+            BasicHttpServer theServer(io, server_environment);
+            return run(theServer);
         }
-        else {
-            Server theServer(io, server_environment); // This can throw exception, bind address in use.
-            return run_server(io, server_environment);
+
+        // Launching custom TCP/IP (SSL) server
+        if constexpr (ECF_OPENSSL == 1) {
+            if (server_environment.ssl()) {
+                BasicSslServer theServer(io, server_environment); // This throws exception, if bind address in use
+                return run(theServer);
+            }
         }
-#else
-        Server theServer(io, server_environment); // This can throw exception, bind address in use.
-        return run_server(io, server_environment);
-#endif
+        
+        // Launching custom TCP/IP (non-SSL) server
+        BasicServer theServer(io, server_environment); // This throws exception, if bind address in use
+        return run(theServer);
     }
     catch (ServerEnvironmentException& e) {
         // *** deal with server options and environment exceptions

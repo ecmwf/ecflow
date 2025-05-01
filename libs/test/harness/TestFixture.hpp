@@ -18,13 +18,14 @@
 /// We will use $SCRATCH as this is accessible by both client and server.
 /// This means copying over the test data
 ///
-/// When TextFixture is GLOBAL, then we can't seem to call any of the
+/// When TestFixture is GLOBAL, then we can't seem to call any of the
 /// BOOST_REQUIRE_MESSAGE() macro in constructor/descructor as this causes a crash
 /// i.e order of initialisation issues
 ///
 
 #include <string>
 
+#include "ScratchDir.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 
@@ -45,20 +46,12 @@ struct TestFixture
     TestFixture();
     ~TestFixture();
 
-    // Configure the server with the job submission interval.
-    // i.e for each 'n' seconds of job submission interval the calendar
-    // is typically incremented by 1 minute. Hence speeding up the
-    // time and thus the testing. See Calendar for further details
     static int job_submission_interval();
 
     /// The location of ECF home will vary. If client/server on same machines we
     /// return test data location. Otherwise we need return a common file system location
     /// that was created in the constructor
     static std::string smshome();
-
-    /// Will end up checking to see if ECF_HOST is specified. This specifies the name
-    /// of the machine that is running the server. Otherwise return true
-    static bool serverOnLocalMachine();
 
     /// If running locally returns  location of client exe, if a server is on a remote
     /// machine, we need to determine its location.
@@ -89,7 +82,7 @@ struct TestFixture
 
     // Use for all comms with server
     static ClientInvoker& client();
-    static std::string port() { return port_; }
+    static const std::string& port() { return port_; }
 
 private:
     static std::string local_ecf_home();
@@ -97,7 +90,7 @@ private:
     void init(const std::string& project_test_dir);
 
 private:
-    static std::string scratchSmsHome_;
+    static std::unique_ptr<ScratchDir> scratch_dir_;
     static std::string host_;
     static std::string port_;
     static std::string test_dir_;         // used when we have an external server, different platform

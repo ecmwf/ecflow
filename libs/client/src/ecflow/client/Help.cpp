@@ -48,7 +48,8 @@ struct CommandFilter
     static bool is_command(const std::string& value) { return is_task_command(value) || is_user_command(value); }
 
 private:
-    constexpr static std::array known_options{"add", "debug", "host", "password", "port", "rid", "ssl", "user"};
+    constexpr static std::array
+        known_options{"add", "debug", "host", "password", "port", "rid", "ssl", "user", "http", "https"};
 };
 
 const char* client_env_description =

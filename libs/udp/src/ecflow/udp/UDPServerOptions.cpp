@@ -89,7 +89,9 @@ po::options_description UDPServerOptions::create_options() {
         (as_string(OPTION_ECFLOW_HOST).c_str(), po::value<std::string>(),
                         "The ecFlow server port to forward requests")
         (as_string(OPTION_ECFLOW_PORT).c_str(), po::value<size_t>()->default_value(3141),
-                        "The ecFlow server port to forward requests");
+                        "The ecFlow server port to forward requests")
+        (as_string(OPTION_ECFLOW_HTTP).c_str(),
+                        "Use HTTP protocol to communicate with ecFlow (default: false)");
     // clang-format on
 
     return general;

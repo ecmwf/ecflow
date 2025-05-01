@@ -67,6 +67,7 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
       submitJobsInterval_(defaultSubmitJobsInterval),
       ecf_prune_node_log_(0),
       jobGeneration_(true),
+      protocol_{ecf::Protocol::Plain},
       debug_(false),
       help_option_(false),
       version_option_(false),
@@ -80,7 +81,7 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
     }
 }
 
-ServerEnvironment::ServerEnvironment(int argc, char* argv[]) : ServerEnvironment(CommandLine(argc, argv)) {
+ServerEnvironment::ServerEnvironment(int argc, char* argv[]) : ServerEnvironment(CommandLine(argc, argv), "server_environment.cfg") {
 }
 
 ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file)
@@ -739,7 +740,7 @@ std::string ServerEnvironment::dump() const {
 
 std::vector<std::string> ServerEnvironment::expected_variables() {
     std::vector<std::string> expected_variables;
-    expected_variables.push_back(ecf::environment::ECF_HOME);
+    expected_variables.emplace_back(ecf::environment::ECF_HOME);
     expected_variables.emplace_back("ECF_LOG");
     expected_variables.emplace_back("ECF_CHECK");
     expected_variables.emplace_back("ECF_CHECKOLD");
@@ -750,18 +751,18 @@ std::vector<std::string> ServerEnvironment::expected_variables() {
     expected_variables.emplace_back("ECF_URL_CMD");
     expected_variables.emplace_back("ECF_URL_BASE");
     expected_variables.emplace_back("ECF_URL");
-    expected_variables.emplace_back("ECF_MICRO");
+    expected_variables.emplace_back(ecf::environment::ECF_MICRO);
     expected_variables.emplace_back("ECF_PID");
     expected_variables.emplace_back("ECF_VERSION");
     expected_variables.emplace_back("ECF_LISTS");
-    expected_variables.push_back(ecf::environment::ECF_PORT);
-    expected_variables.push_back(ecf::environment::ECF_HOST);
+    expected_variables.emplace_back(ecf::environment::ECF_PORT);
+    expected_variables.emplace_back(ecf::environment::ECF_HOST);
     expected_variables.emplace_back("ECF_INTERVAL");
-    expected_variables.emplace_back("ECF_PASSWD");
-    expected_variables.emplace_back("ECF_CUSTOM_PASSWD");
+    expected_variables.emplace_back(ecf::environment::ECF_PASSWD);
+    expected_variables.emplace_back(ecf::environment::ECF_CUSTOM_PASSWD);
 #ifdef ECF_OPENSSL
-    if (ecf::environment::has("ECF_SSL")) {
-        expected_variables.emplace_back("ECF_SSL");
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
+        expected_variables.emplace_back(ecf::environment::ECF_SSL);
     }
 #endif
     return expected_variables;

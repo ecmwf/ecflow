@@ -9,8 +9,11 @@
  */
 
 #ifdef ECF_OPENSSL
-    #define CPPHTTPLIB_OPENSSL_SUPPORT
+    #define CPPHTTPLIB_OPENSSL_SUPPORT 1
 #endif
+
+#define CPPHTTPLIB_THREAD_POOL_COUNT 1
+#define CPPHTTPLIB_ZLIB_SUPPORT 1
 
 #include <httplib.h>
 
@@ -72,8 +75,13 @@ void start_api_server() {
     }
 
     std::thread t([] {
-        int argc     = 3;
-        char* argv[] = {(char*)"ecflow_http", (char*)"--polling_interval", (char*)"1", NULL};
+#if defined(ECF_TEST_HTTP_BACKEND)
+        char* argv[] = {(char*)"ecflow_http", (char*)"-v", (char*)"--polling_interval", (char*)"1", (char*)"--port", (char*)"8081", (char*)"--http", NULL};
+        int argc     = 7;
+#else
+        char* argv[] = {(char*)"ecflow_http", (char*)"-v", (char*)"--polling_interval", (char*)"1", (char*)"--port", (char*)"8080", NULL};
+        int argc     = 6;
+#endif
 
         HttpServer server(argc, argv);
         server.run();
@@ -88,7 +96,12 @@ std::unique_ptr<InvokeServer> start_ecflow_server() {
         return nullptr;
     }
 
-    auto srv = std::make_unique<InvokeServer>();
+    bool use_http_backend = false;
+#if defined(ECF_TEST_HTTP_BACKEND)
+    use_http_backend = true;
+#endif
+
+    auto srv = std::make_unique<InvokeServer>(use_http_backend);
 
     auto port = ecf::environment::get("ECF_PORT");
     BOOST_REQUIRE_MESSAGE(srv->server_started, "Server failed to start on port " << port);
@@ -108,7 +121,11 @@ struct SetupTest
             throw std::runtime_error("Failed to set signal mask");
         }
 
+#if defined(ECF_TEST_HTTP_BACKEND)
+        setenv("ECF_PORT", "3198", 0);
+#else
         setenv("ECF_PORT", "3199", 0);
+#endif
         setenv("ECF_HOST", "localhost", 1);
     }
     void setup() {
@@ -163,7 +180,11 @@ httplib::Result request(const std::string& method,
                         const std::string& payload             = "",
                         const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
+#if defined(ECF_TEST_HTTP_BACKEND)
+    httplib::SSLClient c(API_HOST, 8081);
+#else
     httplib::SSLClient c(API_HOST, 8080);
+#endif
 
     c.enable_server_certificate_verification(false);
     c.set_connection_timeout(3);

@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_base_test_MockServer_HPP
-#define ecflow_base_test_MockServer_HPP
+#ifndef ecflow_base_test_harness_MockServer_HPP
+#define ecflow_base_test_harness_MockServer_HPP
 
 #include <cassert>
 
@@ -29,6 +29,8 @@ public:
     {
         void operator()(void const*) const {}
     };
+
+    std::string ssl() const override { return ""; }
 
     // Only in server side do we increment state/modify numbers, controlled by: Ecf::set_server(true)
     explicit MockServer(Defs* defs) : defs_(defs_ptr(defs, MockServer::null_deleter())) { Ecf::set_server(true); }
@@ -156,4 +158,4 @@ private:
     ecf::SuiteChanged suiteChanged_;
 };
 
-#endif /* ecflow_base_test_MockServer_HPP */
+#endif /* ecflow_base_test_harness_MockServer_HPP */

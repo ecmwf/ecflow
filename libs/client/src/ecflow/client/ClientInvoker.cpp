@@ -82,6 +82,17 @@
     #define NEXT_HOST_POLL_PERIOD 30
 #endif
 
+#include "ecflow/base/HttpClient.hpp"
+
+#if defined(ADD)
+// undefine to avoid conflict with /usr/include/arpa/nameser_compat.h #define ADD ns_uop_add
+    #undef ADD
+#endif
+#if defined(STATUS)
+// undefine to avoid conflict with /usr/include/arpa/nameser_compat.h #define STATUS ns_o_status
+    #undef STATUS
+#endif
+
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
@@ -410,6 +421,10 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 #ifdef ECF_OPENSSL
                     if (clientEnv_.ssl()) {
 
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (with SSL) <<<" << endl;
+                        }
+
                         clientEnv_.openssl().init_for_client();
 
                         SslClient theClient(io,
@@ -424,8 +439,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     #endif
                             io.run();
                         }
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
@@ -440,8 +456,40 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                             return 1;
                         }
                     }
-                    else {
+                    else
 #endif
+                        if (ecf::is_any_variation_of_http(clientEnv_.protocol())) {
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using HTTP client <<<" << endl;
+                        }
+
+                        const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
+                        HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
+                        theClient.run();
+
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
+                        }
+
+                        /// Let see how the server responded if at all.
+                        try {
+                            /// will return false if further action required
+                            if (theClient.handle_server_response(server_reply_, clientEnv_.debug())) {
+                                // The normal response.  RoundTriprecorder will record in rtt_
+                                return 0; // the normal exit path
+                            }
+                        }
+                        catch (std::exception& e) {
+                            server_reply_.set_error_msg(e.what());
+                            return 1;
+                        }
+                    }
+                    else {
+                        if (clientEnv_.debug()) {
+                            cout << TimeStamp::now() << "ClientInvoker: >>> Using TCP/IP client (without SSL) <<<"
+                                 << endl;
+                        }
+
                         Client theClient(
                             io, cts_cmd, clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout());
                         {
@@ -450,8 +498,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 #endif
                             io.run();
                         }
-                        if (clientEnv_.debug())
+                        if (clientEnv_.debug()) {
                             cout << TimeStamp::now() << "ClientInvoker: >>> After: io_context::run() <<<" << endl;
+                        }
 
                         /// Let see how the server responded if at all.
                         try {
@@ -1504,58 +1553,6 @@ std::string ClientInvoker::client_env_host_port() const {
     host_port += Str::COLON();
     host_port += clientEnv_.port();
     return host_port;
-}
-
-std::string ClientInvoker::find_free_port(int seed_port_number, bool debug) {
-    // Ping failed, We need to distinguish between:
-    //    a/ Server does not exist : <FREE> port
-    //    b/ Address in use        : <BUSY> port on existing server
-    // Using server_version() but then get error messages
-    // ******** Until this is done we can't implement port hopping **********
-
-    if (debug)
-        cout << "  ClientInvoker::find_free_port: starting with port " << seed_port_number << "\n";
-    int the_port = seed_port_number;
-    std::string free_port;
-    ClientInvoker client;
-    client.set_retry_connection_period(1); // avoid long wait
-    client.set_connection_attempts(1);     // avoid long wait
-    while (true) {
-        free_port = ecf::convert_to<std::string>(the_port);
-        try {
-            if (debug)
-                cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << free_port << "'\n";
-            client.set_host_port(Str::LOCALHOST(), free_port);
-            client.pingServer();
-            if (debug)
-                cout << "   Connected to server on port " << free_port << " trying next port\n";
-            the_port++;
-        }
-        catch (std::runtime_error& e) {
-            std::string error_msg = e.what();
-            if (debug)
-                cout << "   " << error_msg;
-            if (error_msg.find("authentication failed") != std::string::npos) {
-                if (debug)
-                    cout << "   Could not connect, due to authentication failure, hence port " << the_port
-                         << " is used, trying next port\n";
-                the_port++;
-                continue;
-            }
-            if (error_msg.find("invalid_argument") != std::string::npos) {
-                if (debug)
-                    cout << "   Mixing 4 and 5 series ?, hence port " << the_port << " is used, trying next port\n";
-                the_port++;
-                continue;
-            }
-            else {
-                if (debug)
-                    cout << "   Found free port " << free_port << "\n";
-                break;
-            }
-        }
-    }
-    return free_port;
 }
 
 bool ClientInvoker::wait_for_server_reply(int time_out) const {
