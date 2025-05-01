@@ -31,7 +31,7 @@ find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CUR
 # Project
 # =========================================================================================
 
-project( ecflow LANGUAGES CXX VERSION 5.13.8 )
+project( ecflow LANGUAGES CXX VERSION 5.14.0 )
 #
 # Important:
 #   The CMake project version is used, as generated CMake variables, to filter .../ecflow/core/ecflow_version.h.in
