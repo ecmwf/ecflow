@@ -884,6 +884,18 @@ to run as alias or not:
                       )
 
 
+.. py:method:: Client.enable_http( (Client)arg1) -> None :
+   :module: ecflow
+
+Enable HTTP communication
+
+
+.. py:method:: Client.enable_https( (Client)arg1) -> None :
+   :module: ecflow
+
+Enable HTTPS communication
+
+
 .. py:method:: Client.enable_ssl( (Client)arg1) -> None :
    :module: ecflow
 

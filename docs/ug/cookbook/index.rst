@@ -39,3 +39,4 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
    python_client_for_fault_tolerance
    how_to_mirror_a_remote_task
    how_to_trigger_a_task_based_on_aviso_notification
+   how_to_use_ecFlow_with_http

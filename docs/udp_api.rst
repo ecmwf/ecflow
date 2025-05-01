@@ -57,6 +57,10 @@ All environment variables with "UDP" are new.
      - Environment variable
      - Default Value
      - Description
+   * - --http
+     -
+     - false
+     - Use HTTP to contact the ecFlow server
    * - --ecflow_host
      - ECF_HOST
      - localhost
