@@ -126,10 +126,8 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
                 "Show ecflow version number,boost library version, compiler used and compilation date, then exit");
 
     // 1) Parse the CLI options
-    po::parsed_options parsed_options = po::command_line_parser(cl.tokens())
-                                            .options(desc)
-                                            .style(po::command_line_style::default_style)
-                                            .run();
+    po::parsed_options parsed_options =
+        po::command_line_parser(cl.tokens()).options(desc).style(po::command_line_style::default_style).run();
 
     // 2) Store the CLI options into the variable map
     po::store(parsed_options, vm_);

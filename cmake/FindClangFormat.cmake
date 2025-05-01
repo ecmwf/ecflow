@@ -59,6 +59,13 @@ function(target_clangformat TARGET)
     endforeach ()
   endif ()
 
+  if(clangformat_sources)
+    message(STATUS "clangformat target '${TARGET}': OK")
+  else()
+    message(STATUS "clangformat target '${TARGET}': Skipping, no sources found")
+    return()
+  endif()
+
   # Remove auto-generated sources (e.g. Qt files)
   list(FILTER clangformat_sources EXCLUDE REGEX ".*/moc_.*")
   list(FILTER clangformat_sources EXCLUDE REGEX ".*/ui_.*")

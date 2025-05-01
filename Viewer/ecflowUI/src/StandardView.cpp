@@ -153,7 +153,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding, bool afterIsUni
             maxRowWidth_ = item->right();
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-            // UiLog().dbg() <<  " item=" << currentIndex.data().toString();
+        // UiLog().dbg() <<  " item=" << currentIndex.data().toString();
 #endif
         // We need to expand the item
         if (recursiveExpanding || isIndexExpanded(currentIndex)) {
@@ -189,7 +189,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding, bool afterIsUni
         return; // nothing changed
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-        // UiLog().dbg() << " update parent total";
+    // UiLog().dbg() << " update parent total";
 #endif
 
     int pp = parentId;
@@ -239,7 +239,7 @@ void StandardView::paint(QPainter* painter, const QRegion& region) {
         return;
 
 #ifdef _UI_STANDARDVIEW_DEBUG
-        // UiLog().dbg() << "scrollX" << horizontalScrollBar()->value() << " " << viewport()->width();
+    // UiLog().dbg() << "scrollX" << horizontalScrollBar()->value() << " " << viewport()->width();
 #endif
 
     int xOffset = 0;

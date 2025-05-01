@@ -81,7 +81,8 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
     }
 }
 
-ServerEnvironment::ServerEnvironment(int argc, char* argv[]) : ServerEnvironment(CommandLine(argc, argv), "server_environment.cfg") {
+ServerEnvironment::ServerEnvironment(int argc, char* argv[])
+    : ServerEnvironment(CommandLine(argc, argv), "server_environment.cfg") {
 }
 
 ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file)

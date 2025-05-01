@@ -266,7 +266,7 @@ void TimeSeries::requeue(const ecf::Calendar& c, bool reset_next_time_slot) {
     }
 
     if (nextTimeSlot_ > finish_) {
-        isValid_          = false;      // time has expired
+        isValid_            = false;      // time has expired
         suiteTimeAtRequeue_ = TimeSlot(); // expire for new requeue
 #ifdef DEBUG_TIME_SERIES
         log(Log::DBG, "TimeSeries::requeue  HOLDING TIME EXPIRED (nextTimeSlot_ > finish_) " + dump());

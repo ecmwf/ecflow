@@ -28,7 +28,7 @@ public:
     ~SessionDialog() override;
 
 public Q_SLOTS:
-    void on_savedSessionsList__currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+    void on_savedSessionsList__currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
     void on_cloneButton__clicked();
     void on_deleteButton__clicked();
     void on_renameButton__clicked();

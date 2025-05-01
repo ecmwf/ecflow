@@ -76,10 +76,23 @@ void start_api_server() {
 
     std::thread t([] {
 #if defined(ECF_TEST_HTTP_BACKEND)
-        char* argv[] = {(char*)"ecflow_http", (char*)"-v", (char*)"--polling_interval", (char*)"1", (char*)"--port", (char*)"8081", (char*)"--http", NULL};
+        char* argv[] = {(char*)"ecflow_http",
+                        (char*)"-v",
+                        (char*)"--polling_interval",
+                        (char*)"1",
+                        (char*)"--port",
+                        (char*)"8081",
+                        (char*)"--http",
+                        NULL};
         int argc     = 7;
 #else
-        char* argv[] = {(char*)"ecflow_http", (char*)"-v", (char*)"--polling_interval", (char*)"1", (char*)"--port", (char*)"8080", NULL};
+        char* argv[] = {(char*)"ecflow_http",
+                        (char*)"-v",
+                        (char*)"--polling_interval",
+                        (char*)"1",
+                        (char*)"--port",
+                        (char*)"8080",
+                        NULL};
         int argc     = 6;
 #endif
 

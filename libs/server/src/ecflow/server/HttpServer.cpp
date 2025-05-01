@@ -109,9 +109,7 @@ class HttpSession : public std::enable_shared_from_this<HttpSession> {
 
 public:
     // Take ownership of the stream
-    HttpSession(boost::asio::ip::tcp::socket&& socket, HttpServer* owner)
-        : socket_(std::move(socket)),
-          owner_{owner} {}
+    HttpSession(boost::asio::ip::tcp::socket&& socket, HttpServer* owner) : socket_(std::move(socket)), owner_{owner} {}
 
     void run() {
         // Clear the incoming and outgoing data buffers used buy the session

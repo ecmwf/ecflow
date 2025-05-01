@@ -77,7 +77,9 @@ public:
         return BasicServer::authenticateReadAccess(user, custom_user, passwd, paths);
     }
 
-    bool authenticateWriteAccess(const std::string& user) override { return BasicServer::authenticateWriteAccess(user); }
+    bool authenticateWriteAccess(const std::string& user) override {
+        return BasicServer::authenticateWriteAccess(user);
+    }
     bool authenticateWriteAccess(const std::string& user, const std::string& path) override {
         return BasicServer::authenticateWriteAccess(user, path);
     }

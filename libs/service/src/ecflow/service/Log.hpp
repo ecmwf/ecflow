@@ -17,10 +17,10 @@
 
 #include "ecflow/core/Log.hpp"
 
-#define SLOG(LEVEL, MESSAGE)                                                     \
-    [&]() {                                                                      \
-        using namespace ecf::service::log;                                       \
-        LOG(LevelTraits<Level::LEVEL>::mapping_type,                             \
+#define SLOG(LEVEL, MESSAGE)                                                      \
+    [&]() {                                                                       \
+        using namespace ecf::service::log;                                        \
+        LOG(LevelTraits<Level::LEVEL>::mapping_type,                              \
             MESSAGE << " {" << LevelTraits<Level::LEVEL>::name << "}" << Meta{}); \
     }()
 

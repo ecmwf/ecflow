@@ -63,7 +63,6 @@ QPixmap IconItem::pixmap(int size) {
     return {};
 }
 
-
 QPixmap IconItem::pixmapToHeight(int size) {
     auto it = pixmapsByHeight_.find(size);
     if (it != pixmapsByHeight_.end())
@@ -72,10 +71,10 @@ QPixmap IconItem::pixmapToHeight(int size) {
         QPixmap pix;
         QImageReader imgR(path_);
         if (imgR.canRead()) {
-            int w = imgR.size().width();
-            int h = imgR.size().height();
-            float r = static_cast<float>(w)/static_cast<float>(h);
-            imgR.setScaledSize(QSize(size*r, size));
+            int w   = imgR.size().width();
+            int h   = imgR.size().height();
+            float r = static_cast<float>(w) / static_cast<float>(h);
+            imgR.setScaledSize(QSize(size * r, size));
             QImage img = imgR.read();
             pix        = QPixmap::fromImage(img);
         }
@@ -112,9 +111,10 @@ IconProvider::~IconProvider() {
     // Important!
     //
     // The life time of the singleton instance 'iconProvider' is used to manage the life time of loaded Icons.
-    // This means that when the application closes, after main() has finished, the destruction of the instance clears the Icons.
+    // This means that when the application closes, after main() has finished, the destruction of the instance clears
+    // the Icons.
     //
-    for(auto icon : icons_) {
+    for (auto icon : icons_) {
         delete icon.second;
     }
 }

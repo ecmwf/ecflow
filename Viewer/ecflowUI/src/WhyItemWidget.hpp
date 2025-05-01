@@ -25,11 +25,11 @@ class WhyItemWidget : public HtmlItemWidget, public InfoPanelItem {
 public:
     explicit WhyItemWidget(QWidget* parent = nullptr);
     WhyItemWidget(const WhyItemWidget&) = delete;
-    WhyItemWidget(WhyItemWidget&&) = delete;
+    WhyItemWidget(WhyItemWidget&&)      = delete;
     ~WhyItemWidget() override;
 
     WhyItemWidget& operator=(const WhyItemWidget&) = delete;
-    WhyItemWidget& operator=(WhyItemWidget&&) = delete;
+    WhyItemWidget& operator=(WhyItemWidget&&)      = delete;
 
     void reload(VInfo_ptr) override;
     QWidget* realWidget() override;

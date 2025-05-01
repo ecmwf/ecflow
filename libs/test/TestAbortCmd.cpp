@@ -69,17 +69,16 @@ BOOST_AUTO_TEST_CASE(test_abort_cmd) {
     // Create a custom ecf file for test_task_abort_cmd/family0/abort to invoke the child abort command
     //
 
-    std::string templateEcfFile =
-        "%include <head.h>\n"
-        "\n"
-        "echo do some work\n"
-        "if [ %ECF_TRYNO% -le 3 ] ; then\n"
-        "   %ECF_CLIENT_EXE_PATH% --abort=\"expected abort at task try no %ECF_TRYNO%\"\n"
-        "   trap 0       # Remove all traps\n"
-        "   exit 0       # End the shell before child command complete\n"
-        "fi\n"
-        "\n"
-        "%include <tail.h>\n";
+    std::string templateEcfFile = "%include <head.h>\n"
+                                  "\n"
+                                  "echo do some work\n"
+                                  "if [ %ECF_TRYNO% -le 3 ] ; then\n"
+                                  "   %ECF_CLIENT_EXE_PATH% --abort=\"expected abort at task try no %ECF_TRYNO%\"\n"
+                                  "   trap 0       # Remove all traps\n"
+                                  "   exit 0       # End the shell before child command complete\n"
+                                  "fi\n"
+                                  "\n"
+                                  "%include <tail.h>\n";
 
     // The test harness will create corresponding directory structure
     // Override the default ECF file, with our custom ECF_ file

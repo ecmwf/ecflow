@@ -54,12 +54,8 @@ public:
         }
         return state_change_no_;
     }
-    static counter_t state_change_no() {
-        return state_change_no_;
-    }
-    static void set_state_change_no(counter_t x) {
-        state_change_no_ = x;
-    }
+    static counter_t state_change_no() { return state_change_no_; }
+    static void set_state_change_no(counter_t x) { state_change_no_ = x; }
 
     /// The modify_change_no_ is used for node addition and deletion and re-ordering
     static counter_t incr_modify_change_no() {
@@ -68,12 +64,8 @@ public:
         }
         return modify_change_no_;
     }
-    static counter_t modify_change_no() {
-        return modify_change_no_;
-    }
-    static void set_modify_change_no(counter_t x) {
-        modify_change_no_ = x;
-    }
+    static counter_t modify_change_no() { return modify_change_no_; }
+    static void set_modify_change_no(counter_t x) { modify_change_no_ = x; }
 
     /// Returns true if we are on the server side.
     /// Only in server side do we increment state/modify numbers

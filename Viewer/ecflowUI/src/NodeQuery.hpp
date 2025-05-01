@@ -42,8 +42,8 @@ public:
 
 protected:
     QString name_;
-    QList<VAttributeType*> types_; // This is a non-owning container
-    QList<NodeQueryOption*> options_; // This is a non-owning container 
+    QList<VAttributeType*> types_;    // This is a non-owning container
+    QList<NodeQueryOption*> options_; // This is a non-owning container
 };
 
 class NodeQueryVarAttrGroup : public NodeQueryAttrGroup {

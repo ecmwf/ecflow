@@ -53,7 +53,7 @@ public:
     virtual int value() const {
         assert(false);
         return 0;
-    }                                                       // only valid for leaf or operators
+    } // only valid for leaf or operators
     virtual bool check(std::string&) const { return true; } // check divide or modulo by zero
 
     virtual bool is_valid_ast(std::string& error_msg) const                 = 0;

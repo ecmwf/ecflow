@@ -31,8 +31,8 @@ void ZombieUtil::test_clean_up(int timeout) {
         cout << "Client Environment:\n" << TestFixture::client().to_string() << "\n";
         cout << Zombie::pretty_print(zombies, 9) << "\n, attempting to *fob* then *remove* ...\n";
 
-        int no_fobed =
-            do_zombie_user_action(ZombieCtrlAction::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
+        int no_fobed = do_zombie_user_action(
+            ZombieCtrlAction::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
 
         // In order to FOB, we must wait, till a child command, talks to the server.
         if (no_fobed) {
@@ -44,7 +44,8 @@ void ZombieUtil::test_clean_up(int timeout) {
                  << "s before attempting to remove\n";
             sleep(wait);
         }
-        (void)do_zombie_user_action(ZombieCtrlAction::REMOVE, no_fobed, timeout, false /* don't fail if it takes to long */);
+        (void)do_zombie_user_action(
+            ZombieCtrlAction::REMOVE, no_fobed, timeout, false /* don't fail if it takes to long */);
     }
 }
 
@@ -56,8 +57,8 @@ int ZombieUtil::do_zombie_user_action(ZombieCtrlAction uc,
     bool ecf_debug_zombies = false;
     if (ecf::environment::has("ECF_DEBUG_ZOMBIES")) {
         ecf_debug_zombies = true;
-        cout << "\n   do_zombie_user_action " << ecf::to_string(uc) << " expected_action_cnt "
-             << expected_action_cnt << "\n";
+        cout << "\n   do_zombie_user_action " << ecf::to_string(uc) << " expected_action_cnt " << expected_action_cnt
+             << "\n";
     }
 
     int action_set = 0;

@@ -18,8 +18,8 @@
 ///        IMPORTANT: This functionality is used in TESTS only.
 ///
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 #include "ecflow/core/Converter.hpp"
@@ -32,7 +32,7 @@ class EcfPortLock {
 
     /**
      * Attempts to create the given lock file.
-     * 
+     *
      * \returns false, if: (1) the lock file already exists;
      *                     (2) the lock file could not be created (e.g. due to permissions)
      *          true, if lock file was created successfully
@@ -42,10 +42,11 @@ class EcfPortLock {
         if (fs::exists(path)) {
             std::cout << " *** Found an existing lock file! Giving up..." << std::endl;
             return false;
-        } else {
+        }
+        else {
             std::cout << " *** Didn't find an existing lock file! Creating one NOW..." << std::endl;
             std::ofstream lock(path);
-            if(!lock.is_open()) {
+            if (!lock.is_open()) {
                 std::cout << " *** Unable to create a lock file! Giving up..." << std::endl;
                 return false;
             }
@@ -63,9 +64,9 @@ public:
 
     /**
      * Attempts to lock the given port
-     * 
+     *
      * Has the side-effect of creating a lock file on the filesystem related to the given port
-     * 
+     *
      * \returns true, if lock was achieved; false otherwise.
      */
     static bool try_port_lock(int port, bool debug = false) {
@@ -89,9 +90,9 @@ public:
 
     /**
      * Iteratively attempts to lock an available port, starting the search from the given port
-     * 
+     *
      * Has the side-effect of creating a lock file on the filesystem related to the given port
-     * 
+     *
      * \returns the available port
      */
     static int try_next_port_lock(int port, bool debug = false) {
@@ -103,8 +104,8 @@ public:
 
     /**
      * Performs the unlock the the given port
-     * 
-     * Effectively removes the lock file related to the given port 
+     *
+     * Effectively removes the lock file related to the given port
      */
     static void try_port_unlock(int port, bool debug = false) {
         std::string the_port = ecf::convert_to<std::string>(port);

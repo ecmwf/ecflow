@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
                 return run(theServer);
             }
         }
-        
+
         // Launching custom TCP/IP (non-SSL) server
         BasicServer theServer(io, server_environment); // This throws exception, if bind address in use
         return run(theServer);

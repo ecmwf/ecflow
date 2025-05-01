@@ -44,8 +44,8 @@ public:
 
 private:
     std::string scheme_; /// the scheme to use
-    std::string host_; /// the servers name
-    std::string port_; /// the port on the server
+    std::string host_;   /// the servers name
+    std::string port_;   /// the port on the server
     std::string base_url_;
     httplib::Client client_;
 

@@ -17,4 +17,4 @@
 //
 // Note: Due to boost deficiency this can't be easily accessed, so TestFixture makes use of global data.
 //
-BOOST_TEST_GLOBAL_FIXTURE( TestFixture );
+BOOST_TEST_GLOBAL_FIXTURE(TestFixture);

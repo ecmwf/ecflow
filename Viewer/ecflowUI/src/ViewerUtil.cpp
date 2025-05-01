@@ -228,7 +228,7 @@ QString ViewerUtil::wildcardToRegex(const QString& wc_str) {
                 if (enableEscaping) {
                     if (isEscaping) {
                         rx += QLatin1String("\\\\");
-                    }                 // we insert the \\ later if necessary
+                    } // we insert the \\ later if necessary
                     if (i == wclen) { // the end
                         rx += QLatin1String("\\\\");
                     }

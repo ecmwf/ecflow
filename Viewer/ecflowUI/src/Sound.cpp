@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <regex>
 
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
@@ -19,9 +20,6 @@
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "ecflow/core/Converter.hpp"
-
-#include <regex>
-
 #include "ecflow/core/Str.hpp"
 
 Sound* Sound::instance_ = nullptr;

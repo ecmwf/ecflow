@@ -475,10 +475,10 @@ void VariableAddDialog::notifyCleared(VariableModelDataHandler*) {
     if (!suspended_)
         close();
 
-        // However, when the suspended mode finished the data_ is cleared and reloaded before
-        // this dialogue gets the notification about the suspended mode change. So
-        // we delay the decision on what to do until we receieve this notification in
-        // slotSuspendedChanged()
+    // However, when the suspended mode finished the data_ is cleared and reloaded before
+    // this dialogue gets the notification about the suspended mode change. So
+    // we delay the decision on what to do until we receieve this notification in
+    // slotSuspendedChanged()
 
 #if 0
     messageLabel_->showWarning(nodeTypeCapital_ + " <b>" + nodeName_ +
