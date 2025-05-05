@@ -12,7 +12,7 @@
 #define ecflow_test_harness_ZombieUtil_HPP
 
 #include "ecflow/core/Child.hpp"
-#include "ecflow/core/User.hpp"
+#include "ecflow/core/ZombieCtrlAction.hpp"
 
 class ClientInvoker;
 
@@ -23,7 +23,7 @@ private:
 
 public:
     static void test_clean_up(int timeout);
-    static int do_zombie_user_action(ecf::User::Action uc,
+    static int do_zombie_user_action(ecf::ZombieCtrlAction uc,
                                      int expected_action_cnt,
                                      int max_time_to_wait,
                                      bool fail_if_to_long = true);

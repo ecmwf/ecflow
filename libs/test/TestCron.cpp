@@ -24,6 +24,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -69,8 +70,9 @@ static void wait_for_cron(int max_time_to_wait, const std::string& path) {
 }
 
 BOOST_AUTO_TEST_CASE(test_cron_time_series) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_cron_time_series " << flush;
     TestClean clean_at_start_and_end;
 
     // SLOW SYSTEMS

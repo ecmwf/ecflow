@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestSupport.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 namespace ut = boost::unit_test;
 
@@ -19,6 +20,8 @@ BOOST_FIXTURE_TEST_SUITE(S_UDP, ecf::test::EnableServersFixture)
 BOOST_AUTO_TEST_SUITE(T_UDPServer)
 
 BOOST_AUTO_TEST_CASE(can_update_events) {
+    ECF_NAME_THIS_TEST();
+
     // Family f2
     {
         auto event = ecflow_server.get_event("/s1/f2", "event_at_f2");
@@ -61,6 +64,8 @@ BOOST_AUTO_TEST_CASE(can_update_events) {
 }
 
 BOOST_AUTO_TEST_CASE(can_update_labels) {
+    ECF_NAME_THIS_TEST();
+
     // Family f2
     {
         auto label = ecflow_server.get_label("/s1/f2", "label_at_f2");
@@ -95,6 +100,8 @@ BOOST_AUTO_TEST_CASE(can_update_labels) {
 }
 
 BOOST_AUTO_TEST_CASE(can_update_meters) {
+    ECF_NAME_THIS_TEST();
+
     // Family f2
     {
         auto meter = ecflow_server.get_meter("/s1/f2", "meter_at_f2");
@@ -129,6 +136,8 @@ BOOST_AUTO_TEST_CASE(can_update_meters) {
 }
 
 BOOST_AUTO_TEST_CASE(can_update_meter_outside_valid_range) {
+    ECF_NAME_THIS_TEST();
+
     {
         ecflow_udp.update_meter("/s1/f2/f3/t4", "meter_at_t4", 50);
         auto meter = ecflow_server.get_meter("/s1/f2/f3/t4", "meter_at_t4");
@@ -147,6 +156,8 @@ BOOST_AUTO_TEST_CASE(can_update_meter_outside_valid_range) {
 }
 
 BOOST_AUTO_TEST_CASE(can_handle_invalid_json_request) {
+    ECF_NAME_THIS_TEST();
+
     ecflow_udp.send(R"()");
     ecflow_udp.send(R"({})");
     ecflow_udp.send(R"({"method": "invalid", "data": {}})");
@@ -161,6 +172,7 @@ BOOST_AUTO_TEST_CASE(can_handle_invalid_json_request) {
 }
 
 BOOST_AUTO_TEST_CASE(can_authenticate_requests) {
+    ECF_NAME_THIS_TEST();
 
     ecflow_udp.send(R"()");
 }

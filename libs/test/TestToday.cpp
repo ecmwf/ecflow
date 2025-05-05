@@ -24,6 +24,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -37,8 +38,9 @@ BOOST_AUTO_TEST_SUITE(T_Today)
 // In the test case we will dynamically create all the test data.
 // The data is created dynamically so that we can stress test the server
 BOOST_AUTO_TEST_CASE(test_today_single_slot) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_today_single_slot " << flush;
     TestClean clean_at_start_and_end;
 
     // **************************************************************************
@@ -90,8 +92,9 @@ BOOST_AUTO_TEST_CASE(test_today_single_slot) {
 }
 
 BOOST_AUTO_TEST_CASE(test_today_relative_time_series) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_today_relative_time_series " << flush;
     TestClean clean_at_start_and_end;
 
     // SLOW SYSTEMS
@@ -136,8 +139,9 @@ BOOST_AUTO_TEST_CASE(test_today_relative_time_series) {
 }
 
 BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_today_real_time_series " << flush;
     TestClean clean_at_start_and_end;
 
     // SLOW SYSTEMS

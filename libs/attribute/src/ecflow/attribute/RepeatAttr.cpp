@@ -16,7 +16,7 @@
 #include <boost/date_time.hpp>
 #include <boost/date_time/posix_time/time_parsers.hpp>
 
-#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Indentor.hpp"
@@ -260,8 +260,7 @@ void RepeatDate::update_repeat_genvar_value() const {
             dow_.set_value(ecf::convert_to<std::string>(day_of_week));
 
             long last_value = last_valid_value();
-            long julian     = Cal::date_to_julian(last_value);
-            julian_.set_value(ecf::convert_to<std::string>(julian));
+            julian_.set_value(ecf::convert_to<std::string>(ecf::CalendarDate(last_value).as_julian_day().value()));
         }
         catch (std::exception& e) {
             std::stringstream ss;
@@ -304,17 +303,13 @@ long RepeatDate::valid_value(long value) const {
 }
 
 long RepeatDate::last_valid_value_minus(int val) const {
-    long last_value = last_valid_value();
-    long julian     = Cal::date_to_julian(last_value);
-    julian -= val;
-    return Cal::julian_to_date(julian);
+    auto result = ecf::CalendarDate(last_valid_value()) - val;
+    return result.value();
 }
 
 long RepeatDate::last_valid_value_plus(int val) const {
-    long last_value = last_valid_value();
-    long julian     = Cal::date_to_julian(last_value);
-    julian += val;
-    return Cal::julian_to_date(julian);
+    auto result = ecf::CalendarDate(last_valid_value()) + val;
+    return result.value();
 }
 
 void RepeatDate::reset() {
@@ -384,11 +379,8 @@ std::string RepeatDate::value_as_string(int index) const {
 }
 
 std::string RepeatDate::next_value_as_string() const {
-    long val = last_valid_value();
-
-    long julian = Cal::date_to_julian(val);
-    julian += delta_;
-    val = Cal::julian_to_date(julian);
+    auto result = ecf::CalendarDate(last_valid_value()) + delta_;
+    long val    = result.value();
 
     try {
         return ecf::convert_to<std::string>(valid_value(val));
@@ -399,11 +391,8 @@ std::string RepeatDate::next_value_as_string() const {
 }
 
 std::string RepeatDate::prev_value_as_string() const {
-    long val = last_valid_value();
-
-    long julian = Cal::date_to_julian(val);
-    julian -= delta_;
-    val = Cal::julian_to_date(julian);
+    auto result = ecf::CalendarDate(last_valid_value()) - delta_;
+    long val    = result.value();
 
     try {
         return ecf::convert_to<std::string>(valid_value(val));
@@ -414,9 +403,8 @@ std::string RepeatDate::prev_value_as_string() const {
 }
 
 void RepeatDate::increment() {
-    long julian = Cal::date_to_julian(value_);
-    julian += delta_;
-    set_value(Cal::julian_to_date(julian));
+    auto result = ecf::CalendarDate(last_valid_value()) + delta_;
+    set_value(result.value());
 }
 
 void RepeatDate::change(const std::string& newdate) {
@@ -469,8 +457,8 @@ void RepeatDate::changeValue(long the_new_date) {
     }
 
     // Check new value is in step. ECFLOW-325 repeat date 7
-    long julian_new_date = Cal::date_to_julian(the_new_date);
-    long julian_start    = Cal::date_to_julian(start_);
+    long julian_new_date = ecf::CalendarDate(the_new_date).as_julian_day().value();
+    long julian_start    = ecf::CalendarDate(start_).as_julian_day().value();
     long diff            = julian_new_date - julian_start;
     if (diff % delta_ != 0) {
         std::stringstream ss;
@@ -485,9 +473,9 @@ void RepeatDate::changeValue(long the_new_date) {
 void RepeatDate::set_value(long the_new_date) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     value_ = the_new_date;
     update_repeat_genvar_value();
     incr_state_change_no();
@@ -807,9 +795,9 @@ void RepeatDateTime::changeValue(long the_new_date) {
 void RepeatDateTime::set_value(long the_new_date) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     value_ = coerce_to_instant(the_new_date);
     update_repeat_genvar_value();
     incr_state_change_no();
@@ -913,8 +901,7 @@ void RepeatDateList::update_repeat_genvar_value() const {
             dom_.set_value(ecf::convert_to<std::string>(day_of_month));
             dow_.set_value(ecf::convert_to<std::string>(day_of_week));
 
-            long last_value = last_valid_value();
-            long julian     = Cal::date_to_julian(last_value);
+            long julian = CalendarDate(last_valid_value()).as_julian_day().value();
             julian_.set_value(ecf::convert_to<std::string>(julian));
         }
         catch (std::exception& e) {
@@ -1001,9 +988,7 @@ long RepeatDateList::last_valid_value_minus(int val) const {
     if (last_value == 0)
         return 0;
 
-    long julian = Cal::date_to_julian(last_value);
-    julian -= val;
-    return Cal::julian_to_date(julian);
+    return (CalendarDate(last_value) - val).value();
 }
 
 long RepeatDateList::last_valid_value_plus(int val) const {
@@ -1011,9 +996,7 @@ long RepeatDateList::last_valid_value_plus(int val) const {
     if (last_value == 0)
         return 0;
 
-    long julian = Cal::date_to_julian(last_value);
-    julian += val;
-    return Cal::julian_to_date(julian);
+    return (CalendarDate(last_value) + val).value();
 }
 
 void RepeatDateList::setToLastValue() {
@@ -1058,7 +1041,7 @@ std::string RepeatDateList::prev_value_as_string() const {
 }
 
 void RepeatDateList::change(const std::string& newValue) {
-    // See if if matches one of the dates
+    // See if it matches one of the dates
     int new_val = 0;
     try {
         new_val = ecf::convert_to<int>(newValue);
@@ -1103,9 +1086,9 @@ void RepeatDateList::set_value(long the_new_index) {
 
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     currentIndex_ = the_new_index;
     update_repeat_genvar_value();
     incr_state_change_no();
@@ -1229,9 +1212,9 @@ void RepeatInteger::set_value(long the_new_value) {
     // To be used by Memento only. as it does no checking
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     value_ = the_new_value;
     incr_state_change_no();
 }
@@ -1509,7 +1492,7 @@ std::string RepeatEnumerated::prev_value_as_string() const {
 }
 
 void RepeatEnumerated::change(const std::string& newValue) {
-    // See if if matches one of the enums
+    // See if it matches one of the enums
     for (size_t i = 0; i < theEnums_.size(); i++) {
         if (theEnums_[i] == newValue) {
             currentIndex_ = i;
@@ -1547,9 +1530,9 @@ void RepeatEnumerated::changeValue(long the_new_value) {
 void RepeatEnumerated::set_value(long the_new_value) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     currentIndex_ = the_new_value;
     incr_state_change_no();
 }
@@ -1697,7 +1680,7 @@ std::string RepeatString::value_as_string(int index) const {
 }
 
 void RepeatString::change(const std::string& newValue) {
-    // See if if matches one of the strings
+    // See if it matches one of the strings
     for (size_t i = 0; i < theStrings_.size(); i++) {
         if (theStrings_[i] == newValue) {
             currentIndex_ = i;
@@ -1735,9 +1718,9 @@ void RepeatString::changeValue(long the_new_value) {
 void RepeatString::set_value(long the_new_value) {
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
-    // hence the_new_value may be outside of the valid range.
-    // This can be seen when do a incremental sync,
-    // *hence* allow memento to copy the value as is.
+    // hence the_new_value may be outside the valid range.
+    // This can occur when an incremental sync happens,
+    // hence, allow memento to copy the value as is.
     currentIndex_ = the_new_value;
     incr_state_change_no();
 }

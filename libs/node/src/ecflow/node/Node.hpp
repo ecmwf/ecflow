@@ -27,6 +27,7 @@
 #include <iosfwd>
 #include <limits>
 
+#include "Expression.hpp"
 #include "ecflow/attribute/CronAttr.hpp"
 #include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/attribute/DayAttr.hpp"
@@ -41,9 +42,11 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
+#include "ecflow/node/AvisoAttr.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/InLimitMgr.hpp"
+#include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 namespace ecf {
@@ -57,8 +60,6 @@ namespace ecf {
 class Calendar;
 class NodeTreeVisitor;
 class LateAttr;
-class AvisoAttr;
-class MirrorAttr;
 } // namespace ecf
 
 class Node : public std::enable_shared_from_this<Node> {
@@ -434,7 +435,9 @@ public:
     AstTop* completeAst() const; // Will create AST on demand
     AstTop* triggerAst() const;  // Will create AST on demand
     std::string completeExpression() const;
+    std::string basicCompleteExpression() const { return c_expr_ ? c_expr_->expression() : std::string(); }
     std::string triggerExpression() const;
+    std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string(); }
 
     virtual void get_all_tasks(std::vector<task_ptr>&) const                   = 0;
     virtual void get_all_nodes(std::vector<node_ptr>&) const                   = 0;

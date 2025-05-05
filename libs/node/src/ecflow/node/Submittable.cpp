@@ -15,6 +15,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
@@ -344,7 +345,7 @@ EcfFile Submittable::locatedEcfFile() const {
     std::string reasonEcfFileNotFound;
     std::string theAbsNodePath = absNodePath();
     std::string ecf_home;
-    findParentUserVariableValue(Str::ECF_HOME(), ecf_home);
+    findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home);
 
     /// Update local ECF_SCRIPT variable, ECF_SCRIPT is a generated variable. IT *MUST* exist
     /// Likewise generated variable like TASK and ECF_NAME as they may occur in ECF_FETCH_CMD/ECF_SCRIPT_CMD
@@ -371,7 +372,7 @@ EcfFile Submittable::locatedEcfFile() const {
 
     // Caution: This is not used in operations or research; equally it has not been tested.
     std::string ecf_fetch_cmd;
-    findParentVariableValue(Str::ECF_FETCH(), ecf_fetch_cmd);
+    findParentVariableValue(ecf::environment::ECF_FETCH, ecf_fetch_cmd);
     if (!ecf_fetch_cmd.empty()) {
 #ifdef DEBUG_TASK_LOCATION
         std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_FETCH = '" << ecf_fetch_cmd
@@ -420,7 +421,7 @@ EcfFile Submittable::locatedEcfFile() const {
     }
 
     std::string ecf_filesDirectory;
-    if (findParentUserVariableValue(Str::ECF_FILES(), ecf_filesDirectory)) {
+    if (findParentUserVariableValue(ecf::environment::ECF_FILES, ecf_filesDirectory)) {
 #ifdef DEBUG_TASK_LOCATION
         std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_FILES = '"
                   << ecf_filesDirectory << "' backwards\n";
@@ -573,7 +574,7 @@ bool Submittable::submit_job_only(JobsParam& jobsParam) {
 
     // If the task is a dummy task, return true
     std::string theValue;
-    if (findParentUserVariableValue(Str::ECF_DUMMY_TASK(), theValue)) {
+    if (findParentUserVariableValue(ecf::environment::ECF_DUMMY_TASK, theValue)) {
         return true;
     }
 
@@ -588,7 +589,7 @@ bool Submittable::submit_job_only(JobsParam& jobsParam) {
     requeue_labels(); // ECFLOW-195, requeue no longer resets labels on tasks, hence we do it at task run time.
 
     theValue.clear();
-    if (findParentUserVariableValue(Str::ECF_NO_SCRIPT(), theValue)) {
+    if (findParentUserVariableValue(ecf::environment::ECF_NO_SCRIPT, theValue)) {
         // The script is based on the ECF_JOB_CMD
         return non_script_based_job_submission(jobsParam);
     }
@@ -605,7 +606,7 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
 
         // Pre-process ecf file (i.e. expand includes, remove comments,manual) and perform
         // variable substitution. This will then form the '.job' files.
-        // If the job file already exist it is overridden
+        // If the job file already exists it is overridden
         // The job file SHOULD be referenced in ECF_JOB_CMD
         try {
             const std::string& job_size = jobsParam.ecf_file().create_job(jobsParam);
@@ -798,7 +799,7 @@ void Submittable::kill(const std::string& zombie_pid) {
             throw std::runtime_error(ss.str());
         }
 
-        if (!findParentUserVariableValue(Str::ECF_KILL_CMD(), ecf_kill_cmd) || ecf_kill_cmd.empty()) {
+        if (!findParentUserVariableValue(ecf::environment::ECF_KILL_CMD, ecf_kill_cmd) || ecf_kill_cmd.empty()) {
             flag().set(ecf::Flag::KILLCMD_FAILED);
             std::stringstream ss;
             ss << "Submittable::kill: ECF_KILL_CMD not defined, for task " << absNodePath() << "\n";
@@ -807,7 +808,7 @@ void Submittable::kill(const std::string& zombie_pid) {
     }
     else {
         // Use input
-        if (!findParentUserVariableValue(Str::ECF_KILL_CMD(), ecf_kill_cmd) || ecf_kill_cmd.empty()) {
+        if (!findParentUserVariableValue(ecf::environment::ECF_KILL_CMD, ecf_kill_cmd) || ecf_kill_cmd.empty()) {
             flag().set(ecf::Flag::KILLCMD_FAILED);
             std::stringstream ss;
             ss << "Submittable::kill: ECF_KILL_CMD not defined, for task " << absNodePath() << "\n";
@@ -873,7 +874,7 @@ void Submittable::status() {
     }
 
     std::string ecf_status_cmd;
-    if (!findParentUserVariableValue(Str::ECF_STATUS_CMD(), ecf_status_cmd) || ecf_status_cmd.empty()) {
+    if (!findParentUserVariableValue(ecf::environment::ECF_STATUS_CMD, ecf_status_cmd) || ecf_status_cmd.empty()) {
         flag().set(ecf::Flag::STATUSCMD_FAILED);
         std::stringstream ss;
         ss << "Submittable::status: ECF_STATUS_CMD not defined, for task " << absNodePath() << "\n";
@@ -904,7 +905,7 @@ bool Submittable::createChildProcess(JobsParam& jobsParam) {
     cout << "Submittable::createChildProcess for task " << name() << endl;
 #endif
     std::string ecf_job_cmd;
-    findParentUserVariableValue(Str::ECF_JOB_CMD(), ecf_job_cmd);
+    findParentUserVariableValue(ecf::environment::ECF_JOB_CMD, ecf_job_cmd);
     if (ecf_job_cmd.empty()) {
         jobsParam.errorMsg() += "Submittable::createChildProcess: Could not find ECF_JOB_CMD : ";
         return false;
@@ -1073,21 +1074,21 @@ void Submittable::set_genvar_ecfrid(const std::string& value) {
 // Check the variable names. i.e. we know they are valid
 SubGenVariables::SubGenVariables(const Submittable* sub)
     : submittable_(sub),
-      genvar_ecfjob_(Str::ECF_JOB(), "", false),
-      genvar_ecfjobout_(Str::ECF_JOBOUT(), "", false),
-      genvar_ecftryno_(Str::ECF_TRYNO(), "", false),
+      genvar_ecfjob_(ecf::environment::ECF_JOB, "", false),
+      genvar_ecfjobout_(ecf::environment::ECF_JOBOUT, "", false),
+      genvar_ecftryno_(ecf::environment::ECF_TRYNO, "", false),
       genvar_task_("TASK", "", false),
-      genvar_ecfpass_(Str::ECF_PASS(), "", false),
-      genvar_ecfscript_(Str::ECF_SCRIPT(), "", false),
-      genvar_ecfname_(Str::ECF_NAME(), "", false),
-      genvar_ecfrid_(Str::ECF_RID(), "", false) {
+      genvar_ecfpass_(ecf::environment::ECF_PASS, "", false),
+      genvar_ecfscript_(ecf::environment::ECF_SCRIPT, "", false),
+      genvar_ecfname_(ecf::environment::ECF_NAME, "", false),
+      genvar_ecfrid_(ecf::environment::ECF_RID, "", false) {
 }
 
 void SubGenVariables::update_generated_variables() const {
     // cache strings that are used in many variables
     std::string theAbsNodePath = submittable_->absNodePath();
     std::string ecf_home;
-    submittable_->findParentUserVariableValue(Str::ECF_HOME(), ecf_home);
+    submittable_->findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home);
     update_static_generated_variables(ecf_home, theAbsNodePath);
     update_dynamic_generated_variables(ecf_home, theAbsNodePath);
 }
@@ -1132,7 +1133,7 @@ void SubGenVariables::update_dynamic_generated_variables(const std::string& ecf_
     /// associated with Suites/Families nodes.
     /// Bottom up. Can be expensive when we have thousands of tasks.
     std::string ecf_out;
-    submittable_->findParentUserVariableValue(Str::ECF_OUT(), ecf_out);
+    submittable_->findParentUserVariableValue(ecf::environment::ECF_OUT, ecf_out);
 
     if (ecf_out.empty()) {
         genvar_ecfjobout_.value_by_ref().reserve(ecf_home.size() + theAbsNodePath.size() + 1 + the_try_no.size());

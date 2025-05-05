@@ -19,6 +19,7 @@
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/ZombieCtrlAction.hpp"
 
 using namespace ecf;
 using namespace boost;
@@ -32,7 +33,7 @@ const ZombieAttr& ZombieAttr::EMPTY() {
 // Constructor ==============================================================================
 ZombieAttr::ZombieAttr(ecf::Child::ZombieType t,
                        const std::vector<ecf::Child::CmdType>& c,
-                       ecf::User::Action a,
+                       ZombieCtrlAction a,
                        int zombie_lifetime)
     : child_cmds_(c),
       zombie_type_(t),
@@ -101,7 +102,7 @@ void ZombieAttr::write(std::string& ret) const {
     ret += "zombie ";
     ret += Child::to_string(zombie_type_);
     ret += Str::COLON();
-    ret += User::to_string(action_);
+    ret += ecf::to_string(action_);
     ret += Str::COLON();
     ret += Child::to_string(child_cmds_);
     ret += Str::COLON();
@@ -109,7 +110,7 @@ void ZombieAttr::write(std::string& ret) const {
 }
 
 bool ZombieAttr::fob(ecf::Child::CmdType child_cmd) const {
-    if (action_ != User::FOB)
+    if (action_ != ZombieCtrlAction::FOB)
         return false;
     if (child_cmds_.empty())
         return true;
@@ -125,7 +126,7 @@ bool ZombieAttr::fob(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::fail(ecf::Child::CmdType child_cmd) const {
-    if (action_ != User::FAIL)
+    if (action_ != ZombieCtrlAction::FAIL)
         return false;
     if (child_cmds_.empty())
         return true;
@@ -141,7 +142,7 @@ bool ZombieAttr::fail(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::adopt(ecf::Child::CmdType child_cmd) const {
-    if (action_ != User::ADOPT)
+    if (action_ != ZombieCtrlAction::ADOPT)
         return false;
     if (child_cmds_.empty())
         return true;
@@ -157,7 +158,7 @@ bool ZombieAttr::adopt(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::remove(ecf::Child::CmdType child_cmd) const {
-    if (action_ != User::REMOVE)
+    if (action_ != ZombieCtrlAction::REMOVE)
         return false;
     if (child_cmds_.empty())
         return true;
@@ -173,7 +174,7 @@ bool ZombieAttr::remove(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::block(ecf::Child::CmdType child_cmd) const {
-    if (action_ != User::BLOCK)
+    if (action_ != ZombieCtrlAction::BLOCK)
         return false;
     if (child_cmds_.empty())
         return true;
@@ -189,7 +190,7 @@ bool ZombieAttr::block(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::kill(ecf::Child::CmdType child_cmd) const {
-    if (action_ != User::KILL)
+    if (action_ != ZombieCtrlAction::KILL)
         return false;
     if (child_cmds_.empty())
         return true;
@@ -248,7 +249,7 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
                                  "ecf_pid | ecf_pid_passed | ecf_passwd | path ] but found " +
                                  str_zombie_type + string(":") + string_to_parse);
 
-    if (!action_str.empty() && !User::valid_user_action(action_str)) {
+    if (!action_str.empty() && !ecf::Enumerate<ZombieCtrlAction>::is_valid(action_str)) {
         throw std::runtime_error("ZombieAttr::create failed: Invalid user action, expected one of [ fob | fail | "
                                  "remove | block | adopt | kill ] but found " +
                                  action_str + string(":") + string_to_parse);
@@ -276,9 +277,9 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
             "ZombieAttr::create failed: User Action(fob,fail,remove,adopt,block) or lifetime must be specified: " +
             string_to_parse);
 
-    Child::ZombieType zombie_type   = Child::zombie_type(str_zombie_type);
-    User::Action action             = User::user_action(action_str);
-    vector<Child::CmdType> childVec = Child::child_cmds(child_cmds);
+    auto zombie_type = Child::zombie_type(str_zombie_type);
+    auto action      = Enumerate<ZombieCtrlAction>::to_enum(action_str).value_or(ZombieCtrlAction::BLOCK);
+    auto childVec    = Child::child_cmds(child_cmds);
 
     /// If zombie_lifetime is still -1 constructor will reset to standard defaults
     return ZombieAttr(zombie_type, childVec, action, zombie_lifetime);
@@ -287,21 +288,28 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
 ZombieAttr ZombieAttr::get_default_attr(ecf::Child::ZombieType zt) {
     switch (zt) {
         case Child::USER:
-            return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_user_zombie_life_time());
+            return ZombieAttr(
+                zt, std::vector<ecf::Child::CmdType>(), ZombieCtrlAction::BLOCK, default_user_zombie_life_time());
         case Child::PATH:
-            return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_path_zombie_life_time());
+            return ZombieAttr(
+                zt, std::vector<ecf::Child::CmdType>(), ZombieCtrlAction::BLOCK, default_path_zombie_life_time());
         case Child::ECF:
-            return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_ecf_zombie_life_time());
+            return ZombieAttr(
+                zt, std::vector<ecf::Child::CmdType>(), ZombieCtrlAction::BLOCK, default_ecf_zombie_life_time());
         case Child::ECF_PID:
-            return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_ecf_zombie_life_time());
+            return ZombieAttr(
+                zt, std::vector<ecf::Child::CmdType>(), ZombieCtrlAction::BLOCK, default_ecf_zombie_life_time());
         case Child::ECF_PID_PASSWD:
-            return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_ecf_zombie_life_time());
+            return ZombieAttr(
+                zt, std::vector<ecf::Child::CmdType>(), ZombieCtrlAction::BLOCK, default_ecf_zombie_life_time());
         case Child::ECF_PASSWD:
-            return ZombieAttr(zt, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_ecf_zombie_life_time());
+            return ZombieAttr(
+                zt, std::vector<ecf::Child::CmdType>(), ZombieCtrlAction::BLOCK, default_ecf_zombie_life_time());
         case Child::NOT_SET:
             break;
     }
-    return ZombieAttr(Child::ECF, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_ecf_zombie_life_time());
+    return ZombieAttr(
+        Child::ECF, std::vector<ecf::Child::CmdType>(), ZombieCtrlAction::BLOCK, default_ecf_zombie_life_time());
 }
 
 template <class Archive>

@@ -30,6 +30,7 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/TimeSlot.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace std;
@@ -47,7 +48,7 @@ BOOST_AUTO_TEST_SUITE(T_Migration)
 // backward compatibility.i.e future release can open file, created by an earlier release
 //
 BOOST_AUTO_TEST_CASE(test_migration_restore_def_con) {
-    cout << "ANattr:: ...test_migration_restore_def_con\n";
+    ECF_NAME_THIS_TEST();
 
     std::string file_name =
         File::test_data("libs/attribute/test/data/migration/default_constructor_1_2_2/", "libs/attribute");
@@ -103,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_migration_restore_def_con) {
 }
 
 BOOST_AUTO_TEST_CASE(test_migration_restore) {
-    cout << "ANattr:: ...test_migration_restore\n";
+    ECF_NAME_THIS_TEST();
 
     std::string file_name = File::test_data("libs/attribute/test/data/migration/1_2_2/", "libs/attribute");
     // BOOST_CHECK_MESSAGE(File::createDirectories(file_name ),"Could not create directory " << file_name);
@@ -166,8 +167,8 @@ BOOST_AUTO_TEST_CASE(test_migration_restore) {
     doSave(file_name + "Event_2", Event("event"));
     doSave(file_name + "Event_3", Event(1, "event", true));
     doSave(file_name + "Meter", Meter("meter", 10, 100, 100));
-    doSave(file_name + "ZombieAttr", ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB));
-    doSave(file_name + "ZombieAttr1", ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB, 500));
+    doSave(file_name + "ZombieAttr", ZombieAttr(ecf::Child::USER, child_cmds, ecf::UserAction::FOB));
+    doSave(file_name + "ZombieAttr1", ZombieAttr(ecf::Child::USER, child_cmds, ecf::UserAction::FOB, 500));
     doSave(file_name + "QueueAttr", QueueAttr("queue", theVec));
     doSave(file_name + "GenericAttr", GenericAttr("gen1", theVec));
 #endif
@@ -195,15 +196,17 @@ BOOST_AUTO_TEST_CASE(test_migration_restore) {
     do_restore<Event>(file_name + "Event_2", Event(string("event")));
     do_restore<Event>(file_name + "Event_3", Event(1, string("event"), true));
     do_restore<Meter>(file_name + "Meter", Meter("meter", 10, 100, 100));
-    do_restore<ZombieAttr>(file_name + "ZombieAttr", ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB));
-    do_restore<ZombieAttr>(file_name + "ZombieAttr1", ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB, 500));
+    do_restore<ZombieAttr>(file_name + "ZombieAttr",
+                           ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB));
+    do_restore<ZombieAttr>(file_name + "ZombieAttr1",
+                           ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 500));
     do_restore<QueueAttr>(file_name + "QueueAttr", QueueAttr("queue", theVec));
     do_restore<GenericAttr>(file_name + "GenericAttr", GenericAttr("gen1", theVec));
 }
 
 // The following test shows that CEREAL ignores new data members it does not recognise.
 // This allows new data members, which will be ignored by the old client.
-// OLD server to NEW Client(GUI), will not be a problem, since the the new data members are conditional.
+// OLD server to NEW Client(GUI), will not be a problem, since the new data members are conditional.
 // In ecflow 5.4.0/5.5.0 we added a new data members to the DayAttribute class.
 // This test shows that when NEW SERVER send DayAttr to OLD Client(GUI), this new data member is ignored.
 namespace version_old {
@@ -269,8 +272,9 @@ private:
 } // namespace version_new_data_member
 
 BOOST_AUTO_TEST_CASE(test_day_migration) {
-    cout << "ANattr:: ...test_day_migration\n";
-    // OLD -> NEW  i.e OLD SERVER --> NEW CLIENT
+    ECF_NAME_THIS_TEST();
+
+    // OLD -> NEW  i.e. OLD SERVER --> NEW CLIENT
     {
         const version_old::DayAttr t = version_old::DayAttr();
         ecf::save("test_day_migration", t);
@@ -281,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_day_migration) {
         BOOST_CHECK_MESSAGE(t == version_new_data_member::DayAttr(), "Should be the same");
     }
 
-    // NEW->OLD  i.e NEW SERVER --> OLD CLIENT
+    // NEW->OLD  i.e. NEW SERVER --> OLD CLIENT
     // IMPORTANT: This shows that CEREAL ignore data members is does NOT RECOGNIZE.
     {
         version_new_data_member::DayAttr def;

@@ -8,12 +8,30 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
+#include <cstdlib>
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Environment.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+
 using namespace boost;
 using namespace std;
+
+static bool is_sanitizer_available() {
+
+    /*
+     * This condition is used to skip the test if the sanitizer is not available.
+     *
+     * The implementation to skip a test is currently to short-circuit into early termination.
+     * A better approach would be to use the boost::unit_test::precondition() decorator to skip the test based on
+     * a runtime condition.
+     * Unfortunatelly this approach does not work when using Boost 1.66 @ Rocky 8.6.
+     */
+
+    bool is_available = ecf::environment::has("ECF_TEST_SANITIZER_AS");
+    return is_available;
+}
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 
@@ -33,20 +51,21 @@ int integer_returning_function() {
 
 // *** This test does not seem work with address sanitiser ****
 BOOST_AUTO_TEST_CASE(test_sanitizer_use_of_out_of_scope_stack_memory) {
-    char* test_me = getenv("ECF_TEST_SANITIZER_AS");
-    if (test_me) {
-        cout << "ACore:: ...test_sanitizer_use_of_out_of_scope_stack_memory\n";
+    ECF_NAME_THIS_TEST();
 
-        int* pointer = NULL;
-        if (bool_returning_function()) {
-            int value = integer_returning_function();
-            pointer   = &value;
-        }
-        cout << "dodgy pointer:" << *pointer << "\n"; // Error: invalid access of stack memory out of declaration scope
-        *pointer = 42;
-        cout << "dodgy pointer:" << *pointer << "\n";
-        BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
+    if (!is_sanitizer_available()) {
+        return;
     }
+
+    int* pointer = NULL;
+    if (bool_returning_function()) {
+        int value = integer_returning_function();
+        pointer   = &value;
+    }
+    cout << "dodgy pointer:" << *pointer << "\n"; // Error: invalid access of stack memory out of declaration scope
+    *pointer = 42;
+    cout << "dodgy pointer:" << *pointer << "\n";
+    BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
 }
 
 #if defined(__GNUC__) and !defined(__clang__)
@@ -59,19 +78,21 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_use_of_out_of_scope_stack_memory) {
 #endif
 
 BOOST_AUTO_TEST_CASE(test_sanitizer_vector_overflow) {
-    char* test_me = getenv("ECF_TEST_SANITIZER_AS");
-    if (test_me) {
-        cout << "ACore:: ...test_sanitizer_vector_overflow\n";
-        // This check detects when a libc++ container is accessed beyond the region [container.begin(), container.end())
-        // — even when the accessed memory is in a heap-allocated buffer used internally by a container.
+    ECF_NAME_THIS_TEST();
 
-        // the following example, the vector variable has valid indexes in the range [0, 2], but is accessed at index 3,
-        // causing an overflow.
-        std::vector<int> vector{0, 1, 2};
-        auto* pointer = &vector[0];
-        cout << pointer[3]; // Error: out of bounds access for vector
-        BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
+    if (!is_sanitizer_available()) {
+        return;
     }
+
+    // This check detects when a libc++ container is accessed beyond the region [container.begin(), container.end())
+    // — even when the accessed memory is in a heap-allocated buffer used internally by a container.
+
+    // the following example, the vector variable has valid indexes in the range [0, 2], but is accessed at index 3,
+    // causing an overflow.
+    std::vector<int> vector{0, 1, 2};
+    auto* pointer = &vector[0];
+    cout << pointer[3]; // Error: out of bounds access for vector
+    BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
 }
 
 #if defined(__GNUC__) and !defined(__clang__)

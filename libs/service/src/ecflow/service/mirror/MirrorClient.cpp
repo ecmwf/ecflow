@@ -22,12 +22,12 @@
 namespace ecf::service::mirror {
 
 namespace {
-    std::string get_suite_name(const std::string& node_path) {
-        std::string trimmed = node_path.substr(1);
-        trimmed = trimmed.substr(0, trimmed.find('/'));
-        return trimmed;
-    }
+std::string get_suite_name(const std::string& node_path) {
+    std::string trimmed = node_path.substr(1);
+    trimmed             = trimmed.substr(0, trimmed.find('/'));
+    return trimmed;
 }
+} // namespace
 
 struct MirrorClient::Impl
 {

@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <iostream>
 #include <string>
+#include <vector>
 
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
@@ -17,6 +17,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -30,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_TimeSeries)
 
 BOOST_AUTO_TEST_CASE(test_default_boost_time_duration) {
-    cout << "ACore:: ...test_default_boost_time_duration\n";
+    ECF_NAME_THIS_TEST();
 
     boost::posix_time::time_duration td;
     BOOST_CHECK_MESSAGE(td.is_special() == false,
@@ -41,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_default_boost_time_duration) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_min_max_time_slots) {
-    cout << "ACore:: ...test_time_series_min_max_time_slots\n";
+    ECF_NAME_THIS_TEST();
 
     TimeSlot the_min;
     TimeSlot the_max;
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_min_max_time_slots) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_constrcution) {
-    cout << "ACore:: ...test_time_series_constrcution\n";
+    ECF_NAME_THIS_TEST();
 
     {
         TimeSeries x;
@@ -131,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_constrcution) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series) {
-    cout << "ACore:: ...test_time_series\n";
+    ECF_NAME_THIS_TEST();
 
     /// Basic test for time series of getters and setters
     TimeSeries timeSeries(TimeSlot(0, 1), TimeSlot(0, 4), TimeSlot(0, 1));
@@ -154,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_time_series) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_increment_real) {
-    cout << "ACore:: ...test_time_series_increment_real\n";
+    ECF_NAME_THIS_TEST();
 
     // Test time series with  a calendar, we update calendar then
     // test time series isFree(), and checkForRequeue
@@ -192,9 +193,6 @@ BOOST_AUTO_TEST_CASE(test_time_series_increment_real) {
         timeSeries2.calendarChanged(c);
         timeSeries3.calendarChanged(c);
 
-        //		cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
-        //		    << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << "
-        // timeSeries3=" << timeSeries3.toString() << "\n";
         if (hour < timeSeries.start().hour()) {
             BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(c, t1_min, t1_max, cmd_context),
                                 " Time series " << timeSeries.toString() << " checkForRequeue should pass at "
@@ -276,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_increment_real) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_requeueable_and_compute_next_time_slot) {
-    cout << "ACore:: ...test_time_series_requeueable_and_compute_next_time_slot\n";
+    ECF_NAME_THIS_TEST();
 
     // Test time series with  a calendar, we update calendar then
     // test time series requeueable(), and compute_next_time_slot
@@ -301,9 +299,6 @@ BOOST_AUTO_TEST_CASE(test_time_series_requeueable_and_compute_next_time_slot) {
         timeSeries2.calendarChanged(c);
         timeSeries3.calendarChanged(c);
 
-        //    cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
-        //        << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << "
-        //        timeSeries3=" << timeSeries3.toString() << "\n";
         if (hour < timeSeries.start().hour()) {
             TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
             TimeSlot expected(10, 0);
@@ -435,7 +430,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_requeueable_and_compute_next_time_slot) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_finish_not_divisble_by_increment) {
-    cout << "ACore:: ...test_time_series_finish_not_divisble_by_increment\n";
+    ECF_NAME_THIS_TEST();
 
     // HANDLE CASE WHERE FINISH MINUTES IS NOT DIVISIBLE BY THE INCREMENT
 
@@ -472,8 +467,6 @@ BOOST_AUTO_TEST_CASE(test_time_series_finish_not_divisble_by_increment) {
             calendar.update(minutes(1));
             timeSeries.calendarChanged(calendar);
             timeSeries2.calendarChanged(calendar);
-
-            // cout << to_simple_string(calendar.suiteTime()) << "\n";
 
             if (calendar.dayChanged()) {
                 BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar, t1_min, t1_max),
@@ -528,7 +521,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_finish_not_divisble_by_increment) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_miss_time_slot) {
-    cout << "ACore:: ...test_time_series_miss_time_slot\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2008, 10, 8), hours(10)), Calendar::REAL);
@@ -552,7 +545,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_miss_time_slot) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_miss_time_slot_1) {
-    cout << "ACore:: ...test_time_series_miss_time_slot_1\n";
+    ECF_NAME_THIS_TEST();
 
     // Create calendar before time series
     {
@@ -609,7 +602,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_miss_time_slot_1) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_reset) {
-    cout << "ACore:: ...test_time_series_reset\n";
+    ECF_NAME_THIS_TEST();
 
     // Create a test when we can match a time series.
     // NOTE: Finish minute is not a multiple of INCREMENT hence last valid time slot is 23:50
@@ -665,7 +658,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_reset) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_parsing) {
-    cout << "ACore:: ...test_time_series_parsing\n";
+    ECF_NAME_THIS_TEST();
 
     BOOST_CHECK_MESSAGE(TimeSeries::create("00:30") == ecf::TimeSeries(0, 30), "Error ");
     BOOST_CHECK_MESSAGE(TimeSeries::create("+00:30") == ecf::TimeSeries(0, 30, true), "Error ");
@@ -679,7 +672,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
-    cout << "ACore:: ...test_time_series_state_parsing\n";
+    ECF_NAME_THIS_TEST();
 
     /// extract string like
     ///     time +00:00 20:00 00:10 # this is a comment which will be ignored. index = 1

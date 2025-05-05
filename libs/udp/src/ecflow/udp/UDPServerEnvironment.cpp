@@ -10,7 +10,7 @@
 
 #include "ecflow/udp/UDPServerEnvironment.hpp"
 
-#include <cstdio>
+#include "ecflow/core/Environment.hpp"
 
 namespace ecf {
 
@@ -32,9 +32,7 @@ const std::unordered_map<std::string, std::string> options_map = {{UDPServerEnvi
 
 UDPServerEnvironment::UDPServerEnvironment() : environment_{} {
     for (auto variable : variables) {
-        if (const char* value = ::getenv(variable); value) {
-            environment_[variable] = value;
-        }
+        ecf::environment::get(variable, environment_[variable]);
     }
 }
 

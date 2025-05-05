@@ -22,6 +22,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -231,7 +232,8 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ssync_cmd_test_order) {
-    cout << "Base:: ...test_ssync_cmd_test_order\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_ssync_cmd_test_order.log"); // will create log file, and destroy log and remove file at end of scope
 

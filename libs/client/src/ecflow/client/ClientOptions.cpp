@@ -37,9 +37,9 @@ namespace po = boost::program_options;
 static std::string print_variable_map(const boost::program_options::variables_map& vm);
 
 ClientOptions::ClientOptions() {
-    // This could have been moved to parse(). However since the same ClienttInvoker can be
-    // be used for multiple commands. We have separated out the parts the need only be done once.
-    // hence improving the performance:
+    // This could have been moved to parse(). However, since the same ClientInvoker can be
+    // used for multiple commands, we have separated out the parts.
+    // As this needs to be done only once, this approach improves the performance.
     std::string title_help = "Client options, ";
     title_help += Version::description();
     title_help += "   ";
@@ -78,6 +78,12 @@ ClientOptions::ClientOptions() {
         "Enables the use of SSL when contacting the server.\n"
         "When specified overrides the environment variable ECF_SSL.");
 #endif
+    desc_->add_options()(
+        "http",
+        "Enables communication over HTTP between client/server.\n");
+    desc_->add_options()(
+        "https",
+        "Enables communication over HTTPS between client/server.\n");
     // clang-format on
 }
 
@@ -106,7 +112,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     // parse arguments into 'vm'.
     //       --alter delete cron -w 0,1 10:00 /s1     # -w treated as option
     //       --alter=/s1 change meter name -1         # -1 treated as option
-    // Note: negative numbers get treated as options: i.e trying to change meter value to a negative number
+    // Note: negative numbers get treated as options: i.e. trying to change meter value to a negative number
     //       To avoid negative numbers from being treated as option use, we need to change command line style:
     //       po::command_line_style::unix_style ^ po::command_line_style::allow_short
     boost::program_options::variables_map vm;
@@ -145,7 +151,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     if (vm.count("host")) {
         host = vm["host"].as<std::string>();
         if (env->debug())
-            std::cout << "   host " << host << " overridden at the command line\n";
+            std::cout << "  host " << host << " overridden at the command line\n";
     }
     if (!host.empty() || !port.empty()) {
         if (host.empty())
@@ -195,7 +201,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
             if (env->debug()) {
                 std::cout << "  ssl explicitly enabled via command line, but also enabled via environment variable\n";
             }
-            env->enable_ssl();
+            env->enable_ssl_if_defined();
         }
 
         if (env->debug()) {
@@ -204,9 +210,20 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     }
 #endif
 
+    if (vm.count("http")) {
+        if (env->debug())
+            std::cout << "  http set via command line\n";
+        env->enable_http();
+    }
+    if (vm.count("https")) {
+        if (env->debug())
+            std::cout << "  https set via command line\n";
+        env->enable_https();
+    }
+
     // Defer the parsing of the command , to the command. This allows
     // all cmd functionality to be centralised with the command
-    // This can throw std::runtime_error if arg's don't parse
+    // This can throw std::runtime_error if the arguments do not parse
     Cmd_ptr client_request;
     if (!cmdRegistry_.parse(client_request, vm, env)) {
 

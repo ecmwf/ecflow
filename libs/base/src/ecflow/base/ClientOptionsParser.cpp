@@ -61,8 +61,7 @@ void parse_positional_arguments(
     for (size_t i = 0; i < maximum_positional_args && !args.empty(); ++i) {
         // Take each of the positional values as an option value
         std::string& arg = args.front();
-        // Once we find the first argument that doesn't satify the predicate,
-        // we stop collecting arguments
+        // Once we find the first argument that does not satisfy the predicate, we stop collecting arguments
         if (!predicate(arg)) {
             break;
         }

@@ -23,6 +23,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -38,8 +39,9 @@ BOOST_AUTO_TEST_SUITE(T_Limit)
 // The data is created dynamically so that we can stress test the server
 // This test does not have any time dependencies in the def file.
 BOOST_AUTO_TEST_CASE(test_limit) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_limit " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

@@ -12,10 +12,12 @@
 
 #include "TestHelper.hpp"
 #include "ecflow/base/cts/user/LogCmd.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace boost;
 using namespace std;
@@ -26,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_LogCmd)
 
 BOOST_AUTO_TEST_CASE(test_log_cmd) {
-    cout << "Base:: ...test_log_cmd\n";
+    ECF_NAME_THIS_TEST();
 
     {
         LogCmd log_cmd;
@@ -82,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_log_cmd) {
                                                                 << defs.server().find_variable("ECF_LOG") << "'");
 
     // Update ECF_LOG to have a *SPACE* at the end.  ECFLOW-377
-    defs.set_server().add_or_update_user_variables(Str::ECF_LOG(), new_log_file);
+    defs.set_server().add_or_update_user_variables(ecf::environment::ECF_LOG, new_log_file);
     BOOST_CHECK_MESSAGE(defs.server().find_variable("ECF_LOG") == new_log_file,
                         "expected to find ECF_LOG with value '" << new_log_file << "' but found '"
                                                                 << defs.server().find_variable("ECF_LOG") << "'");

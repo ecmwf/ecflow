@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/node/Flag.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -22,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Flag)
 
 BOOST_AUTO_TEST_CASE(test_node_flags) {
-    cout << "ANode:: ...test_node_flags\n";
+    ECF_NAME_THIS_TEST();
 
     Flag flag;
     std::string expected_flags =
@@ -64,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_node_flags) {
 }
 
 BOOST_AUTO_TEST_CASE(test_node_flags_parsing) {
-    cout << "ANode:: ...test_node_flags_parsing\n";
+    ECF_NAME_THIS_TEST();
 
     /// Set the flags
     Flag flag;

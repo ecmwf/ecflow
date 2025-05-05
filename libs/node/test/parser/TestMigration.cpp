@@ -21,6 +21,7 @@
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -48,7 +49,8 @@ BOOST_AUTO_TEST_SUITE(U_Parser)
 BOOST_AUTO_TEST_SUITE(T_Migration)
 
 BOOST_AUTO_TEST_CASE(test_state_parser) {
-    cout << "AParser:: ...test_state_parser\n";
+    ECF_NAME_THIS_TEST();
+
     // **** The persistence will NOT write the defaults, hence we need to change the states
     // **** to test the persistence
     PersistHelper helper;
@@ -139,7 +141,8 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
 }
 
 BOOST_AUTO_TEST_CASE(test_state_node_attributes) {
-    cout << "AParser:: ...test_state_node_attributes\n";
+    ECF_NAME_THIS_TEST();
+
     PersistHelper helper;
     {
         Defs defs;
@@ -338,7 +341,8 @@ BOOST_AUTO_TEST_CASE(test_state_node_attributes) {
 }
 
 BOOST_AUTO_TEST_CASE(test_state_time_attributes) {
-    cout << "AParser:: ...test_state_time_attributes\n";
+    ECF_NAME_THIS_TEST();
+
     PersistHelper helper;
     {
         Defs defs;
@@ -463,7 +467,8 @@ BOOST_AUTO_TEST_CASE(test_state_time_attributes) {
 }
 
 BOOST_AUTO_TEST_CASE(test_state_edit_history) {
-    cout << "AParser:: ...test_state_edit_history\n";
+    ECF_NAME_THIS_TEST();
+
     PersistHelper helper(true /* compare edit History */);
     Defs defs;
     suite_ptr suite = defs.add_suite("s1");
@@ -491,7 +496,8 @@ static std::string dump_edit_history(const std::unordered_map<std::string, std::
 }
 
 BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning) {
-    cout << "AParser:: ...test_state_edit_history_pruning\n";
+    ECF_NAME_THIS_TEST();
+
     Defs defs;
     suite_ptr suite = defs.add_suite("s1");
     defs.add_edit_history(suite->absNodePath(), "MSG:[07:36:05 10.3.2016] --requeue force /s1  :maj");
@@ -527,7 +533,7 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning) {
 }
 
 BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning2) {
-    cout << "AParser:: ...test_state_edit_history_pruning2\n";
+    ECF_NAME_THIS_TEST();
 
     // Create edit history for today, this should not be affected by pruning
     date todays_date_in_utc = day_clock::universal_day();
@@ -570,7 +576,8 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_state) {
-    cout << "AParser:: ...test_server_state\n";
+    ECF_NAME_THIS_TEST();
+
     PersistHelper helper(true /* compare edit History */);
     {
         Defs defs;
@@ -607,7 +614,8 @@ BOOST_AUTO_TEST_CASE(test_server_state) {
 }
 
 BOOST_AUTO_TEST_CASE(test_state_fixture_defs) {
-    cout << "AParser:: ...test_state_fixture_defs\n";
+    ECF_NAME_THIS_TEST();
+
     PersistHelper helper;
     MyDefsFixture theDefsFixture;
     BOOST_REQUIRE_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(theDefsFixture.defsfile_),

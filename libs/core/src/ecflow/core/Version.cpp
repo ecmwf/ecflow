@@ -20,78 +20,50 @@
 
 namespace ecf {
 
-// ********************************************************************
-// IMPORTANT:
-// The version number is extracted externally.
-//   see ACore/doc/extracting_version_number.ddoc
-//
-//   See ACore/src/ecflow_version.h
-//   This file is generated when cmake is run, i.e.
-//     `sh -x $WK/cmake.sh debug`
-//
-// When changing the version change remember to:
-//    - re-login into remote system to update ECFLOW_INSTALL_DIR & ECFLOW_PYTHON_INSTALL_DIR
-//      required for interactive install
-//
-// To Install a new version on all the different platforms:
-//  . build_scripts/nightly/quick_install_.sh
-// This is because the definition hold's the last version.
-// Hence, we must rerun to update the version.
-//
-// ************************************************************************************
-// Use  <minor_number>rc<number> for release candidates, Once release we revert back:
-//      0rc1    -> 0
-//      10rc3   -> 10
-// ************************************************************************************
-//
-// **Please update file history.ddoc with the changed made for each release ***
-// ********************************************************************
-#ifdef DEBUG
-const std::string Version::TAG = " (debug)"; // Old tag: beta(debug)
-#else
-const std::string Version::TAG = ""; // Old tag: beta
-#endif
+std::string Version::major() {
+    return ECFLOW_VERSION_MAJOR;
+}
 
-// See: http://www.cmake.org/cmake/help/cmake_tutorial.html
-// For defining version numbers. This is done is a separate file
-// that is then included
+std::string Version::minor() {
+    return ECFLOW_VERSION_MINOR;
+}
+
+std::string Version::patch() {
+    return ECFLOW_VERSION_PATCH;
+}
+
+std::string Version::suffix() {
+    return ECFLOW_VERSION_SUFFIX;
+}
+
 std::string Version::description() {
     std::stringstream ss;
-    ss << "Ecflow" << Version::TAG << " version(" << ECFLOW_RELEASE << "." << ECFLOW_MAJOR << "." << ECFLOW_MINOR;
-
-    ss << ") boost(" << Version::boost() << ")";
-    std::string the_comp = compiler();
-    if (!the_comp.empty())
-        ss << " compiler(" << the_comp << ")";
-
-    ss << " protocol(JSON cereal " << CEREAL_VERSION_MAJOR << "." << CEREAL_VERSION_MINOR << "." << CEREAL_VERSION_PATCH
-       << ")";
-
-#ifdef ECF_OPENSSL
-    ss << " openssl(enabled)";
+    ss << "Ecflow ";
+#ifdef DEBUG
+    ss << "(debug) ";
 #endif
-
-    ss << " Compiled on " << __DATE__ << " " << __TIME__;
+    ss << "version(" << Version::full() << ") ";
+    ss << "boost(" << Version::boost() << ") ";
+    ss << "compiler(" << Version::compiler() << ") ";
+    ss << "protocol(JSON cereal " << Version::cereal() << ") ";
+#ifdef ECF_OPENSSL
+    ss << "openssl(enabled) ";
+#endif
+    ss << "Compiled on " << __DATE__ << " " << __TIME__;
     return ss.str();
 }
 
-std::string Version::version() {
-    std::string ret = "ecflow_";
-    ret += ecf::convert_to<std::string>(ECFLOW_RELEASE);
-    ret += "_";
-    ret += ecf::convert_to<std::string>(ECFLOW_MAJOR);
-    ret += "_";
-    ret += ecf::convert_to<std::string>(ECFLOW_MINOR);
+std::string Version::base() {
+    std::string ret = major();
+    ret += ".";
+    ret += minor();
+    ret += ".";
+    ret += patch();
     return ret;
 }
 
-std::string Version::raw() {
-    std::string ret = ecf::convert_to<std::string>(ECFLOW_RELEASE);
-    ret += ".";
-    ret += ecf::convert_to<std::string>(ECFLOW_MAJOR);
-    ret += ".";
-    ret += ecf::convert_to<std::string>(ECFLOW_MINOR);
-    return ret;
+std::string Version::full() {
+    return Version::base() + Version::suffix();
 }
 
 std::string Version::boost() {
@@ -99,6 +71,14 @@ std::string Version::boost() {
     ss << BOOST_VERSION / 100000 << "."     // major version
        << BOOST_VERSION / 100 % 1000 << "." // minor version
        << BOOST_VERSION % 100;              // patch level
+    return ss.str();
+}
+
+std::string Version::cereal() {
+    std::stringstream ss;
+    ss << CEREAL_VERSION_MAJOR         // major version
+       << "." << CEREAL_VERSION_MINOR  // minor version
+       << "." << CEREAL_VERSION_PATCH; // patch level
     return ss.str();
 }
 
@@ -112,7 +92,7 @@ std::string Version::compiler() {
     #if defined(__clang__)
     //  To find the list of defines for clang use:
     //  echo | /usr/local/apps/clang/current/bin/clang++ -dM -E -
-    ss << "clang " << __clang_major__ << "." << __clang_minor__;
+    ss << "clang " << __clang_major__ << "." << __clang_minor__ << "." << __clang_patchlevel__;
     #elif defined(__INTEL_COMPILER)
     ss << "intel " << __INTEL_COMPILER;
     #elif defined(_CRAYC)
@@ -121,7 +101,9 @@ std::string Version::compiler() {
     ss << "gcc " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__;
     #endif
 #endif
-    return ss.str();
+    auto version = ss.str();
+
+    return version.empty() ? "unknown" : version;
 }
 
 } // namespace ecf

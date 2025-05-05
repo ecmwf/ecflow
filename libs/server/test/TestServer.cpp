@@ -19,6 +19,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/server/Server.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -30,9 +31,9 @@ BOOST_AUTO_TEST_SUITE(T_Server)
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // make public the function we wish to test:
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-class TestServer : public Server {
+class TestServer : public BasicServer {
 public:
-    explicit TestServer(boost::asio::io_context& io, ServerEnvironment& s) : Server(io, s) {}
+    explicit TestServer(boost::asio::io_context& io, ServerEnvironment& s) : BasicServer(io, s) {}
     ~TestServer() override = default;
 
     // abort server if check pt files exist, but can't be loaded
@@ -42,54 +43,56 @@ public:
     //   void set_server_state(SState::State);
 
     /// AbstractServer functions
-    SState::State state() const override { return Server::state(); }
-    std::pair<std::string, std::string> hostPort() const override { return Server::hostPort(); }
-    defs_ptr defs() const override { return Server::defs(); }
+    SState::State state() const override { return BasicServer::state(); }
+    std::pair<std::string, std::string> hostPort() const override { return BasicServer::hostPort(); }
+    defs_ptr defs() const override { return BasicServer::defs(); }
     // virtual void updateDefs(defs_ptr,bool force);
-    void clear_defs() override { Server::clear_defs(); }
+    void clear_defs() override { BasicServer::clear_defs(); }
     //   virtual void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
     //                               int check_pt_interval = 0,
     //                               int check_pt_save_time_alarm = 0);
-    void restore_defs_from_checkpt() override { Server::restore_defs_from_checkpt(); }
-    void nodeTreeStateChanged() override { Server::nodeTreeStateChanged(); }
-    bool allowTaskCommunication() const override { return Server::allowTaskCommunication(); }
-    void shutdown() override { Server::shutdown(); }
-    void halted() override { Server::halted(); }
-    void restart() override { Server::restart(); }
+    void restore_defs_from_checkpt() override { BasicServer::restore_defs_from_checkpt(); }
+    void nodeTreeStateChanged() override { BasicServer::nodeTreeStateChanged(); }
+    bool allowTaskCommunication() const override { return BasicServer::allowTaskCommunication(); }
+    void shutdown() override { BasicServer::shutdown(); }
+    void halted() override { BasicServer::halted(); }
+    void restart() override { BasicServer::restart(); }
 
-    bool reloadWhiteListFile(std::string& errorMsg) override { return Server::reloadWhiteListFile(errorMsg); }
-    bool reloadPasswdFile(std::string& errorMsg) override { return Server::reloadPasswdFile(errorMsg); }
+    bool reloadWhiteListFile(std::string& errorMsg) override { return BasicServer::reloadWhiteListFile(errorMsg); }
+    bool reloadPasswdFile(std::string& errorMsg) override { return BasicServer::reloadPasswdFile(errorMsg); }
 
     bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) override {
-        return Server::authenticateReadAccess(user, custom_user, passwd);
+        return BasicServer::authenticateReadAccess(user, custom_user, passwd);
     }
     bool authenticateReadAccess(const std::string& user,
                                 bool custom_user,
                                 const std::string& passwd,
                                 const std::string& path) override {
-        return Server::authenticateReadAccess(user, custom_user, passwd, path);
+        return BasicServer::authenticateReadAccess(user, custom_user, passwd, path);
     }
     bool authenticateReadAccess(const std::string& user,
                                 bool custom_user,
                                 const std::string& passwd,
                                 const std::vector<std::string>& paths) override {
-        return Server::authenticateReadAccess(user, custom_user, passwd, paths);
+        return BasicServer::authenticateReadAccess(user, custom_user, passwd, paths);
     }
 
-    bool authenticateWriteAccess(const std::string& user) override { return Server::authenticateWriteAccess(user); }
+    bool authenticateWriteAccess(const std::string& user) override {
+        return BasicServer::authenticateWriteAccess(user);
+    }
     bool authenticateWriteAccess(const std::string& user, const std::string& path) override {
-        return Server::authenticateWriteAccess(user, path);
+        return BasicServer::authenticateWriteAccess(user, path);
     }
     bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) override {
-        return Server::authenticateWriteAccess(user, paths);
+        return BasicServer::authenticateWriteAccess(user, paths);
     }
 
-    bool lock(const std::string& user) override { return Server::lock(user); }
-    void unlock() override { Server::unlock(); }
-    const std::string& lockedUser() const override { return Server::lockedUser(); }
+    bool lock(const std::string& user) override { return BasicServer::lock(user); }
+    void unlock() override { BasicServer::unlock(); }
+    const std::string& lockedUser() const override { return BasicServer::lockedUser(); }
     //   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now, bool
     //   user_cmd_context) const;
-    int poll_interval() const override { return Server::poll_interval(); }
+    int poll_interval() const override { return BasicServer::poll_interval(); }
     //   virtual void debug_server_on();
     //   virtual void debug_server_off();
     //   virtual bool debug() const;
@@ -149,15 +152,15 @@ void test_the_server(const std::string& port) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server) {
-    cout << "Server:: ...test_server\n";
+    ECF_NAME_THIS_TEST();
 
     // Create a unique port number, allowing debug and release,gnu,clang,intel to run at the same time
     // Hence the lock file is not always sufficient.
     // ECF_FREE_PORT should be unique among  gnu,clang,intel, etc
     std::string the_port1 = "3144";
-    char* test_ecf_port   = getenv("ECF_FREE_PORT"); // from metabuilder, allow parallel tests
-    if (test_ecf_port)
-        the_port1 = test_ecf_port;
+    if (auto port = ecf::environment::fetch("ECF_FREE_PORT"); port) { // from metabuilder, allow parallel tests
+        the_port1 = port.value();
+    }
     cout << "  Find free port to start server, starting with port " << the_port1 << "\n";
 
     auto the_port = ecf::convert_to<int>(the_port1);

@@ -18,6 +18,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -39,7 +40,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_ClientSuiteMgr)
 
 BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_user) {
-    cout << "ANode:: ...test_client_suite_mgr_remove_user\n";
+    ECF_NAME_THIS_TEST();
+
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("test_client_suite_mgr_remove_user");
@@ -91,7 +93,8 @@ BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_user) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_suite_mgr_remove_handle) {
-    cout << "ANode:: ...test_client_suite_mgr_remove_handle\n";
+    ECF_NAME_THIS_TEST();
+
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("test_client_suite_mgr_remove_handle");
@@ -161,13 +164,13 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_with_auto_add) {
     cout << "ANode:: ...test_suite_filter_replace_filtered_suite_with_auto_add\n";
 
     auto defs = load_defs(path);
-    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
 
     auto handle = defs->client_suite_mgr().create_client_suite(true, suites, user);
 
     { // access filtered suites, before replace
         auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 
     { // replace suite
@@ -177,7 +180,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_with_auto_add) {
 
     { // access filtered suites, after replace
         auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 }
 
@@ -185,13 +188,13 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_with_auto_add) {
     cout << "ANode:: ...test_suite_filter_replace_selected_suite_with_auto_add\n";
 
     auto defs = load_defs(path);
-    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
 
     auto handle = defs->client_suite_mgr().create_client_suite(true, suites, user);
 
     { // access filtered suites, before replace
         auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 
     { // replace suite
@@ -202,7 +205,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_with_auto_add) {
     { // access filtered suites, after replace
         auto& mng     = defs->client_suite_mgr();
         auto filtered = mng.create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 }
 
@@ -210,13 +213,13 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_without_auto_add) 
     cout << "ANode:: ...test_suite_filter_replace_filtered_suite_without_auto_add\n";
 
     auto defs = load_defs(path);
-    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
 
     auto handle = defs->client_suite_mgr().create_client_suite(false, suites, user);
 
     { // access filtered suites, before replace
         auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 
     { // replace suite
@@ -226,7 +229,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_without_auto_add) 
 
     { // access filtered suites, after replace
         auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 }
 
@@ -234,13 +237,13 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_without_auto_add) 
     cout << "ANode:: ...test_suite_filter_replace_selected_suite_without_auto_add\n";
 
     auto defs = load_defs(path);
-    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
 
     auto handle = defs->client_suite_mgr().create_client_suite(false, suites, user);
 
     { // access filtered suites, before replace
         auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 
     { // replace suite
@@ -251,7 +254,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_without_auto_add) 
     { // access filtered suites, after replace
         auto& mng     = defs->client_suite_mgr();
         auto filtered = mng.create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 }
 
@@ -259,13 +262,13 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_delete_and_add_filtered_suite_with_auto_a
     cout << "ANode:: ...test_suite_filter_delete_and_add_filtered_suite_with_auto_add\n";
 
     auto defs = load_defs(path);
-    BOOST_CHECK_EQUAL(defs->suiteVec().size(), 3);
+    BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
 
     auto handle = defs->client_suite_mgr().create_client_suite(true, suites, user);
 
     { // access filtered suites, before replace
         auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 2);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{2});
     }
 
     { // delete suite
@@ -282,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_delete_and_add_filtered_suite_with_auto_a
 
     { // access filtered suites, after replace
         auto filtered = defs->client_suite_mgr().create_defs(handle, defs);
-        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), 3);
+        BOOST_CHECK_EQUAL(filtered->suiteVec().size(), std::size_t{3});
     }
 }
 

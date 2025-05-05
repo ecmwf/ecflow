@@ -31,6 +31,7 @@
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -72,10 +73,9 @@ double get_seconds(const boost::timer::nanosecond_type& elapsed) {
 
 BOOST_AUTO_TEST_CASE(test_single_defs) {
     boost::timer::auto_cpu_timer auto_cpu_timer;
-
     std::string path      = File::test_data("libs/node/test/parser/data/single_defs/mega.def", "parser");
     size_t mega_file_size = fs::file_size(path);
-    cout << "AParser:: ...test_single_defs " << path << " file_size(" << mega_file_size << ")\n";
+    ECF_NAME_THIS_TEST(<< ", using file: " << path << " of size(" << mega_file_size << "MB)");
 
     // Time parse/resolve dependencies: This will need to be #defined depending on the platform
     // Change for file_iterator to plain string halved the time taken to load operation suite

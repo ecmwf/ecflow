@@ -14,7 +14,7 @@
 #include <cstdint>
 
 #include "ecflow/core/Child.hpp"
-#include "ecflow/core/User.hpp"
+#include "ecflow/core/ZombieCtrlAction.hpp"
 
 namespace cereal {
 class access;
@@ -27,7 +27,7 @@ class ZombieAttr {
 public:
     ZombieAttr(ecf::Child::ZombieType t,
                const std::vector<ecf::Child::CmdType>& c,
-               ecf::User::Action a,
+               ecf::ZombieCtrlAction a,
                int zombie_lifetime = 0);
     ZombieAttr() = default;
 
@@ -36,7 +36,7 @@ public:
     bool empty() const { return zombie_type_ == ecf::Child::NOT_SET; }
 
     ecf::Child::ZombieType zombie_type() const { return zombie_type_; }
-    ecf::User::Action action() const { return action_; }
+    ecf::ZombieCtrlAction action() const { return action_; }
     int zombie_lifetime() const { return zombie_lifetime_; }
     const std::vector<ecf::Child::CmdType>& child_cmds() const { return child_cmds_; }
 
@@ -71,10 +71,10 @@ private:
     void write(std::string&) const;
 
 private:
-    std::vector<ecf::Child::CmdType> child_cmds_;             // init, event, meter,label, complete
-    ecf::Child::ZombieType zombie_type_{ecf::Child::NOT_SET}; // User,path or ecf
-    ecf::User::Action action_{ecf::User::BLOCK};              // fob, fail,remove, adopt, block, kill
-    int zombie_lifetime_{0};                                  // How long zombie lives in server
+    std::vector<ecf::Child::CmdType> child_cmds_;                // init, event, meter,label, complete
+    ecf::Child::ZombieType zombie_type_{ecf::Child::NOT_SET};    // User,path or ecf
+    ecf::ZombieCtrlAction action_{ecf::ZombieCtrlAction::BLOCK}; // fob, fail,remove, adopt, block, kill
+    int zombie_lifetime_{0};                                     // How long zombie lives in server
 
     friend class cereal::access;
     template <class Archive>

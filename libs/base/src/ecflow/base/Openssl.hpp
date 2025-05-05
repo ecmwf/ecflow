@@ -55,6 +55,8 @@ public:
     void print(std::ostream& os) const { os << ssl_; }
     std::string info() const;
 
+    std::string selected_crt() const;
+
 private:
     void check_server_certificates() const;
     void load_verify_file(boost::asio::ssl::context&); /// load server.crt file into the ssl context
@@ -67,7 +69,7 @@ private:
     std::string passwd() const;
 
 private:
-    std::string ssl_;                                        // Non empty if ssl has been enabled
+    std::string ssl_;                                        // Non-empty if ssl has been enabled
     std::unique_ptr<boost::asio::ssl::context> ssl_context_; // create on demand, otherwise non-ssl context takes a hit.
     bool init_for_client_{false};
 };

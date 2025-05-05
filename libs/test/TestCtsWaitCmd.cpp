@@ -23,6 +23,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -100,8 +101,9 @@ static bool wait_for_state(std::vector<std::pair<std::string, NState::State>>& p
 // In this case the job associated with task 'wait' should block until the expression evaluates
 // to true, which should be after the completion of all other tasks
 BOOST_AUTO_TEST_CASE(test_wait_cmd) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_wait_cmd " << flush;
     TestClean clean_at_start_and_end;
 
     Defs theDefs;
@@ -130,8 +132,9 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_wait_cmd_parse_fail) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_wait_cmd_parse_fail " << flush;
 
     // This time we add a wait expression that
     // should fail to parse, and we should return an error
@@ -175,8 +178,9 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_parse_fail) {
 }
 
 BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_wait_cmd_non_existant_paths " << flush;
 
     // This time we add a wait expression that should fail
     // because the paths referenced in the expression don't exist
@@ -185,14 +189,15 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
 
     // Create a custom ecf file for test_wait_cmd/family0/wait to invoke the child wait command
     // NOTE: ../family1/FRED does not exist
-    std::string templateEcfFileForWait;
-    templateEcfFileForWait += "%include <head.h>\n";
-    templateEcfFileForWait += "\n";
-    templateEcfFileForWait += "echo do some work\n";
-    templateEcfFileForWait += "%ECF_CLIENT_EXE_PATH% --wait=\"../family1/FRED eq complete and ../family1/b eq complete "
-                              "and ../family2/aa eq complete and ../family2/bb eq complete\"\n";
-    templateEcfFileForWait += "\n";
-    templateEcfFileForWait += "%include <tail.h>\n";
+    // clang-format off
+    std::string templateEcfFileForWait =
+        "%include <head.h>\n"
+        "\n"
+        "echo do some work\n"
+        "%ECF_CLIENT_EXE_PATH% --wait=\"../family1/FRED eq complete and ../family1/b eq complete and ../family2/aa eq complete and ../family2/bb eq complete\"\n"
+        "\n"
+        "%include <tail.h>\n";
+    // clang-format on
 
     std::map<std::string, std::string> taskEcfFileMap;
     taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(theDefs, "wait"), templateEcfFileForWait));

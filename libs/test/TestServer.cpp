@@ -25,6 +25,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -37,8 +38,9 @@ BOOST_AUTO_TEST_SUITE(T_Server)
 // The data is created dynamically so that we can stress test the server
 // This test does not have any time dependencies in the def file.
 BOOST_AUTO_TEST_CASE(test_server_job_submission) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_server_job_submission " << flush;
     TestClean clean_at_start_and_end;
 
     // # Note: we have to use relative paths, since these tests are relocatable
@@ -70,8 +72,9 @@ BOOST_AUTO_TEST_CASE(test_server_job_submission) {
 }
 
 BOOST_AUTO_TEST_CASE(test_restore_defs_from_check_pt) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_restore_defs_from_check_pt " << flush;
     TestClean clean_at_start_and_end;
     // **********************************************************************
     // In order for this test to work, we need to disable the automatic

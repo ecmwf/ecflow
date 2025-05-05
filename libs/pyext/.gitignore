@@ -1,3 +1,4 @@
 /build
 /setup.py
 /timestamp
+/ecflow/__init__.py

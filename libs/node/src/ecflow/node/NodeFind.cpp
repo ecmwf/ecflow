@@ -648,7 +648,7 @@ node_ptr findRelativeNode(const vector<std::string>& theExtractedPath, node_ptr 
     else {
         for (const string& s : theExtractedPath) {
             errorMsg += s;
-            errorMsg += Str::PATH_SEPERATOR();
+            errorMsg += Str::PATH_SEPARATOR();
         }
     }
     errorMsg += "' from node ";
@@ -891,7 +891,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
             // search suites, with the remaining path in theExtractedPath
             std::string path;
             for (const auto& i : theExtractedPath) {
-                path += Str::PATH_SEPERATOR();
+                path += Str::PATH_SEPARATOR();
                 path += i;
             }
             node_ptr fndNode = theDefs->findAbsNode(path);

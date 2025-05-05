@@ -12,7 +12,10 @@
 
 #include <boost/program_options.hpp>
 
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Enumerate.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/http/Api.hpp"
 #include "ecflow/http/JSON.hpp"
@@ -25,33 +28,16 @@ HttpServer::HttpServer(int argc, char** argv) {
 }
 
 void read_environment() {
-    if (getenv("ECF_RESTAPI_VERBOSE") != nullptr) {
-        opts.verbose = true;
-    }
-    if (getenv("ECF_RESTAPI_NOSSL") != nullptr) {
-        opts.no_ssl = true;
-    }
-    if (getenv("ECF_RESTAPI_POLLING_INTERVAL") != nullptr) {
-        opts.polling_interval = atoi(getenv("ECF_RESTAPI_POLLING_INTERVAL"));
-    }
-    if (getenv("ECF_RESTAPI_PORT") != nullptr) {
-        opts.port = atoi(getenv("ECF_RESTAPI_PORT"));
-    }
-    if (getenv("ECF_HOST") != nullptr) {
-        opts.ecflow_host = std::string(getenv("ECF_HOST"));
-    }
-    if (getenv("ECF_PORT") != nullptr) {
-        opts.ecflow_port = atoi(getenv("ECF_PORT"));
-    }
-    if (getenv("ECF_RESTAPI_TOKENS_FILE") != nullptr) {
-        opts.tokens_file = std::string(getenv("ECF_RESTAPI_TOKENS_FILE"));
-    }
-    if (getenv("ECF_RESTAPI_CERT_DIRECTORY") != nullptr) {
-        opts.cert_directory = std::string(getenv("ECF_RESTAPI_CERT_DIRECTORY"));
-    }
-    if (getenv("ECF_RESTAPI_MAX_UPDATE_INTERVAL") != nullptr) {
-        opts.max_polling_interval = atoi(getenv("ECF_RESTAPI_MAX_UPDATE_INTERVAL"));
-    }
+    ecf::environment::get("ECF_RESTAPI_VERBOSE", opts.verbose);
+    ecf::environment::get("ECF_RESTAPI_NOSSL", opts.no_ssl);
+    ecf::environment::get("ECF_RESTAPI_POLLING_INTERVAL", opts.polling_interval);
+    ecf::environment::get("ECF_RESTAPI_PORT", opts.port);
+    ecf::environment::get(ecf::environment::ECF_HOST, opts.ecflow_host);
+    ecf::environment::get(ecf::environment::ECF_PORT, opts.ecflow_port);
+    ecf::environment::get("ECF_RESTAPI_TOKENS_FILE", opts.tokens_file);
+    ecf::environment::get("ECF_RESTAPI_CERT_DIRECTORY", opts.cert_directory);
+    ecf::environment::get("ECF_RESTAPI_MAX_UPDATE_INTERVAL", opts.max_polling_interval);
+    ecf::environment::get(ecf::environment::ECF_HOST_PROTOCOL, opts.host_protocol);
 }
 
 void HttpServer::parse_args(int argc, char** argv) const {
@@ -68,6 +54,7 @@ void HttpServer::parse_args(int argc, char** argv) const {
 
    bool verbose = false;
    bool no_ssl = false;
+   bool backend_http = false;
 
    desc.add_options()
        ("cert_directory", po::value(&opts.cert_directory), "directory where certificates are found (default: $HOME/.ecflowrc/ssl)")
@@ -79,7 +66,8 @@ void HttpServer::parse_args(int argc, char** argv) const {
        ("port,p", po::value(&opts.port), "port to listen (default: 8080)")
        ("polling_interval", po::value(&opts.polling_interval), "interval in seconds to poll ecflow server for updates (default: 10)")
        ("tokens_file", po::value(&opts.tokens_file), "location of api tokens file (default: api-tokens.json)")
-       ("verbose,v", po::bool_switch(&verbose), "enable verbose mode");
+       ("verbose,v", po::bool_switch(&verbose), "enable verbose mode")
+       ("http", po::bool_switch(&backend_http), "use http as protocol to communicate with server (default: false)");
 
     // clang-format on
 
@@ -97,18 +85,28 @@ void HttpServer::parse_args(int argc, char** argv) const {
     if (no_ssl) {
         opts.no_ssl = true;
     }
+    if (backend_http) {
+        //
+        // Since the backend is running HTTP, we need to use HTTP to communicate with it
+        // This assumes that the backend runs on the same machine as the REST API and thus the
+        // communication is always done via HTTP (and never over HTTPS)
+        //
+        // In case the backend become accessbile HTTPS, we would need another option --https to specify the protocol
+        //
+        const std::string selected{ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Http).value()};
+        opts.host_protocol = selected;
+    }
 
-    setenv("ECF_HOST", opts.ecflow_host.c_str(), 1);
-    setenv("ECF_PORT", ecf::convert_to<std::string>(opts.ecflow_port).c_str(), 1);
+    setenv(ecf::environment::ECF_HOST, opts.ecflow_host.c_str(), 1);
+    setenv(ecf::environment::ECF_PORT, ecf::convert_to<std::string>(opts.ecflow_port).c_str(), 1);
+    setenv(ecf::environment::ECF_HOST_PROTOCOL, opts.host_protocol.c_str(), 1);
     // Unset these, otherwise ClientInvoker will automatically
     // try to use them
-    unsetenv("ECF_PASSWD");
-    unsetenv("ECF_CUSTOM_PASSWD");
+    unsetenv(ecf::environment::ECF_PASSWD);
+    unsetenv(ecf::environment::ECF_CUSTOM_PASSWD);
 }
 
 void apply_listeners(httplib::Server& http_server) {
-
-    // TODO[MB]: Needs to be further refactored
 
     const auto dump_headers = [](const httplib::Headers& headers, std::stringstream& ss) {
         for (const auto& [key, value] : headers) {
@@ -199,7 +197,7 @@ void apply_listeners(httplib::Server& http_server) {
 
     http_server.set_logger([&format](const httplib::Request& req, const httplib::Response& res) {
         const std::string str = format(req, res);
-        // using std::cout crashes with many threads calling
+        // using iostream-based output crashes with many threads calling
         if (opts.verbose) {
             printf("%s\n", str.c_str());
         }
@@ -245,7 +243,7 @@ void HttpServer::run() const {
         const std::string key  = opts.cert_directory + "/server.key";
 
         httplib::SSLServer http_server(cert.c_str(), key.c_str());
-        apply_listeners(dynamic_cast<httplib::Server&>(http_server));
+        apply_listeners(http_server);
         start_server(http_server);
     }
     else

@@ -26,12 +26,11 @@ BOOST_AUTO_TEST_CASE(can_handle_getting_status_with_invalid_credentials) {
     using namespace ecf::service::mirror;
     MirrorClient client;
 
-    BOOST_CHECK_EXCEPTION(
-        client.get_node_status("invalid_host", "1234", "/s1/f1/p1", true, "username", "password"),
-        std::runtime_error,
-        [](const std::runtime_error& e) {
-            return std::string(e.what()).find("failure to sync remote defs") != std::string::npos;
-        });
+    BOOST_CHECK_EXCEPTION(client.get_node_status("invalid_host", "1234", "/s1/f1/p1", true, "username", "password"),
+                          std::runtime_error,
+                          [](const std::runtime_error& e) {
+                              return std::string(e.what()).find("failure to sync remote defs") != std::string::npos;
+                          });
 }
 
 BOOST_AUTO_TEST_SUITE_END()

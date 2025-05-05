@@ -129,8 +129,8 @@ void AvisoService::register_listener(const AvisoSubscribe& listen) {
     if (auto auth = listen.auth(); !auth.empty()) {
         auto credentials = ecf::service::auth::Credentials::load(auth);
         if (auto key_credentials = credentials.key(); key_credentials) {
-            auto email = key_credentials->email;
-            auto key = key_credentials->key;
+            auto email          = key_credentials->email;
+            auto key            = key_credentials->key;
             inserted.auth_token = email + ":" + key;
         }
         else {

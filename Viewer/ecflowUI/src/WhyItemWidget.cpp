@@ -39,7 +39,8 @@ WhyItemWidget::WhyItemWidget(QWidget* parent) : HtmlItemWidget(parent) {
     fileLabel_->hide();
 
     // Will be used for ECFLOW-901
-    infoProvider_ = new WhyProvider(this); // populating InfoPresenter::infoProvider_, with the deletion later handled by InfoPresenter itself
+    infoProvider_ = new WhyProvider(
+        this); // populating InfoPresenter::infoProvider_, with the deletion later handled by InfoPresenter itself
 
     textEdit_->setProperty("trigger", "1");
     textEdit_->setFontProperty(VConfig::instance()->find("panel.why.font"));

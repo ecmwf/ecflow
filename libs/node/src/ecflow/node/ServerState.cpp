@@ -11,6 +11,7 @@
 #include "ecflow/node/ServerState.hpp"
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
@@ -307,7 +308,7 @@ bool ServerState::variableSubsitution(std::string& cmd) const {
     //    edit bill '%fred%'   # should be 10
     // To prevent this we will use a simple count
     char micro                = '%';
-    const Variable& micro_var = findVariable(Str::ECF_MICRO());
+    const Variable& micro_var = findVariable(ecf::environment::ECF_MICRO);
     if (!micro_var.empty() && !micro_var.theValue().empty())
         micro = micro_var.theValue()[0];
 
@@ -420,9 +421,9 @@ void ServerState::setup_default_env(const std::string& port) {
 
 void ServerState::setup_default_server_variables(std::vector<Variable>& server_variables, const std::string& port) {
     Host host;
-    server_variables.emplace_back(Str::ECF_MICRO(),
+    server_variables.emplace_back(ecf::environment::ECF_MICRO,
                                   Ecf::MICRO()); // Preprocessor character for variable substitution and including files
-    server_variables.emplace_back(Str::ECF_HOME(), string("."));
+    server_variables.emplace_back(ecf::environment::ECF_HOME, string("."));
     server_variables.emplace_back(string("ECF_JOB_CMD"), Ecf::JOB_CMD());   // Command to be executed to submit a job
     server_variables.emplace_back(string("ECF_KILL_CMD"), Ecf::KILL_CMD()); // Command to be executed to kill a job
     server_variables.emplace_back(string("ECF_STATUS_CMD"),
@@ -446,15 +447,15 @@ void ServerState::setup_default_server_variables(std::vector<Variable>& server_v
     // job aborts, the job is automatically re-run. Useful when jobs are run in
     // an unreliable environments. For example using using commands like ftp(1)
     // in a job can fail easily, but re-running the job will often work
-    server_variables.emplace_back(Str::ECF_TRIES(), string("2"));
+    server_variables.emplace_back(ecf::environment::ECF_TRIES, string("2"));
 
-    server_variables.emplace_back(string("ECF_VERSION"), Version::raw()); // server version
+    server_variables.emplace_back(string("ECF_VERSION"), Version::full()); // server version
 
     // Needed to setup client environment.
     // The server sets these variable for use by the client. i.e when creating the jobs
     // The clients then uses them to communicate with the server.
-    server_variables.emplace_back(Str::ECF_PORT(), port);
-    server_variables.emplace_back(Str::ECF_HOST(), Str::LOCALHOST());
+    server_variables.emplace_back(ecf::environment::ECF_PORT, port);
+    server_variables.emplace_back(ecf::environment::ECF_HOST, Str::LOCALHOST());
 }
 
 /// determines why the node is not running.

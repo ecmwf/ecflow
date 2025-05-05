@@ -63,12 +63,14 @@ set(srcs
   base/src/ecflow/base/Cmd.hpp
   base/src/ecflow/base/Connection.hpp
   base/src/ecflow/base/Gnuplot.hpp
+  base/src/ecflow/base/HttpClient.hpp
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
+  base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerReply.hpp
   base/src/ecflow/base/ServerToClientResponse.hpp
   base/src/ecflow/base/Stats.hpp
   base/src/ecflow/base/WhyCmd.hpp
   base/src/ecflow/base/ZombieCtrl.hpp
-  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.hpp>
   base/src/ecflow/base/cts/ClientToServerCmd.hpp
@@ -138,12 +140,13 @@ set(srcs
   base/src/ecflow/base/ClientToServerRequest.cpp
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
+  base/src/ecflow/base/HttpClient.cpp
   base/src/ecflow/base/ServerReply.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp
+  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.cpp>
   base/src/ecflow/base/WhyCmd.cpp
   base/src/ecflow/base/ZombieCtrl.cpp
-  $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.cpp>
   base/src/ecflow/base/cts/ClientToServerCmd.cpp
@@ -230,7 +233,6 @@ set(srcs
   ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_version.h
   ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_source_build_dir.h
   core/src/ecflow/core/AssertTimer.hpp
-  core/src/ecflow/core/Cal.hpp
   core/src/ecflow/core/Calendar.hpp
   core/src/ecflow/core/CalendarUpdateParams.hpp
   core/src/ecflow/core/CheckPt.hpp
@@ -242,6 +244,8 @@ set(srcs
   core/src/ecflow/core/DurationTimer.hpp
   core/src/ecflow/core/Ecf.hpp
   core/src/ecflow/core/EcfPortLock.hpp
+  core/src/ecflow/core/Enumerate.hpp
+  core/src/ecflow/core/Environment.hpp
   core/src/ecflow/core/Extract.hpp
   core/src/ecflow/core/File.hpp
   core/src/ecflow/core/File_r.hpp
@@ -271,13 +275,13 @@ set(srcs
   core/src/ecflow/core/User.hpp
   core/src/ecflow/core/Version.hpp
   core/src/ecflow/core/WhiteListFile.hpp
+  core/src/ecflow/core/ZombieCtrlAction.hpp
   core/src/ecflow/core/cereal_boost_time.hpp
   core/src/ecflow/core/cereal_optional_nvp.hpp
   core/src/ecflow/core/perf_timer.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
   # Core -- Sources
   core/src/ecflow/core/AssertTimer.cpp
-  core/src/ecflow/core/Cal.cpp
   core/src/ecflow/core/Calendar.cpp
   core/src/ecflow/core/Child.cpp
   core/src/ecflow/core/Chrono.cpp
@@ -476,20 +480,20 @@ set(srcs
   # Server -- Headers
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
+  server/src/ecflow/server/HttpServer.hpp
   server/src/ecflow/server/NodeTreeTraverser.hpp
   server/src/ecflow/server/PeriodicScheduler.hpp
   server/src/ecflow/server/Server.hpp
   server/src/ecflow/server/ServerEnvironment.hpp
   server/src/ecflow/server/ServerOptions.hpp
-  server/src/ecflow/server/SslServer.hpp
   server/src/ecflow/server/SslTcpServer.hpp
   server/src/ecflow/server/TcpBaseServer.hpp
   server/src/ecflow/server/TcpServer.hpp
-  $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslServer.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.hpp>
   # Server -- Sources
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
+  server/src/ecflow/server/HttpServer.cpp
   server/src/ecflow/server/NodeTreeTraverser.cpp
   server/src/ecflow/server/PeriodicScheduler.cpp
   server/src/ecflow/server/Server.cpp
@@ -497,7 +501,6 @@ set(srcs
   server/src/ecflow/server/ServerOptions.cpp
   server/src/ecflow/server/TcpBaseServer.cpp
   server/src/ecflow/server/TcpServer.cpp
-  $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslServer.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.cpp>
 
   # Service -- Headers
@@ -543,11 +546,11 @@ set(srcs
 
 ecbuild_add_library(
   TARGET
-  ecflow_all
+    ecflow_all
   NOINSTALL
   TYPE STATIC
   SOURCES
-  ${srcs}
+    ${srcs}
   PUBLIC_INCLUDES
     attribute/src
     base/src
@@ -569,8 +572,10 @@ ecbuild_add_library(
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     $<$<BOOL:${Crypt_FOUND}>:crypt::crypt>
     Threads::Threads
-  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  PUBLIC_DEFINITIONS
     CMAKE
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(ecflow_all)
 

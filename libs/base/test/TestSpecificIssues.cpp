@@ -16,6 +16,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -50,7 +51,8 @@ static defs_ptr create_defs() {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_189) {
-    cout << "Base:: ...test_ECFLOW_189\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_ECFLOW_189.log"); // will create log file, and destroy log and remove file at end of scope
 
     defs_ptr the_defs = create_defs();

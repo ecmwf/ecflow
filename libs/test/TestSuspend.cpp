@@ -26,6 +26,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -78,8 +79,9 @@ static void waitForTimeDependenciesToBeFree(int max_time_to_wait) {
 // be handled. When the server/node is restarted/resumed the task should
 // be submitted straight away.(i.e providing no trigger/complete dependencies)
 BOOST_AUTO_TEST_CASE(test_shutdown) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_shutdown " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below
@@ -158,8 +160,9 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
 // be handled. When the server/node is restarted/resumed the task should
 // be submitted straight away.(i.e providing no trigger/complete dependencies)
 BOOST_AUTO_TEST_CASE(test_suspend_node) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_suspend_node " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

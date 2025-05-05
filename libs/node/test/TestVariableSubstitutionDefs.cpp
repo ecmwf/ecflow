@@ -16,6 +16,7 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_VariableSubstitutionDefs)
 
 BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
-    std::cout << "ANode:: ...test_defs_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     {
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
     cmd      = "%ECF_VERSION%";
-    expected = Version::raw();
+    expected = Version::full();
     BOOST_CHECK_MESSAGE(defs.variableSubsitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
@@ -148,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
 }
 
 BOOST_AUTO_TEST_CASE(test_defs_variable_substitution_double_micro) {
-    std::cout << "ANode:: ...test_defs_variable_substitution_double_micro\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
 

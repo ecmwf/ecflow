@@ -8,7 +8,8 @@
 # nor does it submit to any jurisdiction.
 #
 
-### ecflow python bindings
+### ecFlow python bindings
+#
 # NOTES:
 # 1/ Building multiple python3 versions not supported, since find_python(..) caches variables, Hack: clear cached variable.
 #    https://gitlab.kitware.com/cmake/cmake/issues/19820
@@ -47,7 +48,7 @@ set(SETUP_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
 configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT} )
 
 # ==============================================================================
-# source files (paths relative to dirs python2/python3)
+# source files (paths relative to dirs .../python3)
 # ==============================================================================
 set(srcs
   # Headers
@@ -82,182 +83,48 @@ set(srcs
 # tests
 # =====================================================================
 set(u_tests
-  py_u_test_add
-  py_u_test_collection
-  py_u_test_cron
-  py_u_test_defs_constructor
-  py_u_test_get_attr
-  py_u_test_manual
-  py_u_test_node
-  py_u_test_late
-  py_u_test_replace_node
-  py_u_test_tutorial
-  py_u_TestAddDelete
-  py_u_TestAddDeleteFunc
-  py_u_TestAddNodeFunc
-  py_u_TestAutoAddExtern
-  py_u_TestAviso
-  py_u_TestCopy
-  py_u_TestDefs
-  py_u_TestDefsCheck
-  py_u_TestDerivable
-  py_u_TestEcf
-  py_u_TestError
-  py_u_TestFind
-  py_u_TestFlag
-  py_u_TestGetAllTasks
-  py_u_TestJobGeneration
-  py_u_TestMirror
-  py_u_TestParent
-  py_u_TestRemove
-  py_u_TestRepeatArithmetic
-  py_u_TestSimulator
-  py_u_TestTraversal
-  py_u_TestUserManual
-  py_u_TestWith
-  py_u_sort
+  u_test_add
+  u_test_collection
+  u_test_cron
+  u_test_defs_constructor
+  u_test_get_attr
+  u_test_manual
+  u_test_node
+  u_test_late
+  u_test_replace_node
+  u_test_tutorial
+  u_TestAddDelete
+  u_TestAddDeleteFunc
+  u_TestAddNodeFunc
+  u_TestAutoAddExtern
+  u_TestAviso
+  u_TestCopy
+  u_TestDefs
+  u_TestDefsCheck
+  u_TestDerivable
+  u_TestEcf
+  u_TestError
+  u_TestFind
+  u_TestFlag
+  u_TestGetAllTasks
+  u_TestJobGeneration
+  u_TestMirror
+  u_TestParent
+  u_TestRemove
+  u_TestRepeatArithmetic
+  u_TestSimulator
+  u_TestTraversal
+  u_TestUserManual
+  u_TestWith
+  u_sort
 )
 
 set(s_tests
   s_TestClientApi
   s_TestPythonChildApi
+  s_TestSslSetup
 )
 
-
-message( STATUS "====================================================================================================================" )
-message( STATUS "PYTHON2" )
-message( STATUS "====================================================================================================================" )
-if(${CMAKE_VERSION} VERSION_LESS "3.12.0") 
-  # We only support python2 extension for cmake less 3.12.0
-  # cmake 3.12.0 or greater allows multiple boost python libs & hence multiple extensions to be built
-  # Using -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3 is not sufficient as the wrong(python2) libs are found
-  ecbuild_find_python( VERSION 2.6 REQUIRED )  
-  message( STATUS "  PYTHON_FOUND                      : ${PYTHON_FOUND}" )
-  message( STATUS "  PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
-  message( STATUS "  PYTHONLIBS_FOUND                  : ${PYTHONLIBS_FOUND}" )
-  message( STATUS "  PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
-  message( STATUS "  PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
-  message( STATUS "  PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
-  message( STATUS "  PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
-  message( STATUS "  PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
-  message( STATUS "  PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
-  message( STATUS "  PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
-  message( STATUS "  PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
-  if (${PYTHON_VERSION_MAJOR} EQUAL 3)
-    ecbuild_error("Need cmake version >= 3.12.0 to build ecflow python3 extension, current cmake version is ${CMAKE_VERSION}")
-  endif()
-
-  find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS python )
-  add_subdirectory( python2 )
-else()
-  # ======================================================================================
-  # Attempt to build both python2 *AND/OR* python3 ecflow extension, depending on what is found
-  # this assumes cmake 3.12.0 min, which added support for boost python2 and python3
-  # * NOTICE* that we do *NOT* use REQUIRED when searching for boost python libs
-  # ======================================================================================
-  find_package(Python2 COMPONENTS Interpreter Development)
-  if (Python2_FOUND)
-    message( STATUS "  Python2_Interpreter_FOUND         : ${Python2_Interpreter_FOUND}" )
-    message( STATUS "  Python2_EXECUTABLE                : ${Python2_EXECUTABLE}" )
-    message( STATUS "  Python2_STDLIB                    : ${Python2_STDLIB}    Standard platform independent installation directory" )
-    message( STATUS "  Python2_STDARCH                   : ${Python2_STDARCH}   Standard platform dependent installation directory." )
-    message( STATUS "  Python2_Development_FOUND         : ${Python2_Development_FOUND}" )
-    message( STATUS "  Python2_INCLUDE_DIRS              : ${Python2_INCLUDE_DIRS}" )
-    message( STATUS "  Python2_LIBRARIES                 : ${Python2_LIBRARIES}" )
-    message( STATUS "  Python2_LIBRARY_DIRS              : ${Python2_LIBRARY_DIRS}" )
-    message( STATUS "  Python2_VERSION                   : ${Python2_VERSION}" )
-    message( STATUS "  Python2_VERSION_MAJOR             : ${Python2_VERSION_MAJOR}" )
-    message( STATUS "  Python2_VERSION_MINOR             : ${Python2_VERSION_MINOR}" )
-    message( STATUS "  Python2_VERSION_PATCH             : ${Python2_VERSION_PATCH}" )
-    # *****************************************************************************************
-    # Although we have found python2 it could be that *ONLY* python3 was module loaded
-    # Otherwise will build for python2 and test with python3 interpreter
-    # *****************************************************************************************
-    if ( Python2_LIBRARIES )
-      ecbuild_find_python( VERSION 2.6 REQUIRED ) # if not included iterpreter not found ?
-      if ( ${PYTHON_VERSION_MAJOR} EQUAL 2)
-        message( STATUS "  PYTHON_FOUND                      : ${PYTHON_FOUND}" )
-        message( STATUS "  PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
-        message( STATUS "  PYTHONLIBS_FOUND                  : ${PYTHONLIBS_FOUND}" )
-        message( STATUS "  PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
-        message( STATUS "  PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
-        message( STATUS "  PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
-        message( STATUS "  PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
-        message( STATUS "  PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
-        message( STATUS "  PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
-        message( STATUS "  PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
-        message( STATUS "  PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
-
-        if ( Boost_MINOR_VERSION GREATER 66 )
-          # cmake 3.15
-          # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
-          # INTERFACE_LIBRARY targets may only have whitelisted properties."
-          set(ECFLOW_BOOST_PYTHON_COMPONENT python${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR})
-        else()
-          set(ECFLOW_BOOST_PYTHON_COMPONENT python)
-        endif()
-        find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS ${ECFLOW_BOOST_PYTHON_COMPONENT} )
-
-        if (Boost_PYTHON_FOUND OR Boost_PYTHON${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR}_FOUND)
-          # Indicate that both Python and Boost.Python have been found
-          set(ECF_PYTHON_FOUND "ECF_PYTHON_FOUND")
-          add_subdirectory( python2 )
-        else()
-          message( STATUS "  Boost python2 libraries *NOT* found" )
-        endif()
-      endif()
-    else()
-      message( STATUS "  Python2 libraries *NOT* found" )
-    endif()
-  endif()
-
-  message( STATUS "====================================================================================================================" )
-  message( STATUS "PYTHON3" )
-  message( STATUS "====================================================================================================================" )
-  # The python must include the Development packages. As the headers in these packages is used by boost python.
-  find_package(Python3 COMPONENTS Interpreter Development)
-  if (Python3_FOUND)
-    message( STATUS "  Python3_Interpreter_FOUND         : ${Python3_Interpreter_FOUND}" )
-    message( STATUS "  Python3_EXECUTABLE                : ${Python3_EXECUTABLE}" )
-    message( STATUS "  Python3_STDLIB                    : ${Python3_STDLIB}    Standard platform independent installation directory" )
-    message( STATUS "  Python3_STDARCH                   : ${Python3_STDARCH}   Standard platform dependent installation directory." )
-    message( STATUS "  Python3_Development_FOUND         : ${Python3_Development_FOUND}" )
-    message( STATUS "  Python3_INCLUDE_DIRS              : ${Python3_INCLUDE_DIRS}" )
-    message( STATUS "  Python3_LIBRARIES                 : ${Python3_LIBRARIES}" )
-    message( STATUS "  Python3_LIBRARY_DIRS              : ${Python3_LIBRARY_DIRS}" )
-    message( STATUS "  Python3_VERSION                   : ${Python3_VERSION}" )
-    message( STATUS "  Python3_VERSION_MAJOR             : ${Python3_VERSION_MAJOR}" )
-    message( STATUS "  Python3_VERSION_MINOR             : ${Python3_VERSION_MINOR}" )
-    message( STATUS "  Python3_VERSION_PATCH             : ${Python3_VERSION_PATCH}" )
-
-    # Set (deprecated) FindPython variables
-    # These need to be available, as they are used by `ecbuild_add_test(... TYPE PYTHON ...)`
-    set(PYTHONINTERP_FOUND "${Python3_Interpreter_FOUND}")
-    set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
-
-    if ( Boost_MINOR_VERSION GREATER 66 )
-      # cmake 3.15
-      # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
-      # INTERFACE_LIBRARY targets may only have whitelisted properties.
-      set(ECFLOW_BOOST_PYTHON_COMPONENT python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
-    else()
-      set(ECFLOW_BOOST_PYTHON_COMPONENT python3)
-    endif()
-    find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS ${ECFLOW_BOOST_PYTHON_COMPONENT} )
-
-    if (Boost_PYTHON3_FOUND OR Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_FOUND)
-      # Indicate that both Python and Boost.Python have been found
-      set(ECF_PYTHON_FOUND "ECF_PYTHON_FOUND")
-      add_subdirectory( python3 )
-    else()
-      message( STATUS "  Boost python3 libraries *NOT* found" )
-    endif()
-  endif()
-  
-  if (NOT ECF_PYTHON_FOUND)
-    ecbuild_error("ecflow python extension is enabled, but python2/python3 libraries or python boost libraries not found")
-  endif()
+if (Python3_FOUND AND (Boost_PYTHON3_FOUND OR Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_FOUND))
+  add_subdirectory( python3 )
 endif()
-message( STATUS "====================================================================================================================" )
-message( STATUS "END PYTHON" )
-message( STATUS "====================================================================================================================" )

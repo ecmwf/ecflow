@@ -21,6 +21,7 @@
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/PrintStyle.hpp" // IWYU pragma: keep
 #include "ecflow/node/System.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -48,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_add_log2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_force_cmd) {
-    cout << "Base:: ...test_force_cmd\n";
+    ECF_NAME_THIS_TEST();
 
     defs_ptr the_defs = create_defs();
     the_defs->beginAll();
@@ -149,7 +150,7 @@ doForce(MockServer& mockServer, Node* fnode, const std::string& stateOrEvent, co
 }
 
 BOOST_AUTO_TEST_CASE(test_force_cmd_recursive) {
-    cout << "Base:: ...test_force_cmd_recursive\n";
+    ECF_NAME_THIS_TEST();
 
     defs_ptr the_defs = create_defs();
     node_ptr suite    = the_defs->findAbsNode("/s1");
@@ -164,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_recursive) {
 }
 
 BOOST_AUTO_TEST_CASE(test_force_cmd_bubbles_up_state_changes) {
-    cout << "Base:: ...test_force_cmd_bubbles_up_state_changes\n";
+    ECF_NAME_THIS_TEST();
 
     defs_ptr the_defs = create_defs();
     std::vector<Node*> nodes;
@@ -198,7 +199,7 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_bubbles_up_state_changes) {
 }
 
 BOOST_AUTO_TEST_CASE(test_force_cmd_alias_does_not_bubble_up_state_changes) {
-    cout << "Base:: ...test_force_cmd_alias_does_not_bubble_up_state_changes\n";
+    ECF_NAME_THIS_TEST();
 
     defs_ptr the_defs = create_defs();
     std::vector<Node*> nodes;
@@ -230,7 +231,7 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_alias_does_not_bubble_up_state_changes) {
 }
 
 BOOST_AUTO_TEST_CASE(test_force_events) {
-    cout << "Base:: ...test_force_events\n";
+    ECF_NAME_THIS_TEST();
 
     MyDefsFixture fixtureDef;
     MockServer mockServer(&fixtureDef.defsfile_);
@@ -268,7 +269,7 @@ BOOST_AUTO_TEST_CASE(test_force_events) {
 }
 
 BOOST_AUTO_TEST_CASE(test_force_events_errors) {
-    cout << "Base:: ...test_force_events_errors\n";
+    ECF_NAME_THIS_TEST();
 
     MyDefsFixture fixtureDef;
     MockServer mockServer(&fixtureDef.defsfile_);
@@ -341,7 +342,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive) {
     // this functionality. What we want is that task is set to complete, without
     // forcing a re-queue, this is then propagated up the node tree. Which forces the
     // family to complete, and hence update the repeat variable.
-    cout << "Base:: ...test_force_interactive\n";
+    ECF_NAME_THIS_TEST();
 
     //   suite s1
     //     family daily
@@ -429,7 +430,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot) {
     // This test is custom. When the user interactively forces a node to the complete state,
     // But where the user has a single time slot. We should stay complete and NOT requee
     //
-    cout << "Base:: ...test_force_interactive_next_time_slot\n";
+    ECF_NAME_THIS_TEST();
 
     //   suite s1
     //       task t1
@@ -498,7 +499,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_1) {
     // end of the time slot. In which case the node should *not* re-queue and stay complete
     //
     // When the node is then re-queued check that the time has been correctly reset.
-    cout << "Base:: ...test_force_interactive_next_time_slot_1\n";
+    ECF_NAME_THIS_TEST();
 
     //   suite s1
     //       task t1
@@ -622,7 +623,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_2) {
     // end of the time slot. In which case the node should *not* reque and stay complete
     //
     // When the node is then requeed check that the next time slot has been correctly reset.
-    cout << "Base:: ...test_force_interactive_next_time_slot_2\n";
+    ECF_NAME_THIS_TEST();
 
     //   suite s1
     //       task t1
@@ -722,7 +723,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_3) {
     // end of the time slot. In which case the node should *not* re-queue and stay complete
     //
     // When the node is then re-queued check that the time has been correctly reset.
-    cout << "Base:: ...test_force_interactive_next_time_slot_3\n";
+    ECF_NAME_THIS_TEST();
 
     //   suite s1
     //       task t1
@@ -833,7 +834,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_4) {
     // end of the time slot. In which case the node should *not* reque and stay complete
     //
     // When the node is then requeed check that the next time slot has been correctly reset.
-    cout << "Base:: ...test_force_interactive_next_time_slot_4\n";
+    ECF_NAME_THIS_TEST();
 
     //   suite s1
     //       task t1
@@ -923,7 +924,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_for_cron) {
     // end of the time slot.
     //
     // When the node is then requeed check that the next time slot has been correctly reset.
-    cout << "Base:: ...test_force_interactive_next_time_slot_for_cron\n";
+    ECF_NAME_THIS_TEST();
 
     //   suite s1
     //       task t1
@@ -1016,7 +1017,7 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_for_cron_on_family) {
     // end of the time slot.
     //
     // When the node is then requeed check that the next time slot has been correctly reset.
-    cout << "Base:: ...test_force_interactive_next_time_slot_for_cron_on_family\n";
+    ECF_NAME_THIS_TEST();
 
     //   suite s1
     //     family

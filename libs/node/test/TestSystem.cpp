@@ -15,6 +15,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Signal.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -24,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_System)
 
 BOOST_AUTO_TEST_CASE(test_system) {
-    cout << "ANode:: ...test_system \n";
+    ECF_NAME_THIS_TEST();
 
     std::string file = "test_system.log";
     std::string cmd  = "echo sat siri akal dunyia > " + file;

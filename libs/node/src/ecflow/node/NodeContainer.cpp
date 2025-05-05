@@ -19,6 +19,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
@@ -586,7 +587,7 @@ bool NodeContainer::isAddChildOk(Node* theChild, std::string& errorMsg) const {
             return true;
 
         std::stringstream ss;
-        ss << "Task/Family of name " << theChild->name() << " already exist in container node " << name();
+        ss << "Task/Family of name " << theChild->name() << " already exists in container node " << name();
         errorMsg += ss.str();
         return false;
     }
@@ -599,7 +600,7 @@ bool NodeContainer::isAddChildOk(Node* theChild, std::string& errorMsg) const {
             return true;
 
         std::stringstream ss;
-        ss << "Family/Task of name " << theChild->name() << " already exist in container node " << name();
+        ss << "Family/Task of name " << theChild->name() << " already exists in container node " << name();
         errorMsg += ss.str();
         return false;
     }
@@ -634,7 +635,7 @@ size_t NodeContainer::child_position(const Node* child) const {
 task_ptr NodeContainer::add_task(const std::string& task_name) {
     if (find_by_name(task_name).get()) {
         std::stringstream ss;
-        ss << "Add Task failed: A task/family of name '" << task_name << "' already exist on node " << debugNodePath();
+        ss << "Add Task failed: A task/family of name '" << task_name << "' already exists on node " << debugNodePath();
         throw std::runtime_error(ss.str());
     }
     task_ptr the_task = Task::create(task_name);
@@ -645,7 +646,7 @@ task_ptr NodeContainer::add_task(const std::string& task_name) {
 family_ptr NodeContainer::add_family(const std::string& family_name) {
     if (find_by_name(family_name).get()) {
         std::stringstream ss;
-        ss << "Add Family failed: A Family/Task of name '" << family_name << "' already exist on node "
+        ss << "Add Family failed: A Family/Task of name '" << family_name << "' already exists on node "
            << debugNodePath();
         throw std::runtime_error(ss.str());
     }
@@ -657,7 +658,7 @@ family_ptr NodeContainer::add_family(const std::string& family_name) {
 void NodeContainer::addTask(const task_ptr& t, size_t position) {
     if (find_by_name(t->name()).get()) {
         std::stringstream ss;
-        ss << "Add Task failed: A Task/Family of name '" << t->name() << "' already exist on node " << debugNodePath();
+        ss << "Add Task failed: A Task/Family of name '" << t->name() << "' already exists on node " << debugNodePath();
         throw std::runtime_error(ss.str());
     }
     add_task_only(t, position);
@@ -702,7 +703,7 @@ void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
 void NodeContainer::addFamily(const family_ptr& f, size_t position) {
     if (find_by_name(f->name()).get()) {
         std::stringstream ss;
-        ss << "Add Family failed: A Family/Task of name '" << f->name() << "' already exist on node "
+        ss << "Add Family failed: A Family/Task of name '" << f->name() << "' already exists on node "
            << debugNodePath();
         throw std::runtime_error(ss.str());
     }
@@ -1135,7 +1136,7 @@ void NodeContainer::update_limits() {
 
 std::string NodeContainer::archive_path() const {
     std::string the_archive_path;
-    if (!findParentUserVariableValue(Str::ECF_HOME(), the_archive_path)) {
+    if (!findParentUserVariableValue(ecf::environment::ECF_HOME, the_archive_path)) {
         std::stringstream ss;
         ss << "NodeContainer::archive_path: cannot find ECF_HOME from " << debugNodePath();
         throw std::runtime_error(ss.str());
@@ -1148,7 +1149,7 @@ std::string NodeContainer::archive_path() const {
     std::string port = Str::DEFAULT_PORT_NUMBER();
     Defs* the_defs   = defs();
     if (the_defs) {
-        port = the_defs->server().find_variable(Str::ECF_PORT());
+        port = the_defs->server().find_variable(ecf::environment::ECF_PORT);
         if (port.empty())
             port = Str::DEFAULT_PORT_NUMBER();
     }
@@ -1308,7 +1309,7 @@ void NodeContainer::remove_archived_files() {
     }
 
     std::string ecf_home;
-    if (!findParentUserVariableValue(Str::ECF_HOME(), ecf_home)) {
+    if (!findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home)) {
         return;
     }
 

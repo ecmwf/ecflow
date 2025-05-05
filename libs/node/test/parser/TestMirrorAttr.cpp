@@ -18,13 +18,14 @@
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Parser)
 
 BOOST_AUTO_TEST_SUITE(T_MirrorAttr)
 
 BOOST_AUTO_TEST_CASE(can_parse_mirror_attribute_on_task_with_default_parameters) {
-    std::cout << "..." << boost::unit_test::framework::current_test_unit().full_name() << std::endl;
+    ECF_NAME_THIS_TEST();
 
     using namespace ecf;
 
@@ -65,7 +66,7 @@ BOOST_AUTO_TEST_CASE(can_parse_mirror_attribute_on_task_with_default_parameters)
 }
 
 BOOST_AUTO_TEST_CASE(can_parse_mirror_attribute_on_task_with_all_attributes) {
-    std::cout << "..." << boost::unit_test::framework::current_test_unit().full_name() << std::endl;
+    ECF_NAME_THIS_TEST();
 
     using namespace ecf;
 

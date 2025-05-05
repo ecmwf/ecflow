@@ -97,6 +97,8 @@ public:
     explicit Event(const std::string& eventName, bool initial_val = false);
     Event() = default;
 
+    static Event make_from_value(const std::string& name, const std::string& value);
+
     std::string name_or_number() const; // if name present return, else return number
     const std::string& name() const { return n_; }
     void print(std::string&) const;
@@ -155,9 +157,11 @@ public:
           bool check      = true);
     Meter() = default;
 
+    static Meter make_from_value(const std::string& name, const std::string& value);
+
     void print(std::string&) const;
     void reset() { set_value(min_); }
-    void set_value(int v); // can throw throw std::runtime_error if out of range
+    void set_value(int v); // can throw std::runtime_error if out of range
     bool empty() const { return n_.empty(); }
 
     const std::string& name() const { return n_; }

@@ -31,10 +31,10 @@ class AbstractServer {
 public:
     virtual ~AbstractServer() = default;
 
-    /// Returns an NON empty string if server is ssl enabled.
+    /// Returns an NON-empty string if server is ssl enabled.
     /// 0/ "1 : enabled : uses shared ssl certificates";
     /// 0/ "  : enabled : uses server/port specific ssl certificates";
-    virtual const std::string& ssl() const { return ecf::Str::EMPTY(); }
+    virtual std::string ssl() const = 0;
 
     /// returns the current state of the server
     /// The following table shows the effect of state, on server behaviour:
@@ -51,7 +51,7 @@ public:
     /// returns the defs held by the server. This should always exist. ECFLOW-182
     virtual defs_ptr defs() const = 0;
 
-    /// Update the defs help by the server. This allows multiple suites to loaded
+    /// Update the defs help by the server. This allows multiple suites to be loaded
     /// into the server. Note the input defs will be drained of its suites/externs as they
     /// will get transferred to the server. If the server already has suites of the same
     /// name, then an error message is created. This can be overridden with the force option
@@ -61,7 +61,7 @@ public:
     virtual void clear_defs() = 0;
 
     /// Forces the defs file in the server to be written to disk *IF* no args provided.
-    /// Otherwise updated mode OR check_pt interval OR check pt alarm
+    /// Otherwise, updated mode OR check_pt interval OR check pt alarm
     virtual bool checkPtDefs(ecf::CheckPt::Mode m         = ecf::CheckPt::UNDEFINED,
                              int check_pt_interval        = 0,
                              int check_pt_save_time_alarm = 0) = 0;
@@ -96,7 +96,7 @@ public:
     /// hence we want to preserve the state of the last checkpoint. By prevent any state
     /// changes to the node tree.
     ///
-    /// Hence halted(), will completely stop the server. Server will only respond
+    /// Hence, halted() will completely stop the server. Server will only respond
     /// to user requests. (tasks requests are blocked)
     /// Places server in HALTED state.
     ///           User Request    Task Request   Job Scheduling   Check-pointing
@@ -120,7 +120,7 @@ public:
     /// 	a/ File does not exist
     ///  	b/ File is empty
     ///  	c/ Errors in parsing file
-    /// If errors arise the exist user still stay in affect
+    /// If errors arise the exist user still stay in effect
     virtual bool reloadWhiteListFile(std::string& errorMsg) = 0;
 
     virtual bool reloadPasswdFile(std::string& errorMsg)       = 0;
@@ -147,12 +147,12 @@ public:
     virtual bool authenticateWriteAccess(const std::string& user, const std::string& path)               = 0;
     virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) = 0;
 
-    /// Shutdown the server and let 'user' has have exclusive lock on it.
+    /// Shutdown the server and let 'user' have exclusive lock on it.
     /// If the lock succeeds return true, (This will end up calling the shutdown()
     /// command on the server). If already locked does nothing and return's false
     virtual bool lock(const std::string& user) = 0;
 
-    /// Unlock's the server., and restarts job scheduling
+    /// Unlocks the server, and restarts job scheduling
     virtual void unlock() = 0;
 
     /// Return the user that has exclusive lock, else an empty string
@@ -183,8 +183,8 @@ public:
     int get_job_generation_count() const { return job_gen_count_; }
 
     /// This job generation is special, in that it will time out, job generation time >= next poll.
-    /// This can be called at the end of a *USER* command(force,alter,requeue,etc), hence time_now may be >=
-    /// next_poll_time If this is the case, we will defer job generation
+    /// This can be called at the end of a *USER* command(force, alter, requeue, etc.).
+    /// Hence, time_now may be >= next_poll_time and if this is the case we will defer job generation
     virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,
                                                      bool user_cmd_context) const = 0;
 
@@ -192,7 +192,7 @@ public:
     /// this includes evaluating trigger dependencies and submit the corresponding jobs.
     /// This is set at 60 seconds. But will vary for debug/test purposes only.
     /// For Testing the state change queued->submitted->active duration < submitJobsInterval
-    /// If this state change happens at the job submission boundary then
+    /// If this state change happens during the job submission boundary then
     /// time series can get a skew.
     virtual int poll_interval() const = 0;
 

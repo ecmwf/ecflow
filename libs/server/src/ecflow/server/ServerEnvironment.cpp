@@ -10,7 +10,6 @@
 
 #include "ecflow/server/ServerEnvironment.hpp"
 
-#include <cstdlib> // for getenv()
 #include <iostream>
 
 #include <boost/program_options.hpp>
@@ -18,6 +17,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Pid.hpp"
@@ -67,6 +67,7 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
       submitJobsInterval_(defaultSubmitJobsInterval),
       ecf_prune_node_log_(0),
       jobGeneration_(true),
+      protocol_{ecf::Protocol::Plain},
       debug_(false),
       help_option_(false),
       version_option_(false),
@@ -80,7 +81,8 @@ ServerEnvironment::ServerEnvironment(const CommandLine& cl, const std::string& p
     }
 }
 
-ServerEnvironment::ServerEnvironment(int argc, char* argv[]) : ServerEnvironment(CommandLine(argc, argv)) {
+ServerEnvironment::ServerEnvironment(int argc, char* argv[])
+    : ServerEnvironment(CommandLine(argc, argv), "server_environment.cfg") {
 }
 
 ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file)
@@ -139,7 +141,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     if (ecf_checkpt_file_[0] != '/') {
         // Prepend with ECF_HOME
         std::string check_pt = ecf_home();
-        check_pt += Str::PATH_SEPERATOR();
+        check_pt += Str::PATH_SEPARATOR();
         check_pt += ecf_checkpt_file_;
         ecf_checkpt_file_ = check_pt;
     }
@@ -149,7 +151,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
         ecf_backup_checkpt_file_ = host_name_.prefix_host_and_port(port, ecf_backup_checkpt_file_);
     if (ecf_backup_checkpt_file_[0] != '/') {
         std::string check_pt = ecf_home();
-        check_pt += Str::PATH_SEPERATOR();
+        check_pt += Str::PATH_SEPARATOR();
         check_pt += ecf_backup_checkpt_file_;
         ecf_backup_checkpt_file_ = check_pt;
     }
@@ -157,21 +159,23 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     if (ecf_white_list_file_ == Str::WHITE_LIST_FILE())
         ecf_white_list_file_ = host_name_.prefix_host_and_port(port, ecf_white_list_file_);
 
-    if (ecf_passwd_file_ == Str::ECF_PASSWD())
+    if (ecf_passwd_file_ == ecf::environment::ECF_PASSWD)
         ecf_passwd_file_ = host_name_.prefix_host_and_port(port, ecf_passwd_file_);
 
-    if (ecf_passwd_custom_file_ == Str::ECF_CUSTOM_PASSWD())
+    if (ecf_passwd_custom_file_ == ecf::environment::ECF_CUSTOM_PASSWD)
         ecf_passwd_custom_file_ = host_name_.prefix_host_and_port(port, ecf_passwd_custom_file_);
 
-    // Change directory to ECF_HOME and check thats its accessible
+    // Change directory to ECF_HOME and check that it is accessible
     change_dir_to_ecf_home_and_check_accesibility();
 
     // LOG FILE ================================================================================
     if (log_file_name == Ecf::LOG_FILE())
         log_file_name = host_name_.prefix_host_and_port(port, log_file_name);
 
-    // Create the Log file. The log file is obtained from the environment. Hence **must** be done last.
-    // From ecflow version 4.9.0 we no longer flush for each command. This can enabled/disabled
+    // Create the Log file.
+    //
+    // The log file is obtained from the environment, hence, **must** be done last.
+    // From ecflow version 4.9.0 we no longer flush for each command.
     Log::create(log_file_name);
 
     // Init log file:
@@ -328,12 +332,14 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         }
     }
 
-    // If the white list file is empty or does not exist, *ON* server start, its perfectly valid
-    // i.e any user is free to access the server
-    if (ecf_white_list_file_.empty())
+    // *WHEN* the server starts, it is possible that the white list file is empty or simply does not exist, since any
+    // user is free to access the server.
+    if (ecf_white_list_file_.empty()) {
         return true;
-    if (!fs::exists(ecf_white_list_file_))
+    }
+    if (!fs::exists(ecf_white_list_file_)) {
         return true;
+    }
 
     /// read in the ecf white list file that specifies valid users and their access rights
     /// If the file can't be opened returns false and an error message and false;
@@ -352,12 +358,12 @@ std::string ServerEnvironment::the_port() const {
 void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string>>& theRetVec) const {
     // Variables read in from the environment
     // Need to setup client environment.
-    // The server sets these variable for use by the client. i.e when creating the jobs
+    // The server sets these variable for use by the client, i.e. when creating the jobs
     // The clients then uses them to communicate back with the server.
-    theRetVec.emplace_back(Str::ECF_PORT(), the_port());
-    theRetVec.emplace_back(Str::ECF_HOST(), serverHost_);
+    theRetVec.emplace_back(ecf::environment::ECF_PORT, the_port());
+    theRetVec.emplace_back(ecf::environment::ECF_HOST, serverHost_);
 
-    theRetVec.emplace_back(Str::ECF_HOME(), ecfHome_);
+    theRetVec.emplace_back(ecf::environment::ECF_HOME, ecfHome_);
     theRetVec.emplace_back(std::string("ECF_LOG"), Log::instance()->path());
     theRetVec.emplace_back(std::string("ECF_CHECK"), ecf_checkpt_file_);
     theRetVec.emplace_back(std::string("ECF_CHECKOLD"), ecf_backup_checkpt_file_);
@@ -385,8 +391,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
     theRetVec.emplace_back(std::string("ECF_MICRO"), ecf_micro_);
 
     // Reference variable, these should be read only
-    theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_);           // server PID
-    theRetVec.emplace_back(std::string("ECF_VERSION"), Version::raw()); // server version
+    theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_);            // server PID
+    theRetVec.emplace_back(std::string("ECF_VERSION"), Version::full()); // server version
 
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {
@@ -420,10 +426,10 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
 bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     // Only override valid users if we successfully opened and parsed file
     if (white_list_file_.load(ecf_white_list_file_, debug(), errorMsg)) {
-        // If user accidentally remove the server/user from white list,
-        // they will not be able reload white list, since it requires write access.
+        // If the user accidentally removes the server/user from whitelist,
+        // they will not be able to reload the whitelist, since it requires write access.
         // (Requires terminate, modify white list, restart to fix)
-        // Hence always allow server user write access *IF* required for non empty file
+        // Hence always allow server user write access *IF* required for non-empty file
         white_list_file_.allow_write_access_for_server_user();
         return true;
     }
@@ -550,7 +556,7 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
         config_file_options.add_options()
             ("ECF_HOME", po::value<std::string>(&ecfHome_)->default_value("."), "ECF_HOME, the home for all ECF files")
             ("ECF_PORT", po::value<int>(&serverPort_)->default_value(3141), "The port number. Clients must use same port.")
-            ("ECF_CHECK",po::value<std::string>(&ecf_checkpt_file_)->default_value(Ecf::CHECKPT()), "Check point file name")
+            ("ECF_CHECK", po::value<std::string>(&ecf_checkpt_file_)->default_value(Ecf::CHECKPT()), "Check point file name")
             ("ECF_CHECKOLD", po::value<std::string>(&ecf_backup_checkpt_file_)->default_value(Ecf::BACKUP_CHECKPT()), "Backup checkpoint file name")
             ("ECF_LOG", po::value<std::string>(&log_file_name)->default_value(Ecf::LOG_FILE()), "Log file name")
             ("ECF_CHECKINTERVAL", po::value<int>(&checkPtInterval_)->default_value(CheckPt::default_interval()), "The interval in seconds to save check point file")
@@ -565,8 +571,8 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_URL", po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
             ("ECF_MICRODEF", po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
             ("ECF_LISTS", po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and their access rights")
-            ("ECF_PASSWD", po::value<std::string>(&ecf_passwd_file_)->default_value(Str::ECF_PASSWD()), "Path name to passwd file")
-            ("ECF_CUSTOM_PASSWD", po::value<std::string>(&ecf_passwd_custom_file_)->default_value(Str::ECF_CUSTOM_PASSWD()), "Path name to custom passwd file, for user who don't use login name")
+            ("ECF_PASSWD", po::value<std::string>(&ecf_passwd_file_)->default_value(ecf::environment::ECF_PASSWD), "Path name to passwd file")
+            ("ECF_CUSTOM_PASSWD", po::value<std::string>(&ecf_passwd_custom_file_)->default_value(ecf::environment::ECF_CUSTOM_PASSWD), "Path name to custom passwd file, for user who don't use login name")
             ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
             ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
         // clang-format on
@@ -603,9 +609,8 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     if (debug())
         cout << "ServerEnvironment::read_environment_variables()\n";
 
-    char* serverPort = getenv(Str::ECF_PORT().c_str());
-    if (serverPort) {
-        std::string port = serverPort;
+    if (auto var = ecf::environment::fetch<std::string>(ecf::environment::ECF_PORT); var) {
+        std::string port = var.value();
         try {
             serverPort_ = ecf::convert_to<int>(port);
         }
@@ -616,9 +621,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
             throw ServerEnvironmentException(ss.str());
         }
     }
-    char* checkPtInterval = getenv("ECF_CHECKINTERVAL");
-    if (checkPtInterval) {
-        std::string interval = checkPtInterval;
+
+    if (auto var = ecf::environment::fetch<std::string>("ECF_CHECKINTERVAL"); var) {
+        std::string interval = var.value();
         try {
             checkPtInterval_ = ecf::convert_to<int>(interval);
         }
@@ -630,70 +635,46 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
         }
     }
 
-    char* ecfHome = getenv(Str::ECF_HOME().c_str());
-    if (ecfHome)
-        ecfHome_ = ecfHome;
+    ecf::environment::get(ecf::environment::ECF_HOME, ecfHome_);
     if (ecfHome_ == ".") { // expand to absolute paths
         ecfHome_ = fs::current_path().string();
     }
 
-    char* logFileName = getenv("ECF_LOG");
-    if (logFileName)
-        log_file_name = logFileName;
+    ecf::environment::get(ecf::environment::ECF_LOG, log_file_name);
 
-    char* checkPtFileName = getenv("ECF_CHECK");
-    if (checkPtFileName)
-        ecf_checkpt_file_ = checkPtFileName;
+    ecf::environment::get("ECF_CHECK", ecf_checkpt_file_);
 
-    char* oldCheckPtFileName = getenv("ECF_CHECKOLD");
-    if (oldCheckPtFileName)
-        ecf_backup_checkpt_file_ = oldCheckPtFileName;
+    ecf::environment::get("ECF_CHECKOLD", ecf_backup_checkpt_file_);
 
-    char* smsWhiteListFile = getenv("ECF_LISTS");
-    if (smsWhiteListFile)
-        ecf_white_list_file_ = smsWhiteListFile;
+    ecf::environment::get("ECF_LISTS", ecf_white_list_file_);
 
-    char* passwd = getenv("ECF_PASSWD");
-    if (passwd)
-        ecf_passwd_file_ = passwd;
+    ecf::environment::get(ecf::environment::ECF_PASSWD, ecf_passwd_file_);
 
-    char* custom_passwd = getenv("ECF_CUSTOM_PASSWD");
-    if (custom_passwd)
-        ecf_passwd_custom_file_ = custom_passwd;
+    ecf::environment::get(ecf::environment::ECF_CUSTOM_PASSWD, ecf_passwd_custom_file_);
 
-    char* ecf_prune_node_log = getenv("ECF_PRUNE_NODE_LOG");
-    if (ecf_prune_node_log) {
+    if (auto var = ecf::environment::fetch("ECF_PRUNE_NODE_LOG"); var) {
         try {
-            ecf_prune_node_log_ = ecf::convert_to<int>(ecf_prune_node_log);
+            ecf_prune_node_log_ = ecf::convert_to<int>(var.value());
         }
         catch (const ecf::bad_conversion&) {
             std::stringstream ss;
-            ss << "ServerEnviroment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an integer, "
-                  "But found: "
-               << ecf_prune_node_log;
+            ss << "ServerEnvironment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an "
+                  "integer, but found: "
+               << var.value();
             throw ServerEnvironmentException(ss.str());
         }
     }
 
-    if (getenv("ECF_DEBUG_SERVER")) {
-        debug_ = true; // can also be enabled via --debug option
-    }
+    ecf::environment::get("ECF_DEBUG_SERVER", debug_);
 
-#ifdef ECF_OPENSSL
-    // IF ECF_SSL= 1 search server.crt
-    // ELSE          search <host>.<port>.crt
-    ssl_.enable_if_defined(serverHost_, the_port());
-#endif
-
-    char* threshold = getenv("ECF_TASK_THRESHOLD");
-    if (threshold) {
-        std::string task_threshold = threshold;
+    if (auto var = ecf::environment::fetch("ECF_TASK_THRESHOLD"); var) {
+        std::string task_threshold = var.value();
         try {
             JobProfiler::set_task_threshold(ecf::convert_to<int>(task_threshold));
         }
         catch (...) {
             std::stringstream ss;
-            ss << "ServerEnvironment::read_environment_variables(): ECF_TASK_THRESHOLD is defined(" << threshold
+            ss << "ServerEnvironment::read_environment_variables(): ECF_TASK_THRESHOLD is defined(" << var.value()
                << ") but value is *not* convertible to an integer\n";
             throw ServerEnvironmentException(ss.str());
         }
@@ -760,7 +741,7 @@ std::string ServerEnvironment::dump() const {
 
 std::vector<std::string> ServerEnvironment::expected_variables() {
     std::vector<std::string> expected_variables;
-    expected_variables.push_back(Str::ECF_HOME());
+    expected_variables.emplace_back(ecf::environment::ECF_HOME);
     expected_variables.emplace_back("ECF_LOG");
     expected_variables.emplace_back("ECF_CHECK");
     expected_variables.emplace_back("ECF_CHECKOLD");
@@ -771,18 +752,19 @@ std::vector<std::string> ServerEnvironment::expected_variables() {
     expected_variables.emplace_back("ECF_URL_CMD");
     expected_variables.emplace_back("ECF_URL_BASE");
     expected_variables.emplace_back("ECF_URL");
-    expected_variables.emplace_back("ECF_MICRO");
+    expected_variables.emplace_back(ecf::environment::ECF_MICRO);
     expected_variables.emplace_back("ECF_PID");
     expected_variables.emplace_back("ECF_VERSION");
     expected_variables.emplace_back("ECF_LISTS");
-    expected_variables.push_back(Str::ECF_PORT());
-    expected_variables.push_back(Str::ECF_HOST());
+    expected_variables.emplace_back(ecf::environment::ECF_PORT);
+    expected_variables.emplace_back(ecf::environment::ECF_HOST);
     expected_variables.emplace_back("ECF_INTERVAL");
-    expected_variables.emplace_back("ECF_PASSWD");
-    expected_variables.emplace_back("ECF_CUSTOM_PASSWD");
+    expected_variables.emplace_back(ecf::environment::ECF_PASSWD);
+    expected_variables.emplace_back(ecf::environment::ECF_CUSTOM_PASSWD);
 #ifdef ECF_OPENSSL
-    if (getenv("ECF_SSL"))
-        expected_variables.emplace_back("ECF_SSL");
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
+        expected_variables.emplace_back(ecf::environment::ECF_SSL);
+    }
 #endif
     return expected_variables;
 }

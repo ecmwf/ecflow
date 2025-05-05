@@ -15,6 +15,7 @@
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Task.hpp"
@@ -27,12 +28,12 @@ namespace ecf {
 TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dummy_task_(false) {
     /// if ECF_DUMMY_TASK specified ignore
     std::string theValue;
-    is_dummy_task_ = task_->findParentUserVariableValue(Str::ECF_DUMMY_TASK(), theValue);
+    is_dummy_task_ = task_->findParentUserVariableValue(ecf::environment::ECF_DUMMY_TASK, theValue);
     if (is_dummy_task_)
         return;
 
     /// if ECF_FILES specified use this before ECF_HOME
-    if (task_->findParentUserVariableValue(Str::ECF_FILES(), ecf_files_)) {
+    if (task_->findParentUserVariableValue(ecf::environment::ECF_FILES, ecf_files_)) {
         // Create any missing directories if ECF_FILES is specified
         try {
             fs::create_directories(ecf_files_);
@@ -45,13 +46,13 @@ TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dum
     }
 
     /// Find ECF_HOME and ECF_INCLUDE
-    if (!task_->findParentUserVariableValue(Str::ECF_HOME(), ecf_home_)) {
+    if (!task_->findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home_)) {
         std::stringstream ss;
         ss << "TaskScriptGenerator: Could not generate scripts for task " << task_->absNodePath()
            << " no ECF_HOME specified\n";
         throw std::runtime_error(ss.str());
     }
-    if (!task_->findParentUserVariableValue(Str::ECF_INCLUDE(), ecf_include_)) {
+    if (!task_->findParentUserVariableValue(ecf::environment::ECF_INCLUDE, ecf_include_)) {
         std::stringstream ss;
         ss << "TaskScriptGenerator: Could not generate scripts for task " << task_->absNodePath()
            << " no ECF_INCLUDE specified\n";

@@ -74,4 +74,4 @@ private:
     DState::State st_;
 };
 
-#endif
+#endif /* ecflow_core_DState_HPP */

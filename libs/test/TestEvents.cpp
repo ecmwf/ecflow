@@ -18,11 +18,13 @@
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -36,8 +38,9 @@ BOOST_AUTO_TEST_SUITE(T_Events)
 // This test does not have any time dependencies in the def file.
 
 BOOST_AUTO_TEST_CASE(test_event_and_query) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_event_and_query " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below
@@ -150,7 +153,7 @@ BOOST_AUTO_TEST_CASE(test_event_and_query) {
                             << TestFixture::client().get_string());
 
     // Added since in 5.2.0 (only 5.2.0 server supports this behaviour)
-    if (!getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+    if (!ecf::environment::has("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
         BOOST_CHECK_MESSAGE(TestFixture::client().query("limit", suite->absNodePath(), "limit_x") == 0,
                             "query command failed " << TestFixture::client().errorMsg());
         BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "0",

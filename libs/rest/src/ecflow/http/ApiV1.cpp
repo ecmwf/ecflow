@@ -122,9 +122,7 @@ void handle_exception(const HttpServerException& e, const httplib::Request& requ
 }
 
 void set_last_request_time() {
-    struct timeval curtime
-    {
-    };
+    struct timeval curtime{};
     gettimeofday(&curtime, nullptr);
     last_request_time = static_cast<unsigned int>(curtime.tv_sec);
 }
@@ -275,9 +273,10 @@ void node_tree_read(const httplib::Request& request, httplib::Response& response
         std::string tree_kind  = get_tree_content_kind(request);
         bool with_id           = get_tree_content_id_flag(request);
         bool gen_vars          = get_tree_content_gen_vars(request);
-        ojson tree_content     = (tree_kind == "full") ? get_full_node_tree(path, with_id, gen_vars) : get_basic_node_tree(path);
-        ojson j                = filter_json(tree_content, request);
-        response.status        = HttpStatusCode::success_ok;
+        ojson tree_content =
+            (tree_kind == "full") ? get_full_node_tree(path, with_id, gen_vars) : get_basic_node_tree(path);
+        ojson j         = filter_json(tree_content, request);
+        response.status = HttpStatusCode::success_ok;
         response.set_content(j.dump(), "application/json");
         set_cors(response);
     });

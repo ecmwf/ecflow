@@ -26,7 +26,7 @@
 ///     ****************************************************************************
 ///     ** A time attribute can have a +, which means time relative to suite start
 ///     ** This is stored on the TimeSeries, as it isNode/Attribute specific.
-///     ** i.e repeated families will have its own relative start time.
+///     ** i.e. repeated families will have its own relative start time.
 ///     *****************************************************************************
 ///
 /// DESIGN CONSIDERATIONS:
@@ -37,9 +37,9 @@
 ///   Hybrid:
 ///     There is currently confusion about how this is supposed to work.
 ///     The date is not supposed to change. (According to John date updates at suite restart?)
-///     This has important implications, i.e does the day change ?
+///     This has important implications, i.e. does the day change ?
 ///     If the day does not change, then many of suites will never complete.
-///       i.e if we use repeat, with a single time series,  "time 10:00"
+///       i.e. if we use repeat, with a single time series,  "time 10:00"
 ///     *** This relies on a day change to reset time attribute at midnight. ****
 ///  Conclusion: Will support day change for both REAL and HYBRID (date does not change)
 ///
@@ -55,7 +55,7 @@
 ///     +: Avoids additional system call.
 ///     +: Lead's to more deterministic behaviour
 ///     -: If server is suspended and restarted the calendar will NOT be in
-///        phase with system clock. (Its not clear to me why this should be an issue?)
+///        phase with system clock. (It is not clear to me why this should be an issue?)
 ///     ?: If the server is run for several days is there a possibility for the poll
 ///        update to get out of skew with real time. This is only possible if
 ///        job dependencies take more the 60 seconds to resolve.
@@ -69,7 +69,7 @@
 ///     +: calendar is always in phase with system clock.
 ///        Many task job dependencies depend on ordering based on real time.
 ///     -: Requires additional system call for each poll in the server
-///     -: Time slots can be missed. (i.e if server suspended/restarted).
+///     -: Time slots can be missed. (i.e. if server suspended/restarted).
 ///        There is no catch up. (?? See TimeDependencies.ddoc)
 ///     -: Relative times will not be adhered too, when server stopped/started.
 ///     -: Will require more manual intervention ?
@@ -88,6 +88,89 @@ class access;
 }
 
 namespace ecf {
+
+class JulianDay;
+
+class CalendarDate {
+public:
+    using value_t = long;
+
+    CalendarDate() = delete;
+    explicit CalendarDate(value_t value) : value_(value) {}
+
+    value_t value() const { return value_; }
+
+    JulianDay as_julian_day() const;
+
+    friend CalendarDate& operator+=(CalendarDate&, CalendarDate::value_t rhs);
+    friend CalendarDate& operator-=(CalendarDate&, CalendarDate::value_t rhs);
+
+private:
+    value_t value_;
+};
+
+std::ostream& operator<<(std::ostream& os, const CalendarDate&);
+
+bool operator==(const CalendarDate&, const CalendarDate&);
+inline bool operator!=(const CalendarDate& lhs, const CalendarDate& rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator<(const CalendarDate&, const CalendarDate&);
+bool operator<=(const CalendarDate&, const CalendarDate&);
+bool operator>(const CalendarDate&, const CalendarDate&);
+bool operator>=(const CalendarDate&, const CalendarDate&);
+
+CalendarDate operator+(const CalendarDate&, CalendarDate::value_t);
+CalendarDate operator-(const CalendarDate&, CalendarDate::value_t);
+
+CalendarDate& operator+=(CalendarDate&, CalendarDate::value_t);
+CalendarDate& operator-=(CalendarDate&, CalendarDate::value_t);
+
+class JulianDay {
+public:
+    using value_t = long;
+
+    JulianDay() = delete;
+    explicit JulianDay(value_t value) : value_(value) {}
+
+    value_t value() const { return value_; }
+
+    CalendarDate as_calendar_date() const;
+
+    friend JulianDay& operator+=(JulianDay&, JulianDay::value_t rhs);
+    friend JulianDay& operator-=(JulianDay&, JulianDay::value_t rhs);
+
+private:
+    value_t value_;
+};
+
+std::ostream& operator<<(std::ostream& os, const JulianDay&);
+
+bool operator==(const JulianDay&, const JulianDay&);
+inline bool operator!=(const JulianDay& lhs, const JulianDay& rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator<(const JulianDay&, const JulianDay&);
+bool operator<=(const JulianDay&, const JulianDay&);
+bool operator>(const JulianDay&, const JulianDay&);
+bool operator>=(const JulianDay&, const JulianDay&);
+
+JulianDay operator+(const JulianDay&, JulianDay::value_t);
+JulianDay operator-(const JulianDay&, JulianDay::value_t);
+
+JulianDay& operator+=(JulianDay&, JulianDay::value_t);
+JulianDay& operator-=(JulianDay&, JulianDay::value_t);
+
+bool operator==(const CalendarDate&, const JulianDay&);
+bool operator==(const JulianDay&, const CalendarDate&);
+inline bool operator!=(const CalendarDate& lhs, const JulianDay& rhs) {
+    return !(lhs == rhs);
+}
+inline bool operator!=(const JulianDay& lhs, const CalendarDate& rhs) {
+    return !(lhs == rhs);
+}
 
 class CalendarUpdateParams; // forward declare
 
@@ -158,7 +241,7 @@ public:
     boost::gregorian::date date() const;
 
     /// The calendar type. For hybrid clocks the date does not update.
-    bool hybrid() const { return (ctype_ == Calendar::HYBRID) ? true : false; }
+    bool hybrid() const { return ctype_ == Calendar::HYBRID; }
 
     /// for debug,  must link with boost date and time library
     void dump(const std::string& title) const;
@@ -183,13 +266,13 @@ public:
     /// >>> Please see the "Timers" example.
     /// Taken from boost date/time doc
     /// If you want exact agreement with wall-clock time, you must use either UTC or local time. If you compute a
-    /// duration by subtracting one UTC time from another and you want an answer accurate to the second, the two times
-    /// must not be too far in the future because leap seconds affect the count but are only determined about 6 months
-    /// in advance. With local times a future duration calculation could be off by an entire hour, since legislatures
-    /// can and do change DST rules at will. If you want to handle wall-clock times in the future, you won't be able (in
-    /// the general case) to calculate exact durations, for the same reasons described above. If you want accurate
-    /// calculations with future times, you will have to use TAI or an equivalent, but the mapping from TAI to UTC or
-    /// local time depends on leap seconds, so you will not have exact agreement with wall-clock time.
+    /// duration by subtracting one UTC time from another, and you want an answer accurate to the second, the two times
+    /// must not be too far in the future because leap seconds affect the count (which are only determined about 6
+    /// months in advance). With local times a future duration calculation could be off by an entire hour, since
+    /// legislatures can and do change DST rules at will. If you want to handle wall-clock times in the future, you
+    /// won't be able (in the general case) to calculate exact durations, for the same reasons described above. If you
+    /// want accurate calculations with future times, you will have to use TAI or an equivalent, but the mapping from
+    /// TAI to UTC or local time depends on leap seconds, so you will not have exact agreement with wall-clock time.
     static boost::posix_time::ptime second_clock_time();
 
     bool is_special() const { return initTime_.is_special(); }
@@ -224,6 +307,7 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const /*version*/);
 };
+
 } // namespace ecf
 
 #endif /* ecflow_core_Calendar_HPP */

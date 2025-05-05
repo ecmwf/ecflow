@@ -172,7 +172,7 @@ void MirrorAttr::mirror() {
 std::optional<std::string> MirrorAttr::resolve_cfg(const std::string& value, std::string_view default_value) const {
     // Substitude variable in local value
     std::string local = value;
-    if(!parent_) {
+    if (!parent_) {
         return std::nullopt;
     }
 
@@ -229,8 +229,8 @@ void MirrorAttr::start_controller() {
 
         SLOG(D,
              "MirrorAttr: start polling Mirror attribute '" << absolute_name() << "', from " << remote_path_ << " @ "
-                                                            << remote_host << ':' << remote_port << ") using polling: "
-                                                            << polling << " s");
+                                                            << remote_host << ':' << remote_port
+                                                            << ") using polling: " << polling << " s");
 
         std::uint32_t polling_value;
         try {

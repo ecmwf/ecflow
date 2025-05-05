@@ -26,6 +26,7 @@
 #include "ecflow/client/ClientOptions.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 ///
 /// \brief Tests the capabilities of ClientOptions
@@ -77,6 +78,8 @@ BOOST_AUTO_TEST_SUITE(T_ClientOptions)
 BOOST_AUTO_TEST_SUITE(T_Generic) // test generic options
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_process_username_and_password) {
+    ECF_NAME_THIS_TEST();
+
     const char* expected_username = "username";
     const char* plain_password    = "password";
     std::string expected_password = PasswordEncryption::encrypt(plain_password, expected_username);
@@ -101,17 +104,17 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Abort) // --abort (AbortCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_abort) {
+    ECF_NAME_THIS_TEST();
+
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--abort");
-        test_task_command<AbortCmd>(cl, [&](const auto& command, const ClientEnvironment& env) {
-            BOOST_CHECK_EQUAL(command.reason(), "");
-        });
+        test_task_command<AbortCmd>(
+            cl, [&](const auto& command, const ClientEnvironment& env) { BOOST_CHECK_EQUAL(command.reason(), ""); });
     }
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--abort=");
-        test_task_command<AbortCmd>(cl, [&](const auto& command, const ClientEnvironment& env) {
-            BOOST_CHECK_EQUAL(command.reason(), "");
-        });
+        test_task_command<AbortCmd>(
+            cl, [&](const auto& command, const ClientEnvironment& env) { BOOST_CHECK_EQUAL(command.reason(), ""); });
     }
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--abort=somereason");
@@ -163,6 +166,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Alter) // --alter (AlterCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_change) {
+    ECF_NAME_THIS_TEST();
 
     /*
      * --alter change <type> <name> <value> <path> [<path>...]
@@ -531,6 +535,7 @@ BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_change) {
 }
 
 BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_add) {
+    ECF_NAME_THIS_TEST();
 
     /*
      * --alter add <type> <name> <value> <path> [<path>...]
@@ -588,10 +593,67 @@ BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_add) {
                 });
             }
         }
+
+        /*
+         * --alter add event <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        {
+            auto cl = CommandLine::make_command_line("ecflow_client", "--alter", "add", "event", "name", "set", paths);
+            test_user_command<AlterCmd>(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "set");
+                BOOST_REQUIRE_EQUAL(command.add_attr_type(), Expected::ADD_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "add", "event", "name", "clear", paths);
+            test_user_command<AlterCmd>(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "clear");
+                BOOST_REQUIRE_EQUAL(command.add_attr_type(), Expected::ADD_EVENT);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
+
+        /*
+         * --alter add meter <path> [<path>...]
+         * ---------------------------------------------------------------------------------------------------------- */
+        {
+            auto cl =
+                CommandLine::make_command_line("ecflow_client", "--alter", "add", "meter", "name", "0,100,50", paths);
+            test_user_command<AlterCmd>(cl, [&](const AlterCmd& command, const ClientEnvironment& env) {
+                BOOST_REQUIRE_EQUAL(command.name(), "name");
+                BOOST_REQUIRE_EQUAL(command.value(), "0,100,50");
+                BOOST_REQUIRE_EQUAL(command.add_attr_type(), Expected::ADD_METER);
+                BOOST_REQUIRE_EQUAL(command.paths().size(), paths.size());
+                for (size_t i = 0; i < paths.size(); ++i) {
+                    BOOST_REQUIRE(command.paths()[i] == paths[i]);
+                }
+                BOOST_REQUIRE_EQUAL(env.host(), "localhost");
+                BOOST_REQUIRE_EQUAL(env.port(), "3141");
+                BOOST_REQUIRE_EQUAL(env.debug(), false);
+            });
+        }
     } // paths
 }
 
 BOOST_AUTO_TEST_CASE(test_is_able_handle_alter_delete) {
+    ECF_NAME_THIS_TEST();
+
     /*
      * --alter delete <type> <name> <path> [<path>...]
      * ************************************************************************************************************** */
@@ -828,6 +890,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Begin) // --begin (BeginCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_begin) {
+    ECF_NAME_THIS_TEST();
+
     using Command = BeginCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--begin");
@@ -873,7 +937,7 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_handle_begin) {
     }
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--begin", "--force");
-        // This is an invalid, as --begin only takes a single argument (potentialy with --force as second value)
+        // This is an invalid, as --begin only takes a single argument (potentially with --force as second value)
     }
 }
 
@@ -882,6 +946,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Check) // --check (PathsCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_check) {
+    ECF_NAME_THIS_TEST();
+
     using Command = PathsCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--check=_all_");
@@ -945,6 +1011,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Complete) // --complete (CompleteCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_complete) {
+    ECF_NAME_THIS_TEST();
+
     using Command = CompleteCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--complete");
@@ -974,6 +1042,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Event) // --event (EventCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_event) {
+    ECF_NAME_THIS_TEST();
+
     using Command = EventCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--event=name");
@@ -1024,6 +1094,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Init) // --init (InitCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_init) {
+    ECF_NAME_THIS_TEST();
+
     using Command = InitCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--init=1234");
@@ -1067,6 +1139,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Label) // --label (LabelCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_label) {
+    ECF_NAME_THIS_TEST();
+
     using Command = LabelCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--label=name", "some value with spaces");
@@ -1138,6 +1212,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Meter) // --meter (MeterCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_meter) {
+    ECF_NAME_THIS_TEST();
+
     using Command = MeterCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--meter=name", "0");
@@ -1226,6 +1302,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Queue) // --queue (QueueCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_queue) {
+    ECF_NAME_THIS_TEST();
+
     using Command = QueueCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--queue=name", "active");
@@ -1325,6 +1403,8 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(T_Wait) // --wait (WaitCmd)
 
 BOOST_AUTO_TEST_CASE(test_is_able_to_handle_wait) {
+    ECF_NAME_THIS_TEST();
+
     using Command = CtsWaitCmd;
     {
         auto cl = CommandLine::make_command_line("ecflow_client", "--wait=/suite/taskx == complete");

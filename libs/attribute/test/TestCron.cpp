@@ -17,6 +17,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -28,7 +29,8 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_Cron)
 
 BOOST_AUTO_TEST_CASE(test_cron_parsing) {
-    cout << "ANattr:: ...test_cron_parsing\n";
+    ECF_NAME_THIS_TEST();
+
     TimeSlot start(10, 10);
     TimeSlot finish(23, 10);
     TimeSlot incr(0, 1);
@@ -214,7 +216,7 @@ BOOST_AUTO_TEST_CASE(test_cron_parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(test_cron_state_parsing) {
-    cout << "ANattr:: ...test_cron_state_parsing\n";
+    ECF_NAME_THIS_TEST();
 
     size_t index = 1; // to get over the cron
     {
@@ -338,7 +340,7 @@ BOOST_AUTO_TEST_CASE(test_cron_state_parsing) {
 }
 
 BOOST_AUTO_TEST_CASE(test_cron_once_free_stays_free) {
-    cout << "ANattr:: ...test_cron_once_free_stays_free\n";
+    ECF_NAME_THIS_TEST();
 
     Calendar calendar;
     calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
@@ -375,7 +377,6 @@ BOOST_AUTO_TEST_CASE(test_cron_once_free_stays_free) {
             day_changed = calendar.dayChanged();
         }
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        // cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);
@@ -460,7 +461,7 @@ BOOST_AUTO_TEST_CASE(test_cron_once_free_stays_free) {
 }
 
 BOOST_AUTO_TEST_CASE(test_cron_time_series) {
-    cout << "ANattr:: ...test_cron_time_series\n";
+    ECF_NAME_THIS_TEST();
 
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
@@ -499,7 +500,6 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
             day_changed = calendar.dayChanged();
         }
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-        //      cout << time << " day_changed(" << day_changed << ")\n";
 
         timeSeries.calendarChanged(calendar);
         timeSeries2.calendarChanged(calendar);

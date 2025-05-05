@@ -56,10 +56,10 @@ void rtt(const std::string& message) {
     }
 }
 
-std::string Rtt::analyis(const std::string& filename) {
+std::string Rtt::analysis(const std::string& filename) {
     std::vector<std::string> lines;
     if (!File::splitFileIntoLines(filename, lines)) {
-        std::cout << "Rtt::analyis: could not open file " << filename << " (" << strerror(errno) << ")\n";
+        std::cout << "Rtt::analysis: could not open file " << filename << " (" << strerror(errno) << ")\n";
         return string();
     }
 

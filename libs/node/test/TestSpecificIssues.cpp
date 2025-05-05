@@ -19,6 +19,7 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -28,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_SpecificIssues)
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_195) {
-    cout << "ANode:: ...test_ECFLOW_195 re-queue on task should retain label value\n";
+    ECF_NAME_THIS_TEST();
 
     defs_ptr defs = Defs::create();
     suite_ptr s1  = defs->add_suite("s1");
@@ -109,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_195) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_247) {
-    cout << "ANode:: ...test_ECFLOW_247  \n";
+    ECF_NAME_THIS_TEST();
 
     defs_ptr defs = Defs::create();
     suite_ptr s1  = defs->add_suite("s1");
@@ -184,8 +185,9 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_247) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_417_real_clock) {
+    ECF_NAME_THIS_TEST();
+
     // Make sure reque resets calendar according to the clock attribute *FOR* a real clock
-    cout << "ANode:: ...test_ECFLOW_417_real_clock  \n";
 
     defs_ptr defs = Defs::create();
     suite_ptr s1  = defs->add_suite("s1");
@@ -229,9 +231,10 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_real_clock) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_417_hybrid_clock) {
+    ECF_NAME_THIS_TEST();
+
     // ECFLOW-417
     // For a suite with a hybrid clock *AND* repeat day. requue should update calendar date, by the repeat day interval
-    cout << "ANode:: ...test_ECFLOW_417_hybrid_clock  \n";
 
     defs_ptr defs = Defs::create();
     suite_ptr s1  = defs->add_suite("s1");

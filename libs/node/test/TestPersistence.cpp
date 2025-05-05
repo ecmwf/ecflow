@@ -13,6 +13,7 @@
 #include "MyDefsFixture.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -49,13 +50,14 @@ static void testPersistence(const Defs& fixtureDefs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_node_tree_persistence_text) {
-    cout << left << setw(54) << "ANode:: ...test_node_tree_persistence_text";
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK_MESSAGE(true, ""); // stop boost complaining about no assertions
     testPersistence(fixtureDefsFile());
 }
 
 BOOST_AUTO_TEST_CASE(test_node_defs_persistence) {
-    cout << "ANode:: ...test_node_defs_persistence\n";
+    ECF_NAME_THIS_TEST();
 
     const Defs& defs = fixtureDefsFile();
     std::vector<node_ptr> all_nodes;

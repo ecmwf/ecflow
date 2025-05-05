@@ -319,8 +319,6 @@ std::string Gnuplot::create_gnuplot_script(const std::string& path_to_file,
             gnuplot_script << ",";
     }
 
-    //   gnuplot_script << "pause -1 \"Hit any key to continue\"\n\n";
-
     return script;
 }
 
@@ -339,7 +337,7 @@ bool Gnuplot::extract_suite_path(const std::string& line,
         if (child_cmd) {
 
             // For labels ignore paths in the label part
-            // MSG:[14:55:04 17.10.2013] chd:label progress 'core/nodeattr/nodeAParser'
+            // MSG:[14:55:04 17.10.2013] chd:label progress 'core/nodeattr/node/parser'
             // /suite/build/cray/cray_gnu/build_release/test
             if (line.find("chd:label") != std::string::npos) {
                 size_t last_tick = line.rfind("'");
@@ -353,10 +351,10 @@ bool Gnuplot::extract_suite_path(const std::string& line,
             path = line.substr(forward_slash);
         }
         else {
-            // Ignore the --news command, they dont have a path, hence i.e to ignore line like:
-            //  MSG:[09:36:05 22.10.2013] --news=1 36506 6  :ma0 [server handle(36508,7) server(36508,7)
+            // Ignore the --news command, as it doesn't have a path. This means ignore lines like:
+            //   MSG:[09:36:05 22.10.2013] --news=1 36506 6  :ma0 [server handle(36508,7) server(36508,7)
             //                     : *Large* scale changes (new handle or suites added/removed) :NEWS]
-            //   the /removed was being interpreted as a suite
+            // Note: the /removed was being interpreted as a suite
             if (line.find("--news") != std::string::npos)
                 return false;
         }

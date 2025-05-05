@@ -27,6 +27,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -438,7 +439,8 @@ void set_defs_state(defs_ptr defs) {
 
 BOOST_AUTO_TEST_CASE(test_ssync_cmd) {
     // To DEBUG: enable the defines in Memento.hpp
-    cout << "Base:: ...test_ssync_cmd\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_ssync_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     test_sync_scaffold(update_repeat, "update_repeat");

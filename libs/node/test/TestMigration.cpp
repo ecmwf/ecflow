@@ -15,8 +15,10 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace std;
@@ -31,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Migration)
 
 BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
-    cout << "ANode:: ...test_default_constructor_persistence\n";
+    ECF_NAME_THIS_TEST();
 
     std::string file_name = File::test_data("libs/node/test/data/migration/", "libs/node");
 
@@ -62,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_default_constructor_persistence) {
 }
 
 BOOST_AUTO_TEST_CASE(test_compare_cereal_and_defs_checkpt_file) {
-    cout << "ANode:: ...test_compare_cereal_and_defs_checkpt_file\n";
+    ECF_NAME_THIS_TEST();
 
     std::string file_name = File::test_data("libs/node/test/data/migration/", "libs/node");
 

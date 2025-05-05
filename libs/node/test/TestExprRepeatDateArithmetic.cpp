@@ -14,6 +14,7 @@
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -23,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_ExprRepeatDateArithmetic)
 
 BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic) {
-    cout << "ANode:: ...test_repeat_data_arithmetic\n";
+    ECF_NAME_THIS_TEST();
 
     Defs theDefs;
     task_ptr t2, t1;
@@ -56,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic_add_to_end_of_month) {
-    cout << "ANode:: ...test_repeat_data_arithmetic_add_to_end_of_month\n";
+    ECF_NAME_THIS_TEST();
 
     Defs theDefs;
     task_ptr t2, t1;
@@ -136,7 +137,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic_add_to_end_of_month) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_data_arithmetic_take_from_end_of_month) {
-    cout << "ANode:: ...test_repeat_data_arithmetic_take_from_end_of_month\n";
+    ECF_NAME_THIS_TEST();
 
     Defs theDefs;
     task_ptr t2, t1;

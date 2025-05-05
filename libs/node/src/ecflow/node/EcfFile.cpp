@@ -20,6 +20,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
@@ -99,7 +100,7 @@ EcfFile::EcfFile(Node* t,
       script_path_or_cmd_(pathToEcfFileOrCommand),
       script_origin_(script_origin),
       ecf_file_search_algorithm_(search_algo) {
-    node_->findParentUserVariableValue(Str::ECF_MICRO(), ecfMicroCache_);
+    node_->findParentUserVariableValue(ecf::environment::ECF_MICRO, ecfMicroCache_);
     if (ecfMicroCache_.empty() || ecfMicroCache_.size() != 1) {
         std::stringstream ss;
         ss << "EcfFile::EcfFile: Node " << t->absNodePath() << " is referencing a invalid ECF_MICRO variable(' "
@@ -454,7 +455,7 @@ std::vector<std::string> EcfFile::get_ecf_include_paths(const EcfFile& ecf) {
     const Node& node = *ecf.node_;
 
     std::string ecf_include;
-    node.findParentUserVariableValue(Str::ECF_INCLUDE(), ecf_include);
+    node.findParentUserVariableValue(ecf::environment::ECF_INCLUDE, ecf_include);
 
     std::vector<std::string> paths;
     if (!ecf_include.empty()) {
@@ -902,19 +903,19 @@ void EcfFile::get_used_variables(std::string& used_variables) const {
         // to modify. Hence, we have also excluded generated variables SUITE, FAMILY, TASK
         // ****************************************************************************************
         for (std::pair<std::string, std::string> item : used_variables_map) {
-            if (item.first.find(Str::ECF_TRYNO()) != std::string::npos)
+            if (item.first.find(ecf::environment::ECF_TRYNO) != std::string::npos)
                 continue;
-            if (item.first.find(Str::ECF_JOB()) != std::string::npos)
+            if (item.first.find(ecf::environment::ECF_JOB) != std::string::npos)
                 continue;
-            if (item.first.find(Str::ECF_JOBOUT()) != std::string::npos)
+            if (item.first.find(ecf::environment::ECF_JOBOUT) != std::string::npos)
                 continue;
-            if (item.first.find(Str::ECF_PASS()) != std::string::npos)
+            if (item.first.find(ecf::environment::ECF_PASS) != std::string::npos)
                 continue;
-            if (item.first.find(Str::ECF_PORT()) != std::string::npos)
+            if (item.first.find(ecf::environment::ECF_PORT) != std::string::npos)
                 continue;
-            if (item.first.find(Str::ECF_HOST()) != std::string::npos)
+            if (item.first.find(ecf::environment::ECF_HOST) != std::string::npos)
                 continue;
-            if (item.first.find(Str::ECF_NAME()) != std::string::npos)
+            if (item.first.find(ecf::environment::ECF_NAME) != std::string::npos)
                 continue;
 
             // We must use exact match, to avoid user variables like ESUITE,EFAMILY,ETASK
@@ -1044,7 +1045,7 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const {
         //   b/ The value of the user variable has a valid directory paths and job file name
         //   c/ The user will lose the try number.
         std::string ecf_job;
-        if (!node_->findParentVariableValue(Str::ECF_JOB(), ecf_job)) {
+        if (!node_->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job)) {
             LOG_ASSERT(!ecf_job.empty(), "EcfFile::doCreateJobFile: ECF_JOB should have been generated, program error");
         }
 
@@ -1123,7 +1124,7 @@ std::string EcfFile::script_or_job_path() const {
 
     // ECF_FETCH or ECF_SCRIPT_CMD
     std::string ecf_job;
-    (void)node_->findParentVariableValue(Str::ECF_JOB(), ecf_job);
+    (void)node_->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job);
     return ecf_job;
 }
 
@@ -1739,7 +1740,7 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
 
         // WE get HERE *if* ECF_INCLUDE not specified, or if specified but file *not found*
         std::string ecf_include;
-        node->findParentVariableValue(Str::ECF_HOME(), ecf_include);
+        node->findParentVariableValue(ecf::environment::ECF_HOME, ecf_include);
         if (ecf_include.empty()) {
             std::stringstream ss;
             ss << "ECF_INCLUDE/ECF_HOME not specified, at : " << line;
@@ -1778,7 +1779,7 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
         }
 
         // include contents of %ECF_HOME%/%SUITE%/%FAMILY%/filename
-        node->findParentUserVariableValue(Str::ECF_HOME(), path);
+        node->findParentUserVariableValue(ecf::environment::ECF_HOME, path);
         if (path.empty()) {
             std::stringstream ss;
             ss << "ECF_HOME not specified, at : " << line;
@@ -1867,7 +1868,7 @@ bool IncludeFileCache::lines(std::vector<std::string>& lns) {
     string line;
     while (std::getline(fp_, line)) {
         lns.push_back(line);
-    }                          // c++11
+    } // c++11
     fp_.clear();               // eol fp_ will be in bad state reset. So we can re-use
     no_of_lines_ = lns.size(); // cache for next time
 

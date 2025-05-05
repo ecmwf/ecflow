@@ -14,6 +14,7 @@
 #include <ostream>
 #include <string>
 
+#include "ecflow/test/scaffold/Naming.hpp"
 #include "nlohmann/json.hpp"
 
 class TokenFile {
@@ -57,7 +58,7 @@ inline TokenFile::TokenFile(const std::string& tokenfile) : tokenfile_(tokenfile
 
 inline TokenFile::~TokenFile() {
     if (remove(tokenfile_.c_str()) != 0) {
-        std::cerr << "Failed to remove token file " << tokenfile_ << std::endl;
+        ECF_TEST_ERR(<< "Failed to remove token file " << tokenfile_);
     }
     else {
         BOOST_TEST_MESSAGE("Removed token file " << tokenfile_);

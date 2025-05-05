@@ -17,12 +17,14 @@
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -32,7 +34,7 @@ BOOST_AUTO_TEST_SUITE(U_Server)
 BOOST_AUTO_TEST_SUITE(T_ServerEnvironment)
 
 BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
-    cout << "Server:: ...test_server_environment_ecfinterval\n";
+    ECF_NAME_THIS_TEST();
 
     // ecflow server interval is valid for range [1-60]
     std::string port = Str::DEFAULT_PORT_NUMBER();
@@ -61,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_port) {
-    cout << "Server:: ...test_server_environment_port\n";
+    ECF_NAME_THIS_TEST();
 
     // The port numbers are divided into three ranges.\n";
     //  o the Well Known Ports, (require root permission)      0 -1023\n";
@@ -103,8 +105,9 @@ BOOST_AUTO_TEST_CASE(test_server_environment_port) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
+    ECF_NAME_THIS_TEST();
+
     // Regression test log file creation
-    cout << "Server:: ...test_server_environment_log_file\n";
 
     int argc     = 2;
     char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=3144")};
@@ -120,7 +123,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
     bool found_var = false;
     typedef std::pair<std::string, std::string> mpair;
     for (const mpair& p : server_vars) {
-        if (Str::ECF_LOG() == p.first) {
+        if (ecf::environment::ECF_LOG == p.first) {
             BOOST_CHECK_MESSAGE(p.second == Log::instance()->path(),
                                 "Expected " << Log::instance()->path() << " but found " << p.second);
             found_var = true;
@@ -138,8 +141,9 @@ BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_config_file) {
+    ECF_NAME_THIS_TEST();
+
     // Regression test to make sure the server environment variable don't get removed
-    cout << "Server:: ...test_server_config_file\n";
 
     int argc     = 1;
     char* argv[] = {const_cast<char*>("ServerEnvironment")};
@@ -189,12 +193,12 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
     typedef std::pair<std::string, std::string> mpair;
     for (const mpair& p : server_vars) {
         // std::cout << "server variables " << p.first << "  " << p.second << "\n";
-        if (Str::ECF_HOME() == p.first) {
+        if (ecf::environment::ECF_HOME == p.first) {
             BOOST_CHECK_MESSAGE(p.second == fs::current_path().string(),
                                 "for ECF_HOME expected " << fs::current_path().string() << " but found " << p.second);
             continue;
         }
-        if (string("ECF_PORT") == p.first && !getenv("ECF_PORT")) {
+        if (string("ECF_PORT") == p.first && !ecf::environment::has("ECF_PORT")) {
             BOOST_CHECK_MESSAGE(p.second == Str::DEFAULT_PORT_NUMBER(),
                                 "for ECF_PORT expected " << Str::DEFAULT_PORT_NUMBER() << " but found " << p.second);
             continue;
@@ -264,9 +268,10 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
 
             Host host;
             std::string port = Str::DEFAULT_PORT_NUMBER();
-            if (getenv("ECF_PORT"))
-                port = getenv("ECF_PORT");
-            std::string expected = host.prefix_host_and_port(port, Str::ECF_PASSWD());
+            if (ecf::environment::has("ECF_PORT")) {
+                port = ecf::environment::has("ECF_PORT");
+            }
+            std::string expected = host.prefix_host_and_port(port, ecf::environment::ECF_PASSWD);
 
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_PASSWD expected " << expected << " but found " << p.second);
@@ -280,8 +285,9 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
+    ECF_NAME_THIS_TEST();
+
     // Regression test to make sure the server environment variable don't get removed
-    cout << "Server:: ...test_server_environment_variables\n";
 
     int argc     = 2;
     char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=3144")};
@@ -326,7 +332,8 @@ BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
-    cout << "Server:: ...test_server_profile_threshold_environment_variable\n";
+    ECF_NAME_THIS_TEST();
+
     int argc     = 1;
     char* argv[] = {const_cast<char*>("ServerEnvironment")};
     {

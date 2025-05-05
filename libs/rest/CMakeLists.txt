@@ -127,11 +127,11 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         integration nightly
       SOURCES
         ${test_srcs}
-      INCLUDES
-        ../base/test
       LIBS
         libhttp
         ecflow_all
+        test_scaffold
+        test_harness.base
         Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
         $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
       DEPENDS
@@ -142,6 +142,33 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
         s_client
     )
     target_clangformat(s_http
+      CONDITION ENABLE_TESTS
+    )
+
+    ecbuild_add_test(
+      TARGET
+        s_http_using_http_backend
+      LABELS
+        integration nightly
+      SOURCES
+        ${test_srcs}
+      DEFINITIONS
+        ECF_TEST_HTTP_BACKEND
+      LIBS
+        libhttp
+        ecflow_all
+        test_scaffold
+        test_harness.base
+        Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+        $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+      DEPENDS
+        ecflow_server # the server is launched to support tests
+        ecflow_http
+      TEST_DEPENDS
+        u_base
+        s_client
+    )
+    target_clangformat(s_http_using_http_backend
       CONDITION ENABLE_TESTS
     )
   else ()

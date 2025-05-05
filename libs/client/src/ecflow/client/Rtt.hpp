@@ -33,7 +33,7 @@ public:
     void log(const std::string& message);
 
     /// Open the file, and create average times for all client invoker round trip times
-    static std::string analyis(const std::string& filename);
+    static std::string analysis(const std::string& filename);
 
     /// Used in output and parsing, when computing averages
     static const char* tag() { return "rtt:"; }
@@ -57,7 +57,10 @@ std::string stringize_rtt(Functor const& f) {
     f(out);
     return out.str();
 }
+
 #define STRINGIZE_RTT(EXPRESSION) (ecf::stringize_rtt([](std::ostringstream& os) { os << EXPRESSION };))
 #define RTT(EXPRESSION) ecf::rtt(STRINGIZE_RTT(EXPRESSION))
+
 } // namespace ecf
-#endif
+
+#endif /* ecflow_client_Rtt_HPP */

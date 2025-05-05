@@ -18,12 +18,14 @@
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -33,7 +35,8 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_Cmd)
 
 BOOST_AUTO_TEST_CASE(test_simple_cmd) {
-    cout << "Base:: ...test_simple_cmd\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_simple_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     // Create the defs file. Note that the default ECF_TRIES = 3
@@ -80,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_simple_cmd) {
     // should be re-submitted, until the task try number > ECF_TRIES
     {
         std::string varValue;
-        if (t1->findParentUserVariableValue(Str::ECF_TRIES(), varValue)) {
+        if (t1->findParentUserVariableValue(ecf::environment::ECF_TRIES, varValue)) {
             auto ecf_tries = ecf::convert_to<int>(varValue);
             while (true) {
                 TestHelper::invokeRequest(

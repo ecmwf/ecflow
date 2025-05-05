@@ -68,7 +68,7 @@ foreach( test ${u_tests} )
       python nightly
     TYPE PYTHON
     ARGS
-      ${CMAKE_CURRENT_SOURCE_DIR}/../test/${test}.py
+      ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py
     ENVIRONMENT
       "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
     TEST_DEPENDS
@@ -89,7 +89,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ARGS
         ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py
       ENVIRONMENT
-        "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+        "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR};ECF_SSL_DIR=${CMAKE_CURRENT_BINARY_DIR}/"
       TEST_DEPENDS
         u_base
     )
@@ -118,7 +118,6 @@ endif()
 
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
 
-  message(STATUS "python install *LOCAL* +++ lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages/ecflow +++++++")
   if( NOT INSTALL_PYTHON3_DIR )
     set(PYTHON_SITE "lib/python${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR}/site-packages" )
   else()

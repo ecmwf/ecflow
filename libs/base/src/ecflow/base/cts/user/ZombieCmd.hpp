@@ -12,11 +12,11 @@
 #define ecflow_base_cts_user_ZombieCmd_HPP
 
 #include "ecflow/base/cts/user/UserCmd.hpp"
-#include "ecflow/core/User.hpp"
+#include "ecflow/core/ZombieCtrlAction.hpp"
 
 class ZombieCmd final : public UserCmd {
 public:
-    ZombieCmd(ecf::User::Action uc,
+    ZombieCmd(ecf::ZombieCtrlAction uc,
               const std::vector<std::string>& paths,
               const std::string& process_id,
               const std::string& password)
@@ -24,7 +24,7 @@ public:
           process_id_(process_id),
           password_(password),
           paths_(paths) {}
-    explicit ZombieCmd(ecf::User::Action uc = ecf::User::BLOCK) : user_action_(uc) {}
+    explicit ZombieCmd(ecf::ZombieCtrlAction uc = ecf::ZombieCtrlAction::BLOCK) : user_action_(uc) {}
 
     const std::vector<std::string>& paths() const { return paths_; }
     const std::string& process_or_remote_id() const { return process_id_; }
@@ -42,7 +42,7 @@ private:
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     void cleanup() override { std::vector<std::string>().swap(paths_); } /// run in the server, after handlerequest
 
-    ecf::User::Action user_action_;
+    ecf::ZombieCtrlAction user_action_;
     std::string process_id_; // should be empty for multiple paths and when using CLI
     std::string password_;   // should be empty for multiple paths and when using CLI
     std::vector<std::string> paths_;

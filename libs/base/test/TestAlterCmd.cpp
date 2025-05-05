@@ -17,6 +17,7 @@
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -24,6 +25,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -74,13 +76,15 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(test_add_log5) {
+    ECF_NAME_THIS_TEST();
+
     // create once for all test below, then remove at the end
     Log::create("test_add_log5.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_hybrid) {
-    cout << "Base:: ...test_alter_cmd_for_clock_type_hybrid\n";
+    ECF_NAME_THIS_TEST();
 
     // In this test the suite has NO Clock attribute. It should get added automatically
     // when a new clock is added, we should sync with the computer clock
@@ -117,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_hybrid) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_real) {
-    cout << "Base:: ...test_alter_cmd_for_clock_type_real\n";
+    ECF_NAME_THIS_TEST();
 
     // In this test the suite has NO Clock attribute. It should get added automatically
     // when a new clock is added, we should sync with the computer clock
@@ -153,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_real) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_sync) {
-    cout << "Base:: ...test_alter_cmd_for_clock_sync\n";
+    ECF_NAME_THIS_TEST();
 
     // Add a suite with a hybrid clock set to the past, on switch to real time, should have todays date
     // Since the clock exists on the suite, with another date, we must explicitly sync with computer
@@ -209,7 +213,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_sync) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_date) {
-    cout << "Base:: ...test_alter_cmd_for_clock_date\n";
+    ECF_NAME_THIS_TEST();
 
     // In this test the suite has NO Clock attribute. It should get added automatically
     Defs defs;
@@ -256,7 +260,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_gain) {
-    cout << "Base:: ...test_alter_cmd_for_clock_gain\n";
+    ECF_NAME_THIS_TEST();
 
     // In this test the suite has NO Clock attribute. It should get added automatically
     Defs defs;
@@ -323,7 +327,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_gain) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd) {
-    cout << "Base:: ...test_alter_cmd\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s   = defs.add_suite("suite");
@@ -597,56 +601,101 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
 
     { // test add event
         TestStateChanged changed(s);
-        s->addEvent(Event(1, "event1"));
-        s->addEvent(Event(2, "event2"));
-        s->addEvent(Event(3, "event3"));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "first", "set")));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "second", "set")));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "third", "clear")));
         BOOST_CHECK_MESSAGE(s->events().size() == 3, "expected 3  but found " << s->events().size());
 
+        {
+            const auto& first = s->findEventByNameOrNumber("first");
+            BOOST_CHECK_EQUAL(first.name(), "first");
+            BOOST_CHECK_EQUAL(first.value(), true);
+        }
+        {
+            const auto& second = s->findEventByNameOrNumber("second");
+            BOOST_CHECK_EQUAL(second.name(), "second");
+            BOOST_CHECK_EQUAL(second.value(), true);
+        }
+        {
+            const auto& third = s->findEventByNameOrNumber("third");
+            BOOST_CHECK_EQUAL(third.name(), "third");
+            BOOST_CHECK_EQUAL(third.value(), false);
+        }
+
         // test delete event
-        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_EVENT, "event1")));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_EVENT, "first")));
         BOOST_CHECK_MESSAGE(s->events().size() == 2, "expected 2  but found " << s->events().size());
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_EVENT)));
         BOOST_CHECK_MESSAGE(s->events().size() == 0, "expected 0  but found " << s->events().size());
 
         // test change event
-        s->addEvent(Event(1, "event1"));
-        s->addEvent(Event(2, "event2"));
         TestHelper::invokeRequest(&defs,
-                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "event1", Event::SET())));
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "some_event", "clear")));
+        TestHelper::invokeRequest(
+            &defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_EVENT, "another_event", "clear")));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "some_event", Event::SET())));
         {
-            const Event& v = s->findEventByNameOrNumber("event1");
+            const Event& v = s->findEventByNameOrNumber("some_event");
             BOOST_CHECK_MESSAGE(v.value() == 1, "expected to find  event with value set");
         }
 
-        TestHelper::invokeRequest(&defs,
-                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "event1", Event::CLEAR())));
+        TestHelper::invokeRequest(
+            &defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "some_event", Event::CLEAR())));
         {
-            const Event& v = s->findEventByNameOrNumber("event1");
+            const Event& v = s->findEventByNameOrNumber("some_event");
             BOOST_CHECK_MESSAGE(!v.empty() && v.value() == 0, "expected to find  event with value cleared");
         }
 
-        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "event1", "")));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::EVENT, "some_event", "")));
         {
-            const Event& v = s->findEventByNameOrNumber("event1");
+            const Event& v = s->findEventByNameOrNumber("some_event");
             BOOST_CHECK_MESSAGE(v.value() == 1, "expected to find  event with value set");
         }
     }
 
     { // test add meter
-        // TestStateChanged changed(s);
-        s->addMeter(Meter("meter", 0, 100, 100));
-        s->addMeter(Meter("meter1", 0, 100, 100));
-        s->addMeter(Meter("meter2", 0, 100, 100));
+        TestStateChanged changed(s);
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_METER, "first", "0,100,100")));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_METER, "second", "-10,10,5")));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_METER, "third", "0,50,0")));
         BOOST_CHECK_MESSAGE(s->meters().size() == 3, "expected 3  but found " << s->meters().size());
 
+        {
+            const auto& first = s->findMeter("first");
+            BOOST_CHECK_EQUAL(first.name(), "first");
+            BOOST_CHECK_EQUAL(first.min(), 0);
+            BOOST_CHECK_EQUAL(first.max(), 100);
+            BOOST_CHECK_EQUAL(first.value(), 100);
+        }
+        {
+            const auto& second = s->findMeter("second");
+            BOOST_CHECK_EQUAL(second.name(), "second");
+            BOOST_CHECK_EQUAL(second.min(), -10);
+            BOOST_CHECK_EQUAL(second.max(), 10);
+            BOOST_CHECK_EQUAL(second.value(), 5);
+        }
+        {
+            const auto& third = s->findMeter("third");
+            BOOST_CHECK_EQUAL(third.name(), "third");
+            BOOST_CHECK_EQUAL(third.min(), 0);
+            BOOST_CHECK_EQUAL(third.max(), 50);
+            BOOST_CHECK_EQUAL(third.value(), 0);
+        }
+
         // test delete meter
-        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_METER, "meter")));
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_METER, "first")));
         BOOST_CHECK_MESSAGE(s->meters().size() == 2, "expected 2  but found " << s->meters().size());
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::DEL_METER)));
         BOOST_CHECK_MESSAGE(s->meters().size() == 0, "expected 0 meters but found " << s->meters().size());
 
         // test change meter value
-        s->addMeter(Meter("meter", 0, 100, 100));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::ADD_METER, "meter", "0,100,100")));
         BOOST_CHECK_MESSAGE(s->meters().size() == 1, "expected 1 meter but found " << s->meters().size());
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::METER, "meter", "10")));
         const Meter& v = s->findMeter("meter");
@@ -956,15 +1005,16 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
     { // free password
         TestStateChanged changed(s);
         std::string returnedValue;
-        BOOST_CHECK_MESSAGE(!task->findVariableValue(Str::ECF_PASS(), returnedValue),
+        BOOST_CHECK_MESSAGE(!task->findVariableValue(ecf::environment::ECF_PASS, returnedValue),
                             "Expected no variable of name ECF_PASS");
 
-        TestHelper::invokeRequest(
-            &defs,
-            Cmd_ptr(new AlterCmd(
-                task->absNodePath(), AlterCmd::ADD_VARIABLE, Str::ECF_PASS(), Submittable::FREE_JOBS_PASSWORD())));
+        TestHelper::invokeRequest(&defs,
+                                  Cmd_ptr(new AlterCmd(task->absNodePath(),
+                                                       AlterCmd::ADD_VARIABLE,
+                                                       ecf::environment::ECF_PASS,
+                                                       Submittable::FREE_JOBS_PASSWORD())));
 
-        BOOST_CHECK_MESSAGE(task->findVariableValue(Str::ECF_PASS(), returnedValue),
+        BOOST_CHECK_MESSAGE(task->findVariableValue(ecf::environment::ECF_PASS, returnedValue),
                             "Expected to find variable ECF_PASS on the task");
         BOOST_CHECK_MESSAGE(returnedValue == Submittable::FREE_JOBS_PASSWORD(),
                             "Expected variable value of name " << Submittable::FREE_JOBS_PASSWORD() << " but found "
@@ -1131,7 +1181,7 @@ void add_sorted_attributes(Node* node) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_sort_attributes) {
-    cout << "Base:: ...test_alter_sort_attributes\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     defs.set_server().add_or_update_user_variables("z", "z");
@@ -1171,7 +1221,7 @@ BOOST_AUTO_TEST_CASE(test_alter_sort_attributes) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_sort_attributes_for_task) {
-    cout << "Base:: ...test_alter_sort_attributes_for_task\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -1202,7 +1252,7 @@ BOOST_AUTO_TEST_CASE(test_alter_sort_attributes_for_task) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alter_cmd_errors) {
-    cout << "Base:: ...test_alter_cmd_errors\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");

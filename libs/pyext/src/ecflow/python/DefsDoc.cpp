@@ -756,7 +756,8 @@ const char* DefsDoc::add_repeat_date_doc() {
 const char* DefsDoc::add_repeat_datetime_doc() {
     return "Add a RepeatDateTime attribute. See :py:class:`ecflow.RepeatDateTime`\n\n"
            "A node can only have one repeat.\n"
-           "When a RepeatDateTime is used in a trigger expression, the arithmetic value of the Repeat decays to second.\n"
+           "When a RepeatDateTime is used in a trigger expression, the arithmetic value of the Repeat decays to "
+           "second.\n"
            "For example, the expression `/suite/family:DATETIME + 1` is evaluated as the number of seconds represented "
            "by `/suite/family:DT` (since the reference epoch, i.e. 19700101T000000) plus 1."
            "The result is an integer.\n\n"

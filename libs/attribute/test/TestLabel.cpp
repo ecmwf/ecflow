@@ -15,6 +15,7 @@
 
 #include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -24,7 +25,8 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_Label)
 
 BOOST_AUTO_TEST_CASE(test_label_parsing) {
-    cout << "ANattr:: ...test_label_parsing\n";
+    ECF_NAME_THIS_TEST();
+
     {
         std::string line = "label name \"value\"";
         std::vector<string> linetokens;

@@ -54,11 +54,9 @@ public:
     void async_write(const T& t, Handler handler) {
 
 #ifdef DEBUG_CONNECTION
-        if (Ecf::server())
-            std::cout << "SERVER: Connection::async_write\n";
-        else
-            std::cout << "CLIENT: Connection::async_write\n";
-        std::cout << "   Serialise the data first so we know how large it is\n";
+        auto location = Ecf::server() ? "SERVER" : "CLIENT";
+        std::cout << location << ": Connection::async_write\n"
+                  << "   Serialise the data first so we know how large it is\n";
 #endif
         // Serialise the data first so we know how large it is.
         try {
@@ -86,11 +84,11 @@ public:
         outbound_header_ = header_stream.str();
 
 #ifdef DEBUG_CONNECTION
-        std::cout << "   Write the HEADER and serialised DATA to the socket\n";
-        std::cout << "   outbound_header_.size(" << outbound_header_.size() << ")\n";
-        std::cout << "   outbound_header_:'" << outbound_header_ << "' # this is the size in hex\n";
-        std::cout << "   outbound_data_.size(" << outbound_data_.size() << ")\n";
-        std::cout << "   hdr+data:'" << outbound_header_ << outbound_data_ << "'\n";
+        std::cout << "   Write the HEADER and serialised DATA to the socket\n"
+                  << "   outbound_header_.size(" << outbound_header_.size() << ")\n"
+                  << "   outbound_header_:'" << outbound_header_ << "' # this is the size in hex\n"
+                  << "   outbound_data_.size(" << outbound_data_.size() << ")\n"
+                  << "   hdr+data:'" << outbound_header_ << outbound_data_ << "'\n";
 #endif
         // Write the serialized data to the socket. We use "gather-write" to send
         // both the header and the data in a single write operation.
@@ -113,10 +111,8 @@ public:
     void async_read(T& t, Handler handler) {
 
 #ifdef DEBUG_CONNECTION
-        if (Ecf::server())
-            std::cout << "SERVER: Connection::async_read\n";
-        else
-            std::cout << "CLIENT: Connection::async_read\n";
+        auto location = Ecf::server() ? "SERVER" : "CLIENT";
+        std::cout << location << ": Connection::async_read\n";
 #endif
 
         // Issue a read operation to read exactly the number of bytes in a header
@@ -133,11 +129,9 @@ private:
     template <typename T, typename Handler>
     void handle_read_header(const boost::system::error_code& e, T& t, Handler handler) {
 #ifdef DEBUG_CONNECTION
-        if (Ecf::server())
-            std::cout << "SERVER: Connection::handle_read_header\n";
-        else
-            std::cout << "CLIENT: Connection::handle_read_header\n";
-        std::cout << "   header:'" << std::string(inbound_header_, header_length)
+        auto location = Ecf::server() ? "SERVER" : "CLIENT";
+        std::cout << location << ": Connection::handle_read_header\n"
+                  << "   header:'" << std::string(inbound_header_, header_length)
                   << "'  # this size of payload in hex\n";
 #endif
         if (e) {
@@ -172,10 +166,8 @@ private:
     template <typename T, typename Handler>
     void handle_read_data(const boost::system::error_code& e, T& t, Handler handler) {
 #ifdef DEBUG_CONNECTION
-        if (Ecf::server())
-            std::cout << "SERVER: Connection::handle_read_data\n";
-        else
-            std::cout << "CLIENT: Connection::handle_read_data\n";
+        auto location = Ecf::server() ? "SERVER" : "CLIENT";
+        std::cout << location << ": Connection::handle_read_data\n";
 #endif
 
         if (e) {
@@ -186,9 +178,8 @@ private:
             std::string archive_data(&inbound_data_[0], inbound_data_.size());
             try {
 #ifdef DEBUG_CONNECTION
-                std::cout << "   inbound_data_.size(" << inbound_data_.size() << ") typeid(" << typeid(t).name()
-                          << ")\n";
-                std::cout << "   '" << archive_data << "'\n";
+                std::cout << "   inbound_data_.size(" << inbound_data_.size() << ") typeid=" << typeid(t).name() << "\n"
+                          << "   '" << archive_data << "'\n";
 #endif
                 ecf::restore_from_string(archive_data, t);
             }

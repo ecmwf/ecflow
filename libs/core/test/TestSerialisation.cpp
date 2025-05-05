@@ -12,9 +12,9 @@
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/TimeSeries.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
-using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
@@ -26,14 +26,14 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Serialisation)
 
 BOOST_AUTO_TEST_CASE(test_calendar_serialisation) {
-    cout << "ACore:: ...test_calendar_serialisation \n";
+    ECF_NAME_THIS_TEST();
 
     Calendar cal;
     doSaveAndRestore(fileName, cal);
 }
 
 BOOST_AUTO_TEST_CASE(test_TimeSlot_serialisation) {
-    cout << "ACore:: ...test_TimeSlot_serialisation \n";
+    ECF_NAME_THIS_TEST();
 
     { doSaveAndRestore<TimeSlot>(fileName); }
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_TimeSlot_serialisation) {
 }
 
 BOOST_AUTO_TEST_CASE(test_TimeSeries_serialisation) {
-    cout << "ACore:: ...test_TimeSeries_serialisation \n";
+    ECF_NAME_THIS_TEST();
 
     { doSaveAndRestore<TimeSeries>(fileName); }
     {

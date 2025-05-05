@@ -693,7 +693,7 @@ void Defs::print(std::string& os) const {
     else
         os.reserve(4096);
     os += "#";
-    os += ecf::Version::raw();
+    os += ecf::Version::full();
     os += "\n";
 
     if (!PrintStyle::defsStyle())
@@ -1028,7 +1028,7 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const {
     // This is 14% quicker than the previous algorithm, that split 'pathToNode' into a vector of strings first.
     node_ptr ret;
     bool first = false;
-    StringSplitter string_splitter(pathToNode, Str::PATH_SEPERATOR());
+    StringSplitter string_splitter(pathToNode, Str::PATH_SEPARATOR());
     while (!string_splitter.finished()) {
         std::string_view path_token = string_splitter.next();
         // std::cout << "path_token:'" << path_token << "'  last = " << string_splitter.last() << "\n";
@@ -1527,7 +1527,7 @@ void Defs::restore(const std::string& the_fileName) {
         return;
 
     /// *************************************************************************
-    /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+    /// The reason why Parser code moved to Node directory. Avoid cyclic loop
     /// *************************************************************************
     std::string errorMsg, warningMsg;
     if (!restore(the_fileName, errorMsg, warningMsg)) {
@@ -1553,7 +1553,7 @@ bool Defs::restore(const std::string& the_fileName, std::string& errorMsg, std::
 
 void Defs::restore_from_string(const std::string& str) {
     /// *************************************************************************
-    /// The reason why Parser code moved to ANode directory. Avoid cyclic loop
+    /// The reason why Parser code moved to Node directory. Avoid cyclic loop
     /// *************************************************************************
     std::string errorMsg, warningMsg;
     if (!restore_from_string(str, errorMsg, warningMsg)) {

@@ -113,38 +113,50 @@ The example below shows some of the default variables you can configure.
     
     #  ******************************************************************
     #  * The standard command use for job submission.
-    #  * Provides DEFAULT can be overridden by user variable
+    #  *
+    #  * Provides DEFAULT which can be overridden by a user variable
     #  ******************************************************************
     ECF_JOB_CMD = %ECF_JOB% 1> %ECF_JOBOUT% 2>&1
     
     
     #  ******************************************************************
-    #  * Define variable for killing any jobs.
-    #  * Provides DEFAULT can be overridden by user variable
+    #  * Define the command for killing any jobs.
     #  * The output of the command should be written to %ECF_JOB%.kill
+    #  *
+    #  * Provides DEFAULT which can be overridden by a user variable
+    #  *
     #  * ecmwf: ${ECF_KILL:=/home/ma/emos/bin/ecfkill} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1
     #  ******************************************************************
     ECF_KILL_CMD = kill -15 %ECF_RID% 
     
     
     #  ******************************************************************
-    #  * This is run by the SERVER
-    #  * define variable of obtaining status.
-    #  * Provides DEFAULT can be overridden by user variable
+    #  * The command to be executed, by the SERVER, to obtain the
+    #  * current status of a Job.
     #  * The output of the command should be written to %ECF_JOB%.stat
+    #  *
+    #  * Provides DEFAULT which can be overridden by a user variable
+    #  *
     #  * ecmwf: ${ECF_STAT:=trimurti} %USER% %HOST% %ECF_RID% %ECF_JOB% status> %ECF_JOB%.stat 2>&1
     #  ******************************************************************
     ECF_STATUS_CMD = ps --pid %ECF_RID% -f > %ECF_JOB%.stat 2>&1
     
     #  ******************************************************************
-    #  * This is run by the CLIENT .  check from GUI
+    #  * The command to be executed, by the CLIENT (ecFlowUI), to obtain the
+    #  * current status of a Job.
+    #  *
+    #  * DEPRECATED: This command is deprecated and currently not used.
+    #  *             Use ECF_STATUS_CMD instead as a SERVER side alternative
+    #  *
     #  ******************************************************************
     ECF_CHECK_CMD = ps --pid %ECF_RID% -f
     
     
     #  ******************************************************************
-    #  * define variables used for url command.
-    #  * Provides DEFAULT can be overridden by user variables
+    #  * The command to be executed, bye the CLIENT (ecFlowUI) to open a
+    #  * Browser with the specified URL.
+    #  *
+    #  * Provides DEFAULT which can be overridden by a user variables
     #  ******************************************************************
     ECF_URL_CMD    = ${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%
     ECF_URL_BASE   = https://confluence.ecmwf.int

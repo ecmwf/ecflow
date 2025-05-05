@@ -14,6 +14,7 @@
 
 #include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -23,12 +24,12 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_Rtt)
 
 BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
-    cout << "Client:: ...test_client_invoker_round_trip_times" << endl;
+    ECF_NAME_THIS_TEST();
 
     std::string root_path = File::test_data("libs/client/test/data/", "libs/client");
 
     /// Open file rtt.dat and compute average round trip times
-    std::string result = Rtt::analyis(root_path + "rtt.dat");
+    std::string result = Rtt::analysis(root_path + "rtt.dat");
     // cout << result << "\n";
 
     /// generated a file with results

@@ -39,7 +39,7 @@ const std::string& Str::ROOT_PATH() {
     static std::string root_path = "/";
     return root_path;
 }
-const std::string& Str::PATH_SEPERATOR() {
+const std::string& Str::PATH_SEPARATOR() {
     static std::string path_sep = "/";
     return path_sep;
 }
@@ -79,111 +79,9 @@ const std::string& Str::LOCALHOST() {
     return localhost;
 }
 
-const std::string& Str::ECF_PORT() {
-    static std::string ECF_PORT = "ECF_PORT";
-    return ECF_PORT;
-}
-const std::string& Str::ECF_RID() {
-    static std::string ECF_RID = "ECF_RID";
-    return ECF_RID;
-}
-const std::string& Str::ECF_TRYNO() {
-    static std::string ECF_TRYNO = "ECF_TRYNO";
-    return ECF_TRYNO;
-}
-const std::string& Str::ECF_TRIES() {
-    static std::string ECF_TRIES = "ECF_TRIES";
-    return ECF_TRIES;
-}
-const std::string& Str::ECF_NAME() {
-    static std::string ECF_NAME = "ECF_NAME";
-    return ECF_NAME;
-}
-const std::string& Str::ECF_HOST() {
-    static std::string ECF_HOST = "ECF_HOST";
-    return ECF_HOST;
-}
-const std::string& Str::ECF_PASS() {
-    static std::string ECF_PASS = "ECF_PASS";
-    return ECF_PASS;
-}
-const std::string& Str::ECF_JOB() {
-    static std::string ECF_JOB = "ECF_JOB";
-    return ECF_JOB;
-}
-const std::string& Str::ECF_JOBOUT() {
-    static std::string ECF_JOBOUT = "ECF_JOBOUT";
-    return ECF_JOBOUT;
-}
-const std::string& Str::ECF_SCRIPT() {
-    static std::string ECF_SCRIPT = "ECF_SCRIPT";
-    return ECF_SCRIPT;
-}
-const std::string& Str::ECF_DUMMY_TASK() {
-    static std::string ECF_DUMMY_TASK = "ECF_DUMMY_TASK";
-    return ECF_DUMMY_TASK;
-}
-const std::string& Str::ECF_NO_SCRIPT() {
-    static std::string ECF_NO_SCRIPT = "ECF_NO_SCRIPT";
-    return ECF_NO_SCRIPT;
-}
-const std::string& Str::ECF_MICRO() {
-    static std::string ECF_MICRO = "ECF_MICRO";
-    return ECF_MICRO;
-}
-const std::string& Str::ECF_FILES() {
-    static std::string ECF_FILES = "ECF_FILES";
-    return ECF_FILES;
-}
-const std::string& Str::ECF_FETCH() {
-    static std::string ECF_FETCH = "ECF_FETCH";
-    return ECF_FETCH;
-}
-const std::string& Str::ECF_KILL_CMD() {
-    static std::string ECF_KILL_CMD = "ECF_KILL_CMD";
-    return ECF_KILL_CMD;
-}
-const std::string& Str::ECF_STATUS_CMD() {
-    static std::string ECF_STATUS_CMD = "ECF_STATUS_CMD";
-    return ECF_STATUS_CMD;
-}
-
-const std::string& Str::ECF_HOME() {
-    static std::string ECF_HOME = "ECF_HOME";
-    return ECF_HOME;
-}
-const std::string& Str::ECF_INCLUDE() {
-    static std::string ECF_INCLUDE = "ECF_INCLUDE";
-    return ECF_INCLUDE;
-}
-const std::string& Str::ECF_JOB_CMD() {
-    static std::string ECF_JOB_CMD = "ECF_JOB_CMD";
-    return ECF_JOB_CMD;
-}
-const std::string& Str::ECF_OUT() {
-    static std::string ECF_OUT = "ECF_OUT";
-    return ECF_OUT;
-}
-const std::string& Str::ECF_EXTN() {
-    static std::string ECF_EXTN = "ECF_EXTN";
-    return ECF_EXTN;
-}
-const std::string& Str::ECF_LOG() {
-    static std::string ECF_LOG = "ECF_LOG";
-    return ECF_LOG;
-}
-
 const std::string& Str::WHITE_LIST_FILE() {
     static std::string WHITE_LIST_FILE = "ecf.lists";
     return WHITE_LIST_FILE;
-}
-const std::string& Str::ECF_PASSWD() {
-    static std::string ECF_PASSWD = "ecf.passwd";
-    return ECF_PASSWD;
-}
-const std::string& Str::ECF_CUSTOM_PASSWD() {
-    static std::string ECF_CUSTOM_PASSWD = "ecf.custom_passwd";
-    return ECF_CUSTOM_PASSWD;
 }
 
 const std::string& Str::ALPHANUMERIC_UNDERSCORE() {
@@ -279,7 +177,7 @@ void Str::split(const std::string& line, std::vector<std::string>& tokens, const
     //   Time for std::string_view 1000000            times = 0.769s wall, (0.770s user + 0.000s system = 0.770s) CPU
     //   (100.1%) Time for std::string_view(2) 1000000         times = 0.688s wall, (0.690s user + 0.000s system =
     //   0.690s) CPU (100.3%)
-    //  ACore:: ...test_str_split_perf_with_file
+    //  core :: test_str_split_perf_with_file
     //   This test will split each line in file ${ECF_TEST_DEFS_DIR}vsms2.31415.def
     //   Time for istreamstream 2001774                 times = 1.567s wall, (1.570s user + 0.000s system = 1.570s) CPU
     //   (100.2%) Time for std::getline 2001774                  times = 2.456s wall, (2.460s user + 0.000s system
@@ -526,7 +424,7 @@ bool Str::valid_name(const std::string& name, std::string& msg) {
                 msg += "Windows line ending ? ";
             msg += "'";
             msg += name;
-            msg += "'"; // use '<name>' to show if PC format. i.e carriage return
+            msg += "'"; // use '<name>' to show if PC format, i.e. carriage return
         }
     }
 

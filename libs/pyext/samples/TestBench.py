@@ -121,7 +121,7 @@ if __name__ == "__main__":
             This programs assumes that ecflow module is accessible
 
             example:
-                python libs/pyext/samples/TestBench.py --port=3141 --verbose=True ANode/parser/test/data/good_defs/trigger/late.def
+                python libs/pyext/samples/TestBench.py --port=3141 --verbose=True libs/node/parser/test/data/good_defs/trigger/late.def
             """    
             
     print("####################################################################")

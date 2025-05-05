@@ -554,7 +554,7 @@ bool WhiteListFile::createWithReadAccess(const std::string& pathToFile, std::str
     lines.reserve(2);
 
     lines.emplace_back("4.4.14");
-    lines.push_back("-" + User::login_name());
+    lines.push_back("-" + get_login_name());
 
     return File::create(pathToFile, lines, errorMsg);
 }
@@ -564,7 +564,7 @@ bool WhiteListFile::createWithWriteAccess(const std::string& pathToFile, std::st
     lines.reserve(2);
 
     lines.emplace_back("4.4.14");
-    lines.push_back(User::login_name()); // equivalent to the login name
+    lines.push_back(get_login_name()); // equivalent to the login name
 
     return File::create(pathToFile, lines, errorMsg);
 }
@@ -591,7 +591,7 @@ bool WhiteListFile::createEmpty(const std::string& pathToFile, std::string& erro
 }
 
 void WhiteListFile::allow_write_access_for_server_user() {
-    std::string user = User::login_name();
+    std::string user = get_login_name();
     if (verify_write_access(user))
         return;
 

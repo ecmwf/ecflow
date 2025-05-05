@@ -21,6 +21,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -30,6 +31,8 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_EcfNoScriptCmd)
 
 BOOST_AUTO_TEST_CASE(test_ecf_no_script) {
+    ECF_NAME_THIS_TEST();
+
     // This test is used to case where we ONLY want to execute ECF_JOB_CMD WITHOUT processing .ecf script.
     // For this ECF_NO_SCRIPT must be set to any value.
     // The ECF_JOB_CMD must then encompass ecflow_client --init/complete and the environment settings
@@ -37,7 +40,6 @@ BOOST_AUTO_TEST_CASE(test_ecf_no_script) {
     // Although ServerTestHarness creates the .ecf file, they are ignored when ECF_NO_SCRIPT is specified.
 
     DurationTimer timer;
-    cout << "Test:: ...test_ecf_no_script " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

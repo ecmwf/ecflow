@@ -63,10 +63,11 @@ Credentials load_from_stream(std::istream& input) {
     }
 
     Credentials credentials;
-    for (auto field: content.items()) {
+    for (auto field : content.items()) {
         try {
             credentials.add(field.key(), field.value());
-        } catch (const json::type_error& e) {
+        }
+        catch (const json::type_error& e) {
             throw std::runtime_error(Message("Credentials: Unable to retrieve content, due to ", e.what()).str());
         }
     }

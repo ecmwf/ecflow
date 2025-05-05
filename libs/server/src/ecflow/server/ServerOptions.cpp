@@ -120,15 +120,14 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
 #ifdef ECF_OPENSSL
         ("ssl", ecf::Openssl::ssl_info())
 #endif
-            ("dis_job_gen", "Disable job generation. For DEBUG/Test only.")("debug,d", "Enable debug output.")(
+            ("http", "Enable server/client HTTP communication")(
+                "dis_job_gen", "Disable job generation. For DEBUG/Test only.")("debug,d", "Enable debug output.")(
                 "version,v",
                 "Show ecflow version number,boost library version, compiler used and compilation date, then exit");
 
     // 1) Parse the CLI options
-    po::parsed_options parsed_options = po::command_line_parser(cl.tokens())
-                                            .options(desc)
-                                            .style(po::command_line_style::default_style)
-                                            .run();
+    po::parsed_options parsed_options =
+        po::command_line_parser(cl.tokens()).options(desc).style(po::command_line_style::default_style).run();
 
     // 2) Store the CLI options into the variable map
     po::store(parsed_options, vm_);
@@ -144,31 +143,61 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
     if (vm_.count("debug"))
         env->debug_ = true;
 
+    if (vm_.count("http")) {
+        if (env->debug_) {
+            cout << "ServerOptions:: Deploying HTTP Server\n";
+        }
+        env->protocol_ = ecf::Protocol::Http;
+    }
+
     if (vm_.count("port")) {
-        if (env->debug_)
+        if (env->debug_) {
             cout << "ServerOptions:: The port number set to '" << vm_["port"].as<int>() << "'\n";
+        }
         env->serverPort_ = vm_["port"].as<int>();
     }
     if (vm_.count("ecfinterval")) {
-        if (env->debug_)
+        if (env->debug_) {
             cout << "ServerOptions: The ecfinterval set to '" << vm_["ecfinterval"].as<int>() << "'\n";
+        }
         env->submitJobsInterval_ = vm_["ecfinterval"].as<int>();
     }
     if (vm_.count("v6")) {
-        if (env->debug_)
+        if (env->debug_) {
             cout << "ServerOptions: The tcp protocol set to v6\n";
+        }
         env->tcp_protocol_ = boost::asio::ip::tcp::v6();
     }
     if (vm_.count("dis_job_gen")) {
-        if (env->debug_)
+        if (env->debug_) {
             cout << "ServerOptions: The dis_job_gen is set\n";
+        }
         env->jobGeneration_ = false;
     }
 #ifdef ECF_OPENSSL
-    if (vm_.count("ssl")) {
-        if (env->debug_)
-            cout << "ServerOptions: ssl server \n";
-        env->enable_ssl(); // search server.crt first, then <host>.<port>.crt
+    if (auto ecf_ssl = getenv("ECF_SSL"); vm_.count("ssl") || ecf_ssl) {
+        if (!vm_.count("ssl") && ecf_ssl) {
+            if (env->debug_) {
+                std::cout << "  ssl enabled via environment variable\n";
+            }
+            env->enable_ssl_if_defined();
+        }
+        else if (vm_.count("ssl") && !ecf_ssl) {
+            if (env->debug_) {
+                std::cout << "  ssl explicitly enabled via command line\n";
+            }
+            env->enable_ssl();
+        }
+        else {
+            if (env->debug_) {
+                std::cout << "  ssl explicitly enabled via command line, but also enabled via environment variable\n";
+            }
+            env->enable_ssl_if_defined();
+        }
+
+        if (env->debug_) {
+            std::cout << "  ssl certificate: '" << env->openssl().info() << "' \n";
+        }
     }
 #endif
 }
@@ -178,13 +207,9 @@ ServerOptions::ServerOptions(int argc, char* argv[], ServerEnvironment* env)
 }
 
 bool ServerOptions::help_option() const {
-    if (vm_.count("help"))
-        return true;
-    return false;
+    return vm_.count("help");
 }
 
 bool ServerOptions::version_option() const {
-    if (vm_.count("version"))
-        return true;
-    return false;
+    return vm_.count("version");
 }

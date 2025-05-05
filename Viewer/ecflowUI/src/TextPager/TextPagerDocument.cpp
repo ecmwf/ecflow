@@ -745,7 +745,7 @@ TextPagerDocument::find(const QString& in, const TextPagerCursor& cursor, FindMo
             line = line.toLower();
 
 #ifdef TEXTDOCUMENT_FIND_DEBUG
-            // qDebug() << line;
+        // qDebug() << line;
 #endif
 
         if ((index = line.indexOf(word)) != -1) {

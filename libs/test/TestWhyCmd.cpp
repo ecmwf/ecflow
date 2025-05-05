@@ -25,6 +25,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -74,8 +75,9 @@ static unsigned int waitForWhy(const std::string& path, const std::string& why, 
 }
 
 BOOST_AUTO_TEST_CASE(test_why_day) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_day " << flush;
     TestClean clean_at_start_and_end;
 
     Defs theDefs;
@@ -111,8 +113,9 @@ BOOST_AUTO_TEST_CASE(test_why_day) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_date) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_date " << flush;
 
     Defs theDefs;
     {
@@ -146,8 +149,9 @@ BOOST_AUTO_TEST_CASE(test_why_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_time) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_time " << flush;
 
     Defs theDefs;
     {
@@ -181,8 +185,9 @@ BOOST_AUTO_TEST_CASE(test_why_time) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_today) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_today " << flush;
 
     Defs theDefs;
     {
@@ -225,8 +230,9 @@ BOOST_AUTO_TEST_CASE(test_why_today) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_cron) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_cron " << flush;
 
     Defs theDefs;
     {
@@ -283,8 +289,9 @@ BOOST_AUTO_TEST_CASE(test_why_cron) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_limit) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_limit " << flush;
 
     // Testing for limits requires that we have least some jobs are submitted.
     // we need to kill these jobs, at the end of test.
@@ -362,8 +369,9 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_trigger) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_trigger " << flush;
 
     Defs theDefs;
     {
@@ -389,8 +397,9 @@ BOOST_AUTO_TEST_CASE(test_why_trigger) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_meter) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_meter " << flush;
 
     Defs theDefs;
     {
@@ -417,8 +426,9 @@ BOOST_AUTO_TEST_CASE(test_why_meter) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_event) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_event " << flush;
 
     Defs theDefs;
     {
@@ -449,8 +459,9 @@ BOOST_AUTO_TEST_CASE(test_why_event) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_user_var) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_user_var " << flush;
 
     Defs theDefs;
     {
@@ -477,8 +488,9 @@ BOOST_AUTO_TEST_CASE(test_why_user_var) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_gen_var) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_gen_var " << flush;
 
     Defs theDefs;
     {
@@ -505,8 +517,9 @@ BOOST_AUTO_TEST_CASE(test_why_gen_var) {
 }
 
 BOOST_AUTO_TEST_CASE(test_why_repeat) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_why_repeat " << flush;
 
     Defs theDefs;
     {

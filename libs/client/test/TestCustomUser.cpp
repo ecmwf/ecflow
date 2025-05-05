@@ -16,6 +16,7 @@
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/core/User.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -41,7 +42,7 @@ public:
         auto* put = const_cast<char*>(ecf_passwd_.c_str());
         BOOST_CHECK_MESSAGE(putenv(put) == 0, "putenv failed for " << put);
 
-        ecf_user_ += User::login_name();
+        ecf_user_ += get_login_name();
         auto* put2 = const_cast<char*>(ecf_user_.c_str());
         BOOST_CHECK_MESSAGE(putenv(put2) == 0, "putenv failed for " << put2);
     }
@@ -56,6 +57,8 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(test_custom_user) {
+    ECF_NAME_THIS_TEST();
+
     Host the_host;
     std::string host        = ClientEnvironment::hostSpecified();
     std::string port        = SCPort::next();
@@ -137,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_custom_user) {
 
         // reset to a valid user again:
         theClient.set_user_name(
-            User::login_name()); // this should clear password, so that its reloaded when *next* cmd runs
+            get_login_name()); // this should clear password, so that its reloaded when *next* cmd runs
 
         // all client command should now pass. Invoking a client request that requires authorisation
         BOOST_CHECK_MESSAGE(theClient.reloadcustompasswdfile() == 0,

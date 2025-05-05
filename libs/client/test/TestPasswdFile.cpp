@@ -15,6 +15,7 @@
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/PasswdFile.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -47,6 +48,8 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(test_loading_of_passwd) {
+    ECF_NAME_THIS_TEST();
+
     Host the_host;
     std::string host        = ClientEnvironment::hostSpecified();
     std::string port        = SCPort::next();
@@ -120,6 +123,8 @@ BOOST_AUTO_TEST_CASE(test_loading_of_passwd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_loading_of_passwd_fail) {
+    ECF_NAME_THIS_TEST();
+
     // TEST user *MUST* be in ECF_PASSWD file, into order to *ALLOW* reloadpasswdfile
     Host the_host;
     std::string host        = ClientEnvironment::hostSpecified();

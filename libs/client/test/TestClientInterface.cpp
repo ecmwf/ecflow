@@ -24,6 +24,7 @@
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -37,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(T_ClientInterface)
 // This will test argument parsing.
 // **************************************************************************************
 BOOST_AUTO_TEST_CASE(test_client_interface) {
-    std::cout << "Client:: ...test_client_interface" << endl;
+    ECF_NAME_THIS_TEST();
 
     ClientInvoker theClient;
     theClient.testInterface(); // stops submission to server
@@ -360,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
     BOOST_REQUIRE_MESSAGE(theClient.force(event_paths[1], "clear") == 0, " should return 0\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.force(event_paths, "set") == 0, " should return 0\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.force(event_paths, "clear") == 0, " should return 0\n" << theClient.errorMsg());
-    std::vector<std::string> validStates = NState::allStates(); // HPUX barfs if use NState::allStates() directly
+    std::vector<std::string> validStates = NState::allStates(); // HPUX barfs, if NState::allStates() is used directly
     for (const string& state : validStates) {
         BOOST_REQUIRE_MESSAGE(theClient.force("/s", state, true, true) == 0,
                               "force " << state << " should return 0\n"
@@ -515,7 +516,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
         BOOST_REQUIRE_MESSAGE(theClient.ch_auto_add(1, false) == 0, "--ch_auto_add \n" << theClient.errorMsg());
 
         // need test interface that allows client handle to set on ClinetInvoker
-        // ch1_add needs a non zero handle
+        // ch1_add needs a non-zero handle
         BOOST_REQUIRE_MESSAGE(theClient.ch1_register(true, suites) == 0, "--ch1_drop \n" << theClient.errorMsg());
         auto& svr = const_cast<ServerReply&>(theClient.server_reply());
         svr.set_client_handle(1);
@@ -692,6 +693,17 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
                           "--alter should return 0\n"
                               << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "label", "name", "/value/with/paths") == 0,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "event1", "set") == 0,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "event1", "clear") == 0,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "meter", "name", "0,100,0") == 0,
                           "--alter should return 0\n"
                               << theClient.errorMsg());
 
@@ -968,7 +980,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
-    std::cout << "Client:: ...test_client_interface_for_fail" << endl;
+    ECF_NAME_THIS_TEST();
 
     ClientInvoker theClient;
     theClient.testInterface(); // stops submission to server
@@ -1126,6 +1138,26 @@ BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
                           "--alter should return 0\n"
                               << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "label", " 1 2") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "meter", "m", "a,b,c") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "meter", "m", "1,5,a") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "meter", "m", "1, 5, 3") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "e", "x") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "e", "CLEAR") == 1,
+                          "--alter should return 0\n"
+                              << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "event", "e", "SET") == 1,
                           "--alter should return 0\n"
                               << theClient.errorMsg());
 
@@ -1431,7 +1463,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface_for_fail) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_task_interface) {
-    std::cout << "Client:: ...test_client_task_interface" << endl;
+    ECF_NAME_THIS_TEST();
 
     ClientInvoker theClient;
     theClient.testInterface(); // stops submission to server
@@ -1496,7 +1528,7 @@ BOOST_AUTO_TEST_CASE(test_client_task_interface) {
 }
 
 BOOST_AUTO_TEST_CASE(test_client_task_interface_for_fail) {
-    std::cout << "Client:: ...test_client_task_interface_for_fail" << endl;
+    ECF_NAME_THIS_TEST();
 
     {
         ClientInvoker theClient;
@@ -1511,7 +1543,7 @@ BOOST_AUTO_TEST_CASE(test_client_task_interface_for_fail) {
         theClient.testInterface(); // stops submission to server
         theClient.taskPath("/a/made/up/path");
         theClient.set_jobs_password(
-            ""); // The password(ECF_PASS) will be READ from the environment. Hence set to empty here
+            ""); // The password(ECF_PASS) will be READ from the environment. Hence, set to empty here
 
         BOOST_REQUIRE_THROW(theClient.initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()), std::runtime_error);
         BOOST_REQUIRE_THROW(theClient.abortTask("reason for abort"), std::runtime_error);

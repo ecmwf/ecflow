@@ -14,6 +14,7 @@
 
 #include "MyDefsFixture.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -23,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_CopyConstructor)
 
 BOOST_AUTO_TEST_CASE(test_copy_constructors) {
-    cout << "ANode:: ...test_copy_constructors\n";
+    ECF_NAME_THIS_TEST();
     MyDefsFixture theDefsFixture;
 
     DebugEquality debug_equality; // only as affect in DEBUG build
@@ -32,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_copy_constructors) {
 }
 
 BOOST_AUTO_TEST_CASE(test_default_constructors) {
-    cout << "ANode:: ...test_default_constructors \n";
+    ECF_NAME_THIS_TEST();
 
     Task t;
     BOOST_CHECK_MESSAGE(t.check_defaults(), "constructor test for defaults failed");

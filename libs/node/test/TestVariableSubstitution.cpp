@@ -14,12 +14,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -29,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_VariableSubstitution)
 
 BOOST_AUTO_TEST_CASE(test_variable_substitution) {
-    std::cout << "ANode:: ...test_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -53,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution) {
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
     cmd      = "%ECF_VERSION%";
-    expected = Version::raw();
+    expected = Version::full();
     BOOST_CHECK_MESSAGE(s->variableSubstitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
@@ -162,7 +164,7 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution) {
 }
 
 BOOST_AUTO_TEST_CASE(test_variable_substitution_double_micro) {
-    std::cout << "ANode:: ...test_variable_substitution_double_micro\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -205,7 +207,7 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution_double_micro) {
 }
 
 BOOST_AUTO_TEST_CASE(test_user_variable_substitution) {
-    std::cout << "ANode:: ...test_user_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -346,7 +348,7 @@ BOOST_AUTO_TEST_CASE(test_user_variable_substitution) {
 }
 
 BOOST_AUTO_TEST_CASE(test_user_variable_substitution_1) {
-    std::cout << "ANode:: ...test_user_variable_substitution_1\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -379,10 +381,10 @@ BOOST_AUTO_TEST_CASE(test_user_variable_substitution_1) {
 
 static std::vector<std::string> required_server_variables() {
     std::vector<std::string> required_server_variables;
-    required_server_variables.push_back(Str::ECF_PORT());
-    required_server_variables.push_back(Str::ECF_HOST());
+    required_server_variables.push_back(ecf::environment::ECF_PORT);
+    required_server_variables.push_back(ecf::environment::ECF_HOST);
 
-    required_server_variables.push_back(Str::ECF_HOME());
+    required_server_variables.push_back(ecf::environment::ECF_HOME);
     required_server_variables.emplace_back("ECF_LOG");
     required_server_variables.emplace_back("ECF_CHECK");
     required_server_variables.emplace_back("ECF_CHECKOLD");
@@ -408,7 +410,7 @@ static std::vector<std::string> required_server_variables() {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_variable_substitution) {
-    std::cout << "ANode:: ...test_server_variable_substitution\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -436,15 +438,17 @@ BOOST_AUTO_TEST_CASE(test_server_variable_substitution) {
         cmd += "%";
         BOOST_CHECK_MESSAGE(s->variableSubstitution(cmd), " substitution failed for " << i << " : " << cmd);
         if (i == "ECF_VERSION") {
-            BOOST_CHECK_MESSAGE(cmd == Version::raw(), "expected '" << Version::raw() << "' but found '" << cmd << "'");
+            BOOST_CHECK_MESSAGE(cmd == Version::full(),
+                                "expected '" << Version::full() << "' but found '" << cmd << "'");
         }
     }
 }
 
 BOOST_AUTO_TEST_CASE(test_generated_variable_substitution) {
+    ECF_NAME_THIS_TEST();
+
     // test that if ECF_OUT is defined using %, then we perform variable substitution
     // test that if ECF_JOBOUT or ECF_JOB are specified, they take priority over the generated variables
-    std::cout << "ANode:: ...test_generated_variable_substitution\n";
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
@@ -471,12 +475,12 @@ BOOST_AUTO_TEST_CASE(test_generated_variable_substitution) {
 
     string value;
     value.clear();
-    t->findParentVariableValue(Str::ECF_JOBOUT(), value);
+    t->findParentVariableValue(ecf::environment::ECF_JOBOUT, value);
     BOOST_CHECK_MESSAGE(value == "/fred/bill/joe/suite/f/t.0",
                         "ECF_JOBOUT expected /fred/bill/joe/suite/f/t.0, but found " << value);
 
     value.clear();
-    t1->findParentVariableValue(Str::ECF_JOBOUT(), value);
+    t1->findParentVariableValue(ecf::environment::ECF_JOBOUT, value);
     BOOST_CHECK_MESSAGE(value == "/fred/bill/joe2/suite/f1/t1.0",
                         "ECF_JOBOUT expected /fred/bill/joe/suite/f/t.0, but found " << value);
 

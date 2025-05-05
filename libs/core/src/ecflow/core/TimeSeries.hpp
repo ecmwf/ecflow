@@ -39,7 +39,7 @@ namespace ecf {
 ///           TimeSeries.calendarChanged()   // Called every minute. Calls isFree(). Once free we stay free, until
 ///           requeue.
 ///                                          // At midnight clear time expiration and reset next time slot
-///           TimeSeries.isFree(..)          // called when node is QUEUED:
+///           TimeSeries.isFree(...)         // called when node is QUEUED:
 ///                                          // during dependency evaluation, checks next time slot, against calendar
 ///                                          time
 ///                                          // Once free a node stays free, until requeue()
@@ -70,7 +70,7 @@ public:
     bool calendarChanged(const ecf::Calendar& c);
 
     // relative duration stored locally since it can be reset, when used with repeats
-    // returns true if relative duration is reset/ i.e state change has been made
+    // returns true if relative duration is reset/ i.e. state change has been made
     bool resetRelativeDuration();
     void reset_only();
     void reset(const ecf::Calendar& c);
@@ -95,15 +95,15 @@ public:
     /// Note: relative means relative to suite start, or relative to the beginning of repeated node.
     /// Is of the form hh:mm.   This means relative has a range 00:00->99.59
     /// For a single slot time series, should not be re queued again, and hence
-    /// should fail checkForRequeue. Likewise when the the current value is
+    /// should fail checkForRequeue. Likewise, when the current value is
     /// the finish, then node should also not be re queued, otherwise the
     /// node will be stuck in queued state.
     bool isFree(const ecf::Calendar& calendar) const;
 
-    /// For single slot time based attributes we need additional context (i.e the_min,the_max parameter)
+    /// For single slot time based attributes we need additional context (i.e. the_min, the_max parameter)
     /// in order to determine whether we should re-queue.
-    /// Additionally when we have a time range, what if the last jobs runs over midnight. In this case
-    /// we need to return false. i.e do not re-queue ECFLOW-130
+    /// Additionally, when we have a time range, what if the last jobs runs over midnight. In this case
+    /// we need to return false. i.e. do not re-queue ECFLOW-130
     bool checkForRequeue(const ecf::Calendar& calendar,
                          const TimeSlot& the_min,
                          const TimeSlot& the_max,
@@ -186,9 +186,9 @@ private:
     TimeSlot start_;
     TimeSlot finish_;
     TimeSlot incr_;
-    TimeSlot nextTimeSlot_;             // nextTimeSlot_ >= start && is incremented by incr
-    mutable TimeSlot suiteTimeAtReque_; // NOT persisted, check of day change, between requeue -> checkForRequeue, when
-                                        // we have series
+    TimeSlot nextTimeSlot_;               // nextTimeSlot_ >= start && is incremented by incr
+    mutable TimeSlot suiteTimeAtRequeue_; // NOT persisted, check of day change, between requeue -> checkForRequeue,
+                                          // when we have series
     boost::posix_time::time_duration relativeDuration_;
     boost::posix_time::time_duration lastTimeSlot_; // Only used when we have a series, can be generated
     bool relativeToSuiteStart_{false};

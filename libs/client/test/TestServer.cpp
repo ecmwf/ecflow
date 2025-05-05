@@ -17,10 +17,12 @@
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/core/perf_timer.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -38,6 +40,8 @@ BOOST_AUTO_TEST_SUITE(T_Server)
 // ************************************************************************************
 
 BOOST_AUTO_TEST_CASE(test_server_version) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_server_version:", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -45,21 +49,29 @@ BOOST_AUTO_TEST_CASE(test_server_version) {
 
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
     BOOST_REQUIRE_MESSAGE(theClient.server_version() == 0, "server version\n" << theClient.errorMsg());
+
+    auto client_version = theClient.get_string();
+    auto server_version = Version::full();
+
+    // Important:
+    //   The test only requires a specific server version when both client and server are local.
+    //   When contacting a remote server, only a warning is issued if the versions do not match.
+
     if (ClientEnvironment::hostSpecified().empty()) {
-        // This check only valid if server was invoked locally. Ignore for remote servers
-        BOOST_REQUIRE_MESSAGE(theClient.get_string() == Version::raw(),
-                              "Expected client version(" << Version::raw() << ") to match server version("
-                                                         << theClient.get_string() << ")");
+        BOOST_REQUIRE_MESSAGE(client_version == server_version,
+                              "Client version (" << client_version << ") does not match server version ("
+                                                 << server_version << ")");
     }
     else {
-        // remote server, version may be different
-        BOOST_WARN_MESSAGE(theClient.get_string() == Version::raw(),
-                           "Client version(" << Version::raw() << ") does not match server version("
-                                             << theClient.get_string() << ")");
+        BOOST_WARN_MESSAGE(client_version == server_version,
+                           "Client version (" << client_version << ") does not match server version (" << server_version
+                                              << ")");
     }
 }
 
 BOOST_AUTO_TEST_CASE(test_server_state_changes) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_server_state_changes:", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -166,6 +178,8 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_server_state_changes_with_auto_sync:", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -230,6 +244,8 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_stress_test) {
+    ECF_NAME_THIS_TEST();
+
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
     InvokeServer invokeServer("Client:: ...test_server_stress_test:", SCPort::next());
     BOOST_REQUIRE_MESSAGE(invokeServer.server_started(),
@@ -240,8 +256,9 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
     int load = 125;
 #ifdef ECF_OPENSSL
-    if (getenv("ECF_SSL"))
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         load = 30;
+    }
 #endif
 
     {
@@ -281,10 +298,9 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
         }
         cout << " Server handled " << load * 16 << " requests in boost_timer("
-             << boost_timer.format(3, Str::cpu_timer_format()) << ")"
-             << " DurationTimer(" << to_simple_string(duration_timer.elapsed()) << ")"
-             << " Chrono_timer(" << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count()
-             << " milli)" << endl;
+             << boost_timer.format(3, Str::cpu_timer_format()) << ")" << " DurationTimer("
+             << to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
+             << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)" << endl;
     }
     {
         theClient.set_auto_sync(true);
@@ -317,15 +333,16 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
         }
         cout << " Server handled " << load * 8 << " requests in boost_timer("
-             << boost_timer.format(3, Str::cpu_timer_format()) << ")"
-             << " DurationTimer(" << to_simple_string(duration_timer.elapsed()) << ")"
-             << " Chrono_timer(" << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count()
-             << " milli)"
+             << boost_timer.format(3, Str::cpu_timer_format()) << ")" << " DurationTimer("
+             << to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
+             << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)"
              << " *with* AUTO SYNC" << endl;
     }
 }
 
 BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
+    ECF_NAME_THIS_TEST();
+
     /// This is exactly the same test as above, but uses the group command
     /// This should be faster as the network traffic should be a lot less
     InvokeServer invokeServer("Client:: ...test_server_group_stress_test:", SCPort::next());
@@ -359,8 +376,9 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
 
     int load = 125;
 #ifdef ECF_OPENSSL
-    if (getenv("ECF_SSL"))
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         load = 30;
+    }
 #endif
 
     for (int i = 0; i < load; i++) {
@@ -376,6 +394,8 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
 }
 
 BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
+    ECF_NAME_THIS_TEST();
+
     /// More extensive stress test, using as many user based command as possible.
     ///
     /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
@@ -410,8 +430,9 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
 #endif
 
 #ifdef ECF_OPENSSL
-    if (getenv("ECF_SSL"))
+    if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         load = 10;
+    }
 #endif
 
     boost::timer::cpu_timer

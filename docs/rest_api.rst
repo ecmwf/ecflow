@@ -89,6 +89,10 @@ new.
      - Environment variable
      - Default Value
      - Description
+   * - --http
+     -
+     - false
+     - Use HTTP to contact the ecFlow server
    * - --cert_directory
      - ECF_RESTAPI_CERT_DIRECTORY
      - $HOME/.ecflowrc/ssl

@@ -18,6 +18,7 @@
 #include "TestHelper.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -37,8 +38,9 @@ public:
             if (!msg.empty()) {
                 std::cout << msg << "   port(" << port_ << ")";
 #ifdef ECF_OPENSSL
-                if (getenv("ECF_SSL"))
+                if (ecf::environment::has(ecf::environment::ECF_SSL)) {
                     std::cout << " (ssl)";
+                }
 #endif
                 std::cout << std::endl;
             }

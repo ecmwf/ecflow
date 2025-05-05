@@ -20,6 +20,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -31,7 +32,8 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_FreeDepCmd)
 
 BOOST_AUTO_TEST_CASE(test_free_dep_cmd) {
-    cout << "Base:: ...test_free_dep_cmd\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_free_dep_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     // Create a test and add the date and time dependencies
@@ -163,7 +165,8 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_free_dep_cmd_single_time_slot) {
-    cout << "Base:: ...test_free_dep_cmd_single_time_slot\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_free_dep_cmd_single_time_slot.log"); // will create log file, and destroy log and remove file
                                                                 // at end of scope
 
@@ -221,7 +224,8 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd_single_time_slot) {
 }
 
 BOOST_AUTO_TEST_CASE(test_free_dep_cmd_with_time_series) {
-    cout << "Base:: ...test_free_dep_cmd_with_time_series\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_free_dep_cmd_with_time_series.log"); // will create log file, and destroy log and remove file
                                                                 // at end of scope
 
@@ -280,7 +284,8 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd_with_time_series) {
 }
 
 BOOST_AUTO_TEST_CASE(test_free_dep_cmd_with_time_series_2) {
-    cout << "Base:: ...test_free_dep_cmd_with_time_series_2\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_free_dep_cmd_with_time_series_2.log"); // will create log file, and destroy log and remove
                                                                   // file at end of scope
 

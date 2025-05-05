@@ -57,7 +57,7 @@ bool Node::update_variable(const std::string& name, const std::string& value) {
 
     found->set_value(value);
     if (0 == Ecf::debug_level()) {
-        std::cerr << "Node::addVariable: Variable of name '" << name << "' already exist for node " << debugNodePath()
+        std::cerr << "Node::addVariable: Variable of name '" << name << "' already exists for node " << debugNodePath()
                   << " updating with value '" << value << "'\n";
     }
     return true;
@@ -261,7 +261,7 @@ void Node::addCron(const CronAttr& d) {
 void Node::addLabel(const Label& l) {
     if (findLabel(l.name())) {
         std::stringstream ss;
-        ss << "Add Label failed: Duplicate label of name '" << l.name() << "' already exist for node "
+        ss << "Add Label failed: Duplicate label of name '" << l.name() << "' already exists for node "
            << debugNodePath();
         throw std::runtime_error(ss.str());
     }
@@ -272,7 +272,7 @@ void Node::addLabel(const Label& l) {
 void Node::add_label(const std::string& name, const std::string& value, const std::string& new_value, bool check) {
     if (check && findLabel(name)) {
         std::stringstream ss;
-        ss << "Add Label failed: Duplicate label of name '" << name << "' already exist for node " << debugNodePath();
+        ss << "Add Label failed: Duplicate label of name '" << name << "' already exists for node " << debugNodePath();
         throw std::runtime_error(ss.str());
     }
     labels_.emplace_back(name, value, new_value, check);
@@ -284,7 +284,7 @@ void Node::addMeter(const Meter& m, bool check) {
         const Meter& meter = findMeter(m.name());
         if (!meter.empty()) {
             std::stringstream ss;
-            ss << "Add Meter failed: Duplicate Meter of name '" << m.name() << "' already exist for node "
+            ss << "Add Meter failed: Duplicate Meter of name '" << m.name() << "' already exists for node "
                << debugNodePath();
             throw std::runtime_error(ss.str());
         }
@@ -298,7 +298,7 @@ void Node::add_meter(const std::string& name, int min, int max, int color_change
         const Meter& meter = findMeter(name);
         if (!meter.empty()) {
             std::stringstream ss;
-            ss << "Add Meter failed: Duplicate Meter of name '" << name << "' already exist for node "
+            ss << "Add Meter failed: Duplicate Meter of name '" << name << "' already exists for node "
                << debugNodePath();
             throw std::runtime_error(ss.str());
         }
@@ -312,7 +312,7 @@ void Node::addEvent(const Event& e, bool check) {
         const Event& event = findEvent(e);
         if (!event.empty()) {
             std::stringstream ss;
-            ss << "Add Event failed: Duplicate Event of name '" << e.name_or_number() << "' already exist for node "
+            ss << "Add Event failed: Duplicate Event of name '" << e.name_or_number() << "' already exists for node "
                << debugNodePath();
             throw std::runtime_error(ss.str());
         }
@@ -342,7 +342,7 @@ void Node::addMirror(const MirrorAttr& m) {
 void Node::addLimit(const Limit& l, bool check) {
     if (check && findLimit(l)) {
         std::stringstream ss;
-        ss << "Add Limit failed: Duplicate Limit of name '" << l.name() << "' already exist for node "
+        ss << "Add Limit failed: Duplicate Limit of name '" << l.name() << "' already exists for node "
            << debugNodePath();
         throw std::runtime_error(ss.str());
     }
@@ -360,7 +360,7 @@ void Node::addInLimit(const InLimit& l, bool check) {
 static void throwIfRepeatAlreadyExists(Node* node) {
     if (!node->repeat().empty()) {
         std::stringstream ss;
-        ss << "Add Repeat failed: Repeat of name '" << node->repeat().name() << "' already exist for node "
+        ss << "Add Repeat failed: Repeat of name '" << node->repeat().name() << "' already exists for node "
            << node->debugNodePath();
         throw std::runtime_error(ss.str());
     }

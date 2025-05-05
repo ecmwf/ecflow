@@ -14,8 +14,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/RepeatAttr.hpp"
-#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace boost::gregorian;
@@ -34,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(T_Repeat)
 BOOST_AUTO_TEST_SUITE(test_repeat)
 
 BOOST_AUTO_TEST_CASE(invariants) {
-    cout << "ANattr:: ...TestRepeat::invariants\n";
+    ECF_NAME_THIS_TEST();
 
     // Test the invariant that non-empty repeat must have a name
     Repeat empty;
@@ -45,7 +46,7 @@ BOOST_AUTO_TEST_CASE(invariants) {
 }
 
 BOOST_AUTO_TEST_CASE(construction) {
-    cout << "ANattr:: ...TestRepeat::construction\n";
+    ECF_NAME_THIS_TEST();
 
     Repeat empty;
 
@@ -77,7 +78,7 @@ BOOST_AUTO_TEST_SUITE_END() // test_repeat
 BOOST_AUTO_TEST_SUITE(test_repeat_datelist)
 
 BOOST_AUTO_TEST_CASE(invariants) {
-    cout << "ANattr:: ...test_repeat_datelist::invariants\n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatDateList("YMD", {20190929, 20190131}));
@@ -152,7 +153,7 @@ BOOST_AUTO_TEST_SUITE_END() // test_repeat_datelist
 BOOST_AUTO_TEST_SUITE(test_repeat_date)
 
 BOOST_AUTO_TEST_CASE(invariants) {
-    cout << "ANattr:: ...test_repeat_date::invariants\n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatDate("YMD", 20090916, 20090930, 1));
@@ -246,7 +247,7 @@ BOOST_AUTO_TEST_CASE(invariants) {
 }
 
 BOOST_AUTO_TEST_CASE(construction) {
-    cout << "ANattr:: ...test_repeat_date::construction\n";
+    ECF_NAME_THIS_TEST();
 
     Repeat empty;
     {
@@ -289,7 +290,7 @@ BOOST_AUTO_TEST_CASE(construction) {
 }
 
 BOOST_AUTO_TEST_CASE(move_semantics) {
-    cout << "ANattr:: ...test_repeat_date::move_semantics\n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat x;
@@ -317,7 +318,7 @@ BOOST_AUTO_TEST_CASE(move_semantics) {
 }
 
 BOOST_AUTO_TEST_CASE(last_value) {
-    cout << "ANattr:: ...test_repeat_date::last_value \n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatDate("YMD", 20090916, 20090930, 1));
@@ -356,7 +357,7 @@ BOOST_AUTO_TEST_CASE(last_value) {
 }
 
 BOOST_AUTO_TEST_CASE(increment) {
-    cout << "ANattr:: ...test_repeat_date::increment \n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatDate("YMD", 20090916, 20090920, 1));
@@ -393,7 +394,6 @@ BOOST_AUTO_TEST_CASE(increment) {
         Repeat rep(RepeatDate("YMD", 20150514, 20150730, 7));
         while (rep.valid()) {
             rep.increment();
-            // cout << "YMD: " << rep.value() << "\n";
         }
         BOOST_CHECK_MESSAGE(rep.value() == 20150806, "expected 20150806 but found " << rep.value());
         BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20150730,
@@ -403,7 +403,6 @@ BOOST_AUTO_TEST_CASE(increment) {
         Repeat rep(RepeatDate("YMD", 20150730, 20150514, -7));
         while (rep.valid()) {
             rep.increment();
-            // cout << "YMD: " << rep.value() << "\n";
         }
         BOOST_CHECK_MESSAGE(rep.value() == 20150507, "expected 20150507 but found " << rep.value());
         BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20150514,
@@ -412,7 +411,7 @@ BOOST_AUTO_TEST_CASE(increment) {
 }
 
 BOOST_AUTO_TEST_CASE(handling_errors) {
-    cout << "ANattr:: ...test_repeat_date:handling_errors \n";
+    ECF_NAME_THIS_TEST();
 
     BOOST_REQUIRE_THROW(RepeatDate("", 20090916, 20090920, 1), std::runtime_error);
     BOOST_REQUIRE_THROW(RepeatDate("YMD", 200909161, 20090920, 1), std::runtime_error); // start > 8
@@ -453,7 +452,8 @@ BOOST_AUTO_TEST_CASE(handling_errors) {
 }
 
 BOOST_AUTO_TEST_CASE(change_value) {
-    cout << "ANattr:: ...test_repeat_date::change_value \n";
+    ECF_NAME_THIS_TEST();
+
     {
         Repeat rep2(RepeatDate("YMD", 20150514, 20150730, 7));
         Repeat rep(RepeatDate("YMD", 20150514, 20150730, 7));
@@ -481,7 +481,7 @@ BOOST_AUTO_TEST_CASE(change_value) {
 }
 
 BOOST_AUTO_TEST_CASE(generated_variables) {
-    cout << "ANattr:: ...test_repeat_date::generated_variables\n";
+    ECF_NAME_THIS_TEST();
 
     Repeat rep(RepeatDate("YMD", 20090916, 20090930, 1));
     BOOST_CHECK_MESSAGE(!rep.empty(), " Repeat should not be empty");
@@ -530,13 +530,13 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
     {
         const Variable& var = rep.find_gen_variable("YMD_JULIAN");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_JULIAN");
-        std::string expected = ecf::convert_to<std::string>(Cal::date_to_julian(20090916));
+        std::string expected = ecf::convert_to<std::string>(ecf::CalendarDate(20090916).as_julian_day().value());
         BOOST_CHECK_MESSAGE(var.theValue() == expected, "expected " << expected << " but found " << var.theValue());
     }
 }
 
 BOOST_AUTO_TEST_CASE(more_generated_variables) {
-    cout << "ANattr:: ...test_repeat_date::more_generated_variables\n";
+    ECF_NAME_THIS_TEST();
 
     int start = 20161231;
     int end   = 20170106;
@@ -597,13 +597,13 @@ BOOST_AUTO_TEST_CASE(more_generated_variables) {
     expected_day_of_week.emplace_back("5");
 
     std::vector<std::string> expected_julian;
-    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20161231)));
-    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170101)));
-    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170102)));
-    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170103)));
-    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170104)));
-    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170105)));
-    expected_julian.push_back(ecf::convert_to<std::string>(Cal::date_to_julian(20170106)));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20161231).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170101).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170102).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170103).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170104).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170105).as_julian_day().value()));
+    expected_julian.push_back(ecf::convert_to<std::string>(ecf::CalendarDate(20170106).as_julian_day().value()));
 
     for (int i = 0; i < 7; i++) {
 
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE(more_generated_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
-    cout << "ANattr:: ...test_repeat_date::convert_xref_to_boost_date \n";
+    ECF_NAME_THIS_TEST();
 
     auto check_date = [](int start, int end, int delta) {
         boost::gregorian::date bdate(from_undelimited_string(boost::lexical_cast<std::string>(start)));
@@ -701,7 +701,7 @@ BOOST_AUTO_TEST_SUITE_END() // test_repeat_date
 BOOST_AUTO_TEST_SUITE(test_repeat_datetime)
 
 BOOST_AUTO_TEST_CASE(invariants) {
-    cout << "ANattr:: ...test_repeat_datetime::invariants\n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatDateTime("DT", "19700101T000001", "19700102T000001", "24:00:00"));
@@ -802,7 +802,7 @@ BOOST_AUTO_TEST_SUITE_END() // test_repeat_datetime
 BOOST_AUTO_TEST_SUITE(test_repeat_enumerated)
 
 BOOST_AUTO_TEST_CASE(invariants) {
-    cout << "ANattr:: ...test_repeat_enumerated::invariants\n";
+    ECF_NAME_THIS_TEST();
 
     const std::vector<std::string> stringList = {std::string("a"), std::string("b"), std::string("c")};
 
@@ -839,7 +839,7 @@ BOOST_AUTO_TEST_CASE(invariants) {
 }
 
 BOOST_AUTO_TEST_CASE(construction) {
-    cout << "ANattr:: ...TestRepeatEnumerated::construction\n";
+    ECF_NAME_THIS_TEST();
 
     Repeat empty;
     {
@@ -870,7 +870,7 @@ BOOST_AUTO_TEST_CASE(construction) {
 }
 
 BOOST_AUTO_TEST_CASE(last_value) {
-    cout << "ANattr:: ...test_repeat_enumerated::last_value \n";
+    ECF_NAME_THIS_TEST();
 
     Repeat rep(RepeatEnumerated("AEnum", stringList));
     rep.setToLastValue();
@@ -887,7 +887,7 @@ BOOST_AUTO_TEST_CASE(last_value) {
 }
 
 BOOST_AUTO_TEST_CASE(increment) {
-    cout << "ANattr:: ...test_repeat_enumerated::increment \n";
+    ECF_NAME_THIS_TEST();
 
     Repeat rep(RepeatEnumerated("AEnum", stringList));
     while (rep.valid()) {
@@ -898,7 +898,7 @@ BOOST_AUTO_TEST_CASE(increment) {
 }
 
 BOOST_AUTO_TEST_CASE(more_increment) {
-    cout << "ANattr:: ...test_repeat_enumerated::more_increment\n";
+    ECF_NAME_THIS_TEST();
 
     using namespace std::string_literals;
 
@@ -965,7 +965,7 @@ BOOST_AUTO_TEST_CASE(more_increment) {
 }
 
 BOOST_AUTO_TEST_CASE(handling_errors) {
-    cout << "ANattr:: ...test_repeat_enumerated::handling_errors \n";
+    ECF_NAME_THIS_TEST();
 
     const std::vector<std::string> empty;
     const std::vector<std::string> stringList = {"a", "b"};
@@ -985,7 +985,7 @@ BOOST_AUTO_TEST_SUITE_END() // test_repeat_enumerated
 BOOST_AUTO_TEST_SUITE(test_repeat_integer)
 
 BOOST_AUTO_TEST_CASE(invariants) {
-    cout << "ANattr:: ...test_repeat_integer::invariants\n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatInteger("rep", 0, 100, 1));
@@ -1021,7 +1021,7 @@ BOOST_AUTO_TEST_CASE(invariants) {
 }
 
 BOOST_AUTO_TEST_CASE(construction) {
-    cout << "ANattr:: ...test_repeat_integer::construction\n";
+    ECF_NAME_THIS_TEST();
 
     Repeat empty;
 
@@ -1055,7 +1055,7 @@ BOOST_AUTO_TEST_CASE(construction) {
 }
 
 BOOST_AUTO_TEST_CASE(last_value) {
-    cout << "ANattr:: ...test_repeat_integer::last_value \n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatInteger("integer", 0, 10, 1));
@@ -1085,7 +1085,7 @@ BOOST_AUTO_TEST_CASE(last_value) {
 }
 
 BOOST_AUTO_TEST_CASE(increment) {
-    cout << "ANattr:: ...test_repeat_integer::increment \n";
+    ECF_NAME_THIS_TEST();
 
     Repeat rep(RepeatInteger("integer", 0, 10, 1));
     while (rep.valid()) {
@@ -1104,7 +1104,7 @@ BOOST_AUTO_TEST_SUITE_END() // test_repeat_integer
 BOOST_AUTO_TEST_SUITE(test_repeat_day)
 
 BOOST_AUTO_TEST_CASE(invariants) {
-    cout << "ANattr:: ...test_repeat_day::invariants\n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatDay(2));
@@ -1138,7 +1138,7 @@ BOOST_AUTO_TEST_SUITE_END() // test_repeat_day
 BOOST_AUTO_TEST_SUITE(test_repeat_string)
 
 BOOST_AUTO_TEST_CASE(construction) {
-    cout << "ANattr:: ...test_repeat_string::construction\n";
+    ECF_NAME_THIS_TEST();
 
     Repeat empty;
 
@@ -1172,7 +1172,7 @@ BOOST_AUTO_TEST_CASE(construction) {
 }
 
 BOOST_AUTO_TEST_CASE(last_value) {
-    cout << "ANattr:: ...test_repeat_string::last_value \n";
+    ECF_NAME_THIS_TEST();
 
     {
         Repeat rep(RepeatString("Str", stringList));
@@ -1191,7 +1191,7 @@ BOOST_AUTO_TEST_CASE(last_value) {
 }
 
 BOOST_AUTO_TEST_CASE(increment) {
-    cout << "ANattr:: ...test_repeat_string::increment \n";
+    ECF_NAME_THIS_TEST();
 
     Repeat rep(RepeatString("Str", stringList));
     while (rep.valid()) {
@@ -1202,7 +1202,7 @@ BOOST_AUTO_TEST_CASE(increment) {
 }
 
 BOOST_AUTO_TEST_CASE(handling_errors) {
-    cout << "ANattr:: ...test_repeat_string::handling_errors \n";
+    ECF_NAME_THIS_TEST();
 
     const std::vector<std::string> empty;
     const std::vector<std::string> stringList = {"a", "b"};

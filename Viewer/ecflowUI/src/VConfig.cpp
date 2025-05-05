@@ -29,7 +29,7 @@ VConfig* VConfig::instance_ = nullptr;
 // #define _UI_CONFIG_LOAD_DEBUG
 
 VConfig::VConfig() {
-    appLongName_ = appName_ + " (" + ecf::Version::raw() + ")";
+    appLongName_ = appName_ + " (" + ecf::Version::full() + ")";
 
     // detect if the ui is to run via proxichains
     if (char* variable = getenv("ECFLOWUI_USE_PROXYCHAINS"); variable) {

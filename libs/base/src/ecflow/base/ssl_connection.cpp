@@ -15,20 +15,16 @@
 
 ssl_connection::~ssl_connection() {
 #ifdef DEBUG_CONNECTION
-    if (Ecf::server())
-        std::cout << "SERVER: ssl_connection::~ssl_connection socket_.is_open() = " << socket_.is_open() << "\n\n";
-    else
-        std::cout << "CLIENT: ssl_connection::~ssl_connection socket_.is_open() = " << socket_.is_open() << "\n\n";
+    auto is_socket_open = socket_.lowest_layer().is_open();
+    auto location       = Ecf::server() ? "SERVER" : "CLIENT";
+    std::cout << location << ": ssl_connection::~ssl_connection socket_.is_open() = " << is_socket_open << "\n\n";
 #endif
 }
 
-ssl_connection::ssl_connection(boost::asio::io_context& io, boost::asio::ssl::context& context)
-    : socket_(io, context) {
+ssl_connection::ssl_connection(boost::asio::io_context& io, boost::asio::ssl::context& context) : socket_(io, context) {
 #ifdef DEBUG_CONNECTION
-    if (Ecf::server())
-        std::cout << "SERVER: ssl_connection::ssl_connection\n";
-    else
-        std::cout << "CLIENT: ssl_connection::ssl_connection\n";
+    auto location = Ecf::server() ? "SERVER" : "CLIENT";
+    std::cout << location << ": ssl_connection::ssl_connection\n";
 #endif
     socket_.set_verify_mode(boost::asio::ssl::verify_peer);
 
@@ -61,16 +57,18 @@ bool ssl_connection::verify_certificate(bool preverified, boost::asio::ssl::veri
 
 void ssl_connection::log_error(const char* msg) {
     const char* in_context = ", in client";
-    if (Ecf::server())
+    if (Ecf::server()) {
         in_context = ", in server";
+    }
     ecf::LogToCout logToCout;
     LOG(ecf::Log::ERR, msg << in_context);
 }
 
 void ssl_connection::log_archive_error(const char* msg, const std::exception& ae, const std::string& data) {
     const char* in_context = ", in client";
-    if (Ecf::server())
+    if (Ecf::server()) {
         in_context = ", in server";
+    }
     ecf::LogToCout logToCout;
     LOG(ecf::Log::ERR, msg << ae.what() << in_context << " data:\n" << data);
 }

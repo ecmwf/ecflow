@@ -250,7 +250,7 @@ static std::shared_ptr<GenericAttr> create_generic(const std::string& name, cons
 }
 
 static std::shared_ptr<ZombieAttr>
-create_ZombieAttr(Child::ZombieType zt, const bp::list& list, User::Action uc, int life_time_in_server) {
+create_ZombieAttr(Child::ZombieType zt, const bp::list& list, ZombieCtrlAction uc, int life_time_in_server) {
     std::vector<Child::CmdType> vec;
     int the_list_size = len(list);
     vec.reserve(the_list_size);
@@ -260,7 +260,7 @@ create_ZombieAttr(Child::ZombieType zt, const bp::list& list, User::Action uc, i
     return std::make_shared<ZombieAttr>(zt, vec, uc, life_time_in_server);
 }
 
-static std::shared_ptr<ZombieAttr> create_ZombieAttr1(Child::ZombieType zt, const bp::list& list, User::Action uc) {
+static std::shared_ptr<ZombieAttr> create_ZombieAttr1(Child::ZombieType zt, const bp::list& list, ZombieCtrlAction uc) {
     std::vector<Child::CmdType> vec;
     int the_list_size = len(list);
     vec.reserve(the_list_size);
@@ -502,13 +502,13 @@ void export_NodeAttr() {
         .value("user", Child::USER)
         .value("path", Child::PATH);
 
-    enum_<User::Action>("ZombieUserActionType", NodeAttrDoc::zombie_user_action_type_doc())
-        .value("fob", User::FOB)
-        .value("fail", User::FAIL)
-        .value("remove", User::REMOVE)
-        .value("adopt", User::ADOPT)
-        .value("block", User::BLOCK)
-        .value("kill", User::KILL);
+    enum_<ZombieCtrlAction>("ZombieUserActionType", NodeAttrDoc::zombie_user_action_type_doc())
+        .value("fob", ZombieCtrlAction::FOB)
+        .value("fail", ZombieCtrlAction::FAIL)
+        .value("remove", ZombieCtrlAction::REMOVE)
+        .value("adopt", ZombieCtrlAction::ADOPT)
+        .value("block", ZombieCtrlAction::BLOCK)
+        .value("kill", ZombieCtrlAction::KILL);
 
     enum_<Child::CmdType>("ChildCmdType", NodeAttrDoc::child_cmd_type_doc())
         .value("init", Child::INIT)
@@ -529,8 +529,6 @@ void export_NodeAttr() {
         .value("variable", Attr::VARIABLE)
         .value("all", Attr::ALL);
 
-    // 	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int
-    // zombie_lifetime);
     class_<ZombieAttr>("ZombieAttr", NodeAttrDoc::zombie_doc())
         .def("__init__", make_constructor(&create_ZombieAttr))
         .def("__init__", make_constructor(&create_ZombieAttr1))
@@ -1002,8 +1000,8 @@ void export_NodeAttr() {
         .def("step", &Repeat::step, "The increment for the repeat, as an integer")
         .def("value", &Repeat::last_valid_value, "The current value of the repeat as an integer");
 
-    void (CronAttr::* add_time_series)(const TimeSeries&) = &CronAttr::addTimeSeries;
-    void (CronAttr::* add_time_series_2)(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) =
+    void (CronAttr::*add_time_series)(const TimeSeries&) = &CronAttr::addTimeSeries;
+    void (CronAttr::*add_time_series_2)(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) =
         &CronAttr::addTimeSeries;
     class_<CronAttr, std::shared_ptr<CronAttr>>("Cron", NodeAttrDoc::cron_doc())
         .def("__init__", raw_function(&cron_raw_constructor, 1)) // will call -> cron_init or cron_init1

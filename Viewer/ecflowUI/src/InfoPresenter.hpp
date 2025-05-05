@@ -24,7 +24,7 @@ class VReply;
 
 class InfoPresenter {
 public:
-    InfoPresenter()          = default;
+    InfoPresenter() = default;
     virtual ~InfoPresenter();
     virtual void infoReady(VReply*) {}
     virtual void infoFailed(VReply*) {}

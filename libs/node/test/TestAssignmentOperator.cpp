@@ -14,6 +14,7 @@
 
 #include "MyDefsFixture.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -23,7 +24,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_AssignmentOperator)
 
 BOOST_AUTO_TEST_CASE(test_defs_assignment_operator) {
-    cout << "ANode:: ...test_defs_assignment_operator\n";
+    ECF_NAME_THIS_TEST();
+
     MyDefsFixture theDefsFixture;
 
     Defs defs;
@@ -45,7 +47,8 @@ BOOST_AUTO_TEST_CASE(test_defs_assignment_operator) {
 }
 
 BOOST_AUTO_TEST_CASE(test_suite_assignment_operator) {
-    cout << "ANode:: ...test_suite_assignment_operator\n";
+    ECF_NAME_THIS_TEST();
+
     Suite empty("empty");
 
     Suite s1("s1");
@@ -58,9 +61,9 @@ BOOST_AUTO_TEST_CASE(test_suite_assignment_operator) {
     s1.add_task("t1");
     s1.add_family("f1");
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
-    s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB, 10));
-    s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL, 100));
-    s1.addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK, 100));
+    s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 10));
+    s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
+    s1.addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::ZombieCtrlAction::BLOCK, 100));
 
     ecf::CronAttr cronAttr;
     ecf::TimeSlot start(0, 0);
@@ -105,16 +108,17 @@ BOOST_AUTO_TEST_CASE(test_suite_assignment_operator) {
 }
 
 BOOST_AUTO_TEST_CASE(test_task_assignment_operator) {
-    cout << "ANode:: ...test_task_assignment_operator\n";
+    ECF_NAME_THIS_TEST();
+
     Task empty("empty");
 
     Task s1("s1");
     s1.addAutoCancel(ecf::AutoCancelAttr(2));
     s1.addVariable(Variable("VAR", "value"));
     std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
-    s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB, 10));
-    s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::User::FAIL, 100));
-    s1.addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::User::BLOCK, 100));
+    s1.addZombie(ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 10));
+    s1.addZombie(ZombieAttr(ecf::Child::ECF, child_cmds, ecf::ZombieCtrlAction::FAIL, 100));
+    s1.addZombie(ZombieAttr(ecf::Child::PATH, child_cmds, ecf::ZombieCtrlAction::BLOCK, 100));
 
     ecf::CronAttr cronAttr;
     ecf::TimeSlot start(0, 0);

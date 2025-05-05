@@ -12,6 +12,7 @@
 #define ecflow_attribute_RepeatRange_HPP
 
 #include "ecflow/attribute/RepeatAttr.hpp"
+#include "ecflow/core/Calendar.hpp"
 
 namespace ecf {
 
@@ -54,16 +55,16 @@ struct Range<RepeatDate>
 
     iterator begin() const { return 0; }
     iterator end() const {
-        int i = Cal::date_to_julian(r_.start());
-        int j = Cal::date_to_julian(r_.end());
+        int i = ecf::CalendarDate(r_.start()).as_julian_day().value();
+        int j = ecf::CalendarDate(r_.end()).as_julian_day().value();
         int s = r_.step();
         int d = (j - i) + 1;
         return (d / s) + ((d % s == 0) ? 0 : 1);
     }
     iterator current_index() const {
-        auto i   = Cal::date_to_julian(r_.start());
+        auto i   = ecf::CalendarDate(r_.start()).as_julian_day().value();
         auto s   = r_.step();
-        auto v   = Cal::date_to_julian(r_.value());
+        auto v   = ecf::CalendarDate(r_.value()).as_julian_day().value();
         auto idx = (v - i) / s;
         return idx;
     }
@@ -71,8 +72,8 @@ struct Range<RepeatDate>
     value_type current_value() const { return r_.value(); }
 
     value_type at(iterator i) const {
-        int j = Cal::date_to_julian(r_.start());
-        return Cal::julian_to_date(j + i * r_.step());
+        int j = ecf::CalendarDate(r_.start()).as_julian_day().value();
+        return ecf::JulianDay(j + i * r_.step()).as_calendar_date().value();
     }
 
     size_type size() const { return end() - begin(); }

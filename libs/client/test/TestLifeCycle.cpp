@@ -25,6 +25,7 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -34,7 +35,8 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 BOOST_AUTO_TEST_SUITE(T_LifeCycle)
 
 BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
-    cout << "Client:: ...test_node_tree_lifecycle" << endl;
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_node_tree_lifecycle.log"); // will create log file, and destroy log and remove file at end of scope
 

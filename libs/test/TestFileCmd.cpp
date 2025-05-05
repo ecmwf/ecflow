@@ -22,6 +22,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -37,8 +38,9 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_FileCmd)
 
 BOOST_AUTO_TEST_CASE(test_file_cmd) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_file_cmd " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

@@ -12,13 +12,15 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/core/Cal.hpp"
+#include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -39,7 +41,7 @@ static void findParentVariableValue(task_ptr t, const std::string& name, const s
 }
 
 BOOST_AUTO_TEST_CASE(test_generated_variables) {
-    std::cout << "ANode:: ...test_generated_variables\n";
+    ECF_NAME_THIS_TEST();
 
     task_ptr t;
 
@@ -66,13 +68,13 @@ BOOST_AUTO_TEST_CASE(test_generated_variables) {
 
     // Check Submittable generated variables
     findParentVariableValue(t, "TASK", "t");
-    findParentVariableValue(t, Str::ECF_RID(), "");
-    findParentVariableValue(t, Str::ECF_TRYNO(), "0");
-    findParentVariableValue(t, Str::ECF_NAME(), "/suite/f/f2/t");
-    findParentVariableValue(t, Str::ECF_PASS(), "");
-    findParentVariableValue(t, Str::ECF_JOB(), "./suite/f/f2/t.job0");
-    findParentVariableValue(t, Str::ECF_JOBOUT(), "./suite/f/f2/t.0");
-    findParentVariableValue(t, Str::ECF_SCRIPT(), "./suite/f/f2/t.ecf");
+    findParentVariableValue(t, ecf::environment::ECF_RID, "");
+    findParentVariableValue(t, ecf::environment::ECF_TRYNO, "0");
+    findParentVariableValue(t, ecf::environment::ECF_NAME, "/suite/f/f2/t");
+    findParentVariableValue(t, ecf::environment::ECF_PASS, "");
+    findParentVariableValue(t, ecf::environment::ECF_JOB, "./suite/f/f2/t.job0");
+    findParentVariableValue(t, ecf::environment::ECF_JOBOUT, "./suite/f/f2/t.0");
+    findParentVariableValue(t, ecf::environment::ECF_SCRIPT, "./suite/f/f2/t.ecf");
 
     // Check Family generated variables
     findParentVariableValue(t, "FAMILY", "f/f2");
@@ -100,7 +102,8 @@ BOOST_AUTO_TEST_CASE(test_generated_variables) {
     findParentVariableValue(t, "YMD_MM", "1");
     findParentVariableValue(t, "YMD_DD", "1");
     findParentVariableValue(t, "YMD_DOW", "4");
-    findParentVariableValue(t, "YMD_JULIAN", ecf::convert_to<std::string>(Cal::date_to_julian(20090101)));
+    findParentVariableValue(
+        t, "YMD_JULIAN", ecf::convert_to<std::string>(ecf::CalendarDate(20090101).as_julian_day().value()));
     findParentVariableValue(t, "RepeatInteger", "10");
 }
 

@@ -20,11 +20,11 @@
 ///      Task(path,password,process_id)
 ///      Zombie(path,password,process_id)
 /// Issues:
-///   At the extreme we can have *2* Jobs running at one go. Typically user commands
-///   that have a force parameter, will create 'user' zombies.
-///   ** the command can be invoked at any time, i.e we could invoke
+///   At the extreme we can have *2* Jobs running at one go. Typically, user commands
+///   that have a force parameter will create 'user' zombies.
+///   ** the command can be invoked at any time, i.e. we could invoke
 ///   ** the user command, whilst the task is in SUBMITTED state
-///   ** This will go through and create user zombie. However at this stage we have *NO* process_id
+///   ** This will go through and create user zombie. However, at this stage we have *NO* process_id
 ///   ** since the job has not started. Zombie(path,password)
 ///   When the Task init command is called, we get given a process_id.
 ///   ** HOWEVER ** need to determine if this is from the real child cmd or from the zombie
@@ -38,7 +38,7 @@
 ///
 ///   IMPORTANT:: For command line interface we just have the task path.
 ///               i,e we don't want to expose password, and user will not easily
-///               know the process or remote id. Hence we will make do with the
+///               know the process or remote id. Hence, we will make do with the
 ///               task path. We just find the first zombie, and act up on it
 ///
 
@@ -88,7 +88,7 @@ public:
     const std::string& host() const { return host_; }
     int try_no() const { return try_no_; }
     int duration() const { return duration_; }
-    ecf::User::Action user_action() const;
+    ecf::ZombieCtrlAction user_action() const;
     std::string user_action_str() const;
     std::string explanation() const;
 
@@ -131,9 +131,9 @@ public:
     static Zombie& EMPTY_();
 
 private:
-    ecf::User::Action user_action_{ecf::User::BLOCK};      // [ fob, fail, remove, adopt, block, kill ]
-    int try_no_{0};                                        // task try number, set on construction
-    int duration_{0};                                      // How long zombie been alive
+    ecf::ZombieCtrlAction user_action_{ecf::ZombieCtrlAction::BLOCK}; // [ fob, fail, remove, adopt, block, kill ]
+    int try_no_{0};                                                   // task try number, set on construction
+    int duration_{0};                                                 // How long zombie been alive
     int calls_{0};                                         // Number of times we have communicated with server.
     ecf::Child::ZombieType zombie_type_{ecf::Child::USER}; // [ ecf, ecf_pid, ecf_pid_passwd, ecf_passwd, path, user ]
     ecf::Child::CmdType last_child_cmd_{

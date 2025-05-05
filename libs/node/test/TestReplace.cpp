@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -19,6 +20,7 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -68,7 +70,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Replace)
 
 BOOST_AUTO_TEST_CASE(test_replace_add_task) {
-    cout << "ANode:: ...test_replace_add_task\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -105,7 +108,8 @@ BOOST_AUTO_TEST_CASE(test_replace_add_task) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_add_suite) {
-    cout << "ANode:: ...test_replace_add_suite\n";
+    ECF_NAME_THIS_TEST();
+
     // In this test the server defs is *EMPTY* hence we should copy/move over the whole suite
     // provided the a/ Path to node exists in the client def, b/ create nodes as needed is TRUE
     Defs expectedDefs;
@@ -180,7 +184,8 @@ BOOST_AUTO_TEST_CASE(test_replace_add_suite) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_child) {
-    cout << "ANode:: ...test_replace_child\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -209,7 +214,8 @@ BOOST_AUTO_TEST_CASE(test_replace_child) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_add_preserves_states) {
-    cout << "ANode:: ...test_replace_add_preserves_states\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = clientDef->add_suite("suite1");
@@ -264,7 +270,8 @@ BOOST_AUTO_TEST_CASE(test_replace_add_preserves_states) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_preserves_suspend) {
-    cout << "ANode:: ...test_replace_preserves_suspend\n"; // ECFLOW-1520
+    ECF_NAME_THIS_TEST(); // ECFLOW-1520
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = clientDef->add_suite("suite1");
@@ -324,7 +331,8 @@ BOOST_AUTO_TEST_CASE(test_replace_preserves_suspend) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_preserves_suspend2) {
-    cout << "ANode:: ...test_replace_preserves_suspend2\n"; // ECFLOW-1520
+    ECF_NAME_THIS_TEST(); // ECFLOW-1520
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = clientDef->add_suite("suite1");
@@ -373,7 +381,8 @@ BOOST_AUTO_TEST_CASE(test_replace_preserves_suspend2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_preserves_sibling_states) {
-    cout << "ANode:: ...test_replace_preserves_sibling_states\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -409,7 +418,8 @@ BOOST_AUTO_TEST_CASE(test_replace_preserves_sibling_states) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_preserves_begun_status) {
-    cout << "ANode:: ...test_replace_preserves_begun_status\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = clientDef->add_suite("suite1");
@@ -445,10 +455,12 @@ BOOST_AUTO_TEST_CASE(test_replace_preserves_begun_status) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_preserves_begun_where_client_not_begun) {
-    cout << "ANode:: ...test_replace_preserves_begun_where_client_not_begun\n"; // ECFLOW-1612
+    ECF_NAME_THIS_TEST(); // ECFLOW-1612
+
     // In this test we will end up calling begin on the time attribute.
     // However we had called begin on the client defs side, where the calendar/suite had not been begun
     // Thus causing an assert failure. The fix is to call begin on the server side, after the replace.
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -489,7 +501,8 @@ BOOST_AUTO_TEST_CASE(test_replace_preserves_begun_where_client_not_begun) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_add_node) {
-    cout << "ANode:: ...test_replace_add_node\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -529,7 +542,8 @@ BOOST_AUTO_TEST_CASE(test_replace_add_node) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_add_hierarchy) {
-    cout << "ANode:: ...test_replace_add_hierarchy\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -578,9 +592,11 @@ BOOST_AUTO_TEST_CASE(test_replace_add_hierarchy) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_order_preserved_for_suite) {
-    cout << "ANode:: ...test_replace_order_preserved_for_suite\n";
+    ECF_NAME_THIS_TEST();
+
     // Test that when we replace a suite, its order is preserved,
     // See  ECFLOW-23 - When replacing a node the order is changed.
+
     defs_ptr clientDef = Defs::create();
     {
         clientDef->add_suite("s1");
@@ -628,9 +644,11 @@ BOOST_AUTO_TEST_CASE(test_replace_order_preserved_for_suite) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_order_preserved_for_family) {
-    cout << "ANode:: ...test_replace_order_preserved_for_family\n";
+    ECF_NAME_THIS_TEST();
+
     // Test that when we replace a family, its order is preserved,
     // See  ECFLOW-23 - When replacing a node the order is changed.
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = clientDef->add_suite("suite1");
@@ -682,9 +700,11 @@ BOOST_AUTO_TEST_CASE(test_replace_order_preserved_for_family) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_order_preserved_for_task) {
-    cout << "ANode:: ...test_replace_order_preserved_for_task\n";
+    ECF_NAME_THIS_TEST();
+
     // Test that when we replace a family, its order is preserved,
     // See  ECFLOW-23 - When replacing a node the order is changed.
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = clientDef->add_suite("suite1");
@@ -742,7 +762,8 @@ BOOST_AUTO_TEST_CASE(test_replace_order_preserved_for_task) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_child_errors) {
-    cout << "ANode:: ...test_replace_child_errors\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -763,7 +784,8 @@ BOOST_AUTO_TEST_CASE(test_replace_child_errors) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_child_errors_2) {
-    cout << "ANode:: ...test_replace_child_errors_2\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -802,8 +824,10 @@ BOOST_AUTO_TEST_CASE(test_replace_child_errors_2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_child_errors_3) {
+    ECF_NAME_THIS_TEST();
+
     // test force option
-    cout << "ANode:: ...test_replace_child_errors_3\n";
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = Suite::create("suite1");
@@ -844,7 +868,8 @@ BOOST_AUTO_TEST_CASE(test_replace_child_errors_3) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_add_task_with_bad_trigger) {
-    cout << "ANode:: ...test_replace_add_task_with_bad_trigger\n";
+    ECF_NAME_THIS_TEST();
+
     defs_ptr clientDef = Defs::create();
     {
         suite_ptr suite = clientDef->add_suite("suite1");
@@ -877,7 +902,7 @@ BOOST_AUTO_TEST_CASE(test_replace_add_task_with_bad_trigger) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_add_suite_with_bad_triggers) {
-    cout << "ANode:: ...test_replace_add_suite_with_bad_triggers\n";
+    ECF_NAME_THIS_TEST();
 
     // The whole suite should get *MOVED* from clientDef to the *EMPTY* server def. i.e add
     defs_ptr clientDef = Defs::create();
@@ -913,7 +938,7 @@ BOOST_AUTO_TEST_CASE(test_replace_add_suite_with_bad_triggers) {
 }
 
 BOOST_AUTO_TEST_CASE(test_replace_task_ECFLOW_1135) {
-    cout << "ANode:: ...test_replace_task_ECFLOW_1135\n";
+    ECF_NAME_THIS_TEST();
 
     // The whole suite should get *MOVED* from clientDef to the *EMPTY* server def. i.e add
     defs_ptr clientDef = Defs::create();
@@ -950,7 +975,7 @@ BOOST_AUTO_TEST_CASE(test_replace_task_ECFLOW_1135) {
 }
 
 BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
-    cout << "ANode:: ...test_trigger_references_during_replace\n"; // ECFLOW-1319
+    ECF_NAME_THIS_TEST(); // ECFLOW-1319
 
     // This is used to check that the trigger references in AST, are invalidated after replace.
 
@@ -958,7 +983,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
     suite_ptr server_suite;
     {
         server_suite = serverDefs.add_suite("suite");
-        server_suite->addVariable(Variable(Str::ECF_INCLUDE(), "$ECF_HOME/../includes"));
+        server_suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
         server_suite->addVariable(Variable("SLEEPTIME", "1"));
         server_suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         family_ptr fam = server_suite->add_family("family");
@@ -977,7 +1002,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
     std::string ecf_home = File::test_data("libs/node/test/data/SMSHOME", "libs/node");
-    serverDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(), ecf_home);
+    serverDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files

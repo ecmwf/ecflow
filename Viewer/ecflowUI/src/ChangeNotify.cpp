@@ -11,6 +11,10 @@
 #include "ChangeNotify.hpp"
 
 #include <cstdlib>
+#include <map>
+
+#include <QDebug>
+#include <QSortFilterProxyModel>
 
 #include "ChangeNotifyDialog.hpp"
 #include "ChangeNotifyModel.hpp"
@@ -23,15 +27,6 @@
 #include "VNode.hpp"
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
-
-// #ifdef ECFLOW_QT5
-// #include <QSoundEffect>
-// #endif
-
-#include <map>
-
-#include <QDebug>
-#include <QSortFilterProxyModel>
 
 static std::map<std::string, ChangeNotify*> items;
 

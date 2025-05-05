@@ -15,6 +15,7 @@
 
 #include "MyDefsFixture.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -23,6 +24,7 @@
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -32,7 +34,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_TaskScriptGenerator)
 
 BOOST_AUTO_TEST_CASE(test_reset_after_job_generation_checking) {
-    cout << "ANode:: ...test_reset_after_job_generation_checking\n";
+    ECF_NAME_THIS_TEST();
+
     {
         Defs defs   = Defs();
         suite_ptr s = defs.add_suite("s");
@@ -68,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_reset_after_job_generation_checking) {
 }
 
 BOOST_AUTO_TEST_CASE(test_task_script_generator) {
-    cout << "ANode:: ...test_task_script_generator\n";
+    ECF_NAME_THIS_TEST();
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data/TaskScriptGenerator", "libs/node");
@@ -92,8 +95,8 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->add_variable(Str::ECF_INCLUDE(), ecf_home);
-        suite->add_variable(Str::ECF_HOME(), ecf_home);
+        suite->add_variable(ecf::environment::ECF_INCLUDE, ecf_home);
+        suite->add_variable(ecf::environment::ECF_HOME, ecf_home);
         suite->add_variable("SLEEP", "10");
         task_ptr t1 = suite->add_task("t1");
         t1->addEvent(Event("event1"));
@@ -154,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
 }
 
 BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
-    cout << "ANode:: ...test_task_script_generator_with_dummy_tasks\n";
+    ECF_NAME_THIS_TEST();
 
     // SET ECF_HOME
     std::string ecf_home = File::test_data("libs/node/test/data/TaskScriptGenerator", "libs/node");
@@ -184,8 +187,8 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->add_variable(Str::ECF_INCLUDE(), ecf_home);
-        suite->add_variable(Str::ECF_HOME(), ecf_home);
+        suite->add_variable(ecf::environment::ECF_INCLUDE, ecf_home);
+        suite->add_variable(ecf::environment::ECF_HOME, ecf_home);
         suite->add_variable("SLEEP", "10");
         family_ptr f1 = suite->add_family("f1");
         tasks_with_scripts.push_back(f1->add_task("t1"));

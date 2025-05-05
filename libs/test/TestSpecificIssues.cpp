@@ -21,6 +21,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -30,10 +31,11 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 BOOST_AUTO_TEST_SUITE(T_SpecificIssues)
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_1589) {
+    ECF_NAME_THIS_TEST();
+
     // Test ECF_JOB_CMD where task *completes* but the ECF_JOB_CMD still fails. i.e ECFLOW-1589
 
     DurationTimer timer;
-    cout << "Test:: ...test_ECFLOW_1589 " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

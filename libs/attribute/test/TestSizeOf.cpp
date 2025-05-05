@@ -15,32 +15,66 @@
 
 #include "ecflow/attribute/DayAttr.hpp"
 #include "ecflow/core/TimeSeries.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace boost;
-using namespace std;
+#define STRINGIFY(x) #x
+
+template <typename T>
+inline const char* typeName(void) {
+    return "unknown";
+}
+
+#define TYPE_STRING(T)                 \
+    template <>                        \
+    inline const char* typeName<T>() { \
+        return STRINGIFY(T);           \
+    }
+
+TYPE_STRING(std::ofstream)
+TYPE_STRING(std::string)
+TYPE_STRING(std::vector<int>)
+TYPE_STRING(std::vector<std::string>)
+TYPE_STRING(std::weak_ptr<int>)
+TYPE_STRING(std::nullptr_t)
+TYPE_STRING(std::unique_ptr<int>)
+TYPE_STRING(double)
+TYPE_STRING(long)
+TYPE_STRING(int)
+TYPE_STRING(unsigned int)
+TYPE_STRING(bool)
+TYPE_STRING(ecf::TimeSeries)
+TYPE_STRING(DayAttr)
+
+template <typename T>
+void inspect_size_of(T t = T{}) {
+#if PRINT_SIZEOF_RESULTS
+    ECF_TEST_DBG(<< "   * sizeof(" << typeName<T>() << ") = " << sizeof(T));
+#endif
+    BOOST_REQUIRE_EQUAL(sizeof(T), sizeof(T));
+}
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
 BOOST_AUTO_TEST_SUITE(T_SizeOf)
 
 BOOST_AUTO_TEST_CASE(test_size_of) {
-    cout << "ACore:: ...test_size_of\n";
-    cout << "   sizeof(std::ofstream)      " << sizeof(std::ofstream) << "\n";
-    cout << "   sizeof(std::string)        " << sizeof(std::string) << "\n";
-    cout << "   sizeof(vector<int>)        " << sizeof(std::vector<int>) << "\n";
-    cout << "   sizeof(vector<string>)     " << sizeof(vector<string>) << "\n";
-    cout << "   sizeof(std::weak_ptr<int>) " << sizeof(std::weak_ptr<int>) << "\n";
-    cout << "   sizeof(nullptr)            " << sizeof(nullptr) << "\n";
-    cout << "   sizeof(unique_ptr)         " << sizeof(unique_ptr<int>) << "\n";
-    cout << "   sizeof(double)             " << sizeof(double) << "\n";
-    cout << "   sizeof(long)               " << sizeof(long) << "\n";
-    cout << "   sizeof(int)                " << sizeof(int) << "\n";
-    cout << "   sizeof(unsigned int)       " << sizeof(unsigned int) << "\n";
-    cout << "   sizeof(bool)               " << sizeof(bool) << "\n";
-    cout << "   sizeof(TimeSeries)         " << sizeof(ecf::TimeSeries) << "\n";
-    cout << "   sizeof(DayAttr)            " << sizeof(DayAttr) << "\n";
+    ECF_NAME_THIS_TEST();
 
-    BOOST_CHECK_MESSAGE(true, "Dummy");
+    inspect_size_of<std::ofstream>();
+    inspect_size_of<std::string>();
+    inspect_size_of<std::vector<int>>();
+    inspect_size_of<std::vector<std::string>>();
+    inspect_size_of<std::weak_ptr<int>>();
+    inspect_size_of<std::nullptr_t>();
+    inspect_size_of(nullptr);
+    inspect_size_of<std::unique_ptr<int>>();
+    inspect_size_of<double>();
+    inspect_size_of<long>();
+    inspect_size_of<int>();
+    inspect_size_of<unsigned int>();
+    inspect_size_of<bool>();
+    inspect_size_of<ecf::TimeSeries>();
+    inspect_size_of<DayAttr>();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

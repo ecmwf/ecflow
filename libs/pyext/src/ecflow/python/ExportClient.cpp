@@ -37,7 +37,7 @@ void set_host_port(ClientInvoker* self, const std::string& host, int port) {
 }
 
 std::string version(ClientInvoker* self) {
-    return ecf::Version::raw();
+    return ecf::Version::full();
 }
 std::string server_version(ClientInvoker* self) {
     self->server_version();
@@ -469,12 +469,52 @@ void zombieKillCli(ClientInvoker* self, const bp::list& list) {
     self->zombieKillCliPaths(paths);
 }
 
+///
+/// @brief Creates a new instance of ClientInvoker with the specified arguments.
+///
+/// This ensures that the ClientInvoker instance is properly initialized considering
+/// the environment variable ECF_SSL.
+///
+/// @tparam ARGS
+/// @param args
+/// @return the newly created ClientInvoker instance.
+template <typename... ARGS>
+std::shared_ptr<ClientInvoker> client_invoker_make(const ARGS&... args) {
+    // (1) Create a new instance of ClientInvoker
+    auto ci = std::make_shared<ClientInvoker>(args...);
+
+#if defined(ECF_OPENSSL)
+    // (2) Set up SSL, if needed (i.e. if the ECF_SSL environment variable is set)
+    // Important: this is necessary because the ClientInvoker constructor
+    // loads all the environment variables except ECF_SSL, as setting up SSL
+    // might depend on the host and port (potentially provided as CLI options).
+
+    if (auto ecf_ssl = ::getenv("ECF_SSL"); ecf_ssl) {
+        ci->enable_ssl_if_defined();
+    }
+#endif
+
+    return ci;
+}
+
+#if defined(ECF_OPENSSL)
+void client_invoker_enable_ssl(ClientInvoker* self) {
+    if (auto ecf_ssl = ::getenv("ECF_SSL"); ecf_ssl) {
+        self->enable_ssl_if_defined();
+    }
+    else {
+        self->enable_ssl();
+    }
+}
+#endif
+
 void export_Client() {
     // Need std::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
     class_<ClientInvoker, std::shared_ptr<ClientInvoker>, boost::noncopyable>("Client", ClientDoc::class_client())
-        .def(init<std::string>() /* host:port      */)
-        .def(init<std::string, std::string>() /* host, port      */)
-        .def(init<std::string, int>() /* host, port(int) */)
+        .def("__init__", make_constructor(client_invoker_make<>))
+        .def("__init__", make_constructor(client_invoker_make<const std::string&>))
+        .def("__init__", make_constructor(client_invoker_make<const std::string&, const std::string&>))
+        .def("__init__", make_constructor(client_invoker_make<const std::string&, int>))
         .def("__enter__", &client_enter) // allow with statement
         .def("__exit__", &client_exit)   // allow with statement, remove last handle
         .def("version", &version, "Returns the current client version")
@@ -580,7 +620,9 @@ void export_Client() {
         .def("free_all_dep", &free_all_dep, ClientDoc::free_all_dep())
         .def("free_all_dep", &free_all_dep1)
         .def("ping", &ClientInvoker::pingServer, ClientDoc::ping())
-        .def("stats", &stats, stats_overloads(args("to_stdout"), ClientDoc::stats())[return_value_policy<copy_const_reference>()])
+        .def("stats",
+             &stats,
+             stats_overloads(args("to_stdout"), ClientDoc::stats())[return_value_policy<copy_const_reference>()])
         .def("stats_reset", &stats_reset, ClientDoc::stats_reset())
         .def("get_file",
              &get_file,
@@ -657,9 +699,14 @@ void export_Client() {
         .def("debug", &ClientInvoker::debug, "enable/disable client api debug")
 
 #ifdef ECF_OPENSSL
-        .def("enable_ssl", &ClientInvoker::enable_ssl, ecf::Openssl::ssl_info())
-        .def("disable_ssl", &ClientInvoker::disable_ssl, ecf::Openssl::ssl_info())
+        .def("enable_ssl", client_invoker_enable_ssl, ClientDoc::enable_ssl())
+        .def("disable_ssl", &ClientInvoker::disable_ssl, ClientDoc::disable_ssl())
+        .def("get_certificate", &ClientInvoker::get_certificate, ClientDoc::get_certificate())
 #endif
+
+        .def("enable_http", &ClientInvoker::enable_http, "Enable HTTP communication")
+        .def("enable_https", &ClientInvoker::enable_https, "Enable HTTPS communication")
+
         .def("zombie_get", &zombieGet, return_value_policy<copy_const_reference>())
         .def("zombie_fob", &ClientInvoker::zombieFobCli)
         .def("zombie_fail", &ClientInvoker::zombieFailCli)

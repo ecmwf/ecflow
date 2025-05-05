@@ -21,6 +21,7 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -95,9 +96,9 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
     for (suite_ptr s : theClientDefs.suiteVec()) {
 
         // Always override these to correctly locate files.
-        s->addVariable(Variable(Str::ECF_HOME(), ecf_home));
+        s->addVariable(Variable(ecf::environment::ECF_HOME, ecf_home));
         s->addVariable(Variable("ECF_CLIENT_EXE_PATH", theClientExePath));
-        s->addVariable(Variable(Str::ECF_INCLUDE(), TestFixture::includes()));
+        s->addVariable(Variable(ecf::environment::ECF_INCLUDE, TestFixture::includes()));
 
         if (s->findVariable("SLEEPTIME").empty())
             s->addVariable(Variable("SLEEPTIME", "1"));

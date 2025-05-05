@@ -20,6 +20,9 @@ ecbuild_add_executable(
     ecflow_all
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(ecflow_server)
 
@@ -47,7 +50,7 @@ SET_TARGET_PROPERTIES(ecflow_server
 # which point to directories outside the build tree to the install RPATH
 #SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
-                          
+
 # ================================================================================                         
 # TEST
 ecbuild_add_test(
@@ -89,6 +92,7 @@ ecbuild_add_test(
     test/TestPeriodicScheduler_main.cpp # test entry point
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     Threads::Threads

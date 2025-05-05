@@ -22,6 +22,7 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -88,6 +89,8 @@ void do_test_migration(ClientInvoker& theClient,
 }
 
 BOOST_FIXTURE_TEST_CASE(test_migration, ArgsFixture) {
+    ECF_NAME_THIS_TEST();
+
     if (argc != 2) {
         std::cout << "Ignoring test! Since test directory is not provided\n";
     }

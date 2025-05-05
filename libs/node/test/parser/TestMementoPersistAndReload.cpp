@@ -16,6 +16,7 @@
 #include "PersistHelper.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Memento.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -42,9 +43,10 @@ BOOST_AUTO_TEST_SUITE(U_Parser)
 BOOST_AUTO_TEST_SUITE(T_MementoPersistAndReload)
 
 BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
+    ECF_NAME_THIS_TEST();
+
     std::vector<ecf::Aspect::Type> aspects;
     bool aspect_only = false;
-    cout << "AParser:: ...test_memento_persist_and_reload\n";
     {
         Defs defs;
         suite_ptr suite = defs.add_suite("s1");
@@ -456,7 +458,7 @@ BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
 
         std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 
-        ZombieAttr attr(ecf::Child::USER, child_cmds, ecf::User::FOB, 10);
+        ZombieAttr attr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB, 10);
 
         NodeZombieMemento memento(attr);
         t->set_memento(&memento, aspects, aspect_only); // add zombie;

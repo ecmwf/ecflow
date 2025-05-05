@@ -25,6 +25,7 @@ ecbuild_add_test(
     test/executor/TestPeriodicTaskExecutor.cpp
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
 )
 target_clangformat(u_service_executor
@@ -51,6 +52,7 @@ ecbuild_add_test(
     test
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::filesystem
 )
@@ -79,8 +81,12 @@ ecbuild_add_test(
     test
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::filesystem
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(u_service_aviso
   CONDITION ENABLE_TESTS
@@ -102,7 +108,12 @@ ecbuild_add_test(
     test/mirror/TestMirrorService.cpp
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  DEFINITIONS
+    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+
 )
 target_clangformat(u_service_mirror
   CONDITION ENABLE_TESTS

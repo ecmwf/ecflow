@@ -16,6 +16,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace ecf {
@@ -26,7 +27,7 @@ namespace detail {
  * EnumTraits defines the mapping between a set of enum values and their designation.
  *
  * EnumTraits must define:
- *  - the mapping `map`, provided as an std::array composes of an std::pair<E, const char *> for each enum value
+ *  - the mapping `map`, provided as a std::array composed of a std::pair<E, const char *> for each enum value
  *  - the `size`, holding the number os entries in `map`
  *
  * @tparam E

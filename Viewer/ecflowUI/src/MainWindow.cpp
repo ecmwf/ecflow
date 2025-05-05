@@ -806,7 +806,7 @@ void MainWindowTitleHandler::update() {
     Q_ASSERT(win_);
 
     char* userTitle       = getenv("ECFLOWUI_TITLE");
-    std::string mainTitle = (userTitle != nullptr) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
+    std::string mainTitle = (userTitle != nullptr) ? std::string(userTitle) + " (" + ecf::Version::full() + ")"
                                                    : VConfig::instance()->appLongName();
     QString title         = QString::fromStdString(mainTitle);
 

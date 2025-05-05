@@ -20,6 +20,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -29,7 +30,8 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_MeterCmd)
 
 BOOST_AUTO_TEST_CASE(test_meter_cmd) {
-    cout << "Base:: ...test_meter_cmd\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log("test_meter_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     // Create the defs file.

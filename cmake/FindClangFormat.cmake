@@ -59,6 +59,13 @@ function(target_clangformat TARGET)
     endforeach ()
   endif ()
 
+  if(clangformat_sources)
+    message(STATUS "clangformat target '${TARGET}': OK")
+  else()
+    message(STATUS "clangformat target '${TARGET}': Skipping, no sources found")
+    return()
+  endif()
+
   # Remove auto-generated sources (e.g. Qt files)
   list(FILTER clangformat_sources EXCLUDE REGEX ".*/moc_.*")
   list(FILTER clangformat_sources EXCLUDE REGEX ".*/ui_.*")
@@ -121,11 +128,7 @@ find_program(CLANGFORMAT_EXE
   /usr/local/opt/llvm/bin
   )
 
-if (NOT CLANGFORMAT_EXE)
-  message(STATUS "Clang-Format not found")
-  message(STATUS "    WARNING: No formatting targets will be defined!")
-else ()
+if (CLANGFORMAT_EXE)
   clangformat_get_version(CLANGFORMAT_VERSION)
-  message(STATUS "Clang-Format found at ${CLANGFORMAT_EXE} [${CLANGFORMAT_VERSION}]")
   set(CLANGFORMAT_FOUND ON)
 endif ()

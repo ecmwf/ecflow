@@ -19,6 +19,7 @@
 #include "TestHelper.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/server/Server.hpp"
@@ -26,8 +27,9 @@
 
 class InvokeServer {
 public:
-    InvokeServer() {
-        std::string port(getenv("ECF_PORT"));
+    InvokeServer(bool use_http_backend = false) : use_http_backend_(use_http_backend) {
+        std::string port;
+        ecf::environment::get(ecf::environment::ECF_PORT, port);
         /// Remove check pt and backup check pt file, else server will load it & remove log file
         ecf::Host h;
         fs::remove(h.ecf_checkpt_file(port));
@@ -41,13 +43,21 @@ public:
 
         BOOST_TEST_MESSAGE("Using eclow_server from " << theServerInvokePath);
 
-        std::thread t([&] { system(theServerInvokePath.c_str()); });
+        std::string cmd = theServerInvokePath;
+        if (use_http_backend_) {
+            cmd += " --http";
+        }
+
+        std::thread t([&] { system(cmd.c_str()); });
 
         t.detach();
 
         sleep(1);
 
         ClientInvoker theClient("localhost", port);
+        if (use_http_backend_) {
+            theClient.enable_http();
+        }
         if (theClient.wait_for_server_reply()) {
             theClient.restartServer();
             server_started = true;
@@ -58,11 +68,15 @@ public:
     }
 
     ~InvokeServer() {
-        std::string port(getenv("ECF_PORT"));
+        std::string port;
+        ecf::environment::get(ecf::environment::ECF_PORT, port);
 
         BOOST_TEST_MESSAGE("*****InvokeServer:: Closing server on port " << port);
         {
             ClientInvoker theClient("localhost", port);
+            if (use_http_backend_) {
+                theClient.enable_http();
+            }
             BOOST_REQUIRE_NO_THROW(theClient.terminateServer());
             BOOST_REQUIRE_MESSAGE(theClient.wait_for_server_death(), "Failed to terminate server after 60 seconds\n");
         }
@@ -80,6 +94,7 @@ public:
     }
 
     bool server_started{false};
+    bool use_http_backend_{false};
 };
 
 #endif /* ecflow_http_test_InvokeServer_HPP */

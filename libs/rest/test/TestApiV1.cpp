@@ -9,8 +9,11 @@
  */
 
 #ifdef ECF_OPENSSL
-    #define CPPHTTPLIB_OPENSSL_SUPPORT
+    #define CPPHTTPLIB_OPENSSL_SUPPORT 1
 #endif
+
+#define CPPHTTPLIB_THREAD_POOL_COUNT 1
+#define CPPHTTPLIB_ZLIB_SUPPORT 1
 
 #include <httplib.h>
 
@@ -22,6 +25,7 @@
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/JSON.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Http)
 
@@ -35,9 +39,9 @@ const std::string API_HOST("localhost");
 const std::string API_KEY("3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e");
 
 std::unique_ptr<Certificate> create_certificate() {
-    const char* cert_dir = getenv("ECF_API_CERT_DIRECTORY");
-    const std::string path_to_cert =
-        (cert_dir == nullptr) ? std::string(getenv("HOME")) + "/.ecflowrc/ssl/" : std::string(cert_dir);
+    auto cert_dir = ecf::environment::fetch("ECF_API_CERT_DIRECTORY");
+
+    const std::string path_to_cert = (cert_dir) ? cert_dir.value() : ecf::environment::get("HOME") + "/.ecflowrc/ssl/";
 
     std::unique_ptr<Certificate> cert;
 
@@ -66,12 +70,31 @@ std::unique_ptr<TokenFile> create_token_file() {
 }
 
 void start_api_server() {
+    if (ecf::environment::has("NO_API_SERVER")) {
+        return; // terminate early, for debugging purposes
+    }
 
-    if (getenv("NO_API_SERVER") != nullptr)
-        return; // for debugging
     std::thread t([] {
-        int argc     = 3;
-        char* argv[] = {(char*)"ecflow_http", (char*)"--polling_interval", (char*)"1", NULL};
+#if defined(ECF_TEST_HTTP_BACKEND)
+        char* argv[] = {(char*)"ecflow_http",
+                        (char*)"-v",
+                        (char*)"--polling_interval",
+                        (char*)"1",
+                        (char*)"--port",
+                        (char*)"8081",
+                        (char*)"--http",
+                        NULL};
+        int argc     = 7;
+#else
+        char* argv[] = {(char*)"ecflow_http",
+                        (char*)"-v",
+                        (char*)"--polling_interval",
+                        (char*)"1",
+                        (char*)"--port",
+                        (char*)"8080",
+                        NULL};
+        int argc     = 6;
+#endif
 
         HttpServer server(argc, argv);
         server.run();
@@ -82,13 +105,21 @@ void start_api_server() {
 }
 
 std::unique_ptr<InvokeServer> start_ecflow_server() {
-    if (getenv("NO_ECFLOW_SERVER") != nullptr)
+    if (ecf::environment::has("NO_ECFLOW_SERVER")) {
         return nullptr;
+    }
 
-    auto srv = std::make_unique<InvokeServer>();
+    bool use_http_backend = false;
+#if defined(ECF_TEST_HTTP_BACKEND)
+    use_http_backend = true;
+#endif
 
-    BOOST_REQUIRE_MESSAGE(srv->server_started, "Server failed to start on port " << getenv("ECF_PORT"));
-    BOOST_TEST_MESSAGE("ecflow server at localhost:" << getenv("ECF_PORT"));
+    auto srv = std::make_unique<InvokeServer>(use_http_backend);
+
+    auto port = ecf::environment::get("ECF_PORT");
+    BOOST_REQUIRE_MESSAGE(srv->server_started, "Server failed to start on port " << port);
+    BOOST_TEST_MESSAGE("ecflow server at localhost:" << port);
+
     return srv;
 }
 
@@ -103,7 +134,11 @@ struct SetupTest
             throw std::runtime_error("Failed to set signal mask");
         }
 
+#if defined(ECF_TEST_HTTP_BACKEND)
+        setenv("ECF_PORT", "3198", 0);
+#else
         setenv("ECF_PORT", "3199", 0);
+#endif
         setenv("ECF_HOST", "localhost", 1);
     }
     void setup() {
@@ -158,7 +193,11 @@ httplib::Result request(const std::string& method,
                         const std::string& payload             = "",
                         const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
+#if defined(ECF_TEST_HTTP_BACKEND)
+    httplib::SSLClient c(API_HOST, 8081);
+#else
     httplib::SSLClient c(API_HOST, 8080);
+#endif
 
     c.enable_server_certificate_verification(false);
     c.set_connection_timeout(3);
@@ -230,45 +269,38 @@ bool check_for_element(const std::string& path,
         }
         else if (j.is_array() == false) {
             j = ojson::array({j});
-            std::cout << "json is " << j << std::endl;
+            ECF_TEST_DBG(<< "json is " << j);
         }
 
         for (const auto& x : j) {
-            // std::cout << x << std::endl;
             if (attr_name.empty() == false) {
                 // { "name": "foo", "value": "bar"}
-                // std::cout << "expecting: " << attr_name << "=" << value << " got: " << x["name"].get<std::string>()
-                // << "=" << json_type_to_string(x[key_name]) << std::endl;
-                if (attr_name == x["name"] && value == ecf::http::json_type_to_string(x[key_name]))
+                if (attr_name == x["name"] && value == ecf::http::json_type_to_string(x[key_name])) {
                     return true;
+                }
             }
             else if (key_name.empty() == false) {
                 // { "foo" : "bar" }
-                // std::cout << "expecting: " << key_name << "='" << value << " got: " << key_name << "='" <<
-                // json_type_to_string(x[key_name]) << "'" << std::endl;
-
-                if (ecf::http::json_type_to_string(x[key_name]) == value)
+                if (ecf::http::json_type_to_string(x[key_name]) == value) {
                     return true;
+                }
             }
             else {
                 // "bar"
-                // std::cout << "expecting: '" << value << "' got: '" << json_type_to_string(x) << "'" << std::endl;
-
-                if (value == ecf::http::json_type_to_string(x))
+                if (value == ecf::http::json_type_to_string(x)) {
                     return true;
+                }
             }
         }
     }
     catch (const std::exception& e) {
         BOOST_TEST_MESSAGE(e.what());
     }
-    // BOOST_TEST_MESSAGE("Attribute " << attr_name << " --> " << key_name << "=" << value << " at path " << path << "
-    // not found");
     return false;
 }
 
 BOOST_AUTO_TEST_CASE(test_server) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     wait_until([] { return check_for_element("/v1/server/status?filter=status", "", "", "RUNNING"); });
 
@@ -290,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_server) {
 }
 
 BOOST_AUTO_TEST_CASE(test_suite) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     // remove test-suite if it exists; disregard any problems with the call
     request("delete", "/v1/suites/test/definition", "", API_KEY);
@@ -355,7 +387,7 @@ BOOST_AUTO_TEST_CASE(test_suite) {
 }
 
 BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     // (0) Clean up -- in case there is any left-over from passed/failed tests
     request("delete", "/v1/suites/basic_suite/definition", "", API_KEY);
@@ -403,7 +435,7 @@ BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
 }
 
 BOOST_AUTO_TEST_CASE(test_node_full_tree) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     // (0) Clean up -- in case there is any left-over from passed/failed tests
     request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
@@ -541,7 +573,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(test_token_authentication) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", API_KEY),
@@ -581,6 +613,8 @@ BOOST_AUTO_TEST_CASE(test_token_authentication) {
 }
 
 BOOST_AUTO_TEST_CASE(test_family_add, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_suite")) {
+    ECF_NAME_THIS_TEST();
+
     handle_response(
         request("put", "/v1/suites/test/definition", R"({"definition": "family dynamic\nendfamily"})", API_KEY));
     wait_until([] { return check_for_path("/v1/suites/test/dynamic/definition"); });
@@ -589,7 +623,7 @@ BOOST_AUTO_TEST_CASE(test_family_add, *boost::unit_test::depends_on("S_Http/T_Ap
 // STATUS
 
 BOOST_AUTO_TEST_CASE(test_status, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     const std::map<std::string, std::string> statuses{
         {"abort", "aborted"}, {"complete", "complete"}, {"requeue", "queued"}, {"suspend", "suspended"}};
@@ -617,7 +651,7 @@ BOOST_AUTO_TEST_CASE(test_status, *boost::unit_test::depends_on("S_Http/T_ApiV1/
 // VARIABLE
 
 BOOST_AUTO_TEST_CASE(test_variable, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request(
@@ -642,7 +676,7 @@ BOOST_AUTO_TEST_CASE(test_variable, *boost::unit_test::depends_on("S_Http/T_ApiV
 // METER
 
 BOOST_AUTO_TEST_CASE(test_meter, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(request("post",
                             "/v1/suites/test/dynamic/attributes",
@@ -668,7 +702,7 @@ BOOST_AUTO_TEST_CASE(test_meter, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
 // LIMIT
 
 BOOST_AUTO_TEST_CASE(test_limit, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"limit","name":"foo","value":"0"})", API_KEY),
@@ -692,7 +726,7 @@ BOOST_AUTO_TEST_CASE(test_limit, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
 // EVENT
 
 BOOST_AUTO_TEST_CASE(test_event, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request(
@@ -717,7 +751,7 @@ BOOST_AUTO_TEST_CASE(test_event, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
 // LABEL
 
 BOOST_AUTO_TEST_CASE(test_label, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request(
@@ -742,7 +776,7 @@ BOOST_AUTO_TEST_CASE(test_label, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
 // TIME
 
 BOOST_AUTO_TEST_CASE(test_time, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"time","value":"+00:20"})", API_KEY),
@@ -768,7 +802,7 @@ BOOST_AUTO_TEST_CASE(test_time, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
 // DAY
 
 BOOST_AUTO_TEST_CASE(test_day, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"day","value":"monday"})", API_KEY),
@@ -794,7 +828,7 @@ BOOST_AUTO_TEST_CASE(test_day, *boost::unit_test::depends_on("S_Http/T_ApiV1/tes
 // DATE
 
 BOOST_AUTO_TEST_CASE(test_date, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"date","value":"1.*.*"})", API_KEY),
@@ -820,7 +854,7 @@ BOOST_AUTO_TEST_CASE(test_date, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
 // TODAY
 
 BOOST_AUTO_TEST_CASE(test_today, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"today","value":"03:00"})", API_KEY),
@@ -849,7 +883,7 @@ BOOST_AUTO_TEST_CASE(test_today, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
 // CRON
 
 BOOST_AUTO_TEST_CASE(test_cron, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"cron","value":"-w 0,1 10:00"})", API_KEY),
@@ -876,7 +910,7 @@ BOOST_AUTO_TEST_CASE(test_cron, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
 // LATE
 
 BOOST_AUTO_TEST_CASE(test_late, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(request("post",
                             "/v1/suites/test/dynamic/attributes",
@@ -906,7 +940,7 @@ BOOST_AUTO_TEST_CASE(test_late, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
 // COMPLETE
 
 BOOST_AUTO_TEST_CASE(test_complete, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(request("post",
                             "/v1/suites/test/dynamic/attributes",
@@ -938,7 +972,7 @@ BOOST_AUTO_TEST_CASE(test_complete, *boost::unit_test::depends_on("S_Http/T_ApiV
 // AUTOCANCEL
 
 BOOST_AUTO_TEST_CASE(test_autocancel, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"+01:00"})", API_KEY),
@@ -962,7 +996,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel, *boost::unit_test::depends_on("S_Http/T_Ap
 // AUTOARCHIVE
 
 BOOST_AUTO_TEST_CASE(test_autoarchive, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autoarchive","value":"+01:00"})", API_KEY),
@@ -986,7 +1020,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive, *boost::unit_test::depends_on("S_Http/T_A
 // AUTORESTORE
 
 BOOST_AUTO_TEST_CASE(test_autorestore, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(
         request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autorestore","value":"/test/a"})", API_KEY),
@@ -1012,21 +1046,23 @@ BOOST_AUTO_TEST_CASE(test_autorestore, *boost::unit_test::depends_on("S_Http/T_A
 // OUTPUT
 
 BOOST_AUTO_TEST_CASE(test_output, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
+
     handle_response(request("get", "/v1/suites/test/a/a/output"), HttpStatusCode::client_error_not_found);
 }
 
 // SCRIPT
 
 BOOST_AUTO_TEST_CASE(test_script, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
+
     handle_response(request("get", "/v1/suites/test/a/a/script"), HttpStatusCode::client_error_not_found);
 }
 
 // DELETE FAMILY
 
 BOOST_AUTO_TEST_CASE(test_suite_family_delete, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_autorestore")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     handle_response(request("delete", "/v1/suites/test/dynamic/definition", "", API_KEY),
                     HttpStatusCode::success_no_content);
@@ -1038,7 +1074,7 @@ BOOST_AUTO_TEST_CASE(test_suite_family_delete, *boost::unit_test::depends_on("S_
 }
 
 BOOST_AUTO_TEST_CASE(test_statistics, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_server")) {
-    std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
+    ECF_NAME_THIS_TEST();
 
     auto response = handle_response(request("get", "/v1/statistics"));
     auto j        = ojson::parse(response.body);

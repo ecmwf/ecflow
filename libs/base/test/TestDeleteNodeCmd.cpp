@@ -16,6 +16,7 @@
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -25,7 +26,8 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_DeleteNodeCmd)
 
 BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
-    cout << "Base:: ...test_delete_node_cmd\n";
+    ECF_NAME_THIS_TEST();
+
     TestLog test_log(
         "test_delete_node_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
@@ -185,7 +187,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
 }
 
 BOOST_AUTO_TEST_CASE(test_delete_node_edit_history_ECFLOW_1684) {
-    cout << "Base:: ...test_delete_node_edit_history_ECFLOW_1684\n";
+    ECF_NAME_THIS_TEST();
 
     // This test will ensure that if a suite/family node is deleted, we *remove* any *OLD* edit history associated
     // with the node, AND and of its children

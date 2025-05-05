@@ -17,6 +17,7 @@
 #include "ecflow/client/UrlCmd.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -28,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(T_UrlCmd)
 //=============================================================================
 // This will test the UrlCmd.
 BOOST_AUTO_TEST_CASE(test_url_cmd) {
-    cout << "Client:: ...test_url_cmd" << endl;
+    ECF_NAME_THIS_TEST();
 
     std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 

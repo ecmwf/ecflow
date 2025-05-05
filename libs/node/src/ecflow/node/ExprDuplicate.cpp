@@ -20,7 +20,6 @@ using expression_cache_t = std::unordered_map<std::string, std::unique_ptr<AstTo
 
 static expression_cache_t duplicate_expr;
 
-
 ExprDuplicate::~ExprDuplicate() {
     duplicate_expr.clear();
 }

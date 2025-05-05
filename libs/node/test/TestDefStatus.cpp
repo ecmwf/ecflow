@@ -16,6 +16,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_DefsStatus)
 
 BOOST_AUTO_TEST_CASE(test_defstatus) {
-    cout << "ANode:: ...test_defstatus\n";
+    ECF_NAME_THIS_TEST();
 
     // Create a defs file corresponding to:
     // suite suite1
@@ -120,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_139) {
-    cout << "ANode:: ...test_ECFLOW_139\n";
+    ECF_NAME_THIS_TEST();
 
     // Create a defs file corresponding to:
     // suite suite1

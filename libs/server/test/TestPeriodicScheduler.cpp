@@ -16,6 +16,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/server/PeriodicScheduler.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 std::ostream& operator<<(std::ostream& os, const std::chrono::system_clock::time_point& tp) {
     // Create time stamp
@@ -42,8 +43,8 @@ struct Collector
     using instants_t = std::vector<instant_t>;
 
     void operator()(instant_t now, instant_t last, instant_t next, bool is_boundary = true) {
-        std::cout << "Call at " << now << ", with is_boundary? " << (is_boundary ? "true" : "false") << ". Last call was at " << last
-                  << ". Next call at " << next << "." << std::endl;
+        std::cout << "Call at " << now << ", with is_boundary? " << (is_boundary ? "true" : "false")
+                  << ". Last call was at " << last << ". Next call at " << next << "." << std::endl;
 
         // Activity must be called at minute boundary!
         if (is_boundary && !instants.empty()) {
@@ -61,11 +62,12 @@ struct LongLasting
     using instant_t = ecf::PeriodicScheduler<LongLasting>::instant_t;
 
     template <typename DURATION>
-    explicit LongLasting(const DURATION& duration) : how_long_{std::chrono::duration_cast<std::chrono::milliseconds>(duration)} {}
+    explicit LongLasting(const DURATION& duration)
+        : how_long_{std::chrono::duration_cast<std::chrono::milliseconds>(duration)} {}
 
     void operator()(instant_t now, instant_t last, instant_t next, bool is_boundary = true) {
-        std::cout << "Call at " << now << ", with is_boundary? " << (is_boundary ? "true" : "false") << ". Last call was at " << last
-                  << ". Next call at " << next << "." << std::endl;
+        std::cout << "Call at " << now << ", with is_boundary? " << (is_boundary ? "true" : "false")
+                  << ". Last call was at " << last << ". Next call at " << next << "." << std::endl;
 
         std::this_thread::sleep_for(how_long_);
     }
@@ -74,6 +76,8 @@ struct LongLasting
 };
 
 BOOST_AUTO_TEST_CASE(test_periodic_scheduler_over_one_minute) {
+    ECF_NAME_THIS_TEST();
+
     // Setup time collector
     Collector collector;
     boost::asio::io_context io;
@@ -82,7 +86,8 @@ BOOST_AUTO_TEST_CASE(test_periodic_scheduler_over_one_minute) {
 
     // Arrange time collector termination
     ecf::Timer teardown(io);
-    teardown.set([&scheduler](const boost::system::error_code& error) { scheduler.terminate(); }, std::chrono::seconds(62));
+    teardown.set([&scheduler](const boost::system::error_code& error) { scheduler.terminate(); },
+                 std::chrono::seconds(62));
 
     // Run services
     io.run();
@@ -91,6 +96,8 @@ BOOST_AUTO_TEST_CASE(test_periodic_scheduler_over_one_minute) {
 }
 
 BOOST_AUTO_TEST_CASE(test_periodic_scheduler_with_long_lasting_activity) {
+    ECF_NAME_THIS_TEST();
+
     // Setup time collector
     LongLasting activity{std::chrono::milliseconds(2499)};
     boost::asio::io_context io;
@@ -99,7 +106,8 @@ BOOST_AUTO_TEST_CASE(test_periodic_scheduler_with_long_lasting_activity) {
 
     // Arrange time collector termination
     ecf::Timer teardown(io);
-    teardown.set([&scheduler](const boost::system::error_code& error) { scheduler.terminate(); }, std::chrono::seconds(60));
+    teardown.set([&scheduler](const boost::system::error_code& error) { scheduler.terminate(); },
+                 std::chrono::seconds(60));
 
     // Run services
     io.run();

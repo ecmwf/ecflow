@@ -16,6 +16,7 @@
 #include "ZombieUtil.hpp"
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Environment.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -30,8 +31,8 @@ void ZombieUtil::test_clean_up(int timeout) {
         cout << "Client Environment:\n" << TestFixture::client().to_string() << "\n";
         cout << Zombie::pretty_print(zombies, 9) << "\n, attempting to *fob* then *remove* ...\n";
 
-        int no_fobed =
-            do_zombie_user_action(User::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
+        int no_fobed = do_zombie_user_action(
+            ZombieCtrlAction::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
 
         // In order to FOB, we must wait, till a child command, talks to the server.
         if (no_fobed) {
@@ -43,19 +44,20 @@ void ZombieUtil::test_clean_up(int timeout) {
                  << "s before attempting to remove\n";
             sleep(wait);
         }
-        (void)do_zombie_user_action(User::REMOVE, no_fobed, timeout, false /* don't fail if it takes to long */);
+        (void)do_zombie_user_action(
+            ZombieCtrlAction::REMOVE, no_fobed, timeout, false /* don't fail if it takes to long */);
     }
 }
 
-int ZombieUtil::do_zombie_user_action(User::Action uc,
+int ZombieUtil::do_zombie_user_action(ZombieCtrlAction uc,
                                       int expected_action_cnt,
                                       int max_time_to_wait,
                                       bool fail_if_to_long) {
     /// return the number of zombies set to user action;
     bool ecf_debug_zombies = false;
-    if (getenv("ECF_DEBUG_ZOMBIES")) {
+    if (ecf::environment::has("ECF_DEBUG_ZOMBIES")) {
         ecf_debug_zombies = true;
-        cout << "\n   do_zombie_user_action " << User::to_string(uc) << " expected_action_cnt " << expected_action_cnt
+        cout << "\n   do_zombie_user_action " << ecf::to_string(uc) << " expected_action_cnt " << expected_action_cnt
              << "\n";
     }
 
@@ -70,7 +72,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
         bool continue_looping       = false;
         for (const Zombie& z : zombies) {
             switch (uc) {
-                case User::FOB: {
+                case ZombieCtrlAction::FOB: {
                     if (!z.fob()) {
                         TestFixture::client().zombieFob(z); // UNBLOCK, child commands, allow zombie to complete, will
                                                             // clear server_reply().zombies()
@@ -80,7 +82,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
                     }
                     break;
                 }
-                case User::FAIL: {
+                case ZombieCtrlAction::FAIL: {
                     if (!z.fail()) {
                         TestFixture::client().zombieFail(z); // UNBLOCK, child commands, allow zombie to complete, will
                                                              // clear server_reply().zombies()
@@ -90,7 +92,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
                     }
                     break;
                 }
-                case User::ADOPT: {
+                case ZombieCtrlAction::ADOPT: {
                     if (!z.adopt()) {
                         TestFixture::client().zombieAdopt(z); // UNBLOCK, child commands, allow zombie to complete, will
                                                               // clear server_reply().zombies()
@@ -100,7 +102,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
                     }
                     break;
                 }
-                case User::REMOVE: {
+                case ZombieCtrlAction::REMOVE: {
                     if (!z.remove()) {                         // should always return false
                         TestFixture::client().zombieRemove(z); // This should be immediate, and is not remembered
                         continue_looping = true;
@@ -109,7 +111,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
                     }
                     break;
                 }
-                case User::BLOCK: {
+                case ZombieCtrlAction::BLOCK: {
                     if (!z.block()) {
                         TestFixture::client().zombieBlock(z);
                         continue_looping = true;
@@ -118,7 +120,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
                     }
                     break;
                 }
-                case User::KILL: {
+                case ZombieCtrlAction::KILL: {
                     if (!z.kill()) {
                         TestFixture::client().zombieKill(z);
                         continue_looping = true;
@@ -151,7 +153,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
 
             std::stringstream ss;
             ss << "do_zombie_user_action:\nExpected " << expected_action_cnt << " zombies with user action "
-               << User::to_string(uc) << " but found " << action_set << "\naction set zombies\n"
+               << ecf::to_string(uc) << " but found " << action_set << "\naction set zombies\n"
                << Zombie::pretty_print(action_set_zombies, 6) << ", Test taking longer than time constraint of "
                << assertTimer.timeConstraint();
             if (fail_if_to_long) {
@@ -166,7 +168,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc,
     }
 
     if (ecf_debug_zombies) {
-        cout << "   " << action_set << " zombies set to user action " << User::to_string(uc) << " returning\n";
+        cout << "   " << action_set << " zombies set to user action " << ecf::to_string(uc) << " returning\n";
         cout << Zombie::pretty_print(action_set_zombies, 6);
     }
     return action_set;

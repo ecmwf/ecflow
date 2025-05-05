@@ -23,6 +23,8 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 
+#include "ecflow/test/scaffold/Naming.hpp"
+
 class Certificate {
 public:
     Certificate() = delete;
@@ -37,13 +39,10 @@ private:
 };
 
 inline Certificate::Certificate(const std::string& path) : path_(path) {
-    // std::cout << "Generating RSA key..." << std::endl;
-
+    // Generating RSA key...
     EVP_PKEY* pkey = generate_key();
 
-    /* Generate the certificate. */
-    // std::cout << "Generating x509 certificate..." << std::endl;
-
+    // Generating x509 certificate...
     X509* x509 = generate_x509(pkey);
     if (!x509) {
         EVP_PKEY_free(pkey);
@@ -51,25 +50,23 @@ inline Certificate::Certificate(const std::string& path) : path_(path) {
         ;
     }
 
-    /* Write the private key and certificate out to disk. */
-    // std::cout << "Writing key and certificate to disk..." << std::endl;
-
+    // Writing key and certificate to disk...
     write_to_disk(pkey, x509);
 }
 
 inline Certificate::~Certificate() {
     if (remove((path_ + "/server.crt").c_str()) != 0) {
-        std::cerr << "Failed to remove file server.crt" << std::endl;
+        ECF_TEST_ERR(<< "Failed to remove file server.crt");
     }
     else {
-        std::cout << "Removed file " << (path_ + "/server.crt") << std::endl;
+        ECF_TEST_ERR(<< "Removed file " << (path_ + "/server.crt"));
     }
 
     if (remove((path_ + "/server.key").c_str()) != 0) {
-        std::cerr << "Failed to remove file server.key" << std::endl;
+        ECF_TEST_ERR(<< "Failed to remove file server.key");
     }
     else {
-        std::cout << "Removed file " << (path_ + "/server.key") << std::endl;
+        ECF_TEST_ERR(<< "Removed file " << (path_ + "/server.key"));
     }
 }
 
@@ -185,4 +182,4 @@ inline void Certificate::write_to_disk(EVP_PKEY* pkey, X509* x509) {
     }
 }
 
-#endif /* #ifndef ecflow_http_test_Certificate_HPP */
+#endif /* ecflow_http_test_Certificate_HPP */

@@ -15,6 +15,7 @@
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
@@ -45,6 +46,23 @@ using namespace ecf;
 using namespace std;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
+
+namespace {
+
+/**
+ * This helper function logs the update of a repeat attribute for the given node.
+ *
+ * @param node The node containing the repeat attribute.
+ */
+void log_repeat_value_update(const Node& node) {
+    if (const auto& repeat = node.repeat(); !repeat.empty()) {
+        LOG(ecf::Log::MSG,
+            "Repeat at " << node.absNodePath() << ":" << repeat.name() << " set to value: '" << repeat.valueAsString()
+                         << "'");
+    }
+}
+
+} // namespace
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // #define DEBUG_DEPENDENCIES 1
@@ -324,8 +342,10 @@ void Node::requeue(Requeue_args& args) {
     clearTrigger();
     clearComplete();
 
-    if (args.resetRepeats_)
+    if (args.resetRepeats_) {
         repeat_.reset(); // if repeat is empty reset() does nothing
+        log_repeat_value_update(*this);
+    }
 
     /// If a job takes longer than it slots, then that slot is missed, and next slot is used
     /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
@@ -629,6 +649,8 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
                     "requeueOrSetMostSignificantStateUpNodeTree() VALID for requeue "
                         << debugNodePath() << " for repeat at " << repeat_.toString());
 #endif
+
+                log_repeat_value_update(*this);
 
                 // Remove effects of RUN and Force complete interactive commands
                 // For automated re-queue *DUE* to Repeats, *CLEAR* any user interaction that would miss the next time
@@ -1219,7 +1241,7 @@ search_user_edit_variables(const std::string& name, std::string& value, const Na
 bool Node::variableSubstitution(std::string& cmd) const {
     char micro = '%';
     std::string micro_char;
-    findParentUserVariableValue(Str::ECF_MICRO(), micro_char);
+    findParentUserVariableValue(ecf::environment::ECF_MICRO, micro_char);
     if (!micro_char.empty() && micro_char.size() == 1) {
         micro = micro_char[0];
     }
@@ -1291,15 +1313,15 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitimately override these. ECFLOW-999
         bool generated_variable = false;
         if (percentVar.find("ECF_") == 0) {
-            if (percentVar.find(Str::ECF_HOST()) != std::string::npos)
+            if (percentVar.find(ecf::environment::ECF_HOST) != std::string::npos)
                 generated_variable = true;
-            else if (percentVar.find(Str::ECF_PORT()) != std::string::npos)
+            else if (percentVar.find(ecf::environment::ECF_PORT) != std::string::npos)
                 generated_variable = true;
-            else if (percentVar.find(Str::ECF_TRYNO()) != std::string::npos)
+            else if (percentVar.find(ecf::environment::ECF_TRYNO) != std::string::npos)
                 generated_variable = true;
-            else if (percentVar.find(Str::ECF_NAME()) != std::string::npos)
+            else if (percentVar.find(ecf::environment::ECF_NAME) != std::string::npos)
                 generated_variable = true;
-            else if (percentVar.find(Str::ECF_PASS()) != std::string::npos)
+            else if (percentVar.find(ecf::environment::ECF_PASS) != std::string::npos)
                 generated_variable = true;
         }
 
@@ -1770,7 +1792,7 @@ void Node::print(std::string& os) const {
 
     if (PrintStyle::getStyle() == PrintStyle::STATE) {
         // Distinguish normal variable from generated, by adding a #
-        // This also allows it to be read in again and compared in the AParser/tests
+        // This also allows it to be read in again and compared in the libs/node/test/parser
         std::vector<Variable> gvec;
         gen_variables(gvec);
         for (const Variable& v : gvec) {

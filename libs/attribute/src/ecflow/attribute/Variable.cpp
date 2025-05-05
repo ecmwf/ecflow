@@ -44,15 +44,17 @@ void Variable::set_name(const std::string& v) {
 }
 
 int Variable::value() const {
-    // see if the value is convertible to a integer
+    // see if the value is convertible to an integer
     return Str::to_int(v_, 0 /* value to return if conversion fails*/);
 }
 
 bool Variable::operator==(const Variable& rhs) const {
-    if (v_ != rhs.v_)
+    if (v_ != rhs.v_) {
         return false;
-    if (n_ != rhs.n_)
+    }
+    if (n_ != rhs.n_) {
         return false;
+    }
     return true;
 }
 

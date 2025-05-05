@@ -29,7 +29,7 @@ def get_root_source_dir():
             if os.path.exists(file):
                 # determine path by looking into this file:
                 for line in open(file):
-                    ## Source directory: /tmp/ma0/workspace/ecflow/ACore
+                    ## Source directory: /tmp/ma0/workspace/ecflow/libs/core
                     if line.find("Source directory"):
                         tokens = line.split()
                         if len(tokens) == 4:

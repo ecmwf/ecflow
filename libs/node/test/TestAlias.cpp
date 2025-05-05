@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Alias.hpp"
@@ -19,6 +20,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -28,8 +30,9 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_Alias)
 
 BOOST_AUTO_TEST_CASE(test_alias_create) {
-    cout << "ANode:: ...test_alias_create\n";
-    std::string ecf_home = File::test_data("ANode/test/data/alias", "ANode");
+    ECF_NAME_THIS_TEST();
+
+    std::string ecf_home = File::test_data("libs/node/test/data/alias", "libs/node");
 
     task_ptr t;
     Defs theDefs;
@@ -56,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_alias_create) {
         t->addEvent(event2);
         t->addLabel(label1);
         t->addLabel(label2);
-        s->add_variable(Str::ECF_HOME(), ecf_home);
+        s->add_variable(ecf::environment::ECF_HOME, ecf_home);
     }
 
     // Create .usr file content

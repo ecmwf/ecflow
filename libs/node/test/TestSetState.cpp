@@ -19,6 +19,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -41,7 +42,8 @@ static void test_state(node_ptr n, NState::State expected) {
 }
 
 BOOST_AUTO_TEST_CASE(test_set_state) {
-    cout << "ANode:: ...test_set_state\n";
+    ECF_NAME_THIS_TEST();
+
     std::vector<NState::State> stateVec = NState::states();
 
     // 	cout << "Defs setState\n";
@@ -95,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_set_state) {
 
 BOOST_AUTO_TEST_CASE(test_set_aborted) {
     // see ECFLOW-344
-    cout << "ANode:: ...test_set_aborted\n";
+    ECF_NAME_THIS_TEST();
 
     Defs defs;
     suite_ptr suite = defs.add_suite("s1");

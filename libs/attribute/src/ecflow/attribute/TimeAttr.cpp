@@ -162,7 +162,7 @@ bool TimeAttr::why(const ecf::Calendar& c,
         theReasonWhy += "and date ";
     theReasonWhy += "dependent";
 
-    // Check to see if time has expired, if has not, then report why
+    // Check to see if time has expired; if not, then report why
     if (ts_.is_valid()) {
         // This can apply to single and series
         boost::posix_time::time_duration calendar_time = ts_.duration(c);
@@ -226,7 +226,7 @@ bool TimeAttr::why(const ecf::Calendar& c,
             }
             else {
                 boost::gregorian::date_duration one_day(1);
-                the_min_next_date = c.date(); // todays date
+                the_min_next_date = c.date(); // today's date
                 the_min_next_date += one_day; // add one day, so its in the future
                 theReasonWhy += " next run tomorrow at ";
             }

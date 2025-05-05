@@ -13,8 +13,8 @@
 bool Ecf::server_                            = false;
 bool Ecf::debug_equality_                    = false;
 unsigned int Ecf::debug_level_               = 0;
-thread_local Ecf::atomic_counter_t Ecf::state_change_no_  = 0;
-thread_local Ecf::atomic_counter_t Ecf::modify_change_no_ = 0;
+Ecf::atomic_counter_t Ecf::state_change_no_  = 0;
+Ecf::atomic_counter_t Ecf::modify_change_no_ = 0;
 bool DebugEquality::ignore_server_variables_ = false;
 
 const char* Ecf::SERVER_NAME() {
@@ -78,20 +78,6 @@ const std::string& Ecf::URL_BASE() {
 const std::string& Ecf::URL() {
     static const std::string URL = "display/ECFLOW/ecflow+home";
     return URL;
-}
-
-Ecf::counter_t Ecf::incr_state_change_no() {
-    if (server_) {
-        return ++state_change_no_;
-    }
-    return state_change_no_;
-}
-
-Ecf::counter_t Ecf::incr_modify_change_no() {
-    if (server_) {
-        return ++modify_change_no_;
-    }
-    return modify_change_no_;
 }
 
 // =======================================================

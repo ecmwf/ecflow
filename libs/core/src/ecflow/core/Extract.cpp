@@ -59,7 +59,7 @@ bool Extract::split_get_second(const std::string& str, std::string& ret, char se
     return true;
 }
 
-/// extract integer or throw an std::runtime exception on failure
+/// extract integer or throw a std::runtime exception on failure
 int Extract::theInt(const std::string& token, const std::string& errorMsg) {
     int the_int = -1;
     try {

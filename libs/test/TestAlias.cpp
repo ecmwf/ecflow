@@ -27,6 +27,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -63,8 +64,9 @@ void wait_for_alias_to_complete(const std::string& alias_path) {
 }
 
 BOOST_AUTO_TEST_CASE(test_alias) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_alias " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below

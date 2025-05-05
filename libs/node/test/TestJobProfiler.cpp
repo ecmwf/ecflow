@@ -12,6 +12,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
@@ -21,6 +22,7 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -30,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_JobProfiler)
 
 BOOST_AUTO_TEST_CASE(test_job_profiler) {
-    cout << "ANode:: ...test_job_profiler\n";
+    ECF_NAME_THIS_TEST();
 
     // delete the log file if it exists.
     std::string log_path = File::test_data("libs/node/test/logfile.txt", "libs/node");
@@ -45,8 +47,10 @@ BOOST_AUTO_TEST_CASE(test_job_profiler) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(Str::ECF_INCLUDE(), File::test_data("libs/node/test/data/includes", "libs/node")));
-        suite->addVariable(Variable("ECF_HOME", File::test_data("libs/node/test/data/SMSHOME", "libs/node")));
+        suite->addVariable(
+            Variable(ecf::environment::ECF_INCLUDE, File::test_data("libs/node/test/data/includes", "libs/node")));
+        suite->addVariable(
+            Variable(ecf::environment::ECF_HOME, File::test_data("libs/node/test/data/SMSHOME", "libs/node")));
         suite->addVariable(Variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
         fam->add_task("t1");

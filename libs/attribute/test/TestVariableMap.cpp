@@ -11,12 +11,15 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
 BOOST_AUTO_TEST_SUITE(T_VariableMap)
 
 BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_create_empty_variable_map) {
+    ECF_NAME_THIS_TEST();
+
     VariableMap empty;
 
     BOOST_CHECK(empty.empty());
@@ -24,6 +27,8 @@ BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_create_empty_variable_map) {
 }
 
 BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_create_variable_map) {
+    ECF_NAME_THIS_TEST();
+
     VariableMap variables{Variable("n1", "v1"), Variable("n2", "v2"), Variable("n3", "v3")};
 
     BOOST_CHECK(!variables.empty());
@@ -31,6 +36,8 @@ BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_create_variable_map) {
 }
 
 BOOST_AUTO_TEST_CASE(test_variablemap_is_able_set_value_to_all_variables_in_variable_map) {
+    ECF_NAME_THIS_TEST();
+
     VariableMap variables{Variable("n1", "v1"), Variable("n2", "v2"), Variable("n3", "v3")};
 
     std::string value = "some large value just for precaution!";
@@ -43,6 +50,8 @@ BOOST_AUTO_TEST_CASE(test_variablemap_is_able_set_value_to_all_variables_in_vari
 }
 
 BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_access_variable_in_variable_map) {
+    ECF_NAME_THIS_TEST();
+
     VariableMap variables{Variable("n1", "v1"), Variable("n2", "v2"), Variable("n3", "v3")};
 
     const Variable& variable = variables["n1"];
@@ -52,6 +61,8 @@ BOOST_AUTO_TEST_CASE(test_variablemap_is_able_to_access_variable_in_variable_map
 }
 
 BOOST_AUTO_TEST_CASE(test_variablemap_throws_when_accessing_inexistent_variable_in_variable_map) {
+    ECF_NAME_THIS_TEST();
+
     VariableMap variables{Variable("n1", "v1"), Variable("n2", "v2"), Variable("n3", "v3")};
 
     Variable found;

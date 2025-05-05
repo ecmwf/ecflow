@@ -10,7 +10,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <iostream>
 #include <string>
 
 #include <boost/test/unit_test.hpp>
@@ -19,8 +18,8 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 using namespace boost;
 
@@ -29,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 BOOST_AUTO_TEST_SUITE(T_Str)
 
 BOOST_AUTO_TEST_CASE(test_str) {
-    cout << "ACore:: ...test_str\n";
+    ECF_NAME_THIS_TEST();
 
     {
         std::string str;
@@ -74,11 +73,11 @@ BOOST_AUTO_TEST_CASE(test_str) {
         BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
     }
     {
-        string test;
+        std::string test;
         BOOST_CHECK_MESSAGE(!Str::truncate_at_start(test, 7), "Empty sring should return false");
 
-        test            = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        string expected = "line";
+        test                 = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+        std::string expected = "line";
         BOOST_CHECK_MESSAGE(Str::truncate_at_start(test, 1) && test == expected,
                             "Expected:\n"
                                 << expected << "\nbut found:\n"
@@ -99,11 +98,11 @@ BOOST_AUTO_TEST_CASE(test_str) {
                                 << test);
     }
     {
-        string test;
+        std::string test;
         BOOST_CHECK_MESSAGE(!Str::truncate_at_end(test, 7), "Empty string should return false");
 
-        test            = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        string expected = "this\n";
+        test                 = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+        std::string expected = "this\n";
         BOOST_CHECK_MESSAGE(Str::truncate_at_end(test, 1) && test == expected,
                             "Expected:\n"
                                 << expected << "\nbut found:\n"
@@ -139,17 +138,15 @@ check(const std::string& line, const std::vector<std::string>& result, const std
                                          << "'");
     BOOST_CHECK_MESSAGE(result == expected, "failed for '" << line << "'");
     if (result != expected) {
-        cout << "Line    :'" << line << "'\n";
-        cout << "Actual  :";
-        for (const string& t : result) {
-            cout << "'" << t << "'";
+        ECF_TEST_DBG(<< "Line    :'" << line);
+        ECF_TEST_DBG(<< "Actual  :");
+        for (const std::string& t : result) {
+            ECF_TEST_DBG(<< "   '" << t << "'");
         }
-        cout << "\n";
-        cout << "Expected:";
-        for (const string& t : expected) {
-            cout << "'" << t << "'";
+        ECF_TEST_DBG(<< "Expected:");
+        for (const std::string& t : expected) {
+            ECF_TEST_DBG(<< "'" << t << "'");
         }
-        cout << "\n";
     }
 }
 
@@ -213,7 +210,7 @@ static void check_splitters(const std::string& line, const std::vector<std::stri
 }
 
 BOOST_AUTO_TEST_CASE(test_str_split) {
-    cout << "ACore:: ...test_str_split\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> expected;
 
@@ -308,7 +305,7 @@ BOOST_AUTO_TEST_CASE(test_str_split) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_split_make_split_iterator) {
-    cout << "ACore:: ...test_str_split_make_split_iterator\n";
+    ECF_NAME_THIS_TEST();
 
     std::string line = "This is a string";
     std::vector<std::string> expected;
@@ -440,7 +437,7 @@ static void test_replace_all(std::string& testStr,
 }
 
 BOOST_AUTO_TEST_CASE(test_str_replace) {
-    cout << "ACore:: ...test_str_replace\n";
+    ECF_NAME_THIS_TEST();
 
     std::string testStr = "This is a string";
     test_replace(testStr, "This", "That", "That is a string");
@@ -466,7 +463,7 @@ BOOST_AUTO_TEST_CASE(test_str_replace) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_replace_all) {
-    cout << "ACore:: ...test_str_replace_all\n";
+    ECF_NAME_THIS_TEST();
 
     std::string testStr = "This is a string";
     test_replace_all(testStr, "This", "That", "That is a string");
@@ -488,7 +485,8 @@ BOOST_AUTO_TEST_CASE(test_str_replace_all) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_to_int) {
-    cout << "ACore:: ...test_str(to_int)\n";
+    ECF_NAME_THIS_TEST();
+
     BOOST_CHECK_MESSAGE(Str::to_int("0") == 0, "Expected 0");
     BOOST_CHECK_MESSAGE(Str::to_int("1") == 1, "Expected 1");
     BOOST_CHECK_MESSAGE(Str::to_int("-0") == 0, "Expected 0");
@@ -504,7 +502,8 @@ BOOST_AUTO_TEST_CASE(test_str_to_int) {
 }
 
 BOOST_AUTO_TEST_CASE(test_extract_data_member_value) {
-    cout << "ACore:: ...test_extract_data_member_value\n";
+    ECF_NAME_THIS_TEST();
+
     std::string expected = "value";
     std::string actual;
     std::string str = "aa bb c fred:value";
@@ -540,7 +539,7 @@ std::string toString(const std::vector<std::string>& c) {
 }
 
 BOOST_AUTO_TEST_CASE(test_str_less_greater) {
-    cout << "ACore:: ...test_str_less_greater\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> expected;
     expected.emplace_back("a1");
@@ -642,17 +641,17 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //// ==============================================================
 class Fred {
 public:
-    explicit Fred(int i = 0) : i_(i) { /*std::cout << "Fred constructor\n"*/
+    explicit Fred(int i = 0) : i_(i) {
         // Do nothing...
     }
-    Fred(const Fred& rhs) : i_(rhs.i_) { /*std::cout << "Fred copy constructor\n";*/
+    Fred(const Fred& rhs) : i_(rhs.i_) {
         // Do nothing...
     }
-    Fred& operator=(const Fred& rhs) { /*std::cout << "assignment operator\n";*/
+    Fred& operator=(const Fred& rhs) {
         i_ = rhs.i_;
         return *this;
     }
-    ~Fred() { /*std::cout << "Fred destructor\n";*/
+    ~Fred() {
         // Do nothing...
     }
 
@@ -663,6 +662,8 @@ private:
 };
 
 BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
+    ECF_NAME_THIS_TEST();
+
     const size_t size = 200000000;
     std::vector<Fred> vec;
     vec.reserve(size);
@@ -675,25 +676,25 @@ BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
         for (auto& fred : vec) {
             fred.inc();
         }
-        cout << "Time: for(auto &fred : vec) { fred.inc(); }                                                "
-             << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< "Time: for(auto &fred : vec) { fred.inc(); }                                                "
+                     << timer.format(3, Str::cpu_timer_format()));
     }
 
     {
         boost::timer::cpu_timer timer;
         std::for_each(vec.begin(), vec.end(), [](Fred& fred) { fred.inc(); });
-        cout << "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 "
-             << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 "
+                     << timer.format(3, Str::cpu_timer_format()));
     }
 
     {
         boost::timer::cpu_timer timer;
-        std::vector<Fred>::iterator theEnd = vec.end();
-        for (std::vector<Fred>::iterator i = vec.begin(); i < theEnd; i++) {
+        auto theEnd = vec.end();
+        for (auto i = vec.begin(); i < theEnd; i++) {
             (*i).inc();
         }
-        cout << "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } "
-             << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } "
+                     << timer.format(3, Str::cpu_timer_format()));
     }
 
     {
@@ -702,8 +703,8 @@ BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
         for (size_t i = 0; i < theSize; i++) {
             vec[i].inc();
         }
-        cout << "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              "
-             << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              "
+                     << timer.format(3, Str::cpu_timer_format()));
     }
 }
 
@@ -763,7 +764,7 @@ static void method3(const std::string& str, std::vector<std::string>& stringRes,
 }
 
 BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
-    cout << "ACore:: ...test_string_to_int_conversion\n";
+    ECF_NAME_THIS_TEST();
 
     size_t the_size = 1000000;
     std::vector<std::string> stringTokens;
@@ -790,7 +791,7 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method1(numberTokens[i], stringRes, numberRes);
         }
-        cout << "Time for method1  elapsed time = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< "Time for method1  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method 1 wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method 1 wrong");
         numberRes.clear();
@@ -805,7 +806,7 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
         for (size_t i = 0; i < numberTokens.size(); i++) {
             methodX(numberTokens[i], stringRes, numberRes);
         }
-        cout << "Time for methodX  elapsed time = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< "Time for methodX  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method X wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method X wrong");
         numberRes.clear();
@@ -820,7 +821,7 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method2(numberTokens[i], stringRes, numberRes);
         }
-        cout << "Time for method2  elapsed time = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG("Time for method2  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, "method 2 wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method 2 wrong");
         numberRes.clear();
@@ -835,7 +836,7 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method3(numberTokens[i], stringRes, numberRes);
         }
-        cout << "Time for method3  elapsed time = " << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(<< "Time for method3  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes,
                             " method3 wrong numberRes.size()=" << numberRes.size()
                                                                << " expected size = " << expectedNumberRes.size());
@@ -848,7 +849,7 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
 }
 
 BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
-    cout << "ACore:: ...test_int_to_str_perf\n";
+    ECF_NAME_THIS_TEST();
 
     // Lexical_cast is approx twice as fast as using streams
     // time for ostream = 0.97
@@ -862,8 +863,8 @@ BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
             st << i;
             std::string s = st.str();
         }
-        cout << "Time for int to string using ostringstream  elapsed time = "
-             << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(
+            "Time for int to string using ostringstream  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
     }
 
     {
@@ -871,13 +872,13 @@ BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
         for (size_t i = 0; i < the_size; i++) {
             std::string s = ecf::convert_to<std::string>(i);
         }
-        cout << "Time for int to string using ecf::convert_to elapsed time = "
-             << timer.format(3, Str::cpu_timer_format()) << "\n";
+        ECF_TEST_DBG(
+            "Time for int to string using ecf::convert_to elapsed time = " << timer.format(3, Str::cpu_timer_format()));
     }
 }
 
 BOOST_AUTO_TEST_CASE(test_str_valid_name) {
-    cout << "ACore:: ...test_str_valid_name\n";
+    ECF_NAME_THIS_TEST();
 
     std::vector<std::string> valid;
     valid.emplace_back("a");

@@ -23,6 +23,7 @@ struct Options
     int port{8080};                                                             // ECF_RESTAPI_PORT
     std::string ecflow_host{"localhost"};                                       // ECF_HOST
     int ecflow_port{3141};                                                      // ECF_PORT
+    std::string host_protocol{""};                                              // ECF_HOST_PROTOCOL
     std::string tokens_file{"api-tokens.json"};                                 // ECF_RESTAPI_TOKENS_FILE
     std::string cert_directory{std::string(getenv("HOME")) + "/.ecflowrc/ssl"}; // ECF_RESTAPI_CERT_DIRECTORY
     int max_polling_interval{300};                                              // ECF_RESTAPI_MAX_POLLING_INTERVAL

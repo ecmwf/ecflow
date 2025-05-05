@@ -21,6 +21,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -45,8 +46,9 @@ BOOST_AUTO_TEST_SUITE(T_Complete)
 //      hierarchically
 // **************************************************************************
 BOOST_AUTO_TEST_CASE(test_complete) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_complete " << flush;
     TestClean clean_at_start_and_end;
 
     // Create the defs file corresponding to the text below
@@ -100,8 +102,9 @@ BOOST_AUTO_TEST_CASE(test_complete) {
 }
 
 BOOST_AUTO_TEST_CASE(test_complete_does_not_hold) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_complete_does_not_hold " << flush;
 
     /// This test shows that a complete expression should not hold a node
     /// A complete should complete a node, and not hold it
@@ -135,8 +138,9 @@ BOOST_AUTO_TEST_CASE(test_complete_does_not_hold) {
 }
 
 BOOST_AUTO_TEST_CASE(test_complete_with_empty_family) {
+    ECF_NAME_THIS_TEST();
+
     DurationTimer timer;
-    cout << "Test:: ...test_complete_with_empty_family " << flush;
 
     // Test a family with a complete expression and that has no children
 

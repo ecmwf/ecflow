@@ -48,7 +48,8 @@ struct CommandFilter
     static bool is_command(const std::string& value) { return is_task_command(value) || is_user_command(value); }
 
 private:
-    constexpr static std::array known_options{"add", "debug", "host", "password", "port", "rid", "ssl", "user"};
+    constexpr static std::array
+        known_options{"add", "debug", "host", "password", "port", "rid", "ssl", "user", "http", "https"};
 };
 
 const char* client_env_description =
@@ -59,7 +60,7 @@ const char* client_env_description =
     "| ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |\n"
     "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
 #ifdef ECF_OPENSSL
-    "| ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |\n"
+    "| ECF_SSL  |  <any>   | Optional*  | Enable secure communication between client and server.            |\n"
 #endif
     "|----------|----------|------------|-------------------------------------------------------------------|"
     "\n\n"

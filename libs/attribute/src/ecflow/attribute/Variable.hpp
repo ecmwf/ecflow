@@ -12,9 +12,8 @@
 #define ecflow_attribute_Variable_HPP
 
 #include <string>
-#include <vector>
-
 #include <unordered_map>
+#include <vector>
 
 namespace cereal {
 class access;
@@ -25,11 +24,12 @@ class access;
 // Use compiler , generated destructor, assignment,  copy constructor
 class Variable {
 public:
-    // This constructor added as an optimisation to avoid, checking variable names.
-    // i.e the generated variables, and created by the default constructors of Suite/Family/Task etc
-    // These are called during serialisation, hence to avoid checking generated names, we know are valid
-    // use this constructor. The bool is used as a dummy argument, so that we call the right constructor
-    Variable(const std::string& name, const std::string& value, bool /*check_names_dummy*/) : n_(name), v_(value) {}
+    // This constructor was added as an optimisation, to avoid checking variable names.
+    // This constructor allows easily create generated variables, and is also useful on default constructors of
+    // Suites, Families, and Tasks. This is also used during serialisation, to avoid checking generated names that are
+    // guaranteed to be valid.
+    // Notice that the bool argument is used as a "tag" argument and not actually used.
+    Variable(const std::string& name, const std::string& value, [[maybe_unused]] bool check) : n_(name), v_(value) {}
     Variable(const std::string& name, const std::string& value);
     Variable() = default;
 

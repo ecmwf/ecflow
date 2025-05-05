@@ -17,6 +17,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -28,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(U_Attributes)
 BOOST_AUTO_TEST_SUITE(T_DayAttr)
 
 BOOST_AUTO_TEST_CASE(test_day_attr) {
-    cout << "ANattr:: ...test_day_attr\n";
+    ECF_NAME_THIS_TEST();
 
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
@@ -49,8 +50,6 @@ BOOST_AUTO_TEST_CASE(test_day_attr) {
         calendar.update(time_duration(hours(1)));
         // if (calendar.dayChanged())
         //     day_changed++;
-
-        // cout << " day_changed(" << day_changed << ") calendar.day_of_week() = " <<  calendar.day_of_week() << "\n";
 
         day.calendarChanged(calendar);
 
@@ -78,7 +77,8 @@ BOOST_AUTO_TEST_CASE(test_day_attr) {
 }
 
 BOOST_AUTO_TEST_CASE(test_day_attr_constructor) {
-    cout << "ANattr:: ...test_day_attr_constructor \n";
+    ECF_NAME_THIS_TEST();
+
     {
         DayAttr day;
         BOOST_CHECK_MESSAGE(day.day() == DayAttr::SUNDAY, "");
@@ -113,8 +113,8 @@ static DayAttr print_and_parse_attr(DayAttr& day) {
 }
 
 BOOST_AUTO_TEST_CASE(test_day_parsing) {
+    ECF_NAME_THIS_TEST();
 
-    cout << "ANattr:: ...test_day_parsing\n";
     {
         DayAttr day(DayAttr::WEDNESDAY);
         day.setFree();

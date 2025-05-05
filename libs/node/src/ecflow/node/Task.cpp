@@ -15,6 +15,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Indentor.hpp"
@@ -214,7 +215,7 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
             throw std::runtime_error(ss.str());
         }
 
-        findParentUserVariableValue(Str::ECF_HOME(), dir_to_create);
+        findParentUserVariableValue(ecf::environment::ECF_HOME, dir_to_create);
         dir_to_create += absNodePath();
         if (!File::createDirectories(dir_to_create)) {
             throw std::runtime_error("Task::add_alias: could not create directory " + dir_to_create);
@@ -519,7 +520,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
         // If the task was aborted, and we have not exceeded ECF_TRIES, then resubmit
         // otherwise ONLY in state QUEUED can we submit jobs
         std::string varValue;
-        if (findParentUserVariableValue(Str::ECF_TRIES(), varValue)) {
+        if (findParentUserVariableValue(ecf::environment::ECF_TRIES, varValue)) {
             // std::cout << "tryNo_ = " << tryNo_ << " ECF_TRIES = " <<  varValue << "\n";
             try {
                 auto ecf_tries = ecf::convert_to<int>(varValue);
@@ -596,7 +597,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
         // Locate the ecf files corresponding to the task. Pre-process
         // them(i.e expand includes, remove comments,manual) and perform
         // variable substitution. This will then form the jobs file.
-        // If the job file already exist it is overridden
+        // If the job file already exists it is overridden
         submit_job_only(jobsParam);
     }
     else {
@@ -816,7 +817,7 @@ const std::string& Task::script_extension() const {
     // Migration support, allow user to specify extension. This allows users to use '.sms'
     // Note: This should be removed in the future since there is performance hit.
     //       searching up the node tree, when most of the time we are using .ecf
-    const std::string& ecf_extn = find_parent_user_variable_value(Str::ECF_EXTN());
+    const std::string& ecf_extn = find_parent_user_variable_value(ecf::environment::ECF_EXTN);
     if (!ecf_extn.empty())
         return ecf_extn;
     return File::ECF_EXTN(); // ".ecf"

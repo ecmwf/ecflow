@@ -13,6 +13,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -22,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_MissNextTimeSlot)
 
 BOOST_AUTO_TEST_CASE(test_miss_next_time_slot) {
-    cout << "ANode:: ...test_miss_next_time_slot\n";
+    ECF_NAME_THIS_TEST();
 
     // Start TIME at 9:30
     // This test is custom. When the user interactively forces a node to the complete state,

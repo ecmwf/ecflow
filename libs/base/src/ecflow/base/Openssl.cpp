@@ -11,9 +11,9 @@
 #include "ecflow/base/Openssl.hpp"
 
 #include <cassert>
-#include <cstdlib> // getenv
 #include <stdexcept>
 
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
@@ -28,19 +28,24 @@ std::string Openssl::info() const {
     return ssl_ + " : enabled : uses server/port specific ssl certificates";
 }
 
+std::string Openssl::selected_crt() const {
+    if (enabled()) {
+        return ssl_ == "1" ? "server.crt" : ssl_ + ".crt";
+    }
+
+    return "";
+}
+
 bool Openssl::enable_no_throw(std::string host, const std::string& port, const std::string& ecf_ssl_env) {
     if (host == Str::LOCALHOST())
         host = Host().name();
 
-    //   if (Ecf::server()) cout << "Openssl::enable(SERVER) ---> input host:" << host << " port:" << port << " ECF_SSL
-    //   = " << ecf_ssl_env << "\n"; else               cout << "Openssl::enable(CLIENT) ---> input host:" << host << "
-    //   port:" << port << " ECF_SSL = " << ecf_ssl_env << "\n";
-
     if (ecf_ssl_env.empty() || ecf_ssl_env == "1") {
         // LOOK for      $HOME/.ecflowrc/ssl/server.crt
         // THEN LOOK for $HOME/.ecflowrc/ssl/<host>.<port>.crt
-        // Look for the certificate that HAVE to exist on both client and server. i.e Self signed certificate (CRT)
+        // Look for the certificate that HAS to exist on both client and server, i.e. self-signed certificate (CRT)
         // Needed for testing, avoid <host>.<port>.crt when ports numbers are auto generated
+
         ssl_ = "1";
         if (!fs::exists(crt())) { // crt() uses ssl_
 
@@ -63,7 +68,7 @@ bool Openssl::enable_no_throw(std::string host, const std::string& port, const s
             return false;
         }
     }
-    // cout << "Openssl::enable input ssl_:'" << ssl_ << "'\n";
+
     return true;
 }
 
@@ -80,9 +85,8 @@ void Openssl::enable(std::string host, const std::string& port) {
 }
 
 void Openssl::enable_if_defined(std::string host, const std::string& port) {
-    char* ecf_ssl = getenv("ECF_SSL");
-    if (ecf_ssl) {
-        std::string ecf_ssl_env = ecf_ssl;
+    if (auto ecf_ssl = ecf::environment::fetch<std::string>(ecf::environment::ECF_SSL); ecf_ssl) {
+        std::string ecf_ssl_env = ecf_ssl.value();
 
         if (host == Str::LOCALHOST())
             host = Host().name();
@@ -161,14 +165,12 @@ std::string Openssl::get_password() const {
 }
 
 std::string Openssl::certificates_dir() const {
-    if (auto found = getenv("ECF_SSL_DIR"); found) {
+    if (auto found = ecf::environment::fetch<std::string>("ECF_SSL_DIR"); found) {
         // This is used for testing, to avoid using the default location
-        return found;
+        return found.value();
     }
     else {
-        std::string home_path = getenv("HOME");
-        home_path += "/.ecflowrc/ssl/";
-        return home_path;
+        return ecf::environment::get<std::string>("HOME") + "/.ecflowrc/ssl/";
     }
 }
 

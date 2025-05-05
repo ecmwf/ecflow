@@ -21,6 +21,7 @@
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/User.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -33,16 +34,18 @@ BOOST_AUTO_TEST_SUITE(T_LogAndCheckptErrors)
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
 // ************************************************************************************
 BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
+    ECF_NAME_THIS_TEST();
+
     // This test needs to change directory *BEFORE* before the server starts.
     // Hence if the server is already running ignore this test.
     if (!ClientEnvironment::hostSpecified().empty()) {
-        cout << "Client:: ...test_log_and_checkpt_write_errors. IGNORING when server is already running" << endl;
+        cout << "Ignoring test when server is already running" << endl;
         return;
     }
 
     // When this test is run in Bamboo/Docker, the users is root, hence the chmod below will not work and test will fail
-    if (User::login_name() == "root") {
-        cout << "Client:: ...test_log_and_checkpt_write_errors. IGNORING when user is root." << endl;
+    if (get_login_name() == "root") {
+        cout << "Ignoring test when user is root." << endl;
         return;
     }
 

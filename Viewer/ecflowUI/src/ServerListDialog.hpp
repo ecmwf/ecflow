@@ -14,6 +14,7 @@
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 
+#include "ecflow/base/ServerProtocol.hpp"
 #include "ui_ServerAddDialog.h"
 #include "ui_ServerEditDialog.h"
 #include "ui_ServerListDialog.h"
@@ -45,14 +46,14 @@ public:
                      QString port,
                      QString user,
                      bool favourite,
-                     bool ssl,
+                     ecf::Protocol protocol,
                      QWidget* parent = nullptr);
 
     QString name() const;
     QString host() const;
     QString port() const;
     QString user() const;
-    bool isSsl() const;
+    ecf::Protocol protocol() const;
     bool isFavourite() const;
 
 public Q_SLOTS:
@@ -73,7 +74,7 @@ public:
     QString port() const;
     QString user() const;
     bool addToView() const;
-    bool isSsl() const;
+    ecf::Protocol protocol() const;
 
 public Q_SLOTS:
     void accept() override;
@@ -156,9 +157,10 @@ public:
         PortColumn      = 3,
         UserColumn      = 4,
         SystemColumn    = 5,
-        SslColumn       = 6,
+        ProtocolColumn  = 6,
         FavouriteColumn = 7,
         UseColumn       = 8
+        // when updating the columns list, ensure to update the columnCount() method to refer to last enum entry
     };
     enum CustomItemRole { IconStatusRole = Qt::UserRole + 1 };
 

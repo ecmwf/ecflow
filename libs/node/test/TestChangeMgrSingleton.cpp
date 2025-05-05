@@ -16,6 +16,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -62,7 +63,8 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_ChangeMgrSingleton)
 
 BOOST_AUTO_TEST_CASE(test_change_mgr_singleton) {
-    cout << "ANode:: ...test_change_mgr_singleton\n";
+    ECF_NAME_THIS_TEST();
+
     {
         defs_ptr theDefs = Defs::create();
 

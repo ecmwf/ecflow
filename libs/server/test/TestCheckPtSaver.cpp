@@ -14,11 +14,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/server/CheckPtSaver.hpp"
-
-// TODO: Move the following trace_*_function to a common test module/library
-static void trace_test() {
-    std::cout << "..." << boost::unit_test::framework::current_test_case().full_name() << "\n";
-}
+#include "ecflow/test/scaffold/Naming.hpp"
 
 /**
  * A self cleaning test file, useful to automate test data storage/cleanup, with automatic generation of file names.
@@ -72,7 +68,7 @@ BOOST_AUTO_TEST_SUITE(U_Server)
 BOOST_AUTO_TEST_SUITE(T_CheckPtSaver)
 
 BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case0) {
-    trace_test();
+    ECF_NAME_THIS_TEST();
 
     // Case 0: neither current and backup exist
 
@@ -86,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case0) {
 }
 
 BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case1) {
-    trace_test();
+    ECF_NAME_THIS_TEST();
 
     // Case 1: current and backup both exist and are non-empty
 
@@ -100,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case1) {
 }
 
 BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case2) {
-    trace_test();
+    ECF_NAME_THIS_TEST();
 
     // Case 2: current and backup both exist, and current is empty
 
@@ -114,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_checkpt_store_successful_case3) {
-    trace_test();
+    ECF_NAME_THIS_TEST();
 
     // Case 3: current exists, but no backup is available
 

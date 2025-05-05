@@ -203,4 +203,4 @@ void visit_parents(I& item, V&& visitor) {
 
 } // namespace ecf
 
-#endif // ecflow_node_Operations_HPP
+#endif /* ecflow_node_Operations_HPP */
