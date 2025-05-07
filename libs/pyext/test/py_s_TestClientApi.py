@@ -630,7 +630,8 @@ def test_client_stats_without_stdout(ci):
     with CustomStdOut() as out:
         stats = ci.stats(False)
         assert "statistics" in stats, "Expected 'statistics' in the response"
-        assert not out.value(), "No captured output expected"
+        output = out.value()
+        assert not output, f"No captured output expected, found '{output}'"
 
 
 def test_client_stats_reset(ci):
