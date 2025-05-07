@@ -18,7 +18,7 @@ General
 
 - **Improvement** enable Alter command to add Events and Meters :jiraissue:`ECFLOW-1915`
 - **Improvement** add log entries to register changes to Variables/Triggers/Completed :jiraissue:`ECFLOW-2019`
-- **Improvement** add log entries to register *Repeat* value per iteration:jiraissue:`ECFLOW-2018`
+- **Improvement** add log entries to register *Repeat* value per iteration :jiraissue:`ECFLOW-2018`
 - **Improvement** enable support for recent CMake versions (no longer using FindBoost module) :jiraissue:`ECFLOW-1972`
 
 - **Improvements** multiple fixes to source code to allow building with latest GNU/Clang compilers and dependencies
