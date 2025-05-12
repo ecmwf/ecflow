@@ -20,6 +20,7 @@
 #include "ecflow/node/Permissions.hpp"
 
 class AbstractServer;
+class Defs;
 
 namespace ecf {
 
@@ -49,7 +50,7 @@ public:
         return true;
     }
 
-    ActivePermissions permissions_at(const AbstractServer& server, const path_t& path) const;
+    ActivePermissions permissions_at(const Defs& defs, const path_t& path) const;
 
     /**
      * Verify if the identity is allowed to perform the action on the give paths.
@@ -60,13 +61,13 @@ public:
      * @return true if the identity is allowed to perform the action, false otherwise
      */
     [[nodiscard]]
-    bool allows(const Identity& identity, const AbstractServer& server, Allowed required) const;
+    bool allows(const Identity& identity, const Defs& defs, Allowed required) const;
 
     [[nodiscard]]
-    bool allows(const Identity& identity, const AbstractServer& server, const path_t& path, Allowed required) const;
+    bool allows(const Identity& identity, const Defs& defs, const path_t& path, Allowed required) const;
 
     [[nodiscard]]
-    bool allows(const Identity& identity, const AbstractServer& server, const paths_t& paths, Allowed required) const;
+    bool allows(const Identity& identity, const Defs& defs, const paths_t& paths, Allowed required) const;
 
     [[nodiscard]]
     static result_t load_permissions_from_nodes();
