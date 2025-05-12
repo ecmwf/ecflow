@@ -13,6 +13,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/Algorithms.hpp"
 #include "ecflow/core/Overload.hpp"
+#include "ecflow/node/Defs.hpp"
 
 namespace ecf {
 
@@ -53,7 +54,7 @@ bool AuthorisationService::good() const {
     return impl_ != nullptr;
 }
 
-ActivePermissions AuthorisationService::permissions_at(const AbstractServer& server, const path_t& path) const {
+ActivePermissions AuthorisationService::permissions_at(const Defs& defs, const path_t& path) const {
     assert(good()); // It is up to the caller to check has been properly configured
 
     ActivePermissions active;
@@ -63,7 +64,7 @@ ActivePermissions AuthorisationService::permissions_at(const AbstractServer& ser
                             // Dangerous, but backward compatible!
                             active = ActivePermissions::make_empty();
                         },
-                        [&server, &active, &path](const Rules& rules) {
+                        [&defs, &active, &path](const Rules& rules) {
                             struct Visitor
                             {
                                 Visitor(ActivePermissions& collected) : collected_{collected} {}
@@ -96,11 +97,10 @@ ActivePermissions AuthorisationService::permissions_at(const AbstractServer& ser
                                 ActivePermissions& collected_;
                             };
 
-                            auto d = server.defs();
                             auto p = Path::make(path).value();
                             auto v = Visitor{active};
 
-                            ecf::visit(*d, p, v);
+                            ecf::visit(defs, p, v);
                         }
 
                },
@@ -109,19 +109,19 @@ ActivePermissions AuthorisationService::permissions_at(const AbstractServer& ser
     return active;
 }
 
-bool AuthorisationService::allows(const Identity& identity, const AbstractServer& server, Allowed required) const {
-    return allows(identity, server, paths_t{ROOT}, required);
+bool AuthorisationService::allows(const Identity& identity, const Defs& defs, Allowed required) const {
+    return allows(identity, defs, paths_t{ROOT}, required);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
+                                  const Defs& defs,
                                   const path_t& path,
                                   Allowed required) const {
-    return allows(identity, server, paths_t{path}, required);
+    return allows(identity, defs, paths_t{path}, required);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
+                                  const Defs& defs,
                                   const paths_t& paths,
                                   Allowed required) const {
     if (!good()) {
@@ -131,7 +131,7 @@ bool AuthorisationService::allows(const Identity& identity,
     }
 
     for (auto&& path : paths) {
-        if (auto&& perms = permissions_at(server, path); !perms.allows(identity.username(), required)) {
+        if (auto&& perms = permissions_at(defs, path); !perms.allows(identity.username(), required)) {
             return false;
         }
     }

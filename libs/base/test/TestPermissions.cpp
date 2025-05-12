@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(can_do_permissions) {
     AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
 
     {
-        auto selected = service.permissions_at(server, "/s1/f1/t1"s);
+        auto selected = service.permissions_at(d, "/s1/f1/t1"s);
 
         BOOST_REQUIRE(selected.allows(Username{"a"}, Allowed::READ));
         BOOST_REQUIRE(selected.allows(Username{"a"}, Allowed::WRITE));

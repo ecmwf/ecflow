@@ -52,6 +52,7 @@
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
 #include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
+#include "ecflow/node/Defs.hpp"
 #include "ecflow/server/BaseServer.hpp"
 
 namespace ecf {
@@ -79,8 +80,6 @@ std::vector<std::string> get_affected_paths(const COMMAND& command) {
 
 template <typename COMMAND>
 authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractServer& server) {
-    auto base = dynamic_cast<BaseServer*>(&server);
-
     static_assert(std::is_base_of_v<TaskCmd, COMMAND> || std::is_base_of_v<UserCmd, COMMAND>,
                   "The command must be either a TaskCmd or a UserCmd");
 
@@ -91,8 +90,9 @@ authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractS
 
     std::vector<std::string> paths = get_affected_paths(command);
 
-    auto required = Authoriser<COMMAND>::required(command);
-    if (base->authorisation().allows(command.identity(), *base, paths, required)) {
+    auto required    = Authoriser<COMMAND>::required(command);
+    const Defs& defs = *server.defs();
+    if (server.authorisation().allows(command.identity(), defs, paths, required)) {
         return authorisation_t::success("Authorisation (user) granted");
     }
 
