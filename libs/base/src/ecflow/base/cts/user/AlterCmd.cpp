@@ -294,7 +294,7 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const {
     Defs* defs = as->defs().get();
 
     if (del_attr_type_ == AlterCmd::DEL_VARIABLE) {
-        defs->set_server().delete_user_variable(name_);
+        defs->server_state().delete_user_variable(name_);
     }
     else if (change_attr_type_ == AlterCmd::VARIABLE || add_attr_type_ == AlterCmd::ADD_VARIABLE) {
 
@@ -305,7 +305,7 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const {
             ss << "AlterCmd:: Cannot add or change read only server variable " << name_;
             throw std::runtime_error(ss.str());
         }
-        defs->set_server().add_or_update_user_variables(name_, value_);
+        defs->server_state().add_or_update_user_variables(name_, value_);
     }
 
     // Update defs flag state
@@ -315,9 +315,9 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const {
         else {
             defs->flag().clear(flag_type_);
             if (flag_type_ == Flag::LOG_ERROR)
-                defs->set_server().delete_user_variable("ECF_LOG_ERROR");
+                defs->server_state().delete_user_variable("ECF_LOG_ERROR");
             if (flag_type_ == Flag::CHECKPT_ERROR)
-                defs->set_server().delete_user_variable("ECF_CHECKPT_ERROR");
+                defs->server_state().delete_user_variable("ECF_CHECKPT_ERROR");
         }
     }
 

@@ -65,19 +65,19 @@ BOOST_AUTO_TEST_CASE(test_defs_absorb_server_user_variables) {
     Defs theDefs;
     Defs otherDefs;
     {
-        otherDefs.set_server().add_or_update_user_variables("VAR1", "VAL");
-        otherDefs.set_server().add_or_update_user_variables("VAR2", "VAL");
-        otherDefs.set_server().add_or_update_user_variables("VAR3", "VAL");
+        otherDefs.server_state().add_or_update_user_variables("VAR1", "VAL");
+        otherDefs.server_state().add_or_update_user_variables("VAR2", "VAL");
+        otherDefs.server_state().add_or_update_user_variables("VAR3", "VAL");
         otherDefs.add_suite("suite");
     }
 
-    BOOST_CHECK_MESSAGE(theDefs.server().user_variables().empty(), "Expected no server user variables");
+    BOOST_CHECK_MESSAGE(theDefs.server_state().user_variables().empty(), "Expected no server user variables");
 
     theDefs.absorb(&otherDefs, true);
 
     BOOST_CHECK_MESSAGE(otherDefs.suiteVec().empty(), "absorb failed");
     BOOST_CHECK_MESSAGE(theDefs.suiteVec().size() == 1, "absorb failed");
-    BOOST_CHECK_MESSAGE(theDefs.server().user_variables().size() == 3, "Expected 3 server user variables");
+    BOOST_CHECK_MESSAGE(theDefs.server_state().user_variables().size() == 3, "Expected 3 server user variables");
 }
 
 BOOST_AUTO_TEST_CASE(test_ECFLOW_1684) {

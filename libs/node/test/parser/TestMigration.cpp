@@ -581,21 +581,21 @@ BOOST_AUTO_TEST_CASE(test_server_state) {
     PersistHelper helper(true /* compare edit History */);
     {
         Defs defs;
-        defs.set_server().set_state(SState::HALTED);
+        defs.server_state().set_state(SState::HALTED);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Set server state failed " << helper.errorMsg());
     }
     {
         Defs defs;
-        defs.set_server().set_state(SState::RUNNING);
+        defs.server_state().set_state(SState::RUNNING);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Set server state failed " << helper.errorMsg());
     }
     {
         Defs defs;
-        defs.set_server().set_state(SState::SHUTDOWN);
+        defs.server_state().set_state(SState::SHUTDOWN);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Set server state failed " << helper.errorMsg());
@@ -606,7 +606,7 @@ BOOST_AUTO_TEST_CASE(test_server_state) {
         vec.emplace_back("name", "value1");
         vec.emplace_back("name2", "val with 'spaces' ");
         vec.emplace_back("name3", "");
-        defs.set_server().set_user_variables(vec);
+        defs.server_state().set_user_variables(vec);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Set server variables failed " << helper.errorMsg());

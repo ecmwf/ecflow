@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test_signal_SIGTERM) {
     BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "Sync local failed\n" << theClient.errorMsg());
 
     // Get the process id of the server
-    const std::string& ecf_pid = theClient.defs()->server().find_variable("ECF_PID");
+    const std::string& ecf_pid = theClient.defs()->server_state().find_variable("ECF_PID");
     BOOST_REQUIRE_MESSAGE(!ecf_pid.empty(), "ECF_PID not set in the server");
 
     // Send a SIGTERM to the server and ensure that a check point file is created

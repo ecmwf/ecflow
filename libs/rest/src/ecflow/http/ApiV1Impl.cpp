@@ -218,9 +218,9 @@ ojson get_server_attributes() {
 
     ojson j;
 
-    j["variables"] = get_defs()->server().user_variables();
+    j["variables"] = get_defs()->server_state().user_variables();
 
-    for (auto v : get_defs()->server().server_variables()) {
+    for (auto v : get_defs()->server_state().server_variables()) {
         ojson _j    = v;
         _j["const"] = true;
         j["variables"].push_back(_j);
@@ -288,8 +288,8 @@ ojson get_node_attributes(const std::string& path) {
         });
 
         // ... and from server
-        auto server_variables = get_defs()->server().server_variables();
-        auto user_variables   = get_defs()->server().user_variables();
+        auto server_variables = get_defs()->server_state().server_variables();
+        auto user_variables   = get_defs()->server_state().user_variables();
         server_variables.insert(server_variables.end(), user_variables.begin(), user_variables.end());
 
         inherited.push_back(ojson::object({{"name", "server"}, {"path", "/"}, {"variables", server_variables}}));
@@ -890,7 +890,7 @@ ojson update_server_attribute(const httplib::Request& request) {
     const std::string name  = payload.at("name");
     const std::string value = payload.at("value");
 
-    if (std::string x; !get_defs()->server().find_user_variable(name, x)) {
+    if (std::string x; !get_defs()->server_state().find_user_variable(name, x)) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "User variable not found");
     }
     else if (type != "variable") {
@@ -911,7 +911,7 @@ ojson delete_server_attribute(const httplib::Request& request) {
     const std::string type = payload.at("type");
     const std::string name = payload.at("name");
 
-    if (std::string x; !get_defs()->server().find_user_variable(name, x)) {
+    if (std::string x; !get_defs()->server_state().find_user_variable(name, x)) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "User variable not found");
     }
     else if (type != "variable") {

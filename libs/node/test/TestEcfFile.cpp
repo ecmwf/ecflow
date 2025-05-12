@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -488,7 +488,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -569,7 +569,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -663,7 +663,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -738,7 +738,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -808,7 +808,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -881,7 +881,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     }
 
     // Override ECF_HOME.   ECF_HOME is need to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -1062,7 +1062,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
     // cout << theDefs << "\n";
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files
@@ -1159,7 +1159,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
     // cout << theDefs << "\n";
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files
@@ -1233,7 +1233,7 @@ BOOST_AUTO_TEST_CASE(test_manual_files) {
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -1321,7 +1321,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files
@@ -1385,7 +1385,7 @@ static void basic_test_template(const std::string& test_name,
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
     // or when file does not exist in ECF_INCLUDE
     std::string ecf_home = File::test_data("libs/node/test/data", "libs/node");
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files

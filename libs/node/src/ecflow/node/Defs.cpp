@@ -78,9 +78,9 @@ void Defs::copy_defs_state_only(const defs_ptr& server_defs) {
     flag_ = server_defs->get_flag();
 
     // Initialise the server state
-    set_server().set_state(server_defs->server().get_state());
-    set_server().set_user_variables(server_defs->server().user_variables());
-    set_server().set_server_variables(server_defs->server().server_variables());
+    server_state().set_state(server_defs->server_state().get_state());
+    server_state().set_user_variables(server_defs->server_state().user_variables());
+    server_state().set_server_variables(server_defs->server_state().server_variables());
 }
 
 Defs& Defs::operator=(const Defs& rhs) {
@@ -373,7 +373,7 @@ void Defs::absorb(Defs* input_defs, bool force) {
     LOG_ASSERT(input_defs->suiteVec().empty(), "Defs::absorb");
 
     // Copy over server user variables
-    set_server().add_or_update_user_variables(input_defs->server().user_variables());
+    server_state().add_or_update_user_variables(input_defs->server_state().user_variables());
 
     // This only works on the client side. since server does not store externs
     const set<string>& ex = input_defs->externs();
@@ -701,7 +701,7 @@ void Defs::print(std::string& os) const {
 
     if (PrintStyle::getStyle() == PrintStyle::STATE) {
         os += "# server state: ";
-        os += SState::to_string(server().get_state());
+        os += SState::to_string(server_state().get_state());
         os += "\n";
     }
 
@@ -749,9 +749,9 @@ void Defs::write_state(std::string& os) const {
         os += " modify_change:";
         os += ecf::convert_to<std::string>(modify_change_no_);
     }
-    if (server().get_state() != ServerState::default_state()) {
+    if (server_state().get_state() != ServerState::default_state()) {
         os += " server_state:";
-        os += SState::to_string(server().get_state());
+        os += SState::to_string(server_state().get_state());
     }
 
     // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
@@ -760,12 +760,12 @@ void Defs::write_state(std::string& os) const {
     os += "\n";
 
     // This read by the DefsParser
-    const std::vector<Variable>& server_user_variables = server().user_variables();
+    const std::vector<Variable>& server_user_variables = server_state().user_variables();
     size_t the_size                                    = server_user_variables.size();
     for (size_t i = 0; i < the_size; ++i)
         server_user_variables[i].print(os);
 
-    const std::vector<Variable>& server_variables = server().server_variables();
+    const std::vector<Variable>& server_variables = server_state().server_variables();
     the_size                                      = server_variables.size();
     for (size_t i = 0; i < the_size; ++i)
         server_variables[i].print_server_variable(os); // edit var value # server
@@ -872,7 +872,7 @@ void Defs::read_state(const std::string& line, const std::vector<std::string>& l
                 throw std::runtime_error("Defs::read_state: Invalid server_state specified : " + line);
             if (!SState::isValid(token))
                 throw std::runtime_error("Defs::read_state: Invalid server_state specified : " + line);
-            set_server().set_state(SState::toState(token));
+            server_state().set_state(SState::toState(token));
         }
         else if (line_token_i.find("cal_count:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token))
@@ -973,7 +973,7 @@ bool Defs::operator==(const Defs& rhs) const {
         return false;
     }
 
-    if (server_ != rhs.server()) {
+    if (server_ != rhs.server_state()) {
 #ifdef DEBUG
         if (Ecf::debug_equality()) {
             std::cout << "Defs::operator== server_ != rhs.server())\n";

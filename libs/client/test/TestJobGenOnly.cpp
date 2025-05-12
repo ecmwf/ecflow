@@ -68,13 +68,13 @@ BOOST_AUTO_TEST_CASE(test_jobgenonly) {
     BOOST_REQUIRE_MESSAGE(theDefs.restore(defsFile, errorMsg, warningMsg), errorMsg);
 
     // Override ECF_HOME. ECF_HOME is needed to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     // provide definition of ECF_CLIENT. This should replace smsinit, smscomplete, smsevent,etc
     // with path to the ecf client
     std::string clientPath = File::find_ecf_client_path();
     BOOST_REQUIRE_MESSAGE(!clientPath.empty(), "Could not find path to client executable");
-    theDefs.set_server().add_or_update_user_variables("ECF_CLIENT", clientPath);
+    theDefs.server_state().add_or_update_user_variables("ECF_CLIENT", clientPath);
 
     // JobCreationCtrl is used control what node we generate the jobs for:
     // Since we have not set the node on it, we force job generation for all tasks

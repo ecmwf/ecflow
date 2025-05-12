@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
 
     // To compare the defs, we need to massage theDefsFixture
     // update server state to match server, and update flag, caused by restoreDefsFromCheckPt
-    defs_to_be_check_pointed->set_server().set_state(SState::HALTED);
+    defs_to_be_check_pointed->server_state().set_state(SState::HALTED);
     defs_to_be_check_pointed->flag().set(ecf::Flag::MESSAGE);
 
     // Specifically ignore server variables, as the port numbers are different( and therefore checkpt,log, etc will not

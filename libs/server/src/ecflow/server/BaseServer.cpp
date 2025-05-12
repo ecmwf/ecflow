@@ -211,15 +211,15 @@ void BaseServer::update_defs_server_state() {
     // ECF_CHECKOLD ecf.check.b
     std::vector<std::pair<std::string, std::string>> envVec;
     serverEnv_.variables(envVec);
-    defs_->set_server().add_or_update_server_variables(envVec);
+    defs_->server_state().add_or_update_server_variables(envVec);
 
-    defs_->set_server().hostPort(serverEnv_.hostPort());
-    defs_->set_server().set_state(serverState_);
+    defs_->server_state().hostPort(serverEnv_.hostPort());
+    defs_->server_state().set_state(serverState_);
 
     // let the defs store the job submission interval, & whether we want job generation.testing can disable this
-    defs_->set_server().jobSubmissionInterval(serverEnv_.submitJobsInterval());
-    defs_->set_server().jobGeneration(serverEnv_.jobGeneration());
-    LOG_ASSERT(defs_->server().jobSubmissionInterval() != 0, "");
+    defs_->server_state().jobSubmissionInterval(serverEnv_.submitJobsInterval());
+    defs_->server_state().jobGeneration(serverEnv_.jobGeneration());
+    LOG_ASSERT(defs_->server_state().jobSubmissionInterval() != 0, "");
 
     // Since we have reloaded Defs, make sure clients, re-sync by resetting change and modify numbers on server
     defs_->set_state_change_no(Ecf::state_change_no());
@@ -232,7 +232,7 @@ void BaseServer::update_defs_server_state() {
 void BaseServer::set_server_state(SState::State ss) {
     serverState_    = ss;
     stats().status_ = static_cast<int>(serverState_);
-    defs_->set_server().set_state(serverState_);
+    defs_->server_state().set_state(serverState_);
 }
 
 /// ======================================================================================
@@ -251,7 +251,7 @@ void BaseServer::updateDefs(defs_ptr defs, bool force) {
     defs_->absorb(defs.get(), force);
 
     defs_->set_most_significant_state();
-    LOG_ASSERT(defs_->server().jobSubmissionInterval() != 0, "");
+    LOG_ASSERT(defs_->server_state().jobSubmissionInterval() != 0, "");
 
     if (serverState_ == SState::RUNNING) {
         ecf::visit_all(*defs_, BootstrapDefs{});

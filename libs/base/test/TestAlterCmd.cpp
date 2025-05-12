@@ -347,13 +347,13 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
     { // Change server state. This will cause Flag::MESSAGE to be set on the defs
         TestDefsStateChanged chenged(&defs);
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd("/", AlterCmd::ADD_VARIABLE, "_fred_", "value")));
-        BOOST_CHECK_MESSAGE(defs.server().find_variable("_fred_") == "value", "expected to find value");
+        BOOST_CHECK_MESSAGE(defs.server_state().find_variable("_fred_") == "value", "expected to find value");
 
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd("/", AlterCmd::VARIABLE, "_fred_", "_value_")));
-        BOOST_CHECK_MESSAGE(defs.server().find_variable("_fred_") == "_value_", "expected to find _value_");
+        BOOST_CHECK_MESSAGE(defs.server_state().find_variable("_fred_") == "_value_", "expected to find _value_");
 
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd("/", AlterCmd::DEL_VARIABLE, "_fred_")));
-        BOOST_CHECK_MESSAGE(defs.server().find_variable("_fred_") == "", "expected to find empty string");
+        BOOST_CHECK_MESSAGE(defs.server_state().find_variable("_fred_") == "", "expected to find empty string");
 
         BOOST_CHECK_MESSAGE(defs.get_edit_history("/").size() == 3,
                             "expected edit_history of 3 to be added but found " << defs.get_edit_history("/").size());
@@ -1184,9 +1184,9 @@ BOOST_AUTO_TEST_CASE(test_alter_sort_attributes) {
     ECF_NAME_THIS_TEST();
 
     Defs defs;
-    defs.set_server().add_or_update_user_variables("z", "z");
-    defs.set_server().add_or_update_user_variables("y", "y");
-    defs.set_server().add_or_update_user_variables("x", "x");
+    defs.server_state().add_or_update_user_variables("z", "z");
+    defs.server_state().add_or_update_user_variables("y", "y");
+    defs.server_state().add_or_update_user_variables("x", "x");
     suite_ptr s = defs.add_suite("suite");
     add_sortable_attributes(s.get());
     family_ptr f1 = s->add_family("f1");
@@ -1196,9 +1196,9 @@ BOOST_AUTO_TEST_CASE(test_alter_sort_attributes) {
 
     Defs sorted_defs;
     sorted_defs.flag().set(ecf::Flag::MESSAGE); // take into account alter
-    sorted_defs.set_server().add_or_update_user_variables("x", "x");
-    sorted_defs.set_server().add_or_update_user_variables("y", "y");
-    sorted_defs.set_server().add_or_update_user_variables("z", "z");
+    sorted_defs.server_state().add_or_update_user_variables("x", "x");
+    sorted_defs.server_state().add_or_update_user_variables("y", "y");
+    sorted_defs.server_state().add_or_update_user_variables("z", "z");
     suite_ptr ss = sorted_defs.add_suite("suite");
     add_sorted_attributes(ss.get());
     family_ptr sf1 = ss->add_family("f1");

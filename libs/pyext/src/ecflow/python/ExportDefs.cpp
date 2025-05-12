@@ -94,7 +94,7 @@ std::string simulate(defs_ptr defs) {
 }
 
 SState::State get_server_state(defs_ptr self) {
-    return self->server().get_state();
+    return self->server_state().get_state();
 }
 
 /// Since we don't pass in a child pos, the nodes are added to the end
@@ -135,15 +135,15 @@ std::string check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose)
 
 // Add  server user variables
 defs_ptr add_variable(defs_ptr self, const std::string& name, const std::string& value) {
-    self->set_server().add_or_update_user_variables(name, value);
+    self->server_state().add_or_update_user_variables(name, value);
     return self;
 }
 defs_ptr add_variable_int(defs_ptr self, const std::string& name, int value) {
-    self->set_server().add_or_update_user_variables(name, ecf::convert_to<std::string>(value));
+    self->server_state().add_or_update_user_variables(name, ecf::convert_to<std::string>(value));
     return self;
 }
 defs_ptr add_variable_var(defs_ptr self, const Variable& var) {
-    self->set_server().add_or_update_user_variables(var.name(), var.theValue());
+    self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     return self;
 }
 defs_ptr add_variable_dict(defs_ptr self, const bp::dict& dict) {
@@ -152,12 +152,12 @@ defs_ptr add_variable_dict(defs_ptr self, const bp::dict& dict) {
     std::vector<std::pair<std::string, std::string>>::iterator i;
     auto vec_end = vec.end();
     for (i = vec.begin(); i != vec_end; ++i) {
-        self->set_server().add_or_update_user_variables((*i).first, (*i).second);
+        self->server_state().add_or_update_user_variables((*i).first, (*i).second);
     }
     return self;
 }
 void delete_variable(defs_ptr self, const std::string& name) {
-    self->set_server().delete_user_variable(name);
+    self->server_state().delete_user_variable(name);
 }
 
 void sort_attributes(defs_ptr self, ecf::Attr::Type attr) {
@@ -206,7 +206,7 @@ static object do_add(defs_ptr self, const bp::object& arg) {
         Edit edit                        = extract<Edit>(arg);
         const std::vector<Variable>& vec = edit.variables();
         for (const auto& i : vec)
-            self->set_server().add_or_update_user_variables(i.name(), i.theValue());
+            self->server_state().add_or_update_user_variables(i.name(), i.theValue());
     }
     else if (extract<bp::list>(arg).check()) {
         bp::list the_list = extract<bp::list>(arg);
@@ -216,7 +216,7 @@ static object do_add(defs_ptr self, const bp::object& arg) {
     }
     else if (extract<Variable>(arg).check()) {
         Variable var = extract<Variable>(arg);
-        self->set_server().add_or_update_user_variables(var.name(), var.theValue());
+        self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     }
     else
         throw std::runtime_error("ExportDefs::add : Unknown type");
@@ -250,7 +250,7 @@ static object defs_getattr(defs_ptr self, const std::string& attr) {
     if (child)
         return object(child);
 
-    Variable var = self->server().findVariable(attr);
+    Variable var = self->server_state().findVariable(attr);
     if (!var.empty())
         return object(var);
 

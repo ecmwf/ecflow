@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
-    theDefs.set_server().add_or_update_user_variables(
+    theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
     suite_ptr s1, s2, s3;
     {
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
-    theDefs.set_server().add_or_update_user_variables(
+    theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
 
     suite_ptr suite_s2;
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
 BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
     cout << "Simulator:: ...test_autoarchive_family\n";
     Defs theDefs;
-    theDefs.set_server().add_or_update_user_variables(
+    theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
 
     {
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
 BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
     cout << "Simulator:: ...test_two_autoarchive_in_hierarchy\n";
     Defs theDefs;
-    theDefs.set_server().add_or_update_user_variables(
+    theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
 
     suite_ptr suite;

@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
         vec.emplace_back("hello", "%hello%");
         vec.emplace_back("mary", "%jane%");
         vec.emplace_back("jane", "10");
-        defs.set_server().add_or_update_user_variables(vec);
+        defs.server_state().add_or_update_user_variables(vec);
     }
 
     // See page 31, section 5.1 variable inheritance, of SMS users guide
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution_double_micro) {
     BOOST_CHECK_MESSAGE(defs.variableSubsitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
-    defs.set_server().add_or_update_user_variables("HOUR", "hammer time");
+    defs.server_state().add_or_update_user_variables("HOUR", "hammer time");
     cmd      = "printf %%02d %HOUR:00%";
     expected = "printf %02d hammer time";
     BOOST_CHECK_MESSAGE(defs.variableSubsitution(cmd), "substitution failed");

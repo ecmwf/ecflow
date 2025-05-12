@@ -66,7 +66,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
 
     if (load_ok) {
         defs->handle_migration();
-        defs->set_server().add_or_update_user_variables(client_env); // use in test environment
+        defs->server_state().add_or_update_user_variables(client_env); // use in test environment
 
         if (print) {
             PrintStyle print_style(PrintStyle::NET); // should be same as MIGRATE, only differ on reload

@@ -83,7 +83,7 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
                 node->add_variable(lineTokens[1], lineTokens[2]);
         }
         else
-            defsfile()->set_server().add_or_update_user_variables(lineTokens[1], lineTokens[2]);
+            defsfile()->server_state().add_or_update_user_variables(lineTokens[1], lineTokens[2]);
         return true;
     }
 
@@ -119,9 +119,9 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
                 server_variable = true;
         }
         if (server_variable)
-            defsfile()->set_server().add_or_update_server_variable(lineTokens[1], value);
+            defsfile()->server_state().add_or_update_server_variable(lineTokens[1], value);
         else
-            defsfile()->set_server().add_or_update_user_variables(lineTokens[1], value);
+            defsfile()->server_state().add_or_update_user_variables(lineTokens[1], value);
     }
 
     return true;

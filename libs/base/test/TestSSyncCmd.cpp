@@ -52,14 +52,14 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
     defs_ptr server_defs = serverFixture.create_defs();
     if (start_with_begin)
         server_defs->beginAll();
-    server_defs->set_server().set_state(
+    server_defs->server_state().set_state(
         SState::HALTED); // if defs default state is RUNNING, whereas for server it is HALTED
 
     ServerReply server_reply;
     defs_ptr client_defs = clientFixture.create_defs();
     if (start_with_begin)
         client_defs->beginAll();
-    client_defs->set_server().set_state(
+    client_defs->server_state().set_state(
         SState::HALTED); // if defs default state is RUNNING, whereas for server it is HALTED
     server_reply.set_client_defs(client_defs);
 
@@ -388,10 +388,10 @@ void delete_suite(defs_ptr defs) {
 }
 
 void set_server_state_shutdown(defs_ptr defs) {
-    defs->set_server().set_state(SState::SHUTDOWN);
+    defs->server_state().set_state(SState::SHUTDOWN);
 }
 void set_server_state_running(defs_ptr defs) {
-    defs->set_server().set_state(SState::RUNNING);
+    defs->server_state().set_state(SState::RUNNING);
 }
 
 void add_server_variable(defs_ptr defs) {

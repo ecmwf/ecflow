@@ -75,9 +75,10 @@ struct MyDefsFixture
         defs->add_extern("/limits:event");
         defs->add_extern("/a/b/c:meter");
         defs->add_extern("/a/b/c/d");
-        defs->set_server().add_or_update_user_variables("MyDefsFixture_user_variable",
-                                                        "This is a user variable added to server");
-        defs->set_server().add_or_update_server_variable("MyDefsFixture_server_variable", "This is a server variable");
+        defs->server_state().add_or_update_user_variables("MyDefsFixture_user_variable",
+                                                          "This is a user variable added to server");
+        defs->server_state().add_or_update_server_variable("MyDefsFixture_server_variable",
+                                                           "This is a server variable");
 
         // add an empty suite. Needed for CHECK_JOB_GEN_ONLY cmd
         defs->addSuite(Suite::create("EmptySuite"));

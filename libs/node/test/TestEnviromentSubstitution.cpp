@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_environment_substitution) {
         env.emplace_back(string("BILL"), string("/home/bill"));
         env.emplace_back(string("JANE"), string("/home/jane"));
         env.emplace_back(string("REP"), string("$REP/bill"));
-        defs.set_server().add_or_update_user_variables(env);
+        defs.server_state().add_or_update_user_variables(env);
     }
 
     // Check for recursive, in which case we only substitute once

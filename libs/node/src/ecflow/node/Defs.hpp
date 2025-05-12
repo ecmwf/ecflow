@@ -76,7 +76,7 @@ public:
 
     // The defs does not need suspend()/resume() as this is controlled by the server states
     // The defs cannot schedule jobs when HALTED or SHUTDOWN, i.e. not RUNNING, this is same as suspended
-    bool isSuspended() const { return (server().get_state() != SState::RUNNING); }
+    bool isSuspended() const { return (server_state().get_state() != SState::RUNNING); }
 
     /// Python based checking
     /// Will create a temporary variable ECF_JOB so the job generation is done to a temporary directory
@@ -229,9 +229,9 @@ public:
     void getAllAstNodes(std::set<Node*>&) const;
     const std::set<std::string>& externs() const { return externs_; }
 
-    /// Get/set for server state.
-    const ServerState& server() const { return server_; }
-    ServerState& set_server() { return server_; }
+    /// Access the server state (i.e., State, Variables, etc.)
+    ServerState& server_state() { return server_; }
+    const ServerState& server_state() const { return server_; }
 
     /// find all %VAR% and replaces with variable values, returns false on the
     /// first variable that can't be found, cmd will be left half processed.

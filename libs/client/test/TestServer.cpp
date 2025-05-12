@@ -86,9 +86,9 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
                                         << theClient.errorMsg());
     if (ClientEnvironment::hostSpecified().empty()) {
         // server started locally
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::HALTED,
                               "Expected INITIAL server state HALTED but found "
-                                  << SState::to_string(theClient.defs()->server().get_state()));
+                                  << SState::to_string(theClient.defs()->server_state().get_state()));
     }
 
     BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,
@@ -97,9 +97,9 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
     BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                           CtsApi::get() << " failed should return 0\n"
                                         << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::SHUTDOWN,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::SHUTDOWN,
                           "Expected server state SHUTDOWN but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,
                           CtsApi::haltServer() << " should return 0\n"
@@ -107,9 +107,9 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
     BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                           CtsApi::get() << " failed should return 0\n"
                                         << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::HALTED,
                           "Expected server state HALTED but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,
                           CtsApi::restartServer() << " should return 0\n"
@@ -117,34 +117,34 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
     BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                           CtsApi::get() << " failed should return 0\n"
                                         << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::RUNNING,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::RUNNING,
                           "Expected server state RUNNING but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     /// Repeat test using sync_local() to test incremental changes of server
     BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,
                           CtsApi::shutdownServer() << " should return 0\n"
                                                    << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, " failed should return 0\n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::SHUTDOWN,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::SHUTDOWN,
                           "Expected server state SHUTDOWN but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,
                           CtsApi::haltServer() << " should return 0\n"
                                                << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, " failed should return 0\n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::HALTED,
                           "Expected server state HALTED but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,
                           CtsApi::restartServer() << " should return 0\n"
                                                   << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, " failed should return 0\n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::RUNNING,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::RUNNING,
                           "Expected server state RUNNING but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     if (ClientEnvironment::hostSpecified().empty()) {
         // This check only valid if server was invoked locally. Ignore for remote servers
@@ -193,31 +193,31 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
     BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0, "load defs failed \n" << theClient.errorMsg());
     if (ClientEnvironment::hostSpecified().empty()) {
         // server started locally
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::HALTED,
                               "Expected INITIAL server state HALTED but found "
-                                  << SState::to_string(theClient.defs()->server().get_state()));
+                                  << SState::to_string(theClient.defs()->server_state().get_state()));
     }
 
     BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,
                           CtsApi::shutdownServer() << " should return 0\n"
                                                    << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::SHUTDOWN,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::SHUTDOWN,
                           "Expected server state SHUTDOWN but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,
                           CtsApi::haltServer() << " should return 0\n"
                                                << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::HALTED,
                           "Expected server state HALTED but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,
                           CtsApi::restartServer() << " should return 0\n"
                                                   << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::RUNNING,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->server_state().get_state() == SState::RUNNING,
                           "Expected server state RUNNING but found "
-                              << SState::to_string(theClient.defs()->server().get_state()));
+                              << SState::to_string(theClient.defs()->server_state().get_state()));
 
     if (ClientEnvironment::hostSpecified().empty()) {
         // This check only valid if server was invoked locally. Ignore for remote servers

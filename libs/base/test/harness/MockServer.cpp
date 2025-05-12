@@ -13,5 +13,5 @@
 void MockServer::set_server_state(SState::State ss) {
     serverState_    = ss;
     stats().status_ = static_cast<int>(serverState_);
-    defs_->set_server().set_state(serverState_);
+    defs_->server_state().set_state(serverState_);
 }

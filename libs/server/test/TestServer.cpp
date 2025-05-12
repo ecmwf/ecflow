@@ -115,16 +115,16 @@ void test_the_server(const std::string& port) {
 
         BOOST_REQUIRE_MESSAGE(theServer.defs(), "Expected defs to be created");
 
-        const std::vector<Variable>& server_variables = theServer.defs()->server().server_variables();
+        const std::vector<Variable>& server_variables = theServer.defs()->server_state().server_variables();
         BOOST_REQUIRE_MESSAGE(!server_variables.empty(), "Expected defs to be updated with the server variables");
 
         // for(size_t i = 0; i < server_variables.size(); ++i)  cout << server_variables[i].dump() << "\n";
-        const std::string& ecf_port = theServer.defs()->server().find_variable("ECF_PORT");
+        const std::string& ecf_port = theServer.defs()->server_state().find_variable("ECF_PORT");
         BOOST_REQUIRE_MESSAGE(ecf_port == port,
                               "Expected port " << port << " but found " << ecf_port
                                                << " defs server variables, should be in sync with server");
 
-        const std::string& interval = theServer.defs()->server().find_variable("ECF_INTERVAL");
+        const std::string& interval = theServer.defs()->server_state().find_variable("ECF_INTERVAL");
         BOOST_REQUIRE_MESSAGE(interval == "12",
                               "Expected interval 12 but found "
                                   << interval << " defs server variables, should be in sync with server");

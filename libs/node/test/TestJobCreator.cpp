@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_job_creator) {
     BOOST_REQUIRE_MESSAGE(theTasks.size() == 6, "Expected 6 tasks but found, " << theTasks.size());
 
     // Override ECF_HOME.   ECF_HOME is need to locate to the .ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the ecf files

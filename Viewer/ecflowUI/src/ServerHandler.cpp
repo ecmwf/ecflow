@@ -583,7 +583,7 @@ SState::State ServerHandler::serverState() {
         // access it without locking the mutex!!!
         defs_ptr d = safelyAccessSimpleDefsMembers();
         if (d && d.get()) {
-            prevServerState_ = d->set_server().get_state();
+            prevServerState_ = d->server_state().get_state();
             return prevServerState_;
         }
     }
@@ -1494,7 +1494,7 @@ void ServerHandler::resetFinished() {
 
         defs_ptr defs = defsAccess.defs();
         if (defs != nullptr) {
-            ServerState& st = defs->set_server();
+            ServerState& st = defs->server_state();
             st.hostPort(std::make_pair(host_, port_));
         }
     }

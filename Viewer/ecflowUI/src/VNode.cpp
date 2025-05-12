@@ -1283,7 +1283,7 @@ bool VServer::substituteVariableValue(std::string& val) const {
     if (!defs)
         return false;
 
-    return defs->server().variableSubsitution(val);
+    return defs->server_state().variableSubsitution(val);
 }
 
 //----------------------------------------------
@@ -1582,8 +1582,8 @@ void VServer::updateCache() {
 }
 
 void VServer::updateCache(defs_ptr defs) {
-    cache_.vars_    = defs->server().user_variables();
-    cache_.genVars_ = defs->server().server_variables();
+    cache_.vars_    = defs->server_state().user_variables();
+    cache_.genVars_ = defs->server_state().server_variables();
     cache_.flag_    = defs->flag();
 }
 

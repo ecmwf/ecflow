@@ -1149,7 +1149,7 @@ std::string NodeContainer::archive_path() const {
     std::string port = Str::DEFAULT_PORT_NUMBER();
     Defs* the_defs   = defs();
     if (the_defs) {
-        port = the_defs->server().find_variable(ecf::environment::ECF_PORT);
+        port = the_defs->server_state().find_variable(ecf::environment::ECF_PORT);
         if (port.empty())
             port = Str::DEFAULT_PORT_NUMBER();
     }
