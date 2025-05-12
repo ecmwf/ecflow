@@ -193,7 +193,7 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
     if (the_defs) {
         const Variable& pvar = the_defs->server_state().findVariable(name);
         ret                  = pvar.theValue();
-        the_defs->variableSubsitution(ret);
+        the_defs->variableSubstitution(ret);
         return ret;
     }
 

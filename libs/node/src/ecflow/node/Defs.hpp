@@ -236,7 +236,7 @@ public:
     /// find all %VAR% and replaces with variable values, returns false on the
     /// first variable that can't be found, cmd will be left half processed.
     /// Will search for ECF_MICRO, if not found assumes % as the micro char
-    bool variableSubsitution(std::string& cmd) const { return server_.variableSubsitution(cmd); }
+    bool variableSubstitution(std::string& cmd) const { return server_.variableSubstitution(cmd); }
 
     /// returns true if definition file passes its verification
     /// If the definition file contains verify attribute, this function will check

@@ -479,7 +479,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
     if (!node_)
         return val;
 
-    // should set the def mutex because variableSubsitution
+    // should set the def mutex because variableSubstitution
     // might need information from the defs
 
     const Variable& var = node_->findVariable(key);
@@ -547,7 +547,7 @@ bool VNode::substituteVariableValue(std::string& val) const {
     if (!node_)
         return false;
 
-    // should set the def mutex because variableSubsitution
+    // should set the def mutex because variableSubstitution
     // might need information from the defs
     return node_->variableSubstitution(val);
 }
@@ -1283,7 +1283,7 @@ bool VServer::substituteVariableValue(std::string& val) const {
     if (!defs)
         return false;
 
-    return defs->server_state().variableSubsitution(val);
+    return defs->server_state().variableSubstitution(val);
 }
 
 //----------------------------------------------
