@@ -386,6 +386,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
     theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_);            // server PID
     theRetVec.emplace_back(std::string("ECF_VERSION"), Version::full()); // server version
 
+    theRetVec.emplace_back(std::string("PERMISSIONS"), permissions_);
+
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {
         theRetVec.emplace_back(
@@ -702,6 +704,8 @@ std::string ServerEnvironment::dump() const {
 #ifdef ECF_OPENSSL
     ss << "ECF_SSL = " << ssl_ << "\n";
 #endif
+
+    ss << "PERMISSIONS = " << permissions_ << "\n";
 
     ss << white_list_file_.dump_valid_users();
     return ss.str();
