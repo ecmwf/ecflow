@@ -13,6 +13,7 @@
 
 #include "ecflow/attribute/ClockAttr.hpp" // IWYU pragma: keep
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/node/Node.hpp"
 #include "ecflow/node/NodeContainer.hpp"
 
 class SuiteGenVariables;
