@@ -53,6 +53,62 @@ bool AuthorisationService::good() const {
     return impl_ != nullptr;
 }
 
+ActivePermissions AuthorisationService::permissions_at(const AbstractServer& server, const path_t& path) const {
+    assert(good()); // It is up to the caller to check has been properly configured
+
+    ActivePermissions active;
+
+    std::visit(overload{[&active](const Unrestricted&) {
+                            // when no rules are loaded, we allow everything...
+                            // Dangerous, but backward compatible!
+                            active = ActivePermissions::make_empty();
+                        },
+                        [&server, &active, &path](const Rules& rules) {
+                            struct Visitor
+                            {
+                                Visitor(ActivePermissions& collected) : collected_{collected} {}
+
+                                void handle(const Defs& defs) {
+                                    auto p = defs.server_state().permissions();
+
+                                    // At server level, we only care about the server permissions
+                                    collected_.bootstrap_server_permission(p);
+                                }
+                                void handle(const Node& n) {
+                                    auto p = n.permissions();
+
+                                    if (auto s = dynamic_cast<const Suite*>(&n); s) {
+                                        // At node level, if the node is a Suite we bootstrap the node permissions
+                                        collected_.bootstrap_node_permission(p);
+                                    }
+                                    else {
+                                        // ... otherwise, we combine the node permissions
+                                        //  -- in practice, this combination only restricts node permissions;
+                                        //     for example, a user can't be allowed to read/write/execute a
+                                        //     specific node if he can't do it at a higher node level
+                                        collected_.combine_node_permission(p);
+                                    }
+                                }
+
+                                void not_found() { /* do nothing */ }
+
+                            private:
+                                ActivePermissions& collected_;
+                            };
+
+                            auto d = server.defs();
+                            auto p = Path::make(path).value();
+                            auto v = Visitor{active};
+
+                            ecf::visit(*d, p, v);
+                        }
+
+               },
+               impl_->permissions_);
+
+    return active;
+}
+
 bool AuthorisationService::allows(const Identity& identity, const AbstractServer& server, Allowed required) const {
     return allows(identity, server, paths_t{ROOT}, required);
 }
@@ -74,52 +130,13 @@ bool AuthorisationService::allows(const Identity& identity,
         return true;
     }
 
-    bool allowed = false;
-    std::visit(overload{[&allowed](const Unrestricted&) {
-                            // when no rules are loaded, we allow everything...
-                            // Dangerous, but backward compatible!
-                            allowed = true;
-                        },
-                        [&server, &identity, &paths, &required, &allowed](const Rules& rules) {
-                            for (auto&& path : paths) {
+    for (auto&& path : paths) {
+        if (auto&& perms = permissions_at(server, path); !perms.allows(identity.username(), required)) {
+            return false;
+        }
+    }
 
-                                struct Visitor
-                                {
-                                    void handle(const Defs& defs) {
-                                        auto p      = defs.server_state().permissions();
-                                        permissions = p.is_empty() ? permissions : p;
-                                    }
-                                    void handle(const Node& s) {
-                                        auto p      = s.permissions();
-                                        permissions = p.is_empty() ? permissions : p;
-                                    }
-
-                                    void not_found() { permissions = Permissions::make_empty(); }
-
-                                    Permissions permissions = Permissions::make_empty();
-                                };
-
-                                auto d = server.defs();
-                                auto p = Path::make(path).value();
-                                auto v = Visitor{};
-
-                                ecf::visit(*d, p, v);
-
-                                if (v.permissions.is_empty()) {
-                                    allowed = true;
-                                }
-                                else if (v.permissions.allows(identity.username(), required)) {
-                                    allowed = true;
-                                }
-                                else {
-                                    allowed = false;
-                                    break;
-                                }
-                            }
-                        }},
-               impl_->permissions_);
-
-    return allowed;
+    return true;
 }
 
 AuthorisationService::result_t AuthorisationService::load_permissions_from_nodes() {
