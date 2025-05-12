@@ -49,6 +49,8 @@ public:
         return true;
     }
 
+    ActivePermissions permissions_at(const AbstractServer& server, const path_t& path) const;
+
     /**
      * Verify if the identity is allowed to perform the action on the give paths.
      *
