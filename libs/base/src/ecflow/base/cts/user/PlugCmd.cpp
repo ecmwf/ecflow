@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/Client.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/MoveCmd.hpp"
@@ -74,6 +76,14 @@ bool PlugCmd::equals(ClientToServerCmd* rhs) const {
         return false;
     }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t PlugCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t PlugCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void PlugCmd::print(std::string& os) const {

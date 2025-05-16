@@ -20,6 +20,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/CmdContext.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Flag.hpp"
@@ -64,9 +65,8 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const {
     }
 #endif
 
-    // LogTimer timer("ClientToServerCmd::handleRequest");
     STC_Cmd_ptr halted;
-    if (!authenticate(as, halted)) {
+    if (!check_preconditions(as, halted)) {
         assert(halted.get());
         return halted;
     }
