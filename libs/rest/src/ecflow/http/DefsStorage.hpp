@@ -20,7 +20,8 @@ namespace ecf::http {
 
 std::shared_ptr<Defs> get_defs();
 
-void update_defs_loop(int interval);
+void start_update_defs_loop(int interval);
+void stop_update_defs_loop();
 
 void trigger_defs_update();
 void trigger_defs_update(std::function<void()> function);

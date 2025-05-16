@@ -22,12 +22,15 @@ namespace ecf::http {
 
 extern std::atomic<unsigned int> last_request_time;
 
-std::shared_ptr<Defs> defs_ = nullptr;
+static std::shared_ptr<Defs> defs_ = nullptr;
 
 static std::mutex def_mutex;
 static std::mutex cv_mutex;
 static std::condition_variable defs_cv;
-std::atomic update_defs(true);
+static std::atomic update_defs(true);
+
+static std::unique_ptr<std::thread> loop_thread;
+static std::atomic stop_loop(false);
 
 namespace /* __anonymous__ */ {
 
@@ -51,7 +54,7 @@ std::shared_ptr<Defs> get_defs() {
 
 namespace /* __anonymous__ */ {
 
-[[noreturn]] void defs_update(int interval) {
+void defs_update(int interval) {
     ClientInvoker client;
 
     auto get_current_time = [] {
@@ -99,6 +102,11 @@ namespace /* __anonymous__ */ {
             while (true) {
                 std::unique_lock lock(cv_mutex);
                 if (defs_cv.wait_for(lock, sleeptime, [] { return update_defs.load(); })) {
+                    if (stop_loop.load() == true) {
+                        // we received the 'signal' to stop, so we terminate the loop
+                        return;
+                    }
+
                     // update requested by some other thread
                     if (opts.verbose) {
                         printf("defs update requested\n");
@@ -107,6 +115,11 @@ namespace /* __anonymous__ */ {
                     update_defs = false;
                 }
                 else {
+                    if (stop_loop.load() == true) {
+                        // we received the 'signal' to stop, so we terminate the loop
+                        return;
+                    }
+
                     // update triggered by timeout
                     client.news(defs_);
                     if (client.get_news()) {
@@ -140,19 +153,31 @@ namespace /* __anonymous__ */ {
 
 } // namespace
 
-void update_defs_loop(int interval) {
-    std::thread t(defs_update, interval);
-    t.detach();
+void start_update_defs_loop(int interval) {
+    loop_thread = std::make_unique<std::thread>(defs_update, interval);
 
     while (update_defs.load() == true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
+void stop_update_defs_loop() {
+    {
+        std::unique_lock lock(cv_mutex);
+        // set the 'signal' to stop the loop
+        stop_loop = true;
+        // and trigger the update loop immediately
+        update_defs = true;
+        defs_cv.notify_one();
+    }
+
+    loop_thread->join();
+}
+
 template <typename T>
 void trigger_defs_update_predicate(T&& func) {
     {
-        std::lock_guard lock(cv_mutex);
+        std::unique_lock lock(cv_mutex);
         update_defs = true;
         defs_cv.notify_one();
     }
