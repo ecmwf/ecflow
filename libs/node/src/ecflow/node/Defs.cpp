@@ -2064,7 +2064,7 @@ DefsHistoryParser::DefsHistoryParser() = default;
 void DefsHistoryParser::parse(const std::string& line) {
     size_t pos = line.find("\b");
     if (pos != std::string::npos) {
-        // keep compatibility with current way of writing history
+        // keep compatibility with the current way of writing history
         std::string requests = line.substr(pos);
         Str::split(requests, parsed_messages_, "\b");
         return;
