@@ -1837,12 +1837,15 @@ void Node::print(std::string& os) const {
         ecf::format_as_defs(m, os);
     }
 
-    if (auto_cancel_)
+    if (auto_cancel_) {
         auto_cancel_->print(os);
-    if (auto_archive_)
+    }
+    if (auto_archive_) {
         auto_archive_->print(os);
-    if (auto_restore_)
+    }
+    if (auto_restore_) {
         auto_restore_->print(os);
+    }
 
     if (misc_attrs_)
         misc_attrs_->print(os);
