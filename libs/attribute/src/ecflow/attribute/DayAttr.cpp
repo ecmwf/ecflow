@@ -395,8 +395,12 @@ std::string DayAttr::dump() const {
         ss << " (free)";
     if (expired_)
         ss << " (expired)";
-    ss << " " << to_simple_string(date_);
+    ss << " " << as_simple_string();
     return ss.str();
+}
+
+std::string DayAttr::as_simple_string() const {
+    return boost::gregorian::to_simple_string(date_);
 }
 
 bool DayAttr::operator==(const DayAttr& rhs) const {

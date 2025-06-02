@@ -90,6 +90,7 @@ public:
     std::string name() const; // for display/gui only
     std::string toString() const;
     std::string dump() const;
+    std::string as_simple_string() const;
 
     // return the days, if input is not valid will throw a runtime_error
     static DayAttr create(const std::string& dayStr);
