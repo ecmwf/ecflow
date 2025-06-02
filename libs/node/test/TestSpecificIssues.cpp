@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_247) {
         // cout << defs;
 
         t4->set_state(NState::ABORTED);
-        t4->flag().set(ecf::Flag::FORCE_ABORT); // stopped bu user mimic, otherwise it be be queued
+        t4->get_flag().set(ecf::Flag::FORCE_ABORT); // stopped bu user mimic, otherwise it be be queued
 
         Jobs jobs(defs);
         JobsParam jobsParam;

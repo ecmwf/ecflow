@@ -1512,7 +1512,7 @@ AstFlag* AstFlag::clone() const {
 
 int AstFlag::value() const {
     Node* node = referencedNode();
-    if (node && node->flag().is_set(flag_))
+    if (node && node->get_flag().is_set(flag_))
         return 1;
     if (parentNode_ && nodePath_ == "/") {
         Defs* the_defs = parentNode_->defs();
@@ -1558,7 +1558,7 @@ std::ostream& AstFlag::print(std::ostream& os) const {
 
     if (refNode) {
         Indentor::indent(os) << "# FLAG_NODE " << nodePath_ << " ";
-        os << ecf::Flag::enum_to_string(flag_) << "(" << static_cast<int>(refNode->flag().is_set(flag_)) << ")\n";
+        os << ecf::Flag::enum_to_string(flag_) << "(" << static_cast<int>(refNode->get_flag().is_set(flag_)) << ")\n";
     }
     else {
         Indentor::indent(os) << "# FLAG_NODE node(?not-found?) " << nodePath_ << " ";
@@ -1614,7 +1614,7 @@ std::string AstFlag::why_expression(bool html) const {
             ret += "(?)";
         else {
             ret += "(";
-            ret += ecf::convert_to<std::string>(ref_node->flag().is_set(flag_));
+            ret += ecf::convert_to<std::string>(ref_node->get_flag().is_set(flag_));
             ret += ")";
         }
     }
@@ -1629,7 +1629,7 @@ std::string AstFlag::why_expression(bool html) const {
         else {
             ret += "(";
             std::stringstream ss;
-            ss << ref_node->flag().is_set(flag_);
+            ss << ref_node->get_flag().is_set(flag_);
             ret += ss.str();
             ret += ")";
         }

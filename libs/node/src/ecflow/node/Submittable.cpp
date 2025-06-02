@@ -96,7 +96,7 @@ void Submittable::complete() {
     std::for_each(std::begin(avisos()), std::end(avisos()), [](auto&& aviso) { aviso.finish(); });
 
     set_state(NState::COMPLETE);
-    flag().clear(ecf::Flag::ZOMBIE);
+    get_flag().clear(ecf::Flag::ZOMBIE);
 
     /// Should we clear paswd_ & process_id? It can be argued that
     /// we should keep this. In case it is needed. i.e. The job may not really be
@@ -568,7 +568,7 @@ bool Submittable::submit_job_only(JobsParam& jobsParam) {
         ss << "Submittable::submit_job_only: failed: Submittable " << absNodePath() << " is already "
            << NState::toString(state()) << " : ";
         jobsParam.errorMsg() += ss.str();
-        flag().set(ecf::Flag::EDIT_FAILED);
+        get_flag().set(ecf::Flag::EDIT_FAILED);
         return false;
     }
 
@@ -579,13 +579,13 @@ bool Submittable::submit_job_only(JobsParam& jobsParam) {
     }
 
     // state change
-    flag().clear(ecf::Flag::NO_SCRIPT);
-    flag().clear(ecf::Flag::EDIT_FAILED);
-    flag().clear(ecf::Flag::JOBCMD_FAILED);
-    flag().clear(ecf::Flag::KILLCMD_FAILED);
-    flag().clear(ecf::Flag::STATUSCMD_FAILED);
-    flag().clear(ecf::Flag::KILLED);
-    flag().clear(ecf::Flag::STATUS);
+    get_flag().clear(ecf::Flag::NO_SCRIPT);
+    get_flag().clear(ecf::Flag::EDIT_FAILED);
+    get_flag().clear(ecf::Flag::JOBCMD_FAILED);
+    get_flag().clear(ecf::Flag::KILLCMD_FAILED);
+    get_flag().clear(ecf::Flag::STATUSCMD_FAILED);
+    get_flag().clear(ecf::Flag::KILLED);
+    get_flag().clear(ecf::Flag::STATUS);
     requeue_labels(); // ECFLOW-195, requeue no longer resets labels on tasks, hence we do it at task run time.
 
     theValue.clear();
@@ -621,7 +621,7 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
             // Fall through job submission failed.
         }
         catch (std::exception& e) {
-            flag().set(ecf::Flag::EDIT_FAILED);
+            get_flag().set(ecf::Flag::EDIT_FAILED);
             std::string reason = "Submittable::submit_job_only: Job creation failed for task ";
             reason += absNodePath();
             reason += " : \n   ";
@@ -633,7 +633,7 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
         }
     }
     catch (std::exception& e) {
-        flag().set(ecf::Flag::NO_SCRIPT);
+        get_flag().set(ecf::Flag::NO_SCRIPT);
         std::stringstream ss;
         ss << "Submittable::submit_job_only: Script location failed for task " << absNodePath() << " :\n"
            << e.what() << "\n";
@@ -642,7 +642,7 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
         return false;
     }
 
-    flag().set(ecf::Flag::JOBCMD_FAILED);
+    get_flag().set(ecf::Flag::JOBCMD_FAILED);
     std::string reason = " Job creation failed for task ";
     reason += absNodePath();
     reason += " could not create child process.";
@@ -665,7 +665,7 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
     }
 
     // Fall through job submission failed.
-    flag().set(ecf::Flag::JOBCMD_FAILED);
+    get_flag().set(ecf::Flag::JOBCMD_FAILED);
     std::string reason = " Job creation failed for task ";
     reason += absNodePath();
     reason += " could not create child process.";
@@ -771,8 +771,8 @@ bool Submittable::run(JobsParam& jobsParam, bool force) {
 }
 
 void Submittable::kill(const std::string& zombie_pid) {
-    flag().clear(ecf::Flag::KILLCMD_FAILED);
-    flag().clear(ecf::Flag::KILLED);
+    get_flag().clear(ecf::Flag::KILLCMD_FAILED);
+    get_flag().clear(ecf::Flag::KILLED);
 
     std::string ecf_kill_cmd;
     if (zombie_pid.empty()) {
@@ -793,14 +793,14 @@ void Submittable::kill(const std::string& zombie_pid) {
         /// If we are in active state, then ECF_RID must have been setup
         /// This is typically used in the KILL CMD, make sure its there
         if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty()) {
-            flag().set(ecf::Flag::KILLCMD_FAILED);
+            get_flag().set(ecf::Flag::KILLCMD_FAILED);
             std::stringstream ss;
             ss << "Submittable::kill: Generated variable ECF_RID is empty for task " << absNodePath();
             throw std::runtime_error(ss.str());
         }
 
         if (!findParentUserVariableValue(ecf::environment::ECF_KILL_CMD, ecf_kill_cmd) || ecf_kill_cmd.empty()) {
-            flag().set(ecf::Flag::KILLCMD_FAILED);
+            get_flag().set(ecf::Flag::KILLCMD_FAILED);
             std::stringstream ss;
             ss << "Submittable::kill: ECF_KILL_CMD not defined, for task " << absNodePath() << "\n";
             throw std::runtime_error(ss.str());
@@ -809,7 +809,7 @@ void Submittable::kill(const std::string& zombie_pid) {
     else {
         // Use input
         if (!findParentUserVariableValue(ecf::environment::ECF_KILL_CMD, ecf_kill_cmd) || ecf_kill_cmd.empty()) {
-            flag().set(ecf::Flag::KILLCMD_FAILED);
+            get_flag().set(ecf::Flag::KILLCMD_FAILED);
             std::stringstream ss;
             ss << "Submittable::kill: ECF_KILL_CMD not defined, for task " << absNodePath() << "\n";
             throw std::runtime_error(ss.str());
@@ -820,7 +820,7 @@ void Submittable::kill(const std::string& zombie_pid) {
     }
 
     if (!variableSubstitution(ecf_kill_cmd)) {
-        flag().set(ecf::Flag::KILLCMD_FAILED);
+        get_flag().set(ecf::Flag::KILLCMD_FAILED);
         std::stringstream ss;
         ss << "Submittable::kill: Variable substitution failed for ECF_KILL_CMD(" << ecf_kill_cmd << ") on task "
            << absNodePath() << "\n";
@@ -833,22 +833,22 @@ void Submittable::kill(const std::string& zombie_pid) {
     //   LOG(Log::DBG,"Submittable::kill " << absNodePath() << "  " << ecf_kill_cmd );
     std::string errorMsg;
     if (!System::instance()->spawn(System::ECF_KILL_CMD, ecf_kill_cmd, absNodePath(), errorMsg)) {
-        flag().set(ecf::Flag::KILLCMD_FAILED);
+        get_flag().set(ecf::Flag::KILLCMD_FAILED);
         throw std::runtime_error(errorMsg);
     }
-    flag().set(ecf::Flag::KILLED);
+    get_flag().set(ecf::Flag::KILLED);
 }
 
 void Submittable::status() {
     // Jobs::generate will un-block SIGCHLD (by using Signal class)
     // This will allow child process termination to handled by the signal handler in System
     // Note:: Jobs::generate is called every minute *AND* when there is a state change.
-    flag().clear(ecf::Flag::STATUSCMD_FAILED);
-    flag().clear(ecf::Flag::STATUS);
+    get_flag().clear(ecf::Flag::STATUSCMD_FAILED);
+    get_flag().clear(ecf::Flag::STATUS);
 
     // Note: Only is active state do we have a ECF_RID
     if (state() != NState::ACTIVE && state() != NState::SUBMITTED) {
-        flag().set(ecf::Flag::STATUSCMD_FAILED);
+        get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         std::stringstream ss;
         ss << "Submittable::status: To use status command on a *single* node(" << absNodePath()
            << ") it must be active or submitted";
@@ -867,7 +867,7 @@ void Submittable::status() {
 
     /// If we are in active state, then ECF_RID must have been setup
     if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty()) {
-        flag().set(ecf::Flag::STATUSCMD_FAILED);
+        get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         std::stringstream ss;
         ss << "Submittable::status: Generated variable ECF_RID is empty for ACTIVE task " << absNodePath();
         throw std::runtime_error(ss.str());
@@ -875,14 +875,14 @@ void Submittable::status() {
 
     std::string ecf_status_cmd;
     if (!findParentUserVariableValue(ecf::environment::ECF_STATUS_CMD, ecf_status_cmd) || ecf_status_cmd.empty()) {
-        flag().set(ecf::Flag::STATUSCMD_FAILED);
+        get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         std::stringstream ss;
         ss << "Submittable::status: ECF_STATUS_CMD not defined, for task " << absNodePath() << "\n";
         throw std::runtime_error(ss.str());
     }
 
     if (!variableSubstitution(ecf_status_cmd)) {
-        flag().set(ecf::Flag::STATUSCMD_FAILED);
+        get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         std::stringstream ss;
         ss << "Submittable::status: Variable substitution failed for ECF_STATUS_CMD(" << ecf_status_cmd << ") on task "
            << absNodePath() << "\n";
@@ -893,11 +893,11 @@ void Submittable::status() {
     // SPAWN process, attach signal to monitor process. returns true
     std::string errorMsg;
     if (!System::instance()->spawn(System::ECF_STATUS_CMD, ecf_status_cmd, absNodePath(), errorMsg)) {
-        flag().set(ecf::Flag::STATUSCMD_FAILED);
+        get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         throw std::runtime_error(errorMsg);
     }
 
-    flag().set(ecf::Flag::STATUS);
+    get_flag().set(ecf::Flag::STATUS);
 }
 
 bool Submittable::createChildProcess(JobsParam& jobsParam) {

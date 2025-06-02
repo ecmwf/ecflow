@@ -58,7 +58,7 @@ JobProfiler::~JobProfiler() {
             ss << "Job generation for task " << node_->absNodePath() << " took " << time_taken
                << "ms, Exceeds ECF_TASK_THRESHOLD(" << threshold_ << "ms)";
             log(Log::WAR, ss.str());
-            node_->flag().set(ecf::Flag::THRESHOLD);
+            node_->get_flag().set(ecf::Flag::THRESHOLD);
         }
     }
 }

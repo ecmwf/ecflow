@@ -132,7 +132,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
     if (submittable_->findVariableValue(ecf::environment::ECF_PASS, ecf_pass_value)) {
 
         if (ecf_pass_value == Submittable::FREE_JOBS_PASSWORD()) {
-            submittable_->flag().clear(ecf::Flag::ZOMBIE);
+            submittable_->get_flag().clear(ecf::Flag::ZOMBIE);
             return true;
         }
     }
@@ -230,7 +230,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
                 //   2/ Overloaded server       # The correct course of action
                 //   3/ zombie                  # The zombie has completed anyway, don't bother blocking it
 
-                submittable_->flag().clear(ecf::Flag::ZOMBIE);
+                submittable_->get_flag().clear(ecf::Flag::ZOMBIE);
                 as->zombie_ctrl().remove_by_path(path_to_submittable_);
 
                 string ret = " [ overloaded || zombie || --complete*2 ] : chd:";
@@ -383,13 +383,13 @@ STC_Cmd_ptr CtsWaitCmd::doHandleRequest(AbstractServer* as) const {
     // Evaluate the expression
     if (ast->evaluate()) {
 
-        submittable_->flag().clear(ecf::Flag::WAIT);
+        submittable_->get_flag().clear(ecf::Flag::WAIT);
 
         // expression evaluates, return OK
         return PreAllocatedReply::ok_cmd();
     }
 
-    submittable_->flag().set(ecf::Flag::WAIT);
+    submittable_->get_flag().set(ecf::Flag::WAIT);
 
     // Block/wait while expression is false
     return PreAllocatedReply::block_client_on_home_server_cmd();

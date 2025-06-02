@@ -1197,8 +1197,8 @@ void NodeContainer::archive() {
     // save the created defs, to disk
     archive_defs->save_as_checkpt(archive_path());
 
-    flag().set(ecf::Flag::ARCHIVED); // flag as archived
-    flag().clear(ecf::Flag::RESTORED);
+    get_flag().set(ecf::Flag::ARCHIVED); // flag as archived
+    get_flag().clear(ecf::Flag::RESTORED);
 
     // delete the child nodes, set parent to null first.
     for (auto& n : nodes_) {
@@ -1221,7 +1221,7 @@ void NodeContainer::swap(NodeContainer& rhs) {
 }
 
 void NodeContainer::restore_on_begin_or_requeue() {
-    if (!flag().is_set(ecf::Flag::ARCHIVED))
+    if (!get_flag().is_set(ecf::Flag::ARCHIVED))
         return;
     if (!nodes_.empty())
         return;
@@ -1240,7 +1240,7 @@ void NodeContainer::restore_on_begin_or_requeue() {
 }
 
 void NodeContainer::restore() {
-    if (!flag().is_set(ecf::Flag::ARCHIVED)) {
+    if (!get_flag().is_set(ecf::Flag::ARCHIVED)) {
         std::stringstream ss;
         ss << "NodeContainer::restore() Node " << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set";
         throw std::runtime_error(ss.str());
@@ -1281,8 +1281,8 @@ void NodeContainer::restore() {
     }
 
     swap(*archived_node_container);                            // swap the children, and set parent pointers
-    flag().clear(ecf::Flag::ARCHIVED);                         // clear flag archived
-    flag().set(ecf::Flag::RESTORED);                           // set restored flag, to stop automatic autoarchive
+    get_flag().clear(ecf::Flag::ARCHIVED);                         // clear flag archived
+    get_flag().set(ecf::Flag::RESTORED);                           // set restored flag, to stop automatic autoarchive
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
 
     string msg = " autorestore ";

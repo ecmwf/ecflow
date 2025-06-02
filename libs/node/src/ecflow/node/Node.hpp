@@ -418,7 +418,7 @@ public:
     ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_.get(); }
     ecf::AutoCancelAttr* get_autocancel() const { return auto_cancel_.get(); }
     ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get(); }
-    ecf::Flag& flag() { return flag_; }
+    ecf::Flag& get_flag() { return flag_; }
     const ecf::Flag& get_flag() const { return flag_; }
 
     [[deprecated]] virtual void gen_variables(std::vector<Variable>&) const;

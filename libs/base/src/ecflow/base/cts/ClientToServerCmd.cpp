@@ -191,7 +191,7 @@ void ClientToServerCmd::add_edit_history(Defs* defs) const {
                 // Setting the flag will make a state change. But its OK command allows it.
                 // Since we only get called if command can make state changes (isWrite() == true)
                 SuiteChangedPtr suiteChanged(edited_node.get());
-                edited_node->flag().set(ecf::Flag::MESSAGE); // trap state change in suite for sync
+                edited_node->get_flag().set(ecf::Flag::MESSAGE); // trap state change in suite for sync
                 add_edit_history(defs, edited_node->absNodePath());
             }
         }

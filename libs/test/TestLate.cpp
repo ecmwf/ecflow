@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_late) {
 
     ecf::LateAttr* late = node->get_late();
     BOOST_CHECK_MESSAGE(late->isLate(), "Expected late to be set");
-    BOOST_CHECK_MESSAGE(node->flag().is_set(ecf::Flag::LATE), "Expected late flag to be set");
+    BOOST_CHECK_MESSAGE(node->get_flag().is_set(ecf::Flag::LATE), "Expected late flag to be set");
 
     node_ptr t2 = TestFixture::client().defs()->findAbsNode("/test_late/t2");
     BOOST_REQUIRE_MESSAGE(t2, "Expected task to be found");
@@ -119,11 +119,11 @@ BOOST_AUTO_TEST_CASE(test_late_hierarchically) {
 
     node_ptr t1 = TestFixture::client().defs()->findAbsNode("/test_late_hierarchically/f1/t1");
     BOOST_CHECK_MESSAGE(t1, "Expected task to be found");
-    BOOST_CHECK_MESSAGE(t1->flag().is_set(ecf::Flag::LATE), "Expected late flag to be set");
+    BOOST_CHECK_MESSAGE(t1->get_flag().is_set(ecf::Flag::LATE), "Expected late flag to be set");
 
     node_ptr t2 = TestFixture::client().defs()->findAbsNode("/test_late_hierarchically/f1/t2");
     BOOST_CHECK_MESSAGE(t2, "Expected task to be found");
-    BOOST_CHECK_MESSAGE(t2->flag().is_set(ecf::Flag::LATE), "Expected late flag to be set");
+    BOOST_CHECK_MESSAGE(t2->get_flag().is_set(ecf::Flag::LATE), "Expected late flag to be set");
 
     // cout << TestFixture::client().defs() << "\n";
 

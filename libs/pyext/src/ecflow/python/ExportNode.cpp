@@ -552,6 +552,10 @@ void replace_on_server2(node_ptr self, const std::string& host_port, bool suspen
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const Flag& get_flag_attr(node_ptr self) {
+    return self->get_flag();
+}
+
 void export_Node() {
     // Turn off proxies by passing true as the NoProxy template parameter.
     // shared_ptrs don't need proxies because calls on one a copy of the
@@ -753,7 +757,7 @@ void export_Node() {
         .def("get_parent", &Node::parent, return_internal_reference<>())
         .def("get_all_nodes", &get_all_nodes, "Returns all the child nodes")
         .def("get_flag",
-             &Node::get_flag,
+             &get_flag_attr,
              return_value_policy<copy_const_reference>(),
              "Return additional state associated with a node.")
         .def("replace_on_server",

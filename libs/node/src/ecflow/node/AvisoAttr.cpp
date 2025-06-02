@@ -146,20 +146,20 @@ bool AvisoAttr::isFree() const {
                                                                   service::aviso::AvisoNotification>& response) {
                 SLOG(D, "AvisoAttr::isFree: " << this->path() << " updated revision to " << this->revision_);
                 this->revision_ = response.configuration.revision();
-                parent_->flag().clear(Flag::REMOTE_ERROR);
-                parent_->flag().set_state_change_no(state_change_no_);
+                parent_->get_flag().clear(Flag::REMOTE_ERROR);
+                parent_->get_flag().set_state_change_no(state_change_no_);
                 reason_ = "";
                 return true;
             },
             [this](const ecf::service::aviso::AvisoNoMatch& response) {
-                parent_->flag().clear(Flag::REMOTE_ERROR);
-                parent_->flag().set_state_change_no(state_change_no_);
+                parent_->get_flag().clear(Flag::REMOTE_ERROR);
+                parent_->get_flag().set_state_change_no(state_change_no_);
                 reason_ = "";
                 return false;
             },
             [this](const ecf::service::aviso::AvisoError& response) {
-                parent_->flag().set(Flag::REMOTE_ERROR);
-                parent_->flag().set_state_change_no(state_change_no_);
+                parent_->get_flag().set(Flag::REMOTE_ERROR);
+                parent_->get_flag().set_state_change_no(state_change_no_);
                 reason_ = response.reason();
                 return false;
             }},

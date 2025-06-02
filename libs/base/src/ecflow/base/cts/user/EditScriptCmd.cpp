@@ -212,7 +212,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
             if (!submittable->submitJob(jobsParam)) {
                 throw std::runtime_error("EditScriptCmd:: failed for submit: " + jobsParam.getErrorMsg());
             }
-            submittable->flag().set(ecf::Flag::USER_EDIT);
+            submittable->get_flag().set(ecf::Flag::USER_EDIT);
             break;
         }
 
@@ -243,7 +243,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
                     vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
                     throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: failed : " + jobsParam.getErrorMsg());
                 }
-                submittable->flag().set(ecf::Flag::USER_EDIT);
+                submittable->get_flag().set(ecf::Flag::USER_EDIT);
             }
             else {
                 // CREATE a Child Alias. The create alias and parent it to the Task., and choose to run or not.
@@ -264,7 +264,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
                         throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: failed for Alias : " +
                                                  jobsParam.getErrorMsg());
                     }
-                    alias->flag().set(ecf::Flag::USER_EDIT);
+                    alias->get_flag().set(ecf::Flag::USER_EDIT);
                 }
             }
             break;

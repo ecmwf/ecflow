@@ -1032,10 +1032,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
                 continue;
 
             TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), i, true)));
-            BOOST_CHECK_MESSAGE(s->flag().is_set(i), "Expected flag " << i << " to be set ");
+            BOOST_CHECK_MESSAGE(s->get_flag().is_set(i), "Expected flag " << i << " to be set ");
 
             TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), i, false)));
-            BOOST_CHECK_MESSAGE(!s->flag().is_set(i), "Expected flag " << i << " to be clear ");
+            BOOST_CHECK_MESSAGE(!s->get_flag().is_set(i), "Expected flag " << i << " to be clear ");
         }
     }
 
@@ -1238,7 +1238,7 @@ BOOST_AUTO_TEST_CASE(test_alter_sort_attributes_for_task) {
     add_sortable_attributes(sf1.get());
     task_ptr st1 = sf1->add_task("t1");
     add_sorted_attributes(st1.get());
-    st1->flag().set(ecf::Flag::MESSAGE);
+    st1->get_flag().set(ecf::Flag::MESSAGE);
     {
         TestStateChanged changed(s);
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(t1->absNodePath(), "event", "recursive")));

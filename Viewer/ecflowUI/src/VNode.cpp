@@ -797,12 +797,12 @@ bool VNode::isAlias() const
 #endif
 
 std::string VNode::flagsAsStr() const {
-    return (node_) ? node_->flag().to_string() : std::string();
+    return (node_) ? node_->get_flag().to_string() : std::string();
 }
 
 bool VNode::isFlagSet(ecf::Flag::Type f) const {
     if (node_) {
-        return node_->flag().is_set(f);
+        return node_->get_flag().is_set(f);
     }
     return false;
 }

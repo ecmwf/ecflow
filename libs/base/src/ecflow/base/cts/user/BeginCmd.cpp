@@ -101,7 +101,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
 
     // The begin will clear the zombie flag: Hence reset it here.
     for (auto task : tasks)
-        task->flag().set(ecf::Flag::ZOMBIE);
+        task->get_flag().set(ecf::Flag::ZOMBIE);
 
     // After begin do the first Job submission. This will kick of those
     // jobs that have no dependencies, or relative time of +00:00

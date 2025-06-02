@@ -364,7 +364,7 @@ void Node::requeue(Requeue_args& args) {
             reset_next_time_slot = true;
         }
         else {
-            if (flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+            if (get_flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
                 /// If we have done an interactive run or complete, *dont* increment next_time_slot_
                 /// allow next time on time based attributes to be incremented and *not* reset,
                 /// when force and run commands used
@@ -379,13 +379,13 @@ void Node::requeue(Requeue_args& args) {
 
     // Should *NOT* clear, archived flag, as this is done via autorestore or --restore
     // reset the flags, however remember if edit were made
-    bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
-    bool archived_set     = flag().is_set(ecf::Flag::ARCHIVED);
+    bool edit_history_set = get_flag().is_set(ecf::Flag::MESSAGE);
+    bool archived_set     = get_flag().is_set(ecf::Flag::ARCHIVED);
     flag_.reset(); // will CLEAR NO_REQUE_IF_SINGLE_TIME_DEP
     if (edit_history_set)
-        flag().set(ecf::Flag::MESSAGE);
+        get_flag().set(ecf::Flag::MESSAGE);
     if (archived_set)
-        flag().set(ecf::Flag::ARCHIVED);
+        get_flag().set(ecf::Flag::ARCHIVED);
 
     if (late_)
         late_->reset();
@@ -535,7 +535,7 @@ bool Node::calendarChanged(const ecf::Calendar& c,
     }
 
     // Avoid automatically archiving a restored node. Wait till begin/re-queue
-    if (!flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
+    if (!get_flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
         cal_args.auto_archive_nodes_.push_back(shared_from_this());
     }
     return holding_parent_day_or_date;
@@ -553,15 +553,15 @@ void Node::check_for_lateness(const ecf::Calendar& c, const ecf::LateAttr* inher
                 overridden_late.override_with(late_.get());
                 if (overridden_late.check_for_lateness(st_, c)) {
                     late_->setLate(true);
-                    flag().set(ecf::Flag::LATE);
+                    get_flag().set(ecf::Flag::LATE);
                 }
             }
         }
     }
     else {
         // inherited late, we can only set late flag.
-        if (inherited_late && !flag().is_set(ecf::Flag::LATE) && inherited_late->check_for_lateness(st_, c)) {
-            flag().set(ecf::Flag::LATE);
+        if (inherited_late && !get_flag().is_set(ecf::Flag::LATE) && inherited_late->check_for_lateness(st_, c)) {
+            get_flag().set(ecf::Flag::LATE);
         }
     }
 }
@@ -569,7 +569,7 @@ void Node::check_for_lateness(const ecf::Calendar& c, const ecf::LateAttr* inher
 void Node::checkForLateness(const ecf::Calendar& c) {
     if (late_ && late_->check_for_lateness(st_, c)) {
         late_->setLate(true);
-        flag().set(ecf::Flag::LATE);
+        get_flag().set(ecf::Flag::LATE);
         // cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
     }
 }
@@ -680,7 +680,7 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
 
             // Remove effects of RUN and Force complete interactive commands, *BUT* only if *not* applied to this cron
             if (!crons().empty()) {
-                if (!flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+                if (!get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
                     reset_next_time_slot = true;
                 }
             }
@@ -795,7 +795,7 @@ bool Node::resolveDependencies(JobsParam& jobsParam) {
     if (evaluateComplete()) {
         if (completeAst()) {
 
-            flag().set(ecf::Flag::BYRULE);
+            get_flag().set(ecf::Flag::BYRULE);
 
             // If we are a parent sets the state first. then set state on all the children
             set_state_hierarchically(NState::COMPLETE,
@@ -1058,10 +1058,10 @@ void Node::setStateOnly(NState::State newState,
 
     if (newState == NState::ABORTED) {
         if (force)
-            flag().set(ecf::Flag::FORCE_ABORT);
+            get_flag().set(ecf::Flag::FORCE_ABORT);
         Submittable* submittable = isSubmittable();
         if (submittable) {
-            flag().set(ecf::Flag::TASK_ABORTED);
+            get_flag().set(ecf::Flag::TASK_ABORTED);
             if (do_log_state_changes) {
                 log_state_change += " try-no: ";
                 log_state_change += submittable->tryNo();
@@ -1071,8 +1071,8 @@ void Node::setStateOnly(NState::State newState,
         }
     }
     else {
-        flag().clear(ecf::Flag::TASK_ABORTED);
-        flag().clear(ecf::Flag::FORCE_ABORT);
+        get_flag().clear(ecf::Flag::TASK_ABORTED);
+        get_flag().clear(ecf::Flag::FORCE_ABORT);
     }
 
     if (do_log_state_changes) {
@@ -1707,7 +1707,7 @@ void Node::read_state(const std::string& line, const std::vector<std::string>& l
         else if (line_token_i.find("flag:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token))
                 throw std::runtime_error("Node::read_state invalid flags for node " + name());
-            flag().set_flag(token); // this can throw
+            get_flag().set_flag(token); // this can throw
         }
         else if (line_token_i.find("dur:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token))

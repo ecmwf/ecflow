@@ -499,10 +499,10 @@ void Node::miss_next_time_slot() {
         /// However if the run at 9.00 fails, and we run again, we also miss 11:00 time slot.
         /// During the run the flag is still set.
         /// Hence *ONLY* miss the next time slot *IF* Flag::NO_REQUE_IF_SINGLE_TIME_DEP is NOT set
-        if (!flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+        if (!get_flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
 
             SuiteChanged0 changed(shared_from_this());
-            flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+            get_flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
 
             // Note: when we have multiple time dependencies.
             // We need find valid next time dependency:

@@ -582,9 +582,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
         // Change flags
         if (flag_type_ != Flag::NOT_SET) {
             if (flag_)
-                node->flag().set(flag_type_);
+                node->get_flag().set(flag_type_);
             else
-                node->flag().clear(flag_type_);
+                node->get_flag().clear(flag_type_);
         }
 
         // sort
