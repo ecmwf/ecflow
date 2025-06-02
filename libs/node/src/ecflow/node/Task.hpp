@@ -49,7 +49,7 @@ public:
     void reset_alias_number();
 
     /// return list of aliases held by this task
-    const std::vector<alias_ptr>& aliases() { return aliases_; }
+    const std::vector<alias_ptr>& aliases() const { return aliases_; }
     void immediateChildren(std::vector<node_ptr>&) const override;
 
     /// Overidden from Submittable
