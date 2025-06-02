@@ -414,10 +414,14 @@ public:
     const std::vector<ZombieAttr>& zombies() const;
     const std::vector<QueueAttr>& queues() const;
     const std::vector<GenericAttr>& generics() const;
-    ecf::LateAttr* get_late() const { return late_.get(); }
-    ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_.get(); }
-    ecf::AutoCancelAttr* get_autocancel() const { return auto_cancel_.get(); }
-    ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get(); }
+    ecf::LateAttr* get_late() { return late_.get(); }
+    const ecf::LateAttr* get_late() const { return late_.get(); }
+    ecf::AutoRestoreAttr* get_autorestore() { return auto_restore_.get(); }
+    const ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_.get(); }
+    ecf::AutoCancelAttr* get_autocancel() { return auto_cancel_.get(); }
+    const ecf::AutoCancelAttr* get_autocancel() const { return auto_cancel_.get(); }
+    ecf::AutoArchiveAttr* get_autoarchive() { return auto_archive_.get(); }
+    const ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get(); }
     ecf::Flag& get_flag() { return flag_; }
     const ecf::Flag& get_flag() const { return flag_; }
 

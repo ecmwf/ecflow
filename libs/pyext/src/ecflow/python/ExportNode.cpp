@@ -552,6 +552,22 @@ void replace_on_server2(node_ptr self, const std::string& host_port, bool suspen
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const LateAttr* get_late_attr(node_ptr self) {
+    return self->get_late();
+}
+
+const AutoArchiveAttr* get_autoarchive_attr(node_ptr self) {
+    return self->get_autoarchive();
+}
+
+const AutoCancelAttr* get_autocancel_attr(node_ptr self) {
+    return self->get_autocancel();
+}
+
+const AutoRestoreAttr* get_autorestore_attr(node_ptr self) {
+    return self->get_autorestore();
+}
+
 const Flag& get_flag_attr(node_ptr self) {
     return self->get_flag();
 }
@@ -747,10 +763,10 @@ void export_Node() {
         .def("get_dstate", &Node::dstate, "Returns the state of node. This will include suspended state")
         .def("get_defstatus", &Node::defStatus)
         .def("get_repeat", &Node::repeat, return_value_policy<copy_const_reference>())
-        .def("get_late", &Node::get_late, return_internal_reference<>())
-        .def("get_autocancel", &Node::get_autocancel, return_internal_reference<>())
-        .def("get_autoarchive", &Node::get_autoarchive, return_internal_reference<>())
-        .def("get_autorestore", &Node::get_autorestore, return_internal_reference<>())
+        .def("get_late", &get_late_attr, return_internal_reference<>())
+        .def("get_autocancel", &get_autocancel_attr, return_internal_reference<>())
+        .def("get_autoarchive", &get_autoarchive_attr, return_internal_reference<>())
+        .def("get_autorestore", &get_autorestore_attr, return_internal_reference<>())
         .def("get_trigger", &Node::get_trigger, return_internal_reference<>())
         .def("get_complete", &Node::get_complete, return_internal_reference<>())
         .def("get_defs", get_defs, return_internal_reference<>())
