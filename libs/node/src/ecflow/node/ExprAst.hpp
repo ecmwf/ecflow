@@ -466,6 +466,7 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstNodeState* clone() const override;
     int value() const override { return static_cast<int>(state_); }
+    DState::State state() const { return state_; }
     std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
@@ -549,6 +550,7 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstFlag* clone() const override;
     int value() const override;
+    ecf::Flag::Type flag() const { return flag_; }
     std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }

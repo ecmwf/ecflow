@@ -84,7 +84,6 @@ std::ostream& AstTop::print(std::ostream& os) const {
     Indentor in;
     Indentor::indent(os) << "# Trigger Evaluation Tree\n";
     if (root_) {
-        Indentor in2;
         return root_->print(os);
     }
     return os;
@@ -184,22 +183,11 @@ void AstRoot::addChild(Ast* n) {
 std::ostream& AstRoot::print(std::ostream& os) const {
     // left_ should not be NULL, but keep clang static analyser happy
     if (left_) {
-        if (left_->isRoot()) {
-            Indentor in;
-            left_->print(os);
-        }
-        else
-            left_->print(os);
+        left_->print(os);
     }
 
     if (right_) { // right_ is empty for Not
-        if (right_->isRoot()) {
-            Indentor in;
-            right_->print(os);
-        }
-        else
-            right_->print(os);
-        ;
+        right_->print(os);
     }
     return os;
 }
@@ -277,6 +265,7 @@ AstNot* AstNot::clone() const {
 }
 
 std::ostream& AstNot::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# NOT (" << evaluate_str() << ")";
     if (right_)
         os << " # ERROR has right_";
@@ -343,6 +332,7 @@ AstPlus* AstPlus::clone() const {
 }
 
 std::ostream& AstPlus::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# PLUS value(" << value() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -404,6 +394,7 @@ AstMinus* AstMinus::clone() const {
 }
 
 std::ostream& AstMinus::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# MINUS value(" << value() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -542,6 +533,7 @@ AstMultiply* AstMultiply::clone() const {
 }
 
 std::ostream& AstMultiply::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# MULTIPLY value(" << value() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -619,6 +611,7 @@ int AstModulo::value() const {
 }
 
 std::ostream& AstModulo::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# Modulo value(" << value() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -680,6 +673,7 @@ AstAnd* AstAnd::clone() const {
 }
 
 std::ostream& AstAnd::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# AND (" << evaluate_str() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -743,6 +737,7 @@ AstOr* AstOr::clone() const {
 }
 
 std::ostream& AstOr::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# OR (" << evaluate_str() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -806,6 +801,7 @@ AstEqual* AstEqual::clone() const {
 }
 
 std::ostream& AstEqual::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# EQUAL (" << evaluate_str() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -868,6 +864,7 @@ AstNotEqual* AstNotEqual::clone() const {
 }
 
 std::ostream& AstNotEqual::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# NOT_EQUAL (" << evaluate_str() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -930,6 +927,7 @@ AstLessEqual* AstLessEqual::clone() const {
 }
 
 std::ostream& AstLessEqual::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# LESS_EQUAL (" << evaluate_str() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -982,6 +980,7 @@ void AstGreaterEqual::accept(ExprAstVisitor& v) {
     AstRoot::accept(v);
     v.visitGreaterEqual(this);
 }
+
 AstGreaterEqual* AstGreaterEqual::clone() const {
     auto* ast = new AstGreaterEqual();
     if (left_)
@@ -992,6 +991,7 @@ AstGreaterEqual* AstGreaterEqual::clone() const {
 }
 
 std::ostream& AstGreaterEqual::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# GREATER_EQUAL (" << evaluate_str() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -1044,6 +1044,7 @@ void AstGreaterThan::accept(ExprAstVisitor& v) {
     AstRoot::accept(v);
     v.visitGreaterThan(this);
 }
+
 AstGreaterThan* AstGreaterThan::clone() const {
     auto* ast = new AstGreaterThan();
     if (left_)
@@ -1054,6 +1055,7 @@ AstGreaterThan* AstGreaterThan::clone() const {
 }
 
 std::ostream& AstGreaterThan::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# GREATER_THAN (" << evaluate_str() << ")";
     if (!left_)
         os << " # ERROR has no left_";
@@ -1117,6 +1119,7 @@ AstLessThan* AstLessThan::clone() const {
 }
 
 std::ostream& AstLessThan::print(std::ostream& os) const {
+    Indentor in;
     Indentor::indent(os) << "# LESS_THAN (" << evaluate_str() << ")";
     if (!left_)
         os << " # ERROR has no left_";
