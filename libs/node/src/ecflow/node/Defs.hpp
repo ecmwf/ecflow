@@ -76,7 +76,7 @@ public:
 
     // The defs does not need suspend()/resume() as this is controlled by the server states
     // The defs cannot schedule jobs when HALTED or SHUTDOWN, i.e. not RUNNING, this is same as suspended
-    bool isSuspended() const { return (server_state().get_state() != SState::RUNNING); }
+    bool isSuspended() const { return server_state().get_state() != SState::RUNNING; }
 
     /// Python based checking
     /// Will create a temporary variable ECF_JOB so the job generation is done to a temporary directory
