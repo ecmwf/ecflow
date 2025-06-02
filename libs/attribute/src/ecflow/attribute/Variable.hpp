@@ -54,7 +54,6 @@ public:
     // Added to support return by reference
     static const Variable& EMPTY();
 
-private:
     void write(std::string&) const;
 
 private:

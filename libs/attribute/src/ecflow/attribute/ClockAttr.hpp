@@ -71,7 +71,7 @@ public:
     std::string toString() const;
     boost::posix_time::ptime ptime() const;
 
-private:
+public:
     void write(std::string& os) const;
 
 private:

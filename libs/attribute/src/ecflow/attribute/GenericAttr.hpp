@@ -42,7 +42,7 @@ public:
     // Added to support return by reference
     static const GenericAttr& EMPTY();
 
-private:
+public:
     void write(std::string& ret) const;
 
 private:

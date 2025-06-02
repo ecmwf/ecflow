@@ -62,9 +62,9 @@ public:
 
     void read_state(const std::string& line, const std::vector<std::string>& lineTokens) override;
 
-private:
+public:
     void write_state(std::string&, bool&) const override;
-
+private:
     mutable FamGenVariables* fam_gen_variables_{nullptr};
 
 private:

@@ -108,8 +108,9 @@ private:
     void begin_calendar();
     void requeue_calendar();
     void handle_clock_attribute_change();
+public:
     void write_state(std::string&, bool&) const override;
-
+private:
     friend class cereal::access;
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);

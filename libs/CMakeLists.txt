@@ -366,6 +366,7 @@ set(srcs
   node/src/ecflow/node/TaskScriptGenerator.hpp
   node/src/ecflow/node/move_peer.hpp
   node/src/ecflow/node/formatter/AvisoFormatter.hpp
+  node/src/ecflow/node/formatter/DefsWriter.hpp
   node/src/ecflow/node/formatter/Format.hpp
   node/src/ecflow/node/formatter/Formatter.hpp
   node/src/ecflow/node/formatter/MirrorFormatter.hpp

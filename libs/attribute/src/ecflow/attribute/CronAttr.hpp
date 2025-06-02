@@ -106,7 +106,7 @@ public:
     static void parse(CronAttr&, const std::vector<std::string>& lineTokens, size_t index, bool parse_state = false);
     static CronAttr create(const std::string& cronString);
 
-private:
+public:
     void write(std::string&) const;
 
 private:

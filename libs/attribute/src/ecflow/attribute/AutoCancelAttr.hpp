@@ -40,7 +40,7 @@ public:
     bool relative() const { return relative_; }
     bool days() const { return days_; }
 
-private:
+public:
     void write(std::string& ret) const;
 
 private:

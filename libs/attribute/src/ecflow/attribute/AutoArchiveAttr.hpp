@@ -49,7 +49,7 @@ public:
     bool days() const { return days_; }
     bool idle() const { return idle_; }
 
-private:
+public:
     void write(std::string&) const;
 
 private:

@@ -22,8 +22,6 @@ struct Formatter<MirrorAttr, Stream>
     static void format(const std::vector<MirrorAttr>& items, Stream& output) { format_vector_as_defs(items, output); }
 
     static void format(const MirrorAttr& item, Stream& output) {
-        ecf::Indentor in;
-        ecf::Indentor::indent(output);
         output << "mirror";
         output << " --name ";
         output << item.name();
@@ -52,7 +50,7 @@ struct Formatter<MirrorAttr, Stream>
             output << " --reason ";
             output << item.reason();
         }
-        output << '\n';
+        output << "\n";
     }
 };
 

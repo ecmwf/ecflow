@@ -303,6 +303,7 @@ public:
     const std::vector<std::string>& get_edit_history(const std::string& path) const;
     const std::unordered_map<std::string, std::vector<std::string>>& get_edit_history() const { return edit_history_; }
     void save_edit_history(bool f) const { save_edit_history_ = f; }
+    bool get_save_edit_history() const { return save_edit_history_; }
     static const std::vector<std::string>& empty_edit_history();
     constexpr static size_t max_edit_history_size_per_node() { return 10; }
 
@@ -347,7 +348,11 @@ public:
 
 private:
     void do_generate_scripts(const std::map<std::string, std::string>& override) const;
+
+public:
     void write_state(std::string&) const;
+
+private:
     void collate_defs_changes_only(DefsDelta&) const;
     void setupDefaultEnv();
 

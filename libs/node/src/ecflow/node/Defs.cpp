@@ -1480,8 +1480,13 @@ void Defs::save_as_string(std::string& the_string, PrintStyle::Type_t p_style) c
 
     // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
     // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
-    ecf::DisableIndentor disable_indentation;
-    print(the_string);
+    if (p_style == PrintStyle::DEFS || p_style == PrintStyle::NOTHING) {
+        print(the_string);
+    }
+    else {
+        ecf::DisableIndentor disable_indentation;
+        print(the_string);
+    }
 }
 
 void Defs::restore(const std::string& the_fileName) {

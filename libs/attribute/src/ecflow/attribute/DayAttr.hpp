@@ -115,6 +115,7 @@ private:
     void clear_expired();
     bool is_free(const ecf::Calendar&) const; // ignores free_
     boost::gregorian::date matching_date(const ecf::Calendar& c) const;
+public:
     void write(std::string&) const;
 
 private:

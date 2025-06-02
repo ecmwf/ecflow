@@ -712,14 +712,15 @@ public:
     bool is_repeat_day() const { return (type_) ? type_->is_repeat_day() : false; }
 
     /// Expose base for the GUI only, use with caution
-    RepeatBase* repeatBase() const { return type_.get(); }
+    RepeatBase* repeatBase() { return type_.get(); }
+    const RepeatBase* repeatBase() const { return type_.get(); }
 
     template <typename T>
     const T& as() const {
         return dynamic_cast<const T&>(*repeatBase());
     }
 
-private:
+public:
     void write(std::string& ret) const {
         if (type_)
             type_->write(ret);

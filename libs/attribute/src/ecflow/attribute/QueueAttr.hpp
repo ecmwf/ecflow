@@ -65,6 +65,7 @@ public:
 
 private:
     void incr_state_change_no();
+public:
     void write(std::string&) const;
 
 private:

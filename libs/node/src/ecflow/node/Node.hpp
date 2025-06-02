@@ -425,6 +425,8 @@ public:
     ecf::Flag& get_flag() { return flag_; }
     const ecf::Flag& get_flag() const { return flag_; }
 
+    const MiscAttrs* get_misc_attrs() const { return misc_attrs_.get(); }
+
     [[deprecated]] virtual void gen_variables(std::vector<Variable>&) const;
     std::vector<Variable> gen_variables() const;
     bool getLabelValue(const std::string& name, std::string& value) const;
@@ -812,7 +814,11 @@ private:
     int findExprVariableValueAndPlus(const std::string& name, int val) const;
     int findExprVariableValueAndMinus(const std::string& name, int val) const;
     int findExprVariableValueAndType(const std::string& name, std::string& varType) const;
+
+public:
     void findExprVariableAndPrint(const std::string& name, std::ostream& os) const;
+
+private:
     friend class VariableHelper;
     friend class AstParentVariable;
     bool update_variable(const std::string& name, const std::string& value);

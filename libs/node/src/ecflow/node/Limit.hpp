@@ -74,6 +74,7 @@ public:
 
 private:
     void update_change_no();
+public:
     void write(std::string&) const;
 
 private:

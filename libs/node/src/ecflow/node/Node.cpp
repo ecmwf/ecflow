@@ -1831,9 +1831,13 @@ void Node::print(std::string& os) const {
         cron.print(os);
     }
     for (const AvisoAttr& a : avisos_) {
+        ecf::Indentor in;
+        ecf::Indentor::indent(os);
         ecf::format_as_defs(a, os);
     }
     for (const MirrorAttr& m : mirrors_) {
+        ecf::Indentor in;
+        ecf::Indentor::indent(os);
         ecf::format_as_defs(m, os);
     }
 

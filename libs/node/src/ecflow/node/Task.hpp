@@ -117,6 +117,7 @@ public:
 private:
     void copy(const Task&);
     size_t child_position(const Node*) const override;
+public:
     void write_state(std::string&, bool&) const override;
 
 private:

@@ -67,7 +67,7 @@ public:
     static int default_path_zombie_life_time() { return 900; }
     static int minimum_zombie_life_time() { return 60; }
 
-private:
+public:
     void write(std::string&) const;
 
 private:
