@@ -59,8 +59,8 @@ public:
 
     void copy_defs_state_only(const defs_ptr& defs); // needed when creating defs for client handles
     bool operator==(const Defs& rhs) const;
-    void print(std::string&) const;
-    std::string print(PrintStyle::Type_t t = PrintStyle::MIGRATE) const;
+    [[deprecated]] void print(std::string&) const;
+    [[deprecated]] std::string print(PrintStyle::Type_t t = PrintStyle::MIGRATE) const;
 
     /// Handle migration of checkpoint 4->5, and 5.0-5.4.0 -> 5.5
     /// This essentially update date data member of the Day attribute
@@ -281,9 +281,12 @@ public:
 
     // defs format
     void save_as_checkpt(const std::string& fileName) const;
-    void save_as_filename(const std::string& fileName,
-                          PrintStyle::Type_t = PrintStyle::MIGRATE) const; // used in test only
-    void save_as_string(std::string& str, PrintStyle::Type_t = PrintStyle::MIGRATE) const;
+
+    [[deprecated]] void save_as_string(std::string& str, PrintStyle::Type_t = PrintStyle::MIGRATE) const;
+
+    void write_as_string(std::string& str, PrintStyle::Type_t = PrintStyle::MIGRATE) const;
+    void write_to_file(const std::string& filepath, PrintStyle::Type_t = PrintStyle::MIGRATE) const;
+
     void restore(const std::string& fileName); // will throw
     bool restore(const std::string& fileName, std::string& errorMsg, std::string& warningMsg);
     void restore_from_string(const std::string& str); // will throw

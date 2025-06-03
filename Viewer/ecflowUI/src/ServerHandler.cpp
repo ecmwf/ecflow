@@ -1871,7 +1871,7 @@ void ServerHandler::writeDefs(const std::string& fileName) {
     ServerDefsAccess defsAccess(this); // will reliquish its resources on destruction
     defs_ptr defs = defsAccess.defs();
     if (defs) {
-        defs->save_as_filename(fileName, PrintStyle::MIGRATE);
+        defs->write_to_file(fileName, PrintStyle::MIGRATE);
     }
     comQueue_->start();
 }

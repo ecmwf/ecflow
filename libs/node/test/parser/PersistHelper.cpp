@@ -31,7 +31,7 @@ bool PersistHelper::test_persist_and_reload(const Defs& theInMemoryDefs,
 
     {
         // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
-        theInMemoryDefs.save_as_filename(temporary.path(), file_type_on_disk);
+        theInMemoryDefs.write_to_file(temporary.path(), file_type_on_disk);
     }
 
     // Reload the file we just persisted and compare with in memory defs

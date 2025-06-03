@@ -25,7 +25,7 @@ public:
 
     static alias_ptr create(const std::string& name, bool check = true);
 
-    void print(std::string&) const override;
+    [[deprecated]] void print(std::string&) const override;
     bool operator==(const Alias& rhs) const;
 
     /// Overridden to reset the try number

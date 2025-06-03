@@ -66,7 +66,7 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
     Ecf::set_debug_equality(true); // only has affect in DEBUG build
     BOOST_CHECK_MESSAGE(*server_defs == *server_reply.client_defs(),
                         "Test:" << test_name << ": Starting point client and server defs should be the same");
-    Ecf::set_debug_equality(false); // only has affect in DEBUG build
+    Ecf::set_debug_equality(false); // only has effect in DEBUG build
 
     // Get change number before any changes
     unsigned int client_state_change_no  = Ecf::state_change_no();

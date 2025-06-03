@@ -273,8 +273,9 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
         else {
             BOOST_CHECK_MESSAGE(TestFixture::client().news(full_defs) == 0,
                                 "news failed should return 0 " << TestFixture::client().errorMsg());
+
             server_changed = TestFixture::client().get_news();
-            //			std::cout << "server_changed = " << server_changed << "\n";
+
             if (server_changed) {
 
                 // Get the incremental changes **FIRST** and compare this with the full defs later on
@@ -291,8 +292,8 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
                 BOOST_REQUIRE_MESSAGE(full_defs.get(), "get command failed to get node tree from server");
                 test_invariants(full_defs, "After getting the full defs.");
 
-                // **** NOTE ****: There could have been state change between the calls:
-                // **************: 	 TestFixture::client().sync(incremental_defs)
+                // **** NOTE ****: There could have been s state change between the calls:
+                // **************:    TestFixture::client().sync(incremental_defs)
                 // **************:    TestFixture::client().getDefs()
                 // **************: hence we can only compare, incremental and full defs if
                 // **************: state and modification numbers are the same:

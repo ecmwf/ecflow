@@ -38,6 +38,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/node/move_peer.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
 
@@ -1454,28 +1455,15 @@ void Defs::save_as_checkpt(const std::string& the_fileName) const {
 
     // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
     // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
-    ecf::DisableIndentor disable_indentation;
-    save_as_filename(the_fileName, PrintStyle::MIGRATE);
-}
-
-void Defs::save_as_filename(const std::string& the_fileName, PrintStyle::Type_t p_style) const {
-    PrintStyle printStyle(p_style);
-
-    std::ofstream ofs(the_fileName.c_str());
-    std::string s;
-    print(s);
-    ofs << s;
-
-    if (!ofs.good()) {
-        std::string err = "Defs::save_as_filename: path(";
-        err += the_fileName;
-        err += ") failed: ";
-        err += File::stream_error_condition(ofs);
-        throw std::runtime_error(err);
-    }
+    write_to_file(the_fileName, PrintStyle::MIGRATE);
 }
 
 void Defs::save_as_string(std::string& the_string, PrintStyle::Type_t p_style) const {
+    //
+    // Important: The following `printStyle` declaration is needed before printing as it
+    // statically (i.e., using *Global* state) defines the style used by the `print()` function,
+    // and by all downstream `print()` function calls from other objects.
+    //
     PrintStyle printStyle(p_style);
 
     // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
@@ -1486,6 +1474,41 @@ void Defs::save_as_string(std::string& the_string, PrintStyle::Type_t p_style) c
     else {
         ecf::DisableIndentor disable_indentation;
         print(the_string);
+    }
+}
+
+void Defs::write_as_string(std::string& os, PrintStyle::Type_t p_style) const {
+    // Set up the output, pre-allocating space based on previous runs (if available)
+    os.clear();
+    if (print_cache_ > 0) {
+        os.reserve(print_cache_);
+    }
+    else {
+        os.reserve(4096);
+    }
+
+    auto ctx = ecf::Context::make_for(p_style);
+    ecf::write_t(os, *this, ctx);
+
+    // Store the size of the output, for future use
+    print_cache_ = os.size();
+}
+
+void Defs::write_to_file(const std::string& filepath, PrintStyle::Type_t p_style) const {
+
+    // Place the output into a string buffer
+    std::string buffer;
+    write_as_string(buffer, p_style);
+
+    // Write the buffer to the specified file
+    std::ofstream ofs(filepath.c_str());
+    ofs << buffer;
+    if (!ofs.good()) {
+        std::string err = "Defs::write_to_file: path(";
+        err += filepath;
+        err += ") failed: ";
+        err += File::stream_error_condition(ofs);
+        throw std::runtime_error(err);
     }
 }
 

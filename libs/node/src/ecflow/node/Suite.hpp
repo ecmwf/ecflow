@@ -65,7 +65,7 @@ public:
     const std::string& debugType() const override;
 
     bool operator==(const Suite& rhs) const;
-    void print(std::string&) const override;
+    [[deprecated]] void print(std::string&) const override;
 
     void addClock(const ClockAttr&,
                   bool initialize_calendar = true); // throw std::run_time if more than one clock is added

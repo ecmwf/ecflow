@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
     {
         timer.start();
         std::string defs_as_string;
-        defs.save_as_string(defs_as_string, PrintStyle::DEFS);
+        defs.write_as_string(defs_as_string, PrintStyle::DEFS);
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     {
         timer.start();
         std::string defs_as_string;
-        defs.save_as_string(defs_as_string, PrintStyle::NET);
+        defs.write_as_string(defs_as_string, PrintStyle::NET);
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
     {
         timer.start();
         std::string defs_as_string;
-        defs.save_as_string(defs_as_string, PrintStyle::MIGRATE);
+        defs.write_as_string(defs_as_string, PrintStyle::MIGRATE);
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
