@@ -112,10 +112,10 @@ struct Writer
 /* *** Writers : Expression/AST ********************************************* */
 /* ************************************************************************** */
 
-namespace detail__ {
+namespace detail {
 
 template <typename Stream, typename T>
-bool write_part2_(Stream& output, const Ast* root, Context& ctx) {
+bool write_ast_derived_type(Stream& output, const Ast* root, Context& ctx) {
     if (auto x = dynamic_cast<const T*>(root); x) {
         Writer<T, Stream>::write(output, *x, ctx);
         return true;
@@ -124,40 +124,39 @@ bool write_part2_(Stream& output, const Ast* root, Context& ctx) {
 }
 
 template <typename Stream, typename... T>
-bool write_part1_(Stream& output, const Ast* root, Context& ctx) {
-    return (write_part2_<Stream, T>(output, root, ctx) || ...);
+void write_ast_derived_types(Stream& output, const Ast* root, Context& ctx) {
+    (write_ast_derived_type<Stream, T>(output, root, ctx) || ...);
 }
 
 template <typename Stream>
-void write_ast(Stream& output, const Ast* root, Context& ctx) {
-    auto outcome = write_part1_<Stream,
-                                AstNot,
-                                AstPlus,
-                                AstMinus,
-                                AstDivide,
-                                AstMultiply,
-                                AstModulo,
-                                AstAnd,
-                                AstOr,
-                                AstEqual,
-                                AstNotEqual,
-                                AstLessEqual,
-                                AstGreaterEqual,
-                                AstGreaterThan,
-                                AstLessThan,
-                                AstFunction,
-                                AstInteger,
-                                AstInstant,
-                                AstNodeState,
-                                AstEventState,
-                                AstNode,
-                                AstFlag,
-                                AstVariable,
-                                AstParentVariable>(output, root, ctx);
-    assert(outcome);
+void write_ast_type(Stream& output, const Ast* root, Context& ctx) {
+    write_ast_derived_types<Stream,
+                            AstNot,
+                            AstPlus,
+                            AstMinus,
+                            AstDivide,
+                            AstMultiply,
+                            AstModulo,
+                            AstAnd,
+                            AstOr,
+                            AstEqual,
+                            AstNotEqual,
+                            AstLessEqual,
+                            AstGreaterEqual,
+                            AstGreaterThan,
+                            AstLessThan,
+                            AstFunction,
+                            AstInteger,
+                            AstInstant,
+                            AstNodeState,
+                            AstEventState,
+                            AstNode,
+                            AstFlag,
+                            AstVariable,
+                            AstParentVariable>(output, root, ctx);
 }
 
-} // namespace detail__
+} // namespace detail
 
 template <typename Stream>
 struct Writer<AstTop, Stream>
@@ -171,7 +170,7 @@ struct Writer<AstTop, Stream>
 
         output << "# Trigger Evaluation Tree\n";
         if (const auto* root = item.left(); root) {
-            detail__::write_ast<Stream>(output, root, ctx);
+            detail::write_ast_type<Stream>(output, root, ctx);
         }
     }
 };
@@ -183,25 +182,11 @@ struct Writer<AstRoot, Stream>
         // taken from AstRoot::print(std::string& os) const
 
         if (const auto* left = item.left(); left) {
-            if (left->isRoot()) {
-                // Indent l1(ctx);
-                // l1.write(output);
-                detail__::write_ast(output, left, ctx);
-            }
-            else {
-                detail__::write_ast(output, left, ctx);
-            }
+            detail::write_ast_type(output, left, ctx);
         }
 
         if (const auto* right = item.right(); right) { // right_ is empty for Not
-            if (right->isRoot()) {
-                // Indent l1(ctx);
-                // l1.write(output);
-                detail__::write_ast(output, right, ctx);
-            }
-            else {
-                detail__::write_ast(output, right, ctx);
-            }
+            detail::write_ast_type(output, right, ctx);
         }
     }
 };
