@@ -230,7 +230,7 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
 #endif
     }
     else {
-        the_server_defs->write_as_string(server_defs_, PrintStyle::NET);
+        the_server_defs->write_to_string(server_defs_, PrintStyle::NET);
     }
 
 #ifdef DEBUG_SERVER_SYNC

@@ -1195,7 +1195,7 @@ void NodeContainer::archive() {
     }
 
     // save the created defs, to disk
-    archive_defs->save_as_checkpt(archive_path());
+    archive_defs->write_to_checkpt_file(archive_path());
 
     get_flag().set(ecf::Flag::ARCHIVED); // flag as archived
     get_flag().clear(ecf::Flag::RESTORED);

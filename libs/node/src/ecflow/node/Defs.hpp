@@ -280,12 +280,49 @@ public:
     void cereal_restore_from_checkpt(const std::string& fileName);
 
     // defs format
-    void save_as_checkpt(const std::string& fileName) const;
+    /**
+     * @brief Write the defs to a string.
+     *
+     * @deprecated This function is deprecated, use write_to_string() instead.
+     *
+     * The implementation of this function uses *Global* state to determine the print style,
+     * and this causes issues due to tight coupling (e.g., when using multiple threads).
+     *
+     * @param os the output string buffer to write the defs
+     * @param st the print style to use for writing the defs
+     */
+    [[deprecated]] void save_as_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
 
-    [[deprecated]] void save_as_string(std::string& str, PrintStyle::Type_t = PrintStyle::MIGRATE) const;
+    /**
+     * @brief Write the defs to a string.
+     *
+     * The Defs can be written to a string using multiple styles, meaning that this is effectively the entry point to
+     * the defs "text-based" serialization (e.g., defs file, checkpt file).
+     *
+     * @param os the output string buffer to write the defs
+     * @param st the print style to use for writing the defs
+     */
+    void write_to_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
 
-    void write_as_string(std::string& str, PrintStyle::Type_t = PrintStyle::MIGRATE) const;
-    void write_to_file(const std::string& filepath, PrintStyle::Type_t = PrintStyle::MIGRATE) const;
+    /**
+     * @brief Write the defs to a file at the given path.
+     *
+     * This function serializes the defs to a string which is then stored in the indicated file.
+     *
+     * @param filepath the path to the file used for writing the defs
+     * @param st the print style to use for writing the defs
+     */
+    void write_to_file(const std::string& filepath, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
+
+    /**
+     * @brief Write the defs to a *checkpoint* file at the given path.
+     *
+     * The checkpoint file is a specific format, typically used for saving the defs including
+     * state information plus "edit history".
+     *
+     * @param filepath the path to the file used for writing the defs
+     */
+    void write_to_checkpt_file(const std::string& filepath) const;
 
     void restore(const std::string& fileName); // will throw
     bool restore(const std::string& fileName, std::string& errorMsg, std::string& warningMsg);
@@ -460,6 +497,14 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * @brief Overloaded operator<< for printing Defs objects
+ *        This always uses the style PrintStyle::DEFS.
+ *
+ * @param os the output stream
+ * @param d  the Defs object to print
+ * @return the output stream with the Defs object printed
+ */
 std::ostream& operator<<(std::ostream& os, const Defs*);
 std::ostream& operator<<(std::ostream& os, const Defs&);
 

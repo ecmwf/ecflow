@@ -511,7 +511,7 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning) {
     //   cout << dump_edit_history(defs.get_edit_history()) << "\n";
 
     std::string tmpFilename = "test_state_edit_history_pruning.def";
-    defs.save_as_checkpt(tmpFilename);
+    defs.write_to_checkpt_file(tmpFilename);
 
     {
         // If any edit history is older than 1 day, then prune
@@ -554,7 +554,7 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning2) {
     //   cout << dump_edit_history(defs.get_edit_history()) << "\n";
 
     std::string tmpFilename = "test_state_edit_history_pruning2.def";
-    defs.save_as_checkpt(tmpFilename);
+    defs.write_to_checkpt_file(tmpFilename);
 
     {
         // Since the history is todays it should be preserved, and not affected by pruning

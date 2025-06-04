@@ -333,7 +333,7 @@ void export_Defs() {
              &Defs::hasTimeDependencies,
              "returns True if the `suite definition`_ has any time `dependencies`_")
         .def("save_as_checkpt",
-             &Defs::save_as_checkpt,
+             &Defs::write_to_checkpt_file,
              "Save the in memory `suite definition`_ as a `check point`_ file. This includes all node state.")
         .def("restore_from_checkpt",
              &restore_from_checkpt,

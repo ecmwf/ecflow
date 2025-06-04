@@ -31,10 +31,14 @@ BOOST_AUTO_TEST_SUITE(S_Test)
 
 BOOST_AUTO_TEST_SUITE(T_AbortCmd)
 
-// Test the abort command. This will test the abort command and the
-// retry behaviour. i.e if a task is aborted, and the variable ECF_TRIES
-// is defined. Then providing its value is less the the task's try number
-// we should do an immediate job submission.
+// Test the abort command.
+//
+// This will test the abort command and the retry behavior.
+//
+// Aborting a task with an associated variable ECF_TRIES defined,
+// when ECF_TRIES value is less than the task's try number,
+// triggers an immediate job submission.
+//
 BOOST_AUTO_TEST_CASE(test_abort_cmd) {
     ECF_NAME_THIS_TEST();
 
@@ -80,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_abort_cmd) {
                                   "\n"
                                   "%include <tail.h>\n";
 
-    // The test harness will create corresponding directory structure
+    // The test harness will create the corresponding directory structure
     // Override the default ECF file, with our custom ECF_ file
     std::map<std::string, std::string> taskEcfFileMap;
     taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(defs, "abort"), templateEcfFile));

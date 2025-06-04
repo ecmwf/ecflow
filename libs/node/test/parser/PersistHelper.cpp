@@ -48,7 +48,7 @@ bool PersistHelper::test_defs_checkpt_and_reload(const Defs& theInMemoryDefs, bo
 
     {
         // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
-        theInMemoryDefs.save_as_checkpt(temporary.path());
+        theInMemoryDefs.write_to_checkpt_file(temporary.path());
     }
 
     // Reload the file we just persisted and compare with in memory defs
@@ -88,7 +88,7 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
 
     {
         // The file MUST be written in the *SAME* form that it was read, Otherwise they will not compare:
-        theInMemoryDefs.save_as_checkpt(temporary.path()); // will save edit history
+        theInMemoryDefs.write_to_checkpt_file(temporary.path()); // will save edit history
     }
 
     Defs reload_strings_def;

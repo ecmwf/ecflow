@@ -28,7 +28,7 @@ namespace po = boost::program_options;
 LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force) : force_(force) {
     if (defs) {
         defs->handle_migration();
-        defs->write_as_string(defs_, PrintStyle::NET);
+        defs->write_to_string(defs_, PrintStyle::NET);
     }
 }
 
@@ -77,7 +77,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
         }
 
         if (!check_only && !stats && !print) {
-            defs->write_as_string(defs_, PrintStyle::NET); // NET only takes affect on restore
+            defs->write_to_string(defs_, PrintStyle::NET); // NET only takes affect on restore
         }
 
         // Output any warning to standard output

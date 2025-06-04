@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
     {
         timer.start();
         std::string defs_as_string;
-        defs.write_as_string(defs_as_string, PrintStyle::DEFS);
+        defs.write_to_string(defs_as_string, PrintStyle::DEFS);
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     {
         timer.start();
         std::string defs_as_string;
-        defs.write_as_string(defs_as_string, PrintStyle::NET);
+        defs.write_to_string(defs_as_string, PrintStyle::NET);
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
     {
         timer.start();
         std::string defs_as_string;
-        defs.write_as_string(defs_as_string, PrintStyle::MIGRATE);
+        defs.write_to_string(defs_as_string, PrintStyle::MIGRATE);
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
         TemporaryFile temporary("tmp_%%%%-%%%%-%%%%-%%%%.def");
 
         timer.start();
-        defs.save_as_checkpt(temporary.path());
+        defs.write_to_checkpt_file(temporary.path());
         cout << " Save as DEFS checkpoint, time taken            = " << timer.format(3, Str::cpu_timer_format())
              << endl;
     }

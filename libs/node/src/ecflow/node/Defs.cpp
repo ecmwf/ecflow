@@ -1447,17 +1447,6 @@ void Defs::cereal_restore_from_checkpt(const std::string& the_fileName) {
     //	cout << "Restored: " << suiteVec_.size() << " suites\n";
 }
 
-void Defs::save_as_checkpt(const std::string& the_fileName) const {
-    // Save as defs will always save children, hence no need for CheckPtContext
-
-    // only_save_edit_history_when_check_pointing or if explicitly requested
-    save_edit_history_ = true; // this is reset after edit_history is saved
-
-    // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
-    // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
-    write_to_file(the_fileName, PrintStyle::MIGRATE);
-}
-
 void Defs::save_as_string(std::string& the_string, PrintStyle::Type_t p_style) const {
     //
     // Important: The following `printStyle` declaration is needed before printing as it
@@ -1477,7 +1466,7 @@ void Defs::save_as_string(std::string& the_string, PrintStyle::Type_t p_style) c
     }
 }
 
-void Defs::write_as_string(std::string& os, PrintStyle::Type_t p_style) const {
+void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
     // Set up the output, pre-allocating space based on previous runs (if available)
     os.clear();
     if (print_cache_ > 0) {
@@ -1498,7 +1487,7 @@ void Defs::write_to_file(const std::string& filepath, PrintStyle::Type_t p_style
 
     // Place the output into a string buffer
     std::string buffer;
-    write_as_string(buffer, p_style);
+    write_to_string(buffer, p_style);
 
     // Write the buffer to the specified file
     std::ofstream ofs(filepath.c_str());
@@ -1510,6 +1499,17 @@ void Defs::write_to_file(const std::string& filepath, PrintStyle::Type_t p_style
         err += File::stream_error_condition(ofs);
         throw std::runtime_error(err);
     }
+}
+
+void Defs::write_to_checkpt_file(const std::string& filepath) const {
+    // Save as defs will always save children, hence no need for CheckPtContext
+
+    // only_save_edit_history_when_check_pointing or if explicitly requested
+    save_edit_history_ = true; // this is reset after edit_history is saved
+
+    // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
+    // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
+    write_to_file(filepath, PrintStyle::MIGRATE);
 }
 
 void Defs::restore(const std::string& the_fileName) {
@@ -2072,16 +2072,14 @@ bool Defs::is_observed(AbstractObserver* obs) const {
 std::ostream& operator<<(std::ostream& os, const Defs* d) {
     if (d) {
         std::string s;
-        d->print(s);
+        d->write_to_string(s, PrintStyle::DEFS);
         os << s;
         return os;
     }
     return os << "DEFS == NULL\n";
 }
 std::ostream& operator<<(std::ostream& os, const Defs& d) {
-    std::string s;
-    d.print(s);
-    os << s;
+    os << &d;
     return os;
 }
 
