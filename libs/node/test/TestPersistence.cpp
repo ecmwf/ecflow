@@ -13,6 +13,7 @@
 #include "MyDefsFixture.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -37,8 +38,8 @@ static void testPersistence(const Defs& fixtureDefs) {
     bool theyCompare = (restoredDefs == fixtureDefs);
     if (!theyCompare) {
 
-        std::cout << "Dump restored defs\n" << restoredDefs << "\n";
-        std::cout << "Dump fixture defs\n" << fixtureDefs << "\n";
+        std::cout << "Dump restored defs\n" << ecf::as_string(restoredDefs, PrintStyle::DEFS) << "\n";
+        std::cout << "Dump fixture defs\n" << ecf::as_string(fixtureDefs, PrintStyle::DEFS) << "\n";
 
         BOOST_CHECK_MESSAGE(theyCompare, "restored defs file is not same as fixtureDefs defs file");
     }

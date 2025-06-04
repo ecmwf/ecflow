@@ -28,6 +28,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -137,8 +138,7 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
             load_defs_from_disk = false;
         }
         else {
-            PrintStyle style(PrintStyle::DEFS); // needed for output
-            theClientDefsFile << theClientDefs;
+            theClientDefsFile << ecf::as_string(theClientDefs, PrintStyle::DEFS);
         }
     }
 
@@ -398,7 +398,7 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
                     string localErrorMessage;
                     BOOST_REQUIRE_MESSAGE(full_defs->verification(localErrorMessage),
                                           localErrorMessage << "\n"
-                                                            << *full_defs.get());
+                                                            << ecf::as_string(*full_defs, PrintStyle::STATE));
                 }
                 return full_defs;
             }
@@ -417,7 +417,8 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
             WhyCmd reason(full_defs, "" /* do a top down why */);
             std::cout << reason.why() << "\n";
         }
-        BOOST_REQUIRE_MESSAGE(assertTimer.duration() < assertTimer.timeConstraint(), "\n" << *full_defs);
+        BOOST_REQUIRE_MESSAGE(assertTimer.duration() < assertTimer.timeConstraint(),
+                              "\n" << ecf::as_string(*full_defs, PrintStyle::MIGRATE));
         if (assertTimer.duration() >= assertTimer.timeConstraint())
             break; // fix warning on AIX
 

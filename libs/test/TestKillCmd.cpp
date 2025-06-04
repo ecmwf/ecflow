@@ -24,6 +24,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -139,7 +140,7 @@ static bool waitForTaskState(NState::State state, int max_time_to_wait) {
                                       << NState::toString(state) << " Test wait " << assertTimer.duration()
                                       << " taking longer than time constraint of " << assertTimer.timeConstraint()
                                       << " aborting\n"
-                                      << *defs);
+                                      << ecf::as_string(*defs, PrintStyle::DEFS));
             break;
         }
         sleep(2);

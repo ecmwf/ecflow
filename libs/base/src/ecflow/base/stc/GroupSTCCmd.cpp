@@ -18,6 +18,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -92,7 +93,7 @@ bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_
                     defs->auto_add_externs();
                 }
 
-                std::cout << *defs.get();
+                ecf::write_t(std::cout, *defs, cts_cmd->show_style());
             }
             else {
                 if (node.get()) {

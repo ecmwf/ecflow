@@ -497,17 +497,6 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
-/**
- * @brief Overloaded operator<< for printing Defs objects
- *        This always uses the style PrintStyle::DEFS.
- *
- * @param os the output stream
- * @param d  the Defs object to print
- * @return the output stream with the Defs object printed
- */
-std::ostream& operator<<(std::ostream& os, const Defs*);
-std::ostream& operator<<(std::ostream& os, const Defs&);
-
 // =====================================================================
 // This class is used to read the History
 class DefsHistoryParser {

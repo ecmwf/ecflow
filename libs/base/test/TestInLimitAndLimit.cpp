@@ -27,6 +27,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -390,7 +391,7 @@ BOOST_AUTO_TEST_CASE(test_limit_references_after_delete) {
 
     BOOST_REQUIRE_MESSAGE(f->findInLimitByNameAndPath(in_limit1) && f1->findInLimitByNameAndPath(in_limit2) &&
                               f2->findInLimitByNameAndPath(in_limit3),
-                          "Failed to find in-limits on the families" << defs);
+                          "Failed to find in-limits on the families" << ecf::as_string(defs, PrintStyle::DEFS));
 
     // Now check they all reference the limits
     BOOST_REQUIRE_MESSAGE(f->findLimitViaInLimit(in_limit1),

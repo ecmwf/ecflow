@@ -19,6 +19,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/Edit.hpp"
@@ -33,9 +34,8 @@ namespace bp = boost::python;
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
 void save_as_defs(const Defs& theDefs, const std::string& filename, PrintStyle::Type_t the_style_enum) {
-    PrintStyle style(the_style_enum);
     std::stringstream ss;
-    ss << theDefs;
+    ss << ecf::as_string(theDefs, the_style_enum);
 
     std::string file_creation_error_msg;
     if (!File::create(filename, ss.str(), file_creation_error_msg)) {
@@ -47,6 +47,12 @@ void save_as_defs(const Defs& theDefs, const std::string& filename, PrintStyle::
 
 void save_as_defs_1(const Defs& theDefs, const std::string& filename) {
     save_as_defs(theDefs, filename, PrintStyle::DEFS);
+}
+
+std::string convert_to_string(const Defs& theDefs) {
+    std::string buffer;
+    ecf::write_t(buffer, theDefs, PrintStyle::getStyle());
+    return buffer;
 }
 
 static defs_ptr create_defs(const std::string& file_name) {
@@ -292,7 +298,7 @@ void export_Defs() {
         .def("__init__", make_constructor(&create_defs), DefsDoc::add_definition_doc())
         .def(self == self)                    // __eq__
         .def("__copy__", copyObject<Defs>)    // __copy__ uses copy constructor
-        .def("__str__", &Defs::toString)      // __str__
+        .def("__str__", convert_to_string)    // __str__
         .def("__enter__", &defs_enter)        // allow with statement, hence indentation support
         .def("__exit__", &defs_exit)          // allow with statement, hence indentation support
         .def("__len__", &defs_len)            // Sized protocol

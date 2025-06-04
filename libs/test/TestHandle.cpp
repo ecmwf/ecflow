@@ -26,6 +26,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -237,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_handle_sync) {
                             "Expected a full_sync() after registering");
         BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 3,
                             "Expected 3 suites back from sync, after registering 3 suites "
-                                << *TestFixture::client().defs());
+                                << ecf::as_string(*TestFixture::client().defs(), PrintStyle::DEFS));
 
         // make a change to a suite not in our handle, that does not cause state propagation.
         // State propagation changes the defs state. The defs state is sync regardless
@@ -383,7 +384,8 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),
                             "Expected a full_sync() after registering");
         BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 3,
-                            "Expected 3 suites back from sync " << *TestFixture::client().defs());
+                            "Expected 3 suites back from sync "
+                                << ecf::as_string(*TestFixture::client().defs(), PrintStyle::DEFS));
 
         // DELETE suites. They should stay *registered*
         TestFixture::client().delete_node("/s0");
@@ -393,7 +395,8 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),
                             "Expected a full_sync() after deleting suite");
         BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 0,
-                            "Expected 0 suites back from sync " << *TestFixture::client().defs());
+                            "Expected 0 suites back from sync "
+                                << ecf::as_string(*TestFixture::client().defs(), PrintStyle::DEFS));
 
         // Check suites are still registered. Only explicit drop can remove registered suites
         TestFixture::client().ch_suites();
@@ -407,7 +410,8 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),
                             "Expected a full_sync() since client handle should be refreshed with new suite_pts");
         BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 3,
-                            "Expected 3 suites back from sync " << *TestFixture::client().defs());
+                            "Expected 3 suites back from sync "
+                                << ecf::as_string(*TestFixture::client().defs(), PrintStyle::DEFS));
 
         TestFixture::client().ch_drop(client_handle);
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().get_client_handle_suites().empty(),

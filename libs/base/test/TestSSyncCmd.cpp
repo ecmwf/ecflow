@@ -27,6 +27,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -83,8 +84,8 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
                               "Test:" << test_name << ": Invariants failed: " << error_msg);
         BOOST_REQUIRE_MESSAGE(!(*server_reply.client_defs() == *server_defs),
                               "Test:" << test_name << ": Expected client and server defs to differ\n"
-                                      << *server_reply.client_defs() << "\n"
-                                      << "server defs   = " << *server_defs);
+                                      << ecf::as_string(*server_reply.client_defs(), PrintStyle::DEFS) << "\n"
+                                      << "server defs   = " << ecf::as_string(*server_defs, PrintStyle::DEFS));
         Ecf::set_server(false);
     }
 

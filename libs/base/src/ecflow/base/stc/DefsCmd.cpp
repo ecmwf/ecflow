@@ -17,6 +17,7 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace std;
 using namespace boost;
@@ -76,7 +77,7 @@ bool DefsCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd,
             /// The old spirit based parsing, horrendously, slow. Can't use Spirit QI, till IBM pull support it
             defs->auto_add_externs();
         }
-        std::cout << *defs;
+        ecf::write_t(std::cout, *defs, cts_cmd->show_style());
     }
     else {
         server_reply.set_sync(true);      // always in sync when getting the full defs

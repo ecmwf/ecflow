@@ -21,6 +21,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
 using namespace std;
@@ -70,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_integer.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_integer.def") + ".log";
@@ -115,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer_relative) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_integer_relative.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_integer_relative.def") + ".log";
@@ -155,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_date.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_date.def") + ".log";
@@ -195,7 +196,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_2) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_date.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_date.def") + ".log";
@@ -240,7 +241,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_for_loop) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_date_for_loop.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_date_for_loop.def") + ".log";
@@ -287,7 +288,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_for_loop2) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_date_for_loop2.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_date_for_loop2.def") + ".log";
@@ -326,7 +327,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_date.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_date.def") + ".log";
@@ -393,7 +394,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_with_cron) {
     std::string errorMsg;
     BOOST_REQUIRE_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_with_cron.def"), errorMsg),
                           errorMsg << "\n"
-                                   << theDefs);
+                                   << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_repeat_with_cron.def") + ".log";
@@ -431,7 +432,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_enumerated) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_enumerated.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     std::vector<Task*> theServerTasks;
     theDefs.getAllTasks(theServerTasks);
@@ -482,7 +483,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_string) {
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_repeat_string.def"), errorMsg),
                         errorMsg << "\n"
-                                 << theDefs);
+                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     std::vector<Task*> theServerTasks;
     theDefs.getAllTasks(theServerTasks);

@@ -2067,21 +2067,6 @@ bool Defs::is_observed(AbstractObserver* obs) const {
     }
     return false;
 }
-// =====================================================================================
-
-std::ostream& operator<<(std::ostream& os, const Defs* d) {
-    if (d) {
-        std::string s;
-        d->write_to_string(s, PrintStyle::DEFS);
-        os << s;
-        return os;
-    }
-    return os << "DEFS == NULL\n";
-}
-std::ostream& operator<<(std::ostream& os, const Defs& d) {
-    os << &d;
-    return os;
-}
 
 // =========================================================================
 

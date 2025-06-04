@@ -24,6 +24,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -62,7 +63,7 @@ static void wait_for_cron(int max_time_to_wait, const std::string& path) {
                                   "wait_for_cron: Test wait " << assertTimer.duration()
                                                               << " taking longer than time constraint of "
                                                               << assertTimer.timeConstraint() << " aborting\n"
-                                                              << *defs);
+                                                              << ecf::as_string(*defs, PrintStyle::DEFS));
             break;
         }
         sleep(1);

@@ -1893,10 +1893,43 @@ inline void write_t(std::string& buffer, const T& item, Context& ctx) {
     implementation::Writer<T, stringstreambuf>::write(output, item, ctx);
 }
 
+template <typename Stream, typename T>
+inline void write_t(Stream& output, const T& item, Context& ctx) {
+    std::string buffer;
+    write_t(buffer, item, ctx);
+    output << buffer;
+}
+
 template <typename T>
 inline std::string as_string(const T& item, Context& ctx) {
     std::string buffer;
     write_t(buffer, item, ctx);
+    return buffer;
+}
+
+/* ************************************************************************** */
+/* *** Write entry point (with PrintStyle) ********************************** */
+/* ************************************************************************** */
+
+template <typename T>
+inline void write_t(std::string& buffer, const T& item, PrintStyle::Type_t style) {
+    buffer.reserve(1024 * 4); // Should be using a sensible default size for the buffer
+    stringstreambuf output{buffer};
+    auto ctx = Context::make_for(style);
+    implementation::Writer<T, stringstreambuf>::write(output, item, ctx);
+}
+
+template <typename Stream, typename T>
+inline void write_t(Stream& output, const T& item, PrintStyle::Type_t style) {
+    std::string buffer;
+    write_t(buffer, item, style);
+    output << buffer;
+}
+
+template <typename T>
+inline std::string as_string(const T& item, PrintStyle::Type_t style) {
+    std::string buffer;
+    write_t(buffer, item, style);
     return buffer;
 }
 
