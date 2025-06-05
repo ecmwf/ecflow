@@ -36,9 +36,9 @@ namespace ecf {
 
 struct Style
 {
-    PrintStyle::Type_t selected_;
-
     Style(PrintStyle::Type_t s) : selected_(s) {}
+
+    PrintStyle::Type_t selected() { return selected_; }
 
     template <PrintStyle::Type_t... Args>
     bool is_one_of() const {
@@ -48,6 +48,9 @@ struct Style
     bool is_not_one_of() const {
         return !is_one_of<Args...>();
     }
+
+private:
+    PrintStyle::Type_t selected_;
 };
 
 struct Format
@@ -90,11 +93,17 @@ struct Indent
     ~Indent() { ctx_.format.decrease_indentation(); }
 
     template <typename Stream>
-
-    void write(Stream& output) {
+    void write(Stream& output) const {
         output << (ctx_.format.is_indenting() ? std::string(ctx_.format.indentation_spaces(), ' ') : std::string(""));
     }
 
+    template <typename Stream>
+    friend Stream& operator<<(Stream& output, const Indent& indent) {
+        indent.write(output);
+        return output;
+    }
+
+private:
     Context& ctx_;
 };
 
@@ -167,7 +176,8 @@ struct Writer<AstTop, Stream>
 
         Indent l1(ctx);
         Indent l2(ctx);
-        l2.write(output);
+
+        output << l2;
 
         output << "# Trigger Evaluation Tree\n";
         if (const auto* root = item.left(); root) {
@@ -199,7 +209,8 @@ struct Writer<AstNot, Stream>
         // taken from AstNot::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# NOT (";
         output << item.evaluate_str();
@@ -207,7 +218,9 @@ struct Writer<AstNot, Stream>
         if (const auto* right = item.right(); right) {
             output << " # ERROR has right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -219,7 +232,8 @@ struct Writer<AstPlus, Stream>
         // taken from AstPlus::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# PLUS value(";
         output << item.value();
@@ -230,7 +244,9 @@ struct Writer<AstPlus, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -242,7 +258,8 @@ struct Writer<AstMinus, Stream>
         // taken from AstMinus::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# MINUS value(";
         output << item.value();
@@ -253,7 +270,9 @@ struct Writer<AstMinus, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -265,7 +284,8 @@ struct Writer<AstDivide, Stream>
         // taken from AstDivide::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# DIVIDE value(";
         output << item.value();
@@ -276,7 +296,9 @@ struct Writer<AstDivide, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -288,7 +310,8 @@ struct Writer<AstMultiply, Stream>
         // taken from AstMultiply::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# MULTIPLY value(";
         output << item.value();
@@ -299,7 +322,9 @@ struct Writer<AstMultiply, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -311,7 +336,8 @@ struct Writer<AstModulo, Stream>
         // taken from AstModulo::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# Modulo value(";
         output << item.value();
@@ -322,7 +348,9 @@ struct Writer<AstModulo, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -334,7 +362,8 @@ struct Writer<AstAnd, Stream>
         // taken from AstAnd::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# AND (";
         output << item.evaluate_str();
@@ -345,7 +374,9 @@ struct Writer<AstAnd, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -357,7 +388,8 @@ struct Writer<AstOr, Stream>
         // taken from AstOr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# OR (";
         output << item.evaluate_str();
@@ -368,7 +400,9 @@ struct Writer<AstOr, Stream>
         if (const auto* right_ = item.right(); !right_) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -380,7 +414,8 @@ struct Writer<AstEqual, Stream>
         // taken from AstEqual::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# EQUAL (";
         output << item.evaluate_str();
@@ -391,7 +426,9 @@ struct Writer<AstEqual, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -403,7 +440,8 @@ struct Writer<AstNotEqual, Stream>
         // taken from AstNotEqual::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# NOT_EQUAL (";
         output << item.evaluate_str();
@@ -414,7 +452,9 @@ struct Writer<AstNotEqual, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -426,7 +466,8 @@ struct Writer<AstLessEqual, Stream>
         // taken from AstLessEqual::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# LESS_EQUAL (";
         output << item.evaluate_str();
@@ -438,6 +479,7 @@ struct Writer<AstLessEqual, Stream>
         if (const auto* right_ = item.right(); !right_) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
 
         Writer<AstRoot, Stream>::write(output, item, ctx);
@@ -451,7 +493,8 @@ struct Writer<AstGreaterEqual, Stream>
         // taken from AstGreaterEqual::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# GREATER_EQUAL (";
         output << item.evaluate_str();
@@ -462,7 +505,9 @@ struct Writer<AstGreaterEqual, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -474,7 +519,8 @@ struct Writer<AstGreaterThan, Stream>
         // taken from AstGreaterThan::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# GREATER_THAN (";
         output << item.evaluate_str();
@@ -485,7 +531,9 @@ struct Writer<AstGreaterThan, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -497,7 +545,8 @@ struct Writer<AstLessThan, Stream>
         // taken from AstLessThan::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# LESS_THAN (";
         output << item.evaluate_str();
@@ -508,7 +557,9 @@ struct Writer<AstLessThan, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
+
         output << "\n";
+
         Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
@@ -520,22 +571,23 @@ struct Writer<AstFunction, Stream>
         // taken from AstFunction::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         switch (item.ft()) {
             case AstFunction::DATE_TO_JULIAN:
                 output << "# DATE_TO_JULIAN ";
                 output << item.value();
-                output << "\n";
                 break;
             case AstFunction::JULIAN_TO_DATE:
                 output << "# JULIAN_TO_DATE ";
                 output << item.value();
-                output << "\n";
                 break;
             default:
                 assert(false);
         }
+
+        output << "\n";
     }
 };
 
@@ -546,10 +598,12 @@ struct Writer<AstInteger, Stream>
         // taken from AstInteger::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# INTEGER ";
         output << item.value();
+
         output << "\n";
     }
 };
@@ -561,10 +615,12 @@ struct Writer<AstInstant, Stream>
         // taken from AstInstant::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# Instant ";
         output << item.value();
+
         output << "\n";
     }
 };
@@ -576,13 +632,16 @@ struct Writer<AstNodeState, Stream>
         // taken from AstNodeState::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# NODE_STATE ";
         output << DState::toString(item.state());
         output << "(";
         output << item.value();
-        output << ")\n";
+        output << ")";
+
+        output << "\n";
     }
 };
 
@@ -593,10 +652,12 @@ struct Writer<AstEventState, Stream>
         // taken from AstEventState::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# EVENT_STATE ";
         output << item.value();
+
         output << "\n";
     }
 };
@@ -608,7 +669,8 @@ struct Writer<AstNode, Stream>
         // taken from AstNode::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         if (const Node* refNode = item.referencedNode(); refNode) {
             output << "# NODE ";
@@ -617,7 +679,7 @@ struct Writer<AstNode, Stream>
             output << DState::toString(refNode->dstate());
             output << "(";
             output << static_cast<int>(refNode->dstate());
-            output << ")\n";
+            output << ")";
         }
         else {
             output << "# NODE node(?not-found?) ";
@@ -626,8 +688,10 @@ struct Writer<AstNode, Stream>
             output << DState::toString(DState::UNKNOWN);
             output << "(";
             output << static_cast<int>(DState::UNKNOWN);
-            output << ") # check suite filter\n";
+            output << ") # check suite filter";
         }
+
+        output << "\n";
     }
 };
 
@@ -638,7 +702,8 @@ struct Writer<AstFlag, Stream>
         // taken from AstFlag::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         const Node* refNode = item.referencedNode(); // Only call once
 
@@ -649,15 +714,17 @@ struct Writer<AstFlag, Stream>
             output << ecf::Flag::enum_to_string(item.flag());
             output << "(";
             output << static_cast<int>(refNode->get_flag().is_set(item.flag()));
-            output << ")\n";
+            output << ")";
         }
         else {
             output << "# FLAG_NODE node(?not-found?) ";
             output << item.nodePath();
             output << " ";
             output << ecf::Flag::enum_to_string(item.flag());
-            output << "(0) # check suite filter\n";
+            output << "(0) # check suite filter";
         }
+
+        output << "\n";
     }
 };
 
@@ -668,7 +735,8 @@ struct Writer<AstVariable, Stream>
         // taken from AstVariable::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# ";
         output << item.nodePath();
@@ -689,6 +757,7 @@ struct Writer<AstVariable, Stream>
             output << item.nodePath();
             output << " value(0) # check suite filter";
         }
+
         output << "\n";
     }
 };
@@ -700,7 +769,8 @@ struct Writer<AstParentVariable, Stream>
         // taken from AstParentVariable::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "# ";
         output << Str::COLON();
@@ -717,7 +787,9 @@ struct Writer<AstParentVariable, Stream>
             return;
         }
         output << " node(?not-found?) value(0)";
-        output << " # check suite filter\n";
+        output << " # check suite filter";
+
+        output << "\n";
     }
 };
 
@@ -729,7 +801,8 @@ struct Writer<PartExpression, Stream>
         // taken from PartExpression::print(std::string& os, const std::string& exprType, bool isFree) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << expression_type;
         switch (item.expr_type()) {
@@ -754,6 +827,7 @@ struct Writer<PartExpression, Stream>
                     output << " # free";
             }
         }
+
         output << "\n";
     }
 };
@@ -782,9 +856,11 @@ struct Writer<AutoArchiveAttr, Stream>
         // taken from AutoArchiveAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
+
         output << "\n";
     }
 };
@@ -796,9 +872,10 @@ struct Writer<AutoCancelAttr, Stream>
         // taken from AutoCancelAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+        output << l1;
 
         item.write(output.buf);
+
         output << "\n";
     }
 };
@@ -810,9 +887,10 @@ struct Writer<AutoRestoreAttr, Stream>
         // taken from AutoRestoreAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+        output << l1;
 
         item.write(output.buf);
+
         output << "\n";
     }
 };
@@ -824,7 +902,8 @@ struct Writer<AvisoAttr, Stream>
         // taken from AvisoAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         ecf::format_as_defs(item, output);
     }
@@ -837,9 +916,10 @@ struct Writer<ClockAttr, Stream>
         // taken from ClockAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+        output << l1;
 
         item.write(output.buf);
+
         output << "\n";
     }
 };
@@ -851,12 +931,14 @@ struct Writer<CronAttr, Stream>
         // taken from CronAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             item.time_series().write_state(output.buf, item.isSetFree());
         }
+
         output << "\n";
     }
 };
@@ -868,7 +950,8 @@ struct Writer<DateAttr, Stream>
         // taken from DayAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -876,6 +959,7 @@ struct Writer<DateAttr, Stream>
                 output << " # free";
             }
         }
+
         output << "\n";
     }
 };
@@ -887,7 +971,8 @@ struct Writer<DayAttr, Stream>
         // taken from DayAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -910,6 +995,7 @@ struct Writer<DayAttr, Stream>
             output << " date:";
             output << item.as_simple_string();
         }
+
         output << "\n";
     }
 };
@@ -921,10 +1007,12 @@ struct Writer<DState::State, Stream>
 
         if (item != DState::default_state()) {
             Indent l1(ctx);
-            l1.write(output);
+
+            output << l1;
 
             output << "defstatus ";
             output << DState::toString(item);
+
             output << "\n";
         }
     }
@@ -937,7 +1025,8 @@ struct Writer<Event, Stream>
         // taken from Event::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -951,6 +1040,7 @@ struct Writer<Event, Stream>
                 }
             }
         }
+
         output << "\n";
     }
 };
@@ -962,9 +1052,10 @@ struct Writer<GenericAttr, Stream>
         // taken from GenericAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+        output << l1;
 
         item.write(output.buf);
+
         output << "\n";
     }
 };
@@ -976,7 +1067,8 @@ struct Writer<InLimit, Stream>
         // taken from InLimit::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
 
@@ -1009,7 +1101,8 @@ struct Writer<Label, Stream>
         // taken from Meter::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -1028,6 +1121,7 @@ struct Writer<Label, Stream>
                 }
             }
         }
+
         output << "\n";
     }
 };
@@ -1039,7 +1133,8 @@ struct Writer<LateAttr, Stream>
         // taken from LateAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -1047,6 +1142,7 @@ struct Writer<LateAttr, Stream>
                 output << " # late";
             }
         }
+
         output << "\n";
     }
 };
@@ -1058,7 +1154,7 @@ struct Writer<Limit, Stream>
         // taken from Limit::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+        output << l1;
 
         item.write(output.buf);
 
@@ -1072,6 +1168,7 @@ struct Writer<Limit, Stream>
                 }
             }
         }
+
         output << "\n";
     }
 };
@@ -1083,7 +1180,8 @@ struct Writer<Meter, Stream>
         // taken from Meter::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -1092,6 +1190,7 @@ struct Writer<Meter, Stream>
                 output << ecf::convert_to<std::string>(item.value());
             }
         }
+
         output << "\n";
     }
 };
@@ -1103,7 +1202,8 @@ struct Writer<MirrorAttr, Stream>
         // taken from MirrorAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         ecf::format_as_defs(item, output);
     }
@@ -1116,7 +1216,8 @@ struct Writer<QueueAttr, Stream>
         // taken from QueueAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -1127,6 +1228,7 @@ struct Writer<QueueAttr, Stream>
                 output << NState::toString(i);
             }
         }
+
         output << "\n";
     }
 };
@@ -1138,7 +1240,8 @@ struct Writer<RepeatInteger, Stream>
         // taken from RepeatInteger::write(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "repeat integer ";
         output << item.name();
@@ -1167,7 +1270,8 @@ struct Writer<RepeatDate, Stream>
         // taken from RepeatDate::write(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "repeat date ";
         output << item.name();
@@ -1194,7 +1298,7 @@ struct Writer<RepeatDateList, Stream>
         // taken from RepeatDateList::write(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+        output << l1;
 
         output << "repeat datelist ";
         output << item.name();
@@ -1219,7 +1323,8 @@ struct Writer<RepeatDateTime, Stream>
         // taken from RepeatDateTime::write(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "repeat datetime ";
         output << item.name();
@@ -1248,7 +1353,8 @@ struct Writer<RepeatEnumerated, Stream>
         // taken from RepeatEnumerated::write(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "repeat enumerated ";
         output << item.name();
@@ -1274,7 +1380,8 @@ struct Writer<RepeatString, Stream>
         // taken from RepeatString::write(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "repeat string ";
         output << item.name();
@@ -1300,7 +1407,8 @@ struct Writer<RepeatDay, Stream>
         // taken from RepeatDay::write(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << "repeat day ";
         output << ecf::convert_to<std::string>(item.step());
@@ -1379,12 +1487,14 @@ struct Writer<TodayAttr, Stream>
         // taken from TodayAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             item.time_series().write_state(output.buf, item.isSetFree());
         }
+
         output << "\n";
     }
 };
@@ -1410,11 +1520,13 @@ struct Writer<Variable, Stream>
         //   and from Variable::print_generated(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << prefix;
         item.write(output.buf);
         output << suffix;
+
         output << "\n";
     }
 };
@@ -1426,13 +1538,15 @@ struct Writer<VerifyAttr, Stream>
         // taken from VerifyAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         output << item.toString();
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             output << " # ";
             output << ecf::convert_to<std::string>(item.actual());
         }
+
         output << "\n";
     }
 };
@@ -1444,9 +1558,11 @@ struct Writer<ZombieAttr, Stream>
         // taken from ZombieAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+
+        output << l1;
 
         item.write(output.buf);
+
         output << "\n";
     }
 };
@@ -1461,17 +1577,18 @@ struct Writer<Alias, Stream>
     static void write(Stream& output, const Alias& item, Context& ctx) {
         // taken from Alias::print(std::string& os) const
 
-        // Manage indentation level
         Indent l1(ctx);
 
         // Write the alias header
-        l1.write(output);
+        output << l1;
+
         output << "alias ";
         output << item.name();
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             bool added_comment_char = false;
             item.write_state(output.buf, added_comment_char);
         }
+
         output << "\n";
 
         // Write the node information
@@ -1485,17 +1602,18 @@ struct Writer<Family, Stream>
     static void write(Stream& output, const Family& item, Context& ctx) {
         // taken from Family::print(std::string& os) const
 
-        // Manage indentation level
         Indent l1(ctx);
 
         // Write the family header
-        l1.write(output);
+        output << l1;
+
         output << "family ";
         output << item.name();
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             bool added_comment_char = false;
             item.write_state(output.buf, added_comment_char);
         }
+
         output << "\n";
 
         // Write the node information
@@ -1516,23 +1634,24 @@ struct Writer<Task, Stream>
     static void write(Stream& output, const Task& item, Context& ctx) {
         // taken from Task::print(std::string& os) const
 
-        // Manage indentation level
         Indent l1(ctx);
-        l1.write(output);
 
         // Write the task header
+        output << l1;
+
         output << "task ";
         output << item.name();
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             bool added_comment_char = false;
             item.write_state(output.buf, added_comment_char);
         }
+
         output << "\n";
 
         // Write the node information
         Writer<Node, Stream>::write(output, item, ctx);
 
-        // Although Aliases are not printed, they are _checkpointable_.
+        // Although Aliases are not printed, they can part of _checkpoint_ files.
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             Indent l2(ctx);
             for (auto alias : item.aliases()) {
@@ -1541,7 +1660,8 @@ struct Writer<Task, Stream>
             Indent l3(ctx);
             if (!item.aliases().empty()) {
                 l3.write(output);
-                output << "endalias\n";
+                output << "endalias";
+                output << "\n";
             }
         }
     }
@@ -1551,6 +1671,10 @@ template <typename Stream>
 struct Writer<const Node*, Stream>
 {
     static void write(Stream& output, const Node* item, Context& ctx) {
+
+        // Note: here we must use dynamic_cast to determine the type of the node
+        // This is because we are using a templated Writer, and we need to call the correct
+        // Writer specialisation based on the actual type of the node.
 
         if (auto n = dynamic_cast<const Alias*>(item)) {
             Writer<Alias, Stream>::write(output, *n, ctx);
@@ -1742,6 +1866,9 @@ struct Writer<NodeContainer, Stream>
             else if (auto alias = dynamic_cast<const Alias*>(node.get()); alias) {
                 Writer<Alias, Stream>::write(output, *alias, ctx);
             }
+            else if (auto suite = dynamic_cast<const Suite*>(node.get()); suite) {
+                Writer<Suite, Stream>::write(output, *suite, ctx);
+            }
             else {
                 assert(false); // Should never happen
             }
@@ -1762,6 +1889,7 @@ struct Writer<Suite, Stream>
             bool added_comment_char = false;
             item.write_state(output.buf, added_comment_char);
         }
+
         output << "\n";
 
         // Write the node information
@@ -1775,7 +1903,7 @@ struct Writer<Suite, Stream>
             Writer<ClockAttr, Stream>::write(output, *attr, ctx);
         }
 
-        // Write Calendar attributes
+        // Write Calendar attribute
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (!item.calendar().is_special()) {
                 Indent l2(ctx);
@@ -1790,7 +1918,9 @@ struct Writer<Suite, Stream>
         Writer<NodeContainer, Stream>::write(output, item, ctx);
 
         // Write footer
-        output << "endsuite\n";
+        output << "endsuite";
+
+        output << "\n";
     }
 };
 
@@ -1835,7 +1965,8 @@ struct Writer<Defs, Stream>
         }
 
         // Write footer
-        output << "# enddef\n";
+        output << "# enddef";
+        output << "\n";
     }
 
 private:
@@ -1848,7 +1979,7 @@ private:
         // *IMPORTANT* make sure name are unique, i.e. can't have state: and server_state:
         // Otherwise read_state() will mess up
         output << "defs_state ";
-        output << PrintStyle::to_string(ctx.style.selected_);
+        output << PrintStyle::to_string(ctx.style.selected());
 
         if (item.state() != NState::UNKNOWN) {
             output << " state>:";
