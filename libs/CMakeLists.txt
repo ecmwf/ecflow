@@ -448,6 +448,7 @@ set(srcs
   node/src/ecflow/node/System.cpp
   node/src/ecflow/node/Task.cpp
   node/src/ecflow/node/TaskScriptGenerator.cpp
+  node/src/ecflow/node/formatter/DefsWriter.cpp
   node/src/ecflow/node/parser/AutoArchiveParser.cpp
   node/src/ecflow/node/parser/AutoCancelParser.cpp
   node/src/ecflow/node/parser/AutoRestoreParser.cpp

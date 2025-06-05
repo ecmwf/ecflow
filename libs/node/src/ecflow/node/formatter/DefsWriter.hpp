@@ -16,6 +16,7 @@
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Indentor.hpp"
+#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/AutoRestoreAttr.hpp"

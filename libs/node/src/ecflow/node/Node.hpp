@@ -27,7 +27,6 @@
 #include <iosfwd>
 #include <limits>
 
-#include "Expression.hpp"
 #include "ecflow/attribute/CronAttr.hpp"
 #include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/attribute/DayAttr.hpp"
@@ -42,6 +41,7 @@
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
+#include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/InLimitMgr.hpp"
