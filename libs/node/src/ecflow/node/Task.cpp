@@ -20,7 +20,6 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Alias.hpp"
@@ -94,39 +93,6 @@ task_ptr Task::create_me(const std::string& name) {
     return std::make_shared<Task>(name, true);
 }
 
-void Task::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    os += "task ";
-    os += name();
-    if (!PrintStyle::defsStyle()) {
-        bool added_comment_char = false;
-        write_state(os, added_comment_char);
-    }
-    os += "\n";
-
-    Node::print(os);
-
-    // Generated variable are not persisted since they are created on demand
-    // There *NO* point in printing them they will always be empty
-
-    // Alias are not printed, but are check point able.
-    if (!PrintStyle::defsStyle()) {
-        Indentor in2;
-        size_t node_vec_size = aliases_.size();
-        for (size_t t = 0; t < node_vec_size; t++) {
-            aliases_[t]->print(os);
-        }
-        if (node_vec_size != 0) {
-            Indentor in3;
-            Indentor::indent(os);
-            os += "endalias\n";
-        }
-    }
-
-    // if ( PrintStyle::defsStyle() ) Indentor::indent(os); os += "endtask\n";
-}
-
 void Task::write_state(std::string& ret, bool& added_comment_char) const {
     // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
     //             multiple statement on a single line i.e.
@@ -155,13 +121,6 @@ void Task::read_state(const std::string& line, const std::vector<std::string>& l
         }
     }
     Submittable::read_state(line, lineTokens);
-}
-
-std::ostream& operator<<(std::ostream& os, const Task& d) {
-    std::string s;
-    d.print(s);
-    os << s;
-    return os;
 }
 
 bool Task::operator==(const Task& rhs) const {

@@ -17,6 +17,7 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace std;
 using namespace boost;
@@ -32,7 +33,7 @@ SNodeCmd::SNodeCmd(AbstractServer* as, node_ptr node) {
 void SNodeCmd::init(AbstractServer* as, node_ptr node) {
     the_node_str_.clear();
     if (node.get()) {
-        the_node_str_ = node->print(PrintStyle::NET);
+        the_node_str_ = ecf::as_string(node, PrintStyle::NET);
     }
 }
 
@@ -80,11 +81,12 @@ bool SNodeCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd
 
     if (server_reply.cli() && !cts_cmd->group_cmd()) {
         /// This Could be part of a group command, hence ONLY show Node if NOT group command
-        PrintStyle style(cts_cmd->show_style());
+
+        auto style = cts_cmd->show_style();
 
         Suite* suite = node->isSuite();
         if (suite) {
-            if (!PrintStyle::is_persist_style(cts_cmd->show_style())) {
+            if (!PrintStyle::is_persist_style(style)) {
                 /// Auto generate externs, before writing to standard out. This can be expensive since
                 /// All the trigger references need to to be resolved. & AST need to be created first
                 /// The old spirit based parsing, horrendously, slow. Can't use Spirit QI, till IBM pull support it
@@ -93,17 +95,18 @@ bool SNodeCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd
                 Defs defs;
                 defs.addSuite(std::dynamic_pointer_cast<Suite>(node));
                 defs.auto_add_externs();
-                std::cout << defs.print(cts_cmd->show_style());
+                std::cout << ecf::as_string(defs, style);
                 return true;
             }
 
             // with defs_state MIGRATE on --load we will recover the state.
-            if (PrintStyle::is_persist_style(cts_cmd->show_style()))
-                std::cout << "defs_state " << PrintStyle::to_string(cts_cmd->show_style()) << "\n"; // see ECFLOW-1233
-            std::cout << *suite << "\n";
+            if (PrintStyle::is_persist_style(style)) {
+                std::cout << "defs_state " << PrintStyle::to_string(style) << "\n"; // see ECFLOW-1233
+            }
+            std::cout << ecf::as_string(*suite, style) << "\n";
             return true;
         }
-        cout << node->print() << "\n";
+        cout << ecf::as_string(node, style) << "\n";
     }
     else {
         server_reply.set_client_node(node);

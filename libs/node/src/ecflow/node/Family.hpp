@@ -49,7 +49,6 @@ public:
 
     const std::string& debugType() const override;
 
-    [[deprecated]] void print(std::string&) const override;
     bool operator==(const Family& rhs) const;
 
     void collateChanges(DefsDelta&) const override;
@@ -64,6 +63,7 @@ public:
 
 public:
     void write_state(std::string&, bool&) const override;
+
 private:
     mutable FamGenVariables* fam_gen_variables_{nullptr};
 
@@ -72,8 +72,6 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);
 };
-
-std::ostream& operator<<(std::ostream& os, const Family&);
 
 // We can have several thousands Families. This class helps in avoiding
 // the creation of generated variables until required.

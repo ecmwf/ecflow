@@ -36,31 +36,40 @@ public:
         NET = 4
     };
 
-    explicit PrintStyle(Type_t t) : old_style_(getStyle()) { setStyle(t); }
-
     // Disable default construction
     PrintStyle() = delete;
     // Disable copy (and move) semantics
     PrintStyle(const PrintStyle&)            = delete;
     PrintStyle& operator=(const PrintStyle&) = delete;
 
-    ~PrintStyle() { setStyle(old_style_); } // reset to old style on destruction
+    static bool is_persist_style(Type_t);
+
+    static std::string to_string(PrintStyle::Type_t);
+};
+
+class PrintStyleHolder {
+public:
+    using holding_t = PrintStyle::Type_t;
+
+    explicit PrintStyleHolder(holding_t t) : old_style_(getStyle()) { setStyle(t); }
+
+    // Disable default construction
+    PrintStyleHolder() = delete;
+    // Disable copy (and move) semantics
+    PrintStyleHolder(const PrintStyleHolder&)            = delete;
+    PrintStyleHolder& operator=(const PrintStyleHolder&) = delete;
+
+    ~PrintStyleHolder() { setStyle(old_style_); }
 
     /// We want to control the output, so that we can dump in old style defs format
     /// or choose to dump for debug.
-    static Type_t getStyle();
-    static void setStyle(Type_t);
-
-    static bool defsStyle();
-    static bool persist_style();
-    static bool is_persist_style(Type_t);
-
-    // return current style as a string
-    static std::string to_string();
-    static std::string to_string(PrintStyle::Type_t);
+    static holding_t getStyle() { return current_style_; }
+    static void setStyle(holding_t style) { current_style_ = style; };
 
 private:
-    Type_t old_style_;
+    holding_t old_style_;
+
+    inline static holding_t current_style_ = PrintStyle::NOTHING;
 };
 
 #endif /* ecflow_core_PrintStyle_HPP */

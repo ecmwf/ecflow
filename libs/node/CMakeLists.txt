@@ -53,7 +53,6 @@ set(test_srcs
   test/TestVariableInheritance.cpp
   test/TestVariableSubstitution.cpp
   test/TestVariableSubstitutionDefs.cpp
-  test/TestWriterDefs.cpp
   test/TestZombies.cpp
 )
 

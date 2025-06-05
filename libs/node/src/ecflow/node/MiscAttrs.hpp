@@ -34,7 +34,6 @@ public:
     void requeue();
 
     // standard functions: ==============================================
-    void print(std::string&) const;
     bool operator==(const MiscAttrs&) const;
 
     // Access functions: ======================================================

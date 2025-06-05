@@ -59,8 +59,6 @@ public:
 
     void copy_defs_state_only(const defs_ptr& defs); // needed when creating defs for client handles
     bool operator==(const Defs& rhs) const;
-    [[deprecated]] void print(std::string&) const;
-    [[deprecated]] std::string print(PrintStyle::Type_t t = PrintStyle::MIGRATE) const;
 
     /// Handle migration of checkpoint 4->5, and 5.0-5.4.0 -> 5.5
     /// This essentially update date data member of the Day attribute
@@ -283,19 +281,6 @@ public:
     /**
      * @brief Write the defs to a string.
      *
-     * @deprecated This function is deprecated, use write_to_string() instead.
-     *
-     * The implementation of this function uses *Global* state to determine the print style,
-     * and this causes issues due to tight coupling (e.g., when using multiple threads).
-     *
-     * @param os the output string buffer to write the defs
-     * @param st the print style to use for writing the defs
-     */
-    [[deprecated]] void save_as_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
-
-    /**
-     * @brief Write the defs to a string.
-     *
      * The Defs can be written to a string using multiple styles, meaning that this is effectively the entry point to
      * the defs "text-based" serialization (e.g., defs file, checkpt file).
      *
@@ -388,9 +373,6 @@ public:
 
 private:
     void do_generate_scripts(const std::map<std::string, std::string>& override) const;
-
-public:
-    void write_state(std::string&) const;
 
 private:
     void collate_defs_changes_only(DefsDelta&) const;

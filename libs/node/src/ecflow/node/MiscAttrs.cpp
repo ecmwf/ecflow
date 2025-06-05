@@ -16,6 +16,7 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/node/Node.hpp"
+#include "formatter/DefsWriter.hpp"
 
 #ifdef DEBUG
     #include <iostream>
@@ -61,21 +62,6 @@ void MiscAttrs::begin() {
 void MiscAttrs::requeue() {
     for (auto& queue : queues_) {
         queue.requeue();
-    }
-}
-
-void MiscAttrs::print(std::string& os) const {
-    for (const ZombieAttr& z : zombies_) {
-        z.print(os);
-    }
-    for (const VerifyAttr& v : verifys_) {
-        v.print(os);
-    }
-    for (const QueueAttr& q : queues_) {
-        q.print(os);
-    }
-    for (const GenericAttr& g : generics_) {
-        g.print(os);
     }
 }
 

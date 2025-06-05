@@ -12,6 +12,7 @@
 
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/SState.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using ecf::http::ojson;
 
@@ -239,7 +240,7 @@ void to_json(ojson& j, const ::Expression& a) {
     }
 
     std::string value;
-    a.print(value, "complete");
+    ecf::write_t(value, a, PrintStyle::DEFS, "complete");
     value = value.substr(11, value.size() - 12);
     j     = ojson::object({{"free", a.isFree()}, {"expressions", str}, {"value", value}});
 }

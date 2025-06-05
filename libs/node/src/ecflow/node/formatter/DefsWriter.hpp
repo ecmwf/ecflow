@@ -985,7 +985,7 @@ struct Writer<InLimit, Stream>
             if (item.incremented())
                 output << " # incremented:1";
 
-            if (PrintStyle::getStyle() == PrintStyle::STATE) {
+            if (ctx.style.is_one_of<PrintStyle::STATE>()) {
                 Limit* the_limit = item.limit();
                 if (the_limit) {
                     output << " # referenced limit(value) ";
@@ -1309,6 +1309,39 @@ struct Writer<RepeatDay, Stream>
 };
 
 template <typename Stream>
+struct Writer<RepeatBase, Stream>
+{
+    static void write(Stream& output, const RepeatBase& item, Context& ctx) {
+        // taken from Repeat::print(std::string& os) const
+
+        if (auto r = dynamic_cast<const RepeatInteger*>(&item)) {
+            Writer<RepeatInteger, Stream>::write(output, *r, ctx);
+        }
+        else if (auto r = dynamic_cast<const RepeatDate*>(&item)) {
+            Writer<RepeatDate, Stream>::write(output, *r, ctx);
+        }
+        else if (auto r = dynamic_cast<const RepeatDateList*>(&item)) {
+            Writer<RepeatDateList, Stream>::write(output, *r, ctx);
+        }
+        else if (auto r = dynamic_cast<const RepeatDateTime*>(&item)) {
+            Writer<RepeatDateTime, Stream>::write(output, *r, ctx);
+        }
+        else if (auto r = dynamic_cast<const RepeatEnumerated*>(&item)) {
+            Writer<RepeatEnumerated, Stream>::write(output, *r, ctx);
+        }
+        else if (auto r = dynamic_cast<const RepeatString*>(&item)) {
+            Writer<RepeatString, Stream>::write(output, *r, ctx);
+        }
+        else if (auto r = dynamic_cast<const RepeatDay*>(&item)) {
+            Writer<RepeatDay, Stream>::write(output, *r, ctx);
+        }
+        else {
+            assert(false);
+        }
+    }
+};
+
+template <typename Stream>
 struct Writer<Repeat, Stream>
 {
     static void write(Stream& output, const Repeat& item, Context& ctx) {
@@ -1316,30 +1349,7 @@ struct Writer<Repeat, Stream>
 
         const RepeatBase* base = item.repeatBase();
         if (base) {
-            if (auto r = dynamic_cast<const RepeatInteger*>(base)) {
-                Writer<RepeatInteger, Stream>::write(output, *r, ctx);
-            }
-            else if (auto r = dynamic_cast<const RepeatDate*>(base)) {
-                Writer<RepeatDate, Stream>::write(output, *r, ctx);
-            }
-            else if (auto r = dynamic_cast<const RepeatDateList*>(base)) {
-                Writer<RepeatDateList, Stream>::write(output, *r, ctx);
-            }
-            else if (auto r = dynamic_cast<const RepeatDateTime*>(base)) {
-                Writer<RepeatDateTime, Stream>::write(output, *r, ctx);
-            }
-            else if (auto r = dynamic_cast<const RepeatEnumerated*>(base)) {
-                Writer<RepeatEnumerated, Stream>::write(output, *r, ctx);
-            }
-            else if (auto r = dynamic_cast<const RepeatString*>(base)) {
-                Writer<RepeatString, Stream>::write(output, *r, ctx);
-            }
-            else if (auto r = dynamic_cast<const RepeatDay*>(base)) {
-                Writer<RepeatDay, Stream>::write(output, *r, ctx);
-            }
-            else {
-                assert(false);
-            }
+            Writer<RepeatBase, Stream>::write(output, *base, ctx);
         }
     }
 };
@@ -1533,6 +1543,45 @@ struct Writer<Task, Stream>
                 output << "endalias\n";
             }
         }
+    }
+};
+
+template <typename Stream>
+struct Writer<const Node*, Stream>
+{
+    static void write(Stream& output, const Node* item, Context& ctx) {
+
+        if (auto n = dynamic_cast<const Alias*>(item)) {
+            Writer<Alias, Stream>::write(output, *n, ctx);
+        }
+        else if (auto n = dynamic_cast<const Family*>(item)) {
+            Writer<Family, Stream>::write(output, *n, ctx);
+        }
+        else if (auto n = dynamic_cast<const Task*>(item)) {
+            Writer<Task, Stream>::write(output, *n, ctx);
+        }
+        else if (auto n = dynamic_cast<const Suite*>(item)) {
+            Writer<Suite, Stream>::write(output, *n, ctx);
+        }
+        else {
+            assert(false && "Unknown Node type");
+        }
+    }
+};
+
+template <typename Stream>
+struct Writer<Node*, Stream>
+{
+    static void write(Stream& output, Node* item, Context& ctx) {
+        return Writer<const Node*, Stream>::write(output, item, ctx);
+    }
+};
+
+template <typename Stream>
+struct Writer<std::shared_ptr<Node>, Stream>
+{
+    static void write(Stream& output, const std::shared_ptr<Node>& item, Context& ctx) {
+        return Writer<const Node*, Stream>::write(output, item.get(), ctx);
     }
 };
 
@@ -1910,6 +1959,13 @@ inline std::string as_string(const T& item, Context& ctx) {
 /* ************************************************************************** */
 /* *** Write entry point (with PrintStyle) ********************************** */
 /* ************************************************************************** */
+
+inline void write_t(std::string& buffer, const Expression& item, PrintStyle::Type_t style, const std::string& type) {
+    buffer.reserve(1024 * 4); // Should be using a sensible default size for the buffer
+    stringstreambuf output{buffer};
+    auto ctx = Context::make_for(style);
+    implementation::Writer<Expression, stringstreambuf>::write(output, item, ctx, type);
+}
 
 template <typename T>
 inline void write_t(std::string& buffer, const T& item, PrintStyle::Type_t style) {

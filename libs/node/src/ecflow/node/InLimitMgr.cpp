@@ -44,12 +44,6 @@ InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs) {
     return *this;
 }
 
-void InLimitMgr::print(std::string& os) const {
-    for (const InLimit& i : vec_) {
-        i.print(os);
-    }
-}
-
 bool InLimitMgr::operator==(const InLimitMgr& rhs) const {
     if (vec_.size() != rhs.vec_.size()) {
 #ifdef DEBUG

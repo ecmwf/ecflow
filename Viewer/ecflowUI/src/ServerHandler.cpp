@@ -44,6 +44,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/NodeFwd.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;
@@ -1887,10 +1888,9 @@ void ServerHandler::writeDefs(VInfo_ptr info, const std::string& fileName) {
     ServerDefsAccess defsAccess(this); // will reliquish its resources on destruction
     defs_ptr defs = defsAccess.defs();
     if (defs) {
-        PrintStyle style(PrintStyle::MIGRATE);
         std::ofstream out(fileName.c_str());
         out << "defs_state MIGRATE" << std::endl;
-        out << info->node()->node()->print();
+        out << ecf::as_string(info->node()->node(), PrintStyle::MIGRATE);
         out << std::endl;
         out.close();
     }

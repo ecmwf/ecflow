@@ -59,7 +59,6 @@ private:
 
     mutable std::map<Submittable*, int> taskIntMap_;
     mutable int level_{0};
-    PrintStyle print_style_; // by default show state when writing defs to standard out. RAII
 };
 
 } // namespace ecf

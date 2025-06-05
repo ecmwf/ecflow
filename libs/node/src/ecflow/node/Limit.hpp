@@ -37,7 +37,6 @@ public:
     Limit() = default;
     Limit(const Limit& rhs);
 
-    void print(std::string&) const;
     bool operator==(const Limit& rhs) const;
     bool operator<(const Limit& rhs) const { return n_ < rhs.name(); }
     const std::string& name() const { return n_; }
@@ -74,6 +73,7 @@ public:
 
 private:
     void update_change_no();
+
 public:
     void write(std::string&) const;
 

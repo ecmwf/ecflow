@@ -16,7 +16,6 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -49,21 +48,6 @@ QueueAttr::QueueAttr(const std::string& name, const std::vector<std::string>& th
 }
 
 QueueAttr::~QueueAttr() = default;
-
-void QueueAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        os += " # ";
-        os += ecf::convert_to<std::string>(currentIndex_);
-        for (auto i : state_vec_) {
-            os += " ";
-            os += NState::toString(i);
-        }
-    }
-    os += "\n";
-}
 
 bool QueueAttr::operator==(const QueueAttr& rhs) const {
     if (name_ != rhs.name_)

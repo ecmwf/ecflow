@@ -35,39 +35,8 @@ struct EnumTraits<PrintStyle::Type_t>
 
 } // namespace ecf::detail
 
-static PrintStyle::Type_t style_ = PrintStyle::NOTHING;
-
-PrintStyle::Type_t PrintStyle::getStyle() {
-    return style_;
-}
-
-void PrintStyle::setStyle(PrintStyle::Type_t f) {
-    style_ = f;
-}
-
-bool PrintStyle::defsStyle() {
-    if (getStyle() == PrintStyle::DEFS || getStyle() == PrintStyle::NOTHING) {
-        return true;
-    }
-    return false;
-}
-
-bool PrintStyle::persist_style() {
-    if (getStyle() == PrintStyle::MIGRATE || getStyle() == PrintStyle::NET) {
-        return true;
-    }
-    return false;
-}
-
 bool PrintStyle::is_persist_style(PrintStyle::Type_t t) {
-    if (t == PrintStyle::MIGRATE || t == PrintStyle::NET) {
-        return true;
-    }
-    return false;
-}
-
-std::string PrintStyle::to_string() {
-    return to_string(getStyle());
+    return t == PrintStyle::MIGRATE || t == PrintStyle::NET;
 }
 
 std::string PrintStyle::to_string(PrintStyle::Type_t t) {

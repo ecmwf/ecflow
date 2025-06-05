@@ -83,29 +83,31 @@ bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_
             if (debug)
                 std::cout << "   GroupSTCCmd::handle_server_response *show* was called " << PrintStyle::to_string(style)
                           << "\n";
-            PrintStyle print_style(style);
             if (defs.get()) {
 
                 /// Auto generate externs, before writing to standard out. This can be expensive since
                 /// All the trigger references need to to be resolved. & AST need to be created first
                 /// The old spirit based parsing is horrendously, slow. Can't use Spirit QI, till IBM support it
-                if (!PrintStyle::is_persist_style(cts_cmd->show_style())) {
+                if (!PrintStyle::is_persist_style(style)) {
                     defs->auto_add_externs();
                 }
 
-                ecf::write_t(std::cout, *defs, cts_cmd->show_style());
+                ecf::write_t(std::cout, *defs, style);
             }
             else {
                 if (node.get()) {
                     Suite* suite = node->isSuite();
-                    if (suite)
-                        std::cout << *suite << "\n";
+                    if (suite) {
+                        std::cout << ecf::as_string(*suite, style) << "\n";
+                    }
                     Family* fam = node->isFamily();
-                    if (fam)
-                        std::cout << *fam << "\n";
+                    if (fam) {
+                        std::cout << ecf::as_string(*fam, style) << "\n";
+                    }
                     Task* task = node->isTask();
-                    if (task)
-                        std::cout << *task << "\n";
+                    if (task) {
+                        std::cout << ecf::as_string(*task, style) << "\n";
+                    }
                 }
             }
         }

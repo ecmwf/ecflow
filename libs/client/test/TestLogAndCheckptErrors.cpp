@@ -21,6 +21,7 @@
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/User.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -83,8 +84,7 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
         BOOST_CHECK_MESSAGE(theClient.loadDefs(path) == 0, "load defs failed \n" << theClient.errorMsg());
         if (debug_me) {
             BOOST_CHECK_MESSAGE(theClient.sync_local() == 0, "sync_local failed \n" << theClient.errorMsg());
-            PrintStyle style(PrintStyle::STATE);
-            cout << theClient.defs() << "\n";
+            cout << ecf::as_string(*theClient.defs(), PrintStyle::STATE) << "\n";
         }
 
         if (debug_me)

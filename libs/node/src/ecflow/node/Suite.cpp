@@ -16,7 +16,6 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/DefsDelta.hpp"
@@ -307,38 +306,6 @@ bool Suite::operator==(const Suite& rhs) const {
     return NodeContainer::operator==(rhs);
 }
 
-void Suite::print(std::string& os) const {
-    Indentor::indent(os);
-    os += "suite ";
-    os += name();
-    if (!PrintStyle::defsStyle()) {
-        bool added_comment_char = false;
-        write_state(os, added_comment_char);
-    }
-    os += "\n";
-
-    Node::print(os);
-
-    // make sure clock attribute is written before
-    if (clockAttr_.get())
-        clockAttr_->print(os);
-    if (clock_end_attr_.get())
-        clock_end_attr_->print(os);
-    if (!PrintStyle::defsStyle()) {
-        if (!cal_.is_special()) {
-            Indentor indent;
-            Indentor::indent(os);
-            os += "calendar";
-            cal_.write_state(os);
-            os += "\n";
-        }
-    }
-
-    NodeContainer::print(os);
-    Indentor::indent(os);
-    os += "endsuite\n";
-}
-
 void Suite::write_state(std::string& ret, bool& added_comment_char) const {
     // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
     //             multiple statement on a single line i.e.
@@ -359,13 +326,6 @@ void Suite::read_state(const std::string& line, const std::vector<std::string>& 
 
 const std::string& Suite::debugType() const {
     return ecf::Str::SUITE();
-}
-
-std::ostream& operator<<(std::ostream& os, const Suite& d) {
-    std::string s;
-    d.print(s);
-    os << s;
-    return os;
 }
 
 void Suite::addClock(const ClockAttr& c, bool initialize_calendar) {

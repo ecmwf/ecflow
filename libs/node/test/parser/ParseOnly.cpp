@@ -12,7 +12,6 @@
 #include <iostream>
 #include <string>
 
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 
 using namespace std;
@@ -61,8 +60,5 @@ int main(int argc, char* argv[]) {
     //   cout << "number_of_variables " << number_of_variables << "\n";
     //   cout << "nodes_with_variables  " <<  nodes_with_variables << "\n";
     //   cout <<"Average number of variables per node " <<  (double)number_of_variables/nodes_with_variables  << "\n";
-
-    //   PrintStyle style(PrintStyle::MIGRATE);
-    //   cout << defs;
     return 0;
 }

@@ -27,7 +27,6 @@
 
 #include "ScratchDir.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 
 class Defs;
 
@@ -95,7 +94,6 @@ private:
     static std::string port_;
     static std::string test_dir_;         // used when we have an external server, different platform
     static std::string project_test_dir_; // "Test" or "view"
-    PrintStyle print_style_;              // by default show state when writing defs to standard out. RAII
 };
 
 #endif /* ecflow_test_harness_TestFixture_HPP */

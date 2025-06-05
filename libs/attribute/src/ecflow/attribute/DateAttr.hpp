@@ -39,7 +39,6 @@ public:
           month_(date.month()),
           year_(date.year()) {} // for test
 
-    void print(std::string&) const;
     bool operator==(const DateAttr& rhs) const;
     bool operator<(const DateAttr& rhs) const;
     bool structureEquals(const DateAttr& rhs) const;

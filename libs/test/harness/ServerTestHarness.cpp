@@ -38,7 +38,7 @@ using namespace ecf;
 // #define DEBUG_TEST_HARNESS 1
 // #define DEBUG_DIFF 1
 
-ServerTestHarness::ServerTestHarness() : print_style_(PrintStyle::STATE) {
+ServerTestHarness::ServerTestHarness() {
 }
 
 void ServerTestHarness::run(Defs& theClientDefs,

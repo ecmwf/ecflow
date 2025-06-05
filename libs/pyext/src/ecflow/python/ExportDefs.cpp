@@ -51,7 +51,7 @@ void save_as_defs_1(const Defs& theDefs, const std::string& filename) {
 
 std::string convert_to_string(const Defs& theDefs) {
     std::string buffer;
-    ecf::write_t(buffer, theDefs, PrintStyle::getStyle());
+    ecf::write_t(buffer, theDefs, PrintStyleHolder::getStyle());
     return buffer;
 }
 

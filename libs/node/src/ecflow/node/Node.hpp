@@ -39,7 +39,6 @@
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/DState.hpp"
 #include "ecflow/core/NOrder.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
@@ -279,9 +278,6 @@ public:
     virtual void generate_scripts(const std::map<std::string, std::string>& override) const = 0;
 
     // standard functions: ==============================================
-    [[deprecated]] std::string print() const;
-    virtual void print(std::string&) const;
-    std::string print(PrintStyle::Type_t type) const;
     bool operator==(const Node& rhs) const;
     virtual bool checkInvariants(std::string& errorMsg) const;
 
@@ -914,7 +910,6 @@ private: /// For use by python interface,
     std::vector<limit_ptr>::const_iterator limit_end() const { return limits_.end(); }
     std::vector<InLimit>::const_iterator inlimit_begin() const { return inLimitMgr_.inlimit_begin(); }
     std::vector<InLimit>::const_iterator inlimit_end() const { return inLimitMgr_.inlimit_end(); }
-    std::string to_string() const; // For python interface
 
 private:
     Node* parent_{nullptr}; // *NOT* persisted must be set by the parent class

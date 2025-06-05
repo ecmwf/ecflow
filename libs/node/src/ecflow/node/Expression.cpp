@@ -47,35 +47,6 @@ std::string PartExpression::toString(const std::string& exprType) const {
     return ss.str();
 }
 
-void PartExpression::print(std::string& os, const std::string& exprType, bool isFree) const {
-    Indentor in;
-    Indentor::indent(os);
-    os += exprType;
-    switch (type_) {
-        case PartExpression::FIRST:
-            os += " ";
-            break;
-        case PartExpression::AND:
-            os += " -a ";
-            break;
-        case PartExpression::OR:
-            os += " -o ";
-            break;
-        default:
-            assert(false);
-            break;
-    }
-    os += exp_;
-
-    if (!PrintStyle::defsStyle()) {
-        if (type_ == PartExpression::FIRST) {
-            if (isFree)
-                os += " # free";
-        }
-    }
-    os += "\n";
-}
-
 std::unique_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) const {
     // #ifdef DEBUG
     //	cout << "PartExpression::parseExpressions '" << exp_ << "'\n";
@@ -137,12 +108,6 @@ std::unique_ptr<AstTop> Expression::parse_no_throw(const std::string& expression
         error_msg_context = ss.str();
     }
     return ast;
-}
-
-void Expression::print(std::string& os, const std::string& exprType) const {
-    for (const PartExpression& expr : vec_) {
-        expr.print(os, exprType, free_);
-    }
 }
 
 std::string Expression::compose_expression(const std::vector<PartExpression>& vec) {

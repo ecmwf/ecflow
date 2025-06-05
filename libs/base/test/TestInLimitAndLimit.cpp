@@ -18,7 +18,7 @@
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
-#include "ecflow/core/PrintStyle.hpp" // IWYU pragma: keep
+#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"

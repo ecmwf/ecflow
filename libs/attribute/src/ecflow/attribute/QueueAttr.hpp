@@ -22,7 +22,6 @@ public:
     QueueAttr() = default;
     ~QueueAttr();
 
-    void print(std::string&) const;
     bool operator==(const QueueAttr& rhs) const;
     bool operator<(const QueueAttr& rhs) const { return name_ < rhs.name(); }
 

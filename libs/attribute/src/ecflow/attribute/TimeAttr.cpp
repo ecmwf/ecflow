@@ -19,7 +19,6 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -59,16 +58,6 @@ void TimeAttr::resetRelativeDuration() {
     if (ts_.resetRelativeDuration()) {
         state_change_no_ = Ecf::incr_state_change_no();
     }
-}
-
-void TimeAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        ts_.write_state(os, free_);
-    }
-    os += "\n";
 }
 
 std::string TimeAttr::name() const {

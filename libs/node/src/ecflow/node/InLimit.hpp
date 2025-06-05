@@ -41,7 +41,6 @@ public:
     );
     InLimit() = default;
 
-    void print(std::string&) const;
     bool operator==(const InLimit& rhs) const;
     bool operator<(const InLimit& rhs) const { return n_ < rhs.name(); }
 
@@ -63,6 +62,7 @@ public:
 
 private:
     void limit(limit_ptr l) { limit_ = std::weak_ptr<Limit>(l); }
+
 public:
     Limit* limit() const { return limit_.lock().get(); } // can return NULL
 private:

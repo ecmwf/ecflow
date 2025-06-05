@@ -25,7 +25,6 @@ public:
 
     static alias_ptr create(const std::string& name, bool check = true);
 
-    [[deprecated]] void print(std::string&) const override;
     bool operator==(const Alias& rhs) const;
 
     /// Overridden to reset the try number
@@ -91,7 +90,5 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);
 };
-
-std::ostream& operator<<(std::ostream& os, const Alias&);
 
 #endif /* ecflow_node_Alias_HPP */

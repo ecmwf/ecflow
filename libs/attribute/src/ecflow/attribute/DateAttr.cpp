@@ -20,7 +20,6 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 using namespace std;
@@ -217,18 +216,6 @@ bool DateAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
     ss << c.day_of_month() << "/" << c.month() << "/" << c.year() << " )";
     theReasonWhy += ss.str();
     return true;
-}
-
-void DateAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        if (free_) {
-            os += " # free";
-        }
-    }
-    os += "\n";
 }
 
 std::string DateAttr::name() const {

@@ -65,7 +65,6 @@ public:
     const std::string& debugType() const override;
 
     bool operator==(const Suite& rhs) const;
-    [[deprecated]] void print(std::string&) const override;
 
     void addClock(const ClockAttr&,
                   bool initialize_calendar = true); // throw std::run_time if more than one clock is added
@@ -108,8 +107,10 @@ private:
     void begin_calendar();
     void requeue_calendar();
     void handle_clock_attribute_change();
+
 public:
     void write_state(std::string&, bool&) const override;
+
 private:
     friend class cereal::access;
     template <class Archive>
@@ -129,8 +130,6 @@ private:
     bool begun_{false};
     friend class SuiteGenVariables;
 };
-
-std::ostream& operator<<(std::ostream& os, const Suite&);
 
 // This class helps in avoiding the creation of generated variables until required.
 // This improves client->server down load times by avoiding thousands of string constructions

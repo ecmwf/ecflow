@@ -18,7 +18,6 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 
@@ -316,36 +315,6 @@ bool DayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
     theReasonWhy += theDay(static_cast<DayAttr::Day_t>(c.day_of_week()));
     theReasonWhy += " )";
     return true;
-}
-
-void DayAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        bool added_hash = false;
-        if (free_) {
-            os += " # free";
-            added_hash = true;
-        }
-        if (expired_) {
-            if (added_hash)
-                os += " expired";
-            else
-                os += " # expired";
-            added_hash = true;
-        }
-
-        if (added_hash) {
-            os += " date:";
-            os += to_simple_string(date_);
-        }
-        else {
-            os += " # date:";
-            os += to_simple_string(date_);
-        }
-    }
-    os += "\n";
 }
 
 std::string DayAttr::name() const {

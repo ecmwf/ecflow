@@ -16,7 +16,6 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/NState.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -28,17 +27,6 @@ bool VerifyAttr::operator==(const VerifyAttr& rhs) const {
     if (expected_ != rhs.expected_)
         return false;
     return true;
-}
-
-void VerifyAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    os += toString();
-    if (!PrintStyle::defsStyle()) {
-        os += " # ";
-        os += ecf::convert_to<std::string>(actual_);
-    }
-    os += "\n";
 }
 
 void VerifyAttr::incrementActual() {

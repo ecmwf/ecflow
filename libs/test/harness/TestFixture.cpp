@@ -77,11 +77,11 @@ bool is_local_server(std::string_view host) {
 // #define DEBUG_HOST_SERVER 1
 #define DEBUG_LOCAL_SERVER 1
 
-TestFixture::TestFixture(const std::string& project_test_dir) : print_style_(PrintStyle::STATE) {
+TestFixture::TestFixture(const std::string& project_test_dir) {
     init(project_test_dir);
 }
 
-TestFixture::TestFixture() : print_style_(PrintStyle::STATE) {
+TestFixture::TestFixture() {
     init("libs/test");
 }
 
