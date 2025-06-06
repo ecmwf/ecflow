@@ -170,9 +170,7 @@ void write_ast_type(Stream& output, const Ast* root, Context& ctx) {
 template <typename Stream>
 struct Writer<Ast, Stream>
 {
-    static void write(Stream& output, const Ast& item, Context& ctx) {
-        detail::write_ast_type(output, &item, ctx);
-    }
+    static void write(Stream& output, const Ast& item, Context& ctx) { detail::write_ast_type(output, &item, ctx); }
 };
 
 template <typename Stream>
@@ -219,16 +217,20 @@ struct Writer<AstNot, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstNot& item) {
         output << "# NOT (";
         output << item.evaluate_str();
         output << ")";
         if (const auto* right = item.right(); right) {
             output << " # ERROR has right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -242,6 +244,14 @@ struct Writer<AstPlus, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstPlus& item) {
         output << "# PLUS value(";
         output << item.value();
         output << ")";
@@ -251,10 +261,6 @@ struct Writer<AstPlus, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -268,6 +274,14 @@ struct Writer<AstMinus, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstMinus& item) {
         output << "# MINUS value(";
         output << item.value();
         output << ")";
@@ -277,10 +291,6 @@ struct Writer<AstMinus, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -294,6 +304,14 @@ struct Writer<AstDivide, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstDivide& item) {
         output << "# DIVIDE value(";
         output << item.value();
         output << ")";
@@ -303,10 +321,6 @@ struct Writer<AstDivide, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -320,6 +334,14 @@ struct Writer<AstMultiply, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstMultiply& item) {
         output << "# MULTIPLY value(";
         output << item.value();
         output << ")";
@@ -329,10 +351,6 @@ struct Writer<AstMultiply, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -346,6 +364,14 @@ struct Writer<AstModulo, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstModulo& item) {
         output << "# Modulo value(";
         output << item.value();
         output << ")";
@@ -355,10 +381,6 @@ struct Writer<AstModulo, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -372,6 +394,14 @@ struct Writer<AstAnd, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstAnd& item) {
         output << "# AND (";
         output << item.evaluate_str();
         output << ")";
@@ -381,10 +411,6 @@ struct Writer<AstAnd, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -398,6 +424,14 @@ struct Writer<AstOr, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstOr& item) {
         output << "# OR (";
         output << item.evaluate_str();
         output << ")";
@@ -407,10 +441,6 @@ struct Writer<AstOr, Stream>
         if (const auto* right_ = item.right(); !right_) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -424,6 +454,14 @@ struct Writer<AstEqual, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstEqual& item) {
         output << "# EQUAL (";
         output << item.evaluate_str();
         output << ")";
@@ -433,10 +471,6 @@ struct Writer<AstEqual, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -450,6 +484,14 @@ struct Writer<AstNotEqual, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstNotEqual& item) {
         output << "# NOT_EQUAL (";
         output << item.evaluate_str();
         output << ")";
@@ -459,10 +501,6 @@ struct Writer<AstNotEqual, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -476,6 +514,14 @@ struct Writer<AstLessEqual, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstLessEqual& item) {
         output << "# LESS_EQUAL (";
         output << item.evaluate_str();
         output << ")";
@@ -486,10 +532,6 @@ struct Writer<AstLessEqual, Stream>
         if (const auto* right_ = item.right(); !right_) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -503,6 +545,14 @@ struct Writer<AstGreaterEqual, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstGreaterEqual& item) {
         output << "# GREATER_EQUAL (";
         output << item.evaluate_str();
         output << ")";
@@ -512,10 +562,6 @@ struct Writer<AstGreaterEqual, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -529,6 +575,14 @@ struct Writer<AstGreaterThan, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstGreaterThan& item) {
         output << "# GREATER_THAN (";
         output << item.evaluate_str();
         output << ")";
@@ -538,10 +592,6 @@ struct Writer<AstGreaterThan, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -555,6 +605,14 @@ struct Writer<AstLessThan, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+
+        Writer<AstRoot, Stream>::write(output, item, ctx);
+    }
+
+    static void writeln(Stream& output, const AstLessThan& item) {
         output << "# LESS_THAN (";
         output << item.evaluate_str();
         output << ")";
@@ -564,10 +622,6 @@ struct Writer<AstLessThan, Stream>
         if (const auto* right = item.right(); !right) {
             output << " # ERROR has no right_";
         }
-
-        output << "\n";
-
-        Writer<AstRoot, Stream>::write(output, item, ctx);
     }
 };
 
@@ -581,6 +635,12 @@ struct Writer<AstFunction, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstFunction& item) {
         switch (item.ft()) {
             case AstFunction::DATE_TO_JULIAN:
                 output << "# DATE_TO_JULIAN ";
@@ -593,8 +653,6 @@ struct Writer<AstFunction, Stream>
             default:
                 assert(false);
         }
-
-        output << "\n";
     }
 };
 
@@ -608,10 +666,14 @@ struct Writer<AstInteger, Stream>
 
         output << l1;
 
-        output << "# INTEGER ";
-        output << item.value();
+        writeln(output, item);
 
         output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstInteger& item) {
+        output << "# INTEGER ";
+        output << item.value();
     }
 };
 
@@ -625,10 +687,14 @@ struct Writer<AstInstant, Stream>
 
         output << l1;
 
-        output << "# Instant ";
-        output << item.value();
+        writeln(output, item);
 
         output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstInstant& item) {
+        output << "# Instant ";
+        output << item.value();
     }
 };
 
@@ -642,13 +708,17 @@ struct Writer<AstNodeState, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstNodeState& item) {
         output << "# NODE_STATE ";
         output << DState::toString(item.state());
         output << "(";
         output << item.value();
         output << ")";
-
-        output << "\n";
     }
 };
 
@@ -662,10 +732,14 @@ struct Writer<AstEventState, Stream>
 
         output << l1;
 
-        output << "# EVENT_STATE ";
-        output << item.value();
+        writeln(output, item);
 
         output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstEventState& item) {
+        output << "# EVENT_STATE ";
+        output << item.value();
     }
 };
 
@@ -679,6 +753,12 @@ struct Writer<AstNode, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstNode& item) {
         if (const Node* refNode = item.referencedNode(); refNode) {
             output << "# NODE ";
             output << item.nodePath();
@@ -697,8 +777,6 @@ struct Writer<AstNode, Stream>
             output << static_cast<int>(DState::UNKNOWN);
             output << ") # check suite filter";
         }
-
-        output << "\n";
     }
 };
 
@@ -712,9 +790,13 @@ struct Writer<AstFlag, Stream>
 
         output << l1;
 
-        const Node* refNode = item.referencedNode(); // Only call once
+        writeln(output, item);
 
-        if (refNode) {
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstFlag& item) {
+        if (const Node* refNode = item.referencedNode(); refNode) {
             output << "# FLAG_NODE ";
             output << item.nodePath();
             output << " ";
@@ -730,8 +812,6 @@ struct Writer<AstFlag, Stream>
             output << ecf::Flag::enum_to_string(item.flag());
             output << "(0) # check suite filter";
         }
-
-        output << "\n";
     }
 };
 
@@ -745,6 +825,12 @@ struct Writer<AstVariable, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstVariable& item) {
         output << "# ";
         output << item.nodePath();
         output << Str::COLON();
@@ -764,8 +850,6 @@ struct Writer<AstVariable, Stream>
             output << item.nodePath();
             output << " value(0) # check suite filter";
         }
-
-        output << "\n";
     }
 };
 
@@ -779,6 +863,12 @@ struct Writer<AstParentVariable, Stream>
 
         output << l1;
 
+        writeln(output, item);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const AstParentVariable& item) {
         output << "# ";
         output << Str::COLON();
         output << item.name();
@@ -795,8 +885,6 @@ struct Writer<AstParentVariable, Stream>
         }
         output << " node(?not-found?) value(0)";
         output << " # check suite filter";
-
-        output << "\n";
     }
 };
 
@@ -811,6 +899,16 @@ struct Writer<PartExpression, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx, expression_type, is_free);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output,
+                        const PartExpression& item,
+                        Context& ctx,
+                        const std::string& expression_type,
+                        bool is_free) {
         output << expression_type;
         switch (item.expr_type()) {
             case PartExpression::FIRST:
@@ -834,8 +932,6 @@ struct Writer<PartExpression, Stream>
                     output << " # free";
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -846,7 +942,6 @@ struct Writer<Expression, Stream>
         // taken from Expression::print(std::string& os, const std::string& exprType) const
 
         for (const auto& part : item.expr()) {
-
             Writer<PartExpression, Stream>::write(output, part, ctx, expression_type, item.isFree());
         }
     }
@@ -866,10 +961,12 @@ struct Writer<AutoArchiveAttr, Stream>
 
         output << l1;
 
-        item.write(output.buf);
+        writeln(output, item);
 
         output << "\n";
     }
+
+    static void writeln(Stream& output, const AutoArchiveAttr& item) { item.write(output.buf); }
 };
 
 template <typename Stream>
@@ -881,10 +978,12 @@ struct Writer<AutoCancelAttr, Stream>
         Indent l1(ctx);
         output << l1;
 
-        item.write(output.buf);
+        writeln(output, item);
 
         output << "\n";
     }
+
+    static void writeln(Stream& output, const AutoCancelAttr& item) { item.write(output.buf); }
 };
 
 template <typename Stream>
@@ -896,10 +995,12 @@ struct Writer<AutoRestoreAttr, Stream>
         Indent l1(ctx);
         output << l1;
 
-        item.write(output.buf);
+        writeln(output, item);
 
         output << "\n";
     }
+
+    static void writeln(Stream& output, const AutoRestoreAttr& item) { item.write(output.buf); }
 };
 
 template <typename Stream>
@@ -913,7 +1014,11 @@ struct Writer<AvisoAttr, Stream>
         output << l1;
 
         ecf::format_as_defs(item, output);
+
+        output << "\n";
     }
+
+    static void writeln(Stream& output, const AvisoAttr& item) { ecf::format_as_defs(item, output); }
 };
 
 template <typename Stream>
@@ -925,10 +1030,12 @@ struct Writer<ClockAttr, Stream>
         Indent l1(ctx);
         output << l1;
 
-        item.write(output.buf);
+        writeln(output, item);
 
         output << "\n";
     }
+
+    static void writeln(Stream& output, const ClockAttr& item) { item.write(output.buf); }
 };
 
 template <typename Stream>
@@ -941,12 +1048,16 @@ struct Writer<CronAttr, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const CronAttr& item, Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             item.time_series().write_state(output.buf, item.isSetFree());
         }
-
-        output << "\n";
     }
 };
 
@@ -960,14 +1071,18 @@ struct Writer<DateAttr, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const DateAttr& item, Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.isSetFree()) {
                 output << " # free";
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -981,6 +1096,12 @@ struct Writer<DayAttr, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const DayAttr& item, Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             bool added_hash = false;
@@ -1002,8 +1123,6 @@ struct Writer<DayAttr, Stream>
             output << " date:";
             output << item.as_simple_string();
         }
-
-        output << "\n";
     }
 };
 
@@ -1017,11 +1136,15 @@ struct Writer<DState::State, Stream>
 
             output << l1;
 
-            output << "defstatus ";
-            output << DState::toString(item);
+            writeln(output, item);
 
             output << "\n";
         }
+    }
+
+    static void writeln(Stream& output, const DState::State& item) {
+        output << "defstatus ";
+        output << DState::toString(item);
     }
 };
 
@@ -1035,6 +1158,12 @@ struct Writer<Event, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const Event& item, Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.initial_value() != item.value()) { // initial value and value differ
@@ -1047,8 +1176,6 @@ struct Writer<Event, Stream>
                 }
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -1061,10 +1188,12 @@ struct Writer<GenericAttr, Stream>
         Indent l1(ctx);
         output << l1;
 
-        item.write(output.buf);
+        writeln(output, item);
 
         output << "\n";
     }
+
+    static void writeln(Stream& output, const GenericAttr& item) { item.write(output.buf); }
 };
 
 template <typename Stream>
@@ -1077,8 +1206,13 @@ struct Writer<InLimit, Stream>
 
         output << l1;
 
-        item.write(output.buf);
+        writeln(output, item, ctx);
 
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const InLimit& item, const Context& ctx) {
+        item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
 
             // write state; See InlimitParser::doParse for read state part
@@ -1096,8 +1230,6 @@ struct Writer<InLimit, Stream>
                 }
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -1111,6 +1243,12 @@ struct Writer<Label, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const Label& item, const Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (!item.new_value().empty()) {
@@ -1128,8 +1266,6 @@ struct Writer<Label, Stream>
                 }
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -1143,14 +1279,18 @@ struct Writer<LateAttr, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const LateAttr& item, const Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.isLate()) {
                 output << " # late";
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -1163,6 +1303,12 @@ struct Writer<Limit, Stream>
         Indent l1(ctx);
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const Limit& item, const Context& ctx) {
         item.write(output.buf);
 
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -1175,8 +1321,6 @@ struct Writer<Limit, Stream>
                 }
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -1190,6 +1334,12 @@ struct Writer<Meter, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const Meter& item, const Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.value() != item.min()) {
@@ -1197,8 +1347,6 @@ struct Writer<Meter, Stream>
                 output << ecf::convert_to<std::string>(item.value());
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -1212,8 +1360,12 @@ struct Writer<MirrorAttr, Stream>
 
         output << l1;
 
-        ecf::format_as_defs(item, output);
+        writeln(output, item);
+
+        output << "\n";
     }
+
+    static void writeln(Stream& output, const MirrorAttr& item) { ecf::format_as_defs(item, output); }
 };
 
 template <typename Stream>
@@ -1226,6 +1378,12 @@ struct Writer<QueueAttr, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const QueueAttr& item, const Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             output << " # ";
@@ -1235,8 +1393,6 @@ struct Writer<QueueAttr, Stream>
                 output << NState::toString(i);
             }
         }
-
-        output << "\n";
     }
 };
 
@@ -1250,6 +1406,12 @@ struct Writer<RepeatInteger, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatInteger& item, const Context& ctx) {
         output << "repeat integer ";
         output << item.name();
         output << " ";
@@ -1265,8 +1427,6 @@ struct Writer<RepeatInteger, Stream>
             output << " # ";
             output << ecf::convert_to<std::string>(item.value());
         }
-
-        output << "\n";
     }
 };
 
@@ -1280,6 +1440,12 @@ struct Writer<RepeatDate, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatDate& item, const Context& ctx) {
         output << "repeat date ";
         output << item.name();
         output << " ";
@@ -1293,8 +1459,6 @@ struct Writer<RepeatDate, Stream>
             output << " # ";
             output << ecf::convert_to<std::string>(item.value());
         }
-
-        output << "\n";
     }
 };
 
@@ -1307,6 +1471,12 @@ struct Writer<RepeatDateList, Stream>
         Indent l1(ctx);
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatDateList& item, const Context& ctx) {
         output << "repeat datelist ";
         output << item.name();
         for (auto date : item.values()) {
@@ -1318,8 +1488,6 @@ struct Writer<RepeatDateList, Stream>
             output << " # ";
             output << ecf::convert_to<std::string>(item.index_or_value());
         }
-
-        output << "\n";
     }
 };
 
@@ -1333,6 +1501,12 @@ struct Writer<RepeatDateTime, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatDateTime& item, Context& ctx) {
         output << "repeat datetime ";
         output << item.name();
         output << " ";
@@ -1347,8 +1521,6 @@ struct Writer<RepeatDateTime, Stream>
             output << " # ";
             output << boost::lexical_cast<std::string>(item.value_instant());
         }
-
-        output << "\n";
     }
 };
 
@@ -1363,6 +1535,12 @@ struct Writer<RepeatEnumerated, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatEnumerated& item, const Context& ctx) {
         output << "repeat enumerated ";
         output << item.name();
         for (const auto& value : item.values()) {
@@ -1375,8 +1553,6 @@ struct Writer<RepeatEnumerated, Stream>
             output << " # ";
             output << ecf::convert_to<std::string>(item.index_or_value());
         }
-
-        output << "\n";
     }
 };
 
@@ -1390,6 +1566,12 @@ struct Writer<RepeatString, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatString& item, const Context& ctx) {
         output << "repeat string ";
         output << item.name();
         for (const std::string& s : item.values()) {
@@ -1402,8 +1584,6 @@ struct Writer<RepeatString, Stream>
             output << " # ";
             output << ecf::convert_to<std::string>(item.value());
         }
-
-        output << "\n";
     }
 };
 
@@ -1417,10 +1597,14 @@ struct Writer<RepeatDay, Stream>
 
         output << l1;
 
-        output << "repeat day ";
-        output << ecf::convert_to<std::string>(item.step());
+        writeln(output, item);
 
         output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatDay& item) {
+        output << "repeat day ";
+        output << ecf::convert_to<std::string>(item.step());
     }
 };
 
@@ -1477,13 +1661,18 @@ struct Writer<TimeAttr, Stream>
         // taken from TimeAttr::print(std::string& os) const
 
         Indent l1(ctx);
-        l1.write(output);
+        output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const TimeAttr& item, const Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             item.time_series().write_state(output.buf, item.isSetFree());
         }
-        output << "\n";
     }
 };
 
@@ -1497,12 +1686,16 @@ struct Writer<TodayAttr, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const TodayAttr& item, const Context& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             item.time_series().write_state(output.buf, item.isSetFree());
         }
-
-        output << "\n";
     }
 };
 
@@ -1530,11 +1723,18 @@ struct Writer<Variable, Stream>
 
         output << l1;
 
+        writeln(output, item, prefix, suffix);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output,
+                        const Variable& item,
+                        const std::string& prefix = empty,
+                        const std::string& suffix = empty) {
         output << prefix;
         item.write(output.buf);
         output << suffix;
-
-        output << "\n";
     }
 };
 
@@ -1548,13 +1748,17 @@ struct Writer<VerifyAttr, Stream>
 
         output << l1;
 
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const VerifyAttr& item, const Context& ctx) {
         output << item.toString();
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             output << " # ";
             output << ecf::convert_to<std::string>(item.actual());
         }
-
-        output << "\n";
     }
 };
 
@@ -1568,10 +1772,12 @@ struct Writer<ZombieAttr, Stream>
 
         output << l1;
 
-        item.write(output.buf);
+        writeln(output, item);
 
         output << "\n";
     }
+
+    static void writeln(Stream& output, const ZombieAttr& item) { item.write(output.buf); }
 };
 
 /* ************************************************************************** */

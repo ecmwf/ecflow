@@ -49,7 +49,6 @@ struct Formatter<AvisoAttr, Stream>
             output << " --reason ";
             output << item.reason();
         }
-        output << "\n";
     }
 };
 

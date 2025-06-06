@@ -50,7 +50,6 @@ struct Formatter<MirrorAttr, Stream>
             output << " --reason ";
             output << item.reason();
         }
-        output << "\n";
     }
 };
 
