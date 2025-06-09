@@ -363,7 +363,6 @@ set(srcs
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
   node/src/ecflow/node/Operations.hpp
-  node/src/ecflow/node/Permissions.hpp
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
   node/src/ecflow/node/Signal.hpp
@@ -410,6 +409,10 @@ set(srcs
   node/src/ecflow/node/parser/VariableParser.hpp
   node/src/ecflow/node/parser/VerifyParser.hpp
   node/src/ecflow/node/parser/ZombieAttrParser.hpp
+  node/src/ecflow/node/permissions/ActivePermissions.hpp
+  node/src/ecflow/node/permissions/Allowed.hpp
+  node/src/ecflow/node/permissions/Permission.hpp
+  node/src/ecflow/node/permissions/Permissions.hpp
   # Node -- Sources
   node/src/ecflow/node/Alias.cpp
   node/src/ecflow/node/Attr.cpp
@@ -448,7 +451,6 @@ set(srcs
   node/src/ecflow/node/NodeStats.cpp
   node/src/ecflow/node/NodeTime.cpp
   node/src/ecflow/node/NodeTreeVisitor.cpp
-  node/src/ecflow/node/Permissions.cpp
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
   node/src/ecflow/node/Signal.cpp
@@ -490,6 +492,10 @@ set(srcs
   node/src/ecflow/node/parser/VariableParser.cpp
   node/src/ecflow/node/parser/VerifyParser.cpp
   node/src/ecflow/node/parser/ZombieAttrParser.cpp
+  node/src/ecflow/node/permissions/ActivePermissions.cpp
+  node/src/ecflow/node/permissions/Allowed.cpp
+  node/src/ecflow/node/permissions/Permission.cpp
+  node/src/ecflow/node/permissions/Permissions.cpp
 
   # Server -- Headers
   server/src/ecflow/server/AuthenticationService.hpp
@@ -564,36 +570,36 @@ set(srcs
 
 ecbuild_add_library(
   TARGET
-    ecflow_all
+  ecflow_all
   NOINSTALL
   TYPE STATIC
   SOURCES
-    ${srcs}
+  ${srcs}
   PUBLIC_INCLUDES
-    attribute/src
-    base/src
-    client/src
-    core/src
-    node/src
-    service/src
-    server/src
-    udp/src
-    ${CMAKE_BINARY_DIR}/generated/src
+  attribute/src
+  base/src
+  client/src
+  core/src
+  node/src
+  service/src
+  server/src
+  udp/src
+  ${CMAKE_BINARY_DIR}/generated/src
   PUBLIC_LIBS
-    nlohmann::json
-    cereal::cereal # this needs to be public as it appears in public header files used downstream
-    httplib::httplib
-    $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
-    Boost::filesystem
-    Boost::date_time
-    Boost::program_options
-    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    $<$<BOOL:${Crypt_FOUND}>:crypt::crypt>
-    Threads::Threads
-    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  nlohmann::json
+  cereal::cereal # this needs to be public as it appears in public header files used downstream
+  httplib::httplib
+  $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
+  Boost::filesystem
+  Boost::date_time
+  Boost::program_options
+  $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  $<$<BOOL:${Crypt_FOUND}>:crypt::crypt>
+  Threads::Threads
+  $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   PUBLIC_DEFINITIONS
-    CMAKE
-    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+  CMAKE
+  $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(ecflow_all)
 
