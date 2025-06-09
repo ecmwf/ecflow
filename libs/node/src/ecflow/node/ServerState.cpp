@@ -163,11 +163,9 @@ void ServerState::add_or_update_server_variable(const std::string& name, const s
     for (auto& s : server_variables_) {
         if (s.name() == name) {
             s.set_value(value);
-            //         std::cout << "   Server Variables: Updating " << name << "   " << value << "\n";
             return;
         }
     }
-    //   std::cout << "   Server Variables: Adding " << name << "   " << value << "\n";
     server_variables_.emplace_back(name, value);
 }
 
