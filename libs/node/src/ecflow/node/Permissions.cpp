@@ -17,6 +17,10 @@ namespace ecf {
 
 Permissions Permissions::make_from_variable(const std::string& value) {
 
+    if (value.empty()) {
+        return Permissions::make_empty();
+    }
+
     // Expecting a comma-separated list of user/permissions, e.g. "USER1:RWXO,USER2:R"
 
     std::vector<std::string> entries;
@@ -53,6 +57,11 @@ Permissions Permissions::make_from_variable(const std::string& value) {
                     [[fallthrough]];
                 case 'O':
                     perms |= Allowed::OWNER;
+                    break;
+                case 's':
+                    [[fallthrough]];
+                case 'S':
+                    perms |= Allowed::STICKY;
                     break;
                 default:
                     throw std::runtime_error("Invalid permission character: " + std::string(1, c) +

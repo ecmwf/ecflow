@@ -12,6 +12,7 @@
 #define ecflow_node_Permissions_HPP
 
 #include <algorithm>
+#include <iostream>
 #include <set>
 #include <string>
 #include <vector>
@@ -24,10 +25,14 @@ namespace ecf {
 
 enum class Allowed : std::uint8_t {
     NONE    = 0,
-    READ    = 1 << 0,
-    WRITE   = 1 << 1,
-    EXECUTE = 1 << 2,
-    OWNER   = 1 << 3,
+    READ    = 1 << 0, // Can perform read commands on nodes and their attributes
+    WRITE   = 1 << 1, // Can perform write commands on nodes and their attributes
+    EXECUTE = 1 << 2, // Can perform execute commands on nodes (e.g. run a task)
+    OWNER   = 1 << 3, // Can to load new suites.
+    STICKY  = 1 << 4, // This is a special permission and means the permission is cannot be restricted/removed in lower
+                      // hierarchy levels, i.e. if a user has sticky permissions, it can't be overridden
+                      // by a new permission defined at a lower level. This is useful for defining
+                      // server level permissions that should not be overridden by node level permissions.
 };
 
 inline Allowed operator|(Allowed lhs, Allowed rhs) {
@@ -55,6 +60,9 @@ inline std::string to_string(Allowed allowed) {
     }
     if ((allowed & Allowed::OWNER) != Allowed::NONE) {
         s += "o";
+    }
+    if ((allowed & Allowed::STICKY) != Allowed::NONE) {
+        s += "s";
     }
     return s;
 }
@@ -105,20 +113,64 @@ public:
         return found != std::end(allowed_);
     }
 
-    Permissions supersede(const Permissions& other) const {
-        // `*this` is the new permissions
-        // `other` is the previous permissions
-        // We want to update previous permissions, by restricting them using the new permissions
+    static Permissions combine_supersede(const Permissions& active, const Permissions& current) {
+        // `current` is the new permissions
+        // `previous` is the previous permissions
+        //
+        // The superseding rules are to update previous permissions, by keeping all sticky permissions and keeping any
+        // non-sticky permissions with the new permissions.
+        //
 
         std::vector<Permission> result;
 
-        for (auto&& new_permission : this->allowed_) {
-            if (auto found =
-                    std::find_if(std::begin(other.allowed_),
-                                 std::end(other.allowed_),
-                                 [&](auto&& current) { return current.username() == new_permission.username(); });
-                found != std::end(other.allowed_)) {
-                result.push_back(Permission{new_permission.username(), new_permission.allowed() & found->allowed()});
+        std::cout << "Combining permissions (supersede) active: " << active << " current: " << current << std::endl;
+
+        // First, we keep all sticky permissions from the active permissions
+        for (auto&& permission : active.allowed_) {
+            if (contains(permission.allowed(), Allowed::STICKY)) {
+                result.push_back(permission);
+            }
+        }
+
+        // Then, we retain the non-sticky permissions from the current permissions
+        for (auto&& permission : current.allowed_) {
+            auto found = std::find_if(
+                std::begin(result), std::end(result), [&](auto&& p) { return p.username() == permission.username(); });
+
+            if (found == std::end(result)) {
+                // If the user is not in listed as sticky, we add the permission
+                result.push_back(permission);
+            }
+        }
+
+        auto r = Permissions{std::move(result)};
+        std::cout << "Combined permissions (supersede): " << r << std::endl;
+        return r;
+    }
+
+    static Permissions combine_override(const Permissions& active, const Permissions& current) {
+        // `current` is the new permissions
+        // `previous` is the previous permissions
+        //
+        // The overriding rules are to update previous permissions, by restricting them based on the new permissions.
+        // Sticky permissions are kept as is, while non-sticky permissions are overridden by the current permissions.
+        //
+
+        std::vector<Permission> result;
+
+        for (auto&& permission : active.allowed_) {
+            if (contains(permission.allowed(), Allowed::STICKY)) {
+                // If the permission is sticky, we keep the permissions as is
+                result.push_back(permission);
+            }
+            else {
+                if (auto found = std::find_if(std::begin(current.allowed_),
+                                              std::end(current.allowed_),
+                                              [&](auto&& p) { return p.username() == permission.username(); });
+                    found != std::end(current.allowed_)) {
+                    // When non-sticky permissions are overridden in current, we combine the permissions
+                    result.push_back(Permission{permission.username(), permission.allowed() & found->allowed()});
+                }
             }
         }
 
@@ -129,7 +181,7 @@ public:
         using namespace std::string_literals;
         os << "Permissions: "s;
         for (auto&& permission : p.allowed_) {
-            os << " --> "s << permission.username().value() << ":"s << to_string(permission.allowed()) << " "s;
+            os << "("s << permission.username().value() << ":"s << to_string(permission.allowed()) << ") "s;
         }
         return os;
     }
@@ -145,47 +197,39 @@ class ActivePermissions {
 public:
     static ActivePermissions make_empty() { return ActivePermissions(); }
 
-    [[nodiscard]] bool is_none() const { return server_permissions_.is_empty() && node_permissions_.is_empty(); }
+    [[nodiscard]] bool is_none() const { return permissions_.is_empty(); }
 
     [[nodiscard]] bool allows(const Username& username, Allowed permission) const {
         if (is_none()) {
-            return true; // no active rules, so allow everything
+            return true; // no active rules, so allow everything! Dangerous, but backward compatible!
         }
 
-        if (!server_permissions_.is_empty() && server_permissions_.allows(username, permission)) {
-            return true;
-        }
-
-        if (!node_permissions_.is_empty() && node_permissions_.allows(username, permission)) {
-            return true;
-        }
-
-        return false;
+        return permissions_.allows(username, permission);
     }
 
-    void bootstrap_server_permission(const Permissions& p) { server_permissions_ = p; }
+    void bootstrap(const Permissions& p) { permissions_ = p; }
 
-    void bootstrap_node_permission(const Permissions& p) { node_permissions_ = p; }
+    void combine_supersede(const Permissions& p) {
+        if (!is_none()) {
+            permissions_ = Permissions::combine_supersede(permissions_, p);
+        }
+    }
 
-    void combine_node_permission(const Permissions& p) {
-        if (!p.is_empty()) {
-            node_permissions_ = p.supersede(node_permissions_);
+    void combine_override(const Permissions& p) {
+        if (!is_none()) {
+            permissions_ = Permissions::combine_override(permissions_, p);
         }
     }
 
     friend std::ostream& operator<<(std::ostream& os, const ActivePermissions& p) {
         using namespace std::string_literals;
         os << "ActivePermissions\n"s;
-        os << " -- Server\n"s;
-        os << p.server_permissions_;
-        os << "\n -- Node\n"s;
-        os << p.node_permissions_;
+        os << p.permissions_;
         return os;
     }
 
 private:
-    Permissions server_permissions_ = Permissions::make_empty();
-    Permissions node_permissions_   = Permissions::make_empty();
+    Permissions permissions_ = Permissions::make_empty();
 };
 
 } // namespace ecf

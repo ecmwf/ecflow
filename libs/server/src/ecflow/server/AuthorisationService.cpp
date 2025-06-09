@@ -73,21 +73,21 @@ ActivePermissions AuthorisationService::permissions_at(const Defs& defs, const p
                                     auto p = defs.server_state().permissions();
 
                                     // At server level, we only care about the server permissions
-                                    collected_.bootstrap_server_permission(p);
+                                    collected_.bootstrap(p);
                                 }
                                 void handle(const Node& n) {
                                     auto p = n.permissions();
 
                                     if (auto s = dynamic_cast<const Suite*>(&n); s) {
                                         // At node level, if the node is a Suite we bootstrap the node permissions
-                                        collected_.bootstrap_node_permission(p);
+                                        collected_.combine_supersede(p);
                                     }
                                     else {
                                         // ... otherwise, we combine the node permissions
                                         //  -- in practice, this combination only restricts node permissions;
                                         //     for example, a user can't be allowed to read/write/execute a
                                         //     specific node if he can't do it at a higher node level
-                                        collected_.combine_node_permission(p);
+                                        collected_.combine_override(p);
                                     }
                                 }
 
