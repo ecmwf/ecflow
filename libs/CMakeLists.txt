@@ -365,7 +365,6 @@ set(srcs
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
   node/src/ecflow/node/Operations.hpp
-  node/src/ecflow/node/Permissions.hpp
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
   node/src/ecflow/node/Signal.hpp
@@ -412,6 +411,10 @@ set(srcs
   node/src/ecflow/node/parser/VariableParser.hpp
   node/src/ecflow/node/parser/VerifyParser.hpp
   node/src/ecflow/node/parser/ZombieAttrParser.hpp
+  node/src/ecflow/node/permissions/ActivePermissions.hpp
+  node/src/ecflow/node/permissions/Allowed.hpp
+  node/src/ecflow/node/permissions/Permission.hpp
+  node/src/ecflow/node/permissions/Permissions.hpp
   # Node -- Sources
   node/src/ecflow/node/Alias.cpp
   node/src/ecflow/node/Attr.cpp
@@ -451,7 +454,6 @@ set(srcs
   node/src/ecflow/node/NodeStats.cpp
   node/src/ecflow/node/NodeTime.cpp
   node/src/ecflow/node/NodeTreeVisitor.cpp
-  node/src/ecflow/node/Permissions.cpp
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
   node/src/ecflow/node/Signal.cpp
@@ -493,6 +495,10 @@ set(srcs
   node/src/ecflow/node/parser/VariableParser.cpp
   node/src/ecflow/node/parser/VerifyParser.cpp
   node/src/ecflow/node/parser/ZombieAttrParser.cpp
+  node/src/ecflow/node/permissions/ActivePermissions.cpp
+  node/src/ecflow/node/permissions/Allowed.cpp
+  node/src/ecflow/node/permissions/Permission.cpp
+  node/src/ecflow/node/permissions/Permissions.cpp
 
   # Server -- Headers
   server/src/ecflow/server/AuthenticationService.hpp
