@@ -17,7 +17,7 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/SState.hpp"
 #include "ecflow/node/NodeFwd.hpp"
-#include "ecflow/node/Permissions.hpp"
+#include "ecflow/node/permissions/Permissions.hpp"
 
 /// This class stores the server state, so that it is accessible by the node tree
 ///
