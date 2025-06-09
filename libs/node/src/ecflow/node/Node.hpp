@@ -47,7 +47,7 @@
 #include "ecflow/node/InLimitMgr.hpp"
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeFwd.hpp"
-#include "ecflow/node/Permissions.hpp"
+#include "ecflow/node/permissions/Permissions.hpp"
 
 namespace ecf {
 class Simulator;
