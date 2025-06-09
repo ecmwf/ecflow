@@ -13,7 +13,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -56,36 +55,6 @@ bool Variable::operator==(const Variable& rhs) const {
         return false;
     }
     return true;
-}
-
-void Variable::print(std::string& os) const {
-    // see notes in VariableParser.h
-    //               Hence we do the following:
-    //                  a/ On parsing always remove quotes ie single or double
-    //                  b/ On serialising always add single quotes
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    os += "\n";
-}
-
-void Variable::print_server_variable(std::string& os) const {
-    // see notes in VariableParser.h
-    //               Hence we do the following:
-    //                  a/ On parsing always remove quotes ie single or double
-    //                  b/ On serialising always add single quotes
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    os += " # server\n";
-}
-
-void Variable::print_generated(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    os += "# ";
-    write(os);
-    os += "\n";
 }
 
 std::string Variable::toString() const {

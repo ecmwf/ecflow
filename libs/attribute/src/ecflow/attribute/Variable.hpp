@@ -34,9 +34,6 @@ public:
     Variable() = default;
 
     const std::string& name() const { return n_; }
-    void print(std::string&) const;
-    void print_server_variable(std::string&) const;
-    void print_generated(std::string&) const;
     bool empty() const { return n_.empty(); }
 
     void set_value(const std::string& v) { v_ = v; }

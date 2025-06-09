@@ -10,12 +10,12 @@
 
 #include "ecflow/simulator/DefsAnalyserVisitor.hpp"
 
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/AstAnalyserVisitor.hpp"
 
 using namespace std;
@@ -56,12 +56,7 @@ void DefsAnalyserVisitor::analyse(Node* node, std::set<Node*>& dependentNodes, b
     // ***************************************************************
     // Do a depth first search to find the root cause of the blockage
     // ***************************************************************
-    // #ifdef DEBUG
-    //	if (dependent)  {
-    //		ss_ << "DefsAnalyserVisitor::analyse " << node->debugType() << Str::COLON() << node->absNodePath();
-    //		ss_ << " state(" << NState::toString(node->state()) << ")\n";
-    //	}
-    // #endif
+
     if (analysedNodes_.find(node) != analysedNodes_.end())
         return;
     analysedNodes_.insert(node);
@@ -72,7 +67,11 @@ void DefsAnalyserVisitor::analyse(Node* node, std::set<Node*>& dependentNodes, b
         std::vector<std::string> theReasonWhy;
         node->why(theReasonWhy);
         for (const auto& i : theReasonWhy) {
-            Indentor::indent(ss_) << "Reason: " << i << "\n";
+            Indent l1(ctx_);
+            ss_ << l1;
+            ss_ << "Reason: ";
+            ss_ << i;
+            ss_ << "\n";
         }
     }
 
@@ -109,45 +108,65 @@ void DefsAnalyserVisitor::analyseExpressions(Node* node,
                                              std::set<Node*>& dependentNodes,
                                              bool trigger,
                                              bool dependent) {
-    Indentor in;
-    Indentor::indent(ss_);
+    Indent l1(ctx_);
+
+    ss_ << l1;
     if (dependent)
         ss_ << "DEPENDENT ";
     if (trigger) {
-        ss_ << node->debugNodePath() << " holding on trigger expression '" << node->triggerExpression() << "'\n";
+        ss_ << node->debugNodePath();
+        ss_ << " holding on trigger expression '";
+        ss_ << node->triggerExpression();
+        ss_ << "'\n";
     }
     else {
-        ss_ << node->debugNodePath() << " holding on complete expression '" << node->completeExpression() << "'\n";
+        ss_ << node->debugNodePath();
+        ss_ << " holding on complete expression '";
+        ss_ << node->completeExpression();
+        ss_ << "'\n";
     }
 
     AstAnalyserVisitor astVisitor;
     if (trigger) {
         node->triggerAst()->accept(astVisitor);
-        ss_ << *node->triggerAst();
+        ss_ << ecf::as_string(*node->triggerAst(), PrintStyle::DEFS);
     }
     else {
         node->completeAst()->accept(astVisitor);
-        ss_ << *node->completeAst();
+        ss_ << ecf::as_string(*node->completeAst(), PrintStyle::DEFS);
     }
 
     // Warn about NULL node references in the trigger expressions
     for (const string& nodePath : astVisitor.dependentNodePaths()) {
-        Indentor in2;
-        Indentor::indent(ss_) << "'" << nodePath << "' is not defined in the expression\n";
+        Indent l2(ctx_);
+
+        ss_ << l2;
+        ss_ << "'";
+        ss_ << nodePath;
+        ss_ << "' is not defined in the expression\n";
     }
 
     // **** NOTE: Currently for COMPLETE expression will only follow trigger expressions
     for (Node* triggerNode : astVisitor.dependentNodes()) {
+        Indent l2(ctx_);
 
-        Indentor in2;
-        Indentor::indent(ss_) << "EXPRESSION NODE " << triggerNode->debugNodePath();
-        ss_ << " state(" << NState::toString(triggerNode->state()) << ")";
-        if (triggerNode->triggerAst())
-            ss_ << " trigger(evaluation = " << triggerNode->evaluateTrigger() << "))";
-        if (analysedNodes_.find(triggerNode) != analysedNodes_.end())
+        ss_ << l2;
+        ss_ << "EXPRESSION NODE ";
+        ss_ << triggerNode->debugNodePath();
+        ss_ << " state(";
+        ss_ << NState::toString(triggerNode->state());
+        ss_ << ")";
+        if (triggerNode->triggerAst()) {
+            ss_ << " trigger(evaluation = ";
+            ss_ << triggerNode->evaluateTrigger();
+            ss_ << "))";
+        }
+        if (analysedNodes_.find(triggerNode) != analysedNodes_.end()) {
             ss_ << " analysed ";
-        if (dependentNodes.find(triggerNode) != dependentNodes.end())
+        }
+        if (dependentNodes.find(triggerNode) != dependentNodes.end()) {
             ss_ << " ** ";
+        }
         ss_ << "\n";
 
         if (dependentNodes.find(triggerNode) != dependentNodes.end()) {
@@ -156,19 +175,17 @@ void DefsAnalyserVisitor::analyseExpressions(Node* node,
                 AstAnalyserVisitor visitor;
                 triggerNode->triggerAst()->accept(visitor);
 
-                //				cerr << "Node = " << node->absNodePath() << "\n";
-                //				cerr << "triggerNode = " << triggerNode->absNodePath() << "\n";
-                //				for(Node* n:visitor.dependentNodes() ) {
-                //					cerr << "triggerNode Node dependents = " << n->absNodePath() <<
-                //"\n";
-                //				}
-
                 if (visitor.dependentNodes().find(node) != visitor.dependentNodes().end()) {
-                    Indentor in3;
-                    Indentor::indent(ss_) << "Deadlock detected between:\n";
-                    Indentor in4;
-                    Indentor::indent(ss_) << node->debugNodePath() << "\n";
-                    Indentor::indent(ss_) << triggerNode->debugNodePath() << "\n";
+                    Indent l3(ctx_);
+                    ss_ << l3;
+                    ss_ << "Deadlock detected between:\n";
+                    Indent l4(ctx_);
+                    ss_ << l4;
+                    ss_ << node->debugNodePath();
+                    ss_ << "\n";
+                    ss_ << l4;
+                    ss_ << triggerNode->debugNodePath();
+                    ss_ << "\n";
                 }
             }
             continue;

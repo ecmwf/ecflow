@@ -12,7 +12,6 @@
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 
@@ -25,13 +24,6 @@ using namespace boost::gregorian;
 using namespace boost::posix_time;
 
 namespace ecf {
-
-void AutoArchiveAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    os += "\n";
-}
 
 std::string AutoArchiveAttr::toString() const {
     std::string ret;

@@ -19,7 +19,6 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/Serialization.hpp"

@@ -35,7 +35,6 @@ public:
     // needed by node copy constructor and persistence
     void set_node(Node* n) { node_ = n; }
 
-    void print(std::string&) const;
     bool operator==(const AutoRestoreAttr& rhs) const;
     std::string toString() const;
 

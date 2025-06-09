@@ -37,11 +37,11 @@
 
 #include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
+#include "formatter/DefsWriter.hpp"
 
 // Reference
 // ‘*’   Zero or more
@@ -487,23 +487,28 @@ bool ExprParser::doParse(std::string& errorMsg) {
 }
 
 // The evaluation function for the AST
-void do_print(const tree_iter_t& i, const std::map<parser_id, std::string>& rule_names) {
-    Indentor in;
+void do_print(const tree_iter_t& i, const std::map<parser_id, std::string>& rule_names, ecf::Context& ctx) {
+    ecf::Indent l1(ctx);
     auto iter = rule_names.find(i->value.id());
     if (iter != rule_names.end()) {
-        Indentor::indent(cout) << "Rule " << (*iter).second << "(size:" << i->children.size() << ")"
-                               << "  " << string(i->value.begin(), i->value.end()) << endl;
+        std::cout << l1 << "Rule " << (*iter).second << "(size:" << i->children.size() << ")"
+                  << "  " << string(i->value.begin(), i->value.end()) << endl;
     }
     else {
-        Indentor::indent(cout) << "Unknown rule(id:" << i->value.id().to_long() << ")"
-                               << "(size:" << i->children.size() << ")"
-                               << "  " << string(i->value.begin(), i->value.end()) << endl;
+        std::cout << l1 << "Unknown rule(id:" << i->value.id().to_long() << ")"
+                  << "(size:" << i->children.size() << ")"
+                  << "  " << string(i->value.begin(), i->value.end()) << endl;
     }
 
-    Indentor in2;
+    ecf::Indent l2(ctx);
     for (auto t = i->children.begin(); t != i->children.end(); ++t) {
-        do_print(t, rule_names);
+        do_print(t, rule_names, ctx);
     }
+}
+
+void do_print(const tree_iter_t& i, const std::map<parser_id, std::string>& rule_names) {
+    ecf::Context ctx = ecf::Context::make_for(PrintStyle::DEFS);
+    do_print(i, rule_names, ctx);
 }
 
 void print(tree_parse_info<> info, const std::string& expr, const std::map<parser_id, std::string>& rule_names) {
@@ -837,27 +842,12 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
 
 // The evaluation function for the AST
 Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rule_names, Ast* top) {
-#if defined(PRINT_AST_TRAVERSAL)
-    Indentor in;
-    std::map<parser_id, std::string>::const_iterator iter = rule_names.find(i->value.id());
-    if (iter != rule_names.end()) {
-        Indentor::indent(cout) << "Rule " << (*iter).second << " (" << i->children.size() << ")"
-                               << "  " << string(i->value.begin(), i->value.end()) << endl;
-    }
-    else {
-        Indentor::indent(cout) << "Unknown rule "
-                               << "(" << i->children.size() << ")"
-                               << "  " << string(i->value.begin(), i->value.end()) << endl;
-    }
-#endif
 
-    Indentor in2;
     if (i->children.size() == 3) {
         // child 1: left                0
         // child 2: root(i.e ==,!=)    +1
         // child 3: right              +2
 
-        // cout << "i->children.size() == 3 ======================== \n";
         AstRoot* someRoot = createRootNode(i->children.begin() + 1, rule_names);
         if (someRoot) {
             Ast* left = doCreateAst(i->children.begin(), rule_names, someRoot);
@@ -875,7 +865,6 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
     }
     else if (is_root_node(i) && i->children.size() == 2) {
 
-        // cout << "is_root_node(i) && i->children.size() == 2\n";
         AstRoot* someRoot = createRootNode(i, rule_names);
 
         Ast* left = doCreateAst(i->children.begin(), rule_names, someRoot);
@@ -898,7 +887,6 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         // Create as:         someRoot
         //              notRoot          right
         //      notChild
-        // cout << "(i->children.size() == 4 && is_not(i->children.begin()))\n";
 
         LOG_ASSERT(is_not(i->children.begin()), "");
         AstRoot* notRoot = createRootNode(i->children.begin(), rule_names);
@@ -927,8 +915,7 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         // Create as:         someRoot
         //              child          notRoot
         //                                    notChild
-        // cout << "(i->children.size() == 4 && is_root_node(i->children.begin()+1) && is_not(i->children.begin()+2)
-        // )\n";
+
         AstRoot* someRoot = createRootNode(i->children.begin() + 1, rule_names);
         Ast* varPath      = doCreateAst(i->children.begin(), rule_names, someRoot /*top*/);
         if (varPath)
@@ -949,7 +936,6 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
     else if (i->children.size() == 2 && is_not(i->children.begin())) {
         // child 1: not     0
         // child 2: left   +1
-        // cout << "(i->children.size() == 2 && is_not(i->children.begin()) )\n";
 
         AstRoot* notRoot = createRootNode(i->children.begin(), rule_names);
 
@@ -973,7 +959,7 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         //     !a and b
         //      a and !b
         // We always treat the not as *child*
-        // cout << "(i->children.size() >=5 ) \n";
+
         stack<Ast*> childs;
         stack<Ast*> parents;
         Ast* not_ast = nullptr;
@@ -1023,8 +1009,6 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
             top->addChild(childs.top());
     }
     else {
-        // cout <<
-        // "JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ\n";
         Ast* child = createAst(i, rule_names);
         if (top && child)
             top->addChild(child);

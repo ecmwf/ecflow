@@ -252,7 +252,6 @@ set(srcs
   core/src/ecflow/core/File_r.hpp
   core/src/ecflow/core/Filesystem.hpp
   core/src/ecflow/core/Host.hpp
-  core/src/ecflow/core/Indentor.hpp
   core/src/ecflow/core/Log.hpp
   core/src/ecflow/core/LogVerification.hpp
   core/src/ecflow/core/Message.hpp
@@ -296,7 +295,6 @@ set(srcs
   core/src/ecflow/core/File_r.cpp
   core/src/ecflow/core/Filesystem.cpp
   core/src/ecflow/core/Host.cpp
-  core/src/ecflow/core/Indentor.cpp
   core/src/ecflow/core/Log.cpp
   core/src/ecflow/core/LogVerification.cpp
   core/src/ecflow/core/NOrder.cpp

@@ -19,6 +19,7 @@
 #include "VSState.hpp"
 #include "VTriggerAttr.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 OverviewProvider::OverviewProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::NoTask) {
 }
@@ -255,9 +256,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
         // Suite* suite = dynamic_cast<Suite*>(nn);
         //  f << "clock    : ";
         if (suite->clockAttr()) {
-            std::string s;
-            suite->clockAttr().get()->print(s);
-            f << s; // f << "\n";
+            f << ecf::as_string(*suite->clockAttr(), PrintStyle::DEFS);
         }
     }
 

@@ -19,7 +19,6 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 using namespace std;

@@ -15,7 +15,6 @@
 #include <stdexcept>
 
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/node/ExprParser.hpp"

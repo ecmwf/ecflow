@@ -17,7 +17,6 @@
 #include "ecflow/attribute/DayAttr.hpp"  // Used in Why
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 

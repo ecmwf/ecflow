@@ -16,7 +16,6 @@
 
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"

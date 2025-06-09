@@ -13,7 +13,6 @@
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Limit.hpp"

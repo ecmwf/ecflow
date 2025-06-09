@@ -18,7 +18,6 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"

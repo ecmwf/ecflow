@@ -15,7 +15,6 @@
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Alias.hpp"
@@ -167,6 +166,14 @@ void write_ast_type(Stream& output, const Ast* root, Context& ctx) {
 }
 
 } // namespace detail
+
+template <typename Stream>
+struct Writer<Ast, Stream>
+{
+    static void write(Stream& output, const Ast& item, Context& ctx) {
+        detail::write_ast_type(output, &item, ctx);
+    }
+};
 
 template <typename Stream>
 struct Writer<AstTop, Stream>
@@ -2029,10 +2036,11 @@ private:
         // integers used in the time.
         // -  Used in commands
         if (item.get_save_edit_history()) {
-            Indentor in;
+
             for (const auto& i : item.get_edit_history()) {
                 Indent l(ctx);
                 l.write(output);
+
                 output << "history ";
                 output << i.first;
                 output << " ";                                  // node path

@@ -29,7 +29,6 @@ public:
     AutoCancelAttr(const TimeSlot& ts, bool relative) : time_(ts), relative_(relative) {}
     explicit AutoCancelAttr(int days) : time_(TimeSlot(days * 24, 0)), days_(true) {}
 
-    void print(std::string&) const;
     bool operator==(const AutoCancelAttr& rhs) const;
     bool operator<(const AutoCancelAttr& rhs) const { return time_ < rhs.time(); }
     bool isFree(const ecf::Calendar&, const boost::posix_time::time_duration& suiteDurationAtComplete) const;

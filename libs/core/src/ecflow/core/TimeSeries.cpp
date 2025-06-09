@@ -24,12 +24,6 @@
     #include "ecflow/core/Ecf.hpp"
 #endif
 
-// #define DEBUG_TIME_SERIES 1
-// #define DEBUG_TIME_SERIES_IS_FREE 1
-#ifdef DEBUG_TIME_SERIES_IS_FREE
-    #include "ecflow/core/Indentor.hpp"
-#endif
-
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
