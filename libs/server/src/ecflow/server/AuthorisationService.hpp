@@ -16,7 +16,7 @@ class Defs;
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Result.hpp"
-#include "ecflow/node/Permissions.hpp"
+#include "ecflow/node/permissions/ActivePermissions.hpp"
 
 class AbstractServer;
 
