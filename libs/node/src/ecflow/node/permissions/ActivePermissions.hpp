@@ -8,16 +8,19 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_node_Permissions_HPP
-#define ecflow_node_Permissions_HPP
+#ifndef ecflow_node_permissions_ActivePermissions_HPP
+#define ecflow_node_permissions_ActivePermissions_HPP
 
 #include <algorithm>
 #include <iostream>
 #include <set>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "ecflow/node/permissions/Permissions.hpp"
+
+class Defs;
 
 namespace ecf {
 
@@ -84,6 +87,23 @@ private:
     Permissions permissions_ = Permissions::make_empty();
 };
 
+/**
+ * \brief This is a Tag type used to indicate that the permissions follow the nominal rules.
+ */
+struct Rules
+{
+};
+
+/**
+ * \brief This is a Tag type used to indicate that the permissions are unrestricted.
+ */
+struct Unrestricted
+{
+};
+
+ActivePermissions
+permissions_at(const Defs& defs, const std::string& path, const std::variant<Unrestricted, Rules>& permissions);
+
 } // namespace ecf
 
-#endif /* ecflow_node_Permissions_HPP */
+#endif /* ecflow_node_permissions_ActivePermissions_HPP */
