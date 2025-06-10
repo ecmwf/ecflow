@@ -8,15 +8,14 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_base_Algorithms_hpp
-#define ecflow_base_Algorithms_hpp
+#ifndef ecflow_node_NodePathAlgorithms_hpp
+#define ecflow_node_NodePathAlgorithms_hpp
 
 #include <string>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 
-#include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Result.hpp"
 #include "ecflow/node/Defs.hpp"
 
@@ -25,7 +24,7 @@ namespace ecf {
 ///
 /// Represents a path in the server's hierarchy
 ///
-/// A path object is always represents a valid path (even if it does not exist).
+/// A path object always represents a valid path (even if it does not exist).
 ///
 /// A path with 0 tokens represents the root of the hierarchy (represented by a slash, "/").
 /// A path with N tokens represents a path from the root to a node.
@@ -108,4 +107,4 @@ void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
 
 } // namespace ecf
 
-#endif // ecflow_base_Algorithms_hpp
+#endif // ecflow_node_NodePathAlgorithms_hpp

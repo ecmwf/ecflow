@@ -57,7 +57,6 @@ set(srcs
   # Base -- Headers
   base/src/ecflow/base/AbstractClientEnv.hpp
   base/src/ecflow/base/AbstractServer.hpp
-  base/src/ecflow/base/Algorithms.hpp
   base/src/ecflow/base/Authentication.hpp
   base/src/ecflow/base/AuthenticationDetails.hpp
   base/src/ecflow/base/Authorisation.hpp
@@ -361,6 +360,7 @@ set(srcs
   node/src/ecflow/node/Node.hpp
   node/src/ecflow/node/NodeContainer.hpp
   node/src/ecflow/node/NodeFwd.hpp
+  node/src/ecflow/node/NodePathAlgorithms.hpp
   node/src/ecflow/node/NodeState.hpp
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
