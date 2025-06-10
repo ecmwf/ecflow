@@ -8,17 +8,19 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <string>
+#include <vector>
+
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
-#include "ecflow/server/AuthorisationService.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
-#include "harness/MockServer.hpp"
 
-BOOST_AUTO_TEST_SUITE(U_Base)
+BOOST_AUTO_TEST_SUITE(U_Node)
 
 BOOST_AUTO_TEST_SUITE(T_Permissions)
 
@@ -69,7 +71,6 @@ BOOST_AUTO_TEST_CASE(can_do_permissions) {
     f->addVariable(Variable("PERMISSIONS", "u2:rx,u3:rw"));
     auto t = f->add_task("t1");
 
-    MockServer server(&d);
     d.server_state().add_or_update_server_variable("PERMISSIONS", "a:rwxos");
 
     AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();

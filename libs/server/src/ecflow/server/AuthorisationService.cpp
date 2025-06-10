@@ -11,19 +11,11 @@
 #include "ecflow/server/AuthorisationService.hpp"
 
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/Algorithms.hpp"
 #include "ecflow/core/Overload.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/permissions/ActivePermissions.hpp"
 
 namespace ecf {
-
-struct Rules
-{
-};
-
-struct Unrestricted
-{
-};
 
 struct AuthorisationService::Impl
 {
@@ -56,57 +48,7 @@ bool AuthorisationService::good() const {
 
 ActivePermissions AuthorisationService::permissions_at(const Defs& defs, const path_t& path) const {
     assert(good()); // It is up to the caller to check has been properly configured
-
-    ActivePermissions active;
-
-    std::visit(overload{[&active](const Unrestricted&) {
-                            // when no rules are loaded, we allow everything...
-                            // Dangerous, but backward compatible!
-                            active = ActivePermissions::make_empty();
-                        },
-                        [&defs, &active, &path](const Rules& rules) {
-                            struct Visitor
-                            {
-                                Visitor(ActivePermissions& collected) : collected_{collected} {}
-
-                                void handle(const Defs& defs) {
-                                    auto p = defs.server_state().permissions();
-
-                                    // At server level, we only care about the server permissions
-                                    collected_.bootstrap(p);
-                                }
-                                void handle(const Node& n) {
-                                    auto p = n.permissions();
-
-                                    if (auto s = dynamic_cast<const Suite*>(&n); s) {
-                                        // At node level, if the node is a Suite we bootstrap the node permissions
-                                        collected_.combine_supersede(p);
-                                    }
-                                    else {
-                                        // ... otherwise, we combine the node permissions
-                                        //  -- in practice, this combination only restricts node permissions;
-                                        //     for example, a user can't be allowed to read/write/execute a
-                                        //     specific node if he can't do it at a higher node level
-                                        collected_.combine_override(p);
-                                    }
-                                }
-
-                                void not_found() { /* do nothing */ }
-
-                            private:
-                                ActivePermissions& collected_;
-                            };
-
-                            auto p = Path::make(path).value();
-                            auto v = Visitor{active};
-
-                            ecf::visit(defs, p, v);
-                        }
-
-               },
-               impl_->permissions_);
-
-    return active;
+    return ecf::permissions_at(defs, path, impl_->permissions_);
 }
 
 bool AuthorisationService::allows(const Identity& identity, const Defs& defs, Allowed required) const {
