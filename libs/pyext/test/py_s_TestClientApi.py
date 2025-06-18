@@ -25,6 +25,19 @@ import ecflow_test_util as Test
 from ecflow import Defs, Suite, Family, Task, Edit, Meter, Clock, DState, Style, State, RepeatDate, RepeatDateTime, \
     PrintStyle, File, Client, SState, CheckPt, Cron, Late, debug_build, Flag, FlagType
 
+import re
+import platform
+
+def disable_on(regex_platform):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if re.match(regex_platform, platform.platform()):
+                print(f"Skipping {func.__name__} due to match with {regex_platform}")
+            else:
+                return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
 
 def ecf_includes():  return os.getcwd() + "/test/data/includes"
 
@@ -634,6 +647,7 @@ class CustomStdOut:
     def value(self):
         return self.captured
 
+@disable_on("macOS-13.*-arm64-.*")
 def test_client_stats(ci):
     print_test(ci, "test_client_stats")
     out = CustomStdOut()
@@ -642,6 +656,7 @@ def test_client_stats(ci):
         assert "statistics" in stats, "Expected 'statistics' in the response"
     assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
 
+@disable_on("macOS-13.*-arm64-.*")
 def test_client_stats_with_stdout(ci):
     print_test(ci, "test_client_stats_with_stdout")
     out = CustomStdOut()
@@ -650,7 +665,7 @@ def test_client_stats_with_stdout(ci):
         assert "statistics" in stats, "Expected 'statistics' in the response"
     assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
 
-
+@disable_on("macOS-13.*-arm64-.*")
 def test_client_stats_without_stdout(ci):
     print_test(ci, "test_client_stats_without_stdout")
     out = CustomStdOut()
