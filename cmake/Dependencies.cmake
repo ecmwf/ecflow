@@ -85,6 +85,10 @@ if (ENABLE_PYTHON)
 
   ecbuild_info( "Locating Python3" )
 
+  if (Python3_ROOT_DIR)
+    ecbuild_info( "Searching with Python3_ROOT_DIR  : ${Python3_ROOT_DIR}" )
+  endif()
+
   # The python must include the Development packages. As the headers in these packages is used by boost python.
   find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
@@ -92,6 +96,10 @@ if (ENABLE_PYTHON)
   ecbuild_info( " * Python3_FOUND             : ${Python3_FOUND}" )
   ecbuild_info( " * Python3_Interpreter_FOUND : ${Python3_Interpreter_FOUND}" )
   ecbuild_info( " * Python3_EXECUTABLE        : ${Python3_EXECUTABLE}" )
+  if (Python3_Interpreter_FOUND)
+    get_filename_component(Python3_EXECUTABLE_DIR "${Python3_EXECUTABLE}" DIRECTORY)
+    ecbuild_info( " * Python3_EXECUTABLE_DIR    : ${Python3_EXECUTABLE_DIR}" )
+  endif()
   ecbuild_info( " * Python3_STDLIB            : ${Python3_STDLIB} (Standard platform independent installation directory)" )
   ecbuild_info( " * Python3_STDARCH           : ${Python3_STDARCH} (Standard platform dependent installation directory)" )
   ecbuild_info( " * Python3_Development_FOUND : ${Python3_Development_FOUND}" )
@@ -104,9 +112,11 @@ if (ENABLE_PYTHON)
   ecbuild_info( " * Python3_VERSION_PATCH     : ${Python3_VERSION_PATCH}" )
 
   # Set (deprecated) FindPython variables
-  # These need to be available, as they are used by `ecbuild_add_test(... TYPE PYTHON ...)`
+  # These are used by `ecbuild_add_test(... TYPE PYTHON ...)`.
   set(PYTHONINTERP_FOUND "${Python3_Interpreter_FOUND}")
   set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}")
+  set(Python_Interpreter_FOUND "${Python3_Interpreter_FOUND}")
+  set(Python_EXECUTABLE "${Python3_EXECUTABLE}")
 
   ecbuild_info( "Found Python3 at ${Python3_INCLUDE_DIRS}" )
 
