@@ -10,10 +10,13 @@
 
 #include "ecflow/server/HttpServer.hpp"
 
+#include <httplib.h>
+
 #include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/Identification.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
+#include "ecflow/core/Base64.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/ecflow_version.h"
 #include "ecflow/server/ServerEnvironment.hpp"
@@ -64,6 +67,11 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
     // 1) Retrieve inbound_request from request body
     ecf::restore_from_string(request.body(), inbound_request);
 
+    for (auto& field : request) {
+        LOG_DEBUG("HttpServer::handle_request",
+                  "Request header field: " << field.name_string() << " = " << field.value());
+    }
+
     {
         ecf::Identity identity = ecf::Identity::make_none();
 
@@ -95,7 +103,31 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
                 return field.name_string() == "Authorization";
             });
             if (found != std::end(request)) {
-                identity_secure = true;
+
+                std::cout << "Found Authorization: raw: " << found->value() << std::endl;
+                auto header = std::string{found->value()};
+
+                auto space_separator = header.find(' ');
+                if (space_separator == std::string::npos) {
+                    LOG_ERROR("HttpServer::handle_request", "Malformed Authorization header");
+                    response = bad_request("Malformed Authorization header");
+                    return;
+                }
+                else {
+                    auto tag   = header.substr(0, space_separator);
+                    auto value = header.substr(space_separator + 1, std::string::npos);
+                    if (tag == "Basic") {
+                        identity_secure = true;
+                        auto decoded    = ecf::decode_base64(value);
+                        std::cout << "Found Authorization: decoded:" << decoded << std::endl;
+                        auto colon_separator = decoded.find(':');
+                        username             = decoded.substr(0, colon_separator);
+                        password             = decoded.substr(colon_separator + 1, std::string::npos);
+                    }
+                    else {
+                        // Assume Bearer token, which we do not handle here. A reverse proxy should handle this!
+                    }
+                }
             }
         }
 
@@ -103,9 +135,15 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
             LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (Authorisation)");
             identity = ecf::Identity::make_secure_user(username);
         }
-        else if (identity_headers) {
-            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (X-Auth-Username)");
+        else if (!identity_secure && identity_headers) {
+            LOG_DEBUG("HttpServer::handle_request",
+                      "Identity extracted from HTTP(s) request header (X-Auth-Username/X-Auth-Password)");
             identity = ecf::Identity::make_user(username, password);
+        }
+        else if (identity_secure && !identity_headers) {
+            LOG_DEBUG("HttpServer::handle_request",
+                      "Identity extracted from HTTP(s) request header (Authorization: Basic)");
+            identity = ecf::Identity::make_secure_user(username);
         }
         else {
             LOG_DEBUG("HttpServer::handle_request", "Identity extracted from inbound Command");

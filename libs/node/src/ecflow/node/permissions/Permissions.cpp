@@ -90,9 +90,15 @@ Permissions Permissions::combine_override(const Permissions& active, const Permi
     // `current` is the new permissions
     // `previous` is the previous permissions
     //
-    // The overriding rules are to update previous permissions, by restricting them based on the new permissions.
+    // The overriding rules are to update previous permissions by restricting them based on the new permissions.
     // Sticky permissions are kept as is, while non-sticky permissions are overridden by the current permissions.
     //
+
+    if (current.is_empty()) {
+        // When there are no permissions to override (i.e. the current permissions are empty), the active permissions
+        // are kept as is.
+        return active;
+    }
 
     std::vector<Permission> result;
 
