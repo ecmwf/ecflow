@@ -37,6 +37,7 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
                     unsigned int client_modify_change_no,
                     AbstractServer* as) {
     news_ = ServerReply::NO_NEWS;
+    /// This method assumes that all users see the same content !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // =====================================================================================
     // The code to determine changes here must also relate to SSyncCmd
