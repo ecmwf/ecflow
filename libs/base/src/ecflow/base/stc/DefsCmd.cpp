@@ -25,11 +25,11 @@ using namespace boost;
 //=====================================================================================
 // The defs command returns the full definition back to the client
 
-DefsCmd::DefsCmd(AbstractServer* as, bool save_edit_history) {
-    init(as, save_edit_history); // save edit history
+DefsCmd::DefsCmd(const ecf::Identity& identity, AbstractServer* as, bool save_edit_history){
+    init(identity, as, save_edit_history); // save edit history
 }
 
-void DefsCmd::init(AbstractServer* as, bool save_edit_history) {
+void DefsCmd::init(const ecf::Identity& identity, AbstractServer* as, bool save_edit_history) {
     /// Return the current value of the state change no. So the that
     /// the next call to get the SSYncCmd , we need only return what's changed
     Defs* server_defs = as->defs().get();
@@ -39,7 +39,7 @@ void DefsCmd::init(AbstractServer* as, bool save_edit_history) {
 
     // The CACHE is only updated if state/modify numbers change, hence does not take into account suite CLOCK
     // However DefsCmd should always return the most up to date server contents.
-    DefsCache::update_cache(server_defs);
+    DefsCache::update_cache(server_defs, identity);
 }
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const {

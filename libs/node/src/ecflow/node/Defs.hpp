@@ -44,6 +44,7 @@ class access;
 namespace ecf {
 class NodeTreeVisitor;
 class CalendarUpdateParams;
+struct Context;
 } // namespace ecf
 
 class Defs {
@@ -286,6 +287,7 @@ public:
      * @param st the print style to use for writing the defs
      */
     void write_to_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
+    void write_to_string(std::string& os, ecf::Context ctx) const;
 
     /**
      * @brief Write the defs to a file at the given path.

@@ -1291,6 +1291,11 @@ void Defs::cereal_restore_from_checkpt(const std::string& the_fileName) {
 }
 
 void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
+    auto ctx = ecf::Context::make_for(p_style);
+    write_to_string(os, ctx);
+}
+
+void Defs::write_to_string(std::string& os, ecf::Context ctx) const {
     // Set up the output, pre-allocating space based on previous runs (if available)
     os.clear();
     if (print_cache_ > 0) {
@@ -1300,7 +1305,6 @@ void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
         os.reserve(4096);
     }
 
-    auto ctx = ecf::Context::make_for(p_style);
     ecf::write_t(os, *this, ctx);
 
     // Store the size of the output, for future use
