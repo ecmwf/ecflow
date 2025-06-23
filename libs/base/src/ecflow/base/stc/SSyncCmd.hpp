@@ -13,6 +13,7 @@
 
 #include "ecflow/base/stc/DefsCache.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/node/DefsDelta.hpp"
 
 class AbstractServer;
@@ -40,6 +41,7 @@ public:
     SSyncCmd(unsigned int client_handle, // a reference to a set of suites used by client
              unsigned int client_state_change_no,
              unsigned int client_modify_change_no,
+             ecf::Identity identity,
              AbstractServer* as);
 
     SSyncCmd() : ServerToClientCmd(), incremental_changes_(0) {}
@@ -62,13 +64,14 @@ private:
               unsigned int client_modify_change_no,
               bool full_sync,
               bool sync_suite_clock,
+              ecf::Identity identity,
               AbstractServer* as);
 
     /// For use when doing a full sync
     void init(unsigned int client_handle, AbstractServer* as);
 
     void reset_data_members(unsigned int client_state_change_no, bool sync_suite_clock);
-    void full_sync(unsigned int client_handle, AbstractServer* as);
+    void full_sync(unsigned int client_handle, ecf::Identity identity, AbstractServer* as);
     void cleanup() override; /// run in the server, after command sent to client
 
 private:

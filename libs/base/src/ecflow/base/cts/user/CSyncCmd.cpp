@@ -154,21 +154,23 @@ STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const {
         }
         case CSyncCmd::SYNC: {
             as->update_stats().sync_++;
-            return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as);
+            return PreAllocatedReply::sync_cmd(
+                client_handle_, client_state_change_no_, client_modify_change_no_, this->identity(), as);
         }
         case CSyncCmd::SYNC_FULL: {
             as->update_stats().sync_full_++;
-            return PreAllocatedReply::sync_full_cmd(client_handle_, as);
+            return PreAllocatedReply::sync_full_cmd(client_handle_, this->identity(), as);
         }
         case CSyncCmd::SYNC_CLOCK: {
             as->update_stats().sync_clock_++;
             return PreAllocatedReply::sync_clock_cmd(
-                client_handle_, client_state_change_no_, client_modify_change_no_, as);
+                client_handle_, client_state_change_no_, client_modify_change_no_, this->identity(), as);
         }
     }
 
     // should never get here:
-    return PreAllocatedReply::sync_cmd(client_handle_, client_state_change_no_, client_modify_change_no_, as);
+    return PreAllocatedReply::sync_cmd(
+        client_handle_, client_state_change_no_, client_modify_change_no_, this->identity(), as);
 }
 
 void CSyncCmd::addOption(boost::program_options::options_description& desc) const {
