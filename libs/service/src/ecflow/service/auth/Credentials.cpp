@@ -51,7 +51,7 @@ std::optional<Credentials::KeyCredentials> Credentials::key() const {
 
 namespace {
 
-Credentials load_from_stream(std::istream& input) {
+Credentials::expected_t load_from_stream(std::istream& input) {
     using json = nlohmann::ordered_json;
 
     json content;
@@ -59,7 +59,7 @@ Credentials load_from_stream(std::istream& input) {
         content = json::parse(input);
     }
     catch (const json::parse_error& e) {
-        throw std::runtime_error(Message("Credentials: Unable to parse content, due to ", e.what()).str());
+        return Credentials::Error(Message("Credentials: Unable to parse content, due to ", e.what()).str());
     }
 
     Credentials credentials;
@@ -68,12 +68,12 @@ Credentials load_from_stream(std::istream& input) {
             credentials.add(field.key(), field.value());
         }
         catch (const json::type_error& e) {
-            throw std::runtime_error(Message("Credentials: Unable to retrieve content, due to ", e.what()).str());
+            return Credentials::Error(Message("Credentials: Unable to retrieve content, due to ", e.what()).str());
         }
     }
 
     if (!credentials.user() && !credentials.key()) {
-        throw std::runtime_error("Credentials: Invalid content found (neither user nor key credentials provided)");
+        return Credentials::Error("Credentials: Invalid content found (neither user nor key credentials provided)");
     }
 
     return credentials;
@@ -81,12 +81,12 @@ Credentials load_from_stream(std::istream& input) {
 
 } // namespace
 
-Credentials Credentials::load(const std::string& filepath) {
+Credentials::expected_t Credentials::load(const std::string& filepath) {
     std::ifstream stream(filepath);
     return load_from_stream(stream);
 }
 
-Credentials Credentials::load_content(const std::string& content) {
+Credentials::expected_t Credentials::load_content(const std::string& content) {
     std::istringstream stream(content);
     return load_from_stream(stream);
 }
