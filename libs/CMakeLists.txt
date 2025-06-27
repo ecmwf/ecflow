@@ -233,6 +233,7 @@ set(srcs
   ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_version.h
   ${CMAKE_BINARY_DIR}/generated/src/ecflow/core/ecflow_source_build_dir.h
   core/src/ecflow/core/AssertTimer.hpp
+  core/src/ecflow/core/Base64.hpp
   core/src/ecflow/core/Calendar.hpp
   core/src/ecflow/core/CalendarUpdateParams.hpp
   core/src/ecflow/core/CheckPt.hpp
@@ -282,6 +283,7 @@ set(srcs
   core/src/ecflow/core/exceptions/Exceptions.hpp
   # Core -- Sources
   core/src/ecflow/core/AssertTimer.cpp
+  core/src/ecflow/core/Base64.cpp
   core/src/ecflow/core/Calendar.cpp
   core/src/ecflow/core/Child.cpp
   core/src/ecflow/core/Chrono.cpp
