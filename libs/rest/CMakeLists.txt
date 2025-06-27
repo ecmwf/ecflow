@@ -25,7 +25,6 @@ set(srcs
   src/ecflow/http/Api.hpp
   src/ecflow/http/ApiV1.hpp
   src/ecflow/http/ApiV1Impl.hpp
-  src/ecflow/http/Base64.hpp
   src/ecflow/http/BasicAuth.hpp
   src/ecflow/http/Client.hpp
   src/ecflow/http/DefsStorage.hpp
