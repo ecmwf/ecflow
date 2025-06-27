@@ -12,8 +12,10 @@
 #include <boost/python/raw_function.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
+#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
@@ -31,8 +33,13 @@ bool task_len(task_ptr self) {
 task_ptr task_enter(task_ptr self) {
     return self;
 }
+
 bool task_exit(task_ptr self, const bp::object& type, const bp::object& value, const bp::object& traceback) {
     return false;
+}
+
+std::string task_to_string(task_ptr self) {
+    return ecf::as_string(*self, PrintStyleHolder::getStyle());
 }
 
 task_ptr task_init(const std::string& name, bp::list the_list, bp::dict kw) {
@@ -41,6 +48,10 @@ task_ptr task_init(const std::string& name, bp::list the_list, bp::dict kw) {
     (void)NodeUtil::add_variable_dict(node, kw);
     (void)NodeUtil::node_iadd(node, the_list);
     return node;
+}
+
+std::string alias_to_string(alias_ptr self) {
+    return ecf::as_string(*self, PrintStyleHolder::getStyle());
 }
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -77,7 +88,7 @@ void export_Task() {
         .def(self == self)                 // __eq__
         .def("__enter__", &task_enter)     // allow with statement, hence indentation support
         .def("__exit__", &task_exit)       // allow with statement, hence indentation support
-        .def("__str__", &Task::to_string)  // __str__
+        .def("__str__", &task_to_string)   // __str__
         .def("__copy__", copyObject<Task>) // __copy__ uses copy constructor
         .def("__len__", &task_len)         // Implement sized protocol for immediate children
         .def("__iter__", bp::range(&Task::alias_begin, &Task::alias_end)) // implement iter protocol
@@ -89,7 +100,7 @@ void export_Task() {
 
     class_<Alias, bases<Submittable>, alias_ptr>("Alias", DefsDoc::alias_doc(), no_init)
         .def(self == self)                  // __eq__
-        .def("__str__", &Alias::to_string)  // __str__
+        .def("__str__", &alias_to_string)   // __str__
         .def("__copy__", copyObject<Alias>) // __copy__ uses copy constructor
         ;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER

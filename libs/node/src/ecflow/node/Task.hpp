@@ -27,7 +27,6 @@ public:
     static task_ptr create(const std::string& name, bool check = true);
     static task_ptr create_me(const std::string& name); // python api, to pick correct init function
 
-    void print(std::string&) const override;
     bool operator==(const Task& rhs) const;
 
     /// Add an alias. The .usr is populated with contents of user_file_contents
@@ -117,6 +116,8 @@ public:
 private:
     void copy(const Task&);
     size_t child_position(const Node*) const override;
+
+public:
     void write_state(std::string&, bool&) const override;
 
 private:
@@ -146,7 +147,5 @@ private:
     unsigned int alias_no_{0};
     std::vector<alias_ptr> aliases_;
 };
-
-std::ostream& operator<<(std::ostream& os, const Task&);
 
 #endif /* ecflow_node_Task_HPP */

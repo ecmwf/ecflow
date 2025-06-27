@@ -95,7 +95,6 @@ public:
     virtual void changeValue(long newValue)              = 0; // can throw std::runtime_error
     virtual void set_value(long new_value_or_index)      = 0; // will NOT throw, allows any value
     std::string toString() const;
-    virtual void write(std::string&) const = 0;
     virtual std::string dump() const       = 0;
 
     unsigned int state_change_no() const { return state_change_no_; }
@@ -165,8 +164,6 @@ public:
     void change(const std::string& newValue) override; // can throw std::runtime_error
     void changeValue(long newValue) override;          // can throw std::runtime_error
     void set_value(long newValue) override;            // will NOT throw, allows any value
-
-    void write(std::string&) const override;
 
     std::string dump() const override;
     bool isDate() const override { return true; }
@@ -250,8 +247,6 @@ public:
     void change(const std::string& newValue) override; // can throw std::runtime_error
     void changeValue(long newValue) override;          // can throw std::runtime_error
     void set_value(long newValue) override;            // will NOT throw, allows any value
-
-    void write(std::string&) const override;
 
     std::string dump() const override;
     bool isDateTime() const override { return true; }
@@ -346,7 +341,6 @@ public:
     void change(const std::string& newValue) override; // can throw std::runtime_error
     void changeValue(long newValue) override;          // can throw std::runtime_error
     void set_value(long newValue) override;            // will NOT throw, allows any value
-    void write(std::string&) const override;
     std::string dump() const override;
     bool isDateList() const override { return true; }
     int indexNum() const { return static_cast<int>(list_.size()); }
@@ -406,7 +400,6 @@ public:
     void change(const std::string& newValue) override; // can throw std::runtime_error
     void changeValue(long newValue) override;          // can throw std::runtime_error
     void set_value(long newValue) override;            // will NOT throw, allows any value
-    void write(std::string&) const override;
     std::string dump() const override;
     bool isInteger() const override { return true; }
 
@@ -468,7 +461,6 @@ public:
     void change(const std::string& newValue) override; // can throw std::runtime_error
     void changeValue(long newValue) override;          // can throw std::runtime_error
     void set_value(long newValue) override;            // will NOT throw, allows any value
-    void write(std::string&) const override;
     std::string dump() const override;
     bool isEnumerated() const override { return true; }
     int indexNum() const { return static_cast<int>(theEnums_.size()); }
@@ -522,7 +514,6 @@ public:
     void change(const std::string& newValue) override; // can throw std::runtime_error
     void changeValue(long newValue) override;          // can throw std::runtime_error
     void set_value(long newValue) override;            // will NOT throw, allows any value
-    void write(std::string&) const override;
     std::string dump() const override;
     bool isString() const override { return true; }
     int indexNum() const { return static_cast<int>(theStrings_.size()); }
@@ -595,7 +586,6 @@ public:
     void change(const std::string& /*newValue*/) override { /* do nothing */ }
     void changeValue(long /*newValue*/) override { /* do nothing */ }
     void set_value(long /*newValue*/) override { /* do nothing */ }
-    void write(std::string&) const override;
     std::string dump() const override;
     bool isDay() const override { return true; }
 
@@ -668,7 +658,6 @@ public:
     long last_valid_value_minus(int val) const { return (type_) ? type_->last_valid_value_minus(val) : -val; }
     long last_valid_value_plus(int val) const { return (type_) ? type_->last_valid_value_plus(val) : val; }
 
-    void print(std::string& os) const;
     bool valid() const { return (type_) ? type_->valid() : false; }
     void setToLastValue() {
         if (type_)
@@ -712,17 +701,12 @@ public:
     bool is_repeat_day() const { return (type_) ? type_->is_repeat_day() : false; }
 
     /// Expose base for the GUI only, use with caution
-    RepeatBase* repeatBase() const { return type_.get(); }
+    RepeatBase* repeatBase() { return type_.get(); }
+    const RepeatBase* repeatBase() const { return type_.get(); }
 
     template <typename T>
     const T& as() const {
         return dynamic_cast<const T&>(*repeatBase());
-    }
-
-private:
-    void write(std::string& ret) const {
-        if (type_)
-            type_->write(ret);
     }
 
 private:

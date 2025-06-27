@@ -16,6 +16,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
@@ -63,15 +64,27 @@ bool suite_container(suite_ptr self, const std::string& name) {
 }
 
 // Context management, Only used to provide indentation
+
+std::string suite_to_string(suite_ptr self) {
+    return ecf::as_string(*self, PrintStyleHolder::getStyle());
+}
+
 suite_ptr suite_enter(suite_ptr self) {
     return self;
 }
+
 bool suite_exit(suite_ptr self, const bp::object& type, const bp::object& value, const bp::object& traceback) {
     return false;
 }
+
+std::string family_to_string(family_ptr self) {
+    return ecf::as_string(*self, PrintStyleHolder::getStyle());
+}
+
 family_ptr family_enter(family_ptr self) {
     return self;
 }
+
 bool family_exit(family_ptr self, const bp::object& type, const bp::object& value, const bp::object& traceback) {
     return false;
 }
@@ -120,7 +133,7 @@ void export_SuiteAndFamily() {
         .def("__init__", make_constructor(&family_init), DefsDoc::family_doc())
         .def("__init__", make_constructor(&Family::create_me), DefsDoc::family_doc())
         .def(self == self)                      // __eq__
-        .def("__str__", &Family::to_string)     // __str__
+        .def("__str__", &family_to_string)      // __str__
         .def("__copy__", copyObject<Family>)    // __copy__ uses copy constructor
         .def("__enter__", &family_enter)        // allow with statement, hence indentation support
         .def("__exit__", &family_exit)          // allow with statement, hence indentation support
@@ -136,7 +149,7 @@ void export_SuiteAndFamily() {
         .def("__init__", make_constructor(&suite_init), DefsDoc::suite_doc())
         .def("__init__", make_constructor(&Suite::create_me), DefsDoc::suite_doc())
         .def(self == self)                     // __eq__
-        .def("__str__", &Suite::to_string)     // __str__
+        .def("__str__", &suite_to_string)      // __str__
         .def("__copy__", copyObject<Suite>)    // __copy__ uses copy constructor
         .def("__enter__", &suite_enter)        // allow with statement, hence indentation support
         .def("__exit__", &suite_exit)          // allow with statement, hence indentation support

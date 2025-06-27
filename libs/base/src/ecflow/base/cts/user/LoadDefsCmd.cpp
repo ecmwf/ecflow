@@ -19,6 +19,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -28,7 +29,7 @@ namespace po = boost::program_options;
 LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force) : force_(force) {
     if (defs) {
         defs->handle_migration();
-        defs->save_as_string(defs_, PrintStyle::NET);
+        defs->write_to_string(defs_, PrintStyle::NET);
     }
 }
 
@@ -69,15 +70,15 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
         defs->server_state().add_or_update_user_variables(client_env); // use in test environment
 
         if (print) {
-            PrintStyle print_style(PrintStyle::NET); // should be same as MIGRATE, only differ on reload
-            cout << defs;
+            cout << ecf::as_string(*defs, PrintStyle::NET); // should be same as MIGRATE, only differ on reload
         }
         if (stats) {
             cout << defs->stats();
         }
 
-        if (!check_only && !stats && !print)
-            defs->save_as_string(defs_, PrintStyle::NET); // NET only takes affect on restore
+        if (!check_only && !stats && !print) {
+            defs->write_to_string(defs_, PrintStyle::NET); // NET only takes effect on restore
+        }
 
         // Output any warning to standard output
         cout << warningMsg;

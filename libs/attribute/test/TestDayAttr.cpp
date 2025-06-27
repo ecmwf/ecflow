@@ -17,6 +17,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -101,9 +102,8 @@ BOOST_AUTO_TEST_CASE(test_day_attr_constructor) {
 
 static DayAttr print_and_parse_attr(DayAttr& day) {
 
-    PrintStyle style(PrintStyle::MIGRATE);
     std::string output;
-    day.print(output);
+    ecf::write_t(output, day, PrintStyle::MIGRATE);
     output.erase(output.begin() + output.size() - 1); // remove trailing newline
 
     std::vector<std::string> tokens;

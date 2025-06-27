@@ -16,7 +16,6 @@
 #include <boost/tokenizer.hpp>
 
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/ZombieCtrlAction.hpp"
@@ -81,13 +80,6 @@ bool ZombieAttr::operator==(const ZombieAttr& rhs) const {
     if (zombie_lifetime_ != rhs.zombie_lifetime_)
         return false;
     return true;
-}
-
-void ZombieAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    os += "\n";
 }
 
 std::string ZombieAttr::toString() const {

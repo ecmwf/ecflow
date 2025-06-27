@@ -27,6 +27,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -66,7 +67,7 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
     Ecf::set_debug_equality(true); // only has affect in DEBUG build
     BOOST_CHECK_MESSAGE(*server_defs == *server_reply.client_defs(),
                         "Test:" << test_name << ": Starting point client and server defs should be the same");
-    Ecf::set_debug_equality(false); // only has affect in DEBUG build
+    Ecf::set_debug_equality(false); // only has effect in DEBUG build
 
     // Get change number before any changes
     unsigned int client_state_change_no  = Ecf::state_change_no();
@@ -83,8 +84,8 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
                               "Test:" << test_name << ": Invariants failed: " << error_msg);
         BOOST_REQUIRE_MESSAGE(!(*server_reply.client_defs() == *server_defs),
                               "Test:" << test_name << ": Expected client and server defs to differ\n"
-                                      << *server_reply.client_defs() << "\n"
-                                      << "server defs   = " << *server_defs);
+                                      << ecf::as_string(*server_reply.client_defs(), PrintStyle::DEFS) << "\n"
+                                      << "server defs   = " << ecf::as_string(*server_defs, PrintStyle::DEFS));
         Ecf::set_server(false);
     }
 

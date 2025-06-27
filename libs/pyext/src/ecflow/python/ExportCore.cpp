@@ -109,9 +109,9 @@ void export_Core() {
                                            "   print(defs)                     # show the node state\n"
                                            "   PrintStyle.set_style(old_style) # reset previous style\n",
                                            no_init)
-        .def("get_style", &PrintStyle::getStyle, "Returns the style, static method")
+        .def("get_style", &PrintStyleHolder::getStyle, "Returns the style, static method")
         .staticmethod("get_style")
-        .def("set_style", &PrintStyle::setStyle, "Set the style, static method")
+        .def("set_style", &PrintStyleHolder::setStyle, "Set the style, static method")
         .staticmethod("set_style");
 
     enum_<CheckPt::Mode>(

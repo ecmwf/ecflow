@@ -19,6 +19,7 @@
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -244,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
         return;
     }
 
-    PrintStyle style(PrintStyle::STATE);
+    auto style       = PrintStyle::STATE;
     std::string port = SCPort::next();
 
     MyDefsFixture theDefsFixture; // make sure generated server variable use this port.
@@ -292,15 +293,15 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
     defs_to_be_check_pointed->server_state().set_state(SState::HALTED);
     defs_to_be_check_pointed->flag().set(ecf::Flag::MESSAGE);
 
-    // Specifically ignore server variables, as the port numbers are different( and therefore checkpt,log, etc will not
+    // Specifically, ignore server variables, as the port numbers are different( and therefore checkpt,log, etc will not
     // match)
     DebugEquality debug_equality; // only as affect in DEBUG build
     DebugEquality::set_ignore_server_variables(true);
 
     BOOST_CHECK_MESSAGE(*theClient.defs() == *defs_to_be_check_pointed,
                         "expected defs to be the same.\nServer defs:\n"
-                            << *theClient.defs() << "\nExpected defs:\n"
-                            << *defs_to_be_check_pointed);
+                            << ecf::as_string(*theClient.defs(), style) << "\nExpected defs:\n"
+                            << ecf::as_string(*defs_to_be_check_pointed, style));
 }
 
 BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {

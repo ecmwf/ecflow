@@ -16,9 +16,7 @@
 
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -60,29 +58,6 @@ alias_ptr Alias::create(const std::string& name, bool check) {
 
 bool Alias::operator==(const Alias& rhs) const {
     return Submittable::operator==(rhs);
-}
-
-void Alias::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    os += "alias ";
-    os += name();
-    if (!PrintStyle::defsStyle()) {
-        bool added_comment_char = false;
-        write_state(os, added_comment_char);
-    }
-    os += "\n";
-
-    Node::print(os);
-
-    // Generated variable are not persisted since they are created on demand
-    // There *NO* point in printing them they will always be empty
-}
-std::ostream& operator<<(std::ostream& os, const Alias& d) {
-    std::string s;
-    d.print(s);
-    os << s;
-    return os;
 }
 
 void Alias::begin() {

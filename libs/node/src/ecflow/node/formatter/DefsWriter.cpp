@@ -8,17 +8,4 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/core/Indentor.hpp"
-
-#include <ostream>
-
-namespace ecf {
-
-int Indentor::index_   = 0;
-bool Indentor::indent_ = true;
-
-void Indentor::indent(std::string& os, int char_spaces) {
-    os += (indent_ ? std::string(index_ * char_spaces, ' ') : "");
-}
-
-} // namespace ecf
+#include "ecflow/node/formatter/DefsWriter.hpp"

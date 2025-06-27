@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_compare_cereal_and_defs_checkpt_file) {
     // Cannot save these tests since server variable use HOST which is different for each platform
     MyDefsFixture fixture;
     doSave(file_name + "cereal.checkpt", fixture.fixtureDefsFile());
-    fixture.fixtureDefsFile().save_as_checkpt(file_name + "defs.checkpt");
+    fixture.fixtureDefsFile().write_to_checkpt_file(file_name + "defs.checkpt");
 
     DebugEquality debug_equality; // only as affect in DEBUG build
     do_restore<Defs>(file_name + "cereal.checkpt", fixture.fixtureDefsFile());

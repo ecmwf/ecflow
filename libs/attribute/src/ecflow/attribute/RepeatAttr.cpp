@@ -19,11 +19,10 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -88,15 +87,6 @@ const std::string& Repeat::name() const {
     return (type_.get()) ? type_->name() : Str::EMPTY();
 }
 
-void Repeat::print(std::string& os) const {
-    if (type_) {
-        Indentor in;
-        Indentor::indent(os);
-        write(os);
-        os += "\n";
-    }
-}
-
 // =========================================================================
 RepeatBase::~RepeatBase() = default;
 
@@ -119,9 +109,7 @@ void RepeatBase::update_repeat_genvar() const {
 }
 
 std::string RepeatBase::toString() const {
-    std::string ret;
-    write(ret);
-    return ret;
+    return ecf::as_string(*this, PrintStyle::DEFS);
 }
 
 // =============================================================
@@ -314,22 +302,6 @@ long RepeatDate::last_valid_value_plus(int val) const {
 
 void RepeatDate::reset() {
     set_value(start_);
-}
-
-void RepeatDate::write(std::string& ret) const {
-    ret += "repeat date ";
-    ret += name_;
-    ret += " ";
-    ret += ecf::convert_to<std::string>(start_);
-    ret += " ";
-    ret += ecf::convert_to<std::string>(end_);
-    ret += " ";
-    ret += ecf::convert_to<std::string>(delta_);
-
-    if (!PrintStyle::defsStyle() && (value_ != start_)) {
-        ret += " # ";
-        ret += ecf::convert_to<std::string>(value_);
-    }
 }
 
 std::string RepeatDate::dump() const {
@@ -653,22 +625,6 @@ void RepeatDateTime::reset() {
     set_value(ecf::coerce_from_instant(start_));
 }
 
-void RepeatDateTime::write(std::string& ret) const {
-    ret += "repeat datetime ";
-    ret += name_;
-    ret += " ";
-    ret += boost::lexical_cast<std::string>(start_);
-    ret += " ";
-    ret += boost::lexical_cast<std::string>(end_);
-    ret += " ";
-    ret += boost::lexical_cast<std::string>(delta_);
-
-    if (!PrintStyle::defsStyle() && (value_ != start_)) {
-        ret += " # ";
-        ret += boost::lexical_cast<std::string>(value_);
-    }
-}
-
 std::string RepeatDateTime::dump() const {
     std::stringstream ss;
     ss << toString() << " value(" << value_ << ")";
@@ -929,20 +885,6 @@ bool RepeatDateList::compare(RepeatBase* rb) const {
     if (!rhs)
         return false;
     return operator==(*rhs);
-}
-
-void RepeatDateList::write(std::string& ret) const {
-    ret += "repeat datelist ";
-    ret += name_;
-    for (int date : list_) {
-        ret += " \"";
-        ret += ecf::convert_to<std::string>(date);
-        ret += "\"";
-    }
-    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
-        ret += " # ";
-        ret += ecf::convert_to<std::string>(currentIndex_);
-    }
 }
 
 std::string RepeatDateList::dump() const {
@@ -1224,24 +1166,6 @@ void RepeatInteger::setToLastValue() {
     incr_state_change_no();
 }
 
-void RepeatInteger::write(std::string& ret) const {
-    ret += "repeat integer ";
-    ret += name_;
-    ret += " ";
-    ret += ecf::convert_to<std::string>(start_);
-    ret += " ";
-    ret += ecf::convert_to<std::string>(end_);
-    if (delta_ != 1) {
-        ret += " ";
-        ret += ecf::convert_to<std::string>(delta_);
-    }
-
-    if (!PrintStyle::defsStyle() && (value_ != start_)) {
-        ret += " # ";
-        ret += ecf::convert_to<std::string>(value_);
-    }
-}
-
 std::string RepeatInteger::dump() const {
     std::stringstream ss;
     ss << toString() << " value(" << value_ << ")";
@@ -1364,20 +1288,6 @@ bool RepeatEnumerated::compare(RepeatBase* rb) const {
     if (!rhs)
         return false;
     return operator==(*rhs);
-}
-
-void RepeatEnumerated::write(std::string& ret) const {
-    ret += "repeat enumerated ";
-    ret += name_;
-    for (const string& s : theEnums_) {
-        ret += " \"";
-        ret += s;
-        ret += "\"";
-    }
-    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
-        ret += " # ";
-        ret += ecf::convert_to<std::string>(currentIndex_);
-    }
 }
 
 std::string RepeatEnumerated::dump() const {
@@ -1592,20 +1502,6 @@ bool RepeatString::compare(RepeatBase* rb) const {
     return operator==(*rhs);
 }
 
-void RepeatString::write(std::string& ret) const {
-    ret += "repeat string ";
-    ret += name_;
-    for (const string& s : theStrings_) {
-        ret += " \"";
-        ret += s;
-        ret += "\"";
-    }
-    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
-        ret += " # ";
-        ret += ecf::convert_to<std::string>(value());
-    }
-}
-
 std::string RepeatString::dump() const {
     std::stringstream ss;
     ss << toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")";
@@ -1745,11 +1641,6 @@ bool RepeatDay::compare(RepeatBase* rb) const {
     if (!rhs)
         return false;
     return operator==(*rhs);
-}
-
-void RepeatDay::write(std::string& ret) const {
-    ret += "repeat day ";
-    ret += ecf::convert_to<std::string>(step_);
 }
 
 std::string RepeatDay::dump() const {

@@ -12,7 +12,6 @@
 
 #include <sstream>
 
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
@@ -26,13 +25,6 @@
 using namespace std;
 
 namespace ecf {
-
-void AutoRestoreAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    os += "\n";
-}
 
 std::string AutoRestoreAttr::toString() const {
     std::string ret;

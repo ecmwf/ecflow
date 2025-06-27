@@ -252,7 +252,6 @@ set(srcs
   core/src/ecflow/core/File_r.hpp
   core/src/ecflow/core/Filesystem.hpp
   core/src/ecflow/core/Host.hpp
-  core/src/ecflow/core/Indentor.hpp
   core/src/ecflow/core/Log.hpp
   core/src/ecflow/core/LogVerification.hpp
   core/src/ecflow/core/Message.hpp
@@ -296,7 +295,6 @@ set(srcs
   core/src/ecflow/core/File_r.cpp
   core/src/ecflow/core/Filesystem.cpp
   core/src/ecflow/core/Host.cpp
-  core/src/ecflow/core/Indentor.cpp
   core/src/ecflow/core/Log.cpp
   core/src/ecflow/core/LogVerification.cpp
   core/src/ecflow/core/NOrder.cpp
@@ -366,6 +364,7 @@ set(srcs
   node/src/ecflow/node/TaskScriptGenerator.hpp
   node/src/ecflow/node/move_peer.hpp
   node/src/ecflow/node/formatter/AvisoFormatter.hpp
+  node/src/ecflow/node/formatter/DefsWriter.hpp
   node/src/ecflow/node/formatter/Format.hpp
   node/src/ecflow/node/formatter/Formatter.hpp
   node/src/ecflow/node/formatter/MirrorFormatter.hpp
@@ -447,6 +446,7 @@ set(srcs
   node/src/ecflow/node/System.cpp
   node/src/ecflow/node/Task.cpp
   node/src/ecflow/node/TaskScriptGenerator.cpp
+  node/src/ecflow/node/formatter/DefsWriter.cpp
   node/src/ecflow/node/parser/AutoArchiveParser.cpp
   node/src/ecflow/node/parser/AutoCancelParser.cpp
   node/src/ecflow/node/parser/AutoRestoreParser.cpp

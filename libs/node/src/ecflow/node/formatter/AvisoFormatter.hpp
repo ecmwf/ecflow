@@ -22,8 +22,6 @@ struct Formatter<AvisoAttr, Stream>
     static void format(const std::vector<AvisoAttr>& items, Stream& output) { format_vector_as_defs(items, output); }
 
     static void format(const AvisoAttr& item, Stream& output) {
-        ecf::Indentor in;
-        ecf::Indentor::indent(output);
         output << "aviso";
         output << " --name ";
         output << item.name();
@@ -51,7 +49,6 @@ struct Formatter<AvisoAttr, Stream>
             output << " --reason ";
             output << item.reason();
         }
-        output << '\n';
     }
 };
 

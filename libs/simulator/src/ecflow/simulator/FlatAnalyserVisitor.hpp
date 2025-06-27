@@ -14,6 +14,7 @@
 #include <sstream>
 
 #include "ecflow/node/NodeTreeVisitor.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 class Node;
 
@@ -22,7 +23,7 @@ namespace ecf {
 class FlatAnalyserVisitor final : public NodeTreeVisitor {
 public:
     FlatAnalyserVisitor();
-    std::string report() const { return ss_.str(); }
+    std::string report() const { return buffer_; }
 
     bool traverseObjectStructureViaVisitors() const override { return true; }
     void visitDefs(Defs*) override;
@@ -33,7 +34,9 @@ public:
 
 private:
     bool analyse(Node* n);
-    std::stringstream ss_;
+    std::string buffer_;
+    ecf::stringstreambuf ss_{buffer_};
+    ecf::Context ctx_ = ecf::Context::make_for(PrintStyle::DEFS);
 };
 
 } // namespace ecf

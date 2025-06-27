@@ -41,7 +41,6 @@ public:
     );
     InLimit() = default;
 
-    void print(std::string&) const;
     bool operator==(const InLimit& rhs) const;
     bool operator<(const InLimit& rhs) const { return n_ < rhs.name(); }
 
@@ -58,11 +57,15 @@ public:
 
     std::string toString() const;
 
-private:
+public:
     void write(std::string&) const;
 
+private:
     void limit(limit_ptr l) { limit_ = std::weak_ptr<Limit>(l); }
+
+public:
     Limit* limit() const { return limit_.lock().get(); } // can return NULL
+private:
     friend class InLimitMgr;
 
 private:

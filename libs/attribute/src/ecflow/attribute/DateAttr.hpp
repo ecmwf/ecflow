@@ -39,7 +39,6 @@ public:
           month_(date.month()),
           year_(date.year()) {} // for test
 
-    void print(std::string&) const;
     bool operator==(const DateAttr& rhs) const;
     bool operator<(const DateAttr& rhs) const;
     bool structureEquals(const DateAttr& rhs) const;
@@ -84,7 +83,8 @@ public:
     int year() const { return year_; }
 
     bool is_free(const ecf::Calendar&) const; // ignores free_
-private:
+
+public:
     void write(std::string&) const;
 
 private:

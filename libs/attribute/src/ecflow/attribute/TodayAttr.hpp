@@ -104,7 +104,6 @@ public:
     TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
         : ts_(start, finish, incr, relative) {}
 
-    void print(std::string&) const;
     bool operator==(const TodayAttr& rhs) const;
     bool operator<(const TodayAttr& rhs) const { return ts_ < rhs.ts_; }
     bool structureEquals(const TodayAttr& rhs) const;
@@ -168,7 +167,6 @@ public:
     std::string name() const; // for display/GUI
     std::string toString() const;
     void write(std::string&) const;
-    std::string dump() const;
 
     // access
     const TimeSeries& time_series() const { return ts_; }

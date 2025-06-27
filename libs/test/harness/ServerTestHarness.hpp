@@ -15,7 +15,6 @@
 #include <string>
 
 #include "ZombieUtil.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 // This class provides a test harness for running defs file in a client server environment
@@ -113,7 +112,6 @@ private:
     bool add_default_sleep_time_{true};
     int serverUpdateCalendarCount_{0};
     std::string defs_filename_;
-    PrintStyle print_style_; // by default show state when writing defs to standard out. RAII
 };
 
 #endif /* ecflow_test_harness_ServerTestHarness_HPP */

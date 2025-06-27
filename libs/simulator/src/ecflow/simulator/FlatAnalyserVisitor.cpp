@@ -10,13 +10,13 @@
 
 #include "ecflow/simulator/FlatAnalyserVisitor.hpp"
 
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/AstAnalyserVisitor.hpp"
 
 using namespace std;
@@ -43,10 +43,11 @@ void FlatAnalyserVisitor::visitNodeContainer(NodeContainer* nc) {
     if (nc->state() == NState::COMPLETE)
         return;
 
-    Indentor in;
+    Indent l1(ctx_);
+
     bool traverseChildren = analyse(nc);
 
-    // Dont bother traversing children if parent is holding on trigger/complete expression
+    // Don't traverse children if the parent is holding on trigger/complete expression
     if (traverseChildren) {
         for (node_ptr t : nc->nodeVec()) {
             t->acceptVisitTraversor(*this);
@@ -55,19 +56,26 @@ void FlatAnalyserVisitor::visitNodeContainer(NodeContainer* nc) {
 }
 
 void FlatAnalyserVisitor::visitTask(Task* t) {
-    Indentor in;
     analyse(t);
 }
 
 bool FlatAnalyserVisitor::analyse(Node* node) {
     bool traverseChildren = true;
 
-    Indentor::indent(ss_) << node->debugType() << Str::COLON() << node->name() << " state("
-                          << NState::toString(node->state()) << ")";
+    Indent l1(ctx_);
+
+    ss_ << l1;
+    ss_ << node->debugType();
+    ss_ << Str::COLON();
+    ss_ << node->name();
+    ss_ << " state(";
+    ss_ << NState::toString(node->state());
+    ss_ << ")";
     if (node->state() != NState::COMPLETE) {
 
         if (node->repeat().isInfinite()) {
-            ss_ << " may **NEVER** complete due to " << node->repeat().toString();
+            ss_ << " may **NEVER** complete due to ";
+            ss_ << node->repeat().toString();
         }
         ss_ << "\n";
 
@@ -75,36 +83,51 @@ bool FlatAnalyserVisitor::analyse(Node* node) {
             std::vector<std::string> theReasonWhy;
             node->why(theReasonWhy);
             for (const auto& i : theReasonWhy) {
-                Indentor::indent(ss_) << "Reason: " << i << "\n";
+                ss_ << l1;
+                ss_ << "Reason: ";
+                ss_ << i;
+                ss_ << "\n";
             }
         }
 
         /// Note a complete expression that does not evaluate, does *NOT* hold the node
         /// It merly sets node to complete.
         if (node->completeAst() && !node->evaluateComplete()) {
-            Indentor::indent(ss_) << "holding on complete expression '" << node->completeExpression() << "'\n";
+            ss_ << l1;
+            ss_ << "holding on complete expression '";
+            ss_ << node->completeExpression();
+            ss_ << "'\n";
 
             AstAnalyserVisitor astVisitor;
             node->completeAst()->accept(astVisitor);
             for (const string& nodePath : astVisitor.dependentNodePaths()) {
-                Indentor in;
-                Indentor::indent(ss_) << "'" << nodePath << "' is not defined in the expression\n";
+                Indent l2(ctx_);
+                ss_ << l2;
+                ss_ << "'";
+                ss_ << nodePath;
+                ss_ << "' is not defined in the expression\n";
             }
-            ss_ << *node->completeAst();
+            ss_ << ecf::as_string(*node->completeAst(), PrintStyle::DEFS);
 
             traverseChildren = false;
         }
 
         if (node->triggerAst() && !node->evaluateTrigger()) {
-            Indentor::indent(ss_) << "holding on trigger expression '" << node->triggerExpression() << "'\n";
+            ss_ << l1;
+            ss_ << "holding on trigger expression '";
+            ss_ << node->triggerExpression();
+            ss_ << "'\n";
 
             AstAnalyserVisitor astVisitor;
             node->triggerAst()->accept(astVisitor);
             for (const string& nodePath : astVisitor.dependentNodePaths()) {
-                Indentor in;
-                Indentor::indent(ss_) << "'" << nodePath << "' is not defined in the expression\n";
+                Indent l2(ctx_);
+                ss_ << l2;
+                ss_ << "'";
+                ss_ << nodePath;
+                ss_ << "' is not defined in the expression\n";
             }
-            ss_ << *node->triggerAst();
+            ss_ << ecf::as_string(*node->triggerAst(), PrintStyle::DEFS);
 
             traverseChildren = false;
         }

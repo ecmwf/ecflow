@@ -23,6 +23,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -71,7 +72,7 @@ static bool wait_for_state(std::vector<std::pair<std::string, NState::State>>& p
             node_ptr node = defs->findAbsNode(path_state_vec[i].first);
             BOOST_REQUIRE_MESSAGE(node,
                                   "Could not find path '" << path_state_vec[i].first << "' in the defs\n"
-                                                          << *defs);
+                                                          << ecf::as_string(*defs, PrintStyle::DEFS));
             if (node->state() != path_state_vec[i].second) {
                 all_states_ok = false;
                 break;
@@ -86,7 +87,7 @@ static bool wait_for_state(std::vector<std::pair<std::string, NState::State>>& p
                                   "wait_for_state: Test wait " << assertTimer.duration()
                                                                << " taking longer than time constraint of "
                                                                << assertTimer.timeConstraint() << " aborting\n"
-                                                               << *defs);
+                                                               << ecf::as_string(*defs, PrintStyle::DEFS));
             break;
         }
         sleep(1);

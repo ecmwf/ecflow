@@ -16,6 +16,7 @@
 #include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -69,9 +70,8 @@ BOOST_AUTO_TEST_CASE(test_date) {
 
 static DateAttr print_and_parse_attr(DateAttr& date) {
 
-    PrintStyle style(PrintStyle::MIGRATE);
     std::string output;
-    date.print(output);
+    ecf::write_t(output, date, PrintStyle::MIGRATE);
     output.erase(output.begin() + output.size() - 1); // remove trailing newline
 
     std::vector<std::string> tokens;

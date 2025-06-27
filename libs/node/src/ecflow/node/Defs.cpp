@@ -19,7 +19,6 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/Serialization.hpp"
@@ -38,6 +37,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/node/move_peer.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
 
@@ -678,136 +678,6 @@ bool Defs::hasTimeDependencies() const {
     return false;
 }
 
-std::string Defs::print(PrintStyle::Type_t t) const {
-    PrintStyle style(t);
-    std::string s;
-    print(s);
-    return s;
-}
-
-void Defs::print(std::string& os) const {
-    // cout << "Defs::print(start) print_cache_ " << print_cache_ << "\n";
-    os.clear();
-    if (print_cache_ != 0)
-        os.reserve(print_cache_);
-    else
-        os.reserve(4096);
-    os += "#";
-    os += ecf::Version::full();
-    os += "\n";
-
-    if (!PrintStyle::defsStyle())
-        write_state(os);
-
-    if (PrintStyle::getStyle() == PrintStyle::STATE) {
-        os += "# server state: ";
-        os += SState::to_string(server_state().get_state());
-        os += "\n";
-    }
-
-    // In PrintStyle::MIGRATE we do NOT persist the externs. (+matches boost serialisation)
-    if (!PrintStyle::persist_style()) {
-        auto extern_end = externs_.end();
-        for (auto i = externs_.begin(); i != extern_end; ++i) {
-            os += "extern ";
-            os += *i;
-            os += "\n";
-        }
-    }
-
-    for (const auto& s : suiteVec_) {
-        s->print(os);
-    }
-
-    os += "# enddef\n"; // ECFLOW-1227 so user knows there was no truncation
-    print_cache_ = os.size();
-    // cout << "Defs::print print_cache_ " << print_cache_ << "\n";
-}
-
-void Defs::write_state(std::string& os) const {
-    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
-    //             multiple statement on a single line i.e.
-    //                 task a; task b;
-    // *IMPORTANT* make sure name are unique, i.e can't have state: and server_state:
-    // Otherwise read_state() will mess up
-    os += "defs_state ";
-    os += PrintStyle::to_string();
-
-    if (state_ != NState::UNKNOWN) {
-        os += " state>:";
-        os += NState::toString(state_);
-    } // make <state> is unique
-    if (flag_.flag() != 0) {
-        os += " flag:";
-        flag_.write(os);
-    }
-    if (state_change_no_ != 0) {
-        os += " state_change:";
-        os += ecf::convert_to<std::string>(state_change_no_);
-    }
-    if (modify_change_no_ != 0) {
-        os += " modify_change:";
-        os += ecf::convert_to<std::string>(modify_change_no_);
-    }
-    if (server_state().get_state() != ServerState::default_state()) {
-        os += " server_state:";
-        os += SState::to_string(server_state().get_state());
-    }
-
-    // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
-    os += " cal_count:";
-    os += ecf::convert_to<std::string>(updateCalendarCount_);
-    os += "\n";
-
-    // This read by the DefsParser
-    const std::vector<Variable>& server_user_variables = server_state().user_variables();
-    size_t the_size                                    = server_user_variables.size();
-    for (size_t i = 0; i < the_size; ++i)
-        server_user_variables[i].print(os);
-
-    const std::vector<Variable>& server_variables = server_state().server_variables();
-    the_size                                      = server_variables.size();
-    for (size_t i = 0; i < the_size; ++i)
-        server_variables[i].print_server_variable(os); // edit var value # server
-
-    // READ by Defs::read_history()
-    // We need to define a separator for the message, will to allow it to be re-read
-    // This separator cannot be :
-    // ' ' space, used in the messages
-    // %  Used in job submission
-    // :  Used in time, and name (:ma0)
-    // [] Used in time
-    // integers used in the time.
-    // -  Used in commands
-    if (save_edit_history_) {
-        Indentor in;
-        for (const auto& i : edit_history_) {
-            Indentor::indent(os);
-            os += "history ";
-            os += i.first;
-            os += " ";                                      // node path
-            const std::vector<std::string>& vec = i.second; // list of requests
-            for (const auto& c : vec) {
-
-                // We expect to output a single newline, hence if there are additional new lines
-                // It can mess  up, re-parse. i.e during alter change label/value, user could have added newlines
-                if (c.find("\n") == std::string::npos) {
-                    os += "\b";
-                    os += c;
-                }
-                else {
-                    std::string h = c;
-                    Str::replaceall(h, "\n", "\\n");
-                    os += "\b";
-                    os += h;
-                }
-            }
-            os += "\n";
-        }
-        save_edit_history_ = false;
-    }
-}
-
 std::string Defs::dump_edit_history() const {
     std::stringstream os;
     for (const auto& i : edit_history_) {
@@ -1446,7 +1316,42 @@ void Defs::cereal_restore_from_checkpt(const std::string& the_fileName) {
     //	cout << "Restored: " << suiteVec_.size() << " suites\n";
 }
 
-void Defs::save_as_checkpt(const std::string& the_fileName) const {
+void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
+    // Set up the output, pre-allocating space based on previous runs (if available)
+    os.clear();
+    if (print_cache_ > 0) {
+        os.reserve(print_cache_);
+    }
+    else {
+        os.reserve(4096);
+    }
+
+    auto ctx = ecf::Context::make_for(p_style);
+    ecf::write_t(os, *this, ctx);
+
+    // Store the size of the output, for future use
+    print_cache_ = os.size();
+}
+
+void Defs::write_to_file(const std::string& filepath, PrintStyle::Type_t p_style) const {
+
+    // Place the output into a string buffer
+    std::string buffer;
+    write_to_string(buffer, p_style);
+
+    // Write the buffer to the specified file
+    std::ofstream ofs(filepath.c_str());
+    ofs << buffer;
+    if (!ofs.good()) {
+        std::string err = "Defs::write_to_file: path(";
+        err += filepath;
+        err += ") failed: ";
+        err += File::stream_error_condition(ofs);
+        throw std::runtime_error(err);
+    }
+}
+
+void Defs::write_to_checkpt_file(const std::string& filepath) const {
     // Save as defs will always save children, hence no need for CheckPtContext
 
     // only_save_edit_history_when_check_pointing or if explicitly requested
@@ -1454,34 +1359,7 @@ void Defs::save_as_checkpt(const std::string& the_fileName) const {
 
     // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
     // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
-    ecf::DisableIndentor disable_indentation;
-    save_as_filename(the_fileName, PrintStyle::MIGRATE);
-}
-
-void Defs::save_as_filename(const std::string& the_fileName, PrintStyle::Type_t p_style) const {
-    PrintStyle printStyle(p_style);
-
-    std::ofstream ofs(the_fileName.c_str());
-    std::string s;
-    print(s);
-    ofs << s;
-
-    if (!ofs.good()) {
-        std::string err = "Defs::save_as_filename: path(";
-        err += the_fileName;
-        err += ") failed: ";
-        err += File::stream_error_condition(ofs);
-        throw std::runtime_error(err);
-    }
-}
-
-void Defs::save_as_string(std::string& the_string, PrintStyle::Type_t p_style) const {
-    PrintStyle printStyle(p_style);
-
-    // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
-    // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
-    ecf::DisableIndentor disable_indentation;
-    print(the_string);
+    write_to_file(filepath, PrintStyle::MIGRATE);
 }
 
 void Defs::restore(const std::string& the_fileName) {
@@ -2038,23 +1916,6 @@ bool Defs::is_observed(AbstractObserver* obs) const {
         }
     }
     return false;
-}
-// =====================================================================================
-
-std::ostream& operator<<(std::ostream& os, const Defs* d) {
-    if (d) {
-        std::string s;
-        d->print(s);
-        os << s;
-        return os;
-    }
-    return os << "DEFS == NULL\n";
-}
-std::ostream& operator<<(std::ostream& os, const Defs& d) {
-    std::string s;
-    d.print(s);
-    os << s;
-    return os;
 }
 
 // =========================================================================

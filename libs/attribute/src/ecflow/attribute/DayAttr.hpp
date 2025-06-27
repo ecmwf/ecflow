@@ -33,7 +33,6 @@ public:
         : day_(static_cast<DayAttr::Day_t>(date.day_of_week().as_number())),
           date_(date) {}
 
-    void print(std::string&) const;
     bool operator==(const DayAttr& rhs) const;
     bool operator<(const DayAttr& rhs) const { return day_ < rhs.day_; }
     bool structureEquals(const DayAttr& rhs) const;
@@ -115,6 +114,8 @@ private:
     void clear_expired();
     bool is_free(const ecf::Calendar&) const; // ignores free_
     boost::gregorian::date matching_date(const ecf::Calendar& c) const;
+
+public:
     void write(std::string&) const;
 
 private:

@@ -35,7 +35,6 @@ public:
     // needed by node copy constructor and persistence
     void set_node(Node* n) { node_ = n; }
 
-    void print(std::string&) const;
     bool operator==(const AutoRestoreAttr& rhs) const;
     std::string toString() const;
 
@@ -43,7 +42,7 @@ public:
     const std::vector<std::string>& nodes_to_restore() const { return nodes_to_restore_; }
     void check(std::string& errorMsg) const; // check auto restore can reference the nodes
 
-private:
+public:
     void write(std::string&) const;
 
 private:

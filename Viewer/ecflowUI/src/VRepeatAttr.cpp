@@ -363,7 +363,7 @@ std::string VRepeatDateListAttr::value(int index) const {
 int VRepeatDateListAttr::endIndex() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (auto* rdl = static_cast<RepeatDateList*>(r.repeatBase())) {
+        if (auto* rdl = static_cast<const RepeatDateList*>(r.repeatBase())) {
             return rdl->indexNum() - 1;
         }
     }
@@ -442,7 +442,7 @@ static int get_repeat_position(const REPEAT& repeat) {
 int VRepeatDateListAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (auto* rdl = static_cast<RepeatDateList*>(r.repeatBase())) {
+        if (auto* rdl = static_cast<const RepeatDateList*>(r.repeatBase())) {
             return get_repeat_position(*rdl);
         }
     }
@@ -608,7 +608,7 @@ QString VRepeatEnumAttr::allValues() const {
 int VRepeatEnumAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (auto* repeat = static_cast<RepeatEnumerated*>(r.repeatBase()); repeat) {
+        if (auto* repeat = static_cast<const RepeatEnumerated*>(r.repeatBase()); repeat) {
             return get_repeat_position(*repeat);
         }
     }
@@ -680,7 +680,7 @@ QString VRepeatStringAttr::allValues() const {
 int VRepeatStringAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (auto* rdl = static_cast<RepeatString*>(r.repeatBase())) {
+        if (auto* rdl = static_cast<const RepeatString*>(r.repeatBase())) {
             return get_repeat_position(*rdl);
         }
     }

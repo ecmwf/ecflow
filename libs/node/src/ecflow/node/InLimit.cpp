@@ -13,8 +13,6 @@
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -97,32 +95,6 @@ bool InLimit::operator==(const InLimit& rhs) const {
 
     // Note: comparison does not look at Limit pointers
     return true;
-}
-
-void InLimit::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-
-    if (!PrintStyle::defsStyle()) {
-
-        // write state; See InlimitParser::doParse for read state part
-        if (incremented_)
-            os += " # incremented:1";
-
-        if (PrintStyle::getStyle() == PrintStyle::STATE) {
-            Limit* the_limit = limit();
-            if (the_limit) {
-                os += " # referenced limit(value) ";
-                os += ecf::convert_to<std::string>(the_limit->theLimit());
-                os += "(";
-                os += ecf::convert_to<std::string>(the_limit->value());
-                os += ")";
-            }
-        }
-    }
-
-    os += "\n";
 }
 
 std::string InLimit::toString() const {

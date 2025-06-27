@@ -36,7 +36,6 @@ public:
           idle_(idle) {}
     explicit AutoArchiveAttr(int days, bool idle = false) : time_(TimeSlot(days * 24, 0)), days_(true), idle_(idle) {}
 
-    void print(std::string&) const;
     bool operator==(const AutoArchiveAttr& rhs) const;
     bool operator<(const AutoArchiveAttr& rhs) const { return time_ < rhs.time(); }
     bool isFree(const ecf::Calendar&,
@@ -49,7 +48,7 @@ public:
     bool days() const { return days_; }
     bool idle() const { return idle_; }
 
-private:
+public:
     void write(std::string&) const;
 
 private:

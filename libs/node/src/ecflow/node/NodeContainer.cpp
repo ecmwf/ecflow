@@ -1075,12 +1075,6 @@ bool NodeContainer::operator==(const NodeContainer& rhs) const {
     return Node::operator==(rhs);
 }
 
-void NodeContainer::print(std::string& os) const {
-    for (const auto& node : nodes_) {
-        node->print(os);
-    }
-}
-
 bool NodeContainer::checkInvariants(std::string& errorMsg) const {
     if (!Node::checkInvariants(errorMsg))
         return false;
@@ -1195,7 +1189,7 @@ void NodeContainer::archive() {
     }
 
     // save the created defs, to disk
-    archive_defs->save_as_checkpt(archive_path());
+    archive_defs->write_to_checkpt_file(archive_path());
 
     get_flag().set(ecf::Flag::ARCHIVED); // flag as archived
     get_flag().clear(ecf::Flag::RESTORED);
@@ -1281,8 +1275,8 @@ void NodeContainer::restore() {
     }
 
     swap(*archived_node_container);                            // swap the children, and set parent pointers
-    get_flag().clear(ecf::Flag::ARCHIVED);                         // clear flag archived
-    get_flag().set(ecf::Flag::RESTORED);                           // set restored flag, to stop automatic autoarchive
+    get_flag().clear(ecf::Flag::ARCHIVED);                     // clear flag archived
+    get_flag().set(ecf::Flag::RESTORED);                       // set restored flag, to stop automatic autoarchive
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
 
     string msg = " autorestore ";

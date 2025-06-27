@@ -14,9 +14,7 @@
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/NState.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"
@@ -28,17 +26,6 @@ using namespace boost::posix_time;
 namespace ecf {
 
 LateAttr::LateAttr() = default;
-
-void LateAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        if (isLate_)
-            os += " # late";
-    }
-    os += "\n";
-}
 
 std::string LateAttr::toString() const {
     std::string ret;

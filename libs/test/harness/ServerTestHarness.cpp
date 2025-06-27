@@ -28,6 +28,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -37,7 +38,7 @@ using namespace ecf;
 // #define DEBUG_TEST_HARNESS 1
 // #define DEBUG_DIFF 1
 
-ServerTestHarness::ServerTestHarness() : print_style_(PrintStyle::STATE) {
+ServerTestHarness::ServerTestHarness() {
 }
 
 void ServerTestHarness::run(Defs& theClientDefs,
@@ -137,8 +138,7 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
             load_defs_from_disk = false;
         }
         else {
-            PrintStyle style(PrintStyle::DEFS); // needed for output
-            theClientDefsFile << theClientDefs;
+            theClientDefsFile << ecf::as_string(theClientDefs, PrintStyle::DEFS);
         }
     }
 
@@ -273,8 +273,9 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
         else {
             BOOST_CHECK_MESSAGE(TestFixture::client().news(full_defs) == 0,
                                 "news failed should return 0 " << TestFixture::client().errorMsg());
+
             server_changed = TestFixture::client().get_news();
-            //			std::cout << "server_changed = " << server_changed << "\n";
+
             if (server_changed) {
 
                 // Get the incremental changes **FIRST** and compare this with the full defs later on
@@ -291,8 +292,8 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
                 BOOST_REQUIRE_MESSAGE(full_defs.get(), "get command failed to get node tree from server");
                 test_invariants(full_defs, "After getting the full defs.");
 
-                // **** NOTE ****: There could have been state change between the calls:
-                // **************: 	 TestFixture::client().sync(incremental_defs)
+                // **** NOTE ****: There could have been s state change between the calls:
+                // **************:    TestFixture::client().sync(incremental_defs)
                 // **************:    TestFixture::client().getDefs()
                 // **************: hence we can only compare, incremental and full defs if
                 // **************: state and modification numbers are the same:
@@ -397,7 +398,7 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
                     string localErrorMessage;
                     BOOST_REQUIRE_MESSAGE(full_defs->verification(localErrorMessage),
                                           localErrorMessage << "\n"
-                                                            << *full_defs.get());
+                                                            << ecf::as_string(*full_defs, PrintStyle::STATE));
                 }
                 return full_defs;
             }
@@ -416,7 +417,8 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
             WhyCmd reason(full_defs, "" /* do a top down why */);
             std::cout << reason.why() << "\n";
         }
-        BOOST_REQUIRE_MESSAGE(assertTimer.duration() < assertTimer.timeConstraint(), "\n" << *full_defs);
+        BOOST_REQUIRE_MESSAGE(assertTimer.duration() < assertTimer.timeConstraint(),
+                              "\n" << ecf::as_string(*full_defs, PrintStyle::MIGRATE));
         if (assertTimer.duration() >= assertTimer.timeConstraint())
             break; // fix warning on AIX
 
