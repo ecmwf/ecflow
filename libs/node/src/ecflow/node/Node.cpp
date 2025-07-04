@@ -956,15 +956,10 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
 
         setStateOnly(newState, false, additional_info_to_log);
 
-        if (newState == NState::ABORTED || newState == NState::COMPLETE || newState == NState::UNKNOWN) {
-            //
-            // The node aborting/completing/becoming unknown might trigger an immediate Node requeue, so we must first
-            // finish the Aviso background thread.
-            //
-            for (auto& aviso : avisos()) {
-                aviso.finish();
-            }
-        }
+        //
+        // When the node state becomes `aborted`, `complete` or `unknown`, the Aviso background thread is terminated.
+        //
+        AvisoAttr::finish(avisos(), newState);
 
         // Handle any state change specific functionality. This will update any repeats
         // This is a virtual function, since we want different behaviour during state change
