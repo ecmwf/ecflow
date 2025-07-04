@@ -97,26 +97,20 @@ void MirrorService::register_listener(const MirrorRequest& request) {
     Entry& inserted = listeners_.emplace_back(Entry{request, "", ""});
     if (!request.auth.empty()) {
         SLOG(D, "MirrorService: Loading auth {" << request.auth << "}");
-        try {
-            auto found = ecf::service::auth::Credentials::load(request.auth);
-            std::visit(ecf::overload{[&](const ecf::service::auth::Credentials& credentials) {
-                                         SLOG(D, "MirrorService: using credentials for mirror {"
-                                                     << credentials.value("url").value_or("unknown") << "}");
+        auto found = ecf::service::auth::Credentials::load(request.auth);
+        std::visit(ecf::overload{[&](const ecf::service::auth::Credentials& credentials) {
+                                     auto url = credentials.value("url").value_or("unknown");
+                                     SLOG(D, "MirrorService: using credentials for mirror: " << url);
 
-                                                     if (auto user = credentials.user(); user) {
-                inserted.remote_username_ = user->username;
-                inserted.remote_password_ = user->password;
-            }
-                                     },
-                                     [](const ecf::service::auth::Credentials::Error& error) {
-                                         SLOG(E, "MirrorService: unable to load credentials: " << error.message);
-                                     }},
-                      found);
-
-        }
-        catch (std::runtime_error& e) {
-            throw std::runtime_error("MirrorService: Unable to load auth credentials");
-        }
+                                     if (auto user = credentials.user(); user) {
+                                         inserted.remote_username_ = user->username;
+                                         inserted.remote_password_ = user->password;
+                                     }
+                                 },
+                                 [](const ecf::service::auth::Credentials::Error& error) {
+                                     SLOG(E, "MirrorService: unable to load credentials: " << error.message);
+                                 }},
+                   found);
     }
 }
 
