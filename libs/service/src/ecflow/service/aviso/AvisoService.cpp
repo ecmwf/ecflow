@@ -36,8 +36,8 @@ void AvisoService::start() {
                                      this->register_listener(subscription);
                                  },
                                  [this](const AvisoUnsubscribe& subscription) {
-                                     this->unregister_listener(subscription.path());
                                      SLOG(D, "AvisoService: unregistering listener: " << subscription.path());
+                                     this->unregister_listener(subscription.path());
                                  }},
                    subscription);
     }
