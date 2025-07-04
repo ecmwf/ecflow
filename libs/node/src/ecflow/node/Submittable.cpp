@@ -93,7 +93,9 @@ void Submittable::complete() {
     //
     // Completing the node might trigger an immediate Node requeue, so we must first finish the Aviso background thread.
     //
-    std::for_each(std::begin(avisos()), std::end(avisos()), [](auto&& aviso) { aviso.finish(); });
+    for (auto& aviso : avisos()) {
+        aviso.finish();
+    }
 
     set_state(NState::COMPLETE);
     get_flag().clear(ecf::Flag::ZOMBIE);
@@ -115,7 +117,9 @@ void Submittable::aborted(const std::string& reason) {
     //
     // Aborting the node might trigger an immediate Node requeue, so we must first finish the Aviso background thread.
     //
-    std::for_each(std::begin(avisos()), std::end(avisos()), [](auto&& aviso) { aviso.finish(); });
+    for (auto& aviso : avisos()) {
+        aviso.finish();
+    }
 
     // Called during *abnormal* child termination
     // This will bubble the state, and decrement any limits

@@ -961,7 +961,9 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
             // The node aborting/completing/becoming unknown might trigger an immediate Node requeue, so we must first
             // finish the Aviso background thread.
             //
-            std::for_each(std::begin(avisos()), std::end(avisos()), [](auto&& aviso) { aviso.finish(); });
+            for (auto& aviso : avisos()) {
+                aviso.finish();
+            }
         }
 
         // Handle any state change specific functionality. This will update any repeats
