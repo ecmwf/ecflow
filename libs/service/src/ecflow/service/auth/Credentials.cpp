@@ -83,6 +83,9 @@ Credentials::expected_t load_from_stream(std::istream& input) {
 
 Credentials::expected_t Credentials::load(const std::string& filepath) {
     std::ifstream stream(filepath);
+    if (!stream.is_open()) {
+        return Credentials::Error(Message("Credentials: Unable to open file ", filepath).str());
+    }
     return load_from_stream(stream);
 }
 
