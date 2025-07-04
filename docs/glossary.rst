@@ -112,7 +112,7 @@
 
       .. important::
 
-         If :code:`%ECF_AVISO_AUTH%` provides a path to an inexistent file, or if the provided file is
+         If :code:`%ECF_AVISO_AUTH%` provides a path to a nonexistent file, or if the provided file is
          not a valid JSON, the credentials will be ignored and the Aviso notification retrieval will eventually fail
          due to "UNAUTHORIZED" access.
 
