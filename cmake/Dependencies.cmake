@@ -164,6 +164,11 @@ endif ()
 
 list(APPEND _boost_needed_libs timer chrono filesystem program_options date_time )
 
+if ( Boost_MINOR_VERSION GREATER_EQUAL 86 )
+  message(STATUS "Using Boost::process, since using ${Boost_VERSION}" )
+  list(APPEND _boost_needed_libs process)
+endif()
+
 if (ENABLE_PYTHON)
   # The following is used to find Boost.python library, as the library name changes with python version
   if ( Boost_MINOR_VERSION GREATER 66 )
@@ -175,10 +180,6 @@ if (ENABLE_PYTHON)
     set(_python_base_version "${Python3_VERSION_MAJOR}")
   endif()
   set(ECFLOW_BOOST_PYTHON_COMPONENT "python${_python_base_version}")
-
-  if ( Boost_MINOR_VERSION GREATER_EQUAL 86 )
-    list(APPEND _boost_needed_libs process)
-  endif()
 
   list(APPEND _boost_needed_libs ${ECFLOW_BOOST_PYTHON_COMPONENT})
 endif()
