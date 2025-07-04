@@ -268,6 +268,18 @@ void AvisoAttr::finish() const {
     stop_controller(aviso_path);
 }
 
+void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos) {
+    for (const auto& aviso : avisos) {
+        aviso.finish();
+    }
+}
+
+void AvisoAttr::finish(const std::vector<AvisoAttr>& avisos, NState::State state) {
+    if (NState::is_any_of<NState::ABORTED, NState::COMPLETE, NState::UNKNOWN>(state)) {
+        finish(avisos);
+    }
+}
+
 bool operator==(const AvisoAttr& lhs, const AvisoAttr& rhs) {
     return lhs.name() == rhs.name() && lhs.listener() == rhs.listener() && lhs.url() == rhs.url() &&
            lhs.schema() == rhs.schema() && lhs.polling() == rhs.polling() && lhs.revision() == rhs.revision() &&

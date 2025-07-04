@@ -53,6 +53,18 @@ public:
     static std::vector<std::string> allStates();
     static std::vector<NState::State> states();
 
+    /**
+     * \brief Checks if the given state is any of the specified states.
+     *
+     * @tparam S the states to check against
+     * @param s the state to check
+     * @return true if the state is any of the given states, false otherwise
+     */
+    template <NState::State... S>
+    static constexpr bool is_any_of(NState::State s) {
+        return ((s == S) || ...);
+    }
+
 private:
     State st_;
     unsigned int state_change_no_{0}; // *not* persisted, only used on server side
