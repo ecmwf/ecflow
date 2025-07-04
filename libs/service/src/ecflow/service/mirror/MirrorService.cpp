@@ -98,7 +98,7 @@ void MirrorService::register_listener(const MirrorRequest& request) {
     if (!request.auth.empty()) {
         SLOG(D, "MirrorService: Loading auth {" << request.auth << "}");
         auto found = ecf::service::auth::Credentials::load(request.auth);
-        std::visit(ecf::overload{[&](const ecf::service::auth::Credentials& credentials) {
+        std::visit(ecf::overload{[&inserted](const ecf::service::auth::Credentials& credentials) {
                                      auto url = credentials.value("url").value_or("unknown");
                                      SLOG(D, "MirrorService: using credentials for mirror: " << url);
 
