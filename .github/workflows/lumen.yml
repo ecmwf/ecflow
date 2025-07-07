@@ -1,0 +1,77 @@
+name: lumen
+
+on:
+  # Trigger the workflow on every push
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+
+  # Trigger the workflow on-demand
+  workflow_dispatch: ~
+
+jobs:
+  # Build ecflow
+  build:
+    if: github.repository == 'ecmwf/ecflow'
+
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        # Define the operating systems to use
+        #  n.b. Debian builds produce .deb packages, all others produce .tar.gz
+        os:
+          - arch-20250622
+          - debian-12.10
+          - fedora-37
+          - rocky-9.3
+          - ubuntu-22.04
+          - ubuntu-24.04
+        preset:
+          - linux.gcc.all.relwithdebinfo
+        jobs: [ 4 ]
+
+    container:
+      image: marcosbento/lumen:${{ matrix.os }}
+      options: --user root
+
+    steps:
+      - name: Display build context
+        run: |
+          echo "Working directory: ${{ github.workspace }}"
+          echo "Environment:"
+          echo "$(env)"
+
+      - name: Checkout 'ecbuild'
+        uses: actions/checkout@v4
+        with:
+          repository: ecmwf/ecbuild
+          path: ecbuild
+
+      - name: Checkout 'ecflow'
+        uses: actions/checkout@v4
+        with:
+          path: ecflow
+
+      - name: Configure ecflow
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          cmake --preset ${{ matrix.preset }}
+
+      - name: Build ecflow
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }}
+
+#      - name: Test ecflow
+#        run: |
+#          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+#          ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly --jobs ${{ matrix.jobs }}
+
+      - name: Package ecflow
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          cmake --build --preset ${{ matrix.preset }} --target package_source
+          cmake --build --preset ${{ matrix.preset }} --target package
