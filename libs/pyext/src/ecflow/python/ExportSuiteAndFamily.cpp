@@ -13,10 +13,10 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
@@ -125,13 +125,13 @@ void export_SuiteAndFamily() {
         .def("__init__", bp::raw_function(&NodeUtil::node_raw_constructor, 1)) // will call -> family_init
         .def("__init__", bp::make_constructor(&family_init), DefsDoc::family_doc())
         .def("__init__", bp::make_constructor(&Family::create_me), DefsDoc::family_doc())
-        .def(bp::self == bp::self)              // __eq__
-        .def("__str__", &family_to_string)      // __str__
-        .def("__copy__", copyObject<Family>)    // __copy__ uses copy constructor
-        .def("__enter__", &family_enter)        // allow with statement, hence indentation support
-        .def("__exit__", &family_exit)          // allow with statement, hence indentation support
-        .def("__len__", &family_len)            // Implement sized protocol for immediate children
-        .def("__contains__", &family_container) // Implement container protocol for immediate children
+        .def(bp::self == bp::self)                   // __eq__
+        .def("__str__", &family_to_string)           // __str__
+        .def("__copy__", pyutil_copy_object<Family>) // __copy__ uses copy constructor
+        .def("__enter__", &family_enter)             // allow with statement, hence indentation support
+        .def("__exit__", &family_exit)               // allow with statement, hence indentation support
+        .def("__len__", &family_len)                 // Implement sized protocol for immediate children
+        .def("__contains__", &family_container)      // Implement container protocol for immediate children
         ;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
     bp::register_ptr_to_python<family_ptr>(); // needed for mac and boost 1.6
@@ -141,13 +141,13 @@ void export_SuiteAndFamily() {
         .def("__init__", bp::raw_function(&NodeUtil::node_raw_constructor, 1)) // will call -> suite_init
         .def("__init__", bp::make_constructor(&suite_init), DefsDoc::suite_doc())
         .def("__init__", bp::make_constructor(&Suite::create_me), DefsDoc::suite_doc())
-        .def(bp::self == bp::self)             // __eq__
-        .def("__str__", &suite_to_string)      // __str__
-        .def("__copy__", copyObject<Suite>)    // __copy__ uses copy constructor
-        .def("__enter__", &suite_enter)        // allow with statement, hence indentation support
-        .def("__exit__", &suite_exit)          // allow with statement, hence indentation support
-        .def("__len__", &suite_len)            // Implement sized protocol for immediate children
-        .def("__contains__", &suite_container) // Implement container protocol for immediate children
+        .def(bp::self == bp::self)                  // __eq__
+        .def("__str__", &suite_to_string)           // __str__
+        .def("__copy__", pyutil_copy_object<Suite>) // __copy__ uses copy constructor
+        .def("__enter__", &suite_enter)             // allow with statement, hence indentation support
+        .def("__exit__", &suite_exit)               // allow with statement, hence indentation support
+        .def("__len__", &suite_len)                 // Implement sized protocol for immediate children
+        .def("__contains__", &suite_container)      // Implement container protocol for immediate children
         .def("add_clock", &add_clock)
         .def("get_clock", &Suite::clockAttr, "Returns the `suite`_ `clock`_")
         .def("add_end_clock", &add_end_clock, "End clock, used to mark end of simulation")

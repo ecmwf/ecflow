@@ -21,9 +21,9 @@
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/ClientDoc.hpp"
 #include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
@@ -75,10 +75,10 @@ int edit_script_submit(ClientInvoker* self,
                        bool alias = false,
                        bool run   = true) {
     std::vector<std::string> file_contents;
-    BoostPythonUtil::list_to_str_vec(lines, file_contents);
+    pyutil_list_to_str_vec(lines, file_contents);
 
     std::vector<std::string> namv;
-    BoostPythonUtil::list_to_str_vec(name_values, namv);
+    pyutil_list_to_str_vec(name_values, namv);
     NameValueVec used_variables;
     char sep = '=';
     for (size_t i = 0; i < namv.size(); ++i) {
@@ -166,22 +166,22 @@ void free_all_dep(ClientInvoker* self, const std::string& path) {
 }
 void free_trigger_dep1(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->freeDep(paths, true /*trigger*/, false /*all*/, false /*date*/, false /*time*/);
 }
 void free_date_dep1(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, false /*all*/, true /*date*/, false /*time*/);
 }
 void free_time_dep1(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, false /*all*/, false /*date*/, true /*time*/);
 }
 void free_all_dep1(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, true /*all*/, false /*date*/, false /*time*/);
 }
 
@@ -190,7 +190,7 @@ void force_state(ClientInvoker* self, const std::string& path, NState::State sta
 }
 void force_states(ClientInvoker* self, const bp::list& list, NState::State state) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->force(paths, NState::toString(state), false);
 }
 void force_state_recursive(ClientInvoker* self, const std::string& path, NState::State state) {
@@ -198,7 +198,7 @@ void force_state_recursive(ClientInvoker* self, const std::string& path, NState:
 }
 void force_states_recursive(ClientInvoker* self, const bp::list& list, NState::State state) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->force(paths, NState::toString(state), true);
 }
 void force_event(ClientInvoker* self, const std::string& path, const std::string& set_or_clear) {
@@ -206,7 +206,7 @@ void force_event(ClientInvoker* self, const std::string& path, const std::string
 }
 void force_events(ClientInvoker* self, const bp::list& list, const std::string& set_or_clear) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->force(paths, set_or_clear);
 }
 
@@ -215,7 +215,7 @@ void run(ClientInvoker* self, const std::string& path, bool force) {
 }
 void runs(ClientInvoker* self, const bp::list& list, bool force) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->run(paths, force);
 }
 void requeue(ClientInvoker* self, std::string path, const std::string& option) {
@@ -223,7 +223,7 @@ void requeue(ClientInvoker* self, std::string path, const std::string& option) {
 }
 void requeues(ClientInvoker* self, const bp::list& list, const std::string& option) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->requeue(paths, option);
 }
 void suspend(ClientInvoker* self, const std::string& path) {
@@ -231,7 +231,7 @@ void suspend(ClientInvoker* self, const std::string& path) {
 }
 void suspends(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->suspend(paths);
 }
 void resume(ClientInvoker* self, const std::string& path) {
@@ -239,7 +239,7 @@ void resume(ClientInvoker* self, const std::string& path) {
 }
 void resumes(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->resume(paths);
 }
 void archive(ClientInvoker* self, const std::string& path) {
@@ -247,7 +247,7 @@ void archive(ClientInvoker* self, const std::string& path) {
 }
 void archives(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->archive(paths);
 }
 void restore(ClientInvoker* self, const std::string& path) {
@@ -255,7 +255,7 @@ void restore(ClientInvoker* self, const std::string& path) {
 }
 void restores(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->restore(paths);
 }
 void the_status(ClientInvoker* self, const std::string& path) {
@@ -263,7 +263,7 @@ void the_status(ClientInvoker* self, const std::string& path) {
 }
 void statuss(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->status(paths);
 }
 void do_kill(ClientInvoker* self, const std::string& path) {
@@ -271,7 +271,7 @@ void do_kill(ClientInvoker* self, const std::string& path) {
 }
 void do_kills(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->kill(paths);
 }
 const std::string& check(ClientInvoker* self, const std::string& node_path) {
@@ -280,14 +280,14 @@ const std::string& check(ClientInvoker* self, const std::string& node_path) {
 }
 const std::string& checks(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->check(paths);
     return self->get_string();
 }
 
 void delete_node(ClientInvoker* self, const bp::list& list, bool force) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->delete_nodes(paths, force);
 }
 
@@ -297,29 +297,29 @@ void ch_suites(ClientInvoker* self) {
 }
 void ch_register(ClientInvoker* self, bool auto_add_new_suites, const bp::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch_register(auto_add_new_suites, suites);
 }
 
 void ch_add(ClientInvoker* self, int client_handle, const bp::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch_add(client_handle, suites);
 }
 void ch1_add(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch1_add(suites);
 }
 
 void ch_remove(ClientInvoker* self, int client_handle, const bp::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch_remove(client_handle, suites);
 }
 void ch1_remove(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch1_remove(suites);
 }
 
@@ -343,7 +343,7 @@ void alters(ClientInvoker* self,
             const std::string& name  = "",
             const std::string& value = "") {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->check(paths);
     self->alter(paths, alterType, attrType, name, value);
 }
@@ -358,7 +358,7 @@ void alter(ClientInvoker* self,
 
 void alter_sorts(ClientInvoker* self, const bp::list& list, const std::string& attribute_name, bool recursive = true) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->check(paths);
     self->alter_sort(paths, attribute_name, recursive);
 }
@@ -375,7 +375,7 @@ void set_child_pid(ClientInvoker* self, int pid) {
 
 void set_child_init_add_vars(ClientInvoker* self, const bp::dict& dict) {
     std::vector<std::pair<std::string, std::string>> vars;
-    BoostPythonUtil::dict_to_str_vec(dict, vars);
+    pyutil_dict_to_str_vec(dict, vars);
 
     std::vector<Variable> vec;
     std::transform(vars.begin(),
@@ -388,13 +388,13 @@ void set_child_init_add_vars(ClientInvoker* self, const bp::dict& dict) {
 
 void set_child_init_add_vars2(ClientInvoker* self, const bp::list& dict) {
     std::vector<Variable> vec;
-    BoostPythonUtil::list_to_str_vec(dict, vec);
+    pyutil_list_to_str_vec(dict, vec);
     self->set_child_init_add_vars(vec);
 }
 
 void set_child_complete_del_vars(ClientInvoker* self, const bp::list& dict) {
     std::vector<std::string> vars;
-    BoostPythonUtil::list_to_str_vec(dict, vars);
+    pyutil_list_to_str_vec(dict, vars);
     self->set_child_complete_del_vars(vars);
 }
 
@@ -434,32 +434,32 @@ const std::vector<Zombie>& zombieGet(ClientInvoker* self, int pid) {
 
 void zombieFobCli(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieFobCliPaths(paths);
 }
 void zombieFailCli(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieFailCliPaths(paths);
 }
 void zombieAdoptCli(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieAdoptCliPaths(paths);
 }
 void zombieBlockCli(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieBlockCliPaths(paths);
 }
 void zombieRemoveCli(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieRemoveCliPaths(paths);
 }
 void zombieKillCli(ClientInvoker* self, const bp::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieKillCliPaths(paths);
 }
 

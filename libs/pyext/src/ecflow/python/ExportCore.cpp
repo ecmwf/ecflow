@@ -16,10 +16,10 @@
 #include "ecflow/core/SState.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 #include "ecflow/core/TimeSlot.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/Edit.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 template <class K, class T>
@@ -205,12 +205,12 @@ void export_Core() {
                               "\nUsage::\n\n"
                               "   ts = TimeSlot(10,11)\n",
                               bp::init<int, int>())
-        .def("__str__", &ecf::TimeSlot::toString)   // __str__
-        .def("__copy__", copyObject<ecf::TimeSlot>) // __copy__ uses copy constructor
-        .def(bp::self == bp::self)                  // __eq__
-        .def("hour", &ecf::TimeSlot::hour)          // return int
-        .def("minute", &ecf::TimeSlot::minute)      // return int
-        .def("empty", &ecf::TimeSlot::isNULL)       // return bool
+        .def("__str__", &ecf::TimeSlot::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::TimeSlot>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                          // __eq__
+        .def("hour", &ecf::TimeSlot::hour)                  // return int
+        .def("minute", &ecf::TimeSlot::minute)              // return int
+        .def("empty", &ecf::TimeSlot::isNULL)               // return bool
         ;
 
     // single slot, | start, finish, incr,  bool relative to suite start
@@ -247,9 +247,9 @@ void export_Core() {
         bp::init<ecf::TimeSlot, bp::optional<bool>>())
         .def(bp::init<int, int, bp::optional<bool>>())
         .def(bp::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bp::optional<bool>>())
-        .def(bp::self == bp::self)                    // __eq__
-        .def("__str__", &ecf::TimeSeries::toString)   // __str__
-        .def("__copy__", copyObject<ecf::TimeSeries>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                            // __eq__
+        .def("__str__", &ecf::TimeSeries::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::TimeSeries>) // __copy__ uses copy constructor
         .def("has_increment",
              &ecf::TimeSeries::hasIncrement,
              "distinguish between a single time slot and a series. returns true for a series") // false if single time

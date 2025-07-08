@@ -12,14 +12,14 @@
 
 #include <stdexcept>
 
-#include "ecflow/python/BoostPythonUtil.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 Edit::Edit(const bp::dict& dict) {
-    BoostPythonUtil::dict_to_str_vec(dict, vec_);
+    pyutil_dict_to_str_vec(dict, vec_);
 }
 Edit::Edit(const bp::dict& dict, const bp::dict& dict2) {
-    BoostPythonUtil::dict_to_str_vec(dict, vec_);
-    BoostPythonUtil::dict_to_str_vec(dict2, vec_);
+    pyutil_dict_to_str_vec(dict, vec_);
+    pyutil_dict_to_str_vec(dict2, vec_);
 }
 
 bp::object Edit::init(bp::tuple args, bp::dict kw) {

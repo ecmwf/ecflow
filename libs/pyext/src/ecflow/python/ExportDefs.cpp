@@ -17,11 +17,11 @@
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/Edit.hpp"
 #include "ecflow/python/GlossaryDoc.hpp"
 #include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -147,7 +147,7 @@ defs_ptr add_variable_var(defs_ptr self, const Variable& var) {
 }
 defs_ptr add_variable_dict(defs_ptr self, const bp::dict& dict) {
     std::vector<std::pair<std::string, std::string>> vec;
-    BoostPythonUtil::dict_to_str_vec(dict, vec);
+    pyutil_dict_to_str_vec(dict, vec);
     std::vector<std::pair<std::string, std::string>>::iterator i;
     auto vec_end = vec.end();
     for (i = vec.begin(); i != vec_end; ++i) {
@@ -167,7 +167,7 @@ void sort_attributes1(defs_ptr self, ecf::Attr::Type attr, bool recurse) {
 }
 void sort_attributes2(defs_ptr self, ecf::Attr::Type attr, bool recurse, const bp::list& list) {
     std::vector<std::string> no_sort;
-    BoostPythonUtil::list_to_str_vec(list, no_sort);
+    pyutil_list_to_str_vec(list, no_sort);
     self->sort_attributes(attr, recurse, no_sort);
 }
 
@@ -181,7 +181,7 @@ void sort_attributes3(defs_ptr self, const std::string& attribute_name, bool rec
         throw std::runtime_error(ss.str());
     }
     std::vector<std::string> no_sort;
-    BoostPythonUtil::list_to_str_vec(list, no_sort);
+    pyutil_list_to_str_vec(list, no_sort);
     self->sort_attributes(attr, recursive, no_sort);
 }
 
@@ -289,13 +289,13 @@ void export_Defs() {
         .def("__init__", bp::raw_function(&defs_raw_constructor, 0)) // will call -> task_init
         .def("__init__", bp::make_constructor(&defs_init))
         .def("__init__", bp::make_constructor(&create_defs), DefsDoc::add_definition_doc())
-        .def(bp::self == bp::self)            // __eq__
-        .def("__copy__", copyObject<Defs>)    // __copy__ uses copy constructor
-        .def("__str__", convert_to_string)    // __str__
-        .def("__enter__", &defs_enter)        // allow with statement, hence indentation support
-        .def("__exit__", &defs_exit)          // allow with statement, hence indentation support
-        .def("__len__", &defs_len)            // Sized protocol
-        .def("__contains__", &defs_container) // Container protocol
+        .def(bp::self == bp::self)                 // __eq__
+        .def("__copy__", pyutil_copy_object<Defs>) // __copy__ uses copy constructor
+        .def("__str__", convert_to_string)         // __str__
+        .def("__enter__", &defs_enter)             // allow with statement, hence indentation support
+        .def("__exit__", &defs_exit)               // allow with statement, hence indentation support
+        .def("__len__", &defs_len)                 // Sized protocol
+        .def("__contains__", &defs_container)      // Container protocol
         .def("__iter__", bp::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
         .def("__getattr__", &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't
                                               actually exist on the object itself will be passed to __getattr__*/

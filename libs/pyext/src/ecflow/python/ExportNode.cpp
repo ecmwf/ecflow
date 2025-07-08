@@ -23,11 +23,11 @@
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/NodeContainer.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
@@ -84,7 +84,7 @@ node_ptr add_queue(node_ptr self, const QueueAttr& m) {
 }
 node_ptr add_queue1(node_ptr self, const std::string& name, const bp::list& list) {
     std::vector<std::string> vec;
-    BoostPythonUtil::list_to_str_vec(list, vec);
+    pyutil_list_to_str_vec(list, vec);
     QueueAttr queue_attr(name, vec);
     self->add_queue(queue_attr);
     return self;
@@ -96,7 +96,7 @@ node_ptr add_generic(node_ptr self, const GenericAttr& m) {
 }
 node_ptr add_generic1(node_ptr self, const std::string& name, const bp::list& list) {
     std::vector<std::string> vec;
-    BoostPythonUtil::list_to_str_vec(list, vec);
+    pyutil_list_to_str_vec(list, vec);
     GenericAttr attr(name, vec);
     self->add_generic(attr);
     return self;
@@ -238,7 +238,7 @@ node_ptr add_autorestore(node_ptr self, const ecf::AutoRestoreAttr& attr) {
 }
 node_ptr add_autorestore1(node_ptr self, const bp::list& list) {
     std::vector<std::string> vec;
-    BoostPythonUtil::list_to_str_vec(list, vec);
+    pyutil_list_to_str_vec(list, vec);
     self->add_autorestore(ecf::AutoRestoreAttr(vec));
     return self;
 }
@@ -296,7 +296,7 @@ void sort_attributes1(node_ptr self, ecf::Attr::Type attr, bool recursive) {
 }
 void sort_attributes2(node_ptr self, ecf::Attr::Type attr, bool recursive, const bp::list& list) {
     std::vector<std::string> no_sort;
-    BoostPythonUtil::list_to_str_vec(list, no_sort);
+    pyutil_list_to_str_vec(list, no_sort);
     self->sort_attributes(attr, recursive, no_sort);
 }
 
@@ -310,7 +310,7 @@ void sort_attributes3(node_ptr self, const std::string& attribute_name, bool rec
         throw std::runtime_error(ss.str());
     }
     std::vector<std::string> no_sort;
-    BoostPythonUtil::list_to_str_vec(list, no_sort);
+    pyutil_list_to_str_vec(list, no_sort);
     self->sort_attributes(attr, recursive, no_sort);
 }
 

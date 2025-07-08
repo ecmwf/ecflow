@@ -36,8 +36,8 @@
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/Edit.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 #include "ecflow/python/Trigger.hpp"
 
 bp::object NodeUtil::node_raw_constructor(bp::tuple args, bp::dict kw) {
@@ -61,7 +61,7 @@ bp::object NodeUtil::node_raw_constructor(bp::tuple args, bp::dict kw) {
 
 node_ptr NodeUtil::add_variable_dict(node_ptr self, const bp::dict& dict) {
     std::vector<Variable> vec;
-    BoostPythonUtil::dict_to_str_vec(dict, vec);
+    pyutil_dict_to_str_vec(dict, vec);
     for (const auto& i : vec) {
         self->addVariable(i);
     }

@@ -8,14 +8,14 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/python/BoostPythonUtil.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 #include <stdexcept>
 
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/Converter.hpp"
 
-void BoostPythonUtil::list_to_int_vec(const bp::list& list, std::vector<int>& int_vec) {
+void pyutil_list_to_int_vec(const bp::list& list, std::vector<int>& int_vec) {
     auto the_list_size = len(list);
     int_vec.reserve(the_list_size);
     for (ssize_t i = 0; i < the_list_size; ++i) {
@@ -23,7 +23,7 @@ void BoostPythonUtil::list_to_int_vec(const bp::list& list, std::vector<int>& in
     }
 }
 
-void BoostPythonUtil::list_to_str_vec(const bp::list& list, std::vector<std::string>& vec) {
+void pyutil_list_to_str_vec(const bp::list& list, std::vector<std::string>& vec) {
     auto the_list_size = len(list);
     vec.reserve(the_list_size);
     for (ssize_t i = 0; i < the_list_size; ++i) {
@@ -31,7 +31,7 @@ void BoostPythonUtil::list_to_str_vec(const bp::list& list, std::vector<std::str
     }
 }
 
-void BoostPythonUtil::list_to_str_vec(const bp::list& list, std::vector<Variable>& vec) {
+void pyutil_list_to_str_vec(const bp::list& list, std::vector<Variable>& vec) {
     auto the_list_size = len(list);
     vec.reserve(the_list_size);
     for (ssize_t i = 0; i < the_list_size; ++i) {
@@ -39,7 +39,7 @@ void BoostPythonUtil::list_to_str_vec(const bp::list& list, std::vector<Variable
     }
 }
 
-void BoostPythonUtil::dict_to_str_vec(const bp::dict& dict,
+void pyutil_dict_to_str_vec(const bp::dict& dict,
                                       std::vector<std::pair<std::string, std::string>>& str_pair_vec) {
     bp::list keys = dict.keys();
     const auto no_of_keys    = len(keys);
@@ -57,13 +57,13 @@ void BoostPythonUtil::dict_to_str_vec(const bp::dict& dict,
             second      = ecf::convert_to<std::string>(the_int);
         }
         else {
-            throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
+            throw std::runtime_error("PythonUtil::dict_to_str_vec: type not convertible to string or integer");
         }
         str_pair_vec.emplace_back(first, second);
     }
 }
 
-void BoostPythonUtil::dict_to_str_vec(const bp::dict& dict, std::vector<Variable>& vec) {
+void pyutil_dict_to_str_vec(const bp::dict& dict, std::vector<Variable>& vec) {
     bp::list keys = dict.keys();
     const auto no_of_keys    = len(keys);
     vec.reserve(no_of_keys);
@@ -80,7 +80,7 @@ void BoostPythonUtil::dict_to_str_vec(const bp::dict& dict, std::vector<Variable
             second      = ecf::convert_to<std::string>(the_int);
         }
         else
-            throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
+            throw std::runtime_error("PythonUtil::dict_to_str_vec: type not convertible to string or integer");
 
         vec.emplace_back(first, second);
     }

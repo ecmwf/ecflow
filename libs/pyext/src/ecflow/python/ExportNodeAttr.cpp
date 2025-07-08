@@ -36,10 +36,10 @@
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/MirrorAttr.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 #include "ecflow/python/Trigger.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -125,7 +125,7 @@ static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, 
 
                 bp::list second = bp::extract<bp::list>(dict[keys[i]]);
                 std::vector<int> int_vec;
-                BoostPythonUtil::list_to_int_vec(second, int_vec);
+                pyutil_list_to_int_vec(second, int_vec);
 
                 //  expected keywords are: days_of_week,last_week_days_ofThe_month, days_of_month, months
                 if (first == "days_of_week")
@@ -184,18 +184,18 @@ void add_time_series_3(ecf::CronAttr* self, const std::string& ts) {
 
 void set_week_days(ecf::CronAttr* cron, const bp::list& list) {
     std::vector<int> int_vec;
-    BoostPythonUtil::list_to_int_vec(list, int_vec);
+    pyutil_list_to_int_vec(list, int_vec);
     cron->addWeekDays(int_vec);
 }
 void set_last_week_days_of_month(ecf::CronAttr* cron, const bp::list& list) {
     std::vector<int> int_vec;
-    BoostPythonUtil::list_to_int_vec(list, int_vec);
+    pyutil_list_to_int_vec(list, int_vec);
     cron->add_last_week_days_of_month(int_vec);
 }
 
 void set_days_of_month(ecf::CronAttr* cron, const bp::list& list) {
     std::vector<int> int_vec;
-    BoostPythonUtil::list_to_int_vec(list, int_vec);
+    pyutil_list_to_int_vec(list, int_vec);
     cron->addDaysOfMonth(int_vec);
 }
 void set_last_day_of_the_month(ecf::CronAttr* cron) {
@@ -204,7 +204,7 @@ void set_last_day_of_the_month(ecf::CronAttr* cron) {
 
 void set_months(ecf::CronAttr* cron, const bp::list& list) {
     std::vector<int> int_vec;
-    BoostPythonUtil::list_to_int_vec(list, int_vec);
+    pyutil_list_to_int_vec(list, int_vec);
     cron->addMonths(int_vec);
 }
 
@@ -214,34 +214,34 @@ void set_months(ecf::CronAttr* cron, const bp::list& list) {
 // from shared_ptr to pass by reference
 static std::shared_ptr<RepeatEnumerated> create_RepeatEnumerated(const std::string& name, const bp::list& list) {
     std::vector<std::string> vec;
-    BoostPythonUtil::list_to_str_vec(list, vec);
+    pyutil_list_to_str_vec(list, vec);
     return std::make_shared<RepeatEnumerated>(name, vec);
 }
 static std::shared_ptr<RepeatDateList> create_RepeatDateList(const std::string& name, const bp::list& list) {
     std::vector<int> vec;
-    BoostPythonUtil::list_to_int_vec(list, vec);
+    pyutil_list_to_int_vec(list, vec);
     return std::make_shared<RepeatDateList>(name, vec);
 }
 static std::shared_ptr<RepeatString> create_RepeatString(const std::string& name, const bp::list& list) {
     std::vector<std::string> vec;
-    BoostPythonUtil::list_to_str_vec(list, vec);
+    pyutil_list_to_str_vec(list, vec);
     return std::make_shared<RepeatString>(name, vec);
 }
 static std::shared_ptr<ecf::AutoRestoreAttr> create_AutoRestoreAttr(const bp::list& list) {
     std::vector<std::string> vec;
-    BoostPythonUtil::list_to_str_vec(list, vec);
+    pyutil_list_to_str_vec(list, vec);
     return std::make_shared<ecf::AutoRestoreAttr>(vec);
 }
 
 static std::shared_ptr<QueueAttr> create_queue(const std::string& name, const bp::list& list) {
     std::vector<std::string> vec;
-    BoostPythonUtil::list_to_str_vec(list, vec);
+    pyutil_list_to_str_vec(list, vec);
     return std::make_shared<QueueAttr>(name, vec);
 }
 
 static std::shared_ptr<GenericAttr> create_generic(const std::string& name, const bp::list& list) {
     std::vector<std::string> vec;
-    BoostPythonUtil::list_to_str_vec(list, vec);
+    pyutil_list_to_str_vec(list, vec);
     return std::make_shared<GenericAttr>(name, vec);
 }
 
@@ -531,9 +531,9 @@ void export_NodeAttr() {
     bp::class_<ZombieAttr>("ZombieAttr", NodeAttrDoc::zombie_doc())
         .def("__init__", make_constructor(&create_ZombieAttr))
         .def("__init__", make_constructor(&create_ZombieAttr1))
-        .def("__str__", &ZombieAttr::toString)   // __str__
-        .def("__copy__", copyObject<ZombieAttr>) // __copy__ uses copy constructor
-        .def(bp::self == bp::self)               // __eq__
+        .def("__str__", &ZombieAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ZombieAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                       // __eq__
         .def("empty", &ZombieAttr::empty, "Return true if the attribute is empty")
         .def("zombie_type", &ZombieAttr::zombie_type, "Returns the `zombie type`_")
         .def("user_action", &ZombieAttr::action, "The automated action to invoke, when zombies arise")
@@ -548,9 +548,9 @@ void export_NodeAttr() {
         .def(bp::vector_indexing_suite<std::vector<Zombie>, true>());
 
     bp::class_<Zombie>("Zombie", "Represent a zombie process stored by the server")
-        .def("__str__", &Zombie::to_string)  // __str__
-        .def("__copy__", copyObject<Zombie>) // __copy__ uses copy constructor
-        .def(bp::self == bp::self)           // __eq__
+        .def("__str__", &Zombie::to_string)          // __str__
+        .def("__copy__", pyutil_copy_object<Zombie>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                   // __eq__
         .def("empty", &Zombie::empty)
         .def("manual_user_action", &Zombie::manual_user_action)
         .def("fob", &Zombie::fob)
@@ -576,10 +576,10 @@ void export_NodeAttr() {
         .def("allowed_age", &Zombie::allowed_age);
 
     bp::class_<Variable>("Variable", NodeAttrDoc::variable_doc(), bp::init<std::string, std::string>())
-        .def("__str__", &Variable::toString)   // __str__
-        .def("__copy__", copyObject<Variable>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)              // __lt__
-        .def(bp::self == bp::self)             // __eq__
+        .def("__str__", &Variable::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<Variable>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                      // __lt__
+        .def(bp::self == bp::self)                     // __eq__
         .def("name",
              &Variable::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -602,10 +602,10 @@ void export_NodeAttr() {
         .def(bp::vector_indexing_suite<std::vector<Variable>>());
 
     bp::class_<Label>("Label", NodeAttrDoc::label_doc(), bp::init<std::string, std::string>())
-        .def(bp::self == bp::self)          // __eq__
-        .def("__str__", &Label::toString)   // __str__
-        .def("__copy__", copyObject<Label>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)           // __lt__
+        .def(bp::self == bp::self)                  // __eq__
+        .def("__str__", &Label::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<Label>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                   // __lt__
         .def("name",
              &Label::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -626,10 +626,10 @@ void export_NodeAttr() {
     // consumed a limit")
 
     bp::class_<Limit, std::shared_ptr<Limit>>("Limit", NodeAttrDoc::limit_doc(), bp::init<std::string, int>())
-        .def(bp::self == bp::self)          // __eq__
-        .def("__str__", &Limit::toString)   // __str__
-        .def("__copy__", copyObject<Limit>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)           // __lt__
+        .def(bp::self == bp::self)                  // __eq__
+        .def("__str__", &Limit::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<Limit>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                   // __lt__
         .def("name",
              &Limit::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -649,10 +649,10 @@ void export_NodeAttr() {
         .def(bp::init<std::string, std::string, int>())
         .def(bp::init<std::string, std::string, int, bool>())
         .def(bp::init<std::string, std::string, int, bool, bool>())
-        .def(bp::self == bp::self)            // __eq__
-        .def("__str__", &InLimit::toString)   // __str__
-        .def("__copy__", copyObject<InLimit>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)             // __lt__
+        .def(bp::self == bp::self)                    // __eq__
+        .def("__str__", &InLimit::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<InLimit>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                     // __lt__
         .def("name",
              &InLimit::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -673,10 +673,10 @@ void export_NodeAttr() {
         .def(bp::init<std::string, bool>())      // here bool is the initial value, by default is false/clear. The value
                                                  // taken by begin/re-queue
         .def(bp::init<std::string>())
-        .def(bp::self == bp::self)          // __eq__
-        .def("__str__", &Event::toString)   // __str__
-        .def("__copy__", copyObject<Event>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)           // __lt__
+        .def(bp::self == bp::self)                  // __eq__
+        .def("__str__", &Event::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<Event>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                   // __lt__
         .def("name",
              &Event::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -691,10 +691,10 @@ void export_NodeAttr() {
             "empty", &Event::empty, "Return true if the Event is empty. Used when returning a NULL Event, from a find");
 
     bp::class_<Meter>("Meter", NodeAttrDoc::meter_doc(), bp::init<std::string, int, int, bp::optional<int>>())
-        .def(bp::self == bp::self)          // __eq__
-        .def("__str__", &Meter::toString)   // __str__
-        .def("__copy__", copyObject<Meter>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)           // __lt__
+        .def(bp::self == bp::self)                  // __eq__
+        .def("__str__", &Meter::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<Meter>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                   // __lt__
         .def("name",
              &Meter::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -708,10 +708,10 @@ void export_NodeAttr() {
 
     bp::class_<QueueAttr>("Queue", NodeAttrDoc::queue_doc())
         .def("__init__", make_constructor(&create_queue))
-        .def(bp::self == bp::self)              // __eq__
-        .def("__str__", &QueueAttr::toString)   // __str__
-        .def("__copy__", copyObject<QueueAttr>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)               // __lt__
+        .def(bp::self == bp::self)                      // __eq__
+        .def("__str__", &QueueAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<QueueAttr>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                       // __lt__
         .def("name",
              &QueueAttr::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -725,10 +725,10 @@ void export_NodeAttr() {
     bp::class_<GenericAttr>(
         "Generic", "A generic attribute, used to add new attributes for the future, without requiring a API change")
         .def("__init__", make_constructor(&create_generic))
-        .def(bp::self == bp::self)                // __eq__
-        .def("__str__", &GenericAttr::to_string)  // __str__
-        .def("__copy__", copyObject<GenericAttr>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)                 // __lt__
+        .def(bp::self == bp::self)                        // __eq__
+        .def("__str__", &GenericAttr::to_string)          // __str__
+        .def("__copy__", pyutil_copy_object<GenericAttr>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                         // __lt__
         .def("name",
              &GenericAttr::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -742,10 +742,10 @@ void export_NodeAttr() {
 
     bp::class_<DateAttr>("Date", NodeAttrDoc::date_doc(), bp::init<int, int, int>()) // day,month,year
         .def(bp::init<std::string>())
-        .def(bp::self == bp::self)             // __eq__
-        .def("__str__", &DateAttr::toString)   // __str__
-        .def("__copy__", copyObject<DateAttr>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)              // __lt__
+        .def(bp::self == bp::self)                     // __eq__
+        .def("__str__", &DateAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<DateAttr>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                      // __lt__
         .def("day", &DateAttr::day, "Return the day. The range is 0-31, 0 means its wild-carded")
         .def("month", &DateAttr::month, "Return the month. The range is 0-12, 0 means its wild-carded")
         .def("year", &DateAttr::year, "Return the year, 0 means its wild-carded");
@@ -760,11 +760,11 @@ void export_NodeAttr() {
         .value("saturday", DayAttr::SATURDAY);
 
     bp::class_<DayAttr>("Day", NodeAttrDoc::day_doc(), bp::init<DayAttr::Day_t>())
-        .def(bp::init<std::string>())         // constructor
-        .def(bp::self == bp::self)            // __eq__
-        .def("__str__", &DayAttr::toString)   // __str__
-        .def("__copy__", copyObject<DayAttr>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)             // __lt__
+        .def(bp::init<std::string>())                 // constructor
+        .def(bp::self == bp::self)                    // __eq__
+        .def("__str__", &DayAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<DayAttr>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                     // __lt__
         .def("day", &DayAttr::day, "Return the day as enumerator");
 
     bp::class_<ecf::TimeAttr>("Time", NodeAttrDoc::time_doc(), bp::init<ecf::TimeSlot, bp::optional<bool>>())
@@ -772,9 +772,9 @@ void export_NodeAttr() {
         .def(bp::init<ecf::TimeSeries>())
         .def(bp::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bool>())
         .def(bp::init<std::string>())
-        .def(bp::self == bp::self)                  // __eq__
-        .def("__str__", &ecf::TimeAttr::toString)   // __str__
-        .def("__copy__", copyObject<ecf::TimeAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                          // __eq__
+        .def("__str__", &ecf::TimeAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::TimeAttr>) // __copy__ uses copy constructor
         .def("time_series",
              &ecf::TimeAttr::time_series,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -785,9 +785,9 @@ void export_NodeAttr() {
         .def(bp::init<ecf::TimeSeries>())
         .def(bp::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bool>())
         .def(bp::init<std::string>())
-        .def(bp::self == bp::self)                   // __eq__
-        .def("__str__", &ecf::TodayAttr::toString)   // __str__
-        .def("__copy__", copyObject<ecf::TodayAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                           // __eq__
+        .def("__str__", &ecf::TodayAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::TodayAttr>) // __copy__ uses copy constructor
         .def("time_series",
              &ecf::TodayAttr::time_series,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -826,9 +826,9 @@ void export_NodeAttr() {
              &ecf::LateAttr::addComplete,
              "complete(TimeSlot): The time the node must become `complete`_. If relative, time is taken from the time\n"
              "the node became `active`_, otherwise node must be `complete`_ by the time given")
-        .def(bp::self == bp::self)                  // __eq__
-        .def("__str__", &ecf::LateAttr::toString)   // __str__
-        .def("__copy__", copyObject<ecf::LateAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                          // __eq__
+        .def("__str__", &ecf::LateAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::LateAttr>) // __copy__ uses copy constructor
         .def("submitted",
              &ecf::LateAttr::submitted,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -854,10 +854,10 @@ void export_NodeAttr() {
         )
         .def(bp::init<int>()) // days
         .def(bp::init<ecf::TimeSlot, bool>())
-        .def(bp::self == bp::self)                        // __eq__
-        .def("__str__", &ecf::AutoCancelAttr::toString)   // __str__
-        .def("__copy__", copyObject<ecf::AutoCancelAttr>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)                         // __lt__
+        .def(bp::self == bp::self)                                // __eq__
+        .def("__str__", &ecf::AutoCancelAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::AutoCancelAttr>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                                 // __lt__
         .def("time",
              &ecf::AutoCancelAttr::time,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -874,12 +874,12 @@ void export_NodeAttr() {
         bp::init<int, int, bool, bool>() // hour, minute,relative,idle(true means queued,aborted,complete, false means
                                          // completed only)
         )
-        .def(bp::init<int, bool>())                        // days, idle
-        .def(bp::init<ecf::TimeSlot, bool, bool>())        // TimeSlot,relative,idle
-        .def(bp::self == bp::self)                         // __eq__
-        .def("__str__", &ecf::AutoArchiveAttr::toString)   // __str__
-        .def("__copy__", copyObject<ecf::AutoArchiveAttr>) // __copy__ uses copy constructor
-        .def(bp::self < bp::self)                          // __lt__
+        .def(bp::init<int, bool>())                                // days, idle
+        .def(bp::init<ecf::TimeSlot, bool, bool>())                // TimeSlot,relative,idle
+        .def(bp::self == bp::self)                                 // __eq__
+        .def("__str__", &ecf::AutoArchiveAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::AutoArchiveAttr>) // __copy__ uses copy constructor
+        .def(bp::self < bp::self)                                  // __lt__
         .def("time",
              &ecf::AutoArchiveAttr::time,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -896,9 +896,9 @@ void export_NodeAttr() {
     bp::class_<ecf::AutoRestoreAttr, std::shared_ptr<ecf::AutoRestoreAttr>>("Autorestore",
                                                                             NodeAttrDoc::autorestore_doc())
         .def("__init__", make_constructor(&create_AutoRestoreAttr))
-        .def(bp::self == bp::self)                         // __eq__
-        .def("__str__", &ecf::AutoRestoreAttr::toString)   // __str__
-        .def("__copy__", copyObject<ecf::AutoRestoreAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                                 // __eq__
+        .def("__str__", &ecf::AutoRestoreAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::AutoRestoreAttr>) // __copy__ uses copy constructor
         .def("nodes_to_restore",
              &ecf::AutoRestoreAttr::nodes_to_restore,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -912,7 +912,7 @@ void export_NodeAttr() {
                            bp::init<std::string, int, int, bp::optional<int>>()) // name, start, end , delta
         .def(bp::self == bp::self)                                               // __eq__
         .def("__str__", &RepeatDate::toString)                                   // __str__
-        .def("__copy__", copyObject<RepeatDate>)                                 // __copy__ uses copy constructor
+        .def("__copy__", pyutil_copy_object<RepeatDate>)                         // __copy__ uses copy constructor
         .def("name",
              &RepeatDate::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -929,7 +929,7 @@ void export_NodeAttr() {
         bp::init<std::string, std::string, std::string, bp::optional<std::string>>()) // name, start, end , delta
         .def(bp::self == bp::self)                                                    // __eq__
         .def("__str__", &RepeatDateTime::toString)                                    // __str__
-        .def("__copy__", copyObject<RepeatDateTime>)                                  // __copy__ uses copy constructor
+        .def("__copy__", pyutil_copy_object<RepeatDateTime>)                          // __copy__ uses copy constructor
         .def("name",
              &RepeatDateTime::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -943,9 +943,9 @@ void export_NodeAttr() {
 
     bp::class_<RepeatDateList>("RepeatDateList", NodeAttrDoc::repeat_date_list_doc())
         .def("__init__", make_constructor(&create_RepeatDateList))
-        .def(bp::self == bp::self)                   // __eq__
-        .def("__str__", &RepeatDateList::toString)   // __str__
-        .def("__copy__", copyObject<RepeatDateList>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                           // __eq__
+        .def("__str__", &RepeatDateList::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<RepeatDateList>) // __copy__ uses copy constructor
         .def("name",
              &RepeatDateList::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -958,7 +958,7 @@ void export_NodeAttr() {
                               bp::init<std::string, int, int, bp::optional<int>>()) // name, start, end , delta = 1
         .def(bp::self == bp::self)                                                  // __eq__
         .def("__str__", &RepeatInteger::toString)                                   // __str__
-        .def("__copy__", copyObject<RepeatInteger>)                                 // __copy__ uses copy constructor
+        .def("__copy__", pyutil_copy_object<RepeatInteger>)                         // __copy__ uses copy constructor
         .def("name",
              &RepeatInteger::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -972,9 +972,9 @@ void export_NodeAttr() {
     bp::class_<RepeatEnumerated, std::shared_ptr<RepeatEnumerated>>("RepeatEnumerated",
                                                                     NodeAttrDoc::repeat_enumerated_doc())
         .def("__init__", make_constructor(&create_RepeatEnumerated))
-        .def(bp::self == bp::self)                     // __eq__
-        .def("__str__", &RepeatEnumerated::toString)   // __str__
-        .def("__copy__", copyObject<RepeatEnumerated>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                             // __eq__
+        .def("__str__", &RepeatEnumerated::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<RepeatEnumerated>) // __copy__ uses copy constructor
         .def("name",
              &RepeatEnumerated::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -988,9 +988,9 @@ void export_NodeAttr() {
 
     bp::class_<RepeatString, std::shared_ptr<RepeatString>>("RepeatString", NodeAttrDoc::repeat_string_doc())
         .def("__init__", make_constructor(&create_RepeatString))
-        .def(bp::self == bp::self)                 // __eq__
-        .def("__str__", &RepeatString::toString)   // __str__
-        .def("__copy__", copyObject<RepeatString>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                         // __eq__
+        .def("__str__", &RepeatString::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<RepeatString>) // __copy__ uses copy constructor
         .def("name",
              &RepeatString::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -1003,15 +1003,15 @@ void export_NodeAttr() {
 #endif
 
     bp::class_<RepeatDay>("RepeatDay", NodeAttrDoc::repeat_day_doc(), bp::init<bp::optional<int>>())
-        .def(bp::self == bp::self)              // __eq__
-        .def("__str__", &RepeatDay::toString)   // __str__
-        .def("__copy__", copyObject<RepeatDay>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                      // __eq__
+        .def("__str__", &RepeatDay::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<RepeatDay>) // __copy__ uses copy constructor
         ;
 
     bp::class_<Repeat>("Repeat", NodeAttrDoc::repeat_doc(), bp::init<int>())
-        .def(bp::self == bp::self)           // __eq__
-        .def("__str__", &Repeat::toString)   // __str__
-        .def("__copy__", copyObject<Repeat>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                   // __eq__
+        .def("__str__", &Repeat::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<Repeat>) // __copy__ uses copy constructor
         .def("empty", &Repeat::empty, "Return true if the repeat is empty.")
         .def("name",
              &Repeat::name,
@@ -1031,9 +1031,9 @@ void export_NodeAttr() {
         .def("__init__", bp::make_constructor(&cron_init1))
         .def("__init__", bp::make_constructor(&cron_create2))
         .def("__init__", bp::make_constructor(&cron_create))
-        .def(bp::self == bp::self)                  // __eq__
-        .def("__str__", &ecf::CronAttr::toString)   // __str__
-        .def("__copy__", copyObject<ecf::CronAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                          // __eq__
+        .def("__str__", &ecf::CronAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ecf::CronAttr>) // __copy__ uses copy constructor
         .def("set_week_days",
              &set_week_days,
              "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
@@ -1076,16 +1076,16 @@ void export_NodeAttr() {
     bp::class_<VerifyAttr>("Verify", bp::init<NState::State, int>()) // state, expected
         .def(bp::self == bp::self)                                   // __eq__
         .def("__str__", &VerifyAttr::toString)                       // __str__
-        .def("__copy__", copyObject<VerifyAttr>)                     // __copy__ uses copy constructor
+        .def("__copy__", pyutil_copy_object<VerifyAttr>)             // __copy__ uses copy constructor
         ;
 
     bp::class_<ClockAttr, std::shared_ptr<ClockAttr>>(
         "Clock", NodeAttrDoc::clock_doc(), bp::init<int, int, int, bp::optional<bool>>()) // day, month, year, hybrid
         .def(bp::init<int, int, int, bool>())
         .def(bp::init<bool>())
-        .def(bp::self == bp::self)              // __eq__
-        .def("__str__", &ClockAttr::toString)   // __str__
-        .def("__copy__", copyObject<ClockAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                      // __eq__
+        .def("__str__", &ClockAttr::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<ClockAttr>) // __copy__ uses copy constructor
         .def("set_gain_in_seconds", &ClockAttr::set_gain_in_seconds, "Set the gain in seconds")
         .def("set_gain", &ClockAttr::set_gain, "Set the gain in hours and minutes")
         .def("day", &ClockAttr::day, "Returns the day as an integer, range 1-31")
@@ -1105,9 +1105,9 @@ void export_NodeAttr() {
         .def("__init__", bp::make_constructor(&aviso_init_defaults_1))
         .def("__init__", bp::make_constructor(&aviso_init_defaults_2))
         .def("__init__", bp::make_constructor(&aviso_init_defaults_3))
-        .def(bp::self == bp::self)                   // __eq__
-        .def("__str__", &ecf::to_python_string)      // __str__
-        .def("__copy__", copyObject<ecf::AvisoAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                           // __eq__
+        .def("__str__", &ecf::to_python_string)              // __str__
+        .def("__copy__", pyutil_copy_object<ecf::AvisoAttr>) // __copy__ uses copy constructor
         .def("name",
              &ecf::AvisoAttr::name,
              bp::return_value_policy<bp::copy_const_reference>(),
@@ -1137,9 +1137,9 @@ void export_NodeAttr() {
         .def("__init__", bp::make_constructor(&mirror_init_defaults_2))
         .def("__init__", bp::make_constructor(&mirror_init_defaults_3))
         .def("__init__", bp::make_constructor(&mirror_init_defaults_4))
-        .def(bp::self == bp::self)                    // __eq__
-        .def("__str__", &ecf::to_python_string)       // __str__
-        .def("__copy__", copyObject<ecf::MirrorAttr>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                            // __eq__
+        .def("__str__", &ecf::to_python_string)               // __str__
+        .def("__copy__", pyutil_copy_object<ecf::MirrorAttr>) // __copy__ uses copy constructor
         .def("name",
              &ecf::MirrorAttr::name,
              bp::return_value_policy<bp::copy_const_reference>(),

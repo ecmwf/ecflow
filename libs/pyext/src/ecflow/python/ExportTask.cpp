@@ -12,10 +12,10 @@
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 // Sized protocol
 bool task_len(task_ptr self) {
@@ -76,13 +76,13 @@ void export_Task() {
         .def("__init__", make_constructor(&task_init), DefsDoc::task_doc())
         .def("__init__",
              bp::make_constructor(&Task::create_me),
-             DefsDoc::task_doc())          // create_me take a single string argument
-        .def(bp::self == bp::self)         // __eq__
-        .def("__enter__", &task_enter)     // allow with statement, hence indentation support
-        .def("__exit__", &task_exit)       // allow with statement, hence indentation support
-        .def("__str__", &task_to_string)   // __str__
-        .def("__copy__", copyObject<Task>) // __copy__ uses copy constructor
-        .def("__len__", &task_len)         // Implement sized protocol for immediate children
+             DefsDoc::task_doc())                  // create_me take a single string argument
+        .def(bp::self == bp::self)                 // __eq__
+        .def("__enter__", &task_enter)             // allow with statement, hence indentation support
+        .def("__exit__", &task_exit)               // allow with statement, hence indentation support
+        .def("__str__", &task_to_string)           // __str__
+        .def("__copy__", pyutil_copy_object<Task>) // __copy__ uses copy constructor
+        .def("__len__", &task_len)                 // Implement sized protocol for immediate children
         .def("__iter__", bp::range(&Task::alias_begin, &Task::alias_end)) // implement iter protocol
         .add_property("aliases", bp::range(&Task::alias_begin, &Task::alias_end), "Returns a list of aliases")
         .add_property("nodes", bp::range(&Task::alias_begin, &Task::alias_end), "Returns a list of aliases");
@@ -91,9 +91,9 @@ void export_Task() {
 #endif
 
     bp::class_<Alias, bp::bases<Submittable>, alias_ptr>("Alias", DefsDoc::alias_doc(), bp::no_init)
-        .def(bp::self == bp::self)          // __eq__
-        .def("__str__", &alias_to_string)   // __str__
-        .def("__copy__", copyObject<Alias>) // __copy__ uses copy constructor
+        .def(bp::self == bp::self)                  // __eq__
+        .def("__str__", &alias_to_string)           // __str__
+        .def("__copy__", pyutil_copy_object<Alias>) // __copy__ uses copy constructor
         ;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
     bp::register_ptr_to_python<alias_ptr>(); // needed for mac and boost 1.6
