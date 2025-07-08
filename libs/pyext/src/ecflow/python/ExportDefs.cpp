@@ -26,7 +26,6 @@
 #include "ecflow/python/GlossaryDoc.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace boost::python;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -198,38 +197,38 @@ bool defs_container(defs_ptr self, const std::string& name) {
     return (self->findSuite(name)) ? true : false;
 }
 
-static object do_add(defs_ptr self, const bp::object& arg) {
+static bp::object do_add(defs_ptr self, const bp::object& arg) {
     // std::cout << "defs::do_add \n";
-    if (arg.ptr() == object().ptr())
-        return object(self); // *IGNORE* None
-    else if (extract<suite_ptr>(arg).check())
-        self->addSuite(extract<suite_ptr>(arg));
-    else if (extract<dict>(arg).check())
-        add_variable_dict(self, extract<dict>(arg));
-    else if (extract<Edit>(arg).check()) {
-        Edit edit                        = extract<Edit>(arg);
+    if (arg.ptr() == bp::object().ptr())
+        return bp::object(self); // *IGNORE* None
+    else if (bp::extract<suite_ptr>(arg).check())
+        self->addSuite(bp::extract<suite_ptr>(arg));
+    else if (bp::extract<bp::dict>(arg).check())
+        add_variable_dict(self, bp::extract<bp::dict>(arg));
+    else if (bp::extract<Edit>(arg).check()) {
+        Edit edit                        = bp::extract<Edit>(arg);
         const std::vector<Variable>& vec = edit.variables();
         for (const auto& i : vec)
             self->server_state().add_or_update_user_variables(i.name(), i.theValue());
     }
-    else if (extract<bp::list>(arg).check()) {
-        bp::list the_list = extract<bp::list>(arg);
+    else if (bp::extract<bp::list>(arg).check()) {
+        bp::list the_list = bp::extract<bp::list>(arg);
         int the_list_size = len(the_list);
         for (int i = 0; i < the_list_size; ++i)
             (void)do_add(self, the_list[i]); // recursive
     }
-    else if (extract<Variable>(arg).check()) {
-        Variable var = extract<Variable>(arg);
+    else if (bp::extract<Variable>(arg).check()) {
+        Variable var = bp::extract<Variable>(arg);
         self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     }
     else
         throw std::runtime_error("ExportDefs::add : Unknown type");
-    return object(self);
+    return bp::object(self);
 }
 
-static object add(bp::tuple args, dict kwargs) {
+static bp::object add(bp::tuple args, bp::dict kwargs) {
     int the_list_size = len(args);
-    defs_ptr self     = extract<defs_ptr>(args[0]); // self
+    defs_ptr self     = bp::extract<defs_ptr>(args[0]); // self
     if (!self)
         throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
 
@@ -237,41 +236,41 @@ static object add(bp::tuple args, dict kwargs) {
         (void)do_add(self, args[i]);
     (void)add_variable_dict(self, kwargs);
 
-    return object(self); // return defs as python object, relies class_<Defs>... for type registration
+    return bp::object(self); // return defs as python object, relies class_<Defs>... for type registration
 }
 
-static object defs_iadd(defs_ptr self, const bp::list& list) {
+static bp::object defs_iadd(defs_ptr self, const bp::list& list) {
     // std::cout << "defs_iadd  list " << self->name() << "\n";
     int the_list_size = len(list);
     for (int i = 0; i < the_list_size; ++i)
         (void)do_add(self, list[i]);
-    return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+    return bp::object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
-static object defs_getattr(defs_ptr self, const std::string& attr) {
+static bp::object defs_getattr(defs_ptr self, const std::string& attr) {
     // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
     suite_ptr child = self->findSuite(attr);
     if (child)
-        return object(child);
+        return bp::object(child);
 
     Variable var = self->server_state().findVariable(attr);
     if (!var.empty())
-        return object(var);
+        return bp::object(var);
 
     std::stringstream ss;
     ss << "ExportDefs::defs_getattr : function of name '" << attr << "' does not exist *OR* suite or defs variable";
     throw std::runtime_error(ss.str());
-    return object();
+    return bp::object();
 }
 
-object defs_raw_constructor(bp::tuple args, dict kw) {
+bp::object defs_raw_constructor(bp::tuple args, bp::dict kw) {
     // cout << "defs_raw_constructor  len(args):" << len(args) << endl;
     // args[0] is Defs(i.e self)
     bp::list the_list;
     std::string name;
     for (int i = 1; i < len(args); ++i) {
-        if (extract<std::string>(args[i]).check())
-            name = extract<std::string>(args[i]);
+        if (bp::extract<std::string>(args[i]).check())
+            name = bp::extract<std::string>(args[i]);
         else
             the_list.append(args[i]);
     }
@@ -290,11 +289,11 @@ defs_ptr defs_init(bp::list the_list, bp::dict kw) {
 }
 
 void export_Defs() {
-    class_<Defs, defs_ptr>("Defs", DefsDoc::add_definition_doc(), init<>("Create a empty Defs"))
-        .def("__init__", raw_function(&defs_raw_constructor, 0)) // will call -> task_init
-        .def("__init__", make_constructor(&defs_init))
-        .def("__init__", make_constructor(&create_defs), DefsDoc::add_definition_doc())
-        .def(self == self)                    // __eq__
+    bp::class_<Defs, defs_ptr>("Defs", DefsDoc::add_definition_doc(), bp::init<>("Create a empty Defs"))
+        .def("__init__", bp::raw_function(&defs_raw_constructor, 0)) // will call -> task_init
+        .def("__init__", bp::make_constructor(&defs_init))
+        .def("__init__", bp::make_constructor(&create_defs), DefsDoc::add_definition_doc())
+        .def(bp::self == bp::self)            // __eq__
         .def("__copy__", copyObject<Defs>)    // __copy__ uses copy constructor
         .def("__str__", convert_to_string)    // __str__
         .def("__enter__", &defs_enter)        // allow with statement, hence indentation support

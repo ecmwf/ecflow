@@ -45,17 +45,17 @@
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/Trigger.hpp"
 
-using namespace boost::python;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-object late_raw_constructor(bp::tuple args, bp::dict kw) {
+bp::object late_raw_constructor(bp::tuple args, bp::dict kw) {
     // cout << "late_raw_constructor len(args):" << len(args) << endl;
     //  args[0] is Late(i.e self)
-    if (len(args) > 1)
+    if (len(args) > 1) {
         throw std::runtime_error("late_raw_constructor: Late only expects keyword arguments, ie. "
                                  "Late(submitted='00:20',active='15:00',complete='+30:00')");
+    }
     return args[0].attr("__init__")(kw); // calls -> late_init(dict kw)
 }
 
@@ -63,10 +63,10 @@ static void extract_late_keyword_arguments(std::shared_ptr<ecf::LateAttr> late, 
     boost::python::list keys = dict.keys();
     const int no_of_keys     = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
-        if (extract<std::string>(keys[i]).check()) {
-            std::string first = extract<std::string>(keys[i]);
-            if (extract<std::string>(dict[keys[i]]).check()) {
-                std::string second = extract<std::string>(dict[keys[i]]);
+        if (bp::extract<std::string>(keys[i]).check()) {
+            std::string first = bp::extract<std::string>(keys[i]);
+            if (bp::extract<std::string>(dict[keys[i]]).check()) {
+                std::string second = bp::extract<std::string>(dict[keys[i]]);
                 int hour           = 0;
                 int min            = 0;
                 bool relative      = ecf::TimeSeries::getTime(second, hour, min);
@@ -98,25 +98,25 @@ static std::shared_ptr<ecf::LateAttr> late_create() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-object cron_raw_constructor(bp::tuple args, bp::dict kw) {
+bp::object cron_raw_constructor(bp::tuple args, bp::dict kw) {
     // cout << "cron_raw_constructor len(args):" << len(args) << endl;
     //  args[0] is Cron(i.e self) args[1] is string name
     for (int i = 1; i < len(args); ++i) {
-        if (extract<std::string>(args[i]).check()) {
-            std::string time_series = extract<std::string>(args[i]);
+        if (bp::extract<std::string>(args[i]).check()) {
+            std::string time_series = bp::extract<std::string>(args[i]);
             if (time_series.empty())
                 throw std::runtime_error("cron_raw_constructor: Empty string, please pass a valid time, i.e '12:30'");
             return args[0].attr("__init__")(time_series, kw); // calls -> init(const std::string& ts, dict kw)
         }
-        if (extract<ecf::TimeSeries>(args[i]).check()) {
-            ecf::TimeSeries time_series = extract<ecf::TimeSeries>(args[i]);
+        if (bp::extract<ecf::TimeSeries>(args[i]).check()) {
+            ecf::TimeSeries time_series = bp::extract<ecf::TimeSeries>(args[i]);
             return args[0].attr("__init__")(time_series, kw); // calls -> init(const ecf::TimeSeries& ts, dict kw)
         }
         else
             throw std::runtime_error("cron_raw_constructor: expects string | TimeSeries and keyword arguments");
     }
     throw std::runtime_error("cron_raw_constructor: expects string | TimeSeries and keyword arguments !!");
-    return object();
+    return bp::object();
 }
 
 static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, bp::dict& dict) {
@@ -124,11 +124,11 @@ static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, 
     const int no_of_keys     = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
 
-        if (extract<std::string>(keys[i]).check()) {
-            std::string first = extract<std::string>(keys[i]);
-            if (extract<bp::list>(dict[keys[i]]).check()) {
+        if (bp::extract<std::string>(keys[i]).check()) {
+            std::string first = bp::extract<std::string>(keys[i]);
+            if (bp::extract<bp::list>(dict[keys[i]]).check()) {
 
-                bp::list second = extract<bp::list>(dict[keys[i]]);
+                bp::list second = bp::extract<bp::list>(dict[keys[i]]);
                 std::vector<int> int_vec;
                 BoostPythonUtil::list_to_int_vec(second, int_vec);
 
@@ -146,16 +146,19 @@ static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, 
                         "extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | "
                         "last_week_days_of_the_month | days_of_month | months | last_day_of_the_month");
             }
-            else if (extract<bool>(dict[keys[i]]).check()) {
-                if (first == "last_day_of_the_month")
+            else if (bp::extract<bool>(dict[keys[i]]).check()) {
+                if (first == "last_day_of_the_month") {
                     cron->add_last_day_of_month();
-                else
+                }
+                else {
                     throw std::runtime_error(
                         "extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | "
                         "last_week_days_of_the_month | days_of_month | months | last_day_of_the_month]");
+                }
             }
-            else
+            else {
                 throw std::runtime_error("extract_cron_keyword_arguments: keyword arguments to be a list");
+            }
         }
     }
 }
@@ -253,7 +256,7 @@ create_ZombieAttr(ecf::Child::ZombieType zt, const bp::list& list, ecf::ZombieCt
     int the_list_size = len(list);
     vec.reserve(the_list_size);
     for (int i = 0; i < the_list_size; ++i) {
-        vec.push_back(extract<ecf::Child::CmdType>(list[i]));
+        vec.push_back(bp::extract<ecf::Child::CmdType>(list[i]));
     }
     return std::make_shared<ZombieAttr>(zt, vec, uc, life_time_in_server);
 }
@@ -264,7 +267,7 @@ create_ZombieAttr1(ecf::Child::ZombieType zt, const bp::list& list, ecf::ZombieC
     int the_list_size = len(list);
     vec.reserve(the_list_size);
     for (int i = 0; i < the_list_size; ++i) {
-        vec.push_back(extract<ecf::Child::CmdType>(list[i]));
+        vec.push_back(bp::extract<ecf::Child::CmdType>(list[i]));
     }
     return std::make_shared<ZombieAttr>(zt, vec, uc);
 }
@@ -362,38 +365,39 @@ static std::shared_ptr<ecf::MirrorAttr> mirror_init_defaults_4(const std::string
 
 void export_NodeAttr() {
     // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
-    class_<Trigger, std::shared_ptr<Trigger>>("Trigger", DefsDoc::trigger(), init<std::string>())
-        .def(init<PartExpression>())
-        .def(init<bp::list>())
-        .def(init<std::string, bool>())
-        .def(self == self)                    // __eq__
+    bp::class_<Trigger, std::shared_ptr<Trigger>>("Trigger", DefsDoc::trigger(), bp::init<std::string>())
+        .def(bp::init<PartExpression>())
+        .def(bp::init<bp::list>())
+        .def(bp::init<std::string, bool>())
+        .def(bp::self == bp::self)            // __eq__
         .def("__str__", &Trigger::expression) // __str__
         .def("get_expression", &Trigger::expression, "returns the trigger expression as a string");
 
-    class_<Complete, std::shared_ptr<Complete>>("Complete", DefsDoc::trigger(), init<std::string>())
-        .def(init<PartExpression>())
-        .def(init<bp::list>())
-        .def(init<std::string, bool>())
-        .def(self == self)                     // __eq__
+    bp::class_<Complete, std::shared_ptr<Complete>>("Complete", DefsDoc::trigger(), bp::init<std::string>())
+        .def(bp::init<PartExpression>())
+        .def(bp::init<bp::list>())
+        .def(bp::init<std::string, bool>())
+        .def(bp::self == bp::self)             // __eq__
         .def("__str__", &Complete::expression) // __str__
         .def("get_expression", &Complete::expression, "returns the complete expression as a string");
 
     // mimic PartExpression(const std::string& expression  )
     // mimic PartExpression(const std::string& expression, bool andExpr /* true means AND , false means OR */ )
     // Use to adding large trigger and complete expressions
-    class_<PartExpression>("PartExpression", DefsDoc::part_expression_doc(), init<std::string>())
-        .def(init<std::string, bool>())
-        .def(self == self) // __eq__
+    bp::class_<PartExpression>("PartExpression", DefsDoc::part_expression_doc(), bp::init<std::string>())
+        .def(bp::init<std::string, bool>())
+        .def(bp::self == bp::self) // __eq__
         .def("get_expression",
              &PartExpression::expression,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "returns the part expression as a string")
         .def("and_expr", &PartExpression::andExpr)
         .def("or_expr", &PartExpression::orExpr);
 
-    class_<Expression, std::shared_ptr<Expression>>("Expression", DefsDoc::expression_doc(), init<std::string>())
-        .def(init<PartExpression>())
-        .def(self == self)                       // __eq__
+    bp::class_<Expression, std::shared_ptr<Expression>>(
+        "Expression", DefsDoc::expression_doc(), bp::init<std::string>())
+        .def(bp::init<PartExpression>())
+        .def(bp::self == bp::self)               // __eq__
         .def("__str__", &Expression::expression) // __str__
         .def("get_expression", &Expression::expression, "returns the complete expression as a string")
         .def("add",
@@ -402,33 +406,34 @@ void export_NodeAttr() {
         .add_property(
             "parts", bp::range(&Expression::part_begin, &Expression::part_end), "Returns a list of PartExpression's");
 
-    enum_<ecf::Flag::Type>("FlagType",
-                           "Flags store state associated with a node\n\n"
-                           "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
-                           "- USER_EDIT     - task\n"
-                           "- TASK_ABORTED  - task*\n"
-                           "- EDIT_FAILED   - task*\n"
-                           "- JOBCMD_FAILED - task*\n"
-                           "- KILLCMD_FAILED   - task*\n"
-                           "- STATUSCMD_FAILED - task*\n"
-                           "- NO_SCRIPT     - task*\n"
-                           "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
-                           "- STATUS        - task* indicates that the status command has been run\n"
-                           "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
-                           "- MESSAGE       - Node\n"
-                           "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
-                           "- QUEUELIMIT    - Node\n"
-                           "- WAIT          - task* \n"
-                           "- LOCKED        - Server\n"
-                           "- ZOMBIE        - task*\n"
-                           "- NO_REQUE      - task\n"
-                           "- ARCHIVED      - Suite/Family\n"
-                           "- RESTORED      - Family/Family\n"
-                           "- THRESHOLD     - task\n"
-                           "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
-                           "- LOG_ERROR     - Error in opening or writing to log file\n"
-                           "- CHECKPT_ERROR - Error in opening or writing to checkpt file \n"
-                           "- NOT_SET\n")
+    bp::enum_<ecf::Flag::Type>(
+        "FlagType",
+        "Flags store state associated with a node\n\n"
+        "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
+        "- USER_EDIT     - task\n"
+        "- TASK_ABORTED  - task*\n"
+        "- EDIT_FAILED   - task*\n"
+        "- JOBCMD_FAILED - task*\n"
+        "- KILLCMD_FAILED   - task*\n"
+        "- STATUSCMD_FAILED - task*\n"
+        "- NO_SCRIPT     - task*\n"
+        "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+        "- STATUS        - task* indicates that the status command has been run\n"
+        "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
+        "- MESSAGE       - Node\n"
+        "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
+        "- QUEUELIMIT    - Node\n"
+        "- WAIT          - task* \n"
+        "- LOCKED        - Server\n"
+        "- ZOMBIE        - task*\n"
+        "- NO_REQUE      - task\n"
+        "- ARCHIVED      - Suite/Family\n"
+        "- RESTORED      - Family/Family\n"
+        "- THRESHOLD     - task\n"
+        "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
+        "- LOG_ERROR     - Error in opening or writing to log file\n"
+        "- CHECKPT_ERROR - Error in opening or writing to checkpt file \n"
+        "- NOT_SET\n")
         .value("force_abort", ecf::Flag::FORCE_ABORT)
         .value("user_edit", ecf::Flag::USER_EDIT)
         .value("task_aborted", ecf::Flag::TASK_ABORTED)
@@ -456,9 +461,9 @@ void export_NodeAttr() {
         .value("checkpt_error", ecf::Flag::CHECKPT_ERROR)
         .value("remote_error", ecf::Flag::REMOTE_ERROR);
 
-    class_<ecf::Flag>("Flag", "Represents additional state associated with a Node.\n\n", init<>())
+    bp::class_<ecf::Flag>("Flag", "Represents additional state associated with a Node.\n\n", bp::init<>())
         .def("__str__", &ecf::Flag::to_string) // __str__
-        .def(self == self)                     // __eq__
+        .def(bp::self == bp::self)             // __eq__
         .def("is_set", &ecf::Flag::is_set, "Queries if a given flag is set")
         .def("set", &ecf::Flag::set, "Sets the given flag. Used in test only")
         .def("clear", &ecf::Flag::clear, "Clear the given flag. Used in test only")
@@ -468,11 +473,11 @@ void export_NodeAttr() {
         .def("type_to_string", &ecf::Flag::enum_to_string, "Convert type to a string. Used in test only")
         .staticmethod("type_to_string");
 
-    class_<std::vector<ecf::Flag::Type>>("FlagTypeVec", "Hold a list of flag types")
-        .def(vector_indexing_suite<std::vector<ecf::Flag::Type>, true>());
+    bp::class_<std::vector<ecf::Flag::Type>>("FlagTypeVec", "Hold a list of flag types")
+        .def(bp::vector_indexing_suite<std::vector<ecf::Flag::Type>, true>());
 
-    class_<JobCreationCtrl, boost::noncopyable, job_creation_ctrl_ptr>("JobCreationCtrl", DefsDoc::jobgenctrl_doc())
-        .def("__init__", make_constructor(makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
+    bp::class_<JobCreationCtrl, boost::noncopyable, job_creation_ctrl_ptr>("JobCreationCtrl", DefsDoc::jobgenctrl_doc())
+        .def("__init__", bp::make_constructor(makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
         .def("set_node_path",
              &JobCreationCtrl::set_node_path,
              "The node we want to check job creation for. If no node specified check all tasks")
@@ -482,7 +487,7 @@ void export_NodeAttr() {
         .def("set_verbose", &JobCreationCtrl::set_verbose, "Output each task as its being checked.")
         .def("get_dir_for_job_creation",
              &JobCreationCtrl::dir_for_job_creation,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the directory set for job creation")
         .def(
             "generate_temp_dir",
@@ -490,10 +495,10 @@ void export_NodeAttr() {
             "Automatically generated temporary directory for job creation. Directory written to stdout for information")
         .def("get_error_msg",
              &JobCreationCtrl::get_error_msg,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns an error message generated during checking of job creation");
 
-    enum_<ecf::Child::ZombieType>("ZombieType", NodeAttrDoc::zombie_type_doc())
+    bp::enum_<ecf::Child::ZombieType>("ZombieType", NodeAttrDoc::zombie_type_doc())
         .value("ecf", ecf::Child::ECF)
         .value("ecf_pid", ecf::Child::ECF_PID)
         .value("ecf_pid_passwd", ecf::Child::ECF_PID_PASSWD)
@@ -501,7 +506,7 @@ void export_NodeAttr() {
         .value("user", ecf::Child::USER)
         .value("path", ecf::Child::PATH);
 
-    enum_<ecf::ZombieCtrlAction>("ZombieUserActionType", NodeAttrDoc::zombie_user_action_type_doc())
+    bp::enum_<ecf::ZombieCtrlAction>("ZombieUserActionType", NodeAttrDoc::zombie_user_action_type_doc())
         .value("fob", ecf::ZombieCtrlAction::FOB)
         .value("fail", ecf::ZombieCtrlAction::FAIL)
         .value("remove", ecf::ZombieCtrlAction::REMOVE)
@@ -509,7 +514,7 @@ void export_NodeAttr() {
         .value("block", ecf::ZombieCtrlAction::BLOCK)
         .value("kill", ecf::ZombieCtrlAction::KILL);
 
-    enum_<ecf::Child::CmdType>("ChildCmdType", NodeAttrDoc::child_cmd_type_doc())
+    bp::enum_<ecf::Child::CmdType>("ChildCmdType", NodeAttrDoc::child_cmd_type_doc())
         .value("init", ecf::Child::INIT)
         .value("event", ecf::Child::EVENT)
         .value("meter", ecf::Child::METER)
@@ -519,8 +524,8 @@ void export_NodeAttr() {
         .value("abort", ecf::Child::ABORT)
         .value("complete", ecf::Child::COMPLETE);
 
-    enum_<ecf::Attr::Type>("AttrType",
-                           "Sortable attribute type, currently [event | meter | label | limit | variable | all ]")
+    bp::enum_<ecf::Attr::Type>("AttrType",
+                               "Sortable attribute type, currently [event | meter | label | limit | variable | all ]")
         .value("event", ecf::Attr::EVENT)
         .value("meter", ecf::Attr::METER)
         .value("label", ecf::Attr::LABEL)
@@ -528,12 +533,12 @@ void export_NodeAttr() {
         .value("variable", ecf::Attr::VARIABLE)
         .value("all", ecf::Attr::ALL);
 
-    class_<ZombieAttr>("ZombieAttr", NodeAttrDoc::zombie_doc())
+    bp::class_<ZombieAttr>("ZombieAttr", NodeAttrDoc::zombie_doc())
         .def("__init__", make_constructor(&create_ZombieAttr))
         .def("__init__", make_constructor(&create_ZombieAttr1))
         .def("__str__", &ZombieAttr::toString)   // __str__
         .def("__copy__", copyObject<ZombieAttr>) // __copy__ uses copy constructor
-        .def(self == self)                       // __eq__
+        .def(bp::self == bp::self)               // __eq__
         .def("empty", &ZombieAttr::empty, "Return true if the attribute is empty")
         .def("zombie_type", &ZombieAttr::zombie_type, "Returns the `zombie type`_")
         .def("user_action", &ZombieAttr::action, "The automated action to invoke, when zombies arise")
@@ -544,13 +549,13 @@ void export_NodeAttr() {
                       bp::range(&ZombieAttr::child_begin, &ZombieAttr::child_end),
                       "The list of child commands. If empty action applies to all child cmds");
 
-    class_<std::vector<Zombie>>("ZombieVec", "Hold a list of zombies")
-        .def(vector_indexing_suite<std::vector<Zombie>, true>());
+    bp::class_<std::vector<Zombie>>("ZombieVec", "Hold a list of zombies")
+        .def(bp::vector_indexing_suite<std::vector<Zombie>, true>());
 
-    class_<Zombie>("Zombie", "Represent a zombie process stored by the server")
+    bp::class_<Zombie>("Zombie", "Represent a zombie process stored by the server")
         .def("__str__", &Zombie::to_string)  // __str__
         .def("__copy__", copyObject<Zombie>) // __copy__ uses copy constructor
-        .def(self == self)                   // __eq__
+        .def(bp::self == bp::self)           // __eq__
         .def("empty", &Zombie::empty)
         .def("manual_user_action", &Zombie::manual_user_action)
         .def("fob", &Zombie::fob)
@@ -562,55 +567,61 @@ void export_NodeAttr() {
         .def("type", &Zombie::type)
         .def("type_str", &Zombie::type_str)
         .def("last_child_cmd", &Zombie::last_child_cmd)
-        .def("attr", &Zombie::attr, return_value_policy<copy_const_reference>())
+        .def("attr", &Zombie::attr, bp::return_value_policy<bp::copy_const_reference>())
         .def("calls", &Zombie::calls)
-        .def("jobs_password", &Zombie::jobs_password, return_value_policy<copy_const_reference>())
-        .def("path_to_task", &Zombie::path_to_task, return_value_policy<copy_const_reference>())
-        .def("process_or_remote_id", &Zombie::process_or_remote_id, return_value_policy<copy_const_reference>())
-        .def("user_cmd", &Zombie::user_cmd, return_value_policy<copy_const_reference>())
+        .def("jobs_password", &Zombie::jobs_password, bp::return_value_policy<bp::copy_const_reference>())
+        .def("path_to_task", &Zombie::path_to_task, bp::return_value_policy<bp::copy_const_reference>())
+        .def("process_or_remote_id", &Zombie::process_or_remote_id, bp::return_value_policy<bp::copy_const_reference>())
+        .def("user_cmd", &Zombie::user_cmd, bp::return_value_policy<bp::copy_const_reference>())
         .def("try_no", &Zombie::try_no)
         .def("duration", &Zombie::duration)
         .def("user_action", &Zombie::user_action)
         .def("user_action_str", &Zombie::user_action_str)
-        .def("host", &Zombie::host, return_value_policy<copy_const_reference>())
+        .def("host", &Zombie::host, bp::return_value_policy<bp::copy_const_reference>())
         .def("allowed_age", &Zombie::allowed_age);
 
-    class_<Variable>("Variable", NodeAttrDoc::variable_doc(), init<std::string, std::string>())
+    bp::class_<Variable>("Variable", NodeAttrDoc::variable_doc(), bp::init<std::string, std::string>())
         .def("__str__", &Variable::toString)   // __str__
         .def("__copy__", copyObject<Variable>) // __copy__ uses copy constructor
-        .def(self < self)                      // __lt__
-        .def(self == self)                     // __eq__
-        .def("name", &Variable::name, return_value_policy<copy_const_reference>(), "Return the variable name as string")
+        .def(bp::self < bp::self)              // __lt__
+        .def(bp::self == bp::self)             // __eq__
+        .def("name",
+             &Variable::name,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             "Return the variable name as string")
         .def("value",
              &Variable::theValue,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the variable value as a string")
         .def("empty",
              &Variable::empty,
              "Return true if the variable is empty. Used when returning a Null variable, from a find");
-    // .add_property("value", make_function(&Variable::theValue ,return_value_policy<copy_const_reference>()),
+    // .add_property("value", make_function(&Variable::theValue ,bp::return_value_policy<bp::copy_const_reference>()),
     //                       &Variable::set_value,  "get/set the value as a property")
     // The following works v = Variable('name','fred')
     //   print v.value
     // But it will then break v.value()
 
     // We need to return pass a list of Variable as arguments, to retrieve the generated variables
-    class_<std::vector<Variable>>("VariableList", "Hold a list of Variables")
-        .def(vector_indexing_suite<std::vector<Variable>>());
+    bp::class_<std::vector<Variable>>("VariableList", "Hold a list of Variables")
+        .def(bp::vector_indexing_suite<std::vector<Variable>>());
 
-    class_<Label>("Label", NodeAttrDoc::label_doc(), init<std::string, std::string>())
-        .def(self == self)                  // __eq__
+    bp::class_<Label>("Label", NodeAttrDoc::label_doc(), bp::init<std::string, std::string>())
+        .def(bp::self == bp::self)          // __eq__
         .def("__str__", &Label::toString)   // __str__
         .def("__copy__", copyObject<Label>) // __copy__ uses copy constructor
-        .def(self < self)                   // __lt__
-        .def("name", &Label::name, return_value_policy<copy_const_reference>(), "Return the `label`_ name as string")
+        .def(bp::self < bp::self)           // __lt__
+        .def("name",
+             &Label::name,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             "Return the `label`_ name as string")
         .def("value",
              &Label::value,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the original `label`_ value as string")
         .def("new_value",
              &Label::new_value,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the new label value as string")
         .def(
             "empty", &Label::empty, "Return true if the Label is empty. Used when returning a NULL Label, from a find");
@@ -619,12 +630,15 @@ void export_NodeAttr() {
     //.add_property("node_paths", bp::range(&Limit::paths_begin,&Limit::paths_begin),"List of nodes(paths) that have
     // consumed a limit")
 
-    class_<Limit, std::shared_ptr<Limit>>("Limit", NodeAttrDoc::limit_doc(), init<std::string, int>())
-        .def(self == self)                  // __eq__
+    bp::class_<Limit, std::shared_ptr<Limit>>("Limit", NodeAttrDoc::limit_doc(), bp::init<std::string, int>())
+        .def(bp::self == bp::self)          // __eq__
         .def("__str__", &Limit::toString)   // __str__
         .def("__copy__", copyObject<Limit>) // __copy__ uses copy constructor
-        .def(self < self)                   // __lt__
-        .def("name", &Limit::name, return_value_policy<copy_const_reference>(), "Return the `limit`_ name as string")
+        .def(bp::self < bp::self)           // __lt__
+        .def("name",
+             &Limit::name,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             "Return the `limit`_ name as string")
         .def("value", &Limit::value, "The `limit`_ token value as an integer")
         .def("limit", &Limit::theLimit, "The max value of the `limit`_ as an integer")
         .def("increment", &Limit::increment, "used for test only")
@@ -634,21 +648,23 @@ void export_NodeAttr() {
     bp::register_ptr_to_python<std::shared_ptr<Limit>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<InLimit>("InLimit", NodeAttrDoc::inlimit_doc())
-        .def(init<std::string>())
-        .def(init<std::string, std::string>())
-        .def(init<std::string, std::string, int>())
-        .def(init<std::string, std::string, int, bool>())
-        .def(init<std::string, std::string, int, bool, bool>())
-        .def(self == self)                    // __eq__
+    bp::class_<InLimit>("InLimit", NodeAttrDoc::inlimit_doc())
+        .def(bp::init<std::string>())
+        .def(bp::init<std::string, std::string>())
+        .def(bp::init<std::string, std::string, int>())
+        .def(bp::init<std::string, std::string, int, bool>())
+        .def(bp::init<std::string, std::string, int, bool, bool>())
+        .def(bp::self == bp::self)            // __eq__
         .def("__str__", &InLimit::toString)   // __str__
         .def("__copy__", copyObject<InLimit>) // __copy__ uses copy constructor
-        .def(self < self)                     // __lt__
-        .def(
-            "name", &InLimit::name, return_value_policy<copy_const_reference>(), "Return the `inlimit`_ name as string")
+        .def(bp::self < bp::self)             // __lt__
+        .def("name",
+             &InLimit::name,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             "Return the `inlimit`_ name as string")
         .def("path_to_node",
              &InLimit::pathToNode,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Path to the node that holds the limit, can be empty")
         .def("limit_this_node_only",
              &InLimit::limit_this_node_only,
@@ -656,19 +672,19 @@ void export_NodeAttr() {
         .def("limit_submission", &InLimit::limit_submission, "Limit submission only")
         .def("tokens", &InLimit::tokens, "The number of token to consume from the Limit");
 
-    class_<Event>("Event", NodeAttrDoc::event_doc(), init<int, bp::optional<std::string>>())
-        .def(init<int, std::string, bool>()) // here bool is the initial value, by default is false/clear. The value
-                                             // taken by begin/re-queue
-        .def(init<std::string, bool>()) // here bool is the initial value, by default is false/clear. The value taken by
-                                        // begin/re-queue
-        .def(init<std::string>())
-        .def(self == self)                  // __eq__
+    bp::class_<Event>("Event", NodeAttrDoc::event_doc(), bp::init<int, bp::optional<std::string>>())
+        .def(bp::init<int, std::string, bool>()) // here bool is the initial value, by default is false/clear. The value
+                                                 // taken by begin/re-queue
+        .def(bp::init<std::string, bool>())      // here bool is the initial value, by default is false/clear. The value
+                                                 // taken by begin/re-queue
+        .def(bp::init<std::string>())
+        .def(bp::self == bp::self)          // __eq__
         .def("__str__", &Event::toString)   // __str__
         .def("__copy__", copyObject<Event>) // __copy__ uses copy constructor
-        .def(self < self)                   // __lt__
+        .def(bp::self < bp::self)           // __lt__
         .def("name",
              &Event::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the Events name as string. If number supplied name may be empty.")
         .def("number", &Event::number, "Return events number as a integer. If not specified return max integer value")
         .def("name_or_number", &Event::name_or_number, "Returns name or number as string")
@@ -679,12 +695,15 @@ void export_NodeAttr() {
         .def(
             "empty", &Event::empty, "Return true if the Event is empty. Used when returning a NULL Event, from a find");
 
-    class_<Meter>("Meter", NodeAttrDoc::meter_doc(), init<std::string, int, int, bp::optional<int>>())
-        .def(self == self)                  // __eq__
+    bp::class_<Meter>("Meter", NodeAttrDoc::meter_doc(), bp::init<std::string, int, int, bp::optional<int>>())
+        .def(bp::self == bp::self)          // __eq__
         .def("__str__", &Meter::toString)   // __str__
         .def("__copy__", copyObject<Meter>) // __copy__ uses copy constructor
-        .def(self < self)                   // __lt__
-        .def("name", &Meter::name, return_value_policy<copy_const_reference>(), "Return the Meters name as string")
+        .def(bp::self < bp::self)           // __lt__
+        .def("name",
+             &Meter::name,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             "Return the Meters name as string")
         .def("min", &Meter::min, "Return the Meters minimum value")
         .def("max", &Meter::max, "Return the Meters maximum value")
         .def("value", &Meter::value, "Return meters current value")
@@ -692,29 +711,32 @@ void export_NodeAttr() {
         .def(
             "empty", &Meter::empty, "Return true if the Meter is empty. Used when returning a NULL Meter, from a find");
 
-    class_<QueueAttr>("Queue", NodeAttrDoc::queue_doc())
+    bp::class_<QueueAttr>("Queue", NodeAttrDoc::queue_doc())
         .def("__init__", make_constructor(&create_queue))
-        .def(self == self)                      // __eq__
+        .def(bp::self == bp::self)              // __eq__
         .def("__str__", &QueueAttr::toString)   // __str__
         .def("__copy__", copyObject<QueueAttr>) // __copy__ uses copy constructor
-        .def(self < self)                       // __lt__
-        .def("name", &QueueAttr::name, return_value_policy<copy_const_reference>(), "Return the queue name as string")
+        .def(bp::self < bp::self)               // __lt__
+        .def("name",
+             &QueueAttr::name,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             "Return the queue name as string")
         .def("value", &QueueAttr::value, "Return the queue current value as string")
         .def("index", &QueueAttr::index, "Return the queue current index as a integer")
         .def("empty",
              &QueueAttr::empty,
              "Return true if the Queue is empty. Used when returning a NULL Queue, from a find");
 
-    class_<GenericAttr>(
+    bp::class_<GenericAttr>(
         "Generic", "A generic attribute, used to add new attributes for the future, without requiring a API change")
         .def("__init__", make_constructor(&create_generic))
-        .def(self == self)                        // __eq__
+        .def(bp::self == bp::self)                // __eq__
         .def("__str__", &GenericAttr::to_string)  // __str__
         .def("__copy__", copyObject<GenericAttr>) // __copy__ uses copy constructor
-        .def(self < self)                         // __lt__
+        .def(bp::self < bp::self)                 // __lt__
         .def("name",
              &GenericAttr::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the generic name as string")
         .def("empty",
              &GenericAttr::empty,
@@ -723,17 +745,17 @@ void export_NodeAttr() {
                       boost::python::range(&GenericAttr::values_begin, &GenericAttr::values_end),
                       "The list of values for the generic");
 
-    class_<DateAttr>("Date", NodeAttrDoc::date_doc(), init<int, int, int>()) // day,month,year
-        .def(init<std::string>())
-        .def(self == self)                     // __eq__
+    bp::class_<DateAttr>("Date", NodeAttrDoc::date_doc(), bp::init<int, int, int>()) // day,month,year
+        .def(bp::init<std::string>())
+        .def(bp::self == bp::self)             // __eq__
         .def("__str__", &DateAttr::toString)   // __str__
         .def("__copy__", copyObject<DateAttr>) // __copy__ uses copy constructor
-        .def(self < self)                      // __lt__
+        .def(bp::self < bp::self)              // __lt__
         .def("day", &DateAttr::day, "Return the day. The range is 0-31, 0 means its wild-carded")
         .def("month", &DateAttr::month, "Return the month. The range is 0-12, 0 means its wild-carded")
         .def("year", &DateAttr::year, "Return the year, 0 means its wild-carded");
 
-    enum_<DayAttr::Day_t>("Days", NodeAttrDoc::days_enum_doc())
+    bp::enum_<DayAttr::Day_t>("Days", NodeAttrDoc::days_enum_doc())
         .value("sunday", DayAttr::SUNDAY)
         .value("monday", DayAttr::MONDAY)
         .value("tuesday", DayAttr::TUESDAY)
@@ -742,44 +764,44 @@ void export_NodeAttr() {
         .value("friday", DayAttr::FRIDAY)
         .value("saturday", DayAttr::SATURDAY);
 
-    class_<DayAttr>("Day", NodeAttrDoc::day_doc(), init<DayAttr::Day_t>())
-        .def(init<std::string>())             // constructor
-        .def(self == self)                    // __eq__
+    bp::class_<DayAttr>("Day", NodeAttrDoc::day_doc(), bp::init<DayAttr::Day_t>())
+        .def(bp::init<std::string>())         // constructor
+        .def(bp::self == bp::self)            // __eq__
         .def("__str__", &DayAttr::toString)   // __str__
         .def("__copy__", copyObject<DayAttr>) // __copy__ uses copy constructor
-        .def(self < self)                     // __lt__
+        .def(bp::self < bp::self)             // __lt__
         .def("day", &DayAttr::day, "Return the day as enumerator");
 
-    class_<ecf::TimeAttr>("Time", NodeAttrDoc::time_doc(), init<ecf::TimeSlot, bp::optional<bool>>())
-        .def(init<int, int, bp::optional<bool>>()) // hour, minute, relative
-        .def(init<ecf::TimeSeries>())
-        .def(init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bool>())
-        .def(init<std::string>())
-        .def(self == self)                          // __eq__
+    bp::class_<ecf::TimeAttr>("Time", NodeAttrDoc::time_doc(), bp::init<ecf::TimeSlot, bp::optional<bool>>())
+        .def(bp::init<int, int, bp::optional<bool>>()) // hour, minute, relative
+        .def(bp::init<ecf::TimeSeries>())
+        .def(bp::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bool>())
+        .def(bp::init<std::string>())
+        .def(bp::self == bp::self)                  // __eq__
         .def("__str__", &ecf::TimeAttr::toString)   // __str__
         .def("__copy__", copyObject<ecf::TimeAttr>) // __copy__ uses copy constructor
         .def("time_series",
              &ecf::TimeAttr::time_series,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the Time attributes time series");
 
-    class_<ecf::TodayAttr>("Today", NodeAttrDoc::today_doc(), init<ecf::TimeSlot, bp::optional<bool>>())
-        .def(init<int, int, bp::optional<bool>>()) // hour, minute, relative
-        .def(init<ecf::TimeSeries>())
-        .def(init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bool>())
-        .def(init<std::string>())
-        .def(self == self)                           // __eq__
+    bp::class_<ecf::TodayAttr>("Today", NodeAttrDoc::today_doc(), bp::init<ecf::TimeSlot, bp::optional<bool>>())
+        .def(bp::init<int, int, bp::optional<bool>>()) // hour, minute, relative
+        .def(bp::init<ecf::TimeSeries>())
+        .def(bp::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bool>())
+        .def(bp::init<std::string>())
+        .def(bp::self == bp::self)                   // __eq__
         .def("__str__", &ecf::TodayAttr::toString)   // __str__
         .def("__copy__", copyObject<ecf::TodayAttr>) // __copy__ uses copy constructor
         .def("time_series",
              &ecf::TodayAttr::time_series,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the Todays time series");
 
-    class_<ecf::LateAttr, std::shared_ptr<ecf::LateAttr>>("Late", NodeAttrDoc::late_doc())
-        .def("__init__", raw_function(&late_raw_constructor, 1)) // will call -> late_init
-        .def("__init__", make_constructor(&late_init))
-        .def("__init__", make_constructor(&late_create))
+    bp::class_<ecf::LateAttr, std::shared_ptr<ecf::LateAttr>>("Late", NodeAttrDoc::late_doc())
+        .def("__init__", bp::raw_function(&late_raw_constructor, 1)) // will call -> late_init
+        .def("__init__", bp::make_constructor(&late_init))
+        .def("__init__", bp::make_constructor(&late_create))
         .def(
             "submitted",
             &ecf::LateAttr::addSubmitted,
@@ -809,20 +831,20 @@ void export_NodeAttr() {
              &ecf::LateAttr::addComplete,
              "complete(TimeSlot): The time the node must become `complete`_. If relative, time is taken from the time\n"
              "the node became `active`_, otherwise node must be `complete`_ by the time given")
-        .def(self == self)                          // __eq__
+        .def(bp::self == bp::self)                  // __eq__
         .def("__str__", &ecf::LateAttr::toString)   // __str__
         .def("__copy__", copyObject<ecf::LateAttr>) // __copy__ uses copy constructor
         .def("submitted",
              &ecf::LateAttr::submitted,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the submitted time as a TimeSlot")
         .def("active",
              &ecf::LateAttr::active,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the active time as a TimeSlot")
         .def("complete",
              &ecf::LateAttr::complete,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the complete time as a TimeSlot")
         .def("complete_is_relative",
              &ecf::LateAttr::complete_is_relative,
@@ -832,18 +854,18 @@ void export_NodeAttr() {
     bp::register_ptr_to_python<std::shared_ptr<ecf::LateAttr>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<ecf::AutoCancelAttr, std::shared_ptr<ecf::AutoCancelAttr>>(
-        "Autocancel", NodeAttrDoc::autocancel_doc(), init<int, int, bool>() // hour, minute, relative
+    bp::class_<ecf::AutoCancelAttr, std::shared_ptr<ecf::AutoCancelAttr>>(
+        "Autocancel", NodeAttrDoc::autocancel_doc(), bp::init<int, int, bool>() // hour, minute, relative
         )
-        .def(init<int>()) // days
-        .def(init<ecf::TimeSlot, bool>())
-        .def(self == self)                                // __eq__
+        .def(bp::init<int>()) // days
+        .def(bp::init<ecf::TimeSlot, bool>())
+        .def(bp::self == bp::self)                        // __eq__
         .def("__str__", &ecf::AutoCancelAttr::toString)   // __str__
         .def("__copy__", copyObject<ecf::AutoCancelAttr>) // __copy__ uses copy constructor
-        .def(self < self)                                 // __lt__
+        .def(bp::self < bp::self)                         // __lt__
         .def("time",
              &ecf::AutoCancelAttr::time,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "returns cancel time as a TimeSlot")
         .def("relative", &ecf::AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
         .def("days", &ecf::AutoCancelAttr::days, "Returns a boolean true if time was specified in days");
@@ -851,21 +873,21 @@ void export_NodeAttr() {
     bp::register_ptr_to_python<std::shared_ptr<ecf::AutoCancelAttr>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<ecf::AutoArchiveAttr, std::shared_ptr<ecf::AutoArchiveAttr>>(
+    bp::class_<ecf::AutoArchiveAttr, std::shared_ptr<ecf::AutoArchiveAttr>>(
         "Autoarchive",
         NodeAttrDoc::autoarchive_doc(),
-        init<int, int, bool, bool>() // hour, minute,relative,idle(true means queued,aborted,complete, false means
-                                     // completed only)
+        bp::init<int, int, bool, bool>() // hour, minute,relative,idle(true means queued,aborted,complete, false means
+                                         // completed only)
         )
-        .def(init<int, bool>())                            // days, idle
-        .def(init<ecf::TimeSlot, bool, bool>())            // TimeSlot,relative,idle
-        .def(self == self)                                 // __eq__
+        .def(bp::init<int, bool>())                        // days, idle
+        .def(bp::init<ecf::TimeSlot, bool, bool>())        // TimeSlot,relative,idle
+        .def(bp::self == bp::self)                         // __eq__
         .def("__str__", &ecf::AutoArchiveAttr::toString)   // __str__
         .def("__copy__", copyObject<ecf::AutoArchiveAttr>) // __copy__ uses copy constructor
-        .def(self < self)                                  // __lt__
+        .def(bp::self < bp::self)                          // __lt__
         .def("time",
              &ecf::AutoArchiveAttr::time,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "returns archive time as a TimeSlot")
         .def("relative", &ecf::AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
         .def("days", &ecf::AutoArchiveAttr::days, "Returns a boolean true if time was specified in days")
@@ -876,42 +898,46 @@ void export_NodeAttr() {
     boost::python::register_ptr_to_python<std::shared_ptr<ecf::AutoArchiveAttr>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<ecf::AutoRestoreAttr, std::shared_ptr<ecf::AutoRestoreAttr>>("Autorestore", NodeAttrDoc::autorestore_doc())
+    bp::class_<ecf::AutoRestoreAttr, std::shared_ptr<ecf::AutoRestoreAttr>>("Autorestore",
+                                                                            NodeAttrDoc::autorestore_doc())
         .def("__init__", make_constructor(&create_AutoRestoreAttr))
-        .def(self == self)                                 // __eq__
+        .def(bp::self == bp::self)                         // __eq__
         .def("__str__", &ecf::AutoRestoreAttr::toString)   // __str__
         .def("__copy__", copyObject<ecf::AutoRestoreAttr>) // __copy__ uses copy constructor
         .def("nodes_to_restore",
              &ecf::AutoRestoreAttr::nodes_to_restore,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "returns a list of nodes to be restored");
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
     boost::python::register_ptr_to_python<std::shared_ptr<AutoRestoreAttr>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<RepeatDate>("RepeatDate",
-                       NodeAttrDoc::repeat_date_doc(),
-                       init<std::string, int, int, bp::optional<int>>()) // name, start, end , delta
-        .def(self == self)                                               // __eq__
-        .def("__str__", &RepeatDate::toString)                           // __str__
-        .def("__copy__", copyObject<RepeatDate>)                         // __copy__ uses copy constructor
-        .def("name", &RepeatDate::name, return_value_policy<copy_const_reference>(), "Return the name of the repeat.")
+    bp::class_<RepeatDate>("RepeatDate",
+                           NodeAttrDoc::repeat_date_doc(),
+                           bp::init<std::string, int, int, bp::optional<int>>()) // name, start, end , delta
+        .def(bp::self == bp::self)                                               // __eq__
+        .def("__str__", &RepeatDate::toString)                                   // __str__
+        .def("__copy__", copyObject<RepeatDate>)                                 // __copy__ uses copy constructor
+        .def("name",
+             &RepeatDate::name,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             "Return the name of the repeat.")
         .def("start", &RepeatDate::start, "Return the start date as an integer in yyyymmdd format")
         .def("end", &RepeatDate::end, "Return the end date as an integer in yyyymmdd format")
         .def("step",
              &RepeatDate::step,
              "Return the step increment. This is used to update the repeat, until end date is reached");
 
-    class_<RepeatDateTime>(
+    bp::class_<RepeatDateTime>(
         "RepeatDateTime",
         NodeAttrDoc::repeat_datetime_doc(),
-        init<std::string, std::string, std::string, bp::optional<std::string>>()) // name, start, end , delta
-        .def(self == self)                                                        // __eq__
-        .def("__str__", &RepeatDateTime::toString)                                // __str__
-        .def("__copy__", copyObject<RepeatDateTime>)                              // __copy__ uses copy constructor
+        bp::init<std::string, std::string, std::string, bp::optional<std::string>>()) // name, start, end , delta
+        .def(bp::self == bp::self)                                                    // __eq__
+        .def("__str__", &RepeatDateTime::toString)                                    // __str__
+        .def("__copy__", copyObject<RepeatDateTime>)                                  // __copy__ uses copy constructor
         .def("name",
              &RepeatDateTime::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the name of the repeat.")
         .def(
             "start", &RepeatDateTime::start, "Return the start date as an integer (i.e. seconds since 19700101T000000)")
@@ -920,41 +946,43 @@ void export_NodeAttr() {
              &RepeatDateTime::step,
              "Return the step increment (in seconds). This is used to update the repeat, until end instant is reached");
 
-    class_<RepeatDateList>("RepeatDateList", NodeAttrDoc::repeat_date_list_doc())
+    bp::class_<RepeatDateList>("RepeatDateList", NodeAttrDoc::repeat_date_list_doc())
         .def("__init__", make_constructor(&create_RepeatDateList))
-        .def(self == self)                           // __eq__
+        .def(bp::self == bp::self)                   // __eq__
         .def("__str__", &RepeatDateList::toString)   // __str__
         .def("__copy__", copyObject<RepeatDateList>) // __copy__ uses copy constructor
         .def("name",
              &RepeatDateList::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the name of the repeat.")
         .def("start", &RepeatDateList::start, "Return the start date as an integer in yyyymmdd format")
         .def("end", &RepeatDateList::end, "Return the end date as an integer in yyyymmdd format");
 
-    class_<RepeatInteger>("RepeatInteger",
-                          NodeAttrDoc::repeat_integer_doc(),
-                          init<std::string, int, int, bp::optional<int>>()) // name, start, end , delta = 1
-        .def(self == self)                                                  // __eq__
-        .def("__str__", &RepeatInteger::toString)                           // __str__
-        .def("__copy__", copyObject<RepeatInteger>)                         // __copy__ uses copy constructor
-        .def(
-            "name", &RepeatInteger::name, return_value_policy<copy_const_reference>(), "Return the name of the repeat.")
+    bp::class_<RepeatInteger>("RepeatInteger",
+                              NodeAttrDoc::repeat_integer_doc(),
+                              bp::init<std::string, int, int, bp::optional<int>>()) // name, start, end , delta = 1
+        .def(bp::self == bp::self)                                                  // __eq__
+        .def("__str__", &RepeatInteger::toString)                                   // __str__
+        .def("__copy__", copyObject<RepeatInteger>)                                 // __copy__ uses copy constructor
+        .def("name",
+             &RepeatInteger::name,
+             bp::return_value_policy<bp::copy_const_reference>(),
+             "Return the name of the repeat.")
         .def("start", &RepeatInteger::start)
         .def("end", &RepeatInteger::end)
         .def("step", &RepeatInteger::step);
 
     // Create as shared because: we want to pass a Python list as part of the constructor,
     // and the only way make_constructor works is with a pointer.
-    class_<RepeatEnumerated, std::shared_ptr<RepeatEnumerated>>("RepeatEnumerated",
-                                                                NodeAttrDoc::repeat_enumerated_doc())
+    bp::class_<RepeatEnumerated, std::shared_ptr<RepeatEnumerated>>("RepeatEnumerated",
+                                                                    NodeAttrDoc::repeat_enumerated_doc())
         .def("__init__", make_constructor(&create_RepeatEnumerated))
-        .def(self == self)                             // __eq__
+        .def(bp::self == bp::self)                     // __eq__
         .def("__str__", &RepeatEnumerated::toString)   // __str__
         .def("__copy__", copyObject<RepeatEnumerated>) // __copy__ uses copy constructor
         .def("name",
              &RepeatEnumerated::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the name of the `repeat`_.")
         .def("start", &RepeatEnumerated::start)
         .def("end", &RepeatEnumerated::end)
@@ -963,14 +991,14 @@ void export_NodeAttr() {
     bp::register_ptr_to_python<std::shared_ptr<RepeatEnumerated>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<RepeatString, std::shared_ptr<RepeatString>>("RepeatString", NodeAttrDoc::repeat_string_doc())
+    bp::class_<RepeatString, std::shared_ptr<RepeatString>>("RepeatString", NodeAttrDoc::repeat_string_doc())
         .def("__init__", make_constructor(&create_RepeatString))
-        .def(self == self)                         // __eq__
+        .def(bp::self == bp::self)                 // __eq__
         .def("__str__", &RepeatString::toString)   // __str__
         .def("__copy__", copyObject<RepeatString>) // __copy__ uses copy constructor
         .def("name",
              &RepeatString::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the name of the `repeat`_.")
         .def("start", &RepeatString::start)
         .def("end", &RepeatString::end)
@@ -979,20 +1007,20 @@ void export_NodeAttr() {
     bp::register_ptr_to_python<std::shared_ptr<RepeatString>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<RepeatDay>("RepeatDay", NodeAttrDoc::repeat_day_doc(), init<bp::optional<int>>())
-        .def(self == self)                      // __eq__
+    bp::class_<RepeatDay>("RepeatDay", NodeAttrDoc::repeat_day_doc(), bp::init<bp::optional<int>>())
+        .def(bp::self == bp::self)              // __eq__
         .def("__str__", &RepeatDay::toString)   // __str__
         .def("__copy__", copyObject<RepeatDay>) // __copy__ uses copy constructor
         ;
 
-    class_<Repeat>("Repeat", NodeAttrDoc::repeat_doc(), init<int>())
-        .def(self == self)                   // __eq__
+    bp::class_<Repeat>("Repeat", NodeAttrDoc::repeat_doc(), bp::init<int>())
+        .def(bp::self == bp::self)           // __eq__
         .def("__str__", &Repeat::toString)   // __str__
         .def("__copy__", copyObject<Repeat>) // __copy__ uses copy constructor
         .def("empty", &Repeat::empty, "Return true if the repeat is empty.")
         .def("name",
              &Repeat::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "The `repeat`_ name, can be referenced in `trigger`_ expressions")
         .def("start", &Repeat::start, "The start value of the repeat, as an integer")
         .def("end", &Repeat::end, "The last value of the repeat, as an integer")
@@ -1002,13 +1030,13 @@ void export_NodeAttr() {
     void (ecf::CronAttr::*add_time_series)(const ecf::TimeSeries&) = &ecf::CronAttr::addTimeSeries;
     void (ecf::CronAttr::*add_time_series_2)(const ecf::TimeSlot& s, const ecf::TimeSlot& f, const ecf::TimeSlot& i) =
         &ecf::CronAttr::addTimeSeries;
-    class_<ecf::CronAttr, std::shared_ptr<ecf::CronAttr>>("Cron", NodeAttrDoc::cron_doc())
-        .def("__init__", raw_function(&cron_raw_constructor, 1)) // will call -> cron_init or cron_init1
-        .def("__init__", make_constructor(&cron_init))
-        .def("__init__", make_constructor(&cron_init1))
-        .def("__init__", make_constructor(&cron_create2))
-        .def("__init__", make_constructor(&cron_create))
-        .def(self == self)                          // __eq__
+    bp::class_<ecf::CronAttr, std::shared_ptr<ecf::CronAttr>>("Cron", NodeAttrDoc::cron_doc())
+        .def("__init__", bp::raw_function(&cron_raw_constructor, 1)) // will call -> cron_init or cron_init1
+        .def("__init__", bp::make_constructor(&cron_init))
+        .def("__init__", bp::make_constructor(&cron_init1))
+        .def("__init__", bp::make_constructor(&cron_create2))
+        .def("__init__", bp::make_constructor(&cron_create))
+        .def(bp::self == bp::self)                  // __eq__
         .def("__str__", &ecf::CronAttr::toString)   // __str__
         .def("__copy__", copyObject<ecf::CronAttr>) // __copy__ uses copy constructor
         .def("set_week_days",
@@ -1031,7 +1059,7 @@ void export_NodeAttr() {
         .def("set_time_series", &add_time_series_3, "Add a time series. This will never complete")
         .def("time",
              &ecf::CronAttr::time,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "return cron time as a TimeSeries")
         .def("last_day_of_the_month",
              &ecf::CronAttr::last_day_of_the_month,
@@ -1050,17 +1078,17 @@ void export_NodeAttr() {
                       bp::range(&ecf::CronAttr::months_begin, &ecf::CronAttr::months_end),
                       "returns a integer list of months of the year");
 
-    class_<VerifyAttr>("Verify", init<NState::State, int>()) // state, expected
-        .def(self == self)                                   // __eq__
-        .def("__str__", &VerifyAttr::toString)               // __str__
-        .def("__copy__", copyObject<VerifyAttr>)             // __copy__ uses copy constructor
+    bp::class_<VerifyAttr>("Verify", bp::init<NState::State, int>()) // state, expected
+        .def(bp::self == bp::self)                                   // __eq__
+        .def("__str__", &VerifyAttr::toString)                       // __str__
+        .def("__copy__", copyObject<VerifyAttr>)                     // __copy__ uses copy constructor
         ;
 
-    class_<ClockAttr, std::shared_ptr<ClockAttr>>(
-        "Clock", NodeAttrDoc::clock_doc(), init<int, int, int, bp::optional<bool>>()) // day, month, year, hybrid
-        .def(init<int, int, int, bool>())
-        .def(init<bool>())
-        .def(self == self)                      // __eq__
+    bp::class_<ClockAttr, std::shared_ptr<ClockAttr>>(
+        "Clock", NodeAttrDoc::clock_doc(), bp::init<int, int, int, bp::optional<bool>>()) // day, month, year, hybrid
+        .def(bp::init<int, int, int, bool>())
+        .def(bp::init<bool>())
+        .def(bp::self == bp::self)              // __eq__
         .def("__str__", &ClockAttr::toString)   // __str__
         .def("__copy__", copyObject<ClockAttr>) // __copy__ uses copy constructor
         .def("set_gain_in_seconds", &ClockAttr::set_gain_in_seconds, "Set the gain in seconds")
@@ -1076,62 +1104,61 @@ void export_NodeAttr() {
     bp::register_ptr_to_python<std::shared_ptr<ClockAttr>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<ecf::AvisoAttr>("AvisoAttr", NodeAttrDoc::aviso_doc())
-        .def("__init__", make_constructor(&aviso_init))
-        .def("__init__", make_constructor(&aviso_init_defaults_0))
-        .def("__init__", make_constructor(&aviso_init_defaults_1))
-        .def("__init__", make_constructor(&aviso_init_defaults_2))
-        .def("__init__", make_constructor(&aviso_init_defaults_3))
-        .def(self == self)                           // __eq__
+    bp::class_<ecf::AvisoAttr>("AvisoAttr", NodeAttrDoc::aviso_doc())
+        .def("__init__", bp::make_constructor(&aviso_init))
+        .def("__init__", bp::make_constructor(&aviso_init_defaults_0))
+        .def("__init__", bp::make_constructor(&aviso_init_defaults_1))
+        .def("__init__", bp::make_constructor(&aviso_init_defaults_2))
+        .def("__init__", bp::make_constructor(&aviso_init_defaults_3))
+        .def(bp::self == bp::self)                   // __eq__
         .def("__str__", &ecf::to_python_string)      // __str__
         .def("__copy__", copyObject<ecf::AvisoAttr>) // __copy__ uses copy constructor
         .def("name",
              &ecf::AvisoAttr::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the name of the Aviso attribute")
         .def("listener",
              &ecf::AvisoAttr::listener,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the Aviso listener configuration")
         .def("url",
              &ecf::AvisoAttr::url,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the URL used to contact the Aviso server")
         .def("schema",
              &ecf::AvisoAttr::schema,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the path to the schema used to contact the Aviso server")
         .def("polling", &ecf::AvisoAttr::polling, "Returns polling interval used to contact the Aviso server")
         .def("auth",
              &ecf::AvisoAttr::auth,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the path to Authentication credentials used to contact the Aviso server");
 
-    class_<ecf::MirrorAttr>("MirrorAttr", NodeAttrDoc::mirror_doc())
-        .def("__init__", make_constructor(&mirror_init))
-        .def("__init__", make_constructor(&mirror_init_defaults_0))
-        .def("__init__", make_constructor(&mirror_init_defaults_1))
-        .def("__init__", make_constructor(&mirror_init_defaults_2))
-        .def("__init__", make_constructor(&mirror_init_defaults_3))
-        .def("__init__", make_constructor(&mirror_init_defaults_4))
-        .def(self == self)                            // __eq__
+    bp::class_<ecf::MirrorAttr>("MirrorAttr", NodeAttrDoc::mirror_doc())
+        .def("__init__", bp::make_constructor(&mirror_init))
+        .def("__init__", bp::make_constructor(&mirror_init_defaults_0))
+        .def("__init__", bp::make_constructor(&mirror_init_defaults_1))
+        .def("__init__", bp::make_constructor(&mirror_init_defaults_2))
+        .def("__init__", bp::make_constructor(&mirror_init_defaults_3))
+        .def(bp::self == bp::self)                    // __eq__
         .def("__str__", &ecf::to_python_string)       // __str__
         .def("__copy__", copyObject<ecf::MirrorAttr>) // __copy__ uses copy constructor
         .def("name",
              &ecf::MirrorAttr::name,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the name of the Mirror attribute")
         .def("remote_path",
              &ecf::MirrorAttr::remote_path,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the path on the remote ecFlow server")
         .def("remote_host",
              &ecf::MirrorAttr::remote_host,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the host of the remote ecFlow server")
         .def("remote_port",
              &ecf::MirrorAttr::remote_port,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the port of the remote ecFlow server")
         .def("ssl", &ecf::MirrorAttr::ssl, "Returns a boolean, where true means that SSL is enabled")
         .def("polling",
@@ -1139,6 +1166,6 @@ void export_NodeAttr() {
              "Returns the polling interval used to contact the remove ecFlow server")
         .def("auth",
              &ecf::MirrorAttr::auth,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Returns the path to Authentication credentials used to contact the remote ecFlow server");
 }

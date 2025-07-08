@@ -11,7 +11,7 @@
 #include <boost/python.hpp>
 #include <boost/python/docstring_options.hpp>
 
-using namespace boost::python;
+namespace bp = boost::python;
 
 void export_Core();
 void export_NodeAttr();
@@ -28,8 +28,9 @@ BOOST_PYTHON_MODULE(ecflow) {
         true, // show Python signatures.
         false // Don't mention the C++ method signatures in the generated docstrings
     );
-    scope().attr("__doc__") = "The ecflow module provides the python bindings/api for creating definition structure "
-                              "and communicating with the server.";
+    bp::scope().attr("__doc__") =
+        "The ecflow module provides the python bindings/api for creating definition structure "
+        "and communicating with the server.";
 
     export_Core();
     export_NodeAttr();

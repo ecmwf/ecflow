@@ -32,7 +32,6 @@
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
 
-using namespace boost::python;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -404,15 +403,15 @@ void generated_variables_using_variablelist(node_ptr self, std::vector<Variable>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-static object do_rshift(node_ptr self, const bp::object& arg) {
+static bp::object do_rshift(node_ptr self, const bp::object& arg) {
     // std::cout << "do_rshift\n";
     (void)NodeUtil::do_add(self, arg);
 
-    if (extract<node_ptr>(arg).check()) {
+    if (bp::extract<node_ptr>(arg).check()) {
         NodeContainer* nc = self->isNodeContainer();
         if (!nc)
             throw std::runtime_error("ExportNode::do_rshift() : Can only add a child to Suite or Family");
-        node_ptr child = extract<node_ptr>(arg);
+        node_ptr child = bp::extract<node_ptr>(arg);
 
         std::vector<node_ptr> children;
         nc->immediateChildren(children);
@@ -430,18 +429,18 @@ static object do_rshift(node_ptr self, const bp::object& arg) {
                 previous_child = i;
         }
     }
-    return object(self);
+    return bp::object(self);
 }
-static object do_lshift(node_ptr self, const bp::object& arg) {
+static bp::object do_lshift(node_ptr self, const bp::object& arg) {
     // std::cout << "do_lshift : " << self->name() << "\n"; cout << flush;
     (void)NodeUtil::do_add(self, arg);
 
-    if (extract<node_ptr>(arg).check()) {
+    if (bp::extract<node_ptr>(arg).check()) {
 
         NodeContainer* nc = self->isNodeContainer();
         if (!nc)
             throw std::runtime_error("ExportNode::do_lshift() : Can only add a child to Suite or Family");
-        node_ptr child = extract<node_ptr>(arg);
+        node_ptr child = bp::extract<node_ptr>(arg);
 
         std::vector<node_ptr> children;
         nc->immediateChildren(children);
@@ -462,12 +461,12 @@ static object do_lshift(node_ptr self, const bp::object& arg) {
             }
         }
     }
-    return object(self);
+    return bp::object(self);
 }
 
-static object add(bp::tuple args, bp::dict kwargs) {
+static bp::object add(bp::tuple args, bp::dict kwargs) {
     int the_list_size = len(args);
-    node_ptr self     = extract<node_ptr>(args[0]); // self
+    node_ptr self     = bp::extract<node_ptr>(args[0]); // self
     if (!self)
         throw std::runtime_error("ExportNode::add() : first argument is not a node");
 
@@ -477,42 +476,42 @@ static object add(bp::tuple args, bp::dict kwargs) {
     // key word arguments are use for adding variable only
     (void)NodeUtil::add_variable_dict(self, kwargs);
 
-    return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+    return bp::object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
-static object node_getattr(node_ptr self, const std::string& attr) {
+static bp::object node_getattr(node_ptr self, const std::string& attr) {
     // cout << " node_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
     size_t pos     = 0;
     node_ptr child = self->findImmediateChild(attr, pos);
     if (child) {
-        return object(child);
+        return bp::object(child);
     }
 
     const Variable& var = self->findVariable(attr);
     if (!var.empty())
-        return object(var);
+        return bp::object(var);
 
     const Variable& gvar = self->findGenVariable(attr);
     if (!gvar.empty())
-        return object(gvar);
+        return bp::object(gvar);
 
     const Event& event = self->findEventByNameOrNumber(attr);
     if (!event.empty())
-        return object(event);
+        return bp::object(event);
 
     const Meter& meter = self->findMeter(attr);
     if (!meter.empty())
-        return object(meter);
+        return bp::object(meter);
 
     limit_ptr limit = self->find_limit(attr);
     if (limit.get())
-        return object(limit);
+        return bp::object(limit);
 
     std::stringstream ss;
     ss << "ExportNode::node_getattr: function of name '" << attr
        << "' does not exist *OR* child node,variable,meter,event or limit on node " << self->absNodePath();
     throw std::runtime_error(ss.str());
-    return object();
+    return bp::object();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -574,13 +573,13 @@ void export_Node() {
     // Turn off proxies by passing true as the NoProxy template parameter.
     // shared_ptrs don't need proxies because calls on one a copy of the
     // shared_ptr will affect all of them (duh!).
-    class_<std::vector<node_ptr>>("NodeVec", "Hold a list of Nodes (i.e `suite`_, `family`_ or `task`_\\ s)")
-        .def(vector_indexing_suite<std::vector<node_ptr>, true>());
+    bp::class_<std::vector<node_ptr>>("NodeVec", "Hold a list of Nodes (i.e `suite`_, `family`_ or `task`_\\ s)")
+        .def(bp::vector_indexing_suite<std::vector<node_ptr>, true>());
 
-    class_<Node, boost::noncopyable, node_ptr>("Node", DefsDoc::node_doc(), no_init)
-        .def("name", &Node::name, return_value_policy<copy_const_reference>())
+    bp::class_<Node, boost::noncopyable, node_ptr>("Node", DefsDoc::node_doc(), bp::no_init)
+        .def("name", &Node::name, bp::return_value_policy<bp::copy_const_reference>())
         .def("add", raw_function(add, 1), DefsDoc::add())  // a.add(b) & a.add([b])
-        .def(self < self)                                  // __lt__
+        .def(bp::self < bp::self)                          // __lt__
         .def("__add__", &NodeUtil::do_add, DefsDoc::add()) // a + b
         .def("__rshift__",
              &do_rshift) // nc >> a >> b >> c     a + (b.add(Trigger('a==complete')) + (c.add(Trigger('b==complete')))
@@ -717,38 +716,38 @@ void export_Node() {
         .def("is_suspended", &Node::isSuspended, "Returns true if the `node`_ is in a `suspended`_ state")
         .def("find_variable",
              &Node::findVariable,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Find user variable on the node only. Returns an object")
         .def("find_gen_variable",
              &Node::findGenVariable,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Find generated variable on the node only. Returns an object")
         .def("find_parent_variable",
              &Node::find_parent_variable,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Find user variable variable up the parent hierarchy. Returns an object")
         .def("find_parent_variable_sub_value",
              &Node::find_parent_variable_sub_value,
              "Find user variable *up* node tree, then variable substitute the value, otherwise return empty string")
         .def("find_meter",
              &Node::findMeter,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Find the `meter`_ on the node only. Returns an object")
         .def("find_event",
              &Node::findEventByNameOrNumber,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Find the `event`_ on the node only. Returns a object")
         .def("find_label",
              &Node::find_label,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Find the `label`_ on the node only. Returns a object")
         .def("find_queue",
              &Node::find_queue,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Find the queue on the node only. Returns a queue object")
         .def("find_generic",
              &Node::find_generic,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Find the `generic`_ on the node only. Returns a Generic object")
         .def("find_limit", &Node::find_limit, "Find the `limit`_ on the node only. returns a limit ptr")
         .def("find_node_up_the_tree", &Node::find_node_up_the_tree, "Search immediate node, then up the node hierarchy")
@@ -760,19 +759,19 @@ void export_Node() {
              "iso, simple)")
         .def("get_dstate", &Node::dstate, "Returns the state of node. This will include suspended state")
         .def("get_defstatus", &Node::defStatus)
-        .def("get_repeat", &Node::repeat, return_value_policy<copy_const_reference>())
-        .def("get_late", &get_late_attr, return_internal_reference<>())
-        .def("get_autocancel", &get_autocancel_attr, return_internal_reference<>())
-        .def("get_autoarchive", &get_autoarchive_attr, return_internal_reference<>())
-        .def("get_autorestore", &get_autorestore_attr, return_internal_reference<>())
-        .def("get_trigger", &Node::get_trigger, return_internal_reference<>())
-        .def("get_complete", &Node::get_complete, return_internal_reference<>())
-        .def("get_defs", get_defs, return_internal_reference<>())
-        .def("get_parent", &Node::parent, return_internal_reference<>())
+        .def("get_repeat", &Node::repeat, bp::return_value_policy<bp::copy_const_reference>())
+        .def("get_late", &get_late_attr, bp::return_internal_reference<>())
+        .def("get_autocancel", &get_autocancel_attr, bp::return_internal_reference<>())
+        .def("get_autoarchive", &get_autoarchive_attr, bp::return_internal_reference<>())
+        .def("get_autorestore", &get_autorestore_attr, bp::return_internal_reference<>())
+        .def("get_trigger", &Node::get_trigger, bp::return_internal_reference<>())
+        .def("get_complete", &Node::get_complete, bp::return_internal_reference<>())
+        .def("get_defs", get_defs, bp::return_internal_reference<>())
+        .def("get_parent", &Node::parent, bp::return_internal_reference<>())
         .def("get_all_nodes", &get_all_nodes, "Returns all the child nodes")
         .def("get_flag",
              &get_flag_attr,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return additional state associated with a node.")
         .def("replace_on_server",
              &replace_on_server,

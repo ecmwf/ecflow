@@ -21,7 +21,6 @@
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
 
-using namespace boost::python;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -107,14 +106,15 @@ void export_SuiteAndFamily() {
     // Turn off proxies by passing true as the NoProxy template parameter.
     // shared_ptrs don't need proxies because calls on one a copy of the
     // shared_ptr will affect all of them (duh!).
-    class_<std::vector<family_ptr>>("FamilyVec", "Hold a list of `family`_ nodes")
-        .def(vector_indexing_suite<std::vector<family_ptr>, true>());
+    bp::class_<std::vector<family_ptr>>("FamilyVec", "Hold a list of `family`_ nodes")
+        .def(bp::vector_indexing_suite<std::vector<family_ptr>, true>());
 
-    class_<std::vector<suite_ptr>>("SuiteVec", "Hold a list of `suite`_ nodes's")
-        .def(vector_indexing_suite<std::vector<suite_ptr>, true>());
+    bp::class_<std::vector<suite_ptr>>("SuiteVec", "Hold a list of `suite`_ nodes's")
+        .def(bp::vector_indexing_suite<std::vector<suite_ptr>, true>());
 
     // choose the correct overload
-    class_<NodeContainer, bases<Node>, boost::noncopyable>("NodeContainer", DefsDoc::node_container_doc(), no_init)
+    bp::class_<NodeContainer, bp::bases<Node>, boost::noncopyable>(
+        "NodeContainer", DefsDoc::node_container_doc(), bp::no_init)
         .def("__iter__", bp::range(&NodeContainer::node_begin, &NodeContainer::node_end))
         .def("add_family", &NodeContainer::add_family, DefsDoc::add_family_doc())
         .def("add_family", add_family)
@@ -126,11 +126,11 @@ void export_SuiteAndFamily() {
         .add_property(
             "nodes", bp::range(&NodeContainer::node_begin, &NodeContainer::node_end), "Returns a list of Node's");
 
-    class_<Family, bases<NodeContainer>, family_ptr>("Family", DefsDoc::family_doc())
-        .def("__init__", raw_function(&NodeUtil::node_raw_constructor, 1)) // will call -> family_init
-        .def("__init__", make_constructor(&family_init), DefsDoc::family_doc())
-        .def("__init__", make_constructor(&Family::create_me), DefsDoc::family_doc())
-        .def(self == self)                      // __eq__
+    bp::class_<Family, bp::bases<NodeContainer>, family_ptr>("Family", DefsDoc::family_doc())
+        .def("__init__", bp::raw_function(&NodeUtil::node_raw_constructor, 1)) // will call -> family_init
+        .def("__init__", bp::make_constructor(&family_init), DefsDoc::family_doc())
+        .def("__init__", bp::make_constructor(&Family::create_me), DefsDoc::family_doc())
+        .def(bp::self == bp::self)              // __eq__
         .def("__str__", &family_to_string)      // __str__
         .def("__copy__", copyObject<Family>)    // __copy__ uses copy constructor
         .def("__enter__", &family_enter)        // allow with statement, hence indentation support
@@ -142,11 +142,11 @@ void export_SuiteAndFamily() {
     bp::register_ptr_to_python<family_ptr>(); // needed for mac and boost 1.6
 #endif
 
-    class_<Suite, bases<NodeContainer>, suite_ptr>("Suite", DefsDoc::suite_doc())
-        .def("__init__", raw_function(&NodeUtil::node_raw_constructor, 1)) // will call -> suite_init
-        .def("__init__", make_constructor(&suite_init), DefsDoc::suite_doc())
-        .def("__init__", make_constructor(&Suite::create_me), DefsDoc::suite_doc())
-        .def(self == self)                     // __eq__
+    bp::class_<Suite, bp::bases<NodeContainer>, suite_ptr>("Suite", DefsDoc::suite_doc())
+        .def("__init__", bp::raw_function(&NodeUtil::node_raw_constructor, 1)) // will call -> suite_init
+        .def("__init__", bp::make_constructor(&suite_init), DefsDoc::suite_doc())
+        .def("__init__", bp::make_constructor(&Suite::create_me), DefsDoc::suite_doc())
+        .def(bp::self == bp::self)             // __eq__
         .def("__str__", &suite_to_string)      // __str__
         .def("__copy__", copyObject<Suite>)    // __copy__ uses copy constructor
         .def("__enter__", &suite_enter)        // allow with statement, hence indentation support

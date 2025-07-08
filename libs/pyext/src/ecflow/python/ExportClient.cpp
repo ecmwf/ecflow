@@ -26,7 +26,6 @@
     #include "ecflow/base/Openssl.hpp"
 #endif
 
-using namespace boost::python;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -509,11 +508,11 @@ void client_invoker_enable_ssl(ClientInvoker* self) {
 
 void export_Client() {
     // Need std::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
-    class_<ClientInvoker, std::shared_ptr<ClientInvoker>, boost::noncopyable>("Client", ClientDoc::class_client())
-        .def("__init__", make_constructor(client_invoker_make<>))
-        .def("__init__", make_constructor(client_invoker_make<const std::string&>))
-        .def("__init__", make_constructor(client_invoker_make<const std::string&, const std::string&>))
-        .def("__init__", make_constructor(client_invoker_make<const std::string&, int>))
+    bp::class_<ClientInvoker, std::shared_ptr<ClientInvoker>, boost::noncopyable>("Client", ClientDoc::class_client())
+        .def("__init__", bp::make_constructor(client_invoker_make<>))
+        .def("__init__", bp::make_constructor(client_invoker_make<const std::string&>))
+        .def("__init__", bp::make_constructor(client_invoker_make<const std::string&, const std::string&>))
+        .def("__init__", bp::make_constructor(client_invoker_make<const std::string&, int>))
         .def("__enter__", &client_enter) // allow with statement
         .def("__exit__", &client_exit)   // allow with statement, remove last handle
         .def("version", &version, "Returns the current client version")
@@ -528,11 +527,11 @@ void export_Client() {
         .def("set_host_port", &set_host_port)
         .def("get_host",
              &ClientInvoker::host,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the host, assume set_host_port() has been set, otherwise return localhost")
         .def("get_port",
              &ClientInvoker::port,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              "Return the port, assume set_host_port() has been set. otherwise returns 3141")
         .def("set_retry_connection_period",
              &ClientInvoker::set_retry_connection_period,
@@ -545,14 +544,14 @@ void export_Client() {
         .def("get_defs", &ClientInvoker::defs, ClientDoc::get_defs())
         .def("reset", &ClientInvoker::reset, "reset client definition, and handle number")
         .def("in_sync", &ClientInvoker::in_sync, ClientDoc::in_sync())
-        .def("get_log", &get_log, return_value_policy<copy_const_reference>(), ClientDoc::get_log())
+        .def("get_log", &get_log, bp::return_value_policy<bp::copy_const_reference>(), ClientDoc::get_log())
         .def("edit_script_edit",
              &edit_script_edit,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              ClientDoc::edit_script_edit())
         .def("edit_script_preprocess",
              &edit_script_preprocess,
-             return_value_policy<copy_const_reference>(),
+             bp::return_value_policy<bp::copy_const_reference>(),
              ClientDoc::edit_script_preprocess())
         .def("edit_script_submit", &edit_script_submit, ClientDoc::edit_script_submit())
         .def("new_log", &ClientInvoker::new_log, (bp::arg("path") = ""), ClientDoc::new_log())
@@ -621,15 +620,16 @@ void export_Client() {
         .def("ping", &ClientInvoker::pingServer, ClientDoc::ping())
         .def("stats",
              &stats,
-             stats_overloads(args("to_stdout"), ClientDoc::stats())[return_value_policy<copy_const_reference>()])
+             stats_overloads(bp::args("to_stdout"),
+                             ClientDoc::stats())[bp::return_value_policy<bp::copy_const_reference>()])
         .def("stats_reset", &stats_reset, ClientDoc::stats_reset())
         .def("get_file",
              &get_file,
              (bp::arg("task"), bp::arg("type") = "script", bp::arg("max_lines") = "10000", bp::arg("as_bytes") = false),
              ClientDoc::get_file())
         .def("plug", &ClientInvoker::plug, ClientDoc::plug())
-        .def("query", &query, return_value_policy<copy_const_reference>(), ClientDoc::query())
-        .def("query", &query1, return_value_policy<copy_const_reference>(), ClientDoc::query())
+        .def("query", &query, bp::return_value_policy<bp::copy_const_reference>(), ClientDoc::query())
+        .def("query", &query1, bp::return_value_policy<bp::copy_const_reference>(), ClientDoc::query())
         .def("alter",
              &alters,
              (bp::arg("paths"),
@@ -670,8 +670,8 @@ void export_Client() {
         .def("job_generation", &ClientInvoker::job_gen, ClientDoc::job_gen())
         .def("run", &run, ClientDoc::run())
         .def("run", &runs)
-        .def("check", &check, return_value_policy<copy_const_reference>(), ClientDoc::check())
-        .def("check", &checks, return_value_policy<copy_const_reference>())
+        .def("check", &check, bp::return_value_policy<bp::copy_const_reference>(), ClientDoc::check())
+        .def("check", &checks, bp::return_value_policy<bp::copy_const_reference>())
         .def("kill", &do_kill, ClientDoc::kill())
         .def("kill", &do_kills)
         .def("status", &the_status, ClientDoc::status())
@@ -706,7 +706,7 @@ void export_Client() {
         .def("enable_http", &ClientInvoker::enable_http, "Enable HTTP communication")
         .def("enable_https", &ClientInvoker::enable_https, "Enable HTTPS communication")
 
-        .def("zombie_get", &zombieGet, return_value_policy<copy_const_reference>())
+        .def("zombie_get", &zombieGet, bp::return_value_policy<bp::copy_const_reference>())
         .def("zombie_fob", &ClientInvoker::zombieFobCli)
         .def("zombie_fail", &ClientInvoker::zombieFailCli)
         .def("zombie_adopt", &ClientInvoker::zombieAdoptCli)
@@ -757,29 +757,29 @@ void export_Client() {
              "optionally path to node with the queue")
         .def("child_complete", &ClientInvoker::child_complete, "Child command,notify server job has complete");
 
-    class_<WhyCmd, boost::noncopyable>("WhyCmd",
-                                       "The why command reports, the reason why a node is not running.\n\n"
-                                       "It needs the  definition structure and the path to node\n"
-                                       "\nConstructor::\n\n"
-                                       "   WhyCmd(defs, node_path)\n"
-                                       "      defs_ptr  defs   : pointer to a definition structure\n"
-                                       "      string node_path : The node path\n\n"
-                                       "\nExceptions:\n\n"
-                                       "- raises RuntimeError if the definition is empty\n"
-                                       "- raises RuntimeError if the node path is empty\n"
-                                       "- raises RuntimeError if the node path cannot be found in the definition\n"
-                                       "\nUsage::\n\n"
-                                       "   try:\n"
-                                       "      ci = Client()\n"
-                                       "      ci.sync_local()\n"
-                                       "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
-                                       "      print(ask.why())\n"
-                                       "   except RuntimeError, e:\n"
-                                       "       print(str(e))\n\n",
-                                       init<defs_ptr, std::string>())
+    bp::class_<WhyCmd, boost::noncopyable>("WhyCmd",
+                                           "The why command reports, the reason why a node is not running.\n\n"
+                                           "It needs the  definition structure and the path to node\n"
+                                           "\nConstructor::\n\n"
+                                           "   WhyCmd(defs, node_path)\n"
+                                           "      defs_ptr  defs   : pointer to a definition structure\n"
+                                           "      string node_path : The node path\n\n"
+                                           "\nExceptions:\n\n"
+                                           "- raises RuntimeError if the definition is empty\n"
+                                           "- raises RuntimeError if the node path is empty\n"
+                                           "- raises RuntimeError if the node path cannot be found in the definition\n"
+                                           "\nUsage::\n\n"
+                                           "   try:\n"
+                                           "      ci = Client()\n"
+                                           "      ci.sync_local()\n"
+                                           "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
+                                           "      print(ask.why())\n"
+                                           "   except RuntimeError, e:\n"
+                                           "       print(str(e))\n\n",
+                                           bp::init<defs_ptr, std::string>())
         .def("why", &WhyCmd::why, "returns a '/n' separated string, with reasons why node is not running");
 
-    class_<UrlCmd, boost::noncopyable>(
+    bp::class_<UrlCmd, boost::noncopyable>(
         "UrlCmd",
         "Executes a command ECF_URL_CMD to display a url.\n\n"
         "It needs the definition structure and the path to node.\n"
@@ -810,6 +810,6 @@ void export_Client() {
         "      print(url.execute())\n"
         "   except RuntimeError, e:\n"
         "       print(str(e))\n\n",
-        init<defs_ptr, std::string>())
+        bp::init<defs_ptr, std::string>())
         .def("execute", &UrlCmd::execute, "Displays url in the chosen browser");
 }

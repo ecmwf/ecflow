@@ -15,34 +15,38 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Node.hpp"
 
-using namespace boost::python;
 namespace bp = boost::python;
 
 static void construct_expr(std::vector<PartExpression>& vec, const bp::list& list) {
     int the_list_size = len(list);
     for (int i = 0; i < the_list_size; ++i) {
         std::string part_expr;
-        if (extract<std::string>(list[i]).check()) {
-            part_expr = extract<std::string>(list[i]);
+        if (bp::extract<std::string>(list[i]).check()) {
+            part_expr = bp::extract<std::string>(list[i]);
             if (ecf::Str::valid_name(part_expr)) {
                 part_expr += " == complete";
             }
         }
-        else if (extract<node_ptr>(list[i]).check()) {
-            node_ptr node = extract<node_ptr>(list[i]);
-            if (node->parent())
+        else if (bp::extract<node_ptr>(list[i]).check()) {
+            node_ptr node = bp::extract<node_ptr>(list[i]);
+            if (node->parent()) {
                 part_expr = node->absNodePath();
-            else
+            }
+            else {
                 part_expr = node->name();
+            }
             part_expr += " == complete";
         }
-        else
+        else {
             throw std::runtime_error("Trigger: Expects string, or list(strings or nodes)");
+        }
 
-        if (vec.empty())
+        if (vec.empty()) {
             vec.emplace_back(part_expr);
-        else
+        }
+        else {
             vec.emplace_back(part_expr, true /*AND*/);
+        }
     }
 }
 

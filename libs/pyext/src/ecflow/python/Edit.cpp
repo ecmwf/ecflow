@@ -16,7 +16,6 @@
 
 #include "ecflow/python/BoostPythonUtil.hpp"
 
-using namespace boost::python;
 namespace bp = boost::python;
 
 Edit::Edit(const boost::python::dict& dict) {
@@ -27,17 +26,17 @@ Edit::Edit(const boost::python::dict& dict, const boost::python::dict& dict2) {
     BoostPythonUtil::dict_to_str_vec(dict2, vec_);
 }
 
-object Edit::init(boost::python::tuple args, dict kw) {
+bp::object Edit::init(boost::python::tuple args, bp::dict kw) {
     // cout << "Edit::init args: " << len(args) << " kwargs " << len(kw) << "\n";
     //  args[0] is Edit(i.e self)
     for (int i = 1; i < len(args); ++i) {
-        if (boost::python::extract<dict>(args[i]).check()) {
-            dict d = boost::python::extract<dict>(args[i]);
+        if (boost::python::extract<bp::dict>(args[i]).check()) {
+            bp::dict d = boost::python::extract<bp::dict>(args[i]);
             return args[0].attr("__init__")(d, kw); // calls -> .def(init<dict,dict>() -> Edit(dict,dict)
         }
         else
             throw std::runtime_error("Edit::Edit: only accepts dictionary and key word arguments");
     }
-    bp::tuple rest(args.slice(1, _));
+    bp::tuple rest(args.slice(1, bp::_));
     return args[0].attr("__init__")(kw); // calls -> .def(init<dict>() -> Edit(const boost::python::dict& dict)
 }
