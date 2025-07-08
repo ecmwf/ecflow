@@ -16,7 +16,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace boost::python;
-using namespace ecf;
 namespace bp = boost::python;
 
 static void construct_expr(std::vector<PartExpression>& vec, const bp::list& list) {
@@ -25,7 +24,7 @@ static void construct_expr(std::vector<PartExpression>& vec, const bp::list& lis
         std::string part_expr;
         if (extract<std::string>(list[i]).check()) {
             part_expr = extract<std::string>(list[i]);
-            if (Str::valid_name(part_expr)) {
+            if (ecf::Str::valid_name(part_expr)) {
                 part_expr += " == complete";
             }
         }

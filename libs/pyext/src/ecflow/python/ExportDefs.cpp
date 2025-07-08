@@ -26,7 +26,6 @@
 #include "ecflow/python/GlossaryDoc.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace ecf;
 using namespace boost::python;
 namespace bp = boost::python;
 
@@ -37,7 +36,7 @@ void save_as_defs(const Defs& theDefs, const std::string& filename, PrintStyle::
     ss << ecf::as_string(theDefs, the_style_enum);
 
     std::string file_creation_error_msg;
-    if (!File::create(filename, ss.str(), file_creation_error_msg)) {
+    if (!ecf::File::create(filename, ss.str(), file_creation_error_msg)) {
         std::string error = "save_as_defs failed: ";
         error += file_creation_error_msg;
         throw std::runtime_error(error);
@@ -89,7 +88,7 @@ std::string simulate(defs_ptr defs) {
             defs_filename = (*defs->suiteVec().begin())->name() + ".def";
         }
 
-        Simulator simulator;
+        ecf::Simulator simulator;
         std::string errorMsg;
         if (!simulator.run(*defs, defs_filename, errorMsg)) {
             return errorMsg;
@@ -180,7 +179,7 @@ void sort_attributes2(defs_ptr self, ecf::Attr::Type attr, bool recurse, const b
 void sort_attributes3(defs_ptr self, const std::string& attribute_name, bool recursive, const bp::list& list) {
     std::string attribute = attribute_name;
     boost::algorithm::to_lower(attribute);
-    ecf::Attr::Type attr = Attr::to_attr(attribute_name);
+    ecf::Attr::Type attr = ecf::Attr::to_attr(attribute_name);
     if (attr == ecf::Attr::UNKNOWN) {
         std::stringstream ss;
         ss << "sort_attributes: the attribute " << attribute_name << " is not valid";

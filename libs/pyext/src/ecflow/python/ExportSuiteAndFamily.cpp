@@ -21,7 +21,6 @@
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
 
-using namespace ecf;
 using namespace boost::python;
 namespace bp = boost::python;
 

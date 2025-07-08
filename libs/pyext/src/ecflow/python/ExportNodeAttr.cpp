@@ -45,7 +45,6 @@
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/Trigger.hpp"
 
-using namespace ecf;
 using namespace boost::python;
 namespace bp = boost::python;
 
@@ -60,7 +59,7 @@ object late_raw_constructor(bp::tuple args, bp::dict kw) {
     return args[0].attr("__init__")(kw); // calls -> late_init(dict kw)
 }
 
-static void extract_late_keyword_arguments(std::shared_ptr<LateAttr> late, bp::dict& dict) {
+static void extract_late_keyword_arguments(std::shared_ptr<ecf::LateAttr> late, bp::dict& dict) {
     boost::python::list keys = dict.keys();
     const int no_of_keys     = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
@@ -70,7 +69,7 @@ static void extract_late_keyword_arguments(std::shared_ptr<LateAttr> late, bp::d
                 std::string second = extract<std::string>(dict[keys[i]]);
                 int hour           = 0;
                 int min            = 0;
-                bool relative      = TimeSeries::getTime(second, hour, min);
+                bool relative      = ecf::TimeSeries::getTime(second, hour, min);
                 if (first == "submitted")
                     late->add_submitted(hour, min);
                 else if (first == "active")
@@ -88,14 +87,14 @@ static void extract_late_keyword_arguments(std::shared_ptr<LateAttr> late, bp::d
     }
 }
 
-static std::shared_ptr<LateAttr> late_init(bp::dict& dict) {
-    std::shared_ptr<LateAttr> late = std::make_shared<LateAttr>();
+static std::shared_ptr<ecf::LateAttr> late_init(bp::dict& dict) {
+    std::shared_ptr<ecf::LateAttr> late = std::make_shared<ecf::LateAttr>();
     extract_late_keyword_arguments(late, dict);
     return late;
 }
 
-static std::shared_ptr<LateAttr> late_create() {
-    return std::make_shared<LateAttr>();
+static std::shared_ptr<ecf::LateAttr> late_create() {
+    return std::make_shared<ecf::LateAttr>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,9 +108,9 @@ object cron_raw_constructor(bp::tuple args, bp::dict kw) {
                 throw std::runtime_error("cron_raw_constructor: Empty string, please pass a valid time, i.e '12:30'");
             return args[0].attr("__init__")(time_series, kw); // calls -> init(const std::string& ts, dict kw)
         }
-        if (extract<TimeSeries>(args[i]).check()) {
-            TimeSeries time_series = extract<TimeSeries>(args[i]);
-            return args[0].attr("__init__")(time_series, kw); // calls -> init(const TimeSeries& ts, dict kw)
+        if (extract<ecf::TimeSeries>(args[i]).check()) {
+            ecf::TimeSeries time_series = extract<ecf::TimeSeries>(args[i]);
+            return args[0].attr("__init__")(time_series, kw); // calls -> init(const ecf::TimeSeries& ts, dict kw)
         }
         else
             throw std::runtime_error("cron_raw_constructor: expects string | TimeSeries and keyword arguments");
@@ -120,7 +119,7 @@ object cron_raw_constructor(bp::tuple args, bp::dict kw) {
     return object();
 }
 
-static void extract_cron_keyword_arguments(std::shared_ptr<CronAttr> cron, bp::dict& dict) {
+static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, bp::dict& dict) {
     boost::python::list keys = dict.keys();
     const int no_of_keys     = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
@@ -161,51 +160,51 @@ static void extract_cron_keyword_arguments(std::shared_ptr<CronAttr> cron, bp::d
     }
 }
 
-static std::shared_ptr<CronAttr> cron_init(const std::string& ts, bp::dict& dict) {
-    std::shared_ptr<CronAttr> cron = std::make_shared<CronAttr>(ts);
+static std::shared_ptr<ecf::CronAttr> cron_init(const std::string& ts, bp::dict& dict) {
+    std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
     extract_cron_keyword_arguments(cron, dict);
     return cron;
 }
 
-static std::shared_ptr<CronAttr> cron_init1(const TimeSeries& ts, bp::dict& dict) {
-    std::shared_ptr<CronAttr> cron = std::make_shared<CronAttr>(ts);
+static std::shared_ptr<ecf::CronAttr> cron_init1(const ecf::TimeSeries& ts, bp::dict& dict) {
+    std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
     extract_cron_keyword_arguments(cron, dict);
     return cron;
 }
 
-static std::shared_ptr<CronAttr> cron_create() {
-    return std::make_shared<CronAttr>();
+static std::shared_ptr<ecf::CronAttr> cron_create() {
+    return std::make_shared<ecf::CronAttr>();
 }
-static std::shared_ptr<CronAttr> cron_create2(const TimeSeries& ts) {
-    return std::make_shared<CronAttr>(ts);
+static std::shared_ptr<ecf::CronAttr> cron_create2(const ecf::TimeSeries& ts) {
+    return std::make_shared<ecf::CronAttr>(ts);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void add_time_series_3(CronAttr* self, const std::string& ts) {
-    self->addTimeSeries(TimeSeries::create(ts));
+void add_time_series_3(ecf::CronAttr* self, const std::string& ts) {
+    self->addTimeSeries(ecf::TimeSeries::create(ts));
 }
 
-void set_week_days(CronAttr* cron, const bp::list& list) {
+void set_week_days(ecf::CronAttr* cron, const bp::list& list) {
     std::vector<int> int_vec;
     BoostPythonUtil::list_to_int_vec(list, int_vec);
     cron->addWeekDays(int_vec);
 }
-void set_last_week_days_of_month(CronAttr* cron, const bp::list& list) {
+void set_last_week_days_of_month(ecf::CronAttr* cron, const bp::list& list) {
     std::vector<int> int_vec;
     BoostPythonUtil::list_to_int_vec(list, int_vec);
     cron->add_last_week_days_of_month(int_vec);
 }
 
-void set_days_of_month(CronAttr* cron, const bp::list& list) {
+void set_days_of_month(ecf::CronAttr* cron, const bp::list& list) {
     std::vector<int> int_vec;
     BoostPythonUtil::list_to_int_vec(list, int_vec);
     cron->addDaysOfMonth(int_vec);
 }
-void set_last_day_of_the_month(CronAttr* cron) {
+void set_last_day_of_the_month(ecf::CronAttr* cron) {
     cron->add_last_day_of_month();
 }
 
-void set_months(CronAttr* cron, const bp::list& list) {
+void set_months(ecf::CronAttr* cron, const bp::list& list) {
     std::vector<int> int_vec;
     BoostPythonUtil::list_to_int_vec(list, int_vec);
     cron->addMonths(int_vec);
@@ -230,10 +229,10 @@ static std::shared_ptr<RepeatString> create_RepeatString(const std::string& name
     BoostPythonUtil::list_to_str_vec(list, vec);
     return std::make_shared<RepeatString>(name, vec);
 }
-static std::shared_ptr<AutoRestoreAttr> create_AutoRestoreAttr(const boost::python::list& list) {
+static std::shared_ptr<ecf::AutoRestoreAttr> create_AutoRestoreAttr(const boost::python::list& list) {
     std::vector<std::string> vec;
     BoostPythonUtil::list_to_str_vec(list, vec);
-    return std::make_shared<AutoRestoreAttr>(vec);
+    return std::make_shared<ecf::AutoRestoreAttr>(vec);
 }
 
 static std::shared_ptr<QueueAttr> create_queue(const std::string& name, const boost::python::list& list) {
@@ -249,22 +248,23 @@ static std::shared_ptr<GenericAttr> create_generic(const std::string& name, cons
 }
 
 static std::shared_ptr<ZombieAttr>
-create_ZombieAttr(Child::ZombieType zt, const bp::list& list, ZombieCtrlAction uc, int life_time_in_server) {
-    std::vector<Child::CmdType> vec;
+create_ZombieAttr(ecf::Child::ZombieType zt, const bp::list& list, ecf::ZombieCtrlAction uc, int life_time_in_server) {
+    std::vector<ecf::Child::CmdType> vec;
     int the_list_size = len(list);
     vec.reserve(the_list_size);
     for (int i = 0; i < the_list_size; ++i) {
-        vec.push_back(extract<Child::CmdType>(list[i]));
+        vec.push_back(extract<ecf::Child::CmdType>(list[i]));
     }
     return std::make_shared<ZombieAttr>(zt, vec, uc, life_time_in_server);
 }
 
-static std::shared_ptr<ZombieAttr> create_ZombieAttr1(Child::ZombieType zt, const bp::list& list, ZombieCtrlAction uc) {
-    std::vector<Child::CmdType> vec;
+static std::shared_ptr<ZombieAttr>
+create_ZombieAttr1(ecf::Child::ZombieType zt, const bp::list& list, ecf::ZombieCtrlAction uc) {
+    std::vector<ecf::Child::CmdType> vec;
     int the_list_size = len(list);
     vec.reserve(the_list_size);
     for (int i = 0; i < the_list_size; ++i) {
-        vec.push_back(extract<Child::CmdType>(list[i]));
+        vec.push_back(extract<ecf::Child::CmdType>(list[i]));
     }
     return std::make_shared<ZombieAttr>(zt, vec, uc);
 }
@@ -282,81 +282,81 @@ static job_creation_ctrl_ptr makeJobCreationCtrl() {
     return std::make_shared<JobCreationCtrl>();
 }
 
-static std::shared_ptr<AvisoAttr> aviso_init(const std::string& name,
-                                             const std::string& listener,
-                                             const std::string& url     = AvisoAttr::default_url,
-                                             const std::string& schema  = AvisoAttr::default_schema,
-                                             const std::string& polling = AvisoAttr::default_polling,
-                                             const std::string& auth    = AvisoAttr::default_auth) {
-    auto attr = std::make_shared<AvisoAttr>(nullptr, name, listener, url, schema, polling, 0, auth, "");
+static std::shared_ptr<ecf::AvisoAttr> aviso_init(const std::string& name,
+                                                  const std::string& listener,
+                                                  const std::string& url     = ecf::AvisoAttr::default_url,
+                                                  const std::string& schema  = ecf::AvisoAttr::default_schema,
+                                                  const std::string& polling = ecf::AvisoAttr::default_polling,
+                                                  const std::string& auth    = ecf::AvisoAttr::default_auth) {
+    auto attr = std::make_shared<ecf::AvisoAttr>(nullptr, name, listener, url, schema, polling, 0, auth, "");
     return attr;
 }
 
-static std::shared_ptr<AvisoAttr> aviso_init_defaults_0(const std::string& name, const std::string& listener) {
+static std::shared_ptr<ecf::AvisoAttr> aviso_init_defaults_0(const std::string& name, const std::string& listener) {
     return aviso_init(name, listener);
 }
 
-static std::shared_ptr<AvisoAttr>
+static std::shared_ptr<ecf::AvisoAttr>
 aviso_init_defaults_1(const std::string& name, const std::string& listener, const std::string& url) {
     return aviso_init(name, listener, url);
 }
 
-static std::shared_ptr<AvisoAttr> aviso_init_defaults_2(const std::string& name,
-                                                        const std::string& listener,
-                                                        const std::string& url,
-                                                        const std::string& schema) {
+static std::shared_ptr<ecf::AvisoAttr> aviso_init_defaults_2(const std::string& name,
+                                                             const std::string& listener,
+                                                             const std::string& url,
+                                                             const std::string& schema) {
     return aviso_init(name, listener, url, schema);
 }
 
-static std::shared_ptr<AvisoAttr> aviso_init_defaults_3(const std::string& name,
-                                                        const std::string& listener,
-                                                        const std::string& url,
-                                                        const std::string& schema,
-                                                        const std::string& polling) {
+static std::shared_ptr<ecf::AvisoAttr> aviso_init_defaults_3(const std::string& name,
+                                                             const std::string& listener,
+                                                             const std::string& url,
+                                                             const std::string& schema,
+                                                             const std::string& polling) {
     return aviso_init(name, listener, url, schema, polling);
 }
 
-static std::shared_ptr<MirrorAttr> mirror_init(const std::string& name,
-                                               const std::string& path,
-                                               const std::string& host    = ecf::MirrorAttr::default_remote_host,
-                                               const std::string& port    = ecf::MirrorAttr::default_remote_port,
-                                               const std::string& polling = ecf::MirrorAttr::default_polling,
-                                               bool ssl                   = false,
-                                               const std::string& auth    = ecf::MirrorAttr::default_remote_auth) {
-    auto attr = std::make_shared<MirrorAttr>(nullptr, name, path, host, port, polling, ssl, auth, "");
+static std::shared_ptr<ecf::MirrorAttr> mirror_init(const std::string& name,
+                                                    const std::string& path,
+                                                    const std::string& host    = ecf::MirrorAttr::default_remote_host,
+                                                    const std::string& port    = ecf::MirrorAttr::default_remote_port,
+                                                    const std::string& polling = ecf::MirrorAttr::default_polling,
+                                                    bool ssl                   = false,
+                                                    const std::string& auth    = ecf::MirrorAttr::default_remote_auth) {
+    auto attr = std::make_shared<ecf::MirrorAttr>(nullptr, name, path, host, port, polling, ssl, auth, "");
     return attr;
 }
 
-static std::shared_ptr<MirrorAttr> mirror_init_defaults_0(const std::string& name, const std::string& path) {
+static std::shared_ptr<ecf::MirrorAttr> mirror_init_defaults_0(const std::string& name, const std::string& path) {
     return mirror_init(name, path);
 }
 
-static std::shared_ptr<MirrorAttr>
+static std::shared_ptr<ecf::MirrorAttr>
 mirror_init_defaults_1(const std::string& name, const std::string& path, const std::string& host) {
     return mirror_init(name, path, host);
 }
 
-static std::shared_ptr<MirrorAttr> mirror_init_defaults_2(const std::string& name,
-                                                          const std::string& path,
-                                                          const std::string& host,
-                                                          const std::string& port) {
+static std::shared_ptr<ecf::MirrorAttr> mirror_init_defaults_2(const std::string& name,
+                                                               const std::string& path,
+                                                               const std::string& host,
+                                                               const std::string& port) {
     return mirror_init(name, path, host, port);
 }
 
-static std::shared_ptr<MirrorAttr> mirror_init_defaults_3(const std::string& name,
-                                                          const std::string& path,
-                                                          const std::string& host,
-                                                          const std::string& port,
-                                                          const std::string& polling) {
+static std::shared_ptr<ecf::MirrorAttr> mirror_init_defaults_3(const std::string& name,
+                                                               const std::string& path,
+                                                               const std::string& host,
+                                                               const std::string& port,
+                                                               const std::string& polling) {
     return mirror_init(name, path, host, port, polling);
 }
 
-static std::shared_ptr<MirrorAttr> mirror_init_defaults_4(const std::string& name,
-                                                          const std::string& path,
-                                                          const std::string& host,
-                                                          const std::string& port,
-                                                          const std::string& polling,
-                                                          bool ssl) {
+static std::shared_ptr<ecf::MirrorAttr> mirror_init_defaults_4(const std::string& name,
+                                                               const std::string& path,
+                                                               const std::string& host,
+                                                               const std::string& port,
+                                                               const std::string& polling,
+                                                               bool ssl) {
     return mirror_init(name, path, host, port, polling, ssl);
 }
 
@@ -402,74 +402,74 @@ void export_NodeAttr() {
         .add_property(
             "parts", bp::range(&Expression::part_begin, &Expression::part_end), "Returns a list of PartExpression's");
 
-    enum_<Flag::Type>("FlagType",
-                      "Flags store state associated with a node\n\n"
-                      "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
-                      "- USER_EDIT     - task\n"
-                      "- TASK_ABORTED  - task*\n"
-                      "- EDIT_FAILED   - task*\n"
-                      "- JOBCMD_FAILED - task*\n"
-                      "- KILLCMD_FAILED   - task*\n"
-                      "- STATUSCMD_FAILED - task*\n"
-                      "- NO_SCRIPT     - task*\n"
-                      "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
-                      "- STATUS        - task* indicates that the status command has been run\n"
-                      "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
-                      "- MESSAGE       - Node\n"
-                      "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
-                      "- QUEUELIMIT    - Node\n"
-                      "- WAIT          - task* \n"
-                      "- LOCKED        - Server\n"
-                      "- ZOMBIE        - task*\n"
-                      "- NO_REQUE      - task\n"
-                      "- ARCHIVED      - Suite/Family\n"
-                      "- RESTORED      - Family/Family\n"
-                      "- THRESHOLD     - task\n"
-                      "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
-                      "- LOG_ERROR     - Error in opening or writing to log file\n"
-                      "- CHECKPT_ERROR - Error in opening or writing to checkpt file \n"
-                      "- NOT_SET\n")
-        .value("force_abort", Flag::FORCE_ABORT)
-        .value("user_edit", Flag::USER_EDIT)
-        .value("task_aborted", Flag::TASK_ABORTED)
-        .value("edit_failed", Flag::EDIT_FAILED)
-        .value("jobcmd_failed", Flag::JOBCMD_FAILED)
-        .value("killcmd_failed", Flag::KILLCMD_FAILED)
-        .value("statuscmd_failed", Flag::STATUSCMD_FAILED)
-        .value("no_script", Flag::NO_SCRIPT)
-        .value("killed", Flag::KILLED)
-        .value("status", Flag::STATUS)
-        .value("late", Flag::LATE)
-        .value("message", Flag::MESSAGE)
-        .value("byrule", Flag::BYRULE)
-        .value("queuelimit", Flag::QUEUELIMIT)
-        .value("wait", Flag::WAIT)
-        .value("locked", Flag::LOCKED)
-        .value("zombie", Flag::ZOMBIE)
-        .value("no_reque", Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
-        .value("archived", Flag::ARCHIVED)
-        .value("restored", Flag::RESTORED)
-        .value("threshold", Flag::THRESHOLD)
-        .value("sigterm", Flag::ECF_SIGTERM)
-        .value("not_set", Flag::NOT_SET)
-        .value("log_error", Flag::LOG_ERROR)
-        .value("checkpt_error", Flag::CHECKPT_ERROR)
-        .value("remote_error", Flag::REMOTE_ERROR);
+    enum_<ecf::Flag::Type>("FlagType",
+                           "Flags store state associated with a node\n\n"
+                           "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
+                           "- USER_EDIT     - task\n"
+                           "- TASK_ABORTED  - task*\n"
+                           "- EDIT_FAILED   - task*\n"
+                           "- JOBCMD_FAILED - task*\n"
+                           "- KILLCMD_FAILED   - task*\n"
+                           "- STATUSCMD_FAILED - task*\n"
+                           "- NO_SCRIPT     - task*\n"
+                           "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+                           "- STATUS        - task* indicates that the status command has been run\n"
+                           "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
+                           "- MESSAGE       - Node\n"
+                           "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
+                           "- QUEUELIMIT    - Node\n"
+                           "- WAIT          - task* \n"
+                           "- LOCKED        - Server\n"
+                           "- ZOMBIE        - task*\n"
+                           "- NO_REQUE      - task\n"
+                           "- ARCHIVED      - Suite/Family\n"
+                           "- RESTORED      - Family/Family\n"
+                           "- THRESHOLD     - task\n"
+                           "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
+                           "- LOG_ERROR     - Error in opening or writing to log file\n"
+                           "- CHECKPT_ERROR - Error in opening or writing to checkpt file \n"
+                           "- NOT_SET\n")
+        .value("force_abort", ecf::Flag::FORCE_ABORT)
+        .value("user_edit", ecf::Flag::USER_EDIT)
+        .value("task_aborted", ecf::Flag::TASK_ABORTED)
+        .value("edit_failed", ecf::Flag::EDIT_FAILED)
+        .value("jobcmd_failed", ecf::Flag::JOBCMD_FAILED)
+        .value("killcmd_failed", ecf::Flag::KILLCMD_FAILED)
+        .value("statuscmd_failed", ecf::Flag::STATUSCMD_FAILED)
+        .value("no_script", ecf::Flag::NO_SCRIPT)
+        .value("killed", ecf::Flag::KILLED)
+        .value("status", ecf::Flag::STATUS)
+        .value("late", ecf::Flag::LATE)
+        .value("message", ecf::Flag::MESSAGE)
+        .value("byrule", ecf::Flag::BYRULE)
+        .value("queuelimit", ecf::Flag::QUEUELIMIT)
+        .value("wait", ecf::Flag::WAIT)
+        .value("locked", ecf::Flag::LOCKED)
+        .value("zombie", ecf::Flag::ZOMBIE)
+        .value("no_reque", ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
+        .value("archived", ecf::Flag::ARCHIVED)
+        .value("restored", ecf::Flag::RESTORED)
+        .value("threshold", ecf::Flag::THRESHOLD)
+        .value("sigterm", ecf::Flag::ECF_SIGTERM)
+        .value("not_set", ecf::Flag::NOT_SET)
+        .value("log_error", ecf::Flag::LOG_ERROR)
+        .value("checkpt_error", ecf::Flag::CHECKPT_ERROR)
+        .value("remote_error", ecf::Flag::REMOTE_ERROR);
 
-    class_<Flag>("Flag", "Represents additional state associated with a Node.\n\n", init<>())
-        .def("__str__", &Flag::to_string) // __str__
-        .def(self == self)                // __eq__
-        .def("is_set", &Flag::is_set, "Queries if a given flag is set")
-        .def("set", &Flag::set, "Sets the given flag. Used in test only")
-        .def("clear", &Flag::clear, "Clear the given flag. Used in test only")
-        .def("reset", &Flag::reset, "Clears all flags. Used in test only")
-        .def("list", &Flag::list, "Returns the list of all flag types. returns FlagTypeVec. Used in test only")
+    class_<ecf::Flag>("Flag", "Represents additional state associated with a Node.\n\n", init<>())
+        .def("__str__", &ecf::Flag::to_string) // __str__
+        .def(self == self)                     // __eq__
+        .def("is_set", &ecf::Flag::is_set, "Queries if a given flag is set")
+        .def("set", &ecf::Flag::set, "Sets the given flag. Used in test only")
+        .def("clear", &ecf::Flag::clear, "Clear the given flag. Used in test only")
+        .def("reset", &ecf::Flag::reset, "Clears all flags. Used in test only")
+        .def("list", &ecf::Flag::list, "Returns the list of all flag types. returns FlagTypeVec. Used in test only")
         .staticmethod("list")
-        .def("type_to_string", &Flag::enum_to_string, "Convert type to a string. Used in test only")
+        .def("type_to_string", &ecf::Flag::enum_to_string, "Convert type to a string. Used in test only")
         .staticmethod("type_to_string");
 
-    class_<std::vector<Flag::Type>>("FlagTypeVec", "Hold a list of flag types")
-        .def(vector_indexing_suite<std::vector<Flag::Type>, true>());
+    class_<std::vector<ecf::Flag::Type>>("FlagTypeVec", "Hold a list of flag types")
+        .def(vector_indexing_suite<std::vector<ecf::Flag::Type>, true>());
 
     class_<JobCreationCtrl, boost::noncopyable, job_creation_ctrl_ptr>("JobCreationCtrl", DefsDoc::jobgenctrl_doc())
         .def("__init__", make_constructor(makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
@@ -493,40 +493,40 @@ void export_NodeAttr() {
              return_value_policy<copy_const_reference>(),
              "Returns an error message generated during checking of job creation");
 
-    enum_<Child::ZombieType>("ZombieType", NodeAttrDoc::zombie_type_doc())
-        .value("ecf", Child::ECF)
-        .value("ecf_pid", Child::ECF_PID)
-        .value("ecf_pid_passwd", Child::ECF_PID_PASSWD)
-        .value("ecf_passwd", Child::ECF_PASSWD)
-        .value("user", Child::USER)
-        .value("path", Child::PATH);
+    enum_<ecf::Child::ZombieType>("ZombieType", NodeAttrDoc::zombie_type_doc())
+        .value("ecf", ecf::Child::ECF)
+        .value("ecf_pid", ecf::Child::ECF_PID)
+        .value("ecf_pid_passwd", ecf::Child::ECF_PID_PASSWD)
+        .value("ecf_passwd", ecf::Child::ECF_PASSWD)
+        .value("user", ecf::Child::USER)
+        .value("path", ecf::Child::PATH);
 
-    enum_<ZombieCtrlAction>("ZombieUserActionType", NodeAttrDoc::zombie_user_action_type_doc())
-        .value("fob", ZombieCtrlAction::FOB)
-        .value("fail", ZombieCtrlAction::FAIL)
-        .value("remove", ZombieCtrlAction::REMOVE)
-        .value("adopt", ZombieCtrlAction::ADOPT)
-        .value("block", ZombieCtrlAction::BLOCK)
-        .value("kill", ZombieCtrlAction::KILL);
+    enum_<ecf::ZombieCtrlAction>("ZombieUserActionType", NodeAttrDoc::zombie_user_action_type_doc())
+        .value("fob", ecf::ZombieCtrlAction::FOB)
+        .value("fail", ecf::ZombieCtrlAction::FAIL)
+        .value("remove", ecf::ZombieCtrlAction::REMOVE)
+        .value("adopt", ecf::ZombieCtrlAction::ADOPT)
+        .value("block", ecf::ZombieCtrlAction::BLOCK)
+        .value("kill", ecf::ZombieCtrlAction::KILL);
 
-    enum_<Child::CmdType>("ChildCmdType", NodeAttrDoc::child_cmd_type_doc())
-        .value("init", Child::INIT)
-        .value("event", Child::EVENT)
-        .value("meter", Child::METER)
-        .value("label", Child::LABEL)
-        .value("wait", Child::WAIT)
-        .value("queue", Child::QUEUE)
-        .value("abort", Child::ABORT)
-        .value("complete", Child::COMPLETE);
+    enum_<ecf::Child::CmdType>("ChildCmdType", NodeAttrDoc::child_cmd_type_doc())
+        .value("init", ecf::Child::INIT)
+        .value("event", ecf::Child::EVENT)
+        .value("meter", ecf::Child::METER)
+        .value("label", ecf::Child::LABEL)
+        .value("wait", ecf::Child::WAIT)
+        .value("queue", ecf::Child::QUEUE)
+        .value("abort", ecf::Child::ABORT)
+        .value("complete", ecf::Child::COMPLETE);
 
-    enum_<Attr::Type>("AttrType",
-                      "Sortable attribute type, currently [event | meter | label | limit | variable | all ]")
-        .value("event", Attr::EVENT)
-        .value("meter", Attr::METER)
-        .value("label", Attr::LABEL)
-        .value("limit", Attr::LIMIT)
-        .value("variable", Attr::VARIABLE)
-        .value("all", Attr::ALL);
+    enum_<ecf::Attr::Type>("AttrType",
+                           "Sortable attribute type, currently [event | meter | label | limit | variable | all ]")
+        .value("event", ecf::Attr::EVENT)
+        .value("meter", ecf::Attr::METER)
+        .value("label", ecf::Attr::LABEL)
+        .value("limit", ecf::Attr::LIMIT)
+        .value("variable", ecf::Attr::VARIABLE)
+        .value("all", ecf::Attr::ALL);
 
     class_<ZombieAttr>("ZombieAttr", NodeAttrDoc::zombie_doc())
         .def("__init__", make_constructor(&create_ZombieAttr))
@@ -750,139 +750,139 @@ void export_NodeAttr() {
         .def(self < self)                     // __lt__
         .def("day", &DayAttr::day, "Return the day as enumerator");
 
-    class_<TimeAttr>("Time", NodeAttrDoc::time_doc(), init<TimeSlot, bp::optional<bool>>())
+    class_<ecf::TimeAttr>("Time", NodeAttrDoc::time_doc(), init<ecf::TimeSlot, bp::optional<bool>>())
         .def(init<int, int, bp::optional<bool>>()) // hour, minute, relative
-        .def(init<TimeSeries>())
-        .def(init<TimeSlot, TimeSlot, TimeSlot, bool>())
+        .def(init<ecf::TimeSeries>())
+        .def(init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bool>())
         .def(init<std::string>())
-        .def(self == self)                     // __eq__
-        .def("__str__", &TimeAttr::toString)   // __str__
-        .def("__copy__", copyObject<TimeAttr>) // __copy__ uses copy constructor
+        .def(self == self)                          // __eq__
+        .def("__str__", &ecf::TimeAttr::toString)   // __str__
+        .def("__copy__", copyObject<ecf::TimeAttr>) // __copy__ uses copy constructor
         .def("time_series",
-             &TimeAttr::time_series,
+             &ecf::TimeAttr::time_series,
              return_value_policy<copy_const_reference>(),
              "Return the Time attributes time series");
 
-    class_<TodayAttr>("Today", NodeAttrDoc::today_doc(), init<TimeSlot, bp::optional<bool>>())
+    class_<ecf::TodayAttr>("Today", NodeAttrDoc::today_doc(), init<ecf::TimeSlot, bp::optional<bool>>())
         .def(init<int, int, bp::optional<bool>>()) // hour, minute, relative
-        .def(init<TimeSeries>())
-        .def(init<TimeSlot, TimeSlot, TimeSlot, bool>())
+        .def(init<ecf::TimeSeries>())
+        .def(init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bool>())
         .def(init<std::string>())
-        .def(self == self)                      // __eq__
-        .def("__str__", &TodayAttr::toString)   // __str__
-        .def("__copy__", copyObject<TodayAttr>) // __copy__ uses copy constructor
+        .def(self == self)                           // __eq__
+        .def("__str__", &ecf::TodayAttr::toString)   // __str__
+        .def("__copy__", copyObject<ecf::TodayAttr>) // __copy__ uses copy constructor
         .def("time_series",
-             &TodayAttr::time_series,
+             &ecf::TodayAttr::time_series,
              return_value_policy<copy_const_reference>(),
              "Return the Todays time series");
 
-    class_<LateAttr, std::shared_ptr<LateAttr>>("Late", NodeAttrDoc::late_doc())
+    class_<ecf::LateAttr, std::shared_ptr<ecf::LateAttr>>("Late", NodeAttrDoc::late_doc())
         .def("__init__", raw_function(&late_raw_constructor, 1)) // will call -> late_init
         .def("__init__", make_constructor(&late_init))
         .def("__init__", make_constructor(&late_create))
         .def(
             "submitted",
-            &LateAttr::addSubmitted,
+            &ecf::LateAttr::addSubmitted,
             "submitted(TimeSlot):The time node can stay `submitted`_. Submitted is always relative. If the node stays\n"
             "submitted longer than the time specified, the `late`_ flag is set\n")
         .def(
             "submitted",
-            &LateAttr::add_submitted,
+            &ecf::LateAttr::add_submitted,
             "submitted(hour,minute) The time node can stay submitted. Submitted is always relative. If the node stays\n"
             "submitted longer than the time specified, the late flag is set\n")
         .def("active",
-             &LateAttr::add_active,
+             &ecf::LateAttr::add_active,
              "active(hour,minute): The time the node must become `active`_. If the node is still `queued`_ or "
              "`submitted`_\n"
              "by the time specified, the late flag is set")
         .def(
             "active",
-            &LateAttr::addActive,
+            &ecf::LateAttr::addActive,
             "active(TimeSlot):The time the node must become `active`_. If the node is still `queued`_ or `submitted`_\n"
             "by the time specified, the late flag is set")
         .def("complete",
-             &LateAttr::add_complete,
+             &ecf::LateAttr::add_complete,
              "complete(hour,minute):The time the node must become `complete`_. If relative, time is taken from the "
              "time\n"
              "the node became `active`_, otherwise node must be `complete`_ by the time given")
         .def("complete",
-             &LateAttr::addComplete,
+             &ecf::LateAttr::addComplete,
              "complete(TimeSlot): The time the node must become `complete`_. If relative, time is taken from the time\n"
              "the node became `active`_, otherwise node must be `complete`_ by the time given")
-        .def(self == self)                     // __eq__
-        .def("__str__", &LateAttr::toString)   // __str__
-        .def("__copy__", copyObject<LateAttr>) // __copy__ uses copy constructor
+        .def(self == self)                          // __eq__
+        .def("__str__", &ecf::LateAttr::toString)   // __str__
+        .def("__copy__", copyObject<ecf::LateAttr>) // __copy__ uses copy constructor
         .def("submitted",
-             &LateAttr::submitted,
+             &ecf::LateAttr::submitted,
              return_value_policy<copy_const_reference>(),
              "Return the submitted time as a TimeSlot")
         .def("active",
-             &LateAttr::active,
+             &ecf::LateAttr::active,
              return_value_policy<copy_const_reference>(),
              "Return the active time as a TimeSlot")
         .def("complete",
-             &LateAttr::complete,
+             &ecf::LateAttr::complete,
              return_value_policy<copy_const_reference>(),
              "Return the complete time as a TimeSlot")
         .def("complete_is_relative",
-             &LateAttr::complete_is_relative,
+             &ecf::LateAttr::complete_is_relative,
              "Returns a boolean where true means that complete is relative")
-        .def("is_late", &LateAttr::isLate, "Return True if late");
+        .def("is_late", &ecf::LateAttr::isLate, "Return True if late");
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-    bp::register_ptr_to_python<std::shared_ptr<LateAttr>>(); // needed for mac and boost 1.6
+    bp::register_ptr_to_python<std::shared_ptr<ecf::LateAttr>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<AutoCancelAttr, std::shared_ptr<AutoCancelAttr>>(
+    class_<ecf::AutoCancelAttr, std::shared_ptr<ecf::AutoCancelAttr>>(
         "Autocancel", NodeAttrDoc::autocancel_doc(), init<int, int, bool>() // hour, minute, relative
         )
         .def(init<int>()) // days
-        .def(init<TimeSlot, bool>())
-        .def(self == self)                           // __eq__
-        .def("__str__", &AutoCancelAttr::toString)   // __str__
-        .def("__copy__", copyObject<AutoCancelAttr>) // __copy__ uses copy constructor
-        .def(self < self)                            // __lt__
+        .def(init<ecf::TimeSlot, bool>())
+        .def(self == self)                                // __eq__
+        .def("__str__", &ecf::AutoCancelAttr::toString)   // __str__
+        .def("__copy__", copyObject<ecf::AutoCancelAttr>) // __copy__ uses copy constructor
+        .def(self < self)                                 // __lt__
         .def("time",
-             &AutoCancelAttr::time,
+             &ecf::AutoCancelAttr::time,
              return_value_policy<copy_const_reference>(),
              "returns cancel time as a TimeSlot")
-        .def("relative", &AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
-        .def("days", &AutoCancelAttr::days, "Returns a boolean true if time was specified in days");
+        .def("relative", &ecf::AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
+        .def("days", &ecf::AutoCancelAttr::days, "Returns a boolean true if time was specified in days");
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-    bp::register_ptr_to_python<std::shared_ptr<AutoCancelAttr>>(); // needed for mac and boost 1.6
+    bp::register_ptr_to_python<std::shared_ptr<ecf::AutoCancelAttr>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<AutoArchiveAttr, std::shared_ptr<AutoArchiveAttr>>(
+    class_<ecf::AutoArchiveAttr, std::shared_ptr<ecf::AutoArchiveAttr>>(
         "Autoarchive",
         NodeAttrDoc::autoarchive_doc(),
         init<int, int, bool, bool>() // hour, minute,relative,idle(true means queued,aborted,complete, false means
                                      // completed only)
         )
-        .def(init<int, bool>())                       // days, idle
-        .def(init<TimeSlot, bool, bool>())            // TimeSlot,relative,idle
-        .def(self == self)                            // __eq__
-        .def("__str__", &AutoArchiveAttr::toString)   // __str__
-        .def("__copy__", copyObject<AutoArchiveAttr>) // __copy__ uses copy constructor
-        .def(self < self)                             // __lt__
+        .def(init<int, bool>())                            // days, idle
+        .def(init<ecf::TimeSlot, bool, bool>())            // TimeSlot,relative,idle
+        .def(self == self)                                 // __eq__
+        .def("__str__", &ecf::AutoArchiveAttr::toString)   // __str__
+        .def("__copy__", copyObject<ecf::AutoArchiveAttr>) // __copy__ uses copy constructor
+        .def(self < self)                                  // __lt__
         .def("time",
-             &AutoArchiveAttr::time,
+             &ecf::AutoArchiveAttr::time,
              return_value_policy<copy_const_reference>(),
              "returns archive time as a TimeSlot")
-        .def("relative", &AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
-        .def("days", &AutoArchiveAttr::days, "Returns a boolean true if time was specified in days")
+        .def("relative", &ecf::AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
+        .def("days", &ecf::AutoArchiveAttr::days, "Returns a boolean true if time was specified in days")
         .def("idle",
-             &AutoArchiveAttr::idle,
+             &ecf::AutoArchiveAttr::idle,
              "Returns a boolean true if archiving when idle, i.e queued,aborted,complete and time elapsed");
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-    boost::python::register_ptr_to_python<std::shared_ptr<AutoArchiveAttr>>(); // needed for mac and boost 1.6
+    boost::python::register_ptr_to_python<std::shared_ptr<ecf::AutoArchiveAttr>>(); // needed for mac and boost 1.6
 #endif
 
-    class_<AutoRestoreAttr, std::shared_ptr<AutoRestoreAttr>>("Autorestore", NodeAttrDoc::autorestore_doc())
+    class_<ecf::AutoRestoreAttr, std::shared_ptr<ecf::AutoRestoreAttr>>("Autorestore", NodeAttrDoc::autorestore_doc())
         .def("__init__", make_constructor(&create_AutoRestoreAttr))
-        .def(self == self)                            // __eq__
-        .def("__str__", &AutoRestoreAttr::toString)   // __str__
-        .def("__copy__", copyObject<AutoRestoreAttr>) // __copy__ uses copy constructor
+        .def(self == self)                                 // __eq__
+        .def("__str__", &ecf::AutoRestoreAttr::toString)   // __str__
+        .def("__copy__", copyObject<ecf::AutoRestoreAttr>) // __copy__ uses copy constructor
         .def("nodes_to_restore",
-             &AutoRestoreAttr::nodes_to_restore,
+             &ecf::AutoRestoreAttr::nodes_to_restore,
              return_value_policy<copy_const_reference>(),
              "returns a list of nodes to be restored");
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
@@ -999,18 +999,18 @@ void export_NodeAttr() {
         .def("step", &Repeat::step, "The increment for the repeat, as an integer")
         .def("value", &Repeat::last_valid_value, "The current value of the repeat as an integer");
 
-    void (CronAttr::*add_time_series)(const TimeSeries&) = &CronAttr::addTimeSeries;
-    void (CronAttr::*add_time_series_2)(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) =
-        &CronAttr::addTimeSeries;
-    class_<CronAttr, std::shared_ptr<CronAttr>>("Cron", NodeAttrDoc::cron_doc())
+    void (ecf::CronAttr::*add_time_series)(const ecf::TimeSeries&) = &ecf::CronAttr::addTimeSeries;
+    void (ecf::CronAttr::*add_time_series_2)(const ecf::TimeSlot& s, const ecf::TimeSlot& f, const ecf::TimeSlot& i) =
+        &ecf::CronAttr::addTimeSeries;
+    class_<ecf::CronAttr, std::shared_ptr<ecf::CronAttr>>("Cron", NodeAttrDoc::cron_doc())
         .def("__init__", raw_function(&cron_raw_constructor, 1)) // will call -> cron_init or cron_init1
         .def("__init__", make_constructor(&cron_init))
         .def("__init__", make_constructor(&cron_init1))
         .def("__init__", make_constructor(&cron_create2))
         .def("__init__", make_constructor(&cron_create))
-        .def(self == self)                     // __eq__
-        .def("__str__", &CronAttr::toString)   // __str__
-        .def("__copy__", copyObject<CronAttr>) // __copy__ uses copy constructor
+        .def(self == self)                          // __eq__
+        .def("__str__", &ecf::CronAttr::toString)   // __str__
+        .def("__copy__", copyObject<ecf::CronAttr>) // __copy__ uses copy constructor
         .def("set_week_days",
              &set_week_days,
              "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
@@ -1023,25 +1023,31 @@ void export_NodeAttr() {
         .def("set_last_day_of_the_month", &set_last_day_of_the_month, "Set cron for the last day of the month")
         .def("set_months", &set_months, "Specifies months. Expects a list of integers, with integer range 1-12")
         .def("set_time_series",
-             &CronAttr::add_time_series,
+             &ecf::CronAttr::add_time_series,
              (bp::arg("hour"), bp::arg("minute"), bp::arg("relative") = false),
              "time_series(hour(int),minute(int),relative to suite start(bool=false)), Add a time slot")
         .def("set_time_series", add_time_series, "Add a time series. This will never complete")
         .def("set_time_series", add_time_series_2, "Add a time series. This will never complete")
         .def("set_time_series", &add_time_series_3, "Add a time series. This will never complete")
-        .def("time", &CronAttr::time, return_value_policy<copy_const_reference>(), "return cron time as a TimeSeries")
-        .def("last_day_of_the_month", &CronAttr::last_day_of_the_month, "Return true if last day of month is enabled")
+        .def("time",
+             &ecf::CronAttr::time,
+             return_value_policy<copy_const_reference>(),
+             "return cron time as a TimeSeries")
+        .def("last_day_of_the_month",
+             &ecf::CronAttr::last_day_of_the_month,
+             "Return true if last day of month is enabled")
         .add_property("week_days",
-                      bp::range(&CronAttr::week_days_begin, &CronAttr::week_days_end),
+                      bp::range(&ecf::CronAttr::week_days_begin, &ecf::CronAttr::week_days_end),
                       "returns a integer list of week days")
-        .add_property("last_week_days_of_the_month",
-                      bp::range(&CronAttr::last_week_days_of_month_begin, &CronAttr::last_week_days_end_of_month_end),
-                      "returns a integer list of last week days of the month")
+        .add_property(
+            "last_week_days_of_the_month",
+            bp::range(&ecf::CronAttr::last_week_days_of_month_begin, &ecf::CronAttr::last_week_days_end_of_month_end),
+            "returns a integer list of last week days of the month")
         .add_property("days_of_month",
-                      bp::range(&CronAttr::days_of_month_begin, &CronAttr::days_of_month_end),
+                      bp::range(&ecf::CronAttr::days_of_month_begin, &ecf::CronAttr::days_of_month_end),
                       "returns a integer list of days of the month")
         .add_property("months",
-                      bp::range(&CronAttr::months_begin, &CronAttr::months_end),
+                      bp::range(&ecf::CronAttr::months_begin, &ecf::CronAttr::months_end),
                       "returns a integer list of months of the year");
 
     class_<VerifyAttr>("Verify", init<NState::State, int>()) // state, expected
@@ -1076,61 +1082,63 @@ void export_NodeAttr() {
         .def("__init__", make_constructor(&aviso_init_defaults_1))
         .def("__init__", make_constructor(&aviso_init_defaults_2))
         .def("__init__", make_constructor(&aviso_init_defaults_3))
-        .def(self == self)                      // __eq__
-        .def("__str__", &ecf::to_python_string) // __str__
-        .def("__copy__", copyObject<AvisoAttr>) // __copy__ uses copy constructor
+        .def(self == self)                           // __eq__
+        .def("__str__", &ecf::to_python_string)      // __str__
+        .def("__copy__", copyObject<ecf::AvisoAttr>) // __copy__ uses copy constructor
         .def("name",
-             &AvisoAttr::name,
+             &ecf::AvisoAttr::name,
              return_value_policy<copy_const_reference>(),
              "Returns the name of the Aviso attribute")
         .def("listener",
-             &AvisoAttr::listener,
+             &ecf::AvisoAttr::listener,
              return_value_policy<copy_const_reference>(),
              "Returns the Aviso listener configuration")
         .def("url",
-             &AvisoAttr::url,
+             &ecf::AvisoAttr::url,
              return_value_policy<copy_const_reference>(),
              "Returns the URL used to contact the Aviso server")
         .def("schema",
-             &AvisoAttr::schema,
+             &ecf::AvisoAttr::schema,
              return_value_policy<copy_const_reference>(),
              "Returns the path to the schema used to contact the Aviso server")
-        .def("polling", &AvisoAttr::polling, "Returns polling interval used to contact the Aviso server")
+        .def("polling", &ecf::AvisoAttr::polling, "Returns polling interval used to contact the Aviso server")
         .def("auth",
-             &AvisoAttr::auth,
+             &ecf::AvisoAttr::auth,
              return_value_policy<copy_const_reference>(),
              "Returns the path to Authentication credentials used to contact the Aviso server");
 
-    class_<MirrorAttr>("MirrorAttr", NodeAttrDoc::mirror_doc())
+    class_<ecf::MirrorAttr>("MirrorAttr", NodeAttrDoc::mirror_doc())
         .def("__init__", make_constructor(&mirror_init))
         .def("__init__", make_constructor(&mirror_init_defaults_0))
         .def("__init__", make_constructor(&mirror_init_defaults_1))
         .def("__init__", make_constructor(&mirror_init_defaults_2))
         .def("__init__", make_constructor(&mirror_init_defaults_3))
         .def("__init__", make_constructor(&mirror_init_defaults_4))
-        .def(self == self)                       // __eq__
-        .def("__str__", &ecf::to_python_string)  // __str__
-        .def("__copy__", copyObject<MirrorAttr>) // __copy__ uses copy constructor
+        .def(self == self)                            // __eq__
+        .def("__str__", &ecf::to_python_string)       // __str__
+        .def("__copy__", copyObject<ecf::MirrorAttr>) // __copy__ uses copy constructor
         .def("name",
-             &MirrorAttr::name,
+             &ecf::MirrorAttr::name,
              return_value_policy<copy_const_reference>(),
              "Returns the name of the Mirror attribute")
         .def("remote_path",
-             &MirrorAttr::remote_path,
+             &ecf::MirrorAttr::remote_path,
              return_value_policy<copy_const_reference>(),
              "Returns the path on the remote ecFlow server")
         .def("remote_host",
-             &MirrorAttr::remote_host,
+             &ecf::MirrorAttr::remote_host,
              return_value_policy<copy_const_reference>(),
              "Returns the host of the remote ecFlow server")
         .def("remote_port",
-             &MirrorAttr::remote_port,
+             &ecf::MirrorAttr::remote_port,
              return_value_policy<copy_const_reference>(),
              "Returns the port of the remote ecFlow server")
-        .def("ssl", &MirrorAttr::ssl, "Returns a boolean, where true means that SSL is enabled")
-        .def("polling", &MirrorAttr::polling, "Returns the polling interval used to contact the remove ecFlow server")
+        .def("ssl", &ecf::MirrorAttr::ssl, "Returns a boolean, where true means that SSL is enabled")
+        .def("polling",
+             &ecf::MirrorAttr::polling,
+             "Returns the polling interval used to contact the remove ecFlow server")
         .def("auth",
-             &MirrorAttr::auth,
+             &ecf::MirrorAttr::auth,
              return_value_policy<copy_const_reference>(),
              "Returns the path to Authentication credentials used to contact the remote ecFlow server");
 }

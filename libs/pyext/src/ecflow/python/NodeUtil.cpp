@@ -41,7 +41,6 @@
 #include "ecflow/python/Trigger.hpp"
 
 using namespace boost::python;
-using namespace ecf;
 namespace bp = boost::python;
 
 object NodeUtil::node_raw_constructor(bp::tuple args, bp::dict kw) {
@@ -116,14 +115,14 @@ object NodeUtil::do_add(node_ptr self, const bp::object& arg) {
         self->addDay(extract<DayAttr>(arg));
     else if (extract<DateAttr>(arg).check())
         self->addDate(extract<DateAttr>(arg));
-    else if (extract<TodayAttr>(arg).check())
-        self->addToday(extract<TodayAttr>(arg));
-    else if (extract<TimeAttr>(arg).check())
-        self->addTime(extract<TimeAttr>(arg));
-    else if (extract<CronAttr>(arg).check())
-        self->addCron(extract<CronAttr>(arg));
-    else if (extract<LateAttr>(arg).check())
-        self->addLate(extract<LateAttr>(arg));
+    else if (extract<ecf::TodayAttr>(arg).check())
+        self->addToday(extract<ecf::TodayAttr>(arg));
+    else if (extract<ecf::TimeAttr>(arg).check())
+        self->addTime(extract<ecf::TimeAttr>(arg));
+    else if (extract<ecf::CronAttr>(arg).check())
+        self->addCron(extract<ecf::CronAttr>(arg));
+    else if (extract<ecf::LateAttr>(arg).check())
+        self->addLate(extract<ecf::LateAttr>(arg));
     else if (extract<ZombieAttr>(arg).check())
         self->addZombie(extract<ZombieAttr>(arg));
     else if (extract<RepeatDate>(arg).check())
@@ -140,16 +139,16 @@ object NodeUtil::do_add(node_ptr self, const bp::object& arg) {
         self->addRepeat(Repeat(extract<RepeatString>(arg)));
     else if (extract<RepeatDay>(arg).check())
         self->addRepeat(Repeat(extract<RepeatDay>(arg)));
-    else if (extract<AutoCancelAttr>(arg).check())
-        self->addAutoCancel(extract<AutoCancelAttr>(arg));
+    else if (extract<ecf::AutoCancelAttr>(arg).check())
+        self->addAutoCancel(extract<ecf::AutoCancelAttr>(arg));
     else if (extract<Defstatus>(arg).check()) {
         Defstatus t = extract<Defstatus>(arg);
         self->addDefStatus(t.state());
     }
-    else if (extract<AutoArchiveAttr>(arg).check())
-        self->add_autoarchive(extract<AutoArchiveAttr>(arg));
-    else if (extract<AutoRestoreAttr>(arg).check())
-        self->add_autorestore(extract<AutoRestoreAttr>(arg));
+    else if (extract<ecf::AutoArchiveAttr>(arg).check())
+        self->add_autoarchive(extract<ecf::AutoArchiveAttr>(arg));
+    else if (extract<ecf::AutoRestoreAttr>(arg).check())
+        self->add_autorestore(extract<ecf::AutoRestoreAttr>(arg));
     else if (extract<VerifyAttr>(arg).check())
         self->addVerify(extract<VerifyAttr>(arg));
     else if (extract<bp::list>(arg).check()) {

@@ -32,7 +32,6 @@
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
 
-using namespace ecf;
 using namespace boost::python;
 namespace bp = boost::python;
 
@@ -157,7 +156,7 @@ node_ptr add_time_1(node_ptr self, int hour, int minute, bool relative) {
     return self;
 }
 node_ptr add_time_2(node_ptr self, const std::string& ts) {
-    self->addTime(ecf::TimeAttr(TimeSeries::create(ts)));
+    self->addTime(ecf::TimeAttr(ecf::TimeSeries::create(ts)));
     return self;
 }
 node_ptr add_time_3(node_ptr self, const ecf::TimeAttr& ts) {
@@ -173,7 +172,7 @@ node_ptr add_today_1(node_ptr self, int hour, int minute, bool relative) {
     return self;
 }
 node_ptr add_today_2(node_ptr self, const std::string& ts) {
-    self->addToday(ecf::TodayAttr(TimeSeries::create(ts)));
+    self->addToday(ecf::TodayAttr(ecf::TimeSeries::create(ts)));
     return self;
 }
 node_ptr add_today_3(node_ptr self, const ecf::TodayAttr& ts) {
@@ -209,7 +208,7 @@ node_ptr add_autocancel_1(node_ptr self, int hour, int min, bool relative) {
     self->addAutoCancel(ecf::AutoCancelAttr(hour, min, relative));
     return self;
 }
-node_ptr add_autocancel_2(node_ptr self, const TimeSlot& ts, bool relative) {
+node_ptr add_autocancel_2(node_ptr self, const ecf::TimeSlot& ts, bool relative) {
     self->addAutoCancel(ecf::AutoCancelAttr(ts, relative));
     return self;
 }
@@ -225,7 +224,7 @@ node_ptr add_autoarchive_1(node_ptr self, int hour, int min, bool relative, bool
     self->add_autoarchive(ecf::AutoArchiveAttr(hour, min, relative, idle));
     return self;
 }
-node_ptr add_autoarchive_2(node_ptr self, const TimeSlot& ts, bool relative, bool idle) {
+node_ptr add_autoarchive_2(node_ptr self, const ecf::TimeSlot& ts, bool relative, bool idle) {
     self->add_autoarchive(ecf::AutoArchiveAttr(ts, relative, idle));
     return self;
 }
@@ -310,7 +309,7 @@ void sort_attributes2(node_ptr self, ecf::Attr::Type attr, bool recursive, const
 void sort_attributes3(node_ptr self, const std::string& attribute_name, bool recursive, const bp::list& list) {
     std::string attribute = attribute_name;
     boost::algorithm::to_lower(attribute);
-    ecf::Attr::Type attr = Attr::to_attr(attribute_name);
+    ecf::Attr::Type attr = ecf::Attr::to_attr(attribute_name);
     if (attr == ecf::Attr::UNKNOWN) {
         std::stringstream ss;
         ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
@@ -551,23 +550,23 @@ void replace_on_server2(node_ptr self, const std::string& host_port, bool suspen
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const LateAttr* get_late_attr(node_ptr self) {
+const ecf::LateAttr* get_late_attr(node_ptr self) {
     return self->get_late();
 }
 
-const AutoArchiveAttr* get_autoarchive_attr(node_ptr self) {
+const ecf::AutoArchiveAttr* get_autoarchive_attr(node_ptr self) {
     return self->get_autoarchive();
 }
 
-const AutoCancelAttr* get_autocancel_attr(node_ptr self) {
+const ecf::AutoCancelAttr* get_autocancel_attr(node_ptr self) {
     return self->get_autocancel();
 }
 
-const AutoRestoreAttr* get_autorestore_attr(node_ptr self) {
+const ecf::AutoRestoreAttr* get_autorestore_attr(node_ptr self) {
     return self->get_autorestore();
 }
 
-const Flag& get_flag_attr(node_ptr self) {
+const ecf::Flag& get_flag_attr(node_ptr self) {
     return self->get_flag();
 }
 
