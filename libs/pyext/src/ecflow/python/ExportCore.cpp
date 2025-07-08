@@ -28,8 +28,8 @@ struct pair_to_tuple
     typedef pair_to_tuple<K, T> converter;
     typedef std::pair<K, T> ctype;
 
-    static PyObject* convert(ctype const& v) { return bp::incref(bp::make_tuple(v.first, v.second).ptr()); }
-    static void register_to_python() { bp::to_python_converter<ctype, converter>(); }
+    static PyObject* convert(ctype const& v) { return py::incref(py::make_tuple(v.first, v.second).ptr()); }
+    static void register_to_python() { py::to_python_converter<ctype, converter>(); }
 };
 
 bool debug_build() {
@@ -42,20 +42,20 @@ bool debug_build() {
 
 void export_Core() {
     // For use in test only
-    bp::def("debug_build", debug_build);
+    py::def("debug_build", debug_build);
 
     // see: https://github.com/boostorg/python/blob/master/test/raw_ctor.cpp
     // Uses a raw constructor approach to support pass arbitrary number arguments on the python side.
     // using no_init postpones defining __init__ function until after raw_function for proper overload resolution order,
     // since later defs get higher priority.
-    bp::class_<Edit>("Edit", NodeAttrDoc::variable_doc(), bp::no_init)
+    py::class_<Edit>("Edit", NodeAttrDoc::variable_doc(), py::no_init)
         .def("__init__", raw_function(&Edit::init, 0)) // raw_constructor -> will call -> def(init<dict>() )
-        .def(bp::init<bp::dict>())                     //
-        .def(bp::init<bp::dict, bp::dict>())           //
+        .def(py::init<py::dict>())                     //
+        .def(py::init<py::dict, py::dict>())           //
         .def("__str__", &Edit::to_string)              // __str__
         ;
 
-    bp::class_<ecf::File, boost::noncopyable>("File", "Utility class, Used in test only.", bp::no_init)
+    py::class_<ecf::File, boost::noncopyable>("File", "Utility class, Used in test only.", py::no_init)
         .def("find_server", &ecf::File::find_ecf_server_path, "Provides pathname to the server")
         .staticmethod("find_server")
         .def("find_client", &ecf::File::find_ecf_client_path, "Provides pathname to the client")
@@ -65,7 +65,7 @@ void export_Core() {
         .def("build_dir", &ecf::File::root_build_dir, "Path name to ecflow build directory")
         .staticmethod("build_dir");
 
-    bp::enum_<PrintStyle::Type_t>(
+    py::enum_<PrintStyle::Type_t>(
         "Style",
         "Style is used to control printing output for the definition\n\n"
         "- DEFS:  This style outputs the definition file in a format that is parse-able.\n"
@@ -91,7 +91,7 @@ void export_Core() {
         .value("STATE", PrintStyle::STATE)
         .value("MIGRATE", PrintStyle::MIGRATE);
 
-    bp::class_<PrintStyle, boost::noncopyable>(
+    py::class_<PrintStyle, boost::noncopyable>(
         "PrintStyle",
         "Singleton used to control the print Style. See :py:class:`ecflow.Style`\n\n"
         "\nUsage::\n\n"
@@ -100,13 +100,13 @@ void export_Core() {
         "   ...\n"
         "   print(defs)                     # show the node state\n"
         "   PrintStyle.set_style(old_style) # reset previous style\n",
-        bp::no_init)
+        py::no_init)
         .def("get_style", &PrintStyleHolder::getStyle, "Returns the style, static method")
         .staticmethod("get_style")
         .def("set_style", &PrintStyleHolder::setStyle, "Set the style, static method")
         .staticmethod("set_style");
 
-    bp::enum_<ecf::CheckPt::Mode>(
+    py::enum_<ecf::CheckPt::Mode>(
         "CheckPt",
         "CheckPt is enum that is used to control check pointing in the `ecflow_server`_\n\n"
         "- NEVER  : Switches of check pointing\n"
@@ -118,7 +118,7 @@ void export_Core() {
         .value("ALWAYS", ecf::CheckPt::ALWAYS)
         .value("UNDEFINED", ecf::CheckPt::UNDEFINED);
 
-    bp::class_<Ecf, boost::noncopyable>("Ecf", "Singleton used to control ecf debugging\n\n", bp::no_init)
+    py::class_<Ecf, boost::noncopyable>("Ecf", "Singleton used to control ecf debugging\n\n", py::no_init)
         .def("debug_equality", &Ecf::debug_equality, "Returns true if debugging of equality is enabled")
         .staticmethod("debug_equality")
         .def("set_debug_equality", &Ecf::set_debug_equality, "Set debugging for equality")
@@ -132,7 +132,7 @@ void export_Core() {
              "Set debug level. debug_level > 0 will disable some warning messages")
         .staticmethod("set_debug_level");
 
-    bp::enum_<NState::State>(
+    py::enum_<NState::State>(
         "State",
         "Each `node`_ can have a status, which reflects the life cycle of a node.\n\n"
         "It varies as follows:\n\n"
@@ -153,7 +153,7 @@ void export_Core() {
         .value("submitted", NState::SUBMITTED)
         .value("active", NState::ACTIVE);
 
-    bp::enum_<DState::State>("DState",
+    py::enum_<DState::State>("DState",
                              "A DState is like a ecflow.State, except for the addition of SUSPENDED\n\n"
                              "Suspended stops job generation, and hence is an attribute of a Node.\n"
                              "DState can be used for setting the default state of node when it is\n"
@@ -175,25 +175,25 @@ void export_Core() {
         .value("suspended", DState::SUSPENDED)
         .value("active", DState::ACTIVE);
 
-    bp::class_<Defstatus>("Defstatus",
+    py::class_<Defstatus>("Defstatus",
                           "A `node`_ can be set with a default status other the `queued`_\n\n"
                           "The default state of a `node`_ is `queued`_.\n"
                           "This defines the state to take at 'begin' or 're-queue' time\n"
                           "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.DState`\n",
-                          bp::init<DState::State>())
-        .def(bp::init<std::string>()) // constructor
+                          py::init<DState::State>())
+        .def(py::init<std::string>()) // constructor
         .def("state", &Defstatus::state)
         .def("__str__", &Defstatus::to_string) // __str__
         ;
 
-    bp::enum_<SState::State>("SState",
+    py::enum_<SState::State>("SState",
                              "A SState holds the `ecflow_server`_ state\n\n"
                              "See `server states`_")
         .value("HALTED", SState::HALTED)
         .value("SHUTDOWN", SState::SHUTDOWN)
         .value("RUNNING", SState::RUNNING);
 
-    bp::class_<ecf::TimeSlot>("TimeSlot",
+    py::class_<ecf::TimeSlot>("TimeSlot",
                               "Represents a time slot.\n\n"
                               "It is typically used as an argument to a :py:class:`TimeSeries` or\n"
                               "other time dependent attributes of a node.\n"
@@ -204,17 +204,17 @@ void export_Core() {
                               "      int minute: represents a minute:\n"
                               "\nUsage::\n\n"
                               "   ts = TimeSlot(10,11)\n",
-                              bp::init<int, int>())
+                              py::init<int, int>())
         .def("__str__", &ecf::TimeSlot::toString)           // __str__
         .def("__copy__", pyutil_copy_object<ecf::TimeSlot>) // __copy__ uses copy constructor
-        .def(bp::self == bp::self)                          // __eq__
+        .def(py::self == py::self)                          // __eq__
         .def("hour", &ecf::TimeSlot::hour)                  // return int
         .def("minute", &ecf::TimeSlot::minute)              // return int
         .def("empty", &ecf::TimeSlot::isNULL)               // return bool
         ;
 
     // single slot, | start, finish, incr,  bool relative to suite start
-    bp::class_<ecf::TimeSeries>(
+    py::class_<ecf::TimeSeries>(
         "TimeSeries",
         "A TimeSeries can hold a single time slot or a series.\n\n"
         "Time series can be created relative to the `suite`_ start or start of a repeating node.\n"
@@ -244,10 +244,10 @@ void export_Core() {
         "- Raises IndexError when an invalid time series is specified\n"
         "\nUsage::\n\n"
         "   time_series = TimeSeries(TimeSlot(10,11),False)\n",
-        bp::init<ecf::TimeSlot, bp::optional<bool>>())
-        .def(bp::init<int, int, bp::optional<bool>>())
-        .def(bp::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bp::optional<bool>>())
-        .def(bp::self == bp::self)                            // __eq__
+        py::init<ecf::TimeSlot, py::optional<bool>>())
+        .def(py::init<int, int, py::optional<bool>>())
+        .def(py::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, py::optional<bool>>())
+        .def(py::self == py::self)                            // __eq__
         .def("__str__", &ecf::TimeSeries::toString)           // __str__
         .def("__copy__", pyutil_copy_object<ecf::TimeSeries>) // __copy__ uses copy constructor
         .def("has_increment",
@@ -256,15 +256,15 @@ void export_Core() {
                                                                                                // slot
         .def("start",
              &ecf::TimeSeries::start,
-             bp::return_value_policy<bp::copy_const_reference>(),
+             py::return_value_policy<py::copy_const_reference>(),
              "returns the start time") // returns a time slot
         .def("finish",
              &ecf::TimeSeries::finish,
-             bp::return_value_policy<bp::copy_const_reference>(),
+             py::return_value_policy<py::copy_const_reference>(),
              "returns the finish time if time series specified, else returns a NULL time slot") // returns a time slot
         .def("incr",
              &ecf::TimeSeries::incr,
-             bp::return_value_policy<bp::copy_const_reference>(),
+             py::return_value_policy<py::copy_const_reference>(),
              " returns the increment time if time series specified, else returns a NULL time slot") // returns a time
                                                                                                     // slot
         .def("relative",

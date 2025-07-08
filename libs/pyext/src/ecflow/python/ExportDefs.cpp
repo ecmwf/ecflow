@@ -117,7 +117,7 @@ std::vector<node_ptr> get_all_nodes(defs_ptr self) {
 defs_ptr defs_enter(defs_ptr self) {
     return self;
 }
-bool defs_exit(defs_ptr self, const bp::object& type, const bp::object& value, const bp::object& traceback) {
+bool defs_exit(defs_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
     return false;
 }
 
@@ -145,7 +145,7 @@ defs_ptr add_variable_var(defs_ptr self, const Variable& var) {
     self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     return self;
 }
-defs_ptr add_variable_dict(defs_ptr self, const bp::dict& dict) {
+defs_ptr add_variable_dict(defs_ptr self, const py::dict& dict) {
     std::vector<std::pair<std::string, std::string>> vec;
     pyutil_dict_to_str_vec(dict, vec);
     std::vector<std::pair<std::string, std::string>>::iterator i;
@@ -165,13 +165,13 @@ void sort_attributes(defs_ptr self, ecf::Attr::Type attr) {
 void sort_attributes1(defs_ptr self, ecf::Attr::Type attr, bool recurse) {
     self->sort_attributes(attr, recurse);
 }
-void sort_attributes2(defs_ptr self, ecf::Attr::Type attr, bool recurse, const bp::list& list) {
+void sort_attributes2(defs_ptr self, ecf::Attr::Type attr, bool recurse, const py::list& list) {
     std::vector<std::string> no_sort;
     pyutil_list_to_str_vec(list, no_sort);
     self->sort_attributes(attr, recurse, no_sort);
 }
 
-void sort_attributes3(defs_ptr self, const std::string& attribute_name, bool recursive, const bp::list& list) {
+void sort_attributes3(defs_ptr self, const std::string& attribute_name, bool recursive, const py::list& list) {
     std::string attribute = attribute_name;
     boost::algorithm::to_lower(attribute);
     ecf::Attr::Type attr = ecf::Attr::to_attr(attribute_name);
@@ -193,38 +193,38 @@ bool defs_container(defs_ptr self, const std::string& name) {
     return (self->findSuite(name)) ? true : false;
 }
 
-static bp::object do_add(defs_ptr self, const bp::object& arg) {
+static py::object do_add(defs_ptr self, const py::object& arg) {
     // std::cout << "defs::do_add \n";
-    if (arg.ptr() == bp::object().ptr())
-        return bp::object(self); // *IGNORE* None
-    else if (bp::extract<suite_ptr>(arg).check())
-        self->addSuite(bp::extract<suite_ptr>(arg));
-    else if (bp::extract<bp::dict>(arg).check())
-        add_variable_dict(self, bp::extract<bp::dict>(arg));
-    else if (bp::extract<Edit>(arg).check()) {
-        Edit edit                        = bp::extract<Edit>(arg);
+    if (arg.ptr() == py::object().ptr())
+        return py::object(self); // *IGNORE* None
+    else if (py::extract<suite_ptr>(arg).check())
+        self->addSuite(py::extract<suite_ptr>(arg));
+    else if (py::extract<py::dict>(arg).check())
+        add_variable_dict(self, py::extract<py::dict>(arg));
+    else if (py::extract<Edit>(arg).check()) {
+        Edit edit                        = py::extract<Edit>(arg);
         const std::vector<Variable>& vec = edit.variables();
         for (const auto& i : vec)
             self->server_state().add_or_update_user_variables(i.name(), i.theValue());
     }
-    else if (bp::extract<bp::list>(arg).check()) {
-        bp::list the_list = bp::extract<bp::list>(arg);
+    else if (py::extract<py::list>(arg).check()) {
+        py::list the_list = py::extract<py::list>(arg);
         int the_list_size = len(the_list);
         for (int i = 0; i < the_list_size; ++i)
             (void)do_add(self, the_list[i]); // recursive
     }
-    else if (bp::extract<Variable>(arg).check()) {
-        Variable var = bp::extract<Variable>(arg);
+    else if (py::extract<Variable>(arg).check()) {
+        Variable var = py::extract<Variable>(arg);
         self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     }
     else
         throw std::runtime_error("ExportDefs::add : Unknown type");
-    return bp::object(self);
+    return py::object(self);
 }
 
-static bp::object add(bp::tuple args, bp::dict kwargs) {
+static py::object add(py::tuple args, py::dict kwargs) {
     int the_list_size = len(args);
-    defs_ptr self     = bp::extract<defs_ptr>(args[0]); // self
+    defs_ptr self     = py::extract<defs_ptr>(args[0]); // self
     if (!self)
         throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
 
@@ -232,41 +232,41 @@ static bp::object add(bp::tuple args, bp::dict kwargs) {
         (void)do_add(self, args[i]);
     (void)add_variable_dict(self, kwargs);
 
-    return bp::object(self); // return defs as python object, relies class_<Defs>... for type registration
+    return py::object(self); // return defs as python object, relies class_<Defs>... for type registration
 }
 
-static bp::object defs_iadd(defs_ptr self, const bp::list& list) {
+static py::object defs_iadd(defs_ptr self, const py::list& list) {
     // std::cout << "defs_iadd  list " << self->name() << "\n";
     int the_list_size = len(list);
     for (int i = 0; i < the_list_size; ++i)
         (void)do_add(self, list[i]);
-    return bp::object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+    return py::object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
-static bp::object defs_getattr(defs_ptr self, const std::string& attr) {
+static py::object defs_getattr(defs_ptr self, const std::string& attr) {
     // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
     suite_ptr child = self->findSuite(attr);
     if (child)
-        return bp::object(child);
+        return py::object(child);
 
     Variable var = self->server_state().findVariable(attr);
     if (!var.empty())
-        return bp::object(var);
+        return py::object(var);
 
     std::stringstream ss;
     ss << "ExportDefs::defs_getattr : function of name '" << attr << "' does not exist *OR* suite or defs variable";
     throw std::runtime_error(ss.str());
-    return bp::object();
+    return py::object();
 }
 
-bp::object defs_raw_constructor(bp::tuple args, bp::dict kw) {
+py::object defs_raw_constructor(py::tuple args, py::dict kw) {
     // cout << "defs_raw_constructor  len(args):" << len(args) << endl;
     // args[0] is Defs(i.e self)
-    bp::list the_list;
+    py::list the_list;
     std::string name;
     for (int i = 1; i < len(args); ++i) {
-        if (bp::extract<std::string>(args[i]).check())
-            name = bp::extract<std::string>(args[i]);
+        if (py::extract<std::string>(args[i]).check())
+            name = py::extract<std::string>(args[i]);
         else
             the_list.append(args[i]);
     }
@@ -276,7 +276,7 @@ bp::object defs_raw_constructor(bp::tuple args, bp::dict kw) {
     return args[0].attr("__init__")(the_list, kw); // calls -> init(list attr, dict kw)
 }
 
-defs_ptr defs_init(bp::list the_list, bp::dict kw) {
+defs_ptr defs_init(py::list the_list, py::dict kw) {
     // cout << " defs_init: the_list: " << len(the_list) << " dict: " << len(kw) << endl;
     defs_ptr defs = Defs::create();
     (void)add_variable_dict(defs, kw);
@@ -285,18 +285,18 @@ defs_ptr defs_init(bp::list the_list, bp::dict kw) {
 }
 
 void export_Defs() {
-    bp::class_<Defs, defs_ptr>("Defs", DefsDoc::add_definition_doc(), bp::init<>("Create a empty Defs"))
-        .def("__init__", bp::raw_function(&defs_raw_constructor, 0)) // will call -> task_init
-        .def("__init__", bp::make_constructor(&defs_init))
-        .def("__init__", bp::make_constructor(&create_defs), DefsDoc::add_definition_doc())
-        .def(bp::self == bp::self)                 // __eq__
+    py::class_<Defs, defs_ptr>("Defs", DefsDoc::add_definition_doc(), py::init<>("Create a empty Defs"))
+        .def("__init__", py::raw_function(&defs_raw_constructor, 0)) // will call -> task_init
+        .def("__init__", py::make_constructor(&defs_init))
+        .def("__init__", py::make_constructor(&create_defs), DefsDoc::add_definition_doc())
+        .def(py::self == py::self)                 // __eq__
         .def("__copy__", pyutil_copy_object<Defs>) // __copy__ uses copy constructor
         .def("__str__", convert_to_string)         // __str__
         .def("__enter__", &defs_enter)             // allow with statement, hence indentation support
         .def("__exit__", &defs_exit)               // allow with statement, hence indentation support
         .def("__len__", &defs_len)                 // Sized protocol
         .def("__contains__", &defs_container)      // Container protocol
-        .def("__iter__", bp::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
+        .def("__iter__", py::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
         .def("__getattr__", &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't
                                               actually exist on the object itself will be passed to __getattr__*/
         .def("__iadd__", &defs_iadd) // defs += [ Suite('s1'), Edit(var='value'), Variable('a','b') [ Suite('t2') ] ]
@@ -316,8 +316,8 @@ void export_Defs() {
         .def("sort_attributes", &sort_attributes2)
         .def("sort_attributes",
              &sort_attributes3,
-             (bp::arg("attribute_type"), bp::arg("recursive") = true, bp::arg("no_sort") = bp::list()))
-        .def("sort_attributes", &Defs::sort_attributes, (bp::arg("attribute_type"), bp::arg("recursive") = true))
+             (py::arg("attribute_type"), py::arg("recursive") = true, py::arg("no_sort") = py::list()))
+        .def("sort_attributes", &Defs::sort_attributes, (py::arg("attribute_type"), py::arg("recursive") = true))
         .def("delete_variable", &delete_variable, "An empty string will delete all user variables")
         .def("find_suite", &Defs::findSuite, "Given a name, find the corresponding `suite`_")
         .def("find_abs_node", &Defs::findAbsNode, "Given a path, find the the `node`_")
@@ -347,22 +347,22 @@ void export_Defs() {
         .def("simulate", &simulate, DefsDoc::simulate())
         .def("check_job_creation",
              &check_job_creation,
-             (bp::arg("throw_on_error") = false, bp::arg("verbose") = false),
+             (py::arg("throw_on_error") = false, py::arg("verbose") = false),
              DefsDoc::check_job_creation_doc())
         .def("check_job_creation", &Defs::check_job_creation)
         .def("generate_scripts", &Defs::generate_scripts, DefsDoc::generate_scripts_doc())
         .def("get_state", &Defs::state)
         .def("get_server_state", &get_server_state, DefsDoc::get_server_state())
-        .add_property("suites", bp::range(&Defs::suite_begin, &Defs::suite_end), "Returns a list of `suite`_\\ s")
-        .add_property("externs", bp::range(&Defs::extern_begin, &Defs::extern_end), "Returns a list of `extern`_\\ s")
+        .add_property("suites", py::range(&Defs::suite_begin, &Defs::suite_end), "Returns a list of `suite`_\\ s")
+        .add_property("externs", py::range(&Defs::extern_begin, &Defs::extern_end), "Returns a list of `extern`_\\ s")
         .add_property("user_variables",
-                      bp::range(&Defs::user_variables_begin, &Defs::user_variables_end),
+                      py::range(&Defs::user_variables_begin, &Defs::user_variables_end),
                       "Returns a list of user defined `variable`_\\ s")
         .add_property("server_variables",
-                      bp::range(&Defs::server_variables_begin, &Defs::server_variables_end),
+                      py::range(&Defs::server_variables_begin, &Defs::server_variables_end),
                       "Returns a list of server `variable`_\\ s");
 
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-    bp::register_ptr_to_python<defs_ptr>(); // needed for mac and boost 1.6
+    py::register_ptr_to_python<defs_ptr>(); // needed for mac and boost 1.6
 #endif
 }

@@ -14,25 +14,25 @@
 
 #include "ecflow/python/PythonUtil.hpp"
 
-Edit::Edit(const bp::dict& dict) {
+Edit::Edit(const py::dict& dict) {
     pyutil_dict_to_str_vec(dict, vec_);
 }
-Edit::Edit(const bp::dict& dict, const bp::dict& dict2) {
+Edit::Edit(const py::dict& dict, const py::dict& dict2) {
     pyutil_dict_to_str_vec(dict, vec_);
     pyutil_dict_to_str_vec(dict2, vec_);
 }
 
-bp::object Edit::init(bp::tuple args, bp::dict kw) {
+py::object Edit::init(py::tuple args, py::dict kw) {
     // cout << "Edit::init args: " << len(args) << " kwargs " << len(kw) << "\n";
     //  args[0] is Edit(i.e self)
     for (int i = 1; i < len(args); ++i) {
-        if (bp::extract<bp::dict>(args[i]).check()) {
-            bp::dict d = bp::extract<bp::dict>(args[i]);
+        if (py::extract<py::dict>(args[i]).check()) {
+            py::dict d = py::extract<py::dict>(args[i]);
             return args[0].attr("__init__")(d, kw); // calls -> .def(init<dict,dict>() -> Edit(dict,dict)
         }
         else
             throw std::runtime_error("Edit::Edit: only accepts dictionary and key word arguments");
     }
-    bp::tuple rest(args.slice(1, bp::_));
-    return args[0].attr("__init__")(kw); // calls -> .def(init<dict>() -> Edit(const bp::dict& dict)
+    py::tuple rest(args.slice(1, py::_));
+    return args[0].attr("__init__")(kw); // calls -> .def(init<dict>() -> Edit(const py::dict& dict)
 }

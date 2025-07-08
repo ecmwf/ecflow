@@ -16,6 +16,6 @@
 #include <boost/python/raw_function.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-namespace bp = boost::python;
+namespace py = boost::python;
 
 #endif /* ecflow_python_PythonBinding_HPP */

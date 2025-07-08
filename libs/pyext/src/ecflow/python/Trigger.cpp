@@ -15,18 +15,18 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Node.hpp"
 
-static void construct_expr(std::vector<PartExpression>& vec, const bp::list& list) {
+static void construct_expr(std::vector<PartExpression>& vec, const py::list& list) {
     int the_list_size = len(list);
     for (int i = 0; i < the_list_size; ++i) {
         std::string part_expr;
-        if (bp::extract<std::string>(list[i]).check()) {
-            part_expr = bp::extract<std::string>(list[i]);
+        if (py::extract<std::string>(list[i]).check()) {
+            part_expr = py::extract<std::string>(list[i]);
             if (ecf::Str::valid_name(part_expr)) {
                 part_expr += " == complete";
             }
         }
-        else if (bp::extract<node_ptr>(list[i]).check()) {
-            node_ptr node = bp::extract<node_ptr>(list[i]);
+        else if (py::extract<node_ptr>(list[i]).check()) {
+            node_ptr node = py::extract<node_ptr>(list[i]);
             if (node->parent()) {
                 part_expr = node->absNodePath();
             }
@@ -48,9 +48,9 @@ static void construct_expr(std::vector<PartExpression>& vec, const bp::list& lis
     }
 }
 
-Trigger::Trigger(const bp::list& list) {
+Trigger::Trigger(const py::list& list) {
     construct_expr(vec_, list);
 }
-Complete::Complete(const bp::list& list) {
+Complete::Complete(const py::list& list) {
     construct_expr(vec_, list);
 }

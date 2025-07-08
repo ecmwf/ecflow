@@ -21,17 +21,17 @@ public:
     NodeUtil& operator=(const NodeUtil&) = delete;
 
     /// Any nodes and attributes to be added
-    static bp::object do_add(node_ptr self, const bp::object& arg);
+    static py::object do_add(node_ptr self, const py::object& arg);
 
     /// Add ecflow variables from a python dictionary of strings
-    static node_ptr add_variable_dict(node_ptr self, const bp::dict& dict);
+    static node_ptr add_variable_dict(node_ptr self, const py::dict& dict);
 
     /// Add all the object in a python list, to the node
-    static bp::object node_iadd(node_ptr self, const bp::list& list);
+    static py::object node_iadd(node_ptr self, const py::list& list);
 
     /// The raw constructor assumes the first argument is a string.
     /// Assumes Task, Family, or Suite has defined a constructor  init(const std::string& name, list attrs, dict kw)
-    static bp::object node_raw_constructor(bp::tuple args, bp::dict kw);
+    static py::object node_raw_constructor(py::tuple args, py::dict kw);
 };
 
 #endif /* ecflow_python_NodeUtil_HPP */
