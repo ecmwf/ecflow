@@ -15,67 +15,68 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/Converter.hpp"
 
-void BoostPythonUtil::list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec) {
+void BoostPythonUtil::list_to_int_vec(const bp::list& list, std::vector<int>& int_vec) {
     auto the_list_size = len(list);
     int_vec.reserve(the_list_size);
     for (ssize_t i = 0; i < the_list_size; ++i) {
-        int_vec.push_back(boost::python::extract<int>(list[i]));
+        int_vec.push_back(bp::extract<int>(list[i]));
     }
 }
 
-void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vector<std::string>& vec) {
+void BoostPythonUtil::list_to_str_vec(const bp::list& list, std::vector<std::string>& vec) {
     auto the_list_size = len(list);
     vec.reserve(the_list_size);
     for (ssize_t i = 0; i < the_list_size; ++i) {
-        vec.push_back(boost::python::extract<std::string>(list[i]));
+        vec.push_back(bp::extract<std::string>(list[i]));
     }
 }
 
-void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vector<Variable>& vec) {
+void BoostPythonUtil::list_to_str_vec(const bp::list& list, std::vector<Variable>& vec) {
     auto the_list_size = len(list);
     vec.reserve(the_list_size);
     for (ssize_t i = 0; i < the_list_size; ++i) {
-        vec.push_back(boost::python::extract<Variable>(list[i]));
+        vec.push_back(bp::extract<Variable>(list[i]));
     }
 }
 
-void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict,
+void BoostPythonUtil::dict_to_str_vec(const bp::dict& dict,
                                       std::vector<std::pair<std::string, std::string>>& str_pair_vec) {
-    boost::python::list keys = dict.keys();
+    bp::list keys = dict.keys();
     const auto no_of_keys    = len(keys);
     str_pair_vec.reserve(no_of_keys);
 
     for (ssize_t i = 0; i < no_of_keys; ++i) {
 
         std::string second;
-        std::string first = boost::python::extract<std::string>(keys[i]);
-        if (boost::python::extract<std::string>(dict[keys[i]]).check()) {
-            second = boost::python::extract<std::string>(dict[keys[i]]);
+        std::string first = bp::extract<std::string>(keys[i]);
+        if (bp::extract<std::string>(dict[keys[i]]).check()) {
+            second = bp::extract<std::string>(dict[keys[i]]);
         }
-        else if (boost::python::extract<int>(dict[keys[i]]).check()) {
-            int the_int = boost::python::extract<int>(dict[keys[i]]);
+        else if (bp::extract<int>(dict[keys[i]]).check()) {
+            int the_int = bp::extract<int>(dict[keys[i]]);
             second      = ecf::convert_to<std::string>(the_int);
         }
-        else
+        else {
             throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
+        }
         str_pair_vec.emplace_back(first, second);
     }
 }
 
-void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vector<Variable>& vec) {
-    boost::python::list keys = dict.keys();
+void BoostPythonUtil::dict_to_str_vec(const bp::dict& dict, std::vector<Variable>& vec) {
+    bp::list keys = dict.keys();
     const auto no_of_keys    = len(keys);
     vec.reserve(no_of_keys);
 
     for (ssize_t i = 0; i < no_of_keys; ++i) {
 
         std::string second;
-        std::string first = boost::python::extract<std::string>(keys[i]);
-        if (boost::python::extract<std::string>(dict[keys[i]]).check()) {
-            second = boost::python::extract<std::string>(dict[keys[i]]);
+        std::string first = bp::extract<std::string>(keys[i]);
+        if (bp::extract<std::string>(dict[keys[i]]).check()) {
+            second = bp::extract<std::string>(dict[keys[i]]);
         }
-        else if (boost::python::extract<int>(dict[keys[i]]).check()) {
-            int the_int = boost::python::extract<int>(dict[keys[i]]);
+        else if (bp::extract<int>(dict[keys[i]]).check()) {
+            int the_int = bp::extract<int>(dict[keys[i]]);
             second      = ecf::convert_to<std::string>(the_int);
         }
         else

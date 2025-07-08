@@ -23,10 +23,9 @@ void export_Client();
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 BOOST_PYTHON_MODULE(ecflow) {
-    boost::python::docstring_options doc_options(
-        true, // show the docstrings from here
-        true, // show Python signatures.
-        false // Don't mention the C++ method signatures in the generated docstrings
+    bp::docstring_options doc_options(true, // show the docstrings from here
+                                      true, // show Python signatures.
+                                      false // Don't mention the C++ method signatures in the generated docstrings
     );
     bp::scope().attr("__doc__") =
         "The ecflow module provides the python bindings/api for creating definition structure "

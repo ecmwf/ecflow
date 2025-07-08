@@ -60,7 +60,7 @@ bp::object late_raw_constructor(bp::tuple args, bp::dict kw) {
 }
 
 static void extract_late_keyword_arguments(std::shared_ptr<ecf::LateAttr> late, bp::dict& dict) {
-    boost::python::list keys = dict.keys();
+    bp::list keys = dict.keys();
     const int no_of_keys     = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
         if (bp::extract<std::string>(keys[i]).check()) {
@@ -120,7 +120,7 @@ bp::object cron_raw_constructor(bp::tuple args, bp::dict kw) {
 }
 
 static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, bp::dict& dict) {
-    boost::python::list keys = dict.keys();
+    bp::list keys = dict.keys();
     const int no_of_keys     = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
 
@@ -232,19 +232,19 @@ static std::shared_ptr<RepeatString> create_RepeatString(const std::string& name
     BoostPythonUtil::list_to_str_vec(list, vec);
     return std::make_shared<RepeatString>(name, vec);
 }
-static std::shared_ptr<ecf::AutoRestoreAttr> create_AutoRestoreAttr(const boost::python::list& list) {
+static std::shared_ptr<ecf::AutoRestoreAttr> create_AutoRestoreAttr(const bp::list& list) {
     std::vector<std::string> vec;
     BoostPythonUtil::list_to_str_vec(list, vec);
     return std::make_shared<ecf::AutoRestoreAttr>(vec);
 }
 
-static std::shared_ptr<QueueAttr> create_queue(const std::string& name, const boost::python::list& list) {
+static std::shared_ptr<QueueAttr> create_queue(const std::string& name, const bp::list& list) {
     std::vector<std::string> vec;
     BoostPythonUtil::list_to_str_vec(list, vec);
     return std::make_shared<QueueAttr>(name, vec);
 }
 
-static std::shared_ptr<GenericAttr> create_generic(const std::string& name, const boost::python::list& list) {
+static std::shared_ptr<GenericAttr> create_generic(const std::string& name, const bp::list& list) {
     std::vector<std::string> vec;
     BoostPythonUtil::list_to_str_vec(list, vec);
     return std::make_shared<GenericAttr>(name, vec);
@@ -742,7 +742,7 @@ void export_NodeAttr() {
              &GenericAttr::empty,
              "Return true if the Generic is empty. Used when returning a NULL Generic, from a find")
         .add_property("values",
-                      boost::python::range(&GenericAttr::values_begin, &GenericAttr::values_end),
+                      bp::range(&GenericAttr::values_begin, &GenericAttr::values_end),
                       "The list of values for the generic");
 
     bp::class_<DateAttr>("Date", NodeAttrDoc::date_doc(), bp::init<int, int, int>()) // day,month,year
@@ -895,7 +895,7 @@ void export_NodeAttr() {
              &ecf::AutoArchiveAttr::idle,
              "Returns a boolean true if archiving when idle, i.e queued,aborted,complete and time elapsed");
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-    boost::python::register_ptr_to_python<std::shared_ptr<ecf::AutoArchiveAttr>>(); // needed for mac and boost 1.6
+    bp::register_ptr_to_python<std::shared_ptr<ecf::AutoArchiveAttr>>(); // needed for mac and boost 1.6
 #endif
 
     bp::class_<ecf::AutoRestoreAttr, std::shared_ptr<ecf::AutoRestoreAttr>>("Autorestore",
@@ -909,7 +909,7 @@ void export_NodeAttr() {
              bp::return_value_policy<bp::copy_const_reference>(),
              "returns a list of nodes to be restored");
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-    boost::python::register_ptr_to_python<std::shared_ptr<AutoRestoreAttr>>(); // needed for mac and boost 1.6
+    bp::register_ptr_to_python<std::shared_ptr<AutoRestoreAttr>>(); // needed for mac and boost 1.6
 #endif
 
     bp::class_<RepeatDate>("RepeatDate",

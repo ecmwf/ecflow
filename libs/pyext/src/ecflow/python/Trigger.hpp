@@ -15,6 +15,8 @@
 
 #include "ecflow/node/Expression.hpp"
 
+namespace bp = boost::python;
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Trigger & Complete thin wrapper over Expression, allows us to call:
 //  Task("a").add(Trigger("a == 1"),Complete("b == 1"))
@@ -26,7 +28,7 @@ public:
     Trigger(const std::string& expression, bool and_type) { add(PartExpression(expression, and_type)); }
     explicit Trigger(const PartExpression& pe) { add(pe); }
     Trigger(const Trigger& rhs) = default;
-    explicit Trigger(const boost::python::list& list);
+    explicit Trigger(const bp::list& list);
 
     bool operator==(const Trigger& rhs) const { return vec_ == rhs.vec_; }
     bool operator!=(const Trigger& rhs) const { return !operator==(rhs); }
@@ -46,7 +48,7 @@ public:
     Complete(const std::string& expression, bool and_type) { add(PartExpression(expression, and_type)); }
     explicit Complete(const PartExpression& pe) { add(pe); }
     Complete(const Complete& rhs) = default;
-    explicit Complete(const boost::python::list& list);
+    explicit Complete(const bp::list& list);
 
     bool operator==(const Complete& rhs) const { return vec_ == rhs.vec_; }
     bool operator!=(const Complete& rhs) const { return !operator==(rhs); }

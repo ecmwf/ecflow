@@ -248,9 +248,9 @@ void export_Core() {
         "- Raises IndexError when an invalid time series is specified\n"
         "\nUsage::\n\n"
         "   time_series = TimeSeries(TimeSlot(10,11),False)\n",
-        bp::init<ecf::TimeSlot, boost::python::optional<bool>>())
-        .def(bp::init<int, int, boost::python::optional<bool>>())
-        .def(bp::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, boost::python::optional<bool>>())
+        bp::init<ecf::TimeSlot, bp::optional<bool>>())
+        .def(bp::init<int, int, bp::optional<bool>>())
+        .def(bp::init<ecf::TimeSlot, ecf::TimeSlot, ecf::TimeSlot, bp::optional<bool>>())
         .def(bp::self == bp::self)                    // __eq__
         .def("__str__", &ecf::TimeSeries::toString)   // __str__
         .def("__copy__", copyObject<ecf::TimeSeries>) // __copy__ uses copy constructor

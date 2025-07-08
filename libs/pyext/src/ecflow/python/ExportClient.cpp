@@ -93,22 +93,22 @@ int edit_script_submit(ClientInvoker* self,
 
 namespace /* __ANONYMOUS__ */ {
 
-boost::python::object convert_to_pyobject(const std::string& s, bool as_bytes) {
-    boost::python::object result;
+bp::object convert_to_pyobject(const std::string& s, bool as_bytes) {
+    bp::object result;
     if (as_bytes) {
-        result = boost::python::object(boost::python::handle<>(PyBytes_FromObject(
+        result = bp::object(bp::handle<>(PyBytes_FromObject(
             PyMemoryView_FromMemory(const_cast<char*>(s.data()), static_cast<ssize_t>(s.size()), PyBUF_READ))));
     }
     else {
-        result = boost::python::object(
-            boost::python::handle<>(PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()))));
+        result = bp::object(
+            bp::handle<>(PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()))));
     }
     return result;
 }
 
 } // namespace
 
-boost::python::object get_file(ClientInvoker* self,
+bp::object get_file(ClientInvoker* self,
                                const std::string& absNodePath,
                                const std::string& file_type = "script",
                                const std::string& max_lines = "10000",

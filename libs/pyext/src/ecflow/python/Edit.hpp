@@ -17,13 +17,15 @@
 
 #include "ecflow/attribute/Variable.hpp"
 
+namespace bp = boost::python;
+
 class Edit {
 public:
-    explicit Edit(const boost::python::dict& dict);
-    Edit(const boost::python::dict& dict, const boost::python::dict& dict2);
+    explicit Edit(const bp::dict& dict);
+    Edit(const bp::dict& dict, const bp::dict& dict2);
     const std::vector<Variable>& variables() const { return vec_; }
     static std::string to_string() { return "edit"; }
-    static boost::python::object init(boost::python::tuple args, boost::python::dict kw);
+    static bp::object init(bp::tuple args, bp::dict kw);
 
 private:
     std::vector<Variable> vec_;
