@@ -23,7 +23,6 @@
 
 using namespace ecf;
 using namespace boost::python;
-using namespace std;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects

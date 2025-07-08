@@ -41,7 +41,6 @@
 #include "ecflow/python/Trigger.hpp"
 
 using namespace boost::python;
-using namespace std;
 using namespace ecf;
 namespace bp = boost::python;
 
@@ -51,8 +50,8 @@ object NodeUtil::node_raw_constructor(bp::tuple args, bp::dict kw) {
     bp::list the_list;
     std::string name;
     for (int i = 1; i < len(args); ++i) {
-        if (extract<string>(args[i]).check())
-            name = extract<string>(args[i]);
+        if (extract<std::string>(args[i]).check())
+            name = extract<std::string>(args[i]);
         else
             the_list.append(args[i]);
     }

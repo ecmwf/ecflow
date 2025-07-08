@@ -38,7 +38,6 @@ struct pair_to_tuple
 };
 
 using namespace boost::python;
-using namespace std;
 using namespace ecf;
 
 bool debug_build() {

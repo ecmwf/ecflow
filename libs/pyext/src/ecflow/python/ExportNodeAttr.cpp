@@ -47,7 +47,6 @@
 
 using namespace ecf;
 using namespace boost::python;
-using namespace std;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -65,10 +64,10 @@ static void extract_late_keyword_arguments(std::shared_ptr<LateAttr> late, bp::d
     boost::python::list keys = dict.keys();
     const int no_of_keys     = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
-        if (extract<string>(keys[i]).check()) {
+        if (extract<std::string>(keys[i]).check()) {
             std::string first = extract<std::string>(keys[i]);
-            if (extract<string>(dict[keys[i]]).check()) {
-                std::string second = extract<string>(dict[keys[i]]);
+            if (extract<std::string>(dict[keys[i]]).check()) {
+                std::string second = extract<std::string>(dict[keys[i]]);
                 int hour           = 0;
                 int min            = 0;
                 bool relative      = TimeSeries::getTime(second, hour, min);
@@ -104,8 +103,8 @@ object cron_raw_constructor(bp::tuple args, bp::dict kw) {
     // cout << "cron_raw_constructor len(args):" << len(args) << endl;
     //  args[0] is Cron(i.e self) args[1] is string name
     for (int i = 1; i < len(args); ++i) {
-        if (extract<string>(args[i]).check()) {
-            std::string time_series = extract<string>(args[i]);
+        if (extract<std::string>(args[i]).check()) {
+            std::string time_series = extract<std::string>(args[i]);
             if (time_series.empty())
                 throw std::runtime_error("cron_raw_constructor: Empty string, please pass a valid time, i.e '12:30'");
             return args[0].attr("__init__")(time_series, kw); // calls -> init(const std::string& ts, dict kw)
@@ -126,7 +125,7 @@ static void extract_cron_keyword_arguments(std::shared_ptr<CronAttr> cron, bp::d
     const int no_of_keys     = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
 
-        if (extract<string>(keys[i]).check()) {
+        if (extract<std::string>(keys[i]).check()) {
             std::string first = extract<std::string>(keys[i]);
             if (extract<bp::list>(dict[keys[i]]).check()) {
 

@@ -17,7 +17,6 @@
 #include "ecflow/python/BoostPythonUtil.hpp"
 
 using namespace boost::python;
-using namespace std;
 namespace bp = boost::python;
 
 Edit::Edit(const boost::python::dict& dict) {

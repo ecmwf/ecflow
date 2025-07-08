@@ -28,7 +28,6 @@
 
 using namespace ecf;
 using namespace boost::python;
-using namespace std;
 namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
@@ -96,7 +95,7 @@ std::string simulate(defs_ptr defs) {
             return errorMsg;
         }
     }
-    return string();
+    return std::string();
 }
 
 SState::State get_server_state(defs_ptr self) {
@@ -272,8 +271,8 @@ object defs_raw_constructor(bp::tuple args, dict kw) {
     bp::list the_list;
     std::string name;
     for (int i = 1; i < len(args); ++i) {
-        if (extract<string>(args[i]).check())
-            name = extract<string>(args[i]);
+        if (extract<std::string>(args[i]).check())
+            name = extract<std::string>(args[i]);
         else
             the_list.append(args[i]);
     }

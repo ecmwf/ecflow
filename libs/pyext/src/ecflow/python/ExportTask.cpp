@@ -22,7 +22,6 @@
 
 using namespace ecf;
 using namespace boost::python;
-using namespace std;
 namespace bp = boost::python;
 
 // Sized protocol

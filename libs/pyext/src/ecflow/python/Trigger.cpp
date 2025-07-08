@@ -16,7 +16,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace boost::python;
-using namespace std;
 using namespace ecf;
 namespace bp = boost::python;
 
