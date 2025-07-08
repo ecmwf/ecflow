@@ -8,10 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/docstring_options.hpp>
-
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 void export_Core();
 void export_NodeAttr();

@@ -13,11 +13,8 @@
 
 #include <vector>
 
-#include <boost/python.hpp>
-
 #include "ecflow/attribute/Variable.hpp"
-
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 class Edit {
 public:

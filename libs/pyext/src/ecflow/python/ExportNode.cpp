@@ -10,10 +10,6 @@
 
 #include <stdexcept>
 
-#include <boost/python.hpp>
-#include <boost/python/raw_function.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
@@ -31,8 +27,7 @@
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
-
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 

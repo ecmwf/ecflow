@@ -8,10 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/raw_function.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -20,8 +16,7 @@
 #include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
-
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 

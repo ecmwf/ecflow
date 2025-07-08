@@ -13,9 +13,7 @@
 
 #include <vector>
 
-#include <boost/python.hpp> // IWYU pragma: keep
-
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 class Variable;
 
@@ -27,12 +25,11 @@ public:
     BoostPythonUtil(const BoostPythonUtil&)            = delete;
     BoostPythonUtil& operator=(const BoostPythonUtil&) = delete;
 
-    /// Convert python list to a vector of integers. raises a type error if integer extraction fails
+    /// Convert a python list to a vector of integers, raising a type error if integer extraction fails
     static void list_to_int_vec(const bp::list& list, std::vector<int>& int_vec);
     static void list_to_str_vec(const bp::list& list, std::vector<std::string>& int_vec);
     static void list_to_str_vec(const bp::list& list, std::vector<Variable>& vec);
-    static void dict_to_str_vec(const bp::dict& dict,
-                                std::vector<std::pair<std::string, std::string>>& str_pair);
+    static void dict_to_str_vec(const bp::dict& dict, std::vector<std::pair<std::string, std::string>>& str_pair);
     static void dict_to_str_vec(const bp::dict& dict, std::vector<Variable>& vec);
 };
 

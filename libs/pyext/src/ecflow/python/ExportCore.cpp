@@ -8,11 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/raw_function.hpp>
-
-namespace bp = boost::python;
-
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/DState.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -24,6 +19,7 @@ namespace bp = boost::python;
 #include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/Edit.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
+#include "ecflow/python/PythonBinding.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 template <class K, class T>

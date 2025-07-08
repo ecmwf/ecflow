@@ -11,11 +11,8 @@
 #ifndef ecflow_python_Trigger_HPP
 #define ecflow_python_Trigger_HPP
 
-#include <boost/python.hpp>
-
 #include "ecflow/node/Expression.hpp"
-
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Trigger & Complete thin wrapper over Expression, allows us to call:

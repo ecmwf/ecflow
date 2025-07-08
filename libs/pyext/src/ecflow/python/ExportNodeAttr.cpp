@@ -10,10 +10,6 @@
 
 #include <stdexcept>
 
-#include <boost/python.hpp>
-#include <boost/python/raw_function.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/ClockAttr.hpp"
@@ -43,9 +39,8 @@
 #include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
+#include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/Trigger.hpp"
-
-namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,8 +55,8 @@ bp::object late_raw_constructor(bp::tuple args, bp::dict kw) {
 }
 
 static void extract_late_keyword_arguments(std::shared_ptr<ecf::LateAttr> late, bp::dict& dict) {
-    bp::list keys = dict.keys();
-    const int no_of_keys     = len(keys);
+    bp::list keys        = dict.keys();
+    const int no_of_keys = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
         if (bp::extract<std::string>(keys[i]).check()) {
             std::string first = bp::extract<std::string>(keys[i]);
@@ -120,8 +115,8 @@ bp::object cron_raw_constructor(bp::tuple args, bp::dict kw) {
 }
 
 static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, bp::dict& dict) {
-    bp::list keys = dict.keys();
-    const int no_of_keys     = len(keys);
+    bp::list keys        = dict.keys();
+    const int no_of_keys = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
 
         if (bp::extract<std::string>(keys[i]).check()) {
@@ -1141,6 +1136,7 @@ void export_NodeAttr() {
         .def("__init__", bp::make_constructor(&mirror_init_defaults_1))
         .def("__init__", bp::make_constructor(&mirror_init_defaults_2))
         .def("__init__", bp::make_constructor(&mirror_init_defaults_3))
+        .def("__init__", bp::make_constructor(&mirror_init_defaults_4))
         .def(bp::self == bp::self)                    // __eq__
         .def("__str__", &ecf::to_python_string)       // __str__
         .def("__copy__", copyObject<ecf::MirrorAttr>) // __copy__ uses copy constructor

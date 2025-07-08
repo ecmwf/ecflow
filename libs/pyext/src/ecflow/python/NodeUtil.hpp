@@ -11,11 +11,8 @@
 #ifndef ecflow_python_NodeUtil_HPP
 #define ecflow_python_NodeUtil_HPP
 
-#include <boost/python.hpp>
-
 #include "ecflow/node/NodeFwd.hpp"
-
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 class NodeUtil {
 public:

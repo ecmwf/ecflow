@@ -10,9 +10,6 @@
 
 #include <stdexcept>
 
-#include <boost/python.hpp>
-#include <boost/python/raw_function.hpp>
-
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PrintStyle.hpp"
@@ -24,9 +21,8 @@
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/Edit.hpp"
 #include "ecflow/python/GlossaryDoc.hpp"
+#include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/simulator/Simulator.hpp"
-
-namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 

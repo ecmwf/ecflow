@@ -59,6 +59,7 @@ set(srcs
   ../src/ecflow/python/GlossaryDoc.hpp
   ../src/ecflow/python/NodeAttrDoc.hpp
   ../src/ecflow/python/NodeUtil.hpp
+  ../src/ecflow/python/PythonBinding.hpp
   ../src/ecflow/python/Trigger.hpp
   # Sources
   ../src/ecflow/python/BoostPythonUtil.cpp

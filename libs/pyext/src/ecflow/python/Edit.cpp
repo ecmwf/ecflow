@@ -12,11 +12,7 @@
 
 #include <stdexcept>
 
-#include <boost/python.hpp>
-
 #include "ecflow/python/BoostPythonUtil.hpp"
-
-namespace bp = boost::python;
 
 Edit::Edit(const bp::dict& dict) {
     BoostPythonUtil::dict_to_str_vec(dict, vec_);

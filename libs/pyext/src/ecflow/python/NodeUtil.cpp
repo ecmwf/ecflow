@@ -40,8 +40,6 @@
 #include "ecflow/python/Edit.hpp"
 #include "ecflow/python/Trigger.hpp"
 
-namespace bp = boost::python;
-
 bp::object NodeUtil::node_raw_constructor(bp::tuple args, bp::dict kw) {
     // cout << "node_raw_constructor len(args):" << len(args) << endl;
     // args[0] is Task(i.e self) args[1] is string name

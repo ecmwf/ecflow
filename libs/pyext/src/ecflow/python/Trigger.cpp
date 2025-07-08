@@ -15,8 +15,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Node.hpp"
 
-namespace bp = boost::python;
-
 static void construct_expr(std::vector<PartExpression>& vec, const bp::list& list) {
     int the_list_size = len(list);
     for (int i = 0; i < the_list_size; ++i) {

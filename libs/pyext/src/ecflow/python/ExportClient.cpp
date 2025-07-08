@@ -10,9 +10,10 @@
 
 #include <algorithm> // for std::transform
 
-#include <boost/python.hpp>
-
 #include "ecflow/base/WhyCmd.hpp"
+#ifdef ECF_OPENSSL
+    #include "ecflow/base/Openssl.hpp"
+#endif
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/UrlCmd.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -22,11 +23,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/ClientDoc.hpp"
-#ifdef ECF_OPENSSL
-    #include "ecflow/base/Openssl.hpp"
-#endif
-
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
@@ -100,8 +97,7 @@ bp::object convert_to_pyobject(const std::string& s, bool as_bytes) {
             PyMemoryView_FromMemory(const_cast<char*>(s.data()), static_cast<ssize_t>(s.size()), PyBUF_READ))));
     }
     else {
-        result = bp::object(
-            bp::handle<>(PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()))));
+        result = bp::object(bp::handle<>(PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()))));
     }
     return result;
 }
@@ -109,10 +105,10 @@ bp::object convert_to_pyobject(const std::string& s, bool as_bytes) {
 } // namespace
 
 bp::object get_file(ClientInvoker* self,
-                               const std::string& absNodePath,
-                               const std::string& file_type = "script",
-                               const std::string& max_lines = "10000",
-                               bool as_bytes                = false) {
+                    const std::string& absNodePath,
+                    const std::string& file_type = "script",
+                    const std::string& max_lines = "10000",
+                    bool as_bytes                = false) {
     self->file(absNodePath, file_type, max_lines);
     const std::string& s = self->get_string();
 
