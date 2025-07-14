@@ -1,17 +1,12 @@
-#////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-# Name        :
-# Author      : Avi
-# Revision    : $Revision: #10 $
 #
 # Copyright 2009- ECMWF.
+#
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
-#////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-
-# code for testing  generated variables
+#
 
 import os
 import ecflow
@@ -19,10 +14,10 @@ import ecflow_test_util as Test
 
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))
-     
-    #===========================================================================
+
+    # ===========================================================================
     print("Defs: test generated variables")
-    #===========================================================================
+    # ===========================================================================
     defs = ecflow.Defs()
     suite = defs.add_suite("s1")
     family = suite.add_family("f1")
@@ -35,10 +30,9 @@ if __name__ == "__main__":
         print(gen_var)
         gen_var = suite.find_gen_variable(gen_var.name())
         assert not gen_var.empty(), "Could not find suite generated variable " + gen_var
-    assert len(list(variable_list)) == 14,"Expected 14 generated variables for suites"    
+    assert len(list(variable_list)) == 14, "Expected 14 generated variables for suites"
     assert variable_list[0].name() == "SUITE", "expected generated variable of name SUITE but found " + variable_list[0].name()
     assert variable_list[0].value() == "s1", "expected generated variable of value 's1' but found " + variable_list[0].value()
-
 
     print("\nfamily generated variables")
     variable_list = ecflow.VariableList()
@@ -48,7 +42,7 @@ if __name__ == "__main__":
         gen_var = family.find_gen_variable(gen_var.name())
         assert not gen_var.empty(), "Could not find family generated variable " + gen_var
 
-    assert len(list(variable_list)) == 2,"Expected 2 generated variables for families"    
+    assert len(list(variable_list)) == 2, "Expected 2 generated variables for families"
     assert variable_list[0].name() == "FAMILY", "expected generated variable of name FAMILY but found " + variable_list[0].name()
     assert variable_list[0].value() == "f1", "expected generated variable of value 'f1' but found " + variable_list[0].value()
     assert variable_list[1].name() == "FAMILY1", "expected generated variable of name FAMILY1 but found " + variable_list[1].name()
@@ -62,7 +56,7 @@ if __name__ == "__main__":
         gen_var = task.find_gen_variable(gen_var.name())
         assert not gen_var.empty(), "Could not find task generated variable " + gen_var
 
-    assert len(list(variable_list)) == 8,"Expected 8 generated variables for tasks"    
+    assert len(list(variable_list)) == 8, "Expected 8 generated variables for tasks"
     assert variable_list[0].name() == "TASK", "expected generated variable of name TASK but found " + variable_list[0].name()
     assert variable_list[0].value() == "t1", "expected generated variable of value 't1' but found " + variable_list[0].value()
     assert variable_list[1].name() == "ECF_JOB", "expected generated variable of name ECF_JOB but found " + variable_list[1].name()
@@ -81,4 +75,3 @@ if __name__ == "__main__":
     assert variable_list[7].value() == "", "expected generated variable of value '' but found " + variable_list[7].value()
 
     print("\nAll Tests pass")
-    

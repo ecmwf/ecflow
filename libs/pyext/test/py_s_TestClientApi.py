@@ -1,16 +1,15 @@
-# ////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-# Name        :
-# Author      : Avi
-# Revision    : $Revision: #10 $
 #
 # Copyright 2009- ECMWF.
+#
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
-# ////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#  code for testing client code in python
+#
+
+# This test ensures the User API works as expected.
+
 import time
 import os
 import pwd
@@ -28,6 +27,7 @@ from ecflow import Defs, Suite, Family, Task, Edit, Meter, Clock, DState, Style,
 import re
 import platform
 
+
 def disable_on(regex_platform):
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -35,7 +35,9 @@ def disable_on(regex_platform):
                 print(f"Skipping {func.__name__} due to match with {regex_platform}")
             else:
                 return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -286,7 +288,7 @@ def test_client_shutdown_server(ci):
 def test_client_load_in_memory_defs(ci, protocol):
     print_test(ci, "test_client_load_in_memory_defs")
     ci.delete_all()  # start fresh
-    ci.load(create_defs("" , ci.get_port(), protocol))
+    ci.load(create_defs("", ci.get_port(), protocol))
     sync_local(ci)
     assert ci.get_defs().find_suite("s1") is not None, "Expected to find suite of name s1:\n" + str(ci.get_defs())
 
@@ -294,7 +296,7 @@ def test_client_load_in_memory_defs(ci, protocol):
 def test_client_load_from_disk(ci, protocol):
     print_test(ci, "test_client_load_from_disk")
     ci.delete_all()  # start fresh
-    defs = create_defs("" , ci.get_port(), protocol);
+    defs = create_defs("", ci.get_port(), protocol);
     defs_file = "test_client_load_from_disk_" + str(os.getpid()) + ".def"
     defs.save_as_defs(defs_file)
     assert os.path.exists(defs_file), "Expected file " + defs_file + " to exist after defs.save_as_defs()"
@@ -316,7 +318,7 @@ def test_client_checkpt(ci, protocol):
     except:
         pass
 
-    ci.load(create_defs("" , ci.get_port(), protocol))
+    ci.load(create_defs("", ci.get_port(), protocol))
     ci.checkpt()
     assert os.path.exists(Test.checkpt_file_path(port)), "Expected check pt file to exist after ci.checkpt()"
     assert os.path.exists(Test.backup_checkpt_file_path(port)) == False, "Expected back up check pt file to *NOT* exist"
@@ -641,11 +643,12 @@ class CustomStdOut:
             self.captured += os.read(self.o_pipe, 1).decode(self.stream.encoding)
             if self.captured.endswith(self.marker):
                 # we reached the end marker, so we stop capturing and remove the marker
-                self.captured = self.captured[:-len(self.marker)]  
+                self.captured = self.captured[:-len(self.marker)]
                 break
 
     def value(self):
         return self.captured
+
 
 @disable_on("macOS-13.*-arm64-.*")
 def test_client_stats(ci):
@@ -656,6 +659,7 @@ def test_client_stats(ci):
         assert "statistics" in stats, "Expected 'statistics' in the response"
     assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
 
+
 @disable_on("macOS-13.*-arm64-.*")
 def test_client_stats_with_stdout(ci):
     print_test(ci, "test_client_stats_with_stdout")
@@ -664,6 +668,7 @@ def test_client_stats_with_stdout(ci):
         stats = ci.stats(True)
         assert "statistics" in stats, "Expected 'statistics' in the response"
     assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
+
 
 @disable_on("macOS-13.*-arm64-.*")
 def test_client_stats_without_stdout(ci):
