@@ -6,6 +6,27 @@ Version 5.14 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.14.1
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2025-07-15
+
+General
+-------
+
+- **New Feature** add Docker environment to support HTTP-based deployment of ecFlow :jiraissue:`ECFLOW-2032`
+- **Fix** correct the handling of incorrect Aviso authentication credentials file :jiraissue:`ECFLOW-2027`
+
+Python
+------
+
+- **Improvement** reduce the footpring of Boost.python in the Python API (internal refactoring) :jiraissue:`ECFLOW-1922`
+
+REST
+----
+
+- **Fix** correct memory allocation issues when calling endpoint :code:`.../v1/suites/{path}/definition` :jiraissue:`ECFLOW-2022`
+
 Version 5.14.0
 ==============
 
