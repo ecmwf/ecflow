@@ -1,46 +1,43 @@
-#////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-# Name        :
-# Author      : Avi
-# Revision    : $Revision: #10 $
 #
 # Copyright 2009- ECMWF.
+#
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
-#////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#
 
-# Simple check for get all tasks
 from ecflow import Defs, Client, debug_build
 import ecflow_test_util as Test
 import os
+
 
 def create_defs():
     defs = Defs()
     suite = defs.add_suite("test_get_all")
     suite.add_task("t0")
     fam = suite.add_family("f1")
-    fam.add_task("t1") 
-    fam.add_task("t2") 
+    fam.add_task("t1")
+    fam.add_task("t2")
     fam2 = fam.add_family("f2")
-    fam2.add_task("t3") 
+    fam2.add_task("t3")
     return defs
-   
+
+
 def test_get_all_tasks(defs):
-  
     task_vec2 = defs.get_all_tasks()
     assert len(task_vec2) == 4, "Expected four tasks, but found " + str(len(task_vec2))
-   
+
     assert task_vec2[0].name() == "t0", "Expected task of name t0 but found " + task_vec2[0].name()
     assert task_vec2[1].name() == "t1", "Expected task of name t1 but found " + task_vec2[1].name()
     assert task_vec2[2].name() == "t2", "Expected task of name t2 but found " + task_vec2[2].name()
     assert task_vec2[3].name() == "t3", "Expected task of name t3 but found " + task_vec2[3].name()
-   
+
     print("test_get_all_tasks PASSED")
-   
+
+
 def test_get_all_nodes(defs):
-    
     # Get all the nodes make sure they are in order
     node_vec = defs.get_all_nodes()
     assert len(node_vec) == 7, "Expected seven nodes, but found " + str(len(node_vec))
@@ -64,7 +61,8 @@ def test_get_all_nodes(defs):
     assert len(node_vec) == 1, "Expected one node, but found " + str(len(node_vec))
 
     print("test_get_all_nodes PASSED")
-    
+
+
 def test_get_all_nodes_from_nodes():
     defs = Defs()
     suite = defs.add_suite("test_get_all")
@@ -80,8 +78,8 @@ def test_get_all_nodes_from_nodes():
     node_vec = fam1.get_all_nodes()
     assert len(node_vec) == 1, "Expected 1 nodes but found " + str(len(node_vec))
 
-    f1_t1 = fam1.add_task("t1") 
-    f1_t2 = fam1.add_task("t2") 
+    f1_t1 = fam1.add_task("t1")
+    f1_t2 = fam1.add_task("t2")
     node_vec = fam1.get_all_nodes()
     assert len(node_vec) == 3, "Expected 3 nodes but found " + str(len(node_vec))
 
@@ -92,12 +90,12 @@ def test_get_all_nodes_from_nodes():
     assert len(node_vec) == 6, "Expected 6 nodes but found " + str(len(node_vec))
 
     print("test_get_all_nodes_from_nodes PASSED")
-   
+
 
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))
- 
+
     test_get_all_tasks(create_defs())
     test_get_all_nodes(create_defs())
     test_get_all_nodes_from_nodes()
-    print("All Tests pass")    
+    print("All Tests pass")

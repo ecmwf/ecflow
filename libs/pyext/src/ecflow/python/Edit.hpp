@@ -13,17 +13,16 @@
 
 #include <vector>
 
-#include <boost/python.hpp>
-
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/python/PythonBinding.hpp"
 
 class Edit {
 public:
-    explicit Edit(const boost::python::dict& dict);
-    Edit(const boost::python::dict& dict, const boost::python::dict& dict2);
+    explicit Edit(const py::dict& dict);
+    Edit(const py::dict& dict, const py::dict& dict2);
     const std::vector<Variable>& variables() const { return vec_; }
     static std::string to_string() { return "edit"; }
-    static boost::python::object init(boost::python::tuple args, boost::python::dict kw);
+    static py::object init(py::tuple args, py::dict kw);
 
 private:
     std::vector<Variable> vec_;

@@ -15,42 +15,42 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Node.hpp"
 
-using namespace boost::python;
-using namespace std;
-using namespace ecf;
-namespace bp = boost::python;
-
-static void construct_expr(std::vector<PartExpression>& vec, const bp::list& list) {
+static void construct_expr(std::vector<PartExpression>& vec, const py::list& list) {
     int the_list_size = len(list);
     for (int i = 0; i < the_list_size; ++i) {
         std::string part_expr;
-        if (extract<std::string>(list[i]).check()) {
-            part_expr = extract<std::string>(list[i]);
-            if (Str::valid_name(part_expr)) {
+        if (py::extract<std::string>(list[i]).check()) {
+            part_expr = py::extract<std::string>(list[i]);
+            if (ecf::Str::valid_name(part_expr)) {
                 part_expr += " == complete";
             }
         }
-        else if (extract<node_ptr>(list[i]).check()) {
-            node_ptr node = extract<node_ptr>(list[i]);
-            if (node->parent())
+        else if (py::extract<node_ptr>(list[i]).check()) {
+            node_ptr node = py::extract<node_ptr>(list[i]);
+            if (node->parent()) {
                 part_expr = node->absNodePath();
-            else
+            }
+            else {
                 part_expr = node->name();
+            }
             part_expr += " == complete";
         }
-        else
+        else {
             throw std::runtime_error("Trigger: Expects string, or list(strings or nodes)");
+        }
 
-        if (vec.empty())
+        if (vec.empty()) {
             vec.emplace_back(part_expr);
-        else
+        }
+        else {
             vec.emplace_back(part_expr, true /*AND*/);
+        }
     }
 }
 
-Trigger::Trigger(const bp::list& list) {
+Trigger::Trigger(const py::list& list) {
     construct_expr(vec_, list);
 }
-Complete::Complete(const bp::list& list) {
+Complete::Complete(const py::list& list) {
     construct_expr(vec_, list);
 }

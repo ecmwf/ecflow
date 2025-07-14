@@ -13,7 +13,7 @@
 
 // ===========================================================================
 // IMPORTANT: These appear as python doc strings.
-//            Additionally they are auto documented using sphinx-poco
+//            Additionally, they are auto-documented using sphinx-docs
 //            Hence the doc strings use reStructuredText markup.
 // ===========================================================================
 class ClientDoc {

@@ -10,9 +10,10 @@
 
 #include <algorithm> // for std::transform
 
-#include <boost/python.hpp>
-
 #include "ecflow/base/WhyCmd.hpp"
+#ifdef ECF_OPENSSL
+    #include "ecflow/base/Openssl.hpp"
+#endif
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/UrlCmd.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -20,15 +21,9 @@
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/node/Defs.hpp"
-#include "ecflow/python/BoostPythonUtil.hpp"
 #include "ecflow/python/ClientDoc.hpp"
-#ifdef ECF_OPENSSL
-    #include "ecflow/base/Openssl.hpp"
-#endif
-
-using namespace boost::python;
-using namespace std;
-namespace bp = boost::python;
+#include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
@@ -75,19 +70,19 @@ const std::string& edit_script_preprocess(ClientInvoker* self, const std::string
 
 int edit_script_submit(ClientInvoker* self,
                        const std::string& absNodePath,
-                       const bp::list& name_values,
-                       const bp::list& lines,
+                       const py::list& name_values,
+                       const py::list& lines,
                        bool alias = false,
                        bool run   = true) {
     std::vector<std::string> file_contents;
-    BoostPythonUtil::list_to_str_vec(lines, file_contents);
+    pyutil_list_to_str_vec(lines, file_contents);
 
     std::vector<std::string> namv;
-    BoostPythonUtil::list_to_str_vec(name_values, namv);
+    pyutil_list_to_str_vec(name_values, namv);
     NameValueVec used_variables;
     char sep = '=';
     for (size_t i = 0; i < namv.size(); ++i) {
-        string::size_type pos = namv[i].find(sep);
+        std::string::size_type pos = namv[i].find(sep);
         used_variables.push_back(std::make_pair(namv[i].substr(0, pos - 1), namv[i].substr(pos + 1, namv[i].length())));
     }
     return self->edit_script_submit(absNodePath, used_variables, file_contents, alias, run);
@@ -95,26 +90,25 @@ int edit_script_submit(ClientInvoker* self,
 
 namespace /* __ANONYMOUS__ */ {
 
-boost::python::object convert_to_pyobject(const std::string& s, bool as_bytes) {
-    boost::python::object result;
+py::object convert_to_pyobject(const std::string& s, bool as_bytes) {
+    py::object result;
     if (as_bytes) {
-        result = boost::python::object(boost::python::handle<>(PyBytes_FromObject(
+        result = py::object(py::handle<>(PyBytes_FromObject(
             PyMemoryView_FromMemory(const_cast<char*>(s.data()), static_cast<ssize_t>(s.size()), PyBUF_READ))));
     }
     else {
-        result = boost::python::object(
-            boost::python::handle<>(PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()))));
+        result = py::object(py::handle<>(PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()))));
     }
     return result;
 }
 
 } // namespace
 
-boost::python::object get_file(ClientInvoker* self,
-                               const std::string& absNodePath,
-                               const std::string& file_type = "script",
-                               const std::string& max_lines = "10000",
-                               bool as_bytes                = false) {
+py::object get_file(ClientInvoker* self,
+                    const std::string& absNodePath,
+                    const std::string& file_type = "script",
+                    const std::string& max_lines = "10000",
+                    bool as_bytes                = false) {
     self->file(absNodePath, file_type, max_lines);
     const std::string& s = self->get_string();
 
@@ -143,10 +137,10 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(stats_overloads, stats, 1, 2)
 void stats_reset(ClientInvoker* self) {
     self->stats_reset();
 }
-bp::list suites(ClientInvoker* self) {
+py::list suites(ClientInvoker* self) {
     self->suites();
     const std::vector<std::string>& the_suites = self->server_reply().get_string_vec();
-    bp::list list;
+    py::list list;
     size_t the_size = the_suites.size();
     for (size_t i = 0; i < the_size; i++)
         list.append(the_suites[i]);
@@ -170,130 +164,130 @@ void free_time_dep(ClientInvoker* self, const std::string& path) {
 void free_all_dep(ClientInvoker* self, const std::string& path) {
     self->freeDep(path, false /*trigger*/, true /*all*/, false /*date*/, false /*time*/);
 }
-void free_trigger_dep1(ClientInvoker* self, const bp::list& list) {
+void free_trigger_dep1(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->freeDep(paths, true /*trigger*/, false /*all*/, false /*date*/, false /*time*/);
 }
-void free_date_dep1(ClientInvoker* self, const bp::list& list) {
+void free_date_dep1(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, false /*all*/, true /*date*/, false /*time*/);
 }
-void free_time_dep1(ClientInvoker* self, const bp::list& list) {
+void free_time_dep1(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, false /*all*/, false /*date*/, true /*time*/);
 }
-void free_all_dep1(ClientInvoker* self, const bp::list& list) {
+void free_all_dep1(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, true /*all*/, false /*date*/, false /*time*/);
 }
 
 void force_state(ClientInvoker* self, const std::string& path, NState::State state) {
     self->force(path, NState::toString(state), false);
 }
-void force_states(ClientInvoker* self, const bp::list& list, NState::State state) {
+void force_states(ClientInvoker* self, const py::list& list, NState::State state) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->force(paths, NState::toString(state), false);
 }
 void force_state_recursive(ClientInvoker* self, const std::string& path, NState::State state) {
     self->force(path, NState::toString(state), true);
 }
-void force_states_recursive(ClientInvoker* self, const bp::list& list, NState::State state) {
+void force_states_recursive(ClientInvoker* self, const py::list& list, NState::State state) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->force(paths, NState::toString(state), true);
 }
 void force_event(ClientInvoker* self, const std::string& path, const std::string& set_or_clear) {
     self->force(path, set_or_clear);
 }
-void force_events(ClientInvoker* self, const bp::list& list, const std::string& set_or_clear) {
+void force_events(ClientInvoker* self, const py::list& list, const std::string& set_or_clear) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->force(paths, set_or_clear);
 }
 
 void run(ClientInvoker* self, const std::string& path, bool force) {
     self->run(path, force);
 }
-void runs(ClientInvoker* self, const bp::list& list, bool force) {
+void runs(ClientInvoker* self, const py::list& list, bool force) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->run(paths, force);
 }
 void requeue(ClientInvoker* self, std::string path, const std::string& option) {
     self->requeue(path, option);
 }
-void requeues(ClientInvoker* self, const bp::list& list, const std::string& option) {
+void requeues(ClientInvoker* self, const py::list& list, const std::string& option) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->requeue(paths, option);
 }
 void suspend(ClientInvoker* self, const std::string& path) {
     self->suspend(path);
 }
-void suspends(ClientInvoker* self, const bp::list& list) {
+void suspends(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->suspend(paths);
 }
 void resume(ClientInvoker* self, const std::string& path) {
     self->resume(path);
 }
-void resumes(ClientInvoker* self, const bp::list& list) {
+void resumes(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->resume(paths);
 }
 void archive(ClientInvoker* self, const std::string& path) {
     self->archive(path);
 }
-void archives(ClientInvoker* self, const bp::list& list) {
+void archives(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->archive(paths);
 }
 void restore(ClientInvoker* self, const std::string& path) {
     self->restore(path);
 }
-void restores(ClientInvoker* self, const bp::list& list) {
+void restores(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->restore(paths);
 }
 void the_status(ClientInvoker* self, const std::string& path) {
     self->status(path);
 }
-void statuss(ClientInvoker* self, const bp::list& list) {
+void statuss(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->status(paths);
 }
 void do_kill(ClientInvoker* self, const std::string& path) {
     self->kill(path);
 }
-void do_kills(ClientInvoker* self, const bp::list& list) {
+void do_kills(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->kill(paths);
 }
 const std::string& check(ClientInvoker* self, const std::string& node_path) {
     self->check(node_path);
     return self->get_string();
 }
-const std::string& checks(ClientInvoker* self, const bp::list& list) {
+const std::string& checks(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->check(paths);
     return self->get_string();
 }
 
-void delete_node(ClientInvoker* self, const bp::list& list, bool force) {
+void delete_node(ClientInvoker* self, const py::list& list, bool force) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->delete_nodes(paths, force);
 }
 
@@ -301,31 +295,31 @@ void ch_suites(ClientInvoker* self) {
     CliSetter cli(self);
     self->ch_suites();
 }
-void ch_register(ClientInvoker* self, bool auto_add_new_suites, const bp::list& list) {
+void ch_register(ClientInvoker* self, bool auto_add_new_suites, const py::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch_register(auto_add_new_suites, suites);
 }
 
-void ch_add(ClientInvoker* self, int client_handle, const bp::list& list) {
+void ch_add(ClientInvoker* self, int client_handle, const py::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch_add(client_handle, suites);
 }
-void ch1_add(ClientInvoker* self, const bp::list& list) {
+void ch1_add(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch1_add(suites);
 }
 
-void ch_remove(ClientInvoker* self, int client_handle, const bp::list& list) {
+void ch_remove(ClientInvoker* self, int client_handle, const py::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch_remove(client_handle, suites);
 }
-void ch1_remove(ClientInvoker* self, const bp::list& list) {
+void ch1_remove(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> suites;
-    BoostPythonUtil::list_to_str_vec(list, suites);
+    pyutil_list_to_str_vec(list, suites);
     self->ch1_remove(suites);
 }
 
@@ -343,13 +337,13 @@ void order(ClientInvoker* self, const std::string& absNodePath, const std::strin
 }
 
 void alters(ClientInvoker* self,
-            const bp::list& list,
+            const py::list& list,
             const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
             const std::string& attrType,
             const std::string& name  = "",
             const std::string& value = "") {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->check(paths);
     self->alter(paths, alterType, attrType, name, value);
 }
@@ -362,9 +356,9 @@ void alter(ClientInvoker* self,
     self->alter(path, alterType, attrType, name, value);
 }
 
-void alter_sorts(ClientInvoker* self, const bp::list& list, const std::string& attribute_name, bool recursive = true) {
+void alter_sorts(ClientInvoker* self, const py::list& list, const std::string& attribute_name, bool recursive = true) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->check(paths);
     self->alter_sort(paths, attribute_name, recursive);
 }
@@ -379,9 +373,9 @@ void set_child_pid(ClientInvoker* self, int pid) {
     self->set_child_pid(ecf::convert_to<std::string>(pid));
 }
 
-void set_child_init_add_vars(ClientInvoker* self, const bp::dict& dict) {
+void set_child_init_add_vars(ClientInvoker* self, const py::dict& dict) {
     std::vector<std::pair<std::string, std::string>> vars;
-    BoostPythonUtil::dict_to_str_vec(dict, vars);
+    pyutil_dict_to_str_vec(dict, vars);
 
     std::vector<Variable> vec;
     std::transform(vars.begin(),
@@ -392,15 +386,15 @@ void set_child_init_add_vars(ClientInvoker* self, const bp::dict& dict) {
     self->set_child_init_add_vars(vec);
 }
 
-void set_child_init_add_vars2(ClientInvoker* self, const bp::list& dict) {
+void set_child_init_add_vars2(ClientInvoker* self, const py::list& dict) {
     std::vector<Variable> vec;
-    BoostPythonUtil::list_to_str_vec(dict, vec);
+    pyutil_list_to_str_vec(dict, vec);
     self->set_child_init_add_vars(vec);
 }
 
-void set_child_complete_del_vars(ClientInvoker* self, const bp::list& dict) {
+void set_child_complete_del_vars(ClientInvoker* self, const py::list& dict) {
     std::vector<std::string> vars;
-    BoostPythonUtil::list_to_str_vec(dict, vars);
+    pyutil_list_to_str_vec(dict, vars);
     self->set_child_complete_del_vars(vars);
 }
 
@@ -426,9 +420,9 @@ std::shared_ptr<ClientInvoker> client_enter(std::shared_ptr<ClientInvoker> self)
     return self;
 }
 bool client_exit(std::shared_ptr<ClientInvoker> self,
-                 const bp::object& type,
-                 const bp::object& value,
-                 const bp::object& traceback) {
+                 const py::object& type,
+                 const py::object& value,
+                 const py::object& traceback) {
     self->ch1_drop();
     return false;
 }
@@ -438,34 +432,34 @@ const std::vector<Zombie>& zombieGet(ClientInvoker* self, int pid) {
     return self->server_reply().zombies();
 }
 
-void zombieFobCli(ClientInvoker* self, const bp::list& list) {
+void zombieFobCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieFobCliPaths(paths);
 }
-void zombieFailCli(ClientInvoker* self, const bp::list& list) {
+void zombieFailCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieFailCliPaths(paths);
 }
-void zombieAdoptCli(ClientInvoker* self, const bp::list& list) {
+void zombieAdoptCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieAdoptCliPaths(paths);
 }
-void zombieBlockCli(ClientInvoker* self, const bp::list& list) {
+void zombieBlockCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieBlockCliPaths(paths);
 }
-void zombieRemoveCli(ClientInvoker* self, const bp::list& list) {
+void zombieRemoveCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieRemoveCliPaths(paths);
 }
-void zombieKillCli(ClientInvoker* self, const bp::list& list) {
+void zombieKillCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    BoostPythonUtil::list_to_str_vec(list, paths);
+    pyutil_list_to_str_vec(list, paths);
     self->zombieKillCliPaths(paths);
 }
 
@@ -510,11 +504,11 @@ void client_invoker_enable_ssl(ClientInvoker* self) {
 
 void export_Client() {
     // Need std::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
-    class_<ClientInvoker, std::shared_ptr<ClientInvoker>, boost::noncopyable>("Client", ClientDoc::class_client())
-        .def("__init__", make_constructor(client_invoker_make<>))
-        .def("__init__", make_constructor(client_invoker_make<const std::string&>))
-        .def("__init__", make_constructor(client_invoker_make<const std::string&, const std::string&>))
-        .def("__init__", make_constructor(client_invoker_make<const std::string&, int>))
+    py::class_<ClientInvoker, std::shared_ptr<ClientInvoker>, boost::noncopyable>("Client", ClientDoc::class_client())
+        .def("__init__", py::make_constructor(client_invoker_make<>))
+        .def("__init__", py::make_constructor(client_invoker_make<const std::string&>))
+        .def("__init__", py::make_constructor(client_invoker_make<const std::string&, const std::string&>))
+        .def("__init__", py::make_constructor(client_invoker_make<const std::string&, int>))
         .def("__enter__", &client_enter) // allow with statement
         .def("__exit__", &client_exit)   // allow with statement, remove last handle
         .def("version", &version, "Returns the current client version")
@@ -529,11 +523,11 @@ void export_Client() {
         .def("set_host_port", &set_host_port)
         .def("get_host",
              &ClientInvoker::host,
-             return_value_policy<copy_const_reference>(),
+             py::return_value_policy<py::copy_const_reference>(),
              "Return the host, assume set_host_port() has been set, otherwise return localhost")
         .def("get_port",
              &ClientInvoker::port,
-             return_value_policy<copy_const_reference>(),
+             py::return_value_policy<py::copy_const_reference>(),
              "Return the port, assume set_host_port() has been set. otherwise returns 3141")
         .def("set_retry_connection_period",
              &ClientInvoker::set_retry_connection_period,
@@ -546,17 +540,17 @@ void export_Client() {
         .def("get_defs", &ClientInvoker::defs, ClientDoc::get_defs())
         .def("reset", &ClientInvoker::reset, "reset client definition, and handle number")
         .def("in_sync", &ClientInvoker::in_sync, ClientDoc::in_sync())
-        .def("get_log", &get_log, return_value_policy<copy_const_reference>(), ClientDoc::get_log())
+        .def("get_log", &get_log, py::return_value_policy<py::copy_const_reference>(), ClientDoc::get_log())
         .def("edit_script_edit",
              &edit_script_edit,
-             return_value_policy<copy_const_reference>(),
+             py::return_value_policy<py::copy_const_reference>(),
              ClientDoc::edit_script_edit())
         .def("edit_script_preprocess",
              &edit_script_preprocess,
-             return_value_policy<copy_const_reference>(),
+             py::return_value_policy<py::copy_const_reference>(),
              ClientDoc::edit_script_preprocess())
         .def("edit_script_submit", &edit_script_submit, ClientDoc::edit_script_submit())
-        .def("new_log", &ClientInvoker::new_log, (bp::arg("path") = ""), ClientDoc::new_log())
+        .def("new_log", &ClientInvoker::new_log, (py::arg("path") = ""), ClientDoc::new_log())
         .def("clear_log", &ClientInvoker::clearLog, ClientDoc::clear_log())
         .def("flush_log", &ClientInvoker::flushLog, ClientDoc::flush_log())
         .def("log_msg", &ClientInvoker::logMsg, ClientDoc::log_msg())
@@ -566,22 +560,22 @@ void export_Client() {
         .def("terminate_server", &ClientInvoker::terminateServer, ClientDoc::terminate_server())
         .def("wait_for_server_reply",
              &ClientInvoker::wait_for_server_reply,
-             (bp::arg("time_out") = 60),
+             (py::arg("time_out") = 60),
              ClientDoc::wait_for_server_reply())
         .def("load",
              &ClientInvoker::loadDefs,
-             (bp::arg("path_to_defs"),
-              bp::arg("force")      = false,
-              bp::arg("check_only") = false,
-              bp::arg("print")      = false,
-              bp::arg("stats")      = false),
+             (py::arg("path_to_defs"),
+              py::arg("force")      = false,
+              py::arg("check_only") = false,
+              py::arg("print")      = false,
+              py::arg("stats")      = false),
              ClientDoc::load_defs())
-        .def("load", &ClientInvoker::load, (bp::arg("defs"), bp::arg("force") = false), ClientDoc::load())
+        .def("load", &ClientInvoker::load, (py::arg("defs"), py::arg("force") = false), ClientDoc::load())
         .def("get_server_defs", &ClientInvoker::getDefs, ClientDoc::get_server_defs())
-        .def("sync_local", &ClientInvoker::sync_local, (bp::arg("sync_suite_clock") = false), ClientDoc::sync())
+        .def("sync_local", &ClientInvoker::sync_local, (py::arg("sync_suite_clock") = false), ClientDoc::sync())
         .def("news_local", &news_local, ClientDoc::news())
         .add_property("changed_node_paths",
-                      bp::range(&ClientInvoker::changed_node_paths_begin, &ClientInvoker::changed_node_paths_end),
+                      py::range(&ClientInvoker::changed_node_paths_begin, &ClientInvoker::changed_node_paths_end),
                       ClientDoc::changed_node_paths())
         .def("suites", &suites, ClientDoc::suites())
         .def("ch_register", &ch_register, ClientDoc::ch_register())
@@ -598,9 +592,9 @@ void export_Client() {
         .def("ch_auto_add", &ClientInvoker::ch1_auto_add)
         .def("checkpt",
              &ClientInvoker::checkPtDefs,
-             (bp::arg("mode")                     = ecf::CheckPt::UNDEFINED,
-              bp::arg("check_pt_interval")        = 0,
-              bp::arg("check_pt_save_alarm_time") = 0),
+             (py::arg("mode")                     = ecf::CheckPt::UNDEFINED,
+              py::arg("check_pt_interval")        = 0,
+              py::arg("check_pt_save_alarm_time") = 0),
              ClientDoc::checkpt())
         .def("restore_from_checkpt", &ClientInvoker::restoreDefsFromCheckPt, ClientDoc::restore_from_checkpt())
         .def("reload_wl_file", &ClientInvoker::reloadwsfile, ClientDoc::reload_wl_file())
@@ -609,8 +603,8 @@ void export_Client() {
              &ClientInvoker::reloadcustompasswdfile,
              "reload the custom passwd file. <host>.<port>.ecf.custom_passwd. For users using ECF_USER or --user or "
              "set_user_name()")
-        .def("requeue", &requeue, (bp::arg("abs_node_path"), bp::arg("option") = ""), ClientDoc::requeue())
-        .def("requeue", &requeues, (bp::arg("paths"), bp::arg("option") = ""))
+        .def("requeue", &requeue, (py::arg("abs_node_path"), py::arg("option") = ""), ClientDoc::requeue())
+        .def("requeue", &requeues, (py::arg("paths"), py::arg("option") = ""))
         .def("free_trigger_dep", &free_trigger_dep, ClientDoc::free_trigger_dep())
         .def("free_trigger_dep", &free_trigger_dep1)
         .def("free_date_dep", &free_date_dep, ClientDoc::free_date_dep())
@@ -622,35 +616,36 @@ void export_Client() {
         .def("ping", &ClientInvoker::pingServer, ClientDoc::ping())
         .def("stats",
              &stats,
-             stats_overloads(args("to_stdout"), ClientDoc::stats())[return_value_policy<copy_const_reference>()])
+             stats_overloads(py::args("to_stdout"),
+                             ClientDoc::stats())[py::return_value_policy<py::copy_const_reference>()])
         .def("stats_reset", &stats_reset, ClientDoc::stats_reset())
         .def("get_file",
              &get_file,
-             (bp::arg("task"), bp::arg("type") = "script", bp::arg("max_lines") = "10000", bp::arg("as_bytes") = false),
+             (py::arg("task"), py::arg("type") = "script", py::arg("max_lines") = "10000", py::arg("as_bytes") = false),
              ClientDoc::get_file())
         .def("plug", &ClientInvoker::plug, ClientDoc::plug())
-        .def("query", &query, return_value_policy<copy_const_reference>(), ClientDoc::query())
-        .def("query", &query1, return_value_policy<copy_const_reference>(), ClientDoc::query())
+        .def("query", &query, py::return_value_policy<py::copy_const_reference>(), ClientDoc::query())
+        .def("query", &query1, py::return_value_policy<py::copy_const_reference>(), ClientDoc::query())
         .def("alter",
              &alters,
-             (bp::arg("paths"),
-              bp::arg("alter_type"),
-              bp::arg("attribute_type"),
-              bp::arg("name")  = "",
-              bp::arg("value") = ""),
+             (py::arg("paths"),
+              py::arg("alter_type"),
+              py::arg("attribute_type"),
+              py::arg("name")  = "",
+              py::arg("value") = ""),
              ClientDoc::alter())
         .def("alter",
              &alter,
-             (bp::arg("abs_node_path"),
-              bp::arg("alter_type"),
-              bp::arg("attribute_type"),
-              bp::arg("name")  = "",
-              bp::arg("value") = ""))
+             (py::arg("abs_node_path"),
+              py::arg("alter_type"),
+              py::arg("attribute_type"),
+              py::arg("name")  = "",
+              py::arg("value") = ""))
         .def("sort_attributes",
              &alter_sort,
-             (bp::arg("abs_node_path"), bp::arg("attribute_name"), bp::arg("recursive") = true))
+             (py::arg("abs_node_path"), py::arg("attribute_name"), py::arg("recursive") = true))
         .def(
-            "sort_attributes", &alter_sorts, (bp::arg("paths"), bp::arg("attribute_name"), bp::arg("recursive") = true))
+            "sort_attributes", &alter_sorts, (py::arg("paths"), py::arg("attribute_name"), py::arg("recursive") = true))
         .def("force_event", &force_event, ClientDoc::force_event())
         .def("force_event", &force_events)
         .def("force_state", &force_state, ClientDoc::force_state())
@@ -665,14 +660,14 @@ void export_Client() {
         .def("group", &ClientInvoker::group, ClientDoc::group())
         .def("begin_suite",
              &ClientInvoker::begin,
-             (bp::arg("suite_name"), bp::arg("force") = false),
+             (py::arg("suite_name"), py::arg("force") = false),
              ClientDoc::begin_suite())
-        .def("begin_all_suites", &ClientInvoker::begin_all_suites, (bp::arg("force") = false), ClientDoc::begin_all())
+        .def("begin_all_suites", &ClientInvoker::begin_all_suites, (py::arg("force") = false), ClientDoc::begin_all())
         .def("job_generation", &ClientInvoker::job_gen, ClientDoc::job_gen())
         .def("run", &run, ClientDoc::run())
         .def("run", &runs)
-        .def("check", &check, return_value_policy<copy_const_reference>(), ClientDoc::check())
-        .def("check", &checks, return_value_policy<copy_const_reference>())
+        .def("check", &check, py::return_value_policy<py::copy_const_reference>(), ClientDoc::check())
+        .def("check", &checks, py::return_value_policy<py::copy_const_reference>())
         .def("kill", &do_kill, ClientDoc::kill())
         .def("kill", &do_kills)
         .def("status", &the_status, ClientDoc::status())
@@ -687,10 +682,10 @@ void export_Client() {
         .def("restore", &restores)
         .def("delete",
              &ClientInvoker::delete_node,
-             (bp::arg("abs_node_path"), bp::arg("force") = false),
+             (py::arg("abs_node_path"), py::arg("force") = false),
              ClientDoc::delete_node())
-        .def("delete", &delete_node, (bp::arg("paths"), bp::arg("force") = false))
-        .def("delete_all", &ClientInvoker::delete_all, (bp::arg("force") = false), ClientDoc::delete_all())
+        .def("delete", &delete_node, (py::arg("paths"), py::arg("force") = false))
+        .def("delete_all", &ClientInvoker::delete_all, (py::arg("force") = false), ClientDoc::delete_all())
         .def("debug_server_on",
              &ClientInvoker::debug_server_on,
              "Enable server debug, Will dump to standard out on server host.")
@@ -707,7 +702,7 @@ void export_Client() {
         .def("enable_http", &ClientInvoker::enable_http, "Enable HTTP communication")
         .def("enable_https", &ClientInvoker::enable_https, "Enable HTTPS communication")
 
-        .def("zombie_get", &zombieGet, return_value_policy<copy_const_reference>())
+        .def("zombie_get", &zombieGet, py::return_value_policy<py::copy_const_reference>())
         .def("zombie_fob", &ClientInvoker::zombieFobCli)
         .def("zombie_fail", &ClientInvoker::zombieFailCli)
         .def("zombie_adopt", &ClientInvoker::zombieAdoptCli)
@@ -738,11 +733,11 @@ void export_Client() {
         .def("child_init", &ClientInvoker::child_init, "Child command,notify server job has started")
         .def("child_abort",
              &ClientInvoker::child_abort,
-             (bp::arg("reason") = ""),
+             (py::arg("reason") = ""),
              "Child command,notify server job has aborted, can provide an optional reason")
         .def("child_event",
              &ClientInvoker::child_event,
-             (bp::arg("event_name"), bp::arg("value") = true),
+             (py::arg("event_name"), py::arg("value") = true),
              "Child command,notify server event occurred, requires the event name")
         .def("child_meter",
              &ClientInvoker::child_meter,
@@ -753,34 +748,34 @@ void export_Client() {
         .def("child_wait", &ClientInvoker::child_wait, "Child command,wait for expression to come true")
         .def("child_queue",
              &ClientInvoker::child_queue,
-             (bp::arg("queue_name"), bp::arg("action"), bp::arg("step") = "", bp::arg("path_to_node_with_queue") = ""),
+             (py::arg("queue_name"), py::arg("action"), py::arg("step") = "", py::arg("path_to_node_with_queue") = ""),
              "Child command,active:return current step as string, then increment index, requires queue name, and "
              "optionally path to node with the queue")
         .def("child_complete", &ClientInvoker::child_complete, "Child command,notify server job has complete");
 
-    class_<WhyCmd, boost::noncopyable>("WhyCmd",
-                                       "The why command reports, the reason why a node is not running.\n\n"
-                                       "It needs the  definition structure and the path to node\n"
-                                       "\nConstructor::\n\n"
-                                       "   WhyCmd(defs, node_path)\n"
-                                       "      defs_ptr  defs   : pointer to a definition structure\n"
-                                       "      string node_path : The node path\n\n"
-                                       "\nExceptions:\n\n"
-                                       "- raises RuntimeError if the definition is empty\n"
-                                       "- raises RuntimeError if the node path is empty\n"
-                                       "- raises RuntimeError if the node path cannot be found in the definition\n"
-                                       "\nUsage::\n\n"
-                                       "   try:\n"
-                                       "      ci = Client()\n"
-                                       "      ci.sync_local()\n"
-                                       "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
-                                       "      print(ask.why())\n"
-                                       "   except RuntimeError, e:\n"
-                                       "       print(str(e))\n\n",
-                                       init<defs_ptr, std::string>())
+    py::class_<WhyCmd, boost::noncopyable>("WhyCmd",
+                                           "The why command reports, the reason why a node is not running.\n\n"
+                                           "It needs the  definition structure and the path to node\n"
+                                           "\nConstructor::\n\n"
+                                           "   WhyCmd(defs, node_path)\n"
+                                           "      defs_ptr  defs   : pointer to a definition structure\n"
+                                           "      string node_path : The node path\n\n"
+                                           "\nExceptions:\n\n"
+                                           "- raises RuntimeError if the definition is empty\n"
+                                           "- raises RuntimeError if the node path is empty\n"
+                                           "- raises RuntimeError if the node path cannot be found in the definition\n"
+                                           "\nUsage::\n\n"
+                                           "   try:\n"
+                                           "      ci = Client()\n"
+                                           "      ci.sync_local()\n"
+                                           "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
+                                           "      print(ask.why())\n"
+                                           "   except RuntimeError, e:\n"
+                                           "       print(str(e))\n\n",
+                                           py::init<defs_ptr, std::string>())
         .def("why", &WhyCmd::why, "returns a '/n' separated string, with reasons why node is not running");
 
-    class_<UrlCmd, boost::noncopyable>(
+    py::class_<UrlCmd, boost::noncopyable>(
         "UrlCmd",
         "Executes a command ECF_URL_CMD to display a url.\n\n"
         "It needs the definition structure and the path to node.\n"
@@ -811,6 +806,6 @@ void export_Client() {
         "      print(url.execute())\n"
         "   except RuntimeError, e:\n"
         "       print(str(e))\n\n",
-        init<defs_ptr, std::string>())
+        py::init<defs_ptr, std::string>())
         .def("execute", &UrlCmd::execute, "Displays url in the chosen browser");
 }

@@ -8,10 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/python.hpp>
-#include <boost/python/docstring_options.hpp>
-
-using namespace boost::python;
+#include "ecflow/python/PythonBinding.hpp"
 
 void export_Core();
 void export_NodeAttr();
@@ -23,13 +20,13 @@ void export_Client();
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 BOOST_PYTHON_MODULE(ecflow) {
-    boost::python::docstring_options doc_options(
-        true, // show the docstrings from here
-        true, // show Python signatures.
-        false // Don't mention the C++ method signatures in the generated docstrings
+    py::docstring_options doc_options(true, // show the docstrings from here
+                                      true, // show Python signatures.
+                                      false // Don't mention the C++ method signatures in the generated docstrings
     );
-    scope().attr("__doc__") = "The ecflow module provides the python bindings/api for creating definition structure "
-                              "and communicating with the server.";
+    py::scope().attr("__doc__") =
+        "The ecflow module provides the python bindings/api for creating definition structure "
+        "and communicating with the server.";
 
     export_Core();
     export_NodeAttr();

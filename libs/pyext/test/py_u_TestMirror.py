@@ -134,6 +134,7 @@ def cannot_have_multiple_mirrors_in_single_task():
     except RuntimeError as e:
         assert True
 
+
 def can_check_job_creation_with_mirror():
     defs = ecf.Defs()
 

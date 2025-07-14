@@ -7,6 +7,9 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 #
+
+# This test ensures the SSL setup for the ecFlow client works as expected.
+
 import os
 
 import ecflow_test_util as Test
