@@ -30,6 +30,7 @@ set(test_srcs
   # Headers
   test/TestVersioning.hpp
   # Sources
+  test/TestBase64.cpp
   test/TestCalendar.cpp
   test/TestCereal.cpp
   test/TestCerealOptionalNVP.cpp

@@ -16,6 +16,7 @@
 namespace ecf::http {
 
 void setup(httplib::Server& server);
+void teardown();
 
 } // namespace ecf::http
 

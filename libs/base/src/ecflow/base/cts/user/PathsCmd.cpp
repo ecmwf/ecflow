@@ -236,7 +236,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                 }
                 SuiteChangedPtr changed(theNode.get());
                 theNode->suspend();
-                theNode->flag().set(ecf::Flag::MESSAGE);
+                theNode->get_flag().set(ecf::Flag::MESSAGE);
                 add_edit_history(defs, path);
                 assert(isWrite()); // should only add edit history for write-able commands
             }
@@ -258,7 +258,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                 }
                 SuiteChangedPtr changed(theNode.get());
                 theNode->resume();
-                theNode->flag().set(ecf::Flag::MESSAGE);
+                theNode->get_flag().set(ecf::Flag::MESSAGE);
                 add_edit_history(defs, path);
                 assert(isWrite()); // should only add edit history for write-able commands
 
@@ -340,7 +340,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
 
                 SuiteChanged1 changed(the_container->suite());
 
-                the_container->flag().set(ecf::Flag::MESSAGE);
+                the_container->get_flag().set(ecf::Flag::MESSAGE);
                 add_edit_history(defs, the_container->absNodePath());
                 assert(isWrite()); // should only add edit history for write-able commands
 

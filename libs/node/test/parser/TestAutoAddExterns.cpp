@@ -15,6 +15,7 @@
 
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -37,14 +38,16 @@ BOOST_AUTO_TEST_CASE(test_auto_add_externs) {
 
     // Check number of extrens read in: Duplicate should be ignore
     BOOST_REQUIRE_MESSAGE(defs.externs().size() == 11,
-                          "Expected 11 externs as starting point but found " << defs.externs().size() << "\n"
-                                                                             << defs << "\n");
+                          "Expected 11 externs as starting point but found "
+                              << defs.externs().size() << "\n"
+                              << ecf::as_string(defs, PrintStyle::MIGRATE) << "\n");
 
     // Test auto extern generation. Don't remove existing extern's
     defs.auto_add_externs(false /* remove_existing_externs_first*/);
     BOOST_REQUIRE_MESSAGE(defs.externs().size() == 11,
                           "Expected 11, auto_add_extern(false) gave: " << defs.externs().size() << "\n"
-                                                                       << defs << "\n");
+                                                                       << ecf::as_string(defs, PrintStyle::MIGRATE)
+                                                                       << "\n");
 
     // By removing the externs read, in we can determine the real number of extern;s from
     // parsing all the trigger expressions, and inlimit references
@@ -52,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_auto_add_externs) {
     BOOST_REQUIRE_MESSAGE(defs.externs().size() == 10,
                           "Expected 10 externs, since redundant externs removed, auto_add_extern(true) gave: "
                               << defs.externs().size() << "\n"
-                              << defs << "\n");
+                              << ecf::as_string(defs, PrintStyle::MIGRATE) << "\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

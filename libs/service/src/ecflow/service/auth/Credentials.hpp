@@ -13,12 +13,19 @@
 
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace ecf::service::auth {
 
 class Credentials {
 public:
+    struct Error
+    {
+        std::string message;
+        explicit Error(std::string message) : message(std::move(message)) {}
+    };
+
     struct UserCredentials
     {
         std::string username;
@@ -40,8 +47,10 @@ public:
     [[nodiscard]] std::optional<UserCredentials> user() const;
     [[nodiscard]] std::optional<KeyCredentials> key() const;
 
-    static Credentials load(const std::string& filepath);
-    static Credentials load_content(const std::string& content);
+    using expected_t = std::variant<Credentials, Error>;
+
+    static expected_t load(const std::string& filepath);
+    static expected_t load_content(const std::string& content);
 
 private:
     struct Entry

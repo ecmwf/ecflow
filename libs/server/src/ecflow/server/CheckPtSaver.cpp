@@ -103,7 +103,7 @@ bool CheckPtSaver::explicitSave(bool from_server) const {
         fs::path checkPtFile(serverEnv_->checkPtFilename());
         fs::path oldCheckPtFile(serverEnv_->oldCheckPtFilename());
         CheckPtSaver::storeWithBackup(checkPtFile, oldCheckPtFile, [&](const fs::path& file_path) {
-            server_->defs_->save_as_checkpt(file_path.string());
+            server_->defs_->write_to_checkpt_file(file_path.string());
         });
 
         state_change_no_  = Ecf::state_change_no();  // For periodic update only save checkPt if it has changed
@@ -137,7 +137,7 @@ bool CheckPtSaver::explicitSave(bool from_server) const {
         std::string msg = "Could not save checkPoint file! ";
         msg += e.what();
         server_->defs_->flag().set(ecf::Flag::CHECKPT_ERROR);
-        server_->defs()->set_server().add_or_update_user_variables("ECF_CHECKPT_ERROR", msg);
+        server_->defs()->server_state().add_or_update_user_variables("ECF_CHECKPT_ERROR", msg);
         LOG(Log::ERR, msg);
         return false;
     }

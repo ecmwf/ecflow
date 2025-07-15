@@ -21,6 +21,7 @@
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -461,10 +462,11 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
                 BOOST_CHECK_MESSAGE(expectedEvaluationResult == top->evaluate(),
                                     "evaluation not as expected for:\n"
                                         << p.first << "\n"
-                                        << *top);
+                                        << ecf::as_string(*top, PrintStyle::DEFS));
 
                 std::string error_msg;
-                BOOST_CHECK_MESSAGE(top->check(error_msg), error_msg << ":  Check failed for " << *top);
+                BOOST_CHECK_MESSAGE(top->check(error_msg),
+                                    error_msg << ":  Check failed for " << ecf::as_string(*top, PrintStyle::DEFS));
 
                 std::string why;
                 top->why(why);
@@ -531,10 +533,11 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
                 BOOST_CHECK_MESSAGE(expectedEvaluationResult == top->evaluate(),
                                     "evaluation not as expected for:\n"
                                         << p.first << "\n"
-                                        << *top);
+                                        << ecf::as_string(*top, PrintStyle::DEFS));
 
                 std::string error_msg;
-                BOOST_CHECK_MESSAGE(top->check(error_msg), error_msg << ":  Check failed for " << *top);
+                BOOST_CHECK_MESSAGE(top->check(error_msg),
+                                    error_msg << ":  Check failed for " << ecf::as_string(*top, PrintStyle::DEFS));
 
                 std::string why;
                 top->why(why);
@@ -638,10 +641,11 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
                 BOOST_CHECK_MESSAGE(expectedEvaluationResult == top->evaluate(),
                                     "evaluation not as expected for:\n"
                                         << p.first << "\n"
-                                        << *top);
+                                        << ecf::as_string(*top, PrintStyle::DEFS));
 
                 std::string error_msg;
-                BOOST_CHECK_MESSAGE(top->check(error_msg), error_msg << ":  Check failed for " << *top);
+                BOOST_CHECK_MESSAGE(top->check(error_msg),
+                                    error_msg << ":  Check failed for " << ecf::as_string(*top, PrintStyle::DEFS));
             }
         }
     }
@@ -681,11 +685,13 @@ BOOST_AUTO_TEST_CASE(test_trigger_expression_divide_by_zero) {
         BOOST_CHECK_MESSAGE(top->left()->isRoot(), "First child of top should be a root");
         BOOST_CHECK_MESSAGE(top->left()->type() == expectedRootType,
                             "expected root type " << expectedRootType << " but found " << top->left()->type());
-        BOOST_CHECK_MESSAGE(expectedEvaluationResult == top->evaluate(), "evaluation not as expected for " << *top);
+        BOOST_CHECK_MESSAGE(expectedEvaluationResult == top->evaluate(),
+                            "evaluation not as expected for " << ecf::as_string(*top, PrintStyle::DEFS));
 
         // expect check to fail, due to divide/modulo by zero
         std::string error_msg;
-        BOOST_CHECK_MESSAGE(!top->check(error_msg), error_msg << ":  Check failed for " << *top);
+        BOOST_CHECK_MESSAGE(!top->check(error_msg),
+                            error_msg << ":  Check failed for " << ecf::as_string(*top, PrintStyle::DEFS));
     }
 }
 
@@ -745,7 +751,6 @@ BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
 
     for (const auto& expression : expressions) {
 
-        // std::cout << "parsing expression " << expr << "\n";
         ExprParser theExprParser(expression);
         std::string error;
         auto actual = theExprParser.doParse(error);

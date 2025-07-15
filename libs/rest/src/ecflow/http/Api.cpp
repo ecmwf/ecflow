@@ -18,11 +18,15 @@ namespace ecf::http {
 
 void setup(httplib::Server& http_server) {
     routing(http_server);
-    update_defs_loop(opts.polling_interval);
+    start_update_defs_loop(opts.polling_interval);
 
     if (opts.verbose) {
         printf("API v1 ready\n");
     }
+}
+
+void teardown() {
+    stop_update_defs_loop();
 }
 
 } // namespace ecf::http

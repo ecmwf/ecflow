@@ -21,6 +21,7 @@
 #include "ecflow/node/ExprAst.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/ExprParser.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -77,13 +78,9 @@ BOOST_AUTO_TEST_CASE(test_single_expression) {
                                   "evaluation not as expected for:\n"
                                       << p.first << "\n"
                                       << print_flat << "\n"
-                                      << *top);
+                                      << ecf::as_string(*top, PrintStyle::DEFS));
         }
-        {
-            std::stringstream ss;
-            top->print(ss);
-            cout << ss.str() << "\n";
-        }
+        cout << ecf::as_string(*top, PrintStyle::DEFS) << "\n";
 
         std::string why;
         top->why(why);

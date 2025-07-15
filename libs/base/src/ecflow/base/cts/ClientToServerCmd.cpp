@@ -100,7 +100,7 @@ void ClientToServerCmd::do_log(AbstractServer* as) const {
     if (!log(Log::MSG, ss)) { // will automatically add end of line
         // problems with opening or writing to log file, warn users, ECFLOW-536
         as->defs()->flag().set(ecf::Flag::LOG_ERROR);
-        as->defs()->set_server().add_or_update_user_variables("ECF_LOG_ERROR", Log::instance()->log_error());
+        as->defs()->server_state().add_or_update_user_variables("ECF_LOG_ERROR", Log::instance()->log_error());
     }
 }
 
@@ -191,7 +191,7 @@ void ClientToServerCmd::add_edit_history(Defs* defs) const {
                 // Setting the flag will make a state change. But its OK command allows it.
                 // Since we only get called if command can make state changes (isWrite() == true)
                 SuiteChangedPtr suiteChanged(edited_node.get());
-                edited_node->flag().set(ecf::Flag::MESSAGE); // trap state change in suite for sync
+                edited_node->get_flag().set(ecf::Flag::MESSAGE); // trap state change in suite for sync
                 add_edit_history(defs, edited_node->absNodePath());
             }
         }

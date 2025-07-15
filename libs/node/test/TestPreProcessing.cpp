@@ -165,7 +165,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     theDefs.getAllTasks(theTasks);
 
     // Override ECF_HOME.   ECF_HOME is need to locate the ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are used in client scripts(sms) and used to locate the sms files

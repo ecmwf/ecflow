@@ -21,6 +21,7 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/Analyser.hpp"
 #include "ecflow/simulator/SimulatorVisitor.hpp"
 
@@ -40,7 +41,7 @@ public:
     ~LogDestroyer() { Log::destroy(); }
 };
 
-Simulator::Simulator() : print_style_(PrintStyle::STATE) {
+Simulator::Simulator() {
 }
 
 bool Simulator::run(const std::string& theDefsFile, std::string& errorMsg) const {
@@ -212,7 +213,7 @@ void Simulator::run_analyser(Defs& theDefs, std::string& errorMsg) const {
     Analyser analyser;
     analyser.run(theDefs);
     errorMsg += "Please see files .flat and .depth for analysis\n";
-    errorMsg += theDefs.print(PrintStyle::MIGRATE);
+    errorMsg += ecf::as_string(theDefs, PrintStyle::MIGRATE);
 }
 
 bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const {

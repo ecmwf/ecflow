@@ -20,8 +20,6 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -104,16 +102,6 @@ void CronAttr::addMonths(const std::vector<int>& m) {
             throw std::out_of_range(ss.str());
         }
     }
-}
-
-void CronAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        timeSeries_.write_state(os, free_);
-    }
-    os += "\n";
 }
 
 std::string CronAttr::name() const {

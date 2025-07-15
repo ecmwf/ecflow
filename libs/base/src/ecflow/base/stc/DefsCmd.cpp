@@ -17,6 +17,7 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace std;
 using namespace boost;
@@ -68,15 +69,15 @@ bool DefsCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd,
 
     if (server_reply.cli() && !cts_cmd->group_cmd()) {
         /// This Could be part of a group command, hence ONLY show defs if NOT group command
-        PrintStyle style(cts_cmd->show_style());
+        auto style = cts_cmd->show_style();
 
-        if (!PrintStyle::is_persist_style(cts_cmd->show_style())) {
+        if (!PrintStyle::is_persist_style(style)) {
             /// Auto generate externs, before writing to standard out. This can be expensive since
             /// All the trigger references need to to be resolved. & AST need to be created first
             /// The old spirit based parsing, horrendously, slow. Can't use Spirit QI, till IBM pull support it
             defs->auto_add_externs();
         }
-        std::cout << *defs;
+        ecf::write_t(std::cout, *defs, style);
     }
     else {
         server_reply.set_sync(true);      // always in sync when getting the full defs

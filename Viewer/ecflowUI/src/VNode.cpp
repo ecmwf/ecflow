@@ -479,7 +479,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
     if (!node_)
         return val;
 
-    // should set the def mutex because variableSubsitution
+    // should set the def mutex because variableSubstitution
     // might need information from the defs
 
     const Variable& var = node_->findVariable(key);
@@ -547,7 +547,7 @@ bool VNode::substituteVariableValue(std::string& val) const {
     if (!node_)
         return false;
 
-    // should set the def mutex because variableSubsitution
+    // should set the def mutex because variableSubstitution
     // might need information from the defs
     return node_->variableSubstitution(val);
 }
@@ -797,12 +797,12 @@ bool VNode::isAlias() const
 #endif
 
 std::string VNode::flagsAsStr() const {
-    return (node_) ? node_->flag().to_string() : std::string();
+    return (node_) ? node_->get_flag().to_string() : std::string();
 }
 
 bool VNode::isFlagSet(ecf::Flag::Type f) const {
     if (node_) {
-        return node_->flag().is_set(f);
+        return node_->get_flag().is_set(f);
     }
     return false;
 }
@@ -1283,7 +1283,7 @@ bool VServer::substituteVariableValue(std::string& val) const {
     if (!defs)
         return false;
 
-    return defs->server().variableSubsitution(val);
+    return defs->server_state().variableSubstitution(val);
 }
 
 //----------------------------------------------
@@ -1582,8 +1582,8 @@ void VServer::updateCache() {
 }
 
 void VServer::updateCache(defs_ptr defs) {
-    cache_.vars_    = defs->server().user_variables();
-    cache_.genVars_ = defs->server().server_variables();
+    cache_.vars_    = defs->server_state().user_variables();
+    cache_.genVars_ = defs->server_state().server_variables();
     cache_.flag_    = defs->flag();
 }
 

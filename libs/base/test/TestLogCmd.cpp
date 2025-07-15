@@ -72,28 +72,28 @@ BOOST_AUTO_TEST_CASE(test_log_cmd) {
     // variable. hence visible in GUI
     Defs defs;
     TestHelper::invokeRequest(&defs, Cmd_ptr(new LogCmd(new_log_file)), false /* check_change_numbers */);
-    BOOST_CHECK_MESSAGE(defs.server().find_variable("ECF_LOG") == expected_new_log_file,
+    BOOST_CHECK_MESSAGE(defs.server_state().find_variable("ECF_LOG") == expected_new_log_file,
                         "expected to find ECF_LOG with value '" << expected_new_log_file << "' but found '"
-                                                                << defs.server().find_variable("ECF_LOG") << "'");
+                                                                << defs.server_state().find_variable("ECF_LOG") << "'");
     std::string value;
-    BOOST_CHECK_MESSAGE(defs.server().find_user_variable("ECF_LOG", value) && (value == expected_new_log_file),
+    BOOST_CHECK_MESSAGE(defs.server_state().find_user_variable("ECF_LOG", value) && (value == expected_new_log_file),
                         "expected to find ECF_LOG in the *USER* variables '" << expected_new_log_file << "' but found '"
                                                                              << value << "'");
     BOOST_CHECK_MESSAGE(Log::instance()->path() == expected_new_log_file,
                         "expected to find ECF_LOG with value '" << expected_new_log_file << "' but found '"
-                                                                << defs.server().find_variable("ECF_LOG") << "'");
+                                                                << defs.server_state().find_variable("ECF_LOG") << "'");
 
     // Update ECF_LOG to have a *SPACE* at the end.  ECFLOW-377
-    defs.set_server().add_or_update_user_variables(ecf::environment::ECF_LOG, new_log_file);
-    BOOST_CHECK_MESSAGE(defs.server().find_variable("ECF_LOG") == new_log_file,
+    defs.server_state().add_or_update_user_variables(ecf::environment::ECF_LOG, new_log_file);
+    BOOST_CHECK_MESSAGE(defs.server_state().find_variable("ECF_LOG") == new_log_file,
                         "expected to find ECF_LOG with value '" << new_log_file << "' but found '"
-                                                                << defs.server().find_variable("ECF_LOG") << "'");
+                                                                << defs.server_state().find_variable("ECF_LOG") << "'");
 
     // INVOKE log command where we update log file from ECF_LOG, equivalent --log=new
     TestHelper::invokeRequest(&defs, Cmd_ptr(new LogCmd(LogCmd::NEW)), false /* check_change_numbers */);
     BOOST_CHECK_MESSAGE(Log::instance()->path() == expected_new_log_file,
                         "expected to find Log::instance()->path() with value '"
-                            << expected_new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG")
+                            << expected_new_log_file << "' but found '" << defs.server_state().find_variable("ECF_LOG")
                             << "'");
 
     // tidy up

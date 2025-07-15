@@ -146,13 +146,13 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const {
                 //        This is done adding it as a *USER* variable. This overloads the server variables
                 //        It also allows us to see the change in GUI. Note: Defs/server_variables are not synced
                 // ECFLOW-376
-                as->defs()->set_server().add_or_update_user_variables(ecf::environment::ECF_LOG,
-                                                                      Log::instance()->path());
+                as->defs()->server_state().add_or_update_user_variables(ecf::environment::ECF_LOG,
+                                                                        Log::instance()->path());
             }
             else {
                 // User could have overridden ECF_LOG variable
                 // *FIRST* look at user variables, then look at *server* variables.
-                std::string log_file_name = as->defs()->server().find_variable(ecf::environment::ECF_LOG);
+                std::string log_file_name = as->defs()->server_state().find_variable(ecf::environment::ECF_LOG);
 
                 // ECFLOW-377 should remove leading/trailing spaces from path
                 ecf::algorithm::trim(log_file_name);

@@ -739,6 +739,23 @@ void routing(httplib::Server& http_server) {
         http_server.Delete(resource_path, v1::not_implemented);            // Delete
     }
 
+    /* .../shutdown */
+    {
+        std::string resource_path = R"(/v1/shutdown)";
+
+        http_server.Options(resource_path, v1::not_implemented);     // Options
+        http_server.Post(resource_path, v1::not_implemented);        // Create
+        http_server.Get(resource_path, [&http_server](const httplib::Request& req, httplib::Response& res) {
+            res.set_content("ecFlow REST API Server shutting down...", "text/plain");
+            std::thread([&http_server]() {
+                std::this_thread::sleep_for(std::chrono::seconds(1)); // Allow time to send the response
+                http_server.stop();
+            }).detach();
+        });
+        http_server.Put(resource_path, v1::not_implemented);         // Update
+        http_server.Delete(resource_path, v1::not_implemented);      // Delete
+    }    
+
     api_startup = std::chrono::system_clock::now();
     set_last_request_time();
 }

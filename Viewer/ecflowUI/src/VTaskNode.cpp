@@ -20,8 +20,8 @@ VTaskNode::VTaskNode(VNode* parent, node_ptr node) : VNode(parent, node), prevTr
     NState::State new_status = node_->state();
 
     bool aborted = (new_status == NState::ABORTED);
-    bool zombie  = node_->flag().is_set(ecf::Flag::ZOMBIE);
-    bool late    = node_->flag().is_set(ecf::Flag::LATE);
+    bool zombie  = node_->get_flag().is_set(ecf::Flag::ZOMBIE);
+    bool late    = node_->get_flag().is_set(ecf::Flag::LATE);
 
     updatePrev(tn, aborted, zombie, late);
 }
@@ -54,13 +54,13 @@ void VTaskNode::updatePrev(int tn, bool aborted, bool zombie, bool late) {
 
 bool VTaskNode::isZombie() const {
     if (node_)
-        return node_->flag().is_set(ecf::Flag::ZOMBIE);
+        return node_->get_flag().is_set(ecf::Flag::ZOMBIE);
     return false;
 }
 
 bool VTaskNode::isLate() const {
     if (node_)
-        return node_->flag().is_set(ecf::Flag::LATE);
+        return node_->get_flag().is_set(ecf::Flag::LATE);
     return false;
 }
 

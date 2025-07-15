@@ -15,8 +15,6 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -176,25 +174,6 @@ bool Event::compare(const Event& rhs) const {
     return true;
 }
 
-void Event::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        if (iv_ != v_) { // initial value and value differ
-            if (v_) {
-                os += " # ";
-                os += Event::SET();
-            }
-            else {
-                os += " # ";
-                os += Event::CLEAR();
-            }
-        }
-    }
-    os += "\n";
-}
-
 std::string Event::toString() const {
     std::string ret;
     write(ret);
@@ -319,19 +298,6 @@ bool Meter::operator==(const Meter& rhs) const {
     return true;
 }
 
-void Meter::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        if (v_ != min_) {
-            os += " # ";
-            os += ecf::convert_to<std::string>(v_);
-        }
-    }
-    os += "\n";
-}
-
 std::string Meter::toString() const {
     std::string ret;
     write(ret);
@@ -366,30 +332,6 @@ Label::Label(const std::string& name, const std::string& value, const std::strin
     if (check_name && !Str::valid_name(n_)) {
         throw std::runtime_error("Label::Label: Invalid Label name :" + n_);
     }
-}
-
-void Label::print(std::string& os) const {
-
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        if (!new_v_.empty()) {
-            if (new_v_.find("\n") == std::string::npos) {
-                os += " # \"";
-                os += new_v_;
-                os += "\"";
-            }
-            else {
-                std::string value = new_v_;
-                Str::replaceall(value, "\n", "\\n");
-                os += " # \"";
-                os += value;
-                os += "\"";
-            }
-        }
-    }
-    os += "\n";
 }
 
 std::string Label::toString() const {

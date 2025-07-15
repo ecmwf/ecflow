@@ -12,7 +12,6 @@
 
 #include <stdexcept>
 
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -47,13 +46,6 @@ bool GenericAttr::operator==(const GenericAttr& rhs) const {
     if (values_ != rhs.values_)
         return false;
     return true;
-}
-
-void GenericAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    os += "\n";
 }
 
 std::string GenericAttr::to_string() const {

@@ -16,6 +16,7 @@
 #include <string>
 
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/NState.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/service/aviso/AvisoService.hpp"
 
@@ -120,6 +121,22 @@ public:
 
     template <class Archive>
     friend void serialize(Archive& ar, AvisoAttr& aviso, std::uint32_t version);
+
+    /**
+     * \brief Finishes all the Aviso attributes, effectively stopping the background polling mechanism.
+     *
+     * @param avisos the avisos to finish
+     */
+    static void finish(const std::vector<AvisoAttr>& avisos);
+
+    /**
+     * \brief When the given state is a Task "terminal" state (i.e. complete, aborted, unknown), finishes all Aviso
+     * attributes, effectively stopping the background polling mechanism.
+     *
+     * @param avisos the avisos to finish
+     * @param state the state to check against
+     */
+    static void finish(const std::vector<AvisoAttr>& avisos, NState::State state);
 
 private:
     void start_controller(const std::string& aviso_path,

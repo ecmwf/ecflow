@@ -34,7 +34,7 @@
 
 ||Search in text views||
 |Ctrl+F|Search|
-|F3|Go to next macth|
+|F3|Go to next match|
 |Shift+F3|Go to previous match|
 |Alt+C|Toggle case sensitive|
 |Alt+W|Toggle whole words|

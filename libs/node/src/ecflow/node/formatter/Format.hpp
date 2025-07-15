@@ -21,9 +21,14 @@ struct stringstreambuf
     std::string& buf;
 };
 
-template <typename S>
+template <typename S, typename = std::enable_if_t<std::is_convertible_v<S, std::string>>>
 inline void operator<<(stringstreambuf& sb, S&& s) {
     sb.buf += std::forward<S>(s);
+}
+
+template <typename S, typename = std::enable_if_t<std::is_integral_v<S>>>
+inline void operator<<(stringstreambuf& sb, S s) {
+    sb.buf += std::to_string(s);
 }
 
 template <typename T>

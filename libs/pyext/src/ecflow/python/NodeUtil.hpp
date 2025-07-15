@@ -11,9 +11,8 @@
 #ifndef ecflow_python_NodeUtil_HPP
 #define ecflow_python_NodeUtil_HPP
 
-#include <boost/python.hpp>
-
 #include "ecflow/node/NodeFwd.hpp"
+#include "ecflow/python/PythonBinding.hpp"
 
 class NodeUtil {
 public:
@@ -21,18 +20,18 @@ public:
     NodeUtil(const NodeUtil&)            = delete;
     NodeUtil& operator=(const NodeUtil&) = delete;
 
-    /// any nodes and attributes to be added
-    static boost::python::object do_add(node_ptr self, const boost::python::object& arg);
+    /// Any nodes and attributes to be added
+    static py::object do_add(node_ptr self, const py::object& arg);
 
-    /// add ecflow variables from a python dictionary of strings
-    static node_ptr add_variable_dict(node_ptr self, const boost::python::dict& dict);
+    /// Add ecflow variables from a python dictionary of strings
+    static node_ptr add_variable_dict(node_ptr self, const py::dict& dict);
 
-    /// Add all the object in python list, to the node
-    static boost::python::object node_iadd(node_ptr self, const boost::python::list& list);
+    /// Add all the object in a python list, to the node
+    static py::object node_iadd(node_ptr self, const py::list& list);
 
-    /// raw constructor,assumes first argument is a string.
-    /// Assumes Task,Family,Suite has defined a constructor  init(const std::string& name, list attrs, dict kw)
-    static boost::python::object node_raw_constructor(boost::python::tuple args, boost::python::dict kw);
+    /// The raw constructor assumes the first argument is a string.
+    /// Assumes Task, Family, or Suite has defined a constructor  init(const std::string& name, list attrs, dict kw)
+    static py::object node_raw_constructor(py::tuple args, py::dict kw);
 };
 
 #endif /* ecflow_python_NodeUtil_HPP */

@@ -68,7 +68,7 @@ static defs_ptr create_server_defs() {
     // This allows additional testing. i.e server variables
     std::vector<Variable> server_variables;
     ServerState::setup_default_server_variables(server_variables, "3141");
-    defs->set_server().set_server_variables(server_variables);
+    defs->server_state().set_server_variables(server_variables);
 
     // ensure client/server start out the same
     return create_client_defs(defs);
@@ -128,7 +128,7 @@ void test_sync_scaffold(defs_change_cmd the_defs_change_command, const std::stri
         BOOST_CHECK_MESSAGE(the_client_defs->suiteVec().size() == 2, test_name << ": Expected 2 suites");
         BOOST_CHECK_MESSAGE(server_defs->client_suite_mgr().handle_changed(client_handle) == false,
                             test_name << ": Expected handle_changed to be cleared after create_defs()");
-        BOOST_CHECK_MESSAGE(server_defs->server().compare(the_client_defs->server()),
+        BOOST_CHECK_MESSAGE(server_defs->server_state().compare(the_client_defs->server_state()),
                             test_name << ": Server state does not match");
 
         Ecf::set_server(true);
@@ -140,7 +140,7 @@ void test_sync_scaffold(defs_change_cmd the_defs_change_command, const std::stri
 
         /// Call create defs again, after change in server defs, check server state is synced
         the_client_defs = server_defs->client_suite_mgr().create_defs(client_handle, server_defs);
-        BOOST_CHECK_MESSAGE(server_defs->server().compare(the_client_defs->server()),
+        BOOST_CHECK_MESSAGE(server_defs->server_state().compare(the_client_defs->server_state()),
                             test_name << ": Server state does not match");
         BOOST_CHECK_MESSAGE(server_defs->get_flag() == the_client_defs->get_flag(),
                             test_name << ": Server flags do not match");
@@ -163,7 +163,7 @@ void test_sync_scaffold(defs_change_cmd the_defs_change_command, const std::stri
                                       << NState::toString(server_reply.client_defs()->state()) << ")");
         if (full_sync) {
             Ecf::set_debug_equality(true); // only has affect in DEBUG build
-            BOOST_CHECK_MESSAGE(server_defs->server().compare(server_reply.client_defs()->server()),
+            BOOST_CHECK_MESSAGE(server_defs->server_state().compare(server_reply.client_defs()->server_state()),
                                 test_name << ": Server state does not match");
         }
 
@@ -201,11 +201,11 @@ void test_sync_scaffold(defs_change_cmd the_defs_change_command, const std::stri
 }
 
 static bool set_server_state_shutdown(defs_ptr defs) {
-    defs->set_server().set_state(SState::SHUTDOWN);
+    defs->server_state().set_state(SState::SHUTDOWN);
     return true; // expect changes
 }
 static bool set_server_state_running(defs_ptr defs) {
-    defs->set_server().set_state(SState::RUNNING);
+    defs->server_state().set_state(SState::RUNNING);
     return true; // expect changes
 }
 
@@ -273,7 +273,7 @@ static bool add_server_user_variables(defs_ptr defs) {
     std::vector<Variable> user_variables;
     user_variables.emplace_back("a", "b");
     user_variables.emplace_back("c", "d");
-    defs->set_server().set_user_variables(user_variables);
+    defs->server_state().set_user_variables(user_variables);
     return true; // expect change
 }
 

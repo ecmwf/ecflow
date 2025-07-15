@@ -21,6 +21,7 @@
 #include "ecflow/core/Pid.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/User.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -83,8 +84,7 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
         BOOST_CHECK_MESSAGE(theClient.loadDefs(path) == 0, "load defs failed \n" << theClient.errorMsg());
         if (debug_me) {
             BOOST_CHECK_MESSAGE(theClient.sync_local() == 0, "sync_local failed \n" << theClient.errorMsg());
-            PrintStyle style(PrintStyle::STATE);
-            cout << theClient.defs() << "\n";
+            cout << ecf::as_string(*theClient.defs(), PrintStyle::STATE) << "\n";
         }
 
         if (debug_me)
@@ -108,13 +108,13 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
         BOOST_CHECK_MESSAGE(theClient.defs()->get_flag().is_set(Flag::CHECKPT_ERROR),
                             "Expected Flag::CHECKPT_ERROR to be set");
         BOOST_CHECK_MESSAGE(theClient.defs()->get_flag().is_set(Flag::LOG_ERROR), "Expected Flag::LOG_ERROR to be set");
-        BOOST_CHECK_MESSAGE(theClient.defs()->server().variable_exists("ECF_CHECKPT_ERROR"),
+        BOOST_CHECK_MESSAGE(theClient.defs()->server_state().variable_exists("ECF_CHECKPT_ERROR"),
                             "Expected to find ECF_CHECKPT_ERROR as a server variable");
-        BOOST_CHECK_MESSAGE(theClient.defs()->server().variable_exists("ECF_LOG_ERROR"),
+        BOOST_CHECK_MESSAGE(theClient.defs()->server_state().variable_exists("ECF_LOG_ERROR"),
                             "Expected to find ECF_LOG_ERROR as a server variable");
 
-        const Variable& var  = theClient.defs()->server().findVariable("ECF_LOG_ERROR");
-        const Variable& var1 = theClient.defs()->server().findVariable("ECF_CHECKPT_ERROR");
+        const Variable& var  = theClient.defs()->server_state().findVariable("ECF_LOG_ERROR");
+        const Variable& var1 = theClient.defs()->server_state().findVariable("ECF_CHECKPT_ERROR");
         BOOST_CHECK_MESSAGE(!var1.theValue().empty(), "Expected ECF_CHECKPT_ERROR to have a value");
         BOOST_CHECK_MESSAGE(!var.theValue().empty(), "Expected ECF_LOG_ERROR to have a value");
         if (debug_me)
@@ -152,9 +152,9 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
                             "Expected Flag::CHECKPT_ERROR to be cleared");
         BOOST_CHECK_MESSAGE(!theClient.defs()->get_flag().is_set(Flag::LOG_ERROR),
                             "Expected Flag::LOG_ERROR to be cleared");
-        BOOST_CHECK_MESSAGE(!theClient.defs()->server().variable_exists("ECF_CHECKPT_ERROR"),
+        BOOST_CHECK_MESSAGE(!theClient.defs()->server_state().variable_exists("ECF_CHECKPT_ERROR"),
                             "Expected to NOT find ECF_CHECKPT_ERROR as a server variable");
-        BOOST_CHECK_MESSAGE(!theClient.defs()->server().variable_exists("ECF_LOG_ERROR"),
+        BOOST_CHECK_MESSAGE(!theClient.defs()->server_state().variable_exists("ECF_LOG_ERROR"),
                             "Expected to NOT find ECF_LOG_ERROR as a server variable");
     }
 

@@ -17,7 +17,6 @@
 
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Filesystem.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeStamp.hpp"
 
@@ -234,7 +233,7 @@ std::string Log::handle_write_failure() {
     }
 
     if (LogToCout::ok()) {
-        Indentor::indent(cout) << msg << '\n';
+        std::cout << msg << '\n';
     }
     return msg;
 }
@@ -245,7 +244,7 @@ bool log(Log::LogType lt, const std::string& message) {
     }
     else {
         if (LogToCout::ok()) {
-            Indentor::indent(cout) << message << '\n';
+            std::cout << message << '\n';
         }
     }
     return true;
@@ -257,7 +256,7 @@ bool log_no_newline(Log::LogType lt, const std::string& message) {
     }
     else {
         if (LogToCout::ok()) {
-            Indentor::indent(cout) << message << '\n';
+            std::cout << message << '\n';
         }
     }
     return true;
@@ -269,7 +268,7 @@ bool log_append(const std::string& message) {
     }
     else {
         if (LogToCout::ok()) {
-            Indentor::indent(cout) << message << '\n';
+            std::cout << message << '\n';
         }
     }
     return true;

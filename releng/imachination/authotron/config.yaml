@@ -1,0 +1,45 @@
+version: 1.0.0
+
+logging:
+  level: "debug"
+  format: "console"
+
+auth:
+  timeout_in_ms: 3000 # 3 seconds
+
+providers:
+  - name: "ecmwf-api-provider"
+    type: "ecmwf-api"
+    uri: https://api.ecmwf.int/v1
+    realm: "ecmwf"
+  - name: "plain-provider"
+    type: "plain"
+    realm: "local"
+    users:
+    # For testing purposes only, do not use in production
+      - username: "a"
+        password: "somesecret#a"
+      - username: "u1"
+        password: "somesecret#1"
+      - username: "u2"
+        password: "somesecret#2"
+      - username: "u3"
+        password: "somesecret#3"
+      - username: "u4"
+        password: "somesecret#4"
+
+
+store:
+  enabled: false
+
+services: []
+
+jwt:
+  exp: 3600
+  iss: authotron-issuer
+  secret: authotron-secret-key
+  aud: authotron-audience
+
+include_legacy_headers: True
+
+bind_address: 0.0.0.0:8080

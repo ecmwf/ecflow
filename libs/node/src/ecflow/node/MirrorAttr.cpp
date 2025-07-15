@@ -111,8 +111,8 @@ void MirrorAttr::mirror() {
 
                                      // ** Node State
                                      reason_ = "";
-                                     parent_->flag().clear(Flag::REMOTE_ERROR);
-                                     parent_->flag().set_state_change_no(state_change_no_);
+                                     parent_->get_flag().clear(Flag::REMOTE_ERROR);
+                                     parent_->get_flag().set_state_change_no(state_change_no_);
                                      parent_->setStateOnly(latest_state, true);
 
                                      // ** Node Variables
@@ -138,8 +138,8 @@ void MirrorAttr::mirror() {
                                           "MirrorAttr: Failure detected on Mirror attribute (name: "
                                               << name_ << ") due to " << error.reason());
                                      reason_ = error.reason();
-                                     parent_->flag().set(Flag::REMOTE_ERROR);
-                                     parent_->flag().set_state_change_no(state_change_no_);
+                                     parent_->get_flag().set(Flag::REMOTE_ERROR);
+                                     parent_->get_flag().set_state_change_no(state_change_no_);
                                      parent_->setStateOnly(NState::UNKNOWN, true);
                                  }},
                    notifications.back());
@@ -216,8 +216,8 @@ void MirrorAttr::start_controller() {
 
             reason_ = Message("Unable to start mirror. Failed to resolve mirror remote host: ", remote_host_).str();
             if (parent_) {
-                parent_->flag().set(Flag::REMOTE_ERROR);
-                parent_->flag().set_state_change_no(state_change_no_);
+                parent_->get_flag().set(Flag::REMOTE_ERROR);
+                parent_->get_flag().set_state_change_no(state_change_no_);
                 parent_->setStateOnly(NState::UNKNOWN, true);
             }
             return;
@@ -243,8 +243,8 @@ void MirrorAttr::start_controller() {
             reason_ =
                 Message("Unable to start mirror. Failed to use polling; expected an integer, but found: ", polling)
                     .str();
-            parent_->flag().set(Flag::REMOTE_ERROR);
-            parent_->flag().set_state_change_no(state_change_no_);
+            parent_->get_flag().set(Flag::REMOTE_ERROR);
+            parent_->get_flag().set_state_change_no(state_change_no_);
             parent_->setStateOnly(NState::UNKNOWN, true);
             return;
         }

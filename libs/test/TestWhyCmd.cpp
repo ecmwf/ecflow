@@ -25,6 +25,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -68,7 +69,7 @@ static unsigned int waitForWhy(const std::string& path, const std::string& why, 
                               "waitForWhy Test wait " << assertTimer.duration()
                                                       << " taking longer than time constraint of "
                                                       << assertTimer.timeConstraint() << " aborting\n"
-                                                      << *server_defs);
+                                                      << ecf::as_string(*server_defs, PrintStyle::DEFS));
         sleep(1);
     }
     return updateCalendarCount;
@@ -360,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
                 cout << "waitFor jobs to complete, wait time of " << assertTimer.duration()
                      << " taking longer than time constraint of " << assertTimer.timeConstraint()
                      << " aborting, ......breaking out\n"
-                     << *defs << "\n";
+                     << ecf::as_string(*defs, PrintStyle::DEFS) << "\n";
             }
             sleep(1);
         }

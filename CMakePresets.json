@@ -1,0 +1,63 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "linux.gcc.serveronly.relwithdebinfo",
+      "description": "Build environment on 'Linux', compiled with 'GNU GCC'",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/.deploy/build/${presetName}",
+      "installDir": "${sourceDir}/.deploy/install/${presetName}",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_VERBOSE_MAKEFILE": "ON",
+        "CMAKE_COLOR_DIAGNOSTICS": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CPACK_PACKAGE_NAME": "ecflow",
+        "ENABLE_TESTS": "ON",
+        "ENABLE_ALL_TESTS": "ON",
+        "ENABLE_DOCS": "OFF",
+        "ENABLE_PYTHON": "OFF",
+        "ENABLE_SERVER": "ON",
+        "ENABLE_SSL": "ON",
+        "ENABLE_UDP": "ON",
+        "ENABLE_HTTP": "ON",
+        "ENABLE_UI": "OFF",
+        "ENABLE_STATIC_BOOST_LIBS": "OFF",
+        "ENABLE_DEBIAN_PACKAGE": "ON",
+        "Boost_INCLUDE_DIR": "/usr/include"
+      },
+      "environment": {}
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux.gcc.serveronly.relwithdebinfo",
+      "configurePreset": "linux.gcc.serveronly.relwithdebinfo"
+    }
+  ],
+  "testPresets": [
+   {
+      "name": "linux.gcc.serveronly.relwithdebinfo",
+      "configurePreset": "linux.gcc.serveronly.relwithdebinfo",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    }
+  ]
+}

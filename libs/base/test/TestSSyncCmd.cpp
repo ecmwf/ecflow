@@ -27,6 +27,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -52,21 +53,21 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
     defs_ptr server_defs = serverFixture.create_defs();
     if (start_with_begin)
         server_defs->beginAll();
-    server_defs->set_server().set_state(
+    server_defs->server_state().set_state(
         SState::HALTED); // if defs default state is RUNNING, whereas for server it is HALTED
 
     ServerReply server_reply;
     defs_ptr client_defs = clientFixture.create_defs();
     if (start_with_begin)
         client_defs->beginAll();
-    client_defs->set_server().set_state(
+    client_defs->server_state().set_state(
         SState::HALTED); // if defs default state is RUNNING, whereas for server it is HALTED
     server_reply.set_client_defs(client_defs);
 
     Ecf::set_debug_equality(true); // only has affect in DEBUG build
     BOOST_CHECK_MESSAGE(*server_defs == *server_reply.client_defs(),
                         "Test:" << test_name << ": Starting point client and server defs should be the same");
-    Ecf::set_debug_equality(false); // only has affect in DEBUG build
+    Ecf::set_debug_equality(false); // only has effect in DEBUG build
 
     // Get change number before any changes
     unsigned int client_state_change_no  = Ecf::state_change_no();
@@ -83,8 +84,8 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
                               "Test:" << test_name << ": Invariants failed: " << error_msg);
         BOOST_REQUIRE_MESSAGE(!(*server_reply.client_defs() == *server_defs),
                               "Test:" << test_name << ": Expected client and server defs to differ\n"
-                                      << *server_reply.client_defs() << "\n"
-                                      << "server defs   = " << *server_defs);
+                                      << ecf::as_string(*server_reply.client_defs(), PrintStyle::DEFS) << "\n"
+                                      << "server defs   = " << ecf::as_string(*server_defs, PrintStyle::DEFS));
         Ecf::set_server(false);
     }
 
@@ -388,10 +389,10 @@ void delete_suite(defs_ptr defs) {
 }
 
 void set_server_state_shutdown(defs_ptr defs) {
-    defs->set_server().set_state(SState::SHUTDOWN);
+    defs->server_state().set_state(SState::SHUTDOWN);
 }
 void set_server_state_running(defs_ptr defs) {
-    defs->set_server().set_state(SState::RUNNING);
+    defs->server_state().set_state(SState::RUNNING);
 }
 
 void add_server_variable(defs_ptr defs) {

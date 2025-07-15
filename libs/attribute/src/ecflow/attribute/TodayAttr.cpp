@@ -17,8 +17,6 @@
 #include "ecflow/attribute/DayAttr.hpp"  // Used in Why
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -38,16 +36,6 @@ TodayAttr::TodayAttr(const std::string& str) {
     ts_          = TimeSeries::create(index, tokens, false /*parse_state*/);
 }
 
-void TodayAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        ts_.write_state(os, free_);
-    }
-    os += "\n";
-}
-
 std::string TodayAttr::name() const {
     std::string ret;
     write(ret);
@@ -64,22 +52,6 @@ std::string TodayAttr::toString() const {
 void TodayAttr::write(std::string& ret) const {
     ret += "today ";
     ts_.write(ret);
-}
-
-std::string TodayAttr::dump() const {
-    std::stringstream ss;
-    ss << "today ";
-
-    if (PrintStyle::getStyle() == PrintStyle::STATE) {
-        if (free_)
-            ss << "(free) ";
-        else
-            ss << "(holding) ";
-    }
-
-    ss << ts_.dump();
-
-    return ss.str();
 }
 
 bool TodayAttr::operator==(const TodayAttr& rhs) const {

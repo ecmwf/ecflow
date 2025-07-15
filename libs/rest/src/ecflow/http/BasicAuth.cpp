@@ -10,17 +10,16 @@
 
 #include "ecflow/http/BasicAuth.hpp"
 
+#include "ecflow/core/Base64.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/Str.hpp"
-#include "ecflow/http/Base64.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 
 namespace ecf::http {
 
 std::pair<std::string, std::string> BasicAuth::get_credentials(const std::string& token) {
-    const std::string decoded = base64_decode(token);
     std::vector<std::string> elems;
-    ecf::Str::split(decoded, elems, ":");
+    ecf::Str::split(decode_base64(token), elems, ":");
 
     return std::make_pair(elems[0], PasswordEncryption::encrypt(elems[1], elems[0]));
 }

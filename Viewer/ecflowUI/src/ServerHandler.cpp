@@ -44,6 +44,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/NodeFwd.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;
@@ -583,7 +584,7 @@ SState::State ServerHandler::serverState() {
         // access it without locking the mutex!!!
         defs_ptr d = safelyAccessSimpleDefsMembers();
         if (d && d.get()) {
-            prevServerState_ = d->set_server().get_state();
+            prevServerState_ = d->server_state().get_state();
             return prevServerState_;
         }
     }
@@ -1494,7 +1495,7 @@ void ServerHandler::resetFinished() {
 
         defs_ptr defs = defsAccess.defs();
         if (defs != nullptr) {
-            ServerState& st = defs->set_server();
+            ServerState& st = defs->server_state();
             st.hostPort(std::make_pair(host_, port_));
         }
     }
@@ -1871,7 +1872,7 @@ void ServerHandler::writeDefs(const std::string& fileName) {
     ServerDefsAccess defsAccess(this); // will reliquish its resources on destruction
     defs_ptr defs = defsAccess.defs();
     if (defs) {
-        defs->save_as_filename(fileName, PrintStyle::MIGRATE);
+        defs->write_to_file(fileName, PrintStyle::MIGRATE);
     }
     comQueue_->start();
 }
@@ -1887,10 +1888,9 @@ void ServerHandler::writeDefs(VInfo_ptr info, const std::string& fileName) {
     ServerDefsAccess defsAccess(this); // will reliquish its resources on destruction
     defs_ptr defs = defsAccess.defs();
     if (defs) {
-        PrintStyle style(PrintStyle::MIGRATE);
         std::ofstream out(fileName.c_str());
         out << "defs_state MIGRATE" << std::endl;
-        out << info->node()->node()->print();
+        out << ecf::as_string(info->node()->node(), PrintStyle::MIGRATE);
         out << std::endl;
         out.close();
     }

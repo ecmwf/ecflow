@@ -17,8 +17,6 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
-#include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 
@@ -318,36 +316,6 @@ bool DayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
     return true;
 }
 
-void DayAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        bool added_hash = false;
-        if (free_) {
-            os += " # free";
-            added_hash = true;
-        }
-        if (expired_) {
-            if (added_hash)
-                os += " expired";
-            else
-                os += " # expired";
-            added_hash = true;
-        }
-
-        if (added_hash) {
-            os += " date:";
-            os += to_simple_string(date_);
-        }
-        else {
-            os += " # date:";
-            os += to_simple_string(date_);
-        }
-    }
-    os += "\n";
-}
-
 std::string DayAttr::name() const {
     // for display/GUI only
     std::string os;
@@ -395,8 +363,12 @@ std::string DayAttr::dump() const {
         ss << " (free)";
     if (expired_)
         ss << " (expired)";
-    ss << " " << to_simple_string(date_);
+    ss << " " << as_simple_string();
     return ss.str();
+}
+
+std::string DayAttr::as_simple_string() const {
+    return boost::gregorian::to_simple_string(date_);
 }
 
 bool DayAttr::operator==(const DayAttr& rhs) const {

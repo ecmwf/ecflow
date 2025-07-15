@@ -37,6 +37,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 // For token based authentication, this user account
@@ -218,9 +219,9 @@ ojson get_server_attributes() {
 
     ojson j;
 
-    j["variables"] = get_defs()->server().user_variables();
+    j["variables"] = get_defs()->server_state().user_variables();
 
-    for (auto v : get_defs()->server().server_variables()) {
+    for (auto v : get_defs()->server_state().server_variables()) {
         ojson _j    = v;
         _j["const"] = true;
         j["variables"].push_back(_j);
@@ -288,8 +289,8 @@ ojson get_node_attributes(const std::string& path) {
         });
 
         // ... and from server
-        auto server_variables = get_defs()->server().server_variables();
-        auto user_variables   = get_defs()->server().user_variables();
+        auto server_variables = get_defs()->server_state().server_variables();
+        auto user_variables   = get_defs()->server_state().user_variables();
         server_variables.insert(server_variables.end(), user_variables.begin(), user_variables.end());
 
         inherited.push_back(ojson::object({{"name", "server"}, {"path", "/"}, {"variables", server_variables}}));
@@ -305,7 +306,7 @@ ojson get_node_definition(const std::string& path) {
 
     node_ptr node = get_node(path);
 
-    j["definition"] = node->print();
+    j["definition"] = ecf::as_string(node, PrintStyle::DEFS);
     j["path"]       = path;
 
     return j;
@@ -436,7 +437,7 @@ ojson update_node_definition(const httplib::Request& request) {
     parent->addChild(node);
 
     auto client = get_client(request);
-    client->replace(path, defs->print(), true, force);
+    client->replace(path, ecf::as_string(*defs, PrintStyle::DEFS), true, force);
 
     return make_json_response(path, "Definition updated successfully");
 }
@@ -496,7 +497,7 @@ void add_attribute_to_path(const T& attr, const httplib::Request& request) {
     add_attribute_to_node(parent, attr);
 
     auto client = get_client(request);
-    client->replace(path, defs->print(), false, false);
+    client->replace(path, ecf::as_string(*defs, PrintStyle::DEFS), false, false);
 }
 
 void remove_attribute_from_path(std::string_view type, const httplib::Request& request) {
@@ -520,7 +521,7 @@ void remove_attribute_from_path(std::string_view type, const httplib::Request& r
     }
 
     auto client = get_client(request);
-    client->replace(path, defs->print(), false, false);
+    client->replace(path, ecf::as_string(*defs, PrintStyle::DEFS), false, false);
 }
 
 template <typename T>
@@ -547,7 +548,7 @@ void update_attribute_in_path(const T& attr, std::string_view type, const httpli
     add_attribute_to_node(parent, attr);
 
     auto client = get_client(request);
-    client->replace(path, defs->print(), false, false);
+    client->replace(path, ecf::as_string(*defs, PrintStyle::DEFS), false, false);
 }
 
 template <typename T>
@@ -890,7 +891,7 @@ ojson update_server_attribute(const httplib::Request& request) {
     const std::string name  = payload.at("name");
     const std::string value = payload.at("value");
 
-    if (std::string x; !get_defs()->server().find_user_variable(name, x)) {
+    if (std::string x; !get_defs()->server_state().find_user_variable(name, x)) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "User variable not found");
     }
     else if (type != "variable") {
@@ -911,7 +912,7 @@ ojson delete_server_attribute(const httplib::Request& request) {
     const std::string type = payload.at("type");
     const std::string name = payload.at("name");
 
-    if (std::string x; !get_defs()->server().find_user_variable(name, x)) {
+    if (std::string x; !get_defs()->server_state().find_user_variable(name, x)) {
         throw HttpServerException(HttpStatusCode::client_error_not_found, "User variable not found");
     }
     else if (type != "variable") {

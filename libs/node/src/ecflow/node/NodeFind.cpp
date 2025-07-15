@@ -63,7 +63,7 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
     //   o/ These values are updated from the server environment when the `BEGIN` command is called.
     Defs* the_defs = defs();
     if (the_defs) {
-        theValue = the_defs->server().find_variable(name);
+        theValue = the_defs->server_state().find_variable(name);
         if (!theValue.empty())
             return true;
     }
@@ -88,7 +88,7 @@ bool Node::find_parent_gen_variable_value(const std::string& name, std::string& 
     //   o/ These values are updated from the server environment when the `BEGIN` command is called.
     Defs* the_defs = defs();
     if (the_defs) {
-        theValue = the_defs->server().find_variable(name);
+        theValue = the_defs->server_state().find_variable(name);
         if (!theValue.empty())
             return true;
     }
@@ -111,7 +111,7 @@ bool Node::findParentUserVariableValue(const std::string& name, std::string& the
     if (the_defs) {
         // Note: when calling ecflow_client --get_state=/suite/task
         // The node can be detached from the defs.
-        theValue = the_defs->server().find_variable(name);
+        theValue = the_defs->server_state().find_variable(name);
         if (!theValue.empty())
             return true;
     }
@@ -135,7 +135,7 @@ const std::string& Node::find_parent_user_variable_value(const std::string& name
     if (the_defs) {
         // Note: when calling ecflow_client --get_state=/suite/task
         // The node can be detached from the defs.
-        return the_defs->server().find_variable(name);
+        return the_defs->server_state().find_variable(name);
     }
     return Str::EMPTY();
 }
@@ -158,7 +158,7 @@ bool Node::user_variable_exists(const std::string& name) const {
     if (the_defs) {
         // Note: when calling ecflow_client --get_state=/suite/task
         // The node can be detached from the defs.
-        return the_defs->server().variable_exists(name);
+        return the_defs->server_state().variable_exists(name);
     }
     return false;
 }
@@ -191,9 +191,9 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
     // If all else fails search defs environment
     Defs* the_defs = defs();
     if (the_defs) {
-        const Variable& pvar = the_defs->server().findVariable(name);
+        const Variable& pvar = the_defs->server_state().findVariable(name);
         ret                  = pvar.theValue();
-        the_defs->variableSubsitution(ret);
+        the_defs->variableSubstitution(ret);
         return ret;
     }
 
@@ -216,7 +216,7 @@ const Variable& Node::find_parent_variable(const std::string& name) const {
     // If all else fails search defs environment
     Defs* the_defs = defs();
     if (the_defs) {
-        return the_defs->server().findVariable(name);
+        return the_defs->server_state().findVariable(name);
     }
 
     return Variable::EMPTY();

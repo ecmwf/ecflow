@@ -69,7 +69,6 @@ public:
     TimeAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
         : ts_(start, finish, incr, relative) {}
 
-    void print(std::string&) const;
     bool operator==(const TimeAttr& rhs) const;
     bool operator<(const TimeAttr& rhs) const { return ts_ < rhs.ts_; }
     bool structureEquals(const TimeAttr& rhs) const;

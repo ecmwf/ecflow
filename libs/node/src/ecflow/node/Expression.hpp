@@ -44,7 +44,6 @@ public:
     bool orExpr() const { return (type_ == OR) ? true : false; }
 
     std::string toString(const std::string& exprType) const;
-    void print(std::string&, const std::string& exprType, bool isFree) const;
 
     bool operator==(const PartExpression& rhs) const { return type_ == rhs.type_ && exp_ == rhs.exp_; }
     bool operator!=(const PartExpression& rhs) const { return !operator==(rhs); }
@@ -100,11 +99,6 @@ public:
     /// The part expression's are combined and returned as a single string
     std::string expression() const { return compose_expression(vec_); }
     static std::string compose_expression(const std::vector<PartExpression>& vec);
-
-    /// Need to pass in trigger tag, since expression may be split over multiple lines
-    /// trigger    "a == complete"
-    /// trigger -a "b == complete"
-    void print(std::string&, const std::string& exprType) const;
 
     /// Use when we want to add compose a large expression form a set of smaller ones
     void add(const PartExpression& t);

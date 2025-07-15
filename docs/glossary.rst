@@ -110,6 +110,12 @@
 
       Only the fields :code:`url`, :code:`key`, and :code:`email` are required; any additional fields are ignored.
 
+      .. important::
+
+         If :code:`%ECF_AVISO_AUTH%` provides a path to a nonexistent file, or if the provided file is
+         not a valid JSON, the credentials will be ignored and the Aviso notification retrieval will eventually fail
+         due to "UNAUTHORIZED" access.
+
       The Aviso schema file is a JSON file that defines the event listener schema. This is used by both Aviso server
       and client (thus, by ecFlow) to define the valid event types and request parameters used when polling for
       notifications. The schema file path must be provided to the `schema` option (or via the `ECF_AVISO_SCHEMA` variable).

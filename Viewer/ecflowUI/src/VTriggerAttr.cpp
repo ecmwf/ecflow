@@ -13,8 +13,8 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "ecflow/attribute/NodeAttr.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/node/Expression.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 
 //================================
 // VTriggerAttrType
@@ -134,29 +134,42 @@ void VTriggerAttr::expressions(const VNode* vnode, std::string& trigger, std::st
 }
 
 std::string VTriggerAttr::ast_str() const {
-    std::stringstream ss;
+    std::string buffer;
+    ecf::stringstreambuf ss{buffer};
     if (node_ptr node = parent_->node()) {
         if (index_ == 0) {
             if (Expression* e = node->get_trigger()) {
-                if (e->isFree())
-                    ecf::Indentor::indent(ss) << "# (free)\n";
+                auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
+
+                ecf::Indent l1(ctx);
+
+                if (e->isFree()) {
+                    ss << l1 << "# (free)\n";
+                }
 
                 // show the Abstract Syntax Tree for the expression. This also uses Indentor
-                if (Ast* ast = node->triggerAst())
-                    ast->print(ss);
+                if (Ast* ast = node->triggerAst()) {
+                    ecf::write_t(ss, *ast, ctx);
+                }
             }
         }
         else {
             if (Expression* e = node->get_complete()) {
-                if (e->isFree())
-                    ecf::Indentor::indent(ss) << "# (free)\n";
+                auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
+
+                ecf::Indent l1(ctx);
+
+                if (e->isFree()) {
+                    ss << l1 << "# (free)\n";
+                }
 
                 // show the Abstract Syntax Tree for the expression. This also uses Indentor
-                if (Ast* ast = node->completeAst())
-                    ast->print(ss);
+                if (Ast* ast = node->completeAst()) {
+                    ecf::write_t(ss, *ast, ctx);
+                }
             }
         }
     }
 
-    return ss.str();
+    return buffer;
 }

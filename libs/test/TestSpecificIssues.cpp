@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_1589) {
     // cout << defs;
     node_ptr task = defs->findAbsNode("/test_ECFLOW_1589/t1");
     BOOST_REQUIRE_MESSAGE(task, "Expected to find task\n");
-    BOOST_CHECK_MESSAGE(task->flag().is_set(ecf::Flag::ZOMBIE), "expected zombie flag to be set\n");
-    BOOST_CHECK_MESSAGE(task->flag().is_set(ecf::Flag::JOBCMD_FAILED),
+    BOOST_CHECK_MESSAGE(task->get_flag().is_set(ecf::Flag::ZOMBIE), "expected zombie flag to be set\n");
+    BOOST_CHECK_MESSAGE(task->get_flag().is_set(ecf::Flag::JOBCMD_FAILED),
                         "expected JOBCMD_FAILED failed flag to be set\n");
 
     cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";

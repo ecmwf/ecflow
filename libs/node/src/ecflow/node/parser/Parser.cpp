@@ -17,10 +17,6 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-#ifdef SHOW_PARSER_STATS
-    #include "ecflow/core/Indentor.hpp"
-#endif
-
 using namespace ecf;
 using namespace std;
 using namespace boost;

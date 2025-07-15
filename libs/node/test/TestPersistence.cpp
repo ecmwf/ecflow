@@ -13,6 +13,7 @@
 #include "MyDefsFixture.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -37,8 +38,8 @@ static void testPersistence(const Defs& fixtureDefs) {
     bool theyCompare = (restoredDefs == fixtureDefs);
     if (!theyCompare) {
 
-        std::cout << "Dump restored defs\n" << restoredDefs << "\n";
-        std::cout << "Dump fixture defs\n" << fixtureDefs << "\n";
+        std::cout << "Dump restored defs\n" << ecf::as_string(restoredDefs, PrintStyle::DEFS) << "\n";
+        std::cout << "Dump fixture defs\n" << ecf::as_string(fixtureDefs, PrintStyle::DEFS) << "\n";
 
         BOOST_CHECK_MESSAGE(theyCompare, "restored defs file is not same as fixtureDefs defs file");
     }
@@ -64,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_node_defs_persistence) {
     defs.get_all_nodes(all_nodes);
     BOOST_REQUIRE_MESSAGE(all_nodes.size() > 0, "Expected nodes");
     for (auto& all_node : all_nodes) {
-        std::string node_as_defs_string = all_node->print(PrintStyle::MIGRATE);
+        std::string node_as_defs_string = ecf::as_string(all_node, PrintStyle::MIGRATE);
         node_ptr the_copy               = Node::create(node_as_defs_string);
         BOOST_REQUIRE_MESSAGE(the_copy,
                               "Failed to create node " << all_node->absNodePath() << " from string:\n"
@@ -72,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_node_defs_persistence) {
         BOOST_REQUIRE_MESSAGE(*the_copy == *all_node, "Nodes not the same");
     }
     for (auto& all_node : all_nodes) {
-        std::string node_as_defs_string = all_node->print(PrintStyle::NET);
+        std::string node_as_defs_string = ecf::as_string(all_node, PrintStyle::NET);
         node_ptr the_copy               = Node::create(node_as_defs_string);
         BOOST_REQUIRE_MESSAGE(the_copy,
                               "Failed to create node " << all_node->absNodePath() << " from string:\n"

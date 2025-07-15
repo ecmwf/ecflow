@@ -14,8 +14,6 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -80,23 +78,6 @@ bool Limit::operator==(const Limit& rhs) const {
         return false;
     }
     return true;
-}
-
-void Limit::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    if (!PrintStyle::defsStyle()) {
-        if (value_ != 0) {
-            os += " # ";
-            os += ecf::convert_to<std::string>(value_);
-            for (const auto& path : paths_) {
-                os += " ";
-                os += path;
-            }
-        }
-    }
-    os += "\n";
 }
 
 std::string Limit::toString() const {

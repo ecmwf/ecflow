@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         defs.beginAll();
         suite->set_state(NState::ABORTED);
         for (auto& i : flag_list)
-            suite->flag().set(i);
+            suite->get_flag().set(i);
         suite->suspend();
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Add one suite failed: " << helper.errorMsg());
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         // Change state other the default
         f1->set_state(NState::COMPLETE);
         for (auto& i : flag_list)
-            f1->flag().set(i);
+            f1->get_flag().set(i);
         f1->suspend();
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Add one family failed: " << helper.errorMsg());
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         task_ptr t1   = f1->add_task("t1");
 
         for (auto& i : flag_list)
-            t1->flag().set(i);
+            t1->get_flag().set(i);
         t1->suspend();
         t1->set_state(NState::COMPLETE);
 
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         task_ptr task = defs.add_suite("s1")->add_family("f1")->add_task("t1");
         alias_ptr t1  = task->add_alias_only();
         for (auto& i : flag_list)
-            t1->flag().set(i);
+            t1->get_flag().set(i);
         t1->suspend();
         t1->set_state(NState::COMPLETE);
         // Use memento to modify alias state
@@ -511,7 +511,7 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning) {
     //   cout << dump_edit_history(defs.get_edit_history()) << "\n";
 
     std::string tmpFilename = "test_state_edit_history_pruning.def";
-    defs.save_as_checkpt(tmpFilename);
+    defs.write_to_checkpt_file(tmpFilename);
 
     {
         // If any edit history is older than 1 day, then prune
@@ -554,7 +554,7 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning2) {
     //   cout << dump_edit_history(defs.get_edit_history()) << "\n";
 
     std::string tmpFilename = "test_state_edit_history_pruning2.def";
-    defs.save_as_checkpt(tmpFilename);
+    defs.write_to_checkpt_file(tmpFilename);
 
     {
         // Since the history is todays it should be preserved, and not affected by pruning
@@ -581,21 +581,21 @@ BOOST_AUTO_TEST_CASE(test_server_state) {
     PersistHelper helper(true /* compare edit History */);
     {
         Defs defs;
-        defs.set_server().set_state(SState::HALTED);
+        defs.server_state().set_state(SState::HALTED);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Set server state failed " << helper.errorMsg());
     }
     {
         Defs defs;
-        defs.set_server().set_state(SState::RUNNING);
+        defs.server_state().set_state(SState::RUNNING);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Set server state failed " << helper.errorMsg());
     }
     {
         Defs defs;
-        defs.set_server().set_state(SState::SHUTDOWN);
+        defs.server_state().set_state(SState::SHUTDOWN);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Set server state failed " << helper.errorMsg());
@@ -606,7 +606,7 @@ BOOST_AUTO_TEST_CASE(test_server_state) {
         vec.emplace_back("name", "value1");
         vec.emplace_back("name2", "val with 'spaces' ");
         vec.emplace_back("name3", "");
-        defs.set_server().set_user_variables(vec);
+        defs.server_state().set_user_variables(vec);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Set server variables failed " << helper.errorMsg());

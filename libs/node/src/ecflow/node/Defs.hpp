@@ -59,8 +59,6 @@ public:
 
     void copy_defs_state_only(const defs_ptr& defs); // needed when creating defs for client handles
     bool operator==(const Defs& rhs) const;
-    void print(std::string&) const;
-    std::string print(PrintStyle::Type_t t = PrintStyle::MIGRATE) const;
 
     /// Handle migration of checkpoint 4->5, and 5.0-5.4.0 -> 5.5
     /// This essentially update date data member of the Day attribute
@@ -76,7 +74,7 @@ public:
 
     // The defs does not need suspend()/resume() as this is controlled by the server states
     // The defs cannot schedule jobs when HALTED or SHUTDOWN, i.e. not RUNNING, this is same as suspended
-    bool isSuspended() const { return (server().get_state() != SState::RUNNING); }
+    bool isSuspended() const { return server_state().get_state() != SState::RUNNING; }
 
     /// Python based checking
     /// Will create a temporary variable ECF_JOB so the job generation is done to a temporary directory
@@ -229,14 +227,14 @@ public:
     void getAllAstNodes(std::set<Node*>&) const;
     const std::set<std::string>& externs() const { return externs_; }
 
-    /// Get/set for server state.
-    const ServerState& server() const { return server_; }
-    ServerState& set_server() { return server_; }
+    /// Access the server state (i.e., State, Variables, etc.)
+    ServerState& server_state() { return server_; }
+    const ServerState& server_state() const { return server_; }
 
     /// find all %VAR% and replaces with variable values, returns false on the
     /// first variable that can't be found, cmd will be left half processed.
     /// Will search for ECF_MICRO, if not found assumes % as the micro char
-    bool variableSubsitution(std::string& cmd) const { return server_.variableSubsitution(cmd); }
+    bool variableSubstitution(std::string& cmd) const { return server_.variableSubstitution(cmd); }
 
     /// returns true if definition file passes its verification
     /// If the definition file contains verify attribute, this function will check
@@ -280,10 +278,37 @@ public:
     void cereal_restore_from_checkpt(const std::string& fileName);
 
     // defs format
-    void save_as_checkpt(const std::string& fileName) const;
-    void save_as_filename(const std::string& fileName,
-                          PrintStyle::Type_t = PrintStyle::MIGRATE) const; // used in test only
-    void save_as_string(std::string& str, PrintStyle::Type_t = PrintStyle::MIGRATE) const;
+    /**
+     * @brief Write the defs to a string.
+     *
+     * The Defs can be written to a string using multiple styles, meaning that this is effectively the entry point to
+     * the defs "text-based" serialization (e.g., defs file, checkpt file).
+     *
+     * @param os the output string buffer to write the defs
+     * @param st the print style to use for writing the defs
+     */
+    void write_to_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
+
+    /**
+     * @brief Write the defs to a file at the given path.
+     *
+     * This function serializes the defs to a string which is then stored in the indicated file.
+     *
+     * @param filepath the path to the file used for writing the defs
+     * @param st the print style to use for writing the defs
+     */
+    void write_to_file(const std::string& filepath, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
+
+    /**
+     * @brief Write the defs to a *checkpoint* file at the given path.
+     *
+     * The checkpoint file is a specific format, typically used for saving the defs including
+     * state information plus "edit history".
+     *
+     * @param filepath the path to the file used for writing the defs
+     */
+    void write_to_checkpt_file(const std::string& filepath) const;
+
     void restore(const std::string& fileName); // will throw
     bool restore(const std::string& fileName, std::string& errorMsg, std::string& warningMsg);
     void restore_from_string(const std::string& str); // will throw
@@ -303,6 +328,7 @@ public:
     const std::vector<std::string>& get_edit_history(const std::string& path) const;
     const std::unordered_map<std::string, std::vector<std::string>>& get_edit_history() const { return edit_history_; }
     void save_edit_history(bool f) const { save_edit_history_ = f; }
+    bool get_save_edit_history() const { return save_edit_history_; }
     static const std::vector<std::string>& empty_edit_history();
     constexpr static size_t max_edit_history_size_per_node() { return 10; }
 
@@ -347,7 +373,8 @@ public:
 
 private:
     void do_generate_scripts(const std::map<std::string, std::string>& override) const;
-    void write_state(std::string&) const;
+
+private:
     void collate_defs_changes_only(DefsDelta&) const;
     void setupDefaultEnv();
 
@@ -451,9 +478,6 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);
 };
-
-std::ostream& operator<<(std::ostream& os, const Defs*);
-std::ostream& operator<<(std::ostream& os, const Defs&);
 
 // =====================================================================
 // This class is used to read the History

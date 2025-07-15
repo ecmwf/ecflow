@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
     BOOST_REQUIRE_MESSAGE(theTasks.size() == 8, "Expected 8 tasks but found, " << theTasks.size());
 
     // Override ECF_HOME.   ECF_HOME is need to locate to the ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
@@ -398,8 +398,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES) {
     BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
 
     // ECF_HOME, a directory with no .ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_FILES, ecf_files);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_FILES, ecf_files);
 
     //    cerr << theDefs << "\n";
 
@@ -466,8 +466,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator_using_ECF_FILES_variable_substitution
     BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
 
     // ECF_HOME, a directory with no .ecf files
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
-    theDefs.set_server().add_or_update_user_variables(ecf::environment::ECF_FILES, ecf_files);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, smshome);
+    theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_FILES, ecf_files);
 
     //    cerr << theDefs << "\n";
 

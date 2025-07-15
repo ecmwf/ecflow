@@ -57,7 +57,6 @@ public:
     virtual bool check(std::string&) const { return true; } // check divide or modulo by zero
 
     virtual bool is_valid_ast(std::string& error_msg) const                 = 0;
-    virtual std::ostream& print(std::ostream&) const                        = 0;
     virtual void print_flat(std::ostream&, bool add_brackets = false) const = 0; // used for test
     virtual std::string type() const                                        = 0;
     virtual void exprType(const std::string&) {}
@@ -90,7 +89,6 @@ public:
     bool check(std::string& error_msg) const override;
 
     bool empty() const override { return (root_) ? false : true; }
-    std::ostream& print(std::ostream&) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
 
@@ -122,7 +120,6 @@ public:
     void addChild(Ast* n) override;
     Ast* left() const override { return left_; }
     Ast* right() const override { return right_; }
-    std::ostream& print(std::ostream& os) const override;
     bool empty() const override { return (left_ && right_) ? false : true; }
     void setParentNode(Node*) override;
 
@@ -157,7 +154,6 @@ public:
         assert(!right_);
         return !left_->value();
     }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -178,7 +174,6 @@ public:
 
     bool evaluate() const override { return true; }
     int value() const override { return left_->plus(right_); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -195,7 +190,6 @@ public:
 
     bool evaluate() const override { return true; }
     int value() const override { return left_->minus(right_); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -212,7 +206,6 @@ public:
     bool evaluate() const override { return true; }
     bool check(std::string& error_msg) const override;
     int value() const override; // Log error if right hand side has value of zero
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -228,7 +221,6 @@ public:
     AstMultiply* clone() const override;
     bool evaluate() const override { return true; }
     int value() const override { return (left_->value() * right_->value()); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -245,7 +237,6 @@ public:
     bool check(std::string& error_msg) const override;
     bool evaluate() const override { return true; }
     int value() const override; // Log error if right hand side has value of zero
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -260,7 +251,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstAnd* clone() const override;
     bool evaluate() const override { return (left_->evaluate() && right_->evaluate()); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -275,7 +265,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstOr* clone() const override;
     bool evaluate() const override { return (left_->evaluate() || right_->evaluate()); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -290,7 +279,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstEqual* clone() const override;
     bool evaluate() const override { return (left_->value() == right_->value()); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -305,7 +293,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstNotEqual* clone() const override;
     bool evaluate() const override { return (left_->value() != right_->value()); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -320,7 +307,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstLessEqual* clone() const override;
     bool evaluate() const override { return (left_->value() <= right_->value()); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -335,7 +321,6 @@ public:
     bool evaluate() const override { return (left_->value() >= right_->value()); }
     void accept(ecf::ExprAstVisitor&) override;
     AstGreaterEqual* clone() const override;
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -351,7 +336,6 @@ public:
     bool evaluate() const override { return (left_->value() > right_->value()); }
     void accept(ecf::ExprAstVisitor&) override;
     AstGreaterThan* clone() const override;
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -367,7 +351,6 @@ public:
     bool evaluate() const override { return (left_->value() < right_->value()); }
     void accept(ecf::ExprAstVisitor&) override;
     AstLessThan* clone() const override;
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     bool is_valid_ast(std::string& error_msg) const override;
     std::string type() const override { return stype(); }
@@ -400,7 +383,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstFunction* clone() const override;
     int value() const override;
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -426,7 +408,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstInteger* clone() const override;
     int value() const override { return value_; }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -448,7 +429,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstInstant* clone() const override;
     int value() const override { return ecf::coerce_from_instant(value_); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -466,7 +446,7 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstNodeState* clone() const override;
     int value() const override { return static_cast<int>(state_); }
-    std::ostream& print(std::ostream& os) const override;
+    DState::State state() const { return state_; }
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -484,7 +464,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstEventState* clone() const override;
     int value() const override { return state_; }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -511,7 +490,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstNode* clone() const override;
     int value() const override { return static_cast<int>(state()); }
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -549,7 +527,7 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstFlag* clone() const override;
     int value() const override;
-    std::ostream& print(std::ostream& os) const override;
+    ecf::Flag::Type flag() const { return flag_; }
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -599,7 +577,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstVariable* clone() const override;
     int value() const override;
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -650,7 +627,6 @@ public:
     void accept(ecf::ExprAstVisitor&) override;
     AstParentVariable* clone() const override;
     int value() const override;
-    std::ostream& print(std::ostream& os) const override;
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;
@@ -686,7 +662,6 @@ public:
     int plus(int) const;
     int minus(int) const;
 
-    std::ostream& print(std::ostream& os) const;
     Node* theReferenceNode() const { return theReferenceNode_; }
 
     void varTypeAndValue(std::string& varType, int& value) const;
@@ -695,32 +670,5 @@ private:
     const AstVariable* astVariable_;
     Node* theReferenceNode_;
 };
-
-// 17
-std::ostream& operator<<(std::ostream& os, const Ast&);
-std::ostream& operator<<(std::ostream& os, const AstTop&);
-std::ostream& operator<<(std::ostream& os, const AstRoot&);
-std::ostream& operator<<(std::ostream& os, const AstNot&);
-std::ostream& operator<<(std::ostream& os, const AstPlus&);
-std::ostream& operator<<(std::ostream& os, const AstMinus&);
-std::ostream& operator<<(std::ostream& os, const AstMultiply&);
-std::ostream& operator<<(std::ostream& os, const AstDivide&);
-std::ostream& operator<<(std::ostream& os, const AstModulo&);
-std::ostream& operator<<(std::ostream& os, const AstAnd&);
-std::ostream& operator<<(std::ostream& os, const AstOr&);
-std::ostream& operator<<(std::ostream& os, const AstEqual&);
-std::ostream& operator<<(std::ostream& os, const AstNotEqual&);
-std::ostream& operator<<(std::ostream& os, const AstLessEqual&);
-std::ostream& operator<<(std::ostream& os, const AstGreaterEqual&);
-std::ostream& operator<<(std::ostream& os, const AstGreaterThan&);
-std::ostream& operator<<(std::ostream& os, const AstLessThan&);
-std::ostream& operator<<(std::ostream& os, const AstLeaf&);
-std::ostream& operator<<(std::ostream& os, const AstInteger&);
-std::ostream& operator<<(std::ostream& os, const AstInstant&);
-std::ostream& operator<<(std::ostream& os, const AstNodeState&);
-std::ostream& operator<<(std::ostream& os, const AstEventState&);
-std::ostream& operator<<(std::ostream& os, const AstNode&);
-std::ostream& operator<<(std::ostream& os, const AstVariable&);
-std::ostream& operator<<(std::ostream& os, const AstFlag&);
 
 #endif /* ecflow_node_ExprAst_HPP */

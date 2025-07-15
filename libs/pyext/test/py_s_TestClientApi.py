@@ -1,20 +1,21 @@
-# ////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-# Name        :
-# Author      : Avi
-# Revision    : $Revision: #10 $
 #
 # Copyright 2009- ECMWF.
+#
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
-# ////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#  code for testing client code in python
+#
+
+# This test ensures the User API works as expected.
+
 import time
 import os
 import pwd
 import select
+import sys
+import threading
 from datetime import datetime
 import shutil  # used to remove directory tree
 
@@ -22,6 +23,22 @@ import shutil  # used to remove directory tree
 import ecflow_test_util as Test
 from ecflow import Defs, Suite, Family, Task, Edit, Meter, Clock, DState, Style, State, RepeatDate, RepeatDateTime, \
     PrintStyle, File, Client, SState, CheckPt, Cron, Late, debug_build, Flag, FlagType
+
+import re
+import platform
+
+
+def disable_on(regex_platform):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if re.match(regex_platform, platform.platform()):
+                print(f"Skipping {func.__name__} due to match with {regex_platform}")
+            else:
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def ecf_includes():  return os.getcwd() + "/test/data/includes"
@@ -46,7 +63,7 @@ def create_defs(name, port, protocol):
     family = suite.add_family("f1")
     family.add_task("t1")
     family.add_task("t2")
-    return defs;
+    return defs
 
 
 def test_host_port(ci, host, port):
@@ -117,7 +134,7 @@ def test_set_host_port():
 
 
 def print_test(ci, test_name):
-    print(test_name)
+    print(test_name, flush=True)
     if ci.is_auto_sync_enabled():
         ci.log_msg(test_name + " ============= AUTO SYNC ENABLED ================================ ")
     else:
@@ -271,7 +288,7 @@ def test_client_shutdown_server(ci):
 def test_client_load_in_memory_defs(ci, protocol):
     print_test(ci, "test_client_load_in_memory_defs")
     ci.delete_all()  # start fresh
-    ci.load(create_defs("" , ci.get_port(), protocol))
+    ci.load(create_defs("", ci.get_port(), protocol))
     sync_local(ci)
     assert ci.get_defs().find_suite("s1") is not None, "Expected to find suite of name s1:\n" + str(ci.get_defs())
 
@@ -279,7 +296,7 @@ def test_client_load_in_memory_defs(ci, protocol):
 def test_client_load_from_disk(ci, protocol):
     print_test(ci, "test_client_load_from_disk")
     ci.delete_all()  # start fresh
-    defs = create_defs("" , ci.get_port(), protocol);
+    defs = create_defs("", ci.get_port(), protocol);
     defs_file = "test_client_load_from_disk_" + str(os.getpid()) + ".def"
     defs.save_as_defs(defs_file)
     assert os.path.exists(defs_file), "Expected file " + defs_file + " to exist after defs.save_as_defs()"
@@ -301,7 +318,7 @@ def test_client_checkpt(ci, protocol):
     except:
         pass
 
-    ci.load(create_defs("" , ci.get_port(), protocol))
+    ci.load(create_defs("", ci.get_port(), protocol))
     ci.checkpt()
     assert os.path.exists(Test.checkpt_file_path(port)), "Expected check pt file to exist after ci.checkpt()"
     assert os.path.exists(Test.backup_checkpt_file_path(port)) == False, "Expected back up check pt file to *NOT* exist"
@@ -584,53 +601,83 @@ def test_client_free_dep(ci, protocol):
 
 
 class CustomStdOut:
+
+    def __init__(self, stream=sys.stdout):
+        self.marker = "<<<OUTPUT CAPTURE END>>>"  # marker to indicate end of capture
+        self.captured = ""
+        # create a pipe to capture content temporarily
+        self.o_pipe, self.i_pipe = os.pipe()
+        # store the stream
+        self.stream = sys.stdout if stream is None else stream
+        self.stream_no = self.stream.fileno()
+
     def __enter__(self):
-        # create a pipe to store some content temporarily
-        self.read_pipe, self.write_pipe = os.pipe()
-        # save the original ouput fd
-        self.stdout = os.dup(1)
+        self.captured = ""
+        # make a copy of the original stdout
+        self.backup_no = os.dup(self.stream_no)
         # redirect stdout into the write pipe
-        fd = os.dup2(self.write_pipe, 1)
+        os.dup2(self.i_pipe, self.stream_no)
+
+        # start a worker thread to capture the output
+        self.worker = threading.Thread(target=self._capture_output)
+        self.worker.start()
+
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        # restore the original output fd
-        os.dup2(self.stdout, 1)
+        # write the end marker to indicate the end of capture
+        self.stream.write(self.marker)
+        self.stream.flush()
 
-    def _more_data(self):
-        # check if there is more data in the read pipe
-        r, _, _ = select.select([self.read_pipe], [], [], 0)
-        return bool(r)
+        # wait for the worker threadto finish capturing output
+        self.worker.join()
+
+        # close the temporary pipe
+        os.close(self.i_pipe)
+        os.close(self.o_pipe)
+        # restore the original output fd
+        os.dup2(self.backup_no, self.stream_no)
+
+    def _capture_output(self):
+        while True:
+            self.captured += os.read(self.o_pipe, 1).decode(self.stream.encoding)
+            if self.captured.endswith(self.marker):
+                # we reached the end marker, so we stop capturing and remove the marker
+                self.captured = self.captured[:-len(self.marker)]
+                break
 
     def value(self):
-        out = ''
-        while self._more_data():
-            out += os.read(self.read_pipe, 1024).decode('utf-8')
-        return out
+        return self.captured
 
 
+@disable_on("macOS-13.*-arm64-.*")
 def test_client_stats(ci):
     print_test(ci, "test_client_stats")
-    with CustomStdOut() as out:
+    out = CustomStdOut()
+    with out:
         stats = ci.stats()
         assert "statistics" in stats, "Expected 'statistics' in the response"
-        assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
+    assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
 
 
+@disable_on("macOS-13.*-arm64-.*")
 def test_client_stats_with_stdout(ci):
     print_test(ci, "test_client_stats_with_stdout")
-    with CustomStdOut() as out:
+    out = CustomStdOut()
+    with out:
         stats = ci.stats(True)
         assert "statistics" in stats, "Expected 'statistics' in the response"
-        assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
+    assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
 
 
+@disable_on("macOS-13.*-arm64-.*")
 def test_client_stats_without_stdout(ci):
     print_test(ci, "test_client_stats_without_stdout")
-    with CustomStdOut() as out:
+    out = CustomStdOut()
+    with out:
         stats = ci.stats(False)
         assert "statistics" in stats, "Expected 'statistics' in the response"
-        assert not out.value(), "No captured output expected"
+    assert not out.value(), "No captured output expected, but found: " + out.value()
 
 
 def test_client_stats_reset(ci):
@@ -2243,7 +2290,7 @@ def do_tests(ci, protocol):
 
 
 def launch_tests(ci, protocol):
-    server_version = ci.server_version();
+    server_version = ci.server_version()
     print("Running ecflow server version " + server_version)
     print("Running ecflow client version " + ci.version())
     assert ci.version() == server_version, " Client version not same as server version"

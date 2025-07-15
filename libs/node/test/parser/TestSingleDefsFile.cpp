@@ -30,6 +30,7 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
@@ -169,9 +170,8 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         TemporaryFile temporary("tmp_%%%%-%%%%-%%%%-%%%%.def");
 
         timer.start();
-        PrintStyle style(PrintStyle::DEFS);
         std::ofstream ofs(temporary.path());
-        ofs << defs;
+        ofs << ecf::as_string(defs, PrintStyle::DEFS);
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForDefsPersistOnly,
                             "Performance regression, expected < " << expectedTimeForDefsPersistOnly
                                                                   << " to persist defs file, but found "

@@ -228,6 +228,8 @@ void start_server(httplib::Server& http_server) {
             printf("Server execution stopped: %s\n", e.what());
         }
     }
+
+    teardown();
 }
 
 void HttpServer::run() const {

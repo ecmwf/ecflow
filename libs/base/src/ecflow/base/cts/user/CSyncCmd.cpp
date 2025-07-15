@@ -119,7 +119,7 @@ void CSyncCmd::do_log(AbstractServer* as) const {
         if (!log_no_newline(Log::MSG, ss)) { // log command without adding newline
             // problems with opening or writing to log file, warn users, ECFLOW-536
             as->defs()->flag().set(ecf::Flag::LOG_ERROR);
-            as->defs()->set_server().add_or_update_user_variables("ECF_LOG_ERROR", Log::instance()->log_error());
+            as->defs()->server_state().add_or_update_user_variables("ECF_LOG_ERROR", Log::instance()->log_error());
         }
         return;
     }

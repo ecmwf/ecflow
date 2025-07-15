@@ -14,7 +14,6 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 using namespace std;
@@ -50,13 +49,6 @@ ClockAttr::ClockAttr(int day, int month, int year, bool hybrid)
 }
 
 ClockAttr::ClockAttr(bool hybrid) : state_change_no_(Ecf::incr_state_change_no()), hybrid_(hybrid) {
-}
-
-void ClockAttr::print(std::string& os) const {
-    Indentor in;
-    Indentor::indent(os);
-    write(os);
-    os += "\n";
 }
 
 std::string ClockAttr::toString() const {

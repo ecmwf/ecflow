@@ -28,7 +28,6 @@ public:
 
     bool operator==(const GenericAttr& rhs) const;
     bool operator<(const GenericAttr& rhs) const { return name_ < rhs.name(); }
-    void print(std::string&) const;
     bool empty() const { return name_.empty(); }
 
     const std::string& name() const { return name_; }
@@ -42,7 +41,7 @@ public:
     // Added to support return by reference
     static const GenericAttr& EMPTY();
 
-private:
+public:
     void write(std::string& ret) const;
 
 private:

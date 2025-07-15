@@ -416,7 +416,7 @@ void System::died(const std::string& absNodePath, CmdType cmd_type, const std::s
     // i.e Badly formed status and kill commands should not abort a running job
     switch (cmd_type) {
         case System::ECF_JOB_CMD: {
-            submittable->flag().set(ecf::Flag::JOBCMD_FAILED);
+            submittable->get_flag().set(ecf::Flag::JOBCMD_FAILED);
 
             if (submittable->state() == NState::COMPLETE || submittable->state() == NState::ACTIVE) {
                 // ABNORMAL flow
@@ -429,7 +429,7 @@ void System::died(const std::string& absNodePath, CmdType cmd_type, const std::s
                 str += absNodePath;
                 str += ") setting zombie flag";
                 ecf::log(Log::ERR, str);
-                submittable->flag().set(ecf::Flag::ZOMBIE);
+                submittable->get_flag().set(ecf::Flag::ZOMBIE);
 #ifdef DEBUG_CHILD_ABORT
                 std::cout << str << "\n";
 #endif
@@ -446,10 +446,10 @@ void System::died(const std::string& absNodePath, CmdType cmd_type, const std::s
             break;
         }
         case System::ECF_KILL_CMD:
-            submittable->flag().set(ecf::Flag::KILLCMD_FAILED);
+            submittable->get_flag().set(ecf::Flag::KILLCMD_FAILED);
             break;
         case System::ECF_STATUS_CMD:
-            submittable->flag().set(ecf::Flag::STATUSCMD_FAILED);
+            submittable->get_flag().set(ecf::Flag::STATUSCMD_FAILED);
             break;
     };
 }

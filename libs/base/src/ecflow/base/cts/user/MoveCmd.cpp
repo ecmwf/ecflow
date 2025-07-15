@@ -17,6 +17,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
     #include "ecflow/base/SslClient.hpp"
@@ -49,7 +50,7 @@ private:
 //=======================================================================================
 
 MoveCmd::MoveCmd(const std::pair<std::string, std::string>& host_port, Node* src, const std::string& dest)
-    : src_node_(src->print(PrintStyle::NET)),
+    : src_node_(ecf::as_string(src, PrintStyle::NET)),
       src_host_(host_port.first),
       src_port_(host_port.second),
       src_path_(src->absNodePath()),

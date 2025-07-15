@@ -101,7 +101,7 @@ public:
     static void parse(LateAttr&, const std::string& line, const std::vector<std::string>& lineTokens, size_t index);
     static LateAttr create(const std::string& lateString);
 
-private:
+public:
     void write(std::string&) const;
 
 private:

@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_miss_next_time_slot) {
     BOOST_CHECK_MESSAGE(ts_13.is_valid(), "Expected time 13 to be valid since we started at 9:30");
 
     // Clear the flag and call miss_next_time_slot, this time an additional time slot should have expired
-    t1->flag().clear(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+    t1->get_flag().clear(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
     t1->miss_next_time_slot();
     BOOST_CHECK_MESSAGE(!ts_10.is_valid(), "Expected time 10 to be expired");
     BOOST_CHECK_MESSAGE(!ts_11.is_valid(), "Expected time 11 to be expired");
@@ -107,9 +107,9 @@ BOOST_AUTO_TEST_CASE(test_miss_next_time_slot) {
     BOOST_CHECK_MESSAGE(ts_13.is_valid(), "Expected time 13 to be valid since we started at 9:30");
 
     // call twice more, to expire all time slots
-    t1->flag().clear(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+    t1->get_flag().clear(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
     t1->miss_next_time_slot();
-    t1->flag().clear(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+    t1->get_flag().clear(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
     t1->miss_next_time_slot();
     BOOST_CHECK_MESSAGE(!ts_10.is_valid(), "Expected time 10 to be expired");
     BOOST_CHECK_MESSAGE(!ts_11.is_valid(), "Expected time 11 to be expired");

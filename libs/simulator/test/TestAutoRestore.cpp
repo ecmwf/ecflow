@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
-    theDefs.set_server().add_or_update_user_variables(
+    theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
     string s1_path;
     {
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
     // before
     // ***               autorestore
     Defs theDefs;
-    theDefs.set_server().add_or_update_user_variables(
+    theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
 
     std::vector<std::string> vec;

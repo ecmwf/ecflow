@@ -17,9 +17,7 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Extract.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Stl.hpp"
 #include "ecflow/core/Str.hpp"
@@ -364,7 +362,7 @@ void Node::requeue(Requeue_args& args) {
             reset_next_time_slot = true;
         }
         else {
-            if (flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+            if (get_flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
                 /// If we have done an interactive run or complete, *dont* increment next_time_slot_
                 /// allow next time on time based attributes to be incremented and *not* reset,
                 /// when force and run commands used
@@ -379,13 +377,13 @@ void Node::requeue(Requeue_args& args) {
 
     // Should *NOT* clear, archived flag, as this is done via autorestore or --restore
     // reset the flags, however remember if edit were made
-    bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
-    bool archived_set     = flag().is_set(ecf::Flag::ARCHIVED);
+    bool edit_history_set = get_flag().is_set(ecf::Flag::MESSAGE);
+    bool archived_set     = get_flag().is_set(ecf::Flag::ARCHIVED);
     flag_.reset(); // will CLEAR NO_REQUE_IF_SINGLE_TIME_DEP
     if (edit_history_set)
-        flag().set(ecf::Flag::MESSAGE);
+        get_flag().set(ecf::Flag::MESSAGE);
     if (archived_set)
-        flag().set(ecf::Flag::ARCHIVED);
+        get_flag().set(ecf::Flag::ARCHIVED);
 
     if (late_)
         late_->reset();
@@ -535,7 +533,7 @@ bool Node::calendarChanged(const ecf::Calendar& c,
     }
 
     // Avoid automatically archiving a restored node. Wait till begin/re-queue
-    if (!flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
+    if (!get_flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
         cal_args.auto_archive_nodes_.push_back(shared_from_this());
     }
     return holding_parent_day_or_date;
@@ -553,15 +551,15 @@ void Node::check_for_lateness(const ecf::Calendar& c, const ecf::LateAttr* inher
                 overridden_late.override_with(late_.get());
                 if (overridden_late.check_for_lateness(st_, c)) {
                     late_->setLate(true);
-                    flag().set(ecf::Flag::LATE);
+                    get_flag().set(ecf::Flag::LATE);
                 }
             }
         }
     }
     else {
         // inherited late, we can only set late flag.
-        if (inherited_late && !flag().is_set(ecf::Flag::LATE) && inherited_late->check_for_lateness(st_, c)) {
-            flag().set(ecf::Flag::LATE);
+        if (inherited_late && !get_flag().is_set(ecf::Flag::LATE) && inherited_late->check_for_lateness(st_, c)) {
+            get_flag().set(ecf::Flag::LATE);
         }
     }
 }
@@ -569,7 +567,7 @@ void Node::check_for_lateness(const ecf::Calendar& c, const ecf::LateAttr* inher
 void Node::checkForLateness(const ecf::Calendar& c) {
     if (late_ && late_->check_for_lateness(st_, c)) {
         late_->setLate(true);
-        flag().set(ecf::Flag::LATE);
+        get_flag().set(ecf::Flag::LATE);
         // cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
     }
 }
@@ -680,7 +678,7 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
 
             // Remove effects of RUN and Force complete interactive commands, *BUT* only if *not* applied to this cron
             if (!crons().empty()) {
-                if (!flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+                if (!get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
                     reset_next_time_slot = true;
                 }
             }
@@ -795,7 +793,7 @@ bool Node::resolveDependencies(JobsParam& jobsParam) {
     if (evaluateComplete()) {
         if (completeAst()) {
 
-            flag().set(ecf::Flag::BYRULE);
+            get_flag().set(ecf::Flag::BYRULE);
 
             // If we are a parent sets the state first. then set state on all the children
             set_state_hierarchically(NState::COMPLETE,
@@ -958,6 +956,11 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
 
         setStateOnly(newState, false, additional_info_to_log);
 
+        //
+        // When the node state becomes `aborted`, `complete` or `unknown`, the Aviso background thread is terminated.
+        //
+        AvisoAttr::finish(avisos(), newState);
+
         // Handle any state change specific functionality. This will update any repeats
         // This is a virtual function, since we want different behaviour during state change
         handleStateChange();
@@ -1058,10 +1061,10 @@ void Node::setStateOnly(NState::State newState,
 
     if (newState == NState::ABORTED) {
         if (force)
-            flag().set(ecf::Flag::FORCE_ABORT);
+            get_flag().set(ecf::Flag::FORCE_ABORT);
         Submittable* submittable = isSubmittable();
         if (submittable) {
-            flag().set(ecf::Flag::TASK_ABORTED);
+            get_flag().set(ecf::Flag::TASK_ABORTED);
             if (do_log_state_changes) {
                 log_state_change += " try-no: ";
                 log_state_change += submittable->tryNo();
@@ -1071,8 +1074,8 @@ void Node::setStateOnly(NState::State newState,
         }
     }
     else {
-        flag().clear(ecf::Flag::TASK_ABORTED);
-        flag().clear(ecf::Flag::FORCE_ABORT);
+        get_flag().clear(ecf::Flag::TASK_ABORTED);
+        get_flag().clear(ecf::Flag::FORCE_ABORT);
     }
 
     if (do_log_state_changes) {
@@ -1707,7 +1710,7 @@ void Node::read_state(const std::string& line, const std::vector<std::string>& l
         else if (line_token_i.find("flag:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token))
                 throw std::runtime_error("Node::read_state invalid flags for node " + name());
-            flag().set_flag(token); // this can throw
+            get_flag().set_flag(token); // this can throw
         }
         else if (line_token_i.find("dur:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token))
@@ -1722,141 +1725,6 @@ void Node::read_state(const std::string& line, const std::vector<std::string>& l
         else if (line_token_i == "suspended:1")
             suspend();
     }
-}
-
-std::string Node::print() const {
-    std::string s;
-    print(s);
-    return s;
-}
-
-void Node::print(std::string& os) const {
-    if (d_st_ != DState::default_state()) {
-        Indentor in;
-        Indentor::indent(os);
-        os += "defstatus ";
-        os += DState::toString(d_st_);
-        os += "\n";
-    }
-
-    if (late_)
-        late_->print(os);
-
-    if (c_expr_) {
-        c_expr_->print(os, "complete");
-        if (PrintStyle::getStyle() == PrintStyle::STATE) {
-            Indentor in;
-            if (c_expr_->isFree()) {
-                Indentor::indent(os);
-                os += "# (free)\n";
-            }
-            if (completeAst()) {
-                if (!defs()) {
-                    // Full defs is required for extern checking, and finding absolute node paths
-                    // Hence print will with no defs can give in-accurate information
-                    Indentor in2;
-                    Indentor::indent(os);
-                    os += "# Warning: Full/correct AST evaluation requires the definition\n";
-                }
-                std::stringstream ss;
-                completeAst()->print(ss);
-                os += ss.str();
-            }
-        }
-    }
-    if (t_expr_) {
-        t_expr_->print(os, "trigger");
-        if (PrintStyle::getStyle() == PrintStyle::STATE) {
-            Indentor in;
-            if (t_expr_->isFree()) {
-                Indentor::indent(os);
-                os += "# (free)\n";
-            }
-            if (triggerAst()) {
-                if (!defs()) {
-                    Indentor in2;
-                    Indentor::indent(os);
-                    os += "# Warning: Full/correct AST evaluation requires the definition\n";
-                }
-                std::stringstream ss;
-                triggerAst()->print(ss);
-                os += ss.str();
-            }
-        }
-    }
-    repeat_.print(os); // if repeat is empty print(..) does nothing
-
-    for (const Variable& v : vars_) {
-        v.print(os);
-    }
-
-    if (PrintStyle::getStyle() == PrintStyle::STATE) {
-        // Distinguish normal variable from generated, by adding a #
-        // This also allows it to be read in again and compared in the libs/node/test/parser
-        std::vector<Variable> gvec;
-        gen_variables(gvec);
-        for (const Variable& v : gvec) {
-            v.print_generated(os);
-        }
-    }
-
-    for (limit_ptr l : limits_) {
-        l->print(os);
-    }
-    inLimitMgr_.print(os);
-
-    for (const Label& la : labels_) {
-        la.print(os);
-    }
-    for (const Meter& m : meters_) {
-        m.print(os);
-    }
-    for (const Event& e : events_) {
-        e.print(os);
-    }
-
-    for (const ecf::TimeAttr& t : times_) {
-        t.print(os);
-    }
-    for (const ecf::TodayAttr& t : todays_) {
-        t.print(os);
-    }
-    for (const DateAttr& date : dates_) {
-        date.print(os);
-    }
-    for (const DayAttr& day : days_) {
-        day.print(os);
-    }
-    for (const CronAttr& cron : crons_) {
-        cron.print(os);
-    }
-    for (const AvisoAttr& a : avisos_) {
-        ecf::format_as_defs(a, os);
-    }
-    for (const MirrorAttr& m : mirrors_) {
-        ecf::format_as_defs(m, os);
-    }
-
-    if (auto_cancel_)
-        auto_cancel_->print(os);
-    if (auto_archive_)
-        auto_archive_->print(os);
-    if (auto_restore_)
-        auto_restore_->print(os);
-
-    if (misc_attrs_)
-        misc_attrs_->print(os);
-}
-
-std::string Node::print(PrintStyle::Type_t p_style) const {
-    PrintStyle print_style(p_style);
-    return to_string();
-}
-
-std::string Node::to_string() const {
-    std::string ss;
-    print(ss);
-    return ss;
 }
 
 bool Node::operator==(const Node& rhs) const {

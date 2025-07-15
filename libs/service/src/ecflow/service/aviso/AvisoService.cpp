@@ -31,8 +31,12 @@ void AvisoService::start() {
 
     auto new_subscriptions = subscribe_();
     for (auto&& subscription : new_subscriptions) {
-        std::visit(ecf::overload{[this](const AvisoSubscribe& subscription) { this->register_listener(subscription); },
+        std::visit(ecf::overload{[this](const AvisoSubscribe& subscription) {
+                                     SLOG(D, "AvisoService: registering listener: " << subscription.path());
+                                     this->register_listener(subscription);
+                                 },
                                  [this](const AvisoUnsubscribe& subscription) {
+                                     SLOG(D, "AvisoService: unregistering listener: " << subscription.path());
                                      this->unregister_listener(subscription.path());
                                  }},
                    subscription);
@@ -127,15 +131,27 @@ void AvisoService::register_listener(const AvisoSubscribe& listen) {
     auto& inserted = listeners_.emplace_back(listener);
 
     if (auto auth = listen.auth(); !auth.empty()) {
-        auto credentials = ecf::service::auth::Credentials::load(auth);
-        if (auto key_credentials = credentials.key(); key_credentials) {
-            auto email          = key_credentials->email;
-            auto key            = key_credentials->key;
-            inserted.auth_token = email + ":" + key;
-        }
-        else {
-            SLOG(I, "AvisoService: no key found in auth token for listener {" << listener.path() << "}");
-        }
+        auto found = ecf::service::auth::Credentials::load(auth);
+        std::visit(ecf::overload{[&](const ecf::service::auth::Credentials& credentials) {
+                                     SLOG(D,
+                                          "AvisoService: using credentials for listener {"
+                                              << credentials.value("url").value_or("unknown") << "}");
+
+                                     if (auto key_credentials = credentials.key(); key_credentials) {
+                                         auto email          = key_credentials->email;
+                                         auto key            = key_credentials->key;
+                                         inserted.auth_token = email + ":" + key;
+                                     }
+                                     else {
+                                         SLOG(I,
+                                              "AvisoService: no key found in auth token for listener {"
+                                                  << listener.path() << "}");
+                                     }
+                                 },
+                                 [](const ecf::service::auth::Credentials::Error& error) {
+                                     SLOG(E, "AvisoService: unable to load credentials: " << error.message);
+                                 }},
+                   found);
     }
 }
 

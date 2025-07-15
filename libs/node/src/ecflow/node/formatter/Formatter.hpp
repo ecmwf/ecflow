@@ -30,6 +30,7 @@ template <typename T, typename Stream>
 static void format_vector_as_defs(const std::vector<T>& items, Stream& output) {
     for (const auto& item : items) {
         Formatter<T, Stream>::format(item, output);
+        output << "\n"; // Add a newline after each item
     }
 }
 
@@ -38,6 +39,7 @@ static void format_vector_as_defs(const std::vector<std::shared_ptr<T>>& items, 
     for (const auto& item : items) {
         if (item) {
             Formatter<T, Stream>::format(*item, output);
+            output << "\n"; // Add a newline after each item
         }
     }
 }

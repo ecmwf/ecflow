@@ -126,7 +126,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         SuiteChangedPtr changed(node.get()); // Cater for suites in handles
-        node->flag().set(ecf::Flag::MESSAGE);
+        node->get_flag().set(ecf::Flag::MESSAGE);
         add_edit_history(defs, the_path);
 
         if (is_node_state) {

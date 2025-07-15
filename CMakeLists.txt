@@ -31,7 +31,7 @@ find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CUR
 # Project
 # =========================================================================================
 
-project( ecflow LANGUAGES CXX VERSION 5.14.0 )
+project( ecflow LANGUAGES CXX VERSION 5.14.1 )
 #
 # Important:
 #   The CMake project version is used, as generated CMake variables, to filter .../ecflow/core/ecflow_version.h.in
@@ -76,6 +76,7 @@ option( ENABLE_HTTP                "Enable Rest API/HTTP server"                
 option( ENABLE_HTTP_COMPRESSION    "Enable compression support by HTTP server"           ON )
 option( ENABLE_UDP                 "Enable UDP server"                                   ON )
 option( ENABLE_DOCS                "Enable Documentation"                                OFF )
+option( ENABLE_DEBIAN_PACKAGE      "Enable Debian Package"                               OFF )
 
 # =========================================================================================
 # Sanity check options
@@ -207,54 +208,7 @@ endif()
 # Define packaging/installation
 # =========================================================================================
 
-#
-# Exclude specific content from sources tarball
-#
-#   note: by default ecbuild includes everything apart from the 'build' directory
-#
-
-ecbuild_dont_pack(
-  DIRS
-    # ignore local notes
-    .scratch
-    SCRATCH
-    CUSTOMER
-    # ignore source control directories
-    .git
-    # ignore build directories
-    bamboo
-    ecbuild
-    build_scripts/nightly
-    build_scripts/test_bench
-    Debug
-    bdir
-    bdir_xcode
-    bin
-    # ignore Documentation directories
-    libs/core/doc
-    libs/attributes/doc
-    libs/node/doc
-    libs/client/doc
-    libs/simulator/doc
-    libs/pyext/doc
-    libs/server/doc
-    Doc/misc
-    Doc/sphinx-examples
-  # ignore IDE configuration directories/files
-    .settings
-  FILES
-    .project
-    .cproject
-    .pydevproject
-  # ignore python ancillary files
-    Pyext/.pydevproject
-    Pyext/samples/test.py
-    Pyext/samples/confluence_add_attachment.py
-    build_scripts/.pydevproject
-)
-
-# prepares a tar.gz of your sources and/or binaries
-ecbuild_install_project( NAME ecFlow )
+include(Package)
 
 
 # =========================================================================================

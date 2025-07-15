@@ -14,7 +14,6 @@
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/Indentor.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -78,16 +77,6 @@ bool AstTop::check(std::string& error_msg) const {
         return root_->check(error_msg);
     }
     return true;
-}
-
-std::ostream& AstTop::print(std::ostream& os) const {
-    Indentor in;
-    Indentor::indent(os) << "# Trigger Evaluation Tree\n";
-    if (root_) {
-        Indentor in2;
-        return root_->print(os);
-    }
-    return os;
 }
 
 void AstTop::print_flat(std::ostream& os, bool add_bracket) const {
@@ -181,29 +170,6 @@ void AstRoot::addChild(Ast* n) {
     LOG_ASSERT(false, "AstRoot::addChild: assert failed: root already has left and right children\n");
 }
 
-std::ostream& AstRoot::print(std::ostream& os) const {
-    // left_ should not be NULL, but keep clang static analyser happy
-    if (left_) {
-        if (left_->isRoot()) {
-            Indentor in;
-            left_->print(os);
-        }
-        else
-            left_->print(os);
-    }
-
-    if (right_) { // right_ is empty for Not
-        if (right_->isRoot()) {
-            Indentor in;
-            right_->print(os);
-        }
-        else
-            right_->print(os);
-        ;
-    }
-    return os;
-}
-
 std::string AstRoot::do_why_expression(const std::string& root, bool html) const {
     std::string ret;
     if (left_)
@@ -276,14 +242,6 @@ AstNot* AstNot::clone() const {
     return ast;
 }
 
-std::ostream& AstNot::print(std::ostream& os) const {
-    Indentor::indent(os) << "# NOT (" << evaluate_str() << ")";
-    if (right_)
-        os << " # ERROR has right_";
-    os << "\n";
-    return AstRoot::print(os);
-}
-
 bool AstNot::is_valid_ast(std::string& error_msg) const {
     if (right_) {
         error_msg = "AstNot: should only have a single root";
@@ -342,16 +300,6 @@ AstPlus* AstPlus::clone() const {
     return ast;
 }
 
-std::ostream& AstPlus::print(std::ostream& os) const {
-    Indentor::indent(os) << "# PLUS value(" << value() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
-}
-
 bool AstPlus::is_valid_ast(std::string& error_msg) const {
     if (!left_) {
         error_msg = "AstPlus: has no left part";
@@ -401,16 +349,6 @@ AstMinus* AstMinus::clone() const {
     if (right_)
         ast->addChild(right_->clone());
     return ast;
-}
-
-std::ostream& AstMinus::print(std::ostream& os) const {
-    Indentor::indent(os) << "# MINUS value(" << value() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
 }
 
 bool AstMinus::is_valid_ast(std::string& error_msg) const {
@@ -480,16 +418,6 @@ int AstDivide::value() const {
     return (left_->value() / right_->value());
 }
 
-std::ostream& AstDivide::print(std::ostream& os) const {
-    Indentor::indent(os) << "# DIVIDE value(" << value() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
-}
-
 bool AstDivide::is_valid_ast(std::string& error_msg) const {
     if (!left_) {
         error_msg = "AstDivide: has no left part";
@@ -539,16 +467,6 @@ AstMultiply* AstMultiply::clone() const {
     if (right_)
         ast->addChild(right_->clone());
     return ast;
-}
-
-std::ostream& AstMultiply::print(std::ostream& os) const {
-    Indentor::indent(os) << "# MULTIPLY value(" << value() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
 }
 
 bool AstMultiply::is_valid_ast(std::string& error_msg) const {
@@ -618,16 +536,6 @@ int AstModulo::value() const {
     return (left_->value() % right_->value());
 }
 
-std::ostream& AstModulo::print(std::ostream& os) const {
-    Indentor::indent(os) << "# Modulo value(" << value() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
-}
-
 bool AstModulo::is_valid_ast(std::string& error_msg) const {
     if (!left_) {
         error_msg = "AstModulo: has no left part";
@@ -677,16 +585,6 @@ AstAnd* AstAnd::clone() const {
     if (right_)
         ast->addChild(right_->clone());
     return ast;
-}
-
-std::ostream& AstAnd::print(std::ostream& os) const {
-    Indentor::indent(os) << "# AND (" << evaluate_str() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
 }
 
 bool AstAnd::is_valid_ast(std::string& error_msg) const {
@@ -742,16 +640,6 @@ AstOr* AstOr::clone() const {
     return ast;
 }
 
-std::ostream& AstOr::print(std::ostream& os) const {
-    Indentor::indent(os) << "# OR (" << evaluate_str() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
-}
-
 bool AstOr::is_valid_ast(std::string& error_msg) const {
     if (!left_) {
         error_msg = "AstOr: has no left part";
@@ -803,16 +691,6 @@ AstEqual* AstEqual::clone() const {
     if (right_)
         ast->addChild(right_->clone());
     return ast;
-}
-
-std::ostream& AstEqual::print(std::ostream& os) const {
-    Indentor::indent(os) << "# EQUAL (" << evaluate_str() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
 }
 
 bool AstEqual::is_valid_ast(std::string& error_msg) const {
@@ -867,16 +745,6 @@ AstNotEqual* AstNotEqual::clone() const {
     return ast;
 }
 
-std::ostream& AstNotEqual::print(std::ostream& os) const {
-    Indentor::indent(os) << "# NOT_EQUAL (" << evaluate_str() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
-}
-
 bool AstNotEqual::is_valid_ast(std::string& error_msg) const {
     if (!left_) {
         error_msg = "AstNotEqual: has no left part";
@@ -929,16 +797,6 @@ AstLessEqual* AstLessEqual::clone() const {
     return ast;
 }
 
-std::ostream& AstLessEqual::print(std::ostream& os) const {
-    Indentor::indent(os) << "# LESS_EQUAL (" << evaluate_str() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
-}
-
 bool AstLessEqual::is_valid_ast(std::string& error_msg) const {
     if (!left_) {
         error_msg = "AstLessEqual: has no left part";
@@ -982,6 +840,7 @@ void AstGreaterEqual::accept(ExprAstVisitor& v) {
     AstRoot::accept(v);
     v.visitGreaterEqual(this);
 }
+
 AstGreaterEqual* AstGreaterEqual::clone() const {
     auto* ast = new AstGreaterEqual();
     if (left_)
@@ -989,16 +848,6 @@ AstGreaterEqual* AstGreaterEqual::clone() const {
     if (right_)
         ast->addChild(right_->clone());
     return ast;
-}
-
-std::ostream& AstGreaterEqual::print(std::ostream& os) const {
-    Indentor::indent(os) << "# GREATER_EQUAL (" << evaluate_str() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
 }
 
 bool AstGreaterEqual::is_valid_ast(std::string& error_msg) const {
@@ -1044,6 +893,7 @@ void AstGreaterThan::accept(ExprAstVisitor& v) {
     AstRoot::accept(v);
     v.visitGreaterThan(this);
 }
+
 AstGreaterThan* AstGreaterThan::clone() const {
     auto* ast = new AstGreaterThan();
     if (left_)
@@ -1051,16 +901,6 @@ AstGreaterThan* AstGreaterThan::clone() const {
     if (right_)
         ast->addChild(right_->clone());
     return ast;
-}
-
-std::ostream& AstGreaterThan::print(std::ostream& os) const {
-    Indentor::indent(os) << "# GREATER_THAN (" << evaluate_str() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
 }
 
 bool AstGreaterThan::is_valid_ast(std::string& error_msg) const {
@@ -1114,16 +954,6 @@ AstLessThan* AstLessThan::clone() const {
     if (right_)
         ast->addChild(right_->clone());
     return ast;
-}
-
-std::ostream& AstLessThan::print(std::ostream& os) const {
-    Indentor::indent(os) << "# LESS_THAN (" << evaluate_str() << ")";
-    if (!left_)
-        os << " # ERROR has no left_";
-    if (!right_)
-        os << " # ERROR has no right_";
-    os << "\n";
-    return AstRoot::print(os);
 }
 
 bool AstLessThan::is_valid_ast(std::string& error_msg) const {
@@ -1212,19 +1042,6 @@ int AstFunction::value() const {
     return 0;
 }
 
-std::ostream& AstFunction::print(std::ostream& os) const {
-    Indentor in;
-    switch (ft_) {
-        case AstFunction::DATE_TO_JULIAN:
-            return Indentor::indent(os) << "# DATE_TO_JULIAN " << value() << "\n";
-        case AstFunction::JULIAN_TO_DATE:
-            return Indentor::indent(os) << "# JULIAN_TO_DATE " << value() << "\n";
-        default:
-            assert(false);
-    }
-    return os;
-}
-
 void AstFunction::print_flat(std::ostream& os, bool add_brackets) const {
     switch (ft_) {
         case AstFunction::DATE_TO_JULIAN:
@@ -1283,11 +1100,6 @@ AstInteger* AstInteger::clone() const {
     return ast;
 }
 
-std::ostream& AstInteger::print(std::ostream& os) const {
-    Indentor in;
-    return Indentor::indent(os) << "# INTEGER " << value() << "\n";
-}
-
 void AstInteger::print_flat(std::ostream& os, bool /*add_bracket*/) const {
     os << value_;
 }
@@ -1311,11 +1123,6 @@ void AstInstant::accept(ExprAstVisitor& v) {
 AstInstant* AstInstant::clone() const {
     auto* ast = new AstInstant(value_);
     return ast;
-}
-
-std::ostream& AstInstant::print(std::ostream& os) const {
-    Indentor in;
-    return Indentor::indent(os) << "# Instant " << value_ << "\n";
 }
 
 void AstInstant::print_flat(std::ostream& os, bool /*add_bracket*/) const {
@@ -1342,11 +1149,6 @@ AstNodeState* AstNodeState::clone() const {
     return new AstNodeState(state_);
 }
 
-std::ostream& AstNodeState::print(std::ostream& os) const {
-    Indentor in;
-    return Indentor::indent(os) << "# NODE_STATE " << DState::toString(state_) << "(" << value() << ")\n";
-}
-
 void AstNodeState::print_flat(std::ostream& os, bool /*add_bracket*/) const {
     os << DState::toString(state_);
 }
@@ -1369,11 +1171,6 @@ void AstEventState::accept(ExprAstVisitor& v) {
 
 AstEventState* AstEventState::clone() const {
     return new AstEventState(state_);
-}
-
-std::ostream& AstEventState::print(std::ostream& os) const {
-    Indentor in;
-    return Indentor::indent(os) << "# EVENT_STATE " << state_ << "\n";
 }
 
 void AstEventState::print_flat(std::ostream& os, bool /*add_bracket*/) const {
@@ -1439,23 +1236,6 @@ Node* AstNode::referencedNode(std::string& errorMsg) const {
     return nullptr;
 }
 
-std::ostream& AstNode::print(std::ostream& os) const {
-
-    Node* refNode = referencedNode(); // Only call once
-    Indentor in;
-
-    if (refNode) {
-        Indentor::indent(os) << "# NODE " << nodePath_ << " ";
-        os << DState::toString(refNode->dstate()) << "(" << static_cast<int>(refNode->dstate()) << ")\n";
-    }
-    else {
-        Indentor::indent(os) << "# NODE node(?not-found?) " << nodePath_ << " ";
-        os << DState::toString(DState::UNKNOWN) << "(" << static_cast<int>(DState::UNKNOWN)
-           << ") # check suite filter\n";
-    }
-    return os;
-}
-
 void AstNode::print_flat(std::ostream& os, bool /*add_bracket*/) const {
     os << nodePath_;
 }
@@ -1512,7 +1292,7 @@ AstFlag* AstFlag::clone() const {
 
 int AstFlag::value() const {
     Node* node = referencedNode();
-    if (node && node->flag().is_set(flag_))
+    if (node && node->get_flag().is_set(flag_))
         return 1;
     if (parentNode_ && nodePath_ == "/") {
         Defs* the_defs = parentNode_->defs();
@@ -1549,22 +1329,6 @@ Node* AstFlag::referencedNode(std::string& errorMsg) const {
         return get_ref_node(); // can be NULL
     }
     return nullptr;
-}
-
-std::ostream& AstFlag::print(std::ostream& os) const {
-
-    Node* refNode = referencedNode(); // Only call once
-    Indentor in;
-
-    if (refNode) {
-        Indentor::indent(os) << "# FLAG_NODE " << nodePath_ << " ";
-        os << ecf::Flag::enum_to_string(flag_) << "(" << static_cast<int>(refNode->flag().is_set(flag_)) << ")\n";
-    }
-    else {
-        Indentor::indent(os) << "# FLAG_NODE node(?not-found?) " << nodePath_ << " ";
-        os << ecf::Flag::enum_to_string(flag_) << "(0) # check suite filter\n";
-    }
-    return os;
 }
 
 void AstFlag::print_flat(std::ostream& os, bool /*add_bracket*/) const {
@@ -1614,7 +1378,7 @@ std::string AstFlag::why_expression(bool html) const {
             ret += "(?)";
         else {
             ret += "(";
-            ret += ecf::convert_to<std::string>(ref_node->flag().is_set(flag_));
+            ret += ecf::convert_to<std::string>(ref_node->get_flag().is_set(flag_));
             ret += ")";
         }
     }
@@ -1629,7 +1393,7 @@ std::string AstFlag::why_expression(bool html) const {
         else {
             ret += "(";
             std::stringstream ss;
-            ss << ref_node->flag().is_set(flag_);
+            ss << ref_node->get_flag().is_set(flag_);
             ret += ss.str();
             ret += ")";
         }
@@ -1660,11 +1424,6 @@ int AstVariable::minus(Ast* right) const {
 int AstVariable::plus(Ast* right) const {
     VariableHelper varHelper(this);
     return varHelper.plus(right->value());
-}
-
-std::ostream& AstVariable::print(std::ostream& os) const {
-    VariableHelper varHelper(this);
-    return varHelper.print(os);
 }
 
 void AstVariable::print_flat(std::ostream& os, bool /*add_bracket*/) const {
@@ -1787,22 +1546,6 @@ int AstParentVariable::plus(Ast* right) const {
         return ref_node->findExprVariableValueAndPlus(name_, right->value());
     }
     return right->value();
-}
-
-std::ostream& AstParentVariable::print(std::ostream& os) const {
-    Indentor in;
-    Indentor::indent(os) << "# " << Str::COLON() << name_;
-
-    Node* ref_node = find_node_which_references_variable();
-    if (ref_node) {
-        os << " node(" << ref_node->name() << ") ";
-        ref_node->findExprVariableAndPrint(name_, os);
-        os << "\n";
-        return os;
-    }
-    os << " node(?not-found?) value(0)";
-    os << " # check suite filter\n";
-    return os;
 }
 
 void AstParentVariable::print_flat(std::ostream& os, bool /*add_bracket*/) const {
@@ -1951,95 +1694,4 @@ void VariableHelper::varTypeAndValue(std::string& varType, int& theValue) const 
     }
     varType  = "variable-not-found";
     theValue = 0;
-}
-
-std::ostream& VariableHelper::print(std::ostream& os) const {
-    Indentor in;
-    Indentor::indent(os) << "# " << astVariable_->nodePath() << Str::COLON() << astVariable_->name();
-
-    if (theReferenceNode_) {
-        os << " node(" << theReferenceNode_->name() << ") ";
-        theReferenceNode_->findExprVariableAndPrint(astVariable_->name(), os);
-    }
-    else {
-        os << " node(?not-found?) " << astVariable_->nodePath() << " value(0) # check suite filter";
-    }
-    os << "\n";
-    return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const Ast& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstTop& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstRoot& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstNot& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstPlus& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstMinus& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstDivide& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstMultiply& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstModulo& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstAnd& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstOr& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstEqual& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstNotEqual& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstLessEqual& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstGreaterEqual& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstGreaterThan& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstLessThan& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstLeaf& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstInteger& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstInstant& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstNodeState& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstEventState& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstNode& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstVariable& d) {
-    return d.print(os);
-}
-std::ostream& operator<<(std::ostream& os, const AstFlag& d) {
-    return d.print(os);
 }

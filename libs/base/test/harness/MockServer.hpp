@@ -43,7 +43,7 @@ public:
     SState::State state() const override { return serverState_; }
     std::pair<std::string, std::string> hostPort() const override {
         assert(defs_.get());
-        return defs_->server().hostPort();
+        return defs_->server_state().hostPort();
     }
     defs_ptr defs() const override { return defs_; }
     void updateDefs(defs_ptr d, bool force) override {

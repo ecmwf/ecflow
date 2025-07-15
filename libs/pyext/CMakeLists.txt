@@ -52,16 +52,16 @@ configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT} )
 # ==============================================================================
 set(srcs
   # Headers
-  ../src/ecflow/python/BoostPythonUtil.hpp
   ../src/ecflow/python/ClientDoc.hpp
   ../src/ecflow/python/DefsDoc.hpp
   ../src/ecflow/python/Edit.hpp
   ../src/ecflow/python/GlossaryDoc.hpp
   ../src/ecflow/python/NodeAttrDoc.hpp
   ../src/ecflow/python/NodeUtil.hpp
+  ../src/ecflow/python/PythonBinding.hpp
+  ../src/ecflow/python/PythonUtil.hpp
   ../src/ecflow/python/Trigger.hpp
   # Sources
-  ../src/ecflow/python/BoostPythonUtil.cpp
   ../src/ecflow/python/ClientDoc.cpp
   ../src/ecflow/python/DefsDoc.cpp
   ../src/ecflow/python/EcfExt.cpp
@@ -76,6 +76,7 @@ set(srcs
   ../src/ecflow/python/GlossaryDoc.cpp
   ../src/ecflow/python/NodeAttrDoc.cpp
   ../src/ecflow/python/NodeUtil.cpp
+  ../src/ecflow/python/PythonUtil.cpp
   ../src/ecflow/python/Trigger.cpp
 )
 

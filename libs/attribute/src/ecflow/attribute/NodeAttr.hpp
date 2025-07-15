@@ -29,7 +29,6 @@ public:
     Label(const std::string& name, const std::string& value, const std::string& new_value = "", bool check_name = true);
     Label() = default;
 
-    void print(std::string&) const;
     const std::string& name() const { return n_; }
     const std::string& value() const { return v_; }
     const std::string& new_value() const { return new_v_; }
@@ -70,7 +69,7 @@ public:
                       std::string&);
     static const Label& EMPTY(); // Added to support return by reference
 
-private:
+public:
     void write(std::string&) const;
 
 private:
@@ -101,7 +100,6 @@ public:
 
     std::string name_or_number() const; // if name present return, else return number
     const std::string& name() const { return n_; }
-    void print(std::string&) const;
     bool value() const { return v_; }
     void reset() { set_value(iv_); }
     bool empty() const { return (n_.empty() && number_ == std::numeric_limits<int>::max()); }
@@ -126,7 +124,7 @@ public:
     static const std::string& CLEAR();
     static const Event& EMPTY(); // Added to support return by reference
 
-private:
+public:
     void write(std::string&) const;
 
 private:
@@ -159,7 +157,6 @@ public:
 
     static Meter make_from_value(const std::string& name, const std::string& value);
 
-    void print(std::string&) const;
     void reset() { set_value(min_); }
     void set_value(int v); // can throw std::runtime_error if out of range
     bool empty() const { return n_.empty(); }
@@ -183,8 +180,9 @@ public:
 
     static const Meter& EMPTY(); // Added to support return by reference
 
-private:
+public:
     void write(std::string&) const;
+private:
     bool isValidValue(int v) const { return (v >= min_ && v <= max_); }
 
     int min_{0};

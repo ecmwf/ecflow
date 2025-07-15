@@ -69,12 +69,14 @@ std::unique_ptr<TokenFile> create_token_file() {
     return tokenfile;
 }
 
+static std::unique_ptr<std::thread> api_server;
+
 void start_api_server() {
     if (ecf::environment::has("NO_API_SERVER")) {
         return; // terminate early, for debugging purposes
     }
 
-    std::thread t([] {
+    api_server = std::make_unique<std::thread>([] {
 #if defined(ECF_TEST_HTTP_BACKEND)
         char* argv[] = {(char*)"ecflow_http",
                         (char*)"-v",
@@ -101,7 +103,6 @@ void start_api_server() {
     });
 
     sleep(1);
-    t.detach();
 }
 
 std::unique_ptr<InvokeServer> start_ecflow_server() {
@@ -121,6 +122,53 @@ std::unique_ptr<InvokeServer> start_ecflow_server() {
     BOOST_TEST_MESSAGE("ecflow server at localhost:" << port);
 
     return srv;
+}
+
+httplib::Result request(const std::string& method,
+                        const std::string& resource,
+                        const std::string& payload             = "",
+                        const std::string& token               = "",
+                        const httplib::Headers& custom_headers = {}) {
+#if defined(ECF_TEST_HTTP_BACKEND)
+    httplib::SSLClient c(API_HOST, 8081);
+#else
+    httplib::SSLClient c(API_HOST, 8080);
+#endif
+
+    c.enable_server_certificate_verification(false);
+    c.set_connection_timeout(3);
+
+    BOOST_TEST_MESSAGE("Request URL: " << method << " " << API_HOST << resource);
+    BOOST_TEST_MESSAGE("Request body: " << payload);
+
+    httplib::Headers h = {{"Content-type", "application/json"}};
+
+    if ((method == "post" || method == "put" || method == "delete") && token.empty() == false) {
+        h.insert(std::make_pair("Authorization", "Bearer " + token));
+    }
+
+    for (const auto& kv : custom_headers) {
+        h.insert(kv);
+    }
+
+    c.set_default_headers(h);
+
+    if (method == "get" || method == "head") {
+        return c.Get(resource);
+    }
+    else if (method == "post") {
+        return c.Post(resource, payload, "application/json");
+    }
+    else if (method == "put") {
+        return c.Put(resource, payload, "application/json");
+    }
+    else if (method == "delete") {
+        return c.Delete(resource, payload, "application/json");
+    }
+
+    BOOST_FAIL("Unknown HTTP method");
+
+    return httplib::Result(nullptr, httplib::Error::Unknown); // to silence compiler warnings
 }
 
 struct SetupTest
@@ -148,6 +196,24 @@ struct SetupTest
         start_api_server();
         printf("======= TESTS STARTING ========\n");
     }
+
+    void teardown() {
+        printf("Shutting down REST API\n");
+        auto s = request("get", "/v1/shutdown");
+        BOOST_REQUIRE(s->status == 200);
+        printf("Waiting for shut down REST API\n");
+        api_server->join();
+
+        printf("Shutting down Token file\n");
+        tokenfile.reset();
+
+        printf("Shutting down Certificate\n");
+        cert.reset();
+
+        printf("Shutting down ecFlow (main) server\n");
+        srv.reset();
+    }
+
     ~SetupTest() { printf("======= TESTS FINISHED ========\n"); }
 
     std::unique_ptr<TokenFile> tokenfile{nullptr};
@@ -186,49 +252,6 @@ httplib::Response handle_response(const httplib::Result& r,
     }
 
     return httplib::Response(*r);
-}
-
-httplib::Result request(const std::string& method,
-                        const std::string& resource,
-                        const std::string& payload             = "",
-                        const std::string& token               = "",
-                        const httplib::Headers& custom_headers = {}) {
-#if defined(ECF_TEST_HTTP_BACKEND)
-    httplib::SSLClient c(API_HOST, 8081);
-#else
-    httplib::SSLClient c(API_HOST, 8080);
-#endif
-
-    c.enable_server_certificate_verification(false);
-    c.set_connection_timeout(3);
-
-    BOOST_TEST_MESSAGE("Request URL: " << method << " " << API_HOST << resource);
-    BOOST_TEST_MESSAGE("Request body: " << payload);
-
-    httplib::Headers h = {{"Content-type", "application/json"}};
-
-    if ((method == "post" || method == "put" || method == "delete") && token.empty() == false) {
-        h.insert(std::make_pair("Authorization", "Bearer " + token));
-    }
-
-    for (const auto& kv : custom_headers) {
-        h.insert(kv);
-    }
-
-    c.set_default_headers(h);
-
-    if (method == "get" || method == "head")
-        return c.Get(resource);
-    else if (method == "post")
-        return c.Post(resource, payload, "application/json");
-    else if (method == "put")
-        return c.Put(resource, payload, "application/json");
-    else if (method == "delete")
-        return c.Delete(resource, payload, "application/json");
-
-    BOOST_FAIL("Unknown HTTP method");
-
-    return httplib::Result(nullptr, httplib::Error::Unknown); // to silence compiler warnings
 }
 
 template <typename T>

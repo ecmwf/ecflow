@@ -27,7 +27,6 @@
 #include <iosfwd>
 #include <limits>
 
-#include "Expression.hpp"
 #include "ecflow/attribute/CronAttr.hpp"
 #include "ecflow/attribute/DateAttr.hpp"
 #include "ecflow/attribute/DayAttr.hpp"
@@ -39,10 +38,10 @@
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/DState.hpp"
 #include "ecflow/core/NOrder.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
+#include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/InLimit.hpp"
 #include "ecflow/node/InLimitMgr.hpp"
@@ -279,9 +278,6 @@ public:
     virtual void generate_scripts(const std::map<std::string, std::string>& override) const = 0;
 
     // standard functions: ==============================================
-    std::string print() const;
-    virtual void print(std::string&) const;
-    std::string print(PrintStyle::Type_t type) const;
     bool operator==(const Node& rhs) const;
     virtual bool checkInvariants(std::string& errorMsg) const;
 
@@ -414,12 +410,18 @@ public:
     const std::vector<ZombieAttr>& zombies() const;
     const std::vector<QueueAttr>& queues() const;
     const std::vector<GenericAttr>& generics() const;
-    ecf::LateAttr* get_late() const { return late_.get(); }
-    ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_.get(); }
-    ecf::AutoCancelAttr* get_autocancel() const { return auto_cancel_.get(); }
-    ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get(); }
-    ecf::Flag& flag() { return flag_; }
+    ecf::LateAttr* get_late() { return late_.get(); }
+    const ecf::LateAttr* get_late() const { return late_.get(); }
+    ecf::AutoRestoreAttr* get_autorestore() { return auto_restore_.get(); }
+    const ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_.get(); }
+    ecf::AutoCancelAttr* get_autocancel() { return auto_cancel_.get(); }
+    const ecf::AutoCancelAttr* get_autocancel() const { return auto_cancel_.get(); }
+    ecf::AutoArchiveAttr* get_autoarchive() { return auto_archive_.get(); }
+    const ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get(); }
+    ecf::Flag& get_flag() { return flag_; }
     const ecf::Flag& get_flag() const { return flag_; }
+
+    const MiscAttrs* get_misc_attrs() const { return misc_attrs_.get(); }
 
     [[deprecated]] virtual void gen_variables(std::vector<Variable>&) const;
     std::vector<Variable> gen_variables() const;
@@ -808,7 +810,11 @@ private:
     int findExprVariableValueAndPlus(const std::string& name, int val) const;
     int findExprVariableValueAndMinus(const std::string& name, int val) const;
     int findExprVariableValueAndType(const std::string& name, std::string& varType) const;
+
+public:
     void findExprVariableAndPrint(const std::string& name, std::ostream& os) const;
+
+private:
     friend class VariableHelper;
     friend class AstParentVariable;
     bool update_variable(const std::string& name, const std::string& value);
@@ -904,7 +910,6 @@ private: /// For use by python interface,
     std::vector<limit_ptr>::const_iterator limit_end() const { return limits_.end(); }
     std::vector<InLimit>::const_iterator inlimit_begin() const { return inLimitMgr_.inlimit_begin(); }
     std::vector<InLimit>::const_iterator inlimit_end() const { return inLimitMgr_.inlimit_end(); }
-    std::string to_string() const; // For python interface
 
 private:
     Node* parent_{nullptr}; // *NOT* persisted must be set by the parent class

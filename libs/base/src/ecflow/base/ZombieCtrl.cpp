@@ -122,7 +122,7 @@ bool ZombieCtrl::handle_zombie(Submittable* task,       // This NULL for path zo
 
     /// Mark task as zombie
     if (task)
-        task->flag().set(ecf::Flag::ZOMBIE);
+        task->get_flag().set(ecf::Flag::ZOMBIE);
 
     Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, jobs_password);
     if (!theExistingZombie.empty()) {
@@ -267,7 +267,7 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
         }
 
         /// Clear the zombie flag
-        task->flag().clear(ecf::Flag::ZOMBIE);
+        task->get_flag().clear(ecf::Flag::ZOMBIE);
 
 #ifdef DEBUG_ZOMBIE
         std::cout << " >>>ADOPT<<< then remove(" << remove_ok << ") ";
@@ -297,7 +297,7 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
 
             /// Clear the zombie flag
             if (task)
-                task->flag().clear(ecf::Flag::ZOMBIE);
+                task->get_flag().clear(ecf::Flag::ZOMBIE);
 
 #ifdef DEBUG_ZOMBIE
             std::cout << " child == COMPLETE remove zombie ";
@@ -332,7 +332,7 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
         //    process terminate. Up to use to remove zombies
         // Opted for option b/ however we do *NOT* change action type, we just fob
         if (task) {
-            if (!task->flag().is_set(ecf::Flag::KILLED)) {
+            if (!task->get_flag().is_set(ecf::Flag::KILLED)) {
 
                 action_taken += "kill & fob";
 
@@ -422,7 +422,7 @@ void ZombieCtrl::add_user_zombies(const std::vector<Submittable*>& tasks, const 
                                       user_cmd);
 
                 /// Mark task as zombie for xcdp
-                t->flag().set(ecf::Flag::ZOMBIE);
+                t->get_flag().set(ecf::Flag::ZOMBIE);
             }
         }
     }

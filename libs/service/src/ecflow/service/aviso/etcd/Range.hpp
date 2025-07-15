@@ -14,6 +14,8 @@
 #include <string>
 #include <string_view>
 
+#include "ecflow/core/Base64.hpp"
+
 namespace ecf::service::aviso::etcd {
 
 struct Raw;
@@ -25,17 +27,10 @@ public:
     using content_view_t = std::string_view;
 
     const content_t& raw() const { return raw_; }
-    content_t base64() const { return encode_base64(raw_); }
+    content_t base64() const { return ecf::encode_base64(raw_); }
 
     template <typename tag>
     friend Content make_content_from(Content::content_view_t content);
-
-private:
-    static std::string decode_base64(const std::string& val);
-    static std::string decode_base64(std::string_view val);
-
-    static std::string encode_base64(const std::string& val);
-    static std::string encode_base64(std::string_view val);
 
 private:
     explicit Content(content_view_t raw) : raw_{raw} {}
@@ -53,7 +48,7 @@ inline Content make_content_from<Raw>(Content::content_view_t content) {
 
 template <>
 inline Content make_content_from<Base64>(Content::content_view_t content) {
-    auto raw = Content::decode_base64(content);
+    auto raw = ecf::decode_base64(std::string{content});
     return make_content_from<Raw>(raw);
 }
 

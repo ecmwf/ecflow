@@ -54,7 +54,7 @@ bool Jobs::generate(JobsParam& jobsParam) const {
         // *******************************************************************
 
         if (defs_) {
-            if (defs_->server().get_state() == SState::RUNNING) {
+            if (defs_->server_state().get_state() == SState::RUNNING) {
                 const std::vector<suite_ptr>& suites = defs_->suiteVec();
                 for (const suite_ptr& suite : suites) {
                     // SuiteChanged moved into Suite::resolveDependencies.
@@ -107,9 +107,9 @@ bool Jobs::generate() const {
         LOG_ASSERT(defs != nullptr, "node_->defs() == NULL");
     }
 
-    if (defs && defs->server().get_state() == SState::RUNNING) {
-        LOG_ASSERT(defs->server().jobSubmissionInterval() != 0, "");
-        JobsParam jobsParam(defs->server().jobSubmissionInterval(), defs->server().jobGeneration());
+    if (defs && defs->server_state().get_state() == SState::RUNNING) {
+        LOG_ASSERT(defs->server_state().jobSubmissionInterval() != 0, "");
+        JobsParam jobsParam(defs->server_state().jobSubmissionInterval(), defs->server_state().jobGeneration());
 #ifdef DEBUG_JOB_SUBMISSION
         jobsParam.logDebugMessage(" from Jobs::generate()/Server");
 #endif

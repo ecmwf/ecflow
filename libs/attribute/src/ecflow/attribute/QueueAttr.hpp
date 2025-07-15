@@ -22,7 +22,6 @@ public:
     QueueAttr() = default;
     ~QueueAttr();
 
-    void print(std::string&) const;
     bool operator==(const QueueAttr& rhs) const;
     bool operator<(const QueueAttr& rhs) const { return name_ < rhs.name(); }
 
@@ -65,6 +64,7 @@ public:
 
 private:
     void incr_state_change_no();
+public:
     void write(std::string&) const;
 
 private:

@@ -115,9 +115,10 @@ public:
 
     void read_state(const std::string& line, const std::vector<std::string>& lineTokens) override;
 
-protected:
+public:
     void write_state(std::string&, bool&) const override;
 
+protected:
     /// call just before job submission, reset data members, update try_no, and generate variable
     void increment_try_no(); // will increment state_change_no
 

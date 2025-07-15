@@ -20,6 +20,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
+#include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
 using namespace std;
@@ -214,7 +215,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_family_and_task) {
     theDefs.getAllFamilies(famVec);
     BOOST_CHECK_MESSAGE(famVec.size() == 0,
                         "Expected to have 0 families but found " << famVec.size() << "\n"
-                                                                 << theDefs);
+                                                                 << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_autocancel_family_and_task.def") + ".log";
