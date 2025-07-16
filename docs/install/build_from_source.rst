@@ -12,16 +12,16 @@ Build Environment
 
 - CMake
 
-   - CMake 3.12+
+   - CMake 3.18+
 
 - C++ Compiler
 
    - C++17 support is required
-   - GNU GCC 7.3+ or Clang 14.0+
+   - GNU GCC 8.5+ or Clang 14.0+
 
 - ecbuild
 
-   - ecbuild 3.4+
+   - ecbuild 3.11+
 
 - Boost
 

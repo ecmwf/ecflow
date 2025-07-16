@@ -1,7 +1,3 @@
-.. _get:
-
-get
-///
 
 The CLI command **get** can be used to **show** the definition that is
 loaded in the server.
@@ -26,4 +22,3 @@ option, i.e.
 
   ecflow_client --get_state
   ecflow_client --get_state=/s1
-

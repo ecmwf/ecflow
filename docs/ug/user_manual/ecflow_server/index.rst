@@ -1,5 +1,5 @@
-The ecFlow server
-//////////////////
+ecFlow server
+/////////////
 
 .. toctree::
     :maxdepth: 2

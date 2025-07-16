@@ -14,8 +14,8 @@ Welcome to ecFlow's documentation
    overview
    quickstart.rst
    tutorial/tutorial.rst
-   python_api/python_api.rst
    client_api/index.rst
+   python_api/python_api.rst
    rest_api.rst
    udp_api.rst
    ug/index.rst
