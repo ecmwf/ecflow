@@ -594,25 +594,34 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
                 // Wait a bit before trying to connect again, but only if no_of_tries > 0
                 no_of_tries--;
-                if (no_of_tries > 0)
+                if (no_of_tries > 0) {
                     sleep(retry_connection_period);
+                }
             }
 
-            // Don't bother with other hosts when:
+            //
+            // The ecFlow client may try to connect to multiple hosts, as specified in the ECF_HOSTFILE
+            //
+            // Attempting other hosts only happens for Task commands.
+            //
+            // The multiple hosts connection is ***NOT*** attempted when:
             //  1/ Testing
-            //  2/ ping-ing
-            //  3/ ECF_DENIED has been set
-            //  4/ Dealing with non tasks based request
+            //  2/ Executing Ping command
+            //  3/ Environment variable ECF_DENIED is set
+            //  4/ Executing any User command
+            //
             if (!cts_cmd->connect_to_different_servers() || test_ || cts_cmd->ping_cmd() || clientEnv_.denied()) {
                 std::stringstream ss;
                 ss << TimeStamp::now() << "Request( " << cts_cmd->print_short() << " )";
-                if (clientEnv_.denied())
+                if (clientEnv_.denied()) {
                     ss << " ECF_DENIED ";
+                }
                 ss << ", Failed to connect to " << client_env_host_port() << ". After " << connection_attempts_
                    << " attempts. Is the server running ?\n";
                 // Only print client environment if not pinging
-                if (!cts_cmd->ping_cmd())
+                if (!cts_cmd->ping_cmd()) {
                     ss << clientEnv_.toString() << endl;
+                }
                 server_reply_.set_error_msg(ss.str());
                 return 1;
             }
