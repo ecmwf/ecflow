@@ -138,12 +138,12 @@
          ecflow_client --load=<check_point_file> print check_only
       
    child command
-      Child commands (or task requests) are called from within the :term:`ecf script` files. The table also includes the default action (from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
+      Child (or Task) commands are called from within the :term:`ecf script` files. The table also includes the default action (from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
 
       .. list-table:: 
          :header-rows: 1
          
-         * - Child Command 
+         * - Child (or Task) Command
            - Description
            - Zombie (default action)
          * - :ref:`ecflow_client --init <init_cli>`
@@ -804,7 +804,7 @@
       Since the :term:`ecf script` can call ecflow_client(i.e :term:`child command`) then typically
       some are set in an include header. i.e. :ref:`tutorial-head_h`.
       
-      .. list-table:: Environment variables common for user and child commands
+      .. list-table:: Environment variables common for User and Task commands
          :header-rows: 1
          :widths: 10 50 10 30
 
@@ -862,7 +862,7 @@
              Secure communication can also be activated using the :code:`ecflow_client --ssl ...` option.
              When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
 
-      .. list-table:: Environment variables for child commands
+      .. list-table:: Environment variables for Task commands
          :header-rows: 1
          :widths: 10 50 10 30
 
@@ -891,16 +891,20 @@
            - No
            - $HOME/.echostfile
          * - ECF_TIMEOUT
-           - Maximum time is seconds for the client to deliver message
+           - Maximum time (in seconds) for the client to deliver message
            - No
-           - 24*3600 (default value):
+           - default value: 24 * 60 * 60 # i.e. 24 hours
 
              .. code-block:: shell
 
                export ECF_TIMEOUT=36024*3600   
 
+         * - ECF_CONNECT_TIMEOUT
+           - Maximum time (in seconds) for the client to establish connection
+           - No
+           - default value: 0
          * - ECF_ZOMBIE_TIMEOUT
-           - Maximum time in seconds for the child(init, abort, complete, etc) zombie client to get a reply from the server. 
+           - Maximum time (in seconds) for the zombie Task client (performing :code:`init`, :code:`abort`, :code:`complete`, etc) to get a reply from the server.
            - No
            - 12*3600 (default value):
 
