@@ -147,6 +147,7 @@ The list of commands, amongst other details, can be displayed by using the optio
     :maxdepth: 1
     
     desc/cli_scripting_in_batch
+    desc/using_backup_servers
 """
 
     txt += """
