@@ -18,24 +18,11 @@
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 
-// Sized protocol
-bool task_len(task_ptr self) {
-    return self->aliases().size();
-}
+namespace {
 
-task_ptr task_enter(task_ptr self) {
-    return self;
-}
+// Task
 
-bool task_exit(task_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
-    return false;
-}
-
-std::string task_to_string(task_ptr self) {
-    return ecf::as_string(*self, PrintStyleHolder::getStyle());
-}
-
-std::shared_ptr<Task> task_init(const std::string& name, const py::args& args, const py::kwargs& kwargs) {
+std::shared_ptr<Task> Task_init(const std::string& name, const py::args& args, const py::kwargs& kwargs) {
     std::cout << "task_init: name: " << name << std::endl;
     auto node = std::make_shared<Task>(name);
     NodeUtil::add(*node, args);
@@ -43,11 +30,29 @@ std::shared_ptr<Task> task_init(const std::string& name, const py::args& args, c
     return node;
 }
 
-std::string alias_to_string(alias_ptr self) {
+task_ptr Task_enter(task_ptr self) {
+    return self;
+}
+
+bool Task_exit(task_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
+    return false;
+}
+
+std::string Task_str(task_ptr self) {
     return ecf::as_string(*self, PrintStyleHolder::getStyle());
 }
 
-// See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
+bool Task_len(task_ptr self) {
+    return self->aliases().size();
+}
+
+// Alias
+
+std::string Alias_str(alias_ptr self) {
+    return ecf::as_string(*self, PrintStyleHolder::getStyle());
+}
+
+} // namespace
 
 void export_Task(py::module& m) {
 
@@ -70,29 +75,21 @@ void export_Task(py::module& m) {
 
     py::class_<Task, Submittable, std::shared_ptr<Task>>(m, "Task", DefsDoc::task_doc())
 
-        .def(py::init(&task_init), DefsDoc::task_doc())
+        .def(py::init(&Task_init), DefsDoc::task_doc())
         .def(py::init<const std::string&>(), py::arg("name"))
-        .def(py::self == py::self)                 // __eq__
-        .def("__enter__", &task_enter)             // allow with statement, hence indentation support
-        .def("__exit__", &task_exit)               // allow with statement, hence indentation support
-        .def("__str__", &task_to_string)           // __str__
-        .def("__copy__", pyutil_copy_object<Task>) // __copy__ uses copy constructor
-        .def("__len__", &task_len)                 // Implement sized protocol for immediate children
-        .def("__iter__", &Task::aliases)           // implement iter protocol
+        .def(py::self == py::self)
+        .def("__enter__", &Task_enter)
+        .def("__exit__", &Task_exit)
+        .def("__str__", &Task_str)
+        .def("__copy__", pyutil_copy_object<Task>)
+        .def("__len__", &Task_len)
+        .def("__iter__", &Task::aliases)
         .def_property_readonly("aliases", &Task::aliases, "Returns a list of aliases")
         .def_property_readonly("nodes", &Task::aliases, "Returns a list of aliases");
-
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<task_ptr>(); // needed for mac and boost 1.6
-#endif
 
     py::class_<Alias, Submittable, std::shared_ptr<Alias>>(m, "Alias", DefsDoc::alias_doc())
 
         .def(py::self == py::self)
-        .def("__str__", &alias_to_string)
+        .def("__str__", &Alias_str)
         .def("__copy__", pyutil_copy_object<Alias>);
-
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<alias_ptr>(); // needed for mac and boost 1.6
-#endif
 }
