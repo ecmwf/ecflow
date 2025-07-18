@@ -791,7 +791,7 @@ const char* DefsDoc::add_repeat_date_list_doc() {
            "            RepeatDateList('YMD',[20100111,20100115]))\n";
 }
 
-const char* DefsDoc::add_repeat_datetimelist_doc() {
+const char* DefsDoc::add_repeat_datetime_list_doc() {
     return "Add a RepeatDateTimeList attribute. See :py:class:`ecflow.RepeatDateTimeList`\n\n"
            "A node can only have one repeat\n"
            "\nException:\n\n"
