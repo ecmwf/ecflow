@@ -43,19 +43,75 @@
 #include "ecflow/python/PythonUtil.hpp"
 #include "ecflow/python/Trigger.hpp"
 
-// See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
-///////////////////////////////////////////////////////////////////////////////////////////////////
-py::object late_raw_constructor(const py::args& args, const py::kwargs& kw) {
-    // cout << "late_raw_constructor len(args):" << len(args) << endl;
-    //  args[0] is Late(i.e self)
-    if (len(args) > 1) {
-        throw std::runtime_error("late_raw_constructor: Late only expects keyword arguments, ie. "
-                                 "Late(submitted='00:20',active='15:00',complete='+30:00')");
-    }
-    return args[0].attr("__init__")(kw); // calls -> late_init(dict kw)
+namespace {
+
+// JobCreationCtrl
+
+job_creation_ctrl_ptr JobCreationCtrl_make() {
+    return std::make_shared<JobCreationCtrl>();
 }
 
-static void extract_late_keyword_arguments(std::shared_ptr<ecf::LateAttr> late, const py::kwargs& kwargs) {
+// ZombieAttr
+
+ZombieAttr ZombieAttr_make(ecf::Child::ZombieType zt, const py::list& list, ecf::ZombieCtrlAction uc) {
+
+    int the_list_size = len(list);
+
+    std::vector<ecf::Child::CmdType> vec;
+    vec.reserve(the_list_size);
+
+    for (int i = 0; i < the_list_size; ++i) {
+        vec.push_back(list[i].cast<ecf::Child::CmdType>());
+    }
+    return ZombieAttr(zt, vec, uc);
+}
+
+ZombieAttr ZombieAttr_make_lifetime(ecf::Child::ZombieType zt,
+                                    const py::list& list,
+                                    ecf::ZombieCtrlAction uc,
+                                    int life_time_in_server) {
+
+    int the_list_size = len(list);
+
+    std::vector<ecf::Child::CmdType> vec;
+    vec.reserve(the_list_size);
+
+    for (int i = 0; i < the_list_size; ++i) {
+        vec.push_back(list[i].cast<ecf::Child::CmdType>());
+    }
+    return ZombieAttr(zt, vec, uc, life_time_in_server);
+}
+
+// Limit
+
+py::list Limit_node_paths(Limit* limit) {
+    py::list list;
+    const std::set<std::string>& paths = limit->paths();
+    for (std::string path : paths) {
+        list.append(path);
+    }
+    return list;
+}
+
+// Queue
+
+QueueAttr Queue_make(const std::string& name, const py::list& list) {
+    std::vector<std::string> vec;
+    pyutil_list_to_str_vec(list, vec);
+    return QueueAttr(name, vec);
+}
+
+// Generic
+
+GenericAttr Generic_make(const std::string& name, const py::list& list) {
+    std::vector<std::string> vec;
+    pyutil_list_to_str_vec(list, vec);
+    return GenericAttr(name, vec);
+}
+
+// Late
+
+void Late_extract_from_kwargs(std::shared_ptr<ecf::LateAttr> late, const py::kwargs& kwargs) {
 
     for (const auto& entry : kwargs) {
         // 1. Extract the keywork argument name
@@ -106,46 +162,75 @@ static void extract_late_keyword_arguments(std::shared_ptr<ecf::LateAttr> late, 
     }
 }
 
-static std::shared_ptr<ecf::LateAttr> late_init_default() {
+std::shared_ptr<ecf::LateAttr> Late_make_default() {
     return std::make_shared<ecf::LateAttr>();
 }
 
-std::shared_ptr<ecf::LateAttr> late_init(const py::args& args, const py::kwargs& kwargs) {
+std::shared_ptr<ecf::LateAttr> Late_make(const py::args& args, const py::kwargs& kwargs) {
     int arg_count = len(args);
     if (arg_count > 0) {
-        throw std::runtime_error("late_raw_constructor: Late only expects keyword arguments, ie. "
+        throw std::runtime_error("late_init: Late only expects keyword arguments, i.e. "
                                  "Late(submitted='00:20',active='15:00',complete='+30:00')");
     }
     auto late = std::make_shared<ecf::LateAttr>();
-    extract_late_keyword_arguments(late, kwargs);
+    Late_extract_from_kwargs(late, kwargs);
     return late;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, py::dict& dict) {
+// AutoRestoreAttr
+
+ecf::AutoRestoreAttr AutoRestore_make(const py::list& list) {
+    std::vector<std::string> vec;
+    pyutil_list_to_str_vec(list, vec);
+    return ecf::AutoRestoreAttr(vec);
+}
+
+// RepeatDateList
+
+RepeatDateList RepeatDateList_make(const std::string& name, const py::list& list) {
+    std::vector<int> vec;
+    pyutil_list_to_int_vec(list, vec);
+    return RepeatDateList(name, vec);
+}
+
+// RepeatEnumerated
+
+RepeatEnumerated RepeatEnumerated_make(const std::string& name, const py::list& list) {
+    std::vector<std::string> vec;
+    pyutil_list_to_str_vec(list, vec);
+    return RepeatEnumerated(name, vec);
+}
+
+// RepeatString
+
+RepeatString RepeatString_make(const std::string& name, const py::list& list) {
+    std::vector<std::string> vec;
+    pyutil_list_to_str_vec(list, vec);
+    return RepeatString(name, vec);
+}
+
+// Cron
+
+void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, py::dict& dict) {
     for (auto entry : dict) {
         if (auto found_key = py_extract<py::str>(entry.first); found_key) {
             std::string key = found_key.value();
 
             if (auto found_value = py_extract<py::list>(entry.second); found_value) {
-                py::list value = found_value.value();
-                std::cout << "[1]key: " << key << " value: " << value << std::endl;
+                std::vector<int> value;
+                pyutil_list_to_int_vec(found_value.value(), value);
 
-                std::vector<int> int_vec;
-                pyutil_list_to_int_vec(value, int_vec);
-
-                //  expected keywords are: days_of_week,last_week_days_ofThe_month, days_of_month, months
                 if (key == "days_of_week") {
-                    cron->addWeekDays(int_vec);
+                    cron->addWeekDays(value);
                 }
                 else if (key == "days_of_month") {
-                    cron->addDaysOfMonth(int_vec);
+                    cron->addDaysOfMonth(value);
                 }
                 else if (key == "months") {
-                    cron->addMonths(int_vec);
+                    cron->addMonths(value);
                 }
                 else if (key == "last_week_days_of_the_month") {
-                    cron->add_last_week_days_of_month(int_vec);
+                    cron->add_last_week_days_of_month(value);
                 }
                 else {
                     throw std::runtime_error(
@@ -154,8 +239,7 @@ static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, 
                 }
             }
             else if (auto found_value = py_extract<py::bool_>(entry.second); found_value) {
-                std::cout << "[2]key: " << key << " value: " << found_value.value() << std::endl;
-                if (key == "last_day_of_the_month") {
+                if (key == "last_day_of_the_month" && found_value.value()) {
                     cron->add_last_day_of_month();
                 }
                 else {
@@ -171,163 +255,105 @@ static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, 
     }
 }
 
-static std::shared_ptr<ecf::CronAttr> cron_init(const std::string& ts, py::kwargs& kwargs) {
-    std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
-    extract_cron_keyword_arguments(cron, kwargs);
-    return cron;
-}
-
-static std::shared_ptr<ecf::CronAttr> cron_init1(const ecf::TimeSeries& ts, py::kwargs& kwargs) {
-    std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
-    extract_cron_keyword_arguments(cron, kwargs);
-    return cron;
-}
-
-static std::shared_ptr<ecf::CronAttr> cron_create() {
+std::shared_ptr<ecf::CronAttr> Cron_make() {
     return std::make_shared<ecf::CronAttr>();
 }
-static std::shared_ptr<ecf::CronAttr> cron_create2(const ecf::TimeSeries& ts) {
+
+std::shared_ptr<ecf::CronAttr> cron_make_string_kwargs(const std::string& ts, py::kwargs& kwargs) {
+    std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
+    extract_cron_keyword_arguments(cron, kwargs);
+    return cron;
+}
+
+std::shared_ptr<ecf::CronAttr> cron_make_timeseries_kwargs(const ecf::TimeSeries& ts, py::kwargs& kwargs) {
+    std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
+    extract_cron_keyword_arguments(cron, kwargs);
+    return cron;
+}
+
+std::shared_ptr<ecf::CronAttr> cron_make_timeseries(const ecf::TimeSeries& ts) {
     return std::make_shared<ecf::CronAttr>(ts);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void add_time_series_3(ecf::CronAttr* self, const std::string& ts) {
-    self->addTimeSeries(ecf::TimeSeries::create(ts));
-}
-
-void set_week_days(ecf::CronAttr* cron, const py::list& list) {
+void Cron_set_week_days(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addWeekDays(int_vec);
 }
-void set_last_week_days_of_month(ecf::CronAttr* cron, const py::list& list) {
+
+void Cron_set_last_week_days_of_month(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->add_last_week_days_of_month(int_vec);
 }
 
-void set_days_of_month(ecf::CronAttr* cron, const py::list& list) {
+void Cron_set_days_of_month(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addDaysOfMonth(int_vec);
 }
-void set_last_day_of_the_month(ecf::CronAttr* cron) {
+
+void Cron_set_last_day_of_the_month(ecf::CronAttr* cron) {
     cron->add_last_day_of_month();
 }
 
-void set_months(ecf::CronAttr* cron, const py::list& list) {
+void Cron_set_months(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addMonths(int_vec);
 }
 
-// Create as shared because: we want to pass a Python list as part of the constructor,
-// *AND* the only way make_constructor works is with a pointer.
-// The Node::add function seem to cope with this, some boost python magic,must do a conversion
-// from shared_ptr to pass by reference
-static RepeatEnumerated create_RepeatEnumerated(const std::string& name, const py::list& list) {
-    std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
-    return RepeatEnumerated(name, vec);
-}
-static RepeatDateList create_RepeatDateList(const std::string& name, const py::list& list) {
-    std::vector<int> vec;
-    pyutil_list_to_int_vec(list, vec);
-    return RepeatDateList(name, vec);
-}
-static RepeatString create_RepeatString(const std::string& name, const py::list& list) {
-    std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
-    return RepeatString(name, vec);
-}
-static ecf::AutoRestoreAttr create_AutoRestoreAttr(const py::list& list) {
-    std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
-    return ecf::AutoRestoreAttr(vec);
+void Cron_set_time_series(ecf::CronAttr* self, const std::string& ts) {
+    self->addTimeSeries(ecf::TimeSeries::create(ts));
 }
 
-static QueueAttr create_queue(const std::string& name, const py::list& list) {
-    std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
-    return QueueAttr(name, vec);
-}
+// Aviso
 
-static GenericAttr create_generic(const std::string& name, const py::list& list) {
-    std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
-    return GenericAttr(name, vec);
-}
-
-static ZombieAttr
-create_ZombieAttr(ecf::Child::ZombieType zt, const py::list& list, ecf::ZombieCtrlAction uc, int life_time_in_server) {
-
-    int the_list_size = len(list);
-
-    std::vector<ecf::Child::CmdType> vec;
-    vec.reserve(the_list_size);
-
-    for (int i = 0; i < the_list_size; ++i) {
-        vec.push_back(list[i].cast<ecf::Child::CmdType>());
-    }
-    return ZombieAttr(zt, vec, uc, life_time_in_server);
-}
-
-static ZombieAttr create_ZombieAttr1(ecf::Child::ZombieType zt, const py::list& list, ecf::ZombieCtrlAction uc) {
-
-    int the_list_size = len(list);
-
-    std::vector<ecf::Child::CmdType> vec;
-    vec.reserve(the_list_size);
-
-    for (int i = 0; i < the_list_size; ++i) {
-        vec.push_back(list[i].cast<ecf::Child::CmdType>());
-    }
-    return ZombieAttr(zt, vec, uc);
-}
-
-static py::list wrap_set_of_strings(Limit* limit) {
-    py::list list;
-    const std::set<std::string>& paths = limit->paths();
-    for (std::string path : paths) {
-        list.append(path);
-    }
-    return list;
-}
-
-static job_creation_ctrl_ptr makeJobCreationCtrl() {
-    return std::make_shared<JobCreationCtrl>();
-}
-
-static ecf::AvisoAttr aviso_init(const std::string& name,
-                                 const std::string& listener,
-                                 const std::string& url     = ecf::AvisoAttr::default_url,
-                                 const std::string& schema  = ecf::AvisoAttr::default_schema,
-                                 const std::string& polling = ecf::AvisoAttr::default_polling,
-                                 const std::string& auth    = ecf::AvisoAttr::default_auth) {
+ecf::AvisoAttr Aviso_make(const std::string& name,
+                          const std::string& listener,
+                          const std::string& url     = ecf::AvisoAttr::default_url,
+                          const std::string& schema  = ecf::AvisoAttr::default_schema,
+                          const std::string& polling = ecf::AvisoAttr::default_polling,
+                          const std::string& auth    = ecf::AvisoAttr::default_auth) {
     return ecf::AvisoAttr(nullptr, name, listener, url, schema, polling, 0, auth, "");
 }
 
-static ecf::MirrorAttr mirror_init(const std::string& name,
-                                   const std::string& path,
-                                   const std::string& host    = ecf::MirrorAttr::default_remote_host,
-                                   const std::string& port    = ecf::MirrorAttr::default_remote_port,
-                                   const std::string& polling = ecf::MirrorAttr::default_polling,
-                                   bool ssl                   = false,
-                                   const std::string& auth    = ecf::MirrorAttr::default_remote_auth) {
+std::string Aviso_str(const ecf::AvisoAttr& aviso) {
+    return ecf::to_python_string(aviso);
+}
+
+// Mirror
+
+ecf::MirrorAttr Mirror_make(const std::string& name,
+                            const std::string& path,
+                            const std::string& host    = ecf::MirrorAttr::default_remote_host,
+                            const std::string& port    = ecf::MirrorAttr::default_remote_port,
+                            const std::string& polling = ecf::MirrorAttr::default_polling,
+                            bool ssl                   = false,
+                            const std::string& auth    = ecf::MirrorAttr::default_remote_auth) {
     return ecf::MirrorAttr(nullptr, name, path, host, port, polling, ssl, auth, "");
 }
 
+std::string Mirror_str(const ecf::MirrorAttr& mirror) {
+    return ecf::to_python_string(mirror);
+}
+
+} // namespace
+
 void export_NodeAttr(py::module& m) {
 
-    // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
+    // Trigger & Complete are a thin wrapper over Expression, allowing to call:
+    //
+    //   Task("a").add(Trigger("a=1"),Complete("b=1"))
+    //
     py::class_<Trigger, std::shared_ptr<Trigger>>(m, "Trigger", DefsDoc::trigger())
 
         .def(py::init<std::string>())
         .def(py::init<PartExpression>())
         .def(py::init<py::list>())
         .def(py::init<std::string, bool>())
-        .def(py::self == py::self)            // __eq__
-        .def("__str__", &Trigger::expression) // __str__
+        .def(py::self == py::self)
+        .def("__str__", &Trigger::expression)
         .def("get_expression", &Trigger::expression, "returns the trigger expression as a string");
 
     py::class_<Complete, std::shared_ptr<Complete>>(m, "Complete", DefsDoc::trigger())
@@ -336,18 +362,15 @@ void export_NodeAttr(py::module& m) {
         .def(py::init<PartExpression>())
         .def(py::init<py::list>())
         .def(py::init<std::string, bool>())
-        .def(py::self == py::self)             // __eq__
-        .def("__str__", &Complete::expression) // __str__
+        .def(py::self == py::self)
+        .def("__str__", &Complete::expression)
         .def("get_expression", &Complete::expression, "returns the complete expression as a string");
 
-    // mimic PartExpression(const std::string& expression  )
-    // mimic PartExpression(const std::string& expression, bool andExpr /* true means AND , false means OR */ )
-    // Use to adding large trigger and complete expressions
     py::class_<PartExpression>(m, "PartExpression", DefsDoc::part_expression_doc())
 
         .def(py::init<std::string>())
         .def(py::init<std::string, bool>())
-        .def(py::self == py::self) // __eq__
+        .def(py::self == py::self)
         .def("get_expression",
              &PartExpression::expression,
              py::return_value_policy::reference,
@@ -359,8 +382,8 @@ void export_NodeAttr(py::module& m) {
 
         .def(py::init<std::string>())
         .def(py::init<PartExpression>())
-        .def(py::self == py::self)               // __eq__
-        .def("__str__", &Expression::expression) // __str__
+        .def(py::self == py::self)
+        .def("__str__", &Expression::expression)
         .def("get_expression", &Expression::expression, "returns the complete expression as a string")
         .def("add",
              &Expression::add,
@@ -399,8 +422,8 @@ void export_NodeAttr(py::module& m) {
     py::class_<ecf::Flag>(m, "Flag", "Represents additional state associated with a Node.\n\n")
 
         .def(py::init<>())
-        .def("__str__", &ecf::Flag::to_string) // __str__
-        .def(py::self == py::self)             // __eq__
+        .def("__str__", &ecf::Flag::to_string)
+        .def(py::self == py::self)
         .def("is_set", &ecf::Flag::is_set, "Queries if a given flag is set")
         .def("set", &ecf::Flag::set, "Sets the given flag. Used in test only")
         .def("clear", &ecf::Flag::clear, "Clear the given flag. Used in test only")
@@ -412,7 +435,7 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<JobCreationCtrl, std::shared_ptr<JobCreationCtrl>>(m, "JobCreationCtrl", DefsDoc::jobgenctrl_doc())
 
-        .def(py::init(&makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
+        .def(py::init(&JobCreationCtrl_make), DefsDoc::jobgenctrl_doc())
         .def("set_node_path",
              &JobCreationCtrl::set_node_path,
              "The node we want to check job creation for. If no node specified check all tasks")
@@ -473,11 +496,11 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<ZombieAttr>(m, "ZombieAttr", NodeAttrDoc::zombie_doc())
 
-        .def(py::init(&create_ZombieAttr))
-        .def(py::init(&create_ZombieAttr1))
-        .def("__str__", &ZombieAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ZombieAttr>) // __copy__ uses copy constructor
-        .def(py::self == py::self)                       // __eq__
+        .def(py::init(&ZombieAttr_make))
+        .def(py::init(&ZombieAttr_make_lifetime))
+        .def("__str__", &ZombieAttr::toString)
+        .def("__copy__", pyutil_copy_object<ZombieAttr>)
+        .def(py::self == py::self)
         .def("empty", &ZombieAttr::empty, "Return true if the attribute is empty")
         .def("zombie_type", &ZombieAttr::zombie_type, "Returns the `zombie type`_")
         .def("user_action", &ZombieAttr::action, "The automated action to invoke, when zombies arise")
@@ -494,9 +517,9 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<Zombie>(m, "Zombie", NodeAttrDoc::plain_zombie_doc())
 
-        .def("__str__", &Zombie::to_string)          // __str__
-        .def("__copy__", pyutil_copy_object<Zombie>) // __copy__ uses copy constructor
-        .def(py::self == py::self)                   // __eq__
+        .def("__str__", &Zombie::to_string)
+        .def("__copy__", pyutil_copy_object<Zombie>)
+        .def(py::self == py::self)
         .def("empty", &Zombie::empty)
         .def("manual_user_action", &Zombie::manual_user_action)
         .def("fob", &Zombie::fob)
@@ -524,10 +547,10 @@ void export_NodeAttr(py::module& m) {
     py::class_<Variable>(m, "Variable", NodeAttrDoc::variable_doc())
 
         .def(py::init<std::string, std::string>())
-        .def("__str__", &Variable::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<Variable>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                      // __lt__
-        .def(py::self == py::self)                     // __eq__
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &Variable::toString)
+        .def("__copy__", pyutil_copy_object<Variable>)
         .def("name", &Variable::name, py::return_value_policy::reference, "Return the variable name as string")
         .def("value", &Variable::theValue, py::return_value_policy::reference, "Return the variable value as a string")
         .def("empty",
@@ -537,10 +560,10 @@ void export_NodeAttr(py::module& m) {
     py::class_<Label>(m, "Label", NodeAttrDoc::label_doc())
 
         .def(py::init<std::string, std::string>())
-        .def(py::self == py::self)                  // __eq__
-        .def("__str__", &Label::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<Label>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                   // __lt__
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &Label::toString)
+        .def("__copy__", pyutil_copy_object<Label>)
         .def("name", &Label::name, py::return_value_policy::reference, "Return the `label`_ name as string")
         .def("value", &Label::value, py::return_value_policy::reference, "Return the original `label`_ value as string")
         .def("new_value", &Label::new_value, py::return_value_policy::reference, "Return the new label value as string")
@@ -550,55 +573,52 @@ void export_NodeAttr(py::module& m) {
     py::class_<Limit, std::shared_ptr<Limit>>(m, "Limit", NodeAttrDoc::limit_doc())
 
         .def(py::init<std::string, int>())
-        .def(py::self == py::self)                  // __eq__
-        .def("__str__", &Limit::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<Limit>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                   // __lt__
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &Limit::toString)
+        .def("__copy__", pyutil_copy_object<Limit>)
         .def("name", &Limit::name, py::return_value_policy::reference, "Return the `limit`_ name as string")
         .def("value", &Limit::value, "The `limit`_ token value as an integer")
         .def("limit", &Limit::theLimit, "The max value of the `limit`_ as an integer")
         .def("increment", &Limit::increment, "used for test only")
         .def("decrement", &Limit::decrement, "used for test only")
-        .def("node_paths", &wrap_set_of_strings, "List of nodes(paths) that have consumed a limit");
+        .def("node_paths", &Limit_node_paths, "List of nodes(paths) that have consumed a limit");
 
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<std::shared_ptr<Limit>>() // needed for mac and boost 1.6
-#endif
+    py::class_<InLimit>(m, "InLimit", NodeAttrDoc::inlimit_doc())
 
-        py::class_<InLimit>(m, "InLimit", NodeAttrDoc::inlimit_doc())
-
-            .def(py::init<std::string>())
-            .def(py::init<std::string, std::string>())
-            .def(py::init<std::string, std::string, int>())
-            .def(py::init<std::string, std::string, int, bool>())
-            .def(py::init<std::string, std::string, int, bool, bool>())
-            .def(py::self == py::self)                    // __eq__
-            .def("__str__", &InLimit::toString)           // __str__
-            .def("__copy__", pyutil_copy_object<InLimit>) // __copy__ uses copy constructor
-            .def(py::self < py::self)                     // __lt__
-            .def("name", &InLimit::name, py::return_value_policy::reference, "Return the `inlimit`_ name as string")
-            .def("path_to_node",
-                 &InLimit::pathToNode,
-                 py::return_value_policy::reference,
-                 "Path to the node that holds the limit, can be empty")
-            .def("limit_this_node_only",
-                 &InLimit::limit_this_node_only,
-                 "Only this node is limited. i.e. typically Family or Suite")
-            .def("limit_submission", &InLimit::limit_submission, "Limit submission only")
-            .def("tokens", &InLimit::tokens, "The number of token to consume from the Limit");
+        .def(py::init<std::string>())
+        .def(py::init<std::string, std::string>())
+        .def(py::init<std::string, std::string, int>())
+        .def(py::init<std::string, std::string, int, bool>())
+        .def(py::init<std::string, std::string, int, bool, bool>())
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &InLimit::toString)
+        .def("__copy__", pyutil_copy_object<InLimit>)
+        .def("name", &InLimit::name, py::return_value_policy::reference, "Return the `inlimit`_ name as string")
+        .def("path_to_node",
+             &InLimit::pathToNode,
+             py::return_value_policy::reference,
+             "Path to the node that holds the limit, can be empty")
+        .def("limit_this_node_only",
+             &InLimit::limit_this_node_only,
+             "Only this node is limited. i.e. typically Family or Suite")
+        .def("limit_submission", &InLimit::limit_submission, "Limit submission only")
+        .def("tokens", &InLimit::tokens, "The number of token to consume from the Limit");
 
     py::class_<Event>(m, "Event", NodeAttrDoc::event_doc())
 
-        .def(py::init<int, std::string>(), py::arg("number"), py::arg("name") = "")
-        .def(py::init<int, std::string, bool>()) // here bool is the initial value, by default is false/clear. The
-                                                 // value taken by begin/re-queue
-        .def(py::init<std::string, bool>())      // here bool is the initial value, by default is false/clear. The value
-                                                 // taken by begin/re-queue
         .def(py::init<std::string>())
-        .def(py::self == py::self)                  // __eq__
-        .def("__str__", &Event::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<Event>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                   // __lt__
+        .def(py::init<int, std::string>(), py::arg("number"), py::arg("name") = "")
+        .def(py::init<int, std::string, bool>(),
+             py::arg("number"),
+             py::arg("name")          = "",
+             py::arg("initial_state") = false)
+        .def(py::init<std::string, bool>(), py::arg("name") = "", py::arg("initial_state") = false)
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &Event::toString)
+        .def("__copy__", pyutil_copy_object<Event>)
         .def("name",
              &Event::name,
              py::return_value_policy::reference,
@@ -619,10 +639,10 @@ void export_NodeAttr(py::module& m) {
              py::arg("min"),
              py::arg("color_change") = std::numeric_limits<int>::max(),
              py::arg("value")        = std::numeric_limits<int>::max())
-        .def(py::self == py::self)                  // __eq__
-        .def("__str__", &Meter::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<Meter>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                   // __lt__
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &Meter::toString)
+        .def("__copy__", pyutil_copy_object<Meter>)
         .def("name", &Meter::name, py::return_value_policy::reference, "Return the Meters name as string")
         .def("min", &Meter::min, "Return the Meters minimum value")
         .def("max", &Meter::max, "Return the Meters maximum value")
@@ -633,11 +653,11 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<QueueAttr>(m, "Queue", NodeAttrDoc::queue_doc())
 
-        .def(py::init(&create_queue))
-        .def(py::self == py::self)                      // __eq__
-        .def("__str__", &QueueAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<QueueAttr>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                       // __lt__
+        .def(py::init(&Queue_make))
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &QueueAttr::toString)
+        .def("__copy__", pyutil_copy_object<QueueAttr>)
         .def("name", &QueueAttr::name, py::return_value_policy::reference, "Return the queue name as string")
         .def("value", &QueueAttr::value, "Return the queue current value as string")
         .def("index", &QueueAttr::index, "Return the queue current index as a integer")
@@ -647,11 +667,11 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<GenericAttr>(m, "Generic", NodeAttrDoc::generic_doc())
 
-        .def(py::init(&create_generic))
-        .def(py::self == py::self)                        // __eq__
-        .def("__str__", &GenericAttr::to_string)          // __str__
-        .def("__copy__", pyutil_copy_object<GenericAttr>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                         // __lt__
+        .def(py::init(&Generic_make))
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &GenericAttr::to_string)
+        .def("__copy__", pyutil_copy_object<GenericAttr>)
         .def("name", &GenericAttr::name, py::return_value_policy::reference, "Return the generic name as string")
         .def("empty",
              &GenericAttr::empty,
@@ -662,10 +682,10 @@ void export_NodeAttr(py::module& m) {
 
         .def(py::init<int, int, int>()) // day,month,year
         .def(py::init<std::string>())
-        .def(py::self == py::self)                     // __eq__
-        .def("__str__", &DateAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<DateAttr>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                      // __lt__
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &DateAttr::toString)
+        .def("__copy__", pyutil_copy_object<DateAttr>)
         .def("day", &DateAttr::day, "Return the day. The range is 0-31, 0 means its wild-carded")
         .def("month", &DateAttr::month, "Return the month. The range is 0-12, 0 means its wild-carded")
         .def("year", &DateAttr::year, "Return the year, 0 means its wild-carded");
@@ -683,11 +703,11 @@ void export_NodeAttr(py::module& m) {
     py::class_<DayAttr>(m, "Day", NodeAttrDoc::day_doc())
 
         .def(py::init<DayAttr::Day_t>())
-        .def(py::init<std::string>())                 // constructor
-        .def(py::self == py::self)                    // __eq__
-        .def("__str__", &DayAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<DayAttr>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                     // __lt__
+        .def(py::init<std::string>()) // constructor
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &DayAttr::toString)
+        .def("__copy__", pyutil_copy_object<DayAttr>)
         .def("day", &DayAttr::day, "Return the day as enumerator");
 
     py::class_<ecf::TimeAttr>(m, "Time", NodeAttrDoc::time_doc())
@@ -707,9 +727,9 @@ void export_NodeAttr(py::module& m) {
              py::arg("increment"),
              py::arg("relative") = false)
         .def(py::init<std::string>())
-        .def(py::self == py::self)                          // __eq__
-        .def("__str__", &ecf::TimeAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ecf::TimeAttr>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &ecf::TimeAttr::toString)
+        .def("__copy__", pyutil_copy_object<ecf::TimeAttr>)
         .def("time_series",
              &ecf::TimeAttr::time_series,
              py::return_value_policy::reference,
@@ -732,18 +752,18 @@ void export_NodeAttr(py::module& m) {
              py::arg("increment"),
              py::arg("relative") = false)
         .def(py::init<std::string>())
-        .def(py::self == py::self)                           // __eq__
-        .def("__str__", &ecf::TodayAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ecf::TodayAttr>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &ecf::TodayAttr::toString)
+        .def("__copy__", pyutil_copy_object<ecf::TodayAttr>)
         .def("time_series",
              &ecf::TodayAttr::time_series,
              py::return_value_policy::reference,
-             "Return the Todays time series");
+             "Return the Today's time series");
 
     py::class_<ecf::LateAttr, std::shared_ptr<ecf::LateAttr>>(m, "Late", NodeAttrDoc::late_doc())
 
-        .def(py::init(&late_init_default))
-        .def(py::init(&late_init))
+        .def(py::init(&Late_make_default))
+        .def(py::init(&Late_make))
         .def("submitted",
              &ecf::LateAttr::addSubmitted,
              "submitted(TimeSlot):The time node can stay `submitted`_. Submitted is always relative. If the node "
@@ -774,9 +794,9 @@ void export_NodeAttr(py::module& m) {
              "complete(TimeSlot): The time the node must become `complete`_. If relative, time is taken from the "
              "time\n"
              "the node became `active`_, otherwise node must be `complete`_ by the time given")
-        .def(py::self == py::self)                          // __eq__
-        .def("__str__", &ecf::LateAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ecf::LateAttr>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &ecf::LateAttr::toString)
+        .def("__copy__", pyutil_copy_object<ecf::LateAttr>)
         .def("submitted",
              &ecf::LateAttr::submitted,
              py::return_value_policy::reference,
@@ -794,40 +814,34 @@ void export_NodeAttr(py::module& m) {
              "Returns a boolean where true means that complete is relative")
         .def("is_late", &ecf::LateAttr::isLate, "Return True if late");
 
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<std::shared_ptr<ecf::LateAttr>>(); // needed for mac and boost 1.6
-#endif
-
     py::class_<ecf::AutoCancelAttr, std::shared_ptr<ecf::AutoCancelAttr>>(
         m, "Autocancel", NodeAttrDoc::autocancel_doc())
 
         .def(py::init<int, int, bool>()) // hour, minute, relative
         .def(py::init<int>())            // days
         .def(py::init<ecf::TimeSlot, bool>())
-        .def(py::self == py::self)                                // __eq__
-        .def("__str__", &ecf::AutoCancelAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ecf::AutoCancelAttr>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                                 // __lt__
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &ecf::AutoCancelAttr::toString)
+        .def("__copy__", pyutil_copy_object<ecf::AutoCancelAttr>)
         .def(
             "time", &ecf::AutoCancelAttr::time, py::return_value_policy::reference, "returns cancel time as a TimeSlot")
         .def("relative", &ecf::AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
         .def("days", &ecf::AutoCancelAttr::days, "Returns a boolean true if time was specified in days");
 
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<std::shared_ptr<ecf::AutoCancelAttr>>(); // needed for mac and boost 1.6
-#endif
-
     py::class_<ecf::AutoArchiveAttr, std::shared_ptr<ecf::AutoArchiveAttr>>(
         m, "Autoarchive", NodeAttrDoc::autoarchive_doc())
 
-        .def(py::init<int, int, bool, bool>())      // hour, minute, relative, idle
-                                                    // (idle: true is queued, aborted, or complete; false is completed)
-        .def(py::init<int, bool>())                 // days, idle
-        .def(py::init<ecf::TimeSlot, bool, bool>()) // TimeSlot,relative,idle
-        .def(py::self == py::self)                  // __eq__
-        .def("__str__", &ecf::AutoArchiveAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ecf::AutoArchiveAttr>) // __copy__ uses copy constructor
-        .def(py::self < py::self)                                  // __lt__
+        .def(py::init<int, int, bool, bool>())
+        // hour, minute, relative, idle (idle: true is queued, aborted, or complete; false is completed)
+        .def(py::init<int, bool>())
+        // days, idle
+        .def(py::init<ecf::TimeSlot, bool, bool>())
+        // TimeSlot,relative,idle
+        .def(py::self == py::self)
+        .def(py::self < py::self)
+        .def("__str__", &ecf::AutoArchiveAttr::toString)
+        .def("__copy__", pyutil_copy_object<ecf::AutoArchiveAttr>)
         .def("time",
              &ecf::AutoArchiveAttr::time,
              py::return_value_policy::reference,
@@ -838,25 +852,17 @@ void export_NodeAttr(py::module& m) {
              &ecf::AutoArchiveAttr::idle,
              "Returns a boolean true if archiving when idle, i.e queued,aborted,complete and time elapsed");
 
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<std::shared_ptr<ecf::AutoArchiveAttr>>(); // needed for mac and boost 1.6
-#endif
-
     py::class_<ecf::AutoRestoreAttr, std::shared_ptr<ecf::AutoRestoreAttr>>(
         m, "Autorestore", NodeAttrDoc::autorestore_doc())
 
-        .def(py::init(&create_AutoRestoreAttr))
-        .def(py::self == py::self)                                 // __eq__
-        .def("__str__", &ecf::AutoRestoreAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ecf::AutoRestoreAttr>) // __copy__ uses copy constructor
+        .def(py::init(&AutoRestore_make))
+        .def(py::self == py::self)
+        .def("__str__", &ecf::AutoRestoreAttr::toString)
+        .def("__copy__", pyutil_copy_object<ecf::AutoRestoreAttr>)
         .def("nodes_to_restore",
              &ecf::AutoRestoreAttr::nodes_to_restore,
              py::return_value_policy::reference,
              "returns a list of nodes to be restored");
-
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<std::shared_ptr<AutoRestoreAttr>>(); // needed for mac and boost 1.6
-#endif
 
     py::class_<RepeatDate>(m, "RepeatDate", NodeAttrDoc::repeat_date_doc())
 
@@ -865,9 +871,9 @@ void export_NodeAttr(py::module& m) {
              py::arg("start"),
              py::arg("end"),
              py::arg("delta") = 1)
-        .def(py::self == py::self)                       // __eq__
-        .def("__str__", &RepeatDate::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<RepeatDate>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &RepeatDate::toString)
+        .def("__copy__", pyutil_copy_object<RepeatDate>)
         .def("name", &RepeatDate::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def("start", &RepeatDate::start, "Return the start date as an integer in yyyymmdd format")
         .def("end", &RepeatDate::end, "Return the end date as an integer in yyyymmdd format")
@@ -892,9 +898,9 @@ void export_NodeAttr(py::module& m) {
              py::arg("start"),
              py::arg("end"),
              py::arg("delta") = "24:00:00")
-        .def(py::self == py::self)                           // __eq__
-        .def("__str__", &RepeatDateTime::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<RepeatDateTime>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &RepeatDateTime::toString)
+        .def("__copy__", pyutil_copy_object<RepeatDateTime>)
         .def("name", &RepeatDateTime::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def(
             "start", &RepeatDateTime::start, "Return the start date as an integer (i.e. seconds since 19700101T000000)")
@@ -906,10 +912,10 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<RepeatDateList>(m, "RepeatDateList", NodeAttrDoc::repeat_date_list_doc())
 
-        .def(py::init(&create_RepeatDateList))
-        .def(py::self == py::self)                           // __eq__
-        .def("__str__", &RepeatDateList::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<RepeatDateList>) // __copy__ uses copy constructor
+        .def(py::init(&RepeatDateList_make))
+        .def(py::self == py::self)
+        .def("__str__", &RepeatDateList::toString)
+        .def("__copy__", pyutil_copy_object<RepeatDateList>)
         .def("name", &RepeatDateList::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def("start", &RepeatDateList::start, "Return the start date as an integer in yyyymmdd format")
         .def("end", &RepeatDateList::end, "Return the end date as an integer in yyyymmdd format");
@@ -921,9 +927,9 @@ void export_NodeAttr(py::module& m) {
              py::arg("start"),
              py::arg("end"),
              py::arg("delta") = 1)
-        .def(py::self == py::self)                          // __eq__
-        .def("__str__", &RepeatInteger::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<RepeatInteger>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &RepeatInteger::toString)
+        .def("__copy__", pyutil_copy_object<RepeatInteger>)
         .def("name", &RepeatInteger::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def("start", &RepeatInteger::start)
         .def("end", &RepeatInteger::end)
@@ -934,47 +940,39 @@ void export_NodeAttr(py::module& m) {
     py::class_<RepeatEnumerated, std::shared_ptr<RepeatEnumerated>>(
         m, "RepeatEnumerated", NodeAttrDoc::repeat_enumerated_doc())
 
-        .def(py::init(&create_RepeatEnumerated))
-        .def(py::self == py::self)                             // __eq__
-        .def("__str__", &RepeatEnumerated::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<RepeatEnumerated>) // __copy__ uses copy constructor
+        .def(py::init(&RepeatEnumerated_make))
+        .def(py::self == py::self)
+        .def("__str__", &RepeatEnumerated::toString)
+        .def("__copy__", pyutil_copy_object<RepeatEnumerated>)
         .def("name", &RepeatEnumerated::name, py::return_value_policy::reference, "Return the name of the `repeat`_.")
         .def("start", &RepeatEnumerated::start)
         .def("end", &RepeatEnumerated::end)
         .def("step", &RepeatEnumerated::step);
 
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<std::shared_ptr<RepeatEnumerated>>(); // needed for mac and boost 1.6
-#endif
-
     py::class_<RepeatString, std::shared_ptr<RepeatString>>(m, "RepeatString", NodeAttrDoc::repeat_string_doc())
 
-        .def(py::init(&create_RepeatString))
-        .def(py::self == py::self)                         // __eq__
-        .def("__str__", &RepeatString::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<RepeatString>) // __copy__ uses copy constructor
+        .def(py::init(&RepeatString_make))
+        .def(py::self == py::self)
+        .def("__str__", &RepeatString::toString)
+        .def("__copy__", pyutil_copy_object<RepeatString>)
         .def("name", &RepeatString::name, py::return_value_policy::reference, "Return the name of the `repeat`_.")
         .def("start", &RepeatString::start)
         .def("end", &RepeatString::end)
         .def("step", &RepeatString::step);
 
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<std::shared_ptr<RepeatString>>(); // needed for mac and boost 1.6
-#endif
-
     py::class_<RepeatDay>(m, "RepeatDay", NodeAttrDoc::repeat_day_doc())
 
         .def(py::init<int>(), py::arg("day") = 1)
-        .def(py::self == py::self)                       // __eq__
-        .def("__str__", &RepeatDay::toString)            // __str__
-        .def("__copy__", pyutil_copy_object<RepeatDay>); // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &RepeatDay::toString)
+        .def("__copy__", pyutil_copy_object<RepeatDay>);
 
     py::class_<Repeat>(m, "Repeat", NodeAttrDoc::repeat_doc())
 
         .def(py::init<int>())
-        .def(py::self == py::self)                   // __eq__
-        .def("__str__", &Repeat::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<Repeat>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &Repeat::toString)
+        .def("__copy__", pyutil_copy_object<Repeat>)
         .def("empty", &Repeat::empty, "Return true if the repeat is empty.")
         .def("name",
              &Repeat::name,
@@ -985,40 +983,42 @@ void export_NodeAttr(py::module& m) {
         .def("step", &Repeat::step, "The increment for the repeat, as an integer")
         .def("value", &Repeat::last_valid_value, "The current value of the repeat as an integer");
 
-    void (ecf::CronAttr::*add_time_series)(const ecf::TimeSeries&) = &ecf::CronAttr::addTimeSeries;
-    void (ecf::CronAttr::*add_time_series_2)(const ecf::TimeSlot& s, const ecf::TimeSlot& f, const ecf::TimeSlot& i) =
-        &ecf::CronAttr::addTimeSeries;
+    void (ecf::CronAttr::*Cron_set_time_series_timeseries)(const ecf::TimeSeries&) = &ecf::CronAttr::addTimeSeries;
+    void (ecf::CronAttr::*Cron_set_time_series_timeslot_timeslot_timeslot)(
+        const ecf::TimeSlot& s, const ecf::TimeSlot& f, const ecf::TimeSlot& i) = &ecf::CronAttr::addTimeSeries;
 
     py::class_<ecf::CronAttr, std::shared_ptr<ecf::CronAttr>>(m, "Cron", NodeAttrDoc::cron_doc())
 
-        .def(py::init(&cron_init))
-        .def(py::init(&cron_init1))
-        .def(py::init(&cron_create2))
-        .def(py::init(&cron_create))
-        .def(py::self == py::self)                          // __eq__
-        .def("__str__", &ecf::CronAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ecf::CronAttr>) // __copy__ uses copy constructor
+        .def(py::init(&Cron_make))
+        .def(py::init(&cron_make_string_kwargs))
+        .def(py::init(&cron_make_timeseries_kwargs))
+        .def(py::init(&cron_make_timeseries))
+        .def(py::self == py::self)
+        .def("__str__", &ecf::CronAttr::toString)
+        .def("__copy__", pyutil_copy_object<ecf::CronAttr>)
         .def("set_week_days",
-             &set_week_days,
+             &Cron_set_week_days,
              "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
         .def("set_last_week_days_of_the_month",
-             &set_last_week_days_of_month,
+             &Cron_set_last_week_days_of_month,
              "Specifies last week days of the month. Expects a list of integers, with integer range 0==Sun to "
              "6==Sat")
         .def("set_days_of_month",
-             &set_days_of_month,
+             &Cron_set_days_of_month,
              "Specifies days of the month. Expects a list of integers with integer range 1-31")
-        .def("set_last_day_of_the_month", &set_last_day_of_the_month, "Set cron for the last day of the month")
-        .def("set_months", &set_months, "Specifies months. Expects a list of integers, with integer range 1-12")
+        .def("set_last_day_of_the_month", &Cron_set_last_day_of_the_month, "Set cron for the last day of the month")
+        .def("set_months", &Cron_set_months, "Specifies months. Expects a list of integers, with integer range 1-12")
         .def("set_time_series",
              &ecf::CronAttr::add_time_series,
              py::arg("hour"),
              py::arg("minute"),
              py::arg("relative") = false,
              "time_series(hour(int),minute(int),relative to suite start(bool=false)), Add a time slot")
-        .def("set_time_series", add_time_series, "Add a time series. This will never complete")
-        .def("set_time_series", add_time_series_2, "Add a time series. This will never complete")
-        .def("set_time_series", &add_time_series_3, "Add a time series. This will never complete")
+        .def("set_time_series", Cron_set_time_series_timeseries, "Add a time series. This will never complete")
+        .def("set_time_series",
+             Cron_set_time_series_timeslot_timeslot_timeslot,
+             "Add a time series. This will never complete")
+        .def("set_time_series", &Cron_set_time_series, "Add a time series. This will never complete")
         .def("time", &ecf::CronAttr::time, py::return_value_policy::reference, "return cron time as a TimeSeries")
         .def("last_day_of_the_month",
              &ecf::CronAttr::last_day_of_the_month,
@@ -1032,10 +1032,10 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<VerifyAttr>(m, "Verify")
 
-        .def(py::init<NState::State, int>())              // state, expected
-        .def(py::self == py::self)                        // __eq__
-        .def("__str__", &VerifyAttr::toString)            // __str__
-        .def("__copy__", pyutil_copy_object<VerifyAttr>); // __copy__ uses copy constructor
+        .def(py::init<NState::State, int>()) // state, expected
+        .def(py::self == py::self)
+        .def("__str__", &VerifyAttr::toString)
+        .def("__copy__", pyutil_copy_object<VerifyAttr>);
 
     py::class_<ClockAttr, std::shared_ptr<ClockAttr>>(m, "Clock", NodeAttrDoc::clock_doc())
 
@@ -1045,9 +1045,9 @@ void export_NodeAttr(py::module& m) {
              py::arg("year"),
              py::arg("hybrid") = false) // day, month, year, hybrid
         .def(py::init<bool>(), py::arg("hybrid") = false)
-        .def(py::self == py::self)                      // __eq__
-        .def("__str__", &ClockAttr::toString)           // __str__
-        .def("__copy__", pyutil_copy_object<ClockAttr>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &ClockAttr::toString)
+        .def("__copy__", pyutil_copy_object<ClockAttr>)
         .def("set_gain_in_seconds", &ClockAttr::set_gain_in_seconds, "Set the gain in seconds")
         .def("set_gain", &ClockAttr::set_gain, "Set the gain in hours and minutes")
         .def("day", &ClockAttr::day, "Returns the day as an integer, range 1-31")
@@ -1058,22 +1058,18 @@ void export_NodeAttr(py::module& m) {
              &ClockAttr::positive_gain,
              "Returns a boolean, where true means that the gain is positive");
 
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<std::shared_ptr<ClockAttr>>(); // needed for mac and boost 1.6
-#endif
-
     py::class_<ecf::AvisoAttr>(m, "AvisoAttr", NodeAttrDoc::aviso_doc())
 
-        .def(py::init(&aviso_init),
+        .def(py::init(&Aviso_make),
              py::arg("name"),
              py::arg("listener"),
              py::arg("url")     = "%ECF_AVISO_URL%",
              py::arg("schema")  = "%ECF_AVISO_SCHEMA%",
              py::arg("polling") = "%ECF_AVISO_POLLING%",
              py::arg("auth")    = "%ECF_AVISO_AUTH%")
-        .def(py::self == py::self)                           // __eq__
-        .def("__str__", &ecf::to_python_string)              // __str__
-        .def("__copy__", pyutil_copy_object<ecf::AvisoAttr>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &Aviso_str)
+        .def("__copy__", pyutil_copy_object<ecf::AvisoAttr>)
         .def("name",
              &ecf::AvisoAttr::name,
              py::return_value_policy::reference,
@@ -1098,7 +1094,7 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<ecf::MirrorAttr>(m, "MirrorAttr", NodeAttrDoc::mirror_doc())
 
-        .def(py::init(&mirror_init),
+        .def(py::init(&Mirror_make),
              py::arg("name"),
              py::arg("remote_path") = "%ECF_MIRROR_REMOTE_PATH%",
              py::arg("remote_host") = "%ECF_MIRROR_REMOTE_HOST%",
@@ -1106,9 +1102,9 @@ void export_NodeAttr(py::module& m) {
              py::arg("polling")     = "%ECF_MIRROR_REMOTE_POLLING%",
              py::arg("ssl")         = false,
              py::arg("auth")        = "%ECF_MIRROR_REMOTE_AUTH%")
-        .def(py::self == py::self)                            // __eq__
-        .def("__str__", &ecf::to_python_string)               // __str__
-        .def("__copy__", pyutil_copy_object<ecf::MirrorAttr>) // __copy__ uses copy constructor
+        .def(py::self == py::self)
+        .def("__str__", &Mirror_str)
+        .def("__copy__", pyutil_copy_object<ecf::MirrorAttr>)
         .def("name",
              &ecf::MirrorAttr::name,
              py::return_value_policy::reference,
