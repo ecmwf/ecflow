@@ -10,29 +10,30 @@
 
 #include "ecflow/python/PythonBinding.hpp"
 
-void export_Core();
-void export_NodeAttr();
-void export_Node();
-void export_Task();
-void export_SuiteAndFamily();
-void export_Defs();
-void export_Client();
+void export_Collections(py::module& m);
+void export_Core(py::module& m);
+void export_NodeAttr(py::module& m);
+void export_Node(py::module& m);
+void export_Task(py::module& m);
+void export_SuiteAndFamily(py::module& m);
+void export_Defs(py::module& m);
+void export_Client(py::module& m);
 
-// See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
-BOOST_PYTHON_MODULE(ecflow) {
-    py::docstring_options doc_options(true, // show the docstrings from here
-                                      true, // show Python signatures.
-                                      false // Don't mention the C++ method signatures in the generated docstrings
-    );
-    py::scope().attr("__doc__") =
-        "The ecflow module provides the python bindings/api for creating definition structure "
-        "and communicating with the server.";
+PYBIND11_MODULE(ecflow, m) {
+    py::options options;
+    options.enable_user_defined_docstrings(); // show the docstrings from here
+    options.enable_function_signatures();     // show Python signatures.
+    options.enable_enum_members_docstring();
 
-    export_Core();
-    export_NodeAttr();
-    export_Node();
-    export_Task();
-    export_SuiteAndFamily();
-    export_Defs();
-    export_Client();
+    m.doc() = "The ecflow module provides the python bindings/api for creating definition structure "
+              "and communicating with the server.";
+
+    export_Collections(m);
+    export_Core(m);
+    export_NodeAttr(m);
+    export_Node(m);
+    export_Task(m);
+    export_SuiteAndFamily(m);
+    export_Defs(m);
+    export_Client(m);
 }

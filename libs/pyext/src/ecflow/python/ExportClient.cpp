@@ -25,8 +25,6 @@
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 
-// See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
-
 void set_host_port(ClientInvoker* self, const std::string& host, int port) {
     self->set_host_port(host, ecf::convert_to<std::string>(port));
 }
@@ -54,8 +52,6 @@ const std::string& query1(ClientInvoker* self, const std::string& query_type, co
     self->query(query_type, path_to_attribute, "");
     return self->get_string();
 }
-
-// const std::string& get_log(ClientInvoker* self) { self->getLog(); return self->get_string();}
 
 const std::string& get_log(ClientInvoker* self, int lastLines) {
     self->getLog(lastLines);
@@ -94,16 +90,16 @@ int edit_script_submit(ClientInvoker* self,
 
 namespace /* __ANONYMOUS__ */ {
 
-py::object convert_to_pyobject(const std::string& s, bool as_bytes) {
-    py::object result;
+py::object convert_string_to_pyobject(const std::string& s, bool as_bytes) {
+    PyObject* content = nullptr;
     if (as_bytes) {
-        result = py::object(py::handle<>(PyBytes_FromObject(
-            PyMemoryView_FromMemory(const_cast<char*>(s.data()), static_cast<ssize_t>(s.size()), PyBUF_READ))));
+        content = PyBytes_FromObject(
+            PyMemoryView_FromMemory(const_cast<char*>(s.data()), static_cast<ssize_t>(s.size()), PyBUF_READ));
     }
     else {
-        result = py::object(py::handle<>(PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()))));
+        content = PyUnicode_FromStringAndSize(s.data(), static_cast<ssize_t>(s.size()));
     }
-    return result;
+    return py::reinterpret_steal<py::object>(content);
 }
 
 } // namespace
@@ -116,7 +112,7 @@ py::object get_file(ClientInvoker* self,
     self->file(absNodePath, file_type, max_lines);
     const std::string& s = self->get_string();
 
-    return convert_to_pyobject(s, as_bytes);
+    return convert_string_to_pyobject(s, as_bytes);
 }
 
 /// Set the CLI to enable output to standard out
@@ -139,7 +135,6 @@ const std::string& stats(ClientInvoker* self, bool to_stdout = true) {
     }
     return self->server_reply().get_string();
 }
-BOOST_PYTHON_FUNCTION_OVERLOADS(stats_overloads, stats, 1, 2)
 
 void stats_reset(ClientInvoker* self) {
     self->stats_reset();
@@ -510,13 +505,15 @@ void client_invoker_enable_ssl(ClientInvoker* self) {
 }
 #endif
 
-void export_Client() {
+void export_Client(py::module& m) {
+
     // Need std::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
-    py::class_<ClientInvoker, std::shared_ptr<ClientInvoker>, boost::noncopyable>("Client", ClientDoc::class_client())
-        .def("__init__", py::make_constructor(client_invoker_make<>))
-        .def("__init__", py::make_constructor(client_invoker_make<const std::string&>))
-        .def("__init__", py::make_constructor(client_invoker_make<const std::string&, const std::string&>))
-        .def("__init__", py::make_constructor(client_invoker_make<const std::string&, int>))
+    py::class_<ClientInvoker, std::shared_ptr<ClientInvoker>>(m, "Client", ClientDoc::class_client())
+
+        .def(py::init(&client_invoker_make<>))
+        .def(py::init(&client_invoker_make<const std::string&>))
+        .def(py::init(&client_invoker_make<const std::string&, const std::string&>))
+        .def(py::init(&client_invoker_make<const std::string&, int>))
         .def("__enter__", &client_enter) // allow with statement
         .def("__exit__", &client_exit)   // allow with statement, remove last handle
         .def("version", &version, "Returns the current client version")
@@ -531,11 +528,11 @@ void export_Client() {
         .def("set_host_port", &set_host_port)
         .def("get_host",
              &ClientInvoker::host,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Return the host, assume set_host_port() has been set, otherwise return localhost")
         .def("get_port",
              &ClientInvoker::port,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Return the port, assume set_host_port() has been set. otherwise returns 3141")
         .def("set_retry_connection_period", set_retry_connection_period, ClientDoc::set_retry_connection_period())
         .def("set_connection_attempts", &ClientInvoker::set_connection_attempts, ClientDoc::set_connection_attempts())
@@ -546,17 +543,14 @@ void export_Client() {
         .def("get_defs", &ClientInvoker::defs, ClientDoc::get_defs())
         .def("reset", &ClientInvoker::reset, "reset client definition, and handle number")
         .def("in_sync", &ClientInvoker::in_sync, ClientDoc::in_sync())
-        .def("get_log", &get_log, py::return_value_policy<py::copy_const_reference>(), ClientDoc::get_log())
-        .def("edit_script_edit",
-             &edit_script_edit,
-             py::return_value_policy<py::copy_const_reference>(),
-             ClientDoc::edit_script_edit())
+        .def("get_log", &get_log, py::return_value_policy::reference, ClientDoc::get_log())
+        .def("edit_script_edit", &edit_script_edit, py::return_value_policy::reference, ClientDoc::edit_script_edit())
         .def("edit_script_preprocess",
              &edit_script_preprocess,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              ClientDoc::edit_script_preprocess())
         .def("edit_script_submit", &edit_script_submit, ClientDoc::edit_script_submit())
-        .def("new_log", &ClientInvoker::new_log, (py::arg("path") = ""), ClientDoc::new_log())
+        .def("new_log", &ClientInvoker::new_log, py::arg("path") = "", ClientDoc::new_log())
         .def("clear_log", &ClientInvoker::clearLog, ClientDoc::clear_log())
         .def("flush_log", &ClientInvoker::flushLog, ClientDoc::flush_log())
         .def("log_msg", &ClientInvoker::logMsg, ClientDoc::log_msg())
@@ -566,23 +560,22 @@ void export_Client() {
         .def("terminate_server", &ClientInvoker::terminateServer, ClientDoc::terminate_server())
         .def("wait_for_server_reply",
              &ClientInvoker::wait_for_server_reply,
-             (py::arg("time_out") = 60),
+             py::arg("time_out") = 60,
              ClientDoc::wait_for_server_reply())
         .def("load",
              &ClientInvoker::loadDefs,
-             (py::arg("path_to_defs"),
-              py::arg("force")      = false,
-              py::arg("check_only") = false,
-              py::arg("print")      = false,
-              py::arg("stats")      = false),
+             py::arg("path_to_defs"),
+             py::arg("force")      = false,
+             py::arg("check_only") = false,
+             py::arg("print")      = false,
+             py::arg("stats")      = false,
              ClientDoc::load_defs())
-        .def("load", &ClientInvoker::load, (py::arg("defs"), py::arg("force") = false), ClientDoc::load())
+        .def("load", &ClientInvoker::load, py::arg("defs"), py::arg("force") = false, ClientDoc::load())
         .def("get_server_defs", &ClientInvoker::getDefs, ClientDoc::get_server_defs())
-        .def("sync_local", &ClientInvoker::sync_local, (py::arg("sync_suite_clock") = false), ClientDoc::sync())
+        .def("sync_local", &ClientInvoker::sync_local, py::arg("sync_suite_clock") = false, ClientDoc::sync())
         .def("news_local", &news_local, ClientDoc::news())
-        .add_property("changed_node_paths",
-                      py::range(&ClientInvoker::changed_node_paths_begin, &ClientInvoker::changed_node_paths_end),
-                      ClientDoc::changed_node_paths())
+        .def_property_readonly(
+            "changed_node_paths", &ClientInvoker::changed_node_paths, ClientDoc::changed_node_paths())
         .def("suites", &suites, ClientDoc::suites())
         .def("ch_register", &ch_register, ClientDoc::ch_register())
         .def("ch_suites", &ch_suites, ClientDoc::ch_suites())
@@ -598,9 +591,9 @@ void export_Client() {
         .def("ch_auto_add", &ClientInvoker::ch1_auto_add)
         .def("checkpt",
              &ClientInvoker::checkPtDefs,
-             (py::arg("mode")                     = ecf::CheckPt::UNDEFINED,
-              py::arg("check_pt_interval")        = 0,
-              py::arg("check_pt_save_alarm_time") = 0),
+             py::arg("mode")                     = ecf::CheckPt::UNDEFINED,
+             py::arg("check_pt_interval")        = 0,
+             py::arg("check_pt_save_alarm_time") = 0,
              ClientDoc::checkpt())
         .def("restore_from_checkpt", &ClientInvoker::restoreDefsFromCheckPt, ClientDoc::restore_from_checkpt())
         .def("reload_wl_file", &ClientInvoker::reloadwsfile, ClientDoc::reload_wl_file())
@@ -609,8 +602,8 @@ void export_Client() {
              &ClientInvoker::reloadcustompasswdfile,
              "reload the custom passwd file. <host>.<port>.ecf.custom_passwd. For users using ECF_USER or --user or "
              "set_user_name()")
-        .def("requeue", &requeue, (py::arg("abs_node_path"), py::arg("option") = ""), ClientDoc::requeue())
-        .def("requeue", &requeues, (py::arg("paths"), py::arg("option") = ""))
+        .def("requeue", &requeue, py::arg("abs_node_path"), py::arg("option") = "", ClientDoc::requeue())
+        .def("requeue", &requeues, py::arg("paths"), py::arg("option") = "")
         .def("free_trigger_dep", &free_trigger_dep, ClientDoc::free_trigger_dep())
         .def("free_trigger_dep", &free_trigger_dep1)
         .def("free_date_dep", &free_date_dep, ClientDoc::free_date_dep())
@@ -621,37 +614,42 @@ void export_Client() {
         .def("free_all_dep", &free_all_dep1)
         .def("ping", &ClientInvoker::pingServer, ClientDoc::ping())
         .def("stats",
-             &stats,
-             stats_overloads(py::args("to_stdout"),
-                             ClientDoc::stats())[py::return_value_policy<py::copy_const_reference>()])
+             &stats, // This prints to stdout, so we need to use a call guard to redirect output
+             py::arg("to_stdout") = true,
+             py::call_guard<py::scoped_ostream_redirect, py::scoped_estream_redirect>(),
+             ClientDoc::stats())
         .def("stats_reset", &stats_reset, ClientDoc::stats_reset())
         .def("get_file",
              &get_file,
-             (py::arg("task"), py::arg("type") = "script", py::arg("max_lines") = "10000", py::arg("as_bytes") = false),
+             py::arg("task"),
+             py::arg("type")      = "script",
+             py::arg("max_lines") = "10000",
+             py::arg("as_bytes")  = false,
              ClientDoc::get_file())
         .def("plug", &ClientInvoker::plug, ClientDoc::plug())
-        .def("query", &query, py::return_value_policy<py::copy_const_reference>(), ClientDoc::query())
-        .def("query", &query1, py::return_value_policy<py::copy_const_reference>(), ClientDoc::query())
+        .def("query", &query, py::return_value_policy::reference, ClientDoc::query())
+        .def("query", &query1, py::return_value_policy::reference, ClientDoc::query())
         .def("alter",
              &alters,
-             (py::arg("paths"),
-              py::arg("alter_type"),
-              py::arg("attribute_type"),
-              py::arg("name")  = "",
-              py::arg("value") = ""),
+             py::arg("paths"),
+             py::arg("alter_type"),
+             py::arg("attribute_type"),
+             py::arg("name")  = "",
+             py::arg("value") = "",
              ClientDoc::alter())
         .def("alter",
              &alter,
-             (py::arg("abs_node_path"),
-              py::arg("alter_type"),
-              py::arg("attribute_type"),
-              py::arg("name")  = "",
-              py::arg("value") = ""))
+             py::arg("abs_node_path"),
+             py::arg("alter_type"),
+             py::arg("attribute_type"),
+             py::arg("name")  = "",
+             py::arg("value") = "")
         .def("sort_attributes",
              &alter_sort,
-             (py::arg("abs_node_path"), py::arg("attribute_name"), py::arg("recursive") = true))
-        .def(
-            "sort_attributes", &alter_sorts, (py::arg("paths"), py::arg("attribute_name"), py::arg("recursive") = true))
+             py::arg("abs_node_path"),
+             py::arg("attribute_name"),
+             py::arg("recursive") = true)
+        .def("sort_attributes", &alter_sorts, py::arg("paths"), py::arg("attribute_name"), py::arg("recursive") = true)
         .def("force_event", &force_event, ClientDoc::force_event())
         .def("force_event", &force_events)
         .def("force_state", &force_state, ClientDoc::force_state())
@@ -666,14 +664,15 @@ void export_Client() {
         .def("group", &ClientInvoker::group, ClientDoc::group())
         .def("begin_suite",
              &ClientInvoker::begin,
-             (py::arg("suite_name"), py::arg("force") = false),
+             py::arg("suite_name"),
+             py::arg("force") = false,
              ClientDoc::begin_suite())
-        .def("begin_all_suites", &ClientInvoker::begin_all_suites, (py::arg("force") = false), ClientDoc::begin_all())
+        .def("begin_all_suites", &ClientInvoker::begin_all_suites, py::arg("force") = false, ClientDoc::begin_all())
         .def("job_generation", &ClientInvoker::job_gen, ClientDoc::job_gen())
         .def("run", &run, ClientDoc::run())
         .def("run", &runs)
-        .def("check", &check, py::return_value_policy<py::copy_const_reference>(), ClientDoc::check())
-        .def("check", &checks, py::return_value_policy<py::copy_const_reference>())
+        .def("check", &check, py::return_value_policy::reference, ClientDoc::check())
+        .def("check", &checks, py::return_value_policy::reference)
         .def("kill", &do_kill, ClientDoc::kill())
         .def("kill", &do_kills)
         .def("status", &the_status, ClientDoc::status())
@@ -688,10 +687,11 @@ void export_Client() {
         .def("restore", &restores)
         .def("delete",
              &ClientInvoker::delete_node,
-             (py::arg("abs_node_path"), py::arg("force") = false),
+             py::arg("abs_node_path"),
+             py::arg("force") = false,
              ClientDoc::delete_node())
-        .def("delete", &delete_node, (py::arg("paths"), py::arg("force") = false))
-        .def("delete_all", &ClientInvoker::delete_all, (py::arg("force") = false), ClientDoc::delete_all())
+        .def("delete", &delete_node, py::arg("paths"), py::arg("force") = false)
+        .def("delete_all", &ClientInvoker::delete_all, py::arg("force") = false, ClientDoc::delete_all())
         .def("debug_server_on",
              &ClientInvoker::debug_server_on,
              "Enable server debug, Will dump to standard out on server host.")
@@ -708,7 +708,7 @@ void export_Client() {
         .def("enable_http", &ClientInvoker::enable_http, "Enable HTTP communication")
         .def("enable_https", &ClientInvoker::enable_https, "Enable HTTPS communication")
 
-        .def("zombie_get", &zombieGet, py::return_value_policy<py::copy_const_reference>())
+        .def("zombie_get", &zombieGet, py::return_value_policy::reference)
         .def("zombie_fob", &ClientInvoker::zombieFobCli)
         .def("zombie_fail", &ClientInvoker::zombieFailCli)
         .def("zombie_adopt", &ClientInvoker::zombieAdoptCli)
@@ -739,11 +739,12 @@ void export_Client() {
         .def("child_init", &ClientInvoker::child_init, "Child command,notify server job has started")
         .def("child_abort",
              &ClientInvoker::child_abort,
-             (py::arg("reason") = ""),
+             py::arg("reason") = "",
              "Child command,notify server job has aborted, can provide an optional reason")
         .def("child_event",
              &ClientInvoker::child_event,
-             (py::arg("event_name"), py::arg("value") = true),
+             py::arg("event_name"),
+             py::arg("value") = true,
              "Child command,notify server event occurred, requires the event name")
         .def("child_meter",
              &ClientInvoker::child_meter,
@@ -754,35 +755,39 @@ void export_Client() {
         .def("child_wait", &ClientInvoker::child_wait, "Child command,wait for expression to come true")
         .def("child_queue",
              &ClientInvoker::child_queue,
-             (py::arg("queue_name"), py::arg("action"), py::arg("step") = "", py::arg("path_to_node_with_queue") = ""),
+             py::arg("queue_name"),
+             py::arg("action"),
+             py::arg("step")                    = "",
+             py::arg("path_to_node_with_queue") = "",
              "Child command,active:return current step as string, then increment index, requires queue name, and "
              "optionally path to node with the queue")
         .def("child_complete", &ClientInvoker::child_complete, "Child command,notify server job has complete");
 
-    py::class_<WhyCmd, boost::noncopyable>("WhyCmd",
-                                           "The why command reports, the reason why a node is not running.\n\n"
-                                           "It needs the  definition structure and the path to node\n"
-                                           "\nConstructor::\n\n"
-                                           "   WhyCmd(defs, node_path)\n"
-                                           "      defs_ptr  defs   : pointer to a definition structure\n"
-                                           "      string node_path : The node path\n\n"
-                                           "\nExceptions:\n\n"
-                                           "- raises RuntimeError if the definition is empty\n"
-                                           "- raises RuntimeError if the node path is empty\n"
-                                           "- raises RuntimeError if the node path cannot be found in the definition\n"
-                                           "\nUsage::\n\n"
-                                           "   try:\n"
-                                           "      ci = Client()\n"
-                                           "      ci.sync_local()\n"
-                                           "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
-                                           "      print(ask.why())\n"
-                                           "   except RuntimeError, e:\n"
-                                           "       print(str(e))\n\n",
-                                           py::init<defs_ptr, std::string>())
+    constexpr const char* whycmd_docs = "The why command reports, the reason why a node is not running.\n\n"
+                                        "It needs the  definition structure and the path to node\n"
+                                        "\nConstructor::\n\n"
+                                        "   WhyCmd(defs, node_path)\n"
+                                        "      defs_ptr  defs   : pointer to a definition structure\n"
+                                        "      string node_path : The node path\n\n"
+                                        "\nExceptions:\n\n"
+                                        "- raises RuntimeError if the definition is empty\n"
+                                        "- raises RuntimeError if the node path is empty\n"
+                                        "- raises RuntimeError if the node path cannot be found in the definition\n"
+                                        "\nUsage::\n\n"
+                                        "   try:\n"
+                                        "      ci = Client()\n"
+                                        "      ci.sync_local()\n"
+                                        "      ask = WhyCmd(ci.get_defs(),'/suite/family')\n"
+                                        "      print(ask.why())\n"
+                                        "   except RuntimeError, e:\n"
+                                        "       print(str(e))\n\n";
+
+    py::class_<WhyCmd>(m, "WhyCmd", whycmd_docs)
+
+        .def(py::init<defs_ptr, std::string>())
         .def("why", &WhyCmd::why, "returns a '/n' separated string, with reasons why node is not running");
 
-    py::class_<UrlCmd, boost::noncopyable>(
-        "UrlCmd",
+    constexpr const char* urlcmd_docs =
         "Executes a command ECF_URL_CMD to display a url.\n\n"
         "It needs the definition structure and the path to node.\n"
         "\nConstructor::\n\n"
@@ -811,7 +816,10 @@ void export_Client() {
         "      url = UrlCmd(ci.get_defs(),'/suite/family/task')\n"
         "      print(url.execute())\n"
         "   except RuntimeError, e:\n"
-        "       print(str(e))\n\n",
-        py::init<defs_ptr, std::string>())
+        "       print(str(e))\n\n";
+
+    py::class_<UrlCmd>(m, "UrlCmd", urlcmd_docs)
+
+        .def(py::init<defs_ptr, std::string>())
         .def("execute", &UrlCmd::execute, "Displays url in the chosen browser");
 }

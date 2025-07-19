@@ -369,9 +369,8 @@ if __name__ == "__main__":
 
     task_copy = copy.copy(task)
     assert len(list(task_copy.todays)) == 8, "Expected 8 todays"
-    vec_copy = []
-    for today in task_copy.todays: vec_copy.append(today)
-    for today in vec_copy: task_copy.delete_today(today)
+    deleting = [copy.copy(today) for today in task_copy.todays]
+    for today in deleting: task_copy.delete_today(today)
     assert len(list(task_copy.todays)) == 0, "Expected 0 todays"
 
     # ===========================================================================
@@ -388,9 +387,8 @@ if __name__ == "__main__":
 
     task_copy = copy.copy(task)
     assert len(list(task_copy.times)) == 8, "Expected 8 times"
-    vec_copy = []
-    for time in task_copy.times: vec_copy.append(time)
-    for time in vec_copy: task_copy.delete_time(time)
+    deleting = [copy.copy(time) for time in task_copy.times]
+    for time in deleting: task_copy.delete_time(time)
     assert len(list(task_copy.times)) == 0, "Expected 0 todays"
 
     # ===========================================================================
@@ -406,9 +404,8 @@ if __name__ == "__main__":
 
     task_copy = copy.copy(task)
     assert len(list(task_copy.dates)) == 10, "Expected 10 dates but found " + str(len(list(task_copy.dates)))
-    vec_copy = []
-    for attr in task_copy.dates: vec_copy.append(attr)
-    for attr in vec_copy: task_copy.delete_date(attr)
+    deleting = [copy.copy(attr) for attr in task_copy.dates]
+    for attr in deleting: task_copy.delete_date(attr)
     assert len(list(task_copy.dates)) == 0, "Expected 0 dates"
 
     # ===========================================================================
@@ -421,9 +418,8 @@ if __name__ == "__main__":
 
     task_copy = copy.copy(task)
     assert len(list(task_copy.days)) == 4, "Expected 4 days"
-    vec_copy = []
-    for attr in task_copy.days: vec_copy.append(attr)
-    for attr in vec_copy: task_copy.delete_day(attr)
+    deleting = [copy.copy(attr) for attr in task_copy.days]
+    for attr in deleting: task_copy.delete_day(attr)
     assert len(list(task_copy.days)) == 0, "Expected 0 days"
 
     # ===========================================================================
@@ -468,9 +464,8 @@ if __name__ == "__main__":
 
     task_copy = copy.copy(task)
     assert len(list(task_copy.crons)) == 4, "Expected 4 crons"
-    vec_copy = []
-    for attr in task_copy.crons: vec_copy.append(attr)
-    for attr in vec_copy: task_copy.delete_cron(attr)
+    deleting = [copy.copy(attr) for attr in task_copy.crons]
+    for attr in deleting: task_copy.delete_cron(attr)
     assert len(list(task_copy.crons)) == 0, "Expected 0 crons"
 
     # ===========================================================================

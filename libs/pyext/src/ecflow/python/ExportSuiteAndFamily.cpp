@@ -20,14 +20,22 @@
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
-/// Since we don't pass in a child pos, the nodes are added to the end
-family_ptr add_family(NodeContainer* self, family_ptr f) {
+node_ptr add_family_by_name(NodeContainer* self, const std::string& name) {
+    return self->add_family(name);
+}
+
+node_ptr add_family(NodeContainer* self, family_ptr f) {
     self->addFamily(f);
     return f;
 }
-task_ptr add_task(NodeContainer* self, task_ptr t) {
+node_ptr add_task(NodeContainer* self, task_ptr t) {
     self->addTask(t);
+    std::cout << "add_task: " << t->name() << ", and has parent: " << (t->parent() ? "true" : "false") << std::endl;
     return t;
+}
+
+node_ptr add_task_by_name(NodeContainer* self, const std::string& name) {
+    return self->add_task(name);
 }
 
 suite_ptr add_clock(suite_ptr self, const ClockAttr& clk) {
@@ -81,66 +89,57 @@ bool family_exit(family_ptr self, const py::object& type, const py::object& valu
     return false;
 }
 
-family_ptr family_init(const std::string& name, py::list the_list, py::dict kw) {
-    // cout << "family_init : " << name << " the_list: " << len(the_list) << " dict: " << len(kw) << endl;
-    family_ptr node = Family::create(name);
-    (void)NodeUtil::add_variable_dict(node, kw);
-    (void)NodeUtil::node_iadd(node, the_list);
+family_ptr family_init(const std::string& name, const py::args& args, const py::kwargs& kwargs) {
+    auto node = Family::create(name);
+    NodeUtil::add(*node, args);
+    NodeUtil::add(*node, kwargs);
     return node;
 }
 
-suite_ptr suite_init(const std::string& name, py::list the_list, py::dict kw) {
-    // cout << "suite_init : " << name << " the_list: " << len(the_list) << " dict: " << len(kw) << endl;
-    suite_ptr node = Suite::create(name);
-    (void)NodeUtil::add_variable_dict(node, kw);
-    (void)NodeUtil::node_iadd(node, the_list);
+suite_ptr suite_init(const std::string& name, const py::args& args, const py::kwargs& kwargs) {
+    auto node = Suite::create(name);
+    NodeUtil::add(*node, args);
+    NodeUtil::add(*node, kwargs);
     return node;
 }
 
-void export_SuiteAndFamily() {
-    // Turn off proxies by passing true as the NoProxy template parameter.
-    // shared_ptrs don't need proxies because calls on one a copy of the
-    // shared_ptr will affect all of them (duh!).
-    py::class_<std::vector<family_ptr>>("FamilyVec", "Hold a list of `family`_ nodes")
-        .def(py::vector_indexing_suite<std::vector<family_ptr>, true>());
+void export_SuiteAndFamily(py::module& m) {
 
-    py::class_<std::vector<suite_ptr>>("SuiteVec", "Hold a list of `suite`_ nodes's")
-        .def(py::vector_indexing_suite<std::vector<suite_ptr>, true>());
+    py::class_<NodeContainer, Node, std::shared_ptr<NodeContainer>>(m, "NodeContainer", DefsDoc::node_container_doc())
 
-    // choose the correct overload
-    py::class_<NodeContainer, py::bases<Node>, boost::noncopyable>(
-        "NodeContainer", DefsDoc::node_container_doc(), py::no_init)
-        .def("__iter__", py::range(&NodeContainer::node_begin, &NodeContainer::node_end))
-        .def("add_family", &NodeContainer::add_family, DefsDoc::add_family_doc())
+        .def(
+            "__iter__",
+            [](const NodeContainer& n) { return py::make_iterator(n.nodeVec().begin(), n.nodeVec().end()); },
+            py::keep_alive<0, 1>())
+        .def("add_family", &add_family_by_name, DefsDoc::add_family_doc())
         .def("add_family", add_family)
-        .def("add_task", &NodeContainer::add_task, DefsDoc::add_task_doc())
+        .def("add_task", &add_task_by_name, DefsDoc::add_task_doc())
         .def("add_task", add_task)
         .def("find_node", &NodeContainer::find_by_name, "Find immediate child node given a name")
         .def("find_task", &NodeContainer::findTask, "Find a task given a name")
         .def("find_family", &NodeContainer::findFamily, "Find a family given a name")
-        .add_property(
-            "nodes", py::range(&NodeContainer::node_begin, &NodeContainer::node_end), "Returns a list of Node's");
+        .def_property_readonly("nodes", &NodeContainer::nodeVec, "Returns a list of Node's");
 
-    py::class_<Family, py::bases<NodeContainer>, family_ptr>("Family", DefsDoc::family_doc())
-        .def("__init__", py::raw_function(&NodeUtil::node_raw_constructor, 1)) // will call -> family_init
-        .def("__init__", py::make_constructor(&family_init), DefsDoc::family_doc())
-        .def("__init__", py::make_constructor(&Family::create_me), DefsDoc::family_doc())
+    py::class_<Family, NodeContainer, std::shared_ptr<Family>>(m, "Family")
+
+        .def(py::init(&family_init), DefsDoc::family_doc())
+        .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true, DefsDoc::family_doc())
         .def(py::self == py::self)                   // __eq__
         .def("__str__", &family_to_string)           // __str__
         .def("__copy__", pyutil_copy_object<Family>) // __copy__ uses copy constructor
         .def("__enter__", &family_enter)             // allow with statement, hence indentation support
         .def("__exit__", &family_exit)               // allow with statement, hence indentation support
         .def("__len__", &family_len)                 // Implement sized protocol for immediate children
-        .def("__contains__", &family_container)      // Implement container protocol for immediate children
-        ;
+        .def("__contains__", &family_container);     // Implement container protocol for immediate children
+
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
     py::register_ptr_to_python<family_ptr>(); // needed for mac and boost 1.6
 #endif
 
-    py::class_<Suite, py::bases<NodeContainer>, suite_ptr>("Suite", DefsDoc::suite_doc())
-        .def("__init__", py::raw_function(&NodeUtil::node_raw_constructor, 1)) // will call -> suite_init
-        .def("__init__", py::make_constructor(&suite_init), DefsDoc::suite_doc())
-        .def("__init__", py::make_constructor(&Suite::create_me), DefsDoc::suite_doc())
+    py::class_<Suite, NodeContainer, std::shared_ptr<Suite>>(m, "Suite", DefsDoc::suite_doc())
+
+        .def(py::init(&suite_init), DefsDoc::suite_doc())
+        .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true, DefsDoc::suite_doc())
         .def(py::self == py::self)                  // __eq__
         .def("__str__", &suite_to_string)           // __str__
         .def("__copy__", pyutil_copy_object<Suite>) // __copy__ uses copy constructor
@@ -153,6 +152,7 @@ void export_SuiteAndFamily() {
         .def("add_end_clock", &add_end_clock, "End clock, used to mark end of simulation")
         .def("get_end_clock", &Suite::clock_end_attr, "Return the suite's end clock. Can be NULL")
         .def("begun", &Suite::begun, "Returns true if the `suite`_ has begun, false otherwise");
+
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
     py::register_ptr_to_python<suite_ptr>(); // needed for mac and boost 1.6
 #endif

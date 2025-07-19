@@ -8,26 +8,22 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_python_Edit_HPP
-#define ecflow_python_Edit_HPP
+#ifndef ecflow_python_ExportCollections_HPP
+#define ecflow_python_ExportCollections_HPP
 
 #include <vector>
 
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/node/Family.hpp"
+#include "ecflow/node/Suite.hpp"
+#include "ecflow/node/Task.hpp"
 #include "ecflow/python/PythonBinding.hpp"
 
-class Edit {
-public:
-    explicit Edit(const py::dict& dict);
-    explicit Edit(const py::kwargs& kw);
-    Edit(const py::dict& dict, const py::kwargs& kw);
+PYBIND11_MAKE_OPAQUE(std::vector<Variable>)
 
-    const std::vector<Variable>& variables() const { return vec_; }
+PYBIND11_MAKE_OPAQUE(std::vector<node_ptr>)
+PYBIND11_MAKE_OPAQUE(std::vector<suite_ptr>)
+PYBIND11_MAKE_OPAQUE(std::vector<family_ptr>)
+PYBIND11_MAKE_OPAQUE(std::vector<task_ptr>)
 
-    static std::string to_string() { return "edit"; }
-
-private:
-    std::vector<Variable> vec_;
-};
-
-#endif /* ecflow_python_Edit_HPP */
+#endif /* ecflow_python_ExportCollections_HPP */
