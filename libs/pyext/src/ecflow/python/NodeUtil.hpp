@@ -18,18 +18,17 @@ class NodeUtil {
 public:
     NodeUtil() = delete;
 
-    /// Any nodes and attributes to be added
-    static py::object do_add(node_ptr self, const py::object& arg);
+    /// Add the attribute(s), provided as a python object, to the node
+    static void add1(Node& self, const py::object& args);
 
-    /// Add ecflow variables from a python dictionary of strings
-    static node_ptr add_variable_dict(node_ptr self, const py::dict& dict);
+    /// Add the attribute(s), provided as a python object, to the node
+    static void add(Node& self, const py::handle& arg);
 
-    /// Add all the object in a python list, to the node
-    static py::object node_iadd(node_ptr self, const py::list& list);
-
-    /// The raw constructor assumes the first argument is a string.
-    /// Assumes Task, Family, or Suite has defined a constructor  init(const std::string& name, list attrs, dict kw)
-    static py::object node_raw_constructor(py::tuple args, py::dict kw);
+    /// Add the attribute(s), provided as python args, to the nodes
+    static void add(Node& self, const py::args& args);
+    /// Add the attribute(s), provided as python kwargs, to the node
+    /// Since kwargs is a dictionary, each entry will be added as a Variable with name and value
+    static void add(Node& self, const py::kwargs& kwargs);
 };
 
 #endif /* ecflow_python_NodeUtil_HPP */

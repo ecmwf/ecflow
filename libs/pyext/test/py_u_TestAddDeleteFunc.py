@@ -9,6 +9,7 @@
 #
 
 import os
+import copy
 from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, \
     Event, Meter, Label, Queue, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatDateTime, \
     RepeatDateList, RepeatString, TimeSlot, TimeSeries, Today, Time, Date, Day, Days, Cron, Autocancel, \
@@ -184,9 +185,8 @@ if __name__ == "__main__":
         .add_today(Today(TimeSlot(20, 10))) \
         .add_today(Today(TimeSlot(20, 20), False))
     assert len(list(task.todays)) == 8, "Expected 8 todays"
-    vec_copy = []
-    for today in task.todays: vec_copy.append(today)
-    for today in vec_copy: task.delete_today(today)
+    deleting = [copy.copy(today) for today in task.todays]
+    for today in deleting: task.delete_today(today)
     assert len(list(task.todays)) == 0, "Expected 0 todays"
 
     # add and delete time
@@ -197,9 +197,8 @@ if __name__ == "__main__":
         .add_time(Time(TimeSlot(20, 10))) \
         .add_time(Time(TimeSlot(20, 20), False))
     assert len(list(task.times)) == 8, "Expected 8 times"
-    vec_copy = []
-    for time in task.times: vec_copy.append(time)
-    for time in vec_copy: task.delete_time(time)
+    deleting = [copy.copy(time) for time in task.times]
+    for time in deleting: task.delete_time(time)
     assert len(list(task.todays)) == 0, "Expected 0 todays"
 
     # add and delete date
@@ -211,9 +210,8 @@ if __name__ == "__main__":
         .add_date(Date(4, 1, 2010)) \
         .add_date(1, 1, 2010)
     assert len(list(task.dates)) == 10, "Expected 10 dates but found " + str(len(list(task.dates)))
-    vec_copy = []
-    for attr in task.dates: vec_copy.append(attr)
-    for attr in vec_copy: task.delete_date(attr)
+    deleting = [copy.copy(date) for date in task.dates]
+    for attr in deleting: task.delete_date(attr)
     assert len(list(task.dates)) == 0, "Expected 0 dates"
 
     # add and delete day
@@ -222,9 +220,8 @@ if __name__ == "__main__":
         .add_day(Days.tuesday) \
         .add_day("sunday")
     assert len(list(task.days)) == 4, "Expected 4 days"
-    vec_copy = []
-    for attr in task.days: vec_copy.append(attr)
-    for attr in vec_copy: task.delete_day(attr)
+    deleting = [copy.copy(day) for day in task.days]
+    for attr in deleting: task.delete_day(attr)
     assert len(list(task.days)) == 0, "Expected 0 days"
 
     # add and delete crons
@@ -255,9 +252,8 @@ if __name__ == "__main__":
         .add_cron(cron2) \
         .add_cron(cron3)
     assert len(list(task.crons)) == 4, "Expected 4 crons"
-    vec_copy = []
-    for attr in task.crons: vec_copy.append(attr)
-    for attr in vec_copy: task.delete_cron(attr)
+    deleting = [copy.copy(cron) for cron in task.crons]
+    for attr in deleting: task.delete_cron(attr)
     assert len(list(task.crons)) == 0, "Expected 0 crons"
 
     # add autocancel
