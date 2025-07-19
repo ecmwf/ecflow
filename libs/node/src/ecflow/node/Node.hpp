@@ -68,7 +68,7 @@ protected:
 
 public:
     Node& operator=(const Node&);
-    bool operator<(const Node& rhs) { return name() < rhs.name(); }
+    bool operator<(const Node& rhs) const { return name() < rhs.name(); }
 
     Node(const Node& rhs);
     virtual ~Node();
