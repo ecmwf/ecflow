@@ -38,8 +38,8 @@ public:
 
         std::string theServerInvokePath = ecf::File::find_ecf_server_path();
 
-        BOOST_REQUIRE_MESSAGE(!theServerInvokePath.empty(), "The server program could not be found");
-        BOOST_REQUIRE_MESSAGE(fs::exists(theServerInvokePath), "Server exe does not exist at:" << theServerInvokePath);
+        BOOST_REQUIRE_MESSAGE(!theServerInvokePath.empty(), "The server program was found");
+        BOOST_REQUIRE_MESSAGE(fs::exists(theServerInvokePath), "Server executable exist at:" << theServerInvokePath);
 
         BOOST_TEST_MESSAGE("Using eclow_server from " << theServerInvokePath);
 

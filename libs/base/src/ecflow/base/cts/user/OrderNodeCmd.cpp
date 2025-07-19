@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
@@ -27,11 +29,19 @@ bool OrderNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<OrderNodeCmd*>(rhs);
     if (!the_rhs)
         return false;
-    if (absNodepath_ != the_rhs->absNodepath())
+    if (absNodepath_ != the_rhs->absNodePath())
         return false;
     if (option_ != the_rhs->option())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t OrderNodeCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t OrderNodeCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void OrderNodeCmd::print(std::string& os) const {
@@ -58,9 +68,9 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const {
     return doJobSubmission(as);
 }
 
-bool OrderNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, absNodepath_);
-}
+// bool OrderNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, absNodepath_);
+// }
 
 const char* OrderNodeCmd::arg() {
     return CtsApi::orderArg();
