@@ -87,7 +87,7 @@ def can_add_mirror_to_task():
     family = ecf.Family("f1")
     suite.add_family(family)
 
-    task = ecf.Task("f1")
+    task = ecf.Task("t1")
     family.add_task(task)
 
     mirror = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling", True, "auth")
