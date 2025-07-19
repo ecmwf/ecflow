@@ -14,25 +14,30 @@
 
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/Task.hpp"
 
 static void construct_expr(std::vector<PartExpression>& vec, const py::list& list) {
-    int the_list_size = len(list);
-    for (int i = 0; i < the_list_size; ++i) {
+    for (const auto& entry : list) {
         std::string part_expr;
-        if (py::extract<std::string>(list[i]).check()) {
-            part_expr = py::extract<std::string>(list[i]);
+        if (auto found = py_extract<py::str>(entry); found) {
+            part_expr = found.value();
             if (ecf::Str::valid_name(part_expr)) {
                 part_expr += " == complete";
             }
         }
-        else if (py::extract<node_ptr>(list[i]).check()) {
-            node_ptr node = py::extract<node_ptr>(list[i]);
+        else if (auto found = py_extract<node_ptr>(entry); found) {
+            node_ptr node = found.value();
             if (node->parent()) {
                 part_expr = node->absNodePath();
             }
             else {
                 part_expr = node->name();
             }
+            part_expr += " == complete";
+        }
+        else if (auto found = py_extract<Task>(entry); found) {
+            const auto& node = found.value();
+            part_expr        = node.parent() ? node.absNodePath() : node.name();
             part_expr += " == complete";
         }
         else {

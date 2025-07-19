@@ -155,8 +155,8 @@ if __name__ == "__main__":
     suite.delete_limit("");
     assert len(list(suite.limits)) == 0, "Expected 0 limits since we just deleted all of them"
 
-    # The following will fail, since the iterators are essentially read only, 
-    # This is because we are using C++ vector iterators, hence we can't delete the vectors items, whilst traversing 
+    # The following will fail, since the iterators are essentially read only,
+    # This is because we are using C++ vector iterators, hence we can't delete the vectors items, whilst traversing
     #    for limit in suite.limits: suite.delete_limit(limit.name())
     # We can get round this by copy the limits first
     suite.add_limit(ecflow.Limit("limitName1", 10))
@@ -509,9 +509,8 @@ if __name__ == "__main__":
     task.add_today(ecflow.Today(ecflow.TimeSlot(20, 10)))
     task.add_today(ecflow.Today(ecflow.TimeSlot(20, 20), False))
     assert len(list(task.todays)) == 10, "Expected 8 todays"
-    vec_copy = []
-    for today in task.todays: vec_copy.append(today)
-    for today in vec_copy: task.delete_today(today)
+    deleting = [copy.copy(today) for today in task.todays]
+    for today in deleting: task.delete_today(today)
     assert len(list(task.todays)) == 0, "Expected 0 todays"
 
     # ===========================================================================
@@ -528,9 +527,8 @@ if __name__ == "__main__":
     task.add_time(ecflow.Time(ecflow.TimeSlot(20, 10)))
     task.add_time(ecflow.Time(ecflow.TimeSlot(20, 20), False))
     assert len(list(task.times)) == 10, "Expected 8 times"
-    vec_copy = []
-    for time in task.times: vec_copy.append(time)
-    for time in vec_copy: task.delete_time(time)
+    deleting = [copy.copy(time) for time in task.times]
+    for time in deleting: task.delete_time(time)
     assert len(list(task.todays)) == 0, "Expected 0 todays"
 
     # ===========================================================================
@@ -544,9 +542,8 @@ if __name__ == "__main__":
     task.add_date(ecflow.Date(3, 1, 2010))
     task.add_date(ecflow.Date(4, 1, 2010))
     assert len(list(task.dates)) == 10, "Expected 10 dates but found " + str(len(list(task.dates)))
-    vec_copy = []
-    for attr in task.dates: vec_copy.append(attr)
-    for attr in vec_copy: task.delete_date(attr)
+    deleting = [copy.copy(date) for date in task.dates]
+    for attr in deleting: task.delete_date(attr)
     assert len(list(task.dates)) == 0, "Expected 0 dates"
 
     # ===========================================================================
@@ -558,9 +555,8 @@ if __name__ == "__main__":
     task.add_day(ecflow.Day("tuesday"))
     task.add_day("sunday")
     assert len(list(task.days)) == 5, "Expected 5 days"
-    vec_copy = []
-    for attr in task.days: vec_copy.append(attr)
-    for attr in vec_copy: task.delete_day(attr)
+    deleting = [copy.copy(attr) for attr in task.days]
+    for attr in deleting: task.delete_day(attr)
     assert len(list(task.days)) == 0, "Expected 0 days"
 
     # ===========================================================================
@@ -602,9 +598,8 @@ if __name__ == "__main__":
     task.add_cron(cron2)
     task.add_cron(cron3)
     assert len(list(task.crons)) == 4, "Expected 4 crons"
-    vec_copy = []
-    for attr in task.crons: vec_copy.append(attr)
-    for attr in vec_copy: task.delete_cron(attr)
+    deleting = [copy.copy(cron) for cron in task.crons]
+    for attr in deleting: task.delete_cron(attr)
     assert len(list(task.crons)) == 0, "Expected 0 crons"
 
     # ===========================================================================

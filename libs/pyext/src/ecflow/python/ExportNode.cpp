@@ -25,6 +25,8 @@
 #include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeContainer.hpp"
 #include "ecflow/python/DefsDoc.hpp"
+#include "ecflow/python/Edit.hpp"
+#include "ecflow/python/ExportCollections.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
 #include "ecflow/python/NodeUtil.hpp"
 #include "ecflow/python/PythonBinding.hpp"
@@ -46,6 +48,12 @@ node_ptr add_variable_int(node_ptr self, const std::string& name, int value) {
 }
 node_ptr add_variable_var(node_ptr self, const Variable& var) {
     self->addVariable(var);
+    return self;
+}
+node_ptr add_variable_edit(node_ptr self, const Edit& edit) {
+    for (const auto& var : edit.variables()) {
+        self->addVariable(var);
+    }
     return self;
 }
 
@@ -399,16 +407,25 @@ void generated_variables_using_variablelist(node_ptr self, std::vector<Variable>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-static py::object do_rshift(node_ptr self, const py::object& arg) {
-    // std::cout << "do_rshift\n";
-    (void)NodeUtil::do_add(self, arg);
+static py::object node_add(node_ptr self, const py::object& arg) {
+    NodeUtil::add(*self, arg);
+    return py::cast(self);
+}
 
-    if (py::extract<node_ptr>(arg).check()) {
-        NodeContainer* nc = self->isNodeContainer();
-        if (!nc) {
-            throw std::runtime_error("ExportNode::do_rshift() : Can only add a child to Suite or Family");
-        }
-        node_ptr child = py::extract<node_ptr>(arg);
+static py::object node_iadd(node_ptr self, const py::object& arg) {
+    NodeUtil::add(*self, arg);
+    return py::cast(self);
+}
+
+static py::object do_rshift(node_ptr self, const py::object& arg) {
+    NodeContainer* nc = self->isNodeContainer();
+    if (!nc) {
+        throw std::runtime_error("ExportNode::do_rshift() : Can only add a child to Suite or Family");
+    }
+
+    if (auto found = py_extract<node_ptr>(arg); found) {
+        node_ptr child = found.value();
+        self->addChild(child);
 
         std::vector<node_ptr> children;
         nc->immediateChildren(children);
@@ -429,19 +446,21 @@ static py::object do_rshift(node_ptr self, const py::object& arg) {
             }
         }
     }
-    return py::object(self);
+    else {
+        throw std::runtime_error("ExportNode::do_rshift() : Argument must be a node_ptr");
+    }
+    return py::cast(self);
 }
+
 static py::object do_lshift(node_ptr self, const py::object& arg) {
-    // std::cout << "do_lshift : " << self->name() << "\n"; cout << flush;
-    (void)NodeUtil::do_add(self, arg);
+    NodeContainer* nc = self->isNodeContainer();
+    if (!nc) {
+        throw std::runtime_error("ExportNode::do_lshift() : Can only add a child to Suite or Family");
+    }
 
-    if (py::extract<node_ptr>(arg).check()) {
-
-        NodeContainer* nc = self->isNodeContainer();
-        if (!nc) {
-            throw std::runtime_error("ExportNode::do_lshift() : Can only add a child to Suite or Family");
-        }
-        node_ptr child = py::extract<node_ptr>(arg);
+    if (auto found = py_extract<node_ptr>(arg); found) {
+        node_ptr child = found.value();
+        self->addChild(child);
 
         std::vector<node_ptr> children;
         nc->immediateChildren(children);
@@ -466,62 +485,51 @@ static py::object do_lshift(node_ptr self, const py::object& arg) {
             }
         }
     }
-    return py::object(self);
+    else {
+        throw std::runtime_error("ExportNode::do_lshift() : Argument must be a node_ptr");
+    }
+    return py::cast(self);
 }
 
-static py::object add(py::tuple args, py::dict kwargs) {
-    int the_list_size = len(args);
-    node_ptr self     = py::extract<node_ptr>(args[0]); // self
-    if (!self) {
-        throw std::runtime_error("ExportNode::add() : first argument is not a node");
-    }
+static py::object add(node_ptr self, const py::args& args, const py::kwargs& kwargs) {
 
-    for (int i = 1; i < the_list_size; ++i) {
-        (void)NodeUtil::do_add(self, args[i]);
-    }
+    NodeUtil::add(*self, args);
+    NodeUtil::add(*self, kwargs);
 
-    // key word arguments are use for adding variable only
-    (void)NodeUtil::add_variable_dict(self, kwargs);
-
-    return py::object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+    return py::cast(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
 static py::object node_getattr(node_ptr self, const std::string& attr) {
-    // cout << " node_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
-    size_t pos     = 0;
-    node_ptr child = self->findImmediateChild(attr, pos);
-    if (child) {
-        return py::object(child);
+
+    size_t pos = 0;
+    if (node_ptr child = self->findImmediateChild(attr, pos); child) {
+        return py::cast(child);
     }
 
-    const Variable& var = self->findVariable(attr);
-    if (!var.empty()) {
-        return py::object(var);
+    if (const Variable& var = self->findVariable(attr); !var.empty()) {
+        return py::cast(var);
     }
 
-    const Variable& gvar = self->findGenVariable(attr);
-    if (!gvar.empty()) {
-        return py::object(gvar);
+    if (const Variable& gvar = self->findGenVariable(attr); !gvar.empty()) {
+        return py::cast(gvar);
     }
 
-    const Event& event = self->findEventByNameOrNumber(attr);
-    if (!event.empty()) {
-        return py::object(event);
+    if (const Event& event = self->findEventByNameOrNumber(attr); !event.empty()) {
+        return py::cast(event);
     }
 
-    const Meter& meter = self->findMeter(attr);
-    if (!meter.empty()) {
-        return py::object(meter);
+    if (const Meter& meter = self->findMeter(attr); !meter.empty()) {
+        return py::cast(meter);
     }
 
-    limit_ptr limit = self->find_limit(attr);
-    if (limit.get()) {
-        return py::object(limit);
+    if (limit_ptr limit = self->find_limit(attr); limit.get()) {
+        return py::cast(limit);
     }
 
-    throw std::runtime_error(MESSAGE(
-        "ExportNode::node_getattr: function of name '"
-        << attr << "' does not exist *OR* child node,variable,meter,event or limit on node " << self->absNodePath()));
+    throw std::runtime_error(MESSAGE("ExportNode::node_getattr: function of name '"
+                                     << attr
+                                     << "' does not exist *OR* child node, variable, meter, event or limit on node "
+                                     << self->absNodePath()));
     return py::object();
 }
 
@@ -581,26 +589,21 @@ const ecf::Flag& get_flag_attr(node_ptr self) {
     return self->get_flag();
 }
 
-void export_Node() {
-    // Turn off proxies by passing true as the NoProxy template parameter.
-    // shared_ptrs don't need proxies because calls on one a copy of the
-    // shared_ptr will affect all of them (duh!).
-    py::class_<std::vector<node_ptr>>("NodeVec", "Hold a list of Nodes (i.e `suite`_, `family`_ or `task`_\\ s)")
-        .def(py::vector_indexing_suite<std::vector<node_ptr>, true>());
+void export_Node(py::module& m) {
 
-    py::class_<Node, boost::noncopyable, node_ptr>("Node", DefsDoc::node_doc(), py::no_init)
-        .def("name", &Node::name, py::return_value_policy<py::copy_const_reference>())
-        .def("add", raw_function(add, 1), DefsDoc::add())  // a.add(b) & a.add([b])
-        .def(py::self < py::self)                          // __lt__
-        .def("__add__", &NodeUtil::do_add, DefsDoc::add()) // a + b
+    py::class_<Node, std::shared_ptr<Node>>(m, "Node", py::dynamic_attr(), DefsDoc::node_doc())
+
+        .def("name", &Node::name, py::return_value_policy::reference)
+        .def("add", &add, DefsDoc::add())          // a.add(b) & a.add([b])
+        .def(py::self < py::self)                  // __lt__
+        .def("__add__", &node_add, DefsDoc::add()) // a + b
         .def("__rshift__",
              &do_rshift) // nc >> a >> b >> c     a + (b.add(Trigger('a==complete')) + (c.add(Trigger('b==complete')))
         .def("__lshift__",
              &do_lshift) // nc << a << b << c     (a.add(Trigger('b==complete')) + (b.add(Trigger('c==complete'))) + c
-        .def("__iadd__", &NodeUtil::do_add)    // a += b
-        .def("__iadd__", &NodeUtil::node_iadd) // a += [ b ]
-        .def("__getattr__", &node_getattr)     /* Any attempt to resolve a property, method, or field name that doesn't
-                                                  actually exist on the object itself will be passed to __getattr__*/
+        .def("__iadd__", &node_iadd)       // a += b
+        .def("__getattr__", &node_getattr) /* Any attempt to resolve a property, method, or field name that doesn't
+                                              actually exist on the object itself will be passed to __getattr__*/
         .def("remove", &Node::remove, "Remove the node from its parent. and returns it")
         .def("add_trigger", &add_trigger, DefsDoc::add_trigger_doc())
         .def("add_trigger", &add_trigger_expr)
@@ -617,7 +620,8 @@ void export_Node() {
         .def("add_variable", &add_variable, DefsDoc::add_variable_doc())
         .def("add_variable", &add_variable_int)
         .def("add_variable", &add_variable_var)
-        .def("add_variable", &NodeUtil::add_variable_dict)
+        .def("add_variable", &add_variable_edit)
+        .def("add_variable", &NodeUtil::add1)
         .def("add_label", &add_label, DefsDoc::add_label_doc())
         .def("add_label", &add_label_1)
         .def("add_aviso", &add_aviso, DefsDoc::add_aviso_doc())
@@ -626,10 +630,10 @@ void export_Node() {
         .def("add_limit", &add_limit_1)
         .def("add_inlimit",
              &add_in_limit,
-             (py::arg("limit_name"),
-              py::arg("path_to_node_containing_limit") = "",
-              py::arg("tokens")                        = 1,
-              py::arg("limit_this_node_only")          = false),
+             py::arg("limit_name"),
+             py::arg("path_to_node_containing_limit") = "",
+             py::arg("tokens")                        = 1,
+             py::arg("limit_this_node_only")          = false,
              DefsDoc::add_inlimit_doc())
         .def("add_inlimit", &add_in_limit_1)
         .def("add_event", &add_event, DefsDoc::add_event_doc())
@@ -664,12 +668,16 @@ void export_Node() {
         .def("add_autocancel", &add_autocancel_3)
         .def("add_autoarchive",
              &add_autoarchive,
-             (py::arg("days"), py::arg("idle") = false),
+             py::arg("days"),
+             py::arg("idle") = false,
              DefsDoc::add_autoarchive_doc())
         .def("add_autoarchive",
              &add_autoarchive_1,
-             (py::arg("hour"), py::arg("min"), py::arg("relative"), py::arg("idle") = false))
-        .def("add_autoarchive", &add_autoarchive_2, (py::arg("TimeSlot"), py::arg("relative"), py::arg("idle") = false))
+             py::arg("hour"),
+             py::arg("min"),
+             py::arg("relative"),
+             py::arg("idle") = false)
+        .def("add_autoarchive", &add_autoarchive_2, py::arg("TimeSlot"), py::arg("relative"), py::arg("idle") = false)
         .def("add_autoarchive", &add_autoarchive_3)
         .def("add_autorestore", &add_autorestore, DefsDoc::add_autorestore_doc())
         .def("add_autorestore", &add_autorestore1)
@@ -714,8 +722,14 @@ void export_Node() {
         .def("sort_attributes", &sort_attributes2)
         .def("sort_attributes",
              &sort_attributes3,
-             (py::arg("attribute_type"), py::arg("recursive") = true, py::arg("no_sort") = py::list()))
-        .def("sort_attributes", &Node::sort_attributes, (py::arg("attribute_type"), py::arg("recursive") = true))
+             py::arg("attribute_type"),
+             py::arg("recursive") = true,
+             py::arg("no_sort")   = py::list())
+        .def("sort_attributes",
+             &Node::sort_attributes,
+             py::arg("attribute_type"),
+             py::arg("recursive") = true,
+             py::arg("no_sort")   = py::list())
         .def("get_abs_node_path", &Node::absNodePath, DefsDoc::abs_node_path_doc())
         .def("has_time_dependencies", &Node::hasTimeDependencies)
         .def("update_generated_variables", &Node::update_generated_variables)
@@ -728,100 +742,111 @@ void export_Node() {
         .def("is_suspended", &Node::isSuspended, "Returns true if the `node`_ is in a `suspended`_ state")
         .def("find_variable",
              &Node::findVariable,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Find user variable on the node only. Returns an object")
         .def("find_gen_variable",
              &Node::findGenVariable,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Find generated variable on the node only. Returns an object")
         .def("find_parent_variable",
              &Node::find_parent_variable,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Find user variable variable up the parent hierarchy. Returns an object")
         .def("find_parent_variable_sub_value",
              &Node::find_parent_variable_sub_value,
              "Find user variable *up* node tree, then variable substitute the value, otherwise return empty string")
         .def("find_meter",
              &Node::findMeter,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Find the `meter`_ on the node only. Returns an object")
         .def("find_event",
              &Node::findEventByNameOrNumber,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Find the `event`_ on the node only. Returns a object")
         .def("find_label",
              &Node::find_label,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Find the `label`_ on the node only. Returns a object")
         .def("find_queue",
              &Node::find_queue,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Find the queue on the node only. Returns a queue object")
         .def("find_generic",
              &Node::find_generic,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Find the `generic`_ on the node only. Returns a Generic object")
         .def("find_limit", &Node::find_limit, "Find the `limit`_ on the node only. returns a limit ptr")
         .def("find_node_up_the_tree", &Node::find_node_up_the_tree, "Search immediate node, then up the node hierarchy")
         .def("get_state", &Node::state, "Returns the state of the node. This excludes the suspended state")
         .def("get_state_change_time",
              &get_state_change_time,
-             (py::arg("format") = "iso_extended"),
+             py::arg("format") = "iso_extended",
              "Returns the time of the last state change as a string. Default format is iso_extended, (iso_extended, "
              "iso, simple)")
         .def("get_dstate", &Node::dstate, "Returns the state of node. This will include suspended state")
         .def("get_defstatus", &Node::defStatus)
-        .def("get_repeat", &Node::repeat, py::return_value_policy<py::copy_const_reference>())
-        .def("get_late", &get_late_attr, py::return_internal_reference<>())
-        .def("get_autocancel", &get_autocancel_attr, py::return_internal_reference<>())
-        .def("get_autoarchive", &get_autoarchive_attr, py::return_internal_reference<>())
-        .def("get_autorestore", &get_autorestore_attr, py::return_internal_reference<>())
-        .def("get_trigger", &Node::get_trigger, py::return_internal_reference<>())
-        .def("get_complete", &Node::get_complete, py::return_internal_reference<>())
-        .def("get_defs", get_defs, py::return_internal_reference<>())
-        .def("get_parent", &Node::parent, py::return_internal_reference<>())
+        .def("get_repeat", &Node::repeat, py::return_value_policy::reference)
+        .def("get_late", &get_late_attr, py::return_value_policy::reference_internal)
+        .def("get_autocancel", &get_autocancel_attr, py::return_value_policy::reference_internal)
+        .def("get_autoarchive", &get_autoarchive_attr, py::return_value_policy::reference_internal)
+        .def("get_autorestore", &get_autorestore_attr, py::return_value_policy::reference_internal)
+        .def("get_trigger", &Node::get_trigger, py::return_value_policy::reference_internal)
+        .def("get_complete", &Node::get_complete, py::return_value_policy::reference_internal)
+        .def("get_defs", get_defs, py::return_value_policy::reference_internal)
+        .def("get_parent", &Node::parent, py::return_value_policy::reference_internal)
         .def("get_all_nodes", &get_all_nodes, "Returns all the child nodes")
         .def("get_flag",
              &get_flag_attr,
-             py::return_value_policy<py::copy_const_reference>(),
+             py::return_value_policy::reference,
              "Return additional state associated with a node.")
         .def("replace_on_server",
              &replace_on_server,
-             (py::arg("suspend_node_first") = true, py::arg("force") = true),
+             py::arg("suspend_node_first") = true,
+             py::arg("force")              = true,
              "replace node on the server.")
         .def("replace_on_server",
              &replace_on_server1,
-             (py::arg("suspend_node_first") = true, py::arg("force") = true),
+             py::arg("host"),
+             py::arg("port"),
+             py::arg("suspend_node_first") = true,
+             py::arg("force")              = true,
              "replace node on the server.")
         .def("replace_on_server",
              &replace_on_server2,
-             (py::arg("suspend_node_first") = true, py::arg("force") = true),
+             py::arg("host_port"),
+             py::arg("suspend_node_first") = true,
+             py::arg("force")              = true,
              "replace node on the server.")
         .def("replace_on_server",
              &do_replace_on_server,
-             (py::arg("suspend_node_first") = true, py::arg("force") = true),
+             py::arg("client"),
+             py::arg("suspend_node_first") = true,
+             py::arg("force")              = true,
              "replace node on the server.")
-        .add_property("meters", py::range(&Node::meter_begin, &Node::meter_end), "Returns a list of `meter`_\\ s")
-        .add_property("events", py::range(&Node::event_begin, &Node::event_end), "Returns a list of `event`_\\ s")
-        .add_property("variables",
-                      py::range(&Node::variable_begin, &Node::variable_end),
-                      "Returns a list of user defined `variable`_\\ s")
-        .add_property("labels", py::range(&Node::label_begin, &Node::label_end), "Returns a list of `label`_\\ s")
-        .add_property("avisos", py::range(&Node::aviso_begin, &Node::aviso_end), "Returns a list of `aviso`_\\ s")
-        .add_property("mirrors", py::range(&Node::mirror_begin, &Node::mirror_end), "Returns a list of `mirror`_\\ s")
-        .add_property("limits", py::range(&Node::limit_begin, &Node::limit_end), "Returns a list of `limit`_\\ s")
-        .add_property(
-            "inlimits", py::range(&Node::inlimit_begin, &Node::inlimit_end), "Returns a list of `inlimit`_\\ s")
-        .add_property("verifies", py::range(&Node::verify_begin, &Node::verify_end), "Returns a list of Verify's")
-        .add_property("times", py::range(&Node::time_begin, &Node::time_end), "Returns a list of `time`_\\ s")
-        .add_property("todays", py::range(&Node::today_begin, &Node::today_end), "Returns a list of `today`_\\ s")
-        .add_property("dates", py::range(&Node::date_begin, &Node::date_end), "Returns a list of `date`_\\ s")
-        .add_property("days", py::range(&Node::day_begin, &Node::day_end), "Returns a list of `day`_\\ s")
-        .add_property("crons", py::range(&Node::cron_begin, &Node::cron_end), "Returns a list of `cron`_\\ s")
-        .add_property("zombies", py::range(&Node::zombie_begin, &Node::zombie_end), "Returns a list of `zombie`_\\ s")
-        .add_property("queues", py::range(&Node::queue_begin, &Node::queue_end), "Returns a list of `queue`_\\ s")
-        .add_property(
-            "generics", py::range(&Node::generic_begin, &Node::generic_end), "Returns a list of `generic`_\\ s");
+        .def_property_readonly("meters", &Node::meters, "Returns a list of `meter`_\\ s")
+        .def_property_readonly("events", &Node::events, "Returns a list of `event`_\\ s")
+        .def_property_readonly("variables", &Node::variables, "Returns a list of user defined `variable`_\\ s")
+        .def_property_readonly("labels", &Node::labels, "Returns a list of `label`_\\ s")
+        .def_property_readonly("avisos",
+                               static_cast<const std::vector<ecf::AvisoAttr>& (Node::*)() const>(&Node::avisos),
+                               py::return_value_policy::reference_internal,
+                               "Returns a list of `aviso`_\\ s")
+        .def_property_readonly("mirrors",
+                               static_cast<const std::vector<ecf::MirrorAttr>& (Node::*)() const>(&Node::mirrors),
+                               py::return_value_policy::reference_internal,
+                               "Returns a list of `mirror`_\\ s")
+        .def_property_readonly("limits", &Node::limits, "Returns a list of `limit`_\\ s")
+        .def_property_readonly("inlimits", &Node::inlimits, "Returns a list of `inlimit`_\\ s")
+        .def_property_readonly("verifies", &Node::verifys, "Returns a list of Verify's")
+        .def_property_readonly("times", &Node::timeVec, "Returns a list of `time`_\\ s")
+        .def_property_readonly("todays", &Node::todayVec, "Returns a list of `today`_\\ s")
+        .def_property_readonly("dates", &Node::dates, "Returns a list of `date`_\\ s")
+        .def_property_readonly("days", &Node::days, "Returns a list of `day`_\\ s")
+        .def_property_readonly("crons", &Node::crons, "Returns a list of `cron`_\\ s")
+        .def_property_readonly("zombies", &Node::zombies, "Returns a list of `zombie`_\\ s")
+        .def_property_readonly("queues", &Node::queues, "Returns a list of `queue`_\\ s")
+        .def_property_readonly("generics", &Node::generics, "Returns a list of `generic`_\\ s");
+
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
     py::register_ptr_to_python<node_ptr>(); // needed for mac and boost 1.6
 #endif
