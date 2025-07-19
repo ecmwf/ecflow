@@ -371,6 +371,9 @@ public:
 
     void ecf_prune_node_log(int v) { ecf_prune_node_log_ = v; }
 
+    const std::vector<Variable>& user_variables() const { return server_.user_variables(); }
+    const std::vector<Variable>& server_variables() const { return server_.server_variables(); }
+
 private:
     void do_generate_scripts(const std::map<std::string, std::string>& override) const;
 
