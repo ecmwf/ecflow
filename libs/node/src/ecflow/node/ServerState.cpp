@@ -133,6 +133,15 @@ bool ServerState::compare(const ServerState& rhs) const {
     return true;
 }
 
+ecf::Permissions ServerState::permissions() const {
+    // Find the permissions in the server variables first
+    if (auto permissions = ecf::Permissions::find_in(server_variables_); !permissions.is_empty()) {
+        return permissions;
+    }
+    // If permissions not found in server variables, then check in the user variables
+    return ecf::Permissions::find_in(user_variables_);
+}
+
 void ServerState::sort_variables() {
     variable_state_change_no_ = Ecf::incr_state_change_no();
 
@@ -151,11 +160,9 @@ void ServerState::add_or_update_server_variable(const std::string& name, const s
     for (auto& s : server_variables_) {
         if (s.name() == name) {
             s.set_value(value);
-            //         std::cout << "   Server Variables: Updating " << name << "   " << value << "\n";
             return;
         }
     }
-    //   std::cout << "   Server Variables: Adding " << name << "   " << value << "\n";
     server_variables_.emplace_back(name, value);
 }
 

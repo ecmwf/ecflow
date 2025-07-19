@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -35,6 +37,14 @@ bool RequeueNodeCmd::equals(ClientToServerCmd* rhs) const {
     if (option_ != the_rhs->option())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t RequeueNodeCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t RequeueNodeCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 static std::string to_string(RequeueNodeCmd::Option option) {
@@ -168,9 +178,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
     return doJobSubmission(as);
 }
 
-bool RequeueNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, paths_);
-}
+// bool RequeueNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, paths_);
+// }
 
 const char* RequeueNodeCmd::arg() {
     return CtsApi::requeueArg();

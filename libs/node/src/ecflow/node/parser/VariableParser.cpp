@@ -118,10 +118,12 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
             if (lineTokens[comment_pos + 1] == "server")
                 server_variable = true;
         }
-        if (server_variable)
+        if (server_variable) {
             defsfile()->server_state().add_or_update_server_variable(lineTokens[1], value);
-        else
+        }
+        else {
             defsfile()->server_state().add_or_update_user_variables(lineTokens[1], value);
+        }
     }
 
     return true;

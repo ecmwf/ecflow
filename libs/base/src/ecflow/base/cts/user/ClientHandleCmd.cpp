@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
@@ -108,6 +110,14 @@ bool ClientHandleCmd::equals(ClientToServerCmd* rhs) const {
     if (drop_user_ != the_rhs->drop_user())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t ClientHandleCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t ClientHandleCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 const char* ClientHandleCmd::theArg() const {
