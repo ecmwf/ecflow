@@ -51,6 +51,7 @@
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Environment.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/SslClient.hpp"
 #endif
@@ -282,7 +283,7 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
 
     /// If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
     if (clientEnv_.no_ecf()) {
-        cout << "NO_ECF\n";
+        cout << ecf::environment::NO_ECF << "\n";
         return 0;
     } // success
 
@@ -344,7 +345,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
              << TimeStamp::now() << "ClientInvoker::do_invoke_cmd : on_error_throw_exception_("
              << on_error_throw_exception_ << ")" << std::endl;
     if (clientEnv_.no_ecf()) {
-        cout << "NO_ECF\n";
+        cout << ecf::environment::NO_ECF << "\n";
         return 0;
     } // success If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
     if (testInterface_)

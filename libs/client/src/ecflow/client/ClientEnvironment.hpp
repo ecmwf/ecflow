@@ -18,32 +18,88 @@
 #endif
 #include "ecflow/base/ServerProtocol.hpp"
 
+/**
+ * @brief The ClientEnvironment is used to manage the client configuration loaded from the execution environment.
+ *
+ * The ClientEnvironment is responsible for loading the client related environment variables.
+ * These variables are extracted from several sources:
+ *  - the execution environment (e.g. ECF_NAME, ECF_PASS, etc.),
+ *  - the host file (ECF_HOSTFILE)
+ *
+ * The ClientEnvironment can be configured with multiple hosts (host/port), provided either explicitly or via
+ * ECF_HOST/ECF_PORT plus a list of host/port pairs in the ECF_HOSTFILE. This list of hosts is iterated over
+ * to enable the client to connect to alternative servers, retrying when the 'principal' host connection fails.
+ * The content of the ECF_HOSTFILE is lazy-loaded (i.e. it is only loaded when the connection fails and an alternate
+ * host:port is required).
+ */
 class ClientEnvironment final : public AbstractClientEnv {
 public:
-    /// The constructor will load the environment
+    /**
+     * @brief Create a new ClientEnvironment, effectively loading all environment configurations
+     *
+     * @param gui If true, the environment is set up for a GUI client.
+     */
     explicit ClientEnvironment(bool gui);
+
+    /**
+     * @brief Create a new ClientEnvironment, effectiveling loads all environment configurations
+     *
+     * @param gui If true, the environment is set up for a GUI client.
+     * @param host The host to be contacted by the client
+     * @param port The port to be contacted by the client
+     */
     explicit ClientEnvironment(bool gui, const std::string& host, const std::string& port);
 
-    /// This constructor is only used in Test environment, as it allow the host file to be set
+    /**
+     * @brief Create a new ClientEnvironment, effectively loads all environment configurations
+     *
+     * @remark This constructor is available for testing purposes only.
+     *
+     * @param hostFile The path to a file containing a list of hosts and ports
+     * @param host The host to be contacted by the client
+     * @param port The port to be contacted by the client
+     */
     explicit ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");
 
-    /// This controls for how long child commands continue trying to connect to Server before failing.
-    /// Maximum time in seconds for client to deliver message to server/servers. This is
-    /// typically 24 hours in a real environment. It is this long to allow operators to
-    /// recover from any crashes.
-    /// for the CHILD/task commands *ONLY*
-    /// Can be overridden by  changing environment variable ECF_TIMEOUT
+    /**
+     * @brief Access the value of Task (or Child) command timeout.
+     *
+     * The `Task command timeout` is the maximum time in seconds for the client to deliver the message.
+     * The client will continue to attempt to contact the server until this timeout is reached.
+     *
+     * The `Task command timeout` default is 24 hours
+     * but can be customised by exporting environment variable ECF_TIMEOUT.
+     *
+     * @remark  This timeout is currently used for the Task commands *ONLY*
+     */
     long max_child_cmd_timeout() const { return timeout_; }
 
-    /// This controls for how long child zombie commands continue trying to connect to Server before failing.
-    /// Maximum time in seconds for client to deliver message to server/servers. This is
-    /// typically 12 hours in a real environment.
-    /// for the CHILD/task commands *ONLY*
-    /// Can be overridden by  changing environment variable ECF_ZOMBIE_TIMEOUT
+    /**
+     * @brief Set the value of Task (or Child) command timeout.
+     *
+     * @remark Intended to be used only by the Python API
+     */
+    void set_child_cmd_timeout(unsigned int t) { timeout_ = t; }
+
+    /**
+     * @brief Access the value of 'Zombie' Task (or Child) command timeout.
+     *
+     * The `Zombie Task command timeout` is the maximum time in seconds for the client to deliver the message.
+     * The client, running on a Zombie task, will continue to attempt to contact the server until this timeout is
+     * reached.
+     *
+     * The `Zombie command timeout` default is 12 hours
+     * but can be customised by exporting environment variable ECF_ZOMBIE_TIMEOUT.
+     *
+     * @remark  This timeout is currently used for the Zombie commands *ONLY*
+     */
     long max_zombie_child_cmd_timeout() const { return zombie_timeout_; }
 
-    /// Allow pure python jobs to override the ECF_TIMEOUT & ECF_ZOMBIE_TIMEOUT
-    void set_child_cmd_timeout(unsigned int t) { timeout_ = t; }
+    /**
+     * @brief Set the value of 'Zombie' Task (or Child) command timeout.
+     *
+     * @remark Intended to be used only by the Python API
+     */
     void set_zombie_child_cmd_timeout(unsigned int t) { zombie_timeout_ = t; }
 
     /// The timeout feature allow the client to fail gracefully in the case
@@ -118,7 +174,9 @@ public:
     } // override environment setting for ECF_SSL
 #endif
 
-    // AbstractClientEnv functions:
+    /**
+     * @see AbstractClientEnv::set_cli()
+     */
     void set_cli(bool f) override { cli_ = f; }
     bool get_cli() const override { return cli_; }
     bool checkTaskPathAndPassword(std::string& errorMsg) const override;
@@ -126,6 +184,15 @@ public:
     int task_try_no() const override { return task_try_num_; }
     const std::string& jobs_password() const override { return jobs_password_; }
     const std::string& process_or_remote_id() const override { return remote_id_; }
+
+    /**
+     * @brief Set the host and port for the client.
+     *
+     * @remark Explicitly setting the host/port disables loading the host file, and thus the connection retry mechanism.
+     *
+     * @param host the host to be contacted by the client
+     * @param port the port to be contacted by the client
+     */
     void set_host_port(const std::string& host, const std::string& port) override;
     const std::string& host() const override;
     const std::string& port() const override;
@@ -155,9 +222,9 @@ public:
     const std::vector<std::string>& complete_del_vars() const { return complete_del_vars_; }
 
 private:
-    std::string task_path_;     // ECF_NAME = /aSuit/aFam/aTask
+    std::string task_path_;     // ECF_NAME = /aSuite/aFamily/aTask
     std::string jobs_password_; // ECF_PASS jobs password
-    std::string remote_id_;     // ECF_RID process id of running job
+    std::string remote_id_;     // ECF_RID process id of the running job
     std::string host_file_;     // ECF_HOSTFILE. File that lists the backup hosts, port numbers must match
     std::string user_name_;
     mutable std::string passwd_;
@@ -174,8 +241,23 @@ private:
     ecf::Openssl ssl_;
 #endif
 
+    /**
+     * @brief The number of times the Task execution has been attempted, based on ECF_TRYNO environment variable.
+     *
+     * This value starts at 1, and is incremented each time the Task is retried.
+     */
     unsigned int task_try_num_{1}; // ECF_TRYNO. The task try number. The number of times the job has been run
+
+    /**
+     * @brief The connection timeout (in seconds), based on ECF_CONNECT_TIMEOUT environment variable.
+     *
+     * This value default is 0.
+     */
     int connect_timeout_{0};       // default 0, ECF_CONNECT_TIMEOUT, connection timeout
+
+    /**
+     * @brief The index of the current selected host, used to select an entry into the host_vec_ vector.
+     */
     int host_vec_index_{0};        // index into host_vec;
 
     bool cli_{false};    // Command Line Interface
