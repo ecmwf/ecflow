@@ -50,10 +50,8 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_parsing) {
     expectedHost.emplace_back("host6");
 
     ClientEnvironment client_env(good_host_file);
-    //	cout << "client_env " << client_env.toString() << "\n";
     std::string home_host = client_env.host();
     std::string host;
-    //	cout << "client_env home host " << client_env.host() << " job supplied port " << client_env.port() << "\n";
     size_t count = 0;
     BOOST_CHECK_MESSAGE(home_host == expectedHost[count],
                         "Expected home host " << expectedHost[count] << " but found " << home_host);
@@ -63,7 +61,6 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_parsing) {
         // Cycle through the host until we reach the home host
         std::string errorMsg;
         BOOST_CHECK_MESSAGE(client_env.get_next_host(errorMsg), errorMsg);
-        //	   cout << "client_env host " << client_env.host() << "  port " << client_env.port() << "\n";
         host = client_env.host();
         count++;
         if (host == home_host) {
@@ -101,20 +98,17 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_defaults) {
 
     // Create the ClientEnvironment overriding the config & environment. To specify host and port
     ClientEnvironment client_env(good_host_file, Str::LOCALHOST(), "5111");
-    //   cout << "client_env " << client_env.toString() << "\n";
     std::string home_host = client_env.host();
     std::string home_port = client_env.port();
     BOOST_CHECK_MESSAGE(Str::LOCALHOST() == home_host && "5111" == home_port, "host host & port not as expected");
 
     std::string host;
-    //   cout << "client_env home host " << client_env.host() << "  job supplied port " << client_env.port() << "\n";
     size_t count       = 0;
     bool home_host_fnd = false;
     while (home_host != host) {
         // Cycle through the host until we reach the home host
         std::string errorMsg;
         BOOST_CHECK_MESSAGE(client_env.get_next_host(errorMsg), errorMsg);
-        //      cout << "client_env host " << client_env.host() << "  port " << client_env.port() << "\n";
         host             = client_env.host();
         std::string port = client_env.port();
         count++;

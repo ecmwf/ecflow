@@ -57,6 +57,7 @@ set(test_srcs
   test/TestClientEnvironment.cpp
   test/TestClientOptions.cpp
   test/TestClientInterface.cpp
+  test/TestHostsFile.cpp
   test/TestJobGenOnly.cpp
   test/TestLifeCycle.cpp
   test/TestInitAddVariables.cpp

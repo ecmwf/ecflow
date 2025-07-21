@@ -14,6 +14,7 @@
 #include <iterator>
 #include <stdexcept>
 
+#include "ecflow/client/HostsFile.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Enumerate.hpp"
@@ -308,55 +309,20 @@ void ClientEnvironment::read_environment_variables() {
 }
 
 bool ClientEnvironment::parseHostsFile(std::string& errorMsg) {
-    std::vector<std::string> lines;
-    if (!ecf::File::splitFileIntoLines(host_file_, lines, true /*IGNORE EMPTY LINES*/)) {
-        std::stringstream ss;
-        ss << "ClientEnvironment:: Could not open the hosts file " << host_file_;
-        errorMsg += ss.str();
-        return false;
+
+    std::string configured_port = host_vec_.empty() ? ecf::Str::DEFAULT_PORT_NUMBER() : host_vec_[0].second;
+    int port                    = ecf::convert_to<int>(configured_port);
+
+    try {
+        auto alternate_hosts_file   = ecf::HostsFile::parse(host_file_, port);
+        const auto& alternate_hosts = alternate_hosts_file.hosts();
+
+        using std::begin, std::end;
+        host_vec_.insert(end(host_vec_), begin(alternate_hosts), end(alternate_hosts));
     }
-
-    // The Home server and port should be at index 0.
-    std::string job_supplied_port = ecf::Str::DEFAULT_PORT_NUMBER();
-    if (!host_vec_.empty())
-        job_supplied_port = host_vec_[0].second;
-
-    // Each line should have the format: We only read in the first token.
-    //       host        # comment
-    //       host:port   # another comment
-    // If no port is specified we default to port read in from the environment
-    // if that was not specified we default to Str::DEFAULT_PORT_NUMBER()
-    auto theEnd = lines.end();
-    for (auto i = lines.begin(); i != theEnd; ++i) {
-
-        std::vector<std::string> tokens;
-        ecf::Str::split((*i), tokens);
-        if (tokens.empty())
-            continue;
-        if (tokens[0][0] == '#') {
-            //			std::cout << "Ignoring line:'" << *i << "'\n";
-            continue;
-        }
-
-        std::string theBackupHost;
-        std::string thePort;
-
-        std::size_t colonPos = tokens[0].find_first_of(':');
-        if (colonPos == std::string::npos) {
-            // When the port is *NOT* specified, we must use the job supplied port.
-            // i.e. the one read in from the environment
-            theBackupHost = tokens[0];
-            thePort       = job_supplied_port;
-            //			std::cout << "Host = " << theBackupHost << " Port is  " << thePort << "\n";
-        }
-        else {
-            theBackupHost = tokens[0].substr(0, colonPos);
-            thePort       = tokens[0].substr(colonPos + 1);
-            //			std::cout << "Host = " << theBackupHost << " Port is specified " << thePort << "\n";
-        }
-
-        // std::cout << "Host = " << theBackupHost << "  " << thePort << "\n";
-        host_vec_.emplace_back(theBackupHost, thePort);
+    catch (const ecf::HostsFileFailure& e) {
+        errorMsg = e.what();
+        return false;
     }
 
     return true;
