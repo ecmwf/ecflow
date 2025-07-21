@@ -63,7 +63,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         RepeatDateTime rep(name, startYMD, endYMD, delta);
         ecf::Instant value;
         if (get_value(lineTokens, value)) {
-            rep.set_value(coerce_from_instant(value));
+            rep.set_value(coerce_from_instant_into_seconds(value));
         }
 
         nodeStack_top()->addRepeat(Repeat(rep));

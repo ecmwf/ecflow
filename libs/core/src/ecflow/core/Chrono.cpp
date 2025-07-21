@@ -133,15 +133,14 @@ Duration operator-(const Instant& rhs, const Instant& lhs) {
     return Duration{std::chrono::duration_cast<std::chrono::seconds>(diff)};
 }
 
-Instant coerce_to_instant(long value) {
+Instant coerce_from_seconds_into_instant(long value) {
     auto seconds_since_reference = std::chrono::seconds{value};
     auto instant                 = Instant{Instant::instant_t{seconds_since_reference}};
     return instant;
 }
 
-long coerce_from_instant(const Instant& value) {
-    auto seconds_since_reference = std::chrono::duration_cast<std::chrono::seconds>(value.instant_.time_since_epoch());
-    return seconds_since_reference.count();
+long coerce_from_instant_into_seconds(const Instant& value) {
+    return coerce_from_instant_into<std::chrono::seconds>(value);
 }
 
 namespace detail {

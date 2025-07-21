@@ -334,8 +334,8 @@ int VRepeatDateTimeAttr::currentPosition() const {
         else if (r.value() == r.start()) {
             return 0;
         }
-        else if (r.value() == r.end() ||
-                 ecf::coerce_to_instant(r.value() + r.step()) > ecf::coerce_to_instant(r.end())) {
+        else if (r.value() == r.end() || ecf::coerce_from_seconds_into_instant(r.value() + r.step()) >
+                                             ecf::coerce_from_seconds_into_instant(r.end())) {
             return 2;
         }
         else {

@@ -95,7 +95,7 @@ public:
     virtual void changeValue(long newValue)              = 0; // can throw std::runtime_error
     virtual void set_value(long new_value_or_index)      = 0; // will NOT throw, allows any value
     std::string toString() const;
-    virtual std::string dump() const       = 0;
+    virtual std::string dump() const = 0;
 
     unsigned int state_change_no() const { return state_change_no_; }
 
@@ -218,11 +218,11 @@ public:
     const ecf::Duration& step_duration() const { return delta_; }
     const ecf::Instant& value_instant() const { return value_; }
 
-    int start() const override { return coerce_from_instant(start_); }
-    int end() const override { return coerce_from_instant(end_); }
+    int start() const override { return coerce_from_instant_into_seconds(start_); }
+    int end() const override { return coerce_from_instant_into_seconds(end_); }
     int step() const override { return delta_.as_seconds().count(); }
-    long value() const override { return coerce_from_instant(value_); }
-    long index_or_value() const override { return coerce_from_instant(value_); }
+    long value() const override { return coerce_from_instant_into_seconds(value_); }
+    long index_or_value() const override { return coerce_from_instant_into_seconds(value_); }
     long last_valid_value() const override;
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;

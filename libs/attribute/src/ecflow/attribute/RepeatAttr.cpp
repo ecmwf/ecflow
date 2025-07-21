@@ -586,12 +586,12 @@ bool RepeatDateTime::compare(RepeatBase* rb) const {
 }
 
 void RepeatDateTime::setToLastValue() {
-    set_value(coerce_from_instant(end_));
+    set_value(coerce_from_instant_into_seconds(end_));
 }
 
 long RepeatDateTime::last_valid_value() const {
     Instant valid = valid_value(value_);
-    return coerce_from_instant(valid);
+    return coerce_from_instant_into_seconds(valid);
 }
 
 Instant RepeatDateTime::valid_value(const Instant& value) const {
@@ -610,19 +610,19 @@ Instant RepeatDateTime::valid_value(const Instant& value) const {
 }
 
 long RepeatDateTime::last_valid_value_minus(int val) const {
-    Instant last_value    = coerce_to_instant(last_valid_value());
+    Instant last_value    = coerce_from_seconds_into_instant(last_valid_value());
     Instant updated_value = last_value - Duration{std::chrono::seconds{val}};
-    return coerce_from_instant(updated_value);
+    return coerce_from_instant_into_seconds(updated_value);
 }
 
 long RepeatDateTime::last_valid_value_plus(int val) const {
-    Instant last_value    = coerce_to_instant(last_valid_value());
+    Instant last_value    = coerce_from_seconds_into_instant(last_valid_value());
     Instant updated_value = last_value + Duration{std::chrono::seconds{val}};
-    return coerce_from_instant(updated_value);
+    return coerce_from_instant_into_seconds(updated_value);
 }
 
 void RepeatDateTime::reset() {
-    set_value(ecf::coerce_from_instant(start_));
+    set_value(coerce_from_instant_into_seconds(start_));
 }
 
 std::string RepeatDateTime::dump() const {
@@ -654,7 +654,7 @@ std::string RepeatDateTime::valueAsString() const {
     /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
     try {
         long value      = last_valid_value();
-        Instant instant = coerce_to_instant(value);
+        Instant instant = coerce_from_seconds_into_instant(value);
         return boost::lexical_cast<std::string>(instant);
     }
     catch (boost::bad_lexical_cast&) {
@@ -674,7 +674,7 @@ std::string RepeatDateTime::value_as_string(int index) const {
 }
 
 std::string RepeatDateTime::next_value_as_string() const {
-    Instant next = coerce_to_instant(last_valid_value()) + delta_;
+    Instant next = coerce_from_seconds_into_instant(last_valid_value()) + delta_;
 
     try {
         return boost::lexical_cast<std::string>(valid_value(next));
@@ -685,7 +685,7 @@ std::string RepeatDateTime::next_value_as_string() const {
 }
 
 std::string RepeatDateTime::prev_value_as_string() const {
-    Instant previous = coerce_to_instant(last_valid_value()) - delta_;
+    Instant previous = coerce_from_seconds_into_instant(last_valid_value()) - delta_;
 
     try {
         return boost::lexical_cast<std::string>(valid_value(previous));
@@ -697,7 +697,7 @@ std::string RepeatDateTime::prev_value_as_string() const {
 
 void RepeatDateTime::increment() {
     auto new_value = value_ + delta_;
-    set_value(ecf::coerce_from_instant(new_value));
+    set_value(ecf::coerce_from_instant_into_seconds(new_value));
 }
 
 void RepeatDateTime::change(const std::string& newdate) {
@@ -705,7 +705,7 @@ void RepeatDateTime::change(const std::string& newdate) {
     long the_new_date;
     try {
         auto instant = Instant::parse(newdate);
-        the_new_date = ecf::coerce_from_instant(instant);
+        the_new_date = ecf::coerce_from_instant_into_seconds(instant);
     }
     catch (std::exception& e) {
         std::stringstream ss;
@@ -718,7 +718,7 @@ void RepeatDateTime::change(const std::string& newdate) {
 
 void RepeatDateTime::changeValue(long the_new_date) {
 
-    auto new_date = ecf::coerce_to_instant(the_new_date);
+    auto new_date = ecf::coerce_from_seconds_into_instant(the_new_date);
     if (delta_ > Duration{std::chrono::seconds{0}}) {
         if (new_date < start_ || new_date > end_) {
             std::stringstream ss;
@@ -754,7 +754,7 @@ void RepeatDateTime::set_value(long the_new_date) {
     // hence the_new_value may be outside the valid range.
     // This can occur when an incremental sync happens,
     // hence, allow memento to copy the value as is.
-    value_ = coerce_to_instant(the_new_date);
+    value_ = coerce_from_seconds_into_instant(the_new_date);
     update_repeat_genvar_value();
     incr_state_change_no();
 }
