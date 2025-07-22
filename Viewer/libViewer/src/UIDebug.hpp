@@ -22,6 +22,6 @@ public:
 };
 
 #define UI_ASSERT(expr, EXPRESSION) \
-    ((expr) ? ((void)0) : UIDebug::uiAssert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
+    ((expr) ? ((void)0) : UIDebug::uiAssert(#expr, __FILE__, __LINE__, MESSAGE(EXPRESSION)))
 
 #endif /* ecflow_viewer_UIDebug_HPP */
