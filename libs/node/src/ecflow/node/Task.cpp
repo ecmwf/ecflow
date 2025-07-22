@@ -21,6 +21,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/exceptions/Exceptions.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/DefsDelta.hpp"
 #include "ecflow/node/JobProfiler.hpp"
@@ -30,9 +31,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/TaskScriptGenerator.hpp"
 #include "ecflow/node/move_peer.hpp"
-
-using namespace ecf;
-using namespace std;
 
 // #define DEBUG_TASK_LOCATION 1
 void Task::copy(const Task& rhs) {
@@ -53,14 +51,18 @@ node_ptr Task::clone() const {
 }
 
 bool Task::check_defaults() const {
-    if (order_state_change_no_ != 0)
-        throw std::runtime_error("Task::check_defaults(): order_state_change_no_ != 0");
-    if (add_remove_state_change_no_ != 0)
-        throw std::runtime_error("Task::check_defaults(): add_remove_state_change_no_ != 0");
-    if (alias_change_no_ != 0)
-        throw std::runtime_error("Task::check_defaults(): alias_change_no_ != 0");
-    if (alias_no_ != 0)
-        throw std::runtime_error("Task::check_defaults(): alias_no_ != 0");
+    if (order_state_change_no_ != 0) {
+        THROW_RUNTIME("Task::check_defaults(): order_state_change_no_ != 0");
+    }
+    if (add_remove_state_change_no_ != 0) {
+        THROW_RUNTIME("Task::check_defaults(): add_remove_state_change_no_ != 0");
+    }
+    if (alias_change_no_ != 0) {
+        THROW_RUNTIME("Task::check_defaults(): alias_change_no_ != 0");
+    }
+    if (alias_no_ != 0) {
+        THROW_RUNTIME("Task::check_defaults(): alias_no_ != 0");
+    }
     return Submittable::check_defaults();
 }
 
@@ -112,8 +114,9 @@ void Task::read_state(const std::string& line, const std::vector<std::string>& l
         for (size_t i = 3; i < line_tokens_size; i++) {
             if (lineTokens[i].find("alias_no:") != std::string::npos) {
                 std::string token;
-                if (!Extract::split_get_second(lineTokens[i], token))
-                    throw std::runtime_error("Task::read_state could not read alias_no for task " + name());
+                if (!Extract::split_get_second(lineTokens[i], token)) {
+                    THROW_RUNTIME("Task::read_state could not read alias_no for task " + name());
+                }
                 alias_no_ = Extract::theInt(token, "Task::read_state: invalid alias_no specified : " + line);
                 break;
             }
@@ -170,13 +173,13 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
         if (user_file_contents.empty()) {
             std::stringstream ss;
             ss << "Task::add_alias: No .usr file contents specified. Alias creation failed for task " << absNodePath();
-            throw std::runtime_error(ss.str());
+            THROW_RUNTIME(ss.str());
         }
 
         findParentUserVariableValue(ecf::environment::ECF_HOME, dir_to_create);
         dir_to_create += absNodePath();
-        if (!File::createDirectories(dir_to_create)) {
-            throw std::runtime_error("Task::add_alias: could not create directory " + dir_to_create);
+        if (!ecf::File::createDirectories(dir_to_create)) {
+            THROW_RUNTIME("Task::add_alias: could not create directory " + dir_to_create);
         }
     }
 
@@ -189,7 +192,7 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
     if (create_directory) {
         std::string file_path = dir_to_create + "/" + alias_name + alias->script_extension();
         std::string error_msg;
-        if (!File::create(file_path, user_file_contents, error_msg)) {
+        if (!ecf::File::create(file_path, user_file_contents, error_msg)) {
             std::stringstream ss;
             ss << "Task::add_alias: could not create .usr file at path(" << file_path << "): " << error_msg.c_str();
             throw std::runtime_error(ss.str());
@@ -285,12 +288,12 @@ node_ptr Task::find_immediate_child(const std::string_view& name) const {
 }
 
 std::string Task::find_node_path(const std::string& type, const std::string& node_name) const {
-    if (Str::caseInsCompare(type, "task")) {
+    if (ecf::Str::caseInsCompare(type, "task")) {
         if (node_name == name()) {
             return absNodePath();
         }
     }
-    return string();
+    return std::string();
 }
 
 void Task::reset() {
@@ -383,8 +386,9 @@ node_ptr Task::find_node_up_the_tree(const std::string& name) const {
         }
     }
     Node* the_parent = parent();
-    if (the_parent)
+    if (the_parent) {
         return the_parent->find_node_up_the_tree(name);
+    }
     return node_ptr();
 }
 
@@ -419,11 +423,13 @@ void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const {
 }
 
 bool Task::resolveDependencies(JobsParam& jobsParam) {
-    if (jobsParam.timed_out_of_job_generation())
+    if (jobsParam.timed_out_of_job_generation()) {
         return false;
-    JobProfiler profile_me(this, jobsParam, JobProfiler::task_threshold());
-    if (jobsParam.timed_out_of_job_generation())
+    }
+    ecf::JobProfiler profile_me(this, jobsParam, ecf::JobProfiler::task_threshold());
+    if (jobsParam.timed_out_of_job_generation()) {
         return false;
+    }
 
     // Calling Submittable::resolveDependencies(jobsParam) up front can be expensive.
     // Due to trigger and complete evaluations. Hence low cost state checks first
@@ -493,7 +499,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
                 }
             }
             catch (const ecf::bad_conversion&) {
-                LOG(Log::ERR,
+                LOG(ecf::Log::ERR,
                     "Variable ECF_TRIES must be convertible to an integer. Cannot resubmit job for task:"
                         << absNodePath());
                 return false;
@@ -579,7 +585,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
 }
 
 void Task::generate_scripts(const std::map<std::string, std::string>& override) const {
-    TaskScriptGenerator ecf(this);
+    ecf::TaskScriptGenerator ecf(this);
     ecf.generate(override);
 }
 
@@ -588,7 +594,7 @@ node_ptr Task::removeChild(Node* child) {
     assert(child);
     assert(child->isAlias());
 #endif
-    SuiteChanged1 changed(suite());
+    ecf::SuiteChanged1 changed(suite());
     size_t node_vec_size = aliases_.size();
     for (size_t t = 0; t < node_vec_size; t++) {
         if (aliases_[t].get() == child) {
@@ -605,12 +611,13 @@ node_ptr Task::removeChild(Node* child) {
 }
 
 bool Task::doDeleteChild(Node* child) {
-    SuiteChanged1 changed(suite());
+    ecf::SuiteChanged1 changed(suite());
     auto the_end = aliases_.end();
     for (auto t = aliases_.begin(); t != the_end; ++t) {
         if ((*t).get() == child) {
-            if (child && child->parent())
+            if (child && child->parent()) {
                 child->set_parent(nullptr);
+            }
             aliases_.erase(t);
             add_remove_state_change_no_ = Ecf::incr_state_change_no();
             return true;
@@ -642,7 +649,7 @@ size_t Task::child_position(const Node* child) const {
 }
 
 void Task::order(Node* immediateChild, NOrder::Order ord) {
-    SuiteChanged1 changed(suite());
+    ecf::SuiteChanged1 changed(suite());
     switch (ord) {
         case NOrder::TOP: {
             for (auto i = aliases_.begin(); i != aliases_.end(); ++i) {
@@ -670,14 +677,14 @@ void Task::order(Node* immediateChild, NOrder::Order ord) {
         }
         case NOrder::ALPHA: {
             std::sort(aliases_.begin(), aliases_.end(), [](const alias_ptr& a, const alias_ptr& b) {
-                return Str::caseInsLess(a->name(), b->name());
+                return ecf::Str::caseInsLess(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             break;
         }
         case NOrder::ORDER: {
             std::sort(aliases_.begin(), aliases_.end(), [](const alias_ptr& a, const alias_ptr& b) {
-                return Str::caseInsGreater(a->name(), b->name());
+                return ecf::Str::caseInsGreater(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             break;
@@ -710,12 +717,12 @@ void Task::order(Node* immediateChild, NOrder::Order ord) {
                     return;
                 }
             }
-            throw std::runtime_error("Task::order DOWN, immediate child not found");
+            THROW_RUNTIME("Task::order DOWN, immediate child not found");
         }
         case NOrder::RUNTIME: {
-            for (alias_ptr alias : aliases_) {
+            for (const alias_ptr& alias : aliases_) {
                 if (alias->state() != NState::COMPLETE) {
-                    throw std::runtime_error("Task::order: To order by RUNTIME All aliases must be complete");
+                    THROW_RUNTIME("Task::order: To order by RUNTIME All aliases must be complete");
                 }
             }
             (void)sum_runtime();
@@ -734,27 +741,21 @@ void Task::move_peer(Node* src, Node* dest) {
 }
 
 bool Task::checkInvariants(std::string& errorMsg) const {
-    if (!Node::checkInvariants(errorMsg))
+    if (!Node::checkInvariants(errorMsg)) {
         return false;
+    }
 
     size_t vec_size = aliases_.size();
     for (size_t t = 0; t < vec_size; t++) {
         if (aliases_[t]->parent() != this) {
-            std::stringstream ss;
-            ss << "Task::checkInvariants alias(" << aliases_[t]->name()
-               << ") parent() not correct. See task : " << absNodePath();
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Task::checkInvariants alias("
+                                << aliases_[t]->name() << ") parent() not correct. See task : " << absNodePath());
             return false;
         }
         if (!aliases_[t]->checkInvariants(errorMsg)) {
             return false;
         }
     }
-    //   if ( vec_size > alias_no_ ) {
-    //      std::stringstream ss;
-    //      ss << "Task::checkInvariants: alias vector size " << vec_size << " should be less or equal to alias_no_ " <<
-    //      alias_no_ << " for task " << absNodePath() << "\n"; errorMsg += ss.str(); return false;
-    //   }
     return true;
 }
 
@@ -776,9 +777,10 @@ const std::string& Task::script_extension() const {
     // Note: This should be removed in the future since there is performance hit.
     //       searching up the node tree, when most of the time we are using .ecf
     const std::string& ecf_extn = find_parent_user_variable_value(ecf::environment::ECF_EXTN);
-    if (!ecf_extn.empty())
+    if (!ecf_extn.empty()) {
         return ecf_extn;
-    return File::ECF_EXTN(); // ".ecf"
+    }
+    return ecf::File::ECF_EXTN(); // ".ecf"
 }
 
 void Task::collateChanges(DefsDelta& changes) const {
@@ -794,24 +796,28 @@ void Task::collateChanges(DefsDelta& changes) const {
 
     /// There no point doing a OrderMemento if children have been added/delete
     if (add_remove_state_change_no_ > changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<AliasChildrenMemento>(aliases_));
     }
     else if (order_state_change_no_ > changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         std::vector<std::string> order_vec;
         order_vec.reserve(aliases_.size());
         size_t node_vec_size = aliases_.size();
-        for (size_t i = 0; i < node_vec_size; i++)
+        for (size_t i = 0; i < node_vec_size; i++) {
             order_vec.push_back(aliases_[i]->name());
+        }
         comp->add(std::make_shared<OrderMemento>(order_vec));
     }
 
     if (alias_change_no_ > changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<AliasNumberMemento>(alias_no_));
     }
 
