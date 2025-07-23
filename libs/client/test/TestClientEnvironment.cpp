@@ -18,6 +18,7 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -26,10 +27,6 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 
 BOOST_AUTO_TEST_SUITE(T_ClientEnvironment)
 
-// **************************************************************************************
-// test the client environment:
-// In particular test host file parsing
-// **************************************************************************************
 BOOST_AUTO_TEST_CASE(test_client_environment_host_file_parsing) {
     ECF_NAME_THIS_TEST();
 
@@ -143,6 +140,49 @@ BOOST_AUTO_TEST_CASE(test_client_environment_empty_host_file) {
     fs::remove(empty_host_file);
 }
 
+BOOST_AUTO_TEST_CASE(test_client_environment_host_file_policy) {
+    ECF_NAME_THIS_TEST();
+
+    {
+        // When no host file policy is specified...
+
+        ClientEnvironment env(false);
+        BOOST_CHECK(!env.host_file_policy_is_all());
+        BOOST_CHECK(env.host_file_policy_is_task());
+    }
+
+    {
+        WithTestEnvironmentVariable policy("ECF_HOSTFILE_POLICY", "");
+
+        ClientEnvironment env(false);
+        BOOST_CHECK(!env.host_file_policy_is_all());
+        BOOST_CHECK(env.host_file_policy_is_task());
+    }
+
+    {
+        WithTestEnvironmentVariable policy("ECF_HOSTFILE_POLICY", "task");
+
+        ClientEnvironment env(false);
+        BOOST_CHECK(!env.host_file_policy_is_all());
+        BOOST_CHECK(env.host_file_policy_is_task());
+    }
+
+    {
+        WithTestEnvironmentVariable policy("ECF_HOSTFILE_POLICY", "all");
+
+        ClientEnvironment env(false);
+        BOOST_CHECK(env.host_file_policy_is_all());
+        BOOST_CHECK(!env.host_file_policy_is_task());
+    }
+
+    {
+        WithTestEnvironmentVariable policy("ECF_HOSTFILE_POLICY", "anything");
+
+        ClientEnvironment env(false);
+        BOOST_CHECK(!env.host_file_policy_is_all());
+        BOOST_CHECK(env.host_file_policy_is_task());
+    }
+}
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

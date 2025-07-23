@@ -56,6 +56,7 @@ set(test_srcs
   test/TestClientConfigurations.cpp
   test/TestClientEnvironment.cpp
   test/TestClientOptions.cpp
+  test/TestClientRetry.cpp
   test/TestClientInterface.cpp
   test/TestHostsFile.cpp
   test/TestJobGenOnly.cpp

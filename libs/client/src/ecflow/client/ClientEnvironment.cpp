@@ -45,6 +45,9 @@
 
 // #define DEBUG_ENVIRONMENT 1
 
+static constexpr const char* ECF_HOSTFILE_POLICY_ALL  = "all";
+static constexpr const char* ECF_HOSTFILE_POLICY_TASK = "task";
+
 template <class T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
     copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, "\n"));
@@ -207,6 +210,7 @@ std::string ClientEnvironment::toString() const {
     ss << "   " << ecf::environment::ECF_RID << " = " << remote_id_ << "\n";
     ss << "   " << ecf::environment::ECF_TRYNO << " = " << task_try_num_ << "\n";
     ss << "   " << ecf::environment::ECF_HOSTFILE << " = " << host_file_ << "\n";
+    ss << "   " << ecf::environment::ECF_HOSTFILE_POLICY << " = " << host_file_policy_ << "\n";
     ss << "   " << ecf::environment::ECF_TIMEOUT << " = " << timeout_ << "\n";
     ss << "   " << ecf::environment::ECF_ZOMBIE_TIMEOUT << " = " << zombie_timeout_ << "\n";
     ss << "   " << ecf::environment::ECF_CONNECT_TIMEOUT << " = " << connect_timeout_ << "\n";
@@ -253,6 +257,15 @@ void ClientEnvironment::read_environment_variables() {
     }
 
     ecf::environment::get(ecf::environment::ECF_HOSTFILE, host_file_);
+
+    host_file_policy_ = ECF_HOSTFILE_POLICY_TASK;
+    ecf::environment::get(ecf::environment::ECF_HOSTFILE_POLICY, host_file_policy_);
+    // ensure the policy is lower case
+    ecf::algorithm::tolower(host_file_policy_);
+    // ensure the policy is either "all" or "task", otherwise default to "task"
+    if (host_file_policy_ != ECF_HOSTFILE_POLICY_ALL && host_file_policy_ != ECF_HOSTFILE_POLICY_TASK) {
+        host_file_policy_ = ECF_HOSTFILE_POLICY_TASK;
+    }
 
     ecf::environment::get(ecf::environment::ECF_RID, remote_id_);
 
@@ -363,4 +376,14 @@ const std::string& ClientEnvironment::get_password(const char* env, const std::s
     }
 
     return ecf::Str::EMPTY();
+}
+
+bool ClientEnvironment::host_file_policy_is_task() const {
+    // If the host file policy is not set or is set to "task", then we use the task policy.
+    return host_file_policy_.empty() or host_file_policy_ == ECF_HOSTFILE_POLICY_TASK;
+}
+
+bool ClientEnvironment::host_file_policy_is_all() const {
+    // If the host file policy is set to "all", then we use the all policy.
+    return host_file_policy_ == ECF_HOSTFILE_POLICY_ALL;
 }
