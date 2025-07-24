@@ -890,6 +890,15 @@
            - File that lists alternate hosts to try, if connection to main host fails
            - No
            - $HOME/.echostfile
+         * - ECF_HOSTFILE_POLICY
+           - The policy, one of "task" or "all" indicates when to perform retry based on the ECF_HOSTFILE.
+             The default policy is "task", meaning that the retry will only be performed for task (i.e. commands) commands.
+             If the policy is "all", the retry will be performed for both task and user commands (including :code:`ping`).
+           - No
+           - .. code-block:: shell
+
+               export ECF_HOSTFILE_POLICY=all
+
          * - ECF_TIMEOUT
            - Maximum time (in seconds) for the client to deliver message
            - No
@@ -897,7 +906,7 @@
 
              .. code-block:: shell
 
-               export ECF_TIMEOUT=36024*3600   
+               export ECF_TIMEOUT=36024*3600
 
          * - ECF_CONNECT_TIMEOUT
            - Maximum time (in seconds) for the client to establish connection
