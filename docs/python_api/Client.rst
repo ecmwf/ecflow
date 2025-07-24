@@ -34,6 +34,7 @@ For the python interface these environment variable are not really applicable bu
 * ECF_TRYNO <int>   : The number of times the job has run. Used in file name generation. Set to 1 by begin() and re-queue commands.
 * ECF_TIMEOUT <int> : Max time in seconds for client to deliver message to main server
 * ECF_HOSTFILE <string> : File that lists alternate hosts to try, if connection to main host fails
+* ECF_HOSTFILE_POLICY <string> : The policy ("task" or "all") to define which commands consider using alternate hosts.
 * ECF_DENIED <any> : Provides a way for child to exit with an error, if server denies connection. Avoids 24hr wait. Note: when you have hundreds of tasks, using this approach requires a lot of manual intervention to determine job status
 * NO_ECF <any> : If set exit's immediately with success. Used to test jobs without communicating with server
 
