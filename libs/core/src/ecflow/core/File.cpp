@@ -93,12 +93,71 @@ void File::replaceExt(std::string& file, const std::string& newExt) {
         file.replace(i + 1, newExt.length(), newExt);
 }
 
+std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool ignoreEmptyLine) {
+
+    // The current implementation is 2.5 times faster than method 1, and ~4 times faster than method 2
+
+    std::vector<std::string> lines;
+#define SPLIT_FASTEST_METHOD
+#if defined(SPLIT_FASTEST_METHOD)
+    std::string buffer;
+    while (std::getline(content, buffer)) {
+        if (ignoreEmptyLine && buffer.empty()) {
+            continue;
+        }
+        lines.emplace_back(buffer);
+    }
+#elif defined(SPLIT_ALTERNATIVE_METHOD1)
+    //
+    // Note: uch slower than SPLIT_FASTEST_METHOD (~2.5 slower)
+
+    std::stringstream ss;
+    // Read the whole file into a string
+    ss << ifs.rdbuf();
+    // Take a copy as ss.str() returns a temporary while tokenizer stores a reference
+    std::string theFileAsString = ss.str();
+
+    if (ignoreEmptyLine) {
+        char_separator<char> sep("\n", 0, boost::drop_empty_tokens);
+        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        tokenizer tokens(theFileAsString, sep);
+        std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
+    }
+    else {
+        char_separator<char> sep("\n", 0, boost::keep_empty_tokens);
+        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        tokenizer tokens(theFileAsString, sep);
+        std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
+    }
+#elif defined(SPLIT_ALTERNATIVE_METHOD2)
+    //
+    // Note: This implementation is 2.5 times slower than SPLIT_FASTEST_METHOD
+    //
+
+    std::istreambuf_iterator<char> file_iter(ifs);
+    std::istreambuf_iterator<char> end_of_stream;
+
+    typedef boost::tokenizer<boost::char_separator<char>, std::istreambuf_iterator<char>> tokenizer;
+
+    boost::char_separator<char> sep("\n");
+    tokenizer tokens(file_iter, end_of_stream, sep);
+    std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
+
+#else
+    #error "No split method defined! Please define SPLIT_FASTEST_METHOD or SPLIT_ALTERNATIVE_METHOD1/2"
+#endif
+
+    return lines;
+}
 bool File::splitFileIntoLines(const std::string& filename, std::vector<std::string>& lines, bool ignoreEmptyLine) {
     std::ifstream the_file(filename.c_str(), std::ios_base::in);
     if (!the_file) {
         return false;
     }
     lines.reserve(lines.size() + 100);
+
+    auto new_lines = splitStreamIntoLines(the_file, ignoreEmptyLine);
+    lines.insert(lines.end(), new_lines.begin(), new_lines.end());
 
     // Note if we use: while( getline( theEcfFile, line)), then we will miss the *last* *empty* line
 
@@ -107,53 +166,12 @@ bool File::splitFileIntoLines(const std::string& filename, std::vector<std::stri
     while (std::getline(the_file, line)) {
         //		i++;
         //		cout << i << ": " << line << "\n";
-        if (ignoreEmptyLine && line.empty())
+        if (ignoreEmptyLine && line.empty()) {
             continue;
+        }
         lines.push_back(line); // c++11 - lines.emplace_back(std::move(line)) - actually slower, hence left
     }
 
-    //	 METHOD1
-    //	 Note Another way to split lines of a file was to use a tokenizer.
-    //	 Much slower ~ 2.5 slower,
-    //	ifstream ifs(filename.c_str());
-    //	if (!ifs) return false;
-    //
-    //	// Note: ss.str() returns a temporary std::string.
-    //	// boost::tokenizer stores a reference to the string.
-    //	// The temporary string is destroyed and tokenizer is left with a dangling reference.
-    //	// hence take a copy
-    //	std::stringstream ss;  ss << ifs.rdbuf();  // Read the whole file into a string
-    //	std::string theFileAsString = ss.str();    // take a copy as ss.str() returns a temporary
-    //	//                                         // while tokenizer stores a reference
-    //	if (ignoreEmptyLine) {
-    //	   char_separator<char> sep("\n",0,boost::drop_empty_tokens);
-    //	   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-    //	   tokenizer tokens(theFileAsString, sep);
-    //	   std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
-    //	}
-    //	else {
-    //	   char_separator<char> sep("\n",0,boost::keep_empty_tokens);
-    //	   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-    //	   tokenizer tokens(theFileAsString, sep);
-    //	   std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
-    //	}
-
-    // METHOD 2:
-    // Note: The implementation below is 2.5 times slower
-    //	std::ifstream ifs(filename.c_str());
-    //	if (!ifs) return false;
-    //
-    //	std::istreambuf_iterator<char> file_iter(ifs);
-    //	std::istreambuf_iterator<char> end_of_stream;
-    //
-    //	typedef boost::tokenizer<boost::char_separator<char>,
-    //	std::istreambuf_iterator<char> > tokenizer;
-    //
-    //	boost::char_separator<char> sep("\n");
-    //	tokenizer tokens(file_iter,end_of_stream, sep);
-    // std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
-
-    // The current implementation is 2.5 times faster than method 1, and ~4 times faster than method 2
     return true;
 }
 

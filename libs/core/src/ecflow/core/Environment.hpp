@@ -27,6 +27,7 @@ constexpr const char* ECF_NAME            = "ECF_NAME";
 constexpr const char* ECF_HOST            = "ECF_HOST";
 constexpr const char* ECF_HOST_PROTOCOL   = "ECF_HOST_PROTOCOL";
 constexpr const char* ECF_HOSTFILE        = "ECF_HOSTFILE";
+constexpr const char* ECF_HOSTFILE_POLICY = "ECF_HOSTFILE_POLICY";
 constexpr const char* ECF_TIMEOUT         = "ECF_TIMEOUT";
 constexpr const char* ECF_ZOMBIE_TIMEOUT  = "ECF_ZOMBIE_TIMEOUT";
 constexpr const char* ECF_CONNECT_TIMEOUT = "ECF_CONNECT_TIMEOUT";

@@ -465,6 +465,16 @@ int Str::to_int(const std::string& the_str, int error_return) {
     return error_return;
 }
 
+bool Str::is_int(const std::string& s) {
+    try {
+        boost::lexical_cast<int>(s);
+        return true;
+    }
+    catch (...) {
+        return false;
+    }
+}
+
 bool Str::truncate_at_start(std::string& fileContents, size_t max_lines) {
     if (fileContents.empty())
         return false;

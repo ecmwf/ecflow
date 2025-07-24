@@ -213,7 +213,7 @@ public:
     void set_child_pid(const std::string& pid) { remote_id_ = pid; }
     void set_child_try_no(unsigned int try_no) { task_try_num_ = try_no; }
     void set_child_init_add_vars(const std::vector<Variable>& vars) { init_add_vars_ = vars; }
-    void set_child_complete_del_vars(std::vector<std::string>& vars) { complete_del_vars_ = vars; }
+    void set_child_complete_del_vars(const std::vector<std::string>& vars) { complete_del_vars_ = vars; }
     void set_child_host_file(const std::string& host_file) { host_file_ = host_file; }
     void set_child_denied(bool denied) { denied_ = denied; }
     void set_child_no_ecf(bool no_ecf) { no_ecf_ = no_ecf; }
@@ -221,11 +221,15 @@ public:
     const std::vector<Variable>& init_add_vars() const { return init_add_vars_; }
     const std::vector<std::string>& complete_del_vars() const { return complete_del_vars_; }
 
+    bool host_file_policy_is_task() const;
+    bool host_file_policy_is_all() const;
+
 private:
-    std::string task_path_;     // ECF_NAME = /aSuite/aFamily/aTask
-    std::string jobs_password_; // ECF_PASS jobs password
-    std::string remote_id_;     // ECF_RID process id of the running job
-    std::string host_file_;     // ECF_HOSTFILE. File that lists the backup hosts, port numbers must match
+    std::string task_path_;        // ECF_NAME = /aSuite/aFamily/aTask
+    std::string jobs_password_;    // ECF_PASS jobs password
+    std::string remote_id_;        // ECF_RID process id of the running job
+    std::string host_file_;        // ECF_HOSTFILE. File that lists the backup hosts, port numbers must match
+    std::string host_file_policy_; // ECF_HOSTFILE_POLICY. The policy for using the host file ("all" or "task")
     std::string user_name_;
     mutable std::string passwd_;
 
@@ -253,12 +257,12 @@ private:
      *
      * This value default is 0.
      */
-    int connect_timeout_{0};       // default 0, ECF_CONNECT_TIMEOUT, connection timeout
+    int connect_timeout_{0}; // default 0, ECF_CONNECT_TIMEOUT, connection timeout
 
     /**
      * @brief The index of the current selected host, used to select an entry into the host_vec_ vector.
      */
-    int host_vec_index_{0};        // index into host_vec;
+    int host_vec_index_{0}; // index into host_vec;
 
     bool cli_{false};    // Command Line Interface
     bool denied_{false}; // ECF_DENIED.If the server denies the communication, then the child command can be set to fail

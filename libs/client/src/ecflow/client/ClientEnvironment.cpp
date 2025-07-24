@@ -14,6 +14,7 @@
 #include <iterator>
 #include <stdexcept>
 
+#include "ecflow/client/HostsFile.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Enumerate.hpp"
@@ -43,6 +44,9 @@
 #endif
 
 // #define DEBUG_ENVIRONMENT 1
+
+static constexpr const char* ECF_HOSTFILE_POLICY_ALL  = "all";
+static constexpr const char* ECF_HOSTFILE_POLICY_TASK = "task";
 
 template <class T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
@@ -206,6 +210,7 @@ std::string ClientEnvironment::toString() const {
     ss << "   " << ecf::environment::ECF_RID << " = " << remote_id_ << "\n";
     ss << "   " << ecf::environment::ECF_TRYNO << " = " << task_try_num_ << "\n";
     ss << "   " << ecf::environment::ECF_HOSTFILE << " = " << host_file_ << "\n";
+    ss << "   " << ecf::environment::ECF_HOSTFILE_POLICY << " = " << host_file_policy_ << "\n";
     ss << "   " << ecf::environment::ECF_TIMEOUT << " = " << timeout_ << "\n";
     ss << "   " << ecf::environment::ECF_ZOMBIE_TIMEOUT << " = " << zombie_timeout_ << "\n";
     ss << "   " << ecf::environment::ECF_CONNECT_TIMEOUT << " = " << connect_timeout_ << "\n";
@@ -252,6 +257,15 @@ void ClientEnvironment::read_environment_variables() {
     }
 
     ecf::environment::get(ecf::environment::ECF_HOSTFILE, host_file_);
+
+    host_file_policy_ = ECF_HOSTFILE_POLICY_TASK;
+    ecf::environment::get(ecf::environment::ECF_HOSTFILE_POLICY, host_file_policy_);
+    // ensure the policy is lower case
+    ecf::algorithm::tolower(host_file_policy_);
+    // ensure the policy is either "all" or "task", otherwise default to "task"
+    if (host_file_policy_ != ECF_HOSTFILE_POLICY_ALL && host_file_policy_ != ECF_HOSTFILE_POLICY_TASK) {
+        host_file_policy_ = ECF_HOSTFILE_POLICY_TASK;
+    }
 
     ecf::environment::get(ecf::environment::ECF_RID, remote_id_);
 
@@ -308,55 +322,20 @@ void ClientEnvironment::read_environment_variables() {
 }
 
 bool ClientEnvironment::parseHostsFile(std::string& errorMsg) {
-    std::vector<std::string> lines;
-    if (!ecf::File::splitFileIntoLines(host_file_, lines, true /*IGNORE EMPTY LINES*/)) {
-        std::stringstream ss;
-        ss << "ClientEnvironment:: Could not open the hosts file " << host_file_;
-        errorMsg += ss.str();
-        return false;
+
+    std::string configured_port = host_vec_.empty() ? ecf::Str::DEFAULT_PORT_NUMBER() : host_vec_[0].second;
+    int port                    = ecf::convert_to<int>(configured_port);
+
+    try {
+        auto alternate_hosts_file   = ecf::HostsFile::parse(host_file_, port);
+        const auto& alternate_hosts = alternate_hosts_file.hosts();
+
+        using std::begin, std::end;
+        host_vec_.insert(end(host_vec_), begin(alternate_hosts), end(alternate_hosts));
     }
-
-    // The Home server and port should be at index 0.
-    std::string job_supplied_port = ecf::Str::DEFAULT_PORT_NUMBER();
-    if (!host_vec_.empty())
-        job_supplied_port = host_vec_[0].second;
-
-    // Each line should have the format: We only read in the first token.
-    //       host        # comment
-    //       host:port   # another comment
-    // If no port is specified we default to port read in from the environment
-    // if that was not specified we default to Str::DEFAULT_PORT_NUMBER()
-    auto theEnd = lines.end();
-    for (auto i = lines.begin(); i != theEnd; ++i) {
-
-        std::vector<std::string> tokens;
-        ecf::Str::split((*i), tokens);
-        if (tokens.empty())
-            continue;
-        if (tokens[0][0] == '#') {
-            //			std::cout << "Ignoring line:'" << *i << "'\n";
-            continue;
-        }
-
-        std::string theBackupHost;
-        std::string thePort;
-
-        std::size_t colonPos = tokens[0].find_first_of(':');
-        if (colonPos == std::string::npos) {
-            // When the port is *NOT* specified, we must use the job supplied port.
-            // i.e. the one read in from the environment
-            theBackupHost = tokens[0];
-            thePort       = job_supplied_port;
-            //			std::cout << "Host = " << theBackupHost << " Port is  " << thePort << "\n";
-        }
-        else {
-            theBackupHost = tokens[0].substr(0, colonPos);
-            thePort       = tokens[0].substr(colonPos + 1);
-            //			std::cout << "Host = " << theBackupHost << " Port is specified " << thePort << "\n";
-        }
-
-        // std::cout << "Host = " << theBackupHost << "  " << thePort << "\n";
-        host_vec_.emplace_back(theBackupHost, thePort);
+    catch (const ecf::HostsFileFailure& e) {
+        errorMsg = e.what();
+        return false;
     }
 
     return true;
@@ -397,4 +376,14 @@ const std::string& ClientEnvironment::get_password(const char* env, const std::s
     }
 
     return ecf::Str::EMPTY();
+}
+
+bool ClientEnvironment::host_file_policy_is_task() const {
+    // If the host file policy is not set or is set to "task", then we use the task policy.
+    return host_file_policy_.empty() or host_file_policy_ == ECF_HOSTFILE_POLICY_TASK;
+}
+
+bool ClientEnvironment::host_file_policy_is_all() const {
+    // If the host file policy is set to "all", then we use the all policy.
+    return host_file_policy_ == ECF_HOSTFILE_POLICY_ALL;
 }
