@@ -35,6 +35,7 @@ const char* ClientDoc::class_client() {
            "begin() and re-queue commands.\n"
            "* ECF_TIMEOUT <int> : Max time in seconds for client to deliver message to main server\n"
            "* ECF_HOSTFILE <string> : File that lists alternate hosts to try, if connection to main host fails\n"
+           "* ECF_HOSTFILE_POLICY <string> : The policy (\"task\" or \"all\") to define which commands consider using alternate hosts.\n"
            "* ECF_DENIED <any> : Provides a way for child to exit with an error, if server denies connection. Avoids "
            "24hr wait. Note: when you have hundreds of tasks, using this approach requires a lot of manual "
            "intervention to determine job status\n"

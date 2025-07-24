@@ -226,6 +226,23 @@ std::optional<Cmd_ptr> ClientInvoker::get_cmd_from_args(const CommandLine& cl) c
     return cts_cmd;
 }
 
+bool ClientInvoker::is_not_retrying(const ClientToServerCmd& cmd) const {
+    // Connecting to multiple hosts is _NOT_ attempted when:
+
+    // 1/ Testing
+    bool is_testing = test_;
+    // 2/ Executing Ping command _AND_ HostFile policy is set to "task"
+    bool is_ping_cmd = cmd.ping_cmd();
+    // 3/ Environment variable ECF_DENIED is set
+    bool is_denied = clientEnv_.denied();
+    // 4/ Executing any User command _AND_ HostFile policy is set to "task"
+    bool is_user_cmd              = !cmd.connect_to_different_servers();
+    bool is_host_file_policy_task = clientEnv_.host_file_policy_is_task();
+
+    return is_testing || (is_ping_cmd && is_user_cmd && is_host_file_policy_task) || is_denied ||
+           (is_user_cmd && is_host_file_policy_task);
+}
+
 int ClientInvoker::get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const {
     try {
         // read in program option, and construct the client to server commands from them.
@@ -387,7 +404,6 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
         bool never_polled = true; // don't wait for the first host only subsequent ones
 
         while (true) {
-
             // for each host try connecting several times. To compensate for network glitches.
             int no_of_tries = connection_attempts_;
             while (no_of_tries > 0) {
@@ -420,6 +436,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
                     boost::asio::io_context io;
 #ifdef ECF_OPENSSL
+
                     if (clientEnv_.ssl()) {
 
                         if (clientEnv_.debug()) {
@@ -602,16 +619,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
             //
             // The ecFlow client may try to connect to multiple hosts, as specified in the ECF_HOSTFILE
+            // See ClientEnvironment::is_not_retrying() to see when this is not done.
             //
-            // Attempting other hosts only happens for Task commands.
-            //
-            // The multiple hosts connection is ***NOT*** attempted when:
-            //  1/ Testing
-            //  2/ Executing Ping command
-            //  3/ Environment variable ECF_DENIED is set
-            //  4/ Executing any User command
-            //
-            if (!cts_cmd->connect_to_different_servers() || test_ || cts_cmd->ping_cmd() || clientEnv_.denied()) {
+            if (is_not_retrying(*cts_cmd)) {
                 std::stringstream ss;
                 ss << TimeStamp::now() << "Request( " << cts_cmd->print_short() << " )";
                 if (clientEnv_.denied()) {
@@ -633,9 +643,10 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                      << " clientEnv_.max_child_cmd_timeout() = " << clientEnv_.max_child_cmd_timeout() << endl;
             }
 
+            // The ecFlow client will continue to retry connecting to the server, until it reaches the timeout limit
             if (duration.total_seconds() >= clientEnv_.max_child_cmd_timeout()) {
                 std::stringstream ss;
-                ss << TimeStamp::now() << "ClientInvoker: Timed out after ECF_TIMOUT("
+                ss << TimeStamp::now() << "ClientInvoker: Timed out after ECF_TIMEOUT("
                    << clientEnv_.max_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
                 std::string msg = ss.str();
                 cout << msg;

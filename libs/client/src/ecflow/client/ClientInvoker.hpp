@@ -404,6 +404,19 @@ public:
 
     std::optional<Cmd_ptr> get_cmd_from_args(const CommandLine& cl) const;
 
+    /**
+     * @brief Check if the client is not retrying connecting to a different server to perform a given command.
+     *
+     * The client should not retry connecting to a different server when:
+     * 1. It is in testing mode.
+     * 2. It is executing a Ping command.
+     * 3. The environment variable ECF_DENIED is set.
+     * 4. It is executing any User command and the HostFile policy is set to "task".
+     *
+     * @return true if the command is not retrying connecting to a different server, false otherwise.
+     */
+    bool is_not_retrying(const ClientToServerCmd& cmd) const;
+
 private:
     /**
      * @return 1 when command is selected; 0 if no command is selected (e.g. --help)

@@ -40,12 +40,13 @@ private:
 
 class WithTestFile {
 public:
-    explicit WithTestFile(fs::path location) : location_{location} {
+    explicit WithTestFile(fs::path location, const std::string& content = "This is a dummy test file.\n")
+        : location_{location} {
         // Caution: We assume that existing test files can be overwritten
 
         {
             std::ofstream os(location_.string(), std::ios::out | std::ios::trunc);
-            os << "This is a dummy test file." << std::endl;
+            os << content;
         }
 
         // Now that the file actually exists, we update the location to the canonical path

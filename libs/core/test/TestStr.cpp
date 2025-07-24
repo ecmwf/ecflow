@@ -501,6 +501,22 @@ BOOST_AUTO_TEST_CASE(test_str_to_int) {
     BOOST_CHECK_MESSAGE(Str::to_int("99 99", 0) == 0, "Expected 0 for failure");
 }
 
+BOOST_AUTO_TEST_CASE(test_str_is_int) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_EQUAL(Str::is_int("0"), true);
+    BOOST_CHECK_EQUAL(Str::is_int("1"), true);
+    BOOST_CHECK_EQUAL(Str::is_int("-0"), true);
+    BOOST_CHECK_EQUAL(Str::is_int("-1"), true);
+    BOOST_CHECK_EQUAL(Str::is_int(""), false);
+    BOOST_CHECK_EQUAL(Str::is_int("-"), false);
+    BOOST_CHECK_EQUAL(Str::is_int(" "), false);
+    BOOST_CHECK_EQUAL(Str::is_int("q"), false);
+    BOOST_CHECK_EQUAL(Str::is_int("q22"), false);
+    BOOST_CHECK_EQUAL(Str::is_int("99 99"), false);
+    BOOST_CHECK_EQUAL(Str::is_int("99 99"), false);
+}
+
 BOOST_AUTO_TEST_CASE(test_extract_data_member_value) {
     ECF_NAME_THIS_TEST();
 
