@@ -42,6 +42,7 @@ public:
     using path_t     = std::string;
     using name_t     = std::string;
     using listener_t = std::string;
+    using active_t   = std::string;
     using url_t      = std::string;
     using schema_t   = std::string;
     using polling_t  = std::string;
@@ -84,14 +85,15 @@ public:
     [[nodiscard]] AvisoAttr make_detached() const;
 
     [[nodiscard]] inline Node* parent() const { return parent_; }
-    [[nodiscard]] inline const std::string& name() const { return name_; }
-    [[nodiscard]] inline const std::string& listener() const { return listener_; }
-    [[nodiscard]] inline const std::string& url() const { return url_; }
-    [[nodiscard]] inline const std::string& schema() const { return schema_; }
+    [[nodiscard]] inline const name_t& name() const { return name_; }
+    [[nodiscard]] inline const listener_t& listener() const { return listener_; }
+    [[nodiscard]] inline const url_t& url() const { return url_; }
+    [[nodiscard]] inline const schema_t& schema() const { return schema_; }
     [[nodiscard]] inline polling_t polling() const { return polling_; }
     [[nodiscard]] inline revision_t revision() const { return revision_; }
-    [[nodiscard]] inline const std::string& auth() const { return auth_; }
-    [[nodiscard]] inline const std::string& reason() const { return reason_; }
+    [[nodiscard]] inline const auth_t& auth() const { return auth_; }
+    [[nodiscard]] inline const reason_t& reason() const { return reason_; }
+    [[nodiscard]] inline const active_t& active() const { return active_; }
     [[nodiscard]] path_t path() const;
 
     void set_listener(std::string_view listener);
@@ -147,23 +149,96 @@ private:
                           const std::string& aviso_auth) const;
     void stop_controller(const std::string& aviso_path) const;
 
+    /**
+     * @brief The parent Node of this AvisoAttr.
+     *
+     *  -- This field is *not* serialized nor persisted; it is only used on the server side.
+     */
     Node* parent_{nullptr}; // only ever used on the server side, to access parent Node variables
+
+    /**
+     * @brief The parent Node path of this AvisoAttr.
+     */
     path_t parent_path_;
+
+    /**
+     * @brief The name of this AvisoAttr
+     */
     name_t name_;
+
+    /**
+     * @brief The listener used to launch the Aviso listener
+     *
+     * This listener is the original configuration, and may contain variable placeholders.
+     */
     listener_t listener_;
+
+    /**
+     * @brief The URL used to launch the Aviso listener
+     *
+     * This configuration parameter may contain variable placeholders.
+     */
     url_t url_;
+
+    /**
+     * @brief The schema used to launch the Aviso listener
+     *
+     * This configuration parameter may contain variable placeholders.
+     */
     schema_t schema_;
+
+    /**
+     * @brief The polling interval used to launch the Aviso listener
+     *
+     * This configuration parameter may contain variable placeholders.
+     */
     polling_t polling_;
 
+    /**
+     * @brief The authentication token used to launch the Aviso listener
+     *
+     * This configuration parameter may contain variable placeholders.
+     */
     auth_t auth_;
-    mutable reason_t reason_{};
 
     // The following are mutable as they are modified by the const method isFree()
-    mutable revision_t revision_;
-    mutable unsigned int state_change_no_{0}; // *not* persisted, only used on server side
 
-    // The controller is only instanciated between start() and finish() calls
-    // This allows the AvisoAttr have a copy-ctor and assignment operator
+    /**
+     * @brief A message buffer indicating, if any, the reason for the latest failure received from Aviso
+     *
+     * This field is empty if no error detected; otherwise contains a user facing message describing the error.
+     **/
+    mutable reason_t reason_{};
+
+    /**
+     * @brief The latest revision received from Aviso
+     *
+     * This is a 'marker' of the lastest revision processed, and is used to avoid receiving repeated notifications.
+     **/
+    mutable revision_t revision_;
+
+    /**
+     * @brief The state change number, used to detect changes in the Aviso attribute
+     *
+     *  -- This field is *not* serialized nor persisted; it is only used on the server side.
+     */
+    mutable unsigned int state_change_no_{0};
+
+    /**
+     * @brief A 'cache' buffer, storing the fully configured (i.e. all variables substituted) Aviso listener
+     *
+     * This is the listener actually used to configure the controller.
+     */
+    mutable active_t active_;
+
+    /**
+     * @brief The 'backgroung thread' controller, which is responsible for polling the Aviso service
+     *
+     * The controller is only instanciated between start() and finish() calls.
+     * This allows AvisoAttr to have a copy-ctor and assignment operator.
+     *
+     *  -- This field is *not* serialized nor persisted; it is only used on the server side.
+     **/
     mutable controller_ptr_t controller_;
 };
 
@@ -182,6 +257,7 @@ void serialize(Archive& ar, AvisoAttr& aviso, [[maybe_unused]] std::uint32_t ver
     ar & aviso.auth_;
     ar & aviso.reason_;
     ar & aviso.revision_;
+    ar & aviso.active_;
 }
 
 } // namespace ecf
