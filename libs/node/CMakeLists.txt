@@ -15,6 +15,7 @@ set(test_srcs
   test/TestAdd.cpp
   test/TestAlias.cpp
   test/TestAssignmentOperator.cpp
+  test/TestAvisoAttr.cpp
   test/TestChangeMgrSingleton.cpp
   test/TestClientSuiteMgr.cpp
   test/TestCopyConstructor.cpp

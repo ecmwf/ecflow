@@ -19,7 +19,7 @@
 //================================
 
 VAvisoAttrType::VAvisoAttrType() : VAttributeType("aviso") {
-    dataCount_                         = 9;
+    dataCount_                         = 10;
     searchKeyToData_["aviso_name"]     = NameIndex;
     searchKeyToData_["aviso_listener"] = ListenerIndex;
     searchKeyToData_["aviso_url"]      = UrlIndex;
@@ -28,6 +28,7 @@ VAvisoAttrType::VAvisoAttrType() : VAttributeType("aviso") {
     searchKeyToData_["aviso_revision"] = RevisionIndex;
     searchKeyToData_["aviso_auth"]     = AuthIndex;
     searchKeyToData_["aviso_reason"]   = ReasonIndex;
+    searchKeyToData_["aviso_active"]   = ActiveIndex;
     scanProc_                          = VAvisoAttr::scan;
 }
 
@@ -41,8 +42,12 @@ QString VAvisoAttrType::toolTip(QStringList d) const {
         t += "<b>Polling:</b> " + d[PollingIndex] + " s<br>";
         t += "<b>Revision:</b> " + d[RevisionIndex] + "<br>";
         t += "<b>Auth:</b> " + d[AuthIndex];
-        if (auto& reason = d[ReasonIndex]; !reason.isEmpty()) {
-            t += "<br><b>Reason:</b> <span style=\"color:red\">" + d[ReasonIndex] + "</span>";
+        if (auto& cfg = d[ActiveIndex]; !cfg.isEmpty()) {
+            t += "<br><b>Active:</b> <span style=\"color:green\">" + cfg + "</span>";
+        }
+        if (auto& reason = d[ReasonIndex]; reason.size() > 2) {
+            // The 'reason' is a single-quoted string, so 2 characters long means _empty_
+            t += "<br><b>Reason:</b> <span style=\"color:red\">" + reason + "</span>";
         }
     }
     return t;
@@ -74,7 +79,8 @@ void VAvisoAttrType::encode(const ecf::AvisoAttr& aviso, QStringList& data, bool
          << QString::fromStdString(aviso.polling()) // PollingIndex
          << QString::number(aviso.revision())       // Revision Index
          << QString::fromStdString(aviso.auth())    // AuthIndex
-         << QString::fromStdString(aviso.reason()); // ReasonIndex
+         << QString::fromStdString(aviso.reason())  // ReasonIndex
+         << QString::fromStdString(aviso.active()); // ActiveIndex
 }
 
 void VAvisoAttrType::encode_empty(QStringList& data) const {
@@ -111,8 +117,9 @@ QStringList VAvisoAttr::data(bool firstLine) const {
     QStringList s;
     if (parent_->node_) {
         const std::vector<ecf::AvisoAttr>& v = parent_->node_->avisos();
-        if (index_ < static_cast<int>(v.size()))
+        if (index_ < static_cast<int>(v.size())) {
             atype->encode(v[index_], s, firstLine);
+        }
 
         // this can happen temporarily during update when:
         //
@@ -124,8 +131,9 @@ QStringList VAvisoAttr::data(bool firstLine) const {
         // * In this case, as safety measure, we encode an empty attribute.
         //   When the notification arrives all the attributes of the given node will be rescanned
         //   and will be set with the correct state.
-        else
+        else {
             atype->encode_empty(s);
+        }
     }
     return s;
 }
