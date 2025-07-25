@@ -60,7 +60,7 @@ AvisoAttr::AvisoAttr(Node* parent,
       revision_{revision},
       controller_{nullptr} {
     if (!ecf::Str::valid_name(name_)) {
-        throw ecf::InvalidArgument(ecf::Message("Invalid AvisoAttr name :", name_));
+        THROW_EXCEPTION(ecf::InvalidArgument, "Invalid AvisoAttr name :" << name_);
     }
 }
 
@@ -148,19 +148,19 @@ bool AvisoAttr::isFree() const {
                 this->revision_ = response.configuration.revision();
                 parent_->get_flag().clear(Flag::REMOTE_ERROR);
                 parent_->get_flag().set_state_change_no(state_change_no_);
-                reason_ = "";
+                reason_ = implementation::ensure_single_quotes("");
                 return true;
             },
             [this](const ecf::service::aviso::AvisoNoMatch& response) {
                 parent_->get_flag().clear(Flag::REMOTE_ERROR);
                 parent_->get_flag().set_state_change_no(state_change_no_);
-                reason_ = "";
+                reason_ = implementation::ensure_single_quotes("");
                 return false;
             },
             [this](const ecf::service::aviso::AvisoError& response) {
                 parent_->get_flag().set(Flag::REMOTE_ERROR);
                 parent_->get_flag().set_state_change_no(state_change_no_);
-                reason_ = response.reason();
+                reason_ = implementation::ensure_single_quotes(std::string{response.reason()});
                 return false;
             }},
         back);
@@ -178,7 +178,7 @@ namespace {
 
 void ensure_resolved_variable(std::string_view value, std::string_view default_value, std::string_view msg) {
     if (value.find(default_value) != std::string::npos) {
-        throw std::runtime_error(Message(msg, value).str());
+        THROW_RUNTIME(msg << value);
     }
 }
 
@@ -191,14 +191,18 @@ void AvisoAttr::start() const {
     std::string aviso_path = path();
 
     // Listener -- the configuration for the Aviso listener
-    auto aviso_listener = listener_;
-    aviso_listener      = aviso_listener.substr(1, aviso_listener.size() - 2);
+    active_ = listener_;
+    //  .. replace ecflow variables in the listener
+    parent_->variableSubstitution(active_);
+    //  .. ensure that the listener is a single-quoted string
+    active_ = active_.substr(1, active_.size() - 2);
+    LOG(Log::DBG, Message("AvisoAttr: listener after variable substitution: ", active_, ")"));
 
     // URL -- the URL for the Aviso server
     std::string aviso_url = url_;
     parent_->variableSubstitution(aviso_url);
     if (aviso_url.empty()) {
-        throw std::runtime_error("AvisoAttr: invalid Aviso URL detected for " + aviso_path);
+        THROW_RUNTIME("AvisoAttr: invalid Aviso URL detected for " + aviso_path);
     }
 
     // Schema -- the path to the Schema used to interpret the Aviso notifications
@@ -208,7 +212,7 @@ void AvisoAttr::start() const {
     std::string aviso_polling = polling_;
     parent_->variableSubstitution(aviso_polling);
     if (aviso_polling.empty()) {
-        throw std::runtime_error("AvisoAttr: invalid Aviso polling interval detected for " + aviso_path);
+        THROW_RUNTIME("AvisoAttr: invalid Aviso polling interval detected for " + aviso_path);
     }
 
     std::string aviso_auth = auth_;
@@ -224,11 +228,11 @@ void AvisoAttr::start() const {
         polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
     }
     catch (boost::bad_lexical_cast& e) {
-        throw std::runtime_error(
+        THROW_RUNTIME(
             Message("AvisoAttr: failed to convert polling; expected an integer, but found: ", aviso_polling).str());
     }
 
-    start_controller(aviso_path, aviso_listener, aviso_url, aviso_schema, polling, aviso_auth);
+    start_controller(aviso_path, active_, aviso_url, aviso_schema, polling, aviso_auth);
 }
 
 void AvisoAttr::start_controller(const std::string& aviso_path,
@@ -246,6 +250,8 @@ void AvisoAttr::start_controller(const std::string& aviso_path,
         // Controller -- effectively start the Aviso listener
         // n.b. this must be done after subscribing in the controller, so that the polling interval is set
         controller_->start();
+
+        state_change_no_ = Ecf::incr_state_change_no();
     }
 }
 
@@ -258,6 +264,11 @@ void AvisoAttr::stop_controller(const std::string& aviso_path) const {
         // Controller -- shutdown up the Aviso controller
         controller_->stop();
         controller_ = nullptr;
+
+        // Reset the configured listener buffer
+        active_ = "";
+
+        state_change_no_ = Ecf::incr_state_change_no();
     }
 }
 
