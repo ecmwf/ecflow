@@ -421,16 +421,18 @@ namespace {
  * @return 0 == First, 1 == Middle, 2 == Last, -1 == Invalid
  */
 template <typename REPEAT>
-static int get_repeat_position(const REPEAT& repeat) {
+int get_repeat_position(const REPEAT& repeat) {
     if (repeat.indexNum() < 2) {
         return -1; // == Invalid
     }
 
-    if (repeat.index_or_value() == 0) {
+    auto limits = ecf::limits_of(&repeat);
+
+    if (limits.is_first()) {
         return 0; // == First
     }
 
-    if (repeat.index_or_value() == repeat.indexNum()) {
+    if (limits.is_last()) {
         return 2; // == Last
     }
 
