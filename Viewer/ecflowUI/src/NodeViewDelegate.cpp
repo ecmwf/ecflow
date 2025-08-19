@@ -1769,18 +1769,22 @@ void NodeViewDelegate::renderRepeat(QPainter* painter,
 
         QString endDot;
         if (pos == "0") {
+            // first ...
             name += "=";
             endDot = "...";
         }
         else if (pos == "1") {
+            // ... middle ...
             name += "=...";
             endDot = "...";
         }
         else if (pos == "2") {
+            // last ...
             name += "=...";
             endDot = "";
         }
         else {
+            // no dots
             name += "=";
             endDot = "";
         }
