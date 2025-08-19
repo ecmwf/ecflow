@@ -81,7 +81,7 @@ struct Context
             case PrintStyle::MIGRATE:
                 return Context{Style{PrintStyle::MIGRATE}, Format{false, 0, 0}};
             default:
-                return Context{Style{PrintStyle::NOTHING}, Format{false, 0, 0}};
+                return Context{Style{PrintStyle::NOTHING}, Format{true, 2, 0}};
         }
     }
 };
