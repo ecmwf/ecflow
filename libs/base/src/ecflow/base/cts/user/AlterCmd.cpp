@@ -17,6 +17,8 @@
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Enumerate.hpp"
@@ -240,6 +242,14 @@ bool AlterCmd::equals(ClientToServerCmd* rhs) const {
         return false;
     }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t AlterCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t AlterCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void AlterCmd::alter_and_attr_type(std::string& alter_type, std::string& attr_type) const {
@@ -603,9 +613,9 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
     return doJobSubmission(as);
 }
 
-bool AlterCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, paths_);
-}
+// bool AlterCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, paths_);
+// }
 
 const char* AlterCmd::arg() {
     return CtsApi::alterArg();

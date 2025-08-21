@@ -65,27 +65,16 @@ public:
     void shutdown() override { set_server_state(SState::SHUTDOWN); }
     void halted() override { set_server_state(SState::HALTED); }
     void restart() override { set_server_state(SState::RUNNING); }
+
+    ecf::AuthenticationService& authentication() override { return authentication_service_; }
+    const ecf::AuthenticationService& authentication() const override { return authentication_service_; }
+
+    ecf::AuthorisationService& authorisation() override { return authorisation_service_; }
+    const ecf::AuthorisationService& authorisation() const override { return authorisation_service_; }
+
     bool reloadWhiteListFile(std::string&) override { return true; }
     bool reloadPasswdFile(std::string& errorMsg) override { return true; }
     bool reloadCustomPasswdFile(std::string& errorMsg) override { return true; }
-    bool authenticateReadAccess(const std::string&, bool custom_user, const std::string& passwd) override {
-        return true;
-    }
-    bool authenticateReadAccess(const std::string&,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::string&) override {
-        return true;
-    }
-    bool authenticateReadAccess(const std::string&,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::vector<std::string>&) override {
-        return true;
-    }
-    bool authenticateWriteAccess(const std::string&) override { return true; }
-    bool authenticateWriteAccess(const std::string&, const std::string&) override { return true; }
-    bool authenticateWriteAccess(const std::string&, const std::vector<std::string>&) override { return true; }
 
     bool lock(const std::string& user) override {
         if (userWhoHasLock_.empty()) {
@@ -137,6 +126,9 @@ private:
     std::string userWhoHasLock_;
     SState::State serverState_{SState::RUNNING};
     SState::State server_state_to_preserve_{SState::RUNNING};
+
+    ecf::AuthenticationService authentication_service_;
+    ecf::AuthorisationService authorisation_service_;
 };
 
 /// This class is used to create a Mock Server, so that we can make direct
