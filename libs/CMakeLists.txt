@@ -57,6 +57,10 @@ set(srcs
   # Base -- Headers
   base/src/ecflow/base/AbstractClientEnv.hpp
   base/src/ecflow/base/AbstractServer.hpp
+  base/src/ecflow/base/Authentication.hpp
+  base/src/ecflow/base/AuthenticationDetails.hpp
+  base/src/ecflow/base/Authorisation.hpp
+  base/src/ecflow/base/AuthorisationDetails.hpp
   base/src/ecflow/base/Client.hpp
   base/src/ecflow/base/ClientOptionsParser.hpp
   base/src/ecflow/base/ClientToServerRequest.hpp
@@ -64,6 +68,7 @@ set(srcs
   base/src/ecflow/base/Connection.hpp
   base/src/ecflow/base/Gnuplot.hpp
   base/src/ecflow/base/HttpClient.hpp
+  base/src/ecflow/base/Identification.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
   base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerReply.hpp
@@ -135,12 +140,15 @@ set(srcs
   base/src/ecflow/base/stc/StcCmd.hpp
   base/src/ecflow/base/stc/ZombieGetCmd.hpp
   # Base -- Sources
+  base/src/ecflow/base/Authentication.cpp
+  base/src/ecflow/base/Authorisation.cpp
   base/src/ecflow/base/Client.cpp
   base/src/ecflow/base/ClientOptionsParser.cpp
   base/src/ecflow/base/ClientToServerRequest.cpp
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
   base/src/ecflow/base/HttpClient.cpp
+  base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerReply.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp
@@ -266,6 +274,7 @@ set(srcs
   core/src/ecflow/core/PasswordEncryption.hpp
   core/src/ecflow/core/Pid.hpp
   core/src/ecflow/core/PrintStyle.hpp
+  core/src/ecflow/core/Result.hpp
   core/src/ecflow/core/SState.hpp
   core/src/ecflow/core/Serialization.hpp
   core/src/ecflow/core/Stl.hpp
@@ -351,6 +360,7 @@ set(srcs
   node/src/ecflow/node/Node.hpp
   node/src/ecflow/node/NodeContainer.hpp
   node/src/ecflow/node/NodeFwd.hpp
+  node/src/ecflow/node/NodePathAlgorithms.hpp
   node/src/ecflow/node/NodeState.hpp
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
@@ -401,6 +411,10 @@ set(srcs
   node/src/ecflow/node/parser/VariableParser.hpp
   node/src/ecflow/node/parser/VerifyParser.hpp
   node/src/ecflow/node/parser/ZombieAttrParser.hpp
+  node/src/ecflow/node/permissions/ActivePermissions.hpp
+  node/src/ecflow/node/permissions/Allowed.hpp
+  node/src/ecflow/node/permissions/Permission.hpp
+  node/src/ecflow/node/permissions/Permissions.hpp
   # Node -- Sources
   node/src/ecflow/node/Alias.cpp
   node/src/ecflow/node/Attr.cpp
@@ -480,8 +494,14 @@ set(srcs
   node/src/ecflow/node/parser/VariableParser.cpp
   node/src/ecflow/node/parser/VerifyParser.cpp
   node/src/ecflow/node/parser/ZombieAttrParser.cpp
+  node/src/ecflow/node/permissions/ActivePermissions.cpp
+  node/src/ecflow/node/permissions/Allowed.cpp
+  node/src/ecflow/node/permissions/Permission.cpp
+  node/src/ecflow/node/permissions/Permissions.cpp
 
   # Server -- Headers
+  server/src/ecflow/server/AuthenticationService.hpp
+  server/src/ecflow/server/AuthorisationService.hpp
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
@@ -495,6 +515,8 @@ set(srcs
   server/src/ecflow/server/TcpServer.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.hpp>
   # Server -- Sources
+  server/src/ecflow/server/AuthenticationService.cpp
+  server/src/ecflow/server/AuthorisationService.cpp
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp
@@ -550,36 +572,36 @@ set(srcs
 
 ecbuild_add_library(
   TARGET
-    ecflow_all
+  ecflow_all
   NOINSTALL
   TYPE STATIC
   SOURCES
-    ${srcs}
+  ${srcs}
   PUBLIC_INCLUDES
-    attribute/src
-    base/src
-    client/src
-    core/src
-    node/src
-    service/src
-    server/src
-    udp/src
-    ${CMAKE_BINARY_DIR}/generated/src
+  attribute/src
+  base/src
+  client/src
+  core/src
+  node/src
+  service/src
+  server/src
+  udp/src
+  ${CMAKE_BINARY_DIR}/generated/src
   PUBLIC_LIBS
-    nlohmann::json
-    cereal::cereal # this needs to be public as it appears in public header files used downstream
-    httplib::httplib
-    $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
-    Boost::filesystem
-    Boost::date_time
-    Boost::program_options
-    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
-    $<$<BOOL:${Crypt_FOUND}>:crypt::crypt>
-    Threads::Threads
-    $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
+  nlohmann::json
+  cereal::cereal # this needs to be public as it appears in public header files used downstream
+  httplib::httplib
+  $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
+  Boost::filesystem
+  Boost::date_time
+  Boost::program_options
+  $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  $<$<BOOL:${Crypt_FOUND}>:crypt::crypt>
+  Threads::Threads
+  $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   PUBLIC_DEFINITIONS
-    CMAKE
-    $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+  CMAKE
+  $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
 )
 target_clangformat(ecflow_all)
 

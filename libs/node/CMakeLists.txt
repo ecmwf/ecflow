@@ -38,9 +38,11 @@ set(test_srcs
   test/TestMissNextTimeSlot.cpp
   test/TestMovePeer.cpp
   test/TestNodeBeginRequeue.cpp
+  test/TestNodePathAlgorithms.cpp
   test/TestNodeState.cpp
   test/TestNode_main.cpp # test entry point
   test/TestOrder.cpp
+  test/TestPermissions.cpp
   test/TestPersistence.cpp
   test/TestPreProcessing.cpp
   test/TestRepeatWithTimeDependencies.cpp

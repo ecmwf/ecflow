@@ -12,6 +12,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Version.hpp"
@@ -33,6 +35,14 @@ bool ServerVersionCmd::equals(ClientToServerCmd* rhs) const {
     if (!the_rhs)
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t ServerVersionCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t ServerVersionCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 const char* ServerVersionCmd::theArg() const {
