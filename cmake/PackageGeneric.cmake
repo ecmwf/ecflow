@@ -18,6 +18,8 @@ ecbuild_dont_pack(
   DIRS
     # ignore local notes
     .scratch
+    .sandbox
+    .deploy
     SCRATCH
     CUSTOMER
     # ignore source control directories
@@ -39,20 +41,17 @@ ecbuild_dont_pack(
     libs/simulator/doc
     libs/pyext/doc
     libs/server/doc
-    Doc/misc
-    Doc/sphinx-examples
     # ignore IDE configuration directories
     .settings
+    .vscode
   FILES
     # ignore IDE configuration files
     .project
     .cproject
     .pydevproject
     # ignore python ancillary files
-    Pyext/.pydevproject
-    Pyext/samples/test.py
-    Pyext/samples/confluence_add_attachment.py
-    build_scripts/.pydevproject
+    libs/pyext/samples/test.py
+    libs/pyext/samples/confluence_add_attachment.py
 )
 
 # prepares a tar.gz of your sources and/or binaries
