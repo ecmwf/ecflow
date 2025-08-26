@@ -76,7 +76,6 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    Boost::timer
 )
 target_clangformat(u_core
   CONDITION ENABLE_TESTS

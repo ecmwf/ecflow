@@ -164,7 +164,6 @@ if (ENABLE_ALL_TESTS)
       ecflow_all
       test_scaffold
       Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-      Boost::timer
   )
   target_clangformat(p_parser
     CONDITION ENABLE_TESTS
@@ -197,7 +196,6 @@ if (ENABLE_ALL_TESTS)
       ecflow_all
       test_scaffold
       Boost::boost # Boost header-only libraries must be available
-      Boost::timer
   )
   target_clangformat(p_parser_timer
     CONDITION ENABLE_TESTS

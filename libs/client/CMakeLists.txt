@@ -102,7 +102,6 @@ ecbuild_add_test(
     test_harness.base
     test_harness.client
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   DEPENDS
     ecflow_server # the server is launched to support tests

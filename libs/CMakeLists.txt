@@ -264,6 +264,7 @@ set(srcs
   core/src/ecflow/core/Passwd.hpp
   core/src/ecflow/core/PasswdFile.hpp
   core/src/ecflow/core/PasswordEncryption.hpp
+  core/src/ecflow/core/PerformanceTimer.hpp
   core/src/ecflow/core/Pid.hpp
   core/src/ecflow/core/PrintStyle.hpp
   core/src/ecflow/core/SState.hpp
@@ -280,7 +281,6 @@ set(srcs
   core/src/ecflow/core/ZombieCtrlAction.hpp
   core/src/ecflow/core/cereal_boost_time.hpp
   core/src/ecflow/core/cereal_optional_nvp.hpp
-  core/src/ecflow/core/perf_timer.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
   # Core -- Sources
   core/src/ecflow/core/AssertTimer.cpp
@@ -304,6 +304,7 @@ set(srcs
   core/src/ecflow/core/NodePath.cpp
   core/src/ecflow/core/Passwd.cpp
   core/src/ecflow/core/PasswdFile.cpp
+  core/src/ecflow/core/PerformanceTimer.cpp
   core/src/ecflow/core/Pid.cpp
   core/src/ecflow/core/PrintStyle.cpp
   core/src/ecflow/core/SState.cpp

@@ -8,15 +8,12 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_core_perf_timer_HPP
-#define ecflow_core_perf_timer_HPP
+#ifndef ecflow_core_PerformanceTimer_HPP
+#define ecflow_core_PerformanceTimer_HPP
 
-#include <cassert>
 #include <chrono>
-#include <functional> // std::ref
+#include <functional>
 #include <iostream>
-#include <string>
-#include <vector>
 
 // TODO: remove when we use c++17
 template <typename F, typename... Args>
@@ -60,4 +57,57 @@ public:
     Resolution elapsed() const { return std::chrono::duration_cast<Resolution>(Clock::now() - start_); }
 };
 
-#endif /* ecflow_core_perf_timer_HPP */
+namespace ecf {
+
+struct PerformanceMeasure
+{
+    std::chrono::nanoseconds wall;
+    std::chrono::nanoseconds user;
+    std::chrono::nanoseconds system;
+
+    void clear() {
+        wall   = std::chrono::nanoseconds{0};
+        user   = std::chrono::nanoseconds{0};
+        system = std::chrono::nanoseconds{0};
+    }
+
+    static PerformanceMeasure current();
+};
+
+inline PerformanceMeasure operator-(const PerformanceMeasure& lhs, const PerformanceMeasure& rhs) {
+    auto wall   = lhs.wall - rhs.wall;
+    auto user   = lhs.user - rhs.user;
+    auto system = lhs.system - rhs.system;
+    return PerformanceMeasure{wall, user, system};
+}
+
+class PerformanceTimer {
+public:
+    PerformanceTimer() noexcept : times_{PerformanceMeasure::current()} {}
+
+    void start() noexcept { times_ = PerformanceMeasure::current(); }
+    PerformanceMeasure elapsed() const { return PerformanceMeasure::current() - times_; }
+
+private:
+    PerformanceMeasure times_;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const PerformanceTimer& timer) {
+    auto elapsed = timer.elapsed();
+    auto w       = static_cast<double>(elapsed.wall.count()) / 1000000000.0;
+    auto u       = static_cast<double>(elapsed.user.count()) / 1000000000.0;
+    auto s       = static_cast<double>(elapsed.system.count()) / 1000000000.0;
+    auto t       = u + s;
+    auto p       = static_cast<double>(t) / static_cast<double>(w);
+    os << w << "s wall, (" << u << "s user + " << s << "s system = " << t << "s) CPU (" << p << "%)";
+    return os;
+}
+
+class ScopedPerformanceTimer : public PerformanceTimer {
+public:
+    ~ScopedPerformanceTimer() noexcept { std::cout << *this << std::endl; };
+};
+
+} // namespace ecf
+
+#endif /* ecflow_core_PerformanceTimer_HPP */
