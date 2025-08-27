@@ -11,8 +11,7 @@
 #ifndef ecflow_node_JobsParam_HPP
 #define ecflow_node_JobsParam_HPP
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 

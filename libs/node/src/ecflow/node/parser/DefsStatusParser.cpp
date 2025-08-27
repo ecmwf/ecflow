@@ -18,7 +18,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 bool DefsStatusParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     if (lineTokens.size() < 2)

@@ -9,9 +9,8 @@
  */
 
 #include <iostream>
-#include <limits> // for std::numeric_limits<int>::max()
+#include <limits>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
@@ -26,10 +25,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
 
@@ -80,7 +76,8 @@ BOOST_AUTO_TEST_CASE(test_late) {
     BOOST_REQUIRE_MESSAGE(t2, "Expected task to be found");
     BOOST_CHECK_MESSAGE(t2->state() == NState::COMPLETE, "Expected late trigger to work");
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_late_hierarchically) {
@@ -127,7 +124,8 @@ BOOST_AUTO_TEST_CASE(test_late_hierarchically) {
 
     // cout << TestFixture::client().defs() << "\n";
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

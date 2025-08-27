@@ -17,7 +17,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 // #define DEBUG_CRON 1
 

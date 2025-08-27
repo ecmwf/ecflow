@@ -24,10 +24,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
-
 BOOST_AUTO_TEST_SUITE(U_Node)
 
 BOOST_AUTO_TEST_SUITE(T_ExprParser)
@@ -169,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     // The map key  = trigger expression,
     // value.first  = type of the expected root abstract syntax tree
     // value.second = result of expected evaluation
-    map<string, std::pair<string, bool>> exprMap;
+    std::map<std::string, std::pair<std::string, bool>> exprMap;
 
     exprMap["a:value == 0"]  = std::make_pair(AstEqual::stype(), true);
     exprMap["a:value == 10"] = std::make_pair(AstEqual::stype(), false);
@@ -443,7 +439,7 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
         BOOST_CHECK_MESSAGE(ok, errorMsg + "failed for " + p.first);
 
         if (ok) {
-            string expectedRootType       = p.second.first;
+            std::string expectedRootType  = p.second.first;
             bool expectedEvaluationResult = p.second.second;
 
             Ast* top = theExprParser.getAst();
@@ -490,7 +486,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
     // The map key  = trigger expression,
     // value.first  = type of the expected root abstract syntax tree
     // value.second = result of expected evaluation
-    map<string, std::pair<string, bool>> exprMap;
+    std::map<std::string, std::pair<std::string, bool>> exprMap;
 
     exprMap["cal::date_to_julian(A:x) == 0"]                          = std::make_pair(AstEqual::stype(), true);
     exprMap["cal::date_to_julian( 0 ) == cal::date_to_julian( 0 )"]   = std::make_pair(AstEqual::stype(), true);
@@ -503,7 +499,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
 
     int parse_failure = 0;
     int ast_failure   = 0;
-    for (std::pair<string, std::pair<string, bool>> p : exprMap) {
+    for (std::pair<std::string, std::pair<std::string, bool>> p : exprMap) {
 
         // cout << "parsing: " << p.first << "\n";
         ExprParser theExprParser(p.first);
@@ -514,7 +510,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
         BOOST_CHECK_MESSAGE(ok, errorMsg + "failed for " + p.first);
 
         if (ok) {
-            string expectedRootType       = p.second.first;
+            std::string expectedRootType  = p.second.first;
             bool expectedEvaluationResult = p.second.second;
 
             Ast* top = theExprParser.getAst();
@@ -578,8 +574,8 @@ BOOST_AUTO_TEST_CASE(test_date_to_julian_with_repeat_YMD) {
 
     // be more flexible, of vector is returned we should not get: variable-not-found
     for (auto& i : theReasonWhy) {
-        cout << i << "\n";
-        BOOST_CHECK_MESSAGE(i.find("variable-not-found") == string::npos, "Variable YMD not found: " << i);
+        std::cout << i << "\n";
+        BOOST_CHECK_MESSAGE(i.find("variable-not-found") == std::string::npos, "Variable YMD not found: " << i);
     }
 }
 
@@ -589,29 +585,29 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
     // The map key  = trigger expression,
     // value.first  = type of the expected root abstract syntax tree
     // value.second = result of expected evaluation
-    map<string, std::pair<string, bool>> exprMap;
+    std::map<std::string, std::pair<std::string, bool>> exprMap;
 
-    boost::gregorian::date startDate(2017, 1, 1);
-    boost::gregorian::date endDate(2017, 12, 31);
+    auto startDate = boost::gregorian::date(2017, 1, 1);
+    auto endDate   = boost::gregorian::date(2017, 12, 31);
     while (startDate != endDate) {
         long julian_day                    = startDate.julian_day();
         std::string str_julian_day         = ecf::convert_to<std::string>(julian_day);
         std::string eight_digit_iso_string = to_iso_string(startDate);
-        string expr   = str_julian_day + " ==  cal::date_to_julian(" + eight_digit_iso_string + ")";
-        exprMap[expr] = std::make_pair(AstEqual::stype(), true);
+        std::string expr = str_julian_day + " ==  cal::date_to_julian(" + eight_digit_iso_string + ")";
+        exprMap[expr]    = std::make_pair(AstEqual::stype(), true);
 
         std::string ten_digit_string = eight_digit_iso_string + "12";
         expr                         = str_julian_day + " ==  cal::date_to_julian(" + ten_digit_string + ")";
         exprMap[expr]                = std::make_pair(AstEqual::stype(), true);
 
-        string expr2   = to_iso_string(startDate) + " == cal::julian_to_date(" + str_julian_day + ")";
-        exprMap[expr2] = std::make_pair(AstEqual::stype(), true);
-        startDate += days(1);
+        std::string expr2 = to_iso_string(startDate) + " == cal::julian_to_date(" + str_julian_day + ")";
+        exprMap[expr2]    = std::make_pair(AstEqual::stype(), true);
+        startDate += boost::gregorian::days(1);
     }
 
     int parse_failure = 0;
     int ast_failure   = 0;
-    for (std::pair<string, std::pair<string, bool>> p : exprMap) {
+    for (std::pair<std::string, std::pair<std::string, bool>> p : exprMap) {
 
         // cout << "parsing: " << p.first << "\n";
         ExprParser theExprParser(p.first);
@@ -622,7 +618,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
         BOOST_CHECK_MESSAGE(ok, errorMsg + "failed for " + p.first);
 
         if (ok) {
-            string expectedRootType       = p.second.first;
+            std::string expectedRootType  = p.second.first;
             bool expectedEvaluationResult = p.second.second;
 
             Ast* top = theExprParser.getAst();
@@ -659,7 +655,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_expression_divide_by_zero) {
     // The map key  = trigger expression,
     // value.first  = type of the expected root abstract syntax tree
     // value.second = result of expected evaluation
-    map<string, std::pair<string, bool>> exprMap;
+    std::map<std::string, std::pair<std::string, bool>> exprMap;
 
     // Divide by zero or modulo by zero would lead to run-time crash
     // However the Ast::evaluate() checks for this, and return zero for the whole expression i.e ./a:YMD % 0 returns 0
@@ -676,7 +672,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_expression_divide_by_zero) {
         bool ok = theExprParser.doParse(errorMsg);
         BOOST_REQUIRE_MESSAGE(ok, errorMsg);
 
-        string expectedRootType       = p.second.first;
+        std::string expectedRootType  = p.second.first;
         bool expectedEvaluationResult = p.second.second;
 
         Ast* top = theExprParser.getAst();
@@ -698,6 +694,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_expression_divide_by_zero) {
 BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
     ECF_NAME_THIS_TEST();
 
+    using namespace std::string_literals;
     std::vector expressions = {"/s/f/t<flag>restored"s,
                                "a <= complete"s,
                                "a >= complete"s,

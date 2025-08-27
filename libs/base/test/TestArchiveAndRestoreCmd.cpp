@@ -25,7 +25,6 @@
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
@@ -190,7 +189,8 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
             node_ptr node = theDefs.findAbsNode(i);
             BOOST_REQUIRE_MESSAGE(node, "Could not find node " << i);
             NodeContainer* nc = node->isNodeContainer();
-            BOOST_CHECK_MESSAGE(nc->get_flag().is_set(ecf::Flag::ARCHIVED), "Archived flag not set " << nc->absNodePath());
+            BOOST_CHECK_MESSAGE(nc->get_flag().is_set(ecf::Flag::ARCHIVED),
+                                "Archived flag not set " << nc->absNodePath());
             BOOST_CHECK_MESSAGE(fs::exists(nc->archive_path()), "Archive path" << nc->archive_path() << " not created");
             BOOST_CHECK_MESSAGE(nc->nodeVec().empty(), "Children not removed " << nc->absNodePath());
 
@@ -212,7 +212,8 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
             node_ptr node = theDefs.findAbsNode(i);
             BOOST_REQUIRE_MESSAGE(node, "Could not find node " << i);
             NodeContainer* nc = node->isNodeContainer();
-            BOOST_CHECK_MESSAGE(nc->get_flag().is_set(ecf::Flag::ARCHIVED), "Archived flag not set " << nc->absNodePath());
+            BOOST_CHECK_MESSAGE(nc->get_flag().is_set(ecf::Flag::ARCHIVED),
+                                "Archived flag not set " << nc->absNodePath());
             BOOST_CHECK_MESSAGE(!nc->get_flag().is_set(ecf::Flag::RESTORED),
                                 "Restored flag should be clear " << nc->absNodePath());
             BOOST_CHECK_MESSAGE(fs::exists(nc->archive_path()), "Archive path" << nc->archive_path() << " not created");

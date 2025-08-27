@@ -141,9 +141,6 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
 
     // if(!ServerDefsAccess(server).defs()) return;
 
-    using namespace boost::posix_time;
-    using namespace boost::gregorian;
-
     std::string typeName = "server";
     std::string nodeName = server->name();
     std::string statusName(VSState::toName(server).toStdString());
@@ -214,9 +211,6 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
 
     static const std::string inc = "  ";
 
-    using namespace boost::posix_time;
-    using namespace boost::gregorian;
-
     std::string typeName = node->nodeType();
     std::string nodeName(node->name().toStdString());
     std::string statusName(node->stateName().toStdString());
@@ -233,7 +227,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
 
     node_ptr nn = node->node();
 
-    boost::posix_time::ptime state_change_time = nn->state_change_time();
+    auto state_change_time = nn->state_change_time();
     if (!state_change_time.is_special()) {
         f << "at      : " << boost::posix_time::to_simple_string(state_change_time) << "\n";
     }

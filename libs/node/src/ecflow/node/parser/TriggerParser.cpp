@@ -19,7 +19,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 static bool hasExtension(const std::string& line, const std::vector<std::string>& lineTokens) {
     //    cout << "hasExtension = ";

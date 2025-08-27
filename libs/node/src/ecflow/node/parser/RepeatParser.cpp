@@ -20,7 +20,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     size_t line_token_size = lineTokens.size();

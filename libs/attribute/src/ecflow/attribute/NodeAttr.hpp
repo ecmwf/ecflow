@@ -182,6 +182,7 @@ public:
 
 public:
     void write(std::string&) const;
+
 private:
     bool isValidValue(int v) const { return (v >= min_ && v <= max_); }
 

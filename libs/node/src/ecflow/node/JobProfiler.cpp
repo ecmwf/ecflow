@@ -45,8 +45,8 @@ JobProfiler::JobProfiler(Task* node, JobsParam& jobsParam, size_t threshold)
 
 JobProfiler::~JobProfiler() {
     if (node_) {
-        boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
-        size_t time_taken                         = duration.total_milliseconds();
+        auto duration     = boost::posix_time::microsec_clock::universal_time() - start_time_;
+        size_t time_taken = duration.total_milliseconds();
 
         // When testing we set submitJobsInterval to < 0
         if (jobsParam_.submitJobsInterval() < 0) {

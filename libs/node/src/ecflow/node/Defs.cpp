@@ -15,6 +15,7 @@
 #include <stdexcept>
 
 #include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
@@ -24,7 +25,6 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
-#include "ecflow/core/Version.hpp"
 #include "ecflow/node/AbstractObserver.hpp"
 #include "ecflow/node/DefsDelta.hpp"
 #include "ecflow/node/ExprDuplicate.hpp"
@@ -41,8 +41,6 @@
 #include "ecflow/node/move_peer.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
 
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 using namespace ecf;
 using namespace std;
 
@@ -317,13 +315,13 @@ bool Defs::catch_up_to_real_time() {
     //   cout << "Time Now: " << to_simple_string(time_now) << "\n";
     //   for(const auto& suite : suiteVec_)  cout << suite->calendar().toString() << "\n";
     //   cout << "===================================================================\n";
-    bool updated = false;
-    time_duration schedule_increment(0, 0, server_.jobSubmissionInterval(), 0);
+    bool updated            = false;
+    auto schedule_increment = boost::posix_time::time_duration(0, 0, server_.jobSubmissionInterval(), 0);
     for (const auto& suite : suiteVec_) {
         // Check if suite has time,today,date,day,cron,late,autocancel,autoarchive attributes
         if (suite->has_time_based_attributes()) {
             auto suite_time = suite->calendar().suiteTime();
-            if (time_now - suite_time <= hours(1)) {
+            if (time_now - suite_time <= boost::posix_time::hours(1)) {
                 suite_time += schedule_increment;
                 while (suite_time <= time_now) {
 
@@ -772,7 +770,7 @@ void Defs::read_history(const std::string& line, const std::vector<std::string>&
     }
     else {
         std::vector<std::string> vec;
-        date todays_date_in_utc = day_clock::universal_day();
+        auto todays_date_in_utc = boost::gregorian::day_clock::universal_day();
 
         for (const auto& parsed_message : parsed_messages) {
             // extract the date, expecting MSG:[HH:MM:SS D.M.YYYY]
@@ -789,8 +787,8 @@ void Defs::read_history(const std::string& line, const std::vector<std::string>&
                         int month = ecf::convert_to<int>(vec[1]);
                         int year  = ecf::convert_to<int>(vec[2]);
 
-                        boost::gregorian::date node_log_date(year, month, day);
-                        boost::gregorian::date_duration duration = todays_date_in_utc - node_log_date;
+                        auto node_log_date = boost::gregorian::date(year, month, day);
+                        auto duration      = todays_date_in_utc - node_log_date;
                         if (duration.days() > ecf_prune_node_log_) {
                             continue;
                         }

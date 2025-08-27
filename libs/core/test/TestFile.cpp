@@ -8,7 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <fstream> // for std::ofstream
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -16,19 +16,10 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
-
-// #define FILE_PERF_CHECK_IMPLEMENTATIONS 1;
-#ifdef FILE_PERF_CHECK_IMPLEMENTATIONS
-    #include <boost/timer/timer.hpp>
-
-    #include "ecflow/core/Str.hpp"
-#endif
-
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace boost;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Core)

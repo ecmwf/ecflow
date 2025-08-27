@@ -13,8 +13,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-#include <boost/token_functions.hpp>
 #include <boost/tokenizer.hpp>
 
 #include "ecflow/core/Calendar.hpp"
@@ -23,11 +21,7 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 // #define DEBUG_CRON_ATTR 1
 // #define DEBUG_CRON_PARSING 1
@@ -353,7 +347,7 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
     }
 
     // Find the *NEXT* date that matches, and use the first time slot
-    boost::gregorian::date the_next_date = next_date(c);
+    auto the_next_date = next_date(c);
     theReasonWhy += timeSeries_.start().toString();
     theReasonWhy += " ";
     theReasonWhy += to_simple_string(the_next_date);
@@ -452,9 +446,9 @@ bool CronAttr::week_day_matches(int theDayOfWeek) const {
 }
 
 bool CronAttr::last_week_day_of_month_matches(const ecf::Calendar& c) const {
-    int cal_day_of_week                                                     = c.day_of_week();
-    boost::gregorian::date last_day_of_month                                = c.date().end_of_month();
-    boost::gregorian::date_duration diff_current_date_and_last_day_of_month = last_day_of_month - c.date();
+    int cal_day_of_week                          = c.day_of_week();
+    auto last_day_of_month                       = c.date().end_of_month();
+    auto diff_current_date_and_last_day_of_month = last_day_of_month - c.date();
 
     for (int cron_last_week_day_of_month : last_week_days_of_month_) {
         if (cal_day_of_week == cron_last_week_day_of_month) {
@@ -498,8 +492,8 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const 
     // Find the next date that matches, day of week, day of year, and month
     // that is greater than today's date.
     // This *ASSUMES* day of week, day of month, and month are evaluated with _AND_ together
-    boost::gregorian::date_duration one_day(1);
-    boost::gregorian::date future_date = calendar.date(); // today's date
+    auto one_day     = boost::gregorian::date_duration(1);
+    auto future_date = calendar.date(); // today's date
 
 #ifdef DEBUG_CRON_SIM
     cout << "cron : " << toString() << "\n";
@@ -608,7 +602,7 @@ static std::string nextToken(size_t& index, const std::vector<std::string>& line
 #ifdef DEBUG_CRON_PARSING
     cerr << "nextToken empty \n";
 #endif
-    return string();
+    return std::string();
 }
 
 std::string extract_list(size_t& index, const std::vector<std::string>& lineTokens) {
@@ -619,7 +613,7 @@ std::string extract_list(size_t& index, const std::vector<std::string>& lineToke
     // since we stop on option or time spec, the top level code should decrement index
     std::string theIntList;
     while (index < lineTokens.size() && (!isOption(lineTokens[index]) || !isTimeSpec(lineTokens[index]))) {
-        string theNextToken = nextToken(index, lineTokens);
+        std::string theNextToken = nextToken(index, lineTokens);
         if (theNextToken.empty())
             break;
         if (isOption(theNextToken))
@@ -644,12 +638,12 @@ std::vector<int> extract_month(size_t& index, const std::vector<std::string>& li
 
     // should have 0,1,2,3
     std::vector<int> theIntVec;
-    char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
+    boost::char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
     tokenizer theTokenizer(theIntList, sep);
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
-        string theIntToken = *beg;
+        std::string theIntToken = *beg;
         ecf::algorithm::trim(theIntToken);
         if (theIntToken.empty())
             continue;
@@ -680,12 +674,12 @@ void extract_days_of_week(size_t& index,
     std::string theIntList = extract_list(index, lineTokens);
 
     // should have 0,1,2,3,4L
-    char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
+    boost::char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
     tokenizer theTokenizer(theIntList, sep);
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
-        string theIntToken = *beg;
+        std::string theIntToken = *beg;
         ecf::algorithm::trim(theIntToken);
         if (theIntToken.empty())
             continue;
@@ -727,12 +721,12 @@ void extract_days_of_month(size_t& index,
     std::string theIntList = extract_list(index, lineTokens);
 
     // should have 0,1,2,3,4L
-    char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
+    boost::char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
     tokenizer theTokenizer(theIntList, sep);
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
-        string theIntToken = *beg;
+        std::string theIntToken = *beg;
         ecf::algorithm::trim(theIntToken);
         if (theIntToken.empty())
             continue;

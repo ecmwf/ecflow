@@ -11,10 +11,9 @@
 #ifndef ecflow_base_ZombieCtrl_HPP
 #define ecflow_base_ZombieCtrl_HPP
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
 #include "ecflow/attribute/Zombie.hpp"
 #include "ecflow/base/Cmd.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 class TaskCmd;

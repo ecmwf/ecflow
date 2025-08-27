@@ -21,10 +21,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
 
@@ -409,7 +406,7 @@ BOOST_AUTO_TEST_CASE(test_order_by_runtime) {
 
     Defs defs;
     {
-        std::vector<string> vec{"3", "2", "1"};
+        std::vector<std::string> vec{"3", "2", "1"};
         for (const auto& str0 : vec) {
             suite_ptr s = defs.add_suite("s" + str0);
             for (const auto& str : vec) {
@@ -422,7 +419,7 @@ BOOST_AUTO_TEST_CASE(test_order_by_runtime) {
     }
     Defs expectedDefs;
     {
-        std::vector<string> vec{"1", "2", "3"};
+        std::vector<std::string> vec{"1", "2", "3"};
         for (const auto& str0 : vec) {
             suite_ptr s = expectedDefs.add_suite("s" + str0);
             for (const auto& str : vec) {
@@ -438,7 +435,7 @@ BOOST_AUTO_TEST_CASE(test_order_by_runtime) {
     defs.beginAll();
     expectedDefs.beginAll();
 
-    CalendarUpdateParams calUpdateParams(hours(1));
+    CalendarUpdateParams calUpdateParams(boost::posix_time::hours(1));
 
     Jobs jobs(&defs);
     JobsParam jobsParam;

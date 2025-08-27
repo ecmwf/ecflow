@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
@@ -23,10 +22,7 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 /// Simulate definition files that are created on then fly. This us to validate
 /// Defs file, to check for correctness
@@ -36,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(S_Simulator)
 BOOST_AUTO_TEST_SUITE(T_AutoCancel)
 
 BOOST_AUTO_TEST_CASE(test_autocancel_ast_node_reset) {
-    cout << "Simulator:: ...test_autocancel_ast_node_reset\n";
+    std::cout << "Simulator:: ...test_autocancel_ast_node_reset\n";
 
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autocancel at hour resolution
@@ -111,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_ast_node_reset) {
 }
 
 BOOST_AUTO_TEST_CASE(test_autocancel_suite) {
-    cout << "Simulator:: ...test_autocancel_suite\n";
+    std::cout << "Simulator:: ...test_autocancel_suite\n";
 
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autocancel at hour resolution
@@ -158,7 +154,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_suite) {
 }
 
 BOOST_AUTO_TEST_CASE(test_autocancel_family_and_task) {
-    cout << "Simulator:: ...test_autocancel_family_and_task\n";
+    std::cout << "Simulator:: ...test_autocancel_family_and_task\n";
 
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autocancel at hour resolution
@@ -223,7 +219,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_family_and_task) {
 }
 
 BOOST_AUTO_TEST_CASE(test_autocancel_task) {
-    cout << "Simulator:: ...test_autocancel_task\n";
+    std::cout << "Simulator:: ...test_autocancel_task\n";
 
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autocancel at hour resolution
@@ -278,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_task) {
 }
 
 BOOST_AUTO_TEST_CASE(test_two_autocancel_in_hierarchy) {
-    cout << "Simulator:: ...test_two_autocancel_in_hierarchy\n"; // ECFLOW-556
+    std::cout << "Simulator:: ...test_two_autocancel_in_hierarchy\n"; // ECFLOW-556
 
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autocancel at hour resolution

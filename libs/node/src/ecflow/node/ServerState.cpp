@@ -20,7 +20,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 // When a Defs is loaded into a server:
 //       	o the jobSubmissionInterval_ is set

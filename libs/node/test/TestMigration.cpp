@@ -21,10 +21,7 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 // #define UPDATE_TESTS 1
 

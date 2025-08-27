@@ -23,9 +23,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
 
 // ********************************************************************
 // These test are used to check that MIGRATE is equivalent to check pt
@@ -536,7 +534,7 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history_pruning2) {
     ECF_NAME_THIS_TEST();
 
     // Create edit history for today, this should not be affected by pruning
-    date todays_date_in_utc = day_clock::universal_day();
+    auto todays_date_in_utc = boost::gregorian::day_clock::universal_day();
     std::string history     = "MSG:[07:36:05 ";
     history += ecf::convert_to<std::string>(todays_date_in_utc.day());
     history += ".";

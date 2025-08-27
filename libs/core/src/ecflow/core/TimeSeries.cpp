@@ -12,9 +12,8 @@
 
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
@@ -26,8 +25,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 static void testTimeSlot(const ecf::TimeSlot& ts) {
     if (ts.hour() < 0 || ts.hour() > 23) {
@@ -90,7 +87,7 @@ TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const Time
         throw std::out_of_range(
             "TimeSeries::TimeSeries Invalid time series:  Increment must be greater than 0 minutes.");
     }
-    boost::posix_time::time_duration diff = finish.duration() - start.duration();
+    auto diff = finish.duration() - start.duration();
     if (incr.duration() > diff) {
         std::stringstream ss;
         ss << "TimeSeries::TimeSeries: Invalid time series: Increment(" << incr.toString()
@@ -137,7 +134,7 @@ bool TimeSeries::calendarChanged(const ecf::Calendar& c) {
 
 bool TimeSeries::resetRelativeDuration() {
     if (relativeToSuiteStart_) {
-        relativeDuration_ = time_duration(0, 0, 0, 0);
+        relativeDuration_ = boost::posix_time::time_duration(0, 0, 0, 0);
 
 #ifdef DEBUG_TIME_SERIES
         log(Log::DBG, "TimeSeries::resetRelativeDuration " + dump());
@@ -169,7 +166,7 @@ void TimeSeries::reset(const ecf::Calendar& c) {
 
     // Update nextTimeSlot_ so that why command works out of the box, when nodes have been begun.
     // *if* the current time is *AT* the start do *not* increment nextTimeSlot_, otherwise we will miss first time slot
-    time_duration current_time = duration(c);
+    auto current_time = duration(c);
     if (hasIncrement()) {
 
         // only used when we have a series, and *NOT* relative. A relative time series does not care about midnight.
@@ -178,7 +175,7 @@ void TimeSeries::reset(const ecf::Calendar& c) {
         }
 
         while (current_time > nextTimeSlot_.duration()) {
-            time_duration value = nextTimeSlot_.duration();
+            auto value = nextTimeSlot_.duration();
             value += incr_.duration();
             nextTimeSlot_ = TimeSlot(value.hours(), value.minutes());
         }
@@ -224,7 +221,7 @@ void TimeSeries::requeue(const ecf::Calendar& c, bool reset_next_time_slot) {
     // hence if we get here for a single slot time, where calendar time >= start time
     // then this time series is no longer valid. This will stop multiple job submission
     // for the same time slot
-    time_duration current_time = duration(c);
+    auto current_time = duration(c);
     if (!hasIncrement()) {
         if (current_time >= start_.duration()) {
             isValid_ = false; // time has expired
@@ -254,7 +251,7 @@ void TimeSeries::requeue(const ecf::Calendar& c, bool reset_next_time_slot) {
     //  ------time---->
     //
     while (current_time >= nextTimeSlot_.duration()) {
-        time_duration value = nextTimeSlot_.duration();
+        auto value = nextTimeSlot_.duration();
         value += incr_.duration();
         nextTimeSlot_ = TimeSlot(value.hours(), value.minutes());
     }
@@ -270,7 +267,7 @@ void TimeSeries::requeue(const ecf::Calendar& c, bool reset_next_time_slot) {
 
 TimeSlot TimeSeries::compute_next_time_slot(const ecf::Calendar& c) const {
     // This functionality needs to mirror TimeSeries::requeue
-    time_duration current_time = duration(c);
+    auto current_time = duration(c);
     if (!hasIncrement()) {
         if (current_time >= start_.duration()) {
             return {}; // time has expired
@@ -280,7 +277,7 @@ TimeSlot TimeSeries::compute_next_time_slot(const ecf::Calendar& c) const {
 
     TimeSlot nextTimeSlot = start_;
     while (current_time >= nextTimeSlot.duration()) {
-        time_duration value = nextTimeSlot.duration();
+        auto value = nextTimeSlot.duration();
         value += incr_.duration();
         nextTimeSlot = TimeSlot(value.hours(), value.minutes());
     }
@@ -292,7 +289,7 @@ TimeSlot TimeSeries::compute_next_time_slot(const ecf::Calendar& c) const {
 }
 
 bool TimeSeries::requeueable(const ecf::Calendar& c) const {
-    boost::posix_time::time_duration calendar_time = duration(c);
+    auto calendar_time = duration(c);
     if (calendar_time < start().duration())
         return true;
     if (hasIncrement()) {
@@ -348,7 +345,7 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
 
     if (!hasIncrement()) {
         // We ignore seconds, hence +00:02  will match 2.58 (two minutes 58 seconds) relative duration
-        time_duration start_td = start_.duration();
+        auto start_td = start_.duration();
         if (relative_or_real_td.hours() == start_td.hours() && relative_or_real_td.minutes() == start_td.minutes()) {
 #ifdef DEBUG_TIME_SERIES_IS_FREE
             LOG(Log::DBG,
@@ -366,11 +363,11 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
         return false;
     }
 
-    time_duration endDuration     = finish_.duration();
-    time_duration incrDuration    = incr_.duration();
-    time_duration nextTimeSlot_td = nextTimeSlot_.duration();
-    long hours                    = relative_or_real_td.hours();
-    long minutes                  = relative_or_real_td.minutes();
+    auto endDuration     = finish_.duration();
+    auto incrDuration    = incr_.duration();
+    auto nextTimeSlot_td = nextTimeSlot_.duration();
+    long hours           = relative_or_real_td.hours();
+    long minutes         = relative_or_real_td.minutes();
     while (nextTimeSlot_td <= endDuration) {
 
         if (hours == nextTimeSlot_td.hours() && minutes == nextTimeSlot_td.minutes()) {
@@ -398,7 +395,7 @@ void TimeSeries::miss_next_time_slot() {
         isValid_ = false;
     }
     else {
-        time_duration value = nextTimeSlot_.duration();
+        auto value = nextTimeSlot_.duration();
         value += incr_.duration();
         nextTimeSlot_ = TimeSlot(value.hours(), value.minutes());
         if (nextTimeSlot_ > finish_) {
@@ -472,7 +469,7 @@ bool TimeSeries::checkForRequeue(const ecf::Calendar& calendar,
             }
         }
 
-        time_duration calendar_duration = duration(calendar);
+        auto calendar_duration = duration(calendar);
         if (cmd_context) {
             // In the *COMMAND* context, allow re-queue if we are *BEFORE* the last time slot
             if (calendar_duration < lastTimeSlot_) {
@@ -509,7 +506,7 @@ bool TimeSeries::checkForRequeue(const ecf::Calendar& calendar,
     }
 
     // The the_min/the_max takes into account *all* start/finish Time and Today attributes
-    time_duration calendar_duration = duration(calendar);
+    auto calendar_duration = duration(calendar);
     if (cmd_context) {
         // In the *COMMAND* context, allow re-queue if we are *BEFORE* the max time slot
         if (calendar_duration < the_max.duration()) {
@@ -572,16 +569,16 @@ boost::posix_time::time_duration TimeSeries::duration(const ecf::Calendar& c) co
     }
 
     LOG_ASSERT(!c.suiteTime().is_special(), "init has not been called on calendar. TimeSeries::duration");
-    time_duration time_of_day = c.suiteTime().time_of_day();
+    auto time_of_day = c.suiteTime().time_of_day();
     return {time_of_day.hours(), time_of_day.minutes(), 0, 0};
 }
 
 void TimeSeries::free_slots(std::vector<boost::posix_time::time_duration>& vec) const {
     if (hasIncrement()) {
 
-        time_duration i            = start_.duration();
-        time_duration endDuration  = finish_.duration();
-        time_duration incrDuration = incr_.duration();
+        auto i            = start_.duration();
+        auto endDuration  = finish_.duration();
+        auto incrDuration = incr_.duration();
         while (i < endDuration) {
             vec.push_back(i);
             i += incrDuration;
@@ -821,7 +818,7 @@ void TimeSeries::parse_state(size_t index, const std::vector<std::string>& lineT
             if (lineTokens[i].find("relativeDuration") != std::string::npos) {
                 std::string relativeDuration;
                 if (Extract::split_get_second(lineTokens[i], relativeDuration, '/')) {
-                    ts.relativeDuration_ = time_duration(duration_from_string(relativeDuration));
+                    ts.relativeDuration_ = boost::posix_time::duration_from_string(relativeDuration);
                 }
                 else
                     throw std::runtime_error("TimeSeries::parse_state: could not extract state.");

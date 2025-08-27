@@ -13,9 +13,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"

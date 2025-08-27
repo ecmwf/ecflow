@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Calendar.hpp"
@@ -21,10 +20,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
-
-using namespace boost;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 
@@ -160,7 +155,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_increment_real) {
     // Test time series with  a calendar, we update calendar then
     // test time series isFree(), and checkForRequeue
     Calendar c;
-    c.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    c.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+           Calendar::REAL);
 
     // Create a test when we can match a time series. Need to sync hour with suite time
     // at hour 1, suite time should also be 01:00, for test to work
@@ -188,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_increment_real) {
     bool cmd_context = true;
     for (int hour = 1; hour < 24; hour++) {
         // Update calendar every hour, then see we can match time series, *RELATIVE* to suite start
-        c.update(time_duration(hours(1)));
+        c.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
         timeSeries.calendarChanged(c);
         timeSeries2.calendarChanged(c);
         timeSeries3.calendarChanged(c);
@@ -280,7 +276,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_requeueable_and_compute_next_time_slot) {
     // test time series requeueable(), and compute_next_time_slot
     // This are used with the WHY command
     Calendar c;
-    c.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    c.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+           Calendar::REAL);
 
     // Create a test when we can match a time series. Need to sync hour with suite time
     // at hour 1, suite time should also be 01:00, for test to work
@@ -294,7 +291,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_requeueable_and_compute_next_time_slot) {
 
     for (int hour = 1; hour < 24; hour++) {
         // Update calendar every hour, then see we can match time series,
-        c.update(time_duration(hours(1)));
+        c.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
         timeSeries.calendarChanged(c);
         timeSeries2.calendarChanged(c);
         timeSeries3.calendarChanged(c);
@@ -437,7 +434,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_finish_not_divisble_by_increment) {
     // Test time series with  a calendar, we update calendar then
     // test time series isFree(), and checkForRequeue
     Calendar calendar;
-    calendar.init(ptime(date(2008, 10, 8), hours(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(0)),
+                  Calendar::REAL);
 
     // Create a test when we can match a time series.
     // NOTE: Finish minute is not a multiple of INCREMENT hence last valid time slot is 23:50
@@ -454,8 +452,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_finish_not_divisble_by_increment) {
     BOOST_CHECK_MESSAGE(t1_min == TimeSlot(0, 0) && t1_max == TimeSlot(23, 59), "Not as expected");
     BOOST_CHECK_MESSAGE(t2_min == TimeSlot(0, 30) && t2_max == TimeSlot(23, 59), "Not as expected");
 
-    time_duration last  = hours(23) + minutes(50); // last valid time is 23:50
-    time_duration last2 = hours(20) + minutes(30); // last valid time is 20:30
+    auto last  = boost::posix_time::hours(23) + boost::posix_time::minutes(50); // last valid time is 23:50
+    auto last2 = boost::posix_time::hours(20) + boost::posix_time::minutes(30); // last valid time is 20:30
 
     // follow normal process
     timeSeries.reset(calendar);
@@ -464,7 +462,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_finish_not_divisble_by_increment) {
     for (int hour = 0; hour < 24; hour++) {
         for (int minute = 0; minute < 60; minute++) {
 
-            calendar.update(minutes(1));
+            calendar.update(boost::posix_time::minutes(1));
             timeSeries.calendarChanged(calendar);
             timeSeries2.calendarChanged(calendar);
 
@@ -524,7 +522,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_miss_time_slot) {
     ECF_NAME_THIS_TEST();
 
     Calendar calendar;
-    calendar.init(ptime(date(2008, 10, 8), hours(10)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(10)),
+                  Calendar::REAL);
 
     // Create a test when we can match a time series.
     // NOTE: Finish minute is not a multiple of INCREMENT hence last valid time slot is 23:50
@@ -550,7 +549,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_miss_time_slot_1) {
     // Create calendar before time series
     {
         Calendar calendar;
-        calendar.init(ptime(date(2008, 10, 8), hours(9)), Calendar::REAL); // 09:00
+        calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(9)),
+                      Calendar::REAL); // 09:00
 
         TimeSeries timeSeries(10, 0, false /* relative */); // 10:00
 
@@ -575,7 +575,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_miss_time_slot_1) {
     {
         // Create a time after the time series
         Calendar calendar;
-        calendar.init(ptime(date(2008, 10, 8), hours(11)), Calendar::REAL); // 11:00
+        calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(11)),
+                      Calendar::REAL); // 11:00
 
         TimeSeries timeSeries(10, 0, false /* relative */); // 10:00
 
@@ -616,7 +617,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_reset) {
     { // set calendar before time series start & then reset
 
         Calendar calendar;
-        calendar.init(ptime(date(2008, 10, 8), hours(9)), Calendar::REAL);
+        calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(9)),
+                      Calendar::REAL);
         timeSeries.reset(calendar);
         BOOST_CHECK_MESSAGE(timeSeries.value() == TimeSlot(10, 0),
                             "Reset should set value(next_valid_time_slot) to start." << timeSeries.dump());
@@ -630,7 +632,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_reset) {
     { // set calendar at time series start & then reset
 
         Calendar calendar;
-        calendar.init(ptime(date(2008, 10, 8), hours(10)), Calendar::REAL);
+        calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(10)),
+                      Calendar::REAL);
         timeSeries.reset(calendar);
         BOOST_CHECK_MESSAGE(timeSeries.value() == TimeSlot(10, 0),
                             "Reset should set value(next_valid_time_slot) to start." << timeSeries.dump());
@@ -644,7 +647,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_reset) {
     { // set calendar after time series start & before time series end, then reset
 
         Calendar calendar;
-        calendar.init(ptime(date(2008, 10, 8), hours(11)), Calendar::REAL);
+        calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(11)),
+                      Calendar::REAL);
         timeSeries.reset(calendar);
         BOOST_CHECK_MESSAGE(timeSeries.value() == TimeSlot(11, 0),
                             "Reset should update free slot." << timeSeries.dump());
@@ -734,8 +738,9 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
         expected.set_isValid(false);
 
         Calendar calendar;
-        calendar.init(ptime(date(2008, 10, 8), hours(0)), Calendar::REAL);
-        calendar.update(time_duration(hours(1)));
+        calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(0)),
+                      Calendar::REAL);
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
         expected.calendarChanged(calendar);
 
         std::vector<std::string> lineTokens;
@@ -754,7 +759,8 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
         expected.set_isValid(false);
 
         Calendar calendar;
-        calendar.init(ptime(date(2008, 10, 8), hours(9)), Calendar::REAL);
+        calendar.init(boost::posix_time::ptime(boost::gregorian::date(2008, 10, 8), boost::posix_time::hours(9)),
+                      Calendar::REAL);
         expected.requeue(calendar); // this will reset isValid to true
         expected.set_isValid(false);
 

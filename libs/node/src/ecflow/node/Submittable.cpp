@@ -687,7 +687,7 @@ public:
             if (failed_)
                 std::cout << " (FAILED)\n";
             else {
-                boost::posix_time::time_duration duration = Calendar::second_clock_time() - start_;
+                auto duration = Calendar::second_clock_time() - start_;
                 std::cout << " (" << duration.total_microseconds() << " ms)\n";
             }
         }

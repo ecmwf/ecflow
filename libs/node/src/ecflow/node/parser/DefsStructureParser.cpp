@@ -22,7 +22,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 /////////////////////////////////////////////////////////////////////////////////////
 DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file_name)
@@ -214,7 +213,7 @@ void DefsStructureParser::getNextLine(std::string& line) {
                 if (commentPos != std::string::npos)
                     line = line.substr(0, commentPos);
 
-                char_separator<char> sep(";");
+                boost::char_separator<char> sep(";");
                 typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
                 tokenizer tokens(line, sep);
                 std::copy(tokens.begin(), tokens.end(), back_inserter(multi_statements_per_line_vec_));

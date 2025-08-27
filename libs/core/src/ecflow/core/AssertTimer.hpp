@@ -31,7 +31,7 @@ public:
     int timeConstraint() const { return timeConstraint_; }
 
     int duration() const {
-        boost::posix_time::time_duration duration = Calendar::second_clock_time() - start_time_;
+        auto duration = Calendar::second_clock_time() - start_time_;
         return duration.total_seconds();
     }
 

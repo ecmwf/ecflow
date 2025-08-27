@@ -138,7 +138,7 @@ bool TodayAttr::why(const ecf::Calendar& c,
     // Check to see if time has expired; if not, then report why
     if (ts_.is_valid()) {
         // This can apply to single and series
-        boost::posix_time::time_duration calendar_time = ts_.duration(c);
+        auto calendar_time = ts_.duration(c);
         if (calendar_time < ts_.start().duration()) {
             ts_.why(c, theReasonWhy);
             return true;
@@ -181,14 +181,14 @@ bool TodayAttr::why(const ecf::Calendar& c,
 
             if (!days.empty() || !dates.empty()) {
                 for (auto day : days) {
-                    boost::gregorian::date the_next_matching_date = day.next_matching_date(c);
+                    auto the_next_matching_date = day.next_matching_date(c);
                     if (the_min_next_date.is_special())
                         the_min_next_date = the_next_matching_date;
                     if (the_next_matching_date < the_min_next_date)
                         the_min_next_date = the_next_matching_date;
                 }
                 for (const auto& i : dates) {
-                    boost::gregorian::date the_next_matching_date = i.next_matching_date(c);
+                    auto the_next_matching_date = i.next_matching_date(c);
                     if (the_min_next_date.is_special())
                         the_min_next_date = the_next_matching_date;
                     if (the_next_matching_date < the_min_next_date)
@@ -198,7 +198,7 @@ bool TodayAttr::why(const ecf::Calendar& c,
                 theReasonWhy += " next run at ";
             }
             else {
-                boost::gregorian::date_duration one_day(1);
+                auto one_day      = boost::gregorian::date_duration(1);
                 the_min_next_date = c.date(); // today's date
                 the_min_next_date += one_day; // add one day, so its in the future
                 theReasonWhy += " next run tomorrow at ";

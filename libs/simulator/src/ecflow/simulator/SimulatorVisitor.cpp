@@ -10,17 +10,11 @@
 
 #include "ecflow/simulator/SimulatorVisitor.hpp"
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
-
-using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 namespace ecf {
 
@@ -40,9 +34,9 @@ SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename)
       foundTime_(false),
       hasTimeDependencies_(false),
       has_end_clock_(false),
-      max_sim_duration_(hours(24)),
-      max_suite_duration_(hours(24)),
-      ci_(hours(1)) {
+      max_sim_duration_(boost::posix_time::hours(24)),
+      max_suite_duration_(boost::posix_time::hours(24)),
+      ci_(boost::posix_time::hours(1)) {
 }
 
 void SimulatorVisitor::visitDefs(Defs* d) {
@@ -81,7 +75,7 @@ void SimulatorVisitor::visitSuite(Suite* s) {
 
     // If we have cron/time with calendar increment of 1 hour, where calendar start time is in minutes
     // we will miss the time/cron based attributes, hence use 1 minute resolution
-    if ((foundCrons_ || foundTime_) && ci_ == hours(1)) {
+    if ((foundCrons_ || foundTime_) && ci_ == boost::posix_time::hours(1)) {
         // simulation has not started so, suiteTime same as start time.
         boost::posix_time::time_duration start_time = s->calendar().suiteTime().time_of_day();
         if (start_time.minutes() != 0) {
@@ -91,7 +85,7 @@ void SimulatorVisitor::visitSuite(Suite* s) {
                 "minute resolution, reverting to minute resolution for simulation.");
             log(Log::WAR,
                 "To speed up resolution use suite calendar with hour setting only, i.e where minutes is zero");
-            ci_ = minutes(1);
+            ci_ = boost::posix_time::minutes(1);
         }
     }
 
@@ -118,7 +112,7 @@ void SimulatorVisitor::visitFamily(Family* f) {
 }
 
 void SimulatorVisitor::visitNodeContainer(NodeContainer* nc) {
-    if (ci_ == hours(1))
+    if (ci_ == boost::posix_time::hours(1))
         nc->get_time_resolution_for_simulation(ci_);
     if (!has_end_clock_)
         nc->get_max_simulation_duration(max_suite_duration_);
@@ -140,7 +134,7 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc) {
 }
 
 void SimulatorVisitor::visitTask(Task* t) {
-    if (ci_ == hours(1))
+    if (ci_ == boost::posix_time::hours(1))
         t->get_time_resolution_for_simulation(ci_);
     if (!has_end_clock_)
         t->get_max_simulation_duration(max_suite_duration_);

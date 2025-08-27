@@ -15,7 +15,6 @@
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace ecf;
-using namespace boost;
 
 class MyClass {
 public:

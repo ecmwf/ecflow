@@ -12,12 +12,12 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Timer.hpp"
@@ -27,10 +27,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
 
@@ -68,8 +65,9 @@ BOOST_AUTO_TEST_CASE(test_single_real_time) {
         // i.e if local time is 9:59 and we create a TimeSlot like
         //       task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
         // The the minute will be 62, which is illegal and will not parse
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
-        boost::posix_time::ptime time1        = theLocalTime + minutes(1);
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
+        auto time1 = theLocalTime + boost::posix_time::minutes(1);
 
         // For each 2 seconds of poll in the server update calendar by 1 minute
         // Note: if we use 1 seconds poll to update calendar by 1 minute, then
@@ -91,7 +89,8 @@ BOOST_AUTO_TEST_CASE(test_single_real_time) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_single_real_time.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_single_time_trigger) {
@@ -127,7 +126,8 @@ BOOST_AUTO_TEST_CASE(test_single_time_trigger) {
         // i.e if local time is 9:59 and we create a TimeSlot like
         //       task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
         // The the minute will be 62, which is illegal and will not parse
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
 
         // For each 2 seconds of poll in the server update calendar by 1 minute
         // Note: if we use 1 seconds poll to update calendar by 1 minute, then
@@ -152,7 +152,8 @@ BOOST_AUTO_TEST_CASE(test_single_time_trigger) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_single_time_trigger.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_time_multiple_single_slot) {
@@ -183,10 +184,11 @@ BOOST_AUTO_TEST_CASE(test_time_multiple_single_slot) {
     {
         // Initialise clock with todays date and time, then create a time attribute
         // with todays time + minute.
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
-        boost::posix_time::ptime time1        = theLocalTime + minutes(1);
-        boost::posix_time::ptime time2        = time1 + minutes(TestFixture::job_submission_interval());
-        boost::posix_time::ptime time3        = time2 + minutes(TestFixture::job_submission_interval());
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
+        auto time1 = theLocalTime + boost::posix_time::minutes(1);
+        auto time2 = time1 + boost::posix_time::minutes(TestFixture::job_submission_interval());
+        auto time3 = time2 + boost::posix_time::minutes(TestFixture::job_submission_interval());
 
         suite_ptr suite = theDefs.add_suite("test_time_multiple_single_slot");
         ClockAttr clockAttr(theLocalTime, false);
@@ -206,7 +208,8 @@ BOOST_AUTO_TEST_CASE(test_time_multiple_single_slot) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_multiple_single_slot.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_time_relative_time_series) {
@@ -253,7 +256,8 @@ BOOST_AUTO_TEST_CASE(test_time_relative_time_series) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_relative_time_series.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_time_real_series) {
@@ -282,9 +286,10 @@ BOOST_AUTO_TEST_CASE(test_time_real_series) {
     {
         // Initialise clock with todays date and time, then create a time attribute
         // with a time series, so that task runs 3 times
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
-        boost::posix_time::ptime time1        = theLocalTime + minutes(1);
-        boost::posix_time::ptime time2        = time1 + minutes(TestFixture::job_submission_interval() * 2);
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
+        auto time1 = theLocalTime + boost::posix_time::minutes(1);
+        auto time2 = time1 + boost::posix_time::minutes(TestFixture::job_submission_interval() * 2);
 
         suite_ptr suite = theDefs.add_suite("test_time_real_series");
         suite->add_variable("SLEEPTIME", "1");
@@ -311,7 +316,8 @@ BOOST_AUTO_TEST_CASE(test_time_real_series) {
     // job submission interval
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_real_series.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
@@ -336,8 +342,9 @@ BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
         // Make sure job completes after midnight.
         // The task SHOULD stay complete and *NOT* requeue
         // Since TestHarness requires suite completion, we dont need to do anything.
-        boost::posix_time::ptime time_start  = boost::posix_time::ptime(date(2010, 6, 21), time_duration(23, 59, 0));
-        boost::posix_time::ptime clock_start = time_start - minutes(1);
+        auto time_start =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(23, 59, 0));
+        auto clock_start = time_start - boost::posix_time::minutes(1);
 
         suite_ptr suite = theDefs.add_suite("test_single_real_time_near_midnight");
         ClockAttr clockAttr(clock_start, false);
@@ -363,7 +370,8 @@ BOOST_AUTO_TEST_CASE(test_single_real_time_near_midnight) {
     std::cout << *defs;
 #endif
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
@@ -400,9 +408,10 @@ BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
         // make sure that last job, *runs* and completes after midnight.
         // It should stay complete and not requeue.
         // Test harness, will check suite task->family->suite completes, hence no need to do anything
-        boost::posix_time::ptime last_time   = boost::posix_time::ptime(date(2010, 6, 21), time_duration(23, 59, 0));
-        boost::posix_time::ptime first_time  = last_time - minutes(TestFixture::job_submission_interval() * 2);
-        boost::posix_time::ptime clock_start = first_time - minutes(1);
+        auto last_time =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(23, 59, 0));
+        auto first_time  = last_time - boost::posix_time::minutes(TestFixture::job_submission_interval() * 2);
+        auto clock_start = first_time - boost::posix_time::minutes(1);
 
         suite_ptr suite = theDefs.add_suite("test_time_real_series_near_midnight");
         suite->add_variable("SLEEPTIME", ecf::convert_to<std::string>(TestFixture::job_submission_interval() * 2));
@@ -431,7 +440,8 @@ BOOST_AUTO_TEST_CASE(test_time_real_series_near_midnight) {
     std::cout << *defs;
 #endif
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

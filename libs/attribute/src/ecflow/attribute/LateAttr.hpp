@@ -15,8 +15,7 @@
 #include <utility> // for pair
 #include <vector>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/TimeSlot.hpp"
 
 class NState;

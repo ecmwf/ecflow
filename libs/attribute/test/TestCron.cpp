@@ -19,10 +19,7 @@
 #include "ecflow/core/TimeSeries.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
@@ -343,7 +340,8 @@ BOOST_AUTO_TEST_CASE(test_cron_once_free_stays_free) {
     ECF_NAME_THIS_TEST();
 
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     TimeSeries timeSeriesX(TimeSlot(10, 0), TimeSlot(20, 0), TimeSlot(1, 0), false /* relative */);
     TimeSeries timeSeries2X(TimeSlot(11, 0), TimeSlot(15, 0), TimeSlot(1, 0), false /* relative */);
@@ -372,7 +370,7 @@ BOOST_AUTO_TEST_CASE(test_cron_once_free_stays_free) {
 
     bool day_changed = false; // after midnight make sure we keep day_changed
     for (int m = 1; m < 96; m++) {
-        calendar.update(time_duration(minutes(30)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(30)));
         if (!day_changed) {
             day_changed = calendar.dayChanged();
         }
@@ -466,7 +464,8 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     TimeSeries timeSeriesX(TimeSlot(10, 0), TimeSlot(20, 0), TimeSlot(1, 0), false /* relative */);
     TimeSeries timeSeries2X(TimeSlot(11, 0), TimeSlot(15, 0), TimeSlot(1, 0), false /* relative */);
@@ -495,7 +494,7 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
 
     bool day_changed = false; // after midnight make sure we keep day_changed
     for (int m = 1; m < 96; m++) {
-        calendar.update(time_duration(minutes(30)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(30)));
         if (!day_changed) {
             day_changed = calendar.dayChanged();
         }

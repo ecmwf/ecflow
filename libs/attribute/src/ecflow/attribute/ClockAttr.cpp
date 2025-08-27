@@ -16,10 +16,7 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Serialization.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 //==========================================================================================
 
@@ -28,10 +25,10 @@ ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid, bool pos
       state_change_no_(Ecf::incr_state_change_no()),
       hybrid_(hybrid),
       positiveGain_(positiveGain) {
-    boost::gregorian::date theDate = time.date();
-    day_                           = theDate.day();
-    month_                         = theDate.month();
-    year_                          = theDate.year();
+    auto theDate = time.date();
+    day_         = theDate.day();
+    month_       = theDate.month();
+    year_        = theDate.year();
 
     tm t  = to_tm(time);
     gain_ = t.tm_hour * 3600 + t.tm_min * 60 + t.tm_sec;
@@ -191,13 +188,13 @@ void ClockAttr::begin_calendar(ecf::Calendar& calendar) const {
 boost::posix_time::ptime ClockAttr::ptime() const {
     if (day_ != 0) {
         // Use the date given. ie we start from midnight on the given day + gain.
-        boost::gregorian::date theDate(year_, month_, day_);
-        return {theDate, seconds(gain_)};
+        auto theDate = boost::gregorian::date(year_, month_, day_);
+        return {theDate, boost::posix_time::seconds(gain_)};
     }
 
     // Get the local time, second level resolution, based on the time zone settings of the computer.
-    boost::posix_time::ptime the_time(Calendar::second_clock_time());
-    the_time += seconds(gain_);
+    auto the_time = boost::posix_time::ptime(Calendar::second_clock_time());
+    the_time += boost::posix_time::seconds(gain_);
     return the_time;
 }
 

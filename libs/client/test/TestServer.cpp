@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #include <boost/test/unit_test.hpp>
 
 #include "InvokeServer.hpp"

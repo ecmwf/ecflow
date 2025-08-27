@@ -11,17 +11,10 @@
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
-
-#ifdef DEBUG
-    #include <boost/date_time/posix_time/time_formatters.hpp>
-#endif
-
-using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 namespace ecf {
 
@@ -83,7 +76,7 @@ bool AutoArchiveAttr::isFree(
     }
 
     if (relative_) {
-        time_duration time_elapsed = calendar.duration() - last_state_and_change_duration.second;
+        boost::posix_time::time_duration time_elapsed = calendar.duration() - last_state_and_change_duration.second;
         LOG_ASSERT(!time_elapsed.is_negative(), "should always be positive or some things gone wrong");
         if (time_elapsed >= time_.duration()) {
             return true;

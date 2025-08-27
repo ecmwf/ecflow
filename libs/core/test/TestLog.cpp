@@ -20,7 +20,6 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
-using namespace boost;
 
 void dump_path(const fs::path& path) {
     ECF_TEST_DBG(<< "path = " << path);

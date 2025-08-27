@@ -8,11 +8,11 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/core/Timer.hpp"
+
 #include <unistd.h>
 
 #include <sys/times.h>
-
-#include "ecflow/core/Timer.hpp"
 
 namespace ecf {
 

@@ -12,9 +12,8 @@
 
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
-
 #include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
@@ -25,8 +24,6 @@
 #endif
 
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 // #define DEBUG_CALENDAR 1;
 
@@ -265,11 +262,11 @@ void Calendar::init(const boost::posix_time::ptime& time, Clock_t clock) {
 
 /// Start the Calendar.  Parameter time can include gain.
 void Calendar::begin(const boost::posix_time::ptime& the_time) {
-    duration_  = time_duration(0, 0, 0, 0);
-    increment_ = time_duration(0, 1, 0, 0); // This will get overwritten on update
-                                            // But allows some tests to run
-    suiteTime_     = the_time;              // includes gain _IF_ it was specified
-    initTime_      = the_time;              // includes gain
+    duration_  = boost::posix_time::time_duration(0, 0, 0, 0);
+    increment_ = boost::posix_time::time_duration(0, 1, 0, 0); // This will get overwritten on update
+                                                               // But allows some tests to run
+    suiteTime_     = the_time;                                 // includes gain _IF_ it was specified
+    initTime_      = the_time;                                 // includes gain
     dayChanged_    = false;
     initLocalTime_ = second_clock_time(); // for real time clock
     lastTime_      = initLocalTime_;      // for real time clock
@@ -282,8 +279,8 @@ void Calendar::update(const ecf::CalendarUpdateParams& calUpdateParams) {
     assert(!suiteTime_.is_special()); // begin has not been called.
 
     // Get the day of week before we update calendar, then same after to determine if the day changed
-    boost::gregorian::date currentdate = suiteTime_.date();
-    int theDayOfWeek                   = currentdate.day_of_week().as_number();
+    auto currentdate = suiteTime_.date();
+    int theDayOfWeek = currentdate.day_of_week().as_number();
 
     // However there are two ways of incremented/updating calendar.
     if (!calUpdateParams.forTest()) {
@@ -292,7 +289,7 @@ void Calendar::update(const ecf::CalendarUpdateParams& calUpdateParams) {
             // 0/ We are still testing. User wants to speed up calendar.
             //    i.e. if server poll period is 2 seconds, we increment calendar by 1 minute
 
-            time_duration one_minute(0, 1, 0, 0);
+            auto one_minute = boost::posix_time::time_duration(0, 1, 0, 0);
             duration_ += one_minute;
             suiteTime_ += one_minute;
             increment_ = one_minute;
@@ -306,9 +303,9 @@ void Calendar::update(const ecf::CalendarUpdateParams& calUpdateParams) {
             //    time was constructed from a system call in the server.
             //
             // Take a difference, which means we can ignore dates
-            const ptime& time_now = calUpdateParams.timeNow();
+            const auto& time_now = calUpdateParams.timeNow();
             assert(!time_now.is_special()); // This should have been set
-            duration_  = time_period(initLocalTime_, time_now).length();
+            duration_  = boost::posix_time::time_period(initLocalTime_, time_now).length();
             increment_ = time_now - lastTime_;
             suiteTime_ += increment_;
             lastTime_ = time_now;
@@ -347,9 +344,9 @@ void Calendar::update(const ecf::CalendarUpdateParams& calUpdateParams) {
                  << "\n";
 #endif
 
-            time_duration td = suiteTime_.time_of_day();
+            auto td = suiteTime_.time_of_day();
 
-            suiteTime_ = ptime(initTime_.date(), td);
+            suiteTime_ = boost::posix_time::ptime(initTime_.date(), td);
 
 #ifdef DEBUG_CALENDAR
             cout << "suiteTime_ = " << to_simple_string(suiteTime_) << "\n";
@@ -372,7 +369,7 @@ void Calendar::update_duration_only(boost::posix_time::ptime& time_now) {
     //    time was constructed from a system call in the server.
     //
     // Take a difference, which means we can ignore dates
-    boost::posix_time::time_duration dur = time_period(initLocalTime_, time_now).length();
+    auto dur = boost::posix_time::time_period(initLocalTime_, time_now).length();
     if (dur > duration_) {
         duration_ = dur;
     }
@@ -383,12 +380,12 @@ void Calendar::update_cache() const {
     if (suiteTime_.is_special())
         return;
 
-    boost::gregorian::date newDate = suiteTime_.date();
-    day_of_week_                   = newDate.day_of_week().as_number();
-    day_of_year_                   = newDate.day_of_year();
-    day_of_month_                  = newDate.day();
-    month_                         = newDate.month();
-    year_                          = newDate.year();
+    auto newDate  = suiteTime_.date();
+    day_of_week_  = newDate.day_of_week().as_number();
+    day_of_year_  = newDate.day_of_year();
+    day_of_month_ = newDate.day();
+    month_        = newDate.month();
+    year_         = newDate.year();
 }
 int Calendar::day_of_week() const {
     if (day_of_week_ == -1)
@@ -424,7 +421,7 @@ void Calendar::update(const boost::posix_time::time_duration& serverPollPeriod) 
 void Calendar::update(const boost::posix_time::ptime& time_now) {
     // Used for tests even though for_test is false, as we want to test that path in UNIT tests
     // Test path `1.` shown above. Note: we pass minutes(1), to ensure path `1.` is taken
-    CalendarUpdateParams p(time_now, minutes(1), true /* server running */, false /* for Test*/);
+    CalendarUpdateParams p(time_now, boost::posix_time::minutes(1), true /* server running */, false /* for Test*/);
     update(p);
 }
 
@@ -529,7 +526,7 @@ void Calendar::read_state(const std::string& line, const std::vector<std::string
             }
             else
                 throw std::runtime_error("Calendar::read_state failed: 1");
-            initTime_ = time_from_string(time);
+            initTime_ = boost::posix_time::time_from_string(time);
         }
         else if (line_token.find("suiteTime:") != std::string::npos) {
             if (!Extract::split_get_second(line_token, time))
@@ -540,7 +537,7 @@ void Calendar::read_state(const std::string& line, const std::vector<std::string
             }
             else
                 throw std::runtime_error("Calendar::read_state failed: 1");
-            suiteTime_ = time_from_string(time);
+            suiteTime_ = boost::posix_time::time_from_string(time);
         }
         else if (line_token.find("initLocalTime:") != std::string::npos) {
             if (!Extract::split_get_second(line_token, time))
@@ -551,7 +548,7 @@ void Calendar::read_state(const std::string& line, const std::vector<std::string
             }
             else
                 throw std::runtime_error("Calendar::read_state failed: 1");
-            initLocalTime_ = time_from_string(time);
+            initLocalTime_ = boost::posix_time::time_from_string(time);
         }
         else if (line_token.find("lastTime:") != std::string::npos) {
             if (!Extract::split_get_second(line_token, time))
@@ -562,17 +559,17 @@ void Calendar::read_state(const std::string& line, const std::vector<std::string
             }
             else
                 throw std::runtime_error("Calendar::read_state failed: 1");
-            lastTime_ = time_from_string(time);
+            lastTime_ = boost::posix_time::time_from_string(time);
         }
         else if (line_token.find("duration:") != std::string::npos) {
             if (!Extract::split_get_second(line_token, time))
                 throw std::runtime_error("Calendar::read_state failed: (duration)");
-            duration_ = duration_from_string(time);
+            duration_ = boost::posix_time::duration_from_string(time);
         }
         else if (line_token.find("calendarIncrement:") != std::string::npos) {
             if (!Extract::split_get_second(line_token, time))
                 throw std::runtime_error("Calendar::read_state failed: (calendarIncrement)");
-            increment_ = duration_from_string(time);
+            increment_ = boost::posix_time::duration_from_string(time);
         }
         else if (line_token == "dayChanged:1")
             dayChanged_ = true;
@@ -591,7 +588,7 @@ bool Calendar::checkInvariants(std::string& errorMsg) const {
 
 boost::posix_time::ptime Calendar::second_clock_time() {
     /// Chose UTC since it s compatible with boost deadline timer
-    return second_clock::universal_time(); // UTC
+    return boost::posix_time::second_clock::universal_time(); // UTC
 }
 
 // ==================================================================================

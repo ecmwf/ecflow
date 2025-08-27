@@ -19,8 +19,6 @@
 
 #ifdef DEBUG_CLIENT
     #include <iostream>
-
-    #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #endif
 
 /// The timeout will typically happen when the server has died, but socket is still open
@@ -97,7 +95,7 @@ void SslClient::start(endpoints_iterator_t endpoints_iterator) {
 bool SslClient::start_connect(endpoints_iterator_t endpoints_iterator) {
     if (endpoints_iterator != endpoints_iterator_t()) {
 #ifdef DEBUG_CLIENT
-        std::cout << "   SslClient::start_connect: Trying " << endpoint_iterator->endpoint() << "..." << std::endl;
+        std::cout << "   SslClient::start_connect: Trying " << endpoints_iterator->endpoint() << "..." << std::endl;
 #endif
 
         // expires_from_now cancels any pending asynchronous waits, and returns the number of asynchronous waits that

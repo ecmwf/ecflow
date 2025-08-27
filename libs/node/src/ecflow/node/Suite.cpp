@@ -25,8 +25,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // #define DEBUG_FIND_NODE 1
@@ -211,10 +209,10 @@ void Suite::requeue_calendar() {
     if (clockAttr_.get() && clockAttr_->hybrid() && repeat().is_repeat_day()) {
 
         // Get the current time, but with the *existing* date of the suite
-        boost::gregorian::date suite_date = cal_.suiteTime().date();
-        suite_date += date_duration(repeat().step());
+        auto suite_date = cal_.suiteTime().date();
+        suite_date += boost::gregorian::date_duration(repeat().step());
 
-        ptime suiteTime = ptime(suite_date, Calendar::second_clock_time().time_of_day());
+        auto suiteTime = boost::posix_time::ptime(suite_date, Calendar::second_clock_time().time_of_day());
         cal_.begin(suiteTime);
 
         // make sure update variable regenerates all suite variables, i.e like ECF_DATE, etc
@@ -253,7 +251,7 @@ bool Suite::resolveDependencies(JobsParam& jobsParam) {
         SuiteChanged1 changed(this);
 
         // improve resolution of state change time. ECFLOW-1512
-        boost::posix_time::ptime time_now = Calendar::second_clock_time();
+        auto time_now = Calendar::second_clock_time();
         cal_.update_duration_only(time_now);
 
         //  ** See: collateChanges  and ECFLOW-1512
@@ -424,8 +422,8 @@ void Suite::changeClockDate(const std::string& theDate) {
     // This will update calendar by repeat days.
     // Hence, take this into account by decrementing by number of days
     if (clockAttr_.get() && clockAttr_->hybrid() && repeat().is_repeat_day()) {
-        boost::gregorian::date the_date(year, month, dayy);
-        the_date -= date_duration(repeat().step());
+        auto the_date = boost::gregorian::date(year, month, dayy);
+        the_date -= boost::gregorian::date_duration(repeat().step());
         dayy  = the_date.day();
         month = the_date.month();
         year  = the_date.year();
@@ -755,10 +753,9 @@ void SuiteGenVariables::update_generated_variables() const {
     }
 
     // The code below ASSUMES calendar has been initialised
-    boost::posix_time::time_duration time_of_day = suite_->cal_.suiteTime().time_of_day();
+    auto time_of_day = suite_->cal_.suiteTime().time_of_day();
 
     // #ifdef DEBUG
-    //     using namespace boost::gregorian;
     //     tm t = to_tm(suite_->cal_.suiteTime());  // to_tm can be a bit of a performance hog
     ////  cerr << "\ntm_year = " << t.tm_year << "\n";  /* year - 1900              */
     ////  cerr << "tm_mon = " << t.tm_mon << "\n";      /* month of year (0 - 11)   */

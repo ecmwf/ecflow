@@ -12,14 +12,12 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
-#include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Environment.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -27,10 +25,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
 
@@ -79,7 +74,8 @@ BOOST_AUTO_TEST_CASE(test_clk_sync) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_clk_sync.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
@@ -90,17 +86,17 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
 
     // When using ECF_SSL sync is to slow.
     if (ecf::environment::has(ecf::environment::ECF_SSL)) {
-        cout << " ignore test undel ECF_SSL\n";
+        std::cout << " ignore test undel ECF_SSL\n";
         return;
     }
 
     // Test that sync_local(true), sync's the suite clock/calendar.
     Defs theDefs;
     {
-        boost::posix_time::ptime today = Calendar::second_clock_time();
-        suite_ptr suite                = theDefs.add_suite("test_suite_calendar_sync");
-        family_ptr fam                 = suite->add_family("family");
-        task_ptr task                  = fam->add_task("t1");
+        auto today      = Calendar::second_clock_time();
+        suite_ptr suite = theDefs.add_suite("test_suite_calendar_sync");
+        family_ptr fam  = suite->add_family("family");
+        task_ptr task   = fam->add_task("t1");
 
         // Don't use hybrid for day dependency as that will force node to complete if days is not the same
         ClockAttr clockAttr(today, false);
@@ -140,8 +136,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local(true /*sync suite clock*/) == 0,
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());
-        boost::posix_time::ptime sync_clock_suiteTime =
-            TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
+        auto sync_clock_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
         ss << "   Sync clock suite time:" << to_simple_string(sync_clock_suiteTime) << " full_sync("
            << TestFixture::client().server_reply().full_sync() << ")" << " in_sync("
            << TestFixture::client().server_reply().in_sync() << ") cal_count("
@@ -150,8 +145,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
         // suiteVec is now invalidated
         BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,
                               CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
-        boost::posix_time::ptime sync_full_suiteTime =
-            TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
+        auto sync_full_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
         ss << "   Sync full suite time :" << to_simple_string(sync_full_suiteTime) << " full_sync("
            << TestFixture::client().server_reply().full_sync() << ")" << " in_sync("
            << TestFixture::client().server_reply().in_sync() << ") cal_count("
@@ -164,7 +158,8 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
                                        << TestFixture::client().defs());
     }
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

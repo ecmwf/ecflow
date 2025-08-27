@@ -15,8 +15,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 // #define DEBUG_DAY 1
 
@@ -847,16 +845,16 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
     for (const auto& time : times_) {
         const TimeSeries& time_series = time.time_series();
         if (time_series.start().minute() != 0) {
-            resol = minutes(1);
+            resol = boost::posix_time::minutes(1);
             return;
         }
         if (time_series.hasIncrement()) {
             if (time_series.finish().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
             if (time_series.incr().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
         }
@@ -865,16 +863,16 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
     for (const auto& today : todays_) {
         const TimeSeries& time_series = today.time_series();
         if (time_series.start().minute() != 0) {
-            resol = minutes(1);
+            resol = boost::posix_time::minutes(1);
             return;
         }
         if (time_series.hasIncrement()) {
             if (time_series.finish().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
             if (time_series.incr().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
         }
@@ -883,16 +881,16 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
     for (const auto& cron : crons_) {
         const TimeSeries& time_series = cron.time_series();
         if (time_series.start().minute() != 0) {
-            resol = minutes(1);
+            resol = boost::posix_time::minutes(1);
             return;
         }
         if (time_series.hasIncrement()) {
             if (time_series.finish().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
             if (time_series.incr().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
         }
@@ -901,14 +899,14 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
 
 void Node::get_max_simulation_duration(boost::posix_time::time_duration& duration) const {
     // don't override a higher value of duration
-    if ((!times_.empty() || !todays_.empty()) && duration < hours(24))
-        duration = hours(24); // day
-    if (!days_.empty() && duration < hours(168))
-        duration = hours(168); // week
-    if (!dates_.empty() && duration < hours(24 * 7 * 31))
-        duration = hours(24 * 7 * 31); // month
+    if ((!times_.empty() || !todays_.empty()) && duration < boost::posix_time::hours(24))
+        duration = boost::posix_time::hours(24); // day
+    if (!days_.empty() && duration < boost::posix_time::hours(168))
+        duration = boost::posix_time::hours(168); // week
+    if (!dates_.empty() && duration < boost::posix_time::hours(24 * 7 * 31))
+        duration = boost::posix_time::hours(24 * 7 * 31); // month
     if (!crons_.empty())
-        duration = hours(8760); // year
+        duration = boost::posix_time::hours(8760); // year
     if (!repeat_.empty())
-        duration = hours(8760); // year
+        duration = boost::posix_time::hours(8760); // year
 }

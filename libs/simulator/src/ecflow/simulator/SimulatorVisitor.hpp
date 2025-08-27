@@ -13,8 +13,7 @@
 
 #include <vector>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/node/NodeTreeVisitor.hpp"
 
 class Defs;

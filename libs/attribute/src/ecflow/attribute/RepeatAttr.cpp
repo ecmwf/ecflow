@@ -13,9 +13,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/date_time.hpp>
-#include <boost/date_time/posix_time/time_parsers.hpp>
-
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -26,8 +23,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 const Repeat& Repeat::EMPTY() {
     static const Repeat REPEAT = Repeat();
@@ -37,18 +32,25 @@ const Repeat& Repeat::EMPTY() {
 //=========================================================================
 
 Repeat::Repeat() = default;
+
 Repeat::Repeat(const RepeatDate& r) : type_(std::make_unique<RepeatDate>(r)) {
 }
+
 Repeat::Repeat(const RepeatDateTime& r) : type_(std::make_unique<RepeatDateTime>(r)) {
 }
+
 Repeat::Repeat(const RepeatDateList& r) : type_(std::make_unique<RepeatDateList>(r)) {
 }
+
 Repeat::Repeat(const RepeatInteger& r) : type_(std::make_unique<RepeatInteger>(r)) {
 }
+
 Repeat::Repeat(const RepeatEnumerated& r) : type_(std::make_unique<RepeatEnumerated>(r)) {
 }
+
 Repeat::Repeat(const RepeatString& r) : type_(std::make_unique<RepeatString>(r)) {
 }
+
 Repeat::Repeat(const RepeatDay& r) : type_(std::make_unique<RepeatDay>(r)) {
 }
 
@@ -167,8 +169,8 @@ RepeatDate::RepeatDate(const std::string& variable, int start, int end, int delt
 
     // Use date lib to check YMD
     try {
-        (void)boost::gregorian::date(from_undelimited_string(theStart));
-        (void)boost::gregorian::date(from_undelimited_string(theEnd));
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(theStart));
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(theEnd));
     }
     catch (std::exception& e) {
         std::stringstream ss;
@@ -229,7 +231,7 @@ void RepeatDate::update_repeat_genvar_value() const {
     std::string date_as_string = valueAsString();
     if (valid()) {
         try {
-            boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+            auto the_date = boost::gregorian::from_undelimited_string(date_as_string);
             if (the_date.is_special()) {
                 std::stringstream ss;
                 ss << "RepeatDate::update_repeat_genvar(): invalid current date: " << date_as_string << " is_special";
@@ -399,7 +401,7 @@ void RepeatDate::change(const std::string& newdate) {
 
     // Use date lib to check YMD
     try {
-        (void)boost::gregorian::date(from_undelimited_string(newdate));
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(newdate));
     }
     catch (std::exception& e) {
         std::stringstream ss;
@@ -780,7 +782,7 @@ RepeatDateList::RepeatDateList(const std::string& variable, const std::vector<in
         }
 
         try {
-            (void)boost::gregorian::date(from_undelimited_string(date_i));
+            (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(date_i));
         }
         catch (std::exception& e) {
             std::stringstream ss;
@@ -837,7 +839,7 @@ void RepeatDateList::update_repeat_genvar_value() const {
     if (valid()) {
         std::string date_as_string = valueAsString();
         try {
-            boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+            auto the_date = boost::gregorian::from_undelimited_string(date_as_string);
             if (the_date.is_special()) {
                 std::stringstream ss;
                 ss << "RepeatDateList::update_repeat_genvar_value(): " << toString()

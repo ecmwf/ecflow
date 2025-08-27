@@ -15,7 +15,6 @@
 
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace boost;
 using namespace std;
 
 // #define DEBUG_ME 1

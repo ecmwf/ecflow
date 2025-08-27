@@ -21,7 +21,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace std;
-using namespace boost;
 
 namespace ecf {
 

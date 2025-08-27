@@ -14,7 +14,6 @@
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace boost;
 using namespace std;
 
 BOOST_AUTO_TEST_SUITE(U_Core)

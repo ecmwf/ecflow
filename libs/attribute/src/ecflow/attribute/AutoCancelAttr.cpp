@@ -11,17 +11,10 @@
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Serialization.hpp"
-
-#ifdef DEBUG
-    #include <boost/date_time/posix_time/time_formatters.hpp>
-#endif
-
-using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 namespace ecf {
 
@@ -64,7 +57,7 @@ bool AutoCancelAttr::isFree(const ecf::Calendar& calendar,
     //
 
     if (relative_) {
-        time_duration timeElapsedAfterComplete = calendar.duration() - suiteDurationAtComplete;
+        boost::posix_time::time_duration timeElapsedAfterComplete = calendar.duration() - suiteDurationAtComplete;
         LOG_ASSERT(!timeElapsedAfterComplete.is_negative(), "should always be positive or some things gone wrong");
         if (timeElapsedAfterComplete >= time_.duration()) {
             return true;

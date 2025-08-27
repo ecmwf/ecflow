@@ -20,8 +20,6 @@
 #include "ecflow/core/TimeSeries.hpp"
 
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 namespace ecf {
 
@@ -103,7 +101,7 @@ bool LateAttr::check_for_lateness(const std::pair<NState, boost::posix_time::tim
             //
             // To check for submitted, we need the duration *after* state went into submitted state.
             // `state.second` is when state went SUBMITTED, relative to suite start
-            boost::posix_time::time_duration time_in_submitted_state = calendar.duration() - state.second;
+            auto time_in_submitted_state = calendar.duration() - state.second;
             if (time_in_submitted_state >= s_.duration()) {
                 return true;
             }
@@ -118,7 +116,7 @@ bool LateAttr::check_for_lateness(const std::pair<NState, boost::posix_time::tim
         if (c_is_rel_) {
             // To check for complete, we need the duration when state went into active state.
             // `state.second` is when state went ACTIVE, relative to suite start
-            boost::posix_time::time_duration runtime = calendar.duration() - state.second;
+            auto runtime = calendar.duration() - state.second;
             if (runtime >= c_.duration()) {
                 return true;
             }

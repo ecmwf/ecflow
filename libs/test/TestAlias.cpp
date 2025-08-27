@@ -9,9 +9,8 @@
  */
 
 #include <iostream>
-#include <limits> // for std::numeric_limits<int>::max()
+#include <limits>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
@@ -29,10 +28,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 ///
 ///    This test will TEST:
@@ -237,7 +233,8 @@ BOOST_AUTO_TEST_CASE(test_alias) {
     defs->get_all_aliases(aliases);
     BOOST_REQUIRE_MESSAGE(aliases.empty(), "Alias deletion falied\n" << TestFixture::client().errorMsg());
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -80,8 +80,9 @@
 ///
 
 #include <cstdint>
+#include <iostream>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "ecflow/core/Chrono.hpp"
 
 namespace cereal {
 class access;
@@ -233,7 +234,7 @@ public:
     /// return real time, when the calendar was begun/initialised.
     /// This is used to update the duration_, which is recorded for each state change in the node
     /// Hence to when we can compute when a state change occurred by using:
-    ///   boost::posix_time::ptime time_of_state_change = begin_time() + node->get_state().second(duration)
+    ///   auto time_of_state_change = begin_time() + node->get_state().second(duration)
     const boost::posix_time::ptime& begin_time() const { return initLocalTime_; }
 
     /// return the date, for real calendar this corresponds to the date on suiteTime_

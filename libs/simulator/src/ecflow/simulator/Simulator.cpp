@@ -10,8 +10,6 @@
 
 #include "ecflow/simulator/Simulator.hpp"
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/Log.hpp"
@@ -25,9 +23,6 @@
 #include "ecflow/simulator/Analyser.hpp"
 #include "ecflow/simulator/SimulatorVisitor.hpp"
 
-using namespace boost::gregorian;
-using namespace boost::posix_time;
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG_LONG_RUNNING_SUITES 1
@@ -110,8 +105,8 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     }
 
     // Let visitor determine calendar increment. i.e if no time dependencies we will use 1 hour increment
-    time_duration calendarIncrement                        = simiVisitor.calendarIncrement();
-    boost::posix_time::time_duration max_simulation_period = simiVisitor.maxSimulationPeriod();
+    auto calendarIncrement     = simiVisitor.calendarIncrement();
+    auto max_simulation_period = simiVisitor.maxSimulationPeriod();
 
     std::stringstream ss;
     ss << " time dependency(" << simiVisitor.hasTimeDependencies() << ") max_simulation_period("
@@ -136,7 +131,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     // Assume: User has taken into account autocancel end time.
     // ==================================================================================
     CalendarUpdateParams calUpdateParams(calendarIncrement);
-    boost::posix_time::time_duration duration(0, 0, 0, 0);
+    auto duration = boost::posix_time::time_duration(0, 0, 0, 0);
     while (duration <= max_simulation_period) {
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
@@ -145,13 +140,13 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
                  << " +++++++++++++++++++++++++++++++++++ " << endl;
 
             // use following to snapshot definition state at a given point in time
-            //         {
-            //        	 boost::gregorian::date debug_date(2019,8,5);
-            //        	 ptime debug_time(debug_date, hours(10) );
-            //        	 if (my_suite->calendar().suiteTime() == debug_time) {
-            //        		 cout << theDefs.print(PrintStyle::MIGRATE) << endl;
-            //        	 }
-            //         }
+            //   {
+            //     auto debug_date = boost::gregorian::date(2019,8,5);
+            //     ptime debug_time(debug_date, hours(10) );
+            //     if (my_suite->calendar().suiteTime() == debug_time) {
+            //       cout << theDefs.print(PrintStyle::MIGRATE) << endl;
+            //     }
+            //   }
         }
 #endif
 

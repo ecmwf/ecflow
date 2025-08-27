@@ -13,9 +13,8 @@
 #include <ostream>
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
@@ -23,8 +22,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 //==========================================================================================
 
@@ -79,7 +76,7 @@ void DateAttr::checkDate(int day, int month, int year, bool allow_wild_cards) {
     if (day != 0 && month != 0 && year != 0) {
 
         // let boost validate the date
-        boost::gregorian::date theDate(year, month, day);
+        auto theDate = boost::gregorian::date(year, month, day);
     }
 }
 
@@ -158,7 +155,7 @@ bool DateAttr::checkForRequeue(const ecf::Calendar& calendar) const {
     // checkForRequeue is called when we are deciding whether to re-queue the node.
     // If this date is in the future, we should re-queue
     if (day_ != 0 && month_ != 0 && year_ != 0) {
-        date theDate(year_, month_, day_);
+        auto theDate = boost::gregorian::date(year_, month_, day_);
         if (theDate > calendar.date()) {
             // #ifdef DEBUG
             //			cout << toString() << "   > " << " calendar date " << to_simple_string( calendar.date())
@@ -211,7 +208,8 @@ bool DateAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
         return false;
 
     std::stringstream ss;
-    ss << " is date dependent ( next run on " << to_simple_string(next_matching_date(c)) << " the current date is ";
+    ss << " is date dependent ( next run on " << boost::gregorian::to_simple_string(next_matching_date(c))
+       << " the current date is ";
     ss << c.day_of_month() << "/" << c.month() << "/" << c.year() << " )";
     theReasonWhy += ss.str();
     return true;
@@ -345,23 +343,18 @@ void DateAttr::getDate(const std::string& date, int& day, int& month, int& year)
 
     // let boost validate the date
     if (day != 0 && month != 0 && year != 0) {
-
-        boost::gregorian::date theDate(year, month, day);
+        auto theDate = boost::gregorian::date(year, month, day);
     }
-
-    //	cerr << " DateParser::getDate date=" << date << " day=" << day << " month=" << month << " year=" << year <<
-    //"\n";
 }
 
 boost::gregorian::date DateAttr::next_matching_date(const ecf::Calendar& c) const {
-    boost::gregorian::date next_matching_date = c.date(); // today's date
+    auto next_matching_date = c.date(); // today's date
 
-    boost::gregorian::date_duration one_day(1);
+    auto one_day = boost::gregorian::date_duration(1);
 
     bool day_matches   = (day_ == 0) ? true : false;
     bool month_matches = (month_ == 0) ? true : false;
     bool year_matches  = (year_ == 0) ? true : false;
-    ;
 
     for (int i = 0; i < 365; i++) {
         next_matching_date += one_day;

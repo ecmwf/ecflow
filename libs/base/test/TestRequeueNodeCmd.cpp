@@ -26,8 +26,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
 
@@ -305,14 +303,16 @@ BOOST_AUTO_TEST_CASE(test_repeat_based_requeue_resets_relative_duration) {
     // forward time, so that time expires
     // The calendar is *only* updated if the suite have been begun. Hence make sure this test scaffold
     // starts the test, with all the suites in a begun state
-    boost::posix_time::ptime time_now = Calendar::second_clock_time();
+    auto time_now = Calendar::second_clock_time();
     {
-        CalendarUpdateParams cal(time_now, minutes(1), true /* server running */, false /* for Test*/);
+        CalendarUpdateParams cal(
+            time_now, boost::posix_time::minutes(1), true /* server running */, false /* for Test*/);
         the_defs->updateCalendar(cal); // cout << suite->calendar().toString() << "\n";
-        time_now += minutes(1);
+        time_now += boost::posix_time::minutes(1);
     }
     {
-        CalendarUpdateParams cal(time_now, minutes(1), true /* server running */, false /* for Test*/);
+        CalendarUpdateParams cal(
+            time_now, boost::posix_time::minutes(1), true /* server running */, false /* for Test*/);
         the_defs->updateCalendar(cal); // cout << suite->calendar().toString() << "\n";
     }
     theTime.requeue(suite->calendar(), true); // will expire time
