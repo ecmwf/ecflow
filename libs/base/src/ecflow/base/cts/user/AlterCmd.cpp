@@ -653,6 +653,8 @@ const char* AlterCmd::desc() {
         "\n"
         " * To update, create or remove server variables use '/' for path.\n"
         "\n"
+        " * When updating unnamed attributes (Repeat, Trigger, Complete, ...) the name/arg3 is not necessary.\n"
+        "\n"
         " * After changing the clock the suite needs to be re-queued for the change to take effect.\n"
         "\n"
         " * When adding or updating node attributes (e.g. variable, meter, event, label, limits, late)\n"
