@@ -15,27 +15,6 @@
 #include <functional>
 #include <iostream>
 
-// TODO: remove when we use c++17
-template <typename F, typename... Args>
-auto invoke(F f, Args&&... args) -> decltype(std::ref(f)(std::forward<Args>(args)...)) {
-    return std::ref(f)(std::forward<Args>(args)...);
-}
-
-template <typename Time = std::chrono::microseconds, typename Clock = std::chrono::high_resolution_clock>
-struct perf_timer
-{
-    template <typename F, typename... Args>
-    static Time duration(F&& f, Args... args) {
-        auto start = Clock::now();
-
-        // std::invoke(std::forward<F>(f), std::forward<Args>(args)...); // c++17
-        invoke(std::forward<F>(f), std::forward<Args>(args)...);
-
-        auto end = Clock::now();
-        return std::chrono::duration_cast<Time>(end - start);
-    }
-};
-
 template <class Resolution = std::chrono::milliseconds>
 class Timer {
 public:
@@ -58,6 +37,26 @@ public:
 };
 
 namespace ecf {
+
+/**
+ * @brief A class to measure the duration of a function invocation
+ *
+ * @tparam Time the unit of time used to measure the duration of a function invocation
+ * @tparam Clock the clock type used to measure the duration of a function invocation
+ */
+template <typename Time = std::chrono::microseconds, typename Clock = std::chrono::high_resolution_clock>
+struct FunctionPerformanceTimer
+{
+    template <typename F, typename... Args>
+    static Time duration(F&& f, Args... args) {
+        auto start = Clock::now();
+
+        std::invoke(std::forward<F>(f), std::forward<Args>(args)...); // c++17
+
+        auto end = Clock::now();
+        return std::chrono::duration_cast<Time>(end - start);
+    }
+};
 
 struct PerformanceMeasure
 {
