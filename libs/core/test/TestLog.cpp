@@ -13,10 +13,10 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;

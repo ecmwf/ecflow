@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Timer.hpp"
 
 namespace ecf {
 

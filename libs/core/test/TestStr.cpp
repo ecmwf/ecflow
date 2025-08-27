@@ -15,9 +15,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/PerformanceTimer.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;

@@ -11,11 +11,11 @@
 #include "ecflow/server/CheckPtSaver.hpp"
 
 #include "ecflow/base/cts/user/CtsApi.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/server/BaseServer.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"

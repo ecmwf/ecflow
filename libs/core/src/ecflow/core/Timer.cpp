@@ -8,13 +8,17 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/core/PerformanceTimer.hpp"
-
 #include <unistd.h>
 
 #include <sys/times.h>
 
+#include "ecflow/core/Timer.hpp"
+
 namespace ecf {
+
+ScopedDurationTimer::~ScopedDurationTimer() {
+    std::cout << msg_ << " " << elapsed_milliseconds() / 1000.0 << "s\n";
+}
 
 PerformanceMeasure PerformanceMeasure::current() {
 

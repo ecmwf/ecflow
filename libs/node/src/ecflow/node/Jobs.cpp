@@ -10,8 +10,8 @@
 
 #include "ecflow/node/Jobs.hpp"
 
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Operations.hpp"

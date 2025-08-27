@@ -19,7 +19,7 @@
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
