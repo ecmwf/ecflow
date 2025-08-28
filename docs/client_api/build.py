@@ -146,6 +146,7 @@ The list of commands, amongst other details, can be displayed by using the optio
 .. toctree::
     :maxdepth: 1
     
+    desc/cli_option_overriding
     desc/cli_scripting_in_batch
     desc/using_backup_servers
 """

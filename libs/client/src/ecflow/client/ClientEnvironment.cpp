@@ -169,9 +169,15 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
     // make sure there only one host:port in host_vec_
     host_vec_.emplace_back(the_host, the_port);
 
-    // Make sure we don't look in the hosts file.
-    // When there is only one host:port in host_vec_, calling get_next_host() will always return host_vec_[0]
-    host_file_read_ = true;
+    //
+    // Even when --host/--port options are used, we still allow ECF_HOSTFILE to be processed
+    //
+    //   This allows to:
+    //     1. use host/port as defined per ECF_HOST/ECP_PORT
+    //     2. override the host/port with the option --host/--port
+    //     and, still use the content of ECF_HOSTFILE as alternative hosts to try
+    //
+    host_file_read_ = false;
 
     // Caution:
     //

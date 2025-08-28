@@ -218,6 +218,8 @@ public:
     void set_child_denied(bool denied) { denied_ = denied; }
     void set_child_no_ecf(bool no_ecf) { no_ecf_ = no_ecf; }
 
+    [[nodiscard]] const std::string& host_file() const { return host_file_; }
+
     const std::vector<Variable>& init_add_vars() const { return init_add_vars_; }
     const std::vector<std::string>& complete_del_vars() const { return complete_del_vars_; }
 

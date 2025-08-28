@@ -25,6 +25,7 @@ struct MockClientInvoker
         auto b = client_.get_cmd_from_args(CommandLine(commandline));
     }
 
+    ClientEnvironment& environment() { return client_.environment(); };
     const ClientEnvironment& environment() const { return client_.environment(); };
 
 private:
@@ -240,7 +241,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_none__options_host_ssl__
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_host_request_none__options_host_ssl__certificates_shared_only) {
     WithTestFile shared_crt("server.crt");
-    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overriden");
+    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_user("ECF_USER", someuser);
 
@@ -256,7 +257,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_host_request_none__options_host_
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_host_request_none__options_host_ssl__certificates_specific_only) {
     WithTestFile specific_crt(somehost + '.' + someport + ".crt");
-    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overriden");
+    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_user("ECF_USER", someuser);
 
@@ -273,7 +274,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_host_request_none__options_host_
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_host_request_none__options_host_ssl__certificates_shared_and_specific) {
     WithTestFile shared_crt("server.crt");
     WithTestFile specific_crt(somehost + '.' + someport + ".crt");
-    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overriden");
+    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_user("ECF_USER", someuser);
 
@@ -289,7 +290,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_host_request_none__options_host_
 
 BOOST_AUTO_TEST_CASE(can_setup_environment_without_ssl) {
     WithTestFile shared_crt("server.crt");
-    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overriden");
+    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_user("ECF_USER", someuser);
 
@@ -300,6 +301,141 @@ BOOST_AUTO_TEST_CASE(can_setup_environment_without_ssl) {
     BOOST_CHECK_EQUAL(env.port(), someport);
     BOOST_CHECK_EQUAL(env.get_user_name(), someuser);
     BOOST_CHECK(!env.ssl());
+}
+
+BOOST_AUTO_TEST_CASE(can_setup_environment_using_host_port_and_hostfile__test_case_1) {
+    auto content = fs::path{"test_hostsfile.txt"};
+    WithTestFile hostsfile_content(content.c_str(), R"(
+# Some comment
+host1    # Another comment
+  host2:5678
+)");
+    WithTestEnvironmentVariable ecf_hostfile("ECF_HOSTFILE", content.string());
+
+    MockClientInvoker client("ecflow_client -d --host " + somehost + " --port " + someport + " --ping");
+    ClientEnvironment& env = client.environment();
+
+    BOOST_CHECK_EQUAL(env.host(), somehost);
+    BOOST_CHECK_EQUAL(env.port(), someport);
+    BOOST_CHECK_EQUAL(env.host_file(), content);
+    BOOST_CHECK(env.host_file_policy_is_task());
+    BOOST_CHECK(!env.host_file_policy_is_all());
+
+    {
+        std::string error;
+        auto next = env.get_next_host(error);
+        BOOST_CHECK(next);
+
+        BOOST_CHECK_EQUAL(env.host(), "host1");
+        BOOST_CHECK_EQUAL(env.port(), someport);
+        // Surprise!
+        //
+        // I was expecting ecf::Str::DEFAULT_PORT_NUMBER() here, but no...
+        // Because ECF_PORT / --port are used to define a port, that port is then used
+        // by default when no port is defined in the hostfile.
+        //
+    }
+
+    {
+        std::string error;
+        auto next = env.get_next_host(error);
+        BOOST_CHECK(next);
+
+        BOOST_CHECK_EQUAL(env.host(), "host2");
+        BOOST_CHECK_EQUAL(env.port(), "5678");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(can_setup_environment_using_host_port_and_hostfile__test_case_2) {
+    WithTestEnvironmentVariable ecf_host("ECF_HOST", "to_be_overridden");
+    WithTestEnvironmentVariable ecf_port("ECF_PORT", "12345");
+
+    auto content = fs::path{"test_hostsfile.txt"};
+    WithTestFile hostsfile_content(content.c_str(), R"(
+# Some comment
+host1    # Another comment
+  host2:5678
+)");
+    WithTestEnvironmentVariable ecf_hostfile("ECF_HOSTFILE", content.string());
+
+    MockClientInvoker client("ecflow_client -d --host " + somehost + " --port " + someport + " --ping");
+    ClientEnvironment& env = client.environment();
+
+    BOOST_CHECK_EQUAL(env.host(), somehost);
+    BOOST_CHECK_EQUAL(env.port(), someport);
+    BOOST_CHECK_EQUAL(env.host_file(), content);
+    BOOST_CHECK(env.host_file_policy_is_task());
+    BOOST_CHECK(!env.host_file_policy_is_all());
+
+    {
+        std::string error;
+        auto next = env.get_next_host(error);
+        BOOST_CHECK(next);
+
+        BOOST_CHECK_EQUAL(env.host(), "host1");
+        BOOST_CHECK_EQUAL(env.port(), someport);
+        // Surprise!
+        //
+        // I was expecting ecf::Str::DEFAULT_PORT_NUMBER() here, but no...
+        // Because ECF_PORT / --port are used to define a port, that port is then used
+        // by default when no port is defined in the hostfile.
+        //
+    }
+
+    {
+        std::string error;
+        auto next = env.get_next_host(error);
+        BOOST_CHECK(next);
+
+        BOOST_CHECK_EQUAL(env.host(), "host2");
+        BOOST_CHECK_EQUAL(env.port(), "5678");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(can_setup_environment_using_host_port_and_hostfile__test_case_3) {
+    WithTestEnvironmentVariable ecf_host("ECF_HOST", somehost);
+    WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
+
+    auto content = fs::path{"test_hostsfile.txt"};
+    WithTestFile hostsfile_content(content.c_str(), R"(
+# Some comment
+host1    # Another comment
+  host2:5678
+)");
+    WithTestEnvironmentVariable ecf_hostfile("ECF_HOSTFILE", content.string());
+
+    MockClientInvoker client("ecflow_client -d --ping");
+    ClientEnvironment& env = client.environment();
+
+    BOOST_CHECK_EQUAL(env.host(), somehost);
+    BOOST_CHECK_EQUAL(env.port(), someport);
+    BOOST_CHECK_EQUAL(env.host_file(), content);
+    BOOST_CHECK(env.host_file_policy_is_task());
+    BOOST_CHECK(!env.host_file_policy_is_all());
+
+    {
+        std::string error;
+        auto next = env.get_next_host(error);
+        BOOST_CHECK(next);
+
+        BOOST_CHECK_EQUAL(env.host(), "host1");
+        BOOST_CHECK_EQUAL(env.port(), someport);
+        // Surprise!
+        //
+        // I was expecting ecf::Str::DEFAULT_PORT_NUMBER() here, but no...
+        // Because ECF_PORT / --port are used to define a port, that port is then used
+        // by default when no port is defined in the hostfile.
+        //
+    }
+
+    {
+        std::string error;
+        auto next = env.get_next_host(error);
+        BOOST_CHECK(next);
+
+        BOOST_CHECK_EQUAL(env.host(), "host2");
+        BOOST_CHECK_EQUAL(env.port(), "5678");
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

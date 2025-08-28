@@ -44,6 +44,7 @@ public:
     ClientInvoker(const std::string& host, const std::string& port);
     ClientInvoker(const std::string& host, int port);
 
+    ClientEnvironment& environment() { return clientEnv_; }
     const ClientEnvironment& environment() const { return clientEnv_; }
 
     /// for debug allow the current client environment to be printed
