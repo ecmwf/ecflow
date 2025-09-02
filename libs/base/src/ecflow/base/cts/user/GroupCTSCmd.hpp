@@ -33,7 +33,7 @@ public:
     bool isWrite() const override;
     bool cmd_updates_defs() const override;
 
-    void set_identity(const ecf::Identity& identity) override;
+    void set_identity(ecf::Identity identity) override;
 
     PrintStyle::Type_t show_style() const override;
     bool get_cmd() const override;

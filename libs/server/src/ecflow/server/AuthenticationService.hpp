@@ -13,8 +13,8 @@
 
 #include <string>
 
-#include "ecflow/base/Identity.hpp"
 #include "ecflow/core/Host.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/PasswdFile.hpp"
 
 namespace ecf {

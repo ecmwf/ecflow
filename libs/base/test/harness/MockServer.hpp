@@ -69,11 +69,12 @@ public:
     ecf::AuthenticationService& authentication() override { return authentication_service_; }
     const ecf::AuthenticationService& authentication() const override { return authentication_service_; }
 
+    ecf::AuthorisationService& authorisation() override { return authorisation_service_; }
+    const ecf::AuthorisationService& authorisation() const override { return authorisation_service_; }
+
     bool reloadWhiteListFile(std::string&) override { return true; }
     bool reloadPasswdFile(std::string& errorMsg) override { return true; }
     bool reloadCustomPasswdFile(std::string& errorMsg) override { return true; }
-
-    const ecf::Permissions& permissions() const override { return permissions_; }
 
     bool lock(const std::string& user) override {
         if (userWhoHasLock_.empty()) {
@@ -127,7 +128,7 @@ private:
     SState::State server_state_to_preserve_{SState::RUNNING};
 
     ecf::AuthenticationService authentication_service_;
-    ecf::Permissions permissions_;
+    ecf::AuthorisationService authorisation_service_;
 };
 
 /// This class is used to create a Mock Server, so that we can make direct

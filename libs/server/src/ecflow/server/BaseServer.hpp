@@ -68,7 +68,8 @@ public:
     ecf::AuthenticationService& authentication() override { return serverEnv_.authentication(); }
     const ecf::AuthenticationService& authentication() const override { return serverEnv_.authentication(); }
 
-    const ecf::Permissions& permissions() const override { return serverEnv_.permissions(); }
+    ecf::AuthorisationService& authorisation() override { return serverEnv_.authorisation(); }
+    const ecf::AuthorisationService& authorisation() const override { return serverEnv_.authorisation(); }
 
     bool lock(const std::string& user) override;
     void unlock() override;

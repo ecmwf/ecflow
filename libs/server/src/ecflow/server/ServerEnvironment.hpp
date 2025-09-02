@@ -25,13 +25,13 @@
 
 #include <boost/asio.hpp>
 
-#include "ecflow/base/Permissions.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/server/AuthenticationService.hpp"
+#include "ecflow/server/AuthorisationService.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
 #endif
@@ -186,7 +186,8 @@ public:
     ecf::AuthenticationService& authentication() { return authentication_service_; }
     const ecf::AuthenticationService& authentication() const { return authentication_service_; }
 
-    const ecf::Permissions& permissions() const { return permissions_; };
+    ecf::AuthorisationService& authorisation() { return authorisation_service_; }
+    const ecf::AuthorisationService& authorisation() const { return authorisation_service_; }
 
     // const PasswdFile& passwd_file() const { return passwd_file_; }
     // const PasswdFile& passwd_custom_file() const { return passwd_custom_file_; }
@@ -245,9 +246,8 @@ private:
     std::string ecf_white_list_file_;
     mutable WhiteListFile white_list_file_;
 
-    mutable ecf::Permissions permissions_;
-
-    ecf::AuthenticationService authentication_service_;
+    mutable ecf::AuthenticationService authentication_service_;
+    mutable ecf::AuthorisationService authorisation_service_;
 
 #ifdef ECF_OPENSSL
     ecf::Openssl ssl_;

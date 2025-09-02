@@ -55,15 +55,19 @@ void HttpClient::run() {
 
     client_.set_default_headers(headers_);
 
-    auto result = client_.Post("/v1/ecflow", outbound, "application/json");
-    if (result) {
-        auto response = result.value();
-        status_       = httplib::Error::Success;
-        ecf::restore_from_string(response.body, inbound_response_);
+    if (auto result = client_.Post("/v1/ecflow", outbound, "application/json"); result) {
+        status_ = static_cast<ecf::http::Status>(result->status);
+        reason_ = "";
+        if (status_ == ecf::http::Status::OK) {
+            auto response = result.value();
+            ecf::restore_from_string(response.body, inbound_response_);
+        }
+        else {
+        }
     }
     else {
-        status_ = result.error();
-        reason_ = httplib::to_string(status_);
+        status_ = ecf::http::Status::Unknown;
+        reason_ = "No response from server";
     }
 }
 
@@ -73,12 +77,11 @@ bool HttpClient::handle_server_response(ServerReply& server_reply, bool debug) c
     }
     server_reply.set_host_port(host_, port_); // client context, needed by some commands, ie. SServerLoadCmd
 
-    if (status_ == httplib::Error::Success) {
+    if (status_ == ecf::http::Status::OK) {
         return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
     }
-    else {
-        std::stringstream ss;
-        ss << "HttpClient::handle_server_response: Error: " << status_ << " " << reason_;
-        throw std::runtime_error(ss.str());
-    }
+
+    std::stringstream ss;
+    ss << "HttpClient::handle_server_response: Error: " << status_;
+    throw std::runtime_error(ss.str());
 }

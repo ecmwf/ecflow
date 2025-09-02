@@ -22,6 +22,7 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Submittable.hpp"
 

@@ -303,8 +303,8 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         return false;
     }
 
-    if (auto result = Permissions::load_permissions_from_file(fs::path("server.perms.ecf.json")); result.ok()) {
-        permissions_ = result.value();
+    if (auto result = AuthorisationService::load_permissions_from_file(fs::path("server.perms.ecf.json")); result.ok()) {
+        authorisation_service_ = result.value();
         std::cout << "Loaded server permissions file\n";
     }
     else {

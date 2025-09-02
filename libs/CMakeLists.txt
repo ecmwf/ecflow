@@ -68,6 +68,7 @@ set(srcs
   base/src/ecflow/base/Connection.hpp
   base/src/ecflow/base/Gnuplot.hpp
   base/src/ecflow/base/HttpClient.hpp
+  base/src/ecflow/base/Identification.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
   base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerReply.hpp
@@ -77,7 +78,6 @@ set(srcs
   base/src/ecflow/base/ZombieCtrl.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.hpp>
-  base/src/ecflow/base/Permissions.hpp
   base/src/ecflow/base/cts/ClientToServerCmd.hpp
   base/src/ecflow/base/cts/CtsCmdRegistry.hpp
   base/src/ecflow/base/cts/EditHistoryMgr.hpp
@@ -148,6 +148,7 @@ set(srcs
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
   base/src/ecflow/base/HttpClient.cpp
+  base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerReply.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp
@@ -156,7 +157,6 @@ set(srcs
   base/src/ecflow/base/ZombieCtrl.cpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.cpp>
-  base/src/ecflow/base/Permissions.cpp
   base/src/ecflow/base/cts/ClientToServerCmd.cpp
   base/src/ecflow/base/cts/CtsCmdRegistry.cpp
   base/src/ecflow/base/cts/EditHistoryMgr.cpp
@@ -491,6 +491,7 @@ set(srcs
 
   # Server -- Headers
   server/src/ecflow/server/AuthenticationService.hpp
+  server/src/ecflow/server/AuthorisationService.hpp
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
@@ -505,6 +506,7 @@ set(srcs
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.hpp>
   # Server -- Sources
   server/src/ecflow/server/AuthenticationService.cpp
+  server/src/ecflow/server/AuthorisationService.cpp
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp

@@ -8,15 +8,16 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_node_NodePerms_HPP
-#define ecflow_node_NodePerms_HPP
+#ifndef ecflow_base_Identification_HPP
+#define ecflow_base_Identification_HPP
 
-class Node;
+#include "ecflow/core/Identity.hpp"
+#include "ecflow/base/Cmd.hpp"
 
 namespace ecf {
 
-Permission perms(const Node& node);
+Identity identify(const Cmd_ptr& cmd);
 
-}
+} // namespace ecf
 
-#endif /* ecflow_node_NodePerms_HPP */
+#endif /* ecflow_base_Identification_HPP */

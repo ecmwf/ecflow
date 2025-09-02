@@ -11,15 +11,18 @@
 #include "ecflow/node/NodePerms.hpp"
 
 #include "ecflow/node/Node.hpp"
+
 namespace ecf {
 
-ecf::Perms perms(const Node& node) {
-    Node* current = const_cast<Node*>(&node);
+ecf::Permission perms(const Node& node) {
+    auto current = &node;
     auto perms = current->perms();
     while( !perms.good() ) {
         current = current->parent();
         if (current == nullptr) {
-            return ecf::Perms();
+            // We reached to the top of the hierarchy
+            // Return an empty permission
+            return ecf::Permission();
         }
         perms = current->perms();
     }

@@ -136,7 +136,12 @@ void UserCmd::setup_user_authentification(const std::string& user, const std::st
     pswd_ = passwd; // assumes this has been crypted()
     assert(!hostname().empty());
     assert(!user_.empty());
-    set_identity(Identity::make_user(cu_, user_, pswd_));
+    if (cu_) {
+        set_identity(Identity::make_custom_user(user_, pswd_));
+    }
+    else {
+        set_identity(Identity::make_user(user_, pswd_));
+    }
 }
 
 bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv) {

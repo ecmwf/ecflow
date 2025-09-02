@@ -17,7 +17,7 @@
 #include "ecflow/base/Authentication.hpp"
 #include "ecflow/base/Authorisation.hpp"
 #include "ecflow/base/Cmd.hpp"
-#include "ecflow/base/Identity.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/node/NodeFwd.hpp"
@@ -57,8 +57,8 @@ public:
 
     virtual bool equals(ClientToServerCmd* rhs) const;
 
-    virtual void set_identity(const ecf::Identity& identity) { identity_ = identity; }
-    [[nodiscard]] const ecf::Identity& identity() const { return identity_; }
+    virtual void set_identity(ecf::Identity identity) { identity_ = std::move(identity); }
+    [[nodiscard]] ecf::Identity& identity() const { return identity_; }
 
     [[nodiscard]] virtual ecf::authorisation_t authenticate(AbstractServer& server) const = 0;
     [[nodiscard]] virtual ecf::authorisation_t authorise(AbstractServer& server) const    = 0;
@@ -215,7 +215,7 @@ private:
 
     std::string cl_host_; // The host where the client was called
 
-    mutable ecf::Identity identity_; // The identity of the user who issued the command
+    mutable ecf::Identity identity_ = ecf::Identity::make_none(); // The identity of the user who issued the command
 
 private:
     friend class cereal::access;

@@ -20,6 +20,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/CmdContext.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Flag.hpp"
