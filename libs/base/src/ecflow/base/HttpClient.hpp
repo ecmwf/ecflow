@@ -92,6 +92,9 @@ enum class Status {
 };
 
 inline std::string to_http_reason(Status s) {
+    if (s == Status::Unknown) {
+        return "Could not contact server";
+    }
     return httplib::detail::status_message(static_cast<std::underlying_type_t<Status>>(s));
 }
 
@@ -114,6 +117,8 @@ public:
                const std::string& host,
                const std::string& port,
                int timeout = 120);
+
+    std::string url() const { return base_url_; }
 
     void run();
 

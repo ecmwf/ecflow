@@ -100,12 +100,25 @@ namespace ecf {
 
 void cfg(const ClientEnvironment& env, HttpClient& client) {
 
-    // TODO: set the username and password based on configuration/environment information
-    std::string username = "user";
-    std::string password = "somesecret";
+    try {
+        auto token = env.get_token(client.url());
 
-    // client.set_authorization_basic("user", "somesecret");
-    client.set_autorization_bearer("abcdef01234567890123456789012345");
+        if (token.type == "bearer") {
+            auto key = token.key;
+            client.set_autorization_bearer(key);
+        }
+        else if (token.type == "basic") {
+            auto username = token.username;
+            auto password = token.password;
+            client.set_authorization_basic(username, password);
+        }
+        else {
+            throw std::runtime_error("Unsupported token type: " + token.type);
+        }
+    }
+    catch (const UnavailableToken& e) {
+        std::cerr << e.what() << std::endl;
+    }
 }
 
 } // namespace ecf
@@ -495,7 +508,14 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
                         const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
                         HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
-                        cfg(clientEnv_, theClient);
+                        try {
+                            cfg(clientEnv_, theClient);
+                        }
+                        catch (UnavailableToken& e) {
+                            server_reply_.set_error_msg(e.what());
+                            return 1;
+                        }
+
                         theClient.run();
 
                         if (clientEnv_.debug()) {

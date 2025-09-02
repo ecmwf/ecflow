@@ -56,6 +56,10 @@ bool AuthenticationService::valid(const std::string& host, const std::string& po
 }
 
 bool AuthenticationService::is_authentic(const Identity& identity) const {
+    if (identity.is_secure()) {
+        return true;
+    }
+
     const auto& username = identity.username();
     const auto& password = identity.password();
 

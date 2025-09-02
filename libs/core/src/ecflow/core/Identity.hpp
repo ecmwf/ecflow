@@ -87,6 +87,20 @@ private:
     std::string password_;
 };
 
+class SecureUserX {
+public:
+    explicit SecureUserX(std::string username) : username_(std::move(username)), password_{} {}
+
+    [[nodiscard]] std::string username() const { return username_; }
+    [[nodiscard]] std::string password() const { return password_; }
+
+    [[nodiscard]] std::string as_string() const { return "{SecuredUserX: " + username_ + ":" + password_ + "}"; }
+
+private:
+    std::string username_;
+    std::string password_;
+};
+
 class TaskX {
 public:
     explicit TaskX(std::string pid, std::string pass, std::string tryno)
@@ -125,6 +139,9 @@ public:
     [[nodiscard]] static Identity make_custom_user(const std::string& username, const std::string& password) {
         return Identity{CustomUserX{username, password}};
     }
+    [[nodiscard]] static Identity make_secure_user(const std::string& username) {
+        return Identity{SecureUserX{username}};
+    }
 
     [[nodiscard]] static Identity make_task(const std::string& pid, const std::string& pass, const std::string& tryno) {
         return Identity{TaskX{pid, pass, tryno}};
@@ -145,11 +162,13 @@ public:
     }
 
     [[nodiscard]] bool is_user() const {
-        return is_a<UserX>(*handle_) || is_a<CustomUserX>(*handle_);
+        return is_a<UserX>(*handle_) || is_a<CustomUserX>(*handle_) || is_a<SecureUserX>(*handle_);
     }
     [[nodiscard]] bool is_task() const { return is_a<TaskX>(*handle_); }
 
     [[nodiscard]] bool is_custom() const { return is_a<WrappingIdentity<CustomUserX>>(*handle_); }
+    [[nodiscard]] bool is_secure() const { return is_a<WrappingIdentity<SecureUserX>>(*handle_); }
+
     [[nodiscard]] std::string username() const { return handle_->username(); }
     [[nodiscard]] std::string password() const { return handle_->password(); }
 

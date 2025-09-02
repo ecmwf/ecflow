@@ -69,20 +69,51 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
 
         // If possible, the Identify is retrieved from request header fields
         bool identity_headers = false;
-        for (const auto& field : request) {
-            LOG_DEBUG("HttpServer::handle_request", field.name_string() << ": " << field.value());
-            if (field.name_string() == "X-Auth-Username") {
+        bool identity_secure  = false;
+        std::string username;
+        std::string password;
+        {
+            auto found = std::find_if(std::begin(request), std::end(request), [](auto& field) {
+                return field.name_string() == "X-Auth-Username";
+            });
+            if (found != std::end(request)) {
                 identity_headers = true;
-                LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request");
-                identity = ecf::Identity::make_user(field.value(), "<unable-to-extract-from-http-header>");
+                username         = found->value();
+            }
+        }
+        {
+            auto found = std::find_if(std::begin(request), std::end(request), [](auto& field) {
+                return field.name_string() == "X-Auth-Password";
+            });
+            if (found != std::end(request)) {
+                identity_headers = true;
+                password         = found->value();
+            }
+        }
+        {
+            auto found = std::find_if(std::begin(request), std::end(request), [](auto& field) {
+                return field.name_string() == "Authorization";
+            });
+            if (found != std::end(request)) {
+                identity_secure = true;
             }
         }
 
-        // Otherwise, the Identity is retrieved from the 'in command' fields
-        if (!identity_headers) {
+        if (identity_secure && identity_headers) {
+            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (Authorization)");
+            identity = ecf::Identity::make_secure_user(username);
+        }
+        else if (identity_headers) {
+            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (X-Auth-Username)");
+            identity = ecf::Identity::make_user(username, password);
+        }
+        else {
+            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from inbound Command");
             auto cmd = inbound_request.get_cmd();
             identity = ecf::identify(cmd);
         }
+
+        LOG_DEBUG("HttpServer::handle_request", "Identity extracted is " << identity.as_string());
 
         inbound_request.get_cmd()->set_identity(std::move(identity));
     }
