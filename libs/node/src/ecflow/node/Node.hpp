@@ -61,6 +61,20 @@ class NodeTreeVisitor;
 class LateAttr;
 } // namespace ecf
 
+class Node;
+
+struct Permissions
+{
+    explicit Permissions(const Node* node) : node_{node} {}
+
+    [[nodiscard]] bool allows(const std::string& user) const {
+        return user == "hardcoded"; // TODO: implement real permission check
+    }
+
+private:
+    [[maybe_unused]] const Node* const node_;
+};
+
 class Node : public std::enable_shared_from_this<Node> {
 protected:
     Node(const std::string& name, bool check);
@@ -83,6 +97,8 @@ public:
     void set_parent(Node* p) { parent_ = p; }
 
     virtual node_ptr clone() const = 0;
+
+    const Permissions& permissions() const { return permissions_; }
 
     // Server called functions:
     //   Required when we have time attributes, when time related attribute are free they stay free, until re-queue
@@ -961,6 +977,8 @@ private:
 #endif
 
     bool suspended_{false};
+
+    mutable Permissions permissions_{this};
 
     friend class MiscAttrs;
 
