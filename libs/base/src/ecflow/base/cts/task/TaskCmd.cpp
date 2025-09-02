@@ -69,7 +69,7 @@ bool TaskCmd::equals(ClientToServerCmd* rhs) const {
 //  command is recorded in zombie PATH           |   n/a   |    n/a   | Task not found. Nodes replaced whilst jobs were
 //  running
 //  ----------------------------------------------------------------------------------------------------------------
-bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
+bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) const {
 #ifdef DEBUG_ZOMBIE
     std::cout << "   TaskCmd::authenticate " << Child::to_string(child_type());
     std::cout << " " << path_to_submittable_ << " " << process_or_remote_id_ << " " << jobs_password_ << " " << try_no_;
@@ -87,20 +87,20 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
     /// Don't need to call the base class authenticate
     /// **************************************************************************
 
-    if (!as->allowTaskCommunication()) {
+    if (!server->allowTaskCommunication()) {
         // This is not an Error, hence we don't throw exception
-        theReply = PreAllocatedReply::block_client_server_halted_cmd();
+        reply = PreAllocatedReply::block_client_server_halted_cmd();
         return false;
     }
 
-    submittable_ = get_submittable(as);
+    submittable_ = get_submittable(server);
     if (!submittable_) {
 #ifdef DEBUG_ZOMBIE
         std::cout << ": PATH Zombie\n";
 #endif
         // Create path zombie, if not already created:
         std::string action_taken;
-        static_cast<void>(as->zombie_ctrl().handle_path_zombie(as, this, action_taken, theReply));
+        static_cast<void>(server->zombie_ctrl().handle_path_zombie(server, this, action_taken, reply));
 
         // distinguish output by using *path*
         std::stringstream ss;
@@ -196,7 +196,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
                     ret += path_to_submittable_;
                     ret += " : already active : action(fob)";
                     log(Log::WAR, ret);
-                    theReply = PreAllocatedReply::ok_cmd();
+                    reply = PreAllocatedReply::ok_cmd();
                     return false;
                 }
                 submittable_allready_active = true;
@@ -226,7 +226,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
                 //   3/ zombie                  # The zombie has completed anyway, don't bother blocking it
 
                 submittable_->get_flag().clear(ecf::Flag::ZOMBIE);
-                as->zombie_ctrl().remove_by_path(path_to_submittable_);
+                server->zombie_ctrl().remove_by_path(path_to_submittable_);
 
                 string ret = " [ overloaded || zombie || --complete*2 ] : chd:";
                 ret += ecf::Child::to_string(child_type());
@@ -234,7 +234,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
                 ret += path_to_submittable_;
                 ret += " : already complete : action(fob)";
                 log(Log::WAR, ret);
-                theReply = PreAllocatedReply::ok_cmd();
+                reply = PreAllocatedReply::ok_cmd();
                 return false;
             }
 
@@ -254,7 +254,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
 
                 if (!password_missmatch_ && !pid_missmatch_) {
 
-                    as->zombie_ctrl().remove(submittable_);
+                    server->zombie_ctrl().remove(submittable_);
 
                     string ret = " [ overloaded || --abort*2 ] (pid and passwd match) : chd:";
                     ret += ecf::Child::to_string(child_type());
@@ -262,7 +262,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
                     ret += path_to_submittable_;
                     ret += " : already aborted : action(fob)";
                     log(Log::WAR, ret);
-                    theReply = PreAllocatedReply::ok_cmd();
+                    reply = PreAllocatedReply::ok_cmd();
                     return false;
                 }
             }
@@ -287,7 +287,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
         submittable_allready_aborted) {
         /// If the task has adopted we return true, and carry on as normal
         std::string action_taken;
-        if (!as->zombie_ctrl().handle_zombie(submittable_, this, action_taken, theReply)) {
+        if (!server->zombie_ctrl().handle_zombie(submittable_, this, action_taken, reply)) {
 
             // LOG failure: Include type of zombie.
             // ** NOTE **: the zombie may have been removed by user actions. i.e if fob and child cmd is abort |
@@ -295,7 +295,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const {
             std::stringstream ss;
             ss << " zombie";
             const Zombie& theZombie =
-                as->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_);
+                server->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_);
             if (!theZombie.empty())
                 ss << "(" << theZombie.type_str() << ")";
 

@@ -57,6 +57,10 @@ set(srcs
   # Base -- Headers
   base/src/ecflow/base/AbstractClientEnv.hpp
   base/src/ecflow/base/AbstractServer.hpp
+  base/src/ecflow/base/Authentication.hpp
+  base/src/ecflow/base/AuthenticationDetails.hpp
+  base/src/ecflow/base/Authorisation.hpp
+  base/src/ecflow/base/AuthorisationDetails.hpp
   base/src/ecflow/base/Client.hpp
   base/src/ecflow/base/ClientOptionsParser.hpp
   base/src/ecflow/base/ClientToServerRequest.hpp
@@ -73,6 +77,7 @@ set(srcs
   base/src/ecflow/base/ZombieCtrl.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.hpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.hpp>
+  base/src/ecflow/base/Permissions.hpp
   base/src/ecflow/base/cts/ClientToServerCmd.hpp
   base/src/ecflow/base/cts/CtsCmdRegistry.hpp
   base/src/ecflow/base/cts/EditHistoryMgr.hpp
@@ -135,6 +140,8 @@ set(srcs
   base/src/ecflow/base/stc/StcCmd.hpp
   base/src/ecflow/base/stc/ZombieGetCmd.hpp
   # Base -- Sources
+  base/src/ecflow/base/Authentication.cpp
+  base/src/ecflow/base/Authorisation.cpp
   base/src/ecflow/base/Client.cpp
   base/src/ecflow/base/ClientOptionsParser.cpp
   base/src/ecflow/base/ClientToServerRequest.cpp
@@ -149,6 +156,7 @@ set(srcs
   base/src/ecflow/base/ZombieCtrl.cpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/ssl_connection.cpp>
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/SslClient.cpp>
+  base/src/ecflow/base/Permissions.cpp
   base/src/ecflow/base/cts/ClientToServerCmd.cpp
   base/src/ecflow/base/cts/CtsCmdRegistry.cpp
   base/src/ecflow/base/cts/EditHistoryMgr.cpp
@@ -265,6 +273,7 @@ set(srcs
   core/src/ecflow/core/PasswordEncryption.hpp
   core/src/ecflow/core/Pid.hpp
   core/src/ecflow/core/PrintStyle.hpp
+  core/src/ecflow/core/Result.hpp
   core/src/ecflow/core/SState.hpp
   core/src/ecflow/core/Serialization.hpp
   core/src/ecflow/core/Stl.hpp
@@ -481,6 +490,7 @@ set(srcs
   node/src/ecflow/node/parser/ZombieAttrParser.cpp
 
   # Server -- Headers
+  server/src/ecflow/server/AuthenticationService.hpp
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
@@ -494,6 +504,7 @@ set(srcs
   server/src/ecflow/server/TcpServer.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.hpp>
   # Server -- Sources
+  server/src/ecflow/server/AuthenticationService.cpp
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp

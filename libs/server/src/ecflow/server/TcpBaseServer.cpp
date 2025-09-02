@@ -75,6 +75,22 @@ void TcpBaseServer::handle_request() {
     if (serverEnv_.debug())
         std::cout << "   TcpBaseServer::handle_request  : client request " << inbound_request_ << endl;
 
+    {
+        // TODO: consider 'in command' fields into the identity
+        auto cmd = inbound_request_.get_cmd();
+        if (auto user_cmd = dynamic_cast<UserCmd*>(cmd.get()); user_cmd != nullptr) {
+            Identity identity = ecf::Identity::make_user(user_cmd->is_custom_user(), user_cmd->user(), user_cmd->passwd());
+            user_cmd->set_identity(identity);
+        }
+        else if (auto task_cmd = dynamic_cast<TaskCmd*>(cmd.get()); task_cmd != nullptr) {
+            Identity identity = ecf::Identity::make_task();
+            task_cmd->set_identity(identity);
+        }
+        else {
+            assert(false);
+        }
+    }
+
     try {
         // Service the in bound request, handling the request will populate the outbound_response_
         // Note:: Handle request will first authenticate

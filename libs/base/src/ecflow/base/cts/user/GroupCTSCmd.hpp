@@ -33,6 +33,8 @@ public:
     bool isWrite() const override;
     bool cmd_updates_defs() const override;
 
+    void set_identity(const ecf::Identity& identity) override;
+
     PrintStyle::Type_t show_style() const override;
     bool get_cmd() const override;
     bool task_cmd() const override;
@@ -45,6 +47,9 @@ public:
     void print(std::string&) const override;
     std::string print_short() const override;
     bool equals(ClientToServerCmd*) const override;
+
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
 
     void addChild(Cmd_ptr childCmd);
     const std::vector<Cmd_ptr>& cmdVec() const { return cmdVec_; }
@@ -63,7 +68,7 @@ private:
     bool setup_user_authentification(AbstractClientEnv&) override;
     void setup_user_authentification() override;
 
-    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+    // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     void cleanup() override; // cleanup all children
 

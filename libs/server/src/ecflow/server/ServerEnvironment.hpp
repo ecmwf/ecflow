@@ -25,12 +25,13 @@
 
 #include <boost/asio.hpp>
 
+#include "ecflow/base/Permissions.hpp"
 #include "ecflow/base/ServerProtocol.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Host.hpp"
-#include "ecflow/core/PasswdFile.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
+#include "ecflow/server/AuthenticationService.hpp"
 #ifdef ECF_OPENSSL
     #include "ecflow/base/Openssl.hpp"
 #endif
@@ -162,9 +163,6 @@ public:
     /// If errors arise the exist user still stay in affect
     bool reloadWhiteListFile(std::string& errorMsg);
 
-    bool reloadPasswdFile(std::string& errorMsg);
-    bool reloadCustomPasswdFile(std::string& errorMsg);
-
     /// There are several kinds of authentification:
     ///     a/ None
     ///     b/ List mode.   ASCII file based on ECF_LISTS is defined
@@ -172,18 +170,26 @@ public:
     /// At the moment we will only implement options a/ and b/
     //
     /// Returns true if the given user has access to the server, false otherwise
-    bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) const;
-    bool authenticateReadAccess(const std::string& user,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::string& path) const;
-    bool authenticateReadAccess(const std::string& user,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::vector<std::string>& paths) const;
-    bool authenticateWriteAccess(const std::string& user) const;
-    bool authenticateWriteAccess(const std::string& user, const std::string& path) const;
-    bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) const;
+    // bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) const;
+    // bool authenticateReadAccess(const std::string& user,
+    //                             bool custom_user,
+    //                             const std::string& passwd,
+    //                             const std::string& path) const;
+    // bool authenticateReadAccess(const std::string& user,
+    //                             bool custom_user,
+    //                             const std::string& passwd,
+    //                             const std::vector<std::string>& paths) const;
+    // bool authenticateWriteAccess(const std::string& user) const;
+    // bool authenticateWriteAccess(const std::string& user, const std::string& path) const;
+    // bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) const;
+
+    ecf::AuthenticationService& authentication() { return authentication_service_; }
+    const ecf::AuthenticationService& authentication() const { return authentication_service_; }
+
+    const ecf::Permissions& permissions() const { return permissions_; };
+
+    // const PasswdFile& passwd_file() const { return passwd_file_; }
+    // const PasswdFile& passwd_custom_file() const { return passwd_custom_file_; }
 
     /// return true if help option was selected
     bool help_option() const { return help_option_; }
@@ -239,10 +245,9 @@ private:
     std::string ecf_white_list_file_;
     mutable WhiteListFile white_list_file_;
 
-    std::string ecf_passwd_file_;
-    std::string ecf_passwd_custom_file_;
-    mutable PasswdFile passwd_file_;
-    mutable PasswdFile passwd_custom_file_;
+    mutable ecf::Permissions permissions_;
+
+    ecf::AuthenticationService authentication_service_;
 
 #ifdef ECF_OPENSSL
     ecf::Openssl ssl_;

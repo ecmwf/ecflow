@@ -44,8 +44,8 @@ std::string somepass = "somepass";
 BOOST_AUTO_TEST_SUITE(T_ServerConfiguration)
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_shared__options_none__certificates_shared_and_specific) {
-    WithTestFile shared_crt("server.crt");
-    WithTestFile specific_crt(somehost + '.' + someport + ".crt");
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
+    WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_ssl("ECF_SSL", "1");
 
@@ -58,8 +58,8 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_shared__options_none__ce
 }
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_specific__options_none__certificates_shared_and_specific) {
-    WithTestFile shared_crt("server.crt");
-    WithTestFile specific_crt(somehost + '.' + someport + ".crt");
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
+    WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_ssl("ECF_SSL", somehost + '.' + someport);
 
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_specific__options_none__
 }
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_shared__options_none__certificates_shared_only) {
-    WithTestFile shared_crt("server.crt");
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_ssl("ECF_SSL", "1");
 
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_shared__options_none__ce
 }
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_specific__options_none__certificates_shared_only) {
-    WithTestFile shared_crt("server.crt");
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_ssl("ECF_SSL", somehost + '.' + someport);
 
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_specific__options_none__
 }
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_shared__options_none__certificates_specific_only) {
-    WithTestFile specific_crt(somehost + '.' + someport + ".crt");
+    WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_ssl("ECF_SSL", "1");
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_shared__options_none__ce
 }
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_specific__options_none__certificates_specific_only) {
-    WithTestFile specific_crt(somehost + '.' + someport + ".crt");
+    WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
     WithTestEnvironmentVariable ecf_ssl("ECF_SSL", somehost + '.' + someport);
 
@@ -127,8 +127,8 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_specific__options_none__
 }
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_none__options_ssl__certificates_shared_and_specific) {
-    WithTestFile shared_crt("server.crt");
-    WithTestFile specific_crt(somehost + '.' + someport + ".crt");
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
+    WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
 
     MockServerInvoker server("ecflow_server -d --ssl");
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_none__options_ssl__certi
 }
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_none__options_ssl__certificates_shared_only) {
-    WithTestFile shared_crt("server.crt");
+    WithTestFile shared_crt(NamedTestFile{"server.crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
 
     MockServerInvoker server("ecflow_server -d --ssl");
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_none__options_ssl__certi
 }
 
 BOOST_AUTO_TEST_CASE(can_setup_environment__env_request_none__options_ssl__certificates_specific_only) {
-    WithTestFile specific_crt(somehost + '.' + someport + ".crt");
+    WithTestFile specific_crt(NamedTestFile{somehost + '.' + someport + ".crt"});
     WithTestEnvironmentVariable ecf_port("ECF_PORT", someport);
 
     MockServerInvoker server("ecflow_server -d --ssl");

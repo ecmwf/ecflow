@@ -30,7 +30,8 @@ HttpClient::HttpClient(Cmd_ptr cmd_ptr,
       host_(host),
       port_(port),
       base_url_(make_scheme_host_port(scheme, host, port)),
-      client_(base_url_) {
+      client_(base_url_),
+      headers_() {
 
     client_.set_connection_timeout(std::chrono::seconds{timeout});
     client_.set_read_timeout(std::chrono::seconds{timeout});
@@ -51,6 +52,8 @@ HttpClient::HttpClient(Cmd_ptr cmd_ptr,
 void HttpClient::run() {
     std::string outbound;
     ecf::save_as_string(outbound, outbound_request_);
+
+    client_.set_default_headers(headers_);
 
     auto result = client_.Post("/v1/ecflow", outbound, "application/json");
     if (result) {

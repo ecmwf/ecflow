@@ -96,6 +96,22 @@
 using namespace std;
 using namespace ecf;
 
+namespace ecf {
+
+void cfg(const ClientEnvironment& env, HttpClient& client) {
+    std::string realm    = "realm";
+    std::string username = env.get_user_name();
+    std::string roles    = "admin;user";
+    std::string secret   = "jasdhfakshh";
+
+    client.set_x_realm(realm);
+    client.set_x_username(username);
+    client.set_x_roles(roles);
+    client.set_x_secret(secret);
+}
+
+} // namespace ecf
+
 // ==================================================================================
 // class ClientInvoker
 ClientInvoker::ClientInvoker() : clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD) {
@@ -481,6 +497,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
                         const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
                         HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
+                        cfg(clientEnv_, theClient);
                         theClient.run();
 
                         if (clientEnv_.debug()) {

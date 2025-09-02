@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/server/CheckPtSaver.hpp"
 #include "ecflow/server/NodeTreeTraverser.hpp"
+#include "ecflow/server/ServerEnvironment.hpp"
 
 class ServerEnvironment;
 
@@ -59,21 +60,16 @@ public:
     void shutdown() override;
     void halted() override;
     void restart() override;
+
     bool reloadWhiteListFile(std::string& errorMsg) override;
     bool reloadPasswdFile(std::string& errorMsg) override;
     bool reloadCustomPasswdFile(std::string& errorMsg) override;
-    bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) override;
-    bool authenticateReadAccess(const std::string& user,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::string& path) override;
-    bool authenticateReadAccess(const std::string& user,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::vector<std::string>& paths) override;
-    bool authenticateWriteAccess(const std::string& user) override;
-    bool authenticateWriteAccess(const std::string& user, const std::string& path) override;
-    bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) override;
+
+    ecf::AuthenticationService& authentication() override { return serverEnv_.authentication(); }
+    const ecf::AuthenticationService& authentication() const override { return serverEnv_.authentication(); }
+
+    const ecf::Permissions& permissions() const override { return serverEnv_.permissions(); }
+
     bool lock(const std::string& user) override;
     void unlock() override;
     const std::string& lockedUser() const override;

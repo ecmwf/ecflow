@@ -14,10 +14,13 @@
 #include <atomic>
 #include <memory>
 
+#include "ecflow/base/Permissions.hpp"
 #include "ecflow/base/Stats.hpp"
 #include "ecflow/base/ZombieCtrl.hpp"
 #include "ecflow/core/CheckPt.hpp"
 #include "ecflow/core/SState.hpp"
+#include "ecflow/core/Str.hpp"
+#include "ecflow/server/AuthenticationService.hpp"
 
 class Defs;
 
@@ -127,22 +130,10 @@ public:
     ///     a/ None
     ///     b/ List mode.   ASCII file based on ECF_LISTS is defined. referred as white list file
     ///     c/ Secure mode. ASCII file based ECF_PASSWD is defined. Referred to as black list file
-    //
-    /// Returns true if the given user has access to the server, false otherwise
-    virtual bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) = 0;
-    virtual bool authenticateReadAccess(const std::string& user,
-                                        bool custom_user,
-                                        const std::string& passwd,
-                                        const std::string& path)                                              = 0;
-    virtual bool authenticateReadAccess(const std::string& user,
-                                        bool custom_user,
-                                        const std::string& passwd,
-                                        const std::vector<std::string>& paths)                                = 0;
+    virtual ecf::AuthenticationService& authentication()             = 0;
+    virtual const ecf::AuthenticationService& authentication() const = 0;
 
-    /// Returns true if user has matching write access privileges.
-    virtual bool authenticateWriteAccess(const std::string& user)                                        = 0;
-    virtual bool authenticateWriteAccess(const std::string& user, const std::string& path)               = 0;
-    virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) = 0;
+    virtual const ecf::Permissions& permissions() const = 0;
 
     /// Shutdown the server and let 'user' have exclusive lock on it.
     /// If the lock succeeds return true, (This will end up calling the shutdown()

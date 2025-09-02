@@ -15,6 +15,8 @@
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -41,6 +43,14 @@ bool QueueCmd::equals(ClientToServerCmd* rhs) const {
     if (path_to_node_with_queue_ != the_rhs->path_to_node_with_queue())
         return false;
     return TaskCmd::equals(rhs);
+}
+
+ecf::authentication_t QueueCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t QueueCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void QueueCmd::print(std::string& os) const {

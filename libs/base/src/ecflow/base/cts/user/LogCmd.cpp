@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -102,6 +104,14 @@ bool LogCmd::equals(ClientToServerCmd* rhs) const {
     return UserCmd::equals(rhs);
 }
 
+ecf::authentication_t LogCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t LogCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
+}
+
 // changed for release 4.1.0
 bool LogCmd::isWrite() const {
     switch (api_) {
@@ -134,10 +144,12 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const {
             return PreAllocatedReply::string_cmd(Log::instance()->contents(get_last_n_lines_));
         case LogCmd::CLEAR:
             Log::instance()->clear();
-            break;
+        break;
         case LogCmd::FLUSH:
+            std::cout << "Going to LogCmd::FLUSH" << std::endl;
             Log::instance()->flush();
-            break;
+            std::cout << "Done LogCmd::FLUSHing" << std::endl;
+        break;
         case LogCmd::NEW: {
             if (!new_path_.empty()) {
                 Log::instance()->new_path(new_path_); // will throw for errors

@@ -15,6 +15,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/DeleteCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
@@ -140,6 +142,14 @@ bool PathsCmd::equals(ClientToServerCmd* rhs) const {
     if (force_ != the_rhs->force())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t PathsCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t PathsCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 bool PathsCmd::isWrite() const {
@@ -453,9 +463,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::ok_cmd();
 }
 
-bool PathsCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, paths_);
-}
+// bool PathsCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, paths_);
+// }
 
 static const char* get_check_desc() {
     return "Checks the expression and limits in the server. Will also check trigger references.\n"

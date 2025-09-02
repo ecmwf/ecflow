@@ -126,6 +126,8 @@ private:
         BOOST_REQUIRE_MESSAGE(fs::exists(theServerInvokePath),
                               "InvokeServer::doStart: `ecflow_server` executable available at:" << theServerInvokePath);
 
+        theServerInvokePath += " -d";
+
         // Create a port file. To avoid creating multiple servers on the same port number
         ecf::EcfPortLock::create(port);
 

@@ -12,6 +12,8 @@
 
 #include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
+#include "ecflow/base/cts/task/TaskCmd.hpp"
+#include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/ecflow_version.h"
@@ -21,6 +23,12 @@ inline void log_error(char const* where, boost::beast::error_code ec) {
     using namespace ecf;
     LOG(Log::ERR, where << ": " << ec.message());
 }
+
+#define LOG_ERROR(WHERE, MESSAGE)                                       \
+    {                                                                   \
+        using namespace ecf;                                            \
+        std::cout << "ERR (" << WHERE << "): " << MESSAGE << std::endl; \
+    }
 
 static const std::string CONTENT_TYPE = "application/json";
 
@@ -53,6 +61,27 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
 
     // 1) Retrieve inbound_request from request body
     ecf::restore_from_string(request.body(), inbound_request);
+
+    {
+        // TODO: retrieve Identity from request header fields
+        ecf::Identity identity;
+        for (const auto& field : request) {
+            LOG_ERROR("HttpServer::handle_request", field.name_string() << ": " << field.value());
+        }
+
+        // TODO: consider 'in command' fields into the identity
+        auto cmd = inbound_request.get_cmd();
+        if (auto user_cmd = dynamic_cast<UserCmd*>(cmd.get()); user_cmd != nullptr) {
+            identity = ecf::Identity::make_user(user_cmd->is_custom_user(), user_cmd->user(), user_cmd->passwd());
+        }
+        else if (auto task_cmd = dynamic_cast<TaskCmd*>(cmd.get()); task_cmd != nullptr) {
+            identity = ecf::Identity::make_task();
+        }
+        else {
+            assert(false);
+        }
+        inbound_request.get_cmd()->set_identity(std::move(identity));
+    }
 
     // 2) Handle request, as per TcpBaseServer::handle_request()
     {

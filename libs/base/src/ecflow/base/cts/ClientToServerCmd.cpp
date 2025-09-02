@@ -64,9 +64,8 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const {
     }
 #endif
 
-    // LogTimer timer("ClientToServerCmd::handleRequest");
     STC_Cmd_ptr halted;
-    if (!authenticate(as, halted)) {
+    if (!check_preconditions(as, halted)) {
         assert(halted.get());
         return halted;
     }

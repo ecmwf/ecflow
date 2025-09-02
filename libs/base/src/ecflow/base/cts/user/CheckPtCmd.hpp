@@ -29,6 +29,10 @@ public:
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
+
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
+
     bool isWrite() const override;
     bool is_mutable() const override;
     const char* theArg() const override;

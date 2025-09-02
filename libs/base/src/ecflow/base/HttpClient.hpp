@@ -37,6 +37,11 @@ public:
 
     void run();
 
+    void set_x_realm(const std::string& realm) { headers_.emplace("X-Realm", realm); }
+    void set_x_username(const std::string& username) { headers_.emplace("X-Username", username); }
+    void set_x_roles(const std::string& roles) { headers_.emplace("X-Roles", roles); }
+    void set_x_secret(const std::string& secret) { headers_.emplace("X-Secret", secret); }
+
     /// Client side, get the server response, handles reply from server
     /// Returns true if all is ok, else false if further client action is required
     /// will throw std::runtime_error for errors
@@ -48,6 +53,7 @@ private:
     std::string port_;   /// the port on the server
     std::string base_url_;
     httplib::Client client_;
+    httplib::Headers headers_;
 
     httplib::Response response_;
     httplib::Error status_ = httplib::Error::Success;
