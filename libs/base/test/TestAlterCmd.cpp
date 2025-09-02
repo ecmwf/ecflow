@@ -28,7 +28,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
@@ -106,10 +105,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_hybrid) {
         BOOST_CHECK_MESSAGE(v && v->hybrid(), "expected clock to be added and be hybrid");
 
         // Altering the suite clock attributes, should force suite calendar to  align to todays date and time
-        boost::posix_time::ptime date_now = Calendar::second_clock_time();
-        int day_of_month                  = date_now.date().day();
-        int month                         = date_now.date().month();
-        int year                          = date_now.date().year();
+        auto date_now    = Calendar::second_clock_time();
+        int day_of_month = date_now.date().day();
+        int month        = date_now.date().month();
+        int year         = date_now.date().year();
         BOOST_CHECK_MESSAGE(s->calendar().day_of_month() == day_of_month,
                             "Calendar should be updated after re-queue/begin. Expected "
                                 << day_of_month << " but found " << s->calendar().day_of_month());
@@ -142,10 +141,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_real) {
         BOOST_CHECK_MESSAGE(v && !v->hybrid(), "expected clock to be added and be real");
 
         // Altering the suite clock attributes, should force suite calendar to  align to todays date and time
-        boost::posix_time::ptime date_now = Calendar::second_clock_time();
-        int day_of_month                  = date_now.date().day();
-        int month                         = date_now.date().month();
-        int year                          = date_now.date().year();
+        auto date_now    = Calendar::second_clock_time();
+        int day_of_month = date_now.date().day();
+        int month        = date_now.date().month();
+        int year         = date_now.date().year();
         BOOST_CHECK_MESSAGE(s->calendar().day_of_month() == day_of_month,
                             "Calendar should be updated after re-queue/begin. Expected "
                                 << day_of_month << " but found " << s->calendar().day_of_month());
@@ -198,10 +197,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_sync) {
         // After a clk sync, data should match computer
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::CLOCK_SYNC, "", "")));
 
-        boost::posix_time::ptime date_now = Calendar::second_clock_time();
-        int day_of_month                  = date_now.date().day();
-        int month                         = date_now.date().month();
-        int year                          = date_now.date().year();
+        auto date_now    = Calendar::second_clock_time();
+        int day_of_month = date_now.date().day();
+        int month        = date_now.date().month();
+        int year         = date_now.date().year();
         BOOST_CHECK_MESSAGE(s->calendar().day_of_month() == day_of_month,
                             "Calendar should be updated after re-queue/begin. Expected "
                                 << day_of_month << " but found " << s->calendar().day_of_month());
@@ -245,10 +244,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_date) {
         // Now re sync with the computers clock, the suite calendar should align to todays date and time
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::CLOCK_SYNC, "", "")));
 
-        boost::posix_time::ptime date_now = Calendar::second_clock_time();
-        int day_of_month                  = date_now.date().day();
-        int month                         = date_now.date().month();
-        int year                          = date_now.date().year();
+        auto date_now    = Calendar::second_clock_time();
+        int day_of_month = date_now.date().day();
+        int month        = date_now.date().month();
+        int year         = date_now.date().year();
         BOOST_CHECK_MESSAGE(s->calendar().day_of_month() == day_of_month,
                             "Calendar should be updated after re-queue/begin. Expected "
                                 << day_of_month << " but found " << s->calendar().day_of_month());
@@ -283,9 +282,9 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_gain) {
         // Check that calendar is updated by the alter
         {
             // add one day, to current date, to simulate a gain of 24 hours
-            boost::posix_time::ptime date_now = Calendar::second_clock_time();
-            boost::gregorian::date newDate    = date_now.date();
-            boost::gregorian::date_duration one_day(1);
+            auto date_now = Calendar::second_clock_time();
+            auto newDate  = date_now.date();
+            auto one_day  = boost::gregorian::date_duration(1);
             newDate += one_day;
             int day_of_month = newDate.day();
             int month        = newDate.month();

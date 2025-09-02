@@ -10,20 +10,17 @@
 
 #include <string>
 
-#include <boost/chrono/duration.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 
@@ -151,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_ctor_and_operations) {
     auto a = ecf::Calendar();
     BOOST_CHECK(!a.hybrid());
 
-    auto base = boost::posix_time::ptime(date(2000, 1, 1));
+    auto base = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 1));
     a.init(base, Calendar::HYBRID);
     BOOST_CHECK(a.hybrid());
     BOOST_CHECK(a.year() == 2000);
@@ -177,34 +174,34 @@ BOOST_AUTO_TEST_CASE(test_calendar_equality) {
     ECF_NAME_THIS_TEST();
 
     auto a     = ecf::Calendar();
-    auto base0 = boost::posix_time::ptime(date(2000, 1, 1));
+    auto base0 = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 1));
     a.init(base0, Calendar::REAL);
 
     { // ecf::Calendar::ctype_
         auto x    = ecf::Calendar();
-        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        auto base = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 1));
         x.init(base, Calendar::HYBRID);
         BOOST_CHECK(!(x == a));
     }
 
     { // ecf::Calendar::initTime_
         auto x    = ecf::Calendar();
-        auto base = boost::posix_time::ptime(date(2000, 1, 2));
+        auto base = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 2));
         x.init(base, Calendar::REAL);
         BOOST_CHECK(!(x == a));
     }
     { // ecf::Calendar::suiteTime_
         auto x    = ecf::Calendar();
-        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        auto base = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 1));
         x.init(base, Calendar::REAL);
-        auto now      = boost::posix_time::ptime(date(2000, 1, 2));
+        auto now      = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 2));
         auto interval = boost::posix_time::minutes(1);
         x.update(ecf::CalendarUpdateParams(now, interval, false, true));
         BOOST_CHECK(!(x == a));
     }
     { // ecf::Calendar::duration_
         auto x    = ecf::Calendar();
-        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        auto base = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 1));
         x.init(base, Calendar::REAL);
         auto now = boost::posix_time::second_clock::universal_time() + boost::posix_time::minutes(1);
         x.update_duration_only(now);
@@ -212,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_equality) {
     }
     { // ecf::Calendar::dayChanged_ (interval < 60 seconds)
         auto x    = ecf::Calendar();
-        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        auto base = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 1));
         x.init(base, Calendar::REAL);
         auto now      = boost::posix_time::second_clock::universal_time() + boost::posix_time::hours(24);
         auto interval = boost::posix_time::seconds(30);
@@ -221,7 +218,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_equality) {
     }
     { // ecf::Calendar::dayChanged_ (interval >= 60 seconds)
         auto x    = ecf::Calendar();
-        auto base = boost::posix_time::ptime(date(2000, 1, 1));
+        auto base = boost::posix_time::ptime(boost::gregorian::date(2000, 1, 1));
         x.init(base, Calendar::REAL);
         auto now      = boost::posix_time::second_clock::universal_time() + boost::posix_time::hours(24);
         auto interval = boost::posix_time::minutes(2);
@@ -294,7 +291,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_get_day_of_week) {
 
     auto generate = [](int year, int month, int day) {
         auto a    = ecf::Calendar();
-        auto base = boost::posix_time::ptime(date(year, month, day));
+        auto base = boost::posix_time::ptime(boost::gregorian::date(year, month, day));
         a.init(base, Calendar::HYBRID);
         return a;
     };
@@ -339,7 +336,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_get_day_of_week) {
 BOOST_AUTO_TEST_CASE(test_calendar_default_ptime) {
     ECF_NAME_THIS_TEST();
 
-    ptime time;
+    boost::posix_time::ptime time;
     BOOST_CHECK_MESSAGE(time.is_special(), "Default ptime is special");
     BOOST_CHECK_MESSAGE(time.is_not_a_date_time(), "Default ptime is_not_a_date_time");
     BOOST_CHECK_MESSAGE(!time.is_infinity(), "Expected Default ptime not is_infinity");
@@ -354,8 +351,8 @@ BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
 
     // init the calendar to 2009, Feb, 10th, then write out the state
-    boost::gregorian::date theDate(2009, 2, 10);
-    ptime time(theDate, hours(23) + minutes(59));
+    auto theDate = boost::gregorian::date(2009, 2, 10);
+    auto time    = boost::posix_time::ptime(theDate, boost::posix_time::hours(23) + boost::posix_time::minutes(59));
     calendar.init(time, Calendar::REAL);
     std::string calendar_state;
     calendar.write_state(calendar_state);
@@ -371,7 +368,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
                             << calendar2.toString());
 
     // Update calendar.
-    calendar.update(minutes(2));
+    calendar.update(boost::posix_time::minutes(2));
     BOOST_CHECK_MESSAGE(!(calendar == calendar2), "Calendar should be different");
 
     // re-compare after reloading state
@@ -392,12 +389,12 @@ BOOST_AUTO_TEST_CASE(test_calendar_1) {
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
 
     // init the calendar to 2009, Feb, 10th,  15 minutes past midnight
-    boost::gregorian::date theDate(2009, 2, 10);
-    ptime time(theDate, hours(23) + minutes(59));
+    auto theDate = boost::gregorian::date(2009, 2, 10);
+    auto time    = boost::posix_time::ptime(theDate, boost::posix_time::hours(23) + boost::posix_time::minutes(59));
     calendar.init(time, Calendar::HYBRID);
     BOOST_CHECK_MESSAGE(calendar.hybrid(), "init failed to reset calendar type");
 
-    calendar.update(minutes(2));
+    calendar.update(boost::posix_time::minutes(2));
 }
 
 BOOST_AUTO_TEST_CASE(test_calendar) {
@@ -407,8 +404,8 @@ BOOST_AUTO_TEST_CASE(test_calendar) {
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Default calendar type should be real");
 
     // init the calendar to 2009, Feb, 10th,  15 minutes past midnight
-    boost::gregorian::date theDate(2009, 2, 10);
-    ptime time(theDate, minutes(15));
+    auto theDate = boost::gregorian::date(2009, 2, 10);
+    auto time    = boost::posix_time::ptime(theDate, boost::posix_time::minutes(15));
     calendar.init(time, Calendar::REAL);
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "Calendar should now be REAL");
 
@@ -416,14 +413,14 @@ BOOST_AUTO_TEST_CASE(test_calendar) {
     std::string actualTime   = to_simple_string(calendar.suiteTime());
     BOOST_CHECK_MESSAGE(actualTime == expectedTime, "Expected '" << expectedTime << "' but found " << actualTime);
 
-    time_duration td = hours(1) + minutes(10);
+    auto td = boost::posix_time::hours(1) + boost::posix_time::minutes(10);
     calendar.update(td);
     expectedTime = "2009-Feb-10 01:25:00";
     actualTime   = to_simple_string(calendar.suiteTime());
     BOOST_CHECK_MESSAGE(actualTime == expectedTime, "Expected '" << expectedTime << "' but found " << actualTime);
 
     // Increment by 24 hours
-    calendar.update(hours(24));
+    calendar.update(boost::posix_time::hours(24));
     expectedTime = "2009-Feb-11 01:25:00";
     actualTime   = to_simple_string(calendar.suiteTime());
     BOOST_CHECK_MESSAGE(actualTime == expectedTime, "Expected '" << expectedTime << "' but found " << actualTime);
@@ -434,7 +431,8 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative) {
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::HYBRID);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::HYBRID);
 
     std::string expectedTime = "2010-Feb-10 00:00:00";
     std::string actualTime   = to_simple_string(calendar.suiteTime());
@@ -450,7 +448,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative) {
 
     for (int hour = 1; hour < 24; hour++) {
         // Update calendar every hour, then see we can match time series, *RELATIVE* to suite start
-        calendar.update(time_duration(hours(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
         timeSeries.calendarChanged(calendar);
 
         if (hour >= timeSeries.start().hour() && hour <= timeSeries.finish().hour()) {
@@ -469,7 +467,8 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::HYBRID);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::HYBRID);
 
     // Create a test when we can match a time series
     // Create the time series: start  10:00
@@ -481,7 +480,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
         for (int minute = 0; minute < 60; minute++) {
 
             // Update calendar every hour, then see we can match time series, *RELATIVE* to suite start
-            calendar.update(minutes(1));
+            calendar.update(boost::posix_time::minutes(1));
             timeSeries.calendarChanged(calendar);
 
             tm suiteTm = to_tm(calendar.suiteTime());
@@ -535,7 +534,8 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real) {
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     std::string expectedTime = "2010-Feb-10 00:00:00";
     std::string actualTime   = to_simple_string(calendar.suiteTime());
@@ -551,7 +551,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real) {
         // Update calendar every hour, then see we can match time series, in REAL
         // Update will set the local time from the computers system clock, however
         // for testing this will need to be overriden below.
-        calendar.update(time_duration(hours(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
 
         if (hour >= timeSeries.start().hour() && hour <= timeSeries.finish().hour()) {
             BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar), "Calendar should match time series at hour " << hour);
@@ -567,7 +567,8 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     // Create a test when we can match a time series
     // Create the time series: start  10:00
@@ -579,7 +580,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
         for (int minute = 0; minute < 60; minute++) {
 
             // Update calendar every minute, then see we can match time series, *RELATIVE* to suite start
-            calendar.update(minutes(1));
+            calendar.update(boost::posix_time::minutes(1));
 
             tm suiteTm = to_tm(calendar.suiteTime());
 
@@ -635,7 +636,8 @@ BOOST_AUTO_TEST_CASE(test_calendar_hybrid) {
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::HYBRID);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::HYBRID);
     BOOST_CHECK_MESSAGE(calendar.hybrid(), "calendar type should be hybrid");
 
     std::string expectedTime = "2010-Feb-10 00:00:00";
@@ -655,15 +657,15 @@ BOOST_AUTO_TEST_CASE(test_calendar_hybrid) {
         // Update calendar every hour, for 73 hours
         // the date should be the same, i.e 2009, Feb, 10th
 
-        ptime timeBeforeUpdate = calendar.suiteTime();
+        auto timeBeforeUpdate = calendar.suiteTime();
 
-        calendar.update(time_duration(hours(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
 
-        ptime timeAfterUpdate = calendar.suiteTime();
+        auto timeAfterUpdate = calendar.suiteTime();
 
         if (hour != 24 && hour != 48 && hour != 72) {
-            time_period diff(timeBeforeUpdate, timeAfterUpdate);
-            time_duration gap = diff.length();
+            auto diff = boost::posix_time::time_period(timeBeforeUpdate, timeAfterUpdate);
+            auto gap  = diff.length();
             BOOST_CHECK_MESSAGE(gap.hours() == 1,
                                 "Expected one hour difference but found " << gap.hours() << " at hour " << hour);
         }
@@ -700,7 +702,8 @@ BOOST_AUTO_TEST_CASE(test_day_changed_for_real) {
 
     // init the calendar to 2009, Feb, 10th,  0 minutes past midnight
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "calendar type should be real");
 
     // Check cache is correct
@@ -710,7 +713,7 @@ BOOST_AUTO_TEST_CASE(test_day_changed_for_real) {
 
     for (int hour = 1; hour < 73; hour++) {
         // Update calendar every hour, for 72 hours
-        calendar.update(time_duration(hours(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
 
         if (hour == 24 || hour == 48 || hour == 72) {
             BOOST_CHECK_MESSAGE(calendar.dayChanged(),
@@ -745,7 +748,8 @@ BOOST_AUTO_TEST_CASE(test_day_changed_for_hybrid) {
 
     // init the calendar
     Calendar calendar; // default clock is real
-    calendar.init(ptime(date(2015, 10, 31), minutes(0)), Calendar::HYBRID);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2015, 10, 31), boost::posix_time::minutes(0)),
+                  Calendar::HYBRID);
     BOOST_CHECK_MESSAGE(calendar.hybrid(), "calendar type should be hybrid");
 
     // HYBRID calendars allow for day change but not date.
@@ -758,7 +762,7 @@ BOOST_AUTO_TEST_CASE(test_day_changed_for_hybrid) {
 
     for (int hour = 1; hour < 73; hour++) {
         // Update calendar every hour, for 72 hours
-        calendar.update(time_duration(hours(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
 
         BOOST_CHECK_MESSAGE(expected_date == to_simple_string(calendar.date()),
                             "Unexpected date change for hybrid calendar at hour " << hour);
@@ -793,14 +797,15 @@ BOOST_AUTO_TEST_CASE(test_calendar_julian) {
     ECF_NAME_THIS_TEST();
 
     Calendar calendar;
-    calendar.init(ptime(date(2017, 1, 1), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2017, 1, 1), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
     BOOST_CHECK_MESSAGE(!calendar.hybrid(), "calendar type should be real");
 
     int days = 0;
     while (calendar.year() != 2018) {
 
-        boost::gregorian::date cal_date = calendar.date();
-        long boost_julian               = cal_date.julian_day();
+        auto cal_date     = calendar.date();
+        long boost_julian = cal_date.julian_day();
 
         std::string iso_string = to_iso_string(cal_date);
         auto date_as_long      = ecf::convert_to<long>(iso_string);
@@ -811,7 +816,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_julian) {
                                             << iso_string);
 
         // Update calendar every day for a year
-        calendar.update(time_duration(hours(24)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(24)));
         days++;
     }
     BOOST_CHECK_MESSAGE(days == 365, "expected 365 days but found " << days);

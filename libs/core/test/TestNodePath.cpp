@@ -12,9 +12,9 @@
 #include <string>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/timer/timer.hpp>
 
 #include "ecflow/core/NodePath.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(test_NodePath_perf, *boost::unit_test::disabled()) {
     // See: Str::split -> define USE_STRINGSPLITTER
 
     // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
-    boost::timer::auto_cpu_timer timer;
+    ecf::ScopedPerformanceTimer timer;
     int n = 10000000;
     std::vector<std::string> thePath;
     thePath.reserve(20);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_NodePath_perf, *boost::unit_test::disabled()) {
         thePath.clear();
         NodePath::split("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction", thePath);
     }
-    ECF_TEST_DBG(<< "Timing for " << n << " NodePath is  " << timer.elapsed().wall);
+    ECF_TEST_DBG(<< "Timing for " << n << " NodePath is  " << timer);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -20,13 +20,11 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
 /// Output a vector to cout
 template <class T>
-ostream& operator<<(ostream& os, const vector<T>& v) {
-    copy(v.begin(), v.end(), ostream_iterator<T>(cout, " "));
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+    copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, " "));
     return os;
 }
 
@@ -197,7 +195,7 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
         return ret;
     }
 
-    return string();
+    return std::string();
 }
 
 const Variable& Node::find_parent_variable(const std::string& name) const {
@@ -569,7 +567,7 @@ int Node::findExprVariableValueAndType(const std::string& name, std::string& var
     return 0;
 }
 
-void Node::findExprVariableAndPrint(const std::string& name, ostream& os) const {
+void Node::findExprVariableAndPrint(const std::string& name, std::ostream& os) const {
     const Event& event = findEventByNameOrNumber(name);
     if (!event.empty()) {
         os << "EVENT value(" << event.value() << ")";
@@ -607,7 +605,8 @@ void Node::findExprVariableAndPrint(const std::string& name, ostream& os) const 
     }
 }
 
-node_ptr findRelativeNode(const vector<std::string>& theExtractedPath, node_ptr triggerNode, std::string& errorMsg) {
+node_ptr
+findRelativeNode(const std::vector<std::string>& theExtractedPath, node_ptr triggerNode, std::string& errorMsg) {
     // The referenced node could be itself(error) or most likely a sibling node.
     auto extractedPathSize = static_cast<int>(theExtractedPath.size());
     if (extractedPathSize == 1 && triggerNode->name() == theExtractedPath[0]) {
@@ -646,7 +645,7 @@ node_ptr findRelativeNode(const vector<std::string>& theExtractedPath, node_ptr 
     if (extractedPathSize == 1)
         errorMsg += theExtractedPath[0];
     else {
-        for (const string& s : theExtractedPath) {
+        for (const std::string& s : theExtractedPath) {
             errorMsg += s;
             errorMsg += Str::PATH_SEPARATOR();
         }
@@ -663,7 +662,7 @@ node_ptr findRelativeNode(const vector<std::string>& theExtractedPath, node_ptr 
 }
 
 node_ptr Node::non_const_this() const {
-    return const_pointer_cast<Node>(shared_from_this());
+    return std::const_pointer_cast<Node>(shared_from_this());
 }
 
 node_ptr Node::findReferencedNode(const std::string& nodePath, std::string& errorMsg) const {
@@ -695,7 +694,8 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
     ///  On server side:: No externs are stored, hence for unresolved node paths, we return NULL
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
-    string debug_path = "Searching for path " + nodePath + " from " + debugType() + Str::COLON() + absNodePath() + "\n";
+    std::string debug_path =
+        "Searching for path " + nodePath + " from " + debugType() + Str::COLON() + absNodePath() + "\n";
 #endif
 
     // if an absolute path cut in early
@@ -729,7 +729,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
             // OK: the node path appears in the extern list. This may be because that suite  has not been loaded.
             // *** If the suite is loaded, then it's an error that we did not
             // *** locate the node. i.e. in the previous call to defs->findAbsNode(nodePath);
-            vector<string> theExtractedPath;
+            std::vector<std::string> theExtractedPath;
             NodePath::split(nodePath, theExtractedPath);
 
             std::string referenceSuite = theExtractedPath[0];
@@ -759,7 +759,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
     /// =============================================================================
     /// Path is something other than ABSOLUTE path
     /// =============================================================================
-    vector<string> theExtractedPath;
+    std::vector<std::string> theExtractedPath;
     NodePath::split(nodePath, theExtractedPath);
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
@@ -787,7 +787,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
         debug_path += "( theExtractedPath.size() == 1)\n";
 #endif
         // Search for a relative node first
-        string localErrorMsg;
+        std::string localErrorMsg;
         node_ptr res = findRelativeNode(theExtractedPath, non_const_this(), localErrorMsg);
 #ifdef DEBUG_FIND_REFERENCED_NODE
         if (!localErrorMsg.empty()) {

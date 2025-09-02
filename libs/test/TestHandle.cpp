@@ -9,9 +9,8 @@
  */
 
 #include <iostream>
-#include <limits> // for std::numeric_limits<int>::max()
+#include <limits>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
@@ -20,8 +19,8 @@
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -31,8 +30,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 ///
 /// \note This is used to INVOKE a SINGLE test.

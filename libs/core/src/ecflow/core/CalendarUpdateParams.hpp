@@ -15,7 +15,7 @@
 /// \brief Collate list of arguments used to update calendar
 ///
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "ecflow/core/Chrono.hpp"
 
 namespace ecf {
 

@@ -22,7 +22,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
 
 // #define DEBUG_DAYS 1
 
@@ -444,7 +443,7 @@ void DayAttr::read_state(const std::vector<std::string>& lineTokens) {
                 throw std::runtime_error("DayAttr::read_state failed: (date:)");
             // when a date_ is special date = not-a-date-time\n"
             if (date.find("not") == std::string::npos) {
-                date_ = from_simple_string(date);
+                date_ = boost::gregorian::from_simple_string(date);
             }
         }
     }
@@ -488,8 +487,8 @@ std::vector<std::string> DayAttr::allDays() {
 }
 
 boost::gregorian::date DayAttr::matching_date(const ecf::Calendar& c) const {
-    boost::gregorian::date_duration one_day(1);
-    boost::gregorian::date matching_date = c.date(); // today's date
+    auto one_day       = boost::gregorian::date_duration(1);
+    auto matching_date = c.date(); // today's date
 
     for (int i = 0; i < 7; i++) {
         if (matching_date.day_of_week().as_number() == day_) {
@@ -502,8 +501,8 @@ boost::gregorian::date DayAttr::matching_date(const ecf::Calendar& c) const {
 }
 
 boost::gregorian::date DayAttr::next_matching_date(const ecf::Calendar& c) const {
-    boost::gregorian::date_duration one_day(1);
-    boost::gregorian::date the_next_matching_date = c.date(); // today's date
+    auto one_day                = boost::gregorian::date_duration(1);
+    auto the_next_matching_date = c.date(); // today's date
 
     for (int i = 0; i < 7; i++) {
         the_next_matching_date += one_day;

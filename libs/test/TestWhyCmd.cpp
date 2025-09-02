@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
@@ -18,8 +17,9 @@
 #include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -28,10 +28,7 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
 
@@ -83,10 +80,10 @@ BOOST_AUTO_TEST_CASE(test_why_day) {
 
     Defs theDefs;
     {
-        boost::posix_time::ptime today = Calendar::second_clock_time();
-        suite_ptr suite                = Suite::create("test_why_day");
-        family_ptr fam                 = Family::create("family");
-        task_ptr task                  = Task::create("t1");
+        auto today      = Calendar::second_clock_time();
+        suite_ptr suite = Suite::create("test_why_day");
+        family_ptr fam  = Family::create("family");
+        task_ptr task   = Task::create("t1");
 
         // Dont use hybrid for day dependency as that will force node to complete if days is not the same
         ClockAttr clockAttr(today, false);
@@ -110,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_why_day) {
     // running the why command, should report dependency on day
     unsigned int updateCalendarCount = waitForWhy("/test_why_day/family/t1", "day", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_date) {
@@ -125,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_why_date) {
         task_ptr task   = Task::create("t1");
 
         // Don't use hybrid for date dependency as that will force node to complete if date is not the same
-        boost::posix_time::ptime today = Calendar::second_clock_time();
+        auto today = Calendar::second_clock_time();
         ClockAttr clockAttr(today, false);
         suite->addClock(clockAttr);
 
@@ -146,7 +143,7 @@ BOOST_AUTO_TEST_CASE(test_why_date) {
     // running the why command, should report dependency on day
     unsigned int updateCalendarCount = waitForWhy("/test_why_date/family/t1", "date", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_time) {
@@ -156,8 +153,8 @@ BOOST_AUTO_TEST_CASE(test_why_time) {
 
     Defs theDefs;
     {
-        boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
-        boost::posix_time::ptime time1        = theLocalTime - hours(1);
+        auto theLocalTime = Calendar::second_clock_time();
+        auto time1        = theLocalTime - boost::posix_time::hours(1);
 
         suite_ptr suite = Suite::create("test_why_time");
         family_ptr fam  = Family::create("family");
@@ -182,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_why_time) {
     // running the why command, should report dependency on time
     unsigned int updateCalendarCount = waitForWhy("/test_why_time/family/t1", "time", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_today) {
@@ -201,12 +198,12 @@ BOOST_AUTO_TEST_CASE(test_why_today) {
         // in order to test the why command. Also the following tests, start
         // by deleting all nodes. This will fail due to active/submitted tasks
         // Hence can *NOT* use:
-        // boost::posix_time::ptime theLocalTime =  Calendar::second_clock_time();
-        // boost::posix_time::ptime time1 =  theLocalTime + hours(1);
+        //   auto theLocalTime =  Calendar::second_clock_time();
+        //   auto time1 =  theLocalTime + hours(1);
 
         // Use a hard coded a time, to avoid failure if test is run just before midnight
-        boost::posix_time::ptime theLocalTime(date(2010, 2, 10), hours(1));
-        boost::posix_time::ptime time1 = theLocalTime + hours(1);
+        auto theLocalTime = boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::hours(1));
+        auto time1        = theLocalTime + boost::posix_time::hours(1);
 
         suite_ptr suite = theDefs.add_suite("test_why_today");
         ClockAttr clockAttr(theLocalTime);
@@ -227,7 +224,7 @@ BOOST_AUTO_TEST_CASE(test_why_today) {
     // running the why command, should report dependency on time
     unsigned int updateCalendarCount = waitForWhy("/test_why_today/family/t1", "today", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_cron) {
@@ -237,10 +234,11 @@ BOOST_AUTO_TEST_CASE(test_why_cron) {
 
     Defs theDefs;
     {
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(11, 0, 0));
-        boost::posix_time::ptime time1        = theLocalTime - hours(3);
-        boost::posix_time::ptime time2        = theLocalTime - hours(1);
-        boost::gregorian::date todaysDate     = theLocalTime.date();
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(11, 0, 0));
+        auto time1      = theLocalTime - boost::posix_time::hours(3);
+        auto time2      = theLocalTime - boost::posix_time::hours(1);
+        auto todaysDate = theLocalTime.date();
 
         suite_ptr suite = Suite::create("test_why_cron");
         family_ptr fam  = Family::create("family");
@@ -286,7 +284,7 @@ BOOST_AUTO_TEST_CASE(test_why_cron) {
     // running the why command, should report dependency on cron
     unsigned int updateCalendarCount = waitForWhy("/test_why_cron/family/t1", "cron", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_limit) {
@@ -349,7 +347,7 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
             defs_ptr defs       = TestFixture::client().defs();
             updateCalendarCount = defs->updateCalendarCount();
             bool wait           = false;
-            vector<Task*> tasks;
+            std::vector<Task*> tasks;
             defs->getAllTasks(tasks);
             for (Task* task : tasks) {
                 if (task->state() != NState::COMPLETE)
@@ -358,15 +356,15 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
             if (!wait)
                 break;
             if (assertTimer.duration() >= assertTimer.timeConstraint()) {
-                cout << "waitFor jobs to complete, wait time of " << assertTimer.duration()
-                     << " taking longer than time constraint of " << assertTimer.timeConstraint()
-                     << " aborting, ......breaking out\n"
-                     << ecf::as_string(*defs, PrintStyle::DEFS) << "\n";
+                std::cout << "waitFor jobs to complete, wait time of " << assertTimer.duration()
+                          << " taking longer than time constraint of " << assertTimer.timeConstraint()
+                          << " aborting, ......breaking out\n"
+                          << ecf::as_string(*defs, PrintStyle::DEFS) << "\n";
             }
             sleep(1);
         }
     }
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_trigger) {
@@ -394,7 +392,7 @@ BOOST_AUTO_TEST_CASE(test_why_trigger) {
     // Waiting for a trigger expression which will never evaluate
     unsigned int updateCalendarCount = waitForWhy("/test_why_trigger/family/t1", "expression", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_meter) {
@@ -423,7 +421,7 @@ BOOST_AUTO_TEST_CASE(test_why_meter) {
     // Waiting for a trigger expression which references a meter.
     unsigned int updateCalendarCount = waitForWhy("/test_why_meter/family/t1", "/test_why_meter/family:meter", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_event) {
@@ -456,7 +454,7 @@ BOOST_AUTO_TEST_CASE(test_why_event) {
     unsigned int updateCalendarCount =
         waitForWhy("/test_why_event/family/t1", "/test_why_event/family/t2:theEvent", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_user_var) {
@@ -485,7 +483,7 @@ BOOST_AUTO_TEST_CASE(test_why_user_var) {
     // Task t1, should stay queued because the user variable 'user_var' value  = 10, is not 100
     unsigned int updateCalendarCount = waitForWhy("/test_why_user_var/family/t1", "/test_why_user_var:user_var", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_gen_var) {
@@ -514,7 +512,7 @@ BOOST_AUTO_TEST_CASE(test_why_gen_var) {
     unsigned int updateCalendarCount =
         waitForWhy("/test_why_gen_var/family/t1", "/test_why_gen_var/family/t1:ECF_TRYNO", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_why_repeat) {
@@ -546,7 +544,7 @@ BOOST_AUTO_TEST_CASE(test_why_repeat) {
     unsigned int updateCalendarCount =
         waitForWhy("/test_why_repeat/family/t1", "/test_why_repeat/family:family_repeat_var", 10);
 
-    cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
+    std::cout << " " << timer.duration() << " update-calendar-count(" << updateCalendarCount << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

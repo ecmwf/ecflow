@@ -32,8 +32,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
 
@@ -367,7 +365,8 @@ void update_calendar(defs_ptr defs) {
 
     // The calendar is *only* updated if the suite have been begun. Hence make sure this test scaffold
     // starts the test, with all the suites in a begun state
-    CalendarUpdateParams p(Calendar::second_clock_time(), minutes(1), true /* server running */, false /* for Test*/);
+    CalendarUpdateParams p(
+        Calendar::second_clock_time(), boost::posix_time::minutes(1), true /* server running */, false /* for Test*/);
     defs->updateCalendar(p);
 
     // Currently updating the calendar, does not cause change, Hence force a change

@@ -218,8 +218,6 @@ public:
     static const std::string& LOCALHOST();
 
     static const std::string& WHITE_LIST_FILE();
-
-    static const char* cpu_timer_format() { return "%ws wall, (%us user + %ss system = %ts) CPU (%p%)"; }
 };
 
 } // namespace ecf

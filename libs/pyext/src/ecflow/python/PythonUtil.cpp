@@ -39,10 +39,9 @@ void pyutil_list_to_str_vec(const py::list& list, std::vector<Variable>& vec) {
     }
 }
 
-void pyutil_dict_to_str_vec(const py::dict& dict,
-                                      std::vector<std::pair<std::string, std::string>>& str_pair_vec) {
-    py::list keys = dict.keys();
-    const auto no_of_keys    = len(keys);
+void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<std::pair<std::string, std::string>>& str_pair_vec) {
+    py::list keys         = dict.keys();
+    const auto no_of_keys = len(keys);
     str_pair_vec.reserve(no_of_keys);
 
     for (ssize_t i = 0; i < no_of_keys; ++i) {
@@ -64,8 +63,8 @@ void pyutil_dict_to_str_vec(const py::dict& dict,
 }
 
 void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<Variable>& vec) {
-    py::list keys = dict.keys();
-    const auto no_of_keys    = len(keys);
+    py::list keys         = dict.keys();
+    const auto no_of_keys = len(keys);
     vec.reserve(no_of_keys);
 
     for (ssize_t i = 0; i < no_of_keys; ++i) {

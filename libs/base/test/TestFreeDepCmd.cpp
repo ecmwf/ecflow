@@ -22,10 +22,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
 
@@ -37,12 +34,13 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd) {
     TestLog test_log("test_free_dep_cmd.log"); // will create log file, and destroy log and remove file at end of scope
 
     // Create a test and add the date and time dependencies
-    ptime theLocalTime(date(2011, Nov, 4), time_duration(9, 30, 0));
-    ptime time_plus_hour   = theLocalTime + hours(1);
-    ptime time_plus_2_hour = theLocalTime + hours(2);
-    date todaysDate        = theLocalTime.date();
-    date tomorrows_date    = todaysDate + date_duration(1);
-    date tomorrows_date_1  = todaysDate + date_duration(2);
+    auto theLocalTime     = boost::posix_time::ptime(boost::gregorian::date(2011, boost::gregorian::Nov, 4),
+                                                 boost::posix_time::time_duration(9, 30, 0));
+    auto time_plus_hour   = theLocalTime + boost::posix_time::hours(1);
+    auto time_plus_2_hour = theLocalTime + boost::posix_time::hours(2);
+    auto todaysDate       = theLocalTime.date();
+    auto tomorrows_date   = todaysDate + boost::gregorian::date_duration(1);
+    auto tomorrows_date_1 = todaysDate + boost::gregorian::date_duration(2);
 
     // Get tomorrow as a day so that isFree fails.
     tm day_1 = to_tm(tomorrows_date);
@@ -173,8 +171,9 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd_single_time_slot) {
     // We add a time dependency *AFTER* the suite/calendar time
     // This checks that we DO NOT re-queue a task with a future time dependency
     // when a time dependency has been freed
-    ptime theLocalTime(date(2011, Nov, 4), time_duration(9, 30, 0));
-    ptime time_plus_2minute = theLocalTime + minutes(2);
+    auto theLocalTime      = boost::posix_time::ptime(boost::gregorian::date(2011, boost::gregorian::Nov, 4),
+                                                 boost::posix_time::time_duration(9, 30, 0));
+    auto time_plus_2minute = theLocalTime + boost::posix_time::minutes(2);
 
     suite_ptr suite;
     task_ptr task;
@@ -232,7 +231,8 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd_with_time_series) {
     // We start the suite *IN BETWEEN* a time series, and the force free dependency
     // This checks that we DO NOT re-queue a task with a future time dependency
     // when a time dependency has been freed
-    ptime theLocalTime(date(2011, Nov, 4), time_duration(9, 29, 0));
+    auto theLocalTime = boost::posix_time::ptime(boost::gregorian::date(2011, boost::gregorian::Nov, 4),
+                                                 boost::posix_time::time_duration(9, 29, 0));
     suite_ptr suite;
     task_ptr task;
     Defs theDefs;
@@ -291,7 +291,8 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd_with_time_series_2) {
 
     // We start the suite *IN BETWEEN* a time series, and the force free dependency
     // This time we have a larger range, and *SHOULD* re-queue, even if we miss a time slot
-    ptime theLocalTime(date(2011, Nov, 4), time_duration(9, 29, 0));
+    auto theLocalTime = boost::posix_time::ptime(boost::gregorian::date(2011, boost::gregorian::Nov, 4),
+                                                 boost::posix_time::time_duration(9, 29, 0));
     suite_ptr suite;
     task_ptr task;
     Defs theDefs;

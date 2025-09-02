@@ -12,22 +12,19 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Chrono.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
 
@@ -62,8 +59,9 @@ BOOST_AUTO_TEST_CASE(test_day_at_midnight) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("test_day_at_midnight");
-        ClockAttr clockAttr(boost::posix_time::ptime(date(2019, 9, 9), time_duration(23, 58, 0)),
-                            false); // Monday @ 23:58
+        ClockAttr clockAttr(
+            boost::posix_time::ptime(boost::gregorian::date(2019, 9, 9), boost::posix_time::time_duration(23, 58, 0)),
+            false); // Monday @ 23:58
         suite->addClock(clockAttr);
 
         family_ptr fam = suite->add_family("family");
@@ -86,7 +84,8 @@ BOOST_AUTO_TEST_CASE(test_day_at_midnight) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_day_at_midnight.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_date_at_midnight) {
@@ -112,8 +111,9 @@ BOOST_AUTO_TEST_CASE(test_date_at_midnight) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("test_date_at_midnight");
-        ClockAttr clockAttr(boost::posix_time::ptime(date(2019, 9, 9), time_duration(23, 58, 0)),
-                            false); // Monday @ 23:58
+        ClockAttr clockAttr(
+            boost::posix_time::ptime(boost::gregorian::date(2019, 9, 9), boost::posix_time::time_duration(23, 58, 0)),
+            false); // Monday @ 23:58
         suite->addClock(clockAttr);
 
         family_ptr fam = suite->add_family("family");
@@ -136,7 +136,8 @@ BOOST_AUTO_TEST_CASE(test_date_at_midnight) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_date_at_midnight.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

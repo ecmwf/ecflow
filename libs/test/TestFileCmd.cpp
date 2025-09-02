@@ -17,17 +17,14 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/cts/user/CFileCmd.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 ///
 /// \note This is used to INVOKE a SINGLE test. Easier for debugging
@@ -89,11 +86,11 @@ BOOST_AUTO_TEST_CASE(test_file_cmd) {
 
     for (Node* node : nodeVec) {
 
-        string nodePath                            = node->absNodePath();
+        std::string nodePath                       = node->absNodePath();
         std::vector<CFileCmd::File_t> fileTypesVec = CFileCmd::fileTypesVec();
         for (size_t i = 0; i < fileTypesVec.size(); i++) {
 
-            string file_type                 = CFileCmd::toString(fileTypesVec[i]);
+            std::string file_type            = CFileCmd::toString(fileTypesVec[i]);
             std::vector<std::string> theArgs = CtsApi::file(nodePath, file_type, "10000");
             std::string args;
             for (size_t x = 0; x < theArgs.size(); x++) {
@@ -133,7 +130,8 @@ BOOST_AUTO_TEST_CASE(test_file_cmd) {
         }
     }
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

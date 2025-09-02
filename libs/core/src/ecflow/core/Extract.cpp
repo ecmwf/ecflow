@@ -12,19 +12,14 @@
 
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 
 // #define DEBUG_PARSER 1
 
-using namespace std;
-using namespace boost;
-using namespace boost::gregorian;
-
 template <class T>
-ostream& operator<<(ostream& os, const vector<T>& v) {
-    copy(v.begin(), v.end(), ostream_iterator<T>(cout, ","));
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+    std::copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, ","));
     return os;
 }
 
@@ -33,7 +28,7 @@ bool Extract::pathAndName(const std::string& token, std::string& path, std::stri
         return false;
 
     size_t colonPos = token.find_first_of(':');
-    if (colonPos == string::npos) {
+    if (colonPos == std::string::npos) {
         if (token[0] == '/') {
             path = token; // token of the form /a/b/c, ie no name
         }
@@ -53,7 +48,7 @@ bool Extract::split_get_second(const std::string& str, std::string& ret, char se
     // HH:MM
     // return MM;
     size_t colonPos = str.find_first_of(separator);
-    if (colonPos == string::npos)
+    if (colonPos == std::string::npos)
         return false;
     ret = str.substr(colonPos + 1);
     return true;
@@ -78,7 +73,7 @@ int Extract::ymd(const std::string& ymdToken, std::string& errorMsg) {
 
     // Use date lib to check YMD
     try {
-        (void)boost::gregorian::date(from_undelimited_string(ymdToken));
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(ymdToken));
     }
     catch (std::exception& e) {
         errorMsg += "\n";

@@ -14,8 +14,6 @@
 #include <iterator>
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-
 #include "ecflow/base/Client.hpp"
 #include "ecflow/base/cts/task/AbortCmd.hpp"
 #include "ecflow/base/cts/task/CompleteCmd.hpp"
@@ -50,6 +48,7 @@
 #include "ecflow/base/cts/user/RunNodeCmd.hpp"
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
 #ifdef ECF_OPENSSL
@@ -58,11 +57,11 @@
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/Rtt.hpp"
 #include "ecflow/core/CommandLine.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeStamp.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #ifdef DEBUG_PERF
     #include "ecflow/core/DebugPerf.hpp"
@@ -96,7 +95,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
 
 // ==================================================================================
 // class ClientInvoker
@@ -637,7 +635,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                 return 1;
             }
 
-            boost::posix_time::time_duration duration = microsec_clock::universal_time() - start_time_;
+            auto duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
             if (clientEnv_.debug()) {
                 cout << "ClientInvoker: Time duration = " << duration.total_seconds()
                      << " clientEnv_.max_child_cmd_timeout() = " << clientEnv_.max_child_cmd_timeout() << endl;
@@ -1808,10 +1806,10 @@ RequestLogger::~RequestLogger() {
 // ==========================================================================
 RoundTripRecorder::RoundTripRecorder(const ClientInvoker* ci) : ci_(ci) {
     // get the current time from the clock -- one second resolution
-    ci_->start_time_ = microsec_clock::universal_time();
+    ci_->start_time_ = boost::posix_time::microsec_clock::universal_time();
     ci_->rtt_        = boost::posix_time::time_duration();
 }
 
 RoundTripRecorder::~RoundTripRecorder() {
-    ci_->rtt_ = microsec_clock::universal_time() - ci_->start_time_;
+    ci_->rtt_ = boost::posix_time::microsec_clock::universal_time() - ci_->start_time_;
 }

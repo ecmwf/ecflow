@@ -15,9 +15,6 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace boost;
-using namespace std;
-
 static bool is_sanitizer_available() {
 
     /*
@@ -62,9 +59,9 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_use_of_out_of_scope_stack_memory) {
         int value = integer_returning_function();
         pointer   = &value;
     }
-    cout << "dodgy pointer:" << *pointer << "\n"; // Error: invalid access of stack memory out of declaration scope
+    std::cout << "dodgy pointer:" << *pointer << "\n"; // Error: invalid access of stack memory out of declaration scope
     *pointer = 42;
-    cout << "dodgy pointer:" << *pointer << "\n";
+    std::cout << "dodgy pointer:" << *pointer << "\n";
     BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
 }
 
@@ -91,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_vector_overflow) {
     // causing an overflow.
     std::vector<int> vector{0, 1, 2};
     auto* pointer = &vector[0];
-    cout << pointer[3]; // Error: out of bounds access for vector
+    std::cout << pointer[3]; // Error: out of bounds access for vector
     BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
 }
 

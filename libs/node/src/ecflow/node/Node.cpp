@@ -42,8 +42,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 namespace {
 
@@ -1111,8 +1109,8 @@ void Node::setStateOnly(NState::State newState,
 }
 
 boost::posix_time::ptime Node::state_change_time() const {
-    const Calendar& calendar                       = suite()->calendar();
-    boost::posix_time::ptime the_state_change_time = calendar.begin_time();
+    const Calendar& calendar   = suite()->calendar();
+    auto the_state_change_time = calendar.begin_time();
     the_state_change_time += st_.second; // st_.second is calendar duration relative to calendar begin_time
     return the_state_change_time;
 }
@@ -1715,12 +1713,12 @@ void Node::read_state(const std::string& line, const std::vector<std::string>& l
         else if (line_token_i.find("dur:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token))
                 throw std::runtime_error("Node::read_state invalid duration for node: " + name());
-            st_.second = duration_from_string(token);
+            st_.second = boost::posix_time::duration_from_string(token);
         }
         else if (line_token_i.find("rt:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token))
                 throw std::runtime_error("Node::read_state invalid runtime duration for node: " + name());
-            sc_rt_ = duration_from_string(token);
+            sc_rt_ = boost::posix_time::duration_from_string(token);
         }
         else if (line_token_i == "suspended:1")
             suspend();

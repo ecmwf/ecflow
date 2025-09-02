@@ -21,7 +21,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -287,17 +286,14 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_hybrid_clock) {
 
     // Now update calendar for more than 24 hours, and calendar date should *NOT* change for hybrid
     {
-        using namespace boost::posix_time;
-        using namespace boost::gregorian;
-
-        boost::posix_time::ptime time_now                 = s1->calendar().suiteTime();
-        boost::posix_time::time_duration serverPollPeriod = boost::posix_time::time_duration(0, 1, 0, 0);
-        std::string expectedDate                          = "2015-Oct-10";
+        auto time_now            = s1->calendar().suiteTime();
+        auto serverPollPeriod    = boost::posix_time::time_duration(0, 1, 0, 0);
+        std::string expectedDate = "2015-Oct-10";
 
         for (int hour = 1; hour <= 60; hour++) {
 
             // Update calendar every hour, for 60 hours
-            time_now += hours(1);
+            time_now += boost::posix_time::hours(1);
             CalendarUpdateParams param(time_now, serverPollPeriod, true, /* serverRunning */ false /* forTest */);
 
             defs->updateCalendar(param);

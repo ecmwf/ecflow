@@ -42,7 +42,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost;
 
 static const char* T_NOPP        = "nopp";
 static const char* T_COMMENT     = "comment";

@@ -17,7 +17,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // The client handle commands do not change state & modify change number, hence need to bypass these checks

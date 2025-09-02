@@ -196,14 +196,14 @@ bool TimeAttr::why(const ecf::Calendar& c,
 
             if (!days.empty() || !dates.empty()) {
                 for (const auto& day : days) {
-                    boost::gregorian::date the_next_matching_date = day.next_matching_date(c);
+                    auto the_next_matching_date = day.next_matching_date(c);
                     if (the_min_next_date.is_special())
                         the_min_next_date = the_next_matching_date;
                     if (the_next_matching_date < the_min_next_date)
                         the_min_next_date = the_next_matching_date;
                 }
                 for (const auto& date : dates) {
-                    boost::gregorian::date the_next_matching_date = date.next_matching_date(c);
+                    auto the_next_matching_date = date.next_matching_date(c);
                     if (the_min_next_date.is_special())
                         the_min_next_date = the_next_matching_date;
                     if (the_next_matching_date < the_min_next_date)
@@ -213,7 +213,7 @@ bool TimeAttr::why(const ecf::Calendar& c,
                 theReasonWhy += " next run at ";
             }
             else {
-                boost::gregorian::date_duration one_day(1);
+                auto one_day      = boost::gregorian::date_duration(1);
                 the_min_next_date = c.date(); // today's date
                 the_min_next_date += one_day; // add one day, so its in the future
                 theReasonWhy += " next run tomorrow at ";

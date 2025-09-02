@@ -21,7 +21,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost::posix_time;
 
 // #define DEBUG_ZOMBIE  1
 
@@ -447,13 +446,13 @@ void ZombieCtrl::add_user_zombies(defs_ptr defs, const std::string& user_cmd) {
 /// Returns the list of zombies, **updated** with seconds since creation
 void ZombieCtrl::get(std::vector<Zombie>& ret) {
 
-    boost::posix_time::ptime time_now = Calendar::second_clock_time();
+    auto time_now = Calendar::second_clock_time();
 
     size_t zombieVecSize = zombies_.size();
     ret.reserve(zombieVecSize);
     for (size_t i = 0; i < zombieVecSize; i++) {
 
-        time_duration duration = time_now - zombies_[i].creation_time();
+        auto duration = time_now - zombies_[i].creation_time();
         zombies_[i].set_duration(duration.total_seconds());
 
         ret.push_back(zombies_[i]);
@@ -462,7 +461,7 @@ void ZombieCtrl::get(std::vector<Zombie>& ret) {
 
 void ZombieCtrl::remove_stale_zombies(const boost::posix_time::ptime& time_now) {
     for (auto i = zombies_.begin(); i != zombies_.end(); ++i) {
-        time_duration duration = time_now - (*i).creation_time();
+        auto duration = time_now - (*i).creation_time();
         if (duration.total_seconds() > (*i).allowed_age()) {
 #ifdef DEBUG_ZOMBIE
             std::cout << "   ZombieCtrl::remove_stale_zombies " << (*i) << "\n";

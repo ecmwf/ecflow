@@ -10,11 +10,11 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -23,10 +23,7 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 /// Simulate definition files that are created on then fly. This allows us to create
 /// tests with todays date/time this speeds up the testr, we can also validate
@@ -37,7 +34,7 @@ BOOST_AUTO_TEST_SUITE(S_Simulator)
 BOOST_AUTO_TEST_SUITE(T_Time)
 
 BOOST_AUTO_TEST_CASE(test_time) {
-    cout << "Simulator:: ...test_time\n";
+    std::cout << "Simulator:: ...test_time\n";
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
@@ -50,8 +47,8 @@ BOOST_AUTO_TEST_CASE(test_time) {
 
     // Initialise clock with todays date  then create a time attribute + minutes
     // such that the task should only run once, in the next minute
-    boost::posix_time::ptime theLocalTime     = Calendar::second_clock_time();
-    boost::posix_time::ptime time_plus_minute = theLocalTime + minutes(1);
+    auto theLocalTime     = Calendar::second_clock_time();
+    auto time_plus_minute = theLocalTime + boost::posix_time::minutes(1);
 
     Defs theDefs;
     {
@@ -77,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_time) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_series) {
-    cout << "Simulator:: ...test_time_series\n";
+    std::cout << "Simulator:: ...test_time_series\n";
 
     // suite suite
     //   clock real <sunday>
@@ -116,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_time_series) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_and_date) {
-    cout << "Simulator:: ...test_time_and_date\n";
+    std::cout << "Simulator:: ...test_time_and_date\n";
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
@@ -132,9 +129,9 @@ BOOST_AUTO_TEST_CASE(test_time_and_date) {
     {
         // Initialise clock with todays date  then create a time attribute + minutes
         // such that the task should only run once, in the next minute
-        boost::posix_time::ptime theLocalTime     = Calendar::second_clock_time();
-        boost::gregorian::date todaysDate         = theLocalTime.date();
-        boost::posix_time::ptime time_plus_minute = theLocalTime + minutes(1);
+        auto theLocalTime     = Calendar::second_clock_time();
+        auto todaysDate       = theLocalTime.date();
+        auto time_plus_minute = theLocalTime + boost::posix_time::minutes(1);
 
         ClockAttr clockAttr(theLocalTime, false /*false means use real clock*/);
         suite_ptr suite = theDefs.add_suite("test_time_and_date");
@@ -159,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_time_and_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_time_and_tomorrows_date) {
-    cout << "Simulator:: ...test_time_and_tomorrows_date\n";
+    std::cout << "Simulator:: ...test_time_and_tomorrows_date\n";
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
@@ -175,10 +172,10 @@ BOOST_AUTO_TEST_CASE(test_time_and_tomorrows_date) {
     {
         // Initialise clock with todays date  then create a time attribute + minutes
         // such that the task should only run once, in the next minute
-        boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
-        boost::gregorian::date tomorrows_date = theLocalTime.date();
-        tomorrows_date += days(1);
-        boost::posix_time::ptime time_plus_minute = theLocalTime + minutes(1);
+        auto theLocalTime   = Calendar::second_clock_time();
+        auto tomorrows_date = theLocalTime.date();
+        tomorrows_date += boost::gregorian::days(1);
+        auto time_plus_minute = theLocalTime + boost::posix_time::minutes(1);
 
         ClockAttr clockAttr(theLocalTime, false /*false means use real clock*/);
         suite_ptr suite = theDefs.add_suite("test_time_and_tomorrows_date");
@@ -203,7 +200,7 @@ BOOST_AUTO_TEST_CASE(test_time_and_tomorrows_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates) {
-    cout << "Simulator:: ...test_multiple_times_and_dates\n";
+    std::cout << "Simulator:: ...test_multiple_times_and_dates\n";
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
@@ -220,14 +217,14 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates) {
     {
         // Initialise clock with todays date  then create a time attribute + minutes
         // Note: we don't use:
-        //    boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
+        //    auto theLocalTime = Calendar::second_clock_time();
         // because if run at late we can end up with illegal for the hour, ie. > 24
 
-        boost::gregorian::date todaysDate(2009, 2, 10);
-        ptime theLocalTime(todaysDate, hours(3));
-        boost::gregorian::date tomarrows_date           = todaysDate + date_duration(1);
-        boost::posix_time::time_duration td_plus_minute = theLocalTime.time_of_day() + minutes(1);
-        boost::posix_time::time_duration td_plus_hour   = theLocalTime.time_of_day() + hours(1);
+        auto todaysDate     = boost::gregorian::date(2009, 2, 10);
+        auto theLocalTime   = boost::posix_time::ptime(todaysDate, boost::posix_time::hours(3));
+        auto tomarrows_date = todaysDate + boost::gregorian::date_duration(1);
+        auto td_plus_minute = theLocalTime.time_of_day() + boost::posix_time::minutes(1);
+        auto td_plus_hour   = theLocalTime.time_of_day() + boost::posix_time::hours(1);
 
         ClockAttr clockAttr(theLocalTime, false /*false means use real clock*/);
         suite_ptr suite = theDefs.add_suite("test_multiple_times_and_dates");
@@ -254,7 +251,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates) {
 }
 
 BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates_hybrid) {
-    cout << "Simulator:: ...test_multiple_times_and_dates_hybrid\n";
+    std::cout << "Simulator:: ...test_multiple_times_and_dates_hybrid\n";
 
     // # Note: we have to use relative paths, since these tests are relocatable
     // suite suite
@@ -271,11 +268,12 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates_hybrid) {
     {
         // Initialise clock with todays date  then create a time attribute + minutes
         // such that the task should only run once, in the next minute
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2012, 2, 22), time_duration(10, 20, 0));
-        boost::gregorian::date todaysDate     = theLocalTime.date();
-        boost::gregorian::date tomorrows_date = todaysDate + date_duration(1);
-        boost::posix_time::time_duration td_plus_minute    = theLocalTime.time_of_day() + minutes(1);
-        boost::posix_time::time_duration td_plus_10_minute = theLocalTime.time_of_day() + minutes(10);
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2012, 2, 22), boost::posix_time::time_duration(10, 20, 0));
+        auto todaysDate        = theLocalTime.date();
+        auto tomorrows_date    = todaysDate + boost::gregorian::date_duration(1);
+        auto td_plus_minute    = theLocalTime.time_of_day() + boost::posix_time::minutes(1);
+        auto td_plus_10_minute = theLocalTime.time_of_day() + boost::posix_time::minutes(10);
 
         suite_ptr suite = theDefs.add_suite("test_multiple_times_and_dates_hybrid");
         suite->addClock(ClockAttr(theLocalTime, true)); // true means use hybrid clock
@@ -287,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates_hybrid) {
         task->addTime(TimeAttr(TimeSlot(td_plus_minute)));
         task->addTime(TimeAttr(TimeSlot(td_plus_10_minute)));
         task->addVerify(VerifyAttr(NState::COMPLETE, 2)); // expect task to complete 2 time
-                                                          // cout << theDefs << "\n";
+                                                          // std::cout << theDefs << "\n";
     }
 
     Simulator simulator;
@@ -303,7 +301,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates_hybrid) {
 }
 
 BOOST_AUTO_TEST_CASE(test_multiple_times_and_days) {
-    cout << "Simulator:: ...test_multiple_times_and_days\n";
+    std::cout << "Simulator:: ...test_multiple_times_and_days\n";
 
     // suite suite
     //   clock real <sunday>
@@ -347,7 +345,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_days) {
 }
 
 BOOST_AUTO_TEST_CASE(test_multiple_times_and_days_hybrid) {
-    cout << "Simulator:: ...test_multiple_times_and_days_hybrid\n";
+    std::cout << "Simulator:: ...test_multiple_times_and_days_hybrid\n";
 
     // suite suite
     //   clock hybrid <monday>

@@ -12,26 +12,22 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/AssertTimer.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/DurationTimer.hpp"
-#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 #if defined(_AIX)
 static int timeout = 30;
@@ -52,7 +48,7 @@ static void waitForTimeDependenciesToBeFree(int max_time_to_wait) {
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());
         defs_ptr defs = TestFixture::client().defs();
-        vector<Task*> tasks;
+        std::vector<Task*> tasks;
         defs->getAllTasks(tasks);
         size_t taskTimeDepIsFree = 0;
         for (Task* task : tasks) {
@@ -99,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
         // i.e. if local time is 9:59, and we create a TimeSlot like
         //     task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
         // The minute will be 62, which is illegal and will not parse
-        boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
+        auto theLocalTime = Calendar::second_clock_time();
 
         // For each 2 seconds of poll in the server update calendar by 1 minute
         // Note: if we use 1 seconds poll to update calendar by 1 minute, then
@@ -115,7 +111,7 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
         for (int i = 0; i < taskSize; i++) {
             task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
 
-            boost::posix_time::ptime time1 = theLocalTime + minutes(1 + i);
+            auto time1 = theLocalTime + boost::posix_time::minutes(1 + i);
             task->addTime(ecf::TimeAttr(ecf::TimeSlot(time1.time_of_day())));
 
             task->addVerify(VerifyAttr(NState::COMPLETE, 1)); // task should complete 1 times
@@ -153,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_shutdown) {
     // cout << "Printing Defs \n";
     // std::cout << *serverDefs.get();
 
-    cout << timer.duration() << " update-calendar-count(" << serverDefs->updateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverDefs->updateCalendarCount() << ")\n";
 }
 
 // test:: suspend/shutdown. During suspend the time dependencies should still
@@ -179,18 +175,18 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
         // i.e. if local time is 9:59, and we create a TimeSlot like
         //     task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
         // The minute will be 62, which is illegal and will not parse
-        boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
+        auto theLocalTime = Calendar::second_clock_time();
 
         suite_ptr suite = theDefs.add_suite("test_suspend_node");
         ClockAttr clockAttr(theLocalTime);
         suite->addClock(clockAttr);
 
-        task_ptr t1                    = suite->add_task("t1");
-        boost::posix_time::ptime time1 = theLocalTime + minutes(1);
+        task_ptr t1 = suite->add_task("t1");
+        auto time1  = theLocalTime + boost::posix_time::minutes(1);
         t1->addTime(ecf::TimeAttr(ecf::TimeSlot(time1.time_of_day())));
 
-        task_ptr t2                    = suite->add_task("t2");
-        boost::posix_time::ptime time2 = theLocalTime + minutes(2);
+        task_ptr t2 = suite->add_task("t2");
+        auto time2  = theLocalTime + boost::posix_time::minutes(2);
         t2->addTime(ecf::TimeAttr(ecf::TimeSlot(time2.time_of_day())));
 
         family_ptr fam = suite->add_family("family");
@@ -198,7 +194,7 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
             task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1)); // task should complete 1 times
 
-            boost::posix_time::ptime time3 = theLocalTime + minutes(1 + i);
+            auto time3 = theLocalTime + boost::posix_time::minutes(1 + i);
             task->addTime(ecf::TimeAttr(ecf::TimeSlot(time3.time_of_day())));
         }
     }
@@ -234,7 +230,7 @@ BOOST_AUTO_TEST_CASE(test_suspend_node) {
     // cout << "Printing Defs \n";
     // std::cout << *serverDefs.get();
 
-    cout << timer.duration() << " update-calendar-count(" << serverDefs->updateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverDefs->updateCalendarCount() << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -19,9 +19,9 @@
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/Rtt.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
@@ -94,17 +94,17 @@ void time_load_and_downloads(ClientInvoker& theClient,
                 BOOST_REQUIRE_MESSAGE(theClient.loadDefs(relPath.string()) == 0,
                                       "load defs failed \n"
                                           << theClient.errorMsg());
-                cout << " Load:                " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
-                BOOST_CHECK_MESSAGE(duration_timer.elapsed().total_milliseconds() < load_threshold_ms,
-                                    "regression load(" << duration_timer.elapsed().total_milliseconds()
+                cout << " Load:                " << duration_timer.elapsed_milliseconds() << "ms" << endl;
+                BOOST_CHECK_MESSAGE(duration_timer.elapsed_milliseconds() < load_threshold_ms,
+                                    "regression load(" << duration_timer.elapsed_milliseconds()
                                                        << "), exceeded threshold of " << load_threshold_ms);
             }
             {
                 DurationTimer duration_timer;
                 BOOST_REQUIRE_MESSAGE(theClient.begin_all_suites() == 0, "begin failed \n" << theClient.errorMsg());
-                cout << " Begin:               " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
-                BOOST_CHECK_MESSAGE(duration_timer.elapsed().total_milliseconds() < begin_threshold_ms,
-                                    "regression begin(" << duration_timer.elapsed().total_milliseconds()
+                cout << " Begin:               " << duration_timer.elapsed_milliseconds() << "ms" << endl;
+                BOOST_CHECK_MESSAGE(duration_timer.elapsed_milliseconds() < begin_threshold_ms,
+                                    "regression begin(" << duration_timer.elapsed_milliseconds()
                                                         << "), exceeded threshold of " << begin_threshold_ms);
             }
 
@@ -132,7 +132,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
                         client_news.sync_local();
                 }
                 cout << ": 1:news_local(),2:sync_local(),n:news_local with the new Client: "
-                     << duration_timer.elapsed().total_milliseconds() << "(ms)" << endl;
+                     << duration_timer.elapsed_milliseconds() << "(ms)" << endl;
             }
             {
                 cout << " Download(Sync):      ";
@@ -140,8 +140,8 @@ void time_load_and_downloads(ClientInvoker& theClient,
                 for (int i = 0; i < count; i++) {
                     DurationTimer duration_timer;
                     theClient.sync_local();
-                    int seconds = duration_timer.elapsed().total_milliseconds();
-                    cout << seconds << " ";
+                    int ms = duration_timer.elapsed_milliseconds();
+                    cout << ms << " ";
                 }
                 cout << ":(milli-seconds) sync_local() with the same Client. First call updates cache." << endl;
             }
@@ -154,9 +154,9 @@ void time_load_and_downloads(ClientInvoker& theClient,
                     ClientInvoker client(host, port);
                     DurationTimer duration_timer;
                     client.sync_local();
-                    int mil_secs = duration_timer.elapsed().total_milliseconds();
-                    cout << mil_secs << " ";
-                    total += mil_secs;
+                    int ms = duration_timer.elapsed_milliseconds();
+                    cout << ms << " ";
+                    total += ms;
                 }
                 double average = (double)(total) / ((double)count * 1000);
                 cout << ": Avg:" << average << "(sec)  : sync_local() with *different* clients.uses cache!" << endl;
@@ -172,9 +172,9 @@ void time_load_and_downloads(ClientInvoker& theClient,
                     ClientInvoker client(host, port);
                     DurationTimer duration_timer;
                     theClient.getDefs();
-                    int seconds = duration_timer.elapsed().total_milliseconds();
-                    cout << seconds << " ";
-                    total += seconds;
+                    int ms = duration_timer.elapsed_milliseconds();
+                    cout << ms << " ";
+                    total += ms;
                 }
                 double average = (double)(total) / ((double)count * 1000);
                 cout << ": Avg:" << average << "(sec)  : get_defs() from different client" << endl;
@@ -281,9 +281,9 @@ void time_load_and_downloads(ClientInvoker& theClient,
                 for (int i = 0; i < count; i++) {
                     DurationTimer duration_timer;
                     theClient.checkPtDefs();
-                    int seconds = duration_timer.elapsed().total_milliseconds();
-                    cout << seconds << " ";
-                    total += seconds;
+                    int ms = duration_timer.elapsed_milliseconds();
+                    cout << ms << " ";
+                    total += ms;
                 }
                 double average = (double)(total) / ((double)count * 1000);
                 cout << ": Avg:" << average << "(s)" << endl;
@@ -338,7 +338,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
                 BOOST_REQUIRE_MESSAGE(theClient.delete_all(true) == 0,
                                       "delete all defs failed \n"
                                           << theClient.errorMsg());
-                cout << " Delete:              " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
+                cout << " Delete:              " << duration_timer.elapsed_milliseconds() << "ms" << endl;
             }
         }
         catch (const std::exception& ex) {

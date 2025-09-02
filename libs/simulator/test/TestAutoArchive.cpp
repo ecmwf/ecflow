@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
@@ -24,10 +23,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 /// Simulate definition files that are created on then fly. This allows us to validate
 /// Defs file, to check for correctness
@@ -37,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(S_Simulator)
 BOOST_AUTO_TEST_SUITE(T_AutoArchive)
 
 BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
-    cout << "Simulator:: ...test_autoarchive_suite\n";
+    std::cout << "Simulator:: ...test_autoarchive_suite\n";
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
@@ -121,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
 }
 
 BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
-    cout << "Simulator:: ...test_autoarchive_ast_node_reset\n";
+    std::cout << "Simulator:: ...test_autoarchive_ast_node_reset\n";
 
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autoarchive at hour resolution
@@ -199,7 +195,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
 }
 
 BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
-    cout << "Simulator:: ...test_autoarchive_family\n";
+    std::cout << "Simulator:: ...test_autoarchive_family\n";
     Defs theDefs;
     theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
@@ -269,7 +265,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
 }
 
 BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
-    cout << "Simulator:: ...test_two_autoarchive_in_hierarchy\n";
+    std::cout << "Simulator:: ...test_two_autoarchive_in_hierarchy\n";
     Defs theDefs;
     theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive

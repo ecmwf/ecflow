@@ -12,15 +12,13 @@
 #include <iostream>
 #include <string>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/timer/timer.hpp>
-
 #include "PersistHelper.hpp"
 #include "TemporaryFile.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
@@ -33,7 +31,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::timer;
 
 // This test is used to find a task given a path of the form:
 //      suite/family/task
@@ -73,8 +70,8 @@ int main(int argc, char* argv[]) {
 
     std::string path = argv[1];
 
-    auto_cpu_timer t;
-    cpu_timer timer;
+    ScopedPerformanceTimer scope;
+    PerformanceTimer timer;
 
     /// If this is moved below, we get some caching affect, with the persist and reload timing
     Defs defs;
@@ -82,8 +79,7 @@ int main(int argc, char* argv[]) {
         timer.start();
         std::string errorMsg, warningMsg;
         bool result = defs.restore(path, errorMsg, warningMsg);
-        cout << " Parsing Node tree & AST creation time parse(" << result
-             << ") = " << timer.format(3, Str::cpu_timer_format()) << endl;
+        cout << " Parsing Node tree & AST creation time parse(" << result << ") = " << timer << endl;
     }
     {
         Defs local_defs;
@@ -91,8 +87,7 @@ int main(int argc, char* argv[]) {
         TestDefsStructureParser checkPtParser(&local_defs, path);
         std::string errorMsg;
         bool result = checkPtParser.do_parse_file(errorMsg);
-        cout << " Parsing Node tree *only* time         parse(" << result
-             << ") = " << timer.format(3, Str::cpu_timer_format()) << endl;
+        cout << " Parsing Node tree *only* time         parse(" << result << ") = " << timer << endl;
     }
     {
         timer.start();
@@ -101,8 +96,8 @@ int main(int argc, char* argv[]) {
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
-        cout << " Save and restore as string(DEFS)               = " << timer.format(3, Str::cpu_timer_format())
-             << " -> string size(" << defs_as_string.size() << ")" << endl;
+        cout << " Save and restore as string(DEFS)               = " << timer << " -> string size("
+             << defs_as_string.size() << ")" << endl;
     }
     {
         timer.start();
@@ -111,8 +106,8 @@ int main(int argc, char* argv[]) {
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
-        cout << " Save and restore as string(NET)                = " << timer.format(3, Str::cpu_timer_format())
-             << " -> string size(" << defs_as_string.size() << ") checks relaxed" << endl;
+        cout << " Save and restore as string(NET)                = " << timer << " -> string size("
+             << defs_as_string.size() << ") checks relaxed" << endl;
     }
     {
         timer.start();
@@ -121,8 +116,8 @@ int main(int argc, char* argv[]) {
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
-        cout << " Save and restore as string(MIGRATE)            = " << timer.format(3, Str::cpu_timer_format())
-             << " -> string size(" << defs_as_string.size() << ")" << endl;
+        cout << " Save and restore as string(MIGRATE)            = " << timer << " -> string size("
+             << defs_as_string.size() << ")" << endl;
     }
     {
         // Test time for persisting to defs file only
@@ -130,8 +125,7 @@ int main(int argc, char* argv[]) {
 
         timer.start();
         defs.write_to_checkpt_file(temporary.path());
-        cout << " Save as DEFS checkpoint, time taken            = " << timer.format(3, Str::cpu_timer_format())
-             << endl;
+        cout << " Save as DEFS checkpoint, time taken            = " << timer << endl;
     }
 
     {
@@ -160,8 +154,7 @@ int main(int argc, char* argv[]) {
         std::remove(json_filepath.c_str());
         timer.start();
         defs.cereal_save_as_checkpt(json_filepath);
-        cout << " Save as CEREAL checkpoint, time taken          = " << timer.format(3, Str::cpu_timer_format())
-             << endl;
+        cout << " Save as CEREAL checkpoint, time taken          = " << timer << endl;
     }
 
     {
@@ -170,9 +163,8 @@ int main(int argc, char* argv[]) {
         timer.start();
         PersistHelper helper;
         bool result = helper.test_defs_checkpt_and_reload(defs, do_compare);
-        cout << " Checkpt(DEFS) and reload, time taken           = " << timer.format(3, Str::cpu_timer_format())
-             << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")"
-             << endl;
+        cout << " Checkpt(DEFS) and reload, time taken           = " << timer << " file_size(" << helper.file_size()
+             << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
     }
 
     {
@@ -181,8 +173,8 @@ int main(int argc, char* argv[]) {
         PersistHelper helper;
         bool result = helper.test_cereal_checkpt_and_reload(defs, do_compare);
         cout << " Checkpt(CEREAL) and reload , time taken        = ";
-        cout << timer.format(3, Str::cpu_timer_format()) << " file_size(" << helper.file_size() << ")  result("
-             << result << ") msg(" << helper.errorMsg() << ")" << endl;
+        cout << timer << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg()
+             << ")" << endl;
     }
 
     {
@@ -190,8 +182,7 @@ int main(int argc, char* argv[]) {
         for (suite_ptr s : defs.suiteVec()) {
             test_find_task_using_path(s.get(), defs);
         }
-        cout << " Test all paths can be found. time taken        = " << timer.format(3, Str::cpu_timer_format())
-             << endl;
+        cout << " Test all paths can be found. time taken        = " << timer << endl;
     }
     {
         // Time how long it takes for job submission. Must call begin on all suites first.
@@ -203,7 +194,7 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < count; i++) {
             jobs.generate(jobsParam);
         }
-        cout << " time for 10 jobSubmissions                     = " << timer.format(3, Str::cpu_timer_format())
+        cout << " time for 10 jobSubmissions                     = " << timer
              << " jobs:" << jobsParam.submitted().size() << endl;
     }
     {
@@ -211,8 +202,7 @@ int main(int argc, char* argv[]) {
         timer.start();
         string errorMsg, warningMsg;
         bool result = defs.check(errorMsg, warningMsg);
-        cout << " Time for Defs::check(inlimit resolution)       = " << timer.format(3, Str::cpu_timer_format())
-             << " result(" << result << ")" << endl;
+        cout << " Time for Defs::check(inlimit resolution)       = " << timer << " result(" << result << ")" << endl;
     }
     {
         // Time how long it takes to delete all nodes/ references. Delete all tasks and then suites/families.
@@ -243,7 +233,6 @@ int main(int argc, char* argv[]) {
         if (!defs.suiteVec().empty())
             cout << "Expected all Suites to be deleted but found " << defs.suiteVec().size() << "\n";
 
-        cout << " time for deleting all nodes                    = " << timer.format(3, Str::cpu_timer_format())
-             << endl;
+        cout << " time for deleting all nodes                    = " << timer << endl;
     }
 }

@@ -17,9 +17,9 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -29,8 +29,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 ///
 /// \note This is used to INVOKE a SINGLE test. Easier for debugging

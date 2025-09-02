@@ -50,7 +50,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 // #define DEBUG_PARSER 1
 

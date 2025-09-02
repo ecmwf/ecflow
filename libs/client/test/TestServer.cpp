@@ -8,20 +8,17 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #include <boost/test/unit_test.hpp>
-#include <boost/timer/timer.hpp>
 
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/core/Version.hpp"
-#include "ecflow/core/perf_timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -262,7 +259,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
 #endif
 
     {
-        boost::timer::cpu_timer boost_timer;
+        PerformanceTimer timer;
         DurationTimer duration_timer;
         Timer<std::chrono::milliseconds> chrono_timer;
         for (int i = 0; i < load; i++) {
@@ -297,15 +294,13 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
             BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
         }
-        cout << " Server handled " << load * 16 << " requests in boost_timer("
-             << boost_timer.format(3, Str::cpu_timer_format()) << ")" << " DurationTimer("
-             << to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
+        cout << " Server handled " << load * 16 << " requests in CPU timer(" << timer << ")" << " Duration timer("
+             << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono timer("
              << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)" << endl;
     }
     {
         theClient.set_auto_sync(true);
-        boost::timer::cpu_timer
-            boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        PerformanceTimer timer;
         DurationTimer duration_timer;
         Timer<std::chrono::milliseconds> chrono_timer;
         for (int i = 0; i < load; i++) {
@@ -332,9 +327,8 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
             BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
         }
-        cout << " Server handled " << load * 8 << " requests in boost_timer("
-             << boost_timer.format(3, Str::cpu_timer_format()) << ")" << " DurationTimer("
-             << to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
+        cout << " Server handled " << load * 8 << " requests in boost_timer(" << timer << ")" << " DurationTimer("
+             << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
              << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)"
              << " *with* AUTO SYNC" << endl;
     }
@@ -351,8 +345,7 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
 
     std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
 
-    boost::timer::cpu_timer
-        boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+    PerformanceTimer timer;
     DurationTimer duration_timer;
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
 
@@ -388,9 +381,8 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
         BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
         BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
     }
-    cout << " Server handled " << load * 8 << " commands using " << load << " group requests in boost_timer("
-         << boost_timer.format(3, Str::cpu_timer_format()) << ") DurationTimer("
-         << to_simple_string(duration_timer.elapsed()) << ")" << endl;
+    cout << " Server handled " << load * 8 << " commands using " << load << " group requests in boost_timer(" << timer
+         << ") DurationTimer(" << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
@@ -435,8 +427,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
     }
 #endif
 
-    boost::timer::cpu_timer
-        boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+    PerformanceTimer timer;
     DurationTimer duration_timer;
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
     theClient.set_throw_on_error(false);
@@ -618,9 +609,8 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
 
     int no_of_client_calls = 74;
 
-    cout << " Server handled " << load * no_of_client_calls << " requests in boost_timer("
-         << boost_timer.format(3, Str::cpu_timer_format()) << ") DurationTimer("
-         << to_simple_string(duration_timer.elapsed()) << ")" << endl;
+    cout << " Server handled " << load * no_of_client_calls << " requests in boost_timer(" << timer
+         << ") DurationTimer(" << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

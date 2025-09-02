@@ -22,7 +22,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 //==================================================================================
 Alias::Alias(const std::string& name, bool check) : Submittable(name, check) {

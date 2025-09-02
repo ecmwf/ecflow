@@ -13,7 +13,7 @@
 
 // #define DEBUG_PERF 1
 #ifdef DEBUG_PERF
-    #include "ecflow/core/DurationTimer.hpp"
+    #include "ecflow/core/Timer.hpp"
 #endif
 
 #endif /* ecflow_core_DebugPerf_HPP */

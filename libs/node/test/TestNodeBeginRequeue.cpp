@@ -41,9 +41,9 @@ BOOST_AUTO_TEST_CASE(test_node_begin_requeue_hybrid) {
 
     // For task t1 which has day attribute. For this test to succeed the day must not match today day.
     // So that under the hybrid clock, its is set to complete
-    boost::gregorian::date todays_date = Calendar::second_clock_time().date();
-    int todays_day_as_number           = todays_date.day_of_week().as_number();
-    int tommorrow                      = todays_day_as_number + 1;
+    auto todays_date         = Calendar::second_clock_time().date();
+    int todays_day_as_number = todays_date.day_of_week().as_number();
+    int tommorrow            = todays_day_as_number + 1;
     if (tommorrow > 6)
         tommorrow = 0;
 

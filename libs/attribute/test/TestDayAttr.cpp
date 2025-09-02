@@ -20,10 +20,7 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
@@ -35,7 +32,8 @@ BOOST_AUTO_TEST_CASE(test_day_attr) {
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
     Calendar calendar;
-    calendar.init(ptime(date(2013, 7, 9), minutes(0)), Calendar::REAL); // tuesday
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2013, 7, 9), boost::posix_time::minutes(0)),
+                  Calendar::REAL); // tuesday
 
     // Represent a day within a week (range 0==Sun to 6==Sat)
     BOOST_CHECK_MESSAGE(calendar.day_of_week() == 2, " Expected tuesday(2) but found " << calendar.day_of_week());
@@ -48,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_day_attr) {
     // day_changed = 1;  wednesday
     // day_changed = 3;  thursday
     for (int m = 1; m < 96; m++) {
-        calendar.update(time_duration(hours(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
         // if (calendar.dayChanged())
         //     day_changed++;
 
@@ -140,7 +138,8 @@ BOOST_AUTO_TEST_CASE(test_day_parsing) {
     }
     {
         Calendar calendar;
-        calendar.init(ptime(date(2020, 6, 26), minutes(0)), Calendar::REAL); // friday
+        calendar.init(boost::posix_time::ptime(boost::gregorian::date(2020, 6, 26), boost::posix_time::minutes(0)),
+                      Calendar::REAL); // friday
 
         DayAttr day(calendar.date());
 
@@ -150,10 +149,11 @@ BOOST_AUTO_TEST_CASE(test_day_parsing) {
     }
     {
         Calendar c;
-        c.init(ptime(date(2020, 6, 26), minutes(0)), Calendar::REAL); // friday
+        c.init(boost::posix_time::ptime(boost::gregorian::date(2020, 6, 26), boost::posix_time::minutes(0)),
+               Calendar::REAL); // friday
 
-        boost::gregorian::date_duration one_day(1);
-        boost::gregorian::date next_day = c.date(); // todays date
+        auto one_day  = boost::gregorian::date_duration(1);
+        auto next_day = c.date(); // todays date
 
         for (int i = 0; i < 7; i++) {
             next_day += one_day;

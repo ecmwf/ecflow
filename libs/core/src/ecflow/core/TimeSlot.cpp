@@ -16,8 +16,6 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace boost::posix_time;
-
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +74,7 @@ void TimeSlot::write(std::string& ret) const {
 
 boost::posix_time::time_duration TimeSlot::duration() const {
     assert(!isNULL());
-    return boost::posix_time::time_duration(hours(h_) + minutes(m_));
+    return boost::posix_time::hours(h_) + boost::posix_time::minutes(m_);
 }
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot* d) {

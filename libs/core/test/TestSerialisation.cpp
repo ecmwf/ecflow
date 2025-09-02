@@ -16,8 +16,6 @@
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 static std::string fileName = "test.txt";
 

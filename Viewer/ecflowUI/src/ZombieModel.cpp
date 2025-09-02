@@ -10,10 +10,8 @@
 
 #include "ZombieModel.hpp"
 
-#include <QDebug>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include "ModelColumn.hpp"
+#include "ecflow/core/Chrono.hpp"
 
 ZombieModel::ZombieModel(QObject* parent) : QAbstractItemModel(parent) {
     columns_ = ModelColumn::def("zombie_columns");

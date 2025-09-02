@@ -20,8 +20,6 @@
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 
@@ -37,8 +35,8 @@ BOOST_AUTO_TEST_CASE(test_migration_restore_cereal) {
 
     // Note: default calendar constructor will init with current time: Hence set for comparison
     Calendar calendar;
-    boost::gregorian::date theDate(2011, 2, 10);
-    ptime time(theDate, hours(23) + minutes(59));
+    auto theDate = boost::gregorian::date(2011, 2, 10);
+    auto time    = boost::posix_time::ptime(theDate, boost::posix_time::hours(23) + boost::posix_time::minutes(59));
     calendar.init(time, Calendar::REAL); // Calendar type is derived from the clock attribute & hence is not persisted
 
     DebugEquality debug_equality; // only as affect in DEBUG build

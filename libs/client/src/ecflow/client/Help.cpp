@@ -194,8 +194,7 @@ auto make_task_env_description() -> auto {
         }
     }
 
-    help +=
-        "\nThe scripts are expected to export the mandatory variables, typically in shared include files\n";
+    help += "\nThe scripts are expected to export the mandatory variables, typically in shared include files\n";
 
     return help;
 }

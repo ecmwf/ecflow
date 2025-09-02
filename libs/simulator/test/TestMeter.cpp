@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
@@ -23,10 +22,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 /// Simulate definition files that are created on then fly. This us to validate
 /// Defs file, to check for correctness
@@ -34,7 +30,7 @@ using namespace boost::posix_time;
 BOOST_AUTO_TEST_SUITE(SimulatorTestSuite)
 
 BOOST_AUTO_TEST_CASE(test_meter) {
-    cout << "Simulator:: ...test_meter\n";
+    std::cout << "Simulator:: ...test_meter\n";
 
     // suite suite
     //   clock real <todays date>
@@ -48,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test_meter) {
 
     // Initialise clock with todays date  then create a time attribute + minutes
     // such that the task should only run once, in the next minute
-    boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
+    auto theLocalTime = Calendar::second_clock_time();
 
     Defs theDefs;
     {

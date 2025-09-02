@@ -42,10 +42,9 @@
 ///               task path. We just find the first zombie, and act up on it
 ///
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
 #include "ecflow/attribute/ZombieAttr.hpp"
 #include "ecflow/core/Child.hpp"
+#include "ecflow/core/Chrono.hpp"
 
 /// Use default copy constructor ,assignment operator and destructor
 class Zombie {

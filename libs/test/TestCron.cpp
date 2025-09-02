@@ -12,14 +12,14 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/AssertTimer.hpp"
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Chrono.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -27,10 +27,7 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
 
@@ -99,16 +96,17 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
         // with a time series, so that task runs 3 times
 
         // Note: we don't use:
-        //    boost::posix_time::ptime theLocalTime = Calendar::second_clock_time();
+        //    auto theLocalTime = Calendar::second_clock_time();
         // Because this can fail with:
         //    Test:: ...test_cron_time_series unknown location(0): fatal error in
         //             "test_cron_time_series": std::out_of_range:
         //             TimeSeries::TimeSeries: Invalid time series: Start time(23:58) is greater than end time(00:02)
         // i.e
         // if the test is started at 23:58, then adding the end time of by doing start_time + 5 will fail the check
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
-        boost::posix_time::ptime time1        = theLocalTime + minutes(1);
-        boost::posix_time::ptime time2        = theLocalTime + minutes(5);
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
+        auto time1 = theLocalTime + boost::posix_time::minutes(1);
+        auto time2 = theLocalTime + boost::posix_time::minutes(5);
 
         suite_ptr suite = theDefs.add_suite("test_cron_time_series");
         ClockAttr clockAttr(theLocalTime, false);
@@ -139,7 +137,8 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
     // crons are *infinite*, just wait for cron to complete 3 times
     wait_for_cron(40, path);
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

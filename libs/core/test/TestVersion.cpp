@@ -19,7 +19,6 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
-using namespace boost;
 
 template <typename... T>
 bool contains(std::string_view value, T&&... pattern) {

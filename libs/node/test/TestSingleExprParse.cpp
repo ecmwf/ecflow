@@ -13,9 +13,6 @@
 #include <map>
 #include <string>
 
-#include <boost/date_time/posix_time/conversion.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/node/ExprAst.hpp"
@@ -25,8 +22,6 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 // DEBUG AID: to see the expression tree, invert the expected evaluation
 //            so that test fail's

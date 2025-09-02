@@ -244,7 +244,6 @@ set(srcs
   core/src/ecflow/core/CommandLine.hpp
   core/src/ecflow/core/DState.hpp
   core/src/ecflow/core/DebugPerf.hpp
-  core/src/ecflow/core/DurationTimer.hpp
   core/src/ecflow/core/Ecf.hpp
   core/src/ecflow/core/EcfPortLock.hpp
   core/src/ecflow/core/Enumerate.hpp
@@ -271,6 +270,7 @@ set(srcs
   core/src/ecflow/core/Stl.hpp
   core/src/ecflow/core/Str.hpp
   core/src/ecflow/core/StringSplitter.hpp
+  core/src/ecflow/core/Timer.hpp
   core/src/ecflow/core/TimeSeries.hpp
   core/src/ecflow/core/TimeSlot.hpp
   core/src/ecflow/core/TimeStamp.hpp
@@ -280,7 +280,6 @@ set(srcs
   core/src/ecflow/core/ZombieCtrlAction.hpp
   core/src/ecflow/core/cereal_boost_time.hpp
   core/src/ecflow/core/cereal_optional_nvp.hpp
-  core/src/ecflow/core/perf_timer.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
   # Core -- Sources
   core/src/ecflow/core/AssertTimer.cpp
@@ -290,7 +289,6 @@ set(srcs
   core/src/ecflow/core/Chrono.cpp
   core/src/ecflow/core/CommandLine.cpp
   core/src/ecflow/core/DState.cpp
-  core/src/ecflow/core/DurationTimer.cpp
   core/src/ecflow/core/Ecf.cpp
   core/src/ecflow/core/Extract.cpp
   core/src/ecflow/core/File.cpp
@@ -309,6 +307,7 @@ set(srcs
   core/src/ecflow/core/SState.cpp
   core/src/ecflow/core/Str.cpp
   core/src/ecflow/core/StringSplitter.cpp
+  core/src/ecflow/core/Timer.cpp
   core/src/ecflow/core/TimeSeries.cpp
   core/src/ecflow/core/TimeSlot.cpp
   core/src/ecflow/core/TimeStamp.cpp

@@ -827,17 +827,17 @@ const std::string& VNode::abortedReason() const {
 
 void VNode::statusChangeTime(QString& sct) const {
     if (node_) {
-        boost::posix_time::ptime t = node_->state_change_time();
-        std::string s              = boost::posix_time::to_simple_string(t);
-        sct                        = QString::fromStdString(s);
+        auto t        = node_->state_change_time();
+        std::string s = boost::posix_time::to_simple_string(t);
+        sct           = QString::fromStdString(s);
     }
 }
 
 unsigned int VNode::statusChangeTime() const {
     if (node_) {
-        static boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
-        boost::posix_time::ptime t = node_->state_change_time();
-        boost::posix_time::time_duration diff(t - epoch);
+        static auto epoch = boost::posix_time::ptime(boost::gregorian::date(1970, 1, 1));
+        auto t            = node_->state_change_time();
+        auto diff(t - epoch);
         return diff.ticks() / diff.ticks_per_second();
     }
     return 0;

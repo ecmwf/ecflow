@@ -19,10 +19,7 @@
 #include "ecflow/core/TimeSeries.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
@@ -66,7 +63,8 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
     // See TodayAttr.hpp for rules concerning isFree() and checkForReque()
     // test today attr isFree(), and checkForRequeue
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     // Create a test when we can match a time series. Need to sync hour with suite time
     // at hour 1, suite time should also be 01:00, for test to work
@@ -109,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
     bool cmd_context = true;
     bool day_changed = false; // after midnight make sure we keep day_changed
     for (int m = 1; m < 96; m++) {
-        calendar.update(time_duration(minutes(30)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(30)));
         if (!day_changed) {
             day_changed = calendar.dayChanged();
         }
