@@ -130,7 +130,7 @@ public:
     void set_authorization_basic(const std::string& username, const std::string& password) {
         client_.set_basic_auth(username, password);
     }
-    void set_autorization_bearer(const std::string& token) { client_.set_bearer_token_auth(token); }
+    void set_authorization_bearer(const std::string& token) { client_.set_bearer_token_auth(token); }
 
     /// Client side, get the server response, handles reply from server
     /// Returns true if all is ok, else false if further client action is required

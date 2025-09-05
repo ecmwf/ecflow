@@ -105,7 +105,7 @@ void cfg(const ClientEnvironment& env, HttpClient& client) {
 
         if (token.type == "bearer") {
             auto key = token.key;
-            client.set_autorization_bearer(key);
+            client.set_authorization_bearer(key);
         }
         else if (token.type == "basic") {
             auto username = token.username;
