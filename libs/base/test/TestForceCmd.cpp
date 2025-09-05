@@ -10,7 +10,6 @@
 
 #include <stdexcept>
 
-#include <boost/property_tree/json_parser/detail/parser.hpp>
 #include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
 #include "MockServer.hpp"
