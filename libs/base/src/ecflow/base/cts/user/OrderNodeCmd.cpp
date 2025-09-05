@@ -27,12 +27,15 @@ namespace po = boost::program_options;
 
 bool OrderNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<OrderNodeCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (absNodepath_ != the_rhs->absNodePath())
+    }
+    if (absNodepath_ != the_rhs->pathToNode()) {
         return false;
-    if (option_ != the_rhs->option())
+    }
+    if (option_ != the_rhs->option()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
