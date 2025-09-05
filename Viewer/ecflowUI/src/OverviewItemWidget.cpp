@@ -49,8 +49,9 @@ QWidget* OverviewItemWidget::realWidget() {
 void OverviewItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 
@@ -104,8 +105,9 @@ void OverviewItemWidget::infoFailed(VReply* reply) {
 
 // At this point we can be sure that the node is handled by this item.
 void OverviewItemWidget::nodeChanged(const VNode* /*node*/, const std::vector<ecf::Aspect::Type>& aspect) {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 
     for (auto it : aspect) {
         if (it != ecf::Aspect::ORDER && it != ecf::Aspect::NOT_DEFINED) {
@@ -116,8 +118,9 @@ void OverviewItemWidget::nodeChanged(const VNode* /*node*/, const std::vector<ec
 }
 
 void OverviewItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect) {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 
     for (auto it : aspect) {
         if (it == ecf::Aspect::SERVER_STATE || it == ecf::Aspect::SERVER_VARIABLE ||
@@ -129,8 +132,9 @@ void OverviewItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspec
 }
 
 void OverviewItemWidget::connectStateChanged() {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 
     reload();
 }

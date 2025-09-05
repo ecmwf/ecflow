@@ -15,17 +15,20 @@ namespace ecf {
 bool StringSplitter::finished() const {
     // Skip delimiters at beginning. so for an empty string or string of just separators, we do not call next()
     // This mirrors the old split functionality
-    if (finished_)
+    if (finished_) {
         return true;
+    }
     first_not_of_ = rem_.find_first_not_of(sep_);
-    if (first_not_of_ == std::string_view::npos)
+    if (first_not_of_ == std::string_view::npos) {
         finished_ = true;
+    }
     return finished_;
 }
 
 std::string_view StringSplitter::next() const {
-    if (first_not_of_ != 0)
+    if (first_not_of_ != 0) {
         rem_ = rem_.substr(first_not_of_);
+    }
 
     std::string_view::size_type pos = rem_.find_first_of(sep_); // Find first "non-delimiter".
     if (pos != std::string_view::npos) {
@@ -68,8 +71,9 @@ void StringSplitter::split2(std::string_view str, std::vector<std::string_view>&
         start = pos + 1;
         pos   = str.find_first_of(delimiters, start);
     }
-    if (start < str.length())
+    if (start < str.length()) {
         ret.emplace_back(str.substr(start, str.length() - start));
+    }
 }
 
 void StringSplitter::split(const std::string& str, std::vector<std::string>& lineTokens, std::string_view delimiters) {
@@ -89,8 +93,9 @@ bool StringSplitter::get_token(std::string_view line, size_t pos, std::string& t
             token = std::string(the_token.begin(), the_token.end());
             return true;
         }
-        else if (count > pos)
+        else if (count > pos) {
             return false;
+        }
         count++;
     }
     return false;

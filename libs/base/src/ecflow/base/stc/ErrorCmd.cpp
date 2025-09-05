@@ -34,8 +34,9 @@ void ErrorCmd::init(const std::string& errorMsg) {
 
     // Log the error, Remove any "/n" as the log file will add this automatically
     size_t pos = error_msg_.rfind("\n");
-    if (pos != string::npos)
+    if (pos != string::npos) {
         error_msg_.erase(error_msg_.begin() + pos);
+    }
     ecf::log(Log::ERR, error_msg_); // will automatically add end of line
 }
 
@@ -52,8 +53,9 @@ bool ErrorCmd::equals(ServerToClientCmd* rhs) const {
 }
 
 bool ErrorCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  ErrorCmd::handle_server_response " << error_msg_ << "\n";
+    }
 
     std::string ss;
     ss += "Error: request( ";

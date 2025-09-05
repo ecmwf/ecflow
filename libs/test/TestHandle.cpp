@@ -184,8 +184,9 @@ BOOST_AUTO_TEST_CASE(test_handle) {
         BOOST_CHECK_MESSAGE(ch_suites[1].second == suites_s3_s4, "Expected suites s3,s4 , in second handle");
 
         // Drop all handles
-        for (size_t i = 0; i < ch_suites.size(); i++)
+        for (size_t i = 0; i < ch_suites.size(); i++) {
             TestFixture::client().ch_drop(ch_suites[i].first);
+        }
         TestFixture::client().ch_suites();
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().get_client_handle_suites().empty(),
                             "Expected to have no registered suites");

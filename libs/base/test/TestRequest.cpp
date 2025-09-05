@@ -409,12 +409,15 @@ static void test_persistence(const Defs& theFixtureDefs) {
             BOOST_REQUIRE_MESSAGE(restoredRequest == cmd_request,
                                   "restoredRequest " << restoredRequest << " cmd_request " << cmd_request);
 
-            if (restoredRequest.getRequest())
+            if (restoredRequest.getRequest()) {
                 getRequest++;
-            if (restoredRequest.terminateRequest())
+            }
+            if (restoredRequest.terminateRequest()) {
                 terminateRequest++;
-            if (restoredRequest.groupRequest())
+            }
+            if (restoredRequest.groupRequest()) {
                 groupRequest++;
+            }
         }
         {
             ClientToServerRequest restoredRequest;

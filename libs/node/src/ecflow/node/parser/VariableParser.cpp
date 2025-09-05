@@ -24,20 +24,23 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
     // Note: For migrate the defs can have variables
     Node* node = nullptr;
     if (nodeStack().empty()) {
-        if (!parsing_defs_)
+        if (!parsing_defs_) {
             throw std::runtime_error(
                 "VariableParser::doParse: Could not add variable, as node stack is empty at line: " + line);
+        }
     }
-    else
+    else {
         node = nodeStack_top();
+    }
 
     size_t line_tokens_size = lineTokens.size();
     if (line_tokens_size < 3) {
         std::stringstream ss;
         ss << "VariableParser::doParse: expected at least 3 tokens, found " << line_tokens_size << " on line:" << line
            << "\n";
-        if (node)
+        if (node) {
             ss << "At node: " << node->debugNodePath() << "\n";
+        }
         throw std::runtime_error(ss.str());
     }
 
@@ -52,8 +55,9 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
         // edit fred #
         std::stringstream ss;
         ss << "VariableParser::doParse: Expected value but found comment at line:" << line << "\n";
-        if (node)
+        if (node) {
             ss << "At node: " << node->debugNodePath() << "\n";
+        }
         throw std::runtime_error(ss.str());
     }
 
@@ -77,13 +81,16 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
         Str::removeQuotes(lineTokens[2]);       // if first *and* last character is "
         Str::removeSingleQuotes(lineTokens[2]); // if first *and* last character is '
         if (node) {
-            if (net || node->isAlias())
+            if (net || node->isAlias()) {
                 node->add_variable_bypass_name_check(lineTokens[1], lineTokens[2]); // bypass name checking
-            else
+            }
+            else {
                 node->add_variable(lineTokens[1], lineTokens[2]);
+            }
         }
-        else
+        else {
             defsfile()->server_state().add_or_update_user_variables(lineTokens[1], lineTokens[2]);
+        }
         return true;
     }
 
@@ -99,29 +106,35 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
             comment_pos = i;
             break;
         }
-        if (i != 2)
+        if (i != 2) {
             value += " ";
+        }
         value += lineTokens[i];
     }
 
     Str::removeQuotes(value);
     Str::removeSingleQuotes(value);
     if (node) {
-        if (net || node->isAlias())
+        if (net || node->isAlias()) {
             node->add_variable_bypass_name_check(lineTokens[1], value); // bypass name checking
-        else
+        }
+        else {
             node->add_variable(lineTokens[1], value);
+        }
     }
     else {
         bool server_variable = false;
         if (comment_pos != 0 && comment_pos + 1 < line_tokens_size) {
-            if (lineTokens[comment_pos + 1] == "server")
+            if (lineTokens[comment_pos + 1] == "server") {
                 server_variable = true;
+            }
         }
-        if (server_variable)
+        if (server_variable) {
             defsfile()->server_state().add_or_update_server_variable(lineTokens[1], value);
-        else
+        }
+        else {
             defsfile()->server_state().add_or_update_user_variables(lineTokens[1], value);
+        }
     }
 
     return true;

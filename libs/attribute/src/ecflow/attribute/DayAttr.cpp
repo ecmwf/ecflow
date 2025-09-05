@@ -194,10 +194,12 @@ bool DayAttr::isFree(const ecf::Calendar& c) const {
     bool res = is_free(c);
 
 #ifdef DEBUG_DAYS
-    if (res)
+    if (res) {
         cout << " DayAttr::isFree " << dump() << " calendar:" << c.suite_time_str() << " date is FREE\n";
-    else
+    }
+    else {
         cout << " DayAttr::isFree " << dump() << " calendar:" << c.suite_time_str() << " date is HOLDING\n";
+    }
 #endif
     return res;
 }
@@ -299,16 +301,19 @@ bool DayAttr::validForHybrid(const ecf::Calendar& calendar) const {
 }
 
 bool DayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
-    if (isFree(c))
+    if (isFree(c)) {
         return false;
+    }
 
     theReasonWhy += " is day dependent ( next run on ";
     theReasonWhy += theDay(day_);
     theReasonWhy += " ";
-    if (date_.is_special())
+    if (date_.is_special()) {
         theReasonWhy += to_simple_string(next_matching_date(c));
-    else
+    }
+    else {
         theReasonWhy += to_simple_string(date_);
+    }
     theReasonWhy += " the current day is ";
     theReasonWhy += theDay(static_cast<DayAttr::Day_t>(c.day_of_week()));
     theReasonWhy += " )";
@@ -358,10 +363,12 @@ void DayAttr::write(std::string& ret) const {
 std::string DayAttr::dump() const {
     std::stringstream ss;
     ss << toString();
-    if (free_)
+    if (free_) {
         ss << " (free)";
-    if (expired_)
+    }
+    if (expired_) {
         ss << " (expired)";
+    }
     ss << " " << as_simple_string();
     return ss.str();
 }
@@ -434,13 +441,16 @@ void DayAttr::read_state(const std::vector<std::string>& lineTokens) {
     std::string date;
 
     for (size_t i = 3; i < lineTokens.size(); i++) {
-        if (lineTokens[i] == "free")
+        if (lineTokens[i] == "free") {
             free_ = true;
-        else if (lineTokens[i] == "expired")
+        }
+        else if (lineTokens[i] == "expired") {
             expired_ = true;
+        }
         else if (lineTokens[i].find("date:") != std::string::npos) {
-            if (!Extract::split_get_second(lineTokens[i], date))
+            if (!Extract::split_get_second(lineTokens[i], date)) {
                 throw std::runtime_error("DayAttr::read_state failed: (date:)");
+            }
             // when a date_ is special date = not-a-date-time\n"
             if (date.find("not") == std::string::npos) {
                 date_ = boost::gregorian::from_simple_string(date);
@@ -450,20 +460,27 @@ void DayAttr::read_state(const std::vector<std::string>& lineTokens) {
 }
 
 DayAttr::Day_t DayAttr::getDay(const std::string& day) {
-    if (day == "monday")
+    if (day == "monday") {
         return DayAttr::MONDAY;
-    if (day == "tuesday")
+    }
+    if (day == "tuesday") {
         return DayAttr::TUESDAY;
-    if (day == "wednesday")
+    }
+    if (day == "wednesday") {
         return DayAttr::WEDNESDAY;
-    if (day == "thursday")
+    }
+    if (day == "thursday") {
         return DayAttr::THURSDAY;
-    if (day == "friday")
+    }
+    if (day == "friday") {
         return DayAttr::FRIDAY;
-    if (day == "saturday")
+    }
+    if (day == "saturday") {
         return DayAttr::SATURDAY;
-    if (day == "sunday")
+    }
+    if (day == "sunday") {
         return DayAttr::SUNDAY;
+    }
 
     std::stringstream ss;
     ss << "Invalid day(" << day

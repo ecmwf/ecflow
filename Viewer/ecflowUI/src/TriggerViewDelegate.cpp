@@ -86,8 +86,9 @@ void TriggerViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 
     // Background
     auto bgcol = index.data(Qt::UserRole).value<QColor>();
-    if (bgcol.isValid())
+    if (bgcol.isValid()) {
         painter->fillRect(vopt.rect, bgcol);
+    }
 
     if (index.column() == 0) {
         QVariant tVar = index.data(Qt::DisplayRole);
@@ -108,8 +109,9 @@ void TriggerViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
                 if (vTa.toInt() == Qt::AlignCenter) {
                     int w  = nodeWidth(index, vopt.rect.height(), text);
                     int dw = (vopt.rect.width() - w) / 2;
-                    if (dw > 0)
+                    if (dw > 0) {
                         vopt.rect.moveLeft(dw);
+                    }
                 }
             }
 

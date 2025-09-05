@@ -117,12 +117,14 @@ void Dashboard::slotSelectionChanged(VInfo_ptr info) {
     auto* s = static_cast<DashboardWidget*>(sender());
 
     Q_FOREACH (DashboardWidget* dw, widgets_) {
-        if (dw != s)
+        if (dw != s) {
             dw->setCurrentSelection(info);
+        }
     }
     Q_FOREACH (DashboardWidget* dw, popupWidgets_) {
-        if (dw != s)
+        if (dw != s) {
             dw->setCurrentSelection(info);
+        }
     }
 
     Q_EMIT selectionChanged(info);
@@ -162,8 +164,9 @@ DashboardWidget* Dashboard::addWidget(const std::string& type, const std::string
     DashboardWidget* w = Dashboard::addWidgetCore(type, userAddedView);
 
     // If the db-widget creation fails we should do something!!!
-    if (!w)
+    if (!w) {
         return nullptr;
+    }
 
     // Store dockId in the db-widget
     w->id(dockId);
@@ -192,8 +195,9 @@ DashboardWidget* Dashboard::addDialog(const std::string& type) {
     DashboardWidget* w = Dashboard::addWidgetCore(type, false);
 
     // If the db-widget creation fails we should do something!!!
-    if (!w)
+    if (!w) {
         return nullptr;
+    }
 
     // The DashBoard or any of its children cannot be the parent of the
     // dialog because in this case it would be always on top its parent. This is
@@ -261,8 +265,9 @@ void Dashboard::slotDockClose() {
             widgets_.removeOne(dw);
             disconnect(this, nullptr, dw, nullptr);
 
-            if (dw->isMaximised())
+            if (dw->isMaximised()) {
                 resetMaximised();
+            }
 
             checkMaximisedState();
 
@@ -305,8 +310,9 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info, QString name) {
 }
 
 void Dashboard::slotCommand(VInfo_ptr info, QString cmd) {
-    if (!info || !info.get())
+    if (!info || !info.get()) {
         return;
+    }
 
     if (cmd == "search") {
         addSearchDialog(info);
@@ -328,8 +334,9 @@ void Dashboard::slotMaximisedChanged(DashboardWidget* w) {
         savedDockState_ = saveState();
 
         Q_FOREACH (DashboardDock* d, dLst) {
-            if (d->widget() == w)
+            if (d->widget() == w) {
                 d->setVisible(true);
+            }
             else {
                 auto* dw = static_cast<DashboardWidget*>(d->widget());
                 Q_ASSERT(dw);
@@ -346,8 +353,9 @@ void Dashboard::slotMaximisedChanged(DashboardWidget* w) {
 
 bool Dashboard::hasMaximised() const {
     for (int i = 0; i < widgets_.count(); i++) {
-        if (widgets_[i]->isMaximised())
+        if (widgets_[i]->isMaximised()) {
             return true;
+        }
     }
     return false;
 }
@@ -355,8 +363,9 @@ bool Dashboard::hasMaximised() const {
 bool Dashboard::hasMaximisedApplied() const {
     QList<DashboardDock*> dLst = findChildren<DashboardDock*>(QString());
     Q_FOREACH (DashboardDock* d, dLst) {
-        if (d->isVisible() == false)
+        if (d->isVisible() == false) {
             return true;
+        }
     }
     return false;
 }
@@ -378,8 +387,9 @@ void Dashboard::resetMaximised() {
 
 void Dashboard::checkMaximisedState() {
     bool st = (widgets_.count() > 1);
-    for (int i = 0; i < widgets_.count(); i++)
+    for (int i = 0; i < widgets_.count(); i++) {
         widgets_.at(i)->setEnableMaximised(st);
+    }
 }
 
 //------------------------
@@ -405,13 +415,15 @@ void Dashboard::slotDialogClosed() {
 //------------------------
 
 void Dashboard::reload() {
-    for (int i = 0; i < widgets_.count(); i++)
+    for (int i = 0; i < widgets_.count(); i++) {
         widgets_.at(i)->reload();
+    }
 }
 
 void Dashboard::rerender() {
-    for (int i = 0; i < widgets_.count(); i++)
+    for (int i = 0; i < widgets_.count(); i++) {
         widgets_.at(i)->rerender();
+    }
 
     titleHandler_->updateTitle();
 }
@@ -515,8 +527,9 @@ void Dashboard::initialSelectionInView() {
 }
 
 bool Dashboard::selectInTreeView(VInfo_ptr info) {
-    if (!info)
+    if (!info) {
         return false;
+    }
 
     Q_FOREACH (DashboardWidget* w, widgets_) {
         if (w->type() == "tree") {
@@ -531,8 +544,9 @@ bool Dashboard::selectInTreeView(VInfo_ptr info) {
 VInfo_ptr Dashboard::currentSelectionInView() {
     Q_FOREACH (DashboardWidget* w, widgets_) {
         VInfo_ptr info = w->currentSelection();
-        if (info && info.get())
+        if (info && info.get()) {
             return info;
+        }
     }
 
     return {};
@@ -565,21 +579,24 @@ std::string Dashboard::widgetSettingsId(int i) {
 void Dashboard::notifyServerFilterAdded(ServerItem* /*item*/) {
     if (!settingsAreRead_) {
         // If there are no views we automatically add a tree view
-        if (widgets_.count() == 0)
+        if (widgets_.count() == 0) {
             addWidget("tree");
+        }
 
         Q_EMIT contentsChanged();
     }
 }
 
 void Dashboard::notifyServerFilterRemoved(ServerItem* /*item*/) {
-    if (!settingsAreRead_)
+    if (!settingsAreRead_) {
         Q_EMIT contentsChanged();
+    }
 }
 
 void Dashboard::notifyServerFilterChanged(ServerItem*) {
-    if (!settingsAreRead_)
+    if (!settingsAreRead_) {
         Q_EMIT contentsChanged();
+    }
 }
 
 void Dashboard::notifyServerFilterDelete() {

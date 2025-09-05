@@ -30,8 +30,9 @@ namespace po = boost::program_options;
 
 bool FreeDepCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<FreeDepCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     if (paths_ != the_rhs->paths()) {
         return false;
     }
@@ -91,12 +92,15 @@ STC_Cmd_ptr FreeDepCmd::doHandleRequest(AbstractServer* as) const {
             node->freeHoldingTimeDependencies();
         }
         else {
-            if (trigger_)
+            if (trigger_) {
                 node->freeTrigger();
-            if (date_)
+            }
+            if (date_) {
                 node->freeHoldingDateDependencies();
-            if (time_)
+            }
+            if (time_) {
                 node->freeHoldingTimeDependencies();
+            }
         }
     }
 
@@ -139,8 +143,9 @@ void FreeDepCmd::addOption(boost::program_options::options_description& desc) co
 void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(FreeDepCmd::arg(), args);
+    }
 
     if (args.size() < 1) {
         std::stringstream ss;
@@ -164,14 +169,18 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     bool time       = false;
     size_t vec_size = options.size();
     for (size_t i = 0; i < vec_size; i++) {
-        if (options[i] == "trigger")
+        if (options[i] == "trigger") {
             trigger = true;
-        else if (options[i] == "all")
+        }
+        else if (options[i] == "all") {
             all = true;
-        else if (options[i] == "date")
+        }
+        else if (options[i] == "date") {
             date = true;
-        else if (options[i] == "time")
+        }
+        else if (options[i] == "time") {
             time = true;
+        }
         else {
             std::stringstream ss;
             ss << "FreeDepCmd: Invalid argument(" << options[i] << ")\n" << FreeDepCmd::desc() << "\n";

@@ -48,8 +48,9 @@ void CustomListWidget::slotItemChanged(QListWidgetItem*) {
 
 bool CustomListWidget::hasSelection() const {
     for (int i = 0; i < count(); i++) {
-        if (item(i)->checkState() == Qt::Checked)
+        if (item(i)->checkState() == Qt::Checked) {
             return true;
+        }
     }
 
     return false;
@@ -58,8 +59,9 @@ bool CustomListWidget::hasSelection() const {
 QStringList CustomListWidget::selection() const {
     QStringList lst;
     for (int i = 0; i < count(); i++) {
-        if (item(i)->checkState() == Qt::Checked)
+        if (item(i)->checkState() == Qt::Checked) {
             lst << item(i)->text();
+        }
     }
 
     return lst;
@@ -75,7 +77,8 @@ void CustomListWidget::clearSelection() {
 void CustomListWidget::setSelectionWithList(QStringList sel) {
     for (int i = 0; i < count(); i++) {
         item(i)->setCheckState(Qt::Unchecked);
-        if (sel.contains(item(i)->text()))
+        if (sel.contains(item(i)->text())) {
             item(i)->setCheckState(Qt::Checked);
+        }
     }
 }

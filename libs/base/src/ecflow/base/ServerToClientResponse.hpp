@@ -30,8 +30,9 @@ public:
     std::ostream& print(std::ostream& os) const;
 
     void cleanup() {
-        if (stc_cmd_.get())
+        if (stc_cmd_.get()) {
             stc_cmd_->cleanup();
+        }
     } // reclaim memory *AFTER* command has run
 
     /// Handle the response from the server. On the client side

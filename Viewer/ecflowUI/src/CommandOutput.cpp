@@ -97,19 +97,22 @@ CommandOutputHandler::CommandOutputHandler(QObject* parent) : QObject(parent) {
 }
 
 CommandOutputHandler* CommandOutputHandler::instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new CommandOutputHandler(nullptr);
+    }
 
     return instance_;
 }
 
 int CommandOutputHandler::indexOfItem(CommandOutput_ptr item) const {
-    if (!item)
+    if (!item) {
         return -1;
+    }
 
     for (int i = 0; i < items_.count(); i++) {
-        if (item.get() == items_[i].get())
+        if (item.get() == items_[i].get()) {
             return i;
+        }
     }
 
     return -1;
@@ -122,10 +125,12 @@ void CommandOutputHandler::appendOutput(CommandOutput_ptr item, QString txt) {
         if (needToShowStdOut()) {
             CommandOutputDialog::showDialog();
         }
-        if (trimmed == false)
+        if (trimmed == false) {
             Q_EMIT itemOutputAppend(item, txt);
-        else
+        }
+        else {
             Q_EMIT itemOutputReload(item);
+        }
     }
 }
 
@@ -136,10 +141,12 @@ void CommandOutputHandler::appendError(CommandOutput_ptr item, QString txt) {
         if (needToShowStdErr()) {
             CommandOutputDialog::showDialog();
         }
-        if (trimmed == false)
+        if (trimmed == false) {
             Q_EMIT itemErrorAppend(item, txt);
-        else
+        }
+        else {
             Q_EMIT itemErrorReload(item);
+        }
     }
 }
 

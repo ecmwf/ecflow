@@ -148,12 +148,14 @@ NodeViewDelegate::~NodeViewDelegate() {
     Q_ASSERT(attrBox_);
     delete attrBox_;
 
-    if (prop_)
+    if (prop_) {
         delete prop_;
+    }
 
     Q_FOREACH (LabelStyle* s, labelStyle_.values()) {
-        if (s)
+        if (s) {
             delete s;
+        }
     }
 }
 
@@ -225,12 +227,15 @@ void NodeViewDelegate::updateBaseSettings() {
     }
     if (VProperty* p = prop_->find("view.attribute.limitShape")) {
         QString shape = p->value().toString();
-        if (shape == "rectangle")
+        if (shape == "rectangle") {
             limitShape_ = RectLimitShape;
-        else if (shape == "circle")
+        }
+        else if (shape == "circle") {
             limitShape_ = CircleLimitShape;
-        else
+        }
+        else {
             limitShape_ = CircleLimitShape;
+        }
     }
     if (VProperty* p = prop_->find("view.attribute.limitFillColour")) {
         limitFillBrush_ = QBrush(p->value().value<QColor>());
@@ -332,8 +337,9 @@ void NodeViewDelegate::renderStatus(QPainter* painter,
 
     // The initial filled rect (we will adjust its  width)
     QRect fillRect = option.rect.adjusted(offset, deltaH, -offset, -deltaH - 1);
-    if (option.state & QStyle::State_Selected)
+    if (option.state & QStyle::State_Selected) {
         fillRect.adjust(0, 0, 0, -0);
+    }
 
     int currentRight = fillRect.right();
 
@@ -343,8 +349,9 @@ void NodeViewDelegate::renderStatus(QPainter* painter,
     QRect textRect = fillRect.adjusted(offset, 0, 0, 0);
     textRect.setWidth(textWidth);
 
-    if (textRect.right() > currentRight)
+    if (textRect.right() > currentRight) {
         currentRight = textRect.right();
+    }
 
     // Define clipping
     int rightPos           = currentRight + 1;
@@ -364,8 +371,9 @@ void NodeViewDelegate::renderStatus(QPainter* painter,
         grad_.setColorAt(1, bg);
         bgBrush = QBrush(grad_);
     }
-    else
+    else {
         bgBrush = QBrush(bg);
+    }
 
     painter->fillRect(fillRect, bgBrush);
 
@@ -407,8 +415,9 @@ void NodeViewDelegate::renderMeter(QPainter* painter,
 
     QString name = data.at(1) + ":";
 
-    if (data.count() == 7)
+    if (data.count() == 7) {
         name.prepend(data[6] + ":");
+    }
 
     QString valStr = data.at(2);
     QFontMetrics fm(attrFont_);
@@ -527,13 +536,15 @@ void NodeViewDelegate::renderLabel(QPainter* painter,
     int totalWidth = 0;
     size           = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = data.at(1) + ":";
     QString val;
-    if (data.count() > 2)
+    if (data.count() > 2) {
         val = data.at(2);
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -648,8 +659,9 @@ void NodeViewDelegate::renderLabel(QPainter* painter,
     painter->setPen(fontPen);
     painter->setFont(valFont);
 
-    if (multiCnt == 0)
+    if (multiCnt == 0) {
         painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, val);
+    }
     else {
         painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, valFirst);
         painter->drawText(valRestRect, Qt::AlignLeft | Qt::AlignVCenter, valRest);
@@ -677,13 +689,15 @@ void NodeViewDelegate::renderAviso(QPainter* painter,
     int totalWidth = 0;
     size           = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = data.at(1); // + ":";
     QString val;
-    if (data.count() > 2)
+    if (data.count() > 2) {
         val = data.at(2);
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -808,8 +822,9 @@ void NodeViewDelegate::renderAviso(QPainter* painter,
     painter->setPen(fontPen);
     painter->setFont(valFont);
 
-    if (multiCnt == 0)
+    if (multiCnt == 0) {
         painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, val);
+    }
     else {
         painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, valFirst);
         painter->drawText(valRestRect, Qt::AlignLeft | Qt::AlignVCenter, valRest);
@@ -837,13 +852,15 @@ void NodeViewDelegate::renderMirror(QPainter* painter,
     int totalWidth = 0;
     size           = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = data.at(1); // + ":";
     QString val;
-    if (data.count() > 2)
+    if (data.count() > 2) {
         val = data.at(2);
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -968,8 +985,9 @@ void NodeViewDelegate::renderMirror(QPainter* painter,
     painter->setPen(fontPen);
     painter->setFont(valFont);
 
-    if (multiCnt == 0)
+    if (multiCnt == 0) {
         painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, val);
+    }
     else {
         painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, valFirst);
         painter->drawText(valRestRect, Qt::AlignLeft | Qt::AlignVCenter, valRest);
@@ -989,13 +1007,15 @@ void NodeViewDelegate::renderMirror(QPainter* painter,
 }
 
 void NodeViewDelegate::labelSize(QStringList data, int& totalWidth, int& totalHeight) const {
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = data.at(1) + ":";
     QString val;
-    if (data.count() > 2)
+    if (data.count() > 2) {
         val = data.at(2);
+    }
 
     int currentRight  = attrBox_->leftMargin;
     int currentBottom = attrBox_->topMargin + attrBox_->topPadding;
@@ -1049,8 +1069,9 @@ void NodeViewDelegate::labelSize(QStringList data, int& totalWidth, int& totalHe
 }
 
 int NodeViewDelegate::labelHeight(int lineNum) const {
-    if (lineNum <= 1)
+    if (lineNum <= 1) {
         return attrBox_->sizeHintCache.height();
+    }
 
     int currentBottom = attrBox_->topMargin + attrBox_->topPadding;
 
@@ -1059,8 +1080,9 @@ int NodeViewDelegate::labelHeight(int lineNum) const {
 
     // value rect
     QStringList lst;
-    for (int i = 0; i < lineNum - 1; i++)
+    for (int i = 0; i < lineNum - 1; i++) {
         lst << "1";
+    }
 
     QFontMetrics fm(attrFont_);
     QSize valSize = fm.size(0, lst.join(QString("\n")));
@@ -1083,13 +1105,15 @@ void NodeViewDelegate::renderEvent(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = data[1];
     bool val     = false;
-    if (data.count() > 2)
+    if (data.count() > 2) {
         val = (data[2] == "1");
+    }
 
     // Add full path
     if (data.count() > 3) {
@@ -1156,13 +1180,16 @@ void NodeViewDelegate::renderVarCore(QPainter* painter,
     int totalWidth = 0;
     QString text;
 
-    if (data.count() > 1)
+    if (data.count() > 1) {
         text += data.at(1) + "=";
-    if (data.count() > 2)
+    }
+    if (data.count() > 2) {
         text += data.at(2);
+    }
 
-    if (data.count() == 4)
+    if (data.count() == 4) {
         text.prepend(data[3] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -1239,8 +1266,9 @@ void NodeViewDelegate::renderLimit(QPainter* painter,
     QString valStr = QString::number(val) + "/" + QString::number(maxVal);
     int totalVal   = qMax(val, maxVal); // val can be larger than maxVal!!
 
-    if (data.count() == 5)
+    if (data.count() == 5) {
         name.prepend(data[4] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -1314,12 +1342,15 @@ void NodeViewDelegate::renderLimit(QPainter* painter,
     painter->drawText(attrBox_->adjustTextRect(nameRect), Qt::AlignLeft | Qt::AlignVCenter, name);
 
     // Draw value
-    if (val < maxVal)
+    if (val < maxVal) {
         painter->setPen(Qt::black);
-    else if (val == maxVal)
+    }
+    else if (val == maxVal) {
         painter->setPen(QColor(14, 148, 26));
-    else
+    }
+    else {
         painter->setPen(Qt::red);
+    }
 
     painter->setFont(valFont);
     painter->drawText(attrBox_->adjustTextRect(valRect), Qt::AlignLeft | Qt::AlignVCenter, valStr);
@@ -1339,8 +1370,9 @@ void NodeViewDelegate::renderLimit(QPainter* painter,
                 painter->setPen(QPen(QColor(190, 190, 190), 0));
                 painter->setBrush(Qt::NoBrush);
             }
-            else if (i == maxVal)
+            else if (i == maxVal) {
                 painter->setBrush(limitExtraFillBrush_);
+            }
 
             painter->drawRect(r);
 
@@ -1360,12 +1392,15 @@ void NodeViewDelegate::renderLimit(QPainter* painter,
     else {
         int yItem = option.rect.y() + (option.rect.height() - itemHeight) / 2;
         for (int i = 0; i < itemNum; i++) {
-            if (i >= maxVal)
+            if (i >= maxVal) {
                 painter->drawPixmap(xItem, yItem, itemWidth, itemHeight, limitExtraFillPix_);
-            else if (i >= val)
+            }
+            else if (i >= val) {
                 painter->drawPixmap(xItem, yItem, itemWidth, itemHeight, limitEmptyPix_);
-            else
+            }
+            else {
                 painter->drawPixmap(xItem, yItem, itemHeight, itemWidth, limitFillPix_);
+            }
 
             xItem += itemOffset + itemHeight;
         }
@@ -1400,15 +1435,18 @@ void NodeViewDelegate::renderLimiter(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 4)
+    if (data.count() < 4) {
         return;
+    }
 
     QString name = "inlimit " + data[2] + ":" + data[1];
-    if (data[3] != "1")
+    if (data[3] != "1") {
         name += " " + data[3];
+    }
 
-    if (data.count() == 7)
+    if (data.count() == 7) {
         name.prepend(data[6] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -1459,8 +1497,9 @@ void NodeViewDelegate::renderTrigger(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() != 3)
+    if (data.count() != 3) {
         return;
+    }
 
     int triggerType = data[1].toInt();
     QString text    = data.at(2);
@@ -1500,10 +1539,12 @@ void NodeViewDelegate::renderTrigger(QPainter* painter,
     painter->drawRect(attrBox_->adjustTextBgRect(textRect));
 
     // Draw text
-    if (triggerType == 0)
+    if (triggerType == 0) {
         painter->setPen(triggerFontPen_);
-    else
+    }
+    else {
         painter->setPen(completeFontPen_);
+    }
 
     painter->setFont(font);
     painter->drawText(attrBox_->adjustTextRect(textRect), Qt::AlignHCenter | Qt::AlignVCenter, text);
@@ -1532,13 +1573,15 @@ void NodeViewDelegate::renderTime(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 3)
+    if (data.count() < 3) {
         return;
+    }
 
     QString name = data[1];
 
-    if (data.count() == 4)
+    if (data.count() == 4) {
         name.prepend(data[3] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -1613,13 +1656,15 @@ void NodeViewDelegate::renderDate(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 3)
+    if (data.count() < 3) {
         return;
+    }
 
     QString name = data[1];
 
-    if (data.count() == 4)
+    if (data.count() == 4) {
         name.prepend(data[3] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -1699,8 +1744,9 @@ void NodeViewDelegate::renderRepeat(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 10)
+    if (data.count() < 10) {
         return;
+    }
 
     QString type = data.at(1);
     QString name = data.at(2);
@@ -1802,10 +1848,12 @@ void NodeViewDelegate::renderRepeat(QPainter* painter,
         fm            = QFontMetrics(valFont);
         int valWidth  = ViewerUtil::textWidth(fm, val);
         QRect valRect = nameRect;
-        if (name.endsWith("..."))
+        if (name.endsWith("...")) {
             valRect.setX(nameRect.x() + nameRect.width() + ViewerUtil::textWidth(fm, 'A') / 2);
-        else
+        }
+        else {
             valRect.setX(nameRect.x() + nameRect.width() + ViewerUtil::textWidth(fm, ' ') / 2);
+        }
 
         valRect.setWidth(valWidth);
 
@@ -1871,13 +1919,15 @@ void NodeViewDelegate::renderLate(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = "late: " + data[1];
 
-    if (data.count() == 3)
+    if (data.count() == 3) {
         name.prepend(data[2] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -1927,13 +1977,15 @@ void NodeViewDelegate::renderAutoArchive(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = "autoarchive: " + data[1];
 
-    if (data.count() == 3)
+    if (data.count() == 3) {
         name.prepend(data[2] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -1983,13 +2035,15 @@ void NodeViewDelegate::renderAutoCancel(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = "autocancel: " + data[1];
 
-    if (data.count() == 3)
+    if (data.count() == 3) {
         name.prepend(data[2] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -2039,13 +2093,15 @@ void NodeViewDelegate::renderAutoRestore(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 2)
+    if (data.count() < 2) {
         return;
+    }
 
     QString name = "autorestore: " + data[1];
 
-    if (data.count() == 3)
+    if (data.count() == 3) {
         name.prepend(data[2] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -2095,15 +2151,17 @@ void NodeViewDelegate::renderQueue(QPainter* painter,
 
     size = QSize(totalWidth, attrBox_->fullHeight);
 
-    if (data.count() < 5)
+    if (data.count() < 5) {
         return;
+    }
 
     QString name = data.at(1);
     QString val  = data.at(2);
     QString pos  = data.at(4);
 
-    if (data.count() == 6)
+    if (data.count() == 6) {
         name.prepend(data[5] + ":");
+    }
 
     bool selected = option.state & QStyle::State_Selected;
 
@@ -2143,10 +2201,12 @@ void NodeViewDelegate::renderQueue(QPainter* painter,
     fm            = QFontMetrics(valFont);
     int valWidth  = ViewerUtil::textWidth(fm, val);
     QRect valRect = nameRect;
-    if (name.endsWith("..."))
+    if (name.endsWith("...")) {
         valRect.setX(nameRect.x() + nameRect.width() + ViewerUtil::textWidth(fm, 'A') / 2);
-    else
+    }
+    else {
         valRect.setX(nameRect.x() + nameRect.width() + ViewerUtil::textWidth(fm, ' ') / 2);
+    }
 
     valRect.setWidth(valWidth);
 

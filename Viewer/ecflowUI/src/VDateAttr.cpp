@@ -76,13 +76,15 @@ QStringList VDateAttr::data(bool /*firstLine*/) const {
         const ecf::Calendar& calendar = parent_->calendar();
         if (dataType_ == DateData) {
             const std::vector<DateAttr>& v = parent_->node_->dates();
-            if (index_ < static_cast<int>(v.size()))
+            if (index_ < static_cast<int>(v.size())) {
                 atype->encode(calendar, v[index_], s);
+            }
         }
         else if (dataType_ == DayData) {
             const std::vector<DayAttr>& v = parent_->node_->days();
-            if (index_ < static_cast<int>(v.size()))
+            if (index_ < static_cast<int>(v.size())) {
                 atype->encode(calendar, v[index_], s);
+            }
         }
     }
     return s;

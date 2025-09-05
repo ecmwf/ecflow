@@ -14,6 +14,7 @@
 
 #include "TestUtil.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -22,7 +23,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/Simulator.hpp"
-#include "ecflow/core/Chrono.hpp"
 
 using namespace ecf;
 

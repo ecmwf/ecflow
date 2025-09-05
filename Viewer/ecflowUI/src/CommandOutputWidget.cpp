@@ -43,8 +43,9 @@ int CommandOutputModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int CommandOutputModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -64,25 +65,30 @@ QVariant CommandOutputModel::data(const QModelIndex& index, int role) const {
     }
 
     int pos = CommandOutputHandler::instance()->itemCount() - index.row() - 1;
-    if (pos < 0 || pos >= CommandOutputHandler::instance()->itemCount())
+    if (pos < 0 || pos >= CommandOutputHandler::instance()->itemCount()) {
         return {};
+    }
 
     QString id = columns_->id(index.column());
 
     CommandOutput_ptr item = CommandOutputHandler::instance()->items()[pos];
-    if (!item)
+    if (!item) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
-        if (id == "command")
+        if (id == "command") {
             return item->command();
+        }
         else if (id == "status") {
             return item->statusStr();
         }
-        else if (id == "runtime")
+        else if (id == "runtime") {
             return item->runTime().toString("yyyy-MM-dd hh:mm:ss");
-        else
+        }
+        else {
             return {};
+        }
     }
     else if (role == Qt::ForegroundRole) {
         if (id == "status") {
@@ -94,13 +100,16 @@ QVariant CommandOutputModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant CommandOutputModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
-    if (role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole) {
         return columns_->label(section);
-    else if (role == Qt::UserRole)
+    }
+    else if (role == Qt::UserRole) {
         return columns_->id(section);
+    }
 
     return {};
 }
@@ -125,8 +134,9 @@ QModelIndex CommandOutputModel::parent(const QModelIndex& /*child*/) const {
 CommandOutput_ptr CommandOutputModel::indexToItem(const QModelIndex& idx) const {
     if (idx.isValid() && hasData()) {
         int pos = CommandOutputHandler::instance()->itemCount() - idx.row() - 1;
-        if (pos >= 0 || pos < CommandOutputHandler::instance()->itemCount())
+        if (pos >= 0 || pos < CommandOutputHandler::instance()->itemCount()) {
             return CommandOutputHandler::instance()->items()[pos];
+        }
     }
 
     CommandOutput_ptr r;
@@ -138,8 +148,9 @@ QModelIndex CommandOutputModel::itemToStatusIndex(CommandOutput_ptr item) const 
         int pos = CommandOutputHandler::instance()->indexOfItem(item);
         if (pos != -1) {
             int row = CommandOutputHandler::instance()->itemCount() - pos - 1;
-            if (row >= 0 && row < rowCount())
+            if (row >= 0 && row < rowCount()) {
                 return index(row, columns_->indexOf("status"));
+            }
         }
     }
 
@@ -211,8 +222,9 @@ CommandOutputWidget::CommandOutputWidget(QWidget* parent) : QWidget(parent), err
             this,
             SLOT(slotItemSelected(QModelIndex, QModelIndex)));
 
-    if (model_->rowCount() > 0)
+    if (model_->rowCount() > 0) {
         tree_->setCurrentIndex(model_->index(0, 0));
+    }
 }
 
 CommandOutputWidget::~CommandOutputWidget() = default;

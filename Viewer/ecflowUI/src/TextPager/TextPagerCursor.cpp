@@ -112,8 +112,9 @@ TextPagerDocument* TextPagerCursor::document() const {
 void TextPagerCursor::setSelection(int pos, int length) // can be negative
 {
     setPosition(pos + length);
-    if (length != 0)
+    if (length != 0) {
         setPosition(pos, KeepAnchor);
+    }
 }
 
 void TextPagerCursor::setPosition(int pos, MoveMode mode) {
@@ -158,8 +159,9 @@ int TextPagerCursor::anchor() const {
 }
 
 bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerCursor::MoveMode mode, int n) {
-    if (!d || !d->document || n <= 0)
+    if (!d || !d->document || n <= 0) {
         return false;
+    }
 
     switch (op) {
         case Start:
@@ -173,8 +175,9 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerC
     }
 
     if (n > 1) {
-        while (n > 0 && movePosition(op, mode, 1))
+        while (n > 0 && movePosition(op, mode, 1)) {
             --n;
+        }
         return n == 0;
     }
     detach();
@@ -201,8 +204,9 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerC
             bool currentIsLast;
             const QTextLine currentLine = textLayout->lineForPosition(d->position, nullptr, &index, &currentIsLast);
             Q_ASSERT(textLayout->lines.size() <= 1 || (index != -1 && currentLine.isValid()));
-            if (!currentLine.isValid())
+            if (!currentLine.isValid()) {
                 return false;
+            }
             const int col = columnNumber();
             int targetLinePos;
             if (op == Up) {
@@ -238,8 +242,9 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerC
             int offsetInLine;
 
             const QTextLine targetLine = textLayout->lineForPosition(targetLinePos, &offsetInLine);
-            if (!targetLine.isValid())
+            if (!targetLine.isValid()) {
                 return false;
+            }
             targetLinePos -= offsetInLine; // targetLinePos should now be at col 0
 
             //         qDebug() << "finding targetLine at" << targetLinePos
@@ -265,15 +270,17 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerC
             bool lastLine;
             TextPagerLayout* textLayout = TextLayoutCacheManager::requestLayout(*this, 1);
             QTextLine line              = textLayout->lineForPosition(position(), &offset, nullptr, &lastLine);
-            if (!line.isValid())
+            if (!line.isValid()) {
                 return false;
+            }
             if (op == TextPagerCursor::StartOfLine) {
                 setPosition(position() - offset, mode);
             }
             else {
                 int pos = position() - offset + line.textLength();
-                if (!lastLine)
+                if (!lastLine) {
                     --pos;
+                }
                 setPosition(pos, mode);
             }
             break;
@@ -284,8 +291,9 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerC
             const QLatin1Char newline('\n');
             while (it.hasPrevious() && it.previous() != newline)
                 ;
-            if (it.hasPrevious())
+            if (it.hasPrevious()) {
                 it.next();
+            }
             setPosition(it.position(), mode);
             break;
         }
@@ -305,16 +313,19 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerC
 
             while (it.hasPrevious()) {
                 const QChar ch = it.previous();
-                if (d->document->isWordCharacter(ch, it.position()))
+                if (d->document->isWordCharacter(ch, it.position())) {
                     break;
+                }
             }
             while (it.hasPrevious()) {
                 const QChar ch = it.previous();
-                if (!d->document->isWordCharacter(ch, it.position()))
+                if (!d->document->isWordCharacter(ch, it.position())) {
                     break;
+                }
             }
-            if (it.hasPrevious())
+            if (it.hasPrevious()) {
                 it.next();
+            }
             setPosition(it.position(), mode);
             d->overrideColumn = -1;
             break;
@@ -326,13 +337,15 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerC
             TextDocumentIterator it(d->document->d, d->position);
             while (it.hasNext()) {
                 const QChar ch = it.next();
-                if (d->document->isWordCharacter(ch, it.position()))
+                if (d->document->isWordCharacter(ch, it.position())) {
                     break;
+                }
             }
             while (it.hasNext()) {
                 const QChar ch = it.next();
-                if (!d->document->isWordCharacter(ch, it.position()))
+                if (!d->document->isWordCharacter(ch, it.position())) {
                     break;
+                }
             }
             setPosition(it.position(), mode);
             d->overrideColumn = -1;
@@ -362,8 +375,9 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op, TextPagerC
 }
 
 void TextPagerCursor::select(SelectionType selection) {
-    if (!d || !d->document)
+    if (!d || !d->document) {
         return;
+    }
 
     clearSelection();
 
@@ -414,8 +428,9 @@ int TextPagerCursor::selectionSize() const {
 }
 
 QString TextPagerCursor::selectedText() const {
-    if (isNull() || d->anchor == d->position)
+    if (isNull() || d->anchor == d->position) {
         return QString();
+    }
 
     const int min = qMin(d->anchor, d->position);
     const int max = qMax(d->anchor, d->position);
@@ -447,11 +462,13 @@ bool TextPagerCursor::operator!=(const TextPagerCursor& rhs) const {
 }
 
 bool TextPagerCursor::operator<(const TextPagerCursor& rhs) const {
-    if (!d)
+    if (!d) {
         return true;
+    }
 
-    if (!rhs.d)
+    if (!rhs.d) {
         return false;
+    }
 
     Q_ASSERT_X(d->document == rhs.d->document,
                "TextCursor::operator<",
@@ -465,11 +482,13 @@ bool TextPagerCursor::operator<=(const TextPagerCursor& rhs) const {
 }
 
 bool TextPagerCursor::operator==(const TextPagerCursor& rhs) const {
-    if (isCopyOf(rhs))
+    if (isCopyOf(rhs)) {
         return true;
+    }
 
-    if (!d || !rhs.d)
+    if (!d || !rhs.d) {
         return false;
+    }
 
     return (d->position == rhs.d->position && d->anchor == rhs.d->anchor && d->document == rhs.d->document);
 }
@@ -479,11 +498,13 @@ bool TextPagerCursor::operator>=(const TextPagerCursor& rhs) const {
 }
 
 bool TextPagerCursor::operator>(const TextPagerCursor& rhs) const {
-    if (!d)
+    if (!d) {
         return false;
+    }
 
-    if (!rhs.d)
+    if (!rhs.d) {
         return true;
+    }
 
     Q_ASSERT_X(d->document == rhs.d->document,
                "TextCursor::operator>=",
@@ -545,8 +566,9 @@ bool TextPagerCursor::deref() {
 
 void TextPagerCursor::cursorChanged(bool ensureVisible) {
     if (textEdit) {
-        if (textEdit->d->cursorBlinkTimer.isActive())
+        if (textEdit->d->cursorBlinkTimer.isActive()) {
             textEdit->d->cursorVisible = true;
+        }
         if (ensureVisible) {
             Q_EMIT textEdit->cursorPositionChanged(d->position);
             textEdit->ensureCursorVisible();
@@ -663,11 +685,13 @@ bool TextPagerCursor::cursorMoveKeyEvent(QKeyEvent* e) {
         const MoveOperation operation =
             (e == QKeySequence::MoveToNextPage || e == QKeySequence::SelectNextPage ? Down : Up);
         int visibleLines = 10;
-        if (textEdit)
+        if (textEdit) {
             visibleLines = textEdit->d->visibleLines;
+        }
         for (int i = 0; i < visibleLines; ++i) {
-            if (!movePosition(operation, mode))
+            if (!movePosition(operation, mode)) {
                 break;
+            }
         }
         return true;
     }
@@ -714,8 +738,9 @@ int TextPagerCursor::lineHeight() const {
     int layoutIndex             = -1;
     TextPagerLayout* textLayout = TextLayoutCacheManager::requestLayout(*this, 2);
     QTextLine line              = textLayout->lineForPosition(position(), nullptr, &layoutIndex);
-    if (line.isValid())
+    if (line.isValid()) {
         res = line.height();
+    }
     return res;
 }
 

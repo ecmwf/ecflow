@@ -50,10 +50,12 @@ CalendarDate::value_t julian_day_to_calendar_date(long jdate) {
     e = x % 153;
     d = e / 5 + 1;
 
-    if (m < 11)
+    if (m < 11) {
         month = m + 2;
-    else
+    }
+    else {
         month = m - 10;
+    }
 
     day  = d;
     year = y + m / 11;
@@ -330,10 +332,12 @@ void Calendar::update(const ecf::CalendarUpdateParams& calUpdateParams) {
     // Day change required for both REAL and HYBRID. See TimeDependencies.ddoc for reason
     // This must be done before change date back. (i.e. in hybrid case, below)
     int new_day_of_week = suiteTime_.date().day_of_week().as_number();
-    if (theDayOfWeek != new_day_of_week)
+    if (theDayOfWeek != new_day_of_week) {
         dayChanged_ = true;
-    else
+    }
+    else {
         dayChanged_ = false;
+    }
 
     // With the hybrid calendar the date does not change
     if (ctype_ == Calendar::HYBRID) {
@@ -377,8 +381,9 @@ void Calendar::update_duration_only(boost::posix_time::ptime& time_now) {
 
 void Calendar::update_cache() const {
     // begin() has not been called yet
-    if (suiteTime_.is_special())
+    if (suiteTime_.is_special()) {
         return;
+    }
 
     auto newDate  = suiteTime_.date();
     day_of_week_  = newDate.day_of_week().as_number();
@@ -388,28 +393,33 @@ void Calendar::update_cache() const {
     year_         = newDate.year();
 }
 int Calendar::day_of_week() const {
-    if (day_of_week_ == -1)
+    if (day_of_week_ == -1) {
         update_cache();
+    }
     return day_of_week_;
 }
 int Calendar::day_of_year() const {
-    if (day_of_week_ == -1)
+    if (day_of_week_ == -1) {
         update_cache();
+    }
     return day_of_year_;
 }
 int Calendar::day_of_month() const {
-    if (day_of_week_ == -1)
+    if (day_of_week_ == -1) {
         update_cache();
+    }
     return day_of_month_;
 }
 int Calendar::month() const {
-    if (day_of_week_ == -1)
+    if (day_of_week_ == -1) {
         update_cache();
+    }
     return month_;
 }
 int Calendar::year() const {
-    if (day_of_week_ == -1)
+    if (day_of_week_ == -1) {
         update_cache();
+    }
     return year_;
 }
 
@@ -438,20 +448,27 @@ void Calendar::dump(const std::string& title) const {
 
 std::string Calendar::suite_time_str() const {
     std::string ss;
-    if (day_of_week_ == 0)
+    if (day_of_week_ == 0) {
         ss += " SUNDAY";
-    else if (day_of_week_ == 1)
+    }
+    else if (day_of_week_ == 1) {
         ss += " MONDAY";
-    else if (day_of_week_ == 2)
+    }
+    else if (day_of_week_ == 2) {
         ss += " TUESDAY";
-    else if (day_of_week_ == 3)
+    }
+    else if (day_of_week_ == 3) {
         ss += " WEDNESDAY";
-    else if (day_of_week_ == 4)
+    }
+    else if (day_of_week_ == 4) {
         ss += " THURSDAY";
-    else if (day_of_week_ == 5)
+    }
+    else if (day_of_week_ == 5) {
         ss += " FRIDAY";
-    else if (day_of_week_ == 6)
+    }
+    else if (day_of_week_ == 6) {
         ss += " SATURDAY";
+    }
     ss += " ";
     ss += to_simple_string(suiteTime_);
     return ss;
@@ -464,27 +481,35 @@ std::string Calendar::toString() const {
        << dayChanged_ << ")";
     ss << " increment_(" << to_simple_string(increment_) << ")";
 
-    if (day_of_week_ == 0)
+    if (day_of_week_ == 0) {
         ss << " SUNDAY";
-    else if (day_of_week_ == 1)
+    }
+    else if (day_of_week_ == 1) {
         ss << " MONDAY";
-    else if (day_of_week_ == 2)
+    }
+    else if (day_of_week_ == 2) {
         ss << " TUESDAY";
-    else if (day_of_week_ == 3)
+    }
+    else if (day_of_week_ == 3) {
         ss << " WEDNESDAY";
-    else if (day_of_week_ == 4)
+    }
+    else if (day_of_week_ == 4) {
         ss << " THURSDAY";
-    else if (day_of_week_ == 5)
+    }
+    else if (day_of_week_ == 5) {
         ss << " FRIDAY";
-    else if (day_of_week_ == 6)
+    }
+    else if (day_of_week_ == 6) {
         ss << " SATURDAY";
+    }
 
     return ss.str();
 }
 
 void Calendar::write_state(std::string& ret) const {
-    if (initTime_.is_special())
+    if (initTime_.is_special()) {
         return;
+    }
 
     bool increment__changed = (!increment_.is_special() && increment_.total_seconds() != 0);
 
@@ -504,8 +529,9 @@ void Calendar::write_state(std::string& ret) const {
         ret += to_simple_string(increment_);
     }
 
-    if (dayChanged_)
+    if (dayChanged_) {
         ret += " dayChanged:1";
+    }
 }
 
 void Calendar::read_state(const std::string& line, const std::vector<std::string>& lineTokens) {
@@ -518,61 +544,72 @@ void Calendar::read_state(const std::string& line, const std::vector<std::string
         time.clear();
         const std::string& line_token = lineTokens[i];
         if (line_token.find("initTime:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token, time))
+            if (!Extract::split_get_second(line_token, time)) {
                 throw std::runtime_error("Calendar::read_state failed: (initTime)");
+            }
             if (i + 1 < line_tokens_size) {
                 time += " ";
                 time += lineTokens[i + 1];
             }
-            else
+            else {
                 throw std::runtime_error("Calendar::read_state failed: 1");
+            }
             initTime_ = boost::posix_time::time_from_string(time);
         }
         else if (line_token.find("suiteTime:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token, time))
+            if (!Extract::split_get_second(line_token, time)) {
                 throw std::runtime_error("Calendar::read_state failed: (suiteTime)");
+            }
             if (i + 1 < line_tokens_size) {
                 time += " ";
                 time += lineTokens[i + 1];
             }
-            else
+            else {
                 throw std::runtime_error("Calendar::read_state failed: 1");
+            }
             suiteTime_ = boost::posix_time::time_from_string(time);
         }
         else if (line_token.find("initLocalTime:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token, time))
+            if (!Extract::split_get_second(line_token, time)) {
                 throw std::runtime_error("Calendar::read_state failed: (initLocalTime)");
+            }
             if (i + 1 < line_tokens_size) {
                 time += " ";
                 time += lineTokens[i + 1];
             }
-            else
+            else {
                 throw std::runtime_error("Calendar::read_state failed: 1");
+            }
             initLocalTime_ = boost::posix_time::time_from_string(time);
         }
         else if (line_token.find("lastTime:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token, time))
+            if (!Extract::split_get_second(line_token, time)) {
                 throw std::runtime_error("Calendar::read_state failed: (lastTime)");
+            }
             if (i + 1 < line_tokens_size) {
                 time += " ";
                 time += lineTokens[i + 1];
             }
-            else
+            else {
                 throw std::runtime_error("Calendar::read_state failed: 1");
+            }
             lastTime_ = boost::posix_time::time_from_string(time);
         }
         else if (line_token.find("duration:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token, time))
+            if (!Extract::split_get_second(line_token, time)) {
                 throw std::runtime_error("Calendar::read_state failed: (duration)");
+            }
             duration_ = boost::posix_time::duration_from_string(time);
         }
         else if (line_token.find("calendarIncrement:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token, time))
+            if (!Extract::split_get_second(line_token, time)) {
                 throw std::runtime_error("Calendar::read_state failed: (calendarIncrement)");
+            }
             increment_ = boost::posix_time::duration_from_string(time);
         }
-        else if (line_token == "dayChanged:1")
+        else if (line_token == "dayChanged:1") {
             dayChanged_ = true;
+        }
     }
 }
 
@@ -615,12 +652,15 @@ void Calendar::serialize(Archive& ar, std::uint32_t const /*version*/) {
         ar, increment_, [this]() { return increment_ != boost::posix_time::time_duration(0, 1, 0, 0); });
 
     if (Archive::is_loading::value) {
-        if (lastTime_.is_special())
+        if (lastTime_.is_special()) {
             lastTime_ = initTime_;
-        if (initLocalTime_.is_special())
+        }
+        if (initLocalTime_.is_special()) {
             initLocalTime_ = initTime_;
-        if (suiteTime_.is_special())
+        }
+        if (suiteTime_.is_special()) {
             suiteTime_ = initTime_;
+        }
     }
 }
 

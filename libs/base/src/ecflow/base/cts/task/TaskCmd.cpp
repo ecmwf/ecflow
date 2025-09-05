@@ -28,16 +28,21 @@ namespace po = boost::program_options;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 bool TaskCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<TaskCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (path_to_submittable_ != the_rhs->path_to_node())
+    }
+    if (path_to_submittable_ != the_rhs->path_to_node()) {
         return false;
-    if (jobs_password_ != the_rhs->jobs_password())
+    }
+    if (jobs_password_ != the_rhs->jobs_password()) {
         return false;
-    if (process_or_remote_id_ != the_rhs->process_or_remote_id())
+    }
+    if (process_or_remote_id_ != the_rhs->process_or_remote_id()) {
         return false;
-    if (try_no_ != the_rhs->try_no())
+    }
+    if (try_no_ != the_rhs->try_no()) {
         return false;
+    }
     return ClientToServerCmd::equals(rhs);
 }
 
@@ -74,12 +79,14 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
     std::cout << "   TaskCmd::authenticate " << Child::to_string(child_type());
     std::cout << " " << path_to_submittable_ << " " << process_or_remote_id_ << " " << jobs_password_ << " " << try_no_;
     const Zombie& zombie = as->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_);
-    if (!zombie.empty())
+    if (!zombie.empty()) {
         std::cout << "  " << zombie;
+    }
     else {
         const Zombie& zombiep = as->zombie_ctrl().find_by_path_only(path_to_submittable_);
-        if (!zombiep.empty())
+        if (!zombiep.empty()) {
             std::cout << "  find_by_path_only: " << zombiep;
+        }
     }
 #endif
     /// ***************************************************************************
@@ -296,23 +303,29 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
             ss << " zombie";
             const Zombie& theZombie =
                 server->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_);
-            if (!theZombie.empty())
+            if (!theZombie.empty()) {
                 ss << "(" << theZombie.type_str() << ")";
+            }
 
             ss << " : chd:" << ecf::Child::to_string(child_type());
             ss << " : " << path_to_submittable_ << "(" << NState::toString(submittable_->state()) << ")";
             ss << " : " << process_or_remote_id_ << " : " << jobs_password_;
-            if (submittable_allready_active)
+            if (submittable_allready_active) {
                 ss << " : already active";
-            if (submittable_allready_complete)
+            }
+            if (submittable_allready_complete) {
                 ss << " : already complete";
-            if (submittable_allready_aborted)
+            }
+            if (submittable_allready_aborted) {
                 ss << " : already aborted";
-            if (password_missmatch_)
+            }
+            if (password_missmatch_) {
                 ss << " : passwd != [ task:" << submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
-            if (pid_missmatch_)
+            }
+            if (pid_missmatch_) {
                 ss << " : pid != [ task:" << submittable_->process_or_remote_id() << " child:" << process_or_remote_id_
                    << " ]";
+            }
             ss << " : action(" << action_taken << ")";
             log(Log::ERR, ss.str());
             return false;

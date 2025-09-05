@@ -93,8 +93,9 @@ TreeNodeWidget::~TreeNodeWidget() {
 }
 
 void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode) {
-    if (view_ && viewLayoutMode_ == mode)
+    if (view_ && viewLayoutMode_ == mode) {
         return;
+    }
 
     viewLayoutMode_ = mode;
 
@@ -214,8 +215,9 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw) {
 void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info) {
     updateActionState(info);
     bcWidget_->setPath(info);
-    if (broadcastSelection())
+    if (broadcastSelection()) {
         Q_EMIT selectionChanged(info);
+    }
 }
 
 void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b) {
@@ -236,10 +238,12 @@ bool TreeNodeWidget::initialSelectionInView() {
     // Seeting the initail selection is probably unsuccessful because at
     // this point the servers are probably not fully loaded
     VInfo_ptr selInfo = VInfo::createFromPath(firstSelectionPath_);
-    if (selInfo)
+    if (selInfo) {
         view_->setCurrentSelection(selInfo);
-    else
+    }
+    else {
         view_->selectFirstServer();
+    }
 
     return true;
 }
@@ -287,8 +291,9 @@ void TreeNodeWidget::writeSettings(VComboSettings* vs) {
 
 void TreeNodeWidget::readSettings(VComboSettings* vs) {
     auto type = vs->get<std::string>("type", "");
-    if (type != type_)
+    if (type != type_) {
         return;
+    }
 
     // The selection on last exit. We will use it later when the server is fully loaded.
     firstSelectionPath_ = vs->get<std::string>("selection", "");

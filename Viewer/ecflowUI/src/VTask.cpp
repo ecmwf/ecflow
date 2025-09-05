@@ -21,17 +21,20 @@ VTask::VTask(Type t, VTaskObserver* obs)
       targetPath_("/"),
       node_(nullptr),
       reply_(nullptr) {
-    if (obs)
+    if (obs) {
         observers_.push_back(obs);
+    }
     reply_ = new VReply();
 }
 
 VTask::VTask(Type t, VNode* node, VTaskObserver* obs) : type_(t), status_(NOSTATUS), node_(node), reply_(nullptr) {
-    if (node_)
+    if (node_) {
         targetPath_ = node_->absNodePath();
+    }
 
-    if (obs)
+    if (obs) {
         observers_.push_back(obs);
+    }
 
     reply_ = new VReply();
 }
@@ -77,8 +80,9 @@ const std::string& VTask::typeString() const {
         names[ZombieCommandTask]     = "zombie_command";
     }
 
-    if (names.find(type_) != names.end())
+    if (names.find(type_) != names.end()) {
         return names[type_];
+    }
 
     return names[NoTask];
 }
@@ -86,15 +90,17 @@ const std::string& VTask::typeString() const {
 const std::string& VTask::param(const std::string& key) const {
     static std::string emptyStr("");
     auto it = params_.find(key);
-    if (it != params_.end())
+    if (it != params_.end()) {
         return it->second;
+    }
     return emptyStr;
 }
 
 void VTask::status(Status s, bool broadcastIt) {
     status_ = s;
-    if (broadcastIt)
+    if (broadcastIt) {
         broadcast();
+    }
 }
 
 void VTask::setZombie(const Zombie& z) {

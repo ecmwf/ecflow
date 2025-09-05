@@ -176,8 +176,9 @@ void TextFilterHandlerDialog::reloadTable() {
         table_->setItem(i, 3, filterItem);
     }
 
-    if (table_->rowCount() > 0)
+    if (table_->rowCount() > 0) {
         table_->setCurrentCell(0, 0);
+    }
 
     updateStatus();
 }
@@ -187,8 +188,9 @@ void TextFilterHandlerDialog::editItem() {
     if (r >= 0) {
         TextFilterEditDialog diag(this);
         diag.init(r, TextFilterHandler::Instance()->items()[r]);
-        if (diag.exec() == QDialog::Accepted)
+        if (diag.exec() == QDialog::Accepted) {
             reloadTable();
+        }
     }
 }
 
@@ -201,8 +203,9 @@ void TextFilterHandlerDialog::on_actionDuplicate__triggered() {
     if (r >= 0) {
         TextFilterAddDialog diag(this);
         diag.init(TextFilterHandler::Instance()->items()[r]);
-        if (diag.exec() == QDialog::Accepted)
+        if (diag.exec() == QDialog::Accepted) {
             reloadTable();
+        }
     }
 }
 
@@ -216,8 +219,9 @@ void TextFilterHandlerDialog::on_actionRemove__triggered() {
 
 void TextFilterHandlerDialog::on_actionAdd__triggered() {
     TextFilterAddDialog diag(this);
-    if (diag.exec() == QDialog::Accepted)
+    if (diag.exec() == QDialog::Accepted) {
         reloadTable();
+    }
 }
 
 void TextFilterHandlerDialog::on_table__doubleClicked(const QModelIndex& /*index*/) {

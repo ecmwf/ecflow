@@ -638,15 +638,17 @@ public:
     const std::string& name() const;
 
     void gen_variables(std::vector<Variable>& vec) const {
-        if (type_)
+        if (type_) {
             type_->gen_variables(vec);
+        }
     }
     const Variable& find_gen_variable(const std::string& name) const {
         return (type_) ? type_->find_gen_variable(name) : Variable::EMPTY();
     }
     void update_repeat_genvar() const {
-        if (type_)
+        if (type_) {
             type_->update_repeat_genvar();
+        }
     }
 
     int start() const { return (type_) ? type_->start() : 0; }
@@ -660,8 +662,9 @@ public:
 
     bool valid() const { return (type_) ? type_->valid() : false; }
     void setToLastValue() {
-        if (type_)
+        if (type_) {
             type_->setToLastValue();
+        }
     }
     std::string valueAsString() const { return (type_) ? type_->valueAsString() : std::string(); }
     std::string value_as_string(int index) const { return (type_) ? type_->value_as_string(index) : std::string(); }
@@ -669,24 +672,29 @@ public:
     std::string prev_value_as_string() const { return (type_) ? type_->prev_value_as_string() : std::string(); }
 
     void reset() {
-        if (type_)
+        if (type_) {
             type_->reset();
+        }
     }
     void increment() {
-        if (type_)
+        if (type_) {
             type_->increment();
+        }
     }
     void change(const std::string& newValue) {
-        if (type_)
+        if (type_) {
             type_->change(newValue);
+        }
     }
     void changeValue(long newValue) {
-        if (type_)
+        if (type_) {
             type_->changeValue(newValue);
+        }
     }
     void set_value(long newValue) {
-        if (type_)
+        if (type_) {
             type_->set_value(newValue);
+        }
     }
     std::string toString() const { return (type_) ? type_->toString() : std::string(); }
     std::string dump() const { return (type_) ? type_->dump() : std::string(); } // additional state

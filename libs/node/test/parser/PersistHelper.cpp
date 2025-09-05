@@ -55,8 +55,9 @@ bool PersistHelper::test_defs_checkpt_and_reload(const Defs& theInMemoryDefs, bo
     // Reload the file we just persisted and compare with in memory defs
     Defs savedDef;
     bool reload_result = reload_from_defs_file(theInMemoryDefs, savedDef, temporary.path(), do_compare);
-    if (reload_result)
+    if (reload_result) {
         return savedDef.checkInvariants(errorMsg_);
+    }
     return false;
 }
 
@@ -70,8 +71,9 @@ bool PersistHelper::test_cereal_checkpt_and_reload(const Defs& theInMemoryDefs, 
     // Save in memory defs as a check pt file, then restore and compare
     Defs reloaded_defs;
     bool reload_result = reload_from_cereal_checkpt_file(theInMemoryDefs, reloaded_defs, do_compare);
-    if (reload_result)
+    if (reload_result) {
         return reloaded_defs.checkInvariants(errorMsg_);
+    }
     return false;
 }
 

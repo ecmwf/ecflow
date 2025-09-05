@@ -86,8 +86,9 @@ VParamFilterMenu::VParamFilterMenu(QMenu* parent,
                         grad.setColorAt(1, bg);
                         bgBrush = QBrush(grad);
                     }
-                    else
+                    else {
                         bgBrush = QBrush(bg);
+                    }
 
                     QPixmap pix(pixSize, pixSize);
                     QPainter painter(&pix);
@@ -123,18 +124,22 @@ VParamFilterMenu::VParamFilterMenu(QMenu* parent,
     menu_->addAction(ac);
 
     selectAllAc_ = new QAction(this);
-    if (itemMode_ == FilterMode)
+    if (itemMode_ == FilterMode) {
         selectAllAc_->setText(tr("Select all"));
-    else
+    }
+    else {
         selectAllAc_->setText(tr("Show all"));
+    }
     menu_->addAction(selectAllAc_);
     connect(selectAllAc_, SIGNAL(triggered(bool)), this, SLOT(slotSelectAll(bool)));
 
     unselectAllAc_ = new QAction(this);
-    if (itemMode_ == FilterMode)
+    if (itemMode_ == FilterMode) {
         unselectAllAc_->setText(tr("Clear filter"));
-    else
+    }
+    else {
         unselectAllAc_->setText(tr("Hide all"));
+    }
     menu_->addAction(unselectAllAc_);
     connect(unselectAllAc_, SIGNAL(triggered(bool)), this, SLOT(slotUnselectAll(bool)));
 
@@ -218,8 +223,9 @@ void VParamFilterMenu::slotChanged(bool) {
         }
     }
 
-    if (filter_)
+    if (filter_) {
         filter_->setCurrent(items);
+    }
 
     checkActionState();
 }
@@ -271,14 +277,16 @@ ServerFilterMenu::ServerFilterMenu(QMenu* parent) : menu_(parent), filter_(nullp
 
 ServerFilterMenu::~ServerFilterMenu() {
     ServerList::instance()->removeObserver(this);
-    if (filter_)
+    if (filter_) {
         filter_->removeObserver(this);
+    }
 }
 
 void ServerFilterMenu::aboutToDestroy() {
     ServerList::instance()->removeObserver(this);
-    if (filter_)
+    if (filter_) {
         filter_->removeObserver(this);
+    }
 
     clear();
 }
@@ -348,20 +356,24 @@ QAction* ServerFilterMenu::createAction(QString name, int id) {
 }
 
 void ServerFilterMenu::slotChanged(bool) {
-    if (!filter_)
+    if (!filter_) {
         return;
+    }
 
     if (auto* ac = static_cast<QAction*>(sender())) {
-        if (ac->isSeparator())
+        if (ac->isSeparator()) {
             return;
+        }
 
         if (ServerItem* item = ServerList::instance()->itemAt(ac->data().toInt())) {
             QString name = ac->text();
             bool checked = ac->isChecked();
-            if (checked)
+            if (checked) {
                 filter_->addServer(item);
-            else
+            }
+            else {
                 filter_->removeServer(item);
+            }
 
             // At this point the action (ac) might be deleted so
             // we need to use the name and check state for syncing
@@ -389,13 +401,15 @@ void ServerFilterMenu::reload(ServerFilter* filter) {
     // hide to avoid crashing. See ECFLOW-1839
     menu_->hide();
 
-    if (filter_)
+    if (filter_) {
         filter_->removeObserver(this);
+    }
 
     filter_ = filter;
 
-    if (filter_)
+    if (filter_) {
         filter_->addObserver(this);
+    }
 
     reload(false);
 }

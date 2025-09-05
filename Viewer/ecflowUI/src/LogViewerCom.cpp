@@ -40,8 +40,9 @@ void LogViewerCom::closeApp() {
 }
 
 void LogViewerCom::addToApp(ServerHandler* sh) {
-    if (program_.isEmpty())
+    if (program_.isEmpty()) {
         return;
+    }
 
     if (sh) {
         QStringList args;
@@ -59,8 +60,9 @@ void LogViewerCom::addToApp(ServerHandler* sh) {
 }
 
 void LogViewerCom::start(QStringList args) {
-    if (program_.isEmpty())
+    if (program_.isEmpty()) {
         return;
+    }
 
     if (logViewerId_.isEmpty()) {
         qint64 pid = 0;

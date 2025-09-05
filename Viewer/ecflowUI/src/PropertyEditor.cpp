@@ -84,8 +84,9 @@ void PropertyEditor::clear() {
 
 // Build the property tree from the the definitions
 void PropertyEditor::build() {
-    if (!group_)
+    if (!group_) {
         return;
+    }
 
     assert(holder_ == nullptr);
 
@@ -200,8 +201,9 @@ PropertyLine* PropertyEditor::addLine(VProperty* vProp, QGridLayout* gridLayout,
                     hb->addWidget(item->item());
                     gridLayout->addLayout(hb, row, 1, Qt::AlignLeft);
                 }
-                else
+                else {
                     gridLayout->addWidget(item->item(), row, 1, Qt::AlignLeft);
+                }
             }
         }
         else {
@@ -209,8 +211,9 @@ PropertyLine* PropertyEditor::addLine(VProperty* vProp, QGridLayout* gridLayout,
         }
 
         QWidget* bw = item->button();
-        if (bw)
+        if (bw) {
             gridLayout->addWidget(bw, row, 2);
+        }
 
         QToolButton* defTb = item->defaultTb();
         if (defTb) {
@@ -231,8 +234,9 @@ PropertyLine* PropertyEditor::addLine(VProperty* vProp, QGridLayout* gridLayout,
 }
 
 void PropertyEditor::addGroup(VProperty* vProp, QVBoxLayout* layout, QWidget* parent) {
-    if (vProp->name() != "group")
+    if (vProp->name() != "group") {
         return;
+    }
 
     auto* groupBox = new QGroupBox(vProp->param("title"), parent);
     groupBox->setObjectName("editorGroupBox");
@@ -252,8 +256,9 @@ void PropertyEditor::addGroup(VProperty* vProp, QVBoxLayout* layout, QWidget* pa
 }
 
 void PropertyEditor::addGrid(VProperty* vProp, QVBoxLayout* layout, QWidget* parent) {
-    if (vProp->name() != "grid")
+    if (vProp->name() != "grid") {
         return;
+    }
 
     auto* groupBox = new QGroupBox(vProp->param("title"), parent);
     groupBox->setObjectName("editorGroupBox");
@@ -321,10 +326,12 @@ void PropertyEditor::addGridRow(VProperty* vProp, QGridLayout* grid, QWidget* pa
                 if (defTb || masterTb) {
                     auto* hb = new QHBoxLayout();
                     hb->addWidget(item->item());
-                    if (defTb)
+                    if (defTb) {
                         hb->addWidget(defTb);
-                    if (masterTb)
+                    }
+                    if (masterTb) {
                         hb->addWidget(masterTb);
+                    }
 
                     hb->addSpacing(15);
                     hb->addStretch(1);
@@ -343,8 +350,9 @@ void PropertyEditor::addGridRow(VProperty* vProp, QGridLayout* grid, QWidget* pa
 }
 
 void PropertyEditor::addNotification(VProperty* vProp, QVBoxLayout* layout, QWidget* parent) {
-    if (vProp->name() != "custom-notification")
+    if (vProp->name() != "custom-notification") {
         return;
+    }
 
     // ChangeNotifyEditor* ne=new ChangeNotifyEditor(parent);
 
@@ -389,8 +397,9 @@ void PropertyEditor::addNotification(VProperty* vProp, QVBoxLayout* layout, QWid
             Q_FOREACH (VProperty* lineProp, chProp->children()) {
                 addItem(lineProp, vb, w);
             }
-            for (int i = lineLstPos; i < lineItems_.count(); i++)
+            for (int i = lineLstPos; i < lineItems_.count(); i++) {
                 lineLst << lineItems_[i];
+            }
 
             tab->addTab(w, labelText);
 
@@ -429,8 +438,9 @@ void PropertyEditor::addNotification(VProperty* vProp, QVBoxLayout* layout, QWid
 }
 
 void PropertyEditor::addTabs(VProperty* vProp, QVBoxLayout* layout, QWidget* parent) {
-    if (vProp->name() != "tabs")
+    if (vProp->name() != "tabs") {
         return;
+    }
 
     auto* t = new QTabWidget(parent);
     t->setObjectName("tab");
@@ -448,8 +458,9 @@ void PropertyEditor::addTabs(VProperty* vProp, QVBoxLayout* layout, QWidget* par
 }
 
 void PropertyEditor::addTab(VProperty* vProp, QTabWidget* tab) {
-    if (vProp->name() != "tab")
+    if (vProp->name() != "tab") {
         return;
+    }
 
     auto* w  = new QWidget(tab);
     auto* vb = new QVBoxLayout();
@@ -459,8 +470,9 @@ void PropertyEditor::addTab(VProperty* vProp, QTabWidget* tab) {
 
     if (!vProp->param("adjustLineLabel").isEmpty()) {
         lineLabelLen_ = vProp->param("adjustLineLabel").toInt();
-        if (lineLabelLen_ <= 0 || lineLabelLen_ > 300)
+        if (lineLabelLen_ <= 0 || lineLabelLen_ > 300) {
             lineLabelLen_ = -1;
+        }
     }
 
     Q_FOREACH (VProperty* chProp, vProp->children()) {
@@ -477,8 +489,9 @@ QString PropertyEditor::buildNoteText(VProperty* vProp) const {
 }
 
 void PropertyEditor::addNote(VProperty* vProp, QVBoxLayout* layout, QWidget* parent) {
-    if (vProp->name() != "note")
+    if (vProp->name() != "note") {
         return;
+    }
 
     QString txt = buildNoteText(vProp);
 
@@ -488,8 +501,9 @@ void PropertyEditor::addNote(VProperty* vProp, QVBoxLayout* layout, QWidget* par
 }
 
 void PropertyEditor::addNote(VProperty* vProp, QGridLayout* layout, QWidget* parent) {
-    if (vProp->name() != "note")
+    if (vProp->name() != "note") {
         return;
+    }
 
     QString txt = buildNoteText(vProp);
 

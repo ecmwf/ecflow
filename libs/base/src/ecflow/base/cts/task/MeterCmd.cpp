@@ -31,12 +31,15 @@ namespace po = boost::program_options;
 
 bool MeterCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<MeterCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (name_ != the_rhs->name())
+    }
+    if (name_ != the_rhs->name()) {
         return false;
-    if (value_ != the_rhs->value())
+    }
+    if (value_ != the_rhs->value()) {
         return false;
+    }
     return TaskCmd::equals(rhs);
 }
 

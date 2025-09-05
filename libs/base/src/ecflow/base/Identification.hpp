@@ -11,8 +11,8 @@
 #ifndef ecflow_base_Identification_HPP
 #define ecflow_base_Identification_HPP
 
-#include "ecflow/core/Identity.hpp"
 #include "ecflow/base/Cmd.hpp"
+#include "ecflow/core/Identity.hpp"
 
 namespace ecf {
 

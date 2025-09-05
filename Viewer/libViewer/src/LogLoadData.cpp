@@ -102,8 +102,9 @@ void LogRequestItem::computeStat(size_t startIndex, size_t endIndex) {
     for (size_t i = 0; i < index_.size(); i++) {
         if (index_[i] >= startIndex && index_[i] <= endIndex) {
             sum += req_[i];
-            if (req_[i] > max)
+            if (req_[i] > max) {
                 max = req_[i];
+            }
         }
     }
 
@@ -346,8 +347,9 @@ void LogLoadDataItem::add(size_t index, const LogReqCounter& req) {
     //     stat_.maxTotal_ = tot;
 
     for (size_t i = 0; i < subReq_.size(); i++) {
-        if (req.subReq_[i].counter_ > 0)
+        if (req.subReq_[i].counter_ > 0) {
             subReq_[i].add(index, req.subReq_[i].counter_);
+        }
     }
 }
 
@@ -356,8 +358,9 @@ void LogLoadDataItem::computeSubReqStat(std::vector<LogRequestItem>& subReq, siz
         i.computeStat(startIndex, endIndex);
     }
 
-    if (subReq.size() == 0)
+    if (subReq.size() == 0) {
         return;
+    }
 
     if (subReq.size() == 1) {
         // subReq[0].rank_=0;
@@ -375,8 +378,9 @@ void LogLoadDataItem::computeSubReqStat(std::vector<LogRequestItem>& subReq, siz
         sortVec.emplace_back(i, subReq[i].periodStat_.sumTotal_);
     }
 
-    if (sum <= 0)
+    if (sum <= 0) {
         return;
+    }
 
     assert(sumVec.size() == subReq.size());
     std::sort(sortVec.begin(), sortVec.end(), sortVecFunction);
@@ -418,8 +422,9 @@ void LogLoadDataItem::computeStat(size_t startIndex, size_t endIndex) {
         for (size_t i = startIndex; i <= endIndex; i++) {
             size_t tot = childReq_[i] + userReq_[i];
             sum += tot;
-            if (max < tot)
+            if (max < tot) {
                 max = tot;
+            }
         }
     }
 
@@ -435,8 +440,9 @@ void LogLoadDataItem::computeSubReqMax() {
     subReqMax_ = 0;
 
     for (auto& i : subReq_) {
-        if (subReqMax_ < i.periodStat_.maxTotal_)
+        if (subReqMax_ < i.periodStat_.maxTotal_) {
             subReqMax_ = i.periodStat_.maxTotal_;
+        }
     }
 }
 
@@ -500,22 +506,27 @@ QDateTime LogLoadData::endTime() const {
 // t is in ms
 bool LogLoadData::indexOfTime(qint64 t, size_t& idx, size_t startIdx, qint64 tolerance) const {
     idx = 0;
-    if (t < 0)
+    if (t < 0) {
         return false;
+    }
 
     size_t num = time_.size();
-    if (num == 0)
+    if (num == 0) {
         return false;
+    }
 
-    if (startIdx > num - 1)
+    if (startIdx > num - 1) {
         startIdx = 0;
+    }
 
-    if (startIdx >= num)
+    if (startIdx >= num) {
         return false;
+    }
 
     if (t >= time_[startIdx]) {
-        if (tolerance <= 0)
+        if (tolerance <= 0) {
             tolerance = 10 * 1000; // ms
+        }
 
         for (size_t i = startIdx; i < num; i++) {
             if (time_[i] >= t) {
@@ -534,8 +545,9 @@ bool LogLoadData::indexOfTime(qint64 t, size_t& idx, size_t startIdx, qint64 tol
         }
     }
     else {
-        if (tolerance <= 0)
+        if (tolerance <= 0) {
             tolerance = 10 * 1000; // ms
+        }
 
         for (size_t i = startIdx;; i--) {
             if (time_[i] <= t) {
@@ -566,8 +578,9 @@ void LogLoadData::getSeries(QLineSeries& series, const LogRequestItem& item, int
         QVector<size_t> vals(time_.size(), 0);
         for (size_t i = 0; i < item.index_.size(); i++) {
             vals[item.index_[i]] = item.req_[i];
-            if (maxVal < item.req_[i])
+            if (maxVal < item.req_[i]) {
                 maxVal = item.req_[i];
+            }
         }
         for (size_t i = 0; i < time_.size(); i++) {
             series.append(time_[i], vals[i]);
@@ -588,8 +601,9 @@ void LogLoadData::getSeries(QLineSeries& series, const LogRequestItem& item, int
 
             if (currentMinute != minute) {
                 if (currentMinute > 0) {
-                    if (sum > maxVal)
+                    if (sum > maxVal) {
                         maxVal = sum;
+                    }
                     series.append(time_[i], sum);
                 }
 
@@ -613,8 +627,9 @@ void LogLoadData::getSeries(QLineSeries& series, const LogRequestItem& item, int
 
             if (currentHour != hour) {
                 if (currentHour > 0) {
-                    if (sum > maxVal)
+                    if (sum > maxVal) {
                         maxVal = sum;
+                    }
                     series.append(time_[i], sum);
                 }
 
@@ -631,8 +646,9 @@ void LogLoadData::getSeries(QLineSeries& series, const std::vector<int>& vals, i
     maxVal = 0;
     if (timeRes_ == SecondResolution) {
         for (size_t i = 0; i < time_.size(); i++) {
-            if (vals[i] > maxVal)
+            if (vals[i] > maxVal) {
                 maxVal = vals[i];
+            }
             series.append(time_[i], vals[i]);
         }
     }
@@ -644,8 +660,9 @@ void LogLoadData::getSeries(QLineSeries& series, const std::vector<int>& vals, i
             sum += vals[i];
             if (currentMinute != minute) {
                 if (currentMinute > 0) {
-                    if (sum > maxVal)
+                    if (sum > maxVal) {
                         maxVal = sum;
+                    }
                     series.append(time_[i], sum);
                 }
 
@@ -662,8 +679,9 @@ void LogLoadData::getSeries(QLineSeries& series, const std::vector<int>& vals, i
             sum += vals[i];
             if (currentHour != hour) {
                 if (currentHour > 0) {
-                    if (sum > maxVal)
+                    if (sum > maxVal) {
                         maxVal = sum;
+                    }
                     series.append(time_[i], sum);
                 }
 
@@ -682,8 +700,9 @@ void LogLoadData::getSeries(QLineSeries& series,
     UI_ASSERT(time_.size() == vals2.size(), "time_.size()=" << time_.size() << " vals2.size()=" << vals2.size());
 
     if (timeRes_ == SecondResolution) {
-        for (size_t i = 0; i < time_.size(); i++)
+        for (size_t i = 0; i < time_.size(); i++) {
             series.append(time_[i], vals1[i] + vals2[i]);
+        }
     }
     else if (timeRes_ == MinuteResolution) {
         maxVal               = 0;
@@ -695,8 +714,9 @@ void LogLoadData::getSeries(QLineSeries& series,
             if (currentMinute != minute) {
                 if (currentMinute > 0) {
                     series.append(time_[i], sum);
-                    if (maxVal < sum)
+                    if (maxVal < sum) {
                         maxVal = sum;
+                    }
                 }
                 currentMinute = minute;
                 sum           = 0;
@@ -713,8 +733,9 @@ void LogLoadData::getSeries(QLineSeries& series,
             if (currentHour != hour) {
                 if (currentHour > 0) {
                     series.append(time_[i], sum);
-                    if (maxVal < sum)
+                    if (maxVal < sum) {
                         maxVal = sum;
+                    }
                 }
                 currentHour = hour;
                 sum         = 0;
@@ -735,8 +756,9 @@ void LogLoadData::getUserReq(QLineSeries& series) {
 
 void LogLoadData::getTotalReq(QLineSeries& series, int& maxVal) {
     getSeries(series, total_.childReq(), total_.userReq(), maxVal);
-    if (timeRes_ == SecondResolution)
+    if (timeRes_ == SecondResolution) {
         maxVal = total_.maxTotal();
+    }
 }
 
 void LogLoadData::getSuiteChildReq(size_t idx, QLineSeries& series) {
@@ -790,8 +812,9 @@ void LogLoadData::add(std::vector<std::string> time_stamp,
                       const LogReqCounter& total,
                       const std::vector<LogReqCounter>& suite_vec,
                       const std::vector<LogReqCounter>& uid_vec) {
-    if (time_stamp.size() < 2)
+    if (time_stamp.size() < 2) {
         return;
+    }
 
     QString s = QString::fromStdString(time_stamp[0]) + " " + QString::fromStdString(time_stamp[1]);
 
@@ -855,8 +878,9 @@ void LogLoadData::computeStat(size_t startIndex, size_t endIndex) {
     }
     else {
         total_.computeStat(startIndex, endIndex);
-        if (!fullStatComputed_)
+        if (!fullStatComputed_) {
             total_.saveFullStat();
+        }
     }
 
     // Suites
@@ -881,8 +905,9 @@ void LogLoadData::computeStat(std::vector<LogLoadDataItem>& items,
         item.computeStat(startIndex, endIndex);
     }
 
-    if (items.size() == 0)
+    if (items.size() == 0) {
         return;
+    }
 
     if (items.size() == 1) {
         items[0].setRank(0);
@@ -899,8 +924,9 @@ void LogLoadData::computeStat(std::vector<LogLoadDataItem>& items,
         sortVec.emplace_back(i, items[i].sumTotal());
     }
 
-    if (sum <= 0)
+    if (sum <= 0) {
         return;
+    }
 
     assert(sumVec.size() == items.size());
     std::sort(sortVec.begin(), sortVec.end(), sortVecFunction);
@@ -1000,13 +1026,15 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
     QFileInfo fInfo(QString::fromStdString(logFile));
     size_t fSize         = fInfo.size();
     size_t progressChunk = fSize / 200;
-    if (progressChunk == 0)
+    if (progressChunk == 0) {
         progressChunk = fSize;
+    }
     size_t currentProgressChunk = 0;
     size_t percent              = 0;
 
-    if (fSize == 0)
+    if (fSize == 0) {
         return;
+    }
 
     if (maxReadSize_ > 0) {
         if (fSize > maxReadSize_) {
@@ -1040,12 +1068,14 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
         //  hotfix/%METVIEW_VERSION% /metview; --sync=35 246693 515 :user@host
 
         // We are only interested in Commands (i.e MSG:), and not state changes
-        if (line.empty() || line[0] != 'M')
+        if (line.empty() || line[0] != 'M') {
             continue;
+        }
 
         std::string::size_type msg_pos = line.find("MSG:");
-        if (msg_pos != 0)
+        if (msg_pos != 0) {
             continue;
+        }
 
         bool child_cmd = false;
         bool user_cmd  = false;
@@ -1056,8 +1086,9 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
             user_cmd = true;
         }
 
-        if (!child_cmd && !user_cmd)
+        if (!child_cmd && !user_cmd) {
             continue;
+        }
 
         // lines containing multiple items separated by ";" share the same uid, so we
         // extract it before the splitting
@@ -1087,8 +1118,9 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
             std::string time_stamp = line.substr(0, first_closed_bracket);
 
             ecf::Str::split(time_stamp, parseHelper_.new_time_stamp);
-            if (parseHelper_.new_time_stamp.size() != 2)
+            if (parseHelper_.new_time_stamp.size() != 2) {
                 continue;
+            }
 
             line.erase(0, first_closed_bracket + 1);
         }
@@ -1097,8 +1129,9 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
         if (current / progressChunk > currentProgressChunk) {
             currentProgressChunk = current / progressChunk;
             percent              = current / fSize;
-            if (percent <= 100)
+            if (percent <= 100) {
                 Q_EMIT loadProgress(current, fSize);
+            }
         }
 
         numOfRows_++;
@@ -1119,12 +1152,14 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
             }
             else if (line.find(ecf::Str::USER_CMD()) != std::string::npos) {
                 user_cmd = true;
-                if (i > 0 && line.find("--sync") != std::string::npos)
+                if (i > 0 && line.find("--sync") != std::string::npos) {
                     continue;
+                }
             }
 
-            if (!child_cmd && !user_cmd)
+            if (!child_cmd && !user_cmd) {
                 continue;
+            }
 
             if (parseHelper_.old_time_stamp.empty() ||
                 parseHelper_.old_time_stamp[0] == parseHelper_.new_time_stamp[0]) {
@@ -1194,11 +1229,13 @@ std::streamoff LogLoadData::getStartPos(const std::string& logFile, int numOfRow
             log_file.getline(line); // default delimiter is /n
 
             /// We are only interested in Commands (i.e MSG:), and not state changes
-            if (line.size() < 4)
+            if (line.size() < 4) {
                 continue;
+            }
 
-            if (line[0] != 'M' || line[1] != 'S' || line[2] != 'G' || line[3] != ':')
+            if (line[0] != 'M' || line[1] != 'S' || line[2] != 'G' || line[3] != ':') {
                 continue;
+            }
 
             bool child_cmd = false;
             bool user_cmd  = false;
@@ -1209,8 +1246,9 @@ std::streamoff LogLoadData::getStartPos(const std::string& logFile, int numOfRow
                 user_cmd = true;
             }
 
-            if (!child_cmd && !user_cmd)
+            if (!child_cmd && !user_cmd) {
                 continue;
+            }
 
             posVec[cnt % maxNum] = currentPos;
             cnt++;
@@ -1287,8 +1325,9 @@ bool LogLoadData::extract_suite_path(const std::string& line,
     static std::vector<std::string> specialCmd = {"--begin=", "--cancel="};
     bool hasSuiteName                          = false;
     if (!child_cmd) {
-        if (line.find("--news") != std::string::npos || line.find("--load") != std::string::npos)
+        if (line.find("--news") != std::string::npos || line.find("--load") != std::string::npos) {
             hasSuiteName = true;
+        }
         else {
             for (auto cmd : specialCmd) {
                 std::size_t pos = line.find(cmd);

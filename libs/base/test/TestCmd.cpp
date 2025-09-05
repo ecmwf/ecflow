@@ -97,8 +97,9 @@ BOOST_AUTO_TEST_CASE(test_simple_cmd) {
                 BOOST_CHECK_MESSAGE(s->state() == NState::ACTIVE,
                                     "expected state NState::ACTIVE, but found to be " << NState::toString(s->state()));
                 // std::cout << "tryNo = " << t1->try_no() << " ECF_TRIES = " <<  ecf_tries << "\n";
-                if (t1->try_no() == ecf_tries)
+                if (t1->try_no() == ecf_tries) {
                     break;
+                }
             }
 
             /// Since we have exceeded the try number, abort should mean abort

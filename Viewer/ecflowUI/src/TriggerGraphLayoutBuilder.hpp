@@ -29,16 +29,18 @@ struct GraphLayoutNode
     bool hasChildren() const { return children_.size() > 0; }
     int indexOfParent(int v) const {
         for (std::size_t i = 0; i < parents_.size(); i++) {
-            if (parents_[i] == v)
+            if (parents_[i] == v) {
                 return static_cast<int>(i);
+            }
         }
         return -1;
     }
 
     int indexOfChild(int v) const {
         for (std::size_t i = 0; i < children_.size(); i++) {
-            if (children_[i] == v)
+            if (children_[i] == v) {
                 return static_cast<int>(i);
+            }
         }
         return -1;
     }

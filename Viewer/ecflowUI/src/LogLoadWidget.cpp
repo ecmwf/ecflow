@@ -289,8 +289,9 @@ void LogLoadWidget::updateInfoLabel(bool showDetails) {
             // fetch method and time
             if (localLog_) {
                 txt += " read from disk ";
-                if (data->loadedAt().isValid())
+                if (data->loadedAt().isValid()) {
                     txt += FileInfoLabel::formatHighlight(" at ") + FileInfoLabel::formatDate(data->loadedAt());
+                }
             }
             else {
                 if (logTransferred_) {
@@ -299,8 +300,9 @@ void LogLoadWidget::updateInfoLabel(bool showDetails) {
                 else {
                     txt += " fetch failed from remote host ";
                 }
-                if (transferredAt_.isValid())
+                if (transferredAt_.isValid()) {
                     txt += FileInfoLabel::formatHighlight(" at ") + FileInfoLabel::formatDate(transferredAt_);
+                }
             }
 
             if (data->loadStatus() == LogLoadData::LoadDone) {
@@ -345,11 +347,13 @@ void LogLoadWidget::updateInfoLabel(bool showDetails) {
 
         if (showDetails) {
             if (data->loadStatus() == LogLoadData::LoadDone) {
-                if (archiveLogList_.loadableCount() == 1)
+                if (archiveLogList_.loadableCount() == 1) {
                     txt += FileInfoLabel::formatKwPair(" Size", VFileInfo::formatSize(archiveLogList_.totalSize()));
-                else if (archiveLogList_.loadableCount() > 1)
+                }
+                else if (archiveLogList_.loadableCount() > 1) {
                     txt +=
                         FileInfoLabel::formatKwPair(" Total size", VFileInfo::formatSize(archiveLogList_.totalSize()));
+                }
             }
             txt += FileInfoLabel::formatKwPair(" Source", "read from disk ");
         }
@@ -383,25 +387,30 @@ void LogLoadWidget::setAllVisible(bool b) {
 }
 
 void LogLoadWidget::slotLogMode(int) {
-    if (beingCleared_)
+    if (beingCleared_) {
         return;
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QString id = ui_->logModeCombo->currentData().toString();
 #else
     QString id;
-    if (ui_->logModeCombo->currentIndex() >= 0)
+    if (ui_->logModeCombo->currentIndex() >= 0) {
         id = ui_->logModeCombo->itemData(ui_->logModeCombo->currentIndex()).toString();
+    }
 #endif
-    if (id == "latest")
+    if (id == "latest") {
         setLogMode(LatestMode);
-    else if (id == "archive")
+    }
+    else if (id == "archive") {
         setLogMode(ArchiveMode);
+    }
 }
 
 void LogLoadWidget::setLogMode(LogMode logMode) {
-    if (logMode_ == logMode)
+    if (logMode_ == logMode) {
         return;
+    }
 
     logMode_ = logMode;
     if (logMode_ == LatestMode) {
@@ -443,8 +452,9 @@ void LogLoadWidget::reloadLatest(bool usePrevState) {
             setMaxReadSize(sh->maxSizeForTimelineData());
 
             if (SuiteFilter* sf = sh->suiteFilter()) {
-                if (sf->isEnabled())
+                if (sf->isEnabled()) {
                     suites = sh->suiteFilter()->filter();
+                }
             }
 
             suites_ = suites;
@@ -458,8 +468,9 @@ void LogLoadWidget::reloadLatest(bool usePrevState) {
 void LogLoadWidget::slotLoadCustomFile() {
     Q_ASSERT(logMode_ == ArchiveMode);
     QStringList fileNames = QFileDialog::getOpenFileNames(this);
-    if (fileNames.isEmpty())
+    if (fileNames.isEmpty()) {
         return;
+    }
 
     TimelineFileList archiveLogList = TimelineFileList(fileNames);
     TimelinePreLoadDialog dialog;
@@ -481,8 +492,9 @@ void LogLoadWidget::initLoad(QString serverName,
                              int maxReadSize,
                              const std::string& currentNodePath,
                              bool detached) {
-    if (logMode_ != LatestMode)
+    if (logMode_ != LatestMode) {
         return;
+    }
 
     // we need to be in a clean state
     clear();
@@ -524,8 +536,9 @@ void LogLoadWidget::loadLatest(bool usePrevState) {
         clearData(false);
     }
 
-    if (logFile_.isEmpty())
+    if (logFile_.isEmpty()) {
         return;
+    }
 
     logLoaded_      = false;
     logTransferred_ = false;
@@ -590,8 +603,9 @@ void LogLoadWidget::loadArchive() {
 
     // std::vector<std::string> suites;
     for (int i = 0; i < archiveLogList_.items().count(); i++) {
-        if (!archiveLogList_.items()[i].loadable_)
+        if (!archiveLogList_.items()[i].loadable_) {
             continue;
+        }
 
         ui_->messageLabel->showInfo("Loading data from log file [" + QString::number(i + 1) + "/" +
                                     QString::number(archiveLogList_.items().count()) + "] ...");
@@ -682,8 +696,9 @@ void LogLoadWidget::slotFileTransferStdOutput(QString msg) {
 
 void LogLoadWidget::slotLogLoadProgress(size_t current, size_t total) {
     int percent = 100 * current / total;
-    if (percent >= 0 && percent <= 100)
+    if (percent >= 0 && percent <= 100) {
         ui_->messageLabel->progress("", percent);
+    }
 }
 
 // notification from messagelabel: user cancelled the transfer
@@ -765,10 +780,12 @@ void LogLoadWidget::initFromData() {
 
     // try the set the previously used interval - for reload only
     if (usePrevState && prevState_.valid) {
-        if (prevState_.startDt <= data->startTime() || prevState_.fullStart)
+        if (prevState_.startDt <= data->startTime() || prevState_.fullStart) {
             ui_->startTe->setDateTime(data->startTime());
-        else if (prevState_.startDt < data->endTime())
+        }
+        else if (prevState_.startDt < data->endTime()) {
             ui_->startTe->setDateTime(prevState_.startDt);
+        }
     }
     else {
         ui_->startTe->setDateTime(data->startTime());
@@ -777,10 +794,12 @@ void LogLoadWidget::initFromData() {
     ui_->endTe->setMaximumDateTime(endTime);
 
     if (usePrevState && prevState_.valid) {
-        if (prevState_.endDt >= data->endTime() || prevState_.fullEnd)
+        if (prevState_.endDt >= data->endTime() || prevState_.fullEnd) {
             ui_->endTe->setDateTime(data->endTime());
-        else if (prevState_.endDt > data->startTime())
+        }
+        else if (prevState_.endDt > data->startTime()) {
             ui_->endTe->setDateTime(prevState_.endDt);
+        }
     }
     else {
         ui_->endTe->setDateTime(data->endTime());
@@ -806,10 +825,12 @@ void LogLoadWidget::checkButtonState() {
 }
 
 void LogLoadWidget::setMaxReadSize(int maxReadSizeInMb) {
-    if (maxReadSizeInMb <= 0)
+    if (maxReadSizeInMb <= 0) {
         maxReadSize_ = 0;
-    else
+    }
+    else {
         maxReadSize_ = static_cast<size_t>(maxReadSizeInMb) * 1024 * 1024;
+    }
 }
 
 void LogLoadWidget::periodChanged(qint64 start, qint64 end) {
@@ -843,12 +864,15 @@ void LogLoadWidget::updateTimeLabel(QDateTime startDt, QDateTime endDt) {
 
 void LogLoadWidget::resolutionChanged(int) {
     int idx = ui_->resCombo->currentIndex();
-    if (idx == 0)
+    if (idx == 0) {
         viewHandler_->setResolution(LogLoadData::SecondResolution);
-    else if (idx == 1)
+    }
+    else if (idx == 1) {
         viewHandler_->setResolution(LogLoadData::MinuteResolution);
-    else if (idx == 2)
+    }
+    else if (idx == 2) {
         viewHandler_->setResolution(LogLoadData::HourResolution);
+    }
 }
 
 //-------------------------

@@ -79,8 +79,9 @@ CustomCommand* CustomCommandHandler::duplicate(int index) {
     std::string newName = item->name() + postfix;
 
     // ensure we are creating a unique new name - if we find an existing item with the same name, add another postfix
-    while (find(newName) != nullptr)
+    while (find(newName) != nullptr) {
         newName += postfix;
+    }
 
     CustomCommand* newCmd = add(newName, item->command(), item->inContextMenu(), false);
 
@@ -102,8 +103,9 @@ void CustomCommandHandler::swapCommandsByIndex(int i1, int i2) {
 
 CustomCommand* CustomCommandHandler::find(const std::string& name) const {
     for (auto item : items_) {
-        if (item->name() == name)
+        if (item->name() == name) {
             return item;
+        }
     }
     return nullptr;
 }
@@ -112,8 +114,9 @@ CustomCommand* CustomCommandHandler::find(const std::string& name) const {
 int CustomCommandHandler::findIndexFromName(const std::string& name) const {
     int i = 0;
     for (auto item : items_) {
-        if (item->name() == name)
+        if (item->name() == name) {
             return i;
+        }
         i++;
     }
     return -1; // it was not found
@@ -182,8 +185,9 @@ CustomSavedCommandHandler::add(const std::string& name, const std::string& comma
     auto* item = new CustomCommand(name, command, context);
     items_.push_back(item);
 
-    if (saveSettings)
+    if (saveSettings) {
         writeSettings();
+    }
 
     return item;
 }
@@ -221,8 +225,9 @@ CustomCommandHistoryHandler::add(const std::string& name, const std::string& com
             items_.pop_back(); // remove the last item
         }
 
-        if (saveSettings)
+        if (saveSettings) {
             writeSettings();
+        }
 
         return item;
     }

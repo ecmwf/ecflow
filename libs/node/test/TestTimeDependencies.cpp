@@ -175,10 +175,11 @@ BOOST_AUTO_TEST_CASE(test_day_time_combination_in_hierarchy) {
             // times[0].dump() << "\n";
 
             // 1st Run: Monday at 10:00 am
-            if (submitted == 1)
+            if (submitted == 1) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time,
                                     "\nExpected to submit at " << expected_time << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             Node::Requeue_args args;
             f1->requeue(args);
@@ -234,10 +235,11 @@ BOOST_AUTO_TEST_CASE(test_time_day_combination_in_hierarchy) {
             // times[0].dump() << "\n";
 
             // 1st Run: Monday at 00:00 am
-            if (submitted == 1)
+            if (submitted == 1) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time1,
                                     "\nExpected to submit at " << expected_time1 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             Node::Requeue_args args;
             f1->requeue(args);
@@ -295,10 +297,11 @@ BOOST_AUTO_TEST_CASE(test_date_time_combination_in_hierarchy) {
 
             // New to ecflow 5.0, parent date will guard the time. i.e will not let time be free until date is
             // satisfied.
-            if (submitted == 1)
+            if (submitted == 1) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time,
                                     "\nExpected to submit at " << expected_time << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             Node::Requeue_args args;
             f1->requeue(args);
@@ -358,16 +361,18 @@ BOOST_AUTO_TEST_CASE(test_time_date_combination_in_hierarchy) {
             // times[0].dump() << "\n";
 
             // 1st Run: MONDAY Morning 00:00 time was free from sunday
-            if (submitted == 1)
+            if (submitted == 1) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time1,
                                     "\nExpected to submit at " << expected_time1 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             // 2nd Run: Monday at 10:00
-            if (submitted == 2)
+            if (submitted == 2) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time2,
                                     "\nExpected to submit at " << expected_time2 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             Node::Requeue_args args;
             f1->requeue(args);

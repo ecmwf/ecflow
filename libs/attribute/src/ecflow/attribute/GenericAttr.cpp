@@ -41,10 +41,12 @@ GenericAttr::GenericAttr(const std::string& name) : name_(name) {
 }
 
 bool GenericAttr::operator==(const GenericAttr& rhs) const {
-    if (name_ != rhs.name_)
+    if (name_ != rhs.name_) {
         return false;
-    if (values_ != rhs.values_)
+    }
+    if (values_ != rhs.values_) {
         return false;
+    }
     return true;
 }
 

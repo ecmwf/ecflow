@@ -56,10 +56,12 @@ void CtsWaitCmd::print(std::string& os) const {
 
 bool CtsWaitCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<CtsWaitCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (expression_ != the_rhs->expression())
+    }
+    if (expression_ != the_rhs->expression()) {
         return false;
+    }
     return TaskCmd::equals(rhs);
 }
 
@@ -118,10 +120,11 @@ void CtsWaitCmd::addOption(boost::program_options::options_description& desc) co
 void CtsWaitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     std::string expression = vm[arg()].as<std::string>();
 
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         cout << "  CtsWaitCmd::create " << CtsWaitCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
              << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
              << clientEnv->task_try_no() << ") expression(" << expression << ")\n";
+    }
 
     std::string errorMsg;
     if (!clientEnv->checkTaskPathAndPassword(errorMsg)) {

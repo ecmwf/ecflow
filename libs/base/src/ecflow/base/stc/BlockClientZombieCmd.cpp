@@ -35,19 +35,22 @@ std::string BlockClientZombieCmd::print() const {
 
 // Client context
 bool BlockClientZombieCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  BlockClientZombieCmd::handle_server_response BLOCK_CLIENT_ZOMBIE "
                   << ecf::Child::to_string(zombie_type_) << "\n";
+    }
     server_reply.set_block_client_zombie_detected(); // requires further work, by ClientInvoker
     return false;                                    // false means fall through and try again, i.e BLOCK client
 }
 
 bool BlockClientZombieCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<BlockClientZombieCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (zombie_type_ != the_rhs->zombie_type())
+    }
+    if (zombie_type_ != the_rhs->zombie_type()) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 

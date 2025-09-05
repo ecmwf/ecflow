@@ -33,8 +33,9 @@ void VSettingsPath::add(const std::string& key) {
 }
 
 void VSettingsPath::pop() {
-    if (!path_.empty())
+    if (!path_.empty()) {
         path_.pop_back();
+    }
 }
 
 std::string VSettingsPath::path() const {
@@ -176,8 +177,9 @@ void VSettings::get(const std::string& key, std::vector<int>& val) {
 
 bool VSettings::getAsBool(const std::string& key, bool defaultVal) {
     std::string v = pt_.get<std::string>(path_.path(key), (defaultVal) ? "true" : "false");
-    if (v == "true" || v == "1")
+    if (v == "true" || v == "1") {
         return true;
+    }
 
     return false;
 }

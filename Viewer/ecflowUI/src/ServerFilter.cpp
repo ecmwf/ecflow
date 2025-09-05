@@ -50,14 +50,16 @@ void ServerFilter::addServer(ServerItem* item, bool broadcast) {
 
         item->addObserver(this);
 
-        if (broadcast)
+        if (broadcast) {
             broadcastAdd(item);
+        }
     }
 }
 
 void ServerFilter::removeServer(ServerItem* server) {
-    if (!server)
+    if (!server) {
         return;
+    }
 
     auto it = std::find(items_.begin(), items_.end(), server);
     if (it != items_.end()) {
@@ -75,14 +77,16 @@ void ServerFilter::removeServer(ServerItem* server) {
 }
 
 void ServerFilter::notifyServerItemChanged(ServerItem* server) {
-    if (isFiltered(server))
+    if (isFiltered(server)) {
         broadcastChange(server);
+    }
 }
 
 // Do not remove the observer in this method!!
 void ServerFilter::notifyServerItemDeletion(ServerItem* server) {
-    if (!server)
+    if (!server) {
         return;
+    }
 
     auto it = std::find(items_.begin(), items_.end(), server);
     if (it != items_.end()) {
@@ -95,24 +99,27 @@ void ServerFilter::notifyServerItemDeletion(ServerItem* server) {
 
 bool ServerFilter::isFiltered(ServerItem* item) const {
     for (auto it : items_) {
-        if (it == item)
+        if (it == item) {
             return true;
+        }
     }
     return false;
 }
 
 bool ServerFilter::isFiltered(ServerHandler* server) const {
     for (auto item : items_) {
-        if (item->serverHandler() == server)
+        if (item->serverHandler() == server) {
             return true;
+        }
     }
     return false;
 }
 
 bool ServerFilter::isFiltered(const std::string& serverName) const {
     for (auto item : items_) {
-        if (item->serverHandler()->name() == serverName)
+        if (item->serverHandler()->name() == serverName) {
             return true;
+        }
     }
     return false;
 }

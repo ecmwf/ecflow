@@ -501,8 +501,9 @@ void OutputBrowser::changeIndex(IndexType indexType, qint64 fileSize) {
         htmlEdit_->clear();
 
         // enable and init search
-        if (searchTb_)
+        if (searchTb_) {
             searchTb_->setEnabled(true);
+        }
         searchLine_->setConfirmSearch(fileSize >= minConfirmSearchSize_);
         searchLine_->setSearchInterface(textEditSearchInterface_);
 
@@ -515,8 +516,9 @@ void OutputBrowser::changeIndex(IndexType indexType, qint64 fileSize) {
         htmlEdit_->clear();
 
         // enable and init search
-        if (searchTb_)
+        if (searchTb_) {
             searchTb_->setEnabled(true);
+        }
         searchLine_->setConfirmSearch(fileSize >= minConfirmSearchSize_);
         searchLine_->setSearchInterface(textPagerSearchInterface_);
 
@@ -532,8 +534,9 @@ void OutputBrowser::changeIndex(IndexType indexType, qint64 fileSize) {
         contentsFile_ = file_;
 
         // Disable search
-        if (searchTb_)
+        if (searchTb_) {
             searchTb_->setEnabled(false);
+        }
         searchLine_->setSearchInterface(nullptr);
         searchLine_->hide();
 
@@ -574,38 +577,48 @@ void OutputBrowser::adjustHighlighter(QString fileName) {
 }
 
 void OutputBrowser::gotoLine() {
-    if (stacked_->currentIndex() == BasicIndex)
+    if (stacked_->currentIndex() == BasicIndex) {
         textEdit_->gotoLine();
-    else if (stacked_->currentIndex() == PagerIndex)
+    }
+    else if (stacked_->currentIndex() == PagerIndex) {
         textPager_->gotoLine();
+    }
 }
 
 void OutputBrowser::toDocStart() {
-    if (stacked_->currentIndex() == BasicIndex)
+    if (stacked_->currentIndex() == BasicIndex) {
         textEdit_->toDocStart();
-    else if (stacked_->currentIndex() == PagerIndex)
+    }
+    else if (stacked_->currentIndex() == PagerIndex) {
         textPager_->toDocStart();
+    }
 }
 
 void OutputBrowser::toDocEnd() {
-    if (stacked_->currentIndex() == BasicIndex)
+    if (stacked_->currentIndex() == BasicIndex) {
         textEdit_->toDocEnd();
-    else if (stacked_->currentIndex() == PagerIndex)
+    }
+    else if (stacked_->currentIndex() == PagerIndex) {
         textPager_->toDocEnd();
+    }
 }
 
 void OutputBrowser::toLineStart() {
-    if (stacked_->currentIndex() == BasicIndex)
+    if (stacked_->currentIndex() == BasicIndex) {
         textEdit_->toLineStart();
-    else if (stacked_->currentIndex() == PagerIndex)
+    }
+    else if (stacked_->currentIndex() == PagerIndex) {
         textPager_->toLineStart();
+    }
 }
 
 void OutputBrowser::toLineEnd() {
-    if (stacked_->currentIndex() == BasicIndex)
+    if (stacked_->currentIndex() == BasicIndex) {
         textEdit_->toLineEnd();
-    else if (stacked_->currentIndex() == PagerIndex)
+    }
+    else if (stacked_->currentIndex() == PagerIndex) {
         textPager_->toLineEnd();
+    }
 }
 
 void OutputBrowser::showSearchLine() {
@@ -722,10 +735,12 @@ VFile_ptr OutputBrowser::filterIt() {
 
     // Run grep to filter fSrc into fTarget
     QString extraOptions;
-    if (!matched)
+    if (!matched) {
         extraOptions += " -v ";
-    if (!caseSensitive)
+    }
+    if (!caseSensitive) {
         extraOptions += " -i ";
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -784,8 +799,9 @@ VFile_ptr OutputBrowser::filterIt() {
 #else
         msg = "Failed to run grep command!";
 #endif
-        if (!errStr.isEmpty())
+        if (!errStr.isEmpty()) {
             msg += "<br>Error message: " + errStr;
+        }
 
         UserMessage::message(UserMessage::ERROR, true, msg.toStdString());
         textFilter_->setStatus(TextFilterWidget::NotFoundStatus);
@@ -796,8 +812,9 @@ VFile_ptr OutputBrowser::filterIt() {
 }
 
 void OutputBrowser::slotRemoveFilter() {
-    if (stacked_->currentIndex() == HtmlIndex)
+    if (stacked_->currentIndex() == HtmlIndex) {
         return;
+    }
 
     contentsFile_ = file_;
     loadContents(false);

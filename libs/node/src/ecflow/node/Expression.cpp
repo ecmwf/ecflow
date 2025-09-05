@@ -57,10 +57,12 @@ std::unique_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) 
             // returns new allocated memory, if no errors
             std::unique_ptr<AstTop> ast = expressionParser.ast();
 
-            if (errorMsg.empty())
+            if (errorMsg.empty()) {
                 LOG_ASSERT(ast.get(), "");
-            else
+            }
+            else {
                 LOG_ASSERT(!ast.get(), "");
+            }
 
             return ast;
         }
@@ -113,10 +115,12 @@ std::string Expression::compose_expression(const std::vector<PartExpression>& ve
     string ret;
     auto theEnd = vec.end();
     for (auto expr = vec.begin(); expr != theEnd; ++expr) {
-        if ((*expr).andExpr())
+        if ((*expr).andExpr()) {
             ret += " AND ";
-        else if ((*expr).orExpr())
+        }
+        else if ((*expr).orExpr()) {
             ret += " OR ";
+        }
         ret += (*expr).expression();
     }
     return ret;
@@ -147,8 +151,9 @@ void Expression::add(const PartExpression& t) {
 
 void Expression::add_expr(const std::vector<PartExpression>& vec) {
     for (auto part : vec) {
-        if (!empty() && part.expr_type() == PartExpression::FIRST)
+        if (!empty() && part.expr_type() == PartExpression::FIRST) {
             part.set_expr_type(PartExpression::AND);
+        }
         add(part);
     }
 }
@@ -176,12 +181,15 @@ void Expression::createAST(Node* node, const std::string& exprType, std::string&
                                                                                         root1  root2
                  */
                 Ast* newRoot = nullptr;
-                if (vec_[i].andExpr())
+                if (vec_[i].andExpr()) {
                     newRoot = new AstAnd();
-                else if (vec_[i].orExpr())
+                }
+                else if (vec_[i].orExpr()) {
                     newRoot = new AstOr();
-                else
+                }
+                else {
                     LOG_ASSERT(false, ""); // what else can it be.
+                }
 
                 if (newRoot) {
                     newRoot->addChild(theCombinedAst_->left());

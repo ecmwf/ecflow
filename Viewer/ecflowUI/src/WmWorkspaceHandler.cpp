@@ -33,11 +33,13 @@ bool WmWorkspaceHandler::switchTo(QWidget* sourceWidget, QWidget* targetWidget) 
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    if (sourceWidget == nullptr || targetWidget == nullptr)
+    if (sourceWidget == nullptr || targetWidget == nullptr) {
         return false;
+    }
 
-    if (!hasCommand())
+    if (!hasCommand()) {
         return false;
+    }
 
     Q_ASSERT(sourceWidget);
     Q_ASSERT(targetWidget);
@@ -77,8 +79,9 @@ bool WmWorkspaceHandler::hasCommand() {
         if (proc.waitForStarted(3000)) {
             proc.waitForFinished(3000);
 
-            if (!proc.readAllStandardOutput().isEmpty() && proc.exitStatus() == QProcess::NormalExit)
+            if (!proc.readAllStandardOutput().isEmpty() && proc.exitStatus() == QProcess::NormalExit) {
                 commandTested_ = 1;
+            }
         }
     }
 
@@ -108,8 +111,9 @@ int WmWorkspaceHandler::workspaceId(int winId) {
     if (proc.exitStatus() == QProcess::NormalExit) {
         QString result(proc.readAllStandardOutput());
         QRegExp re("^\\d+\\n?$");
-        if (re.exactMatch(result))
+        if (re.exactMatch(result)) {
             return result.toInt();
+        }
         else {
             UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -141,8 +145,9 @@ void WmWorkspaceHandler::moveAndSwitchToWorkspace(int winId, int wsId) {
     QProcess proc;
     proc.start("xdotool", QStringList() << "set_desktop_for_window" << QString::number(winId) << QString::number(wsId));
 
-    if (!proc.waitForStarted(3000))
+    if (!proc.waitForStarted(3000)) {
         return;
+    }
 
     proc.waitForFinished(3000);
     if (proc.exitStatus() != QProcess::NormalExit) {
@@ -151,6 +156,7 @@ void WmWorkspaceHandler::moveAndSwitchToWorkspace(int winId, int wsId) {
 
     QProcess procSwitch;
     procSwitch.start("xdotool", QStringList() << "set_desktop" << QString::number(wsId));
-    if (procSwitch.waitForStarted(3000))
+    if (procSwitch.waitForStarted(3000)) {
         procSwitch.waitForFinished(3000);
+    }
 }

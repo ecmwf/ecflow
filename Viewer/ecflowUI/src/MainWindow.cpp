@@ -174,8 +174,9 @@ MainWindow::~MainWindow() {
 void MainWindow::init(MainWindow* win) {
     nodePanel_->init();
 
-    if (!win)
+    if (!win) {
         return;
+    }
 }
 
 void MainWindow::addInfoPanelActions(QToolBar* toolbar) {
@@ -429,8 +430,9 @@ void MainWindow::slotServerSyncNotify(bool) {
 }
 
 void MainWindow::hideServerSyncNotify() {
-    if (serverSyncNotifyTb_)
+    if (serverSyncNotifyTb_) {
         serverSyncNotifyTb_->hide();
+    }
 }
 
 void MainWindow::slotEditServerSettings(ServerHandler* s) {
@@ -513,11 +515,13 @@ void MainWindow::readSettings(VComboSettings* vs) {
 	}
 #endif
 
-    if (vs->containsQs("geometry"))
+    if (vs->containsQs("geometry")) {
         restoreGeometry(vs->getQs("geometry").toByteArray());
+    }
 
-    if (vs->containsQs("state"))
+    if (vs->containsQs("state")) {
         restoreState(vs->getQs("state").toByteArray());
+    }
 }
 
 //====================================================
@@ -562,29 +566,35 @@ void MainWindow::openWindow(QStringList idLst, QWidget* fromW) {
 }
 
 void MainWindow::showWindows() {
-    for (auto win : windows_)
+    for (auto win : windows_) {
         win->show();
+    }
 }
 
 void MainWindow::configChanged(MainWindow*) {
-    Q_FOREACH (MainWindow* win, windows_)
+    Q_FOREACH (MainWindow* win, windows_) {
         win->rerenderContents();
+    }
 }
 
 void MainWindow::lookUpInTree(VInfo_ptr info) {
-    Q_FOREACH (MainWindow* win, windows_)
-        if (win->selectInTreeView(info))
+    Q_FOREACH (MainWindow* win, windows_) {
+        if (win->selectInTreeView(info)) {
             return;
+        }
+    }
 }
 
 void MainWindow::hideServerSyncNotify(MainWindow*) {
-    Q_FOREACH (MainWindow* win, windows_)
+    Q_FOREACH (MainWindow* win, windows_) {
         win->hideServerSyncNotify();
+    }
 }
 
 void MainWindow::cleanUpOnQuit(MainWindow*) {
-    Q_FOREACH (MainWindow* win, windows_)
+    Q_FOREACH (MainWindow* win, windows_) {
         win->cleanUpOnQuit();
+    }
 }
 
 // Add server list sync notification
@@ -617,8 +627,9 @@ bool MainWindow::aboutToQuit(MainWindow* topWin) {
                     tr("Delete temporary session?"),
                     tr("This was a temporary session - would you like to preserve it for future use?"),
                     QMessageBox::Yes | QMessageBox::No,
-                    QMessageBox::No) == QMessageBox::No)
+                    QMessageBox::No) == QMessageBox::No) {
                 SessionHandler::destroyInstance();
+            }
         }
         else // if askToPreserveTemporarySession() is false, then we assume we want to delete
         {
@@ -743,8 +754,9 @@ void MainWindow::saveSession(SessionItem*) {
 
 MainWindow* MainWindow::findWindow(QWidget* childW) {
     Q_FOREACH (MainWindow* w, windows_) {
-        if (static_cast<QWidget*>(w) == childW->window())
+        if (static_cast<QWidget*>(w) == childW->window()) {
             return w;
+        }
     }
 
     return nullptr;
@@ -755,8 +767,9 @@ MainWindow* MainWindow::firstWindow() {
 }
 
 void MainWindow::startPreferences(QString option) {
-    if (windows_.count() > 0)
+    if (windows_.count() > 0) {
         startPreferences(windows_.front(), option);
+    }
 }
 
 void MainWindow::startPreferences(MainWindow* w, QString option) {
@@ -798,8 +811,9 @@ MainWindowTitleHandler::~MainWindowTitleHandler() = default;
 
 void MainWindowTitleHandler::update(ServerHandler* sh) {
     Q_ASSERT(win_);
-    if (sh == win_->selectedServer())
+    if (sh == win_->selectedServer()) {
         update();
+    }
 }
 
 void MainWindowTitleHandler::update() {
@@ -812,14 +826,16 @@ void MainWindowTitleHandler::update() {
 
     if (ServerHandler* sh = win_->selectedServer()) {
         QString menuMode = sh->nodeMenuMode();
-        if (!menuMode.isEmpty())
+        if (!menuMode.isEmpty()) {
             title += " - (menu: " + menuMode + ")";
+        }
     }
 
     // add the name of the session to the title bar?
     QString sessionName = QString::fromStdString(SessionHandler::instance()->current()->name());
-    if (sessionName != "default")
+    if (sessionName != "default") {
         title += " - (session: " + sessionName + ")";
+    }
 
     win_->setWindowTitle(title);
 }

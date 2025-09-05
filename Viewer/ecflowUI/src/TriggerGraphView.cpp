@@ -125,10 +125,12 @@ void TriggerGraphNodeItem::paint(QPainter* painter, const QStyleOptionGraphicsIt
         }
     }
     else {
-        if (!isSelected())
+        if (!isSelected()) {
             painter->setPen(QPen(Qt::black, 2));
-        else
+        }
+        else {
             painter->setPen(QPen(Qt::black, 2, Qt::DashLine));
+        }
 
         painter->drawRect(opt.rect.adjusted(1, 1, -2, -2));
     }
@@ -162,8 +164,9 @@ bool TriggerGraphNodeItem::detectSizeGrowth() const {
         view_->delegate()->sizeHintCompute(idx, w, h, true);
     }
 
-    if (w == 0)
+    if (w == 0) {
         return false;
+    }
 
     return (w + 1 > bRect_.width() || h > bRect_.height());
 }
@@ -181,17 +184,20 @@ void TriggerGraphNodeItem::addRelation(TriggerGraphNodeItem* o) {
 
 void TriggerGraphNodeItem::adjustPos(int x, int y) {
     setPos(x, y);
-    if (!scene())
+    if (!scene()) {
         view_->scene()->addItem(this);
+    }
 }
 
 GraphLayoutNode* TriggerGraphNodeItem::toGraphNode() {
     auto* n = new GraphLayoutNode(bRect_.width(), bRect_.height());
-    for (auto p : parents_)
+    for (auto p : parents_) {
         n->parents_.emplace_back(p->index_);
+    }
 
-    for (auto ch : children_)
+    for (auto ch : children_) {
         n->children_.emplace_back(ch->index_);
+    }
 
     return n;
 }
@@ -307,8 +313,9 @@ void TriggerGraphEdgeItem::adjust() {
 
     setPath(p);
 
-    if (!scene())
+    if (!scene()) {
         view_->scene()->addItem(this);
+    }
 }
 
 void TriggerGraphEdgeItem::addArrow(QPainterPath& pPath, double x1, double y1, double x2, double y2) {
@@ -481,12 +488,15 @@ void TriggerGraphEdgeInfoDialog::makeRow(QString label, VItem* t, QString& s) co
 }
 void TriggerGraphEdgeInfoDialog::makeModeRow(TriggerCollector::Mode mode, QString& s) const {
     QString modeTxt = "direct trigger";
-    if (mode == TriggerCollector::Parent)
+    if (mode == TriggerCollector::Parent) {
         modeTxt = "dependency via parent";
-    else if (mode == TriggerCollector::Child)
+    }
+    else if (mode == TriggerCollector::Child) {
         modeTxt = "dependency via child";
-    else if (mode == TriggerCollector::Hierarchy)
+    }
+    else if (mode == TriggerCollector::Hierarchy) {
         modeTxt = "parent-child relationship";
+    }
 
     s += "<tr><td class=\'grfirst\'>type</td><td>" + modeTxt + "</td></tr>";
 }
@@ -556,8 +566,9 @@ void TriggerGraphExpandState::add(VInfo_ptr info, Mode mode) {
 
 TriggerGraphExpandStateItem* TriggerGraphExpandState::find(VItem* item) const {
     for (auto v : items_) {
-        if (v->info_->item() == item)
+        if (v->info_->item() == item) {
             return v;
+        }
     }
     return nullptr;
 }
@@ -684,8 +695,9 @@ TriggerGraphNodeItem* TriggerGraphView::currentNodeItem() const {
 
 void TriggerGraphView::slotContextMenu(const QPoint& position) {
     auto itemClicked = nodeItemAt(mapToScene(position));
-    if (!itemClicked)
+    if (!itemClicked) {
         return;
+    }
 
     QPoint scrollOffset(horizontalScrollBar()->value(), verticalScrollBar()->value());
     QPoint globalPos = mapToGlobal(position); //, position + scrollOffset;
@@ -701,8 +713,9 @@ void TriggerGraphView::slotContextMenu(const QPoint& position) {
         std::vector<VInfo_ptr> nodeLst;
         for (auto n : itemLst) {
             VInfo_ptr info = VInfo::createFromItem(n->item());
-            if (info && !info->isEmpty())
+            if (info && !info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
 
         actionHandler_->contextMenu(nodeLst, globalPos);
@@ -719,8 +732,9 @@ void TriggerGraphView::slotCommandShortcut() {
             std::vector<VInfo_ptr> nodeLst;
             for (auto n : itemLst) {
                 VInfo_ptr info = VInfo::createFromItem(n->item());
-                if (info && !info->isEmpty())
+                if (info && !info->isEmpty()) {
                     nodeLst.push_back(info);
+                }
             }
             actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
         }
@@ -787,8 +801,9 @@ void TriggerGraphView::rerender() {
 // }
 
 void TriggerGraphView::adjustBackground(VProperty* p) {
-    if (!p)
+    if (!p) {
         p = prop_->find("view.trigger.background", true);
+    }
 
     if (p) {
         auto col = p->value().value<QColor>();
@@ -799,8 +814,9 @@ void TriggerGraphView::adjustBackground(VProperty* p) {
 }
 
 void TriggerGraphView::adjustParentConnectColour(VProperty* p) {
-    if (!p)
+    if (!p) {
         p = prop_->find("view.trigger.parentConnectorColour", true);
+    }
 
     if (p) {
         auto col = p->value().value<QColor>();
@@ -812,8 +828,9 @@ void TriggerGraphView::adjustParentConnectColour(VProperty* p) {
 }
 
 void TriggerGraphView::adjustTriggerConnectColour(VProperty* p) {
-    if (!p)
+    if (!p) {
         p = prop_->find("view.trigger.triggerConnectorColour", true);
+    }
 
     if (p) {
         auto col = p->value().value<QColor>();
@@ -825,8 +842,9 @@ void TriggerGraphView::adjustTriggerConnectColour(VProperty* p) {
 }
 
 void TriggerGraphView::adjustDepConnectColour(VProperty* p) {
-    if (!p)
+    if (!p) {
         p = prop_->find("view.trigger.dependencyConnectorColour", true);
+    }
 
     if (p) {
         auto col = p->value().value<QColor>();
@@ -862,8 +880,9 @@ void TriggerGraphView::notifyChange(VProperty* p) {
 
 void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect) {
     ServerHandler* server = node->server();
-    if (!server)
+    if (!server) {
         return;
+    }
 
     // NOTE: the re-layout, if needed, is delayed by 0.1 s. It might be
     // too short and if there are a lot of changes at a synch and a lot of nodes
@@ -984,8 +1003,9 @@ void TriggerGraphView::expandParent(VInfo_ptr info, bool scanOnly) {
     if (VNode* n = info->node()) {
         VNode* p = n->parent();
 
-        if (p)
+        if (p) {
             addRelation(p, n, nullptr, TriggerCollector::Hierarchy, nullptr);
+        }
 
         focus_      = n;
         auto exItem = expandState_.find(n);
@@ -1109,14 +1129,16 @@ void TriggerGraphView::buildLayout() {
     bool showCursor =
         (QGuiApplication::overrideCursor() == nullptr || QGuiApplication::overrideCursor()->shape() != Qt::WaitCursor);
 
-    if (showCursor)
+    if (showCursor) {
         QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    }
 
     builder_->build(lnodes, enodes, focus);
     layoutDurationInMs_ = stopwatch.elapsed();
 
-    if (showCursor)
+    if (showCursor) {
         QGuiApplication::restoreOverrideCursor();
+    }
 
     for (size_t i = 0; i < nodes_.size(); i++) {
         nodes_[i]->adjustPos(lnodes[i]->x_, lnodes[i]->y_);
@@ -1160,10 +1182,12 @@ void TriggerGraphView::updateLayout() {
 void TriggerGraphView::initVisibleRegion() {
     if (info_ && info_->item()) {
         VItem* item = nullptr;
-        if (lastExpandSelected_)
+        if (lastExpandSelected_) {
             item = lastExpandSelected_->item();
-        if (!item)
+        }
+        if (!item) {
             item = info_->item();
+        }
 
         Q_ASSERT(item);
         for (auto n : nodes_) {
@@ -1176,8 +1200,9 @@ void TriggerGraphView::initVisibleRegion() {
 }
 
 TriggerGraphNodeItem* TriggerGraphView::addNode(VItem* item) {
-    if (!item)
+    if (!item) {
         return nullptr;
+    }
 
     for (auto n : nodes_) {
         if (n->item() == item) {
@@ -1251,8 +1276,9 @@ void TriggerGraphView::notifyEdgeSelected(TriggerGraphEdgeItem* e) {
 void TriggerGraphView::slotEdgeInfo(const QUrl& link) {
     if (nodes_.size() > 0 && nodes_[0]->item()) {
         VInfo_ptr info = VInfo::createFromPath(nodes_[0]->item()->server(), link.toString().toStdString());
-        if (info)
+        if (info) {
             Q_EMIT linkSelected(info);
+        }
     }
 }
 

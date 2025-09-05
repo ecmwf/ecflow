@@ -93,8 +93,9 @@ bool ClientSuites::remove_suite(suite_ptr suite) {
 }
 
 void ClientSuites::suite_added_in_defs(suite_ptr suite) {
-    if (auto_add_new_suites_)
+    if (auto_add_new_suites_) {
         add_suite(suite);
+    }
     else {
         // *IF* and *ONLY IF* the suite was previously registered added, *UPDATE* its suite_ptr
         auto i = find_suite(suite->name());

@@ -39,8 +39,9 @@ public:
     bool groupRequest() const { return (cmd_.get()) ? cmd_->group_cmd() : false; }
 
     void cleanup() {
-        if (cmd_.get())
+        if (cmd_.get()) {
             cmd_->cleanup();
+        }
     } // reclaim memory *AFTER* command has run
 
     /// Used by boost test, to verify persistence

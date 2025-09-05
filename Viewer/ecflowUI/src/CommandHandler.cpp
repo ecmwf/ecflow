@@ -162,10 +162,12 @@ void CommandHandler::run(VInfo_ptr info, const std::vector<std::string>& cmd) {
 
     // Replace placeholders with real node names
     for (std::size_t i = 0; i < cmd.size(); i++) {
-        if (realCommand[i] == "<full_name>")
+        if (realCommand[i] == "<full_name>") {
             realCommand[i] = nodeFullName;
-        else if (realCommand[i] == "<node_name>")
+        }
+        else if (realCommand[i] == "<node_name>") {
             realCommand[i] = nodeName;
+        }
     }
 
     UiLog().dbg() << " final command: " << commandToString(realCommand);
@@ -204,8 +206,9 @@ void CommandHandler::openLinkInBrowser(VInfo_ptr info) {
                         browser = prop->valueAsString();
                     }
 
-                    if (browser.isEmpty())
+                    if (browser.isEmpty()) {
                         browser = "firefox";
+                    }
 
                     std::string cmd = "sh " + browser.toStdString() + " " + url.toStdString();
                     ShellCommand::run(cmd, cmd, false);
@@ -260,8 +263,9 @@ bool CommandHandler::kill(const std::vector<VNode*>& nodes, bool confirm) {
 std::string CommandHandler::commandToString(const std::vector<std::string>& cmd) {
     std::string s;
     for (const auto& it : cmd) {
-        if (!s.empty())
+        if (!s.empty()) {
             s += " ";
+        }
         s += it;
     }
     return s;
@@ -270,8 +274,9 @@ std::string CommandHandler::commandToString(const std::vector<std::string>& cmd)
 void CommandHandler::substituteVariables(std::string& cmd, const std::vector<VInfo_ptr>& info) {
     if (info.size() > 0) {
         VNode* n = info[0]->node();
-        if (!n || n->isAttribute())
+        if (!n || n->isAttribute()) {
             return;
+        }
 
         // this can lock the mutex on the defs
         n->substituteVariableValue(cmd);

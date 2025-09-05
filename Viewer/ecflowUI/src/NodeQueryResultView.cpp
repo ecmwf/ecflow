@@ -93,8 +93,9 @@ void NodeQueryResultView::setSourceModel(NodeQueryResultModel* model) {
 QModelIndexList NodeQueryResultView::selectedList() {
     QModelIndexList lst;
     Q_FOREACH (QModelIndex idx, selectedIndexes()) {
-        if (idx.column() == 0)
+        if (idx.column() == 0) {
             lst << idx;
+        }
     }
     return lst;
 }
@@ -156,8 +157,9 @@ void NodeQueryResultView::getListOfSelectedNodes(std::vector<VInfo_ptr>& nodeLis
     nodeList.clear();
     for (int i = 0; i < indexList.count(); i++) {
         VInfo_ptr info = model_->nodeInfo(sortModel_->mapToSource(indexList[i]));
-        if (info && !info->isEmpty())
+        if (info && !info->isEmpty()) {
             nodeList.push_back(info);
+        }
     }
 }
 
@@ -183,8 +185,9 @@ void NodeQueryResultView::handleContextMenu(QModelIndex indexClicked,
         std::vector<VInfo_ptr> nodeLst;
         for (int i = 0; i < indexLst.count(); i++) {
             VInfo_ptr info = model_->nodeInfo(sortModel_->mapToSource(indexLst[i]));
-            if (info && !info->isEmpty())
+            if (info && !info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
 
         actionHandler_->contextMenu(nodeLst, globalPos);
@@ -200,8 +203,9 @@ void NodeQueryResultView::slotCommandShortcut() {
         std::vector<VInfo_ptr> nodeLst;
         for (int i = 0; i < indexLst.count(); i++) {
             VInfo_ptr info = model_->nodeInfo(indexLst[i]);
-            if (info && !info->isEmpty())
+            if (info && !info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
         actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
     }
@@ -209,8 +213,9 @@ void NodeQueryResultView::slotCommandShortcut() {
 
 void NodeQueryResultView::slotViewCommand(std::vector<VInfo_ptr> nodeLst, QString /*cmd*/) {
 
-    if (nodeLst.size() == 0)
+    if (nodeLst.size() == 0) {
         return;
+    }
 
     /*if(cmd == "set_as_root")
     {

@@ -26,8 +26,9 @@ DashboardDialog::DashboardDialog(QWidget* parent) : QDialog(parent) {
 
     // Disable the default button
     Q_FOREACH (QAbstractButton* b, buttonBox_->buttons()) {
-        if (QPushButton* pb = buttonBox_->button(buttonBox_->standardButton(b)))
+        if (QPushButton* pb = buttonBox_->button(buttonBox_->standardButton(b))) {
             pb->setAutoDefault(false);
+        }
     }
 
     readSettings();
@@ -50,16 +51,18 @@ void DashboardDialog::add(DashboardWidget* dw) {
 }
 
 void DashboardDialog::reject() {
-    if (dw_)
+    if (dw_) {
         dw_->writeSettingsForDialog();
+    }
 
     writeSettings();
     QDialog::reject();
 }
 
 void DashboardDialog::closeEvent(QCloseEvent* event) {
-    if (dw_)
+    if (dw_) {
         dw_->writeSettingsForDialog();
+    }
 
     Q_EMIT aboutToClose();
     event->accept();

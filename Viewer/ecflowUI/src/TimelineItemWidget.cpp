@@ -48,8 +48,9 @@ QWidget* TimelineItemWidget::realWidget() {
 void TimelineItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 
@@ -88,8 +89,9 @@ void TimelineItemWidget::load() {
                 if (!logFile.isEmpty()) {
                     std::vector<std::string> suites;
                     if (SuiteFilter* sf = sh->suiteFilter()) {
-                        if (sf->isEnabled())
+                        if (sf->isEnabled()) {
                             suites = sh->suiteFilter()->filter();
+                        }
                     }
 
                     // last 100 MB are read
@@ -128,21 +130,25 @@ bool TimelineItemWidget::hasSameContents(VInfo_ptr info) {
 }
 
 void TimelineItemWidget::notifyInfoChanged(const std::string& path) {
-    if (info_)
+    if (info_) {
         w_->selectPathInView(path);
+    }
 }
 
 void TimelineItemWidget::serverSyncFinished() {
-    if (delayedLoad_)
+    if (delayedLoad_) {
         load();
+    }
 }
 
 void TimelineItemWidget::connectStateChanged() {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 
-    if (delayedLoad_)
+    if (delayedLoad_) {
         load();
+    }
 }
 
 void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
@@ -155,8 +161,9 @@ void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
         else {
             if (info_ && info_->node()) {
                 // reloadTb_->setEnabled(true);
-                if (delayedLoad_)
+                if (delayedLoad_) {
                     load();
+                }
             }
             else {
                 clearContents();
@@ -166,8 +173,9 @@ void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
 
     if (flags.isSet(DetachedChanged)) {
         w_->setDetached(detached_);
-        if (!detached_ && info_)
+        if (!detached_ && info_) {
             w_->selectPathInView(info_->nodePath());
+        }
 #if 0
         // we just returned from detached state
         //if the server in the widget does not match the current one we need to reload

@@ -44,12 +44,15 @@ void BeginCmd::print_only(std::string& os) const {
 
 bool BeginCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<BeginCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (suiteName_ != the_rhs->suiteName())
+    }
+    if (suiteName_ != the_rhs->suiteName()) {
         return false;
-    if (force_ != the_rhs->force())
+    }
+    if (force_ != the_rhs->force()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
@@ -97,8 +100,9 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         /// check_suite_can_begin will throw if suite can't begin
-        if (!force_)
+        if (!force_) {
             defs->check_suite_can_begin(suite);
+        }
         else {
 
             suite->get_all_active_submittables(tasks);
@@ -111,8 +115,9 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
     }
 
     // The begin will clear the zombie flag: Hence reset it here.
-    for (auto task : tasks)
+    for (auto task : tasks) {
         task->get_flag().set(ecf::Flag::ZOMBIE);
+    }
 
     // After begin do the first Job submission. This will kick of those
     // jobs that have no dependencies, or relative time of +00:00
@@ -160,10 +165,12 @@ void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         std::vector<std::string> lineTokens;
         Str::split(beginArg, lineTokens);
         if (lineTokens.size() == 1) {
-            if (lineTokens[0] == "--force")
+            if (lineTokens[0] == "--force") {
                 force = true;
-            else
+            }
+            else {
                 suiteName = lineTokens[0];
+            }
         }
         else if (lineTokens.size() == 2) {
             suiteName = lineTokens[0];

@@ -47,8 +47,9 @@ bool ExpandState::isEmpty() const {
 }
 
 void ExpandState::clear() {
-    if (root_)
+    if (root_) {
         delete root_;
+    }
 
     root_ = nullptr;
 }
@@ -75,8 +76,9 @@ void ExpandState::save(const VNode* vnode) {
         // have a crash when trying to get index of the vnodes via the model!!)
         if (VTreeNode* vtn = model_->indexToServerOrNode(idx)) {
             if (VTree* vt = vtn->root()) {
-                if (vt->totalNum() == 0)
+                if (vt->totalNum() == 0) {
                     return;
+                }
             }
         }
 
@@ -155,8 +157,9 @@ void ExpandState::save(const VNode* node, ExpandStateNode* expandNode, const QMo
         if (chExpandNode) {
             // We only set the expand state when the child node is in the current VTree (i.e. is filtered).
             // Otherwise we keep the original value
-            if (chIdx.isValid())
+            if (chIdx.isValid()) {
                 chExpandNode->setExpanded(view_->isExpanded(chIdx));
+            }
         }
         // ... create a new child expand node at the i-th place
         else {
@@ -178,16 +181,18 @@ void ExpandState::collectExpanded(const VNode* node, QSet<QPersistentModelIndex>
 #endif
     Q_ASSERT(node);
 
-    if (!root_)
+    if (!root_) {
         return;
+    }
 
     QModelIndex nodeIdx = model_->nodeToIndex(node);
 #ifdef _UI_EXPANDSTATE_DEBUG
     UiLog().dbg() << " root=" << root_->name_;
 #endif
     ExpandStateNode* expand = find(node->absNodePath());
-    if (expand)
+    if (expand) {
         collectExpanded(expand, node, nodeIdx, theSet);
+    }
     else {
 #ifdef _UI_EXPANDSTATE_DEBUG
         UiLog().dbg() << " Node not found in expand tree";
@@ -251,8 +256,9 @@ void ExpandState::collectExpanded(ExpandStateNode* expand,
             save(chNode, chExpand, chIdx);
 
             // expand recursively the new expand node if needed
-            if (parentExpandedAll)
+            if (parentExpandedAll) {
                 chExpand->setExpandedRecursively(1);
+            }
             else {
                 UiLog().dbg() << " newly added node not expanded!!";
             }
@@ -278,14 +284,17 @@ void ExpandState::saveCollapseAll(const VNode* node) {
 
 // Find an expand node using its ful path
 ExpandStateNode* ExpandState::find(const std::string& fullPath) {
-    if (!root_)
+    if (!root_) {
         return nullptr;
+    }
 
-    if (fullPath.empty())
+    if (fullPath.empty()) {
         return nullptr;
+    }
 
-    if (fullPath == "/")
+    if (fullPath == "/") {
         return root_;
+    }
 
     std::vector<std::string> pathVec;
     ecf::algorithm::split(pathVec, fullPath, "/");
@@ -299,11 +308,13 @@ ExpandStateNode* ExpandState::find(const std::string& fullPath) {
 
 bool ExpandState::needToExpandNewChild(ExpandStateNode* expandNode, const std::string& expandNodePath) const {
 
-    if (expandNode->expandedAll_ == 1)
+    if (expandNode->expandedAll_ == 1) {
         return true;
+    }
 
-    if (expandNode->collapsedAll_ == 1)
+    if (expandNode->collapsedAll_ == 1) {
         return false;
+    }
 
     // Checks if any of the parents have expandedAll set. In this case we
     // expand recursively all the new expand node
@@ -322,8 +333,9 @@ bool ExpandState::needToExpandNewChild(ExpandStateNode* expandNode, const std::s
 
 // We need to do it this way because we do not store the parents in the nodes for memory efficiency.
 void ExpandState::collectParents(const std::string& fullPath, std::vector<ExpandStateNode*>& parents) const {
-    if (!root_)
+    if (!root_) {
         return;
+    }
 
     // how split works:
     //   str="/"  -> "",""
@@ -352,8 +364,9 @@ void ExpandState::updateServerName(const std::string& serverName) {
 }
 
 void ExpandState::print() const {
-    if (!root_)
+    if (!root_) {
         return;
+    }
 
     std::string indent = "";
     root_->print(indent, true);

@@ -62,10 +62,12 @@ void ServerComThread::task(VTask_ptr task) {
             // Suite filter
             hasSuiteFilter_   = server_->suiteFilter()->isEnabled();
             autoAddNewSuites_ = server_->suiteFilter()->autoAddNewSuites();
-            if (hasSuiteFilter_)
+            if (hasSuiteFilter_) {
                 filteredSuites_ = server_->suiteFilter()->filter();
-            else
+            }
+            else {
                 filteredSuites_.clear();
+            }
 
             maxLineNum_ = server_->conf()->intValue(VServerSettings::MaxOutputFileLines);
         }
@@ -167,18 +169,24 @@ void ServerComThread::run() {
                 case VTask::ZombieCommandTask: {
                     std::string cmd = params_["command"];
                     UiLog(serverName_).dbg() << " ZOMBIE COMMAND " << cmd << " path=" << zombie_.path_to_task();
-                    if (cmd == "zombie_fob")
+                    if (cmd == "zombie_fob") {
                         ci_->zombieFob(zombie_);
-                    else if (cmd == "zombie_fail")
+                    }
+                    else if (cmd == "zombie_fail") {
                         ci_->zombieFail(zombie_);
-                    else if (cmd == "zombie_adopt")
+                    }
+                    else if (cmd == "zombie_adopt") {
                         ci_->zombieAdopt(zombie_);
-                    else if (cmd == "zombie_block")
+                    }
+                    else if (cmd == "zombie_block") {
                         ci_->zombieBlock(zombie_);
-                    else if (cmd == "zombie_remove")
+                    }
+                    else if (cmd == "zombie_remove") {
                         ci_->zombieRemove(zombie_);
-                    else if (cmd == "zombie_kill")
+                    }
+                    else if (cmd == "zombie_kill") {
                         ci_->zombieKill(zombie_);
+                    }
 
                     break;
                 }
@@ -234,10 +242,12 @@ void ServerComThread::run() {
                 case VTask::JobStatusFileTask: {
                     UiLog(serverName_).dbg() << " FILE"
                                              << " " << params_["clientPar"];
-                    if (maxLineNum_ < 0)
+                    if (maxLineNum_ < 0) {
                         ci_->file(nodePath_, params_["clientPar"]);
-                    else
+                    }
+                    else {
                         ci_->file(nodePath_, params_["clientPar"], ecf::convert_to<std::string>(maxLineNum_));
+                    }
 
                     break;
                 }
@@ -519,8 +529,9 @@ void ServerComThread::update_delete(const Defs* dc) {
 void ServerComThread::attach() {
     ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
     defs_ptr d = defsAccess.defs();
-    if (d == nullptr)
+    if (d == nullptr) {
         return;
+    }
 
     attach(d);
 }
@@ -528,8 +539,9 @@ void ServerComThread::attach() {
 // Attach  each node and the defs to the observer. The access to
 // the defs is safe so we do not need to set a mutex on it.
 void ServerComThread::attach(defs_ptr d) {
-    if (d == nullptr)
+    if (d == nullptr) {
         return;
+    }
 
     d->attach(this);
 
@@ -555,8 +567,9 @@ void ServerComThread::attach(Node* node) {
 void ServerComThread::detach() {
     ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
     defs_ptr d = defsAccess.defs();
-    if (d == nullptr)
+    if (d == nullptr) {
         return;
+    }
 
     detach(d);
 }
@@ -564,8 +577,9 @@ void ServerComThread::detach() {
 // Detach each node and the defs from the observer.  The access to
 // the defs is safe so we do not need to set a mutex on it.
 void ServerComThread::detach(defs_ptr d) {
-    if (d == nullptr)
+    if (d == nullptr) {
         return;
+    }
 
     d->detach(this);
 
@@ -589,8 +603,9 @@ void ServerComThread::detach(Node* node) {
 
 void ServerComThread::aspectToStr(std::stringstream& ss, const std::vector<ecf::Aspect::Type>& t) const {
     for (auto it : t) {
-        if (!ss.str().empty())
+        if (!ss.str().empty()) {
             ss << ",";
+        }
         ss << it;
     }
 }

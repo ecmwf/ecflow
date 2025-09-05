@@ -219,8 +219,9 @@ BOOST_AUTO_TEST_CASE(test_get_last_n_lines_from_log) {
 
     // Populate the log file
     std::string msg = "This is message ";
-    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)
+    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i) {
         LOG(Log::MSG, msg << i);
+    }
 
     // Now check, getting the lines
     {
@@ -276,8 +277,9 @@ BOOST_AUTO_TEST_CASE(test_get_first_n_lines_from_log) {
     // Populate the log file
     const int NO_OF_LINES_IN_LOG_FILE = 200;
     std::string msg                   = "This is message ";
-    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)
+    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i) {
         LOG(Log::MSG, msg << i);
+    }
 
     // Now check, getting the lines
     {
@@ -354,8 +356,9 @@ BOOST_AUTO_TEST_CASE(test_get_log_timing) {
     // Populate the log file
     const int NO_OF_LINES_IN_LOG_FILE = 20000;
     std::string msg                   = "This is message ";
-    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)
+    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i) {
         LOG(Log::MSG, msg << i);
+    }
 
     DurationTimer timer;
 

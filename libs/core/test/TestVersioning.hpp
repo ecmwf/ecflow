@@ -52,8 +52,9 @@ private:
         // When *loading* the version pertains to loaded version in the data
         // When *saving* the version always pertains to the latest version
         ar & hour_;
-        if (version > 0)
+        if (version > 0) {
             ar & min_;
+        }
     }
 };
 } // namespace version_new_data_member

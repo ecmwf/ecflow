@@ -31,12 +31,15 @@ VTriggerAttrType::VTriggerAttrType() : VAttributeType("trigger") {
 QString VTriggerAttrType::toolTip(QStringList d) const {
     QString t;
     if (d.count() == dataCount_) {
-        if (d[CompleteIndex] == "0")
+        if (d[CompleteIndex] == "0") {
             t += "<b>Type:</b> Trigger<br>";
-        else if (d[CompleteIndex] == "1")
+        }
+        else if (d[CompleteIndex] == "1") {
             t += "<b>Type:</b> Complete<br>";
-        else
+        }
+        else {
             return t;
+        }
 
         t += "<b>Expression:</b> " + d[ExprIndex];
     }
@@ -46,10 +49,12 @@ QString VTriggerAttrType::toolTip(QStringList d) const {
 QString VTriggerAttrType::definition(QStringList d) const {
     QString t;
     if (d.count() == dataCount_) {
-        if (d[CompleteIndex] == "0")
+        if (d[CompleteIndex] == "0") {
             t += "trigger";
-        else if (d[CompleteIndex] == "1")
+        }
+        else if (d[CompleteIndex] == "1") {
             t += "complete";
+        }
 
         t += " " + d[ExprIndex];
     }
@@ -57,17 +62,21 @@ QString VTriggerAttrType::definition(QStringList d) const {
 }
 
 void VTriggerAttrType::encodeTrigger(Expression* e, QStringList& data) const {
-    if (e)
+    if (e) {
         data << qName_ << "0" << QString::fromStdString(e->expression());
-    else
+    }
+    else {
         encode_empty(data);
+    }
 }
 
 void VTriggerAttrType::encodeComplete(Expression* e, QStringList& data) const {
-    if (e)
+    if (e) {
         data << qName_ << "1" << QString::fromStdString(e->expression());
-    else
+    }
+    else {
         encode_empty(data);
+    }
 }
 
 void VTriggerAttrType::encode_empty(QStringList& data) const {
@@ -112,11 +121,13 @@ void VTriggerAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
         Expression* eT = node->get_trigger();
         Expression* eC = node->get_complete();
 
-        if (eT)
+        if (eT) {
             vec.push_back(new VTriggerAttr(vnode, eT, 0));
+        }
 
-        if (eC)
+        if (eC) {
             vec.push_back(new VTriggerAttr(vnode, eC, 1));
+        }
     }
 }
 
@@ -125,11 +136,13 @@ void VTriggerAttr::expressions(const VNode* vnode, std::string& trigger, std::st
         Expression* eT = node->get_trigger();
         Expression* eC = node->get_complete();
 
-        if (eT)
+        if (eT) {
             trigger = eT->expression();
+        }
 
-        if (eC)
+        if (eC) {
             complete = eC->expression();
+        }
     }
 }
 

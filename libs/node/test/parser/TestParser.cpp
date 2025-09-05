@@ -83,9 +83,10 @@ void test_defs(const std::string& directory, bool pass) {
                         break;
                     }
                 }
-                if (!ignore)
+                if (!ignore) {
                     BOOST_CHECK_MESSAGE(warn_msg.empty(),
                                         "Expected no warnings but found:" << warn_msg << "File: " << relPath.string());
+                }
 
                 // Write parsed file to a temporary file on disk, and reload, then compare defs, should be the same
                 PersistHelper helper;

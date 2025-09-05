@@ -139,8 +139,9 @@ QWidget* TriggerItemWidget::realWidget() {
 void TriggerItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 
@@ -230,8 +231,9 @@ void TriggerItemWidget::clearContents() {
     triggerTable_->clear();
     triggerGraph_->clear();
 
-    if (!active_)
+    if (!active_) {
         triggerTable_->clearSelection();
+    }
 }
 
 void TriggerItemWidget::clearTriggers() {
@@ -433,8 +435,9 @@ void TriggerItemWidget::readSettings(VComboSettings* vs) {
 //-------------------------
 
 void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect) {
-    if (!info_ || !info_->isNode())
+    if (!info_ || !info_->isNode()) {
         return;
+    }
 
     // If the triggers are not scanned there must have been a major change and
     // we need to reload the item
@@ -482,14 +485,17 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     //    }
 
     // We do not track further  changes when the item is not selected
-    if (!selected_ || !active_)
+    if (!selected_ || !active_) {
         return;
+    }
 
     // For the rest of the changes we rerender the collected items that might have changed
-    if (modeGroup_->checkedId() == TableModeIndex)
+    if (modeGroup_->checkedId() == TableModeIndex) {
         triggerTable_->nodeChanged(n, aspect);
-    else if (modeGroup_->checkedId() == GraphModeIndex)
+    }
+    else if (modeGroup_->checkedId() == GraphModeIndex) {
         triggerGraph_->nodeChanged(n, aspect);
+    }
 }
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");

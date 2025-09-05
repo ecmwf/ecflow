@@ -73,8 +73,9 @@ TcpBaseServer::TcpBaseServer(BaseServer* server, boost::asio::io_context& io, Se
 
 void TcpBaseServer::handle_request() {
     // See what kind of message we got from the client
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         std::cout << "   TcpBaseServer::handle_request  : client request " << inbound_request_ << endl;
+    }
 
     // Provide Identity to the command, to enable authentication
     auto cmd = inbound_request_.get_cmd();
@@ -126,9 +127,10 @@ void TcpBaseServer::handle_terminate_request() {
     //           we do this by checking that the out bound response was ok
     //           i.e a read only user should not be allowed to terminate server.
     if (inbound_request_.terminateRequest()) {
-        if (serverEnv_.debug())
+        if (serverEnv_.debug()) {
             cout << "   <-- TcpBaseServer::handle_terminate_request  exiting server via terminate() port "
                  << serverEnv_.port() << endl;
+        }
         terminate();
     }
 }
@@ -136,8 +138,9 @@ void TcpBaseServer::handle_terminate_request() {
 void TcpBaseServer::terminate() {
     // The server is terminated by cancelling all outstanding asynchronous
     // operations. Once all operations have finished the io_context::run() call  will exit.
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   Server::terminate(): posting call to Server::handle_terminate" << endl;
+    }
 
     // Post a call to the stop function so that Server::stop() is safe to call from any thread.
     boost::asio::post(io_, [this]() { handle_terminate(); });
@@ -146,8 +149,9 @@ void TcpBaseServer::terminate() {
 void TcpBaseServer::handle_terminate() {
     // if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling
     // checkpt and traverser timers, and signals" << endl;
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
+    }
 
     server_->handle_terminate();
 

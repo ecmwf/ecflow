@@ -43,16 +43,18 @@ VAttributeType::VAttributeType(const std::string& name) : VParam(name), dataCoun
 
 std::vector<VParam*> VAttributeType::filterItems() {
     std::vector<VParam*> v;
-    for (auto it = types_.begin(); it != types_.end(); ++it)
+    for (auto it = types_.begin(); it != types_.end(); ++it) {
         v.push_back(*it);
+    }
 
     return v;
 }
 
 VAttributeType* VAttributeType::find(const std::string& name) {
     auto it = typesMap_.find(name);
-    if (it != typesMap_.end())
+    if (it != typesMap_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
@@ -70,16 +72,18 @@ void VAttributeType::scan(VNode* vnode, std::vector<VAttribute*>& v) {
 
 int VAttributeType::keyToDataIndex(const std::string& key) const {
     auto it = keyToData_.find(key);
-    if (it != keyToData_.end())
+    if (it != keyToData_.end()) {
         return it->second;
+    }
 
     return -1;
 }
 
 int VAttributeType::searchKeyToDataIndex(const std::string& key) const {
     auto it = searchKeyToData_.find(key);
-    if (it != searchKeyToData_.end())
+    if (it != searchKeyToData_.end()) {
         return it->second;
+    }
 
     return -1;
 }
@@ -94,8 +98,9 @@ QStringList VAttributeType::searchKeys() const {
 
 void VAttributeType::saveLastNames() {
     lastNames_.clear();
-    for (const auto& it : typesMap_)
+    for (const auto& it : typesMap_) {
         lastNames_.push_back(it.first);
+    }
 
     std::string attrFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_attributes.txt");
     VSettings vs(attrFile);
@@ -109,8 +114,9 @@ void VAttributeType::initLastNames() {
     assert(lastNames_.empty());
     std::string attrFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_attributes.txt");
     VSettings vs(attrFile);
-    if (vs.read(false))
+    if (vs.read(false)) {
         vs.get("attributes", lastNames_);
+    }
 }
 
 // Load the attributes parameter file
@@ -136,8 +142,9 @@ void VAttributeType::load(VProperty* group) {
 
     // UI_ASSERT(v.size() == types_.size(),"types size=" << types_.size() << "loaded size=" << v.size());
 
-    if (v.size() == types_.size())
+    if (v.size() == types_.size()) {
         types_ = v;
+    }
     else {
         UserMessage::message(UserMessage::ERROR,
                              true,

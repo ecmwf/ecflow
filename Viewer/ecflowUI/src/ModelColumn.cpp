@@ -78,8 +78,9 @@ ModelColumn* ModelColumn::tableModelColumn() {
 
 int ModelColumn::indexOf(QString id) const {
     for (int i = 0; i < items_.count(); i++) {
-        if (items_.at(i)->id_ == id)
+        if (items_.at(i)->id_ == id) {
             return i;
+        }
     }
     return -1;
 }
@@ -122,8 +123,9 @@ void ModelColumn::loadDiagItem(QString name, QString label) {
 }
 
 void ModelColumn::addExtraItem(QString name, QString label) {
-    if (indexOf(name) != -1)
+    if (indexOf(name) != -1) {
         return;
+    }
 
     // Editable extra items are always inserted in front of the diag items
     int pos = items_.count();
@@ -142,11 +144,13 @@ void ModelColumn::addExtraItem(QString name, QString label) {
 }
 
 void ModelColumn::changeExtraItem(int idx, QString name, QString label) {
-    if (indexOf(name) != -1)
+    if (indexOf(name) != -1) {
         return;
+    }
 
-    if (!isExtra(idx) || !isEditable(idx))
+    if (!isExtra(idx) || !isEditable(idx)) {
         return;
+    }
 
     Q_EMIT changeItemBegin(idx);
 
@@ -192,8 +196,9 @@ bool ModelColumn::isSameDiag(DiagData* diag) const {
 }
 
 void ModelColumn::setDiagData(DiagData* diag) {
-    if (isSameDiag(diag))
+    if (isSameDiag(diag)) {
         return;
+    }
 
     // Remove the current diag items
     if (diagStart_ >= 0 && diagEnd_ >= 0) {
@@ -209,8 +214,9 @@ void ModelColumn::setDiagData(DiagData* diag) {
     }
 
     // Add the current diag items to the back of the items
-    if (diag->count() <= 0)
+    if (diag->count() <= 0) {
         return;
+    }
 
     diagStart_ = items_.count();
     diagEnd_   = items_.count() + diag->count() - 1;
@@ -230,13 +236,16 @@ void ModelColumn::save() {
         if (VProperty* prop = VConfig::instance()->find(configPath_)) {
             QStringList lst;
             for (int i = 0; i < items_.count(); i++) {
-                if (items_[i]->isExtra() && items_[i]->isEditable())
+                if (items_[i]->isExtra() && items_[i]->isEditable()) {
                     lst << items_[i]->id_;
+                }
             }
-            if (lst.isEmpty())
+            if (lst.isEmpty()) {
                 prop->setValue(prop->defaultValue());
-            else
+            }
+            else {
                 prop->setValue(lst.join("/"));
+            }
         }
     }
 }

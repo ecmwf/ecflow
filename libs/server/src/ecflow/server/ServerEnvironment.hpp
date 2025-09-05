@@ -123,8 +123,9 @@ public:
     /// set the check point interval. Typically set via client interface
     /// value should > 0 for valid values.
     void set_checkpt_interval(int v) {
-        if (v > 0)
+        if (v > 0) {
             checkPtInterval_ = v;
+        }
     }
 
     /// returns the check mode. This specifies options for saving of the checkPoint file:

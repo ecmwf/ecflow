@@ -68,12 +68,15 @@ bool ClockParser::doParse(const std::string& line, std::vector<std::string>& lin
     }
 
     bool hybrid = true;
-    if (lineTokens[1] == "real")
+    if (lineTokens[1] == "real") {
         hybrid = false;
-    else if (lineTokens[1] == "hybrid")
+    }
+    else if (lineTokens[1] == "hybrid") {
         hybrid = true;
-    else
+    }
+    else {
         throw std::runtime_error("Invalid clock :" + line);
+    }
 
     ClockAttr clockAttr(hybrid);
 
@@ -113,8 +116,9 @@ bool ClockParser::doParse(const std::string& line, std::vector<std::string>& lin
     }
 
     Suite* suite = nodeStack_top()->isSuite();
-    if (!suite)
+    if (!suite) {
         throw std::runtime_error("Clock can only be added to suites and not " + nodeStack_top()->debugType());
+    }
 
     suite->addClock(clockAttr);
 
@@ -174,8 +178,9 @@ bool EndClockParser::doParse(const std::string& line, std::vector<std::string>& 
     }
 
     Suite* suite = nodeStack_top()->isSuite();
-    if (!suite)
+    if (!suite) {
         throw std::runtime_error("Clock can only be added to suites and not " + nodeStack_top()->debugType());
+    }
 
     suite->add_end_clock(clockAttr);
 

@@ -28,8 +28,9 @@ TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dum
     /// if ECF_DUMMY_TASK specified ignore
     std::string theValue;
     is_dummy_task_ = task_->findParentUserVariableValue(ecf::environment::ECF_DUMMY_TASK, theValue);
-    if (is_dummy_task_)
+    if (is_dummy_task_) {
         return;
+    }
 
     /// if ECF_FILES specified use this before ECF_HOME
     if (task_->findParentUserVariableValue(ecf::environment::ECF_FILES, ecf_files_)) {
@@ -80,15 +81,18 @@ TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dum
 
 void TaskScriptGenerator::generate(const std::map<std::string, std::string>& override) {
     // Ignore generation for dummy tasks
-    if (is_dummy_task_)
+    if (is_dummy_task_) {
         return;
+    }
 
     // If ECF_FILES was specified use that in preference to ECF_HOME for the ecf files.
     std::string root_directory_for_ecf_files;
-    if (!ecf_files_.empty())
+    if (!ecf_files_.empty()) {
         root_directory_for_ecf_files = ecf_files_;
-    else
+    }
+    else {
         root_directory_for_ecf_files = ecf_home_;
+    }
 
     // Note: task_->absNodePath() starts with /.
     std::string ecf_file_path = root_directory_for_ecf_files + task_->absNodePath() + task_->script_extension();
@@ -154,10 +158,12 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const {
     std::string content;
 
     std::string sleep, var_sleep;
-    if (task_->findParentUserVariableValue("SLEEP", var_sleep))
+    if (task_->findParentUserVariableValue("SLEEP", var_sleep)) {
         sleep = "sleep %SLEEP%\n";
-    else
+    }
+    else {
         sleep = "sleep 1\n";
+    }
 
     std::string client_exe = "%ECF_CLIENT_EXE_PATH:";
     client_exe += Ecf::CLIENT_NAME();
@@ -181,10 +187,12 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const {
     content += "\n";
     content += "echo do some work\n";
     for (const Event& e : task_->events()) {
-        if (e.initial_value())
+        if (e.initial_value()) {
             content += client_exe + "--event=" + e.name_or_number() + " clear\n";
-        else
+        }
+        else {
             content += client_exe + "--event=" + e.name_or_number() + "\n"; // same as set
+        }
         content += sleep;
     }
 

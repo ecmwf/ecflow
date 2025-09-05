@@ -16,8 +16,8 @@
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
-#include "ecflow/core/Timer.hpp"
 #include "ecflow/core/Chrono.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -38,16 +38,18 @@ BOOST_AUTO_TEST_SUITE(T_OrderCmd)
 std::vector<std::string> to_string_vec(const std::vector<suite_ptr>& sv) {
     std::vector<std::string> r;
     r.reserve(sv.size());
-    for (size_t i = 0; i < sv.size(); i++)
+    for (size_t i = 0; i < sv.size(); i++) {
         r.push_back(sv[i]->name());
+    }
     return r;
 }
 
 std::vector<std::string> to_string_vec(const std::vector<node_ptr>& sv) {
     std::vector<std::string> r;
     r.reserve(sv.size());
-    for (size_t i = 0; i < sv.size(); i++)
+    for (size_t i = 0; i < sv.size(); i++) {
         r.push_back(sv[i]->name());
+    }
     return r;
 }
 

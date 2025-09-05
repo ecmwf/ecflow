@@ -20,14 +20,17 @@ void CustomTabWidget::setCustomIcon(int index, QPixmap pix) {
     if (index >= 0 && index < count()) {
         QSize maxSize = maxIconSize();
 
-        if (maxSize.width() < pix.width())
+        if (maxSize.width() < pix.width()) {
             maxSize.setWidth(pix.width());
+        }
 
-        if (maxSize.height() < pix.height())
+        if (maxSize.height() < pix.height()) {
             maxSize.setHeight(pix.height());
+        }
 
-        if (maxSize != iconSize())
+        if (maxSize != iconSize()) {
             setIconSize(maxSize);
+        }
 
         setTabIcon(index, QIcon(pix));
     }
@@ -38,11 +41,13 @@ QSize CustomTabWidget::maxIconSize() const {
     for (int i = 0; i < count(); i++) {
         if (tabIcon(i).availableSizes().count() > 0) {
             QSize avs = tabIcon(i).availableSizes().front();
-            if (maxSize.width() < avs.width())
+            if (maxSize.width() < avs.width()) {
                 maxSize.setWidth(avs.width());
+            }
 
-            if (maxSize.height() < avs.height())
+            if (maxSize.height() < avs.height()) {
                 maxSize.setHeight(avs.height());
+            }
         }
     }
     return maxSize;

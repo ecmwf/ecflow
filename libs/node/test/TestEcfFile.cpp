@@ -1376,8 +1376,9 @@ static void basic_test_template(const std::string& test_name,
         suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("simple", "simple");
         suite->add_variable("tail", "tail");
-        if (!ecf_micro.empty())
+        if (!ecf_micro.empty()) {
             suite->add_variable("ECF_MICRO", ecf_micro);
+        }
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }

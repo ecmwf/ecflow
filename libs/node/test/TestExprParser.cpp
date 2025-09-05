@@ -434,8 +434,9 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
         ExprParser theExprParser(p.first);
         std::string errorMsg;
         bool ok = theExprParser.doParse(errorMsg);
-        if (!ok)
+        if (!ok) {
             parse_failure++;
+        }
         BOOST_CHECK_MESSAGE(ok, errorMsg + "failed for " + p.first);
 
         if (ok) {
@@ -443,8 +444,9 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
             bool expectedEvaluationResult = p.second.second;
 
             Ast* top = theExprParser.getAst();
-            if (!top)
+            if (!top) {
                 ast_failure++;
+            }
             BOOST_CHECK_MESSAGE(top, "No abstract syntax tree " + p.first);
             if (top) {
                 BOOST_CHECK_MESSAGE(top->left(), "No root created " + p.first);
@@ -505,8 +507,9 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
         ExprParser theExprParser(p.first);
         std::string errorMsg;
         bool ok = theExprParser.doParse(errorMsg);
-        if (!ok)
+        if (!ok) {
             parse_failure++;
+        }
         BOOST_CHECK_MESSAGE(ok, errorMsg + "failed for " + p.first);
 
         if (ok) {
@@ -514,8 +517,9 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions) {
             bool expectedEvaluationResult = p.second.second;
 
             Ast* top = theExprParser.getAst();
-            if (!top)
+            if (!top) {
                 ast_failure++;
+            }
             BOOST_CHECK_MESSAGE(top, "No abstract syntax tree " + p.first);
             if (top) {
                 BOOST_CHECK_MESSAGE(top->left(), "No root created " + p.first);
@@ -613,8 +617,9 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
         ExprParser theExprParser(p.first);
         std::string errorMsg;
         bool ok = theExprParser.doParse(errorMsg);
-        if (!ok)
+        if (!ok) {
             parse_failure++;
+        }
         BOOST_CHECK_MESSAGE(ok, errorMsg + "failed for " + p.first);
 
         if (ok) {
@@ -622,8 +627,9 @@ BOOST_AUTO_TEST_CASE(test_trigger_functions_with_boost_date) {
             bool expectedEvaluationResult = p.second.second;
 
             Ast* top = theExprParser.getAst();
-            if (!top)
+            if (!top) {
                 ast_failure++;
+            }
             BOOST_CHECK_MESSAGE(top, "No abstract syntax tree " + p.first);
             if (top) {
                 BOOST_CHECK_MESSAGE(top->left(), "No root created " + p.first);

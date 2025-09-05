@@ -74,19 +74,23 @@ static bool kill_cmd(bool kill_task) {
     std::string kill_path;
     {
         suite_ptr suite;
-        if (kill_task)
+        if (kill_task) {
             suite = theDefs.add_suite("test_kill_task");
-        else
+        }
+        else {
             suite = theDefs.add_suite("test_kill_suite");
+        }
         suite->addVariable(Variable("ECF_TRIES", "1")); // do not try again
         family_ptr fam = suite->add_family("family");
         task_ptr task  = fam->add_task("t0");
         task->addMeter(Meter("meter", 0, 200, 100)); // Make sure it run long enough, to receive kill, on slow systems
         task->addVerify(VerifyAttr(NState::ABORTED, 1)); // task should abort 1 times
-        if (kill_task)
+        if (kill_task) {
             kill_path = task->absNodePath();
-        else
+        }
+        else {
             kill_path = suite->absNodePath();
+        }
     }
 
     // *******************************************************************

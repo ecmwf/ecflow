@@ -137,8 +137,9 @@ BOOST_AUTO_TEST_CASE(test_server) {
     cout << "  Find free port to start server, starting with port " << the_port1 << "\n";
 
     auto the_port = ecf::convert_to<int>(the_port1);
-    while (!EcfPortLock::is_free(the_port))
+    while (!EcfPortLock::is_free(the_port)) {
         the_port++;
+    }
     std::string port = ecf::convert_to<std::string>(the_port);
     EcfPortLock::create(port);
     cout << "  Found free port: " << port << " ";
@@ -163,8 +164,9 @@ BOOST_AUTO_TEST_CASE(test_server) {
             the_port = ecf::convert_to<int>(port);
             the_port++;
 
-            while (!EcfPortLock::is_free(the_port))
+            while (!EcfPortLock::is_free(the_port)) {
                 the_port++;
+            }
             port = ecf::convert_to<std::string>(the_port);
             EcfPortLock::create(port);
             cout << "  Found free port: " << port << "\n";

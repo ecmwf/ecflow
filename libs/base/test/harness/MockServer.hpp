@@ -51,8 +51,9 @@ public:
         defs_->absorb(d.get(), force);
     }
     void clear_defs() override {
-        if (defs_.get())
+        if (defs_.get()) {
             defs_->clear();
+        }
     } // dont delete since we pass in Fixture defs. Otherwise it will crash
     bool checkPtDefs(ecf::CheckPt::Mode m         = ecf::CheckPt::UNDEFINED,
                      int check_pt_interval        = 0,
@@ -112,8 +113,9 @@ public:
         if (state() == SState::RUNNING && defs_.get()) {
             JobsParam jobsParam(poll_interval(), false /* as->allow_job_creation_during_tree_walk() */);
             Jobs jobs(defs_);
-            if (!jobs.generate(jobsParam))
+            if (!jobs.generate(jobsParam)) {
                 ecf::log(ecf::Log::ERR, jobsParam.getErrorMsg()); // will automatically add end of line
+            }
         }
     }
     int poll_interval() const override { return 60; }

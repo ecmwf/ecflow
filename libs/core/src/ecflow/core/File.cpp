@@ -89,8 +89,9 @@ std::string File::getExt(const std::string& file) {
 
 void File::replaceExt(std::string& file, const std::string& newExt) {
     string::size_type i = file.rfind('.', file.length());
-    if (i != string::npos)
+    if (i != string::npos) {
         file.replace(i + 1, newExt.length(), newExt);
+    }
 }
 
 std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool ignoreEmptyLine) {
@@ -178,8 +179,9 @@ bool File::splitFileIntoLines(const std::string& filename, std::vector<std::stri
 std::string
 File::get_last_n_lines(const std::string& filename, int last_n_lines, size_t& file_size, std::string& error_msg) {
     file_size = 0;
-    if (last_n_lines <= 0)
+    if (last_n_lines <= 0) {
         return string();
+    }
 
     std::ifstream source(filename.c_str(), std::ios_base::in);
     if (!source) {
@@ -218,8 +220,9 @@ std::string File::get_last_n_lines(const std::string& filename, int last_n_lines
 }
 
 std::string File::get_first_n_lines(const std::string& filename, int n_lines, std::string& error_msg) {
-    if (n_lines <= 0)
+    if (n_lines <= 0) {
         return string();
+    }
 
     std::ifstream source(filename.c_str(), std::ios_base::in);
     if (!source) {
@@ -248,8 +251,9 @@ std::string File::get_first_n_lines(const std::string& filename, int n_lines, st
 /// Opens the file and returns the contents
 bool File::open(const std::string& filePath, std::string& contents) {
     std::ifstream infile(filePath.c_str(), std::ios_base::in);
-    if (!infile)
+    if (!infile) {
         return false;
+    }
 
     std::ostringstream temp;
     temp << infile.rdbuf();
@@ -353,12 +357,15 @@ bool File::create(const std::string& filename, const std::string& contents, std:
 
 std::string File::stream_error_condition(const std::ios& stream) {
     std::string msg;
-    if (stream.fail())
+    if (stream.fail()) {
         msg += " Logical error on i/o operation";
-    if (stream.bad())
+    }
+    if (stream.bad()) {
         msg += " Read/Writing error on i/o operation";
-    if (stream.eof())
+    }
+    if (stream.eof()) {
         msg += " End-of-File reached on input operation";
+    }
     if (errno) {
         msg += ", errno:";
         msg += std::string(strerror(errno));
@@ -371,16 +378,18 @@ bool File::find(const fs::path& dir_path,     // from this directory downwards,
                 fs::path& path_found          // placing path here if found
 ) {
     //	std::cout << "Searching '" << dir_path << "' for  " << file_name  << "\n";
-    if (!fs::exists(dir_path))
+    if (!fs::exists(dir_path)) {
         return false;
+    }
 
     fs::directory_iterator end_itr; // default construction yields past-the-end
     for (fs::directory_iterator itr(dir_path); itr != end_itr; ++itr) {
 
         if (fs::is_directory(itr->status())) {
 
-            if (File::find(itr->path(), file_name, path_found))
+            if (File::find(itr->path(), file_name, path_found)) {
                 return true;
+            }
         }
         else if (itr->path().filename() == file_name) // see below
         {
@@ -395,8 +404,9 @@ void File::findAll(const fs::path& dir_path,          // from this directory dow
                    const std::string& file_name,      // search for this name,
                    std::vector<fs::path>& paths_found // placing path here if found
 ) {
-    if (!fs::exists(dir_path))
+    if (!fs::exists(dir_path)) {
         return;
+    }
 
     fs::directory_iterator end_itr; // default construction yields past-the-end
     for (fs::directory_iterator itr(dir_path); itr != end_itr; ++itr) {
@@ -421,8 +431,9 @@ void File::find_files_with_extn(const fs::path& dir_path,          // In this di
     }
     fs::directory_iterator end_itr; // default construction yields past-the-end
     for (fs::directory_iterator itr(dir_path); itr != end_itr; ++itr) {
-        if (fs::is_directory(itr->status()))
+        if (fs::is_directory(itr->status())) {
             continue;
+        }
         else if (itr->path().extension() == extn) // see below
         {
             paths_found.push_back(itr->path());
@@ -441,8 +452,9 @@ std::string File::findPath(const fs::path& dir_path,     // from this directory 
         // find the path that has leafDir in it.
         for (fs::path path : paths) {
             std::string thePath = path.string();
-            if (thePath.rfind(leafDir) != std::string::npos)
+            if (thePath.rfind(leafDir) != std::string::npos) {
                 return thePath;
+            }
         }
     }
     return std::string();
@@ -461,11 +473,13 @@ std::string File::findPath(const fs::path& dir_path,              // from this d
             std::string thePath = path.string();
             size_t matches      = 0;
             for (const std::string& required_path_tokens : tokens) {
-                if (thePath.rfind(required_path_tokens) != std::string::npos)
+                if (thePath.rfind(required_path_tokens) != std::string::npos) {
                     matches++;
+                }
             }
-            if (matches == tokens.size())
+            if (matches == tokens.size()) {
                 return thePath;
+            }
         }
     }
     return std::string();
@@ -476,8 +490,9 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
 #ifdef INTEL_DEBUG_ME
     std::cout << "File::createMissingDirectories  " << pathToFileOrDir << std::endl;
 #endif
-    if (pathToFileOrDir.empty())
+    if (pathToFileOrDir.empty()) {
         return false;
+    }
 
     // Avoid making unnecessary system calls, by checking to see if directory exists first
     fs::path fs_path(pathToFileOrDir);
@@ -533,8 +548,9 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
             std::string pathToCreate;
 
             // if original path had leading slash then add it here, to preserve path
-            if (pathToFileOrDir[0] == '/')
+            if (pathToFileOrDir[0] == '/') {
                 pathToCreate += Str::PATH_SEPARATOR();
+            }
 
             for (const auto& i : thePath) {
                 pathToCreate += i;
@@ -580,12 +596,14 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
 
 /// Create directories the boost way, with additional check to see if directories exist first
 bool File::createDirectories(const std::string& pathToDir) {
-    if (pathToDir.empty())
+    if (pathToDir.empty()) {
         return false;
+    }
 
     try {
-        if (fs::exists(pathToDir))
+        if (fs::exists(pathToDir)) {
             return true;
+        }
         return fs::create_directories(pathToDir);
     }
     catch (std::exception&) {
@@ -622,8 +640,9 @@ std::string File::diff(const std::string& file,
 
     if (fileLines != file2Lines) {
         std::stringstream ss;
-        if (fileLines.size() != file2Lines.size())
+        if (fileLines.size() != file2Lines.size()) {
             ss << "Expected size " << file2Lines.size() << " but found " << fileLines.size() << "\n";
+        }
 
         for (size_t i = 0; i < fileLines.size() || i < file2Lines.size(); ++i) {
 
@@ -638,8 +657,9 @@ std::string File::diff(const std::string& file,
                             break;
                         }
                     }
-                    if (doIgnore)
+                    if (doIgnore) {
                         continue;
+                    }
                     ss << "Mismatch at " << i << "(" << fileLines[i] << ")   ---->   (" << file2Lines[i] << ")\n";
                 }
                 //				else {
@@ -650,15 +670,19 @@ std::string File::diff(const std::string& file,
             }
             else {
                 ss << "Mismatch at " << i;
-                if (i < fileLines.size())
+                if (i < fileLines.size()) {
                     ss << " (" << fileLines[i] << ")   ";
-                else
+                }
+                else {
                     ss << " ( ---- )   ";
+                }
 
-                if (i < file2Lines.size())
+                if (i < file2Lines.size()) {
                     ss << "(" << file2Lines[i] << ")\n";
-                else
+                }
+                else {
                     ss << "( --- )\n";
+                }
             }
         }
         return ss.str();
@@ -681,8 +705,9 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
     LOG_ASSERT(!nodePathTokens.empty(), "");
 
     std::string leafName; // i.e. task in the example above
-    if (!nodePathTokens.empty())
+    if (!nodePathTokens.empty()) {
         leafName = nodePathTokens[nodePathTokens.size() - 1];
+    }
 
 #ifdef DEBUG_TASK_LOCATION
     cout << "backwardSearch Node " << nodePath << " using root path " << rootPath
@@ -705,8 +730,9 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
                 return combinedPath;
             }
 #ifdef DEBUG_TASK_LOCATION
-            else
+            else {
                 cout << " backwardSearch Node " << nodePath << " the path " << combinedPath << " DOEST NOT EXIST\n";
+            }
 #endif
         }
         catch (fs::filesystem_error& e) {
@@ -749,8 +775,9 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
     LOG_ASSERT(!nodePathTokens.empty(), "");
 
     std::string leafName;
-    if (!nodePathTokens.empty())
+    if (!nodePathTokens.empty()) {
         leafName = nodePathTokens[nodePathTokens.size() - 1];
+    }
 
 #ifdef DEBUG_TASK_LOCATION
     cout << "forwardSearch Node " << nodePath << " using root path " << rootPath
@@ -773,8 +800,9 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
                 return combinedPath;
             }
 #ifdef DEBUG_TASK_LOCATION
-            else
+            else {
                 cout << " forwardSearch Node " << nodePath << " the path " << combinedPath << " DOEST NOT EXIST\n";
+            }
 #endif
         }
         catch (fs::filesystem_error& e) {
@@ -1005,16 +1033,18 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
 
     if (auto workspace = ecf::environment::fetch("WK"); workspace) {
         test_file = workspace.value();
-        if (!rel_path.empty() && rel_path[0] != '/')
+        if (!rel_path.empty() && rel_path[0] != '/') {
             test_file += "/";
+        }
         test_file += rel_path;
     }
     else {
         std::string root_source = root_source_dir();
         if (!root_source.empty()) {
             test_file = root_source;
-            if (!rel_path.empty() && rel_path[0] != '/')
+            if (!rel_path.empty() && rel_path[0] != '/') {
                 test_file += "/";
+            }
             test_file += rel_path;
         }
         else {
@@ -1072,8 +1102,9 @@ std::string File::root_source_dir() {
 
         stem = current_path.stem().string();
         count++;
-        if (count == 1000)
+        if (count == 1000) {
             break;
+        }
     }
 
     return string();
@@ -1089,13 +1120,15 @@ std::string File::root_build_dir() {
 
     // bjam
     std::string version_cmake = the_current_path + "/Jamroot.jam";
-    if (fs::exists(version_cmake))
+    if (fs::exists(version_cmake)) {
         return the_current_path;
+    }
 
     // cmake
     std::string cmake_cache = the_current_path + "/CMakeCache.txt";
-    if (fs::exists(cmake_cache))
+    if (fs::exists(cmake_cache)) {
         return the_current_path;
+    }
 
     // bjam or cmake
     std::string stem = current_path.stem().string();
@@ -1107,19 +1140,22 @@ std::string File::root_build_dir() {
 
         // bjam
         std::string jamroot_file = the_current_path + "/Jamroot.jam";
-        if (fs::exists(jamroot_file))
+        if (fs::exists(jamroot_file)) {
             return the_current_path;
+        }
 
         // cmake
         std::string cmake_cache1 = the_current_path + "/CMakeCache.txt";
-        if (fs::exists(cmake_cache1))
+        if (fs::exists(cmake_cache1)) {
             return the_current_path;
+        }
 
         stem = current_path.stem().string();
         count++;
-        if (count == 1000)
+        if (count == 1000) {
             throw std::runtime_error(
                 "File::root_build_dir() failed to find ecflow in a directory name, up the directory tree");
+        }
     }
 
     throw std::runtime_error("File::root_build_dir() failed to find root build directory");
@@ -1131,8 +1167,9 @@ int File::max_open_file_allowed() {
     return OPEN_MAX;
 #else
     static int max_open_file_allowed_ = -1;
-    if (max_open_file_allowed_ != -1)
+    if (max_open_file_allowed_ != -1) {
         return max_open_file_allowed_;
+    }
 
     max_open_file_allowed_ = sysconf(_SC_OPEN_MAX);
     if (max_open_file_allowed_ < 0) {

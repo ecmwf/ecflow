@@ -141,8 +141,9 @@ doForce(MockServer& mockServer, Node* fnode, const std::string& stateOrEvent, co
                                                       << node->debugNodePath());
             }
         }
-        else
+        else {
             BOOST_CHECK_MESSAGE(false, "oops");
+        }
 
         if (!(node->repeat().empty())) {
             BOOST_CHECK_MESSAGE(!node->repeat().valid(), "Expected repeat to be set to last value. ie in valid");

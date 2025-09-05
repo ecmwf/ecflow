@@ -65,8 +65,9 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         // Change state other the default
         defs.beginAll();
         suite->set_state(NState::ABORTED);
-        for (auto& i : flag_list)
+        for (auto& i : flag_list) {
             suite->get_flag().set(i);
+        }
         suite->suspend();
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Add one suite failed: " << helper.errorMsg());
@@ -78,8 +79,9 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
 
         // Change state other the default
         f1->set_state(NState::COMPLETE);
-        for (auto& i : flag_list)
+        for (auto& i : flag_list) {
             f1->get_flag().set(i);
+        }
         f1->suspend();
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
                             "Add one family failed: " << helper.errorMsg());
@@ -95,8 +97,9 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         family_ptr f1 = defs.add_suite("s1")->add_family("f1");
         task_ptr t1   = f1->add_task("t1");
 
-        for (auto& i : flag_list)
+        for (auto& i : flag_list) {
             t1->get_flag().set(i);
+        }
         t1->suspend();
         t1->set_state(NState::COMPLETE);
 
@@ -118,8 +121,9 @@ BOOST_AUTO_TEST_CASE(test_state_parser) {
         Defs defs;
         task_ptr task = defs.add_suite("s1")->add_family("f1")->add_task("t1");
         alias_ptr t1  = task->add_alias_only();
-        for (auto& i : flag_list)
+        for (auto& i : flag_list) {
             t1->get_flag().set(i);
+        }
         t1->suspend();
         t1->set_state(NState::COMPLETE);
         // Use memento to modify alias state
@@ -434,14 +438,17 @@ BOOST_AUTO_TEST_CASE(test_state_time_attributes) {
         ecf::TimeSlot finish(10, 0);
         ecf::TimeSlot incr(0, 5);
         std::vector<int> weekdays;
-        for (int i = 0; i < 7; ++i)
+        for (int i = 0; i < 7; ++i) {
             weekdays.push_back(i);
+        }
         std::vector<int> daysOfMonth;
-        for (int i = 1; i < 32; ++i)
+        for (int i = 1; i < 32; ++i) {
             daysOfMonth.push_back(i);
+        }
         std::vector<int> months;
-        for (int i = 1; i < 13; ++i)
+        for (int i = 1; i < 13; ++i) {
             months.push_back(i);
+        }
         cronAttr.addTimeSeries(start, finish, incr);
         cronAttr.addWeekDays(weekdays);
         cronAttr.addDaysOfMonth(daysOfMonth);

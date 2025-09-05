@@ -51,32 +51,45 @@ Zombie::Zombie(ecf::Child::ZombieType zombie_type,
 Zombie::Zombie() = default;
 
 bool Zombie::operator==(const Zombie& rhs) const { // for python interface only
-    if (zombie_type_ != rhs.zombie_type_)
+    if (zombie_type_ != rhs.zombie_type_) {
         return false;
-    if (user_action_ != rhs.user_action_)
+    }
+    if (user_action_ != rhs.user_action_) {
         return false;
-    if (try_no_ != rhs.try_no_)
+    }
+    if (try_no_ != rhs.try_no_) {
         return false;
-    if (duration_ != rhs.duration_)
+    }
+    if (duration_ != rhs.duration_) {
         return false;
-    if (calls_ != rhs.calls_)
+    }
+    if (calls_ != rhs.calls_) {
         return false;
-    if (last_child_cmd_ != rhs.last_child_cmd_)
+    }
+    if (last_child_cmd_ != rhs.last_child_cmd_) {
         return false;
-    if (path_to_task_ != rhs.path_to_task_)
+    }
+    if (path_to_task_ != rhs.path_to_task_) {
         return false;
-    if (jobs_password_ != rhs.jobs_password_)
+    }
+    if (jobs_password_ != rhs.jobs_password_) {
         return false;
-    if (process_or_remote_id_ != rhs.process_or_remote_id_)
+    }
+    if (process_or_remote_id_ != rhs.process_or_remote_id_) {
         return false;
-    if (user_cmd_ != rhs.user_cmd_)
+    }
+    if (user_cmd_ != rhs.user_cmd_) {
         return false;
-    if (host_ != rhs.host_)
+    }
+    if (host_ != rhs.host_) {
         return false;
-    if (user_action_set_ != rhs.user_action_set_)
+    }
+    if (user_action_set_ != rhs.user_action_set_) {
         return false;
-    if (!(attr_ == rhs.attr_))
+    }
+    if (!(attr_ == rhs.attr_)) {
         return false;
+    }
     return true;
 }
 
@@ -92,28 +105,36 @@ std::string Zombie::type_str() const {
 
 ZombieCtrlAction Zombie::user_action() const {
     // User action needs to take into account, last child command and setting on attr_
-    if (fob())
+    if (fob()) {
         return ZombieCtrlAction::FOB;
-    else if (block())
+    }
+    else if (block()) {
         return ZombieCtrlAction::BLOCK;
-    else if (fail())
+    }
+    else if (fail()) {
         return ZombieCtrlAction::FAIL;
-    else if (remove())
+    }
+    else if (remove()) {
         return ZombieCtrlAction::REMOVE;
-    else if (kill())
+    }
+    else if (kill()) {
         return ZombieCtrlAction::KILL;
-    else if (adopt())
+    }
+    else if (adopt()) {
         return ZombieCtrlAction::ADOPT;
+    }
 
     return ZombieCtrlAction::BLOCK; // the default action
 }
 
 std::string Zombie::user_action_str() const {
     std::string ret;
-    if (manual_user_action())
+    if (manual_user_action()) {
         ret = "manual-";
-    else
+    }
+    else {
         ret = "auto-";
+    }
     ret += ecf::to_string(user_action());
     return ret;
 }
@@ -121,38 +142,44 @@ std::string Zombie::user_action_str() const {
 /// accessors
 
 bool Zombie::fob() const {
-    if (user_action_set_)
+    if (user_action_set_) {
         return user_action_ == ZombieCtrlAction::FOB;
+    }
     return attr_.fob(last_child_cmd_);
 }
 
 bool Zombie::fail() const {
-    if (user_action_set_)
+    if (user_action_set_) {
         return user_action_ == ZombieCtrlAction::FAIL;
+    }
     return attr_.fail(last_child_cmd_);
 }
 
 bool Zombie::adopt() const {
-    if (user_action_set_)
+    if (user_action_set_) {
         return user_action_ == ZombieCtrlAction::ADOPT;
+    }
     return attr_.adopt(last_child_cmd_);
 }
 
 bool Zombie::block() const {
-    if (user_action_set_)
+    if (user_action_set_) {
         return user_action_ == ZombieCtrlAction::BLOCK;
+    }
     return attr_.block(last_child_cmd_);
 }
 
 bool Zombie::remove() const {
-    if (user_action_set_)
+    if (user_action_set_) {
         return user_action_ == ZombieCtrlAction::REMOVE;
+    }
     return attr_.remove(last_child_cmd_);
 }
 
 bool Zombie::kill() const {
-    if (user_action_set_)
+    if (user_action_set_) {
         return user_action_ == ZombieCtrlAction::KILL;
+    }
     return attr_.kill(last_child_cmd_);
 }
 
@@ -321,9 +348,11 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
 
     {
         std::stringstream ss;
-        if (indent != 0)
-            for (int i = 0; i < indent; i++)
+        if (indent != 0) {
+            for (int i = 0; i < indent; i++) {
                 ss << " ";
+            }
+        }
         ss << left << setw(path_width) << path << " " << setw(type_width) << type << " " << setw(duration_width)
            << duration << " " << setw(password_width) << password << " " << setw(rid_width) << rid << " "
            << setw(tryno_width) << try_no << " " << setw(user_action_width) << user_action << " "
@@ -334,9 +363,11 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
 
     for (const Zombie& z : zombies) {
         std::stringstream ss;
-        if (indent != 0)
-            for (int i = 0; i < indent; i++)
+        if (indent != 0) {
+            for (int i = 0; i < indent; i++) {
                 ss << " ";
+            }
+        }
 
         switch (z.type()) {
             case Child::USER:

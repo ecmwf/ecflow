@@ -65,8 +65,9 @@ void OverviewProvider::visit(VInfoAttribute* /*ptr*/) {
 }
 
 void OverviewProvider::taskChanged(VTask_ptr task) {
-    if (task_ != task)
+    if (task_ != task) {
         return;
+    }
 
     switch (task->status()) {
         case VTask::FINISHED:
@@ -93,8 +94,9 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     static const std::string inc = "  ";
 
     ServerHandler* server = info->server();
-    if (!server)
+    if (!server) {
         return;
+    }
     VServer* snode = server->vRoot();
 
     ConnectState* cst = server->connectState();
@@ -151,8 +153,9 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     f << "type    : " << typeName << "\n";
     f << "status  : " << statusName << "\n";
 
-    if (!flags.empty())
+    if (!flags.empty()) {
         f << "flags   : " << flags << "\n";
+    }
 
     f << "----------\n";
 
@@ -201,13 +204,15 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
 
 void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
     ServerHandler* server = info->server();
-    if (!server)
+    if (!server) {
         return;
+    }
     // if(!ServerDefsAccess(server).defs()) return;
 
     VNode* node = info->node();
-    if (!node)
+    if (!node) {
         return;
+    }
 
     static const std::string inc = "  ";
 
@@ -260,8 +265,9 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
 
     // Zombies attribute
     const std::vector<ZombieAttr>& vect = nn->zombies();
-    for (const auto& it : vect)
+    for (const auto& it : vect) {
         f << inc << it.toString() << "\n";
+    }
 
     // For suspended nodes
     if (nn->isSuspended()) {
@@ -270,10 +276,12 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
 
     if (nn->hasTimeDependencies()) {
         f << inc << "# time-date-dependencies: ";
-        if (nn->isTimeFree())
+        if (nn->isTimeFree()) {
             f << "free\n";
-        else
+        }
+        else {
             f << "holding\n";
+        }
     }
 
     // Generated variables

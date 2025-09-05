@@ -20,10 +20,12 @@ std::string Passwd::generate() {
     for (int i = 0; i < 8; i++) { /* generate a random password */
 
         pw[i] = 64.0 * ecf_drand48() + '.'; /* Just crack this one! */
-        if (pw[i] > '9')
+        if (pw[i] > '9') {
             pw[i] += 7;
-        if (pw[i] > 'Z')
+        }
+        if (pw[i] > 'Z') {
             pw[i] += 6;
+        }
     }
     pw[8] = '\0';
     return std::string(pw);

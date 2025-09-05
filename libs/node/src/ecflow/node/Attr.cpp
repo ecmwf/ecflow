@@ -39,18 +39,24 @@ const char* Attr::to_string(Attr::Type s) {
 }
 
 Attr::Type Attr::to_attr(const std::string& str) {
-    if (str == "event")
+    if (str == "event") {
         return Attr::EVENT;
-    if (str == "meter")
+    }
+    if (str == "meter") {
         return Attr::METER;
-    if (str == "label")
+    }
+    if (str == "label") {
         return Attr::LABEL;
-    if (str == "limit")
+    }
+    if (str == "limit") {
         return Attr::LIMIT;
-    if (str == "variable")
+    }
+    if (str == "variable") {
         return Attr::VARIABLE;
-    if (str == "all")
+    }
+    if (str == "all") {
         return Attr::ALL;
+    }
     return Attr::UNKNOWN;
 }
 

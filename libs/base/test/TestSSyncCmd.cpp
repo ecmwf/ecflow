@@ -49,15 +49,17 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
     MyDefsFixture clientFixture;
     MyDefsFixture serverFixture;
     defs_ptr server_defs = serverFixture.create_defs();
-    if (start_with_begin)
+    if (start_with_begin) {
         server_defs->beginAll();
+    }
     server_defs->server_state().set_state(
         SState::HALTED); // if defs default state is RUNNING, whereas for server it is HALTED
 
     ServerReply server_reply;
     defs_ptr client_defs = clientFixture.create_defs();
-    if (start_with_begin)
+    if (start_with_begin) {
         client_defs->beginAll();
+    }
     client_defs->server_state().set_state(
         SState::HALTED); // if defs default state is RUNNING, whereas for server it is HALTED
     server_reply.set_client_defs(client_defs);

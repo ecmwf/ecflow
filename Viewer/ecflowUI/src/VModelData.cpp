@@ -31,8 +31,9 @@ void VTreeChangeInfo::addStateChange(const VNode* n) {
     VNode* s = n->suite();
     Q_ASSERT(s->isTopLevel());
     Q_ASSERT(s);
-    if (std::find(stateSuites_.begin(), stateSuites_.end(), s) == stateSuites_.end())
+    if (std::find(stateSuites_.begin(), stateSuites_.end(), s) == stateSuites_.end()) {
         stateSuites_.push_back(s);
+    }
 }
 
 //==========================================
@@ -86,8 +87,9 @@ VTreeServer::~VTreeServer() {
     delete tree_;
     delete changeInfo_;
     delete filter_;
-    if (expandState_)
+    if (expandState_) {
         delete expandState_;
+    }
 }
 
 NodeFilter* VTreeServer::filter() const {
@@ -219,8 +221,9 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode,
 #ifdef _UI_VMODELDATA_DEBUG
     UI_FUNCTION_LOG_S(server_)
 #endif
-    if (vnode == nullptr)
+    if (vnode == nullptr) {
         return;
+    }
 
     VTreeNode* node = tree_->find(vnode);
 
@@ -297,8 +300,9 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode,
                     Q_EMIT nodeChanged(this, node);
                 }
 
-                if (!vnode->isServer())
+                if (!vnode->isServer()) {
                     changeInfo_->addStateChange(vnode);
+                }
 
 #ifdef _UI_VMODELDATA_DEBUG
                 UiLogS(server_).dbg() << " node status changed";
@@ -394,8 +398,9 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged) {
     // if there was a state change during the sync
     if (suitesChanged.size() > 0 && !filter_->isNull() && !filter_->isComplete()) {
 #ifdef _UI_VMODELDATA_DEBUG
-        for (auto i : suitesChanged)
+        for (auto i : suitesChanged) {
             UiLogS(server_).dbg() << "  " << i->strName();
+        }
 #endif
         // Update the filter for the suites with a status change. topFilterChange
         // will contain the branches where the filter changed. A branch is
@@ -405,10 +410,12 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged) {
         filter_->update(suitesChanged, topFilterChange);
 
 #ifdef _UI_VMODELDATA_DEBUG
-        if (topFilterChange.size() > 0)
+        if (topFilterChange.size() > 0) {
             UiLogS(server_).dbg() << " top level nodes that changed in filter:";
-        for (auto& i : topFilterChange)
+        }
+        for (auto& i : topFilterChange) {
             UiLogS(server_).dbg() << "  " << i->strName();
+        }
 #endif
 
         // A topFilterChange branch cannot be the root (server)
@@ -508,8 +515,9 @@ void VTreeServer::setForceShowNode(const VNode* node) {
 
     Q_ASSERT(node);
 
-    if (node == filter_->forceShowNode())
+    if (node == filter_->forceShowNode()) {
         return;
+    }
 
     // There is no status filter
     if (filter_->isNull()) {
@@ -638,8 +646,9 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a) {
 }
 
 void VTreeServer::setForceShow(const VItem* item) {
-    if (!item)
+    if (!item) {
         return;
+    }
 
     // Get the server
     if (item->server() == server_) {
@@ -659,8 +668,9 @@ void VTreeServer::clearForceShow(const VItem* itemNext) {
     UI_FUNCTION_LOG_S(server_)
 #endif
 
-    if (!itemNext)
+    if (!itemNext) {
         return;
+    }
 
     // The stateFilter is unique for each VTreeServer while the AttrFilter is
     // shared by the servers!
@@ -676,13 +686,15 @@ void VTreeServer::clearForceShow(const VItem* itemNext) {
             Q_ASSERT(aPrev->parent() == vnPrev);
         }
         // Otherwise we pretend it is 0
-        else
+        else {
             aPrev = nullptr;
+        }
     }
 
     // No forceShowNode or forceShow attribute is set. There is nothing to clear!
-    if (!vnPrev && !aPrev)
+    if (!vnPrev && !aPrev) {
         return;
+    }
 
     // We need to figure out if itemNext is the same foreceShow that we
     // currently store because in this case there is nothing to do.
@@ -697,8 +709,9 @@ void VTreeServer::clearForceShow(const VItem* itemNext) {
             // The current forceShow is a node
             if (!aPrev) {
                 // it is the same that we store or no state filter is defined
-                if (itn == vnPrev || filter_->isNull())
+                if (itn == vnPrev || filter_->isNull()) {
                     return;
+                }
             }
         }
         // itemNext is an attribute
@@ -716,8 +729,9 @@ void VTreeServer::clearForceShow(const VItem* itemNext) {
                 }
             }
             // The item is an attribute (child) of the current showForceNode
-            else if (vnPrev && vnPrev == ita->parent())
+            else if (vnPrev && vnPrev == ita->parent()) {
                 return;
+            }
         }
     }
 
@@ -767,14 +781,16 @@ void VTreeServer::clearForceShow(const VItem* itemNext) {
 }
 
 void VTreeServer::deleteExpandState() {
-    if (expandState_)
+    if (expandState_) {
         delete expandState_;
+    }
     expandState_ = nullptr;
 }
 
 void VTreeServer::setExpandState(ExpandState* es) {
-    if (expandState_)
+    if (expandState_) {
         delete expandState_;
+    }
 
     expandState_ = es;
 }
@@ -914,8 +930,9 @@ void VTableServer::reload() {
 // Set the forceShowNode and rerun the filter. The forceShowNode is a node that
 // has to be visible even if it does not match the filter.
 void VTableServer::setForceShowNode(const VNode* node) {
-    if (inScan_)
+    if (inScan_) {
         return;
+    }
 
     if (filter_->indexOf(node) != -1) {
         clearForceShow(node);
@@ -932,17 +949,20 @@ void VTableServer::setForceShowAttribute(const VAttribute*) {
 }
 
 void VTableServer::clearForceShow(const VItem* item) {
-    if (!item)
+    if (!item) {
         return;
+    }
 
     VNode* vnPrev = filter_->forceShowNode();
-    if (!vnPrev)
+    if (!vnPrev) {
         return;
+    }
 
     if (item->parent()->server() == server_) {
         if (VNode* itn = item->isNode()) {
-            if (itn == vnPrev)
+            if (itn == vnPrev) {
                 return;
+            }
         }
 
         if (VAttribute* ita = item->isAttribute()) {
@@ -1047,8 +1067,9 @@ void VModelData::clear() {
     UI_FUNCTION_LOG
 #endif
 
-    if (serverFilter_)
+    if (serverFilter_) {
         serverFilter_->removeObserver(this);
+    }
 
     serverFilter_ = nullptr;
 
@@ -1070,48 +1091,56 @@ ServerHandler* VModelData::serverHandler(int n) const {
 
 int VModelData::indexOfServer(void* idPointer) const {
     for (std::size_t i = 0; i < servers_.size(); i++) {
-        if (servers_[i] == idPointer)
+        if (servers_[i] == idPointer) {
             return i;
+        }
     }
     return -1;
 }
 
 ServerHandler* VModelData::serverHandler(void* idPointer) const {
     for (int i = 0; i < serverNum_; i++) {
-        if (servers_[i] == idPointer)
+        if (servers_[i] == idPointer) {
             return servers_[i]->server_;
+        }
     }
     return nullptr;
 }
 
 VModelServer* VModelData::server(const void* idPointer) const {
     for (int i = 0; i < serverNum_; i++) {
-        if (servers_[i] == idPointer)
+        if (servers_[i] == idPointer) {
             return servers_[i];
+        }
     }
     return nullptr;
 }
 
 VModelServer* VModelData::server(const std::string& name) const {
-    for (int i = 0; i < serverNum_; i++)
-        if (servers_[i]->server_->name() == name)
+    for (int i = 0; i < serverNum_; i++) {
+        if (servers_[i]->server_->name() == name) {
             return servers_[i];
+        }
+    }
 
     return nullptr;
 }
 
 VModelServer* VModelData::server(ServerHandler* s) const {
-    for (int i = 0; i < serverNum_; i++)
-        if (servers_[i]->server_ == s)
+    for (int i = 0; i < serverNum_; i++) {
+        if (servers_[i]->server_ == s) {
             return servers_[i];
+        }
+    }
 
     return nullptr;
 }
 
 int VModelData::indexOfServer(ServerHandler* s) const {
     for (int i = 0; i < serverNum_; i++) {
-        if (servers_[i]->server_ == s)
+        if (servers_[i]->server_ == s) {
             return i;
+        }
     }
     return -1;
 }
@@ -1126,15 +1155,17 @@ int VModelData::numOfNodes(int index) const {
 // ServerFilter observer methods
 
 void VModelData::notifyServerFilterAdded(ServerItem* item) {
-    if (!item)
+    if (!item) {
         return;
+    }
 
     if (ServerHandler* server = item->serverHandler()) {
         // A server can already be added!! It can happen when we add a server to a tab where no view exists.
         // In this case a tree view is created automatically and can lead to muliple calls
         // to this routine with the same server!!!
-        if (indexOfServer(server) != -1)
+        if (indexOfServer(server) != -1) {
             return;
+        }
 
         // Notifies the model that a change will happen
         Q_EMIT serverAddBegin(count());
@@ -1152,8 +1183,9 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item) {
     UI_FUNCTION_LOG
 #endif
 
-    if (!item)
+    if (!item) {
         return;
+    }
 
 #ifdef _UI_VMODELDATA_DEBUG
     UiLog().dbg() << " server=" << item->longName();
@@ -1213,10 +1245,12 @@ void VModelData::notifyServerFilterDelete() {
 void VModelData::setActive(bool active) {
     if (active != active_) {
         active_ = active;
-        if (active_)
+        if (active_) {
             reload();
-        else
+        }
+        else {
             clear();
+        }
     }
 }
 
@@ -1239,8 +1273,9 @@ void VModelData::slotFilterDefChanged() {
     UI_FUNCTION_LOG
 #endif
 
-    if (active_)
+    if (active_) {
         reload();
+    }
 }
 
 bool VModelData::isFilterComplete() const {
@@ -1359,8 +1394,9 @@ void VTreeModelData::add(ServerHandler* server) {
     VModelData::addToServers(d);
 
     //??????
-    if (active_)
+    if (active_) {
         reload();
+    }
 }
 
 void VTreeModelData::slotAttrFilterChanged() {
@@ -1412,8 +1448,9 @@ void VTableModelData::add(ServerHandler* server) {
 
     connect(d, SIGNAL(updateEnd()), this, SIGNAL(updateEnd()));
 
-    if (active_)
+    if (active_) {
         reload();
+    }
 }
 
 // Gives the position of this server in the full list of filtered nodes.
@@ -1466,8 +1503,9 @@ int VTableModelData::position(VTableServer* server, const VNode* node) const {
                     totalRow += pos;
                     return totalRow;
                 }
-                else
+                else {
                     return -1;
+                }
             }
             else {
                 totalRow += servers_[i]->nodeNum();
@@ -1491,8 +1529,9 @@ int VTableModelData::position(const VNode* node) const {
 VNode* VTableModelData::nodeAt(int totalRow) {
     int cnt = 0;
 
-    if (totalRow < 0)
+    if (totalRow < 0) {
         return nullptr;
+    }
 
     for (int i = 0; i < serverNum_; i++) {
         int pos = totalRow - cnt;

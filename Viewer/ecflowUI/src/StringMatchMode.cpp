@@ -35,16 +35,18 @@ void StringMatchMode::init() {
 const std::string& StringMatchMode::matchOperator() const {
     static std::string emptyStr;
     auto it = matchOper_.find(mode_);
-    if (it != matchOper_.end())
+    if (it != matchOper_.end()) {
         return it->second;
+    }
 
     return emptyStr;
 }
 
 StringMatchMode::Mode StringMatchMode::operToMode(const std::string& op) {
     for (auto it = matchOper_.begin(); it != matchOper_.end(); ++it) {
-        if (op == it->second)
+        if (op == it->second) {
             return it->first;
+        }
     }
     return InvalidMatch;
 }

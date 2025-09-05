@@ -76,12 +76,15 @@ void Palette::load(const std::string& parFile) {
         ptree ptItem     = it->second;
 
         QPalette::ColorGroup group = QPalette::Active;
-        if (name == "active")
+        if (name == "active") {
             group = QPalette::Active;
-        else if (name == "inactive")
+        }
+        else if (name == "inactive") {
             group = QPalette::Inactive;
-        else if (name == "disabled")
+        }
+        else if (name == "disabled") {
             group = QPalette::Disabled;
+        }
         else {
             UserMessage::message(
                 UserMessage::ERROR, true, std::string("Error! Palette::load() unable to identify group: " + name));
@@ -107,10 +110,12 @@ void Palette::load(const std::string& parFile) {
 
 void Palette::statusColours(QColor bg, QColor& bgLight, QColor& border) {
     int lighter = 150;
-    if (bg.value() < 235)
+    if (bg.value() < 235) {
         bgLight = bg.lighter(130);
-    else
+    }
+    else {
         bgLight = bg.lighter(lighter);
+    }
 
     // if(bg.hsvHue() < 58 && bg.hsvHue() > 50)
     //     bgLight=bg.lighter(170);

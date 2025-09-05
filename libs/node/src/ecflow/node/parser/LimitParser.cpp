@@ -22,11 +22,13 @@ using namespace std;
 bool LimitParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // limit name the_limit # value path1 path2
     size_t line_tokens_size = lineTokens.size();
-    if (line_tokens_size < 3)
+    if (line_tokens_size < 3) {
         throw std::runtime_error("LimitParser::doParse: Invalid limit " + line);
+    }
 
-    if (nodeStack().empty())
+    if (nodeStack().empty()) {
         throw std::runtime_error("LimitParser::doParse: Could not add limit as node stack is empty at line: " + line);
+    }
 
     int limitValue = Extract::theInt(lineTokens[2], "LimitParser::doParse: Invalid limit value: " + line);
 
@@ -49,8 +51,9 @@ bool LimitParser::doParse(const std::string& line, std::vector<std::string>& lin
                     paths.insert(lineTokens[i]);
                 }
             }
-            if (lineTokens[i] == "#")
+            if (lineTokens[i] == "#") {
                 comment_fnd = true;
+            }
         }
 
         bool check = (rootParser()->get_file_type() != PrintStyle::NET);

@@ -91,8 +91,9 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
             }
         }
         // ExpandAll from the root
-        else if (count > 0)
+        else if (count > 0) {
             viewItems_.resize(viewItems_.size() + count);
+        }
     }
     else {
         expanding = false;
@@ -114,17 +115,20 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
         itemWidthVec.push_back(w);
         itemHeightVec.push_back(h);
 
-        if (parentId >= 0 && !model_->isAttribute(currentIndex))
-            if (w > widest)
+        if (parentId >= 0 && !model_->isAttribute(currentIndex)) {
+            if (w > widest) {
                 widest = w;
+            }
+        }
 #ifdef _UI_COMPACTVIEW_DEBUG
         UiLog().dbg() << "  item=" << currentIndex.data().toString() << " w=" << w;
 #endif
     }
 
 #ifdef _UI_COMPACTVIEW_DEBUG
-    if (parentId >= 0)
+    if (parentId >= 0) {
         UiLog().dbg() << "layout parent=" << viewItems_[parentId].index.data().toString() << " widest child=" << widest;
+    }
 #endif
 
     // Iterate through the direct children of parent item. At this point all the items
@@ -158,13 +162,15 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
 
         item->x = xp;
 
-        if (item->alignedRight() > maxRowWidth_)
+        if (item->alignedRight() > maxRowWidth_) {
             maxRowWidth_ = item->alignedRight();
+        }
 
         // We need to expand the item
         if (recursiveExpanding || isIndexExpanded(currentIndex)) {
-            if (recursiveExpanding)
+            if (recursiveExpanding) {
                 expandedIndexes.insert(currentIndex);
+            }
 
             item->expanded = true;
 
@@ -187,8 +193,9 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
         }
     }
 
-    if (!expanding)
+    if (!expanding) {
         return; // nothing changed
+    }
 
 #ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << " update parent total";
@@ -236,8 +243,9 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
     UiLog().dbg() << "firstVisible " << firstVisible;
 #endif
 
-    if (firstVisible < 0)
+    if (firstVisible < 0) {
         return;
+    }
 
 #ifdef _UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "scrollX" << horizontalScrollBar()->value() << " " << viewport()->width();
@@ -302,8 +310,9 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
             UiLog().dbg() << "row: " << i << " " << itemHeight << " " << itemsInRow;
 #endif
             // Try to find the first item int the current rect
-            if (y + itemHeight > area.top())
+            if (y + itemHeight > area.top()) {
                 break;
+            }
             y += itemHeight;
         }
 
@@ -329,8 +338,9 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
 #endif
             }
 
-            if (multipleRects)
+            if (multipleRects) {
                 drawn.append(i);
+            }
         }
     }
 }
@@ -365,17 +375,20 @@ void CompactView::drawRow(QPainter* painter,
         leaf = (item->total == 0);
 
         // Find out the first indentation level in the row
-        if (firstLevel == 0)
+        if (firstLevel == 0) {
             firstLevel = item->level;
+        }
 
         // Init style option
         QStyleOptionViewItem opt;
-        if (selectionModel_->isSelected(item->index))
+        if (selectionModel_->isSelected(item->index)) {
             opt.state |= QStyle::State_Selected;
+        }
 
         int optWidth = 2000;
-        if (item->width > optWidth)
+        if (item->width > optWidth) {
             optWidth = item->width;
+        }
         opt.rect = QRect(item->x, yp, optWidth, item->height);
 
         // We do not render the item if it is outisde the viewport and
@@ -383,8 +396,9 @@ void CompactView::drawRow(QPainter* painter,
         // the connector line is always drawn from the child to the parent.
         bool needToDraw = true;
         if (item->parentItem >= 0) {
-            if (viewItems_[item->parentItem].right() >= translation() + viewportWidth)
+            if (viewItems_[item->parentItem].right() >= translation() + viewportWidth) {
                 needToDraw = false;
+            }
         }
 
         if (needToDraw) {
@@ -511,8 +525,9 @@ void CompactView::drawRow(QPainter* painter,
                         painter->drawLine(lineX, lineY, lineX, yp + rh);
                         indentVec[item->level] = lineX;
                     }
-                    else
+                    else {
                         indentVec[item->level] = 0;
+                    }
                 }
                 // Child in the middle - has sibling both upwards and downwards
                 else if (item->hasMoreSiblings) {
@@ -552,8 +567,9 @@ void CompactView::drawRow(QPainter* painter,
             painter->setPen(connectorColour_);
             for (int j = 0; j < firstLevel; j++) {
                 int xp = indentVec[j];
-                if (xp != 0)
+                if (xp != 0) {
                     painter->drawLine(xp, yp, xp, yp + rh);
+                }
             }
 
             yp += rh;
@@ -563,8 +579,9 @@ void CompactView::drawRow(QPainter* painter,
         itemsInRow++;
     }
 
-    if (itemsInRow == 0)
+    if (itemsInRow == 0) {
         itemsInRow = 1;
+    }
 }
 
 void CompactView::adjustWidthInParent(int start) {
@@ -586,8 +603,9 @@ void CompactView::adjustWidthInParent(int start) {
             QModelIndex idx = model_->index(i, 0, parentIndex);
             if (model_->isNode(idx)) {
                 delegate_->sizeHintCompute(idx, w, h);
-                if (w > widest)
+                if (w > widest) {
                     widest = w;
+                }
             }
         }
 
@@ -608,8 +626,9 @@ void CompactView::adjustWidthInParent(int start) {
                 }
 
                 // Check if the total width changed
-                if (viewItems_[i].right() > maxRowWidth_)
+                if (viewItems_[i].right() > maxRowWidth_) {
                     maxRowWidth_ = viewItems_[i].right();
+                }
             }
         }
     }
@@ -630,8 +649,9 @@ void CompactView::adjustWidthInParent(int start) {
                 viewItems_[i].x += delta;
 
                 // Check if the total width changed
-                if (viewItems_[i].right() > maxRowWidth_)
+                if (viewItems_[i].right() > maxRowWidth_) {
                     maxRowWidth_ = viewItems_[i].right();
+                }
             }
         }
     }
@@ -687,8 +707,9 @@ int CompactView::rowHeight(int start, int forward, int& itemsInRow) const {
         for (int i = start; i < itemsCount; i++) {
             rh = qMax(rh, viewItems_[i].height);
             itemsInRow++;
-            if (viewItems_[i].total == 0)
+            if (viewItems_[i].total == 0) {
                 break;
+            }
         }
     }
     else {
@@ -697,8 +718,9 @@ int CompactView::rowHeight(int start, int forward, int& itemsInRow) const {
         rh = qMax(rh, viewItems_[start].height);
         itemsInRow++;
         for (int i = start - 1; i >= 0; i--) {
-            if (viewItems_[i].total == 0)
+            if (viewItems_[i].total == 0) {
                 break;
+            }
             rh = qMax(rh, viewItems_[i].height);
             itemsInRow++;
         }
@@ -713,8 +735,9 @@ int CompactView::itemCountInRow(int start) const {
     int itemsInRow               = 0;
     for (std::size_t i = start; i < itemsCount; i++) {
         itemsInRow++;
-        if (viewItems_[i].total == 0)
+        if (viewItems_[i].total == 0) {
             return itemsInRow;
+        }
     }
 
     UI_ASSERT(itemsInRow > 0, "itemsInRow=" << itemsInRow);
@@ -722,8 +745,9 @@ int CompactView::itemCountInRow(int start) const {
 }
 
 int CompactView::itemRow(int item) const {
-    if (item < 0 || item >= static_cast<int>(viewItems_.size()))
+    if (item < 0 || item >= static_cast<int>(viewItems_.size())) {
         return -1;
+    }
 
     int row        = -1;
     int itemsInRow = 0;
@@ -745,8 +769,9 @@ int CompactView::firstVisibleItem(int& offset) const {
         offset = 0;
         // value is the row number
 
-        if (value < 0 || value >= rowCount_)
+        if (value < 0 || value >= rowCount_) {
             return -1;
+        }
 
         int cnt                      = 0;
         int itemsInRow               = 0;
@@ -772,8 +797,9 @@ void CompactView::updateRowCount() {
     rowCount_             = 0;
     const auto itemsCount = static_cast<int>(viewItems_.size());
     for (int i = 0; i < itemsCount; i++) {
-        if (viewItems_[i].total == 0)
+        if (viewItems_[i].total == 0) {
             rowCount_++;
+        }
     }
 
 #ifdef _UI_COMPACTVIEW_DEBUG
@@ -787,8 +813,9 @@ void CompactView::updateScrollBars() {
 #endif
 
     QSize viewportSize = viewport()->size();
-    if (!viewportSize.isValid())
+    if (!viewportSize.isValid()) {
         viewportSize = QSize(0, 0);
+    }
 
     if (viewItems_.empty()) {
         // doItemsLayout();
@@ -797,16 +824,18 @@ void CompactView::updateScrollBars() {
     int itemsInViewport = 0;
 
     const int itemsCount = viewItems_.size();
-    if (itemsCount == 0)
+    if (itemsCount == 0) {
         return;
+    }
 
     const int viewportHeight = viewportSize.height();
     int itemsInRow           = 1;
     for (int height = 0, item = itemsCount - 1; item >= 0; item -= itemsInRow) {
         // UiLog().dbg() << "item=" << item;
         height += rowHeight(item, -1, itemsInRow);
-        if (height > viewportHeight)
+        if (height > viewportHeight) {
             break;
+        }
         itemsInViewport++;
     }
 #ifdef _UI_COMPACTVIEW_DEBUG
@@ -815,8 +844,9 @@ void CompactView::updateScrollBars() {
 #endif
 
     if (verticalScrollMode_ == ScrollPerItem) {
-        if (!viewItems_.empty())
+        if (!viewItems_.empty()) {
             itemsInViewport = qMax(1, itemsInViewport);
+        }
 
         // verticalScrollBar()->setRange(0, itemsCount - itemsInViewport);
         verticalScrollBar()->setRange(0, rowCount_ - itemsInViewport);
@@ -849,8 +879,9 @@ QRect CompactView::visualRect(const QModelIndex& index) const {
     // d->executePostedLayout();
 
     int vi = viewIndex(index);
-    if (vi < 0)
+    if (vi < 0) {
         return {};
+    }
 
     int y  = -1;
     int rh = 0;
@@ -895,8 +926,9 @@ void CompactView::coordinateForItem(int item, int& itemY, int& itemRowHeight) co
 // coordinate is in viewport coordinates
 int CompactView::itemAtCoordinate(const QPoint& coordinate) const {
     const std::size_t itemCount = viewItems_.size();
-    if (itemCount == 0)
+    if (itemCount == 0) {
         return -1;
+    }
 
     if (verticalScrollMode_ == ScrollPerItem) {
         // int topRow = verticalScrollBar()->value();
@@ -926,8 +958,9 @@ int CompactView::itemAtRowCoordinate(int start, int count, int logicalXPos) cons
     for (int i = start; i < start + count; i++) {
         int left  = viewItems_[i].x - 1;
         int right = viewItems_[i].right() + 2;
-        if (!viewItems_[i].expanded && viewItems_[i].hasChildren)
+        if (!viewItems_[i].expanded && viewItems_[i].hasChildren) {
             right = viewItems_[i].right() + connectorGap_ + expandConnectorLength_ + 3;
+        }
 
         if (left <= logicalXPos && right >= logicalXPos) {
             return i;

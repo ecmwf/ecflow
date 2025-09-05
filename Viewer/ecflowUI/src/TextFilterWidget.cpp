@@ -111,10 +111,12 @@ void TextFilterWidget::setExternalButtons(QToolButton* statusTb, QToolButton* op
 }
 
 void TextFilterWidget::setEnabledExternalButtons(bool b) {
-    if (statusTb_)
+    if (statusTb_) {
         statusTb_->setEnabled(b);
-    if (optionTb_)
+    }
+    if (optionTb_) {
         optionTb_->setEnabled(b);
+    }
 }
 
 void TextFilterWidget::refreshCompleter() {
@@ -144,8 +146,9 @@ void TextFilterWidget::buildMenu(QToolButton* tb) {
         saveAc = new QAction(menu);
         saveAc->setText(tr("Save filter"));
         saveAc->setIcon(QPixmap(":/viewer/filesaveas.svg"));
-        if (!isActive() || isCurrentSaved())
+        if (!isActive() || isCurrentSaved()) {
             saveAc->setEnabled(false);
+        }
         menu->addAction(saveAc);
     }
 
@@ -155,8 +158,9 @@ void TextFilterWidget::buildMenu(QToolButton* tb) {
 
     auto* clearAc = new QAction(menu);
     clearAc->setText(tr("Clear filter"));
-    if (!isActive())
+    if (!isActive()) {
         clearAc->setEnabled(false);
+    }
     menu->addAction(clearAc);
 
     auto* sep1 = new QAction(menu);
@@ -244,8 +248,9 @@ void TextFilterWidget::addMenuSection(QMenu* menu,
                                       const std::vector<TextFilterItem>& items,
                                       QString title,
                                       QString data) {
-    if (items.empty())
+    if (items.empty()) {
         return;
+    }
 
     auto* sep1 = new QAction(menu);
     sep1->setSeparator(true);
@@ -272,10 +277,12 @@ void TextFilterWidget::addMenuSection(QMenu* menu,
             ac->setText(txt);
             ac->setData(data + "_" + QString::number(i)); // set an id for the action
 
-            if (items[i].matched())
+            if (items[i].matched()) {
                 ac->setIcon(QPixmap(":/viewer/filter_match.svg"));
-            else
+            }
+            else {
                 ac->setIcon(QPixmap(":/viewer/filter_no_match.svg"));
+            }
 
             menu->addAction(ac);
         }
@@ -284,8 +291,9 @@ void TextFilterWidget::addMenuSection(QMenu* menu,
 
 void TextFilterWidget::runIt() {
     QString t = le_->text();
-    if (!t.isEmpty())
+    if (!t.isEmpty()) {
         Q_EMIT runRequested(t, isMatched(), isCaseSensitive());
+    }
 }
 
 void TextFilterWidget::slotStatusTb(bool b) {
@@ -319,11 +327,13 @@ void TextFilterWidget::on_le__returnPressed() {
 }
 
 void TextFilterWidget::on_le__textChanged() {
-    if (status_ != EditStatus)
+    if (status_ != EditStatus) {
         setStatus(EditStatus);
+    }
 
-    if (!isActive())
+    if (!isActive()) {
         Q_EMIT clearRequested();
+    }
 }
 
 void TextFilterWidget::on_matchCb__currentIndexChanged(int) {
@@ -344,16 +354,19 @@ void TextFilterWidget::setEditFocus() {
 }
 
 void TextFilterWidget::adjustToolTip() {
-    if (!statusTb_)
+    if (!statusTb_) {
         return;
+    }
 
     QString filterDesc;
     if (status_ == FoundStatus || status_ == NotFoundStatus) {
-        if (!isVisible())
+        if (!isVisible()) {
             filterDesc += tr("Toggle to <b>show</b> text filter bar<br>----------------------------------------<br>");
-        else
+        }
+        else {
             filterDesc += tr("Toggle to <b>hide</b> text filter bar. The filter remains active (if defined). "
                              "<br>----------------------------------------<br>");
+        }
 
         filterDesc += tr("Current filter:") + "<br><b>&nbsp;regexp:</b> " + filterText() + "<br><b>&nbsp;mode: </b>" +
                       (isMatched() ? "match" : "no match") + ", " +

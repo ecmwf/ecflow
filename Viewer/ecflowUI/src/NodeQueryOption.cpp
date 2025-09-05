@@ -54,20 +54,23 @@ public:
 };
 
 NodeQueryOptionFactory::NodeQueryOptionFactory(const std::string& type) {
-    if (makers == nullptr)
+    if (makers == nullptr) {
         makers = new std::map<std::string, NodeQueryOptionFactory*>;
+    }
 
     (*makers)[type] = this;
 }
 
 NodeQueryOption* NodeQueryOptionFactory::create(VProperty* p) {
-    if (!p)
+    if (!p) {
         return nullptr;
+    }
 
     std::string type = p->param("type").toStdString();
     auto j           = makers->find(type);
-    if (j != makers->end())
+    if (j != makers->end()) {
         return (*j).second->make(p);
+    }
 
     return nullptr;
 }
@@ -83,8 +86,9 @@ NodeQueryOption::NodeQueryOption(VProperty* p)
       name_(p->name()),
       label_(p->param("label")),
       ignoreIfAny_((p->param("ignoreIfAny") == "true") ? true : false) {
-    if (label_.isEmpty())
+    if (label_.isEmpty()) {
         label_ = name_;
+    }
 }
 
 void NodeQueryOption::build(NodeQuery* query) {
@@ -154,10 +158,12 @@ void NodeQueryOption::build(NodeQuery* query) {
                 opLst << op;
                 Q_ASSERT(op);
             }
-            if (p->name() == "variable")
+            if (p->name() == "variable") {
                 query->attrGroup_[p->name()] = new NodeQueryVarAttrGroup(p->name(), typeLst, opLst);
-            else
+            }
+            else {
                 query->attrGroup_[p->name()] = new NodeQueryAttrGroup(p->name(), typeLst, opLst);
+            }
         }
     }
 }
@@ -192,8 +198,9 @@ void NodeQueryStringOption::swap(const NodeQueryOption* option) {
 }
 
 void NodeQueryStringOption::save(VSettings* vs) {
-    if (value_.isEmpty() && matchMode_.mode() == defaultMatchMode_ && caseSensitive_ == defaultCaseSensitive_)
+    if (value_.isEmpty() && matchMode_.mode() == defaultMatchMode_ && caseSensitive_ == defaultCaseSensitive_) {
         return;
+    }
 
     vs->beginGroup(name_.toStdString());
     vs->put("value", value_.toStdString());
@@ -203,8 +210,9 @@ void NodeQueryStringOption::save(VSettings* vs) {
 }
 
 void NodeQueryStringOption::load(VSettings* vs) {
-    if (!vs->contains(name().toStdString()))
+    if (!vs->contains(name().toStdString())) {
         return;
+    }
 
     vs->beginGroup(name_.toStdString());
     value_ = QString::fromStdString(vs->get("value", value_.toStdString()));
@@ -223,8 +231,9 @@ NodeQueryListOption::NodeQueryListOption(VProperty* p)
     : NodeQueryOption(p),
       values_(p->param("values").split("|")),
       valueLabels_(p->param("labels").split("|")) {
-    if (valueLabels_.count() == 1 && valueLabels_[0].isEmpty())
+    if (valueLabels_.count() == 1 && valueLabels_[0].isEmpty()) {
         valueLabels_ = values_;
+    }
 
     Q_ASSERT(valueLabels_.count() == values_.count());
 }
@@ -244,26 +253,30 @@ void NodeQueryListOption::swap(const NodeQueryOption* option) {
 }
 
 void NodeQueryListOption::save(VSettings* vs) {
-    if (selection_.isEmpty())
+    if (selection_.isEmpty()) {
         return;
+    }
 
     std::vector<std::string> v;
-    Q_FOREACH (QString s, selection_)
+    Q_FOREACH (QString s, selection_) {
         v.push_back(s.toStdString());
+    }
 
     vs->put(name_.toStdString(), v);
 }
 
 void NodeQueryListOption::load(VSettings* vs) {
-    if (!vs->contains(name_.toStdString()))
+    if (!vs->contains(name_.toStdString())) {
         return;
+    }
 
     std::vector<std::string> v;
     vs->get(name_.toStdString(), v);
 
     selection_.clear();
-    for (auto it = v.begin(); it != v.end(); ++it)
+    for (auto it = v.begin(); it != v.end(); ++it) {
         selection_ << QString::fromStdString(*it);
+    }
 }
 
 //===============================================
@@ -276,21 +289,24 @@ NodeQueryComboOption::NodeQueryComboOption(VProperty* p)
     : NodeQueryOption(p),
       values_(p->param("values").split("|")),
       valueLabels_(p->param("labels").split("|")) {
-    if (valueLabels_.count() == 1 && valueLabels_[0].isEmpty())
+    if (valueLabels_.count() == 1 && valueLabels_[0].isEmpty()) {
         valueLabels_ = values_;
+    }
 
     Q_ASSERT(values_.count() > 0);
     Q_ASSERT(valueLabels_.count() == values_.count());
 
     value_ = p->defaultValue().toString();
-    if (!values_.contains(value_))
+    if (!values_.contains(value_)) {
         value_ = values_[0];
+    }
 }
 
 QString NodeQueryComboOption::query() const {
     QString s;
-    if (ignoreIfAny_ && value_ == "any")
+    if (ignoreIfAny_ && value_ == "any") {
         return s;
+    }
 
     if (!value_.isEmpty()) {
         s = name_ + " = " + " \'" + value_ + "\'";
@@ -365,20 +381,27 @@ QString NodeQueryPeriodOption::query() const {
     if (mode_ == LastPeriodMode || mode_ == OlderPeriodMode) {
         if (period_ >= 0 && periodUnits_ >= nullptr) {
             QDateTime prev = QDateTime::currentDateTime();
-            if (periodUnits_ == "minute")
+            if (periodUnits_ == "minute") {
                 prev = prev.addSecs(-60 * period_);
-            else if (periodUnits_ == "hour")
+            }
+            else if (periodUnits_ == "hour") {
                 prev = prev.addSecs(-3600 * period_);
-            else if (periodUnits_ == "day")
+            }
+            else if (periodUnits_ == "day") {
                 prev = prev.addDays(-period_);
-            else if (periodUnits_ == "week")
+            }
+            else if (periodUnits_ == "week") {
                 prev = prev.addDays(-7 * period_);
-            else if (periodUnits_ == "month")
+            }
+            else if (periodUnits_ == "month") {
                 prev = prev.addMonths(-period_);
-            else if (periodUnits_ == "year")
+            }
+            else if (periodUnits_ == "year") {
                 prev = prev.addYears(-period_);
-            else
+            }
+            else {
                 return {};
+            }
 
             if (mode_ == LastPeriodMode) {
                 s = name_ + " date::>= " + prev.toString(Qt::ISODate);
@@ -427,13 +450,15 @@ void NodeQueryPeriodOption::swap(const NodeQueryOption* option) {
     else if (op->mode_ == FixedPeriodMode) {
         setPeriod(op->fromDate(), op->toDate());
     }
-    else
+    else {
         mode_ = NoMode;
+    }
 }
 
 void NodeQueryPeriodOption::save(VSettings* vs) {
-    if (mode_ == NoMode)
+    if (mode_ == NoMode) {
         return;
+    }
 
     vs->beginGroup(name_.toStdString());
     if (mode_ == LastPeriodMode) {
@@ -455,8 +480,9 @@ void NodeQueryPeriodOption::save(VSettings* vs) {
 }
 
 void NodeQueryPeriodOption::load(VSettings* vs) {
-    if (!vs->contains(name().toStdString()))
+    if (!vs->contains(name().toStdString())) {
         return;
+    }
 
     vs->beginGroup(name_.toStdString());
     QString mode = QString::fromStdString(vs->get("mode", std::string()));
@@ -467,13 +493,15 @@ void NodeQueryPeriodOption::load(VSettings* vs) {
         periodUnits_ = QString::fromStdString(vs->get("units", periodUnits_.toStdString()));
 
         // Check period length
-        if (period_ <= 0)
+        if (period_ <= 0) {
             clear();
+        }
 
         // Check period units
         if (periodUnits_ != "minute" && periodUnits_ != "hour" && periodUnits_ != "day" && periodUnits_ != "week" &&
-            periodUnits_ != "month" && periodUnits_ != "year")
+            periodUnits_ != "month" && periodUnits_ != "year") {
             clear();
+        }
     }
     else if (mode == "fixed") {
         mode_        = FixedPeriodMode;
@@ -486,8 +514,9 @@ void NodeQueryPeriodOption::load(VSettings* vs) {
         toDate_.setTimeSpec(Qt::UTC);
 
         // Check if dates are valis
-        if (!fromDate_.isValid() || !fromDate_.isValid())
+        if (!fromDate_.isValid() || !fromDate_.isValid()) {
             clear();
+        }
     }
     else {
         clear();

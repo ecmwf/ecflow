@@ -107,10 +107,12 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent) {
     // Paths
     std::string pathText = "<b>Log file:</b> ";
 
-    if (DirectoryHandler::uiLogFileName().empty())
+    if (DirectoryHandler::uiLogFileName().empty()) {
         pathText += "<i>not defined (log is written to stdout)</i><br>";
-    else
+    }
+    else {
         pathText += DirectoryHandler::uiLogFileName() + " <br>";
+    }
 
     pathText += "<b>UI event log file:</b> " + DirectoryHandler::uiEventLogFileName() + " <br>";
     pathText += "<b>Socket directory:</b> " + DirectoryHandler::socketDir() + " <br>";

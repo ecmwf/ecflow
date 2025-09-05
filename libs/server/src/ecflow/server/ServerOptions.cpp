@@ -133,15 +133,17 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
     po::store(parsed_options, vm_);
     po::notify(vm_);
 
-    if (vm_.count("help"))
+    if (vm_.count("help")) {
         cout << desc << "\n";
+    }
 
     if (vm_.count("version")) {
         cout << Version::description() << "\n";
     }
 
-    if (vm_.count("debug"))
+    if (vm_.count("debug")) {
         env->debug_ = true;
+    }
 
     if (vm_.count("http")) {
         if (env->debug_) {

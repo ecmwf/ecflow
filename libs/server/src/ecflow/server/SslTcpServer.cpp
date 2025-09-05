@@ -30,8 +30,9 @@ SslTcpServer::SslTcpServer(BaseServer* server, boost::asio::io_context& io, Serv
 }
 
 void SslTcpServer::start_accept() {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   SslTcpServer::start_accept()" << endl;
+    }
 
     ssl_connection_ptr new_conn =
         std::make_shared<ssl_connection>(boost::ref(io_), boost::ref(serverEnv_.openssl().context()));
@@ -41,14 +42,16 @@ void SslTcpServer::start_accept() {
 }
 
 void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connection_ptr conn) {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   SslTcpServer::handle_accept" << endl;
+    }
 
     // Check whether the server was stopped by a signal before this completion
     // handler had a chance to run.
     if (!acceptor_.is_open()) {
-        if (serverEnv_.debug())
+        if (serverEnv_.debug()) {
             cout << "   SslTcpServer::handle_accept:  acceptor is closed, returning" << endl;
+        }
         return;
     }
 
@@ -59,8 +62,9 @@ void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connect
             [this, conn](const boost::system::error_code& error) { this->handle_handshake(error, conn); });
     }
     else {
-        if (serverEnv_.debug())
+        if (serverEnv_.debug()) {
             cout << "   SslTcpServer::handle_accept " << e.message() << endl;
+        }
         if (e != boost::asio::error::operation_aborted) {
             // An error occurred. Log it
             LogToCout toCoutAsWell;
@@ -79,8 +83,9 @@ void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connect
 }
 
 void SslTcpServer::handle_handshake(const boost::system::error_code& e, ssl_connection_ptr new_conn) {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   SslTcpServer::handle_handshake" << endl;
+    }
 
     if (!e) {
         // Successfully accepted a new connection. Determine what the
@@ -121,9 +126,10 @@ void SslTcpServer::handle_write(const boost::system::error_code& e, ssl_connecti
     // Handle completion of a write operation.
     // Nothing to do. The socket will be closed automatically when the last
     // reference to the connection object goes away.
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   SslTcpServer::handle_write: client request " << inbound_request_ << " replying with  "
              << outbound_response_ << endl;
+    }
 
     if (e) {
         LogFlusher logFlusher;

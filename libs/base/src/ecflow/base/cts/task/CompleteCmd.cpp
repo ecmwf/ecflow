@@ -42,10 +42,12 @@ void CompleteCmd::print(std::string& os) const {
 
 bool CompleteCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<CompleteCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (var_to_del_ != the_rhs->variables_to_delete())
+    }
+    if (var_to_del_ != the_rhs->variables_to_delete()) {
         return false;
+    }
     return TaskCmd::equals(rhs);
 }
 
@@ -56,7 +58,6 @@ ecf::authentication_t CompleteCmd::authenticate(AbstractServer& server) const {
 ecf::authorisation_t CompleteCmd::authorise(AbstractServer& server) const {
     return implementation::do_authorise(*this, server);
 }
-
 
 STC_Cmd_ptr CompleteCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().task_complete_++;
@@ -103,10 +104,11 @@ void CompleteCmd::addOption(boost::program_options::options_description& desc) c
         "remove", po::value<vector<string>>()->multitoken(), "remove variables i.e name name2");
 }
 void CompleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         cout << "  CompleteCmd::create " << CompleteCmd::arg() << " task_path(" << clientEnv->task_path()
              << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
              << ") try_no(" << clientEnv->task_try_no() << ")\n";
+    }
 
     std::string errorMsg;
     if (!clientEnv->checkTaskPathAndPassword(errorMsg)) {
@@ -114,8 +116,9 @@ void CompleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm
     }
 
     std::vector<std::string> variable_vec;
-    if (vm.count("remove"))
+    if (vm.count("remove")) {
         variable_vec = vm["remove"].as<vector<string>>();
+    }
 
     cmd = std::make_shared<CompleteCmd>(clientEnv->task_path(),
                                         clientEnv->jobs_password(),

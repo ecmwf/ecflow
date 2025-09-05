@@ -58,8 +58,9 @@ std::string VAttribute::fullPath() const {
 }
 
 bool VAttribute::sameContents(VItem* item) const {
-    if (!item)
+    if (!item) {
         return false;
+    }
 
     if (VAttribute* a = item->isAttribute()) {
         return a->parent() == parent() && a->type() == type() && a->name() == name();

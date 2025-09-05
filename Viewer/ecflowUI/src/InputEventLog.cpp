@@ -33,12 +33,14 @@ static bool firstStart                  = true;
 static QString objectPath(QObject* obj) {
     QString res;
     for (; obj; obj = obj->parent()) {
-        if (!res.isEmpty())
+        if (!res.isEmpty()) {
             res.prepend("/");
+        }
         QString s = obj->objectName();
         // QString cn(obj->metaObject()->className());
-        if (s.isEmpty())
+        if (s.isEmpty()) {
             s = "?";
+        }
         // res.prepend("[" + cn + "]" +s);
         res.prepend(s);
     }
@@ -60,16 +62,18 @@ InputEventLog::~InputEventLog() {
 }
 
 InputEventLog* InputEventLog::instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new InputEventLog(nullptr);
+    }
     return instance_;
 }
 
 void InputEventLog::start() {
     Q_ASSERT(!paused_);
 
-    if (out_.device())
+    if (out_.device()) {
         return;
+    }
 
     QFile::OpenMode mode = (firstStart) ? QFile::WriteOnly : QFile::Append;
     if (outFile_->open(mode)) {

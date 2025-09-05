@@ -96,8 +96,9 @@ public:
 //-------------------------------
 
 DirWidgetState::DirWidgetState(OutputDirWidget* owner, DirWidgetState* prev) : QObject(owner), owner_(owner) {
-    if (prev)
+    if (prev) {
         timerSuspended_ = prev->timerSuspended_;
+    }
 }
 
 void DirWidgetState::handleReload() {
@@ -510,11 +511,13 @@ void OutputDirWidget::updateContents(const std::vector<VDir_ptr>& dirs) {
         // Adjust column width
         if (!dirColumnsAdjusted_) {
             dirColumnsAdjusted_ = true;
-            for (int i = 0; i < dirModel_->columnCount() - 1; i++)
+            for (int i = 0; i < dirModel_->columnCount() - 1; i++) {
                 ui_->view->resizeColumnToContents(i);
+            }
 
-            if (dirModel_->columnCount() > 1)
+            if (dirModel_->columnCount() > 1) {
                 ui_->view->setColumnWidth(1, ui_->view->columnWidth(0));
+            }
         }
 #ifdef UI_OUTPUTDIRWIDGET_DEBUG_
         UiLog().dbg() << UI_FN_INFO << "dir item count=" << dirModel_->rowCount();

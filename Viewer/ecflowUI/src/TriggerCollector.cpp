@@ -136,13 +136,16 @@ bool TriggerTableCollector::contains(const VNode* node, bool attrParents) const 
     for (auto item : items_) {
         if (VItem* it = item->item()) {
             if (VNode* n = it->isNode()) {
-                if (n == node)
+                if (n == node) {
                     return true;
+                }
             }
             else if (attrParents) {
-                if (VAttribute* a = it->isAttribute())
-                    if (a->parent() == node)
+                if (VAttribute* a = it->isAttribute()) {
+                    if (a->parent() == node) {
                         return true;
+                    }
+                }
             }
         }
     }
@@ -152,15 +155,17 @@ bool TriggerTableCollector::contains(const VNode* node, bool attrParents) const 
 
 TriggerTableItem* TriggerTableCollector::find(const VItem* item) const {
     for (auto i : items_) {
-        if (i->item() == item)
+        if (i->item() == item) {
             return i;
+        }
     }
     return nullptr;
 }
 
 TriggerTableItem* TriggerTableCollector::findByContents(const VItem* item) const {
-    if (!item)
+    if (!item) {
         return nullptr;
+    }
 
     for (auto i : items_) {
         if (item->sameContents(i->item())) {

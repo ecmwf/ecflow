@@ -93,8 +93,9 @@ public:
         }
         TextPagerLayout* l = layouts.last();
         l->viewport        = cursor.viewportWidth();
-        if (l->viewport == -1)
+        if (l->viewport == -1) {
             l->viewport = INT_MAX - 1024; // prevent overflow in comparisons.
+        }
         if (cursor.textEdit) {
             l->textEdit                = cursor.textEdit;
             l->suppressTextEditUpdates = true;
@@ -143,8 +144,9 @@ public:
                 --linesBelow;
             }
         }
-        if (startPos > 0)
+        if (startPos > 0) {
             ++startPos; // in this case startPos points to the newline before it
+        }
         l->viewportPosition = startPos;
         l->layoutDirty      = true;
         ASSUME(l->viewportPosition == 0 || doc->readCharacter(l->viewportPosition - 1) == QLatin1Char('\n'));

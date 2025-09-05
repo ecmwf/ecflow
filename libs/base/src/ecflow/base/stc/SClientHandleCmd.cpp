@@ -30,8 +30,9 @@ std::string SClientHandleCmd::print() const {
 }
 
 bool SClientHandleCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         cout << "  SClientHandleCmd::handle_server_response handle_ = " << handle_ << "\n";
+    }
     server_reply.set_client_handle(handle_);
     return true;
 }

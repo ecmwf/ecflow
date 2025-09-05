@@ -94,8 +94,9 @@ public:
 
     const std::string& port() const { return port_; }
     const std::string& host() const {
-        if (host_.empty())
+        if (host_.empty()) {
             return ecf::Str::LOCALHOST();
+        }
         return host_;
     }
 
@@ -145,8 +146,9 @@ private:
         ClientInvoker theClient(ecf::Str::LOCALHOST(), port);
         if (theClient.wait_for_server_reply()) {
             server_started = true;
-            if (!msg.empty())
+            if (!msg.empty()) {
                 theClient.logMsg(msg);
+            }
         }
         else {
             server_started = false;

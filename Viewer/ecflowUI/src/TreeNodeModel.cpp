@@ -81,10 +81,12 @@ int TreeNodeModel::rowCount(const QModelIndex& parent) const {
     //"parent" is a server
     else if (isServer(parent)) {
         if (VTreeServer* server = indexToServer(parent)) {
-            if (server->inScan())
+            if (server->inScan()) {
                 return 0;
-            else
+            }
+            else {
                 return server->tree()->attrNum(atts_) + server->tree()->numOfChildren();
+            }
         }
     }
     //"parent" is a node
@@ -126,10 +128,12 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role) const {
 
         // Identifies server
         else if (role == ServerRole) {
-            if (isServerForValid(index))
+            if (isServerForValid(index)) {
                 return 1;
-            else
+            }
+            else {
                 return -1;
+            }
         }
 
         else if (role == AttributeRole) {
@@ -166,19 +170,23 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant TreeNodeModel::serverData(const QModelIndex& index, int role) const {
-    if (role == FilterRole)
+    if (role == FilterRole) {
         return true;
+    }
 
-    if (role == Qt::ToolTipRole && !serverToolTip_)
+    if (role == Qt::ToolTipRole && !serverToolTip_) {
         return {};
+    }
 
     ServerHandler* server = indexToServerHandler(index);
-    if (!server)
+    if (!server) {
         return {};
+    }
 
     if (index.column() == 0) {
-        if (role == ServerPointerRole)
+        if (role == ServerPointerRole) {
             return QVariant::fromValue((void*)server);
+        }
 
         // The colour of the server node
         if (role == ConnectionRole) {
@@ -186,16 +194,19 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index, int role) const {
         }
 
         // The colour of the server node
-        else if (role == Qt::BackgroundRole)
+        else if (role == Qt::BackgroundRole) {
             return server->vRoot()->stateColour();
+        }
 
         // The font colour of the server node
-        else if (role == Qt::ForegroundRole)
+        else if (role == Qt::ForegroundRole) {
             return server->vRoot()->stateFontColour();
+        }
 
         // The text
-        else if (role == Qt::DisplayRole)
+        else if (role == Qt::DisplayRole) {
             return QString::fromStdString(server->name());
+        }
 
         // The number of nodes the server has
         else if (role == NodeNumRole) {
@@ -215,14 +226,17 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index, int role) const {
             }
         }
 
-        else if (role == LoadRole)
+        else if (role == LoadRole) {
             return (server->activity() == ServerHandler::LoadActivity);
+        }
 
         else if (role == IconRole) {
-            if (icons_->isEmpty())
+            if (icons_->isEmpty()) {
                 return {};
-            else
+            }
+            else {
                 return VIcon::pixmapList(server->vRoot(), icons_);
+            }
         }
 
         // Tooltip
@@ -241,25 +255,30 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index, int role) const {
 }
 
 QVariant TreeNodeModel::nodeData(const QModelIndex& /*index*/, int role, VTreeNode* tnode) const {
-    if (role == Qt::ToolTipRole && !nodeToolTip_)
+    if (role == Qt::ToolTipRole && !nodeToolTip_) {
         return {};
+    }
 
-    if (!tnode)
+    if (!tnode) {
         return {};
+    }
 
     VNode* vnode = tnode->vnode();
-    if (!vnode || !vnode->node())
+    if (!vnode || !vnode->node()) {
         return {};
+    }
 
-    if (role == NodePointerRole)
+    if (role == NodePointerRole) {
         return QVariant::fromValue((void*)vnode);
+    }
 
     else if (role == ConnectionRole) {
         return serverConnectId(vnode->server()->connectState()->state());
     }
 
-    else if (role == Qt::DisplayRole)
+    else if (role == Qt::DisplayRole) {
         return vnode->name();
+    }
 
     else if (role == Qt::BackgroundRole) {
         if (vnode->isSuspended()) {
@@ -267,32 +286,40 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& /*index*/, int role, VTreeNo
             lst << vnode->stateColour() << vnode->realStateColour();
             return lst;
         }
-        else
+        else {
             return vnode->stateColour();
+        }
     }
 
-    else if (role == Qt::ForegroundRole)
+    else if (role == Qt::ForegroundRole) {
         return vnode->stateFontColour();
+    }
 
     else if (role == NodeTypeRole) {
-        if (vnode->isTask())
+        if (vnode->isTask()) {
             return 2;
-        else if (vnode->isSuite())
+        }
+        else if (vnode->isSuite()) {
             return 0;
-        else if (vnode->isFamily())
+        }
+        else if (vnode->isFamily()) {
             return 1;
-        else if (vnode->isAlias())
+        }
+        else if (vnode->isAlias()) {
             return 3;
+        }
         return 0;
     }
     else if (role == NodeTypeForegroundRole) {
         return vnode->typeFontColour();
     }
     else if (role == IconRole) {
-        if (icons_->isEmpty())
+        if (icons_->isEmpty()) {
             return {};
-        else
+        }
+        else {
             return VIcon::pixmapList(vnode, icons_);
+        }
     }
     else if (role == Qt::ToolTipRole) {
         QString txt = vnode->toolTip();
@@ -303,11 +330,13 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& /*index*/, int role, VTreeNo
     // The number of nodes a suite has
     else if (role == NodeNumRole) {
         if (vnode->isTopLevel()) {
-            if (data_->isFilterComplete())
+            if (data_->isFilterComplete()) {
                 return vnode->server()->vRoot()->totalNumOfTopLevel(vnode);
-            else
+            }
+            else {
                 return QString::number(tnode->root()->totalNumOfTopLevel(tnode)) + "/" +
                        QString::number(vnode->server()->vRoot()->totalNumOfTopLevel(vnode));
+            }
         }
         return {};
     }
@@ -332,8 +361,9 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role, VTree
         return {};
     }
 
-    if (role == Qt::BackgroundRole)
+    if (role == Qt::BackgroundRole) {
         return QColor(220, 220, 220);
+    }
 
     VNode* vnode = tnode->vnode();
     Q_ASSERT(vnode);
@@ -356,16 +386,20 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role, VTree
         return serverConnectId(vnode->server()->connectState()->state());
     }
     else if (role == Qt::DisplayRole) {
-        if (VAttribute* a = vnode->attribute(index.row(), atts_))
+        if (VAttribute* a = vnode->attribute(index.row(), atts_)) {
             return a->data();
-        else
+        }
+        else {
             return QStringList();
+        }
     }
     else if (role == Qt::ToolTipRole) {
-        if (VAttribute* a = vnode->attribute(index.row(), atts_))
+        if (VAttribute* a = vnode->attribute(index.row(), atts_)) {
             return a->toolTip();
-        else
+        }
+        else {
             return QString();
+        }
     }
 
     return {};
@@ -407,8 +441,9 @@ QModelIndex TreeNodeModel::index(int row, int column, const QModelIndex& parent)
 
 QModelIndex TreeNodeModel::parent(const QModelIndex& child) const {
     // If "child" is a server the parent is the root
-    if (isServer(child))
+    if (isServer(child)) {
         return {};
+    }
 
     int row = -1;
 
@@ -471,13 +506,15 @@ bool TreeNodeModel::isNode(const QModelIndex& index) const {
 // -any child node does not have children or attributes
 bool TreeNodeModel::isFlatNode(const QModelIndex& index) const {
     if (VTreeNode* node = indexToNode(index)) {
-        if (node->numOfChildren() == 0)
+        if (node->numOfChildren() == 0) {
             return true;
+        }
         else {
             for (int i = 0; i < node->numOfChildren(); i++) {
                 if (node->childAt(i)->numOfChildren() == 0) {
-                    if (node->childAt(i)->attrNum(atts_) > 0)
+                    if (node->childAt(i)->attrNum(atts_) > 0) {
                         return false;
+                    }
                 }
                 else {
                     return false;
@@ -496,8 +533,9 @@ bool TreeNodeModel::isAttribute(const QModelIndex& index) const {
 ServerHandler* TreeNodeModel::indexToServerHandler(const QModelIndex& index) const {
     // For servers the internal id is a null pointer
     if (index.isValid()) {
-        if (index.internalPointer() == nullptr)
+        if (index.internalPointer() == nullptr) {
             return data_->serverHandler(index.row());
+        }
     }
 
     return nullptr;
@@ -506,8 +544,9 @@ ServerHandler* TreeNodeModel::indexToServerHandler(const QModelIndex& index) con
 VTreeServer* TreeNodeModel::indexToServer(const QModelIndex& index) const {
     // For servers the internal id is a null pointer
     if (index.isValid()) {
-        if (index.internalPointer() == nullptr)
+        if (index.internalPointer() == nullptr) {
             return data_->server(index.row())->treeServer();
+        }
     }
 
     return nullptr;
@@ -521,8 +560,9 @@ VTreeServer* TreeNodeModel::nameToServer(const std::string& name) const {
 QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const {
     // For servers the internal id is set to their position in servers_ + 1
     int i = 0;
-    if ((i = data_->indexOfServer(server)) != -1)
+    if ((i = data_->indexOfServer(server)) != -1) {
         return createIndex(i, 0, (void*)nullptr);
+    }
 
     return {};
 }
@@ -530,8 +570,9 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const {
 QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const {
     // For servers the internal id is set to their position in servers_ + 1
     int i = 0;
-    if ((i = data_->indexOfServer(server)) != -1)
+    if ((i = data_->indexOfServer(server)) != -1) {
         return createIndex(i, 0, (void*)nullptr);
+    }
 
     return {};
 }
@@ -545,8 +586,9 @@ QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const {
 // We can only call it when the index is valid!
 VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex& index) const {
     void* ip = nullptr;
-    if ((ip = index.internalPointer()) == nullptr)
+    if ((ip = index.internalPointer()) == nullptr) {
         return nullptr;
+    }
 
     // If it is not a sever ...
 
@@ -564,8 +606,9 @@ VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex& index) const 
     // Otherwise the internal pointer points to the parent node.
     else if (auto* parentNode = static_cast<VTreeNode*>(ip)) {
         // It is an attribute
-        if (index.row() < parentNode->attrNum(atts_))
+        if (index.row() < parentNode->attrNum(atts_)) {
             return parentNode;
+        }
     }
 
     return nullptr;
@@ -574,8 +617,9 @@ VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex& index) const 
 // We can only call it when the index is valid!
 VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex& index, bool& itIsANode) const {
     void* ip = nullptr;
-    if ((ip = index.internalPointer()) == nullptr)
+    if ((ip = index.internalPointer()) == nullptr) {
         return nullptr;
+    }
 
     // If it is not a sever ...
 
@@ -619,8 +663,9 @@ VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex& index, bool
 VTreeNode* TreeNodeModel::indexToServerOrNode(const QModelIndex& index) const {
     VTreeNode* node = indexToNode(index);
     if (!node) {
-        if (VTreeServer* ts = indexToServer(index))
+        if (VTreeServer* ts = indexToServer(index)) {
             node = ts->tree();
+        }
     }
 
     return node;
@@ -662,8 +707,9 @@ VTreeNode* TreeNodeModel::indexToNode(const QModelIndex& index) const {
 
 // Find the index for the node! The VNode can be a server as well!!!
 QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const {
-    if (!node)
+    if (!node) {
         return {};
+    }
 
     // This is a server!!!
     if (node->isServer()) {
@@ -708,8 +754,9 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const {
 
 // Find the index for the node
 QModelIndex TreeNodeModel::nodeToIndex(const VTreeNode* node, int column) const {
-    if (!node)
+    if (!node) {
         return {};
+    }
 
     // It is a server
     if (node->parent() == nullptr) {
@@ -740,8 +787,9 @@ QModelIndex TreeNodeModel::nodeToIndex(const VTreeNode* node, int column) const 
 
 // Find the index for the node when we know what the server is!
 QModelIndex TreeNodeModel::nodeToIndex(VTreeServer* server, const VTreeNode* node, int column) const {
-    if (!node)
+    if (!node) {
         return {};
+    }
 
     // If the node is toplevel node (suite).
     if (node->isTopLevel()) {
@@ -766,12 +814,14 @@ QModelIndex TreeNodeModel::nodeToIndex(VTreeServer* server, const VTreeNode* nod
 
 // Find the index for the node! The VNode can be a server as well!!!
 QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) const {
-    if (!a)
+    if (!a) {
         return {};
+    }
 
     VNode* node = a->parent();
-    if (!node)
+    if (!node) {
         return {};
+    }
 
     VModelServer* mserver = data_->server(node->server());
     VTreeServer* server   = mserver->treeServer();
@@ -842,8 +892,9 @@ QModelIndex TreeNodeModel::forceShowAttribute(const VAttribute* a) const
 void TreeNodeModel::setForceShow(VInfo_ptr info) {
     UI_FUNCTION_LOG
 
-    if (info)
+    if (info) {
         UiLog().dbg() << " info=" << info->path();
+    }
 
     // Clear the forceShow object in all the server data objects. Only one of
     // these is actually need to clear it.
@@ -1012,13 +1063,15 @@ void TreeNodeModel::slotDataChanged(VModelServer* server) {
 
 // The node changed (it status etc)
 void TreeNodeModel::slotNodeChanged(VTreeServer* server, const VTreeNode* node) {
-    if (!node)
+    if (!node) {
         return;
+    }
 
     QModelIndex index = nodeToIndex(server, node, 0);
 
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
+    }
 
     Q_EMIT dataChanged(index, index);
 }
@@ -1026,13 +1079,15 @@ void TreeNodeModel::slotNodeChanged(VTreeServer* server, const VTreeNode* node) 
 // One of the attributes of the node changed. The total number of the
 // attributes is the same.
 void TreeNodeModel::slotAttributesChanged(VTreeServer* server, const VTreeNode* node) {
-    if (!node)
+    if (!node) {
         return;
+    }
 
     // Find the index of the node.
     QModelIndex parent = nodeToIndex(server, node, 0);
-    if (!parent.isValid())
+    if (!parent.isValid()) {
         return;
+    }
 
     // Find out the indexes for all the attributes. For an attribute
     // the internal pointer of the index points to the parent VNode.
@@ -1048,14 +1103,16 @@ void TreeNodeModel::slotBeginAddRemoveAttributes(VTreeServer* server,
                                                  int currentNum,
                                                  int cachedNum) {
     int diff = currentNum - cachedNum;
-    if (diff == 0)
+    if (diff == 0) {
         return;
+    }
 
     // Find the index of the node. This call does not use the
     // number of attributes of the node so it is safe.
     QModelIndex parent = nodeToIndex(server, node, 0);
-    if (!parent.isValid())
+    if (!parent.isValid()) {
         return;
+    }
 
     // At this point the model state is based on cachedNum!!!!
     // So VNode::attr() must return cachedNum and we need to pretend we have
@@ -1081,14 +1138,16 @@ void TreeNodeModel::slotEndAddRemoveAttributes(VTreeServer* server,
                                                int currentNum,
                                                int cachedNum) {
     int diff = currentNum - cachedNum;
-    if (diff == 0)
+    if (diff == 0) {
         return;
+    }
 
     // Find the index of the node. This call does not use the
     // number of attributes of the node so it is safe.
     QModelIndex parent = nodeToIndex(server, node, 0);
-    if (!parent.isValid())
+    if (!parent.isValid()) {
         return;
+    }
 
     // At this point the model state is based on currentNum!!!!
 
@@ -1134,8 +1193,9 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server, int num) {
     Q_ASSERT(ts);
     Q_EMIT scanEnded(ts->tree());
 
-    if (ts->isFirstScan())
+    if (ts->isFirstScan()) {
         Q_EMIT firstScanEnded(ts);
+    }
 }
 
 // The server clear has started. It will remove all the nodes except the root node.
@@ -1152,10 +1212,12 @@ void TreeNodeModel::slotBeginServerClear(VModelServer* server, int) {
 
         // We removes the attributes as well!!!
         int num = rowCount(idx);
-        if (num > 0)
+        if (num > 0) {
             beginRemoveRows(idx, 0, num - 1);
-        else
+        }
+        else {
             beginRemoveRows(idx, 0, 0);
+        }
     }
 }
 // The server clear has finished. The tree is empty only containing the rootnode
@@ -1269,10 +1331,12 @@ void TreeNodeModel::slotEndFilterUpdateInsertTop(VTreeServer* server, int row) {
 }
 
 int TreeNodeModel::iconNum(VNode* n) const {
-    if (icons_->isEmpty())
+    if (icons_->isEmpty()) {
         return 0;
-    else
+    }
+    else {
         return VIcon::pixmapNum(n, icons_);
+    }
 }
 
 int TreeNodeModel::serverConnectId(ConnectState::State st) const {

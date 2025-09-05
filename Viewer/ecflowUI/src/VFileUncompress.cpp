@@ -83,8 +83,9 @@ VFile_ptr VFileUncompress::uncompress(QString sourceFile, QString& errStr) {
 #else
         errStr = "Failed to run " + cmd + " ommand!";
 #endif
-        if (!errStr.isEmpty())
+        if (!errStr.isEmpty()) {
             errStr += "<br>Error message: " + err;
+        }
 
         targetFile.reset(); // delete
     }

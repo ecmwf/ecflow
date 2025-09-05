@@ -47,8 +47,9 @@ public:
     }
 
     MyType& operator=(const MyType& other) {
-        if (this != &other)
+        if (this != &other) {
             mName = other.mName;
+        }
 #ifdef DEBUG_ME
         ECF_TEST_DBG("MyType::operator=(const MyType&) " << mName << " my_int:" << my_int_);
 #endif
@@ -56,8 +57,9 @@ public:
     }
 
     MyType& operator=(MyType&& other) noexcept {
-        if (this != &other)
+        if (this != &other) {
             mName = std::move(other.mName);
+        }
 #ifdef DEBUG_ME
         ECF_TEST_DBG("MyType::operator=(MyType&&) " << mName << " my_int:" << my_int_);
 #endif

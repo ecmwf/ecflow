@@ -43,8 +43,9 @@ QString VLateAttrType::definition(QStringList d) const {
 }
 
 void VLateAttrType::encode(ecf::LateAttr* late, QStringList& data) const {
-    if (late)
+    if (late) {
         data << qName_ << QString::fromStdString(late->name());
+    }
 }
 
 //=====================================================

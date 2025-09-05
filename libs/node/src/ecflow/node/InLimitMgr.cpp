@@ -142,8 +142,9 @@ bool InLimitMgr::inLimit() const {
     // In the case we have multiple inlimits then we are only in limit if _ALL_ are in limit.
     // This is like a logical AND.
 
-    if (vec_.empty())
+    if (vec_.empty()) {
         return true;
+    }
 
     resolveInLimitReferences();
 
@@ -192,8 +193,9 @@ void InLimitMgr::incrementInLimit(std::set<Limit*>& limitSet, const std::string&
     //          inlimit limitname 4
     //          inlimit limitname 2    // illegal and trapped by parser
 
-    if (vec_.empty())
+    if (vec_.empty()) {
         return;
+    }
 
     resolveInLimitReferences();
 
@@ -237,8 +239,9 @@ void InLimitMgr::decrementInLimit(std::set<Limit*>& limitSet, const std::string&
     //          inlimit limitname 4
     //          inlimit limitname 2    // illegal and trapped by parser
 
-    if (vec_.empty())
+    if (vec_.empty()) {
         return;
+    }
 
     resolveInLimitReferences();
 
@@ -255,16 +258,18 @@ void InLimitMgr::decrementInLimit(std::set<Limit*>& limitSet, const std::string&
                     // Can only decrement this once, i.e when all child tasks are completed or aborted or queued or
                     // unknown
                     bool at_least_one_active = false;
-                    if (task_vec.empty())
+                    if (task_vec.empty()) {
                         node_->get_all_tasks(task_vec); // Get tasks once, inside for loop
+                    }
                     for (task_ptr task : task_vec) {
                         if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                             at_least_one_active = true;
                             break;
                         }
                     }
-                    if (at_least_one_active)
+                    if (at_least_one_active) {
                         continue;
+                    }
 
                     limit->decrement(inlimit.tokens(), node_->absNodePath());
                     inlimit.set_incremented(false);
@@ -278,8 +283,9 @@ void InLimitMgr::decrementInLimit(std::set<Limit*>& limitSet, const std::string&
 }
 
 void InLimitMgr::decrementInLimitForSubmission(std::set<Limit*>& limitSet, const std::string& task_path) {
-    if (vec_.empty())
+    if (vec_.empty()) {
         return;
+    }
 
     resolveInLimitReferences();
 
@@ -340,8 +346,9 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const {
                         s << "[limit]" << i.pathToNode() << Str::COLON() << limit->name();
                         ss << Node::path_href_attribute(s.str()) << " is full";
                     }
-                    else
+                    else {
                         ss << "limit " << i.pathToNode() << Str::COLON() << limit->name() << " is full";
+                    }
                 }
 
                 // show node paths that have consumed a limit, Only show first 5, Otherwise string may be too long
@@ -389,10 +396,12 @@ void InLimitMgr::auto_add_inlimit_externs(Defs* defs) const {
     for (size_t i = 0; i < theSize; i++) {
         limit_ptr referencedLimit = find_limit(vec_[i], errorMsg, warningMsg, false, false);
         if (!referencedLimit.get()) {
-            if (vec_[i].pathToNode().empty())
+            if (vec_[i].pathToNode().empty()) {
                 defs->add_extern(vec_[i].name());
-            else
+            }
+            else {
                 defs->add_extern(vec_[i].pathToNode() + ":" + vec_[i].name());
+            }
         }
     }
 }
@@ -406,8 +415,9 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
 
         // cout << "inLimit.pathToNode().empty() search " << debugType() << " " << node_->absNodePath() << "\n";
         limit_ptr referencedLimit = node_->findLimitUpNodeTree(inLimit.name());
-        if (referencedLimit.get())
+        if (referencedLimit.get()) {
             return referencedLimit;
+        }
 
         if (reportWarnings) {
 

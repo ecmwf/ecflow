@@ -113,8 +113,9 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
     bool day_changed = false; // after midnight make sure we keep day_changed
     for (int m = 1; m < 96; m++) {
         calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(30)));
-        if (!day_changed)
+        if (!day_changed) {
             day_changed = calendar.dayChanged();
+        }
 
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
 
@@ -149,12 +150,14 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
                     break;
                 }
             }
-            if (matches_free_slot)
+            if (matches_free_slot) {
                 BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should be free at time " << time);
-            else
+            }
+            else {
                 BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should be fail at time " << time);
+            }
 
             /// At the last hour checkForRequeue should return false; This ensures that value will
             /// not get incremented and so, should leave node in the complete state.
@@ -195,12 +198,14 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
                     break;
                 }
             }
-            if (matches_free_slot)
+            if (matches_free_slot) {
                 BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),
                                     timeSeries2.toString() << " should be free at time " << time);
-            else
+            }
+            else {
                 BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),
                                     timeSeries2.toString() << " should be fail at time " << time);
+            }
 
             /// At the last time checkForRequeue should return false; This ensures that value will
             /// not get incremented and so, should leave node in the complete state.
@@ -309,12 +314,14 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
         // ***********************************************************************************
 
         if (time < timeSeries.time_series().start().duration()) {
-            if (!day_changed)
+            if (!day_changed) {
                 BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should NOT be free at time " << time);
-            else
+            }
+            else {
                 BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should be free at time " << time);
+            }
         }
         else if (time >= timeSeries.time_series().start().duration()) {
             BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
@@ -322,12 +329,14 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
         }
 
         if (time < timeSeries2.time_series().start().duration()) {
-            if (!day_changed)
+            if (!day_changed) {
                 BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),
                                     timeSeries2.toString() << " should NOT be free at time " << time);
-            else
+            }
+            else {
                 BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should be free at time " << time);
+            }
         }
         else if (time >= timeSeries2.time_series().start().duration()) {
             BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),

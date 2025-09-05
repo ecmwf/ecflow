@@ -26,8 +26,9 @@ bool QueueParser::doParse(const std::string& line, std::vector<std::string>& lin
     }
 
     bool parse_state = false;
-    if (rootParser()->get_file_type() != PrintStyle::DEFS)
+    if (rootParser()->get_file_type() != PrintStyle::DEFS) {
         parse_state = true;
+    }
 
     QueueAttr queue_attr;
     QueueAttr::parse(queue_attr, line, lineTokens, parse_state);

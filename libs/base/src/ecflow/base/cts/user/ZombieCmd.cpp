@@ -78,14 +78,18 @@ void ZombieCmd::print_only(std::string& os) const {
 
 bool ZombieCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<ZombieCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (paths_ != the_rhs->paths())
+    }
+    if (paths_ != the_rhs->paths()) {
         return false;
-    if (process_id_ != the_rhs->process_or_remote_id())
+    }
+    if (process_id_ != the_rhs->process_or_remote_id()) {
         return false;
-    if (password_ != the_rhs->password())
+    }
+    if (password_ != the_rhs->password()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
@@ -127,8 +131,9 @@ STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const {
         for (const auto& path : paths_) {
             node_ptr node = as->defs()->findAbsNode(path);
             Task* task    = nullptr;
-            if (node.get())
+            if (node.get()) {
                 task = node->isTask();
+            }
             switch (user_action_) {
                 case ZombieCtrlAction::FOB:
                     as->zombie_ctrl().fobCli(path, task);
@@ -298,8 +303,9 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
 
 void ZombieCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     vector<string> args = vm[theArg()].as<vector<string>>();
-    if (ace->debug())
+    if (ace->debug()) {
         dumpVecArgs(theArg(), args);
+    }
 
     // For Command Line Interface only the task_path is provided. Just have to make do.
     // arg = process_or_remote_id   ( empty for CLI and when multiple paths specified)
@@ -327,10 +333,12 @@ void ZombieCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, 
         ss << "ZombieCmd: to many options expected only process_or_remote_id and password and a list of paths.\n";
         throw std::runtime_error(ss.str());
     }
-    if (options.size() == 1)
+    if (options.size() == 1) {
         process_or_remote_id = options[0];
-    if (options.size() == 2)
+    }
+    if (options.size() == 2) {
         password = options[1];
+    }
 
     if (ace->get_cli()) {
         // We are using command line, expect only paths

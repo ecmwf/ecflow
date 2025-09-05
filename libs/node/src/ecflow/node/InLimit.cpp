@@ -48,47 +48,53 @@ InLimit::InLimit(const std::string& name,
 bool InLimit::operator==(const InLimit& rhs) const {
     if (path_ != rhs.path_) {
 #ifdef DEBUG
-        if (Ecf::debug_equality())
+        if (Ecf::debug_equality()) {
             std::cout << "InLimit::operator==   path_ != rhs.path_\n";
+        }
 #endif
         return false;
     }
     if (n_ != rhs.n_) {
 #ifdef DEBUG
-        if (Ecf::debug_equality())
+        if (Ecf::debug_equality()) {
             std::cout << "InLimit::operator==     n_ != rhs.n_\n";
+        }
 #endif
         return false;
     }
     if (tokens_ != rhs.tokens_) {
 #ifdef DEBUG
-        if (Ecf::debug_equality())
+        if (Ecf::debug_equality()) {
             std::cout << "InLimit::operator==    tokens_(" << tokens_ << ") != rhs.tokens_(" << rhs.tokens_ << ")\n";
+        }
 #endif
         return false;
     }
 
     if (limit_this_node_only_ != rhs.limit_this_node_only_) {
 #ifdef DEBUG
-        if (Ecf::debug_equality())
+        if (Ecf::debug_equality()) {
             std::cout << "InLimit::operator==    limit_this_node_only_(" << limit_this_node_only_
                       << ") != rhs.limit_this_node_only_(" << rhs.limit_this_node_only_ << ")\n";
+        }
 #endif
         return false;
     }
     if (limit_submission_ != rhs.limit_submission_) {
 #ifdef DEBUG
-        if (Ecf::debug_equality())
+        if (Ecf::debug_equality()) {
             std::cout << "InLimit::operator==     limit_submission_(" << limit_submission_
                       << ") != rhs.limit_submission_ (" << rhs.limit_submission_ << ")\n";
+        }
 #endif
         return false;
     }
     if (incremented_ != rhs.incremented_) {
 #ifdef DEBUG
-        if (Ecf::debug_equality())
+        if (Ecf::debug_equality()) {
             std::cout << "InLimit::operator==    incremented_(" << incremented_ << ") != rhs.incremented_("
                       << rhs.incremented_ << ")\n";
+        }
 #endif
         return false;
     }
@@ -105,12 +111,15 @@ std::string InLimit::toString() const {
 
 void InLimit::write(std::string& ret) const {
     ret += "inlimit ";
-    if (limit_this_node_only_)
+    if (limit_this_node_only_) {
         ret += "-n ";
-    if (limit_submission_)
+    }
+    if (limit_submission_) {
         ret += "-s ";
-    if (path_.empty())
+    }
+    if (path_.empty()) {
         ret += n_;
+    }
     else {
         ret += path_;
         ret += Str::COLON();

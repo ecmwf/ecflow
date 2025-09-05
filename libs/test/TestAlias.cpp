@@ -53,8 +53,9 @@ void wait_for_alias_to_complete(const std::string& alias_path) {
         BOOST_REQUIRE_MESSAGE(alias.get(),
                               "Could not locate created alias at path " << alias_path << "\n"
                                                                         << TestFixture::client().errorMsg());
-        if (alias->state() == NState::COMPLETE)
+        if (alias->state() == NState::COMPLETE) {
             break;
+        }
         sleep(2);
     }
 }

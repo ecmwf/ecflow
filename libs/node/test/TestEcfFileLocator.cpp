@@ -335,22 +335,26 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_locator) {
             // cout << "Task: " << t->absNodePath() << " " << ecf_file.ecf_file_origin_dump() << "\n";
             BOOST_REQUIRE_MESSAGE(ecf_file.valid(), "Could not locate ecf file for task ");
             Suite* suite = t->suite();
-            if (suite->name() == "suite")
+            if (suite->name() == "suite") {
                 BOOST_REQUIRE_MESSAGE(ecf_file.ecf_file_origin() == EcfFile::ECF_SCRIPT,
                                       "Expected ecf_file to be obtained from ECF_SCRIPT "
                                           << ecf_file.ecf_file_origin_dump());
-            if (suite->name() == "suite1")
+            }
+            if (suite->name() == "suite1") {
                 BOOST_REQUIRE_MESSAGE(ecf_file.ecf_file_origin() == EcfFile::ECF_HOME,
                                       "Expected ecf_file to be obtained from ECF_HOME "
                                           << ecf_file.ecf_file_origin_dump());
-            if (suite->name() == "suite2")
+            }
+            if (suite->name() == "suite2") {
                 BOOST_REQUIRE_MESSAGE(ecf_file.ecf_file_origin() == EcfFile::ECF_FETCH_CMD,
                                       "Expected ecf_file to be obtained from ECF_FETCH_CMD "
                                           << ecf_file.ecf_file_origin_dump());
-            if (suite->name() == "suite3")
+            }
+            if (suite->name() == "suite3") {
                 BOOST_REQUIRE_MESSAGE(ecf_file.ecf_file_origin() == EcfFile::ECF_SCRIPT_CMD,
                                       "Expected ecf_file to be obtained from ECF_SCRIPT_CMD "
                                           << ecf_file.ecf_file_origin_dump());
+            }
         }
         catch (std::exception& e) {
             BOOST_REQUIRE_MESSAGE(false, "Could not locate ecf file for task " << e.what());

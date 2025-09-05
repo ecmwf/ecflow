@@ -49,8 +49,9 @@ EventEditor::EventEditor(VInfo_ptr info, QWidget* parent)
     Q_ASSERT(a->type()->name() == "event");
     QStringList aData = a->data();
 
-    if (aData.count() < 3)
+    if (aData.count() < 3) {
         return;
+    }
 
     QString name = aData[1];
     oriVal_      = aData[2].toInt();
@@ -95,12 +96,14 @@ void EventEditor::paintEvent(QPaintEvent* e) {
 // We only build the list when the dialogoue is already visible so that
 // the progressbar could show the scanning process
 void EventEditor::buildList() {
-    if (!info_)
+    if (!info_) {
         return;
+    }
 
     VAttribute* a = info_->attribute();
-    if (!a)
+    if (!a) {
         return;
+    }
 
     if (!model_) {
         model_ = new QStringListModel(this);
@@ -123,8 +126,9 @@ void EventEditor::buildList() {
 
         // Update the model(=node list)
         QStringList lst;
-        for (auto& s : v)
+        for (auto& s : v) {
             lst << QString::fromStdString(s);
+        }
 
         setModelData(lst);
 
@@ -180,8 +184,9 @@ void EventEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect) {
         Q_ASSERT(a);
 
         QStringList aData = a->data();
-        if (aData.count() < 3)
+        if (aData.count() < 3) {
             return;
+        }
 
         oriVal_ = aData[2].toInt();
         w_->statusSetRb_->setChecked(oriVal_ == 1);
@@ -217,8 +222,9 @@ void EventEditor::slotDoubleClicked(const QModelIndex& index) {
 }
 
 void EventEditor::lookup(const QModelIndex& idx) {
-    if (!info_)
+    if (!info_) {
         return;
+    }
 
     Q_ASSERT(model_);
 

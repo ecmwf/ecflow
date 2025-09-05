@@ -350,11 +350,13 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
             std::vector<Task*> tasks;
             defs->getAllTasks(tasks);
             for (Task* task : tasks) {
-                if (task->state() != NState::COMPLETE)
+                if (task->state() != NState::COMPLETE) {
                     wait = true;
+                }
             }
-            if (!wait)
+            if (!wait) {
                 break;
+            }
             if (assertTimer.duration() >= assertTimer.timeConstraint()) {
                 std::cout << "waitFor jobs to complete, wait time of " << assertTimer.duration()
                           << " taking longer than time constraint of " << assertTimer.timeConstraint()

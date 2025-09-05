@@ -46,8 +46,9 @@ void simulate(const std::string& directory, bool pass) {
             // Only simulate file with .def file extension, i.e. ignore log files.
             // cout << "path = " << relPath << "\n";
             if (File::getExt(relPath.filename().string()) != "def" &&
-                File::getExt(relPath.filename().string()) != "got")
+                File::getExt(relPath.filename().string()) != "got") {
                 continue;
+            }
 
             // std::cout << "...............Simulating file " << relPath.string() << "\n";
             Simulator simulator;

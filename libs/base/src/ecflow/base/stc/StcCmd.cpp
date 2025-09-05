@@ -41,26 +41,30 @@ bool StcCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, 
     bool ret = false;
     switch (api_) {
         case StcCmd::OK: {
-            if (debug)
+            if (debug) {
                 std::cout << "  StcCmd::handle_server_response OK\n";
+            }
             ret = true;
             break;
         }
         case StcCmd::BLOCK_CLIENT_SERVER_HALTED: {
-            if (debug)
+            if (debug) {
                 std::cout << "  StcCmd::handle_server_response BLOCK_CLIENT_SERVER_HALTED\n";
+            }
             server_reply.set_block_client_server_halted(); // requires further work, by ClientInvoker
             break;
         }
         case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: {
-            if (debug)
+            if (debug) {
                 std::cout << "  StcCmd::handle_server_response BLOCK_CLIENT_ON_HOME_SERVER\n";
+            }
             server_reply.set_block_client_on_home_server(); // requires further work, by ClientInvoker
             break;
         }
         case StcCmd::DELETE_ALL: {
-            if (debug)
+            if (debug) {
                 std::cout << "  StcCmd::handle_server_response DELETE_ALL\n";
+            }
             server_reply.set_client_defs(defs_ptr());
             server_reply.set_client_node(node_ptr());
             server_reply.set_client_handle(0);
@@ -68,8 +72,9 @@ bool StcCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, 
             break;
         }
         case StcCmd::END_OF_FILE: {
-            if (debug)
+            if (debug) {
                 std::cout << "  StcCmd::handle_server_response END_OF_FILE\n";
+            }
             server_reply.set_eof(); // requires further work, by ClientInvoker
             std::string ss;
             ss += "Error: request( ";
@@ -81,8 +86,9 @@ bool StcCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, 
         case StcCmd::INVALID_ARGUMENT: {
             // This is created on the client side, after detecting a INVALID_ARGUMENT reply from the server
             // This keeps compatibility with 4 servers
-            if (debug)
+            if (debug) {
                 std::cout << "  StcCmd::handle_server_response INVALID_ARGUMENT\n";
+            }
             server_reply.set_invalid_argument(); // requires further work, by ClientInvoker
             std::string ss;
             ss += "Error: request( ";
@@ -100,10 +106,12 @@ bool StcCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, 
 
 bool StcCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<StcCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (api_ != the_rhs->api())
+    }
+    if (api_ != the_rhs->api()) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 

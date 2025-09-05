@@ -76,8 +76,9 @@ int ZombieModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int ZombieModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -97,19 +98,23 @@ QVariant ZombieModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    if (row < 0 || row >= static_cast<int>(data_.size()))
+    if (row < 0 || row >= static_cast<int>(data_.size())) {
         return {};
+    }
 
     QString id = columns_->id(index.column());
 
     // UserRole is used for sorting
     if (role == Qt::DisplayRole || role == Qt::UserRole) {
-        if (id == "path")
+        if (id == "path") {
             return QString::fromStdString(data_[row].path_to_task());
-        else if (id == "type")
+        }
+        else if (id == "type") {
             return QString::fromStdString(data_[row].type_str());
-        else if (id == "tryno")
+        }
+        else if (id == "tryno") {
             return data_[row].try_no();
+        }
         else if (id == "duration") {
             if (role == Qt::DisplayRole) {
                 return QString::number(data_[row].duration()) + " s";
@@ -132,35 +137,46 @@ QVariant ZombieModel::data(const QModelIndex& index, int role) const {
                 return data_[row].allowed_age();
             }
         }
-        else if (id == "calls")
+        else if (id == "calls") {
             return data_[row].calls();
-        else if (id == "action")
+        }
+        else if (id == "action") {
             return QString::fromStdString(data_[row].user_action_str());
-        else if (id == "password")
+        }
+        else if (id == "password") {
             return QString::fromStdString(data_[row].jobs_password());
-        else if (id == "child")
+        }
+        else if (id == "child") {
             return QString::fromStdString(ecf::Child::to_string(data_[row].last_child_cmd()));
-        else if (id == "pid")
+        }
+        else if (id == "pid") {
             return QString::fromStdString(data_[row].process_or_remote_id());
-        else if (id == "host")
+        }
+        else if (id == "host") {
             return QString::fromStdString(data_[row].host());
-        else if (id == "explanation")
+        }
+        else if (id == "explanation") {
             return QString::fromStdString(data_[row].explanation());
-        else
+        }
+        else {
             return {};
+        }
     }
 
     return {};
 }
 
 QVariant ZombieModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
-    if (role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole) {
         return columns_->label(section);
-    else if (role == Qt::UserRole)
+    }
+    else if (role == Qt::UserRole) {
         return columns_->id(section);
+    }
 
     return {};
 }
@@ -185,8 +201,9 @@ QModelIndex ZombieModel::parent(const QModelIndex& /*child*/) const {
 Zombie ZombieModel::indexToZombie(const QModelIndex& idx) const {
     if (idx.isValid() && hasData()) {
         int row = idx.row();
-        if (row >= 0 || row < static_cast<int>(data_.size()))
+        if (row >= 0 || row < static_cast<int>(data_.size())) {
             return data_[row];
+        }
     }
     return {};
 }

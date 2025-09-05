@@ -43,10 +43,12 @@ node_ptr SNodeCmd::get_node_ptr(std::string& error_msg) const {
 
 bool SNodeCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SNodeCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (!ServerToClientCmd::equals(rhs))
+    }
+    if (!ServerToClientCmd::equals(rhs)) {
         return false;
+    }
     return true;
 }
 
@@ -55,18 +57,21 @@ std::string SNodeCmd::print() const {
     os += "cmd:SNodeCmd [ ";
     std::string error_msg;
     node_ptr node = get_node_ptr(error_msg);
-    if (node.get())
+    if (node.get()) {
         os += node->absNodePath();
-    else
+    }
+    else {
         os += "node == NULL";
+    }
     os += " ]";
     return os;
 }
 
 // Called in client
 bool SNodeCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  SNodeCmd::handle_server_response\n";
+    }
 
     std::string error_msg;
     node_ptr node = get_node_ptr(error_msg);

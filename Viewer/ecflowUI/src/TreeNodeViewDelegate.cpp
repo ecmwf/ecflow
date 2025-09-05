@@ -95,12 +95,14 @@ public:
 
         auto h   = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
         iconSize = h;
-        if (iconSize % 2 == 1)
+        if (iconSize % 2 == 1) {
             iconSize += 1;
+        }
 
         iconGap = 1;
-        if (iconSize > 16)
+        if (iconSize > 16) {
             iconGap = 2;
+        }
 
         iconPreGap = ViewerUtil::textWidth(fm, 'A') / 2;
     }
@@ -150,12 +152,14 @@ public:
 
         int h    = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
         iconSize = h;
-        if (iconSize % 2 == 1)
+        if (iconSize % 2 == 1) {
             iconSize += 1;
+        }
 
         iconGap = 1;
-        if (iconSize > 16)
+        if (iconSize > 16) {
             iconGap = 2;
+        }
 
         iconPreGap = ViewerUtil::textWidth(fm, 'A') / 2;
     }
@@ -230,8 +234,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model, QWidget* parent
 
 TreeNodeViewDelegate::~TreeNodeViewDelegate() {
     delete animation_;
-    if (tmpPainter_)
+    if (tmpPainter_) {
         delete tmpPainter_;
+    }
 }
 
 void TreeNodeViewDelegate::updateSettingsInternal() {
@@ -239,10 +244,12 @@ void TreeNodeViewDelegate::updateSettingsInternal() {
     Q_ASSERT(attrBox_);
 
     if (VProperty* p = prop_->find("view.common.node_style")) {
-        if (p->value().toString() == "classic")
+        if (p->value().toString() == "classic") {
             nodeStyle_ = ClassicNodeStyle;
-        else
+        }
+        else {
             nodeStyle_ = BoxAndTextNodeStyle;
+        }
     }
     if (VProperty* p = prop_->find("view.tree.nodeRectRadius")) {
         nodeRectRad_ = p->value().toInt();
@@ -571,8 +578,9 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
     }
     // Stops load animation
     else {
-        if ((an = animation_->find(Animation::ServerLoadType, false)) != nullptr)
+        if ((an = animation_->find(Animation::ServerLoadType, false)) != nullptr) {
             an->removeTarget(server->vRoot());
+        }
     }
 
     // The node number (optional)
@@ -599,8 +607,9 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
     // The log/checkpoint error
     QRect errRect;
     QString errTxt = index.data(AbstractNodeModel::LogErrorRole).toString();
-    if (errTxt.contains('\n'))
+    if (errTxt.contains('\n')) {
         errTxt = errTxt.split("\n").first();
+    }
 
     bool hasErr = (!errTxt.isEmpty());
     if (hasErr) {
@@ -750,8 +759,9 @@ int TreeNodeViewDelegate::renderNode(QPainter* painter,
         int realW = itemRect.height() / 4;
 
         QRect r1(currentRight, itemRect.y(), itemRect.height(), itemRect.height());
-        if (hasRealBg)
+        if (hasRealBg) {
             r1.adjust(0, 0, -realW, 0);
+        }
 
         stateShape.shape_ = QPolygon(r1);
 
@@ -760,8 +770,9 @@ int TreeNodeViewDelegate::renderNode(QPainter* painter,
             realShape.shape_ = QPolygon(r2);
             currentRight     = r2.x() + r2.width() + 2;
         }
-        else
+        else {
             currentRight = r1.x() + r1.width() + 2;
+        }
 
         if (drawNodeType_) {
             typeText.br_    = r1;
@@ -882,8 +893,9 @@ int TreeNodeViewDelegate::renderNode(QPainter* painter,
     // The aborted reason
     QRect reasonRect;
     QString reasonTxt = index.data(AbstractNodeModel::AbortedReasonRole).toString();
-    if (reasonTxt.contains('\n'))
+    if (reasonTxt.contains('\n')) {
         reasonTxt = reasonTxt.split("\n").first();
+    }
 
     bool hasReason = (!reasonTxt.isEmpty());
     if (hasReason) {
@@ -1006,14 +1018,16 @@ void TreeNodeViewDelegate::renderNodeCell(QPainter* painter,
 
     if (selected) {
         if (nodeStyle_ == BoxAndTextNodeStyle) {
-            if (!realShape.shape_.isEmpty())
+            if (!realShape.shape_.isEmpty()) {
                 sel = sel.united(realShape.shape_);
+            }
 
             sel = sel.united(QPolygon(nodeText.br_.adjusted(0, 0, 0, 0)));
         }
         else {
-            if (!realShape.shape_.isEmpty())
+            if (!realShape.shape_.isEmpty()) {
                 sel = sel.united(realShape.shape_);
+            }
         }
         painter->drawRect(sel.boundingRect());
     }
@@ -1077,8 +1091,9 @@ void TreeNodeViewDelegate::renderNodeCell(QPainter* painter,
 }
 
 void TreeNodeViewDelegate::renderNodeShape(QPainter* painter, const NodeShape& shape) const {
-    if (shape.shape_.isEmpty())
+    if (shape.shape_.isEmpty()) {
         return;
+    }
 
     QColor bg = shape.col_;
     QColor bgLight, borderCol;
@@ -1090,8 +1105,9 @@ void TreeNodeViewDelegate::renderNodeShape(QPainter* painter, const NodeShape& s
         grad_.setColorAt(1, bg);
         bgBrush = QBrush(grad_);
     }
-    else
+    else {
         bgBrush = QBrush(bg);
+    }
 
     // Fill  shape
     painter->setPen(borderCol);
@@ -1340,8 +1356,9 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index, int height, QStrin
     // The aborted reason
     if (node->isAborted()) {
         QString reasonTxt = QString::fromStdString(node->abortedReason());
-        if (reasonTxt.contains('\n'))
+        if (reasonTxt.contains('\n')) {
             reasonTxt = reasonTxt.split("\n").first();
+        }
 
         bool hasReason = (!reasonTxt.isEmpty());
         if (hasReason) {
@@ -1361,10 +1378,12 @@ QString TreeNodeViewDelegate::formatTime(int timeInSec) const {
     int s = r % 60;
 
     QTime t(h, m, s);
-    if (h > 0)
+    if (h > 0) {
         return t.toString("h:mm:ss");
-    else
+    }
+    else {
         return t.toString("m:ss");
+    }
 
     return {};
 }

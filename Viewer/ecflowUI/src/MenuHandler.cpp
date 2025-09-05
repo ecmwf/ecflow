@@ -193,8 +193,9 @@ bool MenuHandler::readMenuConfigFile(const std::string& configFile) {
                 item->setHidden((hidden == "true") ? true : false);
                 item->setMultiSelect((multiSelect == "true") ? true : false);
 
-                if (type == "Submenu")
+                if (type == "Submenu") {
                     item->setAsSubMenu();
+                }
 
                 addItemToMenu(item, menuName);
                 // std::cout << "   added" << std::endl;
@@ -490,8 +491,9 @@ Menu::Menu(const std::string& name) : name_(name) {
 
 Menu::~Menu() {
     for (auto& itItems : itemsCombined_) {
-        if (itItems)
+        if (itItems) {
             delete itItems;
+        }
     }
 }
 
@@ -510,8 +512,9 @@ QMenu* Menu::generateMenu(std::vector<VInfo_ptr> nodes,
         qmenu->setTitle(QString::fromStdString(name()));
     }
 
-    if (nodes.empty())
+    if (nodes.empty()) {
         return nullptr;
+    }
 
     // qmenu->setWindowFlags(Qt::Tool);
     // qmenu->setWindowTitle("my title");
@@ -552,18 +555,21 @@ QMenu* Menu::generateMenu(std::vector<VInfo_ptr> nodes,
     for (auto& itItems : itemsCombined_) {
         //  is this item valid for the current selection?
 
-        if (itItems->hidden())
+        if (itItems->hidden()) {
             continue;
+        }
 
-        if (!itItems->isValidView(view))
+        if (!itItems->isValidView(view)) {
             continue;
+        }
 
         // Control if some items are shown
         if (!itItems->panelPopupControl().empty()) {
-            if (VProperty* prop = VConfig::instance()->find(itItems->panelPopupControl()))
+            if (VProperty* prop = VConfig::instance()->find(itItems->panelPopupControl())) {
                 if (!prop->valueAsString().contains(QString::fromStdString(itItems->command()), Qt::CaseSensitive)) {
                     continue;
                 }
+            }
         }
 
         bool visible = true;
@@ -581,8 +587,9 @@ QMenu* Menu::generateMenu(std::vector<VInfo_ptr> nodes,
             }
 
             // Check multiple selection
-            if (nodes.size() > 1 && !itItems->multiSelect())
+            if (nodes.size() > 1 && !itItems->multiSelect()) {
                 enabled = false;
+            }
 
             if (itItems->isSubMenu()) {
                 Menu* menu = MenuHandler::findMenu(itItems->name());
@@ -654,8 +661,9 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu) {
     if (!multiple) {
         VNode* node = nodes.at(0)->node();
 
-        if (!node)
+        if (!node) {
             return;
+        }
 
         // single node selected put a label with the node name + colour
         nodeLabel = new QLabel(node->name());
@@ -766,8 +774,9 @@ bool MenuItem::shouldAskQuestion(const std::vector<VInfo_ptr>& nodes) const {
 }
 
 bool MenuItem::isValidView(const std::string& view) const {
-    if (views_.empty())
+    if (views_.empty()) {
         return true;
+    }
 
     return (std::find(views_.begin(), views_.end(), view) != views_.end());
 }
@@ -784,10 +793,12 @@ QAction* MenuItem::createAction(QWidget* parent) {
     }
 
     if (!statustip_.empty()) {
-        if (statustip_ == "__cmd__")
+        if (statustip_ == "__cmd__") {
             ac->setStatusTip(QString::fromStdString(command_)); // so we see the command in the status bar
-        else
+        }
+        else {
             ac->setStatusTip(QString::fromStdString(statustip_));
+        }
     }
     ac->setData(id_);
     return ac;
@@ -804,11 +815,13 @@ QShortcut* MenuItem::createShortcut(QWidget* parent, const std::string& view) {
 }
 
 bool MenuItem::isValidFor(const std::vector<VInfo_ptr>& nodes, bool allowHidden) const {
-    if (!allowHidden && hidden())
+    if (!allowHidden && hidden()) {
         return false;
+    }
 
-    if (nodes.size() == 0 || (nodes.size() > 1 && !multiSelect()))
+    if (nodes.size() == 0 || (nodes.size() > 1 && !multiSelect())) {
         return false;
+    }
 
     for (auto& node : nodes) {
         if (!visibleCondition()->execute(node)) {

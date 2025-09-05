@@ -197,160 +197,234 @@ void Stats::show(std::ostream& os) const {
 
     if (checkpt_ || restore_defs_from_checkpt_ || server_version_ || restart_server_ || shutdown_server_ ||
         halt_server_ || ping_ || debug_server_on_ || debug_server_off_ || get_defs_ || sync_ || sync_full_ ||
-        sync_clock_ || news_)
+        sync_clock_ || news_) {
         os << "\n";
-    if (!locked_by_user_.empty())
+    }
+    if (!locked_by_user_.empty()) {
         os << left << setw(width) << "   Locked by user " << locked_by_user_ << "\n";
-    if (checkpt_ != 0)
+    }
+    if (checkpt_ != 0) {
         os << left << setw(width) << "   Check points " << checkpt_ << "\n";
-    if (restore_defs_from_checkpt_ != 0)
+    }
+    if (restore_defs_from_checkpt_ != 0) {
         os << left << setw(width) << "   Restore from Check point " << restore_defs_from_checkpt_ << "\n";
-    if (restart_server_ != 0)
+    }
+    if (restart_server_ != 0) {
         os << left << setw(width) << "   Restart server " << restart_server_ << "\n";
-    if (shutdown_server_ != 0)
+    }
+    if (shutdown_server_ != 0) {
         os << left << setw(width) << "   Shutdown server " << shutdown_server_ << "\n";
-    if (halt_server_ != 0)
+    }
+    if (halt_server_ != 0) {
         os << left << setw(width) << "   Halt server " << halt_server_ << "\n";
-    if (ping_ != 0)
+    }
+    if (ping_ != 0) {
         os << left << setw(width) << "   Ping " << ping_ << "\n";
-    if (debug_server_on_ != 0)
+    }
+    if (debug_server_on_ != 0) {
         os << left << setw(width) << "   debug server on " << debug_server_on_ << "\n";
-    if (debug_server_off_ != 0)
+    }
+    if (debug_server_off_ != 0) {
         os << left << setw(width) << "   debug server off " << debug_server_off_ << "\n";
-    if (get_defs_ != 0)
+    }
+    if (get_defs_ != 0) {
         os << left << setw(width) << "   Get full definition " << get_defs_ << "\n";
-    if (server_version_ != 0)
+    }
+    if (server_version_ != 0) {
         os << left << setw(width) << "   Server version " << server_version_ << "\n";
-    if (sync_ != 0)
+    }
+    if (sync_ != 0) {
         os << left << setw(width) << "   Sync " << sync_ << "\n";
-    if (sync_full_ != 0)
+    }
+    if (sync_full_ != 0) {
         os << left << setw(width) << "   Sync full " << sync_full_ << "\n";
-    if (sync_clock_ != 0)
+    }
+    if (sync_clock_ != 0) {
         os << left << setw(width) << "   Sync suite clock " << sync_clock_ << "\n";
-    if (news_ != 0)
+    }
+    if (news_ != 0) {
         os << left << setw(width) << "   News " << news_ << "\n";
+    }
 
     if (task_init_ || task_complete_ || task_wait_ || task_abort_ || task_event_ || task_meter_ || task_label_ ||
-        task_queue_)
+        task_queue_) {
         os << "\n";
-    if (task_init_ != 0)
+    }
+    if (task_init_ != 0) {
         os << left << setw(width) << "   Task init " << task_init_ << "\n";
-    if (task_complete_ != 0)
+    }
+    if (task_complete_ != 0) {
         os << left << setw(width) << "   Task complete " << task_complete_ << "\n";
-    if (task_wait_ != 0)
+    }
+    if (task_wait_ != 0) {
         os << left << setw(width) << "   Task wait " << task_wait_ << "\n";
-    if (task_abort_ != 0)
+    }
+    if (task_abort_ != 0) {
         os << left << setw(width) << "   Task abort " << task_abort_ << "\n";
-    if (task_event_ != 0)
+    }
+    if (task_event_ != 0) {
         os << left << setw(width) << "   Task event " << task_event_ << "\n";
-    if (task_meter_ != 0)
+    }
+    if (task_meter_ != 0) {
         os << left << setw(width) << "   Task meter " << task_meter_ << "\n";
-    if (task_label_ != 0)
+    }
+    if (task_label_ != 0) {
         os << left << setw(width) << "   Task label " << task_label_ << "\n";
-    if (task_queue_ != 0)
+    }
+    if (task_queue_ != 0) {
         os << left << setw(width) << "   Task queue " << task_queue_ << "\n";
+    }
 
-    if (zombie_fob_ || zombie_fail_ || zombie_adopt_ || zombie_remove_ || zombie_get_ || zombie_block_ || zombie_kill_)
+    if (zombie_fob_ || zombie_fail_ || zombie_adopt_ || zombie_remove_ || zombie_get_ || zombie_block_ ||
+        zombie_kill_) {
         os << "\n";
-    if (zombie_fob_ != 0)
+    }
+    if (zombie_fob_ != 0) {
         os << left << setw(width) << "   Zombie fob " << zombie_fob_ << "\n";
-    if (zombie_fail_ != 0)
+    }
+    if (zombie_fail_ != 0) {
         os << left << setw(width) << "   Zombie fail " << zombie_fail_ << "\n";
-    if (zombie_adopt_ != 0)
+    }
+    if (zombie_adopt_ != 0) {
         os << left << setw(width) << "   Zombie adopt " << zombie_adopt_ << "\n";
-    if (zombie_remove_ != 0)
+    }
+    if (zombie_remove_ != 0) {
         os << left << setw(width) << "   Zombie remove " << zombie_remove_ << "\n";
-    if (zombie_get_ != 0)
+    }
+    if (zombie_get_ != 0) {
         os << left << setw(width) << "   Zombie get " << zombie_get_ << "\n";
-    if (zombie_block_ != 0)
+    }
+    if (zombie_block_ != 0) {
         os << left << setw(width) << "   Zombie block " << zombie_block_ << "\n";
-    if (zombie_kill_ != 0)
+    }
+    if (zombie_kill_ != 0) {
         os << left << setw(width) << "   Zombie kill " << zombie_kill_ << "\n";
+    }
 
     if (load_defs_ || begin_cmd_ || requeue_node_ || node_job_gen_ || node_check_job_gen_only_ || node_delete_ ||
         node_suspend_ || node_resume_ || node_kill_ || node_status_ || node_edit_history_ || log_cmd_ || log_msg_cmd_ ||
         order_node_ || run_node_ || replace_ || force_ || free_dep_ || suites_ || edit_script_ || alter_cmd_ ||
         ch_cmd_ || plug_ || move_ || group_cmd_ || reload_white_list_file_ || server_load_cmd_ || stats_ || check_ ||
-        query_ || reload_passwd_file_ || node_archive_ || node_restore_)
+        query_ || reload_passwd_file_ || node_archive_ || node_restore_) {
         os << "\n";
+    }
 
-    if (load_defs_ != 0)
+    if (load_defs_ != 0) {
         os << left << setw(width) << "   Load definition " << load_defs_ << "\n";
-    if (begin_cmd_ != 0)
+    }
+    if (begin_cmd_ != 0) {
         os << left << setw(width) << "   Begin " << begin_cmd_ << "\n";
-    if (requeue_node_ != 0)
+    }
+    if (requeue_node_ != 0) {
         os << left << setw(width) << "   Requeue " << requeue_node_ << "\n";
-    if (node_job_gen_ != 0)
+    }
+    if (node_job_gen_ != 0) {
         os << left << setw(width) << "   Job generation " << node_job_gen_ << "\n";
-    if (node_check_job_gen_only_ != 0)
+    }
+    if (node_check_job_gen_only_ != 0) {
         os << left << setw(width) << "   Check Job generation " << node_check_job_gen_only_ << "\n";
-    if (node_delete_ != 0)
+    }
+    if (node_delete_ != 0) {
         os << left << setw(width) << "   Node delete " << node_delete_ << "\n";
-    if (node_suspend_ != 0)
+    }
+    if (node_suspend_ != 0) {
         os << left << setw(width) << "   Node suspend " << node_suspend_ << "\n";
-    if (node_resume_ != 0)
+    }
+    if (node_resume_ != 0) {
         os << left << setw(width) << "   Node resume " << node_resume_ << "\n";
-    if (node_kill_ != 0)
+    }
+    if (node_kill_ != 0) {
         os << left << setw(width) << "   Node kill " << node_kill_ << "\n";
-    if (node_status_ != 0)
+    }
+    if (node_status_ != 0) {
         os << left << setw(width) << "   Node status " << node_status_ << "\n";
-    if (node_edit_history_ != 0)
+    }
+    if (node_edit_history_ != 0) {
         os << left << setw(width) << "   Node edit history " << node_edit_history_ << "\n";
-    if (node_archive_ != 0)
+    }
+    if (node_archive_ != 0) {
         os << left << setw(width) << "   Node archive " << node_archive_ << "\n";
-    if (node_restore_ != 0)
+    }
+    if (node_restore_ != 0) {
         os << left << setw(width) << "   Node restore " << node_restore_ << "\n";
-    if (log_cmd_ != 0)
+    }
+    if (log_cmd_ != 0) {
         os << left << setw(width) << "   Log cmd " << log_cmd_ << "\n";
-    if (log_msg_cmd_ != 0)
+    }
+    if (log_msg_cmd_ != 0) {
         os << left << setw(width) << "   Log message " << log_msg_cmd_ << "\n";
-    if (order_node_ != 0)
+    }
+    if (order_node_ != 0) {
         os << left << setw(width) << "   Order " << order_node_ << "\n";
-    if (run_node_ != 0)
+    }
+    if (run_node_ != 0) {
         os << left << setw(width) << "   Run " << run_node_ << "\n";
-    if (replace_ != 0)
+    }
+    if (replace_ != 0) {
         os << left << setw(width) << "   Replace " << replace_ << "\n";
-    if (force_ != 0)
+    }
+    if (force_ != 0) {
         os << left << setw(width) << "   Force  " << force_ << "\n";
-    if (free_dep_ != 0)
+    }
+    if (free_dep_ != 0) {
         os << left << setw(width) << "   Free dependencies " << free_dep_ << "\n";
-    if (suites_ != 0)
+    }
+    if (suites_ != 0) {
         os << left << setw(width) << "   Suites " << suites_ << "\n";
-    if (edit_script_ != 0)
+    }
+    if (edit_script_ != 0) {
         os << left << setw(width) << "   Edit script " << edit_script_ << "\n";
-    if (alter_cmd_ != 0)
+    }
+    if (alter_cmd_ != 0) {
         os << left << setw(width) << "   Alter " << alter_cmd_ << "\n";
-    if (ch_cmd_ != 0)
+    }
+    if (ch_cmd_ != 0) {
         os << left << setw(width) << "   Client handle " << ch_cmd_ << "\n";
-    if (plug_ != 0)
+    }
+    if (plug_ != 0) {
         os << left << setw(width) << "   Plug " << plug_ << "\n";
-    if (move_ != 0)
+    }
+    if (move_ != 0) {
         os << left << setw(width) << "   Move " << move_ << "\n";
-    if (group_cmd_ != 0)
+    }
+    if (group_cmd_ != 0) {
         os << left << setw(width) << "   Group " << group_cmd_ << "\n";
-    if (server_load_cmd_ != 0)
+    }
+    if (server_load_cmd_ != 0) {
         os << left << setw(width) << "   Server load cmd " << server_load_cmd_ << "\n";
-    if (stats_ != 0)
+    }
+    if (stats_ != 0) {
         os << left << setw(width) << "   stats cmd " << stats_ << "\n";
-    if (check_ != 0)
+    }
+    if (check_ != 0) {
         os << left << setw(width) << "   checks " << check_ << "\n";
-    if (query_ != 0)
+    }
+    if (query_ != 0) {
         os << left << setw(width) << "   query " << query_ << "\n";
-    if (reload_white_list_file_ != 0)
+    }
+    if (reload_white_list_file_ != 0) {
         os << left << setw(width) << "   Reload white list file " << reload_white_list_file_ << "\n";
-    if (reload_passwd_file_ != 0)
+    }
+    if (reload_passwd_file_ != 0) {
         os << left << setw(width) << "   Reload password file " << reload_passwd_file_ << "\n";
-    if (file_ecf_ || file_job_ || file_jobout_ || file_manual_ || file_cmdout_)
+    }
+    if (file_ecf_ || file_job_ || file_jobout_ || file_manual_ || file_cmdout_) {
         os << "\n";
-    if (file_ecf_ != 0)
+    }
+    if (file_ecf_ != 0) {
         os << left << setw(width) << "   File ECF " << file_ecf_ << "\n";
-    if (file_job_ != 0)
+    }
+    if (file_job_ != 0) {
         os << left << setw(width) << "   File job " << file_job_ << "\n";
-    if (file_jobout_ != 0)
+    }
+    if (file_jobout_ != 0) {
         os << left << setw(width) << "   File Job out " << file_jobout_ << "\n";
-    if (file_cmdout_ != 0)
+    }
+    if (file_cmdout_ != 0) {
         os << left << setw(width) << "   File Cmd out " << file_cmdout_ << "\n";
-    if (file_manual_ != 0)
+    }
+    if (file_manual_ != 0) {
         os << left << setw(width) << "   File manual " << file_manual_ << "\n";
+    }
     os << flush;
 }

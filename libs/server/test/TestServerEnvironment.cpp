@@ -52,8 +52,9 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
                                 "Expected submit jobs interval of " << i << " but found "
                                                                     << serverEnv.submitJobsInterval());
         }
-        else
+        else {
             BOOST_CHECK_MESSAGE(!valid, "Server environment ecfinterval valid range is [1-60] " << errorMsg);
+        }
 
         port = serverEnv.the_port();
     }

@@ -32,8 +32,9 @@ void ServerVersionCmd::print_only(std::string& os) const {
 
 bool ServerVersionCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<ServerVersionCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
@@ -67,12 +68,14 @@ void ServerVersionCmd::addOption(boost::program_options::options_description& de
 }
 
 void ServerVersionCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
-    if (ace->debug())
+    if (ace->debug()) {
         cout << "  ServerVersionCmd::create\n";
+    }
 
     // testing client interface
-    if (ace->under_test())
+    if (ace->under_test()) {
         return;
+    }
 
     cmd = std::make_shared<ServerVersionCmd>();
 }

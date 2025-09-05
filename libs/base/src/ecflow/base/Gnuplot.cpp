@@ -92,8 +92,9 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
 
     /// The log file can be massive > 50Mb
     File_r log_file(log_file_);
-    if (!log_file.ok())
+    if (!log_file.ok()) {
         throw std::runtime_error("Gnuplot::prepare_for_gnuplot: Could not open log file " + log_file_);
+    }
 
     /// Create a new file that can be used with gnuplot. This has to be column based
     std::ofstream gnuplot_file(temp_file.c_str());
@@ -118,22 +119,28 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
         // MSG:[HH:MM:SS D.M.YYYY] --begin      [args | path(optional) ]    :<user>
 
         /// We are only interested in Commands (i.e MSG:), and not state changes
-        if (line.empty())
+        if (line.empty()) {
             continue;
-        if (line[0] != 'M')
+        }
+        if (line[0] != 'M') {
             continue;
+        }
         std::string::size_type msg_pos = line.find("MSG:");
-        if (msg_pos != 0)
+        if (msg_pos != 0) {
             continue;
+        }
 
         bool child_cmd = false;
         bool user_cmd  = false;
-        if (line.find(Str::CHILD_CMD()) != std::string::npos)
+        if (line.find(Str::CHILD_CMD()) != std::string::npos) {
             child_cmd = true;
-        else if (line.find(Str::USER_CMD()) != std::string::npos)
+        }
+        else if (line.find(Str::USER_CMD()) != std::string::npos) {
             user_cmd = true;
-        if (!child_cmd && !user_cmd)
+        }
+        if (!child_cmd && !user_cmd) {
             continue;
+        }
 
         new_time_stamp.clear();
         {
@@ -156,8 +163,9 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
             std::string time_stamp = line.substr(0, first_closed_bracket);
 
             Str::split(time_stamp, new_time_stamp);
-            if (new_time_stamp.size() != 2)
+            if (new_time_stamp.size() != 2) {
                 continue;
+            }
 
             line.erase(0, first_closed_bracket + 1);
         }
@@ -168,29 +176,35 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
         // #endif
 
         if (old_time_stamp.empty()) {
-            if (child_cmd)
+            if (child_cmd) {
                 child_requests_per_second++;
-            else
+            }
+            else {
                 user_request_per_second++;
+            }
 
             // Extract path if any, to determine the suite most contributing to server load
             size_t column_index   = 0;
             bool suite_path_found = extract_suite_path(line, child_cmd, suite_vec, column_index);
-            if (suite_path_found)
+            if (suite_path_found) {
                 assert(suite_vec[column_index].request_per_second_ <=
                        (child_requests_per_second + user_request_per_second));
+            }
         }
         else if (old_time_stamp[0] == new_time_stamp[0]) { // HH:MM:SS == HH:MM:SS
-            if (child_cmd)
+            if (child_cmd) {
                 child_requests_per_second++;
-            else
+            }
+            else {
                 user_request_per_second++;
+            }
 
             size_t column_index   = 0;
             bool suite_path_found = extract_suite_path(line, child_cmd, suite_vec, column_index);
-            if (suite_path_found)
+            if (suite_path_found) {
                 assert(suite_vec[column_index].request_per_second_ <=
                        (child_requests_per_second + user_request_per_second));
+            }
         }
         else {
             /// Start of *NEW* time,
@@ -214,16 +228,19 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
             }
 
             // start of *new* time
-            if (child_cmd)
+            if (child_cmd) {
                 child_requests_per_second++;
-            else
+            }
+            else {
                 user_request_per_second++;
+            }
 
             size_t column_index   = 0;
             bool suite_path_found = extract_suite_path(line, child_cmd, suite_vec, column_index);
-            if (suite_path_found)
+            if (suite_path_found) {
                 assert(suite_vec[column_index].request_per_second_ <=
                        (child_requests_per_second + user_request_per_second));
+            }
         }
 
         old_time_stamp = new_time_stamp;
@@ -306,17 +323,21 @@ std::string Gnuplot::create_gnuplot_script(const std::string& path_to_file,
     gnuplot_script << "plot \"" << path_to_file << R"(" using 1:4 title "child" with lines, ")" << path_to_file
                    << R"(" using 1:5 title "user" with lines, ")" << path_to_file
                    << R"(" using 1:3 smooth bezier title "total-load" with lines lt 3)";
-    if (!ordered_suites.empty())
+    if (!ordered_suites.empty()) {
         gnuplot_script << ",";
-    else
+    }
+    else {
         gnuplot_script << "\n";
+    }
     for (size_t i = 0; i < ordered_suites.size(); i++) {
         gnuplot_script << "\"" << path_to_file << "\" using 1:" << (6 + ordered_suites[i].second)
                        << " smooth bezier title \"" << ordered_suites[i].first << "\" with lines";
-        if (i == ordered_suites.size() - 1)
+        if (i == ordered_suites.size() - 1) {
             gnuplot_script << "\n";
-        else
+        }
+        else {
             gnuplot_script << ",";
+        }
     }
 
     return script;
@@ -355,8 +376,9 @@ bool Gnuplot::extract_suite_path(const std::string& line,
             //   MSG:[09:36:05 22.10.2013] --news=1 36506 6  :ma0 [server handle(36508,7) server(36508,7)
             //                     : *Large* scale changes (new handle or suites added/removed) :NEWS]
             // Note: the /removed was being interpreted as a suite
-            if (line.find("--news") != std::string::npos)
+            if (line.find("--news") != std::string::npos) {
                 return false;
+            }
         }
 
         // find the space after the path

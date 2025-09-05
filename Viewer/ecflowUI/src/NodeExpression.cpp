@@ -40,8 +40,9 @@
 NodeExpressionParser* NodeExpressionParser::instance_ = nullptr;
 
 NodeExpressionParser* NodeExpressionParser::instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new NodeExpressionParser;
+    }
 
     return instance_;
 }
@@ -73,38 +74,43 @@ NodeExpressionParser::NodeExpressionParser() {
 
 NodeExpressionParser::NodeType NodeExpressionParser::nodeType(const std::string& name) const {
     auto it = nameToNodeType_.find(name);
-    if (it != nameToNodeType_.end())
+    if (it != nameToNodeType_.end()) {
         return it->second;
+    }
 
     return BAD;
 }
 
 const std::string& NodeExpressionParser::typeName(const NodeType& type) const {
     auto it = nodeTypeToName_.find(type);
-    if (it != nodeTypeToName_.end())
+    if (it != nodeTypeToName_.end()) {
         return it->second;
+    }
 
     return badTypeStr_;
 }
 
 VAttributeType* NodeExpressionParser::toAttrType(const std::string& name) const {
     auto it = nameToAttrType_.find(name);
-    if (it != nameToAttrType_.end())
+    if (it != nameToAttrType_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
 
 bool NodeExpressionParser::isMenuMode(const std::string& str) const {
-    if (str == "oper" || str == "admin" || str == "defStatusMenuModeControl")
+    if (str == "oper" || str == "admin" || str == "defStatusMenuModeControl") {
         return true;
+    }
 
     return false;
 }
 
 bool NodeExpressionParser::isEnvVar(const std::string& str) const {
-    if (str == "ECFLOWUI_ECMWF_OPERATOR_MODE" || str == "ECFLOWUI_DEVELOP_MODE")
+    if (str == "ECFLOWUI_ECMWF_OPERATOR_MODE" || str == "ECFLOWUI_DEVELOP_MODE") {
         return true;
+    }
 
     return false;
 }
@@ -117,8 +123,9 @@ bool NodeExpressionParser::isNodeHasAttribute(const std::string& str) const {
 bool NodeExpressionParser::isNodeFlag(const std::string& str) const {
     if (str == "is_late" || str == "has_message" || str == "is_rerun" || str == "is_waiting" || str == "is_zombie" ||
         str == "is_archived" || str == "is_restored" || str == "is_ecfcmd_failed" || str == "is_killed" ||
-        str == "is_killcmd_failed" || str == "is_statuscmd_failed" || str == "no_script" || str == "threshold")
+        str == "is_killcmd_failed" || str == "is_statuscmd_failed" || str == "no_script" || str == "threshold") {
         return true;
+    }
 
     return false;
 }
@@ -208,25 +215,30 @@ BaseNodeCondition* NodeExpressionParser::parseWholeExpression(const std::string&
 
         if (c == '\'') // a quote character?
         {
-            if (insideQuote == '\'') // this is the closing quote
-                insideQuote = '\0';  // note that we are no longer inside a quote
-            else
+            if (insideQuote == '\'') { // this is the closing quote
+                insideQuote = '\0';    // note that we are no longer inside a quote
+            }
+            else {
                 insideQuote = '\''; // this is an opening quote
+            }
         }
         else if (c == delimiter && insideQuote == '\0') // a delimeter but not inside a quote?
         {
-            if (token.length() > 0)
+            if (token.length() > 0) {
                 tokens.push_back(token);
+            }
             token = "";
         }
-        else
+        else {
             token += c;
+        }
 
         index++;
     }
 
-    if (token.length() > 0)
+    if (token.length() > 0) {
         tokens.push_back(token);
+    }
 
     setTokens(tokens);
 
@@ -453,8 +465,9 @@ BaseNodeCondition* NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             return result;
         }
 
-        if (i_ != tokens_.end() && !returnEarly)
+        if (i_ != tokens_.end() && !returnEarly) {
             ++i_; // move onto the next token
+        }
     }
 
     int iterCnt = 0; // to avoid infinite loop we use this counter
@@ -482,22 +495,27 @@ BaseNodeCondition* NodeExpressionParser::parseExpression(bool caseSensitiveStrin
         }
     }
 
-    if (result)
+    if (result) {
         UiLog().dbg() << "    " << result->print();
+    }
 
     return result;
 }
 
 bool BaseNodeCondition::execute(VInfo_ptr nodeInfo) {
-    if (!nodeInfo)
+    if (!nodeInfo) {
         return true;
+    }
 
-    if (nodeInfo->isServer())
+    if (nodeInfo->isServer()) {
         return execute(nodeInfo->server()->vRoot());
-    else if (nodeInfo->isNode())
+    }
+    else if (nodeInfo->isNode()) {
         return execute(nodeInfo->node());
-    else if (nodeInfo->isAttribute())
+    }
+    else if (nodeInfo->isAttribute()) {
         return execute(nodeInfo->attribute());
+    }
 
     return false;
 }
@@ -638,8 +656,9 @@ bool NodeMenuModeCondition::execute(VItem* item) {
     if (item) {
         if (menuModeName_ == "defStatusMenuModeControl") {
             Q_FOREACH (QString s, item->defStatusNodeMenuMode().split("/")) {
-                if (item->nodeMenuMode() == s)
+                if (item->nodeMenuMode() == s) {
                     return true;
+                }
             }
         }
         else {
@@ -786,10 +805,12 @@ bool StringMatchCondition::execute(VItem* item) {
     }
     else if (VAttribute* a = item->isAttribute()) {
         std::string str;
-        if (a->value(searchIn, str))
+        if (a->value(searchIn, str)) {
             return matcher_->match(searchForOperand->what(), str);
-        else
+        }
+        else {
             return false;
+        }
     }
 
     return false;
@@ -836,51 +857,64 @@ bool NodeFlagCondition::execute(VItem* item) {
     else if (item->isNode()) {
         auto* vnode = static_cast<VNode*>(item);
 
-        if (nodeFlagName_ == "is_zombie")
+        if (nodeFlagName_ == "is_zombie") {
             return vnode->isFlagSet(ecf::Flag::ZOMBIE);
+        }
 
-        if (nodeFlagName_ == "has_message")
+        if (nodeFlagName_ == "has_message") {
             return vnode->isFlagSet(ecf::Flag::MESSAGE);
+        }
 
-        else if (nodeFlagName_ == "is_late")
+        else if (nodeFlagName_ == "is_late") {
             return vnode->isFlagSet(ecf::Flag::LATE);
+        }
 
         else if (nodeFlagName_ == "is_rerun") {
             node_ptr node = vnode->node();
-            if (!node.get())
+            if (!node.get()) {
                 return false;
+            }
 
             if (Submittable* s = node->isSubmittable()) {
                 return (s->try_no() > 1);
             }
             return false;
         }
-        else if (nodeFlagName_ == "is_waiting")
+        else if (nodeFlagName_ == "is_waiting") {
             return vnode->isFlagSet(ecf::Flag::WAIT);
+        }
 
-        else if (nodeFlagName_ == "is_archived")
+        else if (nodeFlagName_ == "is_archived") {
             return vnode->isFlagSet(ecf::Flag::ARCHIVED);
+        }
 
-        else if (nodeFlagName_ == "is_restored")
+        else if (nodeFlagName_ == "is_restored") {
             return vnode->isFlagSet(ecf::Flag::RESTORED);
+        }
 
-        else if (nodeFlagName_ == "is_ecfcmd_failed")
+        else if (nodeFlagName_ == "is_ecfcmd_failed") {
             return vnode->isFlagSet(ecf::Flag::JOBCMD_FAILED);
+        }
 
-        else if (nodeFlagName_ == "is_killed")
+        else if (nodeFlagName_ == "is_killed") {
             return vnode->isFlagSet(ecf::Flag::KILLED);
+        }
 
-        else if (nodeFlagName_ == "is_killcmd_failed")
+        else if (nodeFlagName_ == "is_killcmd_failed") {
             return vnode->isFlagSet(ecf::Flag::KILLCMD_FAILED);
+        }
 
-        else if (nodeFlagName_ == "is_statuscmd_failed")
+        else if (nodeFlagName_ == "is_statuscmd_failed") {
             return vnode->isFlagSet(ecf::Flag::STATUSCMD_FAILED);
+        }
 
-        else if (nodeFlagName_ == "no_script")
+        else if (nodeFlagName_ == "no_script") {
             return vnode->isFlagSet(ecf::Flag::NO_SCRIPT);
+        }
 
-        else if (nodeFlagName_ == "threshold")
+        else if (nodeFlagName_ == "threshold") {
             return vnode->isFlagSet(ecf::Flag::THRESHOLD);
+        }
     }
 
     return false;
@@ -900,12 +934,14 @@ WhatToSearchForOperand::~WhatToSearchForOperand() = default;
 //====================================================
 
 bool AttributeCondition::execute(VItem* item) {
-    if (!item)
+    if (!item) {
         return false;
+    }
 
     VAttribute* a = item->isAttribute();
-    if (!a)
+    if (!a) {
         return false;
+    }
 
     Q_ASSERT(a->type());
 
@@ -919,37 +955,46 @@ bool AttributeCondition::execute(VItem* item) {
 //====================================================
 
 bool AttributeStateCondition::execute(VItem* item) {
-    if (!item)
+    if (!item) {
         return false;
+    }
 
     VAttribute* a = item->isAttribute();
-    if (!a)
+    if (!a) {
         return false;
+    }
 
     assert(a->type());
 
     if (attrState_.startsWith("event_")) {
         if (a->type()->name() == "event" && a->data().count() >= 3) {
             QString v = a->data()[2];
-            if (attrState_ == "event_set")
+            if (attrState_ == "event_set") {
                 return v == "1";
-            else if (attrState_ == "event_clear")
+            }
+            else if (attrState_ == "event_clear") {
                 return v == "0";
+            }
         }
     }
     else if (attrState_.startsWith("repeat_")) {
         if (a->type()->name() == "repeat" && a->data().count() >= 2) {
             QString v = a->data()[1];
-            if (attrState_ == "repeat_date")
+            if (attrState_ == "repeat_date") {
                 return v == "date";
-            else if (attrState_ == "repeat_int")
+            }
+            else if (attrState_ == "repeat_int") {
                 return v == "integer";
-            else if (attrState_ == "repeat_string")
+            }
+            else if (attrState_ == "repeat_string") {
                 return v == "string";
-            else if (attrState_ == "repeat_enum")
+            }
+            else if (attrState_ == "repeat_enum") {
                 return v == "enumeration";
-            else if (attrState_ == "repeat_day")
+            }
+            else if (attrState_ == "repeat_day") {
                 return v == "day";
+            }
         }
     }
     return false;
@@ -964,8 +1009,9 @@ bool AttributeStateCondition::execute(VItem* item) {
 IsoDateCondition::IsoDateCondition(QString dateStr) {
     QDateTime d = QDateTime::fromString(dateStr, Qt::ISODate);
     d.setTimeSpec(Qt::UTC);
-    if (d.isValid())
+    if (d.isValid()) {
         secsSinceEpoch_ = d.toMSecsSinceEpoch() / 1000;
+    }
 }
 
 std::string IsoDateCondition::print() {

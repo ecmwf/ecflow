@@ -49,8 +49,9 @@ void VReportMaker::sendJiraReport(VFile_ptr file) {
         if (node && s) {
             std::string filePath = "_undef_";
             if (file) {
-                if (file->storageMode() != VFile::DiskStorage)
+                if (file->storageMode() != VFile::DiskStorage) {
                     file->setStorageMode(VFile::DiskStorage);
+                }
 
                 filePath = file->path();
             }

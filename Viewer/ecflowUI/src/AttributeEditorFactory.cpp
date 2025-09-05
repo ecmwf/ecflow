@@ -15,8 +15,9 @@
 static std::map<std::string, AttributeEditorFactory*>* makers = nullptr;
 
 AttributeEditorFactory::AttributeEditorFactory(const std::string& type) {
-    if (makers == nullptr)
+    if (makers == nullptr) {
         makers = new std::map<std::string, AttributeEditorFactory*>;
+    }
 
     (*makers)[type] = this;
 }
@@ -27,8 +28,9 @@ AttributeEditorFactory::~AttributeEditorFactory() {
 
 AttributeEditor* AttributeEditorFactory::create(const std::string& type, VInfo_ptr info, QWidget* parent) {
     auto j = makers->find(type);
-    if (j != makers->end())
+    if (j != makers->end()) {
         return (*j).second->make(info, parent);
+    }
 
     return nullptr;
 }

@@ -41,8 +41,9 @@ int TimelineModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int TimelineModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -62,28 +63,36 @@ QVariant TimelineModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    if (row < 0 || row >= static_cast<int>(data_->size()))
+    if (row < 0 || row >= static_cast<int>(data_->size())) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
-        if (index.column() == PathColumn)
+        if (index.column() == PathColumn) {
             return QString::fromStdString(data_->items()[row].path());
-        else if (index.column() == TimelineColumn)
+        }
+        else if (index.column() == TimelineColumn) {
             return row;
-        else if (index.column() == SubmittedDurationColumn)
+        }
+        else if (index.column() == SubmittedDurationColumn) {
             return data_->items()[row].firstSubmittedDuration(startDate_, endDate_);
-        else if (index.column() == ActiveDurationColumn)
+        }
+        else if (index.column() == ActiveDurationColumn) {
             return data_->items()[row].firstActiveDuration(startDate_, endDate_, data_->endTime());
-        else
+        }
+        else {
             return row;
+        }
     }
 
     // sort roles
     else if (role == PathSortRole) {
-        if (index.column() == PathColumn)
+        if (index.column() == PathColumn) {
             return static_cast<qint64>(data_->items()[row].sortIndex());
-        else
+        }
+        else {
             return {};
+        }
     }
 
     // sort roles
@@ -93,10 +102,12 @@ QVariant TimelineModel::data(const QModelIndex& index, int role) const {
         for (size_t i = 0; i <= data_->items()[row].size(); i++) {
             unsigned int val = data_->items()[row].start_[i];
             if (val >= start) {
-                if (val <= end)
+                if (val <= end) {
                     return val;
-                else
+                }
+                else {
                     return end + 2;
+                }
             }
         }
         return end + 1;
@@ -104,16 +115,19 @@ QVariant TimelineModel::data(const QModelIndex& index, int role) const {
 
     // sort roles
     else if (role == TreeSortRole) {
-        if (index.column() == PathColumn)
+        if (index.column() == PathColumn) {
             return static_cast<qint64>(data_->items()[row].treeIndex());
-        else
+        }
+        else {
             return {};
+        }
     }
 
     // Qt sort roles
     else if (role == QtSortRole) {
-        if (index.column() == PathColumn)
+        if (index.column() == PathColumn) {
             return static_cast<qint64>(data_->items()[row].sortIndex());
+        }
         else if (index.column() == SubmittedDurationColumn) {
             if (useMeanDuration_) {
                 float meanVal = 0.;
@@ -141,10 +155,12 @@ QVariant TimelineModel::data(const QModelIndex& index, int role) const {
 
     // task filter
     else if (role == Qt::UserRole) {
-        if (index.column() == PathColumn)
+        if (index.column() == PathColumn) {
             return data_->items()[row].isTask();
-        else
+        }
+        else {
             return {};
+        }
     }
 
     // filter = unchanged in period
@@ -188,8 +204,9 @@ QVariant TimelineModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant TimelineModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     if (role == Qt::DisplayRole) {
         switch (section) {
@@ -367,8 +384,9 @@ void TimelineSortModel::setChangeFilterMode(ChangeFilterMode m) {
 }
 
 bool TimelineSortModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
-    if (skipSort_)
+    if (skipSort_) {
         return true;
+    }
 
     if (sortMode_ == PathSortMode) {
         return tlModel_->data(left, TimelineModel::PathSortRole).toInt() <

@@ -67,38 +67,44 @@ std::vector<VParam*> VNState::filterItems() {
 }
 
 VNState* VNState::toState(const VNode* n) {
-    if (!n || !n->node().get())
+    if (!n || !n->node().get()) {
         return nullptr;
+    }
 
     node_ptr node = n->node();
 
-    if (node->isSuspended())
+    if (node->isSuspended()) {
         return items_["suspended"];
+    }
     else {
         auto it = stateMap_.find(node->state());
-        if (it != stateMap_.end())
+        if (it != stateMap_.end()) {
             return it->second;
+        }
     }
 
     return nullptr;
 }
 
 VNState* VNState::toRealState(const VNode* n) {
-    if (!n || !n->node().get())
+    if (!n || !n->node().get()) {
         return nullptr;
+    }
 
     node_ptr node = n->node();
 
     auto it = stateMap_.find(node->state());
-    if (it != stateMap_.end())
+    if (it != stateMap_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
 
 VNState* VNState::toDefaultState(const VNode* n) {
-    if (!n || !n->node())
+    if (!n || !n->node()) {
         return nullptr;
+    }
 
     node_ptr node = n->node();
 
@@ -110,16 +116,18 @@ VNState* VNState::toDefaultState(const VNode* n) {
 
 VNState* VNState::find(const std::string& name) {
     auto it = items_.find(name);
-    if (it != items_.end())
+    if (it != items_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
 
 VNState* VNState::find(unsigned char ucId) {
     auto it = idMap_.find(ucId);
-    if (it != idMap_.end())
+    if (it != idMap_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
@@ -183,18 +191,21 @@ bool VNState::isSubmitted(unsigned char ucId) {
 //==================================================
 
 VNState* VNState::toState(ServerHandler* s) {
-    if (!s)
+    if (!s) {
         return nullptr;
+    }
 
     bool susp        = false;
     NState::State ns = s->state(susp);
 
-    if (susp)
+    if (susp) {
         return items_["suspended"];
+    }
     else {
         auto it = stateMap_.find(ns);
-        if (it != stateMap_.end())
+        if (it != stateMap_.end()) {
             return it->second;
+        }
     }
 
     return nullptr;

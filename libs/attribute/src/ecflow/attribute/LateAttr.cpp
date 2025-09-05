@@ -43,23 +43,29 @@ void LateAttr::write(std::string& ret) const {
     }
     if (!c_.isNULL()) {
         ret += " -c ";
-        if (c_is_rel_)
+        if (c_is_rel_) {
             ret += "+";
+        }
         c_.write(ret);
     }
 }
 
 bool LateAttr::operator==(const LateAttr& rhs) const {
-    if (c_is_rel_ != rhs.c_is_rel_)
+    if (c_is_rel_ != rhs.c_is_rel_) {
         return false;
-    if (s_ != rhs.s_)
+    }
+    if (s_ != rhs.s_) {
         return false;
-    if (a_ != rhs.a_)
+    }
+    if (a_ != rhs.a_) {
         return false;
-    if (c_ != rhs.c_)
+    }
+    if (c_ != rhs.c_) {
         return false;
-    if (isLate_ != rhs.isLate_)
+    }
+    if (isLate_ != rhs.isLate_) {
         return false;
+    }
     return true;
 }
 
@@ -79,8 +85,9 @@ void LateAttr::checkForLateness(const std::pair<NState, boost::posix_time::time_
 
 bool LateAttr::check_for_lateness(const std::pair<NState, boost::posix_time::time_duration>& state,
                                   const ecf::Calendar& calendar) const {
-    if (isNull())
+    if (isNull()) {
         return false;
+    }
 
     if (state.first == NState::SUBMITTED || state.first == NState::QUEUED) {
 
@@ -145,12 +152,15 @@ void LateAttr::setLate(bool f) {
 
 void LateAttr::override_with(LateAttr* in_late) {
     if (in_late) {
-        if (!in_late->submitted().isNULL())
+        if (!in_late->submitted().isNULL()) {
             s_ = in_late->submitted();
-        if (!in_late->active().isNULL())
+        }
+        if (!in_late->active().isNULL()) {
             a_ = in_late->active();
-        if (!in_late->complete().isNULL())
+        }
+        if (!in_late->complete().isNULL()) {
             c_ = in_late->complete();
+        }
         c_is_rel_ = in_late->complete_is_relative();
 
         // DO NOT override isLate_, because if the parent is late, we do not want *ALL* children to be set late
@@ -171,12 +181,14 @@ void LateAttr::parse(LateAttr& lateAttr,
 
     size_t line_token_size = lineTokens.size();
     for (size_t i = index; i < line_token_size; i += 1) {
-        if (lineTokens[i][0] == '#')
+        if (lineTokens[i][0] == '#') {
             break;
+        }
 
         if (lineTokens[i] == "-s") {
-            if (!lateAttr.submitted().isNULL())
+            if (!lateAttr.submitted().isNULL()) {
                 throw std::runtime_error("LateParser::doParse: Invalid late, submitted specified twice :" + line);
+            }
             if (i + 1 < line_token_size) {
                 int hour = -1;
                 int min  = -1;
@@ -184,12 +196,14 @@ void LateAttr::parse(LateAttr& lateAttr,
                 lateAttr.addSubmitted(TimeSlot(hour, min));
                 i++;
             }
-            else
+            else {
                 throw std::runtime_error("LateParser::doParse: Invalid late, submitted time not specified :" + line);
+            }
         }
         else if (lineTokens[i] == "-a") {
-            if (!lateAttr.active().isNULL())
+            if (!lateAttr.active().isNULL()) {
                 throw std::runtime_error("LateParser::doParse: Invalid late, active specified twice :" + line);
+            }
             if (i + 1 < line_token_size) {
                 int hour = -1;
                 int min  = -1;
@@ -197,12 +211,14 @@ void LateAttr::parse(LateAttr& lateAttr,
                 lateAttr.addActive(TimeSlot(hour, min));
                 i++;
             }
-            else
+            else {
                 throw std::runtime_error("LateParser::doParse: Invalid late, active time not specified :" + line);
+            }
         }
         else if (lineTokens[i] == "-c") {
-            if (!lateAttr.complete().isNULL())
+            if (!lateAttr.complete().isNULL()) {
                 throw std::runtime_error("LateParser::doParse: Invalid late, complete specified twice :" + line);
+            }
             if (i + 1 < line_token_size) {
                 int hour      = -1;
                 int min       = -1;
@@ -210,11 +226,13 @@ void LateAttr::parse(LateAttr& lateAttr,
                 lateAttr.addComplete(TimeSlot(hour, min), relative);
                 i++;
             }
-            else
+            else {
                 throw std::runtime_error("LateParser::doParse: Invalid late, active time not specified :" + line);
+            }
         }
-        else
+        else {
             throw std::runtime_error("LateParser::doParse:5: Invalid late :" + line);
+        }
     }
 
     if (lateAttr.isNull()) {

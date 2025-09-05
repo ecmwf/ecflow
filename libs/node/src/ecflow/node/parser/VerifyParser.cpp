@@ -25,8 +25,9 @@ bool VerifyParser::doParse(const std::string& line, std::vector<std::string>& li
     // expect:
     //    verify <state>:<expected> # actual  i.e
     //    verify complete:3 # 2
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("VerifyParser::doParse: Invalid verify :" + line);
+    }
 
     if (!nodeStack().empty()) {
         Node* node = nodeStack_top();
@@ -34,8 +35,9 @@ bool VerifyParser::doParse(const std::string& line, std::vector<std::string>& li
         std::string stateInt = lineTokens[1];
 
         size_t colonPos = stateInt.find_first_of(':');
-        if (colonPos == std::string::npos)
+        if (colonPos == std::string::npos) {
             throw std::runtime_error("Invalid verify :" + line);
+        }
 
         std::string state    = stateInt.substr(0, colonPos);
         std::string expected = stateInt.substr(colonPos + 1);

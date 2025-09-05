@@ -123,16 +123,18 @@ bool Spline::tdma(const std::vector<double>& a,
     Q[i]               = d[i] / denominator;
     for (i = 1; i < n; i++) {
         denominator = b[i] + a[i] * P[i - 1];
-        if (fabs(denominator) < SMALL)
+        if (fabs(denominator) < SMALL) {
             return false;
+        }
         P[i] = -c[i] / denominator;
         Q[i] = (d[i] - a[i] * Q[i - 1]) / denominator;
     }
 
     // Backward pass
     X[n - 1] = Q[n - 1];
-    for (i = n - 2; i >= 0; i--)
+    for (i = n - 2; i >= 0; i--) {
         X[i] = P[i] * X[i + 1] + Q[i];
+    }
 
     return true;
 }

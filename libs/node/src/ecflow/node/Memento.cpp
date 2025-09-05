@@ -84,21 +84,26 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const {
         Suite* suite   = node->isSuite();
         Family* family = node->isFamily();
 
-        if (clear_attributes_)
+        if (clear_attributes_) {
             aspects_.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
+        }
 
         for (memento_ptr m : vec_) {
 #ifdef DEBUG_MEMENTO
             cout << "   " << typeid(*(m.get())).name() << "\n";
 #endif
-            if (task)
+            if (task) {
                 m->do_incremental_task_sync(task, aspects_, true /* collect aspects only, don't make any changes*/);
-            else if (alias)
+            }
+            else if (alias) {
                 m->do_incremental_alias_sync(alias, aspects_, true /* collect aspects only, don't make any changes*/);
-            else if (suite)
+            }
+            else if (suite) {
                 m->do_incremental_suite_sync(suite, aspects_, true /* collect aspects only, don't make any changes*/);
-            else if (family)
+            }
+            else if (family) {
                 m->do_incremental_family_sync(family, aspects_, true /* collect aspects only, don't make any changes*/);
+            }
             m->do_incremental_node_sync(node.get(), aspects_, true /* collect aspects only, don't make any changes*/);
         }
         size_t aspect_size = aspects_.size();
@@ -107,18 +112,23 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const {
         //
         // data model changes only, aspects should not change
         //
-        if (clear_attributes_)
+        if (clear_attributes_) {
             node->clear();
+        }
 
         for (memento_ptr m : vec_) {
-            if (task)
+            if (task) {
                 m->do_incremental_task_sync(task, aspects_, false /*Data model changes only*/);
-            else if (alias)
+            }
+            else if (alias) {
                 m->do_incremental_alias_sync(alias, aspects_, false /*Data model changes only*/);
-            else if (suite)
+            }
+            else if (suite) {
                 m->do_incremental_suite_sync(suite, aspects_, false /*Data model changes only*/);
-            else if (family)
+            }
+            else if (family) {
                 m->do_incremental_family_sync(family, aspects_, false /*Data model changes only*/);
+            }
             m->do_incremental_node_sync(node.get(), aspects_, false /*Data model changes only*/);
         }
         if (aspect_size != aspects_.size()) {

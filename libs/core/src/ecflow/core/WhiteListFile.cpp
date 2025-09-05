@@ -29,66 +29,86 @@ WhiteListFile::~WhiteListFile() = default;
 bool WhiteListFile::verify_read_access(const std::string& user) const {
     // Please note that the presence of * , even with paths means all users, have access
     // Command like --news has no paths, hence allow access to all if * specified
-    if (all_users_have_read_access_)
+    if (all_users_have_read_access_) {
         return true;
-    if (users_with_read_access_.empty() && users_with_write_access_.empty())
+    }
+    if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         return true;
+    }
 
-    if (users_with_read_access_.find(user) != users_with_read_access_.end())
+    if (users_with_read_access_.find(user) != users_with_read_access_.end()) {
         return true;
-    if (users_with_read_access_.find("*") != users_with_read_access_.end())
+    }
+    if (users_with_read_access_.find("*") != users_with_read_access_.end()) {
         return true;
+    }
 
     // user with write access also have read access
-    if (users_with_write_access_.find(user) != users_with_write_access_.end())
+    if (users_with_write_access_.find(user) != users_with_write_access_.end()) {
         return true;
-    if (users_with_write_access_.find("*") != users_with_write_access_.end())
+    }
+    if (users_with_write_access_.find("*") != users_with_write_access_.end()) {
         return true;
+    }
     return false;
 }
 
 bool WhiteListFile::verify_write_access(const std::string& user) const {
-    if (all_users_have_write_access_)
+    if (all_users_have_write_access_) {
         return true;
-    if (users_with_read_access_.empty() && users_with_write_access_.empty())
+    }
+    if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         return true;
+    }
 
-    if (verify_path_access(user, Str::EMPTY(), users_with_write_access_))
+    if (verify_path_access(user, Str::EMPTY(), users_with_write_access_)) {
         return true;
-    if (verify_path_access("*", Str::EMPTY(), users_with_write_access_))
+    }
+    if (verify_path_access("*", Str::EMPTY(), users_with_write_access_)) {
         return true;
+    }
     return false;
 }
 
 bool WhiteListFile::verify_read_access(const std::string& user, const std::string& path) const {
-    if (all_users_have_read_access_)
+    if (all_users_have_read_access_) {
         return true;
-    if (users_with_read_access_.empty() && users_with_write_access_.empty())
+    }
+    if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         return true;
-    if (verify_path_access(user, path, users_with_read_access_))
+    }
+    if (verify_path_access(user, path, users_with_read_access_)) {
         return true;
-    if (verify_path_access("*", path, users_with_read_access_))
+    }
+    if (verify_path_access("*", path, users_with_read_access_)) {
         return true;
+    }
 
     // user with write access also have read access
-    if (verify_path_access(user, path, users_with_write_access_))
+    if (verify_path_access(user, path, users_with_write_access_)) {
         return true;
-    if (verify_path_access("*", path, users_with_write_access_))
+    }
+    if (verify_path_access("*", path, users_with_write_access_)) {
         return true;
+    }
 
     return false;
 }
 
 bool WhiteListFile::verify_write_access(const std::string& user, const std::string& path) const {
-    if (all_users_have_write_access_)
+    if (all_users_have_write_access_) {
         return true;
-    if (users_with_read_access_.empty() && users_with_write_access_.empty())
+    }
+    if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         return true;
+    }
 
-    if (verify_path_access(user, path, users_with_write_access_))
+    if (verify_path_access(user, path, users_with_write_access_)) {
         return true;
-    if (verify_path_access("*", path, users_with_write_access_))
+    }
+    if (verify_path_access("*", path, users_with_write_access_)) {
         return true;
+    }
 
     return false;
 }
@@ -102,43 +122,55 @@ bool WhiteListFile::verify_read_access(const std::string& user, const std::vecto
     //   std::cout << "  users_with_write_access_.size(): " << users_with_write_access_.size() << "\n";
     //   std::cout << dump_valid_users() << "\n\n";
 
-    if (all_users_have_read_access_)
+    if (all_users_have_read_access_) {
         return true;
-    if (users_with_read_access_.empty() && users_with_write_access_.empty())
+    }
+    if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         return true;
-    if (verify_path_access(user, paths, users_with_read_access_))
+    }
+    if (verify_path_access(user, paths, users_with_read_access_)) {
         return true;
-    if (verify_path_access("*", paths, users_with_read_access_))
+    }
+    if (verify_path_access("*", paths, users_with_read_access_)) {
         return true;
+    }
 
     // user with write access also have read access
-    if (verify_path_access(user, paths, users_with_write_access_))
+    if (verify_path_access(user, paths, users_with_write_access_)) {
         return true;
-    if (verify_path_access("*", paths, users_with_write_access_))
+    }
+    if (verify_path_access("*", paths, users_with_write_access_)) {
         return true;
+    }
 
     return false;
 }
 
 bool WhiteListFile::verify_write_access(const std::string& user, const std::vector<std::string>& paths) const {
-    if (all_users_have_write_access_)
+    if (all_users_have_write_access_) {
         return true;
-    if (users_with_read_access_.empty() && users_with_write_access_.empty())
+    }
+    if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         return true;
-    if (verify_path_access(user, paths, users_with_write_access_))
+    }
+    if (verify_path_access(user, paths, users_with_write_access_)) {
         return true;
-    if (verify_path_access("*", paths, users_with_write_access_))
+    }
+    if (verify_path_access("*", paths, users_with_write_access_)) {
         return true;
+    }
     return false;
 }
 
 static bool path_access(const std::vector<std::string>& paths, const std::vector<std::string>& allowed_paths) {
-    if (allowed_paths.empty())
+    if (allowed_paths.empty()) {
         return true; // no paths are specified in PASSWORD file allow access
+    }
 
     // Paths specified in PASSWORD file.
-    if (paths.empty())
+    if (paths.empty()) {
         return false; // INPUT user path empty deny access
+    }
 
     // when we have a set of paths, supplied by the GUI. These can be random path selections
     // Hence to allow access *ALL* paths need to pass access
@@ -172,17 +204,20 @@ static bool path_access(const std::vector<std::string>& paths, const std::vector
                 continue; // all paths must match, or fail
             }
         }
-        if (!found_path_in_allowed_paths)
+        if (!found_path_in_allowed_paths) {
             return false;
+        }
     }
     return true;
 }
 
 static bool path_access(const std::string& path, const std::vector<std::string>& allowed_paths) {
-    if (allowed_paths.empty())
+    if (allowed_paths.empty()) {
         return true;
-    if (path.empty())
+    }
+    if (path.empty()) {
         return false;
+    }
 
     size_t allowed_paths_size = allowed_paths.size();
     for (size_t ap = 0; ap < allowed_paths_size; ap++) {
@@ -238,12 +273,14 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
         size_t lines_size       = lines.size();
         for (size_t i = 0; i < lines_size; ++i) {
 
-            if (lines[i].empty())
+            if (lines[i].empty()) {
                 continue;
+            }
 
             // ignore/remove all comments
-            if (lines[i][0] == '#')
+            if (lines[i][0] == '#') {
                 continue;
+            }
             std::string theLine           = lines[i];
             string::size_type comment_pos = theLine.find("#");
             if (comment_pos != std::string::npos) {
@@ -253,8 +290,9 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
             ecf::algorithm::trim(theLine); // remove leading and trailing spaces
             std::vector<std::string> lineTokens;
             Str::split(theLine, lineTokens);
-            if (lineTokens.empty())
+            if (lineTokens.empty()) {
                 continue;
+            }
 
             // version should be at the start
             if (!foundVersionNumber) {
@@ -289,8 +327,9 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
             paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
         }
 
-        if (debug)
+        if (debug) {
             std::cout << dump_valid_users() << "\n";
+        }
 
         return true;
     }
@@ -300,34 +339,40 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
     errorMsg += " (";
     errorMsg += strerror(errno);
     errorMsg += ")";
-    if (debug)
+    if (debug) {
         std::cout << dump_valid_users() << "\n";
+    }
     return false;
 }
 
 std::string WhiteListFile::dump_valid_users() const {
     std::stringstream ss;
     ss << "ECF_LISTS = '" << white_list_file_ << "'\n";
-    if (users_with_read_access_.empty() && users_with_write_access_.empty())
+    if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         ss << " No users specified. Everyone has read/write access\n";
-    if (all_users_have_read_access_)
+    }
+    if (all_users_have_read_access_) {
         ss << " All users have read access\n";
-    if (all_users_have_write_access_)
+    }
+    if (all_users_have_write_access_) {
         ss << " All users have write access\n";
+    }
 
     mymap::const_iterator i;
     for (i = users_with_read_access_.begin(); i != users_with_read_access_.end(); ++i) {
         ss << " User: " << (*i).first << " ";
         const std::vector<std::string>& paths = (*i).second;
-        for (const auto& path : paths)
+        for (const auto& path : paths) {
             ss << path << ",";
+        }
         ss << " has read access\n";
     }
     for (i = users_with_write_access_.begin(); i != users_with_write_access_.end(); ++i) {
         ss << " User: " << (*i).first << " ";
         const std::vector<std::string>& paths = (*i).second;
-        for (const auto& path : paths)
+        for (const auto& path : paths) {
             ss << path << ",";
+        }
         ss << " has read/write access\n";
     }
 
@@ -403,8 +448,9 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
     //*      /x,/y    # all user have read/write access to suite /x, /y
 
     // Use of * by itself means *all* user have read/write access to *all* suites
-    if (all_users_have_write_access_)
+    if (all_users_have_write_access_) {
         return true;
+    }
 
     if (tokens.size() == 1) {
         std::string user = tokens[0];
@@ -419,8 +465,9 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
                 users_with_read_access_.clear();
             }
             else {
-                if (!all_users_have_read_access_)
+                if (!all_users_have_read_access_) {
                     users_with_read_access_.insert(std::make_pair(user, std::vector<std::string>()));
+                }
             }
             return true;
         }
@@ -434,10 +481,12 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
             users_with_read_access_.clear();
         }
         else {
-            if (!all_users_have_read_access_)
+            if (!all_users_have_read_access_) {
                 users_with_read_access_.insert(std::make_pair(user, std::vector<std::string>()));
-            if (!all_users_have_write_access_)
+            }
+            if (!all_users_have_write_access_) {
                 users_with_write_access_.insert(std::make_pair(user, std::vector<std::string>()));
+            }
         }
         return true;
     }
@@ -447,8 +496,9 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
     std::string user;
     std::vector<std::string> paths;
     for (auto tok : tokens) {
-        if (tok.empty())
+        if (tok.empty()) {
             continue;
+        }
         if (tok[0] == '-') {
             // read only user for a given set of paths
             read_only = true;
@@ -531,19 +581,23 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
     if (read_only) {
         if (!all_users_have_read_access_) {
             auto it = users_with_read_access_.find(user);
-            if (it == users_with_read_access_.end())
+            if (it == users_with_read_access_.end()) {
                 users_with_read_access_.insert(std::make_pair(user, paths));
-            else
+            }
+            else {
                 std::copy(paths.begin(), paths.end(), std::back_inserter(it->second));
+            }
         }
     }
     else {
         if (!all_users_have_write_access_) {
             auto it = users_with_write_access_.find(user);
-            if (it == users_with_write_access_.end())
+            if (it == users_with_write_access_.end()) {
                 users_with_write_access_.insert(std::make_pair(user, paths));
-            else
+            }
+            else {
                 std::copy(paths.begin(), paths.end(), std::back_inserter(it->second));
+            }
         }
     }
     return true;
@@ -592,8 +646,9 @@ bool WhiteListFile::createEmpty(const std::string& pathToFile, std::string& erro
 
 void WhiteListFile::allow_write_access_for_server_user() {
     std::string user = get_login_name();
-    if (verify_write_access(user))
+    if (verify_write_access(user)) {
         return;
+    }
 
     // add write access
     auto it = users_with_write_access_.find(user);

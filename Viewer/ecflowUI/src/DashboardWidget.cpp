@@ -70,13 +70,16 @@ bool DashboardWidget::detached() const {
 }
 
 void DashboardWidget::slotMaximisedToggled(bool b) {
-    if (!ignoreMaximisedChange_)
+    if (!ignoreMaximisedChange_) {
         Q_EMIT maximisedChanged(this);
+    }
 
-    if (b)
+    if (b) {
         Q_EMIT titleUpdated("Panel maximised!", "warning");
-    else
+    }
+    else {
         Q_EMIT titleUpdated("");
+    }
 
     maximisedAction_->setToolTip((isMaximised()) ? tooltipMaxChk : tooltipMaxUnchk);
 }

@@ -120,8 +120,9 @@ BOOST_AUTO_TEST_CASE(test_file_tokenizer) {
     {
         std::ofstream file(path.c_str());
         for (size_t i = 0; i < linesWithText; i++) {
-            if (i % 2 == 0)
-                file << "\n";        // 51 empty lines
+            if (i % 2 == 0) {
+                file << "\n"; // 51 empty lines
+            }
             file << theText << "\n"; // 100  text lines
         }
     }
@@ -245,10 +246,12 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
     std::string path = rootPath;
     std::string dir  = "dir";
     for (int i = 0; i < 6; i++) {
-        if (i == 5)
+        if (i == 5) {
             path += "/task";
-        else
+        }
+        else {
             path += "/" + dir + ecf::convert_to<std::string>(i);
+        }
     }
     // Should have test/data/dir0/dir1/dir3/dir3/dir4/task
     //         or  libs/core/test/data/dir0/dir1/dir3/dir3/dir4/task
@@ -272,11 +275,13 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
                               "Failed to create " << combinedPath << " because " << errorMsg);
 
         // Preserve the last token, i.e task
-        if (nodePathTokens.size() >= 2)
+        if (nodePathTokens.size() >= 2) {
             nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size() -
                                  2); // consume one from last path token
-        else
+        }
+        else {
             nodePathTokens.erase(nodePathTokens.begin());
+        }
     }
     BOOST_REQUIRE_MESSAGE(nodePathTokens.empty(), "Expected nodePathTokens vec to be empty");
 
@@ -464,8 +469,9 @@ BOOST_AUTO_TEST_CASE(test_directory_traversal) {
     //    int other        = 0;
 
     for (auto& entry : fs::directory_iterator(fs::current_path())) {
-        if (is_regular_file(entry))
+        if (is_regular_file(entry)) {
             regular_file++;
+        }
         if (is_regular_file(entry)) {
             boost::uintmax_t entry_size = fs::file_size(entry);
             boost::uintmax_t path_size  = fs::file_size(entry.path());

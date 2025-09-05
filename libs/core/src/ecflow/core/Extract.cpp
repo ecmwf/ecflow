@@ -24,8 +24,9 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 }
 
 bool Extract::pathAndName(const std::string& token, std::string& path, std::string& name) {
-    if (token.empty())
+    if (token.empty()) {
         return false;
+    }
 
     size_t colonPos = token.find_first_of(':');
     if (colonPos == std::string::npos) {
@@ -48,8 +49,9 @@ bool Extract::split_get_second(const std::string& str, std::string& ret, char se
     // HH:MM
     // return MM;
     size_t colonPos = str.find_first_of(separator);
-    if (colonPos == std::string::npos)
+    if (colonPos == std::string::npos) {
         return false;
+    }
     ret = str.substr(colonPos + 1);
     return true;
 }
@@ -68,8 +70,9 @@ int Extract::theInt(const std::string& token, const std::string& errorMsg) {
 
 /// extract YMD, integer of the form yyyymmdd
 int Extract::ymd(const std::string& ymdToken, std::string& errorMsg) {
-    if (ymdToken.size() != 8)
+    if (ymdToken.size() != 8) {
         throw std::runtime_error(errorMsg + " YMD must be 8 characters i.e yyyymmdd");
+    }
 
     // Use date lib to check YMD
     try {

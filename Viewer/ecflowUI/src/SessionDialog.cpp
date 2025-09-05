@@ -73,10 +73,12 @@ void SessionDialog::addSessionToTable(SessionItem* s) {
 
 std::string SessionDialog::selectedSessionName() {
     QTreeWidgetItem* ci = savedSessionsList_->currentItem();
-    if (ci)
+    if (ci) {
         return ci->text(0).toStdString();
-    else
+    }
+    else {
         return "";
+    }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -167,10 +169,12 @@ void SessionDialog::on_switchToButton__clicked() {
 
     SessionHandler::instance()->current(item); // set this session as the current one
 
-    if (restoreLastSessionCb_->checkState() == Qt::Checked) // save details of the selected session?
+    if (restoreLastSessionCb_->checkState() == Qt::Checked) { // save details of the selected session?
         SessionHandler::instance()->saveLastSessionName();
-    else
+    }
+    else {
         SessionHandler::instance()->removeLastSessionName(); // no, so we can delete the file
+    }
 
     accept(); // close the dialogue and continue loading the main user interface
 }

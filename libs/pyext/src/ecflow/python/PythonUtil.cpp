@@ -78,8 +78,9 @@ void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<Variable>& vec) {
             int the_int = py::extract<int>(dict[keys[i]]);
             second      = ecf::convert_to<std::string>(the_int);
         }
-        else
+        else {
             throw std::runtime_error("PythonUtil::dict_to_str_vec: type not convertible to string or integer");
+        }
 
         vec.emplace_back(first, second);
     }

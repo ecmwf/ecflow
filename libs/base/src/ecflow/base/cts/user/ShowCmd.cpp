@@ -94,21 +94,26 @@ void ShowCmd::addOption(boost::program_options::options_description& desc) const
 void ShowCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     std::string show_state = vm[ShowCmd::arg()].as<std::string>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         cout << "  ShowCmd::create api = '" << show_state << "'.\n";
+    }
 
     PrintStyle::Type_t style = PrintStyle::DEFS;
     if (!show_state.empty()) {
-        if (show_state == "state")
+        if (show_state == "state") {
             style = PrintStyle::STATE;
-        else if (show_state == "migrate")
+        }
+        else if (show_state == "migrate") {
             style = PrintStyle::MIGRATE;
-        else if (show_state == "defs")
+        }
+        else if (show_state == "defs") {
             style = PrintStyle::DEFS;
-        else
+        }
+        else {
             throw std::runtime_error(
                 "ShowCmd::create invalid show option expected one of [ defs | state | migrate ] but found " +
                 show_state);
+        }
     }
     cmd = std::make_shared<ShowCmd>(style);
 }

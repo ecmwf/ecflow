@@ -176,8 +176,9 @@ void ServerAddDialog::accept() {
     QString host = hostEdit->text();
     QString port = portEdit->text();
 
-    if (!checkName(name) || !checkHost(host) || !checkPort(port))
+    if (!checkName(name) || !checkHost(host) || !checkPort(port)) {
         return;
+    }
 
     QDialog::accept();
 }
@@ -281,8 +282,9 @@ void ServerEditDialog::accept() {
     QString port = portEdit->text();
     QString user = userEdit->text();
 
-    if (!checkName(name, oriName_) || !checkHost(host) || !checkPort(port) || !checkUser(user))
+    if (!checkName(name, oriName_) || !checkHost(host) || !checkPort(port) || !checkUser(user)) {
         return;
+    }
 
     QDialog::accept();
 }
@@ -410,8 +412,9 @@ ServerListDialog::ServerListDialog(Mode mode, ServerFilter* filter, QWidget* par
 
     connect(serverView, SIGNAL(clicked(QModelIndex)), this, SLOT(slotItemClicked(QModelIndex)));
 
-    for (int i = 0; i < model_->columnCount() - 1; i++)
+    for (int i = 0; i < model_->columnCount() - 1; i++) {
         serverView->resizeColumnToContents(i);
+    }
 
 #if 0
     QFont labelF;
@@ -465,8 +468,9 @@ void ServerListDialog::reject() {
 
 void ServerListDialog::editItem(const QModelIndex& index) {
     if (ServerItem* item = model_->indexToServer(sortModel_->mapToSource(index))) {
-        if (item->isSystem())
+        if (item->isSystem()) {
             return;
+        }
 
         ServerEditDialog d(QString::fromStdString(item->name()),
                            QString::fromStdString(item->host()),
@@ -560,8 +564,9 @@ void ServerListDialog::addItem() {
 void ServerListDialog::removeItem(const QModelIndex& index) {
     ServerItem* item = model_->indexToServer(sortModel_->mapToSource(index));
 
-    if (!item)
+    if (!item) {
         return;
+    }
 
     QString str = tr("Are you sure that you want to delete server: <b>");
     str += QString::fromStdString(item->name());
@@ -595,8 +600,9 @@ void ServerListDialog::removeItem(const QModelIndex& index) {
 void ServerListDialog::setFavouriteItem(const QModelIndex& index, bool b) {
     ServerItem* item = model_->indexToServer(sortModel_->mapToSource(index));
 
-    if (!item)
+    if (!item) {
         return;
+    }
 
     ServerList::instance()->setFavourite(item, b);
 
@@ -679,12 +685,14 @@ void ServerListDialog::on_sysSyncLogTb_toggled(bool b) {
             sList[1]     = h / 2;
             auto manager = ServerList::instance()->systemFileManager();
             if (manager && manager->hasSyncChange()) {
-                if (h > 500)
+                if (h > 500) {
                     sList[1] = 250;
+                }
             }
             else {
-                if (h > 100)
+                if (h > 100) {
                     sList[1] = 50;
+                }
             }
             sList[0] = h - sList[1];
         }
@@ -812,8 +820,9 @@ int ServerListModel::columnCount(const QModelIndex& /*parent*/) const {
 }
 
 int ServerListModel::rowCount(const QModelIndex& parent) const {
-    if (!parent.isValid())
+    if (!parent.isValid()) {
         return static_cast<int>(ServerList::instance()->count());
+    }
 
     return 0;
 }
@@ -827,8 +836,9 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const {
 
     ServerItem* item = ServerList::instance()->itemAt(index.row());
 
-    if (!item)
+    if (!item) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
@@ -844,8 +854,9 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const {
                 return QString::fromStdString(ecf::to_ui_designation(item->protocol()));
             case UseColumn: {
                 int n = item->useCnt();
-                if (n > 0)
+                if (n > 0) {
                     return "loaded (" + QString::number(n) + ")";
+                }
 
                 return {};
             }
@@ -858,38 +869,45 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const {
         return (item->isSystem()) ? QColor(67, 78, 109) : QVariant();
     }
     else if (role == Qt::DecorationRole) {
-        if (index.column() == SystemColumn)
+        if (index.column() == SystemColumn) {
             return (item->isSystem()) ? sysPix_ : QPixmap();
+        }
 
-        else if (index.column() == FavouriteColumn)
+        else if (index.column() == FavouriteColumn) {
             return (item->isFavourite()) ? favPix_ : favEmptyPix_;
+        }
 
         return {};
     }
     else if (role == Qt::UserRole) {
-        if (index.column() == FavouriteColumn)
+        if (index.column() == FavouriteColumn) {
             return item->isFavourite();
+        }
 
         return {};
     }
     else if (role == Qt::CheckStateRole) {
-        if (index.column() == LoadColumn && filter_)
+        if (index.column() == LoadColumn && filter_) {
             return (filter_->isFiltered(item)) ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
+        }
 
         return {};
     }
     else if (role == Qt::FontRole) {
-        if (index.column() != LoadColumn && index.column() != FavouriteColumn && filter_ && filter_->isFiltered(item))
+        if (index.column() != LoadColumn && index.column() != FavouriteColumn && filter_ && filter_->isFiltered(item)) {
             return loadFont_;
+        }
 
         return {};
     }
     else if (role == IconStatusRole) {
-        if (index.column() == SystemColumn)
+        if (index.column() == SystemColumn) {
             return item->isSystem();
+        }
 
-        else if (index.column() == FavouriteColumn)
+        else if (index.column() == FavouriteColumn) {
             return item->isFavourite();
+        }
 
         return {};
     }
@@ -974,10 +992,12 @@ bool ServerListModel::setData(const QModelIndex& idx, const QVariant& value, int
     if (filter_ && idx.column() == LoadColumn && role == Qt::CheckStateRole) {
         if (ServerItem* item = ServerList::instance()->itemAt(idx.row())) {
             bool checked = (value.toInt() == Qt::Checked) ? true : false;
-            if (checked)
+            if (checked) {
                 filter_->addServer(item);
-            else
+            }
+            else {
                 filter_->removeServer(item);
+            }
 
             QModelIndex startIdx = index(idx.row(), 0);
             QModelIndex endIdx   = index(idx.row(), columnCount() - 1);
@@ -1041,19 +1061,22 @@ bool ServerListFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& s
         QModelIndex idxLoad = sourceModel()->index(sourceRow, ServerListModel::LoadColumn, sourceParent);
         QModelIndex idxFav  = sourceModel()->index(sourceRow, ServerListModel::FavouriteColumn, sourceParent);
         if (!sourceModel()->data(idxFav, Qt::UserRole).toBool() &&
-            sourceModel()->data(idxLoad, Qt::CheckStateRole).toInt() != Qt::Checked)
+            sourceModel()->data(idxLoad, Qt::CheckStateRole).toInt() != Qt::Checked) {
             return false;
+        }
     }
 
-    if (filterStr_.isEmpty())
+    if (filterStr_.isEmpty()) {
         return true;
+    }
 
     QModelIndex idxName = sourceModel()->index(sourceRow, ServerListModel::NameColumn, sourceParent);
     QModelIndex idxHost = sourceModel()->index(sourceRow, ServerListModel::HostColumn, sourceParent);
 
     if (sourceModel()->data(idxName).toString().contains(filterStr_, Qt::CaseInsensitive) ||
-        sourceModel()->data(idxHost).toString().contains(filterStr_, Qt::CaseInsensitive))
+        sourceModel()->data(idxHost).toString().contains(filterStr_, Qt::CaseInsensitive)) {
         return true;
+    }
 
     return false;
 }

@@ -62,8 +62,7 @@ void HttpClient::run() {
             auto response = result.value();
             ecf::restore_from_string(response.body, inbound_response_);
         }
-        else {
-        }
+        else {}
     }
     else {
         status_ = ecf::http::Status::Unknown;

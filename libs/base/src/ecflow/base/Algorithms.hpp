@@ -104,7 +104,6 @@ void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
 
         predicate.handle(*current);
     }
-
 }
 
 } // namespace ecf

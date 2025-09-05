@@ -47,8 +47,9 @@ void NodeSearchWindow::closeEvent(QCloseEvent* event) {
 }
 
 void NodeSearchWindow::keyReleaseEvent(QKeyEvent* event) {
-    if (event->key() == Qt::Key_Return)
+    if (event->key() == Qt::Key_Return) {
         queryWidget_->slotFind();
+    }
     QMainWindow::keyReleaseEvent(event);
 }
 

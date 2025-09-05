@@ -56,12 +56,15 @@ void VQueueAttrType::encode(const QueueAttr& q, QStringList& data) const {
     int idx = q.index();
     int pos = -1;
     if (allvals.count() > 0) {
-        if (idx == 0)
+        if (idx == 0) {
             pos = 0;
-        else if (idx > 0 && idx < allvals.count() - 1)
+        }
+        else if (idx > 0 && idx < allvals.count() - 1) {
             pos = 1;
-        else if (idx == allvals.count() - 1)
+        }
+        else if (idx == allvals.count() - 1) {
             pos = 2;
+        }
     }
     data << allvals.join(" ") << QString::number(pos);
 }

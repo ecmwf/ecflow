@@ -93,8 +93,9 @@ void TimelinePreLoadDialog::init(const TimelineFileList& lst) {
     }
 
     if (!hasGoodFile) {
-        if (QPushButton* pb = ui_->buttonBox->button(QDialogButtonBox::Ok))
+        if (QPushButton* pb = ui_->buttonBox->button(QDialogButtonBox::Ok)) {
             pb->setEnabled(false);
+        }
     }
 }
 

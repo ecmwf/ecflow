@@ -28,8 +28,9 @@ VDir_ptr OutputDirClient::result() const {
 void OutputDirClient::slotCheckTimeout() {
     if (soc_->state() == QAbstractSocket::HostLookupState || soc_->state() == QAbstractSocket::ConnectingState) {
         soc_->abort();
-        if (dir_)
+        if (dir_) {
             dir_.reset();
+        }
 
         Q_EMIT error("Timeout error");
     }
@@ -73,8 +74,9 @@ void OutputDirClient::slotError(QAbstractSocket::SocketError err) {
 
                 Q_EMIT finished();
 
-                if (dir_)
+                if (dir_) {
                     dir_.reset();
+                }
 
                 return;
             }
@@ -122,8 +124,9 @@ void OutputDirClient::slotRead() {
 }
 
 void OutputDirClient::parseData() {
-    if (!dir_)
+    if (!dir_) {
         return;
+    }
 
     QTextStream in(data_);
     while (!in.atEnd()) {

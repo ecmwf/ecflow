@@ -32,8 +32,9 @@ namespace po = boost::program_options;
 
 bool EditScriptCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<EditScriptCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     if (path_to_node_ != the_rhs->path_to_node()) {
         return false;
     }
@@ -129,8 +130,9 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
     node_ptr node =
         find_node_for_edit(as->defs().get(), path_to_node_); // will throw if defs not defined, or node not found
     Submittable* submittable = node->isSubmittable();
-    if (!submittable)
+    if (!submittable) {
         throw std::runtime_error("EditScriptCmd failed. Cannot locate task or alias at path " + path_to_node_);
+    }
 
     /// record any changes made to suite. Needed for incremental updates
     SuiteChangedPtr changed(node.get());
@@ -354,8 +356,9 @@ void EditScriptCmd::addOption(boost::program_options::options_description& desc)
 void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(EditScriptCmd::arg(), args);
+    }
 
     std::stringstream ss;
     if (args.size() < 2) {
@@ -372,16 +375,21 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     std::vector<std::string> edit_types = valid_edit_types();
     for (const auto& i : edit_types) {
         if (edit_type_str == i) {
-            if (edit_type_str == "edit")
+            if (edit_type_str == "edit") {
                 edit_type = EditScriptCmd::EDIT;
-            else if (edit_type_str == "pre_process")
+            }
+            else if (edit_type_str == "pre_process") {
                 edit_type = EditScriptCmd::PREPROCESS;
-            else if (edit_type_str == "submit")
+            }
+            else if (edit_type_str == "submit") {
                 edit_type = EditScriptCmd::SUBMIT;
-            else if (edit_type_str == "pre_process_file")
+            }
+            else if (edit_type_str == "pre_process_file") {
                 edit_type = EditScriptCmd::PREPROCESS_USER_FILE;
-            else if (edit_type_str == "submit_file")
+            }
+            else if (edit_type_str == "submit_file") {
                 edit_type = EditScriptCmd::SUBMIT_USER_FILE;
+            }
             else {
                 assert(false);
             }
@@ -393,8 +401,9 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     if (!ok) {
         ss << "The second argument(" << args[1] << ") to edit_script must be one of [ ";
         for (size_t i = 0; i < edit_types.size(); ++i) {
-            if (i != 0)
+            if (i != 0) {
                 ss << " | ";
+            }
             ss << edit_types[i];
         }
         ss << "]\n" << EditScriptCmd::desc();
@@ -416,10 +425,12 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     bool create_alias = false; // for use with "submit_file" option only
     bool run_alias    = true;  // for use with "submit_file" option only
     for (size_t i = 0; i < args.size(); i++) {
-        if (i > 2 && args[i] == "create_alias")
+        if (i > 2 && args[i] == "create_alias") {
             create_alias = true;
-        if (i > 2 && args[i] == "no_run")
+        }
+        if (i > 2 && args[i] == "no_run") {
             run_alias = false;
+        }
     }
     if ((create_alias || !run_alias) && edit_type != EditScriptCmd::SUBMIT_USER_FILE) {
         ss << "The create_alias option is only valid when the second argument is 'submit_file' \n"

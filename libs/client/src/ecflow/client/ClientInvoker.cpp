@@ -126,15 +126,17 @@ void cfg(const ClientEnvironment& env, HttpClient& client) {
 // ==================================================================================
 // class ClientInvoker
 ClientInvoker::ClientInvoker() : clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD) {
-    if (clientEnv_.debug())
+    if (clientEnv_.debug()) {
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 1=================start=================\n";
+    }
 }
 
 ClientInvoker::ClientInvoker(const std::string& host_port)
     : clientEnv_(false),
       retry_connection_period_(RETRY_CONNECTION_PERIOD) {
-    if (clientEnv_.debug())
+    if (clientEnv_.debug()) {
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 2=================start=================\n";
+    }
     set_hostport(host_port);
 }
 
@@ -142,22 +144,25 @@ ClientInvoker::ClientInvoker(bool gui, const std::string& host, const std::strin
     : clientEnv_(gui, host, port),
       retry_connection_period_(RETRY_CONNECTION_PERIOD),
       gui_(gui) {
-    if (clientEnv_.debug())
+    if (clientEnv_.debug()) {
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
+    }
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
     : clientEnv_(false, host, port),
       retry_connection_period_(RETRY_CONNECTION_PERIOD) {
-    if (clientEnv_.debug())
+    if (clientEnv_.debug()) {
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
+    }
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, int port)
     : clientEnv_(false, host, ecf::convert_to<std::string>(port)),
       retry_connection_period_(RETRY_CONNECTION_PERIOD) {
-    if (clientEnv_.debug())
+    if (clientEnv_.debug()) {
         cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
+    }
 }
 
 std::string ClientInvoker::get_certificate() const {
@@ -176,9 +181,10 @@ void ClientInvoker::set_hostport(const std::string& host_port) {
     size_t colonPos = host_port.find_first_of(':');
     if (colonPos == string::npos) {
         colonPos = host_port.find_first_of('@');
-        if (colonPos == string::npos)
+        if (colonPos == string::npos) {
             throw std::runtime_error("ClientInvoker::set_host_port: expected <host>:<port> || <host>@<port> in " +
                                      host_port);
+        }
     }
     std::string host = host_port.substr(0, colonPos);
     std::string port = host_port.substr(colonPos + 1);
@@ -239,8 +245,9 @@ void ClientInvoker::set_connect_timeout(int t) {
 
 void ClientInvoker::set_connection_attempts(unsigned int attempts) {
     connection_attempts_ = attempts;
-    if (connection_attempts_ < 1)
+    if (connection_attempts_ < 1) {
         connection_attempts_ = 1;
+    }
 }
 
 std::optional<Cmd_ptr> ClientInvoker::get_cmd_from_args(const CommandLine& cl) const {
@@ -300,13 +307,15 @@ int ClientInvoker::get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) co
             ss << cl << "\n";
         }
         server_reply_.set_error_msg(ss.str());
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
     }
     catch (...) {
         server_reply_.set_error_msg("ClientInvoker: caught exception: Parsing arguments: unknown type!\n");
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
     }
     return 1;
 }
@@ -337,15 +346,17 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
     if (get_cmd_from_args(cl, cts_cmd) == 1) {
         return 1;
     }
-    if (!cts_cmd)
+    if (!cts_cmd) {
         return 0; // For --help and --debug, --load defs check_only,  no command is created
+    }
 
     // Under debug, we display round trip time for each request
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
-    if (res == 1 && on_error_throw_exception_)
+    if (res == 1 && on_error_throw_exception_) {
         throw std::runtime_error(server_reply_.error_msg());
+    }
     return res;
 }
 
@@ -372,8 +383,9 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const {
     request_logger.set_cts_cmd(cts_cmd);
 
     int res = do_invoke_cmd(cts_cmd);
-    if (res == 1 && on_error_throw_exception_)
+    if (res == 1 && on_error_throw_exception_) {
         throw std::runtime_error(server_reply_.error_msg());
+    }
     return res;
 }
 
@@ -382,17 +394,19 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     ecf::ScopedDurationTimer timer("  ClientInvoker::do_invoke_cmd");
 #endif
 
-    if (clientEnv_.debug())
+    if (clientEnv_.debug()) {
         cout << "\n"
              << TimeStamp::now() << "ClientInvoker::do_invoke_cmd : on_error_throw_exception_("
              << on_error_throw_exception_ << ")" << std::endl;
+    }
     if (clientEnv_.no_ecf()) {
         cout << ecf::environment::NO_ECF << "\n";
         return 0;
     } // success If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
-    if (testInterface_)
+    if (testInterface_) {
         return 0; // The testInterface_ flag allows testing of client interface, parsing of args, without needing to
                   // contact server
+    }
     assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
 
     // Add support for AUTO sync(using the group command), used by GUI and python *ONLY*
@@ -402,11 +416,13 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
         std::shared_ptr<GroupCTSCmd> grp_cmd = std::make_shared<GroupCTSCmd>(cts_cmd);
         defs_ptr defs                        = server_reply_.client_defs();
 
-        if (defs.get())
+        if (defs.get()) {
             grp_cmd->addChild(std::make_shared<CSyncCmd>(
                 CSyncCmd::SYNC, server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no()));
-        else
+        }
+        else {
             grp_cmd->addChild(std::make_shared<CSyncCmd>(server_reply_.client_handle()));
+        }
 
         cts_cmd = grp_cmd;
     }
@@ -416,8 +432,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     /// However for ping() always default to 1 second. This avoids 10 second wait in release mode.
     /// We do this both for the CLI(command level interface) and python api
     unsigned int retry_connection_period = retry_connection_period_;
-    if (cts_cmd->ping_cmd())
+    if (cts_cmd->ping_cmd()) {
         retry_connection_period = 1;
+    }
 
     try {
         /// report this message at least once. So client has a clue what's going on
@@ -711,10 +728,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
             cout << TimeStamp::now() << "ClientInvoker: " << cts_cmd->print_short() << " current host("
                  << current_host_port << ") trying next host(" << client_env_host_port() << ")" << endl;
 
-            if (never_polled)
+            if (never_polled) {
                 never_polled = false; // To avoid the first wait
-            else
+            }
+            else {
                 sleep(NEXT_HOST_POLL_PERIOD);
+            }
         }
     }
     catch (std::exception& e) {
@@ -743,17 +762,19 @@ void ClientInvoker::reset() const {
 int ClientInvoker::sync(defs_ptr& client_defs) const {
     if (client_defs.get()) {
         server_reply_.set_client_defs(client_defs);
-        if (testInterface_)
+        if (testInterface_) {
             return invoke(CtsApi::sync(
                 server_reply_.client_handle(), client_defs->state_change_no(), client_defs->modify_change_no()));
+        }
         return invoke(std::make_shared<CSyncCmd>(CSyncCmd::SYNC,
                                                  server_reply_.client_handle(),
                                                  client_defs->state_change_no(),
                                                  client_defs->modify_change_no()));
     }
 
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::get());
+    }
     int res = invoke(std::make_shared<CtsNodeCmd>(CtsNodeCmd::GET));
     if (res == 0) {
         client_defs = server_reply_.client_defs(); // update change number
@@ -772,49 +793,55 @@ int ClientInvoker::sync_local(bool sync_suite_clock) const {
         }
 
         if (testInterface_) {
-            if (sync_suite_clock)
+            if (sync_suite_clock) {
                 return invoke(CtsApi::sync_clock(
                     server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no()));
+            }
             return invoke(
                 CtsApi::sync(server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no()));
         }
-        if (sync_suite_clock)
+        if (sync_suite_clock) {
             return invoke(std::make_shared<CSyncCmd>(CSyncCmd::SYNC_CLOCK,
                                                      server_reply_.client_handle(),
                                                      defs->state_change_no(),
                                                      defs->modify_change_no()));
+        }
         return invoke(std::make_shared<CSyncCmd>(
             CSyncCmd::SYNC, server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no()));
     }
     // If we have a handle return the defs, with the registered suites, else returns the full defs
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::sync_full(server_reply_.client_handle()));
+    }
 
     return invoke(std::make_shared<CSyncCmd>(server_reply_.client_handle()));
 }
 
 int ClientInvoker::news(defs_ptr& client_defs) const {
     if (client_defs.get()) {
-        if (testInterface_)
+        if (testInterface_) {
             return invoke(CtsApi::news(
                 server_reply_.client_handle(), client_defs->state_change_no(), client_defs->modify_change_no()));
+        }
         return invoke(std::make_shared<CSyncCmd>(CSyncCmd::NEWS,
                                                  server_reply_.client_handle(),
                                                  client_defs->state_change_no(),
                                                  client_defs->modify_change_no()));
     }
     server_reply_.set_error_msg("The client definition is empty.");
-    if (on_error_throw_exception_)
+    if (on_error_throw_exception_) {
         throw std::runtime_error(server_reply_.error_msg());
+    }
     return 1;
 }
 
 int ClientInvoker::news_local() const {
     defs_ptr defs = server_reply_.client_defs();
     if (defs.get()) {
-        if (testInterface_)
+        if (testInterface_) {
             return invoke(
                 CtsApi::news(server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no()));
+        }
         return invoke(std::make_shared<CSyncCmd>(
             CSyncCmd::NEWS, server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no()));
     }
@@ -822,15 +849,17 @@ int ClientInvoker::news_local() const {
     // There is no local defs, i.e. first time call, The default client handle should be 0.
     // go with defaults for state and modify change numbers
     // User is expected to call sync_local(), which will update local defs.
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::news(server_reply_.client_handle(), 0, 0));
+    }
     return invoke(std::make_shared<CSyncCmd>(CSyncCmd::NEWS, server_reply_.client_handle(), 0, 0));
 }
 //=====================================================================================
 
 int ClientInvoker::getDefs() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::get());
+    }
     return invoke(std::make_shared<CtsNodeCmd>(CtsNodeCmd::GET));
 }
 
@@ -840,73 +869,87 @@ int ClientInvoker::loadDefs(const std::string& filePath,
                             bool print,      /* client side, print the defs */
                             bool stats       /* client side, print the defs statistics */
 ) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::loadDefs(filePath, force, check_only, print));
+    }
     Cmd_ptr cmd = LoadDefsCmd::create(filePath, force, check_only, print, stats, &clientEnv_);
     // If check_only cmd will be empty
-    if (cmd)
+    if (cmd) {
         return invoke(cmd);
+    }
     return 0;
 }
 
 int ClientInvoker::restartServer() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::restartServer());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::RESTART_SERVER));
 }
 int ClientInvoker::haltServer() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::haltServer(true /*auto_confirm*/));
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::HALT_SERVER));
 }
 int ClientInvoker::pingServer() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::pingServer());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::PING));
 }
 int ClientInvoker::shutdownServer() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::shutdownServer(true /*auto_confirm*/));
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::SHUTDOWN_SERVER));
 }
 int ClientInvoker::terminateServer() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::terminateServer(true /*auto_confirm*/));
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::TERMINATE_SERVER));
 }
 int ClientInvoker::stats() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::stats());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::STATS));
 }
 int ClientInvoker::stats_server() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::stats_server());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::STATS_SERVER));
 }
 int ClientInvoker::stats_reset() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::stats_reset());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::STATS_RESET));
 }
 int ClientInvoker::suites() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::suites());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::SUITES));
 }
 int ClientInvoker::server_version() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::server_version());
+    }
     return invoke(std::make_shared<ServerVersionCmd>());
 }
 int ClientInvoker::debug_server_on() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::debug_server_on());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_ON));
 }
 int ClientInvoker::debug_server_off() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::debug_server_off());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_OFF));
 }
 
@@ -914,308 +957,361 @@ int ClientInvoker::debug_server_off() const {
 
 int ClientInvoker::ch_register(bool auto_add_new_suites, const std::vector<std::string>& suites) const {
     reset();
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_register(0, auto_add_new_suites, suites));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(0, suites, auto_add_new_suites));
 }
 int ClientInvoker::ch1_register(bool auto_add_new_suites, const std::vector<std::string>& suites) const {
     int client_handle = server_reply_.client_handle();
     reset();
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_register(client_handle, auto_add_new_suites, suites));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(client_handle, suites, auto_add_new_suites));
 }
 
 int ClientInvoker::ch_suites() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_suites());
+    }
     return invoke(std::make_shared<ClientHandleCmd>(ClientHandleCmd::SUITES));
 }
 int ClientInvoker::ch_drop(int client_handle) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_drop(client_handle));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(client_handle));
 }
 int ClientInvoker::ch_drop_user(const std::string& user) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_drop_user(user));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(user));
 }
 int ClientInvoker::ch_add(int client_handle, const std::vector<std::string>& suites) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_add(client_handle, suites));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(client_handle, suites, ClientHandleCmd::ADD));
 }
 int ClientInvoker::ch_remove(int client_handle, const std::vector<std::string>& suites) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_remove(client_handle, suites));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(client_handle, suites, ClientHandleCmd::REMOVE));
 }
 int ClientInvoker::ch_auto_add(int client_handle, bool auto_add_new_suites) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_auto_add(client_handle, auto_add_new_suites));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(client_handle, auto_add_new_suites));
 }
 int ClientInvoker::ch1_drop() const {
-    if (0 == server_reply_.client_handle())
+    if (0 == server_reply_.client_handle()) {
         return 0;
-    if (testInterface_)
+    }
+    if (testInterface_) {
         return invoke(CtsApi::ch_drop(server_reply_.client_handle()));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(server_reply_.client_handle()));
 }
 int ClientInvoker::ch1_add(const std::vector<std::string>& suites) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_add(server_reply_.client_handle(), suites));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(server_reply_.client_handle(), suites, ClientHandleCmd::ADD));
 }
 int ClientInvoker::ch1_remove(const std::vector<std::string>& suites) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_remove(server_reply_.client_handle(), suites));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(server_reply_.client_handle(), suites, ClientHandleCmd::REMOVE));
 }
 int ClientInvoker::ch1_auto_add(bool auto_add_new_suites) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::ch_auto_add(server_reply_.client_handle(), auto_add_new_suites));
+    }
     return invoke(std::make_shared<ClientHandleCmd>(server_reply_.client_handle(), auto_add_new_suites));
 }
 
 // ======================================================================================================
 
 int ClientInvoker::begin(const std::string& suiteName, bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::begin(suiteName, force));
+    }
     return invoke(std::make_shared<BeginCmd>(suiteName, force));
 }
 int ClientInvoker::begin_all_suites(bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::begin("", force));
+    }
     return invoke(std::make_shared<BeginCmd>("", force));
 }
 // ======================================================================================================
 
 int ClientInvoker::zombieGet() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieGet());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::GET_ZOMBIES));
 }
 int ClientInvoker::zombieFob(const Zombie& z) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieFob(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FOB,
                                               std::vector<std::string>(1, z.path_to_task()),
                                               z.process_or_remote_id(),
                                               z.jobs_password()));
 }
 int ClientInvoker::zombieFail(const Zombie& z) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieFail(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FAIL,
                                               std::vector<std::string>(1, z.path_to_task()),
                                               z.process_or_remote_id(),
                                               z.jobs_password()));
 }
 int ClientInvoker::zombieAdopt(const Zombie& z) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieAdopt(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::ADOPT,
                                               std::vector<std::string>(1, z.path_to_task()),
                                               z.process_or_remote_id(),
                                               z.jobs_password()));
 }
 int ClientInvoker::zombieBlock(const Zombie& z) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieBlock(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::BLOCK,
                                               std::vector<std::string>(1, z.path_to_task()),
                                               z.process_or_remote_id(),
                                               z.jobs_password()));
 }
 int ClientInvoker::zombieRemove(const Zombie& z) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieRemove(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::REMOVE,
                                               std::vector<std::string>(1, z.path_to_task()),
                                               z.process_or_remote_id(),
                                               z.jobs_password()));
 }
 int ClientInvoker::zombieKill(const Zombie& z) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieKill(
             std::vector<std::string>(1, z.path_to_task()), z.process_or_remote_id(), z.jobs_password()));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::KILL,
                                               std::vector<std::string>(1, z.path_to_task()),
                                               z.process_or_remote_id(),
                                               z.jobs_password()));
 }
 int ClientInvoker::zombieFobCli(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieFobCli(absNodePath));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FOB, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieFailCli(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieFailCli(absNodePath));
+    }
     return invoke(
         std::make_shared<ZombieCmd>(ZombieCtrlAction::FAIL, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieAdoptCli(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieAdoptCli(absNodePath));
+    }
     return invoke(
         std::make_shared<ZombieCmd>(ZombieCtrlAction::ADOPT, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieBlockCli(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieBlockCli(absNodePath));
+    }
     return invoke(
         std::make_shared<ZombieCmd>(ZombieCtrlAction::BLOCK, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieRemoveCli(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieRemoveCli(absNodePath));
+    }
     return invoke(
         std::make_shared<ZombieCmd>(ZombieCtrlAction::REMOVE, std::vector<std::string>(1, absNodePath), "", ""));
 }
 int ClientInvoker::zombieKillCli(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieKillCli(absNodePath));
+    }
     return invoke(
         std::make_shared<ZombieCmd>(ZombieCtrlAction::KILL, std::vector<std::string>(1, absNodePath), "", ""));
 }
 
 int ClientInvoker::zombieFobCliPaths(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieFobCli(paths));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FOB, paths, "", ""));
 }
 int ClientInvoker::zombieFailCliPaths(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieFailCli(paths));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::FAIL, paths, "", ""));
 }
 int ClientInvoker::zombieAdoptCliPaths(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieAdoptCli(paths));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::ADOPT, paths, "", ""));
 }
 int ClientInvoker::zombieBlockCliPaths(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieBlockCli(paths));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::BLOCK, paths, "", ""));
 }
 int ClientInvoker::zombieRemoveCliPaths(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieRemoveCli(paths));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::REMOVE, paths, "", ""));
 }
 int ClientInvoker::zombieKillCliPaths(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::zombieKillCli(paths));
+    }
     return invoke(std::make_shared<ZombieCmd>(ZombieCtrlAction::KILL, paths, "", ""));
 }
 
 // ======================================================================================================
 
 int ClientInvoker::job_gen(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::job_gen(absNodePath));
+    }
     return invoke(std::make_shared<CtsNodeCmd>(CtsNodeCmd::JOB_GEN, absNodePath));
 }
 
 int ClientInvoker::edit_history(const std::string& path) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::edit_history(path));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::EDIT_HISTORY, path));
 }
 int ClientInvoker::kill(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::kill(paths));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::KILL, paths));
 }
 int ClientInvoker::kill(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::kill(absNodePath));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::KILL, absNodePath));
 }
 int ClientInvoker::status(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::status(paths));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::STATUS, paths));
 }
 int ClientInvoker::status(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::status(absNodePath));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::STATUS, absNodePath));
 }
 int ClientInvoker::suspend(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::suspend(paths));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, paths));
 }
 int ClientInvoker::suspend(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::suspend(absNodePath));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::SUSPEND, absNodePath));
 }
 int ClientInvoker::resume(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::resume(paths));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::RESUME, paths));
 }
 int ClientInvoker::resume(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::resume(absNodePath));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::RESUME, absNodePath));
 }
 int ClientInvoker::check(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::check(paths));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::CHECK, paths));
 }
 int ClientInvoker::check(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::check(absNodePath));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::CHECK, absNodePath));
 }
 int ClientInvoker::delete_nodes(const std::vector<std::string>& paths, bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::delete_node(paths, force, true /*auto_confirm*/));
+    }
     return invoke(std::make_shared<DeleteCmd>(paths, force));
 }
 int ClientInvoker::delete_node(const std::string& absNodePath, bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::delete_node(absNodePath, force, true /*auto_confirm*/));
+    }
     return invoke(std::make_shared<DeleteCmd>(absNodePath, force));
 }
 int ClientInvoker::delete_all(bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::delete_node(std::vector<std::string>(), force));
+    }
     return invoke(std::make_shared<DeleteCmd>(std::vector<std::string>(), force));
 }
 
 int ClientInvoker::archive(const std::vector<std::string>& paths, bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::archive(paths, force));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::ARCHIVE, paths, force));
 }
 int ClientInvoker::archive(const std::string& absNodePath, bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::archive(absNodePath, force));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::ARCHIVE, absNodePath, force));
 }
 int ClientInvoker::restore(const std::vector<std::string>& paths) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::restore(paths));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::RESTORE, paths));
 }
 int ClientInvoker::restore(const std::string& absNodePath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::restore(absNodePath));
+    }
     return invoke(std::make_shared<PathsCmd>(PathsCmd::RESTORE, absNodePath));
 }
 
@@ -1225,8 +1321,9 @@ int ClientInvoker::replace(const std::string& absNodePath,
                            const std::string& path_to_client_defs,
                            bool create_parents_as_required,
                            bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::replace(absNodePath, path_to_client_defs, create_parents_as_required, force));
+    }
 
     /// *Note* server_reply_.client_handle_ is kept until the next call to register_client_handle
     /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
@@ -1242,8 +1339,9 @@ int ClientInvoker::replace(const std::string& absNodePath,
         std::stringstream ss;
         ss << "ClientInvoker::replace(" << absNodePath << "," << path_to_client_defs << ", ...) failed: " << e.what();
         server_reply_.set_error_msg(ss.str());
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
         return 1;
     }
 
@@ -1267,8 +1365,9 @@ int ClientInvoker::replace_1(const std::string& absNodePath,
         std::stringstream ss;
         ss << "ClientInvoker::replace_1(" << absNodePath << " ...) failed: " << e.what();
         server_reply_.set_error_msg(ss.str());
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
         return 1;
     }
 
@@ -1276,15 +1375,18 @@ int ClientInvoker::replace_1(const std::string& absNodePath,
 }
 
 int ClientInvoker::requeue(const std::vector<std::string>& paths, const std::string& option) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::requeue(paths, option));
+    }
 
     RequeueNodeCmd::Option the_option = RequeueNodeCmd::NO_OPTION;
     if (!option.empty()) {
-        if (option == "abort")
+        if (option == "abort") {
             the_option = RequeueNodeCmd::ABORT;
-        else if (option == "force")
+        }
+        else if (option == "force") {
             the_option = RequeueNodeCmd::FORCE;
+        }
         else {
             server_reply_.set_error_msg("ClientInvoker::requeue: Expected option = [ force | abort ]");
             if (on_error_throw_exception_) {
@@ -1297,19 +1399,23 @@ int ClientInvoker::requeue(const std::vector<std::string>& paths, const std::str
 }
 
 int ClientInvoker::requeue(const std::string& absNodePath, const std::string& option) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::requeue(absNodePath, option));
+    }
 
     RequeueNodeCmd::Option the_option = RequeueNodeCmd::NO_OPTION;
     if (!option.empty()) {
-        if (option == "abort")
+        if (option == "abort") {
             the_option = RequeueNodeCmd::ABORT;
-        else if (option == "force")
+        }
+        else if (option == "force") {
             the_option = RequeueNodeCmd::FORCE;
+        }
         else {
             server_reply_.set_error_msg("ClientInvoker::requeue: Expected option = [ force | abort ]");
-            if (on_error_throw_exception_)
+            if (on_error_throw_exception_) {
                 throw std::runtime_error(server_reply_.error_msg());
+            }
             return 1;
         }
     }
@@ -1317,24 +1423,28 @@ int ClientInvoker::requeue(const std::string& absNodePath, const std::string& op
 }
 
 int ClientInvoker::run(const std::vector<std::string>& paths, bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::run(paths, force));
+    }
     return invoke(std::make_shared<RunNodeCmd>(paths, force));
 }
 int ClientInvoker::run(const std::string& absNodePath, bool force) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::run(absNodePath, force));
+    }
     return invoke(std::make_shared<RunNodeCmd>(absNodePath, force));
 }
 int ClientInvoker::order(const std::string& absNodePath, const std::string& order) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::order(absNodePath, order));
+    }
 
     if (!NOrder::isValid(order)) {
         server_reply_.set_error_msg(
             "ClientInvoker::order: please specify one of [ top, bottom, alpha, order, up, down, runtime ]\n");
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
         return 1;
     }
     return invoke(std::make_shared<OrderNodeCmd>(absNodePath, NOrder::toOrder(order)));
@@ -1346,13 +1456,15 @@ int ClientInvoker::order(const std::string& absNodePath, NOrder::Order order) co
 // ======================================================================================================
 
 int ClientInvoker::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::checkPtDefs(m, check_pt_interval, check_pt_save_time_alarm));
+    }
     return invoke(std::make_shared<CheckPtCmd>(m, check_pt_interval, check_pt_save_time_alarm));
 }
 int ClientInvoker::restoreDefsFromCheckPt() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::restoreDefsFromCheckPt());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::RESTORE_DEFS_FROM_CHECKPT));
 }
 
@@ -1360,16 +1472,18 @@ int ClientInvoker::force(const std::string& absNodePath,
                          const std::string& state_or_event,
                          bool recursive,
                          bool set_repeats_to_last_value) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::force(absNodePath, state_or_event, recursive, set_repeats_to_last_value));
+    }
     return invoke(std::make_shared<ForceCmd>(absNodePath, state_or_event, recursive, set_repeats_to_last_value));
 }
 int ClientInvoker::force(const std::vector<std::string>& paths,
                          const std::string& state_or_event,
                          bool recursive,
                          bool set_repeats_to_last_value) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::force(paths, state_or_event, recursive, set_repeats_to_last_value));
+    }
     return invoke(std::make_shared<ForceCmd>(paths, state_or_event, recursive, set_repeats_to_last_value));
 }
 
@@ -1378,21 +1492,24 @@ int ClientInvoker::freeDep(const std::vector<std::string>& paths,
                            bool all,
                            bool date,
                            bool the_time) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::freeDep(paths, trigger, all, date, the_time));
+    }
     return invoke(std::make_shared<FreeDepCmd>(paths, trigger, all, date, the_time));
 }
 int ClientInvoker::freeDep(const std::string& absNodePath, bool trigger, bool all, bool date, bool the_time) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::freeDep(absNodePath, trigger, all, date, the_time));
+    }
     return invoke(std::make_shared<FreeDepCmd>(absNodePath, trigger, all, date, the_time));
 }
 
 int ClientInvoker::file(const std::string& absNodePath,
                         const std::string& fileType,
                         const std::string& max_lines) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::file(absNodePath, fileType, max_lines));
+    }
 
     /// Handle command constructors that can throw
     Cmd_ptr cts_cmd;
@@ -1413,16 +1530,18 @@ int ClientInvoker::file(const std::string& absNodePath,
 }
 
 int ClientInvoker::plug(const std::string& sourcePath, const std::string& destPath) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::plug(sourcePath, destPath));
+    }
     return invoke(std::make_shared<PlugCmd>(sourcePath, destPath));
 }
 
 int ClientInvoker::query(const std::string& query_type,
                          const std::string& path_to_attribute,
                          const std::string& attribute) {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::query(query_type, path_to_attribute, attribute));
+    }
     return invoke(std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, clientEnv_.task_path()));
 }
 
@@ -1446,8 +1565,9 @@ int ClientInvoker::alter(const std::vector<std::string>& paths,
         std::stringstream ss;
         ss << "ClientInvoker::alter failed: " << e.what();
         server_reply_.set_error_msg(ss.str());
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
         return 1;
     }
     return invoke(cts_cmd);
@@ -1471,8 +1591,9 @@ int ClientInvoker::alter(const std::string& path,
         std::stringstream ss;
         ss << "ClientInvoker::alter failed: " << e.what();
         server_reply_.set_error_msg(ss.str());
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
         return 1;
     }
     return invoke(cts_cmd);
@@ -1481,58 +1602,68 @@ int ClientInvoker::alter(const std::string& path,
 int ClientInvoker::alter_sort(const std::vector<std::string>& paths,
                               const std::string& sortable_attribute_name,
                               bool recursive) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::alter_sort(paths, sortable_attribute_name, recursive));
+    }
     std::string value;
-    if (recursive)
+    if (recursive) {
         value = "recursive";
+    }
     return invoke(std::make_shared<AlterCmd>(paths, sortable_attribute_name, value));
 }
 int ClientInvoker::alter_sort(const std::string& path,
                               const std::string& sortable_attribute_name,
                               bool recursive) const {
-    if (testInterface_)
+    if (testInterface_) {
         invoke(CtsApi::alter_sort(std::vector<std::string>(1, path), sortable_attribute_name, recursive));
+    }
     std::string value;
-    if (recursive)
+    if (recursive) {
         value = "recursive";
+    }
     return invoke(std::make_shared<AlterCmd>(std::vector<std::string>(1, path), sortable_attribute_name, value));
 }
 
 // ======================================================================================================
 
 int ClientInvoker::reloadwsfile() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::reloadwsfile());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::RELOAD_WHITE_LIST_FILE));
 }
 
 int ClientInvoker::reloadpasswdfile() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::reloadpasswdfile());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::RELOAD_PASSWD_FILE));
 }
 
 int ClientInvoker::reloadcustompasswdfile() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::reloadcustompasswdfile());
+    }
     return invoke(std::make_shared<CtsCmd>(CtsCmd::RELOAD_CUSTOM_PASSWD_FILE));
 }
 
 int ClientInvoker::group(const std::string& groupRequest) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::group(groupRequest));
+    }
     return invoke(std::make_shared<GroupCTSCmd>(groupRequest, &clientEnv_));
 }
 
 int ClientInvoker::logMsg(const std::string& msg) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::logMsg(msg));
+    }
     return invoke(std::make_shared<LogMessageCmd>(msg));
 }
 int ClientInvoker::new_log(const std::string& new_path) const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::new_log(new_path));
+    }
 
     /// Handle command constructors that can throw
     Cmd_ptr cts_cmd;
@@ -1541,32 +1672,38 @@ int ClientInvoker::new_log(const std::string& new_path) const {
     }
     catch (std::exception& e) {
         server_reply_.set_error_msg(e.what());
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
         return 1;
     }
     return invoke(cts_cmd);
 }
 int ClientInvoker::getLog(int lastLines) const {
-    if (lastLines == 0)
+    if (lastLines == 0) {
         lastLines = Log::get_last_n_lines_default();
-    if (testInterface_)
+    }
+    if (testInterface_) {
         return invoke(CtsApi::getLog(lastLines));
+    }
     return invoke(std::make_shared<LogCmd>(LogCmd::GET, lastLines));
 }
 int ClientInvoker::clearLog() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::clearLog());
+    }
     return invoke(std::make_shared<LogCmd>(LogCmd::CLEAR));
 }
 int ClientInvoker::flushLog() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::flushLog());
+    }
     return invoke(std::make_shared<LogCmd>(LogCmd::FLUSH));
 }
 int ClientInvoker::get_log_path() const {
-    if (testInterface_)
+    if (testInterface_) {
         return invoke(CtsApi::get_log_path());
+    }
     return invoke(std::make_shared<LogCmd>(LogCmd::PATH));
 }
 
@@ -1669,8 +1806,9 @@ int ClientInvoker::load_in_memory_defs(const defs_ptr& clientDefs, bool force) c
 
     if (!clientDefs.get()) {
         server_reply_.set_error_msg("The client definition is empty.");
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
         return 1;
     }
 
@@ -1679,8 +1817,9 @@ int ClientInvoker::load_in_memory_defs(const defs_ptr& clientDefs, bool force) c
     // Don't allow defs to be loaded into server, with trigger parser errors.
     std::string warningMsg;
     if (!clientDefs->check(server_reply_.get_error_msg(), warningMsg)) {
-        if (on_error_throw_exception_)
+        if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
+        }
         return 1;
     }
 
@@ -1694,14 +1833,18 @@ void ClientInvoker::check_child_parameters() const {
         std::cout << "  child_task_pid = '" << clientEnv_.process_or_remote_id() << "'\n";
         std::cout << "  child_task_try_no = " << clientEnv_.task_try_no() << "\n";
     }
-    if (clientEnv_.task_path().empty())
+    if (clientEnv_.task_path().empty()) {
         throw std::runtime_error("Child Path not set");
-    if (clientEnv_.jobs_password().empty())
+    }
+    if (clientEnv_.jobs_password().empty()) {
         throw std::runtime_error("Child password not set");
-    if (clientEnv_.process_or_remote_id().empty())
+    }
+    if (clientEnv_.process_or_remote_id().empty()) {
         throw std::runtime_error("Child pid not set");
-    if (clientEnv_.task_try_no() == 0)
+    }
+    if (clientEnv_.task_try_no() == 0) {
         throw std::runtime_error("Child try_no not set");
+    }
 }
 
 void ClientInvoker::child_init() {
@@ -1736,8 +1879,9 @@ void ClientInvoker::child_event(const std::string& event_name_or_number, bool ev
 }
 
 void ClientInvoker::child_meter(const std::string& meter_name, int meter_value) {
-    if (meter_name.empty())
+    if (meter_name.empty()) {
         throw std::runtime_error("Meter name not set");
+    }
     check_child_parameters();
     on_error_throw_exception_ = true; // for python always throw exception
     invoke(std::make_shared<MeterCmd>(clientEnv_.task_path(),
@@ -1749,8 +1893,9 @@ void ClientInvoker::child_meter(const std::string& meter_name, int meter_value) 
 }
 
 void ClientInvoker::child_label(const std::string& label_name, const std::string& label_value) {
-    if (label_name.empty())
+    if (label_name.empty()) {
         throw std::runtime_error("Label name not set");
+    }
     check_child_parameters();
     on_error_throw_exception_ = true; // for python always throw exception
     invoke(std::make_shared<LabelCmd>(clientEnv_.task_path(),
@@ -1775,10 +1920,12 @@ std::string ClientInvoker::child_queue(const std::string& queue_name,
                                        const std::string& action,
                                        const std::string& step,
                                        const std::string& path_to_node_with_queue) {
-    if (queue_name.empty())
+    if (queue_name.empty()) {
         throw std::runtime_error("ClientInvoker::child_queue: Queue name not set");
-    if (action.empty())
+    }
+    if (action.empty()) {
         throw std::runtime_error("ClientInvoker::child_queue: action not set");
+    }
     check_child_parameters();
     on_error_throw_exception_ = true; // for python always throw exception
     invoke(std::make_shared<QueueCmd>(clientEnv_.task_path(),

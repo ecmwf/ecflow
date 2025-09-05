@@ -44,10 +44,12 @@ void DefsCmd::init(AbstractServer* as, bool save_edit_history) {
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<DefsCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (!ServerToClientCmd::equals(rhs))
+    }
+    if (!ServerToClientCmd::equals(rhs)) {
         return false;
+    }
     return true;
 }
 
@@ -57,9 +59,10 @@ std::string DefsCmd::print() const {
 
 // Called in client
 bool DefsCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  DefsCmd::handle_server_response show_state = " << PrintStyle::to_string(cts_cmd->show_style())
                   << "\n";
+    }
 
     // If we asked for the defs node tree from the server, then this is what we should have got back.
     // ** Keep existing defs in memory, until a new one is requested. This allows clients

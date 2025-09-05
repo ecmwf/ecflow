@@ -37,8 +37,9 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_empty_server) {
 
     std::vector<std::string> suite_names;
     suite_names.reserve(5);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 5; i++) {
         suite_names.push_back("s" + ecf::convert_to<std::string>(i));
+    }
 
     defs_ptr new_defs = Defs::create();
 
@@ -91,12 +92,14 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register_and_drop) {
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 5; i++) {
         suite_names.push_back("s" + ecf::convert_to<std::string>(i));
+    }
 
     Defs defs;
-    for (const auto& suite_name : suite_names)
+    for (const auto& suite_name : suite_names) {
         defs.addSuite(Suite::create(suite_name));
+    }
 
     // Register new handle
     for (size_t j = 0; j < suite_names.size(); j++) {
@@ -124,12 +127,14 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register__with_drop) {
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 5; i++) {
         suite_names.push_back("s" + ecf::convert_to<std::string>(i));
+    }
 
     Defs defs;
-    for (const auto& suite_name : suite_names)
+    for (const auto& suite_name : suite_names) {
         defs.addSuite(Suite::create(suite_name));
+    }
 
     // Register new handle
     for (size_t j = 0; j < suite_names.size(); j++) {
@@ -168,12 +173,14 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 5; i++) {
         suite_names.push_back("s" + std::to_string(i));
+    }
 
     Defs defs;
-    for (const auto& suite_name : suite_names)
+    for (const auto& suite_name : suite_names) {
         defs.addSuite(Suite::create(suite_name));
+    }
 
     // Register new handle, with no suites, but with auto add new suites
     std::vector<std::string> names;
@@ -194,10 +201,12 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
 
     // now add new suite, they should get added to the new client handles
     names.clear();
-    for (int i = 5; i < 10; i++)
+    for (int i = 5; i < 10; i++) {
         names.push_back("s" + std::to_string(i));
-    for (const auto& name : names)
+    }
+    for (const auto& name : names) {
         defs.addSuite(Suite::create(name));
+    }
 
     std::vector<ecf::ClientSuites> clientSuites = defs.client_suite_mgr().clientSuites();
     std::vector<std::string> handle_suites;
@@ -226,12 +235,14 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_add_remove) {
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 5; i++) {
         suite_names.push_back("s" + std::to_string(i));
+    }
 
     defs_ptr defs = Defs::create();
-    for (const auto& suite_name : suite_names)
+    for (const auto& suite_name : suite_names) {
         defs->addSuite(Suite::create(suite_name));
+    }
     std::vector<std::string> empty_vec;
 
     // Register new handle, with no suites,
@@ -296,8 +307,9 @@ static bool check_ordering(Defs& defs) {
     // make sure order of suites in handles is the same as server order
     const std::vector<suite_ptr>& suite_vec = defs.suiteVec();
     std::vector<std::string> suite_names;
-    for (const auto& i : suite_vec)
+    for (const auto& i : suite_vec) {
         suite_names.push_back(i->name());
+    }
 
     // Drop the handles. take a copy, since we about to delete clientSuites
     std::vector<ecf::ClientSuites> clientSuites = defs.client_suite_mgr().clientSuites();
@@ -305,8 +317,9 @@ static bool check_ordering(Defs& defs) {
         std::vector<std::string> names;
         names.reserve(6);
         clientSuite.suites(names);
-        if (names != suite_names)
+        if (names != suite_names) {
             return false;
+        }
     }
     return true;
 }
@@ -317,12 +330,14 @@ BOOST_AUTO_TEST_CASE(test_client_handle_suite_ordering) {
 
     std::vector<std::string> suite_names;
     suite_names.reserve(6);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 5; i++) {
         suite_names.push_back("s" + ecf::convert_to<std::string>(i));
+    }
 
     Defs defs;
-    for (const auto& suite_name : suite_names)
+    for (const auto& suite_name : suite_names) {
         defs.addSuite(Suite::create(suite_name));
+    }
 
     // Register 3 new handle
     TestHelper::invokeRequest(

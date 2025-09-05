@@ -39,8 +39,9 @@ void TriggeredScanner::scan(VNode* n) {
 
     updateProgress();
 
-    for (int i = 0; i < n->numOfChildren(); i++)
+    for (int i = 0; i < n->numOfChildren(); i++) {
         scan(n->childAt(i));
+    }
 }
 
 void TriggeredScanner::updateProgress() {

@@ -78,8 +78,9 @@ static bool wait_for_state(std::vector<std::pair<std::string, NState::State>>& p
                 break;
             }
         }
-        if (all_states_ok)
+        if (all_states_ok) {
             return true;
+        }
 
         // make sure test does not take too long.
         if (assertTimer.duration() >= assertTimer.timeConstraint()) {

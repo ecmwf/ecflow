@@ -312,8 +312,9 @@ void OutputFileProvider::fetchFile(const std::string& fileName, size_t deltaPos,
 
     // If we do not want to use the cache we detach all the output
     // attached to this instance
-    if (!useCache)
+    if (!useCache) {
         outCache_->detach();
+    }
 
     // Check if the task is already running
     if (task_) {
@@ -348,8 +349,9 @@ void OutputFileProvider::fetchFileInternal(ServerHandler* server,
 
     // If we do not want to use the cache we detach all the output
     // attached to this instance
-    if (!useCache)
+    if (!useCache) {
         outCache_->detach();
+    }
 
     if (!n || !n->node() || !server) {
         owner_->infoFailed(reply_);
@@ -388,13 +390,15 @@ void OutputFileProvider::fetchFileInternal(ServerHandler* server,
     //----------------------------------
 
     if (isJobout) {
-        if (n->isSubmitted())
+        if (n->isSubmitted()) {
             reply_->addLogRemarkEntry(
                 "This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>), but \
                   because the node status is <b>submitted</b> it may contain the output from a previous run!");
-        else
+        }
+        else {
             reply_->addLogRemarkEntry(
                 "This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
+        }
     }
     else {
         reply_->addLogRemarkEntry(
@@ -423,8 +427,9 @@ void OutputFileProvider::fetchFileForModeInternal(const std::string& fileName,
 
     // If we do not want to use the cache we detach all the output
     // attached to this instance
-    if (!useCache)
+    if (!useCache) {
         outCache_->detach();
+    }
 
     // Check if the task is already running
     if (task_) {
@@ -552,12 +557,14 @@ void OutputFileProvider::setDirectories(const std::vector<VDir_ptr>& dirs) {
 VDir_ptr OutputFileProvider::dirToFile(const std::string& fileName) const {
     VDir_ptr dir;
 
-    if (fileName.empty())
+    if (fileName.empty()) {
         return dir;
+    }
 
     for (const auto& dir : dirs_) {
-        if (dir && fileName.find(dir->path()) == 0)
+        if (dir && fileName.find(dir->path()) == 0) {
             return dir;
+        }
     }
     return dir;
 }

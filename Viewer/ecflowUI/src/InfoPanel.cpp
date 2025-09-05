@@ -94,8 +94,9 @@ InfoPanel::~InfoPanel() {
 
     delete prop_;
 
-    Q_FOREACH (InfoPanelItemHandler* d, items_)
+    Q_FOREACH (InfoPanelItemHandler* d, items_) {
         delete d;
+    }
 }
 
 QMenu* InfoPanel::buildOptionsMenu() {
@@ -206,8 +207,9 @@ bool InfoPanel::reset(VInfo_ptr info) {
     if (info_ && info) {
         // UiLog().dbg() << "path: " << info_->path() << " " << info->path();
 
-        if (*(info_.get()) == *(info.get()))
+        if (*(info_.get()) == *(info.get())) {
             return false;
+        }
 
         // it can happen that the stored info was not yet updated after a
         // server reload. If there is chance for it we try to regain its data and
@@ -215,8 +217,9 @@ bool InfoPanel::reset(VInfo_ptr info) {
         else if (info_->server() == info->server() && info_->storedNodePath() == info->storedNodePath() &&
                  !info_->node() && info->node()) {
             info_->regainData();
-            if (info_->node() == info->node())
+            if (info_->node() == info->node()) {
                 return false;
+            }
         }
     }
 
@@ -244,8 +247,9 @@ bool InfoPanel::reloadCore(VInfo_ptr info) {
 
     // When the mode is detached it cannot receive
     // the reload request
-    if (info_ && detached())
+    if (info_ && detached()) {
         return retVal;
+    }
 
     if (info && info->isAttribute()) {
         retVal = reset(VInfo::createParent(info));
@@ -266,15 +270,17 @@ void InfoPanel::slotReloadFromBc(VInfo_ptr info) {
     lastBroadcastInfo_ = info;
 
     reset(info);
-    if (info_)
+    if (info_) {
         Q_EMIT selectionChanged(info_);
+    }
 }
 
 void InfoPanel::linkSelected(VInfo_ptr info) {
     // Here info can be an attribute!
     slotReload(info);
-    if (info_ && info)
+    if (info_ && info) {
         Q_EMIT selectionChanged(info);
+    }
 }
 
 // Set the new VInfo object.
@@ -350,8 +356,9 @@ void InfoPanel::adjustTabs(VInfo_ptr info) {
                 d->item()->setActive(false);
             }
 
-            if (d->match(ids))
+            if (d->match(ids)) {
                 match++;
+            }
         }
     }
 
@@ -408,32 +415,37 @@ void InfoPanel::adjustTabs(VInfo_ptr info) {
     // We reload the current tab
     if (currentItem) {
         currentItem->setSelected(true, info);
-        if (info_ && currentItem->keepServerDataOnLoad())
+        if (info_ && currentItem->keepServerDataOnLoad()) {
             currentItem->notifyInfoChanged(info_->nodePath());
+        }
 
         // currentItem->reload(info);
     }
 }
 
 InfoPanelItem* InfoPanel::findItem(QWidget* w) {
-    if (!w)
+    if (!w) {
         return nullptr;
+    }
 
     Q_FOREACH (InfoPanelItemHandler* d, items_) {
-        if (d->widget() == w)
+        if (d->widget() == w) {
             return d->item();
+        }
     }
 
     return nullptr;
 }
 
 InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w) {
-    if (!w)
+    if (!w) {
         return nullptr;
+    }
 
     Q_FOREACH (InfoPanelItemHandler* d, items_) {
-        if (d->widget() == w)
+        if (d->widget() == w) {
             return d;
+        }
     }
 
     return nullptr;
@@ -441,8 +453,9 @@ InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w) {
 
 InfoPanelItemHandler* InfoPanel::findHandler(InfoPanelDef* def) {
     Q_FOREACH (InfoPanelItemHandler* d, items_) {
-        if (d->def() == def)
+        if (d->def() == def) {
             return d;
+        }
     }
 
     return createHandler(def);
@@ -468,11 +481,13 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def) {
 
 // We clicked on another tab
 void InfoPanel::slotCurrentWidgetChanged(int idx) {
-    if (tabBeingCleared_ || tabBeingAdjusted_)
+    if (tabBeingCleared_ || tabBeingAdjusted_) {
         return;
+    }
 
-    if (!info_.get())
+    if (!info_.get()) {
         return;
+    }
 
     if (InfoPanelItem* current = findItem(tab_->widget(idx))) {
         current->setSelected(true, info_);
@@ -484,8 +499,9 @@ void InfoPanel::slotCurrentWidgetChanged(int idx) {
         // Deselect the others
         for (int i = 0; i < tab_->count(); i++) {
             if (InfoPanelItemHandler* d = findHandler(tab_->widget(i))) {
-                if (d->item() != current)
+                if (d->item() != current) {
                     d->item()->setSelected(false, info_);
+                }
             }
         }
     }
@@ -570,8 +586,9 @@ bool InfoPanel::frozen() const {
 void InfoPanel::updateTitle() {
     if (isInDialog()) {
         QString txt;
-        if (frozen())
+        if (frozen()) {
             txt += "(frozen) ";
+        }
 
         if (info_) {
             txt += QString::fromStdString(info_->path());
@@ -600,8 +617,9 @@ void InfoPanel::notifyDataLost(VInfo* info) {
 //-------------------------------------------------
 
 void InfoPanel::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& aspect) {
-    if (frozen())
+    if (frozen()) {
         return;
+    }
 
     if (info_) {
         if (info_->server() && info_->server() == server) {
@@ -650,8 +668,9 @@ void InfoPanel::notifyEndServerScan(ServerHandler* server) {
 
             // If the info is not available dataLost() might have already been called and
             // the panel was reset!
-            if (!info_)
+            if (!info_) {
                 return;
+            }
 
             Q_ASSERT(info_->server() && info_->node());
 
@@ -664,8 +683,9 @@ void InfoPanel::notifyEndServerScan(ServerHandler* server) {
 }
 
 void InfoPanel::notifyServerConnectState(ServerHandler* server) {
-    if (frozen())
+    if (frozen()) {
         return;
+    }
 
     if (info_) {
         if (info_->server() && info_->server() == server) {
@@ -679,8 +699,9 @@ void InfoPanel::notifyServerConnectState(ServerHandler* server) {
 
 void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server) {
     // TODO: does frozen make sense in this case?
-    if (frozen())
+    if (frozen()) {
         return;
+    }
 
     if (info_) {
         if (info_->server() && info_->server() == server) {
@@ -694,8 +715,9 @@ void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server) {
 
 void InfoPanel::notifyEndServerSync(ServerHandler* server) {
     // TODO: does frozen make sense in this case?
-    if (frozen())
+    if (frozen()) {
         return;
+    }
 
     if (info_) {
         if (info_->server() && info_->server() == server) {
@@ -725,8 +747,9 @@ void InfoPanel::writeSettings(VComboSettings* vs) {
     DashboardWidget::writeSettings(vs);
 
     Q_FOREACH (InfoPanelItemHandler* d, items_) {
-        if (d->item())
+        if (d->item()) {
             d->item()->writeSettings(vs);
+        }
     }
 }
 
@@ -751,8 +774,9 @@ void InfoPanel::readSettings(VComboSettings* vs) {
     DashboardWidget::readSettings(vs);
 
     Q_FOREACH (InfoPanelItemHandler* d, items_) {
-        if (d->item())
+        if (d->item()) {
             d->item()->readSettings(vs);
+        }
     }
 }
 

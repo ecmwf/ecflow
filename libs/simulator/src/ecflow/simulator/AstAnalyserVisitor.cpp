@@ -66,10 +66,12 @@ void AstAnalyserVisitor::visitEventState(AstEventState*) {
 
 void AstAnalyserVisitor::visitNode(AstNode* astNode) {
     Node* refNode = astNode->referencedNode();
-    if (refNode)
+    if (refNode) {
         dependentNodes_.insert(refNode);
-    else
+    }
+    else {
         dependentNodePaths_.insert(astNode->nodePath());
+    }
 }
 
 void AstAnalyserVisitor::visitVariable(AstVariable* astVar) {

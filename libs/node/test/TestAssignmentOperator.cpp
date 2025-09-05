@@ -70,14 +70,17 @@ BOOST_AUTO_TEST_CASE(test_suite_assignment_operator) {
     ecf::TimeSlot finish(10, 0);
     ecf::TimeSlot incr(0, 5);
     std::vector<int> weekdays;
-    for (int i = 0; i < 7; ++i)
+    for (int i = 0; i < 7; ++i) {
         weekdays.push_back(i);
+    }
     std::vector<int> daysOfMonth;
-    for (int i = 1; i < 32; ++i)
+    for (int i = 1; i < 32; ++i) {
         daysOfMonth.push_back(i);
+    }
     std::vector<int> months;
-    for (int i = 1; i < 13; ++i)
+    for (int i = 1; i < 13; ++i) {
         months.push_back(i);
+    }
     cronAttr.addTimeSeries(start, finish, incr);
     cronAttr.addWeekDays(weekdays);
     cronAttr.addDaysOfMonth(daysOfMonth);
@@ -125,14 +128,17 @@ BOOST_AUTO_TEST_CASE(test_task_assignment_operator) {
     ecf::TimeSlot finish(10, 0);
     ecf::TimeSlot incr(0, 5);
     std::vector<int> weekdays;
-    for (int i = 0; i < 7; ++i)
+    for (int i = 0; i < 7; ++i) {
         weekdays.push_back(i);
+    }
     std::vector<int> daysOfMonth;
-    for (int i = 1; i < 32; ++i)
+    for (int i = 1; i < 32; ++i) {
         daysOfMonth.push_back(i);
+    }
     std::vector<int> months;
-    for (int i = 1; i < 13; ++i)
+    for (int i = 1; i < 13; ++i) {
         months.push_back(i);
+    }
     cronAttr.addTimeSeries(start, finish, incr);
     cronAttr.addWeekDays(weekdays);
     cronAttr.addDaysOfMonth(daysOfMonth);

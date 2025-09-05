@@ -131,8 +131,9 @@ void HistoryItemWidget::updateState(const ChangeFlags& flags) {
 }
 
 void HistoryItemWidget::checkActionState() {
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     if (infoProvider_->autoUpdate() == frozen_) {
         infoProvider_->setAutoUpdate(!frozen_);

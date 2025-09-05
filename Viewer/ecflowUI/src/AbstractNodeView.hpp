@@ -205,8 +205,9 @@ private:
     QBasicTimer delayedWidth_;
 
     inline bool storeExpanded(const QPersistentModelIndex& idx) {
-        if (expandedIndexes.contains(idx))
+        if (expandedIndexes.contains(idx)) {
             return false;
+        }
         expandedIndexes.insert(idx);
         return true;
     }

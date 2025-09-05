@@ -137,17 +137,19 @@ int ZombieUtil::do_zombie_user_action(ZombieCtrlAction uc,
         }
 
         if (!continue_looping && action_set > 0) {
-            if (expected_action_cnt == 0)
+            if (expected_action_cnt == 0) {
                 break; // return, some clients set this as 0
+            }
         }
 
         // make sure test does not take too long.
         if (assertTimer.duration() >= assertTimer.timeConstraint()) {
 
             if (expected_action_cnt > 0 && action_set > 0) {
-                if (ecf_debug_zombies)
+                if (ecf_debug_zombies) {
                     cout << "   timeing out after action_set = " << action_set
                          << " expected_action_cnt = " << expected_action_cnt << "\n";
+                }
                 break;
             }
 

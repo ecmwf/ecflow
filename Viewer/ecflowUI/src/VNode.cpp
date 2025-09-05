@@ -68,8 +68,9 @@ public:
         if (it != eventData_.end()) {
             VServer* s = node->root();
             for (int i : it->second) {
-                if (VNode* triggeredNode = s->nodeAt(i))
+                if (VNode* triggeredNode = s->nodeAt(i)) {
                     res.push_back(triggeredNode->absNodePath());
+                }
             }
         }
     }
@@ -83,8 +84,9 @@ public:
 
     void add(VItem* triggered, VAttribute* trigger) {
         static VAttributeType* eventType = nullptr;
-        if (!eventType)
+        if (!eventType) {
             eventType = VAttributeType::find("event");
+        }
 
         assert(trigger);
         assert(triggered);
@@ -162,23 +164,28 @@ VNode::VNode(VNode* parent, node_ptr node)
 #endif
       index_(-1),
       data_(nullptr) {
-    if (parent_)
+    if (parent_) {
         parent_->addChild(this);
+    }
 
-    if (node_)
+    if (node_) {
         node_->set_graphic_ptr(this);
+    }
 
     // do not scan for attributes in a server
-    if (parent_)
+    if (parent_) {
         scanAttr();
+    }
 }
 
 VNode::~VNode() {
-    if (data_)
+    if (data_) {
         delete data_;
+    }
 
-    for (auto& i : attr_)
+    for (auto& i : attr_) {
         delete i;
+    }
 }
 
 VServer* VNode::root() const {
@@ -190,13 +197,15 @@ ServerHandler* VNode::server() const {
 }
 
 VNode* VNode::suite() const {
-    if (isTopLevel())
+    if (isTopLevel()) {
         return const_cast<VNode*>(this);
+    }
 
     VNode* p = parent();
     while (p) {
-        if (p->isTopLevel())
+        if (p->isTopLevel()) {
             return p;
+        }
         p = p->parent();
     }
 
@@ -243,13 +252,15 @@ void VNode::scanAttr() {
     VAttributeType::scan(this, v);
     std::size_t n = v.size();
     attr_.reserve(n);
-    for (std::size_t i = 0; i < n; i++)
+    for (std::size_t i = 0; i < n; i++) {
         attr_.push_back(v[i]);
+    }
 }
 
 void VNode::rescanAttr() {
-    for (auto& i : attr_)
+    for (auto& i : attr_) {
         delete i;
+    }
 
     attr_ = std::vector<VAttribute*>();
     scanAttr();
@@ -259,8 +270,9 @@ int VNode::attrNum(AttributeFilter* filter) const {
     if (filter) {
         int n = 0;
         for (auto i : attr_) {
-            if (filter->isSet(i->type()) || filter->forceShowAttr() == i)
+            if (filter->isSet(i->type()) || filter->forceShowAttr() == i) {
                 n++;
+            }
         }
         return n;
     }
@@ -274,8 +286,9 @@ VAttribute* VNode::attribute(int row, AttributeFilter* filter) const {
     if (filter) {
         int n    = 0;
         auto cnt = static_cast<int>(attr_.size());
-        if (row >= cnt)
+        if (row >= cnt) {
             return nullptr;
+        }
 
         for (int i = 0; i < cnt; i++) {
             if (filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i]) {
@@ -297,8 +310,9 @@ VAttribute* VNode::attributeForType(int row, VAttributeType* t) const {
     assert(row >= 0);
 
     auto cnt = static_cast<int>(attr_.size());
-    if (row >= cnt)
+    if (row >= cnt) {
         return nullptr;
+    }
 
     bool hasIt = false;
     int rowCnt = 0;
@@ -324,8 +338,9 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter* filter) const 
         auto cnt = static_cast<int>(attr_.size());
         for (int i = 0; i < cnt; i++) {
             if (filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i]) {
-                if (a == attr_[i])
+                if (a == attr_[i]) {
                     return n;
+                }
 
                 n++;
             }
@@ -334,8 +349,9 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter* filter) const 
     else {
         auto cnt = static_cast<int>(attr_.size());
         for (int i = 0; i < cnt; i++) {
-            if (a == attr_[i])
+            if (a == attr_[i]) {
                 return i;
+            }
         }
     }
 
@@ -355,12 +371,14 @@ VAttribute* VNode::findAttribute(VAttributeType* t, const std::string& name) {
     bool hasType = false;
     for (int i = 0; i < cnt; i++) {
         if (attr_[i]->type() == t) {
-            if (attr_[i]->strName() == name)
+            if (attr_[i]->strName() == name) {
                 return attr_[i];
+            }
             hasType = true;
         }
-        else if (hasType)
+        else if (hasType) {
             return nullptr;
+        }
     }
     return nullptr;
 }
@@ -368,8 +386,9 @@ VAttribute* VNode::findAttribute(VAttributeType* t, const std::string& name) {
 VAttribute* VNode::findAttribute(QStringList aData) {
     std::size_t cnt = attr_.size();
     for (std::size_t i = 0; i < cnt; i++) {
-        if (attr_[i]->sameAs(aData))
+        if (attr_[i]->sameAs(aData)) {
             return attr_[i];
+        }
     }
     return nullptr;
 }
@@ -382,8 +401,9 @@ void VNode::findAttributes(VAttributeType* t, std::vector<VAttribute*>& v) {
             v.push_back(attr_[i]);
             hasType = true;
         }
-        else if (hasType)
+        else if (hasType) {
             return;
+        }
     }
 }
 
@@ -405,8 +425,9 @@ VNode* VNode::childAt(int index) const {
 
 int VNode::indexOfChild(const VNode* vn) const {
     for (unsigned int i = 0; i < children_.size(); i++) {
-        if (children_[i] == vn)
+        if (children_[i] == vn) {
             return i;
+        }
     }
 
     return -1;
@@ -414,8 +435,9 @@ int VNode::indexOfChild(const VNode* vn) const {
 
 int VNode::indexOfChild(node_ptr n) const {
     for (unsigned int i = 0; i < children_.size(); i++) {
-        if (children_[i]->node() == n)
+        if (children_[i]->node() == n) {
             return i;
+        }
     }
 
     return -1;
@@ -423,8 +445,9 @@ int VNode::indexOfChild(node_ptr n) const {
 
 VNode* VNode::findChild(const std::string& name) const {
     for (auto i : children_) {
-        if (i->sameName(name))
+        if (i->sameName(name)) {
             return i;
+        }
     }
     return nullptr;
 }
@@ -447,15 +470,17 @@ void VNode::collectAbortedTasks(std::vector<VNode*>& vec) const {
 
 int VNode::tryNo() const {
     std::string v = genVariable("ECF_TRYNO");
-    if (v.empty())
+    if (v.empty()) {
         return 0;
+    }
 
     return ecf::convert_to<int>(v);
 }
 
 VNode* VNode::find(const std::vector<std::string>& pathVec) {
-    if (pathVec.size() == 0)
+    if (pathVec.size() == 0) {
         return this;
+    }
 
     if (pathVec.size() == 1) {
         return findChild(pathVec.at(0));
@@ -469,15 +494,17 @@ VNode* VNode::find(const std::vector<std::string>& pathVec) {
 
 std::string VNode::genVariable(const std::string& key) const {
     std::string val;
-    if (node_)
+    if (node_) {
         node_->findGenVariableValue(key, val);
+    }
     return val;
 }
 
 std::string VNode::findVariable(const std::string& key, bool substitute) const {
     std::string val;
-    if (!node_)
+    if (!node_) {
         return val;
+    }
 
     // should set the def mutex because variableSubstitution
     // might need information from the defs
@@ -504,8 +531,9 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
 
 std::string VNode::findInheritedVariable(const std::string& key, bool substitute) const {
     std::string val;
-    if (!node_)
+    if (!node_) {
         return val;
+    }
 
     // should set the def mutex because it might need information from the defs
     // but it would be hang the GUI e.g. in the table view
@@ -522,8 +550,9 @@ std::string VNode::findInheritedVariable(const std::string& key, bool substitute
 }
 
 void VNode::collectInheritedVariableNames(std::set<std::string>& vars) const {
-    if (!node_)
+    if (!node_) {
         return;
+    }
 
     std::vector<Variable> v, gv;
     variables(v);
@@ -544,8 +573,9 @@ void VNode::collectInheritedVariableNames(std::set<std::string>& vars) const {
 }
 
 bool VNode::substituteVariableValue(std::string& val) const {
-    if (!node_)
+    if (!node_) {
         return false;
+    }
 
     // should set the def mutex because variableSubstitution
     // might need information from the defs
@@ -553,8 +583,9 @@ bool VNode::substituteVariableValue(std::string& val) const {
 }
 
 int VNode::variablesNum() const {
-    if (node_.get())
+    if (node_.get()) {
         return static_cast<int>(node_->variables().size());
+    }
 
     return 0;
 }
@@ -572,14 +603,16 @@ int VNode::genVariablesNum() const {
 
 void VNode::variables(std::vector<Variable>& vars) const {
     vars.clear();
-    if (node_)
+    if (node_) {
         vars = node_->variables();
+    }
 }
 
 void VNode::genVariables(std::vector<Variable>& genVars) const {
     genVars.clear();
-    if (node_)
+    if (node_) {
         node_->gen_variables(genVars);
+    }
 }
 
 std::string VNode::fullPath() const {
@@ -611,8 +644,9 @@ bool VNode::sameName(const std::string& name) const {
 }
 
 std::string VNode::strName() const {
-    if (node_ && node_.get())
+    if (node_ && node_.get()) {
         return node_->name();
+    }
 
     return {};
     /*
@@ -641,8 +675,9 @@ QString VNode::stateName() {
 }
 
 bool VNode::isDefaultStateComplete() {
-    if (node_)
+    if (node_) {
         return (node_->defStatus() == DState::COMPLETE);
+    }
 
     return false;
 }
@@ -699,8 +734,9 @@ bool VNode::userLogServer(std::string& host, std::string& port) {
 }
 
 bool VNode::logServer(std::string& host, std::string& port) {
-    if (!node_)
+    if (!node_) {
         return false;
+    }
 
     host              = findInheritedVariable("ECF_LOGHOST", true);
     port              = findInheritedVariable("ECF_LOGPORT");
@@ -738,8 +774,9 @@ std::vector<VNode*> VNode::ancestors(SortMode sortMode) {
 }
 
 VNode* VNode::ancestorAt(int idx, SortMode sortMode) {
-    if (sortMode == ChildToParentSort && idx == 0)
+    if (sortMode == ChildToParentSort && idx == 0) {
         return this;
+    }
 
     std::vector<VNode*> nodes = ancestors(sortMode);
     if (static_cast<int>(nodes.size()) > idx) {
@@ -756,20 +793,25 @@ const std::string& VNode::nodeType() {
     static std::string defaultStr("node");
     static std::string serverStr("server");
 
-    if (isServer())
+    if (isServer()) {
         return serverStr;
+    }
 
     node_ptr np = node();
 
-    if (!np || !np.get())
+    if (!np || !np.get()) {
         return defaultStr;
+    }
 
-    if (np->isSuite())
+    if (np->isSuite()) {
         return suiteStr;
-    else if (np->isFamily())
+    }
+    else if (np->isFamily()) {
         return familyStr;
-    else if (np->isTask())
+    }
+    else if (np->isTask()) {
         return taskStr;
+    }
 
     return defaultStr;
 }
@@ -849,8 +891,9 @@ QString VNode::toolTip() {
     txt += "<b>Type</b>: " + QString::fromStdString(nodeType()) + "<br>";
 
     txt += "<b>Status</b>: " + stateName();
-    if (isSuspended())
+    if (isSuspended()) {
         txt += " (" + VNState::toRealStateName(this) + ")";
+    }
 
     txt += "<br>";
     txt += "<b>Default status</b>: " + defaultStateName() + "<br>";
@@ -860,8 +903,9 @@ QString VNode::toolTip() {
     txt += " <b>Port</b>: " + QString::fromStdString(server()->port());
 
     QString rs = QString::fromStdString(abortedReason());
-    if (!rs.isEmpty())
+    if (!rs.isEmpty()) {
         txt += "<br><b>Aborted reason</b>:" + rs;
+    }
 
     return txt;
 }
@@ -890,11 +934,13 @@ void VNode::triggers(TriggerCollector* tlc) {
             AstCollateVNodesVisitor astVisitor(theVec);
 
             // Collect the nodes from ast
-            if (node_->completeAst())
+            if (node_->completeAst()) {
                 node_->completeAst()->accept(astVisitor);
+            }
 
-            if (node_->triggerAst())
+            if (node_->triggerAst()) {
                 node_->triggerAst()->accept(astVisitor);
+            }
 
             // Add the found items to the collector
             for (auto& it : theVec) {
@@ -959,22 +1005,25 @@ void VNode::triggersInChildren(VNode* n, VNode* p, TriggerCollector* tlc) {
 }
 
 void VNode::clearTriggerData() {
-    if (data_)
+    if (data_) {
         delete data_;
+    }
     data_ = nullptr;
 }
 
 // These are called during the scan for triggered nodes
 void VNode::addTriggeredData(VItem* n) {
-    if (!data_)
+    if (!data_) {
         data_ = new VNodeTriggerData;
+    }
 
     data_->add(n);
 }
 
 void VNode::addTriggeredData(VItem* triggered, VAttribute* trigger) {
-    if (!data_)
+    if (!data_) {
         data_ = new VNodeTriggerData;
+    }
 
     assert(trigger->parent() == this);
     data_->add(triggered, trigger);
@@ -990,8 +1039,9 @@ void VNode::triggered(TriggerCollector* tlc, TriggeredScanner* scanner) {
     }
 
     // Get the nodes directly triggered by this node
-    if (data_)
+    if (data_) {
         data_->get(this, tlc);
+    }
 
     if (tlc->scanParents()) {
         VNode* p = parent();
@@ -1026,8 +1076,9 @@ void VNode::triggeredByEvent(const std::string& name,
     }
 
     // Get the nodes directly triggered by this event
-    if (data_)
+    if (data_) {
         data_->getEvent(this, name, triggeredVec);
+    }
 }
 
 VAttribute* VNode::getLimit(const std::string& name) {
@@ -1073,8 +1124,9 @@ const std::string& VAliasNode::typeName() const {
 
 void VNode::print() {
     UiLog().dbg() << name() << " " << children_.size();
-    for (auto& i : children_)
+    for (auto& i : children_) {
         i->print();
+    }
 }
 
 //=================================================
@@ -1097,12 +1149,14 @@ VServer::~VServer() {
 }
 
 int VServer::totalNumOfTopLevel(VNode* n) const {
-    if (!n->isTopLevel())
+    if (!n->isTopLevel()) {
         return -1;
+    }
 
     int idx = indexOfChild(n);
-    if (idx != -1)
+    if (idx != -1) {
         return totalNumOfTopLevel(idx);
+    }
 
     return -1;
 }
@@ -1119,8 +1173,9 @@ int VServer::totalNumOfTopLevel(int idx) const {
 
 int VServer::totalNumOfTopLevel(const std::string& name) const {
     for (size_t i = 0; i < children_.size(); i++) {
-        if (name == children_[i]->strName())
+        if (name == children_[i]->strName()) {
             return totalNumOfTopLevel(i);
+        }
     }
     return -1;
 }
@@ -1131,16 +1186,18 @@ int VServer::totalNumOfTopLevel(const std::string& name) const {
 
 // Clear the whole contents
 void VServer::clear() {
-    if (totalNum_ == 0)
+    if (totalNum_ == 0) {
         return;
+    }
 
     cache_.clear();
     prevNodeState_.clear();
 
     // clear attrubutes
     Q_ASSERT(attr_.empty());
-    for (auto& i : attrForSearch_)
+    for (auto& i : attrForSearch_) {
         delete i;
+    }
 
     attrForSearch_.clear();
 
@@ -1210,8 +1267,9 @@ std::string VServer::genVariable(const std::string& key) const {
     std::string val;
 
     for (const auto& genVar : cache_.genVars_) {
-        if (genVar.name() == key)
+        if (genVar.name() == key) {
             val = genVar.theValue();
+        }
     }
 
     return val;
@@ -1226,11 +1284,13 @@ VNode* VServer::toVNode(const Node* nc) const {
 }
 
 VNode* VServer::find(const std::string& fullPath) {
-    if (fullPath.empty())
+    if (fullPath.empty()) {
         return nullptr;
+    }
 
-    if (fullPath == "/")
+    if (fullPath == "/") {
         return this;
+    }
 
     std::vector<std::string> pathVec;
     ecf::algorithm::split(pathVec, fullPath, "/");
@@ -1249,8 +1309,9 @@ std::string VServer::findVariable(const std::string& key, bool substitute) const
     for (const auto& var : cache_.vars_) {
         if (var.name() == key) {
             val = var.theValue();
-            if (substitute)
+            if (substitute) {
                 substituteVariableValue(val);
+            }
 
             return val;
         }
@@ -1260,8 +1321,9 @@ std::string VServer::findVariable(const std::string& key, bool substitute) const
     for (const auto& genVar : cache_.genVars_) {
         if (genVar.name() == key) {
             val = genVar.theValue();
-            if (substitute)
+            if (substitute) {
                 substituteVariableValue(val);
+            }
 
             return val;
         }
@@ -1275,13 +1337,15 @@ std::string VServer::findInheritedVariable(const std::string& key, bool substitu
 }
 
 bool VServer::substituteVariableValue(std::string& val) const {
-    if (val.empty())
+    if (val.empty()) {
         return false;
+    }
 
     ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
     defs_ptr defs = defsAccess.defs();
-    if (!defs)
+    if (!defs) {
         return false;
+    }
 
     return defs->server_state().variableSubstitution(val);
 }
@@ -1300,8 +1364,9 @@ void VServer::beginScan(VServerChange& /*change*/) {
     {
         ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
         defs_ptr defs = defsAccess.defs();
-        if (!defs)
+        if (!defs) {
             return;
+        }
 
         // We need to update the cached server variables
         updateCache(defs);
@@ -1316,8 +1381,9 @@ void VServer::endScan() {
     {
         ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
         defs_ptr defs = defsAccess.defs();
-        if (!defs)
+        if (!defs) {
             return;
+        }
 
         bool hasNotifications = server_->conf()->notificationsEnabled();
 
@@ -1334,8 +1400,9 @@ void VServer::endScan() {
     if (totalNum_ > 0) {
         nodes_.reserve(totalNum_);
         collect(nodes_);
-        for (size_t i = 0; i < nodes_.size(); i++)
+        for (size_t i = 0; i < nodes_.size(); i++) {
             nodes_[i]->setIndex(i);
+        }
     }
 }
 
@@ -1361,8 +1428,9 @@ void VServer::scan(VNode* node, bool hasNotifications) {
             if (hasNotifications) {
                 std::string path = (*it)->absNodePath();
                 auto itP         = prevNodeState_.find(path);
-                if (itP != prevNodeState_.end())
+                if (itP != prevNodeState_.end()) {
                     vn->check(server_->conf(), itP->second);
+                }
             }
         }
         else if ((*it)->isFamily()) {
@@ -1471,8 +1539,9 @@ void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect) {
 // when server attribute data is needed for the search.
 const std::vector<VAttribute*>& VServer::attrForSearch() {
     Q_ASSERT(attr_.empty());
-    for (auto& i : attrForSearch_)
+    for (auto& i : attrForSearch_) {
         delete i;
+    }
 
     attrForSearch_.clear();
 
@@ -1491,8 +1560,9 @@ void VServer::suites(std::vector<std::string>& sv) {
 }
 
 std::string VServer::strName() const {
-    if (server_)
+    if (server_) {
         return server_->name();
+    }
 
     return {};
 
@@ -1543,8 +1613,9 @@ QColor VServer::stateFontColour() const {
 void VServer::why(std::vector<std::string>& theReasonWhy) const {
     ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
     defs_ptr defs = defsAccess.defs();
-    if (!defs)
+    if (!defs) {
         return;
+    }
 
     defs->why(theReasonWhy, true);
 }
@@ -1563,8 +1634,9 @@ QString VServer::logOrCheckpointError() const {
         s = findVariable("ECF_LOG_ERROR", true);
     }
     if (isFlagSet(ecf::Flag::CHECKPT_ERROR)) {
-        if (!s.empty())
+        if (!s.empty()) {
             s += " ";
+        }
         s += findVariable("ECF_CHECKPT_ERROR", true);
     }
     return QString::fromStdString(s);
@@ -1575,8 +1647,9 @@ void VServer::updateCache() {
 
     ServerDefsAccess defsAccess(server_); // will reliquish its resources on destruction
     defs_ptr defs = defsAccess.defs();
-    if (!defs)
+    if (!defs) {
         return;
+    }
 
     updateCache(defs);
 }
@@ -1622,8 +1695,9 @@ QString VServer::toolTip() {
             txt += "<b><font color=" + colErr.name() + ">Failed to connect to server!</b><br>";
             txt += "<b>Last connection</b>: " + VFileInfo::formatDateAgo(st->lastConnectTime()) + "<br>";
             txt += "<b>Last failed attempt</b>: " + VFileInfo::formatDateAgo(st->lastLostTime()) + "<br>";
-            if (!st->errorMessage().empty())
+            if (!st->errorMessage().empty()) {
                 txt += "<b>Error message</b>:<br>" + QString::fromStdString(st->shortErrorMessage());
+            }
         }
         else if (st->state() == ConnectState::Disconnected) {
             txt += "<b><font color=" + colErr.name() + ">Server is disconnected!</b><br>";
@@ -1631,24 +1705,28 @@ QString VServer::toolTip() {
         }
         else if (st->state() == ConnectState::VersionIncompatible) {
             txt += "<b><font color=" + colErr.name() + ">Server version is incompatible with client!</b><br>";
-            if (!st->errorMessage().empty())
+            if (!st->errorMessage().empty()) {
                 txt += "<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage());
+            }
         }
         else if (st->state() == ConnectState::SslIncompatible) {
             txt +=
                 "<b><font color=" + colErr.name() + ">Possible SSL incompatibility between server and client!</b><br>";
-            if (!st->errorMessage().empty())
+            if (!st->errorMessage().empty()) {
                 txt += "<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n", "<br>");
+            }
         }
         else if (st->state() == ConnectState::SslCertificateError) {
             txt += "<b><font color=" + colErr.name() + ">SSL certificate error!</b><br>";
-            if (!st->errorMessage().empty())
+            if (!st->errorMessage().empty()) {
                 txt += "<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n", "<br>");
+            }
         }
         else if (st->state() == ConnectState::FailedClient) {
             txt += "<b><font color=" + colErr.name() + ">Could not create client object!</b><br>";
-            if (!st->errorMessage().empty())
+            if (!st->errorMessage().empty()) {
                 txt += "<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n", "<br>");
+            }
         }
     }
 
@@ -1664,11 +1742,13 @@ QString VServer::toolTip() {
 void VServer::clearNodeTriggerData() {
     triggeredScanned_ = false;
     std::size_t num   = nodes_.size();
-    for (std::size_t i = 0; i < num; i++)
+    for (std::size_t i = 0; i < num; i++) {
         nodes_[i]->clearTriggerData();
+    }
 }
 
 void VServer::print() {
-    for (auto& i : children_)
+    for (auto& i : children_) {
         i->print();
+    }
 }

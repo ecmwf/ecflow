@@ -215,8 +215,9 @@ static void validChangeAttr(std::vector<std::string>& vec) {
 
 bool AlterCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<AlterCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     if (paths_ != the_rhs->paths()) {
         return false;
     }
@@ -266,10 +267,12 @@ void AlterCmd::alter_and_attr_type(std::string& alter_type, std::string& attr_ty
         attr_type  = to_string(add_attr_type_);
     }
     else if (flag_type_ != ecf::Flag::NOT_SET) {
-        if (flag_)
+        if (flag_) {
             alter_type = "set_flag";
-        else
+        }
+        else {
             alter_type = "clear_flag";
+        }
         attr_type = ecf::Flag::enum_to_string(flag_type_);
     }
     else {
@@ -280,11 +283,13 @@ void AlterCmd::alter_and_attr_type(std::string& alter_type, std::string& attr_ty
 void AlterCmd::print_only(std::string& os) const {
     std::string alter_type, attr_type;
     alter_and_attr_type(alter_type, attr_type);
-    if (paths_.empty())
+    if (paths_.empty()) {
         os += CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1, " "), alter_type, attr_type, name_, value_));
-    else
+    }
+    else {
         os += CtsApi::to_string(
             CtsApi::alter(std::vector<std::string>(1, paths_[0]), alter_type, attr_type, name_, value_));
+    }
 }
 
 void AlterCmd::print(std::string& os) const {
@@ -320,14 +325,17 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const {
 
     // Update defs flag state
     if (flag_type_ != Flag::NOT_SET) {
-        if (flag_)
+        if (flag_) {
             defs->flag().set(flag_type_);
+        }
         else {
             defs->flag().clear(flag_type_);
-            if (flag_type_ == Flag::LOG_ERROR)
+            if (flag_type_ == Flag::LOG_ERROR) {
                 defs->server_state().delete_user_variable("ECF_LOG_ERROR");
-            if (flag_type_ == Flag::CHECKPT_ERROR)
+            }
+            if (flag_type_ == Flag::CHECKPT_ERROR) {
                 defs->server_state().delete_user_variable("ECF_CHECKPT_ERROR");
+            }
         }
     }
 
@@ -591,10 +599,12 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
 
         // Change flags
         if (flag_type_ != Flag::NOT_SET) {
-            if (flag_)
+            if (flag_) {
                 node->get_flag().set(flag_type_);
-            else
+            }
+            else {
                 node->get_flag().clear(flag_type_);
+            }
         }
 
         // sort
@@ -737,8 +747,9 @@ void AlterCmd::addOption(boost::program_options::options_description& desc) cons
 void AlterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(AlterCmd::arg(), args);
+    }
 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
@@ -810,8 +821,9 @@ AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type
         std::vector<std::string> valid;
         validAddAttr(valid);
         for (size_t i = 0; i < valid.size(); ++i) {
-            if (i != 0)
+            if (i != 0) {
                 ss << " | ";
+            }
             ss << valid[i];
         }
         ss << "] but found " << attr_type << "\n" << AlterCmd::desc();
@@ -984,8 +996,9 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
                              const std::string& value) const {
     // **** parse and check format, expect this argument to be single or double tick quoted ****
     // **** for time,date,day or zombie
-    if (name.empty())
+    if (name.empty()) {
         throw std::runtime_error("Alter: check_for_add : name is empty ?");
+    }
 
     std::stringstream ss;
     switch (theAttrType) {
@@ -1082,8 +1095,9 @@ AlterCmd::Delete_attr_type AlterCmd::get_delete_attr_type(const std::string& att
         std::vector<std::string> valid;
         validDeleteAttr(valid);
         for (size_t i = 0; i < valid.size(); ++i) {
-            if (i != 0)
+            if (i != 0) {
                 ss << " | ";
+            }
             ss << valid[i];
         }
         ss << "] but found " << attr_type << "\n" << AlterCmd::desc();
@@ -1125,8 +1139,9 @@ void AlterCmd::extract_name_and_value_for_delete(AlterCmd::Delete_attr_type theA
                                                  const std::vector<std::string>& options,
                                                  const std::vector<std::string>& paths) const {
     // Generally an empty third argument means delete all attributes, otherwise delete the specific one.
-    if (options.size() >= 3)
+    if (options.size() >= 3) {
         name = options[2];
+    }
 
     // Deleting the limit path requires an additional arg
     std::string path_value;
@@ -1169,28 +1184,33 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
                                 const std::string& value) const {
     switch (theAttrType) {
         case AlterCmd::DEL_VARIABLE: {
-            if (!name.empty())
+            if (!name.empty()) {
                 Variable check(name, ""); // Create a Variable to check valid names
+            }
             break;
         }
         case AlterCmd::DEL_TIME: {
-            if (!name.empty())
+            if (!name.empty()) {
                 (void)TimeSeries::create(name); // will throw if not valid
+            }
             break;
         }
         case AlterCmd::DEL_TODAY: {
-            if (!name.empty())
+            if (!name.empty()) {
                 (void)TimeSeries::create(name); // will throw if not valid
+            }
             break;
         }
         case AlterCmd::DEL_DATE: {
-            if (!name.empty())
+            if (!name.empty()) {
                 (void)DateAttr::create(name); // will throw if not valid
+            }
             break;
         }
         case AlterCmd::DEL_DAY: {
-            if (!name.empty())
+            if (!name.empty()) {
                 (void)DayAttr::create(name); // will throw if not valid
+            }
             break;
         }
         case AlterCmd::DEL_CRON: {
@@ -1225,13 +1245,15 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
             break;
         }
         case AlterCmd::DEL_METER: {
-            if (!name.empty())
+            if (!name.empty()) {
                 Meter check(name, 0, 100); // will throw if not valid
+            }
             break;
         }
         case AlterCmd::DEL_LABEL: {
-            if (!name.empty())
+            if (!name.empty()) {
                 Label check(name, "value"); // will throw if not valid
+            }
             break;
         }
         case AlterCmd::DEL_TRIGGER:
@@ -1251,13 +1273,15 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
             break;
         }
         case AlterCmd::DEL_GENERIC: {
-            if (!name.empty())
+            if (!name.empty()) {
                 GenericAttr check(name); // will throw if not valid
+            }
             break;
         }
         case AlterCmd::DEL_LIMIT: {
-            if (!name.empty())
+            if (!name.empty()) {
                 Limit check(name, 10); // will throw if not valid
+            }
             break;
         }
         case AlterCmd::DEL_INLIMIT: {
@@ -1302,8 +1326,9 @@ AlterCmd::Change_attr_type AlterCmd::get_change_attr_type(const std::string& att
         std::vector<std::string> valid;
         validChangeAttr(valid);
         for (size_t i = 0; i < valid.size(); ++i) {
-            if (i != 0)
+            if (i != 0) {
                 ss << " | ";
+            }
             ss << valid[i];
         }
         ss << "]\n" << AlterCmd::desc();
@@ -1347,8 +1372,9 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
                 throw std::runtime_error(ss.str());
             }
             name = options[2];
-            if (options.size() == 4)
+            if (options.size() == 4) {
                 value = options[3];
+            }
             break;
         }
 
@@ -1770,8 +1796,9 @@ ecf::Flag::Type AlterCmd::get_flag_type(const std::string& flag_type) const {
         std::vector<std::string> valid;
         Flag::valid_flag_type(valid);
         for (size_t i = 0; i < valid.size(); ++i) {
-            if (i != 0)
+            if (i != 0) {
                 ss << " | ";
+            }
             ss << valid[i];
         }
         ss << "]\n" << AlterCmd::desc();
@@ -1799,8 +1826,9 @@ void AlterCmd::check_sort_attr_type(const std::string& attr_type) const {
         ss << "AlterCmd: sort: The second argument must be one of [ ";
         std::vector<std::string> valid = Attr::all_attrs();
         for (size_t i = 0; i < valid.size(); ++i) {
-            if (i != 0)
+            if (i != 0) {
                 ss << " | ";
+            }
             ss << valid[i];
         }
         ss << "] but found " << attr_type << "\n" << AlterCmd::desc();

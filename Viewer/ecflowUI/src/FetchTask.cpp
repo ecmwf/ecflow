@@ -21,8 +21,9 @@
 static std::map<std::string, FetchTaskFactory*>* makers = nullptr;
 
 FetchTaskFactory::FetchTaskFactory(const std::string& name) {
-    if (makers == nullptr)
+    if (makers == nullptr) {
         makers = new std::map<std::string, FetchTaskFactory*>;
+    }
 
     // Put in reverse order...
     (*makers)[name] = this;

@@ -176,8 +176,9 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw) {
 void TableNodeWidget::slotSelectionChangedInView(VInfo_ptr info) {
     updateActionState(info);
     bcWidget_->setPath(info);
-    if (broadcastSelection())
+    if (broadcastSelection()) {
         Q_EMIT selectionChanged(info);
+    }
 }
 
 void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b) {
@@ -223,14 +224,16 @@ void TableNodeWidget::writeSettings(VComboSettings* vs) {
 
     DashboardWidget::writeSettings(vs);
 
-    if (acAutoScroll_)
+    if (acAutoScroll_) {
         vs->putAsBool("autoScrollToSelection", acAutoScroll_->isChecked());
+    }
 }
 
 void TableNodeWidget::readSettings(VComboSettings* vs) {
     auto type = vs->get<std::string>("type", "");
-    if (type != type_)
+    if (type != type_) {
         return;
+    }
 
     // This will not emit the changed signal. So the "observers" will
     // not notice the change.

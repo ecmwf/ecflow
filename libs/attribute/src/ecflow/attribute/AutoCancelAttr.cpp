@@ -31,16 +31,19 @@ void AutoCancelAttr::write(std::string& ret) const {
         return;
     }
 
-    if (relative_)
+    if (relative_) {
         ret += "+";
+    }
     time_.print(ret);
 }
 
 bool AutoCancelAttr::operator==(const AutoCancelAttr& rhs) const {
-    if (relative_ != rhs.relative_)
+    if (relative_ != rhs.relative_) {
         return false;
-    if (days_ != rhs.days_)
+    }
+    if (days_ != rhs.days_) {
         return false;
+    }
     return time_.operator==(rhs.time_);
 }
 

@@ -68,23 +68,28 @@ std::string Rtt::analysis(const std::string& filename) {
     size_t max_cmd_size = 0;
     for (auto& line : lines) {
 
-        if (line.empty())
+        if (line.empty()) {
             continue;
+        }
         //      cout << i << ":" << lines[i] << "   ";
         std::string::size_type dash    = line.find("--");
         std::string::size_type rtt_pos = line.find(Rtt::tag());
-        if (dash == std::string::npos)
+        if (dash == std::string::npos) {
             continue;
-        if (rtt_pos == std::string::npos)
+        }
+        if (rtt_pos == std::string::npos) {
             continue;
+        }
 
         int cmd_length                = 0;
         std::string::size_type equals = line.find("=", dash);
         std::string::size_type space  = line.find(" ", dash);
-        if (equals != std::string::npos)
+        if (equals != std::string::npos) {
             cmd_length = equals;
-        else if (space != std::string::npos)
+        }
+        else if (space != std::string::npos) {
             cmd_length = space;
+        }
         std::string cmd = line.substr(0, cmd_length);
         max_cmd_size    = std::max(max_cmd_size, cmd.size());
 

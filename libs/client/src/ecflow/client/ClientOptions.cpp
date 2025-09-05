@@ -137,8 +137,9 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     std::string host, port;
     if (vm.count("port")) {
         port = vm["port"].as<std::string>();
-        if (env->debug())
+        if (env->debug()) {
             std::cout << "  port " << port << " overridden at the command line\n";
+        }
         try {
             ecf::convert_to<int>(port);
         }
@@ -150,36 +151,44 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     }
     if (vm.count("host")) {
         host = vm["host"].as<std::string>();
-        if (env->debug())
+        if (env->debug()) {
             std::cout << "  host " << host << " overridden at the command line\n";
+        }
     }
     if (!host.empty() || !port.empty()) {
-        if (host.empty())
+        if (host.empty()) {
             host = env->hostSpecified(); // get the environment variable ECF_HOST
-        if (port.empty())
+        }
+        if (port.empty()) {
             port = env->portSpecified(); // get the environment variable ECF_PORT || Str::DEFAULT_PORT_NUMBER()
-        if (host.empty())
+        }
+        if (host.empty()) {
             host = Str::LOCALHOST(); // if ECF_HOST not specified default to localhost
-        if (port.empty())
+        }
+        if (port.empty()) {
             port = Str::DEFAULT_PORT_NUMBER(); // if ECF_PORT not specified use default
+        }
         env->set_host_port(host, port);
     }
     if (vm.count("rid")) {
         std::string rid = vm["rid"].as<std::string>();
-        if (env->debug())
+        if (env->debug()) {
             std::cout << "  rid " << rid << " overridden at the command line\n";
+        }
         env->set_remote_id(rid);
     }
     if (vm.count("user")) {
         std::string user = vm["user"].as<std::string>();
-        if (env->debug())
+        if (env->debug()) {
             std::cout << "  user " << user << " overridden at the command line\n";
+        }
         env->set_user_name(user);
     }
     if (vm.count("password")) {
         std::string password = vm["password"].as<std::string>();
-        if (env->debug())
+        if (env->debug()) {
             std::cout << "  password overridden at the command line\n";
+        }
         env->set_password(PasswordEncryption::encrypt(password, env->get_user_name()));
     }
 
@@ -211,13 +220,15 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
 #endif
 
     if (vm.count("http")) {
-        if (env->debug())
+        if (env->debug()) {
             std::cout << "  http set via command line\n";
+        }
         env->enable_http();
     }
     if (vm.count("https")) {
-        if (env->debug())
+        if (env->debug()) {
             std::cout << "  https set via command line\n";
+        }
         env->enable_https();
     }
 
@@ -258,8 +269,9 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
                     ss << "\nUnrecognised character not in ASCII range(0-127) " << std::dec << "dec("
                        << static_cast<int>(arg[s]) << ") char:" << arg[s];
                     ss << " found at index " << s << " for string '" << arg << "'\n";
-                    if (static_cast<int>(arg[s]) == -30)
+                    if (static_cast<int>(arg[s]) == -30) {
                         ss << "check for bad hyphen/minus";
+                    }
                     throw std::runtime_error(ss.str());
                 }
             }
@@ -276,10 +288,12 @@ static std::string print_variable_map(const boost::program_options::variables_ma
     ss << "boost::program_options::variables_map:    vm.size() " << vm.size() << "\n";
     for (po::variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
         std::cout << "> " << it->first;
-        if (((boost::any)it->second.value()).empty())
+        if (((boost::any)it->second.value()).empty()) {
             ss << "(empty)";
-        if (vm[it->first].defaulted() || it->second.defaulted())
+        }
+        if (vm[it->first].defaulted() || it->second.defaulted()) {
             ss << "(default)";
+        }
 
         ss << "=";
 

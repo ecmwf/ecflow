@@ -33,10 +33,12 @@ void LogMessageCmd::print_only(std::string& os) const {
 
 bool LogMessageCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<LogMessageCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (msg_ != the_rhs->msg())
+    }
+    if (msg_ != the_rhs->msg()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 

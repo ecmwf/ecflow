@@ -33,11 +33,13 @@ using namespace std;
 // is abstract syntax tree during the post process call
 
 Suite::Suite(const Suite& rhs) : NodeContainer(rhs), begun_(rhs.begun_) {
-    if (rhs.clockAttr_.get())
+    if (rhs.clockAttr_.get()) {
         clockAttr_ = std::make_shared<ClockAttr>(*rhs.clockAttr_);
+    }
 
-    if (rhs.clock_end_attr_.get())
+    if (rhs.clock_end_attr_.get()) {
         clock_end_attr_ = std::make_shared<ClockAttr>(*rhs.clock_end_attr_);
+    }
 
     cal_ = rhs.cal_;
 }
@@ -51,10 +53,12 @@ Suite& Suite::operator=(const Suite& rhs) {
     if (this != &rhs) {
         NodeContainer::operator=(rhs);
         begun_ = rhs.begun_;
-        if (rhs.clockAttr_.get())
+        if (rhs.clockAttr_.get()) {
             clockAttr_ = std::make_shared<ClockAttr>(*rhs.clockAttr_);
-        if (rhs.clock_end_attr_.get())
+        }
+        if (rhs.clock_end_attr_.get()) {
             clock_end_attr_ = std::make_shared<ClockAttr>(*rhs.clock_end_attr_);
+        }
         cal_ = rhs.cal_;
 
         state_change_no_    = 0;
@@ -85,20 +89,27 @@ suite_ptr Suite::create_me(const std::string& name) {
 }
 
 bool Suite::check_defaults() const {
-    if (defs_ != nullptr)
+    if (defs_ != nullptr) {
         throw std::runtime_error("Suite::check_defaults(): defs_ != nullptr");
-    if (begun_ != false)
+    }
+    if (begun_ != false) {
         throw std::runtime_error("Suite::check_defaults():  begun_ != false");
-    if (state_change_no_ != 0)
+    }
+    if (state_change_no_ != 0) {
         throw std::runtime_error("Suite::check_defaults():  state_change_no_ != 0");
-    if (modify_change_no_ != 0)
+    }
+    if (modify_change_no_ != 0) {
         throw std::runtime_error("Suite::check_defaults(): modify_change_no_ != 0 ");
-    if (begun_change_no_ != 0)
+    }
+    if (begun_change_no_ != 0) {
         throw std::runtime_error("Suite::check_defaults():  begun_change_no_ != 0");
-    if (calendar_change_no_ != 0)
+    }
+    if (calendar_change_no_ != 0) {
         throw std::runtime_error("Suite::check_defaults(): calendar_change_no_ != 0");
-    if (suite_gen_variables_ != nullptr)
+    }
+    if (suite_gen_variables_ != nullptr) {
         throw std::runtime_error("Suite::check_defaults(): suite_gen_variables_ != nullptr");
+    }
     return NodeContainer::check_defaults();
 }
 
@@ -217,8 +228,9 @@ void Suite::requeue_calendar() {
 
         // make sure update variable regenerates all suite variables, i.e like ECF_DATE, etc
         // Needed since we have changed calendar date
-        if (suite_gen_variables_)
+        if (suite_gen_variables_) {
             suite_gen_variables_->force_update();
+        }
 
         return;
     }
@@ -260,8 +272,9 @@ bool Suite::resolveDependencies(JobsParam& jobsParam) {
         // and thus affects python changed_node_paths
         calendar_change_no_ = Ecf::state_change_no() + 1;
 
-        if (jobsParam.check_for_job_generation_timeout(time_now))
+        if (jobsParam.check_for_job_generation_timeout(time_now)) {
             return false;
+        }
         return NodeContainer::resolveDependencies(jobsParam);
     }
     return true;
@@ -316,8 +329,9 @@ void Suite::write_state(std::string& ret, bool& added_comment_char) const {
 void Suite::read_state(const std::string& line, const std::vector<std::string>& lineTokens) {
 
     // suite s1 # begun:1 state:queued flag:edit_failed suspended:1
-    if (lineTokens.size() >= 4 && lineTokens[3] == "begun:1")
+    if (lineTokens.size() >= 4 && lineTokens[3] == "begun:1") {
         begun_ = true;
+    }
     NodeContainer::read_state(line, lineTokens);
 }
 
@@ -336,12 +350,14 @@ void Suite::addClock(const ClockAttr& c, bool initialize_calendar) {
     }
 
     clockAttr_ = std::make_shared<ClockAttr>(c);
-    if (initialize_calendar)
+    if (initialize_calendar) {
         clockAttr_->init_calendar(cal_);
+    }
 
     // clock_end_attr_ is always same type as clock
-    if (clock_end_attr_.get())
+    if (clock_end_attr_.get()) {
         clock_end_attr_->hybrid(clockAttr_->hybrid());
+    }
 }
 
 void Suite::changeClock(const ClockAttr& c) {
@@ -365,8 +381,9 @@ void Suite::add_end_clock(const ClockAttr& c) {
     clock_end_attr_->set_end_clock();
 
     // clock_end_attr_ is always same type as clock
-    if (clockAttr_.get())
+    if (clockAttr_.get()) {
         clock_end_attr_->hybrid(clockAttr_->hybrid());
+    }
 }
 
 void Suite::changeClockType(const std::string& clockType) {
@@ -402,8 +419,9 @@ void Suite::changeClockType(const std::string& clockType) {
     }
 
     // clock_end_attr_ is always same type as clock
-    if (clock_end_attr_.get())
+    if (clock_end_attr_.get()) {
         clock_end_attr_->hybrid(clockAttr_->hybrid());
+    }
 
     // re-sync suite calendar for clock attribute, re-queue all time based attributes
     handle_clock_attribute_change();
@@ -413,8 +431,9 @@ void Suite::changeClockDate(const std::string& theDate) {
     // See ISSUES: Suite::changeClockType
     int dayy, month, year;
     DateAttr::getDate(theDate, dayy, month, year);
-    if (dayy == 0 || month == 0 || year == 0)
+    if (dayy == 0 || month == 0 || year == 0) {
         throw std::runtime_error("Suite::changeClockDate Invalid clock date:" + theDate);
+    }
 
     // ECFLOW-417
     // By default the user *IS* expected to requeue afterward. However, in the case where we
@@ -494,8 +513,9 @@ void Suite::handle_clock_attribute_change() {
     NodeContainer::requeue_time_attrs();
 
     // make sure we regenerate all suite variables, i.e like ECF_DATE, etc
-    if (suite_gen_variables_)
+    if (suite_gen_variables_) {
         suite_gen_variables_->force_update();
+    }
 
     update_generated_variables();
 }
@@ -602,13 +622,15 @@ void Suite::collateChanges(DefsDelta& changes) const {
 
         compound_memento_ptr suite_compound_mememto;
         if (clockAttr_.get() && clockAttr_->state_change_no() > changes.client_state_change_no()) {
-            if (!suite_compound_mememto.get())
+            if (!suite_compound_mememto.get()) {
                 suite_compound_mememto = std::make_shared<CompoundMemento>(absNodePath());
+            }
             suite_compound_mememto->add(std::make_shared<SuiteClockMemento>(*clockAttr_));
         }
         if (begun_change_no_ > changes.client_state_change_no()) {
-            if (!suite_compound_mememto.get())
+            if (!suite_compound_mememto.get()) {
                 suite_compound_mememto = std::make_shared<CompoundMemento>(absNodePath());
+            }
             suite_compound_mememto->add(std::make_shared<SuiteBeginDeltaMemento>(begun_));
         }
 
@@ -641,10 +663,12 @@ void Suite::set_memento(const SuiteClockMemento* memento, std::vector<ecf::Aspec
     std::cout << "Suite::set_memento( const SuiteClockMemento*) " << debugNodePath() << "\n";
 #endif
 
-    if (aspect_only)
+    if (aspect_only) {
         aspects.push_back(ecf::Aspect::SUITE_CLOCK);
-    else
+    }
+    else {
         changeClock(memento->clockAttr_);
+    }
 }
 
 void Suite::set_memento(const SuiteBeginDeltaMemento* memento,
@@ -654,10 +678,12 @@ void Suite::set_memento(const SuiteBeginDeltaMemento* memento,
     std::cout << "Suite::set_memento( const SuiteBeginDeltaMemento* ) " << debugNodePath() << "\n";
 #endif
 
-    if (aspect_only)
+    if (aspect_only) {
         aspects.push_back(ecf::Aspect::SUITE_BEGIN);
-    else
+    }
+    else {
         begun_ = memento->begun_;
+    }
 }
 
 void Suite::set_memento(const SuiteCalendarMemento* memento,
@@ -676,10 +702,12 @@ void Suite::set_memento(const SuiteCalendarMemento* memento,
     // Hence make sure calendar/clock are in sync. part of the suite invariants
     cal_ = memento->cal_;
     if (clockAttr_.get()) {
-        if (clockAttr_->hybrid())
+        if (clockAttr_->hybrid()) {
             cal_.set_clock_type(ecf::Calendar::HYBRID);
-        else
+        }
+        else {
             cal_.set_clock_type(ecf::Calendar::REAL);
+        }
     }
 }
 
@@ -689,25 +717,29 @@ void Suite::update_generated_variables() const {
     //   o begin()
     //   o requeue()
     //   o when calendar changes
-    if (!suite_gen_variables_)
+    if (!suite_gen_variables_) {
         suite_gen_variables_ = new SuiteGenVariables(this);
+    }
     suite_gen_variables_->update_generated_variables();
     update_repeat_genvar();
 }
 
 const Variable& Suite::findGenVariable(const std::string& name) const {
-    if (!suite_gen_variables_)
+    if (!suite_gen_variables_) {
         update_generated_variables();
+    }
 
     const Variable& gen_var = suite_gen_variables_->findGenVariable(name);
-    if (!gen_var.empty())
+    if (!gen_var.empty()) {
         return gen_var;
+    }
     return NodeContainer::findGenVariable(name);
 }
 
 void Suite::gen_variables(std::vector<Variable>& vec) const {
-    if (!suite_gen_variables_)
+    if (!suite_gen_variables_) {
         update_generated_variables();
+    }
 
     vec.reserve(vec.size() + 13);
     NodeContainer::gen_variables(vec);
@@ -872,34 +904,48 @@ void SuiteGenVariables::update_generated_variables() const {
 }
 
 const Variable& SuiteGenVariables::findGenVariable(const std::string& name) const {
-    if (genvar_suite_.name() == name)
+    if (genvar_suite_.name() == name) {
         return genvar_suite_;
-    if (genvar_ecf_date_.name() == name)
+    }
+    if (genvar_ecf_date_.name() == name) {
         return genvar_ecf_date_;
-    if (genvar_yyyy_.name() == name)
+    }
+    if (genvar_yyyy_.name() == name) {
         return genvar_yyyy_;
-    if (genvar_dow_.name() == name)
+    }
+    if (genvar_dow_.name() == name) {
         return genvar_dow_;
-    if (genvar_doy_.name() == name)
+    }
+    if (genvar_doy_.name() == name) {
         return genvar_doy_;
-    if (genvar_date_.name() == name)
+    }
+    if (genvar_date_.name() == name) {
         return genvar_date_;
-    if (genvar_day_.name() == name)
+    }
+    if (genvar_day_.name() == name) {
         return genvar_day_;
-    if (genvar_dd_.name() == name)
+    }
+    if (genvar_dd_.name() == name) {
         return genvar_dd_;
-    if (genvar_mm_.name() == name)
+    }
+    if (genvar_mm_.name() == name) {
         return genvar_mm_;
-    if (genvar_month_.name() == name)
+    }
+    if (genvar_month_.name() == name) {
         return genvar_month_;
-    if (genvar_ecf_clock_.name() == name)
+    }
+    if (genvar_ecf_clock_.name() == name) {
         return genvar_ecf_clock_;
-    if (genvar_ecf_time_.name() == name)
+    }
+    if (genvar_ecf_time_.name() == name) {
         return genvar_ecf_time_;
-    if (genvar_ecf_julian_.name() == name)
+    }
+    if (genvar_ecf_julian_.name() == name) {
         return genvar_ecf_julian_;
-    if (genvar_time_.name() == name)
+    }
+    if (genvar_time_.name() == name) {
         return genvar_time_;
+    }
     return Variable::EMPTY();
 }
 
@@ -930,8 +976,9 @@ void Suite::serialize(Archive& ar, std::uint32_t const version) {
     // The calendar does not persist the clock type or start stop with server since
     // that is persisted with the clock attribute
     if (Archive::is_loading::value) {
-        if (clockAttr_.get())
+        if (clockAttr_.get()) {
             clockAttr_->init_calendar(cal_);
+        }
     }
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Suite);

@@ -68,8 +68,9 @@ bool ZombieCtrl::handle_path_zombie(AbstractServer* as,
     /// task has been deleted If none found we resort to default behaviour
     node_ptr closest_matching_node = as->defs()->find_closest_matching_node(path_to_task);
 #ifdef DEBUG_ZOMBIE
-    if (closest_matching_node.get())
+    if (closest_matching_node.get()) {
         std::cout << " closest node found: ";
+    }
 #endif
 
 #ifdef DEBUG_ZOMBIE
@@ -120,8 +121,9 @@ bool ZombieCtrl::handle_zombie(Submittable* task,       // This NULL for path zo
     const std::string& process_or_remote_id = task_cmd->process_or_remote_id();
 
     /// Mark task as zombie
-    if (task)
+    if (task) {
         task->get_flag().set(ecf::Flag::ZOMBIE);
+    }
 
     Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, jobs_password);
     if (!theExistingZombie.empty()) {
@@ -131,17 +133,21 @@ bool ZombieCtrl::handle_zombie(Submittable* task,       // This NULL for path zo
     /// Create Zombie:
     /// *** ECF *** Zombies is created with: process path, process password, and process id/rid , process try_no ***
     Child::ZombieType zombie_type = Child::ECF;
-    if (task_cmd->pid_missmatch() && task_cmd->password_missmatch())
+    if (task_cmd->pid_missmatch() && task_cmd->password_missmatch()) {
         zombie_type = Child::ECF_PID_PASSWD;
-    else if (task_cmd->pid_missmatch())
+    }
+    else if (task_cmd->pid_missmatch()) {
         zombie_type = Child::ECF_PID;
-    else if (task_cmd->password_missmatch())
+    }
+    else if (task_cmd->password_missmatch()) {
         zombie_type = Child::ECF_PASSWD;
+    }
     ZombieAttr attr = ZombieAttr::get_default_attr(zombie_type);
 
     /// Look for any Zombie attribute up node tree, use this to construct & configure zombie
-    if (task)
+    if (task) {
         task->findParentZombie(zombie_type, attr);
+    }
 
     /// Handle corner case ,where we have two jobs with different process id, but same password
     /// Can happen if jobs is started externally, or via test, occasionally
@@ -215,8 +221,9 @@ bool ZombieCtrl::handle_existing_zombie(Zombie& theExistingZombie,      // The s
     }
     theExistingZombie.set_attr(attr);                             // Update attribute stored on the zombie
     theExistingZombie.set_last_child_cmd(task_cmd->child_type()); // The zombie stores the last child command.
-    if (theExistingZombie.host().empty())
+    if (theExistingZombie.host().empty()) {
         theExistingZombie.set_host(task_cmd->hostname());
+    }
     theExistingZombie.increment_calls(); // record how times server handled with zombie
 
     /// Update the process id, if it is empty on the existing zombie
@@ -243,10 +250,12 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
     const std::string& process_password     = task_cmd->jobs_password();
     const std::string& process_or_remote_id = task_cmd->process_or_remote_id();
 
-    if (theZombie.manual_user_action())
+    if (theZombie.manual_user_action()) {
         action_taken = "manual-";
-    else
+    }
+    else {
         action_taken = "automatic-";
+    }
 
     // *ADOPT* If zombie is set to adopt, copy over password and carry on as >NORMAL< , i.e. we return true
     if (task && theZombie.adopt()) {
@@ -270,8 +279,9 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
 
 #ifdef DEBUG_ZOMBIE
         std::cout << " >>>ADOPT<<< then remove(" << remove_ok << ") ";
-        if (!remove_ok)
+        if (!remove_ok) {
             std::cout << " >>>ERROR<<<< Remove failed ";
+        }
         std::cout << " zombies_.size(" << zombies_.size() << ")\n";
 #endif
         return true;
@@ -295,13 +305,15 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
             }
 
             /// Clear the zombie flag
-            if (task)
+            if (task) {
                 task->get_flag().clear(ecf::Flag::ZOMBIE);
+            }
 
 #ifdef DEBUG_ZOMBIE
             std::cout << " child == COMPLETE remove zombie ";
-            if (!remove_ok)
+            if (!remove_ok) {
                 std::cout << " >>>ERROR<<<< Remove failed ";
+            }
 #endif
         }
 
@@ -357,13 +369,15 @@ bool ZombieCtrl::handle_user_actions(Zombie& theZombie,         // Existing or o
         /// Ask ClientInvoker to continue blocking, Zombie may re-appear
         action_taken += "remove";
         bool remove_ok = remove(path_to_task, process_or_remote_id, process_password);
-        if (!remove_ok)
+        if (!remove_ok) {
             (void)remove_by_path(path_to_task);
+        }
 
 #ifdef DEBUG_ZOMBIE
         std::cout << " >>>REMOVE<<< zombies_.size(" << zombies_.size() << ") : BLOCKING ";
-        if (!remove_ok)
+        if (!remove_ok) {
             std::cout << " >>>ERROR<<<< Remove failed ";
+        }
 #endif
         theReply = PreAllocatedReply::block_client_zombie_cmd(theZombie.type());
         return false;
@@ -428,16 +442,18 @@ void ZombieCtrl::add_user_zombies(const std::vector<Submittable*>& tasks, const 
 }
 
 void ZombieCtrl::add_user_zombies(Node* node, const std::string& user_cmd) {
-    if (!node)
+    if (!node) {
         return;
+    }
     std::vector<Submittable*> tasks;
     node->get_all_active_submittables(tasks);
     add_user_zombies(tasks, user_cmd);
 }
 
 void ZombieCtrl::add_user_zombies(defs_ptr defs, const std::string& user_cmd) {
-    if (!defs.get())
+    if (!defs.get()) {
         return;
+    }
     std::vector<Submittable*> tasks;
     defs->get_all_active_submittables(tasks);
     add_user_zombies(tasks, user_cmd);
@@ -476,8 +492,9 @@ void ZombieCtrl::fob(const std::string& path_to_task,
                      const std::string& password) {
 
     Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, password);
-    if (theExistingZombie.empty())
+    if (theExistingZombie.empty()) {
         return;
+    }
     theExistingZombie.set_fob();
 }
 
@@ -504,8 +521,9 @@ void ZombieCtrl::fobCli(const std::string& path_to_task, Submittable* task) {
 
     /// The best we can do
     Zombie& theExistingZombie = find_by_path(path_to_task);
-    if (theExistingZombie.empty())
+    if (theExistingZombie.empty()) {
         return;
+    }
     theExistingZombie.set_fob();
 }
 
@@ -514,8 +532,9 @@ void ZombieCtrl::fail(const std::string& path_to_task,
                       const std::string& password) {
 
     Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, password);
-    if (theExistingZombie.empty())
+    if (theExistingZombie.empty()) {
         return;
+    }
     theExistingZombie.set_fail();
 }
 
@@ -542,8 +561,9 @@ void ZombieCtrl::failCli(const std::string& path_to_task, Submittable* task) {
 
     /// The best we can do
     Zombie& theExistingZombie = find_by_path(path_to_task);
-    if (theExistingZombie.empty())
+    if (theExistingZombie.empty()) {
         return;
+    }
     theExistingZombie.set_fail();
 }
 
@@ -552,8 +572,9 @@ void ZombieCtrl::adopt(const std::string& path_to_task,
                        const std::string& password) {
 
     Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, password);
-    if (theExistingZombie.empty())
+    if (theExistingZombie.empty()) {
         return;
+    }
     theExistingZombie.set_adopt();
 }
 
@@ -596,8 +617,9 @@ void ZombieCtrl::block(const std::string& path_to_task,
                        const std::string& password) {
 
     Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, password);
-    if (theExistingZombie.empty())
+    if (theExistingZombie.empty()) {
         return;
+    }
     theExistingZombie.set_block();
 }
 
@@ -625,8 +647,9 @@ void ZombieCtrl::kill(const std::string& path_to_task,
                       const std::string& password) {
 
     Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, password);
-    if (theExistingZombie.empty())
+    if (theExistingZombie.empty()) {
         return;
+    }
     theExistingZombie.set_kill();
 }
 
@@ -755,14 +778,16 @@ const Zombie& ZombieCtrl::find(const std::string& path_to_task,
 //================= private ===================================================================
 
 Zombie& ZombieCtrl::find(Submittable* task) {
-    if (task)
+    if (task) {
         return find_zombie(task->absNodePath(), task->process_or_remote_id(), task->jobsPassword());
+    }
     return Zombie::EMPTY_();
 }
 
 const Zombie& ZombieCtrl::find(Submittable* task) const {
-    if (task)
+    if (task) {
         return find(task->absNodePath(), task->process_or_remote_id(), task->jobsPassword());
+    }
     return Zombie::EMPTY();
 }
 

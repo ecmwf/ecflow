@@ -47,16 +47,21 @@ void QueryCmd::print_only(std::string& os) const {
 
 bool QueryCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<QueryCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (query_type_ != the_rhs->query_type())
+    }
+    if (query_type_ != the_rhs->query_type()) {
         return false;
-    if (path_to_attribute_ != the_rhs->path_to_attribute())
+    }
+    if (path_to_attribute_ != the_rhs->path_to_attribute()) {
         return false;
-    if (attribute_ != the_rhs->attribute())
+    }
+    if (attribute_ != the_rhs->attribute()) {
         return false;
-    if (path_to_task_ != the_rhs->path_to_task())
+    }
+    if (path_to_task_ != the_rhs->path_to_task()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
@@ -84,8 +89,9 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     std::string path_to_attribute;
     std::string attribute;
 
-    if (args.size())
+    if (args.size()) {
         query_type = args[0];
+    }
     if (query_type == "event" || query_type == "meter" || query_type == "label" || query_type == "variable" ||
         query_type == "limit" || query_type == "limit_max") {
         // second argument must be <path>:event_or_meter_or_label_or_variable_or_limit
@@ -106,34 +112,40 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             ss << " args size = " << args.size() << " expected 2 arguments";
             throw std::runtime_error(ss.str());
         }
-        if (attribute.empty())
+        if (attribute.empty()) {
             throw std::runtime_error("QueryCmd: no attribute specified: query type: " + query_type +
                                      " path+attribute: " + path_and_name + "\n" + string(QueryCmd::desc()));
+        }
     }
     else if (query_type == "trigger") {
         for (size_t i = 1; i < args.size(); i++) {
-            if (i == 1)
+            if (i == 1) {
                 path_to_attribute = args[i];
+            }
             if (i == 2) {
                 attribute = args[i];
                 (void)Expression::parse(attribute, "QueryCmd:"); // will throw if expression does not parse
             }
         }
-        if (attribute.empty())
+        if (attribute.empty()) {
             throw std::runtime_error("QueryCmd: no attribute specified: query type: trigger\n" +
                                      string(QueryCmd::desc()));
+        }
     }
     else if (query_type == "state" || query_type == "dstate") {
         // for state and dstate attribute is empty
-        if (args.size() > 1)
+        if (args.size() > 1) {
             path_to_attribute = args[1];
-        if (args.size() > 2)
+        }
+        if (args.size() > 2) {
             throw std::runtime_error("QueryCmd: invalid (state | dstate) query : " + args[2]);
+        }
     }
     else if (query_type == "repeat") {
         // for repeat attribute can only be next or prev
-        if (args.size() > 1)
+        if (args.size() > 1) {
             path_to_attribute = args[1];
+        }
         if (args.size() == 3) {
             attribute = args[2];
             if (attribute != "next" && attribute != "prev") {
@@ -141,13 +153,15 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
                                          attribute);
             }
         }
-        if (args.size() > 3)
+        if (args.size() > 3) {
             throw std::runtime_error("QueryCmd: invalid (repeat) query : " + args[3]);
+        }
     }
-    else
+    else {
         throw std::runtime_error("QueryCmd: first argument must be one of [ state | dstate | repeat | event | meter | "
                                  "variable | trigger ] but found:" +
                                  query_type);
+    }
 
     if (path_to_attribute.empty() || (!path_to_attribute.empty() && path_to_attribute[0] != '/')) {
         throw std::runtime_error("QueryCmd: invalid path to attribute: " + path_to_attribute);
@@ -244,8 +258,9 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
             ss << "QueryCmd: Cannot find event " << attribute_ << " on node " << path_to_attribute_;
             throw std::runtime_error(ss.str());
         }
-        if (event.value())
+        if (event.value()) {
             return PreAllocatedReply::string_cmd(Event::SET());
+        }
         return PreAllocatedReply::string_cmd(Event::CLEAR());
     }
 
@@ -261,14 +276,16 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
 
     if (query_type_ == "limit") {
         limit_ptr limit = node->find_limit(attribute_);
-        if (!limit.get())
+        if (!limit.get()) {
             throw std::runtime_error("QueryCmd: Could not find limit " + attribute_);
+        }
         return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(limit->value()));
     }
     if (query_type_ == "limit_max") {
         limit_ptr limit = node->find_limit(attribute_);
-        if (!limit.get())
+        if (!limit.get()) {
             throw std::runtime_error("QueryCmd: Could not find limit " + attribute_);
+        }
         return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(limit->theLimit()));
     }
 
@@ -279,8 +296,9 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
             ss << "QueryCmd: Cannot find label " << attribute_ << " on node " << path_to_attribute_;
             throw std::runtime_error(ss.str());
         }
-        if (label.new_value().empty())
+        if (label.new_value().empty()) {
             return PreAllocatedReply::string_cmd(label.value());
+        }
         return PreAllocatedReply::string_cmd(label.new_value());
     }
 
@@ -298,8 +316,9 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
     if (query_type_ == "trigger") {
         std::unique_ptr<AstTop> ast =
             node->parse_and_check_expressions(attribute_, true, "QueryCmd:"); // will throw for errors
-        if (ast->evaluate())
+        if (ast->evaluate()) {
             return PreAllocatedReply::string_cmd("true");
+        }
         return PreAllocatedReply::string_cmd("false");
     }
 
@@ -318,12 +337,15 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
             ss << "QueryCmd: Cannot find repeat on node " << path_to_attribute_;
             throw std::runtime_error(ss.str());
         }
-        if (attribute_.empty())
+        if (attribute_.empty()) {
             return PreAllocatedReply::string_cmd(repeat.valueAsString());
-        if (attribute_ == "next")
+        }
+        if (attribute_ == "next") {
             return PreAllocatedReply::string_cmd(repeat.next_value_as_string());
-        if (attribute_ == "prev")
+        }
+        if (attribute_ == "prev") {
             return PreAllocatedReply::string_cmd(repeat.prev_value_as_string());
+        }
         std::stringstream ss;
         ss << "QueryCmd: invalid repeat attribute expected next | prev but found " << attribute_;
         throw std::runtime_error(ss.str());

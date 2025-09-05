@@ -40,8 +40,9 @@ void FlatAnalyserVisitor::visitFamily(Family* f) {
 }
 
 void FlatAnalyserVisitor::visitNodeContainer(NodeContainer* nc) {
-    if (nc->state() == NState::COMPLETE)
+    if (nc->state() == NState::COMPLETE) {
         return;
+    }
 
     Indent l1(ctx_);
 

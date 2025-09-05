@@ -121,8 +121,9 @@ SessionHandler* SessionHandler::instance() {
 }
 
 void SessionHandler::destroyInstance() {
-    if (instance_)
+    if (instance_) {
         delete instance_;
+    }
 
     instance_ = nullptr;
 }
@@ -138,8 +139,9 @@ std::string SessionHandler::sessionQtDirName(const std::string& sessionName) {
 
 SessionItem* SessionHandler::find(const std::string& name) {
     for (auto it = sessions_.begin(); it != sessions_.end(); ++it) {
-        if ((*it)->name() == name)
+        if ((*it)->name() == name) {
             return *it;
+        }
     }
     return nullptr;
 }
@@ -148,8 +150,9 @@ SessionItem* SessionHandler::find(const std::string& name) {
 int SessionHandler::indexFromName(const std::string& name) {
     int n = 0;
     for (auto it = sessions_.begin(); it != sessions_.end(); ++it) {
-        if ((*it)->name() == name)
+        if ((*it)->name() == name) {
             return n;
+        }
         n++;
     }
     return -1;
@@ -184,8 +187,9 @@ SessionItem* SessionHandler::add(const std::string& name) {
         sessions_.push_back(item);
         return item;
     }
-    else
+    else {
         return nullptr;
+    }
 }
 
 void SessionHandler::remove(const std::string& sessionName) {
@@ -246,10 +250,12 @@ void SessionHandler::load() {
 
 bool SessionHandler::requestStartupViaSessionManager() {
     char* sm = getenv("ECFLOWUI_SESSION_MANAGER");
-    if (sm)
+    if (sm) {
         return true;
-    else
+    }
+    else {
         return false;
+    }
 }
 
 void SessionHandler::setTemporarySessionIfReqested() {
@@ -264,15 +270,17 @@ void SessionHandler::setTemporarySessionIfReqested() {
             snprintf(sessName, buff_size, "temporary_%s_%s_%d", sh, sp, getpid());
             std::string sname(sessName);
             SessionItem* si = instance()->add(sname);
-            if (!si)
+            if (!si) {
                 si = instance()->find(sname);
+            }
 
             instance()->current(si);
             si->temporary(true);
 
             char* sask = getenv("ECFLOWUI_TEMP_SESSION_PRESERVE_CONFIRM");
-            if (sask && !strcmp(sask, "no"))
+            if (sask && !strcmp(sask, "no")) {
                 si->askToPreserveTemporarySession(false);
+            }
 
             std::string templateName("ecflow_ui_test_session_template.json");
             instance()->createSessionDirWithTemplate(sname, templateName);
@@ -335,8 +343,9 @@ void SessionHandler::readLastSessionName() {
             loadedLastSessionName_ = true;
             lastSessionName_       = line;
         }
-        else
+        else {
             lastSessionName_ = defaultSessionName();
+        }
     }
     else {
         // could not read the file, so just use the default

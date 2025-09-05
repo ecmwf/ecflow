@@ -30,12 +30,15 @@ namespace po = boost::program_options;
 
 bool RunNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<RunNodeCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (paths_ != the_rhs->paths())
+    }
+    if (paths_ != the_rhs->paths()) {
         return false;
-    if (force_ != the_rhs->force())
+    }
+    if (force_ != the_rhs->force()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
@@ -87,8 +90,9 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const {
         // the returns the active/submitted tasks first. This can then be
         // presented to the user, who can elect to kill them if required.
         bool createJobs = true;
-        if (test_)
+        if (test_) {
             createJobs = false;
+        }
 
         /// This will *NOT* timeout, unlike server Job generation
         JobsParam jobsParam(as->poll_interval(),
@@ -98,8 +102,9 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const {
         jobsParam.logDebugMessage(" from RunNodeCmd::doHandleRequest");
 #endif
 
-        if (force_)
+        if (force_) {
             as->zombie_ctrl().add_user_zombies(node.get(), CtsApi::runArg());
+        }
 
         // Avoid re-running the task again on the same time slot
         node->miss_next_time_slot();
@@ -156,8 +161,9 @@ void RunNodeCmd::addOption(boost::program_options::options_description& desc) co
 void RunNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     vector<string> args = vm[RunNodeCmd::arg()].as<vector<string>>();
 
-    if (ace->debug())
+    if (ace->debug()) {
         dumpVecArgs(RunNodeCmd::arg(), args);
+    }
 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
@@ -175,8 +181,9 @@ void RunNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
             ss << "RunNodeCmd: Invalid arguments. Expected a single optional 'force'\n" << RunNodeCmd::desc() << "\n";
             throw std::runtime_error(ss.str());
         }
-        if (options[0].find("force") != std::string::npos)
+        if (options[0].find("force") != std::string::npos) {
             force = true;
+        }
         else {
             std::stringstream ss;
             ss << "RunNodeCmd: Expected force <path(s)>\n" << RunNodeCmd::desc() << "\n";

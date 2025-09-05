@@ -60,8 +60,9 @@ QWidget* MessageItemWidget::realWidget() {
 void MessageItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 

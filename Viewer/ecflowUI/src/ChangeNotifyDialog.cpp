@@ -197,14 +197,16 @@ void ChangeNotifyDialogWidget::readSettings(const QSettings& settings) {
     QList<int> wVec;
     if (settings.contains("colWidth")) {
         wVec = settings.value("colWidth").value<QList<int>>();
-        if (wVec.count() > 0 && wVec[0] < 1)
+        if (wVec.count() > 0 && wVec[0] < 1) {
             wVec.clear();
+        }
     }
 
     if (!wVec.isEmpty()) {
         for (int i = 0; i < tree_->model()->columnCount(QModelIndex()); i++) {
-            if (wVec.count() > i && wVec[i] > 0)
+            if (wVec.count() > i && wVec[i] > 0) {
                 tree_->setColumnWidth(i, wVec[i]);
+            }
         }
     }
     else {
@@ -296,8 +298,9 @@ void ChangeNotifyDialog::slotSelectionChanged(VInfo_ptr info) {
     // Moves the dialogue to the virtual workspace of the first
     // mainwindow and then switches the workspace
     if (switchWsProp_ && switchWsProp_->value().toBool()) {
-        if (WmWorkspaceHandler::switchTo(this, MainWindow::firstWindow()))
+        if (WmWorkspaceHandler::switchTo(this, MainWindow::firstWindow())) {
             raise();
+        }
     }
 
     MainWindow::lookUpInTree(info);
@@ -347,8 +350,9 @@ void ChangeNotifyDialog::clearCurrentData() {
     if (idx != -1) {
         UI_ASSERT(idx < stacked_->count(), "idx=" << idx << " stacked_->count()=" << stacked_->count());
         UI_ASSERT(idx >= 0, "idx=" << idx);
-        if (ChangeNotify* ntf = indexToNtf(idx))
+        if (ChangeNotify* ntf = indexToNtf(idx)) {
             ntf->clearData();
+        }
     }
 }
 
@@ -386,8 +390,9 @@ int ChangeNotifyDialog::ntfToIndex(ChangeNotify* ntf) {
                                    << " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
 
     for (int i = 0; i < stacked_->count(); i++) {
-        if (ntfWidgets_[i]->notifier() == ntf)
+        if (ntfWidgets_[i]->notifier() == ntf) {
             return i;
+        }
     }
 
     return -1;

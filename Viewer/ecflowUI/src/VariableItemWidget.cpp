@@ -216,8 +216,9 @@ QString VariablePropDialog::value() const {
 void VariablePropDialog::notifyCleared(VariableModelDataHandler*) {
     // When we are not in suspended mode and the data_ is cleared
     // we need to close the dialogue
-    if (!suspended_)
+    if (!suspended_) {
         close();
+    }
 
     // However, when the suspended mode finished the data_ is cleared and reloaded before
     // this dialogue gets the notification about the suspended mode change. So
@@ -247,8 +248,9 @@ void VariablePropDialog::notifyUpdated(VariableModelDataHandler*) {
 }
 
 void VariablePropDialog::slotSuspendedChanged(bool s) {
-    if (cleared_)
+    if (cleared_) {
         return;
+    }
 
     if (s) {
         messageLabel_->showWarning("The server holding " + nodeType_ + " <b>" + nodeName_ + "</b> is being reloaded. \
@@ -472,8 +474,9 @@ QString VariableAddDialog::value() const {
 void VariableAddDialog::notifyCleared(VariableModelDataHandler*) {
     // When we are not in suspended mode and the data_ is cleared
     // we need to close the dialogue
-    if (!suspended_)
+    if (!suspended_) {
         close();
+    }
 
     // However, when the suspended mode finished the data_ is cleared and reloaded before
     // this dialogue gets the notification about the suspended mode change. So
@@ -492,8 +495,9 @@ void VariableAddDialog::notifyCleared(VariableModelDataHandler*) {
 }
 
 void VariableAddDialog::slotSuspendedChanged(bool s) {
-    if (cleared_)
+    if (cleared_) {
         return;
+    }
 
     if (s) {
         messageLabel_->showWarning("The server holding " + nodeType_ + " <b>" + nodeName_ + "</b> is being reloaded. \
@@ -689,8 +693,9 @@ QWidget* VariableItemWidget::realWidget() {
 void VariableItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 
@@ -733,8 +738,9 @@ void VariableItemWidget::slotItemSelected(const QModelIndex& idx, const QModelIn
 
     // remembers the last clicked variable
     UiLog().dbg() << idx;
-    if (canSaveLastSelection_)
+    if (canSaveLastSelection_) {
         lastSelection_ = model_->indexToInfo(sortModel_->mapToSource(idx));
+    }
 
     checkActionState();
 }
@@ -796,13 +802,16 @@ void VariableItemWidget::checkActionState() {
             else {
                 int block = -1;
                 if (model_->indexToData(index, block)) {
-                    if (block == 0)
+                    if (block == 0) {
                         actionDelete->setEnabled(true);
-                    else
+                    }
+                    else {
                         actionDelete->setEnabled(false);
+                    }
                 }
-                else
+                else {
                     actionDelete->setEnabled(false);
+                }
             }
             actionProp->setEnabled(true);
             actionCopy->setEnabled(true);
@@ -869,8 +878,9 @@ void VariableItemWidget::editItem(const QModelIndex& index) {
 }
 
 void VariableItemWidget::duplicateItem(const QModelIndex&) {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 
 #if 0
     QString name;
@@ -897,8 +907,9 @@ void VariableItemWidget::duplicateItem(const QModelIndex&) {
 }
 
 void VariableItemWidget::addItem(const QModelIndex&) {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 
     if (data_->count() > 0) {
         // Start add dialog (will be deleted on close - deleteOnClose is set)
@@ -910,8 +921,9 @@ void VariableItemWidget::addItem(const QModelIndex&) {
 }
 
 void VariableItemWidget::removeItem(const QModelIndex& index) {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 
     QString name;
     QString value;
@@ -945,10 +957,12 @@ void VariableItemWidget::removeItem(const QModelIndex& index) {
                 std::string msg =
                     "Could not delete variable=<b>" + name.toStdString() + "</b> from node <b>" + nodeName + "</b>!";
 
-                if (block == -1)
+                if (block == -1) {
                     msg += " Node does not exist.";
-                else
+                }
+                else {
                     msg += " Variable does not exist.";
+                }
 
                 UserMessage::message(UserMessage::ERROR, true, msg);
             }
@@ -982,8 +996,9 @@ void VariableItemWidget::slotVariableAdded() {
 }
 
 void VariableItemWidget::on_varView_doubleClicked(const QModelIndex& index) {
-    if (!suspended_)
+    if (!suspended_) {
         editItem(index);
+    }
 }
 
 void VariableItemWidget::on_actionProp_triggered() {
@@ -1027,10 +1042,12 @@ void VariableItemWidget::on_actionCopy_triggered() {
     bool gen = false;
 
     if (model_->variable(idx, name, val, gen)) {
-        if (idx.column() == 0)
+        if (idx.column() == 0) {
             toClipboard(name);
-        else if (idx.column() == 1)
+        }
+        else if (idx.column() == 1) {
             toClipboard(val);
+        }
     }
 }
 
@@ -1140,8 +1157,9 @@ void VariableItemWidget::saveExpandState() {
 }
 
 void VariableItemWidget::restoreExpandState() {
-    if (expanded_.isEmpty())
+    if (expanded_.isEmpty()) {
         varView->expandAll();
+    }
     else {
         for (int i = 0; i < varView->model()->rowCount() && i < expanded_.count(); i++) {
             varView->setExpanded(varView->model()->index(i, 0), expanded_[i]);

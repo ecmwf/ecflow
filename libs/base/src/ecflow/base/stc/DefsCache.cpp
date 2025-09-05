@@ -70,10 +70,12 @@ defs_ptr DefsCache::restore_defs_from_string(const std::string& archive_data) {
     }
 
 #ifdef DEBUG_CLIENT_SYNC
-    if (defs.get())
+    if (defs.get()) {
         cout << ": valid defs";
-    else
+    }
+    else {
         cout << ": *empty* defs?";
+    }
 #endif
     return defs;
 }

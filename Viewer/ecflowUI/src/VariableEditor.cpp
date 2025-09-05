@@ -40,13 +40,15 @@ VariableEditor::VariableEditor(VInfo_ptr info, QWidget* parent)
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "var" || a->type()->name() == "genvar");
 
-    if (a->data().count() < 2)
+    if (a->data().count() < 2) {
         return;
+    }
 
     QString name = a->data().at(1);
     QString val;
-    if (a->data().count() > 2)
+    if (a->data().count() > 2) {
         val = a->data().at(2);
+    }
 
     oriVal_ = val;
 

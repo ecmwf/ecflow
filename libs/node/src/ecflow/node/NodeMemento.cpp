@@ -59,22 +59,25 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
 
     // determine if state changed
     if (st_.first.state_change_no() > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<NodeStateMemento>(std::make_pair(st_.first.state(), st_.second)));
     }
 
     // determine if def status changed
     if (d_st_.state_change_no() > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<NodeDefStatusDeltaMemento>(d_st_.state()));
     }
 
     // determine if node suspend changed
     if (suspended_change_no_ > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<SuspendedMemento>(suspended_));
     }
 
@@ -92,8 +95,9 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
 #endif
         // Note: auto-cancel does not have any alterable state hence, *NO* memento
 
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->clear_attributes();
 
         for (const Meter& m : meters_) {
@@ -129,8 +133,9 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
 
         if (misc_attrs_) {
             const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
-            if (!verify_attrs.empty())
+            if (!verify_attrs.empty()) {
                 comp->add(std::make_shared<NodeVerifyMemento>(verify_attrs));
+            }
 
             const std::vector<ZombieAttr>& zombie_attrs = misc_attrs_->zombies();
             for (const ZombieAttr& attr : zombie_attrs) {
@@ -157,14 +162,18 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
 
         inLimitMgr_.get_memento(comp);
 
-        if (t_expr_)
+        if (t_expr_) {
             comp->add(std::make_shared<NodeTriggerMemento>(*t_expr_));
-        if (c_expr_)
+        }
+        if (c_expr_) {
             comp->add(std::make_shared<NodeCompleteMemento>(*c_expr_));
-        if (!repeat_.empty())
+        }
+        if (!repeat_.empty()) {
             comp->add(std::make_shared<NodeRepeatMemento>(repeat_));
-        if (late_)
+        }
+        if (late_) {
             comp->add(std::make_shared<NodeLateMemento>(*late_));
+        }
 
         comp->add(std::make_shared<FlagMemento>(flag_));
 
@@ -181,36 +190,41 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
     // determine if event, meter, label   changed.
     for (const Event& e : events_) {
         if (e.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeEventMemento>(e));
         }
     }
     for (const Meter& m : meters_) {
         if (m.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeMeterMemento>(m));
         }
     }
     for (const Label& l : labels_) {
         if (l.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeLabelMemento>(l));
         }
     }
     for (const auto& a : avisos_) {
         if (a.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeAvisoMemento>(a));
         }
     }
     for (const auto& a : mirrors_) {
         if (a.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeMirrorMemento>(a));
         }
     }
@@ -218,36 +232,41 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
     // Determine if the time related dependency changed
     for (const TodayAttr& attr : todays_) {
         if (attr.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeTodayMemento>(attr));
         }
     }
     for (const TimeAttr& attr : times_) {
         if (attr.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeTimeMemento>(attr));
         }
     }
     for (const DayAttr& attr : days_) {
         if (attr.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeDayMemento>(attr));
         }
     }
     for (const DateAttr& attr : dates_) {
         if (attr.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeDateMemento>(attr));
         }
     }
     for (const CronAttr& attr : crons_) {
         if (attr.state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeCronMemento>(attr));
         }
     }
@@ -257,8 +276,9 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
         const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
         for (const QueueAttr& attr : queue_attrs) {
             if (attr.state_change_no() > client_state_change_no) {
-                if (!comp.get())
+                if (!comp.get()) {
                     comp = std::make_shared<CompoundMemento>(absNodePath());
+                }
                 comp->add(std::make_shared<NodeQueueIndexMemento>(attr.name(), attr.index(), attr.state_vec()));
             }
         }
@@ -268,8 +288,9 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
         const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
         for (const VerifyAttr& v : verify_attrs) {
             if (v.state_change_no() > client_state_change_no) {
-                if (!comp.get())
+                if (!comp.get()) {
                     comp = std::make_shared<CompoundMemento>(absNodePath());
+                }
                 comp->add(std::make_shared<NodeVerifyMemento>(verify_attrs));
                 break;
             }
@@ -278,36 +299,41 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
 
     // determine if the trigger or complete changed
     if (t_expr_ && t_expr_->state_change_no() > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<NodeTriggerMemento>(*t_expr_));
     }
     if (c_expr_ && c_expr_->state_change_no() > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<NodeCompleteMemento>(*c_expr_));
     }
 
     // determine if the repeat changed
     if (!repeat_.empty() && repeat_.state_change_no() > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<NodeRepeatIndexMemento>(repeat_));
     }
 
     // determine if limits changed.
     for (limit_ptr l : limits_) {
         if (l->state_change_no() > client_state_change_no) {
-            if (!comp.get())
+            if (!comp.get()) {
                 comp = std::make_shared<CompoundMemento>(absNodePath());
+            }
             comp->add(std::make_shared<NodeLimitMemento>(*l));
         }
     }
 
     // determine if variable values changed. Copy all variables. Save on having variable_change_no_ per variable
     if (variable_change_no_ > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         for (const Variable& v : vars_) {
             comp->add(std::make_shared<NodeVariableMemento>(v));
         }
@@ -315,15 +341,17 @@ void Node::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) c
 
     // Determine if the late attribute has changed
     if (late_ && late_->state_change_no() > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<NodeLateMemento>(*late_));
     }
 
     // Determine if the flag changed
     if (flag_.state_change_no() > client_state_change_no) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<FlagMemento>(flag_));
     }
 
@@ -339,8 +367,9 @@ void Node::set_memento(const NodeStateMemento* memento, std::vector<ecf::Aspect:
               << NState::toString(memento->state_) << "\n";
 #endif
 
-    if (aspect_only)
+    if (aspect_only) {
         aspects.push_back(ecf::Aspect::STATE);
+    }
     else {
         setStateOnly(memento->state_.first);
         st_.second = memento->state_.second;
@@ -355,10 +384,12 @@ void Node::set_memento(const NodeDefStatusDeltaMemento* memento,
     std::cout << "Node::set_memento(const NodeDefStatusDeltaMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-    if (aspect_only)
+    if (aspect_only) {
         aspects.push_back(ecf::Aspect::DEFSTATUS);
-    else
+    }
+    else {
         d_st_.setState(memento->state_);
+    }
 }
 
 void Node::set_memento(const SuspendedMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
@@ -370,10 +401,12 @@ void Node::set_memento(const SuspendedMemento* memento, std::vector<ecf::Aspect:
         return;
     }
 
-    if (memento->suspended_)
+    if (memento->suspended_) {
         suspend();
-    else
+    }
+    else {
         resume();
+    }
 }
 
 void Node::set_memento(const NodeEventMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
@@ -531,10 +564,12 @@ void Node::set_memento(const NodeTriggerMemento* memento, std::vector<ecf::Aspec
     }
 
     if (t_expr_) {
-        if (memento->exp_.isFree())
+        if (memento->exp_.isFree()) {
             freeTrigger();
-        else
+        }
+        else {
             clearTrigger();
+        }
         return;
     }
     add_trigger_expression(memento->exp_);
@@ -553,10 +588,12 @@ void Node::set_memento(const NodeCompleteMemento* memento, std::vector<ecf::Aspe
     }
 
     if (c_expr_) {
-        if (memento->exp_.isFree())
+        if (memento->exp_.isFree()) {
             freeComplete();
-        else
+        }
+        else {
             clearComplete();
+        }
         return;
     }
     add_complete_expression(memento->exp_);
@@ -774,10 +811,12 @@ void Node::set_memento(const NodeDateMemento* memento, std::vector<ecf::Aspect::
         // We need to ignore state changes (ie we don't use equality operator)
         // otherwise attributes will never compare
         if (date.structureEquals(memento->attr_)) {
-            if (memento->attr_.isSetFree())
+            if (memento->attr_.isSetFree()) {
                 date.setFree();
-            else
+            }
+            else {
                 date.clearFree();
+            }
             return;
         }
     }
@@ -813,10 +852,12 @@ void Node::set_memento(const FlagMemento* memento, std::vector<ecf::Aspect::Type
     std::cout << "Node::set_memento(const FlagMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-    if (aspect_only)
+    if (aspect_only) {
         aspects.push_back(ecf::Aspect::FLAG);
-    else
+    }
+    else {
         flag_.set_flag(memento->flag_.flag());
+    }
 }
 
 void Node::set_memento(const NodeZombieMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {

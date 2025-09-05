@@ -446,10 +446,12 @@ BOOST_AUTO_TEST_CASE(test_order_by_runtime) {
         s->set_state(NState::ACTIVE);
 
         defs.updateCalendar(calUpdateParams);
-        if (s->name() == "t2" || s->name() == "t1")
+        if (s->name() == "t2" || s->name() == "t1") {
             defs.updateCalendar(calUpdateParams);
-        if (s->name() == "t1")
+        }
+        if (s->name() == "t1") {
             defs.updateCalendar(calUpdateParams);
+        }
         s->set_state(NState::COMPLETE);
     }
 

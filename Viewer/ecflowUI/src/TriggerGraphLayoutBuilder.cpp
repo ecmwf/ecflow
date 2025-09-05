@@ -83,8 +83,9 @@ void SimpleGraphLayoutBuilder::build(std::vector<GraphLayoutNode*>& nodes,
 bool SimpleGraphLayoutBuilder::hasManagedParent(SimpleGraphLayoutNode* n) const {
     for (auto i : n->parents_) {
         auto p = nodes_[i];
-        if (p->managed_)
+        if (p->managed_) {
             return true;
+        }
     }
     return false;
 }
@@ -92,15 +93,17 @@ bool SimpleGraphLayoutBuilder::hasManagedParent(SimpleGraphLayoutNode* n) const 
 bool SimpleGraphLayoutBuilder::hasManagedChild(SimpleGraphLayoutNode* n) const {
     for (auto i : n->children_) {
         auto p = nodes_[i];
-        if (p->managed_)
+        if (p->managed_) {
             return true;
+        }
     }
     return false;
 }
 
 int SimpleGraphLayoutBuilder::compute_level(SimpleGraphLayoutNode* item) {
-    if (item->visited_)
+    if (item->visited_) {
         return -1;
+    }
 
     item->visited_ = true;
 
@@ -123,8 +126,9 @@ void SimpleGraphLayoutBuilder::compute_level_pass2(SimpleGraphLayoutNode* item) 
     int lvl1 = 12000;
     for (auto i : item->children_) {
         auto ch = nodes_[i];
-        if (ch->managed_)
+        if (ch->managed_) {
             lvl1 = std::min(lvl1, ch->level_);
+        }
     }
     item->level_ = lvl1 - 1;
 }
@@ -137,8 +141,9 @@ void SimpleGraphLayoutBuilder::compute_y(const std::vector<int>& nodes,
                                          int v_dist) {
     int max = max_in_a_level * v_dist;
 
-    for (int i = 0; i < levelNum; i++)
+    for (int i = 0; i < levelNum; i++) {
         positions[i] = ((max / levels[i]) - (max / max_in_a_level)) / 2;
+    }
 
     for (size_t i = 0; i < nodes.size(); i++) {
         auto item = nodes_[nodes[i]];
@@ -148,16 +153,18 @@ void SimpleGraphLayoutBuilder::compute_y(const std::vector<int>& nodes,
 }
 
 void SimpleGraphLayoutBuilder::set_arc(SimpleGraphLayoutNode* item, int arc) {
-    if (item->visited_)
+    if (item->visited_) {
         return;
+    }
 
     item->visited_ = true;
     item->arc_     = arc;
 
     for (auto i : item->parents_) {
         auto p = nodes_[i];
-        if (p->managed_)
+        if (p->managed_) {
             set_arc(p, arc);
+        }
     }
 
     item->visited_ = false;
@@ -166,8 +173,9 @@ void SimpleGraphLayoutBuilder::set_arc(SimpleGraphLayoutNode* item, int arc) {
 int SimpleGraphLayoutBuilder::compute_arc(SimpleGraphLayoutNode* item) {
     int a = item->arc_;
 
-    if (item->visited_)
+    if (item->visited_) {
         return 0;
+    }
 
     item->visited_ = true;
 
@@ -216,8 +224,9 @@ bool SimpleGraphLayoutBuilder::addDummy(int nodeIndex) {
     int more  = false;
     int level = n->level_;
 
-    if (n->visited_)
+    if (n->visited_) {
         return false;
+    }
 
     n->visited_ = true;
 
@@ -276,19 +285,22 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
     std::vector<int> nodes;
     for (size_t i = 0; i < nodes_.size(); i++) {
         auto item = nodes_[i];
-        if (item->managed_)
+        if (item->managed_) {
             nodes.push_back(i);
+        }
 
         // item->x_ = item->y_ = 0;
         item->level_ = item->arc_ = -1;
         item->visited_            = false;
     }
 
-    if (nodes.empty())
+    if (nodes.empty()) {
         return;
+    }
 
-    if (!focus)
+    if (!focus) {
         focus = nodes_[focus_];
+    }
 
     std::vector<int> levels(nodes.size(), 0);
     std::vector<int> widths(nodes.size(), 0);
@@ -314,8 +326,9 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
 
     for (auto i : nodes) {
         auto item = nodes_[i];
-        if (!hasManagedParent(item) && hasManagedChild(item))
+        if (!hasManagedParent(item) && hasManagedChild(item)) {
             compute_level_pass2(item);
+        }
     }
 
     // printState(nodes);
@@ -371,34 +384,40 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
     for (size_t a = 0; a < 2; a++) {
         for (auto i : nodes) {
             auto item = nodes_[i];
-            if (!hasManagedChild(item))
+            if (!hasManagedChild(item)) {
                 compute_arc(item);
+            }
         }
         for (auto i : nodes) {
             auto item = nodes_[i];
-            if (!hasManagedChild(item))
+            if (!hasManagedChild(item)) {
                 set_arc(item, item->arc_);
+            }
         }
     }
 
     // sort by arc
     std::sort(nodes.begin(), nodes.end(), [this](int idx1, int idx2) {
-        if (nodes_[idx1]->level_ != nodes_[idx2]->level_)
+        if (nodes_[idx1]->level_ != nodes_[idx2]->level_) {
             return nodes_[idx1]->level_ < nodes_[idx2]->level_;
+        }
 
         return nodes_[idx1]->arc_ < nodes_[idx2]->arc_;
     });
 
-    for (int a = 0; a < levelNum; a++)
-        if (levels[a] == 0)
+    for (int a = 0; a < levelNum; a++) {
+        if (levels[a] == 0) {
             levels[a] = 1;
+        }
+    }
 
     compute_y(nodes, levels, positions, max_in_a_level, levelNum, V_DIST);
 
     // sort by tmpY
     std::sort(nodes.begin(), nodes.end(), [this](int idx1, int idx2) {
-        if (nodes_[idx1]->level_ != nodes_[idx2]->level_)
+        if (nodes_[idx1]->level_ != nodes_[idx2]->level_) {
             return nodes_[idx1]->level_ < nodes_[idx2]->level_;
+        }
 
         return nodes_[idx1]->y_ < nodes_[idx2]->y_;
     });
@@ -440,8 +459,9 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
 
             // sort by tmpY
             std::sort(nodes.begin(), nodes.end(), [this](int idx1, int idx2) {
-                if (nodes_[idx1]->level_ != nodes_[idx2]->level_)
+                if (nodes_[idx1]->level_ != nodes_[idx2]->level_) {
                     return nodes_[idx1]->level_ < nodes_[idx2]->level_;
+                }
 
                 return nodes_[idx1]->y_ < nodes_[idx2]->y_;
             });
@@ -455,14 +475,17 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
                 for (size_t i = 1; i < nodes.size(); i++) {
                     auto item     = nodes_[nodes[i]];
                     auto itemPrev = nodes_[nodes[i - 1]];
-                    if (itemPrev->level_ == item->level_)
+                    if (itemPrev->level_ == item->level_) {
                         if ((item->y_ - itemPrev->y_) < heights[item->level_]) {
-                            if (itemPrev != focus)
+                            if (itemPrev != focus) {
                                 itemPrev->y_ -= heights[item->level_] / 2;
-                            if (item != focus)
+                            }
+                            if (item != focus) {
                                 item->y_ += heights[item->level_] / 2;
+                            }
                             chg = true;
                         }
+                    }
                 }
             }
         }
@@ -473,10 +496,12 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
 
     for (size_t i = 1; i < nodes.size(); i++) {
         auto item = nodes_[nodes[i]];
-        if (item->x_ < minX)
+        if (item->x_ < minX) {
             minX = item->x_;
-        if (item->y_ < minY)
+        }
+        if (item->y_ < minY) {
             minY = item->y_;
+        }
     }
 
     minX -= 20;
@@ -498,13 +523,15 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy) {
     // set width for dummy nodes
     std::vector<int> minW(levelNum, 100000);
     for (auto n : nodes_) {
-        if (!n->dummy_ && n->level_ >= 0)
+        if (!n->dummy_ && n->level_ >= 0) {
             minW[n->level_] = std::min(minW[n->level_], n->width_);
+        }
     }
 
     for (auto n : nodes_) {
-        if (n->dummy_ && n->level_ >= 0 && n->level_ < static_cast<int>(minW.size()))
+        if (n->dummy_ && n->level_ >= 0 && n->level_ < static_cast<int>(minW.size())) {
             n->width_ = minW[n->level_];
+        }
     }
 
     // printState(nodes);

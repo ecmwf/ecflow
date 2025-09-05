@@ -57,10 +57,12 @@ std::string ClockAttr::toString() const {
 void ClockAttr::write(std::string& ss) const {
     if (!end_clock_) {
         ss += "clock ";
-        if (hybrid_)
+        if (hybrid_) {
             ss += "hybrid ";
-        else
+        }
+        else {
             ss += "real ";
+        }
     }
     else {
         ss += "endclock ";
@@ -76,8 +78,9 @@ void ClockAttr::write(std::string& ss) const {
     }
 
     if (gain_ != 0) {
-        if (positiveGain_)
+        if (positiveGain_) {
             ss += "+";
+        }
         ss += ecf::convert_to<std::string>(gain_);
     }
 }

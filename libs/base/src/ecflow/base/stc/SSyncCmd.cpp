@@ -109,10 +109,12 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
         incremental_changes_.set_server_state_change_no(Ecf::state_change_no());
         incremental_changes_.set_server_modify_change_no(Ecf::modify_change_no());
 #ifdef DEBUG_SERVER_SYNC
-        if (incremental_changes_.size())
+        if (incremental_changes_.size()) {
             cout << ":*small* scale changes: no of changes(" << incremental_changes_.size() << ")\n";
-        else
+        }
+        else {
             cout << ": *No changes*\n";
+        }
 #endif
         //      LOG(Log::DBG,"SSyncCmd::init incremental_changes_.size() " << incremental_changes_.size() << "
         //      Ecf::state_change_no()-client_state_change_no " << Ecf::state_change_no()-client_state_change_no );
@@ -176,10 +178,12 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
     incremental_changes_.set_server_state_change_no(max_client_handle_state_change_no);
     incremental_changes_.set_server_modify_change_no(max_client_handle_modify_change_no);
 #ifdef DEBUG_SERVER_SYNC
-    if (incremental_changes_.size())
+    if (incremental_changes_.size()) {
         cout << ": *small* scale changes: no of changes(" << incremental_changes_.size() << ")\n";
-    else
+    }
+    else {
         cout << ": *No changes*\n";
+    }
 #endif
 }
 
@@ -234,10 +238,12 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
     }
 
 #ifdef DEBUG_SERVER_SYNC
-    if (the_server_defs)
+    if (the_server_defs) {
         cout << ": no of suites(" << the_server_defs->suiteVec().size() << ")" << endl;
-    else
+    }
+    else {
         cout << ": NULL defs!" << endl;
+    }
 #endif
 }
 
@@ -250,8 +256,9 @@ void SSyncCmd::cleanup() {
 
 bool SSyncCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SSyncCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 
@@ -280,9 +287,10 @@ bool SSyncCmd::do_sync(ServerReply& server_reply, bool debug) const {
         server_reply.client_defs_ = server_defs;
         server_reply.set_sync(true);
         server_reply.set_full_sync(true);
-        if (debug)
+        if (debug) {
             cout << "  SSyncCmd::do_sync::*FULL sync*, client side state/modify numbers("
                  << server_defs->state_change_no() << "," << server_defs->modify_change_no() << ")\n";
+        }
 #ifdef DEBUG_CLIENT_SYNC
         cout << "SSyncCmd::do_sync: defs *FULL sync*, client side state/modify numbers("
              << server_defs->state_change_no() << "," << server_defs->modify_change_no() << ")\n";
@@ -307,10 +315,11 @@ bool SSyncCmd::do_sync(ServerReply& server_reply, bool debug) const {
         }
         server_reply.set_sync(true);
         server_reply.set_full_sync(true);
-        if (debug)
+        if (debug) {
             cout << "  SSyncCmd::do_sync::*FULL CACHE sync*, client side state/modify numbers("
                  << server_reply.client_defs_->state_change_no() << "," << server_reply.client_defs_->modify_change_no()
                  << ")\n";
+        }
 #ifdef DEBUG_CLIENT_SYNC
         cout << ": client side state/modify numbers(" << server_reply.client_defs_->state_change_no() << ","
              << server_reply.client_defs_->modify_change_no() << ")\n";
@@ -340,11 +349,12 @@ bool SSyncCmd::do_sync(ServerReply& server_reply, bool debug) const {
             server_reply.client_defs_, server_reply.changed_nodes(), server_reply.client_handle());
         server_reply.set_sync(changes_made_to_client);
 
-        if (debug)
+        if (debug) {
             cout << "  SSyncCmd::do_sync::*INCREMENTAL sync*, client side state/modify numbers("
                  << incremental_changes_.get_server_state_change_no() << ","
                  << incremental_changes_.get_server_modify_change_no() << ") changes_made_to_client("
                  << changes_made_to_client << ")\n";
+        }
 
 #ifdef DEBUG_CLIENT_SYNC
         cout << "SSyncCmd::do_sync::*INCREMENTAL sync*, client side state/modify numbers("

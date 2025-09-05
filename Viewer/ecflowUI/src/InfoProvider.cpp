@@ -31,8 +31,9 @@ InfoProvider::InfoProvider(InfoPresenter* owner, VTask::Type taskType)
     : owner_(owner),
       reply_(new VReply(this)),
       taskType_(taskType) {
-    if (owner_)
+    if (owner_) {
         owner_->registerInfoProvider(this);
+    }
 }
 
 InfoProvider::~InfoProvider() {
@@ -63,8 +64,9 @@ void InfoProvider::clear() {
 
 void InfoProvider::setActive(bool b) {
     active_ = b;
-    if (!active_)
+    if (!active_) {
         clear();
+    }
 }
 
 void InfoProvider::setAutoUpdate(bool b) {
@@ -80,8 +82,9 @@ void InfoProvider::info(VInfo_ptr info) {
         task_.reset();
     }
 
-    if (owner_ && info_)
+    if (owner_ && info_) {
         info_->accept(this);
+    }
 }
 
 // Server
@@ -165,8 +168,9 @@ bool InfoProvider::handleFileMissing(const std::string& /*fileName*/, VReply* /*
 }
 
 void InfoProvider::taskChanged(VTask_ptr task) {
-    if (task_ != task)
+    if (task_ != task) {
         return;
+    }
 
     // temporary hack!
     task_->reply()->setSender(this);

@@ -60,8 +60,9 @@ QWidget* JobStatusItemWidget::realWidget() {
 void JobStatusItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 

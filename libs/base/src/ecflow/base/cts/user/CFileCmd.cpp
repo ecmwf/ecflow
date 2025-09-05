@@ -36,18 +36,24 @@ CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, 
       max_lines_(File::MAX_LINES()) {
     // std::cout << "CFileCmd::CFileCmd the_max_lines " << the_max_lines << "\n";
 
-    if (file_type == "script")
+    if (file_type == "script") {
         file_ = CFileCmd::ECF;
-    else if (file_type == "job")
+    }
+    else if (file_type == "job") {
         file_ = CFileCmd::JOB;
-    else if (file_type == "jobout")
+    }
+    else if (file_type == "jobout") {
         file_ = CFileCmd::JOBOUT;
-    else if (file_type == "manual")
+    }
+    else if (file_type == "manual") {
         file_ = CFileCmd::MANUAL;
-    else if (file_type == "kill")
+    }
+    else if (file_type == "kill") {
         file_ = CFileCmd::KILL;
-    else if (file_type == "stat")
+    }
+    else if (file_type == "stat") {
         file_ = CFileCmd::STAT;
+    }
     else {
         std::stringstream ss;
         ss << "CFileCmd::CFileCmd: Unrecognised file type " << file_type
@@ -59,8 +65,9 @@ CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, 
         try {
             // Note: max_lines_ if type size_t, hence we cast to int to check for negative numbers
             auto the_max_lines = ecf::convert_to<int>(input_max_lines);
-            if (the_max_lines <= 0)
+            if (the_max_lines <= 0) {
                 the_max_lines = File::MAX_LINES();
+            }
             max_lines_ = the_max_lines;
         }
         catch (const ecf::bad_conversion&) {
@@ -112,8 +119,9 @@ std::string CFileCmd::toString(CFileCmd::File_t ft) {
 
 bool CFileCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<CFileCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     if (file_ != the_rhs->fileType()) {
         return false;
     }
@@ -211,8 +219,9 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 std::stringstream ss;
                 std::string user_jobout;
                 if (submittable->findParentUserVariableValue(ecf::environment::ECF_JOBOUT, user_jobout)) {
-                    if (File::open(user_jobout, fileContents))
+                    if (File::open(user_jobout, fileContents)) {
                         break;
+                    }
                     ss << "Failed to open user specified job-out(ECF_JOBOUT='" << user_jobout << "') ";
                 }
 
@@ -360,8 +369,9 @@ void CFileCmd::addOption(boost::program_options::options_description& desc) cons
 void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(CFileCmd::arg(), args);
+    }
 
     if (args.size() < 1) {
         std::stringstream ss;

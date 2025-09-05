@@ -54,14 +54,17 @@ static void waitForTimeDependenciesToBeFree(int max_time_to_wait) {
         for (Task* task : tasks) {
             size_t attSetFree = 0;
             for (const ecf::TimeAttr& timeAttr : task->timeVec()) {
-                if (timeAttr.isFree(task->suite()->calendar()))
+                if (timeAttr.isFree(task->suite()->calendar())) {
                     attSetFree++;
+                }
             }
-            if (attSetFree == task->timeVec().size())
+            if (attSetFree == task->timeVec().size()) {
                 taskTimeDepIsFree++;
+            }
         }
-        if (taskTimeDepIsFree == tasks.size())
+        if (taskTimeDepIsFree == tasks.size()) {
             break;
+        }
 
         BOOST_REQUIRE_MESSAGE(assertTimer.duration() < assertTimer.timeConstraint(),
                               "waitForTimeDependenciesToBeFree Test wait "

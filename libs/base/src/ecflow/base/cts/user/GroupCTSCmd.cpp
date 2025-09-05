@@ -40,8 +40,9 @@ namespace po = boost::program_options;
 GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* clientEnv) {
     std::vector<std::string> individualCmdVec;
     Str::split(cmdSeries, individualCmdVec, ";");
-    if (individualCmdVec.empty())
+    if (individualCmdVec.empty()) {
         throw std::runtime_error("GroupCTSCmd::GroupCTSCmd: Please provide a list of ';' separated commands\n");
+    }
     if (clientEnv->debug()) {
         for (const auto& i : individualCmdVec) {
             cout << "  CHILD COMMAND = " << i << "\n";
@@ -60,8 +61,9 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         ecf::algorithm::trim(aCmd);
 
         subCmd.clear();
-        if (aCmd.find("--") == std::string::npos)
+        if (aCmd.find("--") == std::string::npos) {
             subCmd = "--";
+        }
         subCmd += aCmd;
 
         // handle case like: alter add variable FRED "fre d ddy" /suite
@@ -72,16 +74,18 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         bool replaced_spaces = false;
         for (char& i : subCmd) {
             if (start_quote) {
-                if (i == '"' || i == '\'')
+                if (i == '"' || i == '\'') {
                     start_quote = false;
+                }
                 else if (i == ' ') {
                     i               = '\b'; // "fre d ddy"  => "fre\bd\bddy"
                     replaced_spaces = true;
                 }
             }
             else {
-                if (i == '"' || i == '\'')
+                if (i == '"' || i == '\'') {
                     start_quote = true;
+                }
             }
         }
 
@@ -92,8 +96,9 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         if (replaced_spaces) {
             for (auto& str : subCmdArgs) {
                 for (char& j : str) {
-                    if (j == '\b')
+                    if (j == '\b') {
                         j = ' '; // "fre\bd\bddy"  => "fre d ddy"
+                    }
                 }
             }
         }
@@ -144,16 +149,18 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
 
 bool GroupCTSCmd::isWrite() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->isWrite())
+        if (subCmd->isWrite()) {
             return true;
+        }
     }
     return false;
 }
 
 bool GroupCTSCmd::cmd_updates_defs() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->cmd_updates_defs())
+        if (subCmd->cmd_updates_defs()) {
             return true;
+        }
     }
     return false;
 }
@@ -167,8 +174,9 @@ void GroupCTSCmd::set_identity(ecf::Identity identity) {
 
 bool GroupCTSCmd::get_cmd() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->get_cmd())
+        if (subCmd->get_cmd()) {
             return true;
+        }
     }
     return false;
 }
@@ -177,32 +185,36 @@ PrintStyle::Type_t GroupCTSCmd::show_style() const {
     // Only return non default style( PrintStyle::NOTHING ) if sub command
     // contains a show cmd
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->show_cmd())
+        if (subCmd->show_cmd()) {
             return subCmd->show_style();
+        }
     }
     return PrintStyle::NOTHING;
 }
 
 bool GroupCTSCmd::task_cmd() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->task_cmd())
+        if (subCmd->task_cmd()) {
             return true;
+        }
     }
     return false;
 }
 
 bool GroupCTSCmd::terminate_cmd() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->terminate_cmd())
+        if (subCmd->terminate_cmd()) {
             return true;
+        }
     }
     return false;
 }
 
 bool GroupCTSCmd::why_cmd(std::string& nodePath) const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->why_cmd(nodePath))
+        if (subCmd->why_cmd(nodePath)) {
             return true;
+        }
     }
     return false;
 }
@@ -211,8 +223,9 @@ void GroupCTSCmd::print(std::string& os) const {
     std::string ret;
     size_t the_size = cmdVec_.size();
     for (size_t i = 0; i < the_size; i++) {
-        if (i != 0)
+        if (i != 0) {
             ret += "; ";
+        }
         cmdVec_[i]->print_only(ret); //  avoid overhead of user@host for each child command
     }
     user_cmd(os, CtsApi::group(ret));
@@ -222,8 +235,9 @@ std::string GroupCTSCmd::print_short() const {
     std::string ret;
     size_t the_size = cmdVec_.size();
     for (size_t i = 0; i < the_size; i++) {
-        if (i != 0)
+        if (i != 0) {
             ret += "; ";
+        }
         ret +=
             cmdVec_[i]
                 ->print_short(); // limit number of paths shown and avoid overhead of user@host for each child command
@@ -233,12 +247,14 @@ std::string GroupCTSCmd::print_short() const {
 
 bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<GroupCTSCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
 
     const std::vector<Cmd_ptr>& rhsCmdVec = the_rhs->cmdVec();
-    if (cmdVec_.size() != rhsCmdVec.size())
+    if (cmdVec_.size() != rhsCmdVec.size()) {
         return false;
+    }
 
     for (size_t i = 0; i < cmdVec_.size(); i++) {
         if (!cmdVec_[i]->equals(rhsCmdVec[i].get())) {
@@ -270,11 +286,13 @@ void GroupCTSCmd::setup_user_authentification(const std::string& user, const std
 }
 
 bool GroupCTSCmd::setup_user_authentification(AbstractClientEnv& env) {
-    if (!UserCmd::setup_user_authentification(env))
+    if (!UserCmd::setup_user_authentification(env)) {
         return false;
+    }
     for (auto& i : cmdVec_) {
-        if (!i->setup_user_authentification(env))
+        if (!i->setup_user_authentification(env)) {
             return false;
+        }
     }
     return true;
 }
@@ -412,8 +430,9 @@ void GroupCTSCmd::addOption(boost::program_options::options_description& desc) c
 }
 
 void GroupCTSCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         cout << "  " << arg() << ": Group Cmd '" << vm[arg()].as<std::string>() << "'\n";
+    }
 
     // Parse and split commands and then parse individually. Assumes commands are separated by ';'
     std::string cmdSeries = vm[GroupCTSCmd::arg()].as<std::string>();

@@ -24,12 +24,14 @@ bool InlimitParser::doParse(const std::string& line, std::vector<std::string>& l
     // inlimit -n /suite:queue1 2
     // inlimit -n fam
     size_t lineTokens_size = lineTokens.size();
-    if (lineTokens_size < 2)
+    if (lineTokens_size < 2) {
         throw std::runtime_error("InlimitParser::doParse: Invalid inlimit :" + line);
+    }
 
-    if (nodeStack().empty())
+    if (nodeStack().empty()) {
         throw std::runtime_error("InlimitParser::doParse: Could not add inlimit as node stack is empty at line: " +
                                  line);
+    }
 
     bool limit_this_node_only = false;
     int token_pos             = 1;

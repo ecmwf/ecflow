@@ -65,8 +65,9 @@ TextPagerDocument::~TextPagerDocument() {
         }
         Chunk* c = d->first;
         while (c) {
-            if (!(d->options & KeepTemporaryFiles) && !c->swap.isEmpty())
+            if (!(d->options & KeepTemporaryFiles) && !c->swap.isEmpty()) {
                 QFile::remove(c->swap);
+            }
             Chunk* tmp = c;
             c          = c->next;
             delete tmp;
@@ -76,8 +77,9 @@ TextPagerDocument::~TextPagerDocument() {
             section->d.textEdit = nullptr;
             delete section;
         }
-        if (d->ownDevice)
+        if (d->ownDevice) {
             delete d->device.data();
+        }
     }
     delete d->readWriteLock;
     delete d;
@@ -86,8 +88,9 @@ TextPagerDocument::~TextPagerDocument() {
 bool TextPagerDocument::load(QIODevice* device, DeviceMode mode, TextCodecWrapper codec) {
     QWriteLocker locker(d->readWriteLock);
     Q_ASSERT(device);
-    if (!device->isReadable())
+    if (!device->isReadable()) {
         return false;
+    }
 
     Options options = d->options;
     if (options & ConvertCarriageReturns && mode == Sparse) {
@@ -95,8 +98,9 @@ bool TextPagerDocument::load(QIODevice* device, DeviceMode mode, TextCodecWrappe
         options &= ~ConvertCarriageReturns;
     }
     if ((options & (AutoDetectCarriageReturns | ConvertCarriageReturns)) ==
-        (AutoDetectCarriageReturns | ConvertCarriageReturns))
+        (AutoDetectCarriageReturns | ConvertCarriageReturns)) {
         options &= ~AutoDetectCarriageReturns;
+    }
 
     Q_FOREACH (TextPagerSection* section, d->sections) {
         Q_EMIT sectionRemoved(section);
@@ -118,8 +122,9 @@ bool TextPagerDocument::load(QIODevice* device, DeviceMode mode, TextCodecWrappe
 
     d->textCodec    = codec;
     d->documentSize = device->size();
-    if (d->documentSize <= d->chunkSize && mode == Sparse && !(options & NoImplicitLoadAll))
+    if (d->documentSize <= d->chunkSize && mode == Sparse && !(options & NoImplicitLoadAll)) {
         mode = LoadAll;
+    }
 #if 0
     if (codec.hasValue() && mode == Sparse) {
 
@@ -129,8 +134,9 @@ bool TextPagerDocument::load(QIODevice* device, DeviceMode mode, TextCodecWrappe
     d->first = d->last = nullptr;
 
     if (d->device) {
-        if (d->ownDevice && d->device.data() != device) // this is done when saving to the same file
+        if (d->ownDevice && d->device.data() != device) { // this is done when saving to the same file
             delete d->device.data();
+        }
     }
 
     d->ownDevice  = false;
@@ -168,8 +174,9 @@ bool TextPagerDocument::load(QIODevice* device, DeviceMode mode, TextCodecWrappe
                     }
                     options &= ~AutoDetectCarriageReturns;
                 }
-                if (options & ConvertCarriageReturns)
+                if (options & ConvertCarriageReturns) {
                     c->data.remove(QLatin1Char('\r'));
+                }
                 d->documentSize += c->data.size();
                 if (current) {
                     current->next = c;
@@ -339,8 +346,9 @@ int TextPagerDocument::instantiatedChunkCount() const {
     Chunk* c  = d->first;
     int count = 0;
     while (c) {
-        if (!c->data.isEmpty())
+        if (!c->data.isEmpty()) {
             ++count;
+        }
         c = c->next;
     }
     return count;
@@ -351,8 +359,9 @@ int TextPagerDocument::swappedChunkCount() const {
     Chunk* c  = d->first;
     int count = 0;
     while (c) {
-        if (!c->swap.isEmpty())
+        if (!c->swap.isEmpty()) {
             ++count;
+        }
         c = c->next;
     }
     return count;
@@ -373,12 +382,14 @@ QTextCodec* TextPagerDocument::textCodec() const {
 class FindScope {
 public:
     explicit FindScope(TextDocumentPrivate::FindState* s) : state(s) {
-        if (state)
+        if (state) {
             *state = TextDocumentPrivate::Finding;
+        }
     }
     ~FindScope() {
-        if (state)
+        if (state) {
             *state = TextDocumentPrivate::NotFinding;
+        }
     }
     TextDocumentPrivate::FindState* state;
 };
@@ -399,8 +410,9 @@ static void initFind(const TextPagerCursor& cursor, bool reverse, int* start, in
 
 static void initFindForLines(const TextPagerCursor& cursor, bool reverse, int* start, int* limit) {
     *start = cursor.position();
-    if (*limit == -1)
+    if (*limit == -1) {
         *limit = (reverse ? 0 : cursor.document()->documentSize());
+    }
 
 #ifdef TEXTDOCUMENT_FIND_DEBUG
     qDebug() << "initial position"
@@ -413,14 +425,17 @@ static void initFindForLines(const TextPagerCursor& cursor, bool reverse, int* s
         int ca = cursor.anchor();
 
         if (!reverse) {
-            if (*start < ca)
+            if (*start < ca) {
                 *start = ca;
+            }
         }
         else {
-            if (*start > ca && ca > 0)
+            if (*start > ca && ca > 0) {
                 *start = ca - 1;
-            else if (*start > 0)
+            }
+            else if (*start > 0) {
                 *start = (*start) - 1;
+            }
         }
     }
 
@@ -441,8 +456,9 @@ TextPagerDocument::find(const QRegExp& regexp, const TextPagerCursor& cursor, Fi
         return TextPagerCursor();
     }
 
-    if (regexp.isEmpty())
+    if (regexp.isEmpty()) {
         return TextPagerCursor();
+    }
 
     QReadLocker locker(d->readWriteLock);
     if (flags & FindWholeWords) {
@@ -461,12 +477,14 @@ TextPagerDocument::find(const QRegExp& regexp, const TextPagerCursor& cursor, Fi
     ::initFindForLines(cursor, reverse, &pos, &limit);
 
     if (reverse) {
-        if (pos < limit)
+        if (pos < limit) {
             return TextPagerCursor();
+        }
     }
     else {
-        if (pos > limit)
+        if (pos > limit) {
             return TextPagerCursor();
+        }
     }
 
     if (pos == d->documentSize) {
@@ -522,8 +540,9 @@ TextPagerDocument::find(const QRegExp& regexp, const TextPagerCursor& cursor, Fi
 
         if (((reverse) ? it.prevLine(line) : it.nextLine(line)) == 0) {
             ok = false;
-            if (line.isEmpty())
+            if (line.isEmpty()) {
                 break;
+            }
         }
 
         // We only search for the first occurrence. So the FindAll flag is ignored.
@@ -656,12 +675,14 @@ TextPagerDocument::find(const QString& in, const TextPagerCursor& cursor, FindMo
     Q_ASSERT(limit >= 0 && limit <= d->documentSize);
 
     if (reverse) {
-        if (pos < limit)
+        if (pos < limit) {
             return TextPagerCursor();
+        }
     }
     else {
-        if (pos > limit)
+        if (pos > limit) {
             return TextPagerCursor();
+        }
     }
 
     if (pos == d->documentSize) {
@@ -690,8 +711,9 @@ TextPagerDocument::find(const QString& in, const TextPagerCursor& cursor, FindMo
     qDebug() << "current character:" << it.current();
 #endif
 
-    if (!caseSensitive)
+    if (!caseSensitive) {
         it.setConvertToLowerCase(true);
+    }
 
     bool ok = true;
     // QChar ch = it.current();
@@ -737,12 +759,14 @@ TextPagerDocument::find(const QString& in, const TextPagerCursor& cursor, FindMo
 
         if (((reverse) ? it.prevLine(line) : it.nextLine(line)) == 0) {
             ok = false;
-            if (line.isEmpty())
+            if (line.isEmpty()) {
                 break;
+            }
         }
 
-        if (!caseSensitive)
+        if (!caseSensitive) {
             line = line.toLower();
+        }
 
 #ifdef TEXTDOCUMENT_FIND_DEBUG
         // qDebug() << line;
@@ -945,8 +969,9 @@ TextPagerCursor TextPagerDocument::find(const QChar& chIn, const TextPagerCursor
             const TextPagerCursor ret(this, it.position() + 1, it.position());
             if (flags & FindAll) {
                 Q_EMIT entryFound(ret);
-                if (d->findState == TextDocumentPrivate::AbortFind)
+                if (d->findState == TextDocumentPrivate::AbortFind) {
                     return TextPagerCursor();
+                }
             }
             else {
                 return ret;
@@ -992,8 +1017,9 @@ static inline int count(const QString& string, int from, int size, const QChar& 
     const ushort* haystack = string.utf16() + from;
     int num                = 0;
     for (int i = 0; i < size; ++i) {
-        if (*haystack++ == needle)
+        if (*haystack++ == needle) {
             ++num;
+        }
     }
     //    Q_ASSERT(string.mid(from, size).count(ch) == num);
     return num;
@@ -1092,8 +1118,9 @@ bool TextPagerDocument::abortFind() const {
 
 QChar TextPagerDocument::readCharacter(int pos) const {
     QReadLocker locker(d->readWriteLock);
-    if (pos == d->documentSize)
+    if (pos == d->documentSize) {
         return {};
+    }
     Q_ASSERT(pos >= 0 && pos < d->documentSize);
 #ifndef NO_TEXTDOCUMENT_READ_CACHE
     #ifdef DEBUG_CACHE_HITS
@@ -1206,8 +1233,9 @@ int TextPagerDocument::columnNumber(const TextPagerCursor& cursor) const {
 }
 
 TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor& cursor) const {
-    if (lineNum <= 0)
+    if (lineNum <= 0) {
         return TextPagerCursor();
+    }
 
     lineNum--;
 
@@ -1267,16 +1295,19 @@ TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor& 
     }
 
 #ifdef TEXTDOCUMENT_FIND_DEBUG
-    if (c)
+    if (c) {
         qDebug() << "chunk found - first line:" << c->firstLineIndex << "pos:" << pos;
-    else
+    }
+    else {
         qDebug() << "chunk not found";
+    }
 #endif
     if (c && c->firstLineIndex != -1 && c->firstLineIndex <= lineNum) {
 
         current = c->firstLineIndex;
-        if (current == lineNum)
+        if (current == lineNum) {
             return TextPagerCursor(this, pos);
+        }
 
         QChar newline('\n');
         int index    = 0;
@@ -1343,15 +1374,17 @@ Chunk* TextDocumentPrivate::chunkAt(int p, int* offset) const {
     Q_ASSERT(first);
     Q_ASSERT(last);
     if (p == documentSize) {
-        if (offset)
+        if (offset) {
             *offset = last->size();
+        }
         return last;
     }
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
     Q_ASSERT(!cachedChunk || cachedChunkPos != -1);
     if (cachedChunk && p >= cachedChunkPos && p < cachedChunkPos + cachedChunkData.size()) {
-        if (offset)
+        if (offset) {
             *offset = p - cachedChunkPos;
+        }
         return cachedChunk;
     }
 #endif
@@ -1368,8 +1401,9 @@ Chunk* TextDocumentPrivate::chunkAt(int p, int* offset) const {
         Q_ASSERT(c);
     }
 
-    if (offset)
+    if (offset) {
         *offset = pos;
+    }
 
     Q_ASSERT(c);
     return c;
@@ -1478,8 +1512,9 @@ int TextDocumentPrivate::chunkIndex(const Chunk* c) const {
 }
 
 void TextDocumentPrivate::instantiateChunk(Chunk* chunk) {
-    if (chunk->from == -1 && chunk->swap.isEmpty())
+    if (chunk->from == -1 && chunk->swap.isEmpty()) {
         return;
+    }
     chunk->data = chunkData(chunk, -1);
     //    qDebug() << "instantiateChunk" << chunk << chunk->swap;
     chunk->swap.clear();
@@ -1527,8 +1562,9 @@ void TextDocumentPrivate::removeChunk(Chunk* c) {
 QString TextDocumentPrivate::wordAt(int position, int* start) const {
     TextDocumentIterator from(this, position);
     if (!q->isWordCharacter(from.current(), position)) {
-        if (start)
+        if (start) {
             *start = -1;
+        }
         return QString();
     }
 
@@ -1543,12 +1579,14 @@ QString TextDocumentPrivate::wordAt(int position, int* start) const {
     TextDocumentIterator to(this, position);
     while (to.hasNext()) {
         const QChar ch = to.next();
-        if (!q->isWordCharacter(ch, to.position()))
+        if (!q->isWordCharacter(ch, to.position())) {
             break;
+        }
     }
 
-    if (start)
+    if (start) {
         *start = from.position();
+    }
     return q->read(from.position(), to.position() - from.position());
 }
 
@@ -1560,8 +1598,9 @@ QString TextDocumentPrivate::paragraphAt(int position, int* start) const {
     TextDocumentIterator to(this, position);
     while (to.hasNext() && to.next() != newline)
         ;
-    if (start)
+    if (start) {
         *start = from.position();
+    }
     return q->read(from.position(), to.position() - from.position());
 }
 
@@ -1656,8 +1695,9 @@ int TextDocumentPrivate::countNewLines(Chunk* c, int chunkPos, int size) const {
                 ++c->lineNumbers[i / lineNumberCacheInterval];
                 //                 qDebug() << "found one at" << i << "put it in" << (i / lineNumberCacheInterval)
                 //                          << "chunkPos" << chunkPos;
-                if (i < size)
+                if (i < size) {
                     ++ret;
+                }
             }
         }
     }
@@ -1688,8 +1728,9 @@ int TextDocumentPrivate::countNewLines(Chunk* c, int chunkPos, int size) const {
 }
 
 void TextDocumentPrivate::swapOutChunk(Chunk* c) {
-    if (!c->swap.isEmpty())
+    if (!c->swap.isEmpty()) {
         return;
+    }
     Q_ASSERT(!c->data.isEmpty());
     c->from   = 0;
     c->length = c->data.size();
@@ -1734,8 +1775,9 @@ match(int pos, int size, const TextPagerSection* section, TextPagerSection::Text
     else if (flags & TextPagerSection::IncludePartial) {
         const int boundaries[] = {pos, pos + size - 1};
         for (int boundarie : boundaries) {
-            if (::match(boundarie, sectionPos, sectionSize))
+            if (::match(boundarie, sectionPos, sectionSize)) {
                 return true;
+            }
         }
     }
     return false;
@@ -1744,8 +1786,9 @@ match(int pos, int size, const TextPagerSection* section, TextPagerSection::Text
 static inline void filter(QList<TextPagerSection*>& sections, const TextPagerEdit* filter) {
     if (filter) {
         for (int i = sections.size() - 1; i >= 0; --i) {
-            if (!::matchSection(sections.at(i), filter))
+            if (!::matchSection(sections.at(i), filter)) {
                 sections.removeAt(i);
+            }
         }
     }
 }
@@ -1754,8 +1797,9 @@ QList<TextPagerSection*> TextDocumentPrivate::getSections(int pos,
                                                           int size,
                                                           TextPagerSection::TextSectionOptions flags,
                                                           const TextPagerEdit* filter) const {
-    if (size == -1)
+    if (size == -1) {
         size = documentSize - pos;
+    }
     QList<TextPagerSection*> ret;
     if (pos == 0 && size == documentSize) {
         ret = sections;
@@ -1778,8 +1822,9 @@ QList<TextPagerSection*> TextDocumentPrivate::getSections(int pos,
     if (flags & TextPagerSection::IncludePartial && it != sections.begin()) {
         QList<TextPagerSection*>::const_iterator prev = it;
         do {
-            if (::match(pos, size, *--prev, flags))
+            if (::match(pos, size, *--prev, flags)) {
                 ret.append(*prev);
+            }
         } while (prev != sections.begin());
     }
     while (it != sections.end()) {

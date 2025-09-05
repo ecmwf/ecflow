@@ -27,8 +27,9 @@ public:
         : createJobs_(createJobs),
           spawnJobs_(spawn_jobs),
           submitJobsInterval_(submitJobsInterval) {
-        if (!createJobs_)
+        if (!createJobs_) {
             spawnJobs_ = false;
+        }
     }
 
     // Disable copy (and move) semantics

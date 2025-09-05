@@ -36,16 +36,19 @@ void FontMetrics::computeRealHeight(QFont f) {
 
     int minRow = img.height() + 100;
     int maxRow = -1;
-    for (int i = 0; i < img.height(); i++)
+    for (int i = 0; i < img.height(); i++) {
         for (int j = 0; j < img.width(); j++) {
             QRgb c = img.pixel(j, i);
             if (qRed(c) != 255 || qGreen(c) != 255 || qBlue(c) != 255) {
-                if (i > maxRow)
+                if (i > maxRow) {
                     maxRow = i;
-                if (i < minRow)
+                }
+                if (i < minRow) {
                     minRow = i;
+                }
             }
         }
+    }
 
     if (minRow >= 0 && maxRow < img.height()) {
         realHeight_    = maxRow - minRow + 1;

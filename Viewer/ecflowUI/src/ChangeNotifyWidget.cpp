@@ -74,10 +74,12 @@ void ChangeNotifyButton::updateIcon() {
     int num = 0;
     if (notifier_->data()) {
         num = notifier_->data()->size();
-        if (num > 0 && num < 10)
+        if (num > 0 && num < 10) {
             numText = QString::number(num);
-        else if (num > 10)
+        }
+        else if (num > 10) {
             numText = "9+";
+        }
     }
 
     QColor bgCol(198, 198, 199);
@@ -103,10 +105,12 @@ void ChangeNotifyButton::updateIcon() {
     QFontMetrics fmNum(fNum);
 
     int w = 0;
-    if (!numText.isEmpty())
+    if (!numText.isEmpty()) {
         w = ViewerUtil::textWidth(fm, text) + 6 + ViewerUtil::textWidth(fm, numText) + 2;
-    else
+    }
+    else {
         w = ViewerUtil::textWidth(fm, text) + 6;
+    }
 
     int h = fm.height() + 2;
 
@@ -163,14 +167,16 @@ ChangeNotifyWidget::ChangeNotifyWidget(QWidget* parent) : QWidget(parent) {
 
 ChangeNotifyWidget::~ChangeNotifyWidget() {
     auto it = std::find(widgets_.begin(), widgets_.end(), this);
-    if (it != widgets_.end())
+    if (it != widgets_.end()) {
         widgets_.erase(it);
+    }
 }
 
 ChangeNotifyButton* ChangeNotifyWidget::findButton(const std::string& id) {
     auto it = buttons_.find(id);
-    if (it != buttons_.end())
+    if (it != buttons_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
@@ -204,8 +210,9 @@ void ChangeNotifyWidget::updateVisibility() {
 
 bool ChangeNotifyWidget::hasVisibleButton() const {
     for (const auto& button : buttons_) {
-        if (button.second->isEnabled())
+        if (button.second->isEnabled()) {
             return true;
+        }
     }
     return false;
 }

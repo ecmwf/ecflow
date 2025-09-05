@@ -138,9 +138,10 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
                     }
                 }
                 // no else branch since once today is free it stays free, unti re-queue
-                if (matches_free_slot)
+                if (matches_free_slot) {
                     BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                         timeSeries.toString() << " should be free at time " << time);
+                }
 
                 /// At the last time checkForRequeue should return false; This ensures that value will
                 /// not get incremented and so, should leave node in the complete state.
@@ -184,9 +185,10 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
                         break;
                     }
                 }
-                if (matches_free_slot)
+                if (matches_free_slot) {
                     BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),
                                         timeSeries2.toString() << " should be free at time " << time);
+                }
 
                 /// At the last time checkForRequeue should return false; This ensures that value will
                 /// not get incremented and so, should leave node in the complete state.

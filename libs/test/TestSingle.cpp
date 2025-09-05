@@ -101,15 +101,18 @@ BOOST_AUTO_TEST_CASE(test_stress) {
             std::vector<Task*> vec;
             defs->getAllTasks(vec);
             for (size_t i = 0; i < vec.size(); i++) {
-                if (vec[i]->get_state().first == NState::ACTIVE)
+                if (vec[i]->get_state().first == NState::ACTIVE) {
                     no_of_active_tasks++;
-                else if (vec[i]->get_state().first == NState::SUBMITTED)
+                }
+                else if (vec[i]->get_state().first == NState::SUBMITTED) {
                     no_of_submitted_tasks++;
+                }
             }
             std::cout << "   still active:" << no_of_active_tasks << "  still submitted:" << no_of_submitted_tasks
                       << std::endl;
-            if (no_of_active_tasks == 0 && no_of_submitted_tasks == 0)
+            if (no_of_active_tasks == 0 && no_of_submitted_tasks == 0) {
                 break;
+            }
         }
 
         // make sure test does not take too long.

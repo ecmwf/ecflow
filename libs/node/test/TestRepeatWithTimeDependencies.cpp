@@ -82,28 +82,32 @@ BOOST_AUTO_TEST_CASE(test_repeat_day_time_combination_in_hierarchy) {
             // times[0].dump() << "\n";
 
             // 1st Run: Monday at 10:00 am
-            if (submitted == 1)
+            if (submitted == 1) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time1,
                                     "\nExpected to submit at " << expected_time1 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             // 2nd Run: Monday at 11:00 am
-            if (submitted == 2)
+            if (submitted == 2) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time2,
                                     "\nExpected to submit at " << expected_time2 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             // 3rd Run: Monday at 10:00 am
-            if (submitted == 3)
+            if (submitted == 3) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time3,
                                     "\nExpected to submit at " << expected_time3 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             // 4th Run: Monday at 11:00 am
-            if (submitted == 4)
+            if (submitted == 4) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time4,
                                     "\nExpected to submit at " << expected_time4 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             t1->set_state(NState::COMPLETE); // cause repeat to loop
             // cout << "   set_complete t1 at " << suite->calendar().suiteTime() << " " << days[0].dump() << " " <<
@@ -164,16 +168,18 @@ BOOST_AUTO_TEST_CASE(test_repeat_time_day_combination_in_hierarchy) {
             // times[0].dump() << "\n";
 
             // 1st Run: Monday at 00:00 am
-            if (submitted == 1)
+            if (submitted == 1) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time1,
                                     "\nExpected to submit at " << expected_time1 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             // 1st Run: Monday at 00:00 am
-            if (submitted == 2)
+            if (submitted == 2) {
                 BOOST_CHECK_MESSAGE(suite->calendar().suiteTime() == expected_time3,
                                     "\nExpected to submit at " << expected_time3 << " only, but also found "
                                                                << suite->calendar().suiteTime());
+            }
 
             t1->set_state(NState::COMPLETE); // cause repeat to loop
             // cout << "   set_complete t1 at " << suite->calendar().suiteTime() << " " << days[0].dump() << " " <<

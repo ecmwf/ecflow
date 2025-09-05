@@ -99,10 +99,12 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
         std::string msg           = "Exception in ServerEnvironment::ServerEnvironment() : ";
         std::string exception_msg = e.what();
         // On ecgate, wrong locale, causes an exception where msg is empty
-        if (exception_msg.empty())
+        if (exception_msg.empty()) {
             msg += "Invalid locale? Check locale using 'locale -a', then export/set LANG environment";
-        else
+        }
+        else {
             msg += e.what();
+        }
         throw ServerEnvironmentException(msg);
     }
 
@@ -118,11 +120,13 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     // The options(argc/argv) must be read after the environment, since they override everything else
     ServerOptions options(cl, this);
     help_option_ = options.help_option();
-    if (help_option_)
+    if (help_option_) {
         return; // User is printing the help
+    }
     version_option_ = options.version_option();
-    if (version_option_)
+    if (version_option_) {
         return; // User is printing the version
+    }
 
     /// Config, Environment, or Options may have updated port, update port dependent file names
     /// If we have default names make unique, by prefixing host and port
@@ -136,8 +140,9 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     std::string port = ecf::convert_to<std::string>(serverPort_);
 
     // If path is absolute leave as is
-    if (ecf_checkpt_file_ == Ecf::CHECKPT())
+    if (ecf_checkpt_file_ == Ecf::CHECKPT()) {
         ecf_checkpt_file_ = host_name_.prefix_host_and_port(port, ecf_checkpt_file_);
+    }
     if (ecf_checkpt_file_[0] != '/') {
         // Prepend with ECF_HOME
         std::string check_pt = ecf_home();
@@ -147,8 +152,9 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
 
     // If path is absolute leave as is
-    if (ecf_backup_checkpt_file_ == Ecf::BACKUP_CHECKPT())
+    if (ecf_backup_checkpt_file_ == Ecf::BACKUP_CHECKPT()) {
         ecf_backup_checkpt_file_ = host_name_.prefix_host_and_port(port, ecf_backup_checkpt_file_);
+    }
     if (ecf_backup_checkpt_file_[0] != '/') {
         std::string check_pt = ecf_home();
         check_pt += Str::PATH_SEPARATOR();
@@ -156,8 +162,9 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
         ecf_backup_checkpt_file_ = check_pt;
     }
 
-    if (ecf_white_list_file_ == Str::WHITE_LIST_FILE())
+    if (ecf_white_list_file_ == Str::WHITE_LIST_FILE()) {
         ecf_white_list_file_ = host_name_.prefix_host_and_port(port, ecf_white_list_file_);
+    }
 
     authentication_service_.init(host_name_, port);
 
@@ -165,8 +172,9 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     change_dir_to_ecf_home_and_check_accesibility();
 
     // LOG FILE ================================================================================
-    if (log_file_name == Ecf::LOG_FILE())
+    if (log_file_name == Ecf::LOG_FILE()) {
         log_file_name = host_name_.prefix_host_and_port(port, log_file_name);
+    }
 
     // Create the Log file.
     //
@@ -177,10 +185,12 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     // Init log file:
     LOG(Log::MSG, ""); // previous log may not end in newline
     LOG(Log::MSG, "Started at " << to_simple_string(Calendar::second_clock_time()) << " universal time");
-    if (tcp_protocol_.family() == 2 /*PF_INET*/)
+    if (tcp_protocol_.family() == 2 /*PF_INET*/) {
         LOG(Log::MSG, "Host(" << hostPort().first << ")  Port(" << hostPort().second << ") using TCP/IP v4");
-    else
+    }
+    else {
         LOG(Log::MSG, "Host(" << hostPort().first << ")  Port(" << hostPort().second << ") using TCP/IP v6");
+    }
     LOG(Log::MSG, "ECF_HOME " << ecf_home());
     LOG(Log::MSG, "Job scheduling interval: " << submitJobsInterval_);
 }
@@ -386,9 +396,10 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
 }
 
 bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
-    if (debug())
+    if (debug()) {
         cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD("
              << fs::current_path().string() << ")\n";
+    }
     if (ecf_white_list_file_.empty()) {
         errorMsg += "The ECF_LISTS file ";
         errorMsg += ecf_white_list_file_;
@@ -417,8 +428,6 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     }
     return false;
 }
-
-
 
 // bool ServerEnvironment::authenticateReadAccess(const std::string& user,
 //                                                bool custom_user,
@@ -485,8 +494,9 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
 // ============================================================================================
 
 void ServerEnvironment::read_config_file(std::string& log_file_name, const std::string& path_to_config_file) {
-    if (debug())
+    if (debug()) {
         cout << "ServerEnvironment::read_config_file() current_path = " << fs::current_path() << "\n";
+    }
 
     try {
         std::string theCheckMode;
@@ -525,8 +535,9 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
 
         ifstream ifs(path_to_config_file.c_str());
         if (!ifs) {
-            if (debug())
+            if (debug()) {
                 cout << "Could not load server_environment.cfg " << path_to_config_file << "\n";
+            }
         }
 
         /// This is *NOT* redundant, when the file is empty/not present, then the default value
@@ -535,12 +546,15 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
         po::store(parse_config_file(ifs, config_file_options), vm);
         po::notify(vm);
 
-        if (theCheckMode == "CHECK_ON_TIME")
+        if (theCheckMode == "CHECK_ON_TIME") {
             checkMode_ = ecf::CheckPt::ON_TIME;
-        else if (theCheckMode == "CHECK_NEVER")
+        }
+        else if (theCheckMode == "CHECK_NEVER") {
             checkMode_ = ecf::CheckPt::NEVER;
-        else if (theCheckMode == "CHECK_ALWAYS")
+        }
+        else if (theCheckMode == "CHECK_ALWAYS") {
             checkMode_ = ecf::CheckPt::ALWAYS;
+        }
 
         authentication_service_.set_passwd_file(passwd_file);
         authentication_service_.set_custom_passwd_file(custom_passwd_file);
@@ -555,8 +569,9 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
 }
 
 void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
-    if (debug())
+    if (debug()) {
         cout << "ServerEnvironment::read_environment_variables()\n";
+    }
 
     if (auto var = ecf::environment::fetch<std::string>(ecf::environment::ECF_PORT); var) {
         std::string port = var.value();
@@ -674,10 +689,12 @@ std::string ServerEnvironment::dump() const {
     ss << "Server host name " << serverHost_ << "\n";
     ss << "ECF_PASSWD = " << authentication_service_.passwd_file() << "\n";
     ss << "ECF_CUSTOM_PASSWD = " << authentication_service_.custom_passwd_file() << "\n";
-    if (tcp_protocol_.family() == 2 /*PF_INET*/)
+    if (tcp_protocol_.family() == 2 /*PF_INET*/) {
         ss << "TCP Protocol  v4 \n";
-    else if (tcp_protocol_.family() == 10 /*PF_INET6*/)
+    }
+    else if (tcp_protocol_.family() == 10 /*PF_INET6*/) {
         ss << "TCP Protocol  v6 \n";
+    }
 
 #ifdef ECF_OPENSSL
     ss << "ECF_SSL = " << ssl_ << "\n";

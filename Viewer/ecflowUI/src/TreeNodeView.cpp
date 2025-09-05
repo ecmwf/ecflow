@@ -142,9 +142,11 @@ QObject* TreeNodeView::realObject() {
 // Collect the selected list of indexes
 QModelIndexList TreeNodeView::selectedList() {
     QModelIndexList lst;
-    Q_FOREACH (QModelIndex idx, view_->selectedIndexes())
-        if (idx.column() == 0)
+    Q_FOREACH (QModelIndex idx, view_->selectedIndexes()) {
+        if (idx.column() == 0) {
             lst << idx;
+        }
+    }
     return lst;
 }
 
@@ -172,8 +174,9 @@ void TreeNodeView::selectionChanged(const QItemSelection& /*selected*/, const QI
     // The model has to know about the selection in order to manage the
     // nodes that are forced to be shown. We only do it when we are not in the the middle of
     //  "setCurrentSelection()" call because that handles the forceShow independently.
-    if (!setCurrentIsRunning_)
+    if (!setCurrentIsRunning_) {
         model_->selectionChanged(lst);
+    }
 }
 
 // Returns the current selection (the last one!)
@@ -196,8 +199,9 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info) {
     // We cannot call it recursively.
     // While the current item  is being selected we do not allow
     // another setCurrent call to go through
-    if (!info || setCurrentIsRunning_)
+    if (!info || setCurrentIsRunning_) {
         return;
+    }
 
     // Indicate that setCurrent started
     setCurrentIsRunning_ = true;
@@ -243,8 +247,9 @@ void TreeNodeView::setCurrentSelectionFromExpand(VInfo_ptr info) {
 #ifdef _UI_TREENODEVIEW_DEBUG
     UI_FUNCTION_LOG
 #endif
-    if (!info || setCurrentFromExpandIsRunning_)
+    if (!info || setCurrentFromExpandIsRunning_) {
         return;
+    }
 
 #ifdef _UI_TREENODEVIEW_DEBUG
     UiLog().dbg() << " info=" << info->path();
@@ -291,8 +296,9 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,
         std::vector<VInfo_ptr> nodeLst;
         for (int i = 0; i < indexLst.count(); i++) {
             VInfo_ptr info = model_->nodeInfo(indexLst[i]);
-            if (info && !info->isEmpty())
+            if (info && !info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
 
         actionHandler_->contextMenu(nodeLst, globalPos);
@@ -315,8 +321,9 @@ void TreeNodeView::slotCommandShortcut() {
         std::vector<VInfo_ptr> nodeLst;
         for (int i = 0; i < indexLst.count(); i++) {
             VInfo_ptr info = model_->nodeInfo(indexLst[i]);
-            if (info && !info->isEmpty())
+            if (info && !info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
         actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
     }
@@ -370,8 +377,9 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info, QString cmd) {
         if (info) {
             if (ServerHandler* server = info->server()) {
                 VNode* n = info->node();
-                if (n && info->isNode())
+                if (n && info->isNode()) {
                     server->setSuiteFilterWithOne(n);
+                }
             }
         }
     }
@@ -403,8 +411,9 @@ void TreeNodeView::slotRerender() {
 }
 
 void TreeNodeView::slotRepaint(Animation* an) {
-    if (!an)
+    if (!an) {
         return;
+    }
 
     Q_FOREACH (VNode* n, an->targets()) {
         view_->update(model_->nodeToIndex(n));
@@ -534,20 +543,23 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node) {
 #ifdef _UI_TREENODEVIEW_DEBUG
             UiLog().dbg() << " expanded=" << view_->isExpanded(idx);
 #endif
-            if (expandedOri || view_->isExpanded(idx))
+            if (expandedOri || view_->isExpanded(idx)) {
                 view_->expand(idx);
+            }
         }
 
         // es->print();
     }
 
-    if (canRegainCurrentFromExpand_)
+    if (canRegainCurrentFromExpand_) {
         regainSelectionFromExpand();
+    }
 }
 
 void TreeNodeView::saveExpandAll(const QModelIndex& idx) {
-    if (!idx.isValid())
+    if (!idx.isValid()) {
         return;
+    }
 
     VTreeNode* tnode = model_->indexToServerOrNode(idx);
     Q_ASSERT(tnode);
@@ -570,8 +582,9 @@ void TreeNodeView::saveExpandAll(const QModelIndex& idx) {
 }
 
 void TreeNodeView::saveCollapseAll(const QModelIndex& idx) {
-    if (!idx.isValid())
+    if (!idx.isValid()) {
         return;
+    }
 
     VTreeNode* tnode = model_->indexToServerOrNode(idx);
     Q_ASSERT(tnode);
@@ -640,8 +653,9 @@ void TreeNodeView::adjustBackground(QColor col) {
         // When we set the palette on startup something resets the palette
         // before the first paint event happens. So we set the expected bg colour
         // so that the view should know what bg colour it should use.
-        if (inStartUp_)
+        if (inStartUp_) {
             view_->setExpectedBg(col);
+        }
     }
 }
 

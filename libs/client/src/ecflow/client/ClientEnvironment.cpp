@@ -232,8 +232,9 @@ std::string ClientEnvironment::toString() const {
 
     ss << "   ECF_DEBUG_CLIENT = " << debug_ << "\n";
 #ifdef ECF_OPENSSL
-    if (ssl())
+    if (ssl()) {
         ss << "   ECF_SSL = " << ssl_ << "\n";
+    }
 #endif
     return ss.str();
 }

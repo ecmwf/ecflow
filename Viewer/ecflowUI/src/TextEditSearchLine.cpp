@@ -59,14 +59,16 @@ void TextEditSearchLine::slotHighlight() {
 
     highlightAllTimer_.stop();
 
-    if (highlightAll())
+    if (highlightAll()) {
         highlightMatches(searchLine_->text());
+    }
 }
 
 // This slot is called as we type in the search string
 void TextEditSearchLine::slotFind(QString txt) {
-    if (!interface_)
+    if (!interface_) {
         return;
+    }
 
     // In confirmSearch mode we do not start the search
     if (confirmSearch_) {
@@ -102,16 +104,18 @@ void TextEditSearchLine::slotFind(QString txt) {
 }
 
 void TextEditSearchLine::slotFindNext() {
-    if (!interface_)
+    if (!interface_) {
         return;
+    }
 
     lastFindSuccessful_ = findString(searchLine_->text(), false, QTextDocument::FindFlags(), QTextCursor::NoMove, 0);
     updateButtons(lastFindSuccessful_);
 }
 
 void TextEditSearchLine::slotFindPrev() {
-    if (!interface_)
+    if (!interface_) {
         return;
+    }
 
     lastFindSuccessful_ = findString(searchLine_->text(), false, QTextDocument::FindBackward, QTextCursor::NoMove, 0);
     updateButtons(lastFindSuccessful_);
@@ -137,8 +141,9 @@ QTextDocument::FindFlags TextEditSearchLine::findFlags() {
 // we'd like it to be found first.
 
 void TextEditSearchLine::refreshSearch() {
-    if (!interface_)
+    if (!interface_) {
         return;
+    }
 
     // if there's something selected already then move the cursor to the start of the line and search again
     interface_->refreshSearch();
@@ -148,20 +153,24 @@ void TextEditSearchLine::refreshSearch() {
 }
 
 void TextEditSearchLine::disableHighlights() {
-    if (interface_)
+    if (interface_) {
         interface_->disableHighlights();
+    }
 }
 
 void TextEditSearchLine::clearHighlights() {
-    if (interface_)
+    if (interface_) {
         interface_->clearHighlights();
+    }
 }
 
 void TextEditSearchLine::matchModeChanged(int /*notUsed*/) {
-    if (matchModeCb_->currentMatchMode() == StringMatchMode::ContainsMatch)
+    if (matchModeCb_->currentMatchMode() == StringMatchMode::ContainsMatch) {
         actionWholeWords_->setEnabled(true);
-    else
+    }
+    else {
         actionWholeWords_->setEnabled(false);
+    }
 
     refreshSearch();
 }
@@ -181,13 +190,16 @@ void TextEditSearchLine::on_actionWholeWords__toggled(bool b) {
 void TextEditSearchLine::on_actionHighlightAll__toggled(bool b) {
     AbstractSearchLine::on_actionHighlightAll__toggled(b);
 
-    if (b) // user switched on the highlights
+    if (b) { // user switched on the highlights
         slotHighlight();
-    else // user switched off the highlights
+    }
+    else { // user switched off the highlights
         disableHighlights();
+    }
 
-    if (interface_ && interface_->highlightsNeedSearch())
+    if (interface_ && interface_->highlightsNeedSearch()) {
         refreshSearch();
+    }
 }
 
 void TextEditSearchLine::slotClose() {
@@ -206,8 +218,9 @@ void TextEditSearchLine::searchOnReload(bool userClickedReload) {
     if (isVisible() && !isEmpty()) {
         slotFindNext();
         slotHighlight();
-        if (!lastFindSuccessful())
+        if (!lastFindSuccessful()) {
             interface_->gotoLastLine();
+        }
     }
     else if (interface_) {
         // search for a highlight any of the pre-defined keywords so that

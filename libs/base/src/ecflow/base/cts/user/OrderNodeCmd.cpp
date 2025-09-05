@@ -63,10 +63,12 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const {
     node_ptr theNode = find_node_for_edit(defs, absNodepath_);
 
     Node* theParent = theNode->parent();
-    if (theParent)
+    if (theParent) {
         theParent->order(theNode.get(), option_);
-    else
+    }
+    else {
         defs->order(theNode.get(), option_);
+    }
 
     return doJobSubmission(as);
 }
@@ -108,8 +110,9 @@ void OrderNodeCmd::addOption(boost::program_options::options_description& desc) 
 void OrderNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[OrderNodeCmd::arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(OrderNodeCmd::arg(), args);
+    }
 
     if (args.size() != 2) {
         std::stringstream ss;

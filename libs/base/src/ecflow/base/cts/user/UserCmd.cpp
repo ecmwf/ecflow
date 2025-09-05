@@ -24,10 +24,12 @@ using namespace ecf;
 
 bool UserCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<UserCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (user_ != the_rhs->user())
+    }
+    if (user_ != the_rhs->user()) {
         return false;
+    }
     return ClientToServerCmd::equals(rhs);
 }
 
@@ -215,8 +217,9 @@ void UserCmd::split_args_to_options_and_paths(const std::vector<std::string>& ar
     size_t vec_size = args.size();
     if (treat_colon_in_path_as_path) {
         for (size_t i = 0; i < vec_size; i++) {
-            if (args[i].empty())
+            if (args[i].empty()) {
                 continue;
+            }
             if (args[i][0] == '/' && args[i].find(" ") == std::string::npos) {
                 // --force=clear /suite/task:ev  -> treat '/suite/task:ev' as a path
                 paths.push_back(args[i]);

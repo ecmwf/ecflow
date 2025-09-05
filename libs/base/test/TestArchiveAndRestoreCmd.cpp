@@ -176,8 +176,9 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
     std::vector<std::string> nc_vec;
     for (auto& node : nodes) {
         NodeContainer* nc = node->isNodeContainer();
-        if (!nc)
+        if (!nc) {
             continue;
+        }
         nc_vec.push_back(nc->absNodePath());
     }
 

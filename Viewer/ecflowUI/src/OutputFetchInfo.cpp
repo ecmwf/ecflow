@@ -101,12 +101,14 @@ QString OutputFetchInfo::formatErrors(const std::vector<std::string>& errorVec) 
     if (errorVec.size() > 0) {
         QColor col(70, 71, 72);
         if (errorVec.size() > 1) {
-            for (size_t i = 0; i < errorVec.size(); i++)
+            for (size_t i = 0; i < errorVec.size(); i++) {
                 s += Viewer::formatBoldText("[" + QString::number(i + 1) + "] ", col) +
                      QString::fromStdString(errorVec[i]) + ". &nbsp;&nbsp;";
+            }
         }
-        else if (errorVec.size() == 1)
+        else if (errorVec.size() == 1) {
             s += QString::fromStdString(errorVec[0]);
+        }
     }
     return s.replace("\n", "<br>");
 }
@@ -173,8 +175,9 @@ QString OutputFileFetchInfo::makeHtml(VReply* reply, VInfo_ptr info) {
             tries << msg;
             continue;
         }
-        else
+        else {
             other << s;
+        }
     }
 
     if (info && info->server()) {
@@ -298,8 +301,9 @@ QString OutputDirFetchInfo::makeHtml(VReply* reply, VInfo_ptr /*info*/) {
             tries[path] << msg;
             continue;
         }
-        else
+        else {
             other << s;
+        }
     }
 
     if (!msg.isEmpty()) {

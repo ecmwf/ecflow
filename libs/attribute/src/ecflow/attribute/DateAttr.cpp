@@ -35,11 +35,13 @@ DateAttr::DateAttr(const std::string& str) {
 }
 
 bool DateAttr::operator<(const DateAttr& rhs) const {
-    if (year_ < rhs.year_)
+    if (year_ < rhs.year_) {
         return true;
+    }
     if (year_ == rhs.year_) {
-        if (month_ < rhs.month_)
+        if (month_ < rhs.month_) {
             return true;
+        }
         if (month_ == rhs.month_) {
             return day_ < rhs.day_;
         }
@@ -83,8 +85,9 @@ void DateAttr::checkDate(int day, int month, int year, bool allow_wild_cards) {
 void DateAttr::calendarChanged(const ecf::Calendar& c, bool clear_at_midnight) {
     // See ECFLOW-337 versus ECFLOW-1550
     if (c.dayChanged()) {
-        if (clear_at_midnight)
+        if (clear_at_midnight) {
             clearFree();
+        }
     }
 
     if (free_) {
@@ -136,12 +139,15 @@ bool DateAttr::is_free(const ecf::Calendar& calendar) const {
     bool dayMatches   = true;
     bool monthMatches = true;
     bool yearMatches  = true;
-    if (day_ != 0)
+    if (day_ != 0) {
         dayMatches = calendar.day_of_month() == day_;
-    if (month_ != 0)
+    }
+    if (month_ != 0) {
         monthMatches = calendar.month() == month_;
-    if (year_ != 0)
+    }
+    if (year_ != 0) {
         yearMatches = calendar.year() == year_;
+    }
 
     return (dayMatches && monthMatches && yearMatches);
 }
@@ -169,12 +175,15 @@ bool DateAttr::checkForRequeue(const ecf::Calendar& calendar) const {
     bool futureDayMatches   = true;
     bool futureMonthMatches = true;
     bool futureYearMatches  = true;
-    if (day_ != 0)
+    if (day_ != 0) {
         futureDayMatches = day_ > calendar.day_of_month();
-    if (month_ != 0)
+    }
+    if (month_ != 0) {
         futureMonthMatches = month_ > calendar.month();
-    if (year_ != 0)
+    }
+    if (year_ != 0) {
         futureYearMatches = year_ > calendar.year();
+    }
 
     // #ifdef DEBUG
     //   	if ( futureDayMatches ) {
@@ -192,20 +201,24 @@ bool DateAttr::checkForRequeue(const ecf::Calendar& calendar) const {
 }
 
 bool DateAttr::validForHybrid(const ecf::Calendar& calendar) const {
-    if (day_ == 0)
+    if (day_ == 0) {
         return false; // relies on day change i.e. date *.10.2009
-    if (month_ == 0)
+    }
+    if (month_ == 0) {
         return false; // relies on day change i.e. date 12.*.2009
-    if (year_ == 0)
+    }
+    if (year_ == 0) {
         return false; // relies on day change i.e. date 12.10.*
+    }
 
     // if the date matches exactly for today
     return (day_ == calendar.day_of_month() && month_ == calendar.month() && year_ == calendar.year());
 }
 
 bool DateAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
-    if (isFree(c))
+    if (isFree(c)) {
         return false;
+    }
 
     std::stringstream ss;
     ss << " is date dependent ( next run on " << boost::gregorian::to_simple_string(next_matching_date(c))
@@ -232,33 +245,39 @@ std::string DateAttr::toString() const {
 
 void DateAttr::write(std::string& ret) const {
     ret += "date ";
-    if (day_ == 0)
+    if (day_ == 0) {
         ret += "*.";
+    }
     else {
         ret += ecf::convert_to<std::string>(day_);
         ret += ".";
     }
 
-    if (month_ == 0)
+    if (month_ == 0) {
         ret += "*.";
+    }
     else {
         ret += ecf::convert_to<std::string>(month_);
         ret += ".";
     }
 
-    if (year_ == 0)
+    if (year_ == 0) {
         ret += "*";
-    else
+    }
+    else {
         ret += ecf::convert_to<std::string>(year_);
+    }
 }
 
 std::string DateAttr::dump() const {
     std::stringstream ss;
     ss << toString();
-    if (free_)
+    if (free_) {
         ss << " (free)";
-    else
+    }
+    else {
         ss << " (holding)";
+    }
     return ss.str();
 }
 
@@ -269,12 +288,15 @@ bool DateAttr::operator==(const DateAttr& rhs) const {
     return structureEquals(rhs);
 }
 bool DateAttr::structureEquals(const DateAttr& rhs) const {
-    if (day_ != rhs.day_)
+    if (day_ != rhs.day_) {
         return false;
-    if (month_ != rhs.month_)
+    }
+    if (month_ != rhs.month_) {
         return false;
-    if (year_ != rhs.year_)
+    }
+    if (year_ != rhs.year_) {
         return false;
+    }
     return true;
 }
 
@@ -296,8 +318,9 @@ DateAttr DateAttr::create(const std::vector<std::string>& lineTokens, bool read_
     DateAttr date = DateAttr::create(lineTokens[1]);
     if (read_state) {
         for (size_t i = 3; i < lineTokens.size(); i++) {
-            if (lineTokens[i] == "free")
+            if (lineTokens[i] == "free") {
                 date.setFree();
+            }
         }
     }
     return date;
@@ -306,40 +329,50 @@ DateAttr DateAttr::create(const std::vector<std::string>& lineTokens, bool read_
 void DateAttr::getDate(const std::string& date, int& day, int& month, int& year) {
     size_t firstDotPos = date.find_first_of('.');
     size_t lastDotPos  = date.find_first_of('.', firstDotPos + 1);
-    if (firstDotPos == std::string::npos)
+    if (firstDotPos == std::string::npos) {
         throw std::runtime_error("DateAttr::getDate Invalid date missing first dot :" + date);
-    if (lastDotPos == std::string::npos)
+    }
+    if (lastDotPos == std::string::npos) {
         throw std::runtime_error("DateAttr::getDate: Invalid date missing second dot :" + date);
-    if (firstDotPos == lastDotPos)
+    }
+    if (firstDotPos == lastDotPos) {
         throw std::runtime_error("DateAttr::getDate: Invalid date :" + date);
+    }
 
     std::string theDay   = date.substr(0, firstDotPos);
     std::string theMonth = date.substr(firstDotPos + 1, (lastDotPos - firstDotPos) - 1);
     std::string theYear  = date.substr(lastDotPos + 1);
 
-    if (theDay == "*")
+    if (theDay == "*") {
         day = 0;
+    }
     else {
         day = Extract::theInt(theDay, "DateAttr::getDate: Invalid day :" + date);
-        if (day < 1 || day > 31)
+        if (day < 1 || day > 31) {
             throw std::runtime_error("DateAttr::getDate: Invalid clock date: " + date);
+        }
     }
 
-    if (theMonth == "*")
+    if (theMonth == "*") {
         month = 0;
+    }
     else {
         month = Extract::theInt(theMonth, "DateAttr::getDate: Invalid month :" + date);
-        if (month < 1 || month > 12)
+        if (month < 1 || month > 12) {
             throw std::runtime_error("DateAttr::getDate Invalid clock date: " + date);
+        }
     }
 
-    if (theYear == "*")
+    if (theYear == "*") {
         year = 0;
-    else
+    }
+    else {
         year = Extract::theInt(theYear, "DateAttr::getDate: Invalid year :" + date);
+    }
 
-    if (day == -1 || month == -1 || year == -1)
+    if (day == -1 || month == -1 || year == -1) {
         throw std::runtime_error("DateAttr::getDate: Invalid clock date:" + date);
+    }
 
     // let boost validate the date
     if (day != 0 && month != 0 && year != 0) {
@@ -358,12 +391,15 @@ boost::gregorian::date DateAttr::next_matching_date(const ecf::Calendar& c) cons
 
     for (int i = 0; i < 365; i++) {
         next_matching_date += one_day;
-        if (day_ != 0 && next_matching_date.day() == day_)
+        if (day_ != 0 && next_matching_date.day() == day_) {
             day_matches = true;
-        if (month_ != 0 && next_matching_date.month() == month_)
+        }
+        if (month_ != 0 && next_matching_date.month() == month_) {
             month_matches = true;
-        if (year_ != 0 && next_matching_date.year() == year_)
+        }
+        if (year_ != 0 && next_matching_date.year() == year_) {
             year_matches = true;
+        }
         if (day_matches && month_matches && year_matches) {
             return next_matching_date;
         }

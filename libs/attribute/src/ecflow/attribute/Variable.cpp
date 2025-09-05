@@ -68,8 +68,9 @@ void Variable::write(std::string& ret) const {
     ret += "edit ";
     ret += n_;
     ret += " '";
-    if (v_.find("\n") == std::string::npos)
+    if (v_.find("\n") == std::string::npos) {
         ret += v_;
+    }
     else {
         // replace \n, otherwise re-parse will fail
         std::string value = v_;

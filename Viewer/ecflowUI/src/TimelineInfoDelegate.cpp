@@ -117,8 +117,9 @@ void TimelineInfoDelegate::paint(QPainter* painter,
 
     if (cellMode == 3) {
         QColor fg(230, 230, 230, 180);
-        if (fg.isValid())
+        if (fg.isValid()) {
             painter->fillRect(vopt.rect, fg);
+        }
     }
 
     // Render the horizontal border for rows. We only render the top border line.

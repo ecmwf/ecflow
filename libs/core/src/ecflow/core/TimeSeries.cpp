@@ -110,8 +110,9 @@ bool TimeSeries::operator<(const TimeSeries& rhs) const {
 void TimeSeries::compute_last_time_slot() {
     if (!finish_.isNULL()) {
         lastTimeSlot_ = start_.duration();
-        while (lastTimeSlot_ <= finish_.duration())
+        while (lastTimeSlot_ <= finish_.duration()) {
             lastTimeSlot_ += incr_.duration();
+        }
         lastTimeSlot_ -= incr_.duration();
     }
 }
@@ -290,8 +291,9 @@ TimeSlot TimeSeries::compute_next_time_slot(const ecf::Calendar& c) const {
 
 bool TimeSeries::requeueable(const ecf::Calendar& c) const {
     auto calendar_time = duration(c);
-    if (calendar_time < start().duration())
+    if (calendar_time < start().duration()) {
         return true;
+    }
     if (hasIncrement()) {
         if (calendar_time < finish().duration()) {
             return true;
@@ -533,29 +535,35 @@ bool TimeSeries::checkForRequeue(const ecf::Calendar& calendar,
 }
 
 void TimeSeries::min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {
-    if (the_min.isNULL() || start_ < the_min)
+    if (the_min.isNULL() || start_ < the_min) {
         the_min = start_;
-    if (the_max.isNULL() || start_ > the_max)
+    }
+    if (the_max.isNULL() || start_ > the_max) {
         the_max = start_;
+    }
     if (hasIncrement()) {
-        if (finish_ < the_min)
+        if (finish_ < the_min) {
             the_min = finish_;
-        if (finish_ > the_max)
+        }
+        if (finish_ > the_max) {
             the_max = finish_;
+        }
     }
 }
 
 void TimeSeries::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
     std::stringstream ss;
     ss << " ( next run time is ";
-    if (relativeToSuiteStart_)
+    if (relativeToSuiteStart_) {
         ss << "+";
+    }
     ss << nextTimeSlot_.toString();
 
     TimeSlot currentTime = TimeSlot(duration(c));
     ss << ", current suite time is ";
-    if (relativeToSuiteStart_)
+    if (relativeToSuiteStart_) {
         ss << "+";
+    }
     ss << currentTime.toString() << " )";
     theReasonWhy += ss.str();
 }
@@ -591,14 +599,18 @@ void TimeSeries::free_slots(std::vector<boost::posix_time::time_duration>& vec) 
 }
 
 bool TimeSeries::structureEquals(const TimeSeries& rhs) const {
-    if (relativeToSuiteStart_ != rhs.relativeToSuiteStart_)
+    if (relativeToSuiteStart_ != rhs.relativeToSuiteStart_) {
         return false;
-    if (start_ != rhs.start_)
+    }
+    if (start_ != rhs.start_) {
         return false;
-    if (finish_ != rhs.finish_)
+    }
+    if (finish_ != rhs.finish_) {
         return false;
-    if (incr_ != rhs.incr_)
+    }
+    if (incr_ != rhs.incr_) {
         return false;
+    }
     return true;
 }
 
@@ -644,8 +656,9 @@ std::string TimeSeries::toString() const {
 }
 
 void TimeSeries::write(std::string& ret) const {
-    if (relativeToSuiteStart_)
+    if (relativeToSuiteStart_) {
         ret += "+";
+    }
     start_.write(ret);
     if (!finish_.isNULL()) {
         ret += " ";
@@ -750,10 +763,12 @@ void TimeSeries::write_state(std::string& ret, bool isFree) const {
     bool relative_duration_changed = (!relativeDuration_.is_special() && relativeDuration_.total_seconds() != 0);
     if (isFree || !isValid_ || next_time_slot_changed || relative_duration_changed) {
         ret += " #";
-        if (isFree)
+        if (isFree) {
             ret += " free";
-        if (!isValid_)
+        }
+        if (!isValid_) {
             ret += " isValid:false";
+        }
         if (next_time_slot_changed) {
             ret += " nextTimeSlot/";
             ret += nextTimeSlot_.toString();
@@ -770,10 +785,12 @@ void TimeSeries::write_state_for_gui(std::string& ret, bool isFree) const {
     bool relative_duration_changed = (!relativeDuration_.is_special() && relativeDuration_.total_seconds() != 0);
     if (isFree || !isValid_ || next_time_slot_changed || relative_duration_changed) {
         ret += " #";
-        if (isFree)
+        if (isFree) {
             ret += " free";
-        if (!isValid_)
+        }
+        if (!isValid_) {
             ret += " expired";
+        }
         if (next_time_slot_changed) {
             ret += " nextTimeSlot=";
             ret += nextTimeSlot_.toString();
@@ -812,20 +829,23 @@ void TimeSeries::parse_state(size_t index, const std::vector<std::string>& lineT
                     getTime(nextTimeSlot, startHour, startMin, false /*check_time*/);
                     ts.nextTimeSlot_ = TimeSlot(startHour, startMin);
                 }
-                else
+                else {
                     throw std::runtime_error("TimeSeries::parse_state: could not extract state.");
+                }
             }
             if (lineTokens[i].find("relativeDuration") != std::string::npos) {
                 std::string relativeDuration;
                 if (Extract::split_get_second(lineTokens[i], relativeDuration, '/')) {
                     ts.relativeDuration_ = boost::posix_time::duration_from_string(relativeDuration);
                 }
-                else
+                else {
                     throw std::runtime_error("TimeSeries::parse_state: could not extract state.");
+                }
             }
         }
-        if (lineTokens[i] == "#")
+        if (lineTokens[i] == "#") {
             comment_fnd = true;
+        }
     }
     ts.compute_last_time_slot();
 }
@@ -853,8 +873,9 @@ ecf::TimeSeries TimeSeries::create(size_t& index, const std::vector<std::string>
 
         // if third token is not a comment the time must be of the form
         // cron 10:00 20:00 01:00
-        if (index + 1 >= line_tokens_size)
+        if (index + 1 >= line_tokens_size) {
             throw std::runtime_error("TimeSeries::create: Invalid time series :");
+        }
 
         int finishHour = -1;
         int finishMin  = -1;
@@ -888,8 +909,9 @@ bool TimeSeries::getTime(const std::string& time, int& hour, int& min, bool chec
     // HH:MM
     // +HH:MM  for other clients
     size_t colonPos = time.find_first_of(':');
-    if (colonPos == string::npos)
+    if (colonPos == string::npos) {
         throw std::runtime_error("TimeSeries::getTime: Invalid time :'" + time + "'");
+    }
 
     std::string theHour;
     bool relative = false;
@@ -897,21 +919,25 @@ bool TimeSeries::getTime(const std::string& time, int& hour, int& min, bool chec
         relative = true;
         theHour  = time.substr(1, colonPos - 1);
     }
-    else
+    else {
         theHour = time.substr(0, colonPos);
+    }
 
     std::string theMin = time.substr(colonPos + 1);
 
-    if (check_time && theHour.size() != 2)
+    if (check_time && theHour.size() != 2) {
         throw std::runtime_error("TimeSeries::getTime: Invalid hour :" + theHour);
-    if (theMin.size() != 2)
+    }
+    if (theMin.size() != 2) {
         throw std::runtime_error("TimeSeries::getTime: Invalid minute :" + theMin);
+    }
 
     hour = Extract::theInt(theHour, "TimeSeries::getTime: hour must be a integer : " + theHour);
     min  = Extract::theInt(theMin, "TimeSeries::getTime: minute must be integer : " + theMin);
 
-    if (check_time)
+    if (check_time) {
         testTime(hour, min);
+    }
     return relative;
 }
 
@@ -943,10 +969,12 @@ void TimeSeries::serialize(Archive& ar, std::uint32_t const /*version*/) {
     CEREAL_OPTIONAL_NVP(ar, isValid_, [this]() { return !isValid_; });
 
     if (Archive::is_loading::value) {
-        if (nextTimeSlot_.isNULL())
+        if (nextTimeSlot_.isNULL()) {
             nextTimeSlot_ = start_;
-        if (!finish_.isNULL())
+        }
+        if (!finish_.isNULL()) {
             compute_last_time_slot();
+        }
     }
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(TimeSeries);

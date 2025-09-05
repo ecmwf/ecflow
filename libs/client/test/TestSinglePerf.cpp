@@ -128,8 +128,9 @@ void time_load_and_downloads(ClientInvoker& theClient,
                                 break;
                         }
                     }
-                    else if (i == 1)
+                    else if (i == 1) {
                         client_news.sync_local();
+                    }
                 }
                 cout << ": 1:news_local(),2:sync_local(),n:news_local with the new Client: "
                      << duration_timer.elapsed_milliseconds() << "(ms)" << endl;
@@ -184,13 +185,15 @@ void time_load_and_downloads(ClientInvoker& theClient,
             }
             {
                 std::vector<task_ptr> all_tasks;
-                if (!theClient.defs())
+                if (!theClient.defs()) {
                     theClient.sync_local();
+                }
                 theClient.defs()->get_all_tasks(all_tasks);
                 paths.clear();
                 paths.reserve(all_tasks.size());
-                for (size_t i = 0; i < all_tasks.size(); i++)
+                for (size_t i = 0; i < all_tasks.size(); i++) {
                     paths.push_back(all_tasks[i]->absNodePath());
+                }
 
                 {
                     cout << " Suspend " << paths.size() << " tasks : ";

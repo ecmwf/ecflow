@@ -88,8 +88,9 @@ void BcWidget::notifyChange(VProperty*) {
 }
 
 void BcWidget::updateSettings() {
-    if (VProperty* p = prop_->find("view.common.node_gradient"))
+    if (VProperty* p = prop_->find("view.common.node_gradient")) {
         useGrad_ = p->value().toBool();
+    }
 }
 
 bool BcWidget::isFull() const {
@@ -140,8 +141,9 @@ void BcWidget::reset(int idx, QString text, QColor bgCol, QColor fontCol) {
         bool newText = (text != items_.at(idx)->text_);
         items_[idx]->reset(text, bgCol, fontCol, idx == hovered_);
 
-        if (newText)
+        if (newText) {
             reset(items_, maxWidth_);
+        }
         else {
             updatePixmap(idx);
             update();
@@ -198,8 +200,9 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth) {
             if (i != items_.count() - 1) {
                 xp += gap_;
                 int tl = items_[i]->textLen();
-                if (tl > maxRedTextLen)
+                if (tl > maxRedTextLen) {
                     maxRedTextLen = tl;
+                }
             }
         }
 
@@ -356,8 +359,9 @@ int BcWidget::estimateWidth(int startIndex, int xp, int redTextLen) {
             xp = items_[i]->estimateRightPos(xp, redTextLen);
             xp += gap_;
         }
-        else
+        else {
             xp = items_[i]->estimateRightPos(xp);
+        }
     }
 
     return xp + NodePathItem::triLen_ + hMargin_;
@@ -369,8 +373,9 @@ int BcWidget::adjustItems(int startIndex, int xp, int yp, int redTextLen) {
             xp = items_[i]->adjust(xp, yp, redTextLen);
             xp += gap_;
         }
-        else
+        else {
             xp = items_[i]->adjust(xp, yp);
+        }
     }
 
     return xp + NodePathItem::triLen_ + hMargin_;
@@ -383,8 +388,9 @@ int BcWidget::adjustVisibleItems(int startIndex, int xp, int yp, int redTextLen)
                 xp = items_[i]->adjust(xp, yp, redTextLen);
                 xp += gap_;
             }
-            else
+            else {
                 xp = items_[i]->adjust(xp, yp);
+            }
         }
     }
     return xp + NodePathItem::triLen_ + hMargin_;
@@ -392,8 +398,9 @@ int BcWidget::adjustVisibleItems(int startIndex, int xp, int yp, int redTextLen)
 
 void BcWidget::adjustSize(int maxWidth) {
     if (isFull()) {
-        if (width_ > maxWidth)
+        if (width_ > maxWidth) {
             reset(items_, maxWidth);
+        }
     }
     else {
         reset(items_, maxWidth);
@@ -410,10 +417,12 @@ void BcWidget::crePixmap() {
     painter.setFont(font_);
 
     if (items_.count() == 0) {
-        if (isEnabled())
+        if (isEnabled()) {
             painter.setPen(textCol_);
-        else
+        }
+        else {
             painter.setPen(textDisabledCol_);
+        }
 
         painter.drawText(textRect_, Qt::AlignHCenter | Qt::AlignVCenter, text_);
     }
@@ -472,8 +481,9 @@ void BcWidget::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void BcWidget::mousePressEvent(QMouseEvent* event) {
-    if (event->button() != Qt::RightButton && event->button() != Qt::LeftButton)
+    if (event->button() != Qt::RightButton && event->button() != Qt::LeftButton) {
         return;
+    }
 
     for (int i = 0; i < items_.count(); i++) {
         if (items_[i]->visible_ && items_[i]->shape_.containsPoint(event->pos(), Qt::OddEvenFill)) {
@@ -596,19 +606,23 @@ int NodePathItem::estimateRightPos(int xp, int elidedLen) {
     QFontMetrics fm(owner_->font());
     int len = 0;
 
-    if (elidedLen == 0)
+    if (elidedLen == 0) {
         len = ViewerUtil::textWidth(fm, text_);
-    else
+    }
+    else {
         len = ViewerUtil::textWidth(fm, fm.elidedText(text_, Qt::ElideRight, elidedLen));
+    }
 
     return rightPos(xp, len);
 }
 
 void NodePathItem::resetBorder(bool hovered) {
-    if (!hovered)
+    if (!hovered) {
         borderCol_ = bgCol_.darker(125);
-    else
+    }
+    else {
         borderCol_ = bgCol_.darker(240);
+    }
 }
 
 void NodePathItem::reset(QString text, QColor bgCol, QColor fontCol, bool hovered) {
@@ -616,15 +630,18 @@ void NodePathItem::reset(QString text, QColor bgCol, QColor fontCol, bool hovere
     bgCol_   = bgCol;
     fontCol_ = fontCol;
 
-    if (!hovered)
+    if (!hovered) {
         borderCol_ = bgCol_.darker(125);
-    else
+    }
+    else {
         borderCol_ = bgCol_.darker(240);
+    }
 }
 
 void NodePathItem::draw(QPainter* painter, bool useGrad, int /*lighter*/) {
-    if (!visible_)
+    if (!visible_) {
         return;
+    }
 
     QColor border, bg, fontCol;
     if (enabled_) {
@@ -648,8 +665,9 @@ void NodePathItem::draw(QPainter* painter, bool useGrad, int /*lighter*/) {
         grad_.setColorAt(1, bg);
         bgBrush = QBrush(grad_);
     }
-    else
+    else {
         bgBrush = QBrush(bg);
+    }
 
     painter->setPen(QPen(border, 0));
     painter->setBrush(bgBrush);
@@ -757,8 +775,9 @@ void NodePathWidget::clear(bool detachObservers) {
         info_->removeObserver(this);
     }
 
-    if (info_)
+    if (info_) {
         info_->removeObserver(this);
+    }
 
     info_.reset();
 
@@ -884,8 +903,9 @@ void NodePathWidget::setPath(VInfo_ptr info) {
     if (mode_ == TextMode) {
         info_ = info;
         QString pt;
-        if (info_)
+        if (info_) {
             pt = QString::fromStdString(info_->path());
+        }
 
         bc_->reset(pt, bcWidth());
         return;
@@ -981,12 +1001,15 @@ VInfo_ptr NodePathWidget::nodeAt(int idx) {
 
     if (info_ && info_->server()) {
         if (VNode* n = info_->node()->ancestorAt(idx, VNode::ParentToChildSort)) {
-            if (n == info_->node())
+            if (n == info_->node()) {
                 return info_;
-            else if (n->isServer())
+            }
+            else if (n->isServer()) {
                 return VInfoServer::create(n->server());
-            else
+            }
+            else {
                 return VInfoNode::create(n);
+            }
         }
     }
 
@@ -995,8 +1018,9 @@ VInfo_ptr NodePathWidget::nodeAt(int idx) {
 
 void NodePathWidget::loadMenu(const QPoint& pos, VInfo_ptr p) {
     Q_ASSERT(mode_ == GuiMode);
-    if (mode_ == TextMode)
+    if (mode_ == TextMode) {
         return;
+    }
 
     if (p && p->node()) {
         QList<QAction*> acLst;
@@ -1030,8 +1054,9 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node,
                                            const std::vector<ecf::Aspect::Type>& aspect,
                                            const VNodeChange&) {
     Q_ASSERT(mode_ == GuiMode);
-    if (mode_ == TextMode)
+    if (mode_ == TextMode) {
         return;
+    }
 
 #if 0
     if(!active_)
@@ -1075,8 +1100,9 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server, const std::vector<
 #endif
 
     Q_ASSERT(mode_ == GuiMode);
-    if (mode_ == TextMode)
+    if (mode_ == TextMode) {
         return;
+    }
 #if 0
     if(!active_)
 		return;
@@ -1141,8 +1167,9 @@ void NodePathWidget::notifyEndServerScan(ServerHandler* server) {
 
             // If the info is not available dataLost() must have already been called and
             // the breadcrumbs were reset!
-            if (!info_)
+            if (!info_) {
                 return;
+            }
 
             Q_ASSERT(info_->server() && info_->node());
 
@@ -1199,8 +1226,9 @@ void NodePathWidget::notifyDataLost(VInfo* info) {
 
 void NodePathWidget::slotRefreshServer() {
     Q_ASSERT(mode_ == GuiMode);
-    if (mode_ == TextMode)
+    if (mode_ == TextMode) {
         return;
+    }
 
     if (info_ && info_->server()) {
         info_->server()->refresh();

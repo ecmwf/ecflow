@@ -100,20 +100,23 @@ TabWidget::TabWidget(QWidget* parent) : QWidget(parent) {
 
 void TabWidget::slotContextMenu(const QPoint& pos) {
 
-    if (pos.isNull())
+    if (pos.isNull()) {
         return;
+    }
 
     int index = bar_->tabAt(pos);
-    if (index < 0 || index > bar_->count())
+    if (index < 0 || index > bar_->count()) {
         return;
+    }
 
     QList<QAction*> lst;
     auto* closeAc = new QAction(QPixmap(":/viewer/close.svg"), "&Close tab", this);
     lst << closeAc;
 
     if (QAction* ac = QMenu::exec(lst, mapToGlobal(pos), closeAc, this)) {
-        if (ac == closeAc)
+        if (ac == closeAc) {
             removeTab(index);
+        }
     }
 
     qDeleteAll(lst);
@@ -157,9 +160,11 @@ QWidget* TabWidget::currentWidget() const {
 }
 
 int TabWidget::indexOfWidget(QWidget* w) const {
-    for (int i = 0; i < stacked_->count(); i++)
-        if (w == stacked_->widget(i))
+    for (int i = 0; i < stacked_->count(); i++) {
+        if (w == stacked_->widget(i)) {
             return i;
+        }
+    }
 
     return -1;
 }
@@ -200,8 +205,9 @@ void TabWidget::removeOtherTabs(int index) {
         if (stacked_->widget(0) != actW) {
             removeTab(0);
         }
-        else
+        else {
             break;
+        }
     }
 
     while (bar_->count() > 1) {

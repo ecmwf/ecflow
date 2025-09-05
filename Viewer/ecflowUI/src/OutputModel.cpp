@@ -57,14 +57,16 @@ int OutputModel::columnCount(const QModelIndex& /*parent*/) const {
 }
 
 int OutputModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     if (!parent.isValid()) {
         int cnt = 0;
         for (const auto& dir : dirs_) {
-            if (dir)
+            if (dir) {
                 cnt += dir->count();
+            }
         }
         return cnt;
     }
@@ -74,15 +76,17 @@ int OutputModel::rowCount(const QModelIndex& parent) const {
 
 QVariant OutputModel::data(const QModelIndex& index, int role) const {
     if (!hasData() || (role != Qt::DisplayRole && role != Qt::UserRole && role != Qt::ForegroundRole &&
-                       role != Qt::ToolTipRole && role != Qt::FontRole))
+                       role != Qt::ToolTipRole && role != Qt::FontRole)) {
         return {};
+    }
 
     int row = index.row();
     VDir_ptr dir;
     VDirItem* item = itemAt(row, dir);
 
-    if (!item || !dir)
+    if (!item || !dir) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
@@ -147,8 +151,9 @@ QVariant OutputModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant OutputModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || role != Qt::DisplayRole)
+    if (orient != Qt::Horizontal || role != Qt::DisplayRole) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     switch (section) {
         case 0:
@@ -205,16 +210,19 @@ VDirItem* OutputModel::itemAt(int row, VDir_ptr& dir) const {
 }
 
 bool OutputModel::hasData() const {
-    for (const auto& dir : dirs_)
-        if (dir)
+    for (const auto& dir : dirs_) {
+        if (dir) {
             return true;
+        }
+    }
 
     return false;
 }
 
 std::string OutputModel::fullName(const QModelIndex& index) const {
-    if (!hasData())
+    if (!hasData()) {
         return {};
+    }
 
     int row = index.row();
     for (const auto& dir : dirs_) {
@@ -234,8 +242,9 @@ std::string OutputModel::fullName(const QModelIndex& index) const {
 void OutputModel::itemDesc(const QModelIndex& index, std::string& itemFullName, VDir::FetchMode& mode) const {
     itemFullName.clear();
 
-    if (!hasData())
+    if (!hasData()) {
         return;
+    }
 
     int row = index.row();
     for (const auto& dir : dirs_) {
@@ -257,12 +266,15 @@ QModelIndex OutputModel::itemToIndex(const std::string& itemFullName, VDir::Fetc
     for (const auto& dir : dirs_) {
         if (dir) {
             if (dir->fetchMode() == fetchMode) {
-                for (int j = 0; j < dir->count(); j++, row++)
-                    if (dir->fullName(j) == itemFullName)
+                for (int j = 0; j < dir->count(); j++, row++) {
+                    if (dir->fullName(j) == itemFullName) {
                         return index(row, 0);
+                    }
+                }
             }
-            else
+            else {
                 row += dir->count();
+            }
         }
     }
     return {};
@@ -272,23 +284,29 @@ QModelIndex OutputModel::itemToIndex(const std::string& itemFullName) const {
     int row = 0;
     for (const auto& dir : dirs_) {
         if (dir) {
-            for (int j = 0; j < dir->count(); j++, row++)
-                if (dir->fullName(j) == itemFullName)
+            for (int j = 0; j < dir->count(); j++, row++) {
+                if (dir->fullName(j) == itemFullName) {
                     return index(row, 0);
+                }
+            }
         }
     }
     return {};
 }
 
 QString OutputModel::formatSize(unsigned int size) const {
-    if (size < 1024)
+    if (size < 1024) {
         return QString::number(size) + " B";
-    else if (size < 1024 * 1024)
+    }
+    else if (size < 1024 * 1024) {
         return QString::number(size / 1024) + " KB";
-    else if (size < 1024 * 1024 * 1024)
+    }
+    else if (size < 1024 * 1024 * 1024) {
         return QString::number(size / (1024 * 1024)) + " MB";
-    else
+    }
+    else {
         return QString::number(static_cast<float>(size) / (1024. * 1024. * 1024.), 'f', 1) + " GB";
+    }
 
     return {};
 }
@@ -304,11 +322,13 @@ QString OutputModel::formatAgo(QDateTime dt) const {
     QDateTime now = QDateTime::currentDateTime();
 
     int delta = dt.secsTo(now);
-    if (delta < 0)
+    if (delta < 0) {
         delta = 0;
+    }
 
-    if (delta == 1)
+    if (delta == 1) {
         str = tr("1 second ago");
+    }
 
     else if (delta >= 1 && delta < 60) {
         str = QString::number(delta) + tr(" second") + ((delta == 1) ? tr("") : tr("s")) + tr(" ago");

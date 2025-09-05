@@ -23,12 +23,14 @@ QString NodeQueryAttrGroup::query() const {
     QStringList lst;
     Q_FOREACH (NodeQueryOption* op, options_) {
         QString s = op->query().simplified();
-        if (!s.isEmpty())
+        if (!s.isEmpty()) {
             lst << op->query();
+        }
     }
 
-    if (lst.count() == 0)
+    if (lst.count() == 0) {
         return name_;
+    }
     else if (lst.count() == 1) {
         return lst[0];
     }
@@ -47,10 +49,12 @@ bool NodeQueryVarAttrGroup::hasType(VAttributeType* t) const {
 #ifdef _UI_NODEQUERY_DEBUG
                 UiLog().dbg() << "NodeQueryVarAttrGroup::hasType  var_type=" << v.toStdString();
 #endif
-                if (v == "any")
+                if (v == "any") {
                     return true;
-                else
+                }
+                else {
                     return (v == t->name());
+                }
             }
         }
 
@@ -118,29 +122,35 @@ bool NodeQuery::hasServer(const std::string& name) const {
     UiLog().dbg() << "NodeQuery::hasServer -->";
 #endif
 
-    if (servers_.empty())
+    if (servers_.empty()) {
         return true;
+    }
 
     return servers_.contains(QString::fromStdString(name));
 }
 
 NodeQueryOption* NodeQuery::option(QString name) const {
     QMap<QString, NodeQueryOption*>::const_iterator it = options_.find(name);
-    if (it != options_.constEnd())
+    if (it != options_.constEnd()) {
         return it.value();
+    }
     return nullptr;
 }
 
 QString NodeQuery::query() const {
     QString s1 = nodeQueryPart();
     QString s2 = attrQueryPart();
-    if (!s1.isEmpty())
-        if (!s2.isEmpty())
+    if (!s1.isEmpty()) {
+        if (!s2.isEmpty()) {
             return s1 + " and " + s2;
-        else
+        }
+        else {
             return s1;
-    else
+        }
+    }
+    else {
         return s2;
+    }
 
     return {};
 }
@@ -154,8 +164,9 @@ QString NodeQuery::nodeQueryPart() const {
          << "flag"
          << "status_change_time";
     Q_FOREACH (QString s, keys) {
-        if (!extQuery_.value(s).isEmpty())
+        if (!extQuery_.value(s).isEmpty()) {
             lst << extQuery_.value(s);
+        }
     }
 
     // TODO : handle all
@@ -169,8 +180,9 @@ bool NodeQuery::hasBasicNodeQueryPart() const {
          << "state"
          << "flag";
     Q_FOREACH (QString s, keys) {
-        if (!extQuery_.value(s).isEmpty())
+        if (!extQuery_.value(s).isEmpty()) {
             return true;
+        }
     }
     return false;
 }
@@ -199,10 +211,12 @@ QString NodeQuery::attrQueryPart(VAttributeType* t) const {
                 }
             }
 
-            if (qLst.isEmpty())
+            if (qLst.isEmpty()) {
                 q = t->name();
-            else
+            }
+            else {
                 q = qLst.join(" and ");
+            }
 
             break;
         }
@@ -245,8 +259,9 @@ bool NodeQuery::removeServer(const std::string& serverName) {
 }
 
 bool NodeQuery::renameServer(const std::string& newName, const std::string& oldName) {
-    if (servers_.empty())
+    if (servers_.empty()) {
         return false;
+    }
 
     QString sNew = QString::fromStdString(newName);
     QString sOld = QString::fromStdString(oldName);
@@ -270,28 +285,33 @@ void NodeQuery::buildQueryString() {
     QStringList nodePart;
     QString name = options_["node_name"]->query();
     QString path = options_["node_path"]->query();
-    if (!name.isEmpty())
+    if (!name.isEmpty()) {
         nodePart << name;
-    if (!path.isEmpty())
+    }
+    if (!path.isEmpty()) {
         nodePart << path;
-    if (nodePart.count() > 0)
+    }
+    if (nodePart.count() > 0) {
         extQuery_["node"] = "(" + nodePart.join(" and ") + ")";
+    }
 
     // Type
     QString typePart = options_["type"]->query(" or ");
-    if (!typePart.isEmpty())
+    if (!typePart.isEmpty()) {
         extQuery_["type"] = "(" + typePart + ")";
+    }
 
     // State
     QString statePart = options_["state"]->query(" or ");
-    if (!statePart.isEmpty())
+    if (!statePart.isEmpty()) {
         extQuery_["state"] = "(" + statePart + ")";
+    }
 
     // Flag
     QString flagPart = options_["flag"]->query(" or ");
-    if (!flagPart.isEmpty())
+    if (!flagPart.isEmpty()) {
         extQuery_["flag"] = "(" + flagPart + ")";
-    ;
+    };
 
     // Status change time
     QString periodPart = options_["status_change_time"]->query();
@@ -307,31 +327,36 @@ void NodeQuery::buildQueryString() {
         Q_ASSERT(grp);
         QString grpPart = grp->query();
 
-        if (!attrPart.isEmpty())
+        if (!attrPart.isEmpty()) {
             attrPart += " or ";
+        }
 
         attrPart += grpPart;
     }
 
-    if (!attrPart.isEmpty())
+    if (!attrPart.isEmpty()) {
         // extQuery_["attr"]="(" + attrPart + ")";
         extQuery_["attr"] = attrPart;
+    }
 
     bool hasEq = QStringList(extQuery_.values()).join("").contains("=");
 
     // Scope
     QString scopePart;
-    if (!servers_.isEmpty())
+    if (!servers_.isEmpty()) {
         scopePart = "servers = \'" + servers_.join(", ") + "\'";
+    }
 
     if (servers_.size() <= 1 && !rootNode_.empty()) {
-        if (!scopePart.isEmpty())
+        if (!scopePart.isEmpty()) {
             scopePart += " and ";
+        }
 
         scopePart += "root_node = \'" + QString::fromStdString(rootNode_) + "\'";
     }
-    if (!scopePart.isEmpty())
+    if (!scopePart.isEmpty()) {
         extQuery_["scope"] = scopePart;
+    }
 
     // Other options
     QString opPart;
@@ -340,16 +365,20 @@ void NodeQuery::buildQueryString() {
     }
 
     if (hasEq) {
-        if (!opPart.isEmpty())
+        if (!opPart.isEmpty()) {
             opPart += " and ";
-        if (caseSensitive_)
+        }
+        if (caseSensitive_) {
             opPart += "case_sensitive";
-        else
+        }
+        else {
             opPart += "case_insensitive";
+        }
     }
 
-    if (!opPart.isEmpty())
+    if (!opPart.isEmpty()) {
         extQuery_["options"] = opPart;
+    }
 
     // SQL-like query
     sqlQuery_.clear();
@@ -388,8 +417,9 @@ void NodeQuery::buildQueryString() {
         selectPart << grp->name();
         selectPart.removeOne("node");
         QString grpPart = grp->query();
-        if (grpPart != grp->name())
+        if (grpPart != grp->name()) {
             wherePart << grpPart;
+        }
     }
 
     sqlQuery_ += " " + selectPart.join(", ");
@@ -399,8 +429,9 @@ void NodeQuery::buildQueryString() {
         if (servers_.size() == 1 && !rootNode_.empty()) {
             fromPart << servers_[0] + ":/" + QString::fromStdString(rootNode_);
         }
-        else
+        else {
             fromPart = servers_;
+        }
 
         sqlQuery_ += " FROM " + fromPart.join(", ");
     }
@@ -408,8 +439,9 @@ void NodeQuery::buildQueryString() {
         // sqlQuery_+=" FROM *";
     }
 
-    if (wherePart.count() > 0)
+    if (wherePart.count() > 0) {
         sqlQuery_ += " WHERE " + wherePart.join(" and ");
+    }
 
     if (!ignoreMaxNum_) {
         sqlQuery_ += " LIMIT " + QString::number(maxNum_);
@@ -421,14 +453,16 @@ void NodeQuery::load(VSettings* vs) {
     caseSensitive_ = vs->getAsBool("case", caseSensitive_);
 
     auto maxNum = vs->get<int>("maxNum", maxNum_);
-    if (maxNum_ > 1 && maxNum < 5000000)
+    if (maxNum_ > 1 && maxNum < 5000000) {
         maxNum_ = maxNum;
+    }
 
     std::vector<std::string> v;
     vs->get("servers", v);
     servers_.clear();
-    for (auto& it : v)
+    for (auto& it : v) {
         servers_ << QString::fromStdString(it);
+    }
 
     // allServers_=vs->getAsBool("allServers",allServers_);
 
@@ -449,27 +483,33 @@ void NodeQuery::load(VSettings* vs) {
 }
 
 void NodeQuery::save(VSettings* vs) {
-    if (advanced_)
+    if (advanced_) {
         vs->putAsBool("advanced", advanced_);
+    }
 
-    if (caseSensitive_)
+    if (caseSensitive_) {
         vs->putAsBool("case", caseSensitive_);
+    }
 
-    if (maxNum_ != defaultMaxNum_)
+    if (maxNum_ != defaultMaxNum_) {
         vs->put("maxNum", maxNum_);
+    }
 
     std::vector<std::string> v;
-    Q_FOREACH (QString s, servers_)
+    Q_FOREACH (QString s, servers_) {
         v.push_back(s.toStdString());
+    }
 
     // if(!allServers_)
     //     vs->putAsBool("allServers",allServers_);
 
-    if (!v.empty())
+    if (!v.empty()) {
         vs->put("servers", v);
+    }
 
-    if (!rootNode_.empty())
+    if (!rootNode_.empty()) {
         vs->put("rootNode", rootNode_);
+    }
 
     Q_FOREACH (QString s, options_.keys()) {
         options_[s]->save(vs);

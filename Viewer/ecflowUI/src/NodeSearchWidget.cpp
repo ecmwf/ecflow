@@ -294,8 +294,9 @@ void NodeSearchWidget::writeSettings(QSettings& settings) {
     settings.setValue("defPanel", editor_->isDefPanelVisible());
     settings.setValue("queryPanel", editor_->isQueryPanelVisible());
     QStringList colW;
-    for (int i = 0; i < resTree_->model()->columnCount() - 1; i++)
+    for (int i = 0; i < resTree_->model()->columnCount() - 1; i++) {
         colW << QString::number(resTree_->columnWidth(i));
+    }
 
     settings.setValue("resColumnWidth", colW);
 }
@@ -309,10 +310,12 @@ void NodeSearchWidget::readSettings(const QSettings& settings) {
     }
     if (settings.contains("resColumnWidth")) {
         QStringList lst = settings.value("resColumnWidth").toStringList();
-        for (int i = 0; i < lst.count(); i++)
+        for (int i = 0; i < lst.count(); i++) {
             resTree_->setColumnWidth(i, lst[i].toInt());
+        }
 
-        if (lst.count() >= 4)
+        if (lst.count() >= 4) {
             columnsAdjusted_ = true;
+        }
     }
 }

@@ -26,11 +26,13 @@ bool AutoCancelParser::doParse(const std::string& line, std::vector<std::string>
     // autocancel 10        # cancel 10 days after complete
     // autocancel 0         # cancel immediately after complete
 
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("AutoCancelParser::doParse: Invalid autocancel :" + line);
-    if (nodeStack().empty())
+    }
+    if (nodeStack().empty()) {
         throw std::runtime_error(
             "AutoCancelParser::doParse: Could not add autocancel as node stack is empty at line: " + line);
+    }
 
     if (lineTokens[1].find_first_of(':') == string::npos) {
         // Must be of the form:

@@ -96,8 +96,9 @@ void NodeQueryStringOptionEdit::initInternal(NodeQueryOption* option) {
 }
 
 void NodeQueryStringOptionEdit::slotEdited(QString val) {
-    if (initIsOn_)
+    if (initIsOn_) {
         return;
+    }
 
     if (option_) {
         option_->setValue(val);
@@ -106,8 +107,9 @@ void NodeQueryStringOptionEdit::slotEdited(QString val) {
 }
 
 void NodeQueryStringOptionEdit::slotMatchChanged(int val) {
-    if (initIsOn_)
+    if (initIsOn_) {
         return;
+    }
 
     if (option_) {
         option_->setMatchMode(matchCb_->matchMode(val));
@@ -165,8 +167,9 @@ void NodeQueryListOptionEdit::clear() {
 
 void NodeQueryListOptionEdit::slotListChanged() {
     resetTb_->setEnabled(list_->hasSelection());
-    if (initIsOn_)
+    if (initIsOn_) {
         return;
+    }
 
     if (option_) {
         option_->setSelection(list_->selection());
@@ -219,8 +222,9 @@ void NodeQueryComboOptionEdit::initInternal(NodeQueryOption* option) {
 }
 
 void NodeQueryComboOptionEdit::slotCbChanged(int idx) {
-    if (initIsOn_)
+    if (initIsOn_) {
         return;
+    }
 
     if (option_) {
         option_->setValue(cb_->itemData(idx).toString());
@@ -389,8 +393,9 @@ void NodeQueryPeriodOptionEdit::slotToChanged(QDateTime) {
 }
 
 void NodeQueryPeriodOptionEdit::updateOptions() {
-    if (initIsOn_)
+    if (initIsOn_) {
         return;
+    }
 
     if (option_) {
         int modeIdx = modeCb_->currentIndex();
@@ -404,10 +409,12 @@ void NodeQueryPeriodOptionEdit::updateOptions() {
             int val = valueSpin_->value();
             int idx = unitsCb_->currentIndex();
             QString units;
-            if (idx > -1)
+            if (idx > -1) {
                 units = unitsCb_->itemData(idx).toString();
-            else
+            }
+            else {
                 val = -1;
+            }
 
             if (mode == "last") {
                 option_->setLastPeriod(val, units);

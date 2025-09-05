@@ -30,12 +30,14 @@ PropertyMapper::~PropertyMapper() {
 
 VProperty* PropertyMapper::find(const std::string& path, bool failOnError) const {
     for (auto prop : props_) {
-        if (prop->path() == path)
+        if (prop->path() == path) {
             return prop;
+        }
     }
 
-    if (failOnError)
+    if (failOnError) {
         UI_ASSERT(0, "Could not find property=" + path);
+    }
 
     return nullptr;
 }

@@ -29,8 +29,9 @@ DiagData* DiagData::instance_ = nullptr;
 DiagDataServerItem::DiagDataServerItem(const std::string& host, const std::string& port, size_t colNum)
     : host_(host),
       port_(port) {
-    for (size_t i = 0; i < colNum; i++)
+    for (size_t i = 0; i < colNum; i++) {
         data_.emplace_back();
+    }
 }
 
 const std::string& DiagDataServerItem::dataAt(int row, int column) const {
@@ -40,9 +41,11 @@ const std::string& DiagDataServerItem::dataAt(int row, int column) const {
 }
 
 int DiagDataServerItem::findRowByPath(const std::string& path) const {
-    for (size_t i = 0; i < pathData_.size(); i++)
-        if (pathData_[i] == path)
+    for (size_t i = 0; i < pathData_.size(); i++) {
+        if (pathData_[i] == path) {
             return i;
+        }
+    }
 
     return -1;
 }
@@ -50,8 +53,9 @@ int DiagDataServerItem::findRowByPath(const std::string& path) const {
 bool DiagDataServerItem::checkSizes() const {
     size_t num = pathData_.size();
     for (const auto& d : data_) {
-        if (d.size() != num)
+        if (d.size() != num) {
             return false;
+        }
     }
     return true;
 }
@@ -59,15 +63,17 @@ bool DiagDataServerItem::checkSizes() const {
 DiagData::DiagData() = default;
 
 DiagData* DiagData::instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new DiagData();
+    }
 
     return instance_;
 }
 
 const std::string& DiagData::columnName(int i) const {
-    if (i >= 0 && i < static_cast<int>(columnNames_.size()))
+    if (i >= 0 && i < static_cast<int>(columnNames_.size())) {
         return columnNames_[i];
+    }
 
     static std::string emptyStr;
     return emptyStr;
@@ -75,14 +81,16 @@ const std::string& DiagData::columnName(int i) const {
 
 const std::string& DiagData::dataAt(VNode* vn, int column) const {
     static std::string emptyStr;
-    if (!vn)
+    if (!vn) {
         return emptyStr;
+    }
 
     if (ServerHandler* sh = vn->server()) {
         if (DiagDataServerItem* d = findServerData(sh->host(), sh->port())) {
             int row = d->findRowByPath(vn->absNodePath());
-            if (row > -1)
+            if (row > -1) {
                 return d->dataAt(row, column);
+            }
         }
     }
 
@@ -90,12 +98,14 @@ const std::string& DiagData::dataAt(VNode* vn, int column) const {
 }
 
 DiagDataServerItem* DiagData::findServerData(const std::string& host, const std::string& port) const {
-    if (host.empty() || port.empty())
+    if (host.empty() || port.empty()) {
         return nullptr;
+    }
 
     for (size_t i = 0; i < serverData_.size(); i++) {
-        if (serverData_[i]->host_ == host && serverData_[i]->port_ == port)
+        if (serverData_[i]->host_ == host && serverData_[i]->port_ == port) {
             return serverData_[i];
+        }
     }
 
     return nullptr;
@@ -111,8 +121,9 @@ void DiagData::clear() {
 }
 
 void DiagData::load() {
-    if (const char* df = getenv("ECFLOWUI_DIAG_FILE"))
+    if (const char* df = getenv("ECFLOWUI_DIAG_FILE")) {
         loadFile(std::string(df));
+    }
 }
 
 void DiagData::loadFile(const std::string& fileName) {
@@ -133,20 +144,24 @@ void DiagData::loadFile(const std::string& fileName) {
     diag_file.getline(line); // default delimiter is /n
 
     // No header, no diag data can be read
-    if (line.empty())
+    if (line.empty()) {
         return;
+    }
 
     QString headerLine = QString::fromStdString(line);
-    if (headerLine.startsWith("#"))
+    if (headerLine.startsWith("#")) {
         headerLine = headerLine.mid(1);
+    }
 
     QStringList headerLst = headerLine.split(",");
     int pathColumnIndex   = -1;
     for (int i = 0; i < headerLst.count(); i++) {
-        if (headerLst[i].compare("path", Qt::CaseInsensitive) == 0)
+        if (headerLst[i].compare("path", Qt::CaseInsensitive) == 0) {
             pathColumnIndex = i;
-        else
+        }
+        else {
             columnNames_.push_back(headerLst[i].toStdString());
+        }
     }
 
     if (pathColumnIndex == -1) {
@@ -157,18 +172,21 @@ void DiagData::loadFile(const std::string& fileName) {
     while (diag_file.good()) {
         diag_file.getline(line); // default delimiter is /n
 
-        if (line.size() <= 1)
+        if (line.size() <= 1) {
             continue;
+        }
 
-        if (line[0] == '#')
+        if (line[0] == '#') {
             line = line.substr(1);
+        }
 
         // split by comma
         QStringList lst = QString::fromStdString(line).split(",");
 
         // When number of items does not match expected number we skip the line
-        if (lst.count() != static_cast<int>(columnNames_.size()) + 1)
+        if (lst.count() != static_cast<int>(columnNames_.size()) + 1) {
             continue;
+        }
 
         std::string path = lst[pathColumnIndex].toStdString();
         std::string host, port;
@@ -200,11 +218,13 @@ void DiagData::loadFile(const std::string& fileName) {
 #endif
 
             int idx = i;
-            if (idx > pathColumnIndex)
+            if (idx > pathColumnIndex) {
                 idx--;
+            }
 
-            if (i != pathColumnIndex)
+            if (i != pathColumnIndex) {
                 data->data_[idx].push_back(val.toStdString());
+            }
         }
     }
 

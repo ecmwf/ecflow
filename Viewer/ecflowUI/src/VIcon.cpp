@@ -218,8 +218,9 @@ std::vector<VParam*> VIcon::filterItems() {
 
 VIcon* VIcon::find(const std::string& name) {
     auto it = items_.find(name);
-    if (it != items_.end())
+    if (it != items_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
@@ -227,8 +228,9 @@ VIcon* VIcon::find(const std::string& name) {
 // Create the pixmap containing all the relevant icons for the given node according to the filter.
 QVariantList VIcon::pixmapList(VNode* vnode, VParamSet* filter) {
     QVariantList lst;
-    if (!vnode)
+    if (!vnode) {
         return lst;
+    }
 
     for (auto it = itemsVec_.begin(); it != itemsVec_.end(); ++it) {
         VIcon* v = *it;
@@ -245,8 +247,9 @@ QVariantList VIcon::pixmapList(VNode* vnode, VParamSet* filter) {
 
 // Create the pixmap containing all the relevant icons for the given node according to the filter.
 int VIcon::pixmapNum(VNode* vnode, VParamSet* filter) {
-    if (!vnode)
+    if (!vnode) {
         return 0;
+    }
 
     int ret = 0;
 
@@ -262,8 +265,9 @@ int VIcon::pixmapNum(VNode* vnode, VParamSet* filter) {
 }
 
 QString VIcon::toolTip(VNode* vnode, VParamSet* filter) {
-    if (!filter || filter->isEmpty())
+    if (!filter || filter->isEmpty()) {
         return {};
+    }
 
     int iconSize = 16;
     QString txt;
@@ -284,31 +288,36 @@ QString VIcon::toolTip(VNode* vnode, VParamSet* filter) {
         }
     }
 
-    if (!txt.isEmpty())
+    if (!txt.isEmpty()) {
         txt += "</table>";
+    }
 
     return txt;
 }
 
 QString VIcon::shortDescription() const {
     QString v;
-    if (prop_)
+    if (prop_) {
         v = prop_->param("shortDesc");
+    }
 
-    if (v.isEmpty())
+    if (v.isEmpty()) {
         v = name();
+    }
 
     return v;
 }
 void VIcon::names(std::vector<std::string>& v) {
-    for (auto it = items_.begin(); it != items_.end(); ++it)
+    for (auto it = items_.begin(); it != items_.end(); ++it) {
         v.push_back(it->first);
+    }
 }
 
 void VIcon::saveLastNames() {
     lastNames_.clear();
-    for (auto it = items_.begin(); it != items_.end(); ++it)
+    for (auto it = items_.begin(); it != items_.end(); ++it) {
         lastNames_.push_back(it->first);
+    }
 
     std::string iconFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_icons.txt");
     VSettings vs(iconFile);
@@ -322,8 +331,9 @@ void VIcon::initLastNames() {
     assert(lastNames_.empty());
     std::string iconFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_icons.txt");
     VSettings vs(iconFile);
-    if (vs.read(false))
+    if (vs.read(false)) {
         vs.get("icons", lastNames_);
+    }
 }
 
 void VIcon::load(VProperty* group) {
@@ -343,8 +353,9 @@ static SimpleLoader<VIcon> loader("icon");
 
 // Task only
 bool VWaitIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::WAIT);
 }
@@ -355,12 +366,14 @@ bool VWaitIcon::show(VNode* n) {
 
 // Task only
 bool VRerunIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     node_ptr node = n->node();
-    if (!node.get())
+    if (!node.get()) {
         return false;
+    }
 
     if (Submittable* s = node->isSubmittable()) {
         return (s->try_no() > 1);
@@ -375,8 +388,9 @@ bool VRerunIcon::show(VNode* n) {
 
 // Node and server
 bool VNodeLogIcon::show(VNode* n) {
-    if (!n)
+    if (!n) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::MESSAGE);
 }
@@ -387,22 +401,27 @@ bool VNodeLogIcon::show(VNode* n) {
 
 // Task only
 bool VCompleteIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
-    if (!n->node())
+    if (!n->node()) {
         return false;
+    }
 
     node_ptr node = n->node();
-    if (!node.get())
+    if (!node.get()) {
         return false;
+    }
 
-    if (n->isDefaultStateComplete())
+    if (n->isDefaultStateComplete()) {
         return true;
+    }
 
     if (AstTop* t = node->completeAst()) {
-        if (t->evaluate())
+        if (t->evaluate()) {
             return true;
+        }
     }
     return false;
 }
@@ -413,13 +432,15 @@ bool VCompleteIcon::show(VNode* n) {
 
 // Node only?
 bool VDateIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     node_ptr node = n->node();
 
-    if (!node.get())
+    if (!node.get()) {
         return false;
+    }
 
     return (node->days().size() > 0 || node->dates().size() > 0);
 }
@@ -430,12 +451,14 @@ bool VDateIcon::show(VNode* n) {
 
 // Node only?
 bool VTimeIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     node_ptr node = n->node();
-    if (!node)
+    if (!node) {
         return false;
+    }
 
     bool b = node->time_today_cron_is_free();
     return !b && (node->timeVec().size() > 0 || node->todayVec().size() > 0 || node->crons().size() > 0);
@@ -447,12 +470,14 @@ bool VTimeIcon::show(VNode* n) {
 
 // Node only?
 bool VTimeFreeIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     node_ptr node = n->node();
-    if (!node)
+    if (!node) {
         return false;
+    }
 
     return node->time_today_cron_is_free();
 }
@@ -463,8 +488,9 @@ bool VTimeFreeIcon::show(VNode* n) {
 
 // Node only?
 bool VZombieIcon::show(VNode* n) {
-    if (!n)
+    if (!n) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::ZOMBIE);
 }
@@ -475,8 +501,9 @@ bool VZombieIcon::show(VNode* n) {
 
 // Node and server
 bool VLateIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::LATE);
 }
@@ -487,8 +514,9 @@ bool VLateIcon::show(VNode* n) {
 
 // Server only
 bool VSlowIcon::show(VNode* n) {
-    if (!n || !n->isServer())
+    if (!n || !n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::LATE);
 }
@@ -499,8 +527,9 @@ bool VSlowIcon::show(VNode* n) {
 
 // Node only?
 bool VKilledIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::KILLED);
 }
@@ -511,8 +540,9 @@ bool VKilledIcon::show(VNode* n) {
 
 // Node only?
 bool VArchivedIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::ARCHIVED);
 }
@@ -523,8 +553,9 @@ bool VArchivedIcon::show(VNode* n) {
 
 // Node only?
 bool VRestoredIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::RESTORED);
 }
@@ -535,8 +566,9 @@ bool VRestoredIcon::show(VNode* n) {
 
 // Node only?
 bool VSlowJobCreationIcon::show(VNode* n) {
-    if (!n || n->isServer())
+    if (!n || n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::THRESHOLD);
 }
@@ -547,8 +579,9 @@ bool VSlowJobCreationIcon::show(VNode* n) {
 
 // Server only
 bool VNoLogIcon::show(VNode* n) {
-    if (!n || !n->isServer())
+    if (!n || !n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::LOG_ERROR);
 }
@@ -559,8 +592,9 @@ bool VNoLogIcon::show(VNode* n) {
 
 // Server only
 bool VCheckpointErrorIcon::show(VNode* n) {
-    if (!n || !n->isServer())
+    if (!n || !n->isServer()) {
         return false;
+    }
 
     return n->isFlagSet(ecf::Flag::CHECKPT_ERROR);
 }

@@ -170,8 +170,9 @@ QWidget* OutputItemWidget::realWidget() {
 void OutputItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 
@@ -279,8 +280,9 @@ void OutputItemWidget::infoReady(VReply* reply) {
         VFile_ptr f = reply->tmpFile();
         if (f) {
             browser_->loadFile(f);
-            if (f->storageMode() == VFile::DiskStorage)
+            if (f->storageMode() == VFile::DiskStorage) {
                 hasMessage = false;
+            }
         }
 
         if (!hasMessage) {
@@ -660,8 +662,9 @@ void OutputItemWidget::on_toLineEndTb__clicked() {
 void OutputItemWidget::slotSaveFileAs() {
     if (browser_->isFileLoaded()) {
         QString fileName = QFileDialog::getSaveFileName(this);
-        if (fileName.isEmpty())
+        if (fileName.isEmpty()) {
             return;
+        }
 
         browser_->saveCurrentFile(fileName);
     }

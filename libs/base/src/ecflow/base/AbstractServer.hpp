@@ -12,6 +12,7 @@
 #define ecflow_base_AbstractServer_HPP
 
 #include <atomic>
+
 #include "ecflow/base/Stats.hpp"
 #include "ecflow/base/ZombieCtrl.hpp"
 #include "ecflow/core/CheckPt.hpp"

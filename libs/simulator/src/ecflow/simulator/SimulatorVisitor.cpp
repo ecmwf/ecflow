@@ -101,8 +101,9 @@ void SimulatorVisitor::visitSuite(Suite* s) {
 boost::posix_time::time_duration SimulatorVisitor::max_simulation_period(Suite* s) const {
     size_t suite_duration_vec_size = suite_duration_vec_.size();
     for (size_t i = 0; i < suite_duration_vec_size; i++) {
-        if (suite_duration_vec_[i].first == s)
+        if (suite_duration_vec_[i].first == s) {
             return suite_duration_vec_[i].second;
+        }
     }
     return max_sim_duration_;
 }
@@ -112,10 +113,12 @@ void SimulatorVisitor::visitFamily(Family* f) {
 }
 
 void SimulatorVisitor::visitNodeContainer(NodeContainer* nc) {
-    if (ci_ == boost::posix_time::hours(1))
+    if (ci_ == boost::posix_time::hours(1)) {
         nc->get_time_resolution_for_simulation(ci_);
-    if (!has_end_clock_)
+    }
+    if (!has_end_clock_) {
         nc->get_max_simulation_duration(max_suite_duration_);
+    }
 
     if (!nc->crons().empty()) {
         foundCrons_ = true;
@@ -134,10 +137,12 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc) {
 }
 
 void SimulatorVisitor::visitTask(Task* t) {
-    if (ci_ == boost::posix_time::hours(1))
+    if (ci_ == boost::posix_time::hours(1)) {
         t->get_time_resolution_for_simulation(ci_);
-    if (!has_end_clock_)
+    }
+    if (!has_end_clock_) {
         t->get_max_simulation_duration(max_suite_duration_);
+    }
 
     foundTasks_ = true;
 

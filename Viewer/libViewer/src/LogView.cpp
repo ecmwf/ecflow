@@ -52,6 +52,7 @@ void LogView::rerender() {
 
 void LogView::scrolltToHighlightPeriod() {
     QModelIndex idx = logModel_->highlightPeriodIndex();
-    if (idx.isValid())
+    if (idx.isValid()) {
         scrollTo(idx, QAbstractItemView::PositionAtCenter);
+    }
 }

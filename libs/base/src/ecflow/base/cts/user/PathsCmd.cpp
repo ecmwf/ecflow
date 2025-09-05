@@ -32,8 +32,9 @@ using namespace boost;
 namespace po = boost::program_options;
 
 PathsCmd::PathsCmd(Api api, const std::string& absNodePath, bool force) : api_(api), force_(force) {
-    if (!absNodePath.empty())
+    if (!absNodePath.empty()) {
         paths_.push_back(absNodePath);
+    }
 }
 
 void PathsCmd::print(std::string& os) const {
@@ -42,8 +43,9 @@ void PathsCmd::print(std::string& os) const {
 
 std::string PathsCmd::print_short() const {
     std::vector<std::string> paths;
-    if (!paths_.empty())
+    if (!paths_.empty()) {
         paths.emplace_back(paths_[0]);
+    }
 
     std::string os;
     my_print_only(os, paths);
@@ -133,14 +135,18 @@ void PathsCmd::my_print_only(std::string& os, const std::vector<std::string>& pa
 
 bool PathsCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<PathsCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (api_ != the_rhs->api())
+    }
+    if (api_ != the_rhs->api()) {
         return false;
-    if (paths_ != the_rhs->paths())
+    }
+    if (paths_ != the_rhs->paths()) {
         return false;
-    if (force_ != the_rhs->force())
+    }
+    if (force_ != the_rhs->force()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
@@ -170,8 +176,9 @@ bool PathsCmd::isWrite() const {
             return false;
             break; // read only
         case PathsCmd::EDIT_HISTORY: {
-            if (paths_.size() == 1 && paths_[0] == "clear")
+            if (paths_.size() == 1 && paths_[0] == "clear") {
                 return true; // requires write privilege
+            }
             return false;
             break; // read only
         }
@@ -294,8 +301,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
 
         case PathsCmd::EDIT_HISTORY: {
             as->update_stats().node_edit_history_++;
-            if (paths_.empty())
+            if (paths_.empty()) {
                 throw std::runtime_error("No paths/options specified for edit history");
+            }
             if (paths_.size() == 1 && paths_[0] == "clear") {
                 defs->clear_edit_history();
                 break;
@@ -308,8 +316,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
             use_EditHistoryMgr_ = false; // will add edit history ourselves
 
             as->update_stats().node_archive_++;
-            if (paths_.empty())
+            if (paths_.empty()) {
                 throw std::runtime_error("No paths specified for archive");
+            }
 
             // make sure paths don't overlap, Should not find same path up the hierarchy, which is also in paths_
             std::vector<NodeContainer*> containers_to_archive;
@@ -322,8 +331,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                     continue;
                 }
                 NodeContainer* container = theNode->isNodeContainer();
-                if (!container)
+                if (!container) {
                     continue;
+                }
 
                 bool unique  = true;
                 Node* parent = theNode->parent();
@@ -335,18 +345,21 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                     }
                     parent = parent->parent();
                 }
-                if (unique)
+                if (unique) {
                     containers_to_archive.push_back(container);
+                }
             }
 
             size_t vec_size = containers_to_archive.size();
             for (size_t i = 0; i < vec_size; i++) {
                 NodeContainer* the_container = containers_to_archive[i];
 
-                if (!force_)
+                if (!force_) {
                     DeleteCmd::check_for_active_or_submitted_tasks(as, the_container);
-                else
+                }
+                else {
                     as->zombie_ctrl().add_user_zombies(the_container, CtsApi::archive_arg());
+                }
 
                 SuiteChanged1 changed(the_container->suite());
 
@@ -361,8 +374,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
 
         case PathsCmd::RESTORE: {
             as->update_stats().node_restore_++;
-            if (paths_.empty())
+            if (paths_.empty()) {
                 throw std::runtime_error("No paths specified for restore");
+            }
             for (const auto& path : paths_) {
                 node_ptr theNode = find_node_for_edit_no_throw(defs, path);
                 if (!theNode.get()) {
@@ -371,8 +385,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                     continue;
                 }
                 NodeContainer* container = theNode->isNodeContainer();
-                if (!container)
+                if (!container) {
                     continue;
+                }
 
                 SuiteChanged1 changed(container->suite());
                 container->restore(); // this can throw std::runtime_error
@@ -434,8 +449,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                     acc_warning_msg += warning_msg;
                 }
                 std::string paths_not_fnd_error_msg = ss.str();
-                if (!paths_not_fnd_error_msg.empty())
+                if (!paths_not_fnd_error_msg.empty()) {
                     throw std::runtime_error(paths_not_fnd_error_msg);
+                }
                 return PreAllocatedReply::string_cmd(acc_warning_msg);
             }
             break;
@@ -639,8 +655,9 @@ void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     assert(api_ != PathsCmd::NO_CMD);
 
     vector<string> args = vm[theArg()].as<vector<string>>();
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(theArg(), args);
+    }
 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
@@ -651,8 +668,9 @@ void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         bool all        = false;
         size_t vec_size = options.size();
         for (size_t i = 0; i < vec_size; i++) {
-            if (args[i] == "_all_")
+            if (args[i] == "_all_") {
                 all = true;
+            }
         }
         if (!all && paths.empty()) {
             std::stringstream ss;
@@ -668,8 +686,9 @@ void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     else if (api_ == PathsCmd::EDIT_HISTORY) {
 
         if (paths.empty()) {
-            if (options.size() == 1 && options[0] == "clear")
+            if (options.size() == 1 && options[0] == "clear") {
                 paths.emplace_back("clear");
+            }
             else {
                 std::stringstream ss;
                 ss << theArg() << ":  No paths or option specified. Paths must begin with a leading '/' character\n";

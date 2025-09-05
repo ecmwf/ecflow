@@ -66,8 +66,9 @@ Defs::Defs(const Defs& rhs) : state_(rhs.state_), server_(rhs.server_), flag_(rh
 }
 
 void Defs::copy_defs_state_only(const defs_ptr& server_defs) {
-    if (!server_defs)
+    if (!server_defs) {
         return;
+    }
 
     // Initialise the defs state. We need to reflect the real state.
     set_state(server_defs->state());
@@ -140,8 +141,9 @@ void Defs::handle_migration() {
         if (!node.get()) {
             it = edit_history_.erase(it);
         }
-        else
+        else {
             it++;
+        }
     }
 }
 
@@ -171,8 +173,9 @@ void Defs::set_state(NState::State the_new_state) {
 void Defs::set_most_significant_state() {
     NState::State computedStateOfImmediateChildren =
         ecf::theComputedNodeState(suiteVec_, true /* immediate children only */);
-    if (computedStateOfImmediateChildren != state_.state())
+    if (computedStateOfImmediateChildren != state_.state()) {
         set_state(computedStateOfImmediateChildren);
+    }
 }
 
 /// Others ======================================================================
@@ -182,11 +185,13 @@ void Defs::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
     /// However Job generation checking will end up changing the states of the DEFS
     /// If this defs is loaded into the server the state of each node may be surprising. (i.e submitted)
     /// Hence we need to reset the state.
-    if (!jobCtrl.get())
+    if (!jobCtrl.get()) {
         throw std::runtime_error("Defs::check_job_creation: NULL JobCreationCtrl passed");
+    }
 
-    if (jobCtrl->verbose())
+    if (jobCtrl->verbose()) {
         cout << "Defs::check_job_creation(verbose):\n";
+    }
 
     // This function should NOT really change the data model
     // The changed state is reset, hence we need to preserve change and modify numbers
@@ -571,8 +576,9 @@ void Defs::auto_add_externs(bool remove_existing_externs_first) {
 }
 
 void Defs::beginSuite(const suite_ptr& suite) {
-    if (!suite.get())
+    if (!suite.get()) {
         throw std::runtime_error("Defs::beginSuite: Begin failed as suite is not loaded");
+    }
 
     if (!suite->begun()) {
         // Hierarchical set the state. Handle case where we have children that are all defstatus complete
@@ -616,8 +622,9 @@ void Defs::reset_begin() {
 void Defs::requeue() {
     bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
     flag_.reset();
-    if (edit_history_set)
+    if (edit_history_set) {
         flag().set(ecf::Flag::MESSAGE);
+    }
 
     Node::Requeue_args args;
     size_t theSuiteVecSize = suiteVec_.size();
@@ -629,8 +636,9 @@ void Defs::requeue() {
 }
 
 void Defs::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vector<std::string>& no_sort) {
-    if (attr == ecf::Attr::VARIABLE || attr == ecf::Attr::ALL)
+    if (attr == ecf::Attr::VARIABLE || attr == ecf::Attr::ALL) {
         server_.sort_variables();
+    }
 
     if (recursive) {
         size_t theSuiteVecSize = suiteVec_.size();
@@ -670,8 +678,9 @@ void Defs::check_suite_can_begin(const suite_ptr& suite) const {
 bool Defs::hasTimeDependencies() const {
     size_t theSuiteVecSize = suiteVec_.size();
     for (size_t s = 0; s < theSuiteVecSize; s++) {
-        if (suiteVec_[s]->hasTimeDependencies())
+        if (suiteVec_[s]->hasTimeDependencies()) {
             return true;
+        }
     }
     return false;
 }
@@ -711,40 +720,48 @@ void Defs::read_state(const std::string& line, const std::vector<std::string>& l
         token.clear();
         const std::string& line_token_i = lineTokens[i];
         if (line_token_i.find("state>:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: state extraction failed : " + line_token_i);
+            }
             std::pair<NState::State, bool> state_pair = NState::to_state(token);
-            if (!state_pair.second)
+            if (!state_pair.second) {
                 throw std::runtime_error("Defs::read_state: Invalid state specified : " + token);
+            }
             set_state_only(state_pair.first);
         }
         else if (line_token_i.find("flag:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: Invalid flag specified : " + line);
+            }
             flag().set_flag(token); // this can throw
         }
         else if (line_token_i.find("state_change:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: Invalid state_change specified : " + line);
+            }
             int sc = Extract::theInt(token, "Defs::read_state: invalid state_change specified : " + line);
             set_state_change_no(sc);
         }
         else if (line_token_i.find("modify_change:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: Invalid modify_change specified : " + line);
+            }
             int mc = Extract::theInt(token, "Defs::read_state: invalid state_change specified : " + line);
             set_modify_change_no(mc);
         }
         else if (line_token_i.find("server_state:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: Invalid server_state specified : " + line);
-            if (!SState::isValid(token))
+            }
+            if (!SState::isValid(token)) {
                 throw std::runtime_error("Defs::read_state: Invalid server_state specified : " + line);
+            }
             server_state().set_state(SState::toState(token));
         }
         else if (line_token_i.find("cal_count:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: Invalid cal_count specified : " + line);
+            }
             updateCalendarCount_ = Extract::theInt(token, "Defs::read_state: invalid cal_count specified : " + line);
         }
     }
@@ -756,8 +773,9 @@ void Defs::read_history(const std::string& line, const std::vector<std::string>&
     // The message can contain spaces,
     // Multiple spaces will be lost !!
     // Edit history older than ecf_prune_node_log_ days, will be pruned.
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("Defs::read_history: Invalid history " + line);
+    }
 
     DefsHistoryParser parser;
     parser.parse(line);
@@ -803,8 +821,9 @@ void Defs::read_history(const std::string& line, const std::vector<std::string>&
 }
 
 bool Defs::compare_edit_history(const Defs& rhs) const {
-    if (edit_history_ != rhs.edit_history_)
+    if (edit_history_ != rhs.edit_history_) {
         return false;
+    }
     return true;
 }
 
@@ -930,16 +949,18 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const {
 node_ptr Defs::find_closest_matching_node(const std::string& pathToNode) const {
     std::vector<std::string> theNodeNames;
     NodePath::split(pathToNode, theNodeNames);
-    if (theNodeNames.empty())
+    if (theNodeNames.empty()) {
         return node_ptr();
+    }
 
     node_ptr closest_matching_node;
     int index              = 0;
     size_t theSuiteVecSize = suiteVec_.size();
     for (size_t s = 0; s < theSuiteVecSize; s++) {
         suiteVec_[s]->find_closest_matching_node(theNodeNames, index, closest_matching_node);
-        if (closest_matching_node.get())
+        if (closest_matching_node.get()) {
             return closest_matching_node;
+        }
     }
     return node_ptr();
 }
@@ -978,8 +999,9 @@ suite_ptr Defs::findSuite(const std::string& name) const {
 std::string Defs::find_node_path(const std::string& type, const std::string& name) const {
     for (const auto& s : suiteVec_) {
         std::string res = s->find_node_path(type, name);
-        if (!res.empty())
+        if (!res.empty()) {
             return res;
+        }
     }
     return string();
 }
@@ -993,18 +1015,21 @@ node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode)
     }
 
     if (Str::caseInsCompare(type, "task")) {
-        if (node_p->isTask())
+        if (node_p->isTask()) {
             return node_p;
+        }
         return node_ptr();
     }
     if (Str::caseInsCompare(type, "family")) {
-        if (node_p->isFamily())
+        if (node_p->isFamily()) {
             return node_p;
+        }
         return node_ptr();
     }
     if (Str::caseInsCompare(type, "suite")) {
-        if (node_p->suite())
+        if (node_p->suite()) {
             return node_p;
+        }
         return node_ptr();
     }
 
@@ -1080,8 +1105,9 @@ bool Defs::deleteChild(Node* nodeToBeDeleted) {
     remove_edit_history(nodeToBeDeleted);
 
     Node* parent = nodeToBeDeleted->parent();
-    if (parent)
+    if (parent) {
         return parent->doDeleteChild(nodeToBeDeleted);
+    }
     return doDeleteChild(nodeToBeDeleted);
 }
 
@@ -1140,8 +1166,9 @@ node_ptr Defs::replaceChild(const std::string& path,
         serverNode->getAllTasks(taskVec); // taskVec will be empty if serverNode is a task
         int count = 0;
         for (Task* t : taskVec) {
-            if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED)
+            if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
                 count++;
+            }
         }
         if (count != 0) {
             std::stringstream ss;
@@ -1171,16 +1198,18 @@ node_ptr Defs::replaceChild(const std::string& path,
         bool begin_node = serverNode->suite()->begun();
 
         // Preserver suspended states, otherwise preserve state of client node
-        if (serverNode->isSuspended())
+        if (serverNode->isSuspended()) {
             clientNode->suspend();
+        }
 
         std::vector<node_ptr> all_server_node_children;
         serverNode->allChildren(all_server_node_children);
         for (auto& i : all_server_node_children) {
             if (i->isSuspended()) {
                 node_ptr client_node = clientDefs->findAbsNode(i->absNodePath());
-                if (client_node)
+                if (client_node) {
                     client_node->suspend();
+                }
             }
         }
 
@@ -1208,8 +1237,9 @@ node_ptr Defs::replaceChild(const std::string& path,
         // been begun. This can cause assert, because begin time attributes assumes that calendar has been
         // initialised. This is not the case for client ASSERT failure: !c.suiteTime().is_special() at
         // ../core/src/TimeSeries.cpp:526 init has not been called on calendar. TimeSeries::duration ECFLOW-1612
-        if (begin_node)
+        if (begin_node) {
             client_node_to_add->begin();
+        }
 
         client_node_to_add->set_most_significant_state_up_node_tree();
         return client_node_to_add;
@@ -1284,8 +1314,9 @@ node_ptr Defs::replaceChild(const std::string& path,
     // begun. This can cause assert, because begin time attributes assumes that calendar has been initialised. This
     // is not the case for client ASSERT failure: !c.suiteTime().is_special() at ../core/src/TimeSeries.cpp:526 init
     // has not been called on calendar. TimeSeries::duration ECFLOW-1612
-    if (begin_node)
+    if (begin_node) {
         client_node_to_add->begin();
+    }
 
     client_node_to_add->set_most_significant_state_up_node_tree();
 
@@ -1303,8 +1334,9 @@ void Defs::cereal_save_as_checkpt(const std::string& the_fileName) const {
 void Defs::cereal_restore_from_checkpt(const std::string& the_fileName) {
     //	cout << "Defs::cereal_restore_from_checkpt " << the_fileName << "\n";
 
-    if (the_fileName.empty())
+    if (the_fileName.empty()) {
         return;
+    }
 
     // deleting existing content first. *** Note: Server environment left as is ****
     clear();
@@ -1361,8 +1393,9 @@ void Defs::write_to_checkpt_file(const std::string& filepath) const {
 }
 
 void Defs::restore(const std::string& the_fileName) {
-    if (the_fileName.empty())
+    if (the_fileName.empty()) {
         return;
+    }
 
     /// *************************************************************************
     /// The reason why Parser code moved to Node directory. Avoid cyclic loop
@@ -1593,8 +1626,9 @@ void Defs::order(Node* immediateChild, NOrder::Order ord) {
                     throw std::runtime_error("Defs::order: To order by RUNTIME All suites must be complete");
                 }
             }
-            for (suite_ptr suite : suiteVec_)
+            for (suite_ptr suite : suiteVec_) {
                 (void)suite->sum_runtime();
+            }
             std::sort(suiteVec_.begin(), suiteVec_.end(), [](const suite_ptr& a, const suite_ptr& b) {
                 return a->state_change_runtime() > b->state_change_runtime();
             });
@@ -1628,10 +1662,12 @@ bool Defs::why(std::vector<std::string>& theReasonWhy, bool html) const {
     }
     else if (state() != NState::QUEUED && state() != NState::ABORTED) {
         std::stringstream ss;
-        if (html)
+        if (html) {
             ss << "The definition state(" << NState::to_html(state()) << ") is not queued or aborted.";
-        else
+        }
+        else {
             ss << "The definition state(" << NState::toString(state()) << ") is not queued or aborted.";
+        }
         theReasonWhy.push_back(ss.str());
     }
     return server_.why(theReasonWhy);
@@ -1679,36 +1715,42 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // ************************************************************************************************
     compound_memento_ptr comp;
     if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+        }
         comp->add(std::make_shared<StateMemento>(state_.state()));
     }
     if (order_state_change_no_ > incremental_changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+        }
         std::vector<std::string> order;
         order.reserve(suiteVec_.size());
-        for (const auto& i : suiteVec_)
+        for (const auto& i : suiteVec_) {
             order.push_back(i->name());
+        }
         comp->add(std::make_shared<OrderMemento>(order));
     }
 
     // Determine if the flag changed
     if (flag_.state_change_no() > incremental_changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+        }
         comp->add(std::make_shared<FlagMemento>(flag_));
     }
 
     // determine if defs server state, currently only watch server state. i.e HALTED, SHUTDOWN, RUNNING
     if (server_.state_change_no() > incremental_changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+        }
         comp->add(std::make_shared<ServerStateMemento>(server_.get_state()));
     }
     if (server_.variable_state_change_no() > incremental_changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+        }
         comp->add(std::make_shared<ServerVariableMemento>(server_.user_variables()));
     }
 
@@ -1735,10 +1777,12 @@ void Defs::set_memento(const StateMemento* memento, std::vector<ecf::Aspect::Typ
     std::cout << "Defs::set_memento(const StateMemento* memento)\n";
 #endif
 
-    if (aspect_only)
+    if (aspect_only) {
         aspects.push_back(ecf::Aspect::STATE);
-    else
+    }
+    else {
         set_state(memento->state_);
+    }
 }
 
 void Defs::set_memento(const ServerStateMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
@@ -1746,10 +1790,12 @@ void Defs::set_memento(const ServerStateMemento* memento, std::vector<ecf::Aspec
     std::cout << "Defs::set_memento(const ServerStateMemento* memento)\n";
 #endif
 
-    if (aspect_only)
+    if (aspect_only) {
         aspects.push_back(ecf::Aspect::SERVER_STATE);
-    else
+    }
+    else {
         server_.set_state(memento->state_);
+    }
 }
 
 void Defs::set_memento(const ServerVariableMemento* memento,
@@ -1812,10 +1858,12 @@ void Defs::set_memento(const FlagMemento* memento, std::vector<ecf::Aspect::Type
     std::cout << "Defs::set_memento(const FlagMemento* memento)\n";
 #endif
 
-    if (aspect_only)
+    if (aspect_only) {
         aspects.push_back(ecf::Aspect::FLAG);
-    else
+    }
+    else {
         flag_.set_flag(memento->flag_.flag());
+    }
 }
 
 // =====================================================================
@@ -1834,8 +1882,9 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
 }
 
 void Defs::remove_edit_history(Node* node) {
-    if (!node)
+    if (!node) {
         return;
+    }
 
     // When removing a node *it* and all its children also need to be removed.
     std::vector<node_ptr> node_children;
@@ -1931,8 +1980,9 @@ void DefsHistoryParser::parse(const std::string& line) {
 
     // fallback, split line based on looking for logType like 'MSG:[' | 'LOG:['
     string::size_type first = find_log(line, 0);
-    if (first == std::string::npos)
+    if (first == std::string::npos) {
         return;
+    }
 
     string::size_type next = find_log(line, first + 4);
     if (next == std::string::npos) {
@@ -1977,8 +2027,9 @@ std::string Defs::stats() const {
     get_all_tasks(task_vec);
 
     size_t alias = 0;
-    for (auto task : task_vec)
+    for (auto task : task_vec) {
         alias += task->aliases().size();
+    }
 
     NodeStats stats;
     stats.suites_ = suiteVec_.size();
@@ -1993,8 +2044,9 @@ std::string Defs::stats() const {
         stats.edit_history_paths_ += vec.size();
     }
 
-    for (auto node : node_vec)
+    for (auto node : node_vec) {
         node->stats(stats);
+    }
     return stats.print();
 }
 

@@ -30,12 +30,15 @@ namespace po = boost::program_options;
 
 bool EventCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<EventCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (name_ != the_rhs->name())
+    }
+    if (name_ != the_rhs->name()) {
         return false;
-    if (value_ != the_rhs->value())
+    }
+    if (value_ != the_rhs->value()) {
         return false;
+    }
     return TaskCmd::equals(rhs);
 }
 
@@ -52,10 +55,12 @@ void EventCmd::print(std::string& os) const {
     os += "event ";
     os += name_;
     os += " ";
-    if (value_)
+    if (value_) {
         os += "1 ";
-    else
+    }
+    else {
         os += "0 ";
+    }
     os += path_to_node();
 }
 
@@ -105,15 +110,18 @@ void EventCmd::addOption(boost::program_options::options_description& desc) cons
 void EventCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     vector<string> args = vm[arg()].as<vector<string>>();
     std::string event;
-    if (args.size() >= 1)
+    if (args.size() >= 1) {
         event = args[0];
+    }
 
     bool value = true;
     if (args.size() == 2) {
-        if (args[1] == "set")
+        if (args[1] == "set") {
             value = true;
-        else if (args[1] == "clear")
+        }
+        else if (args[1] == "clear") {
             value = false;
+        }
         else {
             std::stringstream ss;
             ss << "EventCmd: The second argument must be [ set | clear ] but found " << args[1];
@@ -121,11 +129,12 @@ void EventCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         }
     }
 
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         cout << "  EventCmd::create " << EventCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
              << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
              << clientEnv->task_try_no() << ") event(" << event << ")"
              << ") value(" << value << ")\n";
+    }
 
     std::string errorMsg;
     if (!clientEnv->checkTaskPathAndPassword(errorMsg)) {

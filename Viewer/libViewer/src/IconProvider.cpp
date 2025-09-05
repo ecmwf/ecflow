@@ -43,8 +43,9 @@ IconItem::IconItem(QString path) : path_(path), id_(idCnt++) {
 
 QPixmap IconItem::pixmap(int size) {
     auto it = pixmaps_.find(size);
-    if (it != pixmaps_.end())
+    if (it != pixmaps_.end()) {
         return it->second;
+    }
     else {
         QPixmap pix;
         QImageReader imgR(path_);
@@ -65,8 +66,9 @@ QPixmap IconItem::pixmap(int size) {
 
 QPixmap IconItem::pixmapToHeight(int size) {
     auto it = pixmapsByHeight_.find(size);
-    if (it != pixmapsByHeight_.end())
+    if (it != pixmapsByHeight_.end()) {
         return it->second;
+    }
     else {
         QPixmap pix;
         QImageReader imgR(path_);
@@ -121,8 +123,9 @@ IconProvider::~IconProvider() {
 
 QString IconProvider::path(int id) {
     auto it = iconsById_.find(id);
-    if (it != iconsById_.end())
+    if (it != iconsById_.end()) {
         return it->second->path();
+    }
 
     return {};
 }
@@ -141,16 +144,18 @@ int IconProvider::add(QString path, QString name) {
 
 IconItem* IconProvider::icon(QString name) {
     auto it = icons_.find(name);
-    if (it != icons_.end())
+    if (it != icons_.end()) {
         return it->second;
+    }
 
     return &unknownIcon;
 }
 
 IconItem* IconProvider::icon(int id) {
     auto it = iconsById_.find(id);
-    if (it != iconsById_.end())
+    if (it != iconsById_.end()) {
         return it->second;
+    }
 
     return &unknownIcon;
 }

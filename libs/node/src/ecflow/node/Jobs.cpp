@@ -29,8 +29,9 @@ bool Jobs::generate(JobsParam& jobsParam) const {
 #ifdef DEBUG_JOB_SUBMISSION
     cout << "\n"
          << "Jobs::generate (" << jobsParam.logDebugMessage() << ") create jobs(" << jobsParam.createJobs() << ")";
-    if (defs_)
+    if (defs_) {
         cout << " server_state(" << SState::to_string(defs_->server().get_state()) << ")\n";
+    }
 #endif
 
     // dependency resolving and job submission must be less than submitJobsInterval seconds

@@ -21,10 +21,12 @@
 using namespace ecf;
 
 bool VerifyAttr::operator==(const VerifyAttr& rhs) const {
-    if (state_ != rhs.state_)
+    if (state_ != rhs.state_) {
         return false;
-    if (expected_ != rhs.expected_)
+    }
+    if (expected_ != rhs.expected_) {
         return false;
+    }
     return true;
 }
 

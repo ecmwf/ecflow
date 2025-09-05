@@ -38,8 +38,9 @@ ServerItem::ServerItem(const std::string& name,
 ServerItem::~ServerItem() {
     broadcastDeletion();
 
-    if (handler_)
+    if (handler_) {
         ServerHandler::removeServer(handler_);
+    }
 }
 
 bool ServerItem::isUsed() const {
@@ -91,8 +92,9 @@ void ServerItem::setSystem(bool b) {
 void ServerItem::setProtocol(ecf::Protocol protocol) {
     if (protocol_ != protocol) {
         protocol_ = protocol;
-        if (handler_)
+        if (handler_) {
             handler_->setProtocol(protocol_);
+        }
     }
     // broadcastChanged();
 }
@@ -100,8 +102,9 @@ void ServerItem::setProtocol(ecf::Protocol protocol) {
 void ServerItem::setUser(const std::string& user) {
     if (user_ != user) {
         user_ = user;
-        if (handler_)
+        if (handler_) {
             handler_->setUser(user_);
+        }
     }
     // broadcastChanged();
 }
@@ -119,8 +122,9 @@ void ServerItem::registerUsageBegin() {
     if (!handler_) {
         handler_ = ServerHandler::addServer(name_, host_, port_, user_, protocol_);
     }
-    if (handler_)
+    if (handler_) {
         useCnt_++;
+    }
 }
 
 void ServerItem::registerUsageEnd() {
@@ -140,8 +144,9 @@ void ServerItem::addObserver(ServerItemObserver* o) {
     if (it == observers_.end()) {
         registerUsageBegin();
         // We might not be able to create the handle
-        if (handler_)
+        if (handler_) {
             observers_.push_back(o);
+        }
     }
 }
 
@@ -154,13 +159,15 @@ void ServerItem::removeObserver(ServerItemObserver* o) {
 }
 
 void ServerItem::broadcastChanged() {
-    for (auto it = observers_.begin(); it != observers_.end(); ++it)
+    for (auto it = observers_.begin(); it != observers_.end(); ++it) {
         (*it)->notifyServerItemChanged(this);
+    }
 }
 
 void ServerItem::broadcastDeletion() {
     std::vector<ServerItemObserver*> obsCopy = observers_;
 
-    for (auto it = obsCopy.begin(); it != obsCopy.end(); ++it)
+    for (auto it = obsCopy.begin(); it != obsCopy.end(); ++it) {
         (*it)->notifyServerItemDeletion(this);
+    }
 }

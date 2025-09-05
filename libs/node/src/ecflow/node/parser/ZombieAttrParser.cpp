@@ -27,10 +27,12 @@ bool ZombieAttrParser::doParse(const std::string& line, std::vector<std::string>
     //    zombie ecf:fob::                                                            # fob all child commands
     //    zombie ecf:fail:event,meter:200                                             # fail child command  event,meter
     //    and block other children
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("ZombieAttrParser::doParse: Invalid zombie :" + line);
-    if (nodeStack().empty())
+    }
+    if (nodeStack().empty()) {
         throw std::runtime_error("Add zombie failed empty node stack");
+    }
 
     // cout << "ZombieAttrParser::doParse: " << lineTokens[1] << "\n";
 

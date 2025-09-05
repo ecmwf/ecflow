@@ -36,12 +36,14 @@ using namespace ecf;
 //      suite/family/task
 //    suite/family/family/task
 void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
-    if (f != defs.findAbsNode(f->absNodePath()).get())
+    if (f != defs.findAbsNode(f->absNodePath()).get()) {
         cout << "Could not find path " << f->absNodePath() << "\n";
+    }
 
     for (node_ptr t : f->nodeVec()) {
-        if (t.get() != defs.findAbsNode(t->absNodePath()).get())
+        if (t.get() != defs.findAbsNode(t->absNodePath()).get()) {
             cout << "Could not find path " << t->absNodePath() << "\n";
+        }
         Family* family = t->isFamily();
         if (family) {
             test_find_task_using_path(family, defs);
@@ -210,28 +212,34 @@ int main(int argc, char* argv[]) {
         std::vector<Task*> tasks;
         defs.getAllTasks(tasks);
         for (Task* ta : tasks) {
-            if (!defs.deleteChild(ta))
+            if (!defs.deleteChild(ta)) {
                 cout << "Failed to delete task\n";
+            }
         }
         tasks.clear();
         defs.getAllTasks(tasks);
-        if (!tasks.empty())
+        if (!tasks.empty()) {
             cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";
+        }
 
         std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators
         for (suite_ptr s : vec) {
             std::vector<node_ptr> familyVec = s->nodeVec(); // make a copy, to avoid invalidating iterators
             for (node_ptr f : familyVec) {
-                if (!defs.deleteChild(f.get()))
+                if (!defs.deleteChild(f.get())) {
                     cout << "Failed to delete family\n";
+                }
             }
-            if (!s->nodeVec().empty())
+            if (!s->nodeVec().empty()) {
                 cout << "Expected all Families to be deleted but found " << s->nodeVec().size() << "\n";
-            if (!defs.deleteChild(s.get()))
+            }
+            if (!defs.deleteChild(s.get())) {
                 cout << "Failed to delete suite\n";
+            }
         }
-        if (!defs.suiteVec().empty())
+        if (!defs.suiteVec().empty()) {
             cout << "Expected all Suites to be deleted but found " << defs.suiteVec().size() << "\n";
+        }
 
         cout << " time for deleting all nodes                    = " << timer << endl;
     }

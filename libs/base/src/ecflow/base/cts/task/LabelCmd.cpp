@@ -30,12 +30,15 @@ namespace po = boost::program_options;
 
 bool LabelCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<LabelCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (name_ != the_rhs->name())
+    }
+    if (name_ != the_rhs->name()) {
         return false;
-    if (label_ != the_rhs->label())
+    }
+    if (label_ != the_rhs->label()) {
         return false;
+    }
     return TaskCmd::equals(rhs);
 }
 
@@ -119,8 +122,9 @@ void LabelCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     args.erase(args.begin()); // remove name from vector of strings
     std::string labelValue;
     for (size_t i = 0; i < args.size(); i++) {
-        if (i != 0)
+        if (i != 0) {
             labelValue += " ";
+        }
         labelValue += args[i];
     }
 

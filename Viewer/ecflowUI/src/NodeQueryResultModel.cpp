@@ -71,8 +71,9 @@ int NodeQueryResultModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int NodeQueryResultModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -93,54 +94,69 @@ QVariant NodeQueryResultModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    if (row < 0 || row >= data_->size())
+    if (row < 0 || row >= data_->size()) {
         return {};
+    }
 
     auto id                = static_cast<ColumnType>(index.column());
     NodeQueryResultItem* d = data_->itemAt(row);
 
     if (role == Qt::DisplayRole) {
-        if (id == PathColumn)
+        if (id == PathColumn) {
             return d->pathStr();
-        else if (id == ServerColumn)
+        }
+        else if (id == ServerColumn) {
             return d->serverStr();
-        else if (id == TypeColumn)
+        }
+        else if (id == TypeColumn) {
             return d->typeStr();
-        else if (id == StatusColumn)
+        }
+        else if (id == StatusColumn) {
             return d->stateStr();
-        else if (id == StatusChangeColumn)
+        }
+        else if (id == StatusChangeColumn) {
             return d->stateChangeTimeAsString();
-        else if (id == AttributeColumn)
+        }
+        else if (id == AttributeColumn) {
             return d->attr();
+        }
 
         return {};
     }
     else if (role == Qt::BackgroundRole) {
-        if (id == StatusColumn)
+        if (id == StatusColumn) {
             return d->stateColour();
+        }
 
         return {};
     }
     else if (role == Qt::TextAlignmentRole) {
-        if (id == StatusColumn || id == TypeColumn || id == StatusChangeColumn)
+        if (id == StatusColumn || id == TypeColumn || id == StatusChangeColumn) {
             return Qt::AlignCenter;
+        }
 
         return {};
     }
 
     else if (role == SortRole) {
-        if (id == PathColumn)
+        if (id == PathColumn) {
             return d->pathStr();
-        else if (id == ServerColumn)
+        }
+        else if (id == ServerColumn) {
             return d->serverStr();
-        else if (id == TypeColumn)
+        }
+        else if (id == TypeColumn) {
             return d->typeStr();
-        else if (id == StatusColumn)
+        }
+        else if (id == StatusColumn) {
             return d->stateStr();
-        else if (id == StatusChangeColumn)
+        }
+        else if (id == StatusChangeColumn) {
             return d->stateChangeTime();
-        else if (id == AttributeColumn)
+        }
+        else if (id == AttributeColumn) {
             return d->attr();
+        }
 
         return {};
     }
@@ -149,20 +165,25 @@ QVariant NodeQueryResultModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant NodeQueryResultModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal)
+    if (orient != Qt::Horizontal) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     auto id = static_cast<ColumnType>(section);
 
-    if (role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole) {
         return columns_->label(section);
-    else if (role == Qt::UserRole)
+    }
+    else if (role == Qt::UserRole) {
         return columns_->id(section);
-    else if (role == Qt::ToolTipRole)
+    }
+    else if (role == Qt::ToolTipRole) {
         return columns_->tooltip(section);
+    }
     else if (role == Qt::TextAlignmentRole) {
-        if (id == StatusColumn || id == TypeColumn || id == StatusChangeColumn)
+        if (id == StatusColumn || id == TypeColumn || id == StatusChangeColumn) {
             return Qt::AlignCenter;
+        }
     }
 
     return {};
@@ -207,10 +228,12 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index) {
                 }
                 // attribute
                 else {
-                    if (VAttribute* a = d->node_->findAttribute(d->attr_))
+                    if (VAttribute* a = d->node_->findAttribute(d->attr_)) {
                         return VInfoAttribute::create(a);
-                    else
+                    }
+                    else {
                         return VInfoNode::create(d->node_);
+                    }
                 }
             }
         }
@@ -251,16 +274,18 @@ void NodeQueryResultModel::slotEndAppendRow() {
 }
 
 void NodeQueryResultModel::slotBeginAppendRows(int n) {
-    if (n <= 0)
+    if (n <= 0) {
         return;
+    }
 
     int num = data_->size();
     Q_EMIT beginInsertRows(QModelIndex(), num, num + n - 1);
 }
 
 void NodeQueryResultModel::slotEndAppendRows(int n) {
-    if (n <= 0)
+    if (n <= 0) {
         return;
+    }
     Q_EMIT endInsertRows();
 }
 

@@ -45,8 +45,9 @@ NodeWidget::~NodeWidget() {
     delete icons_;
     delete atts_;
 
-    if (filterDef_)
+    if (filterDef_) {
         delete filterDef_;
+    }
 }
 
 QWidget* NodeWidget::widget() {
@@ -72,8 +73,9 @@ void NodeWidget::setCurrentSelection(VInfo_ptr info) {
         //  ...
         // So here we need to check if the given item is already selected!!
         VInfo_ptr csInfo = currentSelection();
-        if (csInfo && info && *(csInfo.get()) == *(info.get()))
+        if (csInfo && info && *(csInfo.get()) == *(info.get())) {
             return;
+        }
 
         // This will broadcast the selection!!!
         view_->setCurrentSelection(info);

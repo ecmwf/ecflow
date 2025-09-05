@@ -365,8 +365,9 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
             for (auto& i : flag_list) {
                 // When any user command(including setting flags) invoked, we set Flag::MESSAGE on the defs.
                 // Hence setting flag Flag::MESSAGE has no effect. Likewise clearing has no affect since it get set
-                if (i == Flag::MESSAGE)
+                if (i == Flag::MESSAGE) {
                     continue;
+                }
 
                 TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd("/", i, true)));
                 BOOST_CHECK_MESSAGE(defs.flag().is_set(i), "Expected flag " << i << " to be set ");
@@ -555,8 +556,9 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
         std::vector<node_ptr> all_nodes;
         defs.get_all_nodes(all_nodes);
         std::vector<std::string> paths;
-        for (auto& all_node : all_nodes)
+        for (auto& all_node : all_nodes) {
             paths.push_back(all_node->absNodePath());
+        }
         BOOST_CHECK_MESSAGE(paths.size() >= 2, "expected at least 2 nodes");
 
         for (auto& all_node : all_nodes) {
@@ -960,14 +962,17 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
         ecf::TimeSlot finish(10, 0);
         ecf::TimeSlot incr(0, 5);
         std::vector<int> weekdays;
-        for (int i = 0; i < 7; ++i)
+        for (int i = 0; i < 7; ++i) {
             weekdays.push_back(i);
+        }
         std::vector<int> daysOfMonth;
-        for (int i = 1; i < 32; ++i)
+        for (int i = 1; i < 32; ++i) {
             daysOfMonth.push_back(i);
+        }
         std::vector<int> months;
-        for (int i = 1; i < 13; ++i)
+        for (int i = 1; i < 13; ++i) {
             months.push_back(i);
+        }
         cronAttr.addTimeSeries(start, finish, incr);
         cronAttr.addWeekDays(weekdays);
         cronAttr.addDaysOfMonth(daysOfMonth);
@@ -1028,8 +1033,9 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
         for (auto& i : flag_list) {
             // When any user command(including setting flags) invoked, we set Flag::MESSAGE on the defs.
             // Hence setting flag Flag::MESSAGE has no effect. Likewise clearing has no affect since it get set
-            if (i == Flag::MESSAGE)
+            if (i == Flag::MESSAGE) {
                 continue;
+            }
 
             TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), i, true)));
             BOOST_CHECK_MESSAGE(s->get_flag().is_set(i), "Expected flag " << i << " to be set ");

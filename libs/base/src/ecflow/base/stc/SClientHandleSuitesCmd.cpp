@@ -62,8 +62,9 @@ void SClientHandleSuitesCmd::init(AbstractServer* as) {
 
 bool SClientHandleSuitesCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SClientHandleSuitesCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 
@@ -72,8 +73,9 @@ std::string SClientHandleSuitesCmd::print() const {
 }
 
 bool SClientHandleSuitesCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  SClientHandleSuitesCmd::handle_server_response\n";
+    }
 
     if (server_reply.cli() && !cts_cmd->group_cmd()) {
         /// This Could be part of a group command, hence ONLY if NOT group command
@@ -95,8 +97,9 @@ bool SClientHandleSuitesCmd::handle_server_response(ServerReply& server_reply, C
                 unsigned int handle = users_[u].second[h];
                 for (const auto& client_handle : client_handles_) {
                     if (handle == client_handle.first) {
-                        if (h != 0)
+                        if (h != 0) {
                             cout << "          "; // 10 spaces to align handles
+                        }
                         cout << right << setw(6) << handle << "  ";
                         const std::vector<std::string>& suites = client_handle.second;
                         for (const auto& suite : suites) {

@@ -28,24 +28,30 @@ void AutoArchiveAttr::write(std::string& ret) const {
     ret += "autoarchive ";
     if (days_) {
         ret += ecf::convert_to<std::string>(time_.hour() / 24);
-        if (idle_)
+        if (idle_) {
             ret += " -i";
+        }
         return;
     }
-    if (relative_)
+    if (relative_) {
         ret += "+";
+    }
     time_.print(ret);
-    if (idle_)
+    if (idle_) {
         ret += " -i";
+    }
 }
 
 bool AutoArchiveAttr::operator==(const AutoArchiveAttr& rhs) const {
-    if (relative_ != rhs.relative_)
+    if (relative_ != rhs.relative_) {
         return false;
-    if (days_ != rhs.days_)
+    }
+    if (days_ != rhs.days_) {
         return false;
-    if (idle_ != rhs.idle_)
+    }
+    if (idle_ != rhs.idle_) {
         return false;
+    }
     return time_.operator==(rhs.time_);
 }
 
@@ -63,13 +69,16 @@ bool AutoArchiveAttr::isFree(
     //
 
     bool is_valid_state = false;
-    if (last_state_and_change_duration.first == NState::COMPLETE)
+    if (last_state_and_change_duration.first == NState::COMPLETE) {
         is_valid_state = true;
+    }
     if (idle_) {
-        if (last_state_and_change_duration.first == NState::QUEUED)
+        if (last_state_and_change_duration.first == NState::QUEUED) {
             is_valid_state = true;
-        if (last_state_and_change_duration.first == NState::ABORTED)
+        }
+        if (last_state_and_change_duration.first == NState::ABORTED) {
             is_valid_state = true;
+        }
     }
     if (!is_valid_state) {
         return false;

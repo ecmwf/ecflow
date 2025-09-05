@@ -31,8 +31,9 @@ void WidgetNameProvider::nameChildren(QWidget* w) {
     }
 #else
     Q_FOREACH (QToolBar* tb, w->findChildren<QToolBar*>(QString())) {
-        if (tb->parent() == w)
+        if (tb->parent() == w) {
             nameButtons(tb->actions());
+        }
     }
 #endif
 
@@ -80,8 +81,9 @@ void WidgetNameProvider::nameTabWidget(QTabWidget* t) {
     }
 #else
     Q_FOREACH (QTabBar* tb, t->findChildren<QTabBar*>(QString())) {
-        if (tb->parent() == t)
+        if (tb->parent() == t) {
             nameTabBar(tb);
+        }
     }
 #endif
 
@@ -91,8 +93,9 @@ void WidgetNameProvider::nameTabWidget(QTabWidget* t) {
     }
 #else
     Q_FOREACH (QStackedWidget* tb, t->findChildren<QStackedWidget*>(QString())) {
-        if (tb->parent() == t)
+        if (tb->parent() == t) {
             nameStacked(tb);
+        }
     }
 #endif
 }
@@ -110,8 +113,9 @@ void WidgetNameProvider::nameStacked(QStackedWidget* t) {
 }
 
 void WidgetNameProvider::nameViewport(QWidget* t) {
-    if (!t)
+    if (!t) {
         return;
+    }
 
     if (t->objectName().isEmpty() || t->objectName() == "qt_scrollarea_viewport") {
         t->setObjectName("viewport");

@@ -21,8 +21,9 @@ std::string NodeStats::print() const {
     ss << "Family              " << family_ << "\n";
     ss << "Task                " << task_ << "\n";
     ss << "Alias               " << alias_ << "\n\n";
-    if (suites_ + family_ + task_ + alias_ != nodes_)
+    if (suites_ + family_ + task_ + alias_ != nodes_) {
         ss << "suites_ + family_ +  task_ + alias_ != nodes_ ?\n";
+    }
 
     ss << "Edit history nodes  " << edit_history_nodes_ << "\n";
     ss << "Edit history paths  " << edit_history_paths_ << "\n\n";

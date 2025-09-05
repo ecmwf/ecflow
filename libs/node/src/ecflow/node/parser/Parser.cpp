@@ -65,8 +65,9 @@ bool Parser::doParse(const std::string& line, std::vector<std::string>& lineToke
         cerr << " " << p->keyword();
     }
     cerr << ") Trying parent ";
-    if (parent())
+    if (parent()) {
         cout << "Parser::" << parent()->keyword();
+    }
     cerr << "\n";
 #endif
 
@@ -119,11 +120,13 @@ std::unordered_map<Node*, bool>& Parser::defStatusMap() const {
 
 void Parser::dumpStackTop(const std::string& msg, const std::string& msg2) const {
     std::cout << msg << "  '" << msg2 << "' ++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-    if (rootParser_->nodeStack_.empty())
+    if (rootParser_->nodeStack_.empty()) {
         std::cout << "nodeStack_ is EMPTY\n";
-    else
+    }
+    else {
         std::cout << "TOP = " << rootParser_->nodeStack_.top().first->debugType() << " '"
                   << rootParser_->nodeStack_.top().first->name() << "'\n";
+    }
 }
 
 void Parser::addParser(Parser* p) {

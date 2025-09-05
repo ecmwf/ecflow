@@ -39,13 +39,16 @@ void findVariable(std::string& line, std::set<std::string>& variables) {
     //  %VAR:fred --f%  will either be "BILL" or if VAR is not defined "fred --f"
     while (true) {
         size_t firstPercentPos = line.find(Ecf::MICRO());
-        if (firstPercentPos == string::npos)
+        if (firstPercentPos == string::npos) {
             break;
+        }
         size_t secondPercentPos = line.find(Ecf::MICRO(), firstPercentPos + 1);
-        if (secondPercentPos == string::npos)
+        if (secondPercentPos == string::npos) {
             break;
-        if (secondPercentPos - firstPercentPos <= 1)
+        }
+        if (secondPercentPos - firstPercentPos <= 1) {
             break; // handle %% with no characters in between
+        }
 
         string percentVar(line.begin() + firstPercentPos + 1, line.begin() + secondPercentPos);
 
@@ -87,8 +90,9 @@ void autoDiscoverVariables(const std::string& directory, std::set<std::string>& 
                 continue;
             }
             // std::cout << "......autoDiscoverVariables for file " << relPath.string() << "\n";
-            if (relPath.extension() != ".h")
+            if (relPath.extension() != ".h") {
                 continue; // Only look at .h files
+            }
 
             // open the file, and find variables.
             std::vector<std::string> lines;
@@ -144,10 +148,12 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
                 fs::path relPath(directory + "/" + dir_itr->path().filename().string());
 
                 // Ignore directories were only interested in .ecf files.
-                if (fs::is_directory(relPath))
+                if (fs::is_directory(relPath)) {
                     continue;
-                if (File::getExt(relPath.filename().string()) != "ecf")
+                }
+                if (File::getExt(relPath.filename().string()) != "ecf") {
                     continue; // ignore other files
+                }
 
                 // std::cout << "......Parsing file " << relPath.string() << "\n";
                 // std::cout << "      adding task name " << relPath.leaf() << "\n";

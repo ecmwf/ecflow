@@ -74,8 +74,9 @@ bool LogLoadRequestSortModel::lessThan(const QModelIndex& left, const QModelInde
             return QString::localeAwareCompare(leftString, rightString) < 0;
         }
 
-        else
+        else {
             return leftData < rightData;
+        }
     }
 
     return false;
@@ -168,8 +169,9 @@ int LogLoadRequestModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int LogLoadRequestModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -192,8 +194,9 @@ QVariant LogLoadRequestModel::data(const QModelIndex& index, int role) const {
         return {};
     }
     int row = index.row();
-    if (row < 0 || row >= data_.count())
+    if (row < 0 || row >= data_.count()) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
@@ -208,8 +211,9 @@ QVariant LogLoadRequestModel::data(const QModelIndex& index, int role) const {
         }
     }
     else if (role == Qt::CheckStateRole) {
-        if (index.column() == 0)
+        if (index.column() == 0) {
             return (data_[row].checked_) ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
+        }
 
         return {};
     }
@@ -226,8 +230,9 @@ QVariant LogLoadRequestModel::data(const QModelIndex& index, int role) const {
         }
     }
     else if (role == Qt::BackgroundRole && showColour_) {
-        if (data_[row].checked_ && data_[row].col_ != QColor())
+        if (data_[row].checked_ && data_[row].col_ != QColor()) {
             return data_[row].col_;
+        }
 
         return {};
     }
@@ -251,8 +256,9 @@ bool LogLoadRequestModel::setData(const QModelIndex& idx, const QVariant& value,
 }
 
 QVariant LogLoadRequestModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     if (role == Qt::DisplayRole) {
         switch (section) {
@@ -295,10 +301,12 @@ QModelIndex LogLoadRequestModel::parent(const QModelIndex& /*child*/) const {
 }
 
 QString LogLoadRequestModel::formatPrecentage(float perc) const {
-    if (perc < 0.000000001)
+    if (perc < 0.000000001) {
         return "0";
-    else if (perc < 0.5)
+    }
+    else if (perc < 0.5) {
         return "<0.5";
+    }
 
     return QString::number(perc, 'f', 1);
 }
@@ -503,15 +511,17 @@ void ChartView::mousePressEvent(QMouseEvent* event) {
 }
 
 void ChartView::mouseMoveEvent(QMouseEvent* event) {
-    if (leftButtonPressed_)
+    if (leftButtonPressed_) {
         QChartView::mouseMoveEvent(event);
+    }
 
     if (event->pos().x() <= chart()->plotArea().right() && event->pos().x() >= chart()->plotArea().left()) {
         qreal v = chart()->mapToValue(event->pos()).x();
         Q_EMIT positionChanged(v);
     }
-    else
+    else {
         Q_EMIT positionChanged(-1);
+    }
 }
 
 void ChartView::mouseReleaseEvent(QMouseEvent* event) {
@@ -649,8 +659,9 @@ void ChartView::adjustCallout() {
         QPointF anchor = callout_->anchor();
         qint64 start = 0, end = 0;
         currentTimeRange(start, end);
-        if (anchor.x() >= start && anchor.x() <= end)
+        if (anchor.x() >= start && anchor.x() <= end) {
             callout_->setAnchor(callout_->anchor());
+        }
         else {
             scene()->removeItem(callout_);
             delete callout_;
@@ -743,8 +754,9 @@ void LogRequestViewHandler::buildOtherTab(QWidget* parent) {
 
     auto* stacked = new QStackedWidget(w);
     int cnt       = views_.count();
-    for (int i = cnt - 4; i < cnt; i++)
+    for (int i = cnt - 4; i < cnt; i++) {
         stacked->addWidget(views_[i]);
+    }
 
     vb->addWidget(stacked);
 
@@ -791,8 +803,9 @@ void LogRequestViewHandler::buildTableTab(QWidget* parent) {
 
     auto* stacked = new QStackedWidget(w);
     int cnt       = views_.count();
-    for (int i = cnt - 4; i < cnt; i++)
+    for (int i = cnt - 4; i < cnt; i++) {
         stacked->addWidget(views_[i]);
+    }
 
     vb->addWidget(stacked);
 
@@ -829,16 +842,19 @@ void LogRequestViewHandler::loadMultiLogFile(const std::string& logFile,
 
 void LogRequestViewHandler::loadPostProc() {
     suitePlotState_.clear();
-    for (size_t i = 0; i < data_->suites().size(); i++)
+    for (size_t i = 0; i < data_->suites().size(); i++) {
         suitePlotState_ << false;
+    }
 
     cmdPlotState_.clear();
-    for (size_t i = 0; i < data_->total().subReq().size(); i++)
+    for (size_t i = 0; i < data_->total().subReq().size(); i++) {
         cmdPlotState_ << false;
+    }
 
     uidPlotState_.clear();
-    for (size_t i = 0; i < data_->uidData().size(); i++)
+    for (size_t i = 0; i < data_->uidData().size(); i++) {
         uidPlotState_ << false;
+    }
 
     for (int i = 0; i < views_.count(); i++) {
         views_[i]->load();
@@ -887,8 +903,9 @@ void LogRequestViewHandler::addRemoveUid(int idx, bool st) {
 void LogRequestViewHandler::slotZoomHappened(QRectF r) {
     if (LogRequestView* senderView = static_cast<LogRequestView*>(sender())) {
         Q_FOREACH (LogRequestView* v, views_) {
-            if (v != senderView)
+            if (v != senderView) {
                 v->adjustZoom(r);
+            }
         }
     }
 }
@@ -911,8 +928,9 @@ void LogRequestViewHandler::readSettings(VComboSettings* vs) {
 
 void LogRequestViewControlItem::adjustColumnWidth() {
     if (model_) {
-        for (int i = 0; i < model_->columnCount() - 1; i++)
+        for (int i = 0; i < model_->columnCount() - 1; i++) {
             tree_->resizeColumnToContents(i);
+        }
     }
 }
 
@@ -1118,8 +1136,9 @@ QString LogRequestView::chartId(ChartView* cv) {
 void LogRequestView::slotZoom(QRectF r) {
     if (auto* senderView = static_cast<ChartView*>(sender())) {
         Q_FOREACH (ChartView* v, views_) {
-            if (v != senderView)
+            if (v != senderView) {
                 v->doZoom(r);
+            }
 
             v->adjustCallout();
         }
@@ -1193,8 +1212,9 @@ void LogRequestView::removeSeries(QChart* chart, QString id) {
 QColor LogRequestView::seriesColour(QChart* chart, QString id) {
     Q_FOREACH (QAbstractSeries* s, chart->series()) {
         if (s->name().endsWith(id)) {
-            if (auto* ls = static_cast<QLineSeries*>(s))
+            if (auto* ls = static_cast<QLineSeries*>(s)) {
                 return ls->color();
+            }
             break;
         }
     }
@@ -1204,14 +1224,17 @@ QColor LogRequestView::seriesColour(QChart* chart, QString id) {
 void LogRequestView::clear() {
     clearCharts();
 
-    if (suiteCtl_.model_)
+    if (suiteCtl_.model_) {
         suiteCtl_.model_->clearData();
+    }
 
-    if (cmdCtl_.model_)
+    if (cmdCtl_.model_) {
         cmdCtl_.model_->clearData();
+    }
 
-    if (uidCtl_.model_)
+    if (uidCtl_.model_) {
         uidCtl_.model_->clearData();
+    }
 }
 
 void LogRequestView::clearCharts() {
@@ -1239,8 +1262,9 @@ void LogRequestView::clearViews() {
     while ((child = viewLayout_->takeAt(0)) != nullptr) {
         QWidget* w = child->widget();
         delete child;
-        if (w)
+        if (w) {
             delete w;
+        }
     }
 
     Q_ASSERT(viewLayout_->count() == 0);
@@ -1250,16 +1274,19 @@ void LogRequestView::clearViews() {
 
 void LogRequestView::load() {
     suiteCtl_.plotState_.clear();
-    for (size_t i = 0; i < data_->suites().size(); i++)
+    for (size_t i = 0; i < data_->suites().size(); i++) {
         suiteCtl_.plotState_ << false;
+    }
 
     cmdCtl_.plotState_.clear();
-    for (size_t i = 0; i < data_->total().subReq().size(); i++)
+    for (size_t i = 0; i < data_->total().subReq().size(); i++) {
         cmdCtl_.plotState_ << false;
+    }
 
     uidCtl_.plotState_.clear();
-    for (size_t i = 0; i < data_->uidData().size(); i++)
+    for (size_t i = 0; i < data_->uidData().size(); i++) {
         uidCtl_.plotState_ << false;
+    }
 
     loadCore();
     loadSuites();
@@ -1306,12 +1333,15 @@ void LogRequestView::build(ChartView* view, QLineSeries* series, QString title, 
         axisY->setLabelFormat("%i");
 
         QString yTitle;
-        if (data_->timeRes() == LogLoadData::SecondResolution)
+        if (data_->timeRes() == LogLoadData::SecondResolution) {
             yTitle = "Req. per second";
-        else if (data_->timeRes() == LogLoadData::MinuteResolution)
+        }
+        else if (data_->timeRes() == LogLoadData::MinuteResolution) {
             yTitle = "Req. per minute";
-        else if (data_->timeRes() == LogLoadData::HourResolution)
+        }
+        else if (data_->timeRes() == LogLoadData::HourResolution) {
             yTitle = "Req. per hour";
+        }
 
         axisY->setTitleText(yTitle);
         axisY->setMin(0.);
@@ -1358,8 +1388,9 @@ void LogRequestView::showFullRange() {
 }
 
 void LogRequestView::removeCallout() {
-    Q_FOREACH (ChartView* view, views_)
+    Q_FOREACH (ChartView* view, views_) {
         view->removeCallout();
+    }
 
     Q_EMIT(timeRangeHighlighted(0, 0, 0));
 }
@@ -1370,8 +1401,9 @@ void LogRequestView::scanPositionClicked(qreal pos) {
         qint64 t2 = t1;
 
         qint64 tw = 0;
-        if (!views_.isEmpty())
+        if (!views_.isEmpty()) {
             tw = views_[0]->widthToTimeRange(50.);
+        }
 
         // Try to find the nearest data point around the click position
         int idx = 0;
@@ -1387,11 +1419,13 @@ void LogRequestView::scanPositionClicked(qreal pos) {
             }
         }
 
-        if (data_->timeRes() == LogLoadData::MinuteResolution)
+        if (data_->timeRes() == LogLoadData::MinuteResolution) {
             t2 = t1 + 60 * 1000;
+        }
 
-        Q_FOREACH (ChartView* view, views_)
+        Q_FOREACH (ChartView* view, views_) {
             view->setCallout(t1);
+        }
 
         Q_EMIT(timeRangeHighlighted(t1, t2, tw));
     }
@@ -1415,29 +1449,35 @@ bool LogRequestView::seriesIndex(qint64 t, int startIdx, qint64 tolerance, int& 
     QChart* chart = views_[0]->chart();
 
     QList<QAbstractSeries*> lst = chart->series();
-    if (lst.empty())
+    if (lst.empty()) {
         return false;
+    }
 
     auto* ser = static_cast<QLineSeries*>(lst[0]);
     Q_ASSERT(ser);
 
     idx = -1;
-    if (t < 0)
+    if (t < 0) {
         return false;
+    }
 
     int num = ser->count();
-    if (num == 0)
+    if (num == 0) {
         return false;
+    }
 
-    if (startIdx > num - 1)
+    if (startIdx > num - 1) {
         startIdx = 0;
+    }
 
-    if (startIdx >= num)
+    if (startIdx >= num) {
         return false;
+    }
 
     if (t >= ser->at(startIdx).x()) {
-        if (tolerance <= 0)
+        if (tolerance <= 0) {
             tolerance = 10 * 1000; // ms
+        }
 
         for (int i = startIdx; i < num; i++) {
             if (ser->at(i).x() >= t) {
@@ -1456,8 +1496,9 @@ bool LogRequestView::seriesIndex(qint64 t, int startIdx, qint64 tolerance, int& 
         }
     }
     else {
-        if (tolerance <= 0)
+        if (tolerance <= 0) {
             tolerance = 10 * 1000; // ms
+        }
 
         for (int i = startIdx; i >= 0; i--) {
             if (ser->at(i).x() <= t) {
@@ -1483,8 +1524,9 @@ qint64 LogRequestView::seriesTime(int idx) {
     QChart* chart = views_[0]->chart();
 
     QList<QAbstractSeries*> lst = chart->series();
-    if (lst.empty())
+    if (lst.empty()) {
         return 0;
+    }
 
     QLineSeries* ser = static_cast<QLineSeries*>(lst[0]);
     Q_ASSERT(ser);
@@ -1495,10 +1537,12 @@ int LogRequestView::seriesValue(QChart* chart, QString id, int idx) {
     if (chart) {
         Q_FOREACH (QAbstractSeries* s, chart->series()) {
             if (s->name().endsWith(id)) {
-                if (auto* ls = static_cast<QLineSeries*>(s))
+                if (auto* ls = static_cast<QLineSeries*>(s)) {
                     return ls->at(idx).y();
-                else
+                }
+                else {
                     return 0;
+                }
             }
         }
     }
@@ -1623,8 +1667,9 @@ LogTotalRequestView::LogTotalRequestView(LogRequestViewHandler* handler, QWidget
 }
 
 QChart* LogTotalRequestView::getChart(ChartType type) {
-    if (ChartView* v = getView(type))
+    if (ChartView* v = getView(type)) {
         return v->chart();
+    }
     return nullptr;
 }
 
@@ -1873,8 +1918,9 @@ void LogCmdSuiteRequestView::addTotal() {
 
             int maxVal = 0;
             data_->getSubReq(i, *series, maxVal);
-            if (maxVal_ < maxVal)
+            if (maxVal_ < maxVal) {
                 maxVal_ = maxVal;
+            }
 
             build(view, series, title, maxVal_);
 
@@ -1921,8 +1967,9 @@ void LogCmdSuiteRequestView::addCmd(int reqIdx) {
 
             int maxVal = 0;
             data_->getSubReq(reqIdx, *series, maxVal);
-            if (maxVal > maxVal_)
+            if (maxVal > maxVal_) {
                 maxVal_ = maxVal;
+            }
 
             build(views_[i], series, title, maxVal_);
         }
@@ -1973,13 +2020,15 @@ void LogCmdSuiteRequestView::loadCore() {
     // Total
     addTotal();
 
-    if (!cmdCtl_.isAnySet())
+    if (!cmdCtl_.isAnySet()) {
         cmdCtl_.model_->selectFirstItem();
+    }
 }
 
 void LogCmdSuiteRequestView::buildScanTable(QString& txt, int idx) {
-    if (views_.count() == 0)
+    if (views_.count() == 0) {
         return;
+    }
 
     txt += "</table>";
     txt += "<br><table width=\'100%\' cellpadding=\'4px\'>";
@@ -2098,8 +2147,9 @@ void LogSuiteCmdRequestView::addTotal() {
 
             int maxVal = 0;
             data_->getSuiteTotalReq(i, *series);
-            if (maxVal_ < maxVal)
+            if (maxVal_ < maxVal) {
                 maxVal_ = maxVal;
+            }
 
             build(view, series, title, maxVal_);
 
@@ -2143,8 +2193,9 @@ void LogSuiteCmdRequestView::addSuite(int suiteIdx) {
 
             int maxVal = 0;
             data_->getSuiteTotalReq(suiteIdx, *series);
-            if (maxVal > maxVal_)
+            if (maxVal > maxVal_) {
                 maxVal_ = maxVal;
+            }
 
             build(views_[i], series, title, maxVal_);
         }
@@ -2197,13 +2248,15 @@ void LogSuiteCmdRequestView::loadCore() {
     // Total
     addTotal();
 
-    if (!suiteCtl_.isAnySet())
+    if (!suiteCtl_.isAnySet()) {
         suiteCtl_.model_->selectFirstItem();
+    }
 }
 
 void LogSuiteCmdRequestView::buildScanTable(QString& txt, int idx) {
-    if (views_.count() == 0)
+    if (views_.count() == 0) {
         return;
+    }
 
     txt += "</table>";
     txt += "<br><table width=\'100%\' cellpadding=\'4px\'>";
@@ -2298,8 +2351,9 @@ void LogUidCmdRequestView::addUid(int uidIdx) {
 
             int maxVal = 0;
             data_->getUidTotalReq(uidIdx, *series, maxVal);
-            if (maxVal > maxVal_)
+            if (maxVal > maxVal_) {
                 maxVal_ = maxVal;
+            }
 
             build(views_[i], series, title, maxVal_);
         }
@@ -2382,8 +2436,9 @@ void LogUidCmdRequestView::addTotal() {
             series->setName(uidSeriesId(i));
             int maxVal = 0;
             data_->getUidTotalReq(i, *series, maxVal);
-            if (maxVal_ < maxVal)
+            if (maxVal_ < maxVal) {
                 maxVal_ = maxVal;
+            }
 
             build(view, series, title, maxVal);
 
@@ -2421,8 +2476,9 @@ void LogUidCmdRequestView::loadCore() {
     // Total
     addTotal();
 
-    if (!uidCtl_.isAnySet())
+    if (!uidCtl_.isAnySet()) {
         uidCtl_.model_->selectFirstItem();
+    }
 }
 
 void LogUidCmdRequestView::buildScanTable(QString& txt, int idx) {
@@ -2520,8 +2576,9 @@ void LogCmdUidRequestView::addCmd(int reqIdx) {
 
             int maxVal = 0;
             data_->getUidTotalReq(i, *series, maxVal);
-            if (maxVal > maxVal_)
+            if (maxVal > maxVal_) {
                 maxVal_ = maxVal;
+            }
 
             build(views_[i], series, title, maxVal_);
         }
@@ -2603,8 +2660,9 @@ void LogCmdUidRequestView::addTotal() {
             series->setName(cmdSeriesId(i));
             int maxVal = 0;
             data_->getSubReq(i, *series, maxVal);
-            if (maxVal_ < maxVal)
+            if (maxVal_ < maxVal) {
                 maxVal_ = maxVal;
+            }
 
             build(view, series, title, maxVal);
 
@@ -2642,8 +2700,9 @@ void LogCmdUidRequestView::loadCore() {
     // Total
     addTotal();
 
-    if (!cmdCtl_.isAnySet())
+    if (!cmdCtl_.isAnySet()) {
         cmdCtl_.model_->selectFirstItem();
+    }
 }
 
 void LogCmdUidRequestView::buildScanTable(QString& /*txt*/, int /*idx*/) {
@@ -2752,8 +2811,9 @@ LogStatCmdUidView::LogStatCmdUidView(LogRequestViewHandler* handler, QWidget* pa
 
 void LogStatCmdUidView::addRemoveUid(int uidIdx, bool st) {
     for (int i = 0; i < statModel_->columnCount(); i++) {
-        if (statModel_->dataIndex(i) == uidIdx)
+        if (statModel_->dataIndex(i) == uidIdx) {
             statTable_->setColumnHidden(i, !st);
+        }
     }
 }
 
@@ -2770,8 +2830,9 @@ void LogStatCmdUidView::loadCore() {
 
     statModel_->setDataCmdUid(data_->total(), data_->uidData());
 
-    for (int i = 0; i < statModel_->columnCount() - 1; i++)
+    for (int i = 0; i < statModel_->columnCount() - 1; i++) {
         statTable_->resizeColumnToContents(i);
+    }
 }
 
 //=============================================================================
@@ -2787,8 +2848,9 @@ LogStatUidCmdView::LogStatUidCmdView(LogRequestViewHandler* handler, QWidget* pa
 
 void LogStatUidCmdView::addRemoveCmd(int reqIdx, bool st) {
     for (int i = 0; i < statModel_->columnCount(); i++) {
-        if (statModel_->dataIndex(i) == reqIdx)
+        if (statModel_->dataIndex(i) == reqIdx) {
             statTable_->setColumnHidden(i, !st);
+        }
     }
 }
 
@@ -2804,8 +2866,9 @@ void LogStatUidCmdView::loadCore() {
 
     statModel_->setDataUidCmd(data_->total(), data_->uidData());
 
-    for (int i = 0; i < statModel_->columnCount() - 1; i++)
+    for (int i = 0; i < statModel_->columnCount() - 1; i++) {
         statTable_->resizeColumnToContents(i);
+    }
 }
 
 //=============================================================================
@@ -2821,8 +2884,9 @@ LogStatCmdSuiteView::LogStatCmdSuiteView(LogRequestViewHandler* handler, QWidget
 
 void LogStatCmdSuiteView::addRemoveSuite(int suiteIdx, bool st) {
     for (int i = 0; i < statModel_->columnCount(); i++) {
-        if (statModel_->dataIndex(i) == suiteIdx)
+        if (statModel_->dataIndex(i) == suiteIdx) {
             statTable_->setColumnHidden(i, !st);
+        }
     }
 }
 
@@ -2839,8 +2903,9 @@ void LogStatCmdSuiteView::loadCore() {
 
     statModel_->setDataCmdSuite(data_->total(), data_->suiteData());
 
-    for (int i = 0; i < statModel_->columnCount() - 1; i++)
+    for (int i = 0; i < statModel_->columnCount() - 1; i++) {
         statTable_->resizeColumnToContents(i);
+    }
 }
 
 //=============================================================================
@@ -2856,8 +2921,9 @@ LogStatSuiteCmdView::LogStatSuiteCmdView(LogRequestViewHandler* handler, QWidget
 
 void LogStatSuiteCmdView::addRemoveCmd(int idx, bool st) {
     for (int i = 0; i < statModel_->columnCount(); i++) {
-        if (statModel_->dataIndex(i) == idx)
+        if (statModel_->dataIndex(i) == idx) {
             statTable_->setColumnHidden(i, !st);
+        }
     }
 }
 
@@ -2873,8 +2939,9 @@ void LogStatSuiteCmdView::loadCore() {
 
     statModel_->setDataSuiteCmd(data_->total(), data_->suiteData());
 
-    for (int i = 0; i < statModel_->columnCount() - 1; i++)
+    for (int i = 0; i < statModel_->columnCount() - 1; i++) {
         statTable_->resizeColumnToContents(i);
+    }
 }
 
 //=====================================================
@@ -2899,8 +2966,9 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
     data_.clear();
 
     data_.colLabels_ << "ALL";
-    for (size_t i = 0; i < data.size(); i++)
+    for (size_t i = 0; i < data.size(); i++) {
         data_.colLabels_ << "";
+    }
 
     data_.vals_      = QVector<QVector<float>>(1 + data.size());
     data_.dataIndex_ = QVector<int>(1 + data.size(), -1);
@@ -2915,10 +2983,12 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
 
     for (size_t i = 0; i < data.size(); i++) {
         size_t pos = 0;
-        if (columnOrder_ == NameOrder)
+        if (columnOrder_ == NameOrder) {
             pos = i + 1;
-        else
+        }
+        else {
             pos = data[i].rank() + 1;
+        }
 
         data_.dataIndex_[pos] = i;
         data_.colLabels_[pos] = QString::fromStdString(data[i].name());
@@ -2943,8 +3013,9 @@ void LogStatRequestModel::setDataUidCmd(const LogLoadDataItem& total, const std:
     data_.clear();
 
     data_.colLabels_ << "ALL";
-    for (size_t i = 0; i < total.subReq().size(); i++)
+    for (size_t i = 0; i < total.subReq().size(); i++) {
         data_.colLabels_ << "";
+    }
 
     data_.vals_      = QVector<QVector<float>>(1 + total.subReq().size());
     data_.dataIndex_ = QVector<int>(1 + total.subReq().size(), -1);
@@ -2959,10 +3030,12 @@ void LogStatRequestModel::setDataUidCmd(const LogLoadDataItem& total, const std:
 
     for (size_t i = 0; i < total.subReq().size(); i++) {
         size_t pos = 0;
-        if (columnOrder_ == NameOrder)
+        if (columnOrder_ == NameOrder) {
             pos = i + 1;
-        else
+        }
+        else {
             pos = total.subReq()[i].periodStat().rank_ + 1;
+        }
 
         data_.dataIndex_[pos] = i;
         data_.colLabels_[pos] = QString::fromStdString(total.subReq()[i].name_);
@@ -2984,8 +3057,9 @@ void LogStatRequestModel::setDataCmdSuite(const LogLoadDataItem& total, const st
     data_.clear();
 
     data_.colLabels_ << "ALL";
-    for (size_t i = 0; i < data.size(); i++)
+    for (size_t i = 0; i < data.size(); i++) {
         data_.colLabels_ << "";
+    }
 
     data_.vals_      = QVector<QVector<float>>(1 + data.size());
     data_.dataIndex_ = QVector<int>(1 + data.size(), -1);
@@ -3001,10 +3075,12 @@ void LogStatRequestModel::setDataCmdSuite(const LogLoadDataItem& total, const st
 
     for (size_t i = 0; i < data.size(); i++) {
         size_t pos = 0;
-        if (columnOrder_ == NameOrder)
+        if (columnOrder_ == NameOrder) {
             pos = i + 1;
-        else
+        }
+        else {
             pos = data[i].rank() + 1;
+        }
 
         data_.dataIndex_[pos] = i;
         data_.colLabels_[pos] = QString::fromStdString(data[i].name());
@@ -3028,8 +3104,9 @@ void LogStatRequestModel::setDataSuiteCmd(const LogLoadDataItem& total, const st
     size_t colNum = 1 + total.subReq().size();
 
     data_.colLabels_ << "ALL";
-    for (size_t i = 0; i < colNum - 1; i++)
+    for (size_t i = 0; i < colNum - 1; i++) {
         data_.colLabels_ << "";
+    }
 
     data_.vals_      = QVector<QVector<float>>(colNum);
     data_.dataIndex_ = QVector<int>(colNum, -1);
@@ -3045,10 +3122,12 @@ void LogStatRequestModel::setDataSuiteCmd(const LogLoadDataItem& total, const st
 
     for (size_t i = 0; i < total.subReq().size(); i++) {
         size_t pos = 0;
-        if (columnOrder_ == NameOrder)
+        if (columnOrder_ == NameOrder) {
             pos = i + 1;
-        else
+        }
+        else {
             pos = total.subReq()[i].periodStat().rank_ + 1;
+        }
 
         data_.dataIndex_[pos] = i;
         data_.colLabels_[pos] = QString::fromStdString(total.subReq()[i].name_);
@@ -3079,8 +3158,9 @@ int LogStatRequestModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int LogStatRequestModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -3095,23 +3175,27 @@ QVariant LogStatRequestModel::data(const QModelIndex& index, int role) const {
         return {};
     }
     int row = index.row();
-    if (row < 0 || row >= data_.rowNum())
+    if (row < 0 || row >= data_.rowNum()) {
         return {};
+    }
 
     int column = index.column();
-    if (column < 0 || column >= data_.colNum())
+    if (column < 0 || column >= data_.colNum()) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         return data_.vals_[index.column()][index.row()];
     }
     else if (role == Qt::ForegroundRole) {
-        if (fabs(data_.vals_[index.column()][index.row()]) < 0.0000001)
+        if (fabs(data_.vals_[index.column()][index.row()]) < 0.0000001) {
             return QColor(190, 190, 190);
+        }
     }
     else if (role == Qt::BackgroundRole) {
-        if (fabs(data_.vals_[index.column()][index.row()]) > 0.0000001)
+        if (fabs(data_.vals_[index.column()][index.row()]) > 0.0000001) {
             return QColor(192, 219, 247);
+        }
     }
 
     return {};
@@ -3119,12 +3203,14 @@ QVariant LogStatRequestModel::data(const QModelIndex& index, int role) const {
 
 QVariant LogStatRequestModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
     if (orient == Qt::Horizontal) {
-        if (role == Qt::DisplayRole)
+        if (role == Qt::DisplayRole) {
             return data_.colLabels_[section];
+        }
     }
     else if (orient == Qt::Vertical) {
-        if (role == Qt::DisplayRole)
+        if (role == Qt::DisplayRole) {
             return data_.rowLabels_[section];
+        }
     }
 
     return {};

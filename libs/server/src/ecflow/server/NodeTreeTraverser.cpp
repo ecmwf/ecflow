@@ -172,8 +172,9 @@ void NodeTreeTraverser::do_traverse() {
     std::stringstream ss;
     ss << "   NodeTreeTraverser::traverse() diff_from_last_time:" << diff_from_last_time << " running:" << running_
        << " count:" << count_ << " real_diff:" << real_diff << "  time_now:" << to_simple_string(time_now);
-    if (diff_from_last_time == 0)
+    if (diff_from_last_time == 0) {
         ss << ": FIRST time: ";
+    }
 #endif
 
     /// Update server stat's. ie records number of requests for each poll period

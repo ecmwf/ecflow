@@ -36,11 +36,13 @@ bool AutoArchiveParser::doParse(const std::string& line, std::vector<std::string
     // autoarchive 10     -i   # archive 10 days after complete,queued,aborted
     // autoarchive 0      -i   # archive immediately after complete,queued,aborted
 
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("AutoArchiveParser::doParse: Invalid autoarchive :" + line);
-    if (nodeStack().empty())
+    }
+    if (nodeStack().empty()) {
         throw std::runtime_error(
             "AutoArchiveParser::doParse: Could not add autoarchive as node stack is empty at line: " + line);
+    }
 
     if (lineTokens[1].find_first_of(':') == string::npos) {
         // Must be of the form:

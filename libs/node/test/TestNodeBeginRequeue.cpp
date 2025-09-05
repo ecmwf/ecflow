@@ -44,8 +44,9 @@ BOOST_AUTO_TEST_CASE(test_node_begin_requeue_hybrid) {
     auto todays_date         = Calendar::second_clock_time().date();
     int todays_day_as_number = todays_date.day_of_week().as_number();
     int tommorrow            = todays_day_as_number + 1;
-    if (tommorrow > 6)
+    if (tommorrow > 6) {
         tommorrow = 0;
+    }
 
     task_ptr t1 = f1->add_task("t1");
     t1->addDay(DayAttr(DayAttr::Day_t(tommorrow)));

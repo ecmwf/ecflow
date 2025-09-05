@@ -146,8 +146,9 @@ std::string VServerSettings::notificationId(Param par) {
 
 VServerSettings::Param VServerSettings::notificationParam(const std::string& id) {
     for (auto& notifyId : notifyIds_) {
-        if (notifyId.second == id)
+        if (notifyId.second == id) {
             return notifyId.first;
+        }
     }
 
     return UnknownParam;
@@ -155,8 +156,9 @@ VServerSettings::Param VServerSettings::notificationParam(const std::string& id)
 
 bool VServerSettings::notificationsEnabled() const {
     for (auto& notifyId : notifyIds_) {
-        if (boolValue(notifyId.first))
+        if (boolValue(notifyId.first)) {
             return true;
+        }
     }
     return false;
 }

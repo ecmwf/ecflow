@@ -928,8 +928,9 @@ struct Writer<PartExpression, Stream>
 
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.expr_type() == PartExpression::FIRST) {
-                if (is_free)
+                if (is_free) {
                     output << " # free";
+                }
             }
         }
     }
@@ -1110,10 +1111,12 @@ struct Writer<DayAttr, Stream>
                 added_hash = true;
             }
             if (item.expired()) {
-                if (added_hash)
+                if (added_hash) {
                     output << " expired";
-                else
+                }
+                else {
                     output << " # expired";
+                }
                 added_hash = true;
             }
 
@@ -1216,8 +1219,9 @@ struct Writer<InLimit, Stream>
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
 
             // write state; See InlimitParser::doParse for read state part
-            if (item.incremented())
+            if (item.incremented()) {
                 output << " # incremented:1";
+            }
 
             if (ctx.style.is_one_of<PrintStyle::STATE>()) {
                 Limit* the_limit = item.limit();

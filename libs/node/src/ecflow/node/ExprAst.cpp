@@ -122,13 +122,15 @@ std::string AstTop::why_expression(bool html) const {
 }
 
 void AstTop::setParentNode(Node* p) {
-    if (root_)
+    if (root_) {
         root_->setParentNode(p);
+    }
 }
 
 void AstTop::invalidate_trigger_references() const {
-    if (root_)
+    if (root_) {
         root_->invalidate_trigger_references();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -143,15 +145,18 @@ AstRoot::~AstRoot() {
 void AstRoot::accept(ExprAstVisitor& v) {
     v.visitRoot(this);
     left_->accept(v);
-    if (right_)
+    if (right_) {
         right_->accept(v); // right_ is empty for Not
+    }
 }
 
 bool AstRoot::check(std::string& error_msg) const {
-    if (left_ && !left_->check(error_msg))
+    if (left_ && !left_->check(error_msg)) {
         return false;
-    if (right_ && !right_->check(error_msg))
+    }
+    if (right_ && !right_->check(error_msg)) {
         return false;
+    }
     return true;
 }
 
@@ -172,11 +177,13 @@ void AstRoot::addChild(Ast* n) {
 
 std::string AstRoot::do_why_expression(const std::string& root, bool html) const {
     std::string ret;
-    if (left_)
+    if (left_) {
         ret += left_->why_expression(html);
+    }
     ret += root;
-    if (right_)
+    if (right_) {
         ret += right_->why_expression(html);
+    }
     return ret;
 }
 
@@ -189,21 +196,25 @@ std::string AstRoot::do_bracket_why_expression(const std::string& root, bool htm
 
 std::string AstRoot::do_false_bracket_why_expression(const std::string& root, bool html) const {
     std::string ret;
-    if (html)
+    if (html) {
         ret += "<false>"; // still need guard with html for ecflowview ?
+    }
     ret += do_bracket_why_expression(root, html);
-    if (html)
+    if (html) {
         ret += "</false>";
+    }
     return ret;
 }
 
 std::string AstRoot::do_expression(const std::string& root) const {
     std::string ret;
-    if (left_)
+    if (left_) {
         ret += left_->expression();
+    }
     ret += root;
-    if (right_)
+    if (right_) {
         ret += right_->expression();
+    }
     return ret;
 }
 
@@ -215,17 +226,21 @@ std::string AstRoot::do_bracket_expression(const std::string& root) const {
 }
 
 void AstRoot::setParentNode(Node* p) {
-    if (left_)
+    if (left_) {
         left_->setParentNode(p);
-    if (right_)
+    }
+    if (right_) {
         right_->setParentNode(p);
+    }
 }
 
 void AstRoot::invalidate_trigger_references() const {
-    if (left_)
+    if (left_) {
         left_->invalidate_trigger_references();
-    if (right_)
+    }
+    if (right_) {
         right_->invalidate_trigger_references();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -237,8 +252,9 @@ void AstNot::accept(ExprAstVisitor& v) {
 
 AstNot* AstNot::clone() const {
     auto* ast = new AstNot();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
+    }
     return ast;
 }
 
@@ -257,11 +273,13 @@ bool AstNot::is_valid_ast(std::string& error_msg) const {
 void AstNot::print_flat(std::ostream& os, bool add_bracket) const {
     os << name_;
     if (left_) {
-        if (add_bracket)
+        if (add_bracket) {
             os << "(";
+        }
         left_->print_flat(os, add_bracket);
-        if (add_bracket)
+        if (add_bracket) {
             os << ")";
+        }
     }
 }
 
@@ -272,16 +290,19 @@ std::string AstNot::expression() const {
 }
 
 std::string AstNot::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
 
     std::string ret;
-    if (html)
+    if (html) {
         ret += "<false>";
+    }
     ret += "not ";
     ret += left_->why_expression(html);
-    if (html)
+    if (html) {
         ret += "</false>";
+    }
     return ret;
 }
 ////////////////////////////////////////////////////////////////////////////////////
@@ -293,10 +314,12 @@ void AstPlus::accept(ExprAstVisitor& v) {
 
 AstPlus* AstPlus::clone() const {
     auto* ast = new AstPlus();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -316,15 +339,19 @@ bool AstPlus::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstPlus::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " + ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstPlus::expression() const {
@@ -344,10 +371,12 @@ void AstMinus::accept(ExprAstVisitor& v) {
 
 AstMinus* AstMinus::clone() const {
     auto* ast = new AstMinus();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -367,15 +396,19 @@ bool AstMinus::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstMinus::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " - ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstMinus::expression() const {
@@ -395,10 +428,12 @@ void AstDivide::accept(ExprAstVisitor& v) {
 
 AstDivide* AstDivide::clone() const {
     auto* ast = new AstDivide();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -434,15 +469,19 @@ bool AstDivide::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstDivide::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " / ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstDivide::expression() const {
@@ -462,10 +501,12 @@ void AstMultiply::accept(ExprAstVisitor& v) {
 
 AstMultiply* AstMultiply::clone() const {
     auto* ast = new AstMultiply();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -485,15 +526,19 @@ bool AstMultiply::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstMultiply::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " * ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstMultiply::expression() const {
@@ -513,10 +558,12 @@ void AstModulo::accept(ExprAstVisitor& v) {
 
 AstModulo* AstModulo::clone() const {
     auto* ast = new AstModulo();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -552,15 +599,19 @@ bool AstModulo::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstModulo::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " % ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstModulo::expression() const {
@@ -580,10 +631,12 @@ void AstAnd::accept(ExprAstVisitor& v) {
 
 AstAnd* AstAnd::clone() const {
     auto* ast = new AstAnd();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -603,15 +656,19 @@ bool AstAnd::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstAnd::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " and ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstAnd::expression() const {
@@ -619,8 +676,9 @@ std::string AstAnd::expression() const {
 }
 
 std::string AstAnd::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
     return do_false_bracket_why_expression(" and ", html); // false - allows GUI to colour the false expression part
 }
 
@@ -633,10 +691,12 @@ void AstOr::accept(ExprAstVisitor& v) {
 
 AstOr* AstOr::clone() const {
     auto* ast = new AstOr();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -656,15 +716,19 @@ bool AstOr::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstOr::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " or ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstOr::expression() const {
@@ -672,8 +736,9 @@ std::string AstOr::expression() const {
 }
 
 std::string AstOr::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
     return do_false_bracket_why_expression(" or ", html); // false - allows GUI to colour the false expression part
 }
 
@@ -686,10 +751,12 @@ void AstEqual::accept(ExprAstVisitor& v) {
 
 AstEqual* AstEqual::clone() const {
     auto* ast = new AstEqual();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -709,15 +776,19 @@ bool AstEqual::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstEqual::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " == ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstEqual::expression() const {
@@ -725,8 +796,9 @@ std::string AstEqual::expression() const {
 }
 
 std::string AstEqual::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
     return do_false_bracket_why_expression(" == ", html); // false - allows GUI to colour the false expression part
 }
 
@@ -738,10 +810,12 @@ void AstNotEqual::accept(ExprAstVisitor& v) {
 }
 AstNotEqual* AstNotEqual::clone() const {
     auto* ast = new AstNotEqual();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -761,15 +835,19 @@ bool AstNotEqual::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstNotEqual::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " != ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstNotEqual::expression() const {
@@ -777,8 +855,9 @@ std::string AstNotEqual::expression() const {
 }
 
 std::string AstNotEqual::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
     return do_false_bracket_why_expression(" != ", html); // false - allows GUI to colour the false expression part
 }
 
@@ -790,10 +869,12 @@ void AstLessEqual::accept(ExprAstVisitor& v) {
 }
 AstLessEqual* AstLessEqual::clone() const {
     auto* ast = new AstLessEqual();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -813,15 +894,19 @@ bool AstLessEqual::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstLessEqual::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " <= ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstLessEqual::expression() const {
@@ -829,8 +914,9 @@ std::string AstLessEqual::expression() const {
 }
 
 std::string AstLessEqual::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
     return do_false_bracket_why_expression(" <= ", html); // false - allows GUI to colour the false expression part
 }
 
@@ -843,10 +929,12 @@ void AstGreaterEqual::accept(ExprAstVisitor& v) {
 
 AstGreaterEqual* AstGreaterEqual::clone() const {
     auto* ast = new AstGreaterEqual();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -866,15 +954,19 @@ bool AstGreaterEqual::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstGreaterEqual::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " >= ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstGreaterEqual::expression() const {
@@ -882,8 +974,9 @@ std::string AstGreaterEqual::expression() const {
 }
 
 std::string AstGreaterEqual::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
     return do_false_bracket_why_expression(" >= ", html); // false - allows GUI to colour the false expression part
 }
 
@@ -896,10 +989,12 @@ void AstGreaterThan::accept(ExprAstVisitor& v) {
 
 AstGreaterThan* AstGreaterThan::clone() const {
     auto* ast = new AstGreaterThan();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -919,15 +1014,19 @@ bool AstGreaterThan::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstGreaterThan::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " > ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstGreaterThan::expression() const {
@@ -935,8 +1034,9 @@ std::string AstGreaterThan::expression() const {
 }
 
 std::string AstGreaterThan::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
     return do_false_bracket_why_expression(" > ", html); // false - allows GUI to colour the false expression part
 }
 
@@ -949,10 +1049,12 @@ void AstLessThan::accept(ExprAstVisitor& v) {
 
 AstLessThan* AstLessThan::clone() const {
     auto* ast = new AstLessThan();
-    if (left_)
+    if (left_) {
         ast->addChild(left_->clone());
-    if (right_)
+    }
+    if (right_) {
         ast->addChild(right_->clone());
+    }
     return ast;
 }
 
@@ -972,15 +1074,19 @@ bool AstLessThan::is_valid_ast(std::string& error_msg) const {
 }
 
 void AstLessThan::print_flat(std::ostream& os, bool add_bracket) const {
-    if (add_bracket)
+    if (add_bracket) {
         os << "(";
-    if (left_)
+    }
+    if (left_) {
         left_->print_flat(os, add_bracket);
+    }
     os << " < ";
-    if (right_)
+    if (right_) {
         right_->print_flat(os, add_bracket);
-    if (add_bracket)
+    }
+    if (add_bracket) {
         os << ")";
+    }
 }
 
 std::string AstLessThan::expression() const {
@@ -988,8 +1094,9 @@ std::string AstLessThan::expression() const {
 }
 
 std::string AstLessThan::why_expression(bool html) const {
-    if (evaluate())
+    if (evaluate()) {
         return "true";
+    }
     // Using ' < ' seems to mess up html
     return do_false_bracket_why_expression(" lt ", html); // false - allows GUI to colour the false expression part
 }
@@ -1012,8 +1119,9 @@ AstFunction* AstFunction::clone() const {
 
 static int digits_in_integer(int number) {
     int digits = 0;
-    if (number < 0)
+    if (number < 0) {
         digits = 1; // remove this line if '-' counts as a digit
+    }
     while (number) {
         number /= 10;
         digits++;
@@ -1028,10 +1136,12 @@ int AstFunction::value() const {
         case AstFunction::DATE_TO_JULIAN: {
             // cope with 8 digit, yyyymmdd and 10 digit yyyymmddhh
             int integer_digits = digits_in_integer(arg_eval);
-            if (integer_digits == 10)
+            if (integer_digits == 10) {
                 arg_eval = arg_eval / 100;
-            else if (integer_digits != 8)
+            }
+            else if (integer_digits != 8) {
                 return 0;
+            }
             return ecf::CalendarDate(arg_eval).as_julian_day().value();
         }
         case AstFunction::JULIAN_TO_DATE:
@@ -1086,8 +1196,9 @@ std::string AstFunction::why_expression(bool html) const {
 }
 
 void AstFunction::setParentNode(Node* n) {
-    if (arg_)
+    if (arg_) {
         arg_->setParentNode(n);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1158,8 +1269,9 @@ std::string AstNodeState::expression() const {
 }
 
 std::string AstNodeState::why_expression(bool html) const {
-    if (html)
+    if (html) {
         return DState::to_html(state_);
+    }
     return DState::toString(state_);
 }
 
@@ -1174,15 +1286,18 @@ AstEventState* AstEventState::clone() const {
 }
 
 void AstEventState::print_flat(std::ostream& os, bool /*add_bracket*/) const {
-    if (state_)
+    if (state_) {
         os << Event::SET();
-    else
+    }
+    else {
         os << Event::CLEAR();
+    }
 }
 
 std::string AstEventState::expression() const {
-    if (state_)
+    if (state_) {
         return Event::SET();
+    }
     return Event::CLEAR();
 }
 
@@ -1203,8 +1318,9 @@ AstNode* AstNode::clone() const {
 DState::State AstNode::state() const {
     // This function is called hundreds of millions of times
     Node* refNode = referencedNode(); // call once, could be expensive
-    if (refNode)
+    if (refNode) {
         return refNode->dstate();
+    }
     return DState::UNKNOWN;
 }
 
@@ -1248,29 +1364,36 @@ std::string AstNode::why_expression(bool html) const {
     Node* refNode = referencedNode(); // Only call once
     std::string ret;
     if (html) {
-        if (refNode)
+        if (refNode) {
             ret = Node::path_href_attribute(refNode->absNodePath(), nodePath_);
-        else
+        }
+        else {
             ret = Node::path_href_attribute(nodePath_);
+        }
     }
-    else
+    else {
         ret = nodePath_;
+    }
 
     if (refNode) {
         ret += "(";
-        if (html)
+        if (html) {
             ret += DState::to_html(refNode->dstate());
-        else
+        }
+        else {
             ret += DState::toString(refNode->dstate());
+        }
         ret += ")";
         return ret;
     }
     else {
         ret += "?(";
-        if (html)
+        if (html) {
             ret += DState::to_html(DState::UNKNOWN);
-        else
+        }
+        else {
             ret += DState::toString(DState::UNKNOWN);
+        }
         ret += ")";
     }
     return ret;
@@ -1292,12 +1415,14 @@ AstFlag* AstFlag::clone() const {
 
 int AstFlag::value() const {
     Node* node = referencedNode();
-    if (node && node->get_flag().is_set(flag_))
+    if (node && node->get_flag().is_set(flag_)) {
         return 1;
+    }
     if (parentNode_ && nodePath_ == "/") {
         Defs* the_defs = parentNode_->defs();
-        if (the_defs && the_defs->flag().is_set(flag_))
+        if (the_defs && the_defs->flag().is_set(flag_)) {
             return 1;
+        }
     }
     return 0;
 }
@@ -1308,8 +1433,9 @@ Node* AstFlag::referencedNode() const {
         return ref;
     }
     if (parentNode_) {
-        if (nodePath_ == "/")
+        if (nodePath_ == "/") {
             return nullptr; // reference to defs
+        }
         std::string errorMsg;
         ref_node_ = parentNode_->findReferencedNode(nodePath_, errorMsg);
         return get_ref_node(); // can be NULL
@@ -1323,8 +1449,9 @@ Node* AstFlag::referencedNode(std::string& errorMsg) const {
         return ref;
     }
     if (parentNode_) {
-        if (nodePath_ == "/")
+        if (nodePath_ == "/") {
             return nullptr; // reference to defs
+        }
         ref_node_ = parentNode_->findReferencedNode(nodePath_, ecf::Flag::enum_to_string(flag_), errorMsg);
         return get_ref_node(); // can be NULL
     }
@@ -1370,12 +1497,14 @@ std::string AstFlag::why_expression(bool html) const {
             ref_ss << "[flag:" << ecf::Flag::enum_to_string(flag_) << "]" << ref_node->absNodePath();
             ref_str = ref_ss.str();
         }
-        else
+        else {
             ref_str = display_str;
+        }
 
         ret = Node::path_href_attribute(ref_str, display_str);
-        if (!ref_node)
+        if (!ref_node) {
             ret += "(?)";
+        }
         else {
             ret += "(";
             ret += ecf::convert_to<std::string>(ref_node->get_flag().is_set(flag_));
@@ -1384,12 +1513,14 @@ std::string AstFlag::why_expression(bool html) const {
     }
     else {
         ret = nodePath_;
-        if (!ref_node)
+        if (!ref_node) {
             ret += "(?)";
+        }
         ret += "<flag>";
         ret += ecf::Flag::enum_to_string(flag_);
-        if (!ref_node)
+        if (!ref_node) {
             ret += "(?)";
+        }
         else {
             ret += "(";
             std::stringstream ss;
@@ -1454,20 +1585,23 @@ std::string AstVariable::why_expression(bool html) const {
             ref_ss << "[" << varType << "]" << ref_node->absNodePath() << ":" << name_;
             ref_str = ref_ss.str();
         }
-        else
+        else {
             ref_str = display_str;
+        }
 
         ret = Node::path_href_attribute(ref_str, display_str);
-        if (!ref_node)
+        if (!ref_node) {
             ret += "(?)";
+        }
         ret += "(";
         ret += ecf::convert_to<std::string>(theValue);
         ret += ")";
     }
     else {
         ret = nodePath_;
-        if (!ref_node)
+        if (!ref_node) {
             ret += "(?)";
+        }
         ret += Str::COLON();
         ret += name_;
         ret += "(";
@@ -1509,8 +1643,9 @@ Node* AstVariable::referencedNode(std::string& errorMsg) const {
 Node* AstParentVariable::find_node_which_references_variable() const {
     Node* parent = parentNode_;
     while (parent) {
-        if (parent->findExprVariable(name_))
+        if (parent->findExprVariable(name_)) {
             return parent;
+        }
         parent = parent->parent();
     }
     return nullptr;
@@ -1577,19 +1712,22 @@ std::string AstParentVariable::why_expression(bool html) const {
             ref_ss << "[" << varType << "]" << ref_node->absNodePath() << ":" << name_;
             ref_str = ref_ss.str();
         }
-        else
+        else {
             ref_str = display_str;
+        }
 
         ret = Node::path_href_attribute(ref_str, display_str);
-        if (!ref_node)
+        if (!ref_node) {
             ret += "(?)";
+        }
         ret += "(";
         ret += ecf::convert_to<std::string>(theValue);
         ret += ")";
     }
     else {
-        if (!ref_node)
+        if (!ref_node) {
             ret += "(?)";
+        }
         ret += Str::COLON();
         ret += name_;
         ret += "(";

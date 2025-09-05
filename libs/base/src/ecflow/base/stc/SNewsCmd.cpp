@@ -223,18 +223,21 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
 
 /// Called in the client
 bool SNewsCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr /*cts_cmd*/, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  SNewsCmd::handle_server_response news_ = " << news_ << "\n";
+    }
     server_reply.set_news(news_);
     return true;
 }
 
 bool SNewsCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SNewsCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (news_ != the_rhs->news())
+    }
+    if (news_ != the_rhs->news()) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 

@@ -33,8 +33,9 @@ namespace po = boost::program_options;
 
 bool ForceCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<ForceCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     if (paths_ != the_rhs->paths()) {
         return false;
     }
@@ -64,8 +65,9 @@ void ForceCmd::print(std::string& os) const {
 
 std::string ForceCmd::print_short() const {
     std::vector<std::string> paths;
-    if (!paths_.empty())
+    if (!paths_.empty()) {
         paths.emplace_back(paths_[0]);
+    }
 
     std::string os;
     my_print_only(os, paths);
@@ -153,16 +155,19 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
                 as->zombie_ctrl().add_user_zombies(node.get(), CtsApi::forceArg());
             }
 
-            if (recursive_)
+            if (recursive_) {
                 node->set_state_hierarchically(new_state, true /* force */);
-            else
+            }
+            else {
                 node->set_state(new_state, true /* force */);
+            }
 
             // force queued allows a job to re-run preserving job output.
             // However other nodes may reference this nodes events/meters/late in trigger expression, hence
             // reset events,meters and late flag ECFLOW-1617
-            if (new_state == NState::QUEUED)
+            if (new_state == NState::QUEUED) {
                 node->reset_late_event_meters();
+            }
         }
         else {
             // The recursive option is *NOT* applicable to events, hence ignore. According to Axel !!!!
@@ -180,8 +185,9 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
                     continue;
                 }
             }
-            else
+            else {
                 throw std::runtime_error("ForceCmd: Invalid parameter");
+            }
         }
 
         if (recursive_ && setRepeatToLastValue_) {
@@ -243,8 +249,9 @@ void ForceCmd::addOption(boost::program_options::options_description& desc) cons
 void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(ForceCmd::arg(), args);
+    }
 
     if (args.size() < 2) {
         std::stringstream ss;
@@ -277,10 +284,12 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     std::string stateOrEvent;
     size_t options_size = options.size();
     for (size_t i = 0; i < options_size; i++) {
-        if (Str::caseInsCompare(options[i], "recursive"))
+        if (Str::caseInsCompare(options[i], "recursive")) {
             recursive = true;
-        else if (Str::caseInsCompare(options[i], "full"))
+        }
+        else if (Str::caseInsCompare(options[i], "full")) {
             setRepeatToLastValue = true;
+        }
         else if (NState::isValid(options[i])) {
             is_valid_state = true;
             stateOrEvent   = options[i];

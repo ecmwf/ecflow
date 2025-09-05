@@ -37,8 +37,9 @@ void SSuitesCmd::init(AbstractServer* as) {
 
 bool SSuitesCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SSuitesCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 
@@ -47,8 +48,9 @@ std::string SSuitesCmd::print() const {
 }
 
 bool SSuitesCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  SSuitesCmd::handle_server_response\n";
+    }
 
     if (server_reply.cli() && !cts_cmd->group_cmd()) {
         /// This Could be part of a group command, hence ONLY if NOT group command

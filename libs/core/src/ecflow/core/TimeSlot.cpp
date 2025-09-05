@@ -21,8 +21,9 @@ namespace ecf {
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 bool TimeSlot::operator<(const TimeSlot& rhs) const {
-    if (h_ < rhs.hour())
+    if (h_ < rhs.hour()) {
         return true;
+    }
     if (h_ == rhs.hour()) {
         return m_ < rhs.minute();
     }
@@ -30,8 +31,9 @@ bool TimeSlot::operator<(const TimeSlot& rhs) const {
 }
 
 bool TimeSlot::operator>(const TimeSlot& rhs) const {
-    if (h_ > rhs.hour())
+    if (h_ > rhs.hour()) {
         return true;
+    }
     if (h_ == rhs.hour()) {
         return m_ > rhs.minute();
     }
@@ -39,14 +41,16 @@ bool TimeSlot::operator>(const TimeSlot& rhs) const {
 }
 
 bool TimeSlot::operator<=(const TimeSlot& rhs) const {
-    if (operator<(rhs))
+    if (operator<(rhs)) {
         return true;
+    }
     return operator==(rhs);
 }
 
 bool TimeSlot::operator>=(const TimeSlot& rhs) const {
-    if (operator>(rhs))
+    if (operator>(rhs)) {
         return true;
+    }
     return operator==(rhs);
 }
 
@@ -62,13 +66,15 @@ void TimeSlot::write(std::string& ret) const {
         return;
     }
 
-    if (h_ < 10)
+    if (h_ < 10) {
         ret += "0";
+    }
     ret += ecf::convert_to<std::string>(h_);
 
     ret += Str::COLON();
-    if (m_ < 10)
+    if (m_ < 10) {
         ret += "0";
+    }
     ret += ecf::convert_to<std::string>(m_);
 }
 

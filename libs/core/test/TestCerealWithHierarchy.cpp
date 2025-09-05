@@ -43,10 +43,12 @@ public:
 
     bool equals(BaseCmd* rhs) const override {
         auto* the_rhs = dynamic_cast<Derived1*>(rhs);
-        if (!the_rhs)
+        if (!the_rhs) {
             return false;
-        if (x_ != the_rhs->get_x())
+        }
+        if (x_ != the_rhs->get_x()) {
             return false;
+        }
         return true;
     }
 
@@ -77,18 +79,22 @@ public:
     explicit CmdContainer(std::shared_ptr<BaseCmd> cmd) : cmd_(cmd) {}
 
     bool operator==(const CmdContainer& rhs) const {
-        if (!cmd_.get() && !rhs.cmd_.get())
+        if (!cmd_.get() && !rhs.cmd_.get()) {
             return true;
-        if (cmd_.get() && !rhs.cmd_.get())
+        }
+        if (cmd_.get() && !rhs.cmd_.get()) {
             return false;
-        if (!cmd_.get() && rhs.cmd_.get())
+        }
+        if (!cmd_.get() && rhs.cmd_.get()) {
             return false;
+        }
         return (cmd_->equals(rhs.cmd_.get()));
     }
 
     void print(std::ostream& os) const {
-        if (cmd_.get())
+        if (cmd_.get()) {
             cmd_->print(os);
+        }
         os << "NULL request";
     }
 

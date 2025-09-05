@@ -106,12 +106,14 @@ void Highlighter::load(QString id) {
             format.setForeground(VProperty::toColour(itPar->second.get_value<std::string>()));
         }
         if ((itPar = ptPar.find("bold")) != ptPar.not_found()) {
-            if (itPar->second.get_value<std::string>() == "true")
+            if (itPar->second.get_value<std::string>() == "true") {
                 format.setFontWeight(QFont::Bold);
+            }
         }
         if ((itPar = ptPar.find("italic")) != ptPar.not_found()) {
-            if (itPar->second.get_value<std::string>() == "true")
+            if (itPar->second.get_value<std::string>() == "true") {
                 format.setFontItalic(true);
+            }
         }
         addRule(pattern, format);
     }
@@ -150,8 +152,9 @@ void Highlighter::toHtml(QString& html) {
         {
             const int start = current.position() + range.start - selectionStart;
             const int end   = start + range.length;
-            if (end <= 0 or start >= endOfDocument)
+            if (end <= 0 or start >= endOfDocument) {
                 continue;
+            }
             tmpCursor.setPosition(qMax(start, 0));
             tmpCursor.setPosition(qMin(end, endOfDocument), QTextCursor::KeepAnchor);
             tmpCursor.setCharFormat(range.format);
@@ -159,8 +162,9 @@ void Highlighter::toHtml(QString& html) {
     }
 
     // Reset the user states since they are not interesting
-    for (QTextBlock block = tmpDoc->begin(); block.isValid(); block = block.next())
+    for (QTextBlock block = tmpDoc->begin(); block.isValid(); block = block.next()) {
         block.setUserState(-1);
+    }
 
     // Make sure the text appears pre-formatted, and set the background we want.
     tmpCursor.select(QTextCursor::Document);

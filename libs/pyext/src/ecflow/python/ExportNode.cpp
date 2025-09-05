@@ -252,10 +252,12 @@ node_ptr add_late(node_ptr self, const ecf::LateAttr& attr) {
     return self;
 }
 std::string get_state_change_time(node_ptr self, const std::string& format) {
-    if (format == "iso_extended")
+    if (format == "iso_extended") {
         return to_iso_extended_string(self->state_change_time());
-    else if (format == "iso")
+    }
+    else if (format == "iso") {
         return to_iso_string(self->state_change_time());
+    }
     return to_simple_string(self->state_change_time());
 }
 
@@ -362,14 +364,16 @@ node_ptr add_part_complete_2(node_ptr self, const std::string& expression, bool 
 }
 bool evaluate_trigger(node_ptr self) {
     Ast* t = self->triggerAst();
-    if (t)
+    if (t) {
         return t->evaluate();
+    }
     return false;
 }
 bool evaluate_complete(node_ptr self) {
     Ast* t = self->completeAst();
-    if (t)
+    if (t) {
         return t->evaluate();
+    }
     return false;
 }
 
@@ -404,8 +408,9 @@ static py::object do_rshift(node_ptr self, const py::object& arg) {
 
     if (py::extract<node_ptr>(arg).check()) {
         NodeContainer* nc = self->isNodeContainer();
-        if (!nc)
+        if (!nc) {
             throw std::runtime_error("ExportNode::do_rshift() : Can only add a child to Suite or Family");
+        }
         node_ptr child = py::extract<node_ptr>(arg);
 
         std::vector<node_ptr> children;
@@ -414,14 +419,17 @@ static py::object do_rshift(node_ptr self, const py::object& arg) {
         for (auto& i : children) {
             if (previous_child && i == child) {
                 // if existing trigger, add new trigger as AND
-                if (child->get_trigger())
+                if (child->get_trigger()) {
                     child->add_part_trigger(
                         PartExpression(previous_child->name() + " == complete", PartExpression::AND));
-                else
+                }
+                else {
                     child->add_trigger_expr(Expression(previous_child->name() + " == complete"));
+                }
             }
-            if (i->defStatus() != DState::COMPLETE)
+            if (i->defStatus() != DState::COMPLETE) {
                 previous_child = i;
+            }
         }
     }
     return py::object(self);
@@ -433,26 +441,31 @@ static py::object do_lshift(node_ptr self, const py::object& arg) {
     if (py::extract<node_ptr>(arg).check()) {
 
         NodeContainer* nc = self->isNodeContainer();
-        if (!nc)
+        if (!nc) {
             throw std::runtime_error("ExportNode::do_lshift() : Can only add a child to Suite or Family");
+        }
         node_ptr child = py::extract<node_ptr>(arg);
 
         std::vector<node_ptr> children;
         nc->immediateChildren(children);
         node_ptr previous_child;
         for (size_t i = 0; i < children.size(); i++) {
-            if (i == 0)
+            if (i == 0) {
                 continue;
-            if (children[i - 1]->defStatus() != DState::COMPLETE)
+            }
+            if (children[i - 1]->defStatus() != DState::COMPLETE) {
                 previous_child = children[i - 1];
+            }
 
             if (previous_child && previous_child != child && children[i] == child) {
                 // if existing trigger, add new trigger as AND
-                if (previous_child->get_trigger())
+                if (previous_child->get_trigger()) {
                     previous_child->add_part_trigger(
                         PartExpression(child->name() + " == complete", PartExpression::AND));
-                else
+                }
+                else {
                     previous_child->add_trigger_expr(Expression(child->name() + " == complete"));
+                }
             }
         }
     }
@@ -462,11 +475,13 @@ static py::object do_lshift(node_ptr self, const py::object& arg) {
 static py::object add(py::tuple args, py::dict kwargs) {
     int the_list_size = len(args);
     node_ptr self     = py::extract<node_ptr>(args[0]); // self
-    if (!self)
+    if (!self) {
         throw std::runtime_error("ExportNode::add() : first argument is not a node");
+    }
 
-    for (int i = 1; i < the_list_size; ++i)
+    for (int i = 1; i < the_list_size; ++i) {
         (void)NodeUtil::do_add(self, args[i]);
+    }
 
     // key word arguments are use for adding variable only
     (void)NodeUtil::add_variable_dict(self, kwargs);
@@ -483,24 +498,29 @@ static py::object node_getattr(node_ptr self, const std::string& attr) {
     }
 
     const Variable& var = self->findVariable(attr);
-    if (!var.empty())
+    if (!var.empty()) {
         return py::object(var);
+    }
 
     const Variable& gvar = self->findGenVariable(attr);
-    if (!gvar.empty())
+    if (!gvar.empty()) {
         return py::object(gvar);
+    }
 
     const Event& event = self->findEventByNameOrNumber(attr);
-    if (!event.empty())
+    if (!event.empty()) {
         return py::object(event);
+    }
 
     const Meter& meter = self->findMeter(attr);
-    if (!meter.empty())
+    if (!meter.empty()) {
         return py::object(meter);
+    }
 
     limit_ptr limit = self->find_limit(attr);
-    if (limit.get())
+    if (limit.get()) {
         return py::object(limit);
+    }
 
     std::stringstream ss;
     ss << "ExportNode::node_getattr: function of name '" << attr
@@ -522,8 +542,9 @@ void do_replace_on_server(node_ptr self, ClientInvoker& theClient, bool suspend_
     // Need to make a defs_ptr from a Defs*  to avoid double delete use null_deletor
     defs_ptr defs                   = defs_ptr(self->defs(), null_deleter());
     bool create_parents_as_required = true;
-    if (suspend_node_first)
+    if (suspend_node_first) {
         theClient.suspend(self->absNodePath());
+    }
     theClient.replace_1(self->absNodePath(), defs, create_parents_as_required, force_replace); // this can throw
 }
 void replace_on_server(node_ptr self, bool suspend_node_first, bool force_replace) {

@@ -154,9 +154,10 @@ bool CtsCmdRegistry::parse(Cmd_ptr& cmd,
 
         if (vm.count(registered_cmd->theArg())) {
 
-            if (clientEnv->debug())
+            if (clientEnv->debug()) {
                 std::cout << "  CtsCmdRegistry::parse matched with registered command " << registered_cmd->theArg()
                           << "\n";
+            }
 
             registered_cmd->create(cmd, vm, clientEnv);
             return true;

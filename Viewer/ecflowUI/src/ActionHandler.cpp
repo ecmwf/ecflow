@@ -89,17 +89,20 @@ void ActionHandler::filterNodes(const std::vector<VInfo_ptr>& nodesLst, std::vec
     // count how many attributes and non-attributes are selected
     long numAttrs = 0, numNonAttrNodes = 0;
     for (auto& itNodes : nodesLst) {
-        if (itNodes->isAttribute())
+        if (itNodes->isAttribute()) {
             numAttrs++;
-        else
+        }
+        else {
             numNonAttrNodes++;
+        }
     }
 
     if (numAttrs > 0 && numNonAttrNodes > 0) // just keep the non-attribute nodes
     {
         for (auto& itNodes : nodesLst) {
-            if (!(itNodes->isAttribute()))
+            if (!(itNodes->isAttribute())) {
                 filteredNodes.push_back(itNodes);
+            }
         }
     }
     else // keep all the nodes
@@ -137,8 +140,9 @@ void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& 
             QString txt;
             for (const auto& filteredNode : filteredNodes) {
                 if (filteredNode) {
-                    if (!txt.isEmpty())
+                    if (!txt.isEmpty()) {
                         txt += ",";
+                    }
                     txt += QString::fromStdString(filteredNode->path());
                 }
             }
@@ -268,16 +272,19 @@ void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& 
             }
 
             // bool ok=true;
-            if (item->isCustom())
+            if (item->isCustom()) {
                 MenuHandler::interceptCommandsThatNeedConfirmation(item);
+            }
 
             bool ok = confirmCommand(item, filteredNodes);
 
-            if (ok)
+            if (ok) {
                 CommandHandler::run(filteredNodes, item->command());
+            }
 
-            if (customCommandDialog)
+            if (customCommandDialog) {
                 delete customCommandDialog;
+            }
         }
     }
 }
@@ -289,16 +296,20 @@ bool ActionHandler::confirmCommand(MenuItem* item,
     bool needQuestion = item && !item->question().empty() && item->shouldAskQuestion(filteredNodes);
 
     // We can control if a confrmation is needed for a command from the config dialogue
-    if (needQuestion && !item->questionControl().empty())
-        if (VProperty* prop = VConfig::instance()->find(item->questionControl()))
+    if (needQuestion && !item->questionControl().empty()) {
+        if (VProperty* prop = VConfig::instance()->find(item->questionControl())) {
             needQuestion = prop->value().toBool();
+        }
+    }
 
     if (needQuestion) {
         std::string cmdStr;
-        if (!commandDescStr.empty())
+        if (!commandDescStr.empty()) {
             cmdStr = commandDescStr;
-        else if (!item->command().empty())
+        }
+        else if (!item->command().empty()) {
             cmdStr = item->command();
+        }
 
         return ActionHandler::confirmCommand(filteredNodes, item->question(), item->warning(), cmdStr, taskNum);
     }
@@ -353,8 +364,9 @@ bool ActionHandler::confirmCommand(const std::vector<VInfo_ptr>& filteredNodes,
 
     QString warningStr = QString::fromStdString(warning);
     if (!warningStr.isEmpty()) {
-        if (!msg.contains("<ul>"))
+        if (!msg.contains("<ul>")) {
             msg += "<br><br>";
+        }
 
         msg += "<i>warning: " + Viewer::formatText(warningStr, QColor(196, 103, 36)) + "</i><br>";
     }
@@ -367,10 +379,12 @@ bool ActionHandler::confirmCommand(const std::vector<VInfo_ptr>& filteredNodes,
 #else
         cmdStr = Qt::escape(cmdStr);
 #endif
-        if (!warningStr.isEmpty())
+        if (!warningStr.isEmpty()) {
             msg += "<br>";
-        else if (!msg.contains("<ul>"))
+        }
+        else if (!msg.contains("<ul>")) {
             msg += "<br><br>";
+        }
 
         msg += "<i>command: " + Viewer::formatText(cmdStr, QColor(41, 78, 126)) + "</i>";
         msg += "<br>";

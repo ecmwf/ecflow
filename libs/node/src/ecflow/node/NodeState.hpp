@@ -34,10 +34,12 @@ NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate
     size_t theVecSize = nodeVec.size();
     for (size_t n = 0; n < theVecSize; n++) {
         NState::State theState;
-        if (immediate)
+        if (immediate) {
             theState = nodeVec[n]->state();
-        else
+        }
+        else {
             theState = nodeVec[n]->computedState(Node::HIERARCHICAL);
+        }
 
         // std::cout << "the computed state for " << nodeVec[n]->debugNodePath() << " is " << NState::toString(theState)
         // << "\n";
@@ -66,16 +68,21 @@ NState::State theComputedNodeState(const std::vector<T>& nodeVec, bool immediate
                 break;
         }
     }
-    if (abortedCount > 0)
+    if (abortedCount > 0) {
         return NState::ABORTED;
-    if (activeCount > 0)
+    }
+    if (activeCount > 0) {
         return NState::ACTIVE;
-    if (submittedCount > 0)
+    }
+    if (submittedCount > 0) {
         return NState::SUBMITTED;
-    if (queuedCount > 0)
+    }
+    if (queuedCount > 0) {
         return NState::QUEUED;
-    if (completeCount > 0)
+    }
+    if (completeCount > 0) {
         return NState::COMPLETE;
+    }
     return NState::UNKNOWN;
 }
 

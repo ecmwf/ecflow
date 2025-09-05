@@ -191,19 +191,22 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         }
         else {
             fg = index.data(Qt::ForegroundRole).value<QColor>();
-            if (!fg.isValid())
+            if (!fg.isValid()) {
                 fg = Qt::black;
+            }
         }
 
         painter->setPen(fg);
 
         painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
 
-        if (hasLock)
+        if (hasLock) {
             painter->drawPixmap(lockRect, lockPix);
+        }
 
-        if (hasGen)
+        if (hasGen) {
             painter->drawPixmap(genRect, genPix);
+        }
 
         if (hasMirror) {
             painter->drawPixmap(mirrorRect, mirrorPix);
@@ -211,8 +214,9 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     }
     else if (index.column() == 0) {
         auto fg = index.data(Qt::ForegroundRole).value<QColor>();
-        if (!fg.isValid())
+        if (!fg.isValid()) {
             fg = Qt::black;
+        }
         painter->setPen(fg);
 
         QRegExp rx("^(.+)\\s(\\S+)$");
@@ -247,8 +251,9 @@ void VariableDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         }
         else {
             fg = index.data(Qt::ForegroundRole).value<QColor>();
-            if (!fg.isValid())
+            if (!fg.isValid()) {
                 fg = Qt::black;
+            }
         }
 
         painter->setPen(fg);
@@ -268,8 +273,9 @@ QSize VariableDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
     if (index.column() == 1) {
         int w1 = view_->header()->sectionSize(0);
         int w  = view_->viewport()->size().width();
-        if (w1 + size.width() < w)
+        if (w1 + size.width() < w) {
             size.setWidth(w - w1 + 1);
+        }
     }
     return size;
 }
