@@ -146,9 +146,7 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const {
             Log::instance()->clear();
         break;
         case LogCmd::FLUSH:
-            std::cout << "Going to LogCmd::FLUSH" << std::endl;
             Log::instance()->flush();
-            std::cout << "Done LogCmd::FLUSHing" << std::endl;
         break;
         case LogCmd::NEW: {
             if (!new_path_.empty()) {

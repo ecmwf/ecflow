@@ -382,7 +382,6 @@ static void test_persistence(const Defs& theFixtureDefs) {
                     ++i;
                     STC_Cmd_ptr ok_or_error_cmd = cmd_request.handleRequest(&mockServer);
                     if (ok_or_error_cmd) {
-                        std::cout << " [" << i << "]: " << ok_or_error_cmd->ok() << std::endl;
                         // Commands like ErrorCmd, OkCmd don't return a cmd_ptr from handleRequest
                         // those that do, check OkCmd returned, else if ErrorCmd show the error
                         BOOST_CHECK_MESSAGE(ok_or_error_cmd->ok(),
