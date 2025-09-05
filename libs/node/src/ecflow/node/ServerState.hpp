@@ -16,6 +16,7 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/SState.hpp"
 #include "ecflow/node/NodeFwd.hpp"
+#include "ecflow/node/Permissions.hpp"
 
 /// This class stores the server state, so that it is accessible by the node tree
 ///
@@ -45,15 +46,18 @@ public:
     /// This does compare server variables. Used in testing
     bool compare(const ServerState& rhs) const;
 
+    ecf::Permissions permissions() const { return ecf::Permissions::find_in(user_variables_); }
+
     void sort_variables();
 
-    /// The server variable: are automatically added by the server
-    /// on STARTUP and when a checkpoint file is reloaded.
-    /// The variable are required by Job creation & needed in creation of generated variables
-    /// The variables should NOT be modified.
+    /// The server variables are automatically added by the server on start-up, or, when a checkpoint file is reloaded.
     ///
-    /// However user variables can be freely added,deleted and modified
-    /// They will override server variables of the same name
+    /// These variables should NOT be modified, as they are required during:
+    ///  - the creation of Jobs;
+    ///  - the creation of generated variables.
+    ///
+    /// On the other hand, user variables can be freely added, deleted and modified.
+    /// Notice that user variables will override server variables of the same name.
 
     void add_or_update_server_variable(const std::string&, const std::string&);
     void add_or_update_server_variables(const NameValueVec& env);

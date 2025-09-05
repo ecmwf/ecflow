@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -112,6 +114,14 @@ bool ReplaceNodeCmd::equals(ClientToServerCmd* rhs) const {
     return true;
 }
 
+ecf::authentication_t ReplaceNodeCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t ReplaceNodeCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
+}
+
 STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().replace_++;
     assert(isWrite()); // isWrite used in handleRequest() to control check pointing
@@ -151,9 +161,9 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     return doJobSubmission(as);
 }
 
-bool ReplaceNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, pathToNode_);
-}
+// bool ReplaceNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, pathToNode_);
+// }
 
 void ReplaceNodeCmd::print(std::string& os) const {
     std::string path_to_client_defs = path_to_defs_;

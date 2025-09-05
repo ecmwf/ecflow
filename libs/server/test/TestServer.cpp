@@ -59,33 +59,6 @@ public:
     void restart() override { BasicServer::restart(); }
 
     bool reloadWhiteListFile(std::string& errorMsg) override { return BasicServer::reloadWhiteListFile(errorMsg); }
-    bool reloadPasswdFile(std::string& errorMsg) override { return BasicServer::reloadPasswdFile(errorMsg); }
-
-    bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) override {
-        return BasicServer::authenticateReadAccess(user, custom_user, passwd);
-    }
-    bool authenticateReadAccess(const std::string& user,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::string& path) override {
-        return BasicServer::authenticateReadAccess(user, custom_user, passwd, path);
-    }
-    bool authenticateReadAccess(const std::string& user,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::vector<std::string>& paths) override {
-        return BasicServer::authenticateReadAccess(user, custom_user, passwd, paths);
-    }
-
-    bool authenticateWriteAccess(const std::string& user) override {
-        return BasicServer::authenticateWriteAccess(user);
-    }
-    bool authenticateWriteAccess(const std::string& user, const std::string& path) override {
-        return BasicServer::authenticateWriteAccess(user, path);
-    }
-    bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) override {
-        return BasicServer::authenticateWriteAccess(user, paths);
-    }
 
     bool lock(const std::string& user) override { return BasicServer::lock(user); }
     void unlock() override { BasicServer::unlock(); }

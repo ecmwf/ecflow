@@ -15,11 +15,14 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Submittable.hpp"
 
@@ -121,6 +124,14 @@ bool CFileCmd::equals(ClientToServerCmd* rhs) const {
         return false;
     }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t CFileCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t CFileCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void CFileCmd::print(std::string& os) const {
@@ -325,9 +336,9 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::string_cmd(fileContents);
 }
 
-bool CFileCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, pathToNode_);
-}
+// bool CFileCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, pathToNode_);
+// }
 
 const char* CFileCmd::arg() {
     return CtsApi::fileArg();

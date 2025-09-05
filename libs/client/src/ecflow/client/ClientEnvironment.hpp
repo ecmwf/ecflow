@@ -18,6 +18,45 @@
 #endif
 #include "ecflow/base/ServerProtocol.hpp"
 
+struct Token
+{
+    std::string server;
+    std::string type;
+    std::string url;
+    std::string key;
+    std::string email;
+    std::string username;
+    std::string password;
+
+    static Token make_basic(const std::string& server, const std::string& username, const std::string& password) {
+        return Token{server, username, password};
+    }
+
+    static Token
+    make_bearer(const std::string& server, const std::string& url, const std::string& key, const std::string& email) {
+        return Token{server, url, key, email};
+    }
+
+private:
+    Token(std::string server, std::string url, std::string key, std::string email)
+        : server(std::move(server)),
+          type("bearer"),
+          url(std::move(url)),
+          key(std::move(key)),
+          email(std::move(email)) {}
+
+    Token(std::string server, std::string username, std::string password)
+        : server(std::move(server)),
+          type("basic"),
+          username(std::move(username)),
+          password(std::move(password)) {}
+};
+
+struct UnavailableToken : public std::runtime_error
+{
+    explicit UnavailableToken(const std::string& what) : std::runtime_error(what) {}
+};
+
 /**
  * @brief The ClientEnvironment is used to manage the client configuration loaded from the execution environment.
  *
@@ -206,6 +245,8 @@ public:
     bool debug() const override { return debug_; } // enabled if ECF_DEBUG_CLIENT set
     void set_test() override { under_test_ = true; }
     bool under_test() const override { return under_test_; }
+
+    Token get_token(const std::string& url) const;
 
     // Support for python child commands, and python jobs
     void set_child_path(const std::string& path) { task_path_ = path; }

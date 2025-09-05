@@ -10,9 +10,13 @@
 
 #include "ecflow/client/ClientEnvironment.hpp"
 
+#include <fstream>
 #include <iostream>
 #include <iterator>
+#include <regex>
 #include <stdexcept>
+
+#include <nlohmann/json.hpp>
 
 #include "ecflow/client/HostsFile.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -382,6 +386,111 @@ const std::string& ClientEnvironment::get_password(const char* env, const std::s
     }
 
     return ecf::Str::EMPTY();
+}
+
+struct TokenFile
+{
+public:
+    static TokenFile load(const fs::path& path) {
+        using nlohmann::json;
+        using namespace std::string_literals;
+
+        std::ifstream f(path.c_str());
+
+        if (!f.good()) {
+            throw UnavailableToken("Unable to open : "s + path.c_str() + ", to load tokens.");
+        }
+
+        try {
+            json data = json::parse(f);
+
+            // Check version
+            if (auto meta_version = data["version"]; meta_version.is_number_integer()) {
+                if (auto version = int(meta_version); version != 1) {
+                    throw UnavailableToken("Unable to load tokens, from: "s + path.c_str() +
+                                           ". Expected version 1, found:" + std::to_string(version));
+                }
+            }
+            else {
+                throw UnavailableToken("Unable to load tokens, from: "s + path.c_str() + ". No version found.");
+            }
+
+            TokenFile file;
+            // Load tokens
+            for (auto token : data["tokens"]) {
+                auto type = token["type"];
+                if (type == "bearer") {
+                    auto server = std::string(token["server"]);
+                    auto url    = std::string(token["api"]["url"]);
+                    auto key    = std::string(token["api"]["key"]);
+                    auto email  = std::string(token["api"]["email"]);
+                    file.tokens.push_back(Token::make_bearer(server, url, key, email));
+                }
+                else if (type == "basic") {
+                    auto server   = std::string(token["server"]);
+                    auto username = std::string(token["api"]["username"]);
+                    auto password = std::string(token["api"]["password"]);
+                    file.tokens.push_back(Token::make_basic(server, username, password));
+                }
+            }
+            return file;
+        }
+        catch (const nlohmann::detail::exception& e) {
+            using namespace std::string_literals;
+            throw UnavailableToken("Unable to load tokens, from: "s + path.c_str() + ". Due to: " + e.what());
+        }
+        catch (const std::exception& e) {
+            using namespace std::string_literals;
+            throw UnavailableToken("Unable to load tokens, from: "s + path.c_str() + ". Due to: " + e.what());
+        }
+    }
+
+    std::vector<Token> tokens;
+};
+
+fs::path get_ecflow_api_tokens_path() {
+    const char* const ECFLOWAPIRC = ".ecflowapirc";
+
+    // Use the value of ${ECF_AUTHTOKENS} environment variable, if specified
+    const char* const ECF_AUTHTOKENS = "ECF_AUTHTOKENS";
+    if (auto selected_path = ecf::environment::fetch(ECF_AUTHTOKENS); selected_path) {
+        std::string tokens_path = selected_path.value();
+        return fs::absolute(tokens_path);
+    }
+
+    // Otherwise, search for ${HOME}/.ecflowapirc
+    const char* const HOME = "HOME";
+    if (auto base_path = ecf::environment::fetch(HOME); base_path) {
+        std::string tokens_path = base_path.value() + "/" + ECFLOWAPIRC;
+        if (fs::exists(tokens_path)) {
+            return fs::absolute(tokens_path);
+        }
+    }
+
+    // As an ultimate fallback, use the current directory (i.e. ${PWD}/.ecflowapirc)
+    std::string tokens_path = ECFLOWAPIRC;
+    return fs::absolute(tokens_path);
+}
+
+Token ClientEnvironment::get_token(const std::string& url) const {
+    using namespace std::string_literals;
+
+    auto tokens_path = get_ecflow_api_tokens_path();
+
+    try {
+        auto data = TokenFile::load(tokens_path);
+        for (auto token : data.tokens) {
+            std::regex pattern(token.server);
+            if (std::regex_match(url, pattern)) {
+                return token;
+            }
+        }
+    }
+    catch (const UnavailableToken& e) {
+        throw;
+    }
+
+    throw UnavailableToken("Unable to find token for URL: "s + url);
 }
 
 bool ClientEnvironment::host_file_policy_is_task() const {

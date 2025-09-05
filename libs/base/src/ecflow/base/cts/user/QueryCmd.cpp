@@ -15,6 +15,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -56,6 +58,14 @@ bool QueryCmd::equals(ClientToServerCmd* rhs) const {
     if (path_to_task_ != the_rhs->path_to_task())
         return false;
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t QueryCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t QueryCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void QueryCmd::addOption(boost::program_options::options_description& desc) const {

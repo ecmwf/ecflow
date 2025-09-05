@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(can_run_aviso_attribute_with_variable_substitution) {
 
     using namespace ecf;
 
-    WithTestFile schema("schema.aviso.json", R"(
+    WithTestFile schema(NamedTestFile{"schema.aviso.json"}, R"(
       {
         "version":0.1,
         "payload":"location",

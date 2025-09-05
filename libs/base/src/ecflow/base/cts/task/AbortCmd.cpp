@@ -15,6 +15,8 @@
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -58,6 +60,14 @@ bool AbortCmd::equals(ClientToServerCmd* rhs) const {
     if (reason_ != the_rhs->reason())
         return false;
     return TaskCmd::equals(rhs);
+}
+
+ecf::authentication_t AbortCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t AbortCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr AbortCmd::doHandleRequest(AbstractServer* as) const {

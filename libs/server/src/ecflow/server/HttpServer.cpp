@@ -11,6 +11,7 @@
 #include "ecflow/server/HttpServer.hpp"
 
 #include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/Identification.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -21,6 +22,15 @@ inline void log_error(char const* where, boost::beast::error_code ec) {
     using namespace ecf;
     LOG(Log::ERR, where << ": " << ec.message());
 }
+
+#define LOG_LEVEL(LEVEL, WHERE, MESSAGE)                                      \
+    {                                                                         \
+        using namespace ecf;                                                  \
+        std::cout << LEVEL << " (" << WHERE << "): " << MESSAGE << std::endl; \
+    }
+
+#define LOG_ERROR(WHERE, MESSAGE) LOG_LEVEL("ERR", WHERE, MESSAGE)
+#define LOG_DEBUG(WHERE, MESSAGE) LOG_LEVEL("DBG", WHERE, MESSAGE)
 
 static const std::string CONTENT_TYPE = "application/json";
 
@@ -53,6 +63,60 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
 
     // 1) Retrieve inbound_request from request body
     ecf::restore_from_string(request.body(), inbound_request);
+
+    {
+        ecf::Identity identity = ecf::Identity::make_none();
+
+        // If possible, the Identify is retrieved from request header fields
+        bool identity_headers = false;
+        bool identity_secure  = false;
+        std::string username;
+        std::string password;
+        {
+            auto found = std::find_if(std::begin(request), std::end(request), [](auto& field) {
+                return field.name_string() == "X-Auth-Username";
+            });
+            if (found != std::end(request)) {
+                identity_headers = true;
+                username         = std::string{found->value()};
+            }
+        }
+        {
+            auto found = std::find_if(std::begin(request), std::end(request), [](auto& field) {
+                return field.name_string() == "X-Auth-Password";
+            });
+            if (found != std::end(request)) {
+                identity_headers = true;
+                password         = std::string{found->value()};
+            }
+        }
+        {
+            auto found = std::find_if(std::begin(request), std::end(request), [](auto& field) {
+                return field.name_string() == "Authorization";
+            });
+            if (found != std::end(request)) {
+                identity_secure = true;
+            }
+        }
+
+        if (identity_secure && identity_headers) {
+            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (Authorisation)");
+            identity = ecf::Identity::make_secure_user(username);
+        }
+        else if (identity_headers) {
+            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (X-Auth-Username)");
+            identity = ecf::Identity::make_user(username, password);
+        }
+        else {
+            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from inbound Command");
+            auto cmd = inbound_request.get_cmd();
+            identity = ecf::identify(cmd);
+        }
+
+        LOG_DEBUG("HttpServer::handle_request", "Identity extracted is " << identity.as_string());
+
+        inbound_request.get_cmd()->set_identity(std::move(identity));
+    }
 
     // 2) Handle request, as per TcpBaseServer::handle_request()
     {

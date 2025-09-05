@@ -57,6 +57,11 @@ set(srcs
   # Base -- Headers
   base/src/ecflow/base/AbstractClientEnv.hpp
   base/src/ecflow/base/AbstractServer.hpp
+  base/src/ecflow/base/Algorithms.hpp
+  base/src/ecflow/base/Authentication.hpp
+  base/src/ecflow/base/AuthenticationDetails.hpp
+  base/src/ecflow/base/Authorisation.hpp
+  base/src/ecflow/base/AuthorisationDetails.hpp
   base/src/ecflow/base/Client.hpp
   base/src/ecflow/base/ClientOptionsParser.hpp
   base/src/ecflow/base/ClientToServerRequest.hpp
@@ -64,6 +69,7 @@ set(srcs
   base/src/ecflow/base/Connection.hpp
   base/src/ecflow/base/Gnuplot.hpp
   base/src/ecflow/base/HttpClient.hpp
+  base/src/ecflow/base/Identification.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
   base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerReply.hpp
@@ -135,12 +141,15 @@ set(srcs
   base/src/ecflow/base/stc/StcCmd.hpp
   base/src/ecflow/base/stc/ZombieGetCmd.hpp
   # Base -- Sources
+  base/src/ecflow/base/Authentication.cpp
+  base/src/ecflow/base/Authorisation.cpp
   base/src/ecflow/base/Client.cpp
   base/src/ecflow/base/ClientOptionsParser.cpp
   base/src/ecflow/base/ClientToServerRequest.cpp
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
   base/src/ecflow/base/HttpClient.cpp
+  base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerReply.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp
@@ -265,6 +274,7 @@ set(srcs
   core/src/ecflow/core/PasswordEncryption.hpp
   core/src/ecflow/core/Pid.hpp
   core/src/ecflow/core/PrintStyle.hpp
+  core/src/ecflow/core/Result.hpp
   core/src/ecflow/core/SState.hpp
   core/src/ecflow/core/Serialization.hpp
   core/src/ecflow/core/Stl.hpp
@@ -354,6 +364,7 @@ set(srcs
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
   node/src/ecflow/node/Operations.hpp
+  node/src/ecflow/node/Permissions.hpp
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
   node/src/ecflow/node/Signal.hpp
@@ -438,6 +449,7 @@ set(srcs
   node/src/ecflow/node/NodeStats.cpp
   node/src/ecflow/node/NodeTime.cpp
   node/src/ecflow/node/NodeTreeVisitor.cpp
+  node/src/ecflow/node/Permissions.cpp
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
   node/src/ecflow/node/Signal.cpp
@@ -481,6 +493,8 @@ set(srcs
   node/src/ecflow/node/parser/ZombieAttrParser.cpp
 
   # Server -- Headers
+  server/src/ecflow/server/AuthenticationService.hpp
+  server/src/ecflow/server/AuthorisationService.hpp
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
@@ -494,6 +508,8 @@ set(srcs
   server/src/ecflow/server/TcpServer.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.hpp>
   # Server -- Sources
+  server/src/ecflow/server/AuthenticationService.cpp
+  server/src/ecflow/server/AuthorisationService.cpp
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp

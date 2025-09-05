@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -96,6 +98,14 @@ void CtsNodeCmd::print_only(std::string& os) const {
             throw std::runtime_error("CtsNodeCmd::print_only : Unrecognised command");
             break;
     }
+}
+
+ecf::authentication_t CtsNodeCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t CtsNodeCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const {
@@ -254,9 +264,9 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::ok_cmd();
 }
 
-bool CtsNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, absNodePath_);
-}
+// bool CtsNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, absNodePath_);
+// }
 
 static const char* job_gen_only_desc() {
     return "Test hierarchical Job generation only, for chosen Node.\n"

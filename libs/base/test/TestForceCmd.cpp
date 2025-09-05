@@ -25,9 +25,17 @@
 using namespace std;
 using namespace ecf;
 
+struct Fixture
+{
+    Fixture() : log{"test_base_forcecmd.log"} {}
+    ~Fixture() {}
+
+    TestLog log;
+};
+
 BOOST_AUTO_TEST_SUITE(U_Base)
 
-BOOST_AUTO_TEST_SUITE(T_ForceCmd)
+BOOST_FIXTURE_TEST_SUITE(T_ForceCmd, Fixture)
 
 static defs_ptr create_defs() {
     defs_ptr theDefs = Defs::create();
@@ -39,12 +47,6 @@ static defs_ptr create_defs() {
     task_ptr t2 = f1->add_task("t2");
     t2->add_alias_only();
     return theDefs;
-}
-
-BOOST_AUTO_TEST_CASE(test_add_log2) {
-    // create once for all test below, then remove at the end
-    Log::create("test_add_log2.log");
-    BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_CASE(test_force_cmd) {
@@ -1083,12 +1085,6 @@ BOOST_AUTO_TEST_CASE(test_force_interactive_next_time_slot_for_cron_on_family) {
 
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();
-}
-
-BOOST_AUTO_TEST_CASE(test_destroy_log2) {
-    Log::destroy();
-    fs::remove("test_add_log2.log");
-    BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

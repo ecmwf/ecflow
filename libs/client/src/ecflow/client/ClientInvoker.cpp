@@ -96,6 +96,33 @@
 using namespace std;
 using namespace ecf;
 
+namespace ecf {
+
+void cfg(const ClientEnvironment& env, HttpClient& client) {
+
+    try {
+        auto token = env.get_token(client.url());
+
+        if (token.type == "bearer") {
+            auto key = token.key;
+            client.set_authorisation_bearer(key);
+        }
+        else if (token.type == "basic") {
+            auto username = token.username;
+            auto password = token.password;
+            client.set_authorisation_basic(username, password);
+        }
+        else {
+            throw std::runtime_error("Unsupported token type: " + token.type);
+        }
+    }
+    catch (const UnavailableToken& e) {
+        std::cerr << e.what() << std::endl;
+    }
+}
+
+} // namespace ecf
+
 // ==================================================================================
 // class ClientInvoker
 ClientInvoker::ClientInvoker() : clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD) {
@@ -481,6 +508,14 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
                         const std::string scheme = ecf::scheme_for(clientEnv_.protocol());
                         HttpClient theClient(cts_cmd, scheme, clientEnv_.host(), clientEnv_.port());
+                        try {
+                            cfg(clientEnv_, theClient);
+                        }
+                        catch (UnavailableToken& e) {
+                            server_reply_.set_error_msg(e.what());
+                            return 1;
+                        }
+
                         theClient.run();
 
                         if (clientEnv_.debug()) {

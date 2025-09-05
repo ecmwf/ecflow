@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Filesystem.hpp"
@@ -100,6 +102,14 @@ bool LoadDefsCmd::equals(ClientToServerCmd* rhs) const {
     if (defs_ != the_rhs->defs_as_string())
         return false;
     return true;
+}
+
+ecf::authentication_t LoadDefsCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t LoadDefsCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {

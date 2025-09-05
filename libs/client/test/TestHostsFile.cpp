@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_can_parse_from_file) {
     ECF_NAME_THIS_TEST();
 
     auto content = fs::path{"test_hostsfile.txt"};
-    WithTestFile hostsfile(content.c_str(), R"(
+    WithTestFile hostsfile(NamedTestFile{content.c_str()}, R"(
 
 host1:3142
 host2:3143
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_can_parse_from_file_with_comments) {
     ECF_NAME_THIS_TEST();
 
     auto content = fs::path{"test_hostsfile.txt"};
-    WithTestFile hostsfile(content.c_str(), R"(
+    WithTestFile hostsfile(NamedTestFile{content.c_str()}, R"(
 # Some comment
 host1    # Another comment
   host2:5678
