@@ -34,8 +34,8 @@ bool AuthenticationService::valid(const std::string& host, const std::string& po
             return false;
         }
         if (!passwd_file_.check_at_least_one_user_with_host_and_port(host, port)) {
-            std::cout << "Error: password file " << ecf_passwd_file_;
-            std::cout << " does not contain any users, which match the host and port of this server\n";
+            std::cout << "Error: password file " << ecf_passwd_file_
+                      << " does not contain any users, which match the host and port of this server\n";
             return false;
         }
     }
@@ -47,8 +47,8 @@ bool AuthenticationService::valid(const std::string& host, const std::string& po
             return false;
         }
         if (!passwd_custom_file_.check_at_least_one_user_with_host_and_port(host, port)) {
-            std::cout << "Error: custom password file " << ecf_passwd_custom_file_;
-            std::cout << " does not contain any users, which match the host and port of this server\n";
+            std::cout << "Error: custom password file " << ecf_passwd_custom_file_
+                      << " does not contain any users, which match the host and port of this server\n";
             return false;
         }
     }
@@ -108,7 +108,7 @@ bool AuthenticationService::reload_passwd_file(std::string& error) {
 
 bool AuthenticationService::reload_custom_passwd_file(std::string& error) {
     if (debug_) {
-        std::cout << "ServerEnvironment::reload_custom_passwd_file:(" << ecf_passwd_custom_file_ << ") CWD("
+        std::cout << "AuthenticationService::reload_custom_passwd_file:(" << ecf_passwd_custom_file_ << ") CWD("
                   << fs::current_path().string() << ")\n";
     }
     if (ecf_passwd_custom_file_.empty()) {
