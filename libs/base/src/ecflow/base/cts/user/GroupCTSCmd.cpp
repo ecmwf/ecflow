@@ -159,11 +159,10 @@ bool GroupCTSCmd::cmd_updates_defs() const {
 }
 
 void GroupCTSCmd::set_identity(ecf::Identity identity) {
-    this->ClientToServerCmd::set_identity(identity);
-    for (auto subCmd : cmdVec_) {
+    for (const auto& subCmd : cmdVec_) {
         subCmd->set_identity(identity);
     }
-    ClientToServerCmd::set_identity(std::move(identity));
+    ClientToServerCmd::set_identity(identity);
 }
 
 bool GroupCTSCmd::get_cmd() const {
