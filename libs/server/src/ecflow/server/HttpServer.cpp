@@ -100,7 +100,7 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
         }
 
         if (identity_secure && identity_headers) {
-            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (Authorization)");
+            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (Authorisation)");
             identity = ecf::Identity::make_secure_user(username);
         }
         else if (identity_headers) {

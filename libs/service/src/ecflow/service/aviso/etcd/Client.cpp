@@ -41,7 +41,7 @@ std::vector<std::pair<std::string, std::string>> Client::poll(std::string_view k
     httplib::Headers headers;
 
     if (!auth_token_.empty()) {
-        SLOG(D, "EtcdClient: using authorization token");
+        SLOG(D, "EtcdClient: using authorisation token");
         headers.emplace("Authorization", "EmailKey " + auth_token_);
     }
 

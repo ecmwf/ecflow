@@ -105,12 +105,12 @@ void cfg(const ClientEnvironment& env, HttpClient& client) {
 
         if (token.type == "bearer") {
             auto key = token.key;
-            client.set_authorization_bearer(key);
+            client.set_authorisation_bearer(key);
         }
         else if (token.type == "basic") {
             auto username = token.username;
             auto password = token.password;
-            client.set_authorization_basic(username, password);
+            client.set_authorisation_basic(username, password);
         }
         else {
             throw std::runtime_error("Unsupported token type: " + token.type);

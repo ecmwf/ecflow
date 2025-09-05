@@ -127,10 +127,10 @@ public:
     void set_x_roles(const std::string& roles) { headers_.emplace("X-Roles", roles); }
     void set_x_secret(const std::string& secret) { headers_.emplace("X-Secret", secret); }
 
-    void set_authorization_basic(const std::string& username, const std::string& password) {
+    void set_authorisation_basic(const std::string& username, const std::string& password) {
         client_.set_basic_auth(username, password);
     }
-    void set_authorization_bearer(const std::string& token) { client_.set_bearer_token_auth(token); }
+    void set_authorisation_bearer(const std::string& token) { client_.set_bearer_token_auth(token); }
 
     /// Client side, get the server response, handles reply from server
     /// Returns true if all is ok, else false if further client action is required
