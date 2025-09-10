@@ -2,7 +2,7 @@
 .. _version_cli:
 
 version
-///////
+*******
 
 
 

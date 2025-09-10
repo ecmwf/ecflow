@@ -1,7 +1,7 @@
 .. _how_to_trigger_a_task_based_on_aviso_notification:
 
 How to trigger a Task based on Aviso notification?
---------------------------------------------------
+**************************************************
 
 The following instructions describe the necessary steps to use the ability to
 trigger a :term:`task` based on an Aviso notification. The intended task must
@@ -15,14 +15,14 @@ The deployment of this feature has the following requirements:
  - (optional) Authentication credentials, stored as JSON file
 
 Setup the ecFlow Server
-^^^^^^^^^^^^^^^^^^^^^^^
+=======================
 
 Deploy the Authentication credentials and Aviso event listener schema files so
 that these files are accessible to the ecFlow server. Launch the server, as per
 the :ref:`regular instructions<starting_the_ecflow_server>`.
 
 Define a Suite with an `Aviso` dependent Task
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=============================================
 
 On the :term:`suite` definition file, create a :term:`task` and assign it an
 :term:`aviso` attribute.
@@ -76,7 +76,7 @@ and is specific to the Aviso server being used (access is currently restricted; 
 support to request the files).
 
 Define a Suite with an `Aviso` dependent Task
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=============================================
 
 Load the suite definition containing the :term:`aviso` attribute.
 

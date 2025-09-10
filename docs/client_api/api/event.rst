@@ -2,7 +2,7 @@
 .. _event_cli:
 
 event
-/////
+*****
 
 
 

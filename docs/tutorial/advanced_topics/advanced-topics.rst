@@ -1,7 +1,7 @@
 .. _tutorial-advanced_topics:
 
 Advanced Topics
-===================
+***************
 
 The topics covered in this chapter are more advanced. 
 

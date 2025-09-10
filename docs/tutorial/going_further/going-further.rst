@@ -1,7 +1,7 @@
 .. _tutorial-going-further:
 
-**Going Further**
-=================
+Going Further
+*************
 
 We will now try to build a more complex :term:`suite` by introducing one by one various ecFlow functionalities. 
 

@@ -2,7 +2,7 @@
 .. _get_state_cli:
 
 get_state
-/////////
+*********
 
 
 

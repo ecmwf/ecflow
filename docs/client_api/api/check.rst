@@ -2,7 +2,7 @@
 .. _check_cli:
 
 check
-/////
+*****
 
 
 

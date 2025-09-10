@@ -2,7 +2,7 @@
 .. _archive_cli:
 
 archive
-///////
+*******
 
 
 

@@ -1,7 +1,7 @@
 .. _handling_cli_options:
 
 Handling CLI options
-////////////////////
+********************
 
 Some ecFlow client options, such as the user name and password or the ecFlow server host and port, are used very frequently.
 

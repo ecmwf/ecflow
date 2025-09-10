@@ -2,7 +2,7 @@
 .. _edit_history_cli:
 
 edit_history
-////////////
+************
 
 
 

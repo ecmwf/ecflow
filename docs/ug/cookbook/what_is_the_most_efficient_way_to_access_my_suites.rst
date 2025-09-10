@@ -1,7 +1,7 @@
 .. _what_is_the_most_efficient_way_to_access_my_suites:
 
 What is the most efficient way to access my suites?
-//////////////////////////////////////////////////////////////////
+***************************************************
 
 We will use the python api, as this this gives us the most flexibility.
 

@@ -1,7 +1,7 @@
 .. _unconditional_variable_replacement:
 
 Unconditional variable replacement
-//////////////////////////////////////////////////////////////
+**********************************
 
 The utility ~emos/bin/ls.py provides a way to dump server content below a given node. It can be used to replace a variable throughout all suites on a server:
 

@@ -2,7 +2,7 @@
 .. _ch_drop_user_cli:
 
 ch_drop_user
-////////////
+************
 
 
 

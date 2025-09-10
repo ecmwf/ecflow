@@ -2,7 +2,7 @@
 .. _stats_server_cli:
 
 stats_server
-////////////
+************
 
 
 

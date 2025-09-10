@@ -2,7 +2,7 @@
 .. _zombie_adopt_cli:
 
 zombie_adopt
-////////////
+************
 
 
 

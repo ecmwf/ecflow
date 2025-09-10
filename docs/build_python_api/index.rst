@@ -4,7 +4,7 @@
 .. _python_api:
 
 ecFlow Python Api
-=====================
+*****************
 
 .. _suite_definition_python_api:
 

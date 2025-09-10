@@ -2,7 +2,7 @@
 .. _restore_from_checkpt_cli:
 
 restore_from_checkpt
-////////////////////
+********************
 
 
 

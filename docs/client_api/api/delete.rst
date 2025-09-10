@@ -2,7 +2,7 @@
 .. _delete_cli:
 
 delete
-//////
+******
 
 
 

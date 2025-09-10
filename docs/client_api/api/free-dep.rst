@@ -2,7 +2,7 @@
 .. _free-dep_cli:
 
 free-dep
-////////
+********
 
 
 

@@ -2,7 +2,7 @@
 .. _server_version_cli:
 
 server_version
-//////////////
+**************
 
 
 

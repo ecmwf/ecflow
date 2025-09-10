@@ -1,7 +1,7 @@
 .. _using_backup_servers:
 
 Using backup servers
-////////////////////
+********************
 
 
 The :code:`ecflow_client` can be configured to contact alternate backup servers in case the primary server is not available -- this typically most useful in Operational environments.

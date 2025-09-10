@@ -1,7 +1,7 @@
 .. _version_5.14:
 
 Version 5.14 updates
-////////////////////
+********************
 
 .. role:: jiraissue
    :class: hidden

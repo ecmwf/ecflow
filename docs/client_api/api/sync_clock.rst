@@ -2,7 +2,7 @@
 .. _sync_clock_cli:
 
 sync_clock
-//////////
+**********
 
 
 

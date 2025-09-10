@@ -2,7 +2,7 @@
 .. _ch_register_cli:
 
 ch_register
-///////////
+***********
 
 
 

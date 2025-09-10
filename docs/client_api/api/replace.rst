@@ -2,7 +2,7 @@
 .. _replace_cli:
 
 replace
-///////
+*******
 
 
 

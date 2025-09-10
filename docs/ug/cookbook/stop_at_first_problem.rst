@@ -1,7 +1,7 @@
 .. _stop_at_first_problem:
 
 Stop at first problem
-///////////////////////
+*********************
 
 It can be as simple as adding a line trigger to prevent a family (orcsuite) to continue any further as soon as a problem (abort) occurs:
 

@@ -1,7 +1,7 @@
 .. _ecflow_ui_web_menu:
 
 ecflow_ui web menu
-///////////////////
+******************
 
 In :ref:`ecflow_ui` just click the ode context menu and select **User Defined > Manage Commands > Command**
 

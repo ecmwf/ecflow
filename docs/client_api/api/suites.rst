@@ -2,7 +2,7 @@
 .. _suites_cli:
 
 suites
-//////
+******
 
 
 

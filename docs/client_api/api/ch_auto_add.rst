@@ -2,7 +2,7 @@
 .. _ch_auto_add_cli:
 
 ch_auto_add
-///////////
+***********
 
 
 

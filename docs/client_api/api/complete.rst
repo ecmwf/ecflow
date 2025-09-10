@@ -2,7 +2,7 @@
 .. _complete_cli:
 
 complete
-////////
+********
 
 
 

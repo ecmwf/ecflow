@@ -1,7 +1,7 @@
 .. _compiler_and_os_requirements:
 
 Compiler and OS requirements
-////////////////////////////
+****************************
 
 ecFlow supports Linux and macOS systems only.
 

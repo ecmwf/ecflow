@@ -2,7 +2,7 @@
 .. _query_cli:
 
 query
-/////
+*****
 
 
 

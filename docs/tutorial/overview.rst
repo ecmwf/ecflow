@@ -1,12 +1,12 @@
 .. _tutorial-overview:
    
 Overview
-========
+********
 
 This section gives an overview of the steps involved in using ecFlow.
 
 Step 1: Write a suite definition
---------------------------------------
+================================
      
 The :term:`suite definition` defines how your tasks run and interact.
 :term:`task` s are placed in families, which themselves may be placed in families
@@ -30,7 +30,7 @@ There are two main methods for describing a :term:`suite definition` to the :ter
   such is our **preferred** method. See :ref:`python_api`.
      
 Step 2: Write your scripts
------------------------------
+==========================
    
 :term:`ecf script` will correspond with the :term:`task` in the :term:`suite definition`. 
 The script defines the **main work** that is to be carried out.
@@ -42,7 +42,7 @@ the :term:`ecflow_server`. They inform the server when the job has started, comp
 set some :term:`event`.
 
 Step 3: Start an ecFlow server
----------------------------------
+==============================
 
 After :term:`ecflow_server` is started, the :term:`suite definition`, can then be loaded into it.
 
@@ -59,7 +59,7 @@ These cause:
 * update to attributes of a node (i.e like :term:`event` s, :term:`meter` s and :term:`label` s)
    
 Step 4: Interact with the GUI
---------------------------------
+=============================
 
 ecFlow has a specialised GUI client, called :term:`ecflow_ui`. This is used to
 visualise and monitor:

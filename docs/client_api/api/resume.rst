@@ -2,7 +2,7 @@
 .. _resume_cli:
 
 resume
-//////
+******
 
 
 

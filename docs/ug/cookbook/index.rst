@@ -5,7 +5,7 @@
 .. _cookbook:
    
 Cookbook
-========
+********
 
 This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
 

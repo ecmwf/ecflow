@@ -2,7 +2,7 @@
 .. _zombie_remove_cli:
 
 zombie_remove
-/////////////
+*************
 
 
 

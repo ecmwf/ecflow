@@ -3,9 +3,8 @@
    
 .. _glossary:
    
-============
-**Glossary**
-============
+Glossary
+********
 
 .. glossary::
    :sorted:

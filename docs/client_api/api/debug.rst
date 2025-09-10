@@ -2,7 +2,7 @@
 .. _debug_cli:
 
 debug
-/////
+*****
 
 
 

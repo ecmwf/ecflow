@@ -1,7 +1,7 @@
 .. _template_suite:
 
 Template suite
-//////////////
+**************
 
 Few questions were about starting a project from scratch, creating a
 "template suite", or a suite skeleton, where to define tasks targeting

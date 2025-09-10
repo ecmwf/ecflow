@@ -2,7 +2,7 @@
 .. _restart_cli:
 
 restart
-///////
+*******
 
 
 

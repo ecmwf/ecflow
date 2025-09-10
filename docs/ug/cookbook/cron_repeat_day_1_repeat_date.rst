@@ -1,7 +1,7 @@
 .. _cron_repeat_day_1_repeat_date:
 
 Cron, repeat day 1, repeat date
-///////////////////////////////
+*******************************
 
 Attributes cron, repeat day 1 and repeat date can be used to get a suite running in real time mode.
 

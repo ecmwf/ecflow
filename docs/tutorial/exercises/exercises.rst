@@ -1,7 +1,7 @@
 .. _tutorial-exercises:
 
 Exercises
-=============
+*********
 
 For the rest of the course, we will try to design a real suite.
 

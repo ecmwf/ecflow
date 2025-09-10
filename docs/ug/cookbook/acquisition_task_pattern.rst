@@ -4,7 +4,7 @@
 .. _cookbook-acquisition_task_pattern:
 
 Acquisition task pattern example
---------------------------------
+********************************
 
 An acquisition task may be needed to initiate the processing. The
 following example shows such a pattern where a wait task is created to

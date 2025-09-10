@@ -2,7 +2,7 @@
 .. _sync_full_cli:
 
 sync_full
-/////////
+*********
 
 
 

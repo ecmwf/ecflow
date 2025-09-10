@@ -2,7 +2,7 @@
 .. _restore_cli:
 
 restore
-///////
+*******
 
 
 

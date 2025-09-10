@@ -2,7 +2,7 @@
 .. _stats_reset_cli:
 
 stats_reset
-///////////
+***********
 
 
 

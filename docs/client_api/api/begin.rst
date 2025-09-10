@@ -2,7 +2,7 @@
 .. _begin_cli:
 
 begin
-/////
+*****
 
 
 

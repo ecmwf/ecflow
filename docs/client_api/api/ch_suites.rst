@@ -2,7 +2,7 @@
 .. _ch_suites_cli:
 
 ch_suites
-/////////
+*********
 
 
 

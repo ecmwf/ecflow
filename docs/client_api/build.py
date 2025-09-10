@@ -70,7 +70,7 @@ def render_single_page_rst(name):
 .. _{name}_cli:
 
 {title}
-{"/" * len(title)}
+{"*" * len(title)}
 
 
 {description_header}

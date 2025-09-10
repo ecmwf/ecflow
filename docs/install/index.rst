@@ -1,5 +1,6 @@
+
 Install
-//////////////////
+*******
 
 .. toctree::
     :maxdepth: 1

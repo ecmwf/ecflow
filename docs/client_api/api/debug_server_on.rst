@@ -2,7 +2,7 @@
 .. _debug_server_on_cli:
 
 debug_server_on
-///////////////
+***************
 
 
 

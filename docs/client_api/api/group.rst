@@ -2,7 +2,7 @@
 .. _group_cli:
 
 group
-/////
+*****
 
 
 

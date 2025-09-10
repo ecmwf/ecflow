@@ -1,7 +1,7 @@
 .. _cli_scripting_in_batch:
 
 Using :code:`ecflow_client` in Tasks
-////////////////////////////////////
+************************************
 
 :code:`ecflow_client` can be used from within Task scripts. This enables some very
 powerful tools for controlling suites, and allows to set up dynamic suites

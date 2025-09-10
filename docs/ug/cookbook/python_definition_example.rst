@@ -4,7 +4,7 @@
 .. _cookbook-python_definition_example:
 
 Python definition example
--------------------------
+*************************
 
 Here is an example of a Python Suite Definition, hosting a task that
 might be helpful for simple SMS suite translation to ecFlow:

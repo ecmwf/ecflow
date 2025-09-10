@@ -2,11 +2,11 @@
 .. _python_api:
 
 Python API
-//////////
+**********
 
 
 Suite definition
-----------------
+================
     - :py:class:`ecflow.Alias`
     - :py:class:`ecflow.Autoarchive`
     - :py:class:`ecflow.Autocancel`
@@ -58,7 +58,7 @@ Suite definition
     - :py:class:`ecflow.ZombieAttr`
 
 Container API
--------------
+=============
     - :py:class:`ecflow.FamilyVec`
     - :py:class:`ecflow.FlagTypeVec`
     - :py:class:`ecflow.NodeVec`
@@ -69,22 +69,22 @@ Container API
     - :py:class:`ecflow.ZombieVec`
 
 Command API
------------
+===========
     - :py:class:`ecflow.UrlCmd`
     - :py:class:`ecflow.WhyCmd`
 
 Client-server API
------------------
+=================
     - :py:class:`ecflow.Client`
 
 Common API
-----------
+==========
     - :py:class:`ecflow.Ecf`
     - :py:class:`ecflow.PrintStyle`
     - :py:class:`ecflow.JobCreationCtrl`
 
 Enums
------
+=====
     - :py:class:`ecflow.AttrType`
     - :py:class:`ecflow.CheckPt`
     - :py:class:`ecflow.ChildCmdType`
@@ -98,7 +98,7 @@ Enums
     - :py:class:`ecflow.ZombieUserActionType`
 
 Api
----
+===
 
 .. toctree::
    :maxdepth: 1

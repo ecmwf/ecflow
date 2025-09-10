@@ -1,7 +1,7 @@
 .. _python_client_for_fault_tolerance:
 
 Python Client for fault tolerance
-///////////////////////////////////
+*********************************
 
 An ecFlow Python Client can be used to solve a Fault Tolerance request, for example, when three out of five families or tasks are enough to carry on submitting new jobs.
 

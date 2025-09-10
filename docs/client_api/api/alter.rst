@@ -2,7 +2,7 @@
 .. _alter_cli:
 
 alter
-/////
+*****
 
 
 

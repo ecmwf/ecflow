@@ -1,10 +1,10 @@
 .. _build_from_source:
 
 Build from source
-///////////////////////////////////////////////////////////////////////////////
+*****************
 
 Build Environment
-===============================================================================
+=================
 
 - Git
 
@@ -62,14 +62,14 @@ Build Environment
    Please refer to your intended target platform documentation for help.
 
 Build using CMake
-===============================================================================
+=================
 
 **CMake** is a cross-platform free software program for managing the build
 process of software using a compiler-independent method. The following sections
 describe how CMake is used to build and install ecFlow.
 
 Create a development directory
--------------------------------------------------------------------------------
+------------------------------
 
 Create a new *development directory* as follows
 
@@ -80,7 +80,7 @@ Create a new *development directory* as follows
 
 
 Get the source code
--------------------------------------------------------------------------------
+-------------------
 
 The ecFlow source code repository is available at `github <https://github.com/ecmwf/ecflow>`_.
 Use Git to clone the source code repository as follows
@@ -130,7 +130,7 @@ the source code package, ecFlow source code should now be available at the
       cd ..
 
 Configure ecFlow
--------------------------------------------------------------------------------
+----------------
 
 CMake examines the development environment configuration to find the location
 of required software tools and libraries, and produces the build scripts to
@@ -256,7 +256,7 @@ consider the following example command.
 
 
 Build ecFlow
--------------------------------------------------------------------------------
+------------
 
 Once successfully configured, ecFlow is built using the following command
 (the ``-j`` option allows to run multiple compilation tasks in parallel).
@@ -273,7 +273,7 @@ To build a specific artifact, such as ``ecflow_client``, consider the following 
 
 
 (Optional) Test ecFlow
--------------------------------------------------------------------------------
+----------------------
 
 Once successfully built, ecFlow tests are executed using the following command.
 
@@ -283,7 +283,7 @@ Once successfully built, ecFlow tests are executed using the following command.
 
 
 Install ecFlow
--------------------------------------------------------------------------------
+--------------
 
 Finally, to install ecFlow use the following command.
 

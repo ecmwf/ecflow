@@ -2,7 +2,7 @@
 .. _label_cli:
 
 label
-/////
+*****
 
 
 

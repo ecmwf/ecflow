@@ -2,7 +2,7 @@
 .. _terminate_cli:
 
 terminate
-/////////
+*********
 
 
 

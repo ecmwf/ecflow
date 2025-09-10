@@ -2,7 +2,7 @@
 .. _status_cli:
 
 status
-//////
+******
 
 
 
