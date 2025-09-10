@@ -5,7 +5,7 @@
 .. _cookbook:
    
 Cookbook
-============
+========
 
 This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
 
@@ -40,3 +40,4 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
    how_to_mirror_a_remote_task
    how_to_trigger_a_task_based_on_aviso_notification
    how_to_use_ecFlow_with_http
+   how_to_setup_ecFlow_with_https_authentication
