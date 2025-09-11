@@ -77,7 +77,7 @@ private:
 
     BaseServer* server_;
     const ServerEnvironment& serverEnv_;
-    boost::asio::deadline_timer timer_;
+    boost::asio::system_timer timer_;
     boost::posix_time::ptime last_time_;        // ensure poll is in sync
     boost::posix_time::ptime next_poll_time_;   // Keep as sync as possible with hard real times
     boost::posix_time::time_duration interval_; // Job submission interval
