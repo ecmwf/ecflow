@@ -104,7 +104,7 @@ bool SslClient::start_connect(endpoints_iterator_t endpoints_iterator) {
         // will soon be executed. If it returns 1 then the wait handler was successfully cancelled.
 
         // Set a deadline for the connect operation.
-        deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
+        deadline_.expires_after(std::chrono::seconds(timeout_));
 
         boost::asio::ip::tcp::endpoint endpoint = *endpoints_iterator;
         connection_.socket_ll().async_connect(endpoint,
@@ -192,7 +192,7 @@ void SslClient::start_handshake() {
     // cancelled. If it returns 0 then you were too late and the wait handler has already been executed, or will soon be
     // executed. If it returns 1 then the wait handler was successfully cancelled. Set a deadline for the write
     // operation.
-    deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
+    deadline_.expires_after(std::chrono::seconds(timeout_));
 
     connection_.socket().async_handshake(boost::asio::ssl::stream_base::client,
                                          [this](const boost::system::error_code& e) { handle_handshake(e); });
@@ -222,7 +222,7 @@ void SslClient::start_write() {
     // executed. If it returns 1 then the wait handler was successfully cancelled.
 
     // Set a deadline for the write operation.
-    deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
+    deadline_.expires_after(std::chrono::seconds(timeout_));
 
     connection_.async_write(outbound_request_,
                             [this](const boost::system::error_code& error) { this->handle_write(error); });
@@ -267,7 +267,7 @@ void SslClient::start_read() {
     // executed. If it returns 1 then the wait handler was successfully cancelled.
 
     // Set a deadline for the read operation.
-    deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
+    deadline_.expires_after(std::chrono::seconds(timeout_));
 
     connection_.async_read(inbound_response_,
                            [this](const boost::system::error_code& error) { this->handle_read(error); });
@@ -369,7 +369,7 @@ void SslClient::check_deadline() {
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
-    if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {
+    if (deadline_.expiry() <= boost::asio::chrono::system_clock::now()) {
 #ifdef DEBUG_CLIENT
         std::cout << "   SslClient::check_deadline timed out" << std::endl;
 #endif

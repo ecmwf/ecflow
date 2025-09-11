@@ -37,7 +37,7 @@ using namespace ecf;
 NodeTreeTraverser::NodeTreeTraverser(BaseServer* s, boost::asio::io_context& io, const ServerEnvironment& serverEnv)
     : server_(s),
       serverEnv_(serverEnv),
-      timer_(io, boost::posix_time::seconds(0)),
+      timer_(io, std::chrono::seconds(0)),
       interval_(0, 0, serverEnv_.submitJobsInterval(), 0),
 #ifdef DEBUG_TRAVERSER
       count_(0),
@@ -283,7 +283,7 @@ void NodeTreeTraverser::do_traverse() {
 void NodeTreeTraverser::start_timer() {
     /// Appears that expires_from_now is more accurate then expires_at i.e timer_.expires_at( timer_.expires_at() +
     /// boost::posix_time::seconds( poll_at ) );
-    timer_.expires_from_now(boost::posix_time::seconds(1));
+    timer_.expires_after(std::chrono::seconds(1));
     timer_.async_wait(
         boost::asio::bind_executor(server_->io_, [this](const boost::system::error_code& error) { traverse(error); }));
 }

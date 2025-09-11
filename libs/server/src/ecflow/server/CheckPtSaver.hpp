@@ -115,7 +115,7 @@ private:
     void periodicSaveCheckPt(const boost::system::error_code& error);
 
     BaseServer* server_;
-    boost::asio::deadline_timer timer_;
+    boost::asio::system_timer timer_;
     bool firstTime_;
     bool running_;
     const ServerEnvironment* serverEnv_;
