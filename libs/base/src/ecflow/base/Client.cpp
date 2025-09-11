@@ -15,15 +15,13 @@
 #include <stdexcept>
 
 #include "ecflow/base/stc/StcCmd.hpp"
+#include "ecflow/core/Chrono.hpp"
 
 #ifdef DEBUG_PERF
     #include "ecflow/core/DebugPerf.hpp"
 #endif
 
 // #define DEBUG_CLIENT 1;
-#ifdef DEBUG_CLIENT
-    #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
-#endif
 
 /// The timeout will typically happen when the server has died, but socket is still open
 /// If we do not have a timeout, it will hang indefinitely
@@ -41,8 +39,9 @@ Client::Client(boost::asio::io_context& io,
       deadline_(io),
       timeout_(timeout) {
     /// Avoid sending a NULL request to the server
-    if (!cmd_ptr.get())
+    if (!cmd_ptr.get()) {
         throw std::runtime_error("Client::Client: No request specified !");
+    }
 
     // The timeout can be set externally for testing.
     // When the timeout is not set it is obtained from the command.
@@ -96,7 +95,7 @@ void Client::start(endpoints_iterator_t endpoints_iterator) {
 bool Client::start_connect(endpoints_iterator_t endpoints_iterator) {
     if (endpoints_iterator != endpoints_iterator_t()) {
 #ifdef DEBUG_CLIENT
-        std::cout << "   Client::start_connect: Trying " << endpoint_iterator->endpoint() << "..." << std::endl;
+        std::cout << "   Client::start_connect: Trying " << endpoints_iterator->endpoint() << "..." << std::endl;
 #endif
 
         // expires_from_now cancels any pending asynchronous waits, and returns the number of asynchronous waits that
@@ -124,8 +123,9 @@ void Client::handle_connect(const boost::system::error_code& e, endpoints_iterat
     std::cout << "   Client::handle_connect stopped_=" << stopped_ << std::endl;
 #endif
 
-    if (stopped_)
+    if (stopped_) {
         return;
+    }
 
     // The async_connect() function automatically opens the socket at the start
     // of the asynchronous operation. If the socket is closed at this time then
@@ -139,12 +139,14 @@ void Client::handle_connect(const boost::system::error_code& e, endpoints_iterat
             // Ran out of end points, An error occurred
             stop();
             std::stringstream ss;
-            if (e)
+            if (e) {
                 ss << "Client::handle_connect: Ran out of end points : connection error( " << e.message()
                    << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;
-            else
+            }
+            else {
                 ss << "Client::handle_connect: Ran out of end points : connection error for request( "
                    << outbound_request_ << " ) on " << host_ << ":" << port_;
+            }
             throw std::runtime_error(ss.str());
         }
     }
@@ -198,8 +200,9 @@ void Client::handle_write(const boost::system::error_code& e) {
 #ifdef DEBUG_CLIENT
     std::cout << "   Client::handle_write stopped_ = " << stopped_ << std::endl;
 #endif
-    if (stopped_)
+    if (stopped_) {
         return;
+    }
 
     if (!e) {
 
@@ -242,8 +245,9 @@ void Client::handle_read(const boost::system::error_code& e) {
 #ifdef DEBUG_CLIENT
     std::cout << "   Client::handle_read stopped_ = " << stopped_ << std::endl;
 #endif
-    if (stopped_)
+    if (stopped_) {
         return;
+    }
 
     // close socket, & cancel timer.
     stop();
@@ -316,8 +320,9 @@ bool Client::handle_server_response(ServerReply& server_reply, bool debug) const
 #ifdef DEBUG_PERF
     ecf::ScopedDurationTimer timer("  Client::handle_server_response");
 #endif
-    if (debug)
+    if (debug) {
         std::cout << "  Client::handle_server_response" << std::endl;
+    }
     server_reply.set_host_port(host_, port_); // client context, needed by some commands, i.e. SServerLoadCmd
     return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
 }
@@ -328,8 +333,9 @@ void Client::check_deadline() {
               << to_simple_string(deadline_.expires_at()) << ") time now("
               << to_simple_string(boost::asio::deadline_timer::traits_type::now()) << ")" << std::endl;
 #endif
-    if (stopped_)
+    if (stopped_) {
         return;
+    }
 
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the

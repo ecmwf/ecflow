@@ -21,8 +21,9 @@
 #include "TextPagerEdit_p.hpp"
 
 int TextPagerLayout::viewportWidth() const {
-    if (!lineBreaking)
+    if (!lineBreaking) {
         return INT_MAX - 1024;
+    }
     return textEdit ? textEdit->viewport()->width() : viewport;
 }
 
@@ -52,14 +53,16 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*>* sections) // 
     Q_ASSERT(index == 0 || bufferReadCharacter(index - 1) == '\n');
     const int max       = bufferPosition + buffer.size();
     const int lineStart = index;
-    while (index < max && bufferReadCharacter(index) != '\n')
+    while (index < max && bufferReadCharacter(index) != '\n') {
         ++index;
+    }
 
     const QString string = buffer.mid(lineStart - bufferPosition, index - lineStart);
     Q_ASSERT(string.size() == index - lineStart);
     Q_ASSERT(!string.contains('\n'));
-    if (index < max)
+    if (index < max) {
         ++index; // for the newline
+    }
     textLayout->setText(string);
 
     QMultiMap<int, QTextLayout::FormatRange> formatMap;
@@ -104,18 +107,23 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*>* sections) // 
         syntaxHighlighter->d->currentBlock.clear();
         if (syntaxHighlighter->d->blockFormat.isValid()) {
             blockFormats[textLayout] = syntaxHighlighter->d->blockFormat;
-            if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockLeftMargin))
+            if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockLeftMargin)) {
                 leftMargin = syntaxHighlighter->d->blockFormat.leftMargin();
-            if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockRightMargin))
+            }
+            if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockRightMargin)) {
                 rightMargin = syntaxHighlighter->d->blockFormat.rightMargin();
-            if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockTopMargin))
+            }
+            if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockTopMargin)) {
                 topMargin = syntaxHighlighter->d->blockFormat.topMargin();
-            if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockBottomMargin))
+            }
+            if (syntaxHighlighter->d->blockFormat.hasProperty(QTextFormat::BlockBottomMargin)) {
                 bottomMargin = syntaxHighlighter->d->blockFormat.bottomMargin();
+            }
         }
         syntaxHighlighter->d->previousBlockState = syntaxHighlighter->d->currentBlockState;
-        if (!syntaxHighlighter->d->formatRanges.isEmpty())
+        if (!syntaxHighlighter->d->formatRanges.isEmpty()) {
             formats += syntaxHighlighter->d->formatRanges;
+        }
     }
 #if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
     textLayout->setFormats(formats.toVector());
@@ -132,8 +140,9 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*>* sections) // 
             break;
         }
         line.setLineWidth(lineWidth);
-        if (!lineBreaking)
+        if (!lineBreaking) {
             localWidest = qMax<int>(localWidest, line.naturalTextWidth() + (LeftMargin * 2));
+        }
         // ### support blockformat margins etc
         int y = topMargin + lastBottomMargin;
         if (!lines.isEmpty()) {
@@ -174,8 +183,9 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*>* sections) // 
 
 int TextPagerLayout::textPositionAt(const QPoint& p) const {
     QPoint pos = p;
-    if (pos.x() >= 0 && pos.x() < LeftMargin)
+    if (pos.x() >= 0 && pos.x() < LeftMargin) {
         pos.rx() = LeftMargin; // clicking in the margin area should count as the first characters
+    }
 
     int textLayoutOffset = viewportPosition;
     Q_FOREACH (const QTextLayout* l, textLayouts) {
@@ -186,8 +196,9 @@ int TextPagerLayout::textPositionAt(const QPoint& p) const {
                 const QTextLine line = l->lineAt(i);
                 if (line.y() <= pos.y() && pos.y() <= line.height() + line.y()) { // ### < ???
                     {
-                        if (pos.x() > l->boundingRect().right())
+                        if (pos.x() > l->boundingRect().right()) {
                             pos.setX(l->boundingRect().right() - 1);
+                        }
 
                         return textLayoutOffset + line.xToCursor(qMax<int>(LeftMargin, pos.x()));
                     }
@@ -226,14 +237,16 @@ QList<TextPagerSection*> TextPagerLayout::relayoutCommon() {
     }
     sectionsDirty              = false;
     QList<TextPagerSection*> l = sections;
-    while (!l.isEmpty() && l.first()->position() + l.first()->size() < viewportPosition)
+    while (!l.isEmpty() && l.first()->position() + l.first()->size() < viewportPosition) {
         l.takeFirst(); // could cache these as well
+    }
     return l;
 }
 
 void TextPagerLayout::relayoutByGeometry(int height) {
-    if (!layoutDirty)
+    if (!layoutDirty) {
         return;
+    }
 
     QList<TextPagerSection*> l = relayoutCommon();
 
@@ -271,8 +284,9 @@ void TextPagerLayout::relayoutByGeometry(int height) {
 }
 
 void TextPagerLayout::relayoutByPosition(int size) {
-    if (!layoutDirty)
+    if (!layoutDirty) {
         return;
+    }
 
     QList<TextPagerSection*> l = relayoutCommon();
 
@@ -296,10 +310,12 @@ void TextPagerLayout::relayout() {
 }
 
 QTextLayout* TextPagerLayout::layoutForPosition(int pos, int* offset, int* index) const {
-    if (offset)
+    if (offset) {
         *offset = -1;
-    if (index)
+    }
+    if (index) {
         *index = -1;
+    }
 
     if (textLayouts.isEmpty() || pos < viewportPosition || pos > layoutEnd) {
         return nullptr;
@@ -310,10 +326,12 @@ QTextLayout* TextPagerLayout::layoutForPosition(int pos, int* offset, int* index
 
     Q_FOREACH (QTextLayout* l, textLayouts) {
         if (pos >= textLayoutOffset && pos <= l->text().size() + textLayoutOffset) {
-            if (offset)
+            if (offset) {
                 *offset = pos - textLayoutOffset;
-            if (index)
+            }
+            if (index) {
                 *index = i;
+            }
             return l;
         }
         ++i;
@@ -323,12 +341,15 @@ QTextLayout* TextPagerLayout::layoutForPosition(int pos, int* offset, int* index
 }
 
 QTextLine TextPagerLayout::lineForPosition(int pos, int* offsetInLine, int* lineIndex, bool* lastLine) const {
-    if (offsetInLine)
+    if (offsetInLine) {
         *offsetInLine = -1;
-    if (lineIndex)
+    }
+    if (lineIndex) {
         *lineIndex = -1;
-    if (lastLine)
+    }
+    if (lastLine) {
         *lastLine = false;
+    }
 
     if (pos < viewportPosition || pos >= layoutEnd || textLayouts.isEmpty() || lines.isEmpty()) {
         return {};
@@ -355,8 +376,9 @@ QTextLine TextPagerLayout::lineForPosition(int pos, int* offsetInLine, int* line
             if (lineIndex) {
                 *lineIndex = i;
             }
-            if (lastLine)
+            if (lastLine) {
                 *lastLine = last;
+            }
             return line.second;
         }
         else if (!layout) {
@@ -401,8 +423,9 @@ void TextPagerLayout::updateViewportPosition(int pos, Direction direction, bool 
         Q_ASSERT(index != -1);
         viewportPosition = index;
 
-        if (viewportPosition != 0 && document->read(viewportPosition - 1, 1) != QString("\n"))
+        if (viewportPosition != 0 && document->read(viewportPosition - 1, 1) != QString("\n")) {
             qWarning() << "viewportPosition" << viewportPosition << document->read(viewportPosition - 1, 10) << this;
+        }
         ASSUME(viewportPosition == 0 || document->read(viewportPosition - 1, 1) == QString("\n"));
     }
     if (viewportPosition > maxViewportPosition && direction == Forward) {

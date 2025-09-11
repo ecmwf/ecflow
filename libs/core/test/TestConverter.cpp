@@ -10,9 +10,9 @@
 
 #include <string>
 
-#include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 

@@ -21,6 +21,7 @@ public:
 
     Node* source() const;
     const std::string& src_node() const { return src_node_; }
+    const std::string& src_path() const { return src_path_; }
     const std::string& dest() const { return dest_; }
 
     bool handleRequestIsTestable() const override { return false; }
@@ -28,6 +29,9 @@ public:
 
     void print(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
+
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
 
     const char* theArg() const override { return arg(); }
     void addOption(boost::program_options::options_description& desc) const override;

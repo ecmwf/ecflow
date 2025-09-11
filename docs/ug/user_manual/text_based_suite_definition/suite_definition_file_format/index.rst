@@ -9,7 +9,11 @@ limitations on the use of this functionality, i.e.:
 * conditionals and looping structures are not allowed
 * families can only exist inside a suite or inside other families.
 
-The following topics are covered:
+.. tip::
+
+   `ecFlow Syntax Highlighting <https://marketplace.visualstudio.com/items?itemName=ajdawson.ecflow-syntax>`__ is available when using Microsoft Visual Studio Code.
+
+The following topics are covered:   
 
 .. toctree::
    :maxdepth: 1

@@ -1,7 +1,7 @@
 .. _how_to_use_ecflow_with_http:
 
 How use ecFlow with HTTP/HTTPS?
--------------------------------
+*******************************
 
 ecFlow uses by default a TCP/IP socket to communicate between the multiple ecFlow components,
 but it is possible to use HTTP/HTTPS communication instead. This is useful when
@@ -24,7 +24,7 @@ and how to configure the multiple ecFlow components to use HTTP.
 Then, we proceed to describe how to set up the reverse proxy server and thus enable HTTPS communication.
 
 Setup the ecFlow Server with HTTP
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=================================
 
 Deploy the ecFlow server, as per the :ref:`regular instructions<starting_the_ecflow_server>`,
 considering that an additional argument `--http` is used to activate the HTTP communication.
@@ -37,12 +37,12 @@ For example, to start the ecFlow server with HTTP communication on port 31415:
   ecflow_server --http -d
 
 Use other ecFlow components with HTTP
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=====================================
 
 The ecFlow clients (CLI and UI) can be easily configured to use HTTP communication.
 
 ecFlow CLI
-~~~~~~~~~~
+----------
 
 The ecFlow CLI will use HTTP communication when the additional argument
 `--http` is used. For example, ping the ecFlow server started in the previous section with:
@@ -53,7 +53,7 @@ The ecFlow CLI will use HTTP communication when the additional argument
   ecflow_client --http ping
 
 ecFlowUI
-~~~~~~~~
+--------
 
 ecFlowUI is enables the use of HTTP communication, by allowing to configure ecFlow servers through the Manage Server dialog.
 In the dialog, along the usual server name and port number specify the use of the protocol HTTP.
@@ -65,7 +65,7 @@ In the dialog, along the usual server name and port number specify the use of th
    Enable HTTP communication in ecFlowUI
 
 ecFlow REST & ecFlow UDP
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 ecFlow REST and ecFlow UDP are two components of ecFlow that communicate with the ecFlow server.
 Both components can be configured to use HTTP communication via the additional `--http` argument.
@@ -83,7 +83,7 @@ ecFlow UDP can be started with HTTP communication in a similar way on port 31417
   ecflow_udp --http --ecflow_port 31415 --port 31417
 
 ecFlow Python API
-~~~~~~~~~~~~~~~~~
+-----------------
 
 The ecFlow Python API is a useful tool for interacting with the ecFlow server, and can also be configured to use HTTP communication.
 The class :code:`ecflow.Client` allows enabling HTTP communication using the :code:`ecflow.Client.enable_http()` method, as shown in the following example:
@@ -101,7 +101,7 @@ The class :code:`ecflow.Client` allows enabling HTTP communication using the :co
   client.ping()
 
 Enable HTTPS connection to ecFlow Server
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+========================================
 
 To enable HTTPS communication, you need to set up a reverse proxy server (e.g. Nginx)
 that can handle SSL termination. The reverse proxy server can listen on port 443 (or any

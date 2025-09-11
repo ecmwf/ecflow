@@ -6,7 +6,7 @@
    
 
 Introduction
-============
+************
  
 This cookbook will provide real examples of using the ecflow
 python api.

@@ -52,45 +52,156 @@ private:
         known_options{"add", "debug", "host", "password", "port", "rid", "ssl", "user", "http", "https"};
 };
 
-const char* client_env_description =
-    "The client reads in the following environment variables. These are read by user and child command\n\n"
-    "|----------|----------|------------|-------------------------------------------------------------------|\n"
-    "| Name     |  Type    | Required   | Description                                                       |\n"
-    "|----------|----------|------------|-------------------------------------------------------------------|\n"
-    "| ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |\n"
-    "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
-#ifdef ECF_OPENSSL
-    "| ECF_SSL  |  <any>   | Optional*  | Enable secure communication between client and server.            |\n"
-#endif
-    "|----------|----------|------------|-------------------------------------------------------------------|"
-    "\n\n"
-    "* The host and port must be specified in order for the client to communicate with the server, this can \n"
-    "  be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n";
+struct EnvironmentOptionDocs
+{
+    std::string kind; // "option", "task", "both"
+    std::string name;
+    std::string type;
+    std::string required;
+    std::string description;
+};
 
-const char* client_task_env_description =
-    "The following environment variables are specific to child commands.\n"
-    "The scripts should export the mandatory variables. Typically defined in the head/tail includes files\n\n"
-    "|--------------|----------|-----------|---------------------------------------------------------------|\n"
-    "| Name         |  Type    | Required  | Description                                                   |\n"
-    "|--------------|----------|-----------|---------------------------------------------------------------|\n"
-    "| ECF_NAME     | <string> | Mandatory | Full path name to the task                                    |\n"
-    "| ECF_PASS     | <string> | Mandatory | The jobs password, allocated by server, then used by server to|\n"
-    "|              |          |           | authenticate client request                                   |\n"
-    "| ECF_TRYNO    |  <int>   | Mandatory | The number of times the job has run. This is allocated by the |\n"
-    "|              |          |           | server, and used in job/output file name generation.          |\n"
-    "| ECF_RID      | <string> | Mandatory | The process identifier. Helps zombies identification and      |\n"
-    "|              |          |           | automated killing of running jobs                             |\n"
-    "| ECF_TIMEOUT  |  <int>   | optional  | Max time in *seconds* for client to deliver message to main   |\n"
-    "|              |          |           | server. The default is 24 hours                               |\n"
-    "| ECF_HOSTFILE | <string> | optional  | File that lists alternate hosts to try, if connection to main |\n"
-    "|              |          |           | host fails                                                    |\n"
-    "| ECF_DENIED   |  <any>   | optional  | Provides a way for child to exit with an error, if server     |\n"
-    "|              |          |           | denies connection. Avoids 24hr wait. Note: when you have      |\n"
-    "|              |          |           | hundreds of tasks, using this approach requires a lot of      |\n"
-    "|              |          |           | manual intervention to determine job status                   |\n"
-    "| NO_ECF       |  <any>   | optional  | If set exit's ecflow_client immediately with success. This    |\n"
-    "|              |          |           | allows the scripts to be tested independent of the server     |\n"
-    "|--------------|----------|-----------|---------------------------------------------------------------|\n";
+std::vector<EnvironmentOptionDocs> known_env_options = {
+    // clang-format off
+    {
+        "both",
+        "ECF_HOST",
+        "string",
+        "mandatory*",
+        "The main server hostname; default value is 'localhost'"
+    },
+    {
+        "both",
+        "ECF_PORT",
+        "int",
+        "mandatory*",
+        "The main server port; default value is '3141'"
+    },
+#ifdef ECF_OPENSSL
+    {
+        "both",
+        "ECF_SSL",
+        "any",
+        "optional*",
+        "Enable secure communication between client and server."
+    },
+#endif
+    {
+        "both",
+        "ECF_HOSTFILE",
+        "string",
+        "optional",
+        "File that lists alternate hosts to try, if connection to main host fails"
+    },
+    {
+        "both",
+        "ECF_HOSTFILE_POLICY",
+        "string",
+        "optional",
+        "The policy ('task' or 'all') to define which commands consider using alternate hosts."
+    },
+    {
+        "task",
+        "ECF_NAME",
+        "string",
+        "mandatory", "Full path name to the task"
+    },
+    {
+        "task",
+        "ECF_PASS",
+        "string",
+        "mandatory",
+        "The job password (defined by the server, and used to authenticate client requests)"
+    },
+    {
+        "task",
+        "ECF_TRYNO",
+        "int",
+        "mandatory",
+        "The run number of the job (defined by the server, and used in job/output file name generation."
+    },
+    {
+        "task",
+        "ECF_RID",
+        "string",
+        "mandatory",
+        "The process identifier. Supports identifying zombies and automated killing of running jobs"
+    },
+    {
+        "task",
+        "ECF_TIMEOUT",
+        "int",
+        "optional",
+        "Maximum time in *seconds* for client to deliver message to main server; default is 24 hours"
+    },
+    {
+        "task",
+        "ECF_DENIED",
+        "any",
+        "optional",
+        "Allows task to exit with an error, upon connection failure, thus avoids ECF_TIMEOUTs wait."
+    },
+    {
+        "task",
+        "NO_ECF",
+        "any",
+        "optional",
+        "If set, ecflow_client exits immediately with success; useful to test the scripts without a server"
+    }
+    // clang-format on
+};
+
+auto make_client_env_description() -> auto {
+    std::string help;
+    help += "The client considers, for both user and child commands, the following environment variables:\n\n";
+
+    for (const auto& o : known_env_options) {
+        if (o.kind == "both") {
+            help += "  ";
+            help += o.name;
+            help += " <";
+            help += o.type;
+            help += "> [";
+            help += o.required;
+            help += "]\n    ";
+            help += o.description;
+            help += "\n";
+        }
+    }
+
+    help += "\nThe options marked with (*) must be specified in order for the client to communicate\n"
+            "with the server, either by setting the environment variables or by specifying the\n"
+            "command line options.\n";
+
+    return help;
+}
+
+auto make_task_env_description() -> auto {
+    std::string help;
+    help += "The following environment variables are used specifically by child commands:\n\n";
+
+    for (const auto& o : known_env_options) {
+        if (o.kind == "task") {
+            help += "  ";
+            help += o.name;
+            help += " <";
+            help += o.type;
+            help += "> [";
+            help += o.required;
+            help += "]\n    ";
+            help += o.description;
+            help += "\n";
+        }
+    }
+
+    help += "\nThe scripts are expected to export the mandatory variables, typically in shared include files\n";
+
+    return help;
+}
+
+std::string client_env_description = make_client_env_description();
+
+std::string client_task_env_description = make_task_env_description();
 
 int get_options_max_width(const options_t& options) {
     size_t vec_size  = options.size();

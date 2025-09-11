@@ -14,9 +14,6 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
-using namespace boost;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 

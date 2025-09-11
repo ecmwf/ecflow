@@ -28,7 +28,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
@@ -106,10 +105,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_hybrid) {
         BOOST_CHECK_MESSAGE(v && v->hybrid(), "expected clock to be added and be hybrid");
 
         // Altering the suite clock attributes, should force suite calendar to  align to todays date and time
-        boost::posix_time::ptime date_now = Calendar::second_clock_time();
-        int day_of_month                  = date_now.date().day();
-        int month                         = date_now.date().month();
-        int year                          = date_now.date().year();
+        auto date_now    = Calendar::second_clock_time();
+        int day_of_month = date_now.date().day();
+        int month        = date_now.date().month();
+        int year         = date_now.date().year();
         BOOST_CHECK_MESSAGE(s->calendar().day_of_month() == day_of_month,
                             "Calendar should be updated after re-queue/begin. Expected "
                                 << day_of_month << " but found " << s->calendar().day_of_month());
@@ -142,10 +141,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_type_real) {
         BOOST_CHECK_MESSAGE(v && !v->hybrid(), "expected clock to be added and be real");
 
         // Altering the suite clock attributes, should force suite calendar to  align to todays date and time
-        boost::posix_time::ptime date_now = Calendar::second_clock_time();
-        int day_of_month                  = date_now.date().day();
-        int month                         = date_now.date().month();
-        int year                          = date_now.date().year();
+        auto date_now    = Calendar::second_clock_time();
+        int day_of_month = date_now.date().day();
+        int month        = date_now.date().month();
+        int year         = date_now.date().year();
         BOOST_CHECK_MESSAGE(s->calendar().day_of_month() == day_of_month,
                             "Calendar should be updated after re-queue/begin. Expected "
                                 << day_of_month << " but found " << s->calendar().day_of_month());
@@ -198,10 +197,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_sync) {
         // After a clk sync, data should match computer
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::CLOCK_SYNC, "", "")));
 
-        boost::posix_time::ptime date_now = Calendar::second_clock_time();
-        int day_of_month                  = date_now.date().day();
-        int month                         = date_now.date().month();
-        int year                          = date_now.date().year();
+        auto date_now    = Calendar::second_clock_time();
+        int day_of_month = date_now.date().day();
+        int month        = date_now.date().month();
+        int year         = date_now.date().year();
         BOOST_CHECK_MESSAGE(s->calendar().day_of_month() == day_of_month,
                             "Calendar should be updated after re-queue/begin. Expected "
                                 << day_of_month << " but found " << s->calendar().day_of_month());
@@ -245,10 +244,10 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_date) {
         // Now re sync with the computers clock, the suite calendar should align to todays date and time
         TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::CLOCK_SYNC, "", "")));
 
-        boost::posix_time::ptime date_now = Calendar::second_clock_time();
-        int day_of_month                  = date_now.date().day();
-        int month                         = date_now.date().month();
-        int year                          = date_now.date().year();
+        auto date_now    = Calendar::second_clock_time();
+        int day_of_month = date_now.date().day();
+        int month        = date_now.date().month();
+        int year         = date_now.date().year();
         BOOST_CHECK_MESSAGE(s->calendar().day_of_month() == day_of_month,
                             "Calendar should be updated after re-queue/begin. Expected "
                                 << day_of_month << " but found " << s->calendar().day_of_month());
@@ -283,9 +282,9 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd_for_clock_gain) {
         // Check that calendar is updated by the alter
         {
             // add one day, to current date, to simulate a gain of 24 hours
-            boost::posix_time::ptime date_now = Calendar::second_clock_time();
-            boost::gregorian::date newDate    = date_now.date();
-            boost::gregorian::date_duration one_day(1);
+            auto date_now = Calendar::second_clock_time();
+            auto newDate  = date_now.date();
+            auto one_day  = boost::gregorian::date_duration(1);
             newDate += one_day;
             int day_of_month = newDate.day();
             int month        = newDate.month();
@@ -366,8 +365,9 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
             for (auto& i : flag_list) {
                 // When any user command(including setting flags) invoked, we set Flag::MESSAGE on the defs.
                 // Hence setting flag Flag::MESSAGE has no effect. Likewise clearing has no affect since it get set
-                if (i == Flag::MESSAGE)
+                if (i == Flag::MESSAGE) {
                     continue;
+                }
 
                 TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd("/", i, true)));
                 BOOST_CHECK_MESSAGE(defs.flag().is_set(i), "Expected flag " << i << " to be set ");
@@ -556,8 +556,9 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
         std::vector<node_ptr> all_nodes;
         defs.get_all_nodes(all_nodes);
         std::vector<std::string> paths;
-        for (auto& all_node : all_nodes)
+        for (auto& all_node : all_nodes) {
             paths.push_back(all_node->absNodePath());
+        }
         BOOST_CHECK_MESSAGE(paths.size() >= 2, "expected at least 2 nodes");
 
         for (auto& all_node : all_nodes) {
@@ -961,14 +962,17 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
         ecf::TimeSlot finish(10, 0);
         ecf::TimeSlot incr(0, 5);
         std::vector<int> weekdays;
-        for (int i = 0; i < 7; ++i)
+        for (int i = 0; i < 7; ++i) {
             weekdays.push_back(i);
+        }
         std::vector<int> daysOfMonth;
-        for (int i = 1; i < 32; ++i)
+        for (int i = 1; i < 32; ++i) {
             daysOfMonth.push_back(i);
+        }
         std::vector<int> months;
-        for (int i = 1; i < 13; ++i)
+        for (int i = 1; i < 13; ++i) {
             months.push_back(i);
+        }
         cronAttr.addTimeSeries(start, finish, incr);
         cronAttr.addWeekDays(weekdays);
         cronAttr.addDaysOfMonth(daysOfMonth);
@@ -1029,8 +1033,9 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
         for (auto& i : flag_list) {
             // When any user command(including setting flags) invoked, we set Flag::MESSAGE on the defs.
             // Hence setting flag Flag::MESSAGE has no effect. Likewise clearing has no affect since it get set
-            if (i == Flag::MESSAGE)
+            if (i == Flag::MESSAGE) {
                 continue;
+            }
 
             TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), i, true)));
             BOOST_CHECK_MESSAGE(s->get_flag().is_set(i), "Expected flag " << i << " to be set ");

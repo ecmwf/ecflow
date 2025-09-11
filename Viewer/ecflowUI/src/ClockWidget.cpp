@@ -44,8 +44,9 @@ ClockWidget::~ClockWidget() {
 }
 
 void ClockWidget::renderTime() {
-    if (isHidden())
+    if (isHidden()) {
         return;
+    }
 
     QTime t = QTime::currentTime();
     if (showSec_) {
@@ -58,8 +59,9 @@ void ClockWidget::renderTime() {
 
 void ClockWidget::slotTimeOut() {
     renderTime();
-    if (!showSec_)
+    if (!showSec_) {
         adjustTimer();
+    }
 }
 
 void ClockWidget::adjustTimer() {
@@ -95,8 +97,9 @@ void ClockWidget::notifyChange(VProperty* p) {
     else if (p->path() == "view.clock.clockFormat") {
         QString v    = p->valueAsString();
         bool showSec = false;
-        if (v == "hhmmss")
+        if (v == "hhmmss") {
             showSec = true;
+        }
 
         if (showSec != showSec_) {
             showSec_ = showSec;

@@ -4,7 +4,7 @@
 .. _operational:
    
 Toward an operational server
----------------------------------------------------
+****************************
 
 At the beginning of the course, the ecflow server is started in a
 directory, and tasks/header scripts are created, below the same

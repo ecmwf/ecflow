@@ -110,8 +110,9 @@ bool System::spawn(System::CmdType cmd_type,
     if (sys(cmd_type, cmdToSpawn, absPath, msg)) {
         std::stringstream ss;
         ss << "Child process creation failed( " << msg << ") for command " << cmdToSpawn;
-        if (!absPath.empty())
+        if (!absPath.empty()) {
             ss << " at path(" << absPath << ")";
+        }
         errorMsg = ss.str();
 #ifdef DEBUG_FORK
         LOG(Log::DBG, "  System::spawn returning false\n");
@@ -140,16 +141,19 @@ int System::sys(System::CmdType cmd_type,
 
         int f;
         close(2);
-        if ((f = open("/dev/null", O_WRONLY)) != 2)
+        if ((f = open("/dev/null", O_WRONLY)) != 2) {
             close(f);
+        }
 
         close(1);
-        if ((f = open("/dev/null", O_WRONLY)) != 1)
+        if ((f = open("/dev/null", O_WRONLY)) != 1) {
             close(f);
+        }
 
         close(0);
-        if ((f = open("/dev/null", O_RDONLY)) != 0)
+        if ((f = open("/dev/null", O_RDONLY)) != 0) {
             close(f);
+        }
 
         // ==============================================================================
         // Ideally we should close all open file descriptors in the child process
@@ -162,8 +166,9 @@ int System::sys(System::CmdType cmd_type,
         // open socket file descriptors. But this will require a singleton of some sort
         // ===============================================================================
         int fd_limit = sysconf(_SC_OPEN_MAX);
-        for (int i = 3; i < fd_limit; i++)
+        for (int i = 3; i < fd_limit; i++) {
             close(i);
+        }
 
         execl("/bin/sh", "sh", "-c", cmdToSpawn.c_str(), (char*)nullptr);
         /*
@@ -353,8 +358,9 @@ SignalFunction* signal_(int signo, SignalFunction* func) {
 #endif
     }
 
-    if (sigaction(signo, &act, &oact) < 0)
+    if (sigaction(signo, &act, &oact) < 0) {
         return (SIG_ERR);
+    }
 
     // Return the old handler
     return oact.sa_handler;

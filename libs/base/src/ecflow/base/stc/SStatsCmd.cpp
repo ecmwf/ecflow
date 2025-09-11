@@ -29,8 +29,9 @@ void SStatsCmd::init(AbstractServer* as) {
 
 bool SStatsCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SStatsCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 
@@ -39,10 +40,12 @@ std::string SStatsCmd::print() const {
 }
 
 bool SStatsCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr /*cts_cmd*/, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  SStatsCmd::handle_server_response\n";
-    if (server_reply.cli())
+    }
+    if (server_reply.cli()) {
         stats_.show();
+    }
     else {
         server_reply.set_stats(stats_);
     }

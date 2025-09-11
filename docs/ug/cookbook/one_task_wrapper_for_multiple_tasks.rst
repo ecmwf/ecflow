@@ -1,7 +1,7 @@
 .. _one_task_wrapper_for_multiple_tasks:
 
 One task wrapper for multiple tasks
-///////////////////////////////////
+***********************************
 
 We can keep maintenance simple using a single "task wrapper file",
 called in multiple contexts, for multiple tasks. It can be seen as a

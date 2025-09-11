@@ -153,15 +153,18 @@ int LogModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int LogModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
-        if (!filterPeriod_)
+        if (!filterPeriod_) {
             return static_cast<int>(data_.size());
-        else
+        }
+        else {
             return static_cast<int>(periodEnd_) - static_cast<int>(periodStart_) + 1;
+        }
     }
 
     return 0;
@@ -177,11 +180,13 @@ QVariant LogModel::data(const QModelIndex& index, int role) const {
     }
     int row = index.row();
 
-    if (filterPeriod_)
+    if (filterPeriod_) {
         row += static_cast<int>(periodStart_);
+    }
 
-    if (row < 0 || row >= static_cast<int>(data_.size()))
+    if (row < 0 || row >= static_cast<int>(data_.size())) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
@@ -232,11 +237,13 @@ QVariant LogModel::data(const QModelIndex& index, int role) const {
 
     else if (role == Qt::BackgroundRole) {
         if (highlightPeriod_) {
-            if (static_cast<size_t>(row) >= highlightStart_ && static_cast<size_t>(row) <= highlightEnd_)
+            if (static_cast<size_t>(row) >= highlightStart_ && static_cast<size_t>(row) <= highlightEnd_) {
                 // return QColor(168,226,145);
                 return QColor(198, 223, 188);
-            else
+            }
+            else {
                 return {};
+            }
         }
     }
 
@@ -289,8 +296,9 @@ QVariant LogModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant LogModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     if (role == Qt::DisplayRole) {
         switch (section) {

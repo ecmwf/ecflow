@@ -12,26 +12,23 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/WhyCmd.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace boost::gregorian;
-using namespace boost::posix_time;
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
@@ -93,7 +90,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_integer.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date) {
@@ -131,7 +129,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_date) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_date.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
@@ -169,7 +168,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_date.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_enumerator) {
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_enumerator) {
         family_ptr top        = suite->add_family("top");
         family_ptr plot       = top->add_family("plot");
         family_ptr iasi_plots = plot->add_family("iasi_plots");
-        vector<string> months;
+        std::vector<std::string> months;
         months.reserve(12);
         months.push_back("200801");
         months.push_back("200802");
@@ -212,7 +212,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_enumerator) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_enumerator.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_defstatus) {
@@ -257,7 +258,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_defstatus) {
 
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_defstatus.def"));
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 // #define DEBUG_ME 1
@@ -285,8 +287,9 @@ BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
     Defs theDefs;
     task_ptr task;
     {
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
-        boost::posix_time::ptime time1        = theLocalTime + minutes(3);
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
+        auto time1 = theLocalTime + boost::posix_time::minutes(3);
 
         suite_ptr suite = theDefs.add_suite("test_repeat_clears_user_edit");
         ClockAttr clockAttr(theLocalTime, false);
@@ -358,7 +361,8 @@ BOOST_AUTO_TEST_CASE(test_repeat_clears_user_edit) {
     cout << serverDefs << "\n";
 #endif
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

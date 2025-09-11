@@ -30,10 +30,7 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 // Globals used throughout the test
 static std::string fileName = "test.txt";

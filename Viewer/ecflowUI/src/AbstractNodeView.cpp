@@ -169,10 +169,12 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event) {
                   << " pressedRef=" << pressedRefIndex_.data().toString();
 #endif
 
-    if ((command & QItemSelectionModel::Current) == 0)
+    if ((command & QItemSelectionModel::Current) == 0) {
         pressedRefIndex_ = index;
-    else if (!pressedRefIndex_.isValid())
+    }
+    else if (!pressedRefIndex_.isValid()) {
         pressedRefIndex_ = currentIndex();
+    }
 
     // The pressed ref position (e.g. shift selection) can be outside the
     // viewport.
@@ -327,8 +329,9 @@ void AbstractNodeView::reset() {
     expandedIndexes.clear();
     pressedRefIndex_ = QPersistentModelIndex(QModelIndex());
     // currentIndexSet_ = false;
-    if (selectionModel_)
+    if (selectionModel_) {
         selectionModel_->reset();
+    }
 
     layout(-1, false, false, false);
     updateRowCount();
@@ -379,10 +382,12 @@ void AbstractNodeView::doItemsLayout(bool hasRemovedItems) {
         // clean the QSet that may contains old (and thus invalid) indexes
         QSet<QPersistentModelIndex>::iterator it = expandedIndexes.begin();
         while (it != expandedIndexes.constEnd()) {
-            if (!it->isValid())
+            if (!it->isValid()) {
                 it = expandedIndexes.erase(it);
-            else
+            }
+            else {
                 ++it;
+            }
         }
         // TODO: do we need to clear the selectionmodel?
     }
@@ -407,8 +412,9 @@ void AbstractNodeView::paintEvent(QPaintEvent* event) {
 }
 
 void AbstractNodeView::slotRepaint(Animation* an) {
-    if (!an)
+    if (!an) {
         return;
+    }
 
     Q_FOREACH (VNode* n, an->targets()) {
         update(model_->nodeToIndex(n));
@@ -464,8 +470,9 @@ int AbstractNodeView::translation() const {
 }
 
 void AbstractNodeView::scrollTo(const QModelIndex& index) {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
+    }
 
     // d->executePostedLayout();
     updateScrollBars();
@@ -479,13 +486,15 @@ void AbstractNodeView::scrollTo(const QModelIndex& index) {
     }
 
     Q_FOREACH (QModelIndex pt, parentLst) {
-        if (!isExpanded(pt))
+        if (!isExpanded(pt)) {
             expand(pt);
+        }
     }
 
     int item = viewIndex(index);
-    if (item < 0)
+    if (item < 0) {
         return;
+    }
 
     if (verticalScrollMode_ == ScrollPerItem) {
         int row = itemRow(item);
@@ -531,8 +540,9 @@ void AbstractNodeView::scrollTo(const QModelIndex& index) {
 
     if (horizontalPosition < 0) {
         xp -= 10;
-        if (xp < 0)
+        if (xp < 0) {
             xp = 0;
+        }
         horizontalScrollBar()->setValue(xp);
     }
     else if (horizontalPosition > viewportWidth) {
@@ -548,16 +558,18 @@ QModelIndex AbstractNodeView::indexAt(const QPoint& point) const {
 }
 
 QModelIndex AbstractNodeView::modelIndex(int i) const {
-    if (i < 0 || i >= static_cast<int>(viewItems_.size()))
+    if (i < 0 || i >= static_cast<int>(viewItems_.size())) {
         return {};
+    }
 
     return viewItems_[i].index;
 }
 
 // Returns the index of the view item representing the given index
 int AbstractNodeView::viewIndex(const QModelIndex& index) const {
-    if (!index.isValid() || viewItems_.empty())
+    if (!index.isValid() || viewItems_.empty()) {
         return -1;
+    }
 
     const auto totalCount      = static_cast<int>(viewItems_.size());
     const QModelIndex topIndex = index.sibling(index.row(), 0);
@@ -604,9 +616,11 @@ void AbstractNodeView::insertViewItems(int pos, int count, const TreeNodeViewIte
 
     // We need to update the parentItem in the items after the insertion
     const auto itemsCount = static_cast<int>(viewItems_.size());
-    for (int i = pos + count; i < itemsCount; i++)
-        if (viewItems_[i].parentItem >= pos)
+    for (int i = pos + count; i < itemsCount; i++) {
+        if (viewItems_[i].parentItem >= pos) {
             viewItems_[i].parentItem += count;
+        }
+    }
 }
 
 void AbstractNodeView::removeViewItems(int pos, int count) {
@@ -615,9 +629,11 @@ void AbstractNodeView::removeViewItems(int pos, int count) {
 
     // We need to update the parentItem in the items after the deletion
     const auto itemsCount = static_cast<int>(viewItems_.size());
-    for (int i = 0; i < itemsCount; i++)
-        if (viewItems_[i].parentItem >= pos)
+    for (int i = 0; i < itemsCount; i++) {
+        if (viewItems_[i].parentItem >= pos) {
             viewItems_[i].parentItem -= count;
+        }
+    }
 }
 
 //---------------------------------------
@@ -657,8 +673,9 @@ void AbstractNodeView::expand(int item) {
             for (int i = 0; i < count; i++) {
                 QModelIndex chIdx = model_->index(i, 0, idx);
                 if (model_->isFlatNode(chIdx)) {
-                    if (!isIndexExpanded(chIdx))
+                    if (!isIndexExpanded(chIdx)) {
                         storeExpanded(chIdx);
+                    }
                 }
             }
         }
@@ -682,9 +699,11 @@ void AbstractNodeView::expand(int item) {
         // this point to gain performance!
         const auto itemsCount = static_cast<int>(viewItems_.size());
         int count             = viewItems_[item].total;
-        for (int i = item + count + 1; i < itemsCount; i++)
-            if (viewItems_[i].parentItem >= item)
+        for (int i = item + count + 1; i < itemsCount; i++) {
+            if (viewItems_[i].parentItem >= item) {
                 viewItems_[i].parentItem += count;
+            }
+        }
 
         // update the scrollbars and rerender the viewport
         updateRowCount();
@@ -729,9 +748,11 @@ void AbstractNodeView::expandAll(const QModelIndex& idx) {
         // this point to gain performance!
         const auto itemsCount = static_cast<int>(viewItems_.size());
         int count             = viewItems_[item].total;
-        for (int i = item + count + 1; i < itemsCount; i++)
-            if (viewItems_[i].parentItem >= item)
+        for (int i = item + count + 1; i < itemsCount; i++) {
+            if (viewItems_[i].parentItem >= item) {
                 viewItems_[i].parentItem += count;
+            }
+        }
 
         // update the scrollbars and rerender the viewport
         updateRowCount();
@@ -746,16 +767,18 @@ void AbstractNodeView::restoreExpand(const QModelIndex& idx) {
 }
 
 void AbstractNodeView::collapse(int item) {
-    if (item == -1 || expandedIndexes.isEmpty())
+    if (item == -1 || expandedIndexes.isEmpty()) {
         return;
+    }
 
     const QModelIndex& modelIndex = viewItems_.at(item).index;
     // if(!isPersistent(modelIndex))
     //        return; // if the index is not persistent, no chances it is expanded
 
     QSet<QPersistentModelIndex>::iterator it = expandedIndexes.find(modelIndex);
-    if (it == expandedIndexes.end() || viewItems_.at(item).expanded == false)
+    if (it == expandedIndexes.end() || viewItems_.at(item).expanded == false) {
         return; // nothing to do
+    }
 
     expandedIndexes.erase(it);
     viewItems_[item].expanded = false;
@@ -784,13 +807,15 @@ bool AbstractNodeView::collapseAllCore(const QModelIndex& index) {
     int item = viewIndex(index);
 
     // check if there is nothing to do
-    if (item == -1 || expandedIndexes.isEmpty())
+    if (item == -1 || expandedIndexes.isEmpty()) {
         return false;
+    }
 
     // check if the item is expanded
     QSet<QPersistentModelIndex>::iterator it = expandedIndexes.find(index);
-    if (it == expandedIndexes.end() || viewItems_.at(item).expanded == false)
+    if (it == expandedIndexes.end() || viewItems_.at(item).expanded == false) {
         return false;
+    }
 
     // remove all the children of the item
     viewItems_[item].expanded = false;
@@ -817,12 +842,14 @@ void AbstractNodeView::collapseAll(const QModelIndex& index) {
 }
 
 void AbstractNodeView::removeAllFromExpanded(const QModelIndex& index) {
-    if (expandedIndexes.isEmpty())
+    if (expandedIndexes.isEmpty()) {
         return;
+    }
 
     QSet<QPersistentModelIndex>::iterator it = expandedIndexes.find(index);
-    if (it == expandedIndexes.end())
+    if (it == expandedIndexes.end()) {
         return;
+    }
 
     expandedIndexes.erase(it);
 
@@ -837,10 +864,12 @@ bool AbstractNodeView::isExpanded(const QModelIndex& index) const {
 }
 
 void AbstractNodeView::setExpanded(const QModelIndex& index, bool expanded) {
-    if (expanded)
+    if (expanded) {
         expand(index);
-    else
+    }
+    else {
         collapse(index);
+    }
 }
 
 // Expands all expandable items.
@@ -936,8 +965,9 @@ void AbstractNodeView::setCurrentIndex(const QModelIndex& index) {
     if (selectionModel_ && index.isValid()) {
         QItemSelectionModel::SelectionFlags command = selectionCommand(index, nullptr);
         selectionModel_->setCurrentIndex(index, command);
-        if ((command & QItemSelectionModel::Current) == 0)
+        if ((command & QItemSelectionModel::Current) == 0) {
             pressedRefIndex_ = currentIndex();
+        }
     }
 }
 
@@ -946,8 +976,9 @@ QModelIndex AbstractNodeView::currentIndex() const {
 }
 
 QModelIndexList AbstractNodeView::selectedIndexes() const {
-    if (selectionModel_)
+    if (selectionModel_) {
         return selectionModel_->selectedIndexes();
+    }
 
     return {};
 }
@@ -959,8 +990,9 @@ QModelIndexList AbstractNodeView::selectedIndexes() const {
 void AbstractNodeView::setSelection(const QRect& rect,
                                     QItemSelectionModel::SelectionFlags command,
                                     bool shiftKeyPressed) {
-    if (!selectionModel_ || rect.isNull())
+    if (!selectionModel_ || rect.isNull()) {
         return;
+    }
 
 #ifdef _UI_QABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << "TreeNodeViewBase::setSelection --> rect=" << rect;
@@ -969,8 +1001,9 @@ void AbstractNodeView::setSelection(const QRect& rect,
     QPoint tl = QPoint(rect.x(), rect.y());
     QPoint br = QPoint(rect.x() + rect.width(), rect.y() + rect.height());
 
-    if (tl.y() > br.y())
+    if (tl.y() > br.y()) {
         qSwap(tl, br);
+    }
 
     QModelIndex topLeft     = indexAt(tl);
     QModelIndex bottomRight = indexAt(br);
@@ -981,13 +1014,15 @@ void AbstractNodeView::setSelection(const QRect& rect,
 #endif
 
     if (!topLeft.isValid() && !bottomRight.isValid()) {
-        if (command & QItemSelectionModel::Clear)
+        if (command & QItemSelectionModel::Clear) {
             selectionModel_->clear();
+        }
         return;
     }
 
-    if (!topLeft.isValid() && !viewItems_.empty())
+    if (!topLeft.isValid() && !viewItems_.empty()) {
         topLeft = viewItems_.front().index;
+    }
 
     if (!bottomRight.isValid() && !viewItems_.empty()) {
         const QModelIndex index = viewItems_.back().index;
@@ -1062,8 +1097,9 @@ void AbstractNodeView::select(const QModelIndex& topIndex,
         }
 
         else {
-            if (currentRange.isValid())
+            if (currentRange.isValid()) {
                 selection.append(currentRange);
+            }
             if (rangeStack.isEmpty()) {
                 currentRange = QItemSelectionRange(index, index);
             }
@@ -1077,11 +1113,13 @@ void AbstractNodeView::select(const QModelIndex& topIndex,
         previous = index;
     }
 
-    if (currentRange.isValid())
+    if (currentRange.isValid()) {
         selection.append(currentRange);
+    }
 
-    for (int i = 0; i < rangeStack.count(); ++i)
+    for (int i = 0; i < rangeStack.count(); ++i) {
         selection.append(rangeStack.at(i));
+    }
 
 #if 0
     UiLog().dbg() << "before";
@@ -1123,8 +1161,9 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(const QMo
             case QEvent::MouseMove: {
                 // Toggle on MouseMove
                 modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
-                if (modifiers & Qt::ControlModifier)
+                if (modifiers & Qt::ControlModifier) {
                     return QItemSelectionModel::ToggleCurrent | selectionBehaviorFlags();
+                }
                 break;
             }
             case QEvent::MouseButtonPress: {
@@ -1134,14 +1173,18 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(const QMo
                 const bool shiftKeyPressed    = modifiers & Qt::ShiftModifier;
                 const bool controlKeyPressed  = modifiers & Qt::ControlModifier;
                 const bool indexIsSelected    = selectionModel_->isSelected(index);
-                if ((shiftKeyPressed || controlKeyPressed) && rightButtonPressed)
+                if ((shiftKeyPressed || controlKeyPressed) && rightButtonPressed) {
                     return QItemSelectionModel::NoUpdate;
-                if (!shiftKeyPressed && !controlKeyPressed && indexIsSelected)
+                }
+                if (!shiftKeyPressed && !controlKeyPressed && indexIsSelected) {
                     return QItemSelectionModel::NoUpdate;
-                if (!index.isValid() && !rightButtonPressed && !shiftKeyPressed && !controlKeyPressed)
+                }
+                if (!index.isValid() && !rightButtonPressed && !shiftKeyPressed && !controlKeyPressed) {
                     return QItemSelectionModel::Clear;
-                if (!index.isValid())
+                }
+                if (!index.isValid()) {
                     return QItemSelectionModel::NoUpdate;
+                }
                 break;
             }
             case QEvent::MouseButtonRelease: {
@@ -1153,8 +1196,9 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(const QMo
                 const bool controlKeyPressed  = modifiers & Qt::ControlModifier;
                 if (((index == pressedIndex_ && selectionModel_->isSelected(index)) ||
                      !index.isValid()) //&& state != QAbstractItemView::DragSelectingState
-                    && !shiftKeyPressed && !controlKeyPressed && (!rightButtonPressed || !index.isValid()))
+                    && !shiftKeyPressed && !controlKeyPressed && (!rightButtonPressed || !index.isValid())) {
                     return QItemSelectionModel::ClearAndSelect | selectionBehaviorFlags();
+                }
                 return QItemSelectionModel::NoUpdate;
             }
             case QEvent::KeyPress: {
@@ -1184,8 +1228,9 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(const QMo
                     case Qt::Key_Select:
                         return QItemSelectionModel::Toggle | selectionBehaviorFlags();
                     case Qt::Key_Space: // Toggle on Ctrl-Qt::Key_Space, Select on Space
-                        if (modifiers & Qt::ControlModifier)
+                        if (modifiers & Qt::ControlModifier) {
                             return QItemSelectionModel::Toggle | selectionBehaviorFlags();
+                        }
                         return QItemSelectionModel::Select | selectionBehaviorFlags();
                     default:
                         break;
@@ -1196,10 +1241,12 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(const QMo
         }
     }
 
-    if (modifiers & Qt::ShiftModifier)
+    if (modifiers & Qt::ShiftModifier) {
         return QItemSelectionModel::SelectCurrent | selectionBehaviorFlags();
-    if (modifiers & Qt::ControlModifier)
+    }
+    if (modifiers & Qt::ControlModifier) {
         return QItemSelectionModel::Toggle | selectionBehaviorFlags();
+    }
     // if (state == QAbstractItemView::DragSelectingState) {
     //     //when drag-selecting we need to clear any previous selection and select the current one
     //     return QItemSelectionModel::Clear|QItemSelectionModel::SelectCurrent|selectionBehaviorFlags();
@@ -1216,44 +1263,53 @@ QItemSelectionModel::SelectionFlags AbstractNodeView::selectionCommand(const QMo
   (or included in) the viewport.
 */
 QRegion AbstractNodeView::visualRegionForSelection(const QItemSelection& selection) const {
-    if (selection.isEmpty())
+    if (selection.isEmpty()) {
         return {};
+    }
 
     QRegion selectionRegion;
     const QRect& viewportRect = viewport()->rect();
     for (int i = 0; i < selection.count(); ++i) {
         QItemSelectionRange range = selection.at(i);
-        if (!range.isValid())
+        if (!range.isValid()) {
             continue;
+        }
 
         QModelIndex leftIndex = range.topLeft();
-        if (!leftIndex.isValid())
+        if (!leftIndex.isValid()) {
             continue;
+        }
 
         QModelIndex rightIndex = range.bottomRight();
-        if (!rightIndex.isValid())
+        if (!rightIndex.isValid()) {
             continue;
+        }
 
         int left = 100000000, right = 0, top = 1000000000, bottom = 0;
         Q_FOREACH (QModelIndex idx, range.indexes()) {
             const QRect r = visualRect(idx);
             // UiLog().dbg() << r << " " << idx << " " << idx.data().toString();
-            if (r.x() < left)
+            if (r.x() < left) {
                 left = r.x();
-            if (r.right() + 1 > right)
+            }
+            if (r.right() + 1 > right) {
                 right = r.right() + 1;
-            if (r.y() < top)
+            }
+            if (r.y() < top) {
                 top = r.y();
-            if (r.bottom() + 1 > bottom)
+            }
+            if (r.bottom() + 1 > bottom) {
                 bottom = r.bottom() + 1;
+            }
         }
 
         top -= 1;
         bottom += 1;
 
         QRect combined(left, top, right - left + 1, bottom - top + 1);
-        if (viewportRect.intersects(combined))
+        if (viewportRect.intersects(combined)) {
             selectionRegion += combined;
+        }
     }
     return selectionRegion;
 }
@@ -1285,8 +1341,9 @@ void AbstractNodeView::selectionChanged(const QItemSelection& selected, const QI
     item by the current index.
 */
 void AbstractNodeView::currentChanged(const QModelIndex& current, const QModelIndex& previous) {
-    if (!isVisible())
+    if (!isVisible()) {
         return;
+    }
 
     if (previous.isValid()) {
         update(previous);

@@ -13,9 +13,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/date_time.hpp>
-#include <boost/date_time/posix_time/time_parsers.hpp>
-
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -26,8 +23,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 const Repeat& Repeat::EMPTY() {
     static const Repeat REPEAT = Repeat();
@@ -37,18 +32,25 @@ const Repeat& Repeat::EMPTY() {
 //=========================================================================
 
 Repeat::Repeat() = default;
+
 Repeat::Repeat(const RepeatDate& r) : type_(std::make_unique<RepeatDate>(r)) {
 }
+
 Repeat::Repeat(const RepeatDateTime& r) : type_(std::make_unique<RepeatDateTime>(r)) {
 }
+
 Repeat::Repeat(const RepeatDateList& r) : type_(std::make_unique<RepeatDateList>(r)) {
 }
+
 Repeat::Repeat(const RepeatInteger& r) : type_(std::make_unique<RepeatInteger>(r)) {
 }
+
 Repeat::Repeat(const RepeatEnumerated& r) : type_(std::make_unique<RepeatEnumerated>(r)) {
 }
+
 Repeat::Repeat(const RepeatString& r) : type_(std::make_unique<RepeatString>(r)) {
 }
+
 Repeat::Repeat(const RepeatDay& r) : type_(std::make_unique<RepeatDay>(r)) {
 }
 
@@ -74,12 +76,15 @@ Repeat& Repeat::operator=(Repeat&& rhs) {
 }
 
 bool Repeat::operator==(const Repeat& rhs) const {
-    if (!type_ && rhs.type_)
+    if (!type_ && rhs.type_) {
         return false;
-    if (type_ && !rhs.type_)
+    }
+    if (type_ && !rhs.type_) {
         return false;
-    if (!type_ && !rhs.type_)
+    }
+    if (!type_ && !rhs.type_) {
         return true;
+    }
     return type_->compare(rhs.type_.get());
 }
 
@@ -167,8 +172,8 @@ RepeatDate::RepeatDate(const std::string& variable, int start, int end, int delt
 
     // Use date lib to check YMD
     try {
-        (void)boost::gregorian::date(from_undelimited_string(theStart));
-        (void)boost::gregorian::date(from_undelimited_string(theEnd));
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(theStart));
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(theEnd));
     }
     catch (std::exception& e) {
         std::stringstream ss;
@@ -187,18 +192,24 @@ void RepeatDate::gen_variables(std::vector<Variable>& vec) const {
 }
 
 const Variable& RepeatDate::find_gen_variable(const std::string& name) const {
-    if (name == name_)
+    if (name == name_) {
         return var_;
-    if (name == julian_.name())
+    }
+    if (name == julian_.name()) {
         return julian_;
-    if (name == dow_.name())
+    }
+    if (name == dow_.name()) {
         return dow_;
-    if (name == dom_.name())
+    }
+    if (name == dom_.name()) {
         return dom_;
-    if (name == mm_.name())
+    }
+    if (name == mm_.name()) {
         return mm_;
-    if (name == yyyy_.name())
+    }
+    if (name == yyyy_.name()) {
         return yyyy_;
+    }
     return Variable::EMPTY();
 }
 
@@ -229,7 +240,7 @@ void RepeatDate::update_repeat_genvar_value() const {
     std::string date_as_string = valueAsString();
     if (valid()) {
         try {
-            boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+            auto the_date = boost::gregorian::from_undelimited_string(date_as_string);
             if (the_date.is_special()) {
                 std::stringstream ss;
                 ss << "RepeatDate::update_repeat_genvar(): invalid current date: " << date_as_string << " is_special";
@@ -262,8 +273,9 @@ void RepeatDate::update_repeat_genvar_value() const {
 
 bool RepeatDate::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatDate*>(rb);
-    if (!rhs)
+    if (!rhs) {
         return false;
+    }
     return operator==(*rhs);
 }
 
@@ -277,16 +289,20 @@ long RepeatDate::last_valid_value() const {
 
 long RepeatDate::valid_value(long value) const {
     if (delta_ > 0) {
-        if (value < start_)
+        if (value < start_) {
             return start_;
-        if (value > end_)
+        }
+        if (value > end_) {
             return end_;
+        }
         return value;
     }
-    if (value > start_)
+    if (value > start_) {
         return start_;
-    if (value < end_)
+    }
+    if (value < end_) {
         return end_;
+    }
     return value;
 }
 
@@ -399,7 +415,7 @@ void RepeatDate::change(const std::string& newdate) {
 
     // Use date lib to check YMD
     try {
-        (void)boost::gregorian::date(from_undelimited_string(newdate));
+        (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(newdate));
     }
     catch (std::exception& e) {
         std::stringstream ss;
@@ -580,49 +596,54 @@ void RepeatDateTime::update_repeat_genvar_value() const {
 
 bool RepeatDateTime::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatDateTime*>(rb);
-    if (!rhs)
+    if (!rhs) {
         return false;
+    }
     return operator==(*rhs);
 }
 
 void RepeatDateTime::setToLastValue() {
-    set_value(coerce_from_instant(end_));
+    set_value(coerce_from_instant_into_seconds(end_));
 }
 
 long RepeatDateTime::last_valid_value() const {
     Instant valid = valid_value(value_);
-    return coerce_from_instant(valid);
+    return coerce_from_instant_into_seconds(valid);
 }
 
 Instant RepeatDateTime::valid_value(const Instant& value) const {
     if (delta_ > Duration{std::chrono::seconds{0}}) {
-        if (value < start_)
+        if (value < start_) {
             return start_;
-        if (value > end_)
+        }
+        if (value > end_) {
             return end_;
+        }
         return value;
     }
-    if (value > start_)
+    if (value > start_) {
         return start_;
-    if (value < end_)
+    }
+    if (value < end_) {
         return end_;
+    }
     return value;
 }
 
 long RepeatDateTime::last_valid_value_minus(int val) const {
-    Instant last_value    = coerce_to_instant(last_valid_value());
+    Instant last_value    = coerce_from_seconds_into_instant(last_valid_value());
     Instant updated_value = last_value - Duration{std::chrono::seconds{val}};
-    return coerce_from_instant(updated_value);
+    return coerce_from_instant_into_seconds(updated_value);
 }
 
 long RepeatDateTime::last_valid_value_plus(int val) const {
-    Instant last_value    = coerce_to_instant(last_valid_value());
+    Instant last_value    = coerce_from_seconds_into_instant(last_valid_value());
     Instant updated_value = last_value + Duration{std::chrono::seconds{val}};
-    return coerce_from_instant(updated_value);
+    return coerce_from_instant_into_seconds(updated_value);
 }
 
 void RepeatDateTime::reset() {
-    set_value(ecf::coerce_from_instant(start_));
+    set_value(coerce_from_instant_into_seconds(start_));
 }
 
 std::string RepeatDateTime::dump() const {
@@ -654,7 +675,7 @@ std::string RepeatDateTime::valueAsString() const {
     /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
     try {
         long value      = last_valid_value();
-        Instant instant = coerce_to_instant(value);
+        Instant instant = coerce_from_seconds_into_instant(value);
         return boost::lexical_cast<std::string>(instant);
     }
     catch (boost::bad_lexical_cast&) {
@@ -674,7 +695,7 @@ std::string RepeatDateTime::value_as_string(int index) const {
 }
 
 std::string RepeatDateTime::next_value_as_string() const {
-    Instant next = coerce_to_instant(last_valid_value()) + delta_;
+    Instant next = coerce_from_seconds_into_instant(last_valid_value()) + delta_;
 
     try {
         return boost::lexical_cast<std::string>(valid_value(next));
@@ -685,7 +706,7 @@ std::string RepeatDateTime::next_value_as_string() const {
 }
 
 std::string RepeatDateTime::prev_value_as_string() const {
-    Instant previous = coerce_to_instant(last_valid_value()) - delta_;
+    Instant previous = coerce_from_seconds_into_instant(last_valid_value()) - delta_;
 
     try {
         return boost::lexical_cast<std::string>(valid_value(previous));
@@ -697,7 +718,7 @@ std::string RepeatDateTime::prev_value_as_string() const {
 
 void RepeatDateTime::increment() {
     auto new_value = value_ + delta_;
-    set_value(ecf::coerce_from_instant(new_value));
+    set_value(ecf::coerce_from_instant_into_seconds(new_value));
 }
 
 void RepeatDateTime::change(const std::string& newdate) {
@@ -705,7 +726,7 @@ void RepeatDateTime::change(const std::string& newdate) {
     long the_new_date;
     try {
         auto instant = Instant::parse(newdate);
-        the_new_date = ecf::coerce_from_instant(instant);
+        the_new_date = ecf::coerce_from_instant_into_seconds(instant);
     }
     catch (std::exception& e) {
         std::stringstream ss;
@@ -718,7 +739,7 @@ void RepeatDateTime::change(const std::string& newdate) {
 
 void RepeatDateTime::changeValue(long the_new_date) {
 
-    auto new_date = ecf::coerce_to_instant(the_new_date);
+    auto new_date = ecf::coerce_from_seconds_into_instant(the_new_date);
     if (delta_ > Duration{std::chrono::seconds{0}}) {
         if (new_date < start_ || new_date > end_) {
             std::stringstream ss;
@@ -754,7 +775,7 @@ void RepeatDateTime::set_value(long the_new_date) {
     // hence the_new_value may be outside the valid range.
     // This can occur when an incremental sync happens,
     // hence, allow memento to copy the value as is.
-    value_ = coerce_to_instant(the_new_date);
+    value_ = coerce_from_seconds_into_instant(the_new_date);
     update_repeat_genvar_value();
     incr_state_change_no();
 }
@@ -767,8 +788,9 @@ RepeatDateList::RepeatDateList(const std::string& variable, const std::vector<in
     if (!Str::valid_name(variable)) {
         throw std::runtime_error("RepeatDateList: Invalid name: " + variable);
     }
-    if (list_.empty())
+    if (list_.empty()) {
         throw std::runtime_error("RepeatDateList: " + variable + " is empty");
+    }
 
     for (int i : list_) {
         std::string date_i = ecf::convert_to<std::string>(i);
@@ -780,7 +802,7 @@ RepeatDateList::RepeatDateList(const std::string& variable, const std::vector<in
         }
 
         try {
-            (void)boost::gregorian::date(from_undelimited_string(date_i));
+            (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(date_i));
         }
         catch (std::exception& e) {
             std::stringstream ss;
@@ -801,18 +823,24 @@ void RepeatDateList::gen_variables(std::vector<Variable>& vec) const {
 }
 
 const Variable& RepeatDateList::find_gen_variable(const std::string& name) const {
-    if (name == name_)
+    if (name == name_) {
         return var_;
-    if (name == yyyy_.name())
+    }
+    if (name == yyyy_.name()) {
         return yyyy_;
-    if (name == mm_.name())
+    }
+    if (name == mm_.name()) {
         return mm_;
-    if (name == dom_.name())
+    }
+    if (name == dom_.name()) {
         return dom_;
-    if (name == dow_.name())
+    }
+    if (name == dow_.name()) {
         return dow_;
-    if (name == julian_.name())
+    }
+    if (name == julian_.name()) {
         return julian_;
+    }
     return Variable::EMPTY();
 }
 
@@ -837,7 +865,7 @@ void RepeatDateList::update_repeat_genvar_value() const {
     if (valid()) {
         std::string date_as_string = valueAsString();
         try {
-            boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+            auto the_date = boost::gregorian::from_undelimited_string(date_as_string);
             if (the_date.is_special()) {
                 std::stringstream ss;
                 ss << "RepeatDateList::update_repeat_genvar_value(): " << toString()
@@ -870,20 +898,23 @@ void RepeatDateList::update_repeat_genvar_value() const {
 }
 
 int RepeatDateList::start() const {
-    if (list_.empty())
+    if (list_.empty()) {
         return 0;
+    }
     return list_[0];
 }
 int RepeatDateList::end() const {
-    if (list_.empty())
+    if (list_.empty()) {
         return 0;
+    }
     return list_[list_.size() - 1];
 }
 
 bool RepeatDateList::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatDateList*>(rb);
-    if (!rhs)
+    if (!rhs) {
         return false;
+    }
     return operator==(*rhs);
 }
 
@@ -902,8 +933,9 @@ void RepeatDateList::increment() {
 }
 
 long RepeatDateList::value() const {
-    if (list_.empty())
+    if (list_.empty()) {
         return 0;
+    }
 
     if (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())) {
         return list_[currentIndex_];
@@ -912,38 +944,44 @@ long RepeatDateList::value() const {
 }
 
 long RepeatDateList::last_valid_value() const {
-    if (list_.empty())
+    if (list_.empty()) {
         return 0;
+    }
 
     if (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())) {
         return list_[currentIndex_];
     }
-    if (currentIndex_ < 0)
+    if (currentIndex_ < 0) {
         return list_[0];
-    if (currentIndex_ >= static_cast<int>(list_.size()))
+    }
+    if (currentIndex_ >= static_cast<int>(list_.size())) {
         return list_[list_.size() - 1];
+    }
     return 0;
 }
 
 long RepeatDateList::last_valid_value_minus(int val) const {
     long last_value = last_valid_value();
-    if (last_value == 0)
+    if (last_value == 0) {
         return 0;
+    }
 
     return (CalendarDate(last_value) - val).value();
 }
 
 long RepeatDateList::last_valid_value_plus(int val) const {
     long last_value = last_valid_value();
-    if (last_value == 0)
+    if (last_value == 0) {
         return 0;
+    }
 
     return (CalendarDate(last_value) + val).value();
 }
 
 void RepeatDateList::setToLastValue() {
-    if (list_.empty())
+    if (list_.empty()) {
         return;
+    }
     set_value(static_cast<int>(list_.size() - 1));
 }
 
@@ -952,21 +990,25 @@ std::string RepeatDateList::valueAsString() const {
 }
 
 std::string RepeatDateList::value_as_string(int index) const {
-    if (list_.empty())
+    if (list_.empty()) {
         return string("0");
+    }
     if (index >= 0 && index < static_cast<int>(list_.size())) {
         return ecf::convert_to<std::string>(list_[index]);
     }
-    if (index < 0)
+    if (index < 0) {
         return ecf::convert_to<std::string>(list_[0]);
-    if (index >= static_cast<int>(list_.size()))
+    }
+    if (index >= static_cast<int>(list_.size())) {
         return ecf::convert_to<std::string>(list_[list_.size() - 1]);
+    }
     return std::string();
 }
 
 std::string RepeatDateList::next_value_as_string() const {
-    if (list_.empty())
+    if (list_.empty()) {
         return string("0");
+    }
 
     int index = currentIndex_;
     index++;
@@ -974,8 +1016,9 @@ std::string RepeatDateList::next_value_as_string() const {
 }
 
 std::string RepeatDateList::prev_value_as_string() const {
-    if (list_.empty())
+    if (list_.empty()) {
         return string("0");
+    }
 
     int index = currentIndex_;
     index--;
@@ -1009,8 +1052,9 @@ void RepeatDateList::change(const std::string& newValue) {
 }
 
 void RepeatDateList::changeValue(long the_new_index) {
-    if (list_.empty())
+    if (list_.empty()) {
         return;
+    }
 
     if (the_new_index < 0 || the_new_index >= static_cast<int>(list_.size())) {
         std::stringstream ss;
@@ -1023,8 +1067,9 @@ void RepeatDateList::changeValue(long the_new_index) {
 }
 
 void RepeatDateList::set_value(long the_new_index) {
-    if (list_.empty())
+    if (list_.empty()) {
         return;
+    }
 
     // Note: the node is incremented one past, the last value
     // In Node we increment() then check for validity
@@ -1082,8 +1127,9 @@ RepeatInteger::RepeatInteger() = default;
 
 bool RepeatInteger::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatInteger*>(rb);
-    if (!rhs)
+    if (!rhs) {
         return false;
+    }
     return operator==(*rhs);
 }
 
@@ -1098,16 +1144,20 @@ long RepeatInteger::last_valid_value() const {
 
 long RepeatInteger::valid_value(long value) const {
     if (delta_ > 0) {
-        if (value < start_)
+        if (value < start_) {
             return start_;
-        if (value > end_)
+        }
+        if (value > end_) {
             return end_;
+        }
         return value;
     }
-    if (value > start_)
+    if (value > start_) {
         return start_;
-    if (value < end_)
+    }
+    if (value < end_) {
         return end_;
+    }
     return value;
 }
 
@@ -1278,15 +1328,17 @@ RepeatEnumerated::RepeatEnumerated(const std::string& variable, const std::vecto
 }
 
 int RepeatEnumerated::end() const {
-    if (theEnums_.empty())
+    if (theEnums_.empty()) {
         return 0;
+    }
     return static_cast<int>(theEnums_.size() - 1);
 }
 
 bool RepeatEnumerated::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatEnumerated*>(rb);
-    if (!rhs)
+    if (!rhs) {
         return false;
+    }
     return operator==(*rhs);
 }
 
@@ -1346,8 +1398,9 @@ long RepeatEnumerated::last_valid_value() const {
 
 void RepeatEnumerated::setToLastValue() {
     currentIndex_ = static_cast<int>(theEnums_.size() - 1);
-    if (currentIndex_ < 0)
+    if (currentIndex_ < 0) {
         currentIndex_ = 0;
+    }
     incr_state_change_no();
 }
 
@@ -1356,8 +1409,9 @@ std::string RepeatEnumerated::valueAsString() const {
     if (!theEnums_.empty()) {
 
         // Returns the last valid value
-        if (currentIndex_ < 0)
+        if (currentIndex_ < 0) {
             return theEnums_[0]; // return first
+        }
 
         if (currentIndex_ >= static_cast<int>(theEnums_.size())) {
             return theEnums_[theEnums_.size() - 1]; // return last
@@ -1376,28 +1430,34 @@ std::string RepeatEnumerated::value_as_string(int index) const {
 }
 
 std::string RepeatEnumerated::next_value_as_string() const {
-    if (theEnums_.empty())
+    if (theEnums_.empty()) {
         return string();
+    }
 
     int index = currentIndex_;
     index++;
-    if (index < 0)
+    if (index < 0) {
         return theEnums_[0]; // return first
-    if (index >= static_cast<int>(theEnums_.size()))
+    }
+    if (index >= static_cast<int>(theEnums_.size())) {
         return theEnums_[theEnums_.size() - 1]; // return last
+    }
     return theEnums_[index];
 }
 
 std::string RepeatEnumerated::prev_value_as_string() const {
-    if (theEnums_.empty())
+    if (theEnums_.empty()) {
         return string();
+    }
 
     int index = currentIndex_;
     index--;
-    if (index < 0)
+    if (index < 0) {
         return theEnums_[0]; // return first
-    if (index >= static_cast<int>(theEnums_.size()))
+    }
+    if (index >= static_cast<int>(theEnums_.size())) {
         return theEnums_[theEnums_.size() - 1]; // return last
+    }
     return theEnums_[index];
 }
 
@@ -1490,15 +1550,17 @@ RepeatString::RepeatString(const std::string& variable, const std::vector<std::s
 }
 
 int RepeatString::end() const {
-    if (theStrings_.empty())
+    if (theStrings_.empty()) {
         return 0;
+    }
     return static_cast<int>(theStrings_.size() - 1);
 }
 
 bool RepeatString::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatString*>(rb);
-    if (!rhs)
+    if (!rhs) {
         return false;
+    }
     return operator==(*rhs);
 }
 
@@ -1515,10 +1577,12 @@ void RepeatString::reset() {
 
 long RepeatString::last_valid_value() const {
     if (!theStrings_.empty()) {
-        if (currentIndex_ < 0)
+        if (currentIndex_ < 0) {
             return 0;
-        if (currentIndex_ >= static_cast<int>(theStrings_.size()))
+        }
+        if (currentIndex_ >= static_cast<int>(theStrings_.size())) {
             return static_cast<long>(theStrings_.size() - 1);
+        }
         return currentIndex_;
     }
     return 0;
@@ -1528,10 +1592,12 @@ std::string RepeatString::next_value_as_string() const {
     if (!theStrings_.empty()) {
         int index = currentIndex_;
         index++;
-        if (index < 0)
+        if (index < 0) {
             return theStrings_[0]; // return first
-        if (index >= static_cast<int>(theStrings_.size()))
+        }
+        if (index >= static_cast<int>(theStrings_.size())) {
             return theStrings_[theStrings_.size() - 1]; // return last
+        }
         return theStrings_[index];
     }
     return string();
@@ -1541,10 +1607,12 @@ std::string RepeatString::prev_value_as_string() const {
     if (!theStrings_.empty()) {
         int index = currentIndex_;
         index--;
-        if (index < 0)
+        if (index < 0) {
             return theStrings_[0]; // return first
-        if (index >= static_cast<int>(theStrings_.size()))
+        }
+        if (index >= static_cast<int>(theStrings_.size())) {
             return theStrings_[theStrings_.size() - 1]; // return last
+        }
         return theStrings_[index];
     }
     return string();
@@ -1557,14 +1625,16 @@ void RepeatString::increment() {
 
 void RepeatString::setToLastValue() {
     currentIndex_ = static_cast<int>(theStrings_.size() - 1);
-    if (currentIndex_ < 0)
+    if (currentIndex_ < 0) {
         currentIndex_ = 0;
+    }
     incr_state_change_no();
 }
 
 std::string RepeatString::valueAsString() const {
-    if (!theStrings_.empty())
+    if (!theStrings_.empty()) {
         return theStrings_[last_valid_value()];
+    }
     return std::string();
 }
 
@@ -1638,8 +1708,9 @@ bool RepeatString::operator==(const RepeatString& rhs) const {
 
 bool RepeatDay::compare(RepeatBase* rb) const {
     auto* rhs = dynamic_cast<RepeatDay*>(rb);
-    if (!rhs)
+    if (!rhs) {
         return false;
+    }
     return operator==(*rhs);
 }
 

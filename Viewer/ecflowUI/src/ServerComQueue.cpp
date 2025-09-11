@@ -47,8 +47,9 @@ ServerComQueue::ServerComQueue(ServerHandler* server, ClientInvoker* client)
 
     connect(timer_, SIGNAL(timeout()), this, SLOT(slotRun()));
 
-    if (client_)
+    if (client_) {
         createThread();
+    }
 }
 
 // the deletion is inititated by logout()
@@ -60,8 +61,9 @@ ServerComQueue::~ServerComQueue() {
 void ServerComQueue::createThread() {
     assert(client_);
 
-    if (comThread_)
+    if (comThread_) {
         delete comThread_;
+    }
 
     // We create a ServerComThread here. At this point the thread is not doing anything.
     comThread_ = new ServerComThread(server_, client_);
@@ -99,8 +101,9 @@ void ServerComQueue::enable() {
 }
 
 void ServerComQueue::disable() {
-    if (state_ == DisabledState)
+    if (state_ == DisabledState) {
         return;
+    }
 
     UiLogS(server_).dbg() << "ComQueue::disable -->";
 
@@ -122,16 +125,18 @@ void ServerComQueue::disable() {
     }
 
     // Clear the current task
-    if (current_)
+    if (current_) {
         current_.reset();
+    }
 
     taskStarted_ = false;
 }
 
 // This is a special mode to reload the whole ClientInvoker
 bool ServerComQueue::prepareReset() {
-    if (state_ == DisabledState || state_ == ResetState || state_ == SuspendedState)
+    if (state_ == DisabledState || state_ == ResetState || state_ == SuspendedState) {
         return false;
+    }
 
     // Stop the timer
     stopTimer();
@@ -188,8 +193,9 @@ void ServerComQueue::endReset() {
 //  -it is ready to accept tasks
 //  -its timer is running
 void ServerComQueue::start() {
-    if (!client_ || !comThread_)
+    if (!client_ || !comThread_) {
         return;
+    }
 
     if (state_ != DisabledState && state_ != ResetState) {
         UiLogS(server_).dbg() << "ComQueue::start -->";
@@ -240,8 +246,9 @@ void ServerComQueue::stopTimer() {
 
 bool ServerComQueue::hasTask(VTask::Type t) const {
     for (const auto& task : tasks_) {
-        if (task && task->type() == t && task->status() != VTask::CANCELLED && task->status() != VTask::ABORTED)
+        if (task && task->type() == t && task->status() != VTask::CANCELLED && task->status() != VTask::ABORTED) {
             return true;
+        }
     }
     return false;
 }
@@ -251,14 +258,17 @@ bool ServerComQueue::isNextTask(VTask::Type t) const {
 }
 
 void ServerComQueue::addTask(VTask_ptr task) {
-    if (!task)
+    if (!task) {
         return;
+    }
 
-    if (isNextTask(VTask::ZombieListTask) && tasks_.back()->type() == task->type())
+    if (isNextTask(VTask::ZombieListTask) && tasks_.back()->type() == task->type()) {
         return;
+    }
 
-    if (state_ == DisabledState || state_ == ResetState || (task && task->type() == VTask::ResetTask))
+    if (state_ == DisabledState || state_ == ResetState || (task && task->type() == VTask::ResetTask)) {
         return;
+    }
 
     tasks_.push_back(task);
     if (state_ != SuspendedState) {
@@ -276,11 +286,13 @@ void ServerComQueue::addNewsTask() {
 }
 
 void ServerComQueue::addNewsTask(const std::string& key, const std::string& value) {
-    if (state_ == DisabledState || state_ == ResetState)
+    if (state_ == DisabledState || state_ == ResetState) {
         return;
+    }
 
-    if (isNextTask(VTask::NewsTask))
+    if (isNextTask(VTask::NewsTask)) {
         return;
+    }
 
     VTask_ptr task = VTask::create(VTask::NewsTask);
     if (!key.empty()) {
@@ -292,44 +304,52 @@ void ServerComQueue::addNewsTask(const std::string& key, const std::string& valu
 }
 
 void ServerComQueue::addSyncTask() {
-    if (state_ == DisabledState || state_ == ResetState)
+    if (state_ == DisabledState || state_ == ResetState) {
         return;
+    }
 
-    if (isNextTask(VTask::SyncTask))
+    if (isNextTask(VTask::SyncTask)) {
         return;
+    }
 
     VTask_ptr task = VTask::create(VTask::SyncTask);
     addTask(task);
 }
 
 void ServerComQueue::addSuiteListTask() {
-    if (state_ == DisabledState || state_ == ResetState)
+    if (state_ == DisabledState || state_ == ResetState) {
         return;
+    }
 
-    if (isNextTask(VTask::SuiteListTask))
+    if (isNextTask(VTask::SuiteListTask)) {
         return;
+    }
 
     VTask_ptr task = VTask::create(VTask::SuiteListTask);
     addTask(task);
 }
 
 void ServerComQueue::addSuiteAutoRegisterTask() {
-    if (state_ == DisabledState || state_ == ResetState)
+    if (state_ == DisabledState || state_ == ResetState) {
         return;
+    }
 
-    if (isNextTask(VTask::SuiteAutoRegisterTask))
+    if (isNextTask(VTask::SuiteAutoRegisterTask)) {
         return;
+    }
 
     VTask_ptr task = VTask::create(VTask::SuiteAutoRegisterTask);
     addTask(task);
 }
 
 void ServerComQueue::addServerVersionTask() {
-    if (state_ == DisabledState || state_ == ResetState)
+    if (state_ == DisabledState || state_ == ResetState) {
         return;
+    }
 
-    if (isNextTask(VTask::ServerVersionTask))
+    if (isNextTask(VTask::ServerVersionTask)) {
         return;
+    }
 
     VTask_ptr task = VTask::create(VTask::ServerVersionTask);
     addTask(task);
@@ -563,20 +583,24 @@ void ServerComQueue::slotTaskFailed(std::string msg) {
 
     UiLogS(server_).dbg() << "ComQueue::slotTaskFailed -->";
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
-    if (current_)
+    if (current_) {
         UiLogS(server_).dbg() << " current_ exists";
-    else
+    }
+    else {
         UiLogS(server_).dbg() << " current_ is null";
+    }
 #endif
 
     // We need to leave the load mode
     endReset();
 
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
-    if (current_)
+    if (current_) {
         UiLogS(server_).dbg() << " current_ exists";
-    else
+    }
+    else {
         UiLogS(server_).dbg() << " current_ is null";
+    }
 #endif
 
 #ifdef _UI_SERVERCOMQUEUE_DEBUG

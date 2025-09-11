@@ -107,8 +107,9 @@ void ChangeNotifyEditor::addRow(QString label, QList<PropertyLine*> lineLst, QWi
 
 void ChangeNotifyEditor::slotRowSelected(const QModelIndex& idx) {
     // if(idx.row() == stacked_->currentIndex())
-    if (idx.row() == tab_->currentIndex())
+    if (idx.row() == tab_->currentIndex()) {
         return;
+    }
 
     if (idx.row() >= 0 && idx.row() < tab_->count()) {
         tab_->setCurrentIndex(idx.row());
@@ -141,8 +142,9 @@ void ChangeNotifyEditorModel::add(QString label, QList<VProperty*> propLst) {
 
                 // Get the description
                 if (p->parent()) {
-                    if (VProperty* np = VConfig::instance()->find("notification." + p->parent()->strName()))
+                    if (VProperty* np = VConfig::instance()->find("notification." + p->parent()->strName())) {
                         d.desc_ = np->param("description");
+                    }
                 }
             }
         }
@@ -172,8 +174,9 @@ QVariant ChangeNotifyEditorModel::data(const QModelIndex& index, int role) const
     }
 
     int row = index.row();
-    if (row < 0 || row >= data_.count())
+    if (row < 0 || row >= data_.count()) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
@@ -201,8 +204,9 @@ QVariant ChangeNotifyEditorModel::data(const QModelIndex& index, int role) const
 bool ChangeNotifyEditorModel::setData(const QModelIndex& index, const QVariant& value, int role) {
     if (index.column() == 0) {
         int row = index.row();
-        if (row < 0 || row >= data_.count())
+        if (row < 0 || row >= data_.count()) {
             return false;
+        }
 
         if (role == Qt::CheckStateRole) {
             bool checked           = (value.toInt() == Qt::Checked) ? true : false;
@@ -217,8 +221,9 @@ bool ChangeNotifyEditorModel::setData(const QModelIndex& index, const QVariant& 
 }
 
 QVariant ChangeNotifyEditorModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || role != Qt::DisplayRole)
+    if (orient != Qt::Horizontal || role != Qt::DisplayRole) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     if (role == Qt::DisplayRole) {
         switch (section) {
@@ -261,8 +266,9 @@ Qt::ItemFlags ChangeNotifyEditorModel::flags(const QModelIndex& index) const {
 
     Qt::ItemFlags defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
-    if (index.isValid() && index.column() == 0)
+    if (index.isValid() && index.column() == 0) {
         defaultFlags = defaultFlags | Qt::ItemIsUserCheckable;
+    }
 
     return defaultFlags;
 }

@@ -257,9 +257,20 @@ bool empty(const Range<T>& rng) {
 
 struct Limits
 {
+    /*
+     * The limits of a Repeat is described by a 0-based range.
+     *
+     * - begin: the first index in the range (inclusive, meaning it is a valid index)
+     * - end: the last index in the range (exclusive, meaning it is one past the last valid index)
+     *
+     * - current is expected to be in the interval [begin, end[
+     */
     size_t begin;
     size_t end;
     size_t current;
+
+    bool is_first() const { return current == begin; }
+    bool is_last() const { return current + 1 >= end; }
 };
 
 Limits limits_of(const RepeatBase* repeat) {
@@ -292,7 +303,7 @@ Limits limits_of(const RepeatBase* repeat) {
         return {rng.begin(), rng.end(), rng.current_index()};
     }
     assert(false); // Should never be reached!
-    return {0, 0, 0};
+    return {0, 1, 0};
 }
 
 template <typename T>

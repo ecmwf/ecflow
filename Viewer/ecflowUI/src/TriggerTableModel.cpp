@@ -48,10 +48,12 @@ void TriggerTableModel::setTriggerCollector(TriggerTableCollector* tc) {
 }
 
 bool TriggerTableModel::hasData() const {
-    if (tc_)
+    if (tc_) {
         return tc_->size() > 0;
-    else
+    }
+    else {
         return false;
+    }
 }
 
 int TriggerTableModel::columnCount(const QModelIndex& /*parent */) const {
@@ -59,8 +61,9 @@ int TriggerTableModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int TriggerTableModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -82,8 +85,9 @@ QVariant TriggerTableModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    if (row < 0 || row >= static_cast<int>(tc_->size()))
+    if (row < 0 || row >= static_cast<int>(tc_->size())) {
         return {};
+    }
 
     // QString id=columns_->id(index.column());
 
@@ -95,8 +99,9 @@ QVariant TriggerTableModel::data(const QModelIndex& index, int role) const {
         if (VAttribute* a = t->isAttribute()) {
             if (role == Qt::DisplayRole) {
                 QStringList d = a->data();
-                if (VNode* pn = a->parent())
+                if (VNode* pn = a->parent()) {
                     d.append(QString::fromStdString(pn->absNodePath()));
+                }
                 return d;
             }
             else if (role == Qt::ToolTipRole) {
@@ -113,11 +118,13 @@ QVariant TriggerTableModel::data(const QModelIndex& index, int role) const {
                     lst << vnode->stateColour() << vnode->realStateColour();
                     return lst;
                 }
-                else
+                else {
                     return vnode->stateColour();
+                }
             }
-            else if (role == Qt::ForegroundRole)
+            else if (role == Qt::ForegroundRole) {
                 return vnode->stateFontColour();
+            }
 
             else if (role == Qt::ToolTipRole) {
                 QString txt = vnode->toolTip();
@@ -128,14 +135,18 @@ QVariant TriggerTableModel::data(const QModelIndex& index, int role) const {
                 return VIcon::pixmapList(vnode, nullptr);
             }
             else if (role == NodeTypeRole) {
-                if (vnode->isTask())
+                if (vnode->isTask()) {
                     return 2;
-                else if (vnode->isSuite())
+                }
+                else if (vnode->isSuite()) {
                     return 0;
-                else if (vnode->isFamily())
+                }
+                else if (vnode->isFamily()) {
                     return 1;
-                else if (vnode->isAlias())
+                }
+                else if (vnode->isAlias()) {
                     return 3;
+                }
                 return 0;
             }
             else if (role == NodeTypeForegroundRole) {
@@ -155,18 +166,21 @@ QVariant TriggerTableModel::data(const QModelIndex& index, int role) const {
     // BackgroundRole is already used for the node rendering
     if (role == Qt::UserRole && mode_ != NodeMode) {
         const std::set<TriggerCollector::Mode>& modes = items[row]->modes();
-        if (modes.find(TriggerCollector::Normal) != modes.end())
+        if (modes.find(TriggerCollector::Normal) != modes.end()) {
             return {};
-        else
+        }
+        else {
             return QColor(233, 242, 247);
+        }
     }
 
     return {};
 }
 
 QVariant TriggerTableModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal)
+    if (orient != Qt::Horizontal) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     return {};
 }
@@ -206,29 +220,34 @@ VInfo_ptr TriggerTableModel::nodeInfo(const QModelIndex& index) {
 
 QModelIndex TriggerTableModel::itemToIndex(TriggerTableItem* item) {
     if (item) {
-        for (std::size_t i = 0; i < tc_->items().size(); i++)
-            if (tc_->items()[i] == item)
+        for (std::size_t i = 0; i < tc_->items().size(); i++) {
+            if (tc_->items()[i] == item) {
                 return index(i, 0);
+            }
+        }
     }
 
     return {};
 }
 
 TriggerTableItem* TriggerTableModel::indexToItem(const QModelIndex& index) const {
-    if (!hasData())
+    if (!hasData()) {
         return nullptr;
+    }
 
     int row = index.row();
-    if (row < 0 || row >= static_cast<int>(tc_->size()))
+    if (row < 0 || row >= static_cast<int>(tc_->size())) {
         return nullptr;
+    }
 
     const std::vector<TriggerTableItem*>& items = tc_->items();
     return items[row];
 }
 
 void TriggerTableModel::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>&) {
-    if (!hasData())
+    if (!hasData()) {
         return;
+    }
 
     int num = tc_->items().size();
     for (int i = 0; i < num; i++) {

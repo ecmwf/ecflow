@@ -71,14 +71,18 @@ ZombieAttr::ZombieAttr(ecf::Child::ZombieType t,
 }
 
 bool ZombieAttr::operator==(const ZombieAttr& rhs) const {
-    if (child_cmds_ != rhs.child_cmds_)
+    if (child_cmds_ != rhs.child_cmds_) {
         return false;
-    if (zombie_type_ != rhs.zombie_type_)
+    }
+    if (zombie_type_ != rhs.zombie_type_) {
         return false;
-    if (action_ != rhs.action_)
+    }
+    if (action_ != rhs.action_) {
         return false;
-    if (zombie_lifetime_ != rhs.zombie_lifetime_)
+    }
+    if (zombie_lifetime_ != rhs.zombie_lifetime_) {
         return false;
+    }
     return true;
 }
 
@@ -102,10 +106,12 @@ void ZombieAttr::write(std::string& ret) const {
 }
 
 bool ZombieAttr::fob(ecf::Child::CmdType child_cmd) const {
-    if (action_ != ZombieCtrlAction::FOB)
+    if (action_ != ZombieCtrlAction::FOB) {
         return false;
-    if (child_cmds_.empty())
+    }
+    if (child_cmds_.empty()) {
         return true;
+    }
 
     // If we have child commands specified, then the action is only applicable for that child cmd
     // for all other child cmds we block
@@ -118,10 +124,12 @@ bool ZombieAttr::fob(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::fail(ecf::Child::CmdType child_cmd) const {
-    if (action_ != ZombieCtrlAction::FAIL)
+    if (action_ != ZombieCtrlAction::FAIL) {
         return false;
-    if (child_cmds_.empty())
+    }
+    if (child_cmds_.empty()) {
         return true;
+    }
 
     // If we have child commands specified, then the action is only applicable for that child cmd
     // for all other child cmds we block
@@ -134,10 +142,12 @@ bool ZombieAttr::fail(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::adopt(ecf::Child::CmdType child_cmd) const {
-    if (action_ != ZombieCtrlAction::ADOPT)
+    if (action_ != ZombieCtrlAction::ADOPT) {
         return false;
-    if (child_cmds_.empty())
+    }
+    if (child_cmds_.empty()) {
         return true;
+    }
 
     // If we have child commands specified, then the action is only applicable for that child cmd
     // for all other child cmds we block
@@ -150,10 +160,12 @@ bool ZombieAttr::adopt(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::remove(ecf::Child::CmdType child_cmd) const {
-    if (action_ != ZombieCtrlAction::REMOVE)
+    if (action_ != ZombieCtrlAction::REMOVE) {
         return false;
-    if (child_cmds_.empty())
+    }
+    if (child_cmds_.empty()) {
         return true;
+    }
 
     // If we have child commands specified, then the action is only applicable for that child cmd
     // for all other child cmds we block
@@ -166,10 +178,12 @@ bool ZombieAttr::remove(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::block(ecf::Child::CmdType child_cmd) const {
-    if (action_ != ZombieCtrlAction::BLOCK)
+    if (action_ != ZombieCtrlAction::BLOCK) {
         return false;
-    if (child_cmds_.empty())
+    }
+    if (child_cmds_.empty()) {
         return true;
+    }
 
     // If we have child commands specified, then the action is only applicable for that child cmd
     // for all other child cmds we block
@@ -182,10 +196,12 @@ bool ZombieAttr::block(ecf::Child::CmdType child_cmd) const {
 }
 
 bool ZombieAttr::kill(ecf::Child::CmdType child_cmd) const {
-    if (action_ != ZombieCtrlAction::KILL)
+    if (action_ != ZombieCtrlAction::KILL) {
         return false;
-    if (child_cmds_.empty())
+    }
+    if (child_cmds_.empty()) {
         return true;
+    }
 
     // If we have child commands specified, then the action is only applicable for that child cmd
     // for all other child cmds we block
@@ -204,8 +220,9 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
     tokenizer tokenise(string_to_parse, sep);
     std::vector<std::string> tokens;
     std::copy(tokenise.begin(), tokenise.end(), back_inserter(tokens));
-    if (tokens.size() < 2)
+    if (tokens.size() < 2) {
         throw std::runtime_error("ZombieAttr::create failed: Invalid zombie type " + string_to_parse);
+    }
 
     /// expects <zombie_type>:<user_action>:child_cmds:zombie_lifetime
     string str_zombie_type;
@@ -236,10 +253,11 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
     // std::cout << "   zombie_type = " << str_zombie_type << "   user_action = " << action_str <<  "   child_cmds = "
     // << child_cmds<< "   zombie_lifetime = " << lifetime << "\n";
 
-    if (!Child::valid_zombie_type(str_zombie_type))
+    if (!Child::valid_zombie_type(str_zombie_type)) {
         throw std::runtime_error("ZombieAttr::create failed: Invalid zombie type, expected one of [ user | ecf | "
                                  "ecf_pid | ecf_pid_passed | ecf_passwd | path ] but found " +
                                  str_zombie_type + string(":") + string_to_parse);
+    }
 
     if (!action_str.empty() && !ecf::Enumerate<ZombieCtrlAction>::is_valid(action_str)) {
         throw std::runtime_error("ZombieAttr::create failed: Invalid user action, expected one of [ fob | fail | "
@@ -264,10 +282,11 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
         }
     }
 
-    if (action_str.empty() && zombie_lifetime == -1)
+    if (action_str.empty() && zombie_lifetime == -1) {
         throw std::runtime_error(
             "ZombieAttr::create failed: User Action(fob,fail,remove,adopt,block) or lifetime must be specified: " +
             string_to_parse);
+    }
 
     auto zombie_type = Child::zombie_type(str_zombie_type);
     auto action      = Enumerate<ZombieCtrlAction>::to_enum(action_str).value_or(ZombieCtrlAction::BLOCK);

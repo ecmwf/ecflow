@@ -30,12 +30,14 @@ std::string GroupSTCCmd::print() const {
 
 bool GroupSTCCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<GroupSTCCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
 
     const std::vector<STC_Cmd_ptr>& rhsCmdVec = the_rhs->cmdVec();
-    if (cmdVec_.size() != rhsCmdVec.size())
+    if (cmdVec_.size() != rhsCmdVec.size()) {
         return false;
+    }
 
     for (size_t i = 0; i < cmdVec_.size(); i++) {
         if (!cmdVec_[i]->equals(rhsCmdVec[i].get())) {
@@ -47,16 +49,19 @@ bool GroupSTCCmd::equals(ServerToClientCmd* rhs) const {
 }
 
 bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  GroupSTCCmd::handle_server_response\n";
+    }
 
     bool ret_flag = true;
     for (STC_Cmd_ptr subCmd : cmdVec_) {
-        if (!subCmd->handle_server_response(server_reply, cts_cmd, debug))
+        if (!subCmd->handle_server_response(server_reply, cts_cmd, debug)) {
             ret_flag = false; // one of the commands failed
+        }
     }
-    if (!server_reply.cli())
+    if (!server_reply.cli()) {
         return ret_flag;
+    }
 
     /// CLI called from the command line.
     /// This assumes the DefsCmd::handle_server_response() | SNodeCmd::handle_server_response has been called
@@ -65,8 +70,9 @@ bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_
     node_ptr node = server_reply.client_node();
 
     if (defs.get() || node.get()) {
-        if (debug)
+        if (debug) {
             std::cout << "   GroupSTCCmd::handle_server_response *get* | *sync* | *sync_full* called\n";
+        }
 
         /// client --group="get; show"         # where get will call DefsCmd will return defs, from the server
         /// client --group="get; show state"   # where get will call DefsCmd will return defs, from the server
@@ -80,9 +86,10 @@ bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_
         // The show request is only valid if the out bound request to the server
         PrintStyle::Type_t style = cts_cmd->show_style();
         if (style != PrintStyle::NOTHING) {
-            if (debug)
+            if (debug) {
                 std::cout << "   GroupSTCCmd::handle_server_response *show* was called " << PrintStyle::to_string(style)
                           << "\n";
+            }
             if (defs.get()) {
 
                 /// Auto generate externs, before writing to standard out. This can be expensive since
@@ -115,8 +122,9 @@ bool GroupSTCCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_
 
     std::string nodePath;
     if (cts_cmd->why_cmd(nodePath) && defs.get()) {
-        if (debug)
+        if (debug) {
             std::cout << "  GroupSTCCmd::handle_server_response *why* was called\n";
+        }
 
         /// client --group="get; why"          # where get will call DefsCmd will return defs, from the server
         /// client --group="get; why <path>"   # where get will call DefsCmd will return defs, from the server
@@ -135,8 +143,9 @@ void GroupSTCCmd::addChild(STC_Cmd_ptr childCmd) {
 // these two must be opposite of each other
 bool GroupSTCCmd::ok() const {
     for (const auto& i : cmdVec_) {
-        if (!i->ok())
+        if (!i->ok()) {
             return false; // if child is ErrorCmd will return false
+        }
     }
     return true;
 }

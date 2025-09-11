@@ -28,10 +28,12 @@ public:
 
     ~MyObserver() override {
         /* std::cout << "~MyObserver()\n"; */
-        if (defs_)
+        if (defs_) {
             defs_->detach(this);
-        if (node_)
+        }
+        if (node_) {
             node_->detach(this);
+        }
     }
 
     void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) override {}

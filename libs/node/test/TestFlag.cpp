@@ -70,8 +70,9 @@ BOOST_AUTO_TEST_CASE(test_node_flags_parsing) {
     /// Set the flags
     Flag flag;
     std::vector<Flag::Type> flag_list = Flag::list();
-    for (auto& i : flag_list)
+    for (auto& i : flag_list) {
         flag.set(i);
+    }
 
     Flag flag2;
     flag2.set_flag(flag.to_string());

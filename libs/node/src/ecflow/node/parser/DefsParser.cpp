@@ -50,7 +50,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 // #define DEBUG_PARSER 1
 
@@ -94,8 +93,9 @@ public:
         const char* first_token = lineTokens[0].c_str();
         if (Str::local_strcmp(first_token, keyword()) == 0) {
 
-            if (lineTokens.size() < 2)
+            if (lineTokens.size() < 2) {
                 throw std::runtime_error("Alias name missing.");
+            }
 
             addAlias(line, lineTokens);
 
@@ -116,16 +116,18 @@ private:
 
         if (nodeStack().empty() && rootParser()->parsing_node_string()) {
             alias_ptr alias = Alias::create(lineTokens[1], check);
-            if (rootParser()->get_file_type() != PrintStyle::DEFS)
+            if (rootParser()->get_file_type() != PrintStyle::DEFS) {
                 alias->read_state(line, lineTokens);
+            }
             nodeStack().emplace(alias.get(), this);
             rootParser()->set_node_ptr(alias);
             return;
         }
 
         // bad test data can mean that last node is not a suite family or task, will fail parse
-        if (nodeStack().empty())
+        if (nodeStack().empty()) {
             throw std::runtime_error("Add alias failed empty node stack");
+        }
 
         // alias can only be added to tasks
         Task* lastAddedTask = nodeStack_top()->isTask();
@@ -142,8 +144,9 @@ private:
                 popNode();
                 addAlias(line, lineTokens);
             }
-            else
+            else {
                 throw std::runtime_error("Add alias failed, expected task on node stack");
+            }
         }
     }
 };
@@ -185,14 +188,16 @@ public:
 
         const char* first_token = lineTokens[0].c_str();
         if (Str::local_strcmp(first_token, keyword()) == 0) {
-            if (lineTokens.size() < 2)
+            if (lineTokens.size() < 2) {
                 throw std::runtime_error("Task name missing.");
+            }
             addTask(line, lineTokens);
             return true;
         }
         else if (Str::local_strcmp(first_token, "endfamily") == 0) {
-            if (parent())
+            if (parent()) {
                 return parent()->doParse(line, lineTokens);
+            }
         }
         else if (Str::local_strcmp(first_token, "endtask") == 0) { // optional
             popToContainerNode();
@@ -209,16 +214,18 @@ private:
 
         if (nodeStack().empty() && rootParser()->parsing_node_string()) {
             task_ptr task = Task::create(lineTokens[1], check);
-            if (rootParser()->get_file_type() != PrintStyle::DEFS)
+            if (rootParser()->get_file_type() != PrintStyle::DEFS) {
                 task->read_state(line, lineTokens);
+            }
             nodeStack().emplace(task.get(), this);
             rootParser()->set_node_ptr(task);
             return;
         }
 
         // bad test data can mean that last node is not a suite family or task, will fail parse
-        if (nodeStack().empty())
+        if (nodeStack().empty()) {
             throw std::runtime_error("Add task failed empty node stack");
+        }
 
         // end task is optional, so if we get another task, whilst in a task pop the parser
         if (nodeStack_top()->isTask()) {
@@ -229,8 +236,9 @@ private:
         if (lastAddedContainer) {
 
             task_ptr task = Task::create(lineTokens[1], check);
-            if (rootParser()->get_file_type() != PrintStyle::DEFS)
+            if (rootParser()->get_file_type() != PrintStyle::DEFS) {
                 task->read_state(line, lineTokens);
+            }
             nodeStack().emplace(task.get(), this);
             lastAddedContainer->addTask(task);
         }
@@ -285,8 +293,9 @@ public:
         const char* first_token = lineTokens[0].c_str();
         if (Str::local_strcmp(first_token, keyword()) == 0) {
 
-            if (lineTokens.size() < 2)
+            if (lineTokens.size() < 2) {
                 throw std::runtime_error("Family name missing.");
+            }
 
             addFamily(line, lineTokens);
 
@@ -313,8 +322,9 @@ private:
         if (nodeStack().empty() && rootParser()->parsing_node_string()) {
             family_ptr family = Family::create(lineTokens[1], check);
             rootParser()->set_node_ptr(family);
-            if (rootParser()->get_file_type() != PrintStyle::DEFS)
+            if (rootParser()->get_file_type() != PrintStyle::DEFS) {
                 family->read_state(line, lineTokens);
+            }
             nodeStack().emplace(family.get(), this);
         }
         else {
@@ -323,8 +333,9 @@ private:
             if (lastAddedSuite) {
 
                 family_ptr family = Family::create(lineTokens[1], check);
-                if (rootParser()->get_file_type() != PrintStyle::DEFS)
+                if (rootParser()->get_file_type() != PrintStyle::DEFS) {
                     family->read_state(line, lineTokens);
+                }
 
                 nodeStack().emplace(family.get(), this);
                 lastAddedSuite->addFamily(family);
@@ -335,8 +346,9 @@ private:
                 if (lastAddedFamily) {
 
                     family_ptr family = Family::create(lineTokens[1], check);
-                    if (rootParser()->get_file_type() != PrintStyle::DEFS)
+                    if (rootParser()->get_file_type() != PrintStyle::DEFS) {
                         family->read_state(line, lineTokens);
+                    }
 
                     nodeStack().emplace(family.get(), this);
                     lastAddedFamily->addFamily(family);
@@ -404,10 +416,12 @@ public:
         const char* first_token = lineTokens[0].c_str();
         if (Str::local_strcmp(first_token, keyword()) == 0) {
 
-            if (started_)
+            if (started_) {
                 throw std::runtime_error("Can't have hierarchical suites.");
-            if (lineTokens.size() < 2)
+            }
+            if (lineTokens.size() < 2) {
                 throw std::runtime_error("Suite name missing.");
+            }
             started_ = true;
 
             addSuite(line, lineTokens);
@@ -421,8 +435,9 @@ public:
             }
 
             // ... process end suite
-            while (!nodeStack().empty())
+            while (!nodeStack().empty()) {
                 nodeStack().pop();
+            }
             started_ = false; // since this parser is reused
             return true;
         }
@@ -440,12 +455,14 @@ private:
 
         bool check      = (rootParser()->get_file_type() != PrintStyle::NET);
         suite_ptr suite = Suite::create(lineTokens[1], check);
-        if (rootParser()->get_file_type() != PrintStyle::DEFS)
+        if (rootParser()->get_file_type() != PrintStyle::DEFS) {
             suite->read_state(line, lineTokens);
+        }
 
         nodeStack().emplace(suite.get(), this);
-        if (defsfile())
+        if (defsfile()) {
             defsfile()->addSuite(suite);
+        }
         rootParser()->set_node_ptr(suite);
     }
 

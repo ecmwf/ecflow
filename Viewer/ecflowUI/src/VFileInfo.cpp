@@ -38,14 +38,18 @@ QString VFileInfo::formatPermissions() const {
 }
 
 QString VFileInfo::formatSize(unsigned int size) {
-    if (size < 1024)
+    if (size < 1024) {
         return QString::number(size) + " B";
-    else if (size < 1024 * 1024)
+    }
+    else if (size < 1024 * 1024) {
         return QString::number(size / 1024) + " KB";
-    else if (size < 1024 * 1024 * 1024)
+    }
+    else if (size < 1024 * 1024 * 1024) {
         return QString::number(size / (1024 * 1024)) + " MB";
-    else
+    }
+    else {
         return QString::number(static_cast<float>(size) / (1024. * 1024. * 1024.), 'f', 1) + " GB";
+    }
 
     return {};
 }
@@ -65,15 +69,17 @@ QString VFileInfo::formatDateAgo(const std::time_t& t) {
     time_t now = time(nullptr);
 
     int delta = now - t;
-    if (delta < 0)
+    if (delta < 0) {
         delta = 0;
+    }
 
     if (t == 0) {
         return QObject::tr("never");
     }
 
-    if (delta == 1)
+    if (delta == 1) {
         str = QObject::tr("1 second ago");
+    }
 
     else if (delta >= 1 && delta < 60) {
         str = QString::number(delta) + QObject::tr(" second") + ((delta == 1) ? "" : "s") + QObject::tr(" ago");

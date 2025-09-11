@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -32,24 +34,39 @@ void CheckPtCmd::print_only(std::string& os) const {
 
 bool CheckPtCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<CheckPtCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (mode_ != the_rhs->mode())
+    }
+    if (mode_ != the_rhs->mode()) {
         return false;
-    if (check_pt_interval_ != the_rhs->check_pt_interval())
+    }
+    if (check_pt_interval_ != the_rhs->check_pt_interval()) {
         return false;
-    if (check_pt_save_time_alarm_ != the_rhs->check_pt_save_time_alarm())
+    }
+    if (check_pt_save_time_alarm_ != the_rhs->check_pt_save_time_alarm()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
+ecf::authentication_t CheckPtCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t CheckPtCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
+}
+
 bool CheckPtCmd::isWrite() const {
-    if (mode_ != ecf::CheckPt::UNDEFINED)
+    if (mode_ != ecf::CheckPt::UNDEFINED) {
         return true;
-    if (check_pt_interval_ != 0)
+    }
+    if (check_pt_interval_ != 0) {
         return true;
-    if (check_pt_save_time_alarm_ != 0)
+    }
+    if (check_pt_save_time_alarm_ != 0) {
         return true;
+    }
     return false;
 }
 
@@ -162,13 +179,15 @@ static int parse_check_pt_alarm_time(const std::string& the_arg, int colon_pos) 
 }
 
 void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
-    if (ace->debug())
+    if (ace->debug()) {
         cout << "CheckPtCmd::create\n";
+    }
 
     std::string the_arg = vm[theArg()].as<std::string>();
 
-    if (ace->debug())
+    if (ace->debug()) {
         cout << "  CheckPtCmd::create arg = " << the_arg << "\n";
+    }
 
     ecf::CheckPt::Mode m         = ecf::CheckPt::UNDEFINED;
     int check_pt_interval        = 0;
@@ -185,12 +204,15 @@ void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
                 std::string mode     = the_arg.substr(0, colon_pos);
                 std::string interval = the_arg.substr(colon_pos + 1);
 
-                if (mode == "never")
+                if (mode == "never") {
                     m = ecf::CheckPt::NEVER;
-                else if (mode == "on_time")
+                }
+                else if (mode == "on_time") {
                     m = ecf::CheckPt::ON_TIME;
-                else if (mode == "always")
+                }
+                else if (mode == "always") {
                     m = ecf::CheckPt::ALWAYS;
+                }
                 else {
                     std::stringstream ss;
                     ss << "check_pt: Illegal argument(" << the_arg
@@ -202,12 +224,15 @@ void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
             }
         }
         else {
-            if (the_arg == "never")
+            if (the_arg == "never") {
                 m = ecf::CheckPt::NEVER;
-            else if (the_arg == "on_time")
+            }
+            else if (the_arg == "on_time") {
                 m = ecf::CheckPt::ON_TIME;
-            else if (the_arg == "always")
+            }
+            else if (the_arg == "always") {
                 m = ecf::CheckPt::ALWAYS;
+            }
             else {
                 check_pt_interval = parse_check_pt_interval(the_arg);
             }
@@ -215,11 +240,13 @@ void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     }
 
     // testing client interface
-    if (ace->under_test())
+    if (ace->under_test()) {
         return;
+    }
 
-    if (ace->debug())
+    if (ace->debug()) {
         cout << "  CheckPtCmd::create mode = " << m << " check_pt_interval = " << check_pt_interval << "\n";
+    }
 
     cmd = std::make_shared<CheckPtCmd>(m, check_pt_interval, check_pt_save_time_alarm);
 }

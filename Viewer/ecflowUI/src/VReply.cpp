@@ -38,8 +38,9 @@ void VReply::appendText(const std::string& txt) {
 std::string VReply::errorText(const std::string& sep) const {
     std::string s;
     for (size_t i = 0; i < errorText_.size(); i++) {
-        if (i != 0)
+        if (i != 0) {
             s += sep;
+        }
         s += errorText_[i];
     }
     return s;
@@ -48,8 +49,9 @@ std::string VReply::errorText(const std::string& sep) const {
 std::string VReply::warningText(const std::string& sep) const {
     std::string s;
     for (size_t i = 0; i < warningText_.size(); i++) {
-        if (i != 0)
+        if (i != 0) {
             s += sep;
+        }
         s += warningText_[i];
     }
     return s;
@@ -58,8 +60,9 @@ std::string VReply::warningText(const std::string& sep) const {
 std::string VReply::infoText(const std::string& sep) const {
     std::string s;
     for (size_t i = 0; i < infoText_.size(); i++) {
-        if (i != 0)
+        if (i != 0) {
             s += sep;
+        }
         s += infoText_[i];
     }
     return s;

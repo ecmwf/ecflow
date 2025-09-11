@@ -182,10 +182,12 @@ NodeQueryEditor::NodeQueryEditor(QWidget* parent) : QWidget(parent) {
         Q_FOREACH (NodeQueryOption* op, aGrp->options()) {
             NodeQueryOptionEdit* e = nullptr;
             // TODO: use factory here
-            if (op->type() == "string")
+            if (op->type() == "string") {
                 e = new NodeQueryStringOptionEdit(op, attrGrid_, this, false);
-            else if (op->type() == "combo")
+            }
+            else if (op->type() == "combo") {
                 e = new NodeQueryComboOptionEdit(op, attrGrid_, this);
+            }
 
             Q_ASSERT(e);
             attr_[grName] << e;
@@ -229,8 +231,9 @@ NodeQueryEditor::NodeQueryEditor(QWidget* parent) : QWidget(parent) {
 NodeQueryEditor::~NodeQueryEditor() {
     delete query_;
 
-    if (serverFilter_)
+    if (serverFilter_) {
         serverFilter_->removeObserver(this);
+    }
 }
 
 void NodeQueryEditor::setFilterMode(bool b) {
@@ -252,10 +255,12 @@ void NodeQueryEditor::init() {
 
     // Servers
     QStringList servers = query_->servers();
-    if (servers == serverCb_->all())
+    if (servers == serverCb_->all()) {
         serverCb_->clearSelection();
-    else
+    }
+    else {
         serverCb_->setSelection(servers);
+    }
 
     rootLe_->setText(QString::fromStdString(query_->rootNode()));
 
@@ -343,8 +348,9 @@ void NodeQueryEditor::slotOptionEditChanged() {
     if (!initIsOn_) {
         auto* e = static_cast<NodeQueryOptionEdit*>(sender());
         Q_ASSERT(e);
-        if (e->optionId() == "attribute")
+        if (e->optionId() == "attribute") {
             setAttributePanel(attrList_->selection());
+        }
 
         updateQueryTe();
         checkGuiState();
@@ -409,14 +415,16 @@ void NodeQueryEditor::checkGuiState() {
     }
 
     QString t = nodeTabText_;
-    if (query_->hasBasicNodeQueryPart())
+    if (query_->hasBasicNodeQueryPart()) {
         t += "*";
+    }
     tab_->setTabText(0, t);
 
     if (!filterMode_) {
         t = attrTabText_;
-        if (!query_->attrQueryPart().isEmpty())
+        if (!query_->attrQueryPart().isEmpty()) {
             t += "*";
+        }
         tab_->setTabText(1, t);
     }
 }
@@ -458,8 +466,9 @@ void NodeQueryEditor::updateServers() {
 }
 
 void NodeQueryEditor::setServerFilter(ServerFilter* sf) {
-    if (serverFilter_ == sf)
+    if (serverFilter_ == sf) {
         return;
+    }
 
     if (serverFilter_) {
         serverFilter_->removeObserver(this);

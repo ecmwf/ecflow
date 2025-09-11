@@ -10,7 +10,6 @@
 
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/RepeatAttr.hpp"
@@ -19,8 +18,6 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 static const std::vector<std::string> stringList = {std::string("a"), std::string("b"), std::string("c")};
 
@@ -664,7 +661,7 @@ BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
     ECF_NAME_THIS_TEST();
 
     auto check_date = [](int start, int end, int delta) {
-        boost::gregorian::date bdate(from_undelimited_string(boost::lexical_cast<std::string>(start)));
+        auto bdate = boost::gregorian::from_undelimited_string(boost::lexical_cast<std::string>(start));
 
         Repeat rep(RepeatDate("YMD", start, end, delta));
         Repeat rep2(RepeatDate("YMD", start, end, delta));
@@ -672,7 +669,7 @@ BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
 
             // xref repeat date with boost date, essentially checking bdate with rep
             string str_value = boost::lexical_cast<std::string>(rep.value());
-            boost::gregorian::date date2(from_undelimited_string(str_value));
+            auto date2       = boost::gregorian::from_undelimited_string(str_value);
             BOOST_CHECK_MESSAGE(bdate == date2, "expected same value, but found " << bdate << "  " << date2);
 
             // check change value
@@ -682,7 +679,7 @@ BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
 
             // increment repeat and boost date
             rep.increment();
-            bdate += days(delta);
+            bdate += boost::gregorian::days(delta);
         }
     };
 

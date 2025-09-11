@@ -57,15 +57,18 @@ OutputCache::~OutputCache() {
 }
 
 void OutputCache::adjustTimer() {
-    if (items_.isEmpty())
+    if (items_.isEmpty()) {
         stopTimer();
-    else
+    }
+    else {
         startTimer();
+    }
 }
 
 void OutputCache::startTimer() {
-    if (!timer_->isActive())
+    if (!timer_->isActive()) {
         timer_->start(timeOut_);
+    }
 }
 
 void OutputCache::stopTimer() {
@@ -81,8 +84,9 @@ void OutputCache::clear() {
 }
 
 OutputCacheItem* OutputCache::add(VInfo_ptr info, const std::string& sourcePath, VFile_ptr file) {
-    if (!file)
+    if (!file) {
         return nullptr;
+    }
 
     if (info && file && info->isNode() && info->server()) {
         // The key we would store for the item in the map

@@ -56,8 +56,9 @@ family_ptr Family::create_me(const std::string& name) {
 }
 
 bool Family::check_defaults() const {
-    if (fam_gen_variables_ != nullptr)
+    if (fam_gen_variables_ != nullptr) {
         throw std::runtime_error("Family ::check_defaults():  fam_gen_variables_ != nullptr");
+    }
     return NodeContainer::check_defaults();
 }
 
@@ -76,8 +77,9 @@ void Family::begin() {
 }
 
 bool Family::resolveDependencies(JobsParam& jobsParam) {
-    if (jobsParam.check_for_job_generation_timeout())
+    if (jobsParam.check_for_job_generation_timeout()) {
         return false;
+    }
 
     return NodeContainer::resolveDependencies(jobsParam);
 }
@@ -114,8 +116,9 @@ void Family::collateChanges(DefsDelta& changes) const {
 // generated variables --------------------------------------------------------------------------
 
 void Family::update_generated_variables() const {
-    if (!fam_gen_variables_)
+    if (!fam_gen_variables_) {
         fam_gen_variables_ = new FamGenVariables(this);
+    }
     fam_gen_variables_->update_generated_variables();
     update_repeat_genvar();
 }
@@ -128,18 +131,21 @@ const Variable& Family::findGenVariable(const std::string& name) const {
     // AST can reference generated variables. Currently integer based values
     // The family names can be integers
 
-    if (!fam_gen_variables_)
+    if (!fam_gen_variables_) {
         update_generated_variables();
+    }
     const Variable& gen_var = fam_gen_variables_->findGenVariable(name);
-    if (!gen_var.empty())
+    if (!gen_var.empty()) {
         return gen_var;
+    }
 
     return NodeContainer::findGenVariable(name);
 }
 
 void Family::gen_variables(std::vector<Variable>& vec) const {
-    if (!fam_gen_variables_)
+    if (!fam_gen_variables_) {
         update_generated_variables();
+    }
 
     vec.reserve(vec.size() + 3);
     fam_gen_variables_->gen_variables(vec);
@@ -178,10 +184,12 @@ void FamGenVariables::update_generated_variables() const {
 }
 
 const Variable& FamGenVariables::findGenVariable(const std::string& name) const {
-    if (genvar_family_.name() == name)
+    if (genvar_family_.name() == name) {
         return genvar_family_;
-    if (genvar_family1_.name() == name)
+    }
+    if (genvar_family1_.name() == name) {
         return genvar_family1_;
+    }
     return Variable::EMPTY();
 }
 

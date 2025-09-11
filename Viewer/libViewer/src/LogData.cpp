@@ -27,22 +27,26 @@ LogDataItem::LogDataItem(const std::string& line, qint64& refTimeInMs) : type_(N
     // Format is as follows:
     // MSG:[06:46:44 23.4.2018] chd:complete .....
 
-    if (line.size() == 0)
+    if (line.size() == 0) {
         return;
+    }
 
     std::string::size_type pos = line.find("[");
-    if (pos == std::string::npos)
+    if (pos == std::string::npos) {
         return;
+    }
 
     std::string::size_type pos1 = line.find("]", pos);
-    if (pos1 == std::string::npos || pos1 == pos + 1)
+    if (pos1 == std::string::npos || pos1 == pos + 1) {
         return;
+    }
 
     std::string t = line.substr(0, pos);
     std::string d = line.substr(pos + 1, pos1 - pos - 1);
 
-    if (pos1 + 1 < line.size())
+    if (pos1 + 1 < line.size()) {
         entry_ = line.substr(pos1 + 1);
+    }
 
     QDateTime dt = QDateTime::fromString(QString::fromStdString(d), "hh:mm:ss d.M.yyyy");
     dt.setTimeSpec(Qt::UTC);
@@ -73,16 +77,19 @@ LogDataItem::LogDataItem(const std::string& line, qint64& refTimeInMs) : type_(N
 }
 
 qint64 LogDataItem::getTimeInMs(const std::string& line) {
-    if (line.size() == 0)
+    if (line.size() == 0) {
         return 0;
+    }
 
     std::string::size_type pos = line.find("[");
-    if (pos == std::string::npos)
+    if (pos == std::string::npos) {
         return 0;
+    }
 
     std::string::size_type pos1 = line.find("]", pos);
-    if (pos1 == std::string::npos || pos1 == pos + 1)
+    if (pos1 == std::string::npos || pos1 == pos + 1) {
         return 0;
+    }
 
     QString d    = QString::fromStdString(line.substr(pos + 1, pos1 - pos - 1));
     QDateTime dt = QDateTime::fromString(d, "hh:mm:ss d.M.yyyy");
@@ -95,8 +102,9 @@ void LogData::loadFromFile(const std::string& logFile, size_t startPos) {
 
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);
-    if (!log_file.ok())
+    if (!log_file.ok()) {
         throw std::runtime_error("LogData::loadFromFile: Could not open log file " + logFile);
+    }
 
     log_file.setPos(startPos);
 
@@ -129,8 +137,9 @@ void LogData::addLogLine(const std::string& txt) {
 }
 
 void LogData::appendFromText(const std::string& txt) {
-    if (txt.size() < 4 || txt.substr(0, 4) != "MSG:")
+    if (txt.size() < 4 || txt.substr(0, 4) != "MSG:") {
         return;
+    }
 
     QString s = QString::fromStdString(txt);
     if (!s.simplified().isEmpty()) {
@@ -163,8 +172,9 @@ bool LogData::indexOfPeriod(qint64 start, qint64 end, size_t& idxStart, size_t& 
             }
         }
 
-        if (!hasStart)
+        if (!hasStart) {
             return false;
+        }
 
         for (size_t i = idxStart; i < data_.size(); i++) {
             if (data_[i].time_ > endTime) {
@@ -199,14 +209,16 @@ bool LogData::indexOfPeriod(qint64 start, qint64 end, size_t& idxStart, size_t& 
         }
     }
 
-    if (!hasStart)
+    if (!hasStart) {
         return false;
+    }
 
     for (size_t i = idxStart; i < data_.size(); i++) {
         if (data_[i].time_ > endTime) {
             idxEnd = (i == 0) ? 0 : (i - 1);
-            if (idxEnd < idxStart)
+            if (idxEnd < idxStart) {
                 idxEnd = idxStart;
+            }
             return true;
         }
     }

@@ -1,7 +1,7 @@
 .. _how_to_mirror_a_remote_task:
 
 How to mirror a remote Task?
-----------------------------
+****************************
 
 The following instructions describe the necessary steps to use the ability to
 synchronise (i.e. :term:`mirror`) the status and attributes, such as variables,
@@ -16,7 +16,7 @@ The deployment of this feature has the following requirements:
  - (optional) Authentication credentials, stored as JSON file
 
 Setup the ecFlow Server
-^^^^^^^^^^^^^^^^^^^^^^^
+=======================
 
 Deploy the `remote` ecFlow server, as per the :ref:`regular instructions<starting_the_ecflow_server>`
 and specifying username/password access configuration.
@@ -29,7 +29,7 @@ client.
 
 
 Define the Suite with a `mirrored` Task
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=======================================
 
 On the :term:`suite` definition file, create a :term:`task` (which will mirror
 the remote task status) and assign it a :term:`mirror` attribute. The mirror
@@ -69,7 +69,7 @@ at :term:`suite` level:
      for variables that eventually get synchronised.
 
 Deploy the Suite with a `mirrored` Task
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=======================================
 
 Load the suite definition containing the :term:`mirror` attribute.
 

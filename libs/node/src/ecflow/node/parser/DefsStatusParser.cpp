@@ -18,11 +18,11 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 bool DefsStatusParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("DefsStatusParser::doParse: Invalid defstatus :" + line);
+    }
 
     if (!DState::isValid(lineTokens[1])) {
         throw std::runtime_error("DefsStatusParser::doParse: Invalid defstatus state :" + line);

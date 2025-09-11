@@ -38,11 +38,13 @@ const std::string& VNodeListItem::serverName() const {
 }
 
 bool VNodeListItem::sameAs(VNode* node) const {
-    if (!node)
+    if (!node) {
         return false;
+    }
 
-    if (node_)
+    if (node_) {
         return (node_ == node);
+    }
 
     return (server_ == node->server() && path_ == node->absNodePath());
 }
@@ -77,8 +79,9 @@ VNodeList::~VNodeList() {
 }
 
 VNodeListItem* VNodeList::itemAt(int i) {
-    if (i >= 0 && i < static_cast<int>(data_.size()))
+    if (i >= 0 && i < static_cast<int>(data_.size())) {
         return data_.at(i);
+    }
 
     return nullptr;
 }
@@ -92,12 +95,14 @@ void VNodeList::setMaxNum(int maxNum) {
 }
 
 void VNodeList::add(VNode* node) {
-    if (contains(node))
+    if (contains(node)) {
         return;
+    }
 
     ServerHandler* s = node->server();
-    if (!s)
+    if (!s) {
         return;
+    }
 
     attach(s);
 
@@ -110,8 +115,9 @@ void VNodeList::add(VNode* node) {
 }
 
 void VNodeList::remove(VNode* node) {
-    if (!node)
+    if (!node) {
         return;
+    }
 
     for (auto it = data_.begin(); it != data_.end(); it++) {
         if ((*it)->sameAs(node)) {
@@ -133,8 +139,9 @@ void VNodeList::trim() {
     int cnt     = data_.size();
     bool doTrim = (cnt > 0 && cnt > maxNum_);
 
-    if (!doTrim)
+    if (!doTrim) {
         return;
+    }
 
     Q_EMIT beginRemoveRows(0, cnt - maxNum_ - 1);
 
@@ -155,8 +162,9 @@ void VNodeList::trim() {
 
 bool VNodeList::contains(VNode* node) {
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-        if ((*it)->sameAs(node))
+        if ((*it)->sameAs(node)) {
             return true;
+        }
     }
 
     return false;
@@ -218,16 +226,18 @@ void VNodeList::serverScan(ServerHandler* server) {
                 data_.push_back(*it);
                 serverCnt_[server]++;
             }
-            else
+            else {
                 delete *it;
+            }
         }
         else {
             data_.push_back(*it);
         }
     }
 
-    if (serverCnt_[server] == 0)
+    if (serverCnt_[server] == 0) {
         detach(server);
+    }
 }
 
 void VNodeList::attach(ServerHandler* s) {

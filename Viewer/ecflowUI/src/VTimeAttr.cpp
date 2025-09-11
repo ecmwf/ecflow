@@ -88,18 +88,21 @@ QStringList VTimeAttr::data(bool /*firstLine*/) const {
         const ecf::Calendar& calendar = parent_->calendar();
         if (dataType_ == TimeData) {
             const std::vector<ecf::TimeAttr>& v = parent_->node_->timeVec();
-            if (index_ < static_cast<int>(v.size()))
+            if (index_ < static_cast<int>(v.size())) {
                 atype->encode(calendar, v[index_], s);
+            }
         }
         else if (dataType_ == TodayData) {
             const std::vector<ecf::TodayAttr>& v = parent_->node_->todayVec();
-            if (index_ < static_cast<int>(v.size()))
+            if (index_ < static_cast<int>(v.size())) {
                 atype->encode(calendar, v[index_], s);
+            }
         }
         else if (dataType_ == CronData) {
             const std::vector<ecf::CronAttr>& v = parent_->node_->crons();
-            if (index_ < static_cast<int>(v.size()))
+            if (index_ < static_cast<int>(v.size())) {
                 atype->encode(calendar, v[index_], s);
+            }
         }
     }
     return s;

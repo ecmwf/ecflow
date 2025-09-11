@@ -138,6 +138,24 @@ BOOST_AUTO_TEST_CASE(test_chrono_parsing_invalid_value_throws) {
     BOOST_CHECK_THROW(Instant::parse("20000631T000000"), expected);
 }
 
+BOOST_AUTO_TEST_CASE(test_chrono_experimental) {
+    ECF_NAME_THIS_TEST();
+
+    {
+        ecf::Instant instant;
+        BOOST_CHECK_EQUAL(ecf::Instant::format(instant), "19700101T000000");
+        BOOST_CHECK_EQUAL(ecf::coerce_from_instant_into_seconds(instant), 0);
+        BOOST_CHECK_EQUAL(ecf::coerce_from_instant_into<std::chrono::nanoseconds>(instant), 0);
+    }
+
+    {
+        ecf::Instant instant = ecf::Instant::parse("20230601T000000");
+        BOOST_CHECK_EQUAL(ecf::Instant::format(instant), "20230601T000000");
+        BOOST_CHECK_EQUAL(ecf::coerce_from_instant_into_seconds(instant), 1685577600);
+        BOOST_CHECK_EQUAL(ecf::coerce_from_instant_into<std::chrono::nanoseconds>(instant), 1685577600000000000);
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

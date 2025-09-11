@@ -65,19 +65,24 @@ static void extract_late_keyword_arguments(std::shared_ptr<ecf::LateAttr> late, 
                 int hour           = 0;
                 int min            = 0;
                 bool relative      = ecf::TimeSeries::getTime(second, hour, min);
-                if (first == "submitted")
+                if (first == "submitted") {
                     late->add_submitted(hour, min);
-                else if (first == "active")
+                }
+                else if (first == "active") {
                     late->add_active(hour, min);
-                else if (first == "complete")
+                }
+                else if (first == "complete") {
                     late->add_complete(hour, min, relative);
-                else
+                }
+                else {
                     throw std::runtime_error(
                         "extract_late_keyword_arguments: keyword arguments, expected [submitted | active | complete]");
+                }
             }
-            else
+            else {
                 throw std::runtime_error("extract_late_keyword_arguments: expected keyword arguments to be a string, "
                                          "ie Late(submitted='00:20',active='15:00',complete='+30:00')");
+            }
         }
     }
 }
@@ -99,16 +104,18 @@ py::object cron_raw_constructor(py::tuple args, py::dict kw) {
     for (int i = 1; i < len(args); ++i) {
         if (py::extract<std::string>(args[i]).check()) {
             std::string time_series = py::extract<std::string>(args[i]);
-            if (time_series.empty())
+            if (time_series.empty()) {
                 throw std::runtime_error("cron_raw_constructor: Empty string, please pass a valid time, i.e '12:30'");
+            }
             return args[0].attr("__init__")(time_series, kw); // calls -> init(const std::string& ts, dict kw)
         }
         if (py::extract<ecf::TimeSeries>(args[i]).check()) {
             ecf::TimeSeries time_series = py::extract<ecf::TimeSeries>(args[i]);
             return args[0].attr("__init__")(time_series, kw); // calls -> init(const ecf::TimeSeries& ts, dict kw)
         }
-        else
+        else {
             throw std::runtime_error("cron_raw_constructor: expects string | TimeSeries and keyword arguments");
+        }
     }
     throw std::runtime_error("cron_raw_constructor: expects string | TimeSeries and keyword arguments !!");
     return py::object();
@@ -128,18 +135,23 @@ static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, 
                 pyutil_list_to_int_vec(second, int_vec);
 
                 //  expected keywords are: days_of_week,last_week_days_ofThe_month, days_of_month, months
-                if (first == "days_of_week")
+                if (first == "days_of_week") {
                     cron->addWeekDays(int_vec);
-                else if (first == "days_of_month")
+                }
+                else if (first == "days_of_month") {
                     cron->addDaysOfMonth(int_vec);
-                else if (first == "months")
+                }
+                else if (first == "months") {
                     cron->addMonths(int_vec);
-                else if (first == "last_week_days_of_the_month")
+                }
+                else if (first == "last_week_days_of_the_month") {
                     cron->add_last_week_days_of_month(int_vec);
-                else
+                }
+                else {
                     throw std::runtime_error(
                         "extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | "
                         "last_week_days_of_the_month | days_of_month | months | last_day_of_the_month");
+                }
             }
             else if (py::extract<bool>(dict[keys[i]]).check()) {
                 if (first == "last_day_of_the_month") {

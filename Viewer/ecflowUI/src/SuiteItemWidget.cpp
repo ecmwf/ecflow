@@ -94,8 +94,9 @@ QWidget* SuiteItemWidget::realWidget() {
 void SuiteItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 

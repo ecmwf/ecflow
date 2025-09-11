@@ -59,33 +59,6 @@ public:
     void restart() override { BasicServer::restart(); }
 
     bool reloadWhiteListFile(std::string& errorMsg) override { return BasicServer::reloadWhiteListFile(errorMsg); }
-    bool reloadPasswdFile(std::string& errorMsg) override { return BasicServer::reloadPasswdFile(errorMsg); }
-
-    bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) override {
-        return BasicServer::authenticateReadAccess(user, custom_user, passwd);
-    }
-    bool authenticateReadAccess(const std::string& user,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::string& path) override {
-        return BasicServer::authenticateReadAccess(user, custom_user, passwd, path);
-    }
-    bool authenticateReadAccess(const std::string& user,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::vector<std::string>& paths) override {
-        return BasicServer::authenticateReadAccess(user, custom_user, passwd, paths);
-    }
-
-    bool authenticateWriteAccess(const std::string& user) override {
-        return BasicServer::authenticateWriteAccess(user);
-    }
-    bool authenticateWriteAccess(const std::string& user, const std::string& path) override {
-        return BasicServer::authenticateWriteAccess(user, path);
-    }
-    bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) override {
-        return BasicServer::authenticateWriteAccess(user, paths);
-    }
 
     bool lock(const std::string& user) override { return BasicServer::lock(user); }
     void unlock() override { BasicServer::unlock(); }
@@ -164,8 +137,9 @@ BOOST_AUTO_TEST_CASE(test_server) {
     cout << "  Find free port to start server, starting with port " << the_port1 << "\n";
 
     auto the_port = ecf::convert_to<int>(the_port1);
-    while (!EcfPortLock::is_free(the_port))
+    while (!EcfPortLock::is_free(the_port)) {
         the_port++;
+    }
     std::string port = ecf::convert_to<std::string>(the_port);
     EcfPortLock::create(port);
     cout << "  Found free port: " << port << " ";
@@ -190,8 +164,9 @@ BOOST_AUTO_TEST_CASE(test_server) {
             the_port = ecf::convert_to<int>(port);
             the_port++;
 
-            while (!EcfPortLock::is_free(the_port))
+            while (!EcfPortLock::is_free(the_port)) {
                 the_port++;
+            }
             port = ecf::convert_to<std::string>(the_port);
             EcfPortLock::create(port);
             cout << "  Found free port: " << port << "\n";

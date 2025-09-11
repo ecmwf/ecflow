@@ -29,7 +29,7 @@ def build_toc():
 .. _python_api:
 
 {title}
-{"/" * len(title)}
+{"*" * len(title)}
 
 """
     names = set()
@@ -39,7 +39,7 @@ def build_toc():
             title = category["title"]
             t += f"""
 {title}
-{"-" * len(title)}
+{"=" * len(title)}
 """
             for name in category["items"]:
                 t += f"""    - :py:class:`ecflow.{name}`\n"""
@@ -47,7 +47,7 @@ def build_toc():
 
         t += """
 Api
----
+===
 
 .. toctree::
    :maxdepth: 1

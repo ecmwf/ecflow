@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -94,22 +96,36 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
 
 bool ReplaceNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<ReplaceNodeCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (!UserCmd::equals(rhs))
+    }
+    if (!UserCmd::equals(rhs)) {
         return false;
+    }
     if (createNodesAsNeeded_ != the_rhs->createNodesAsNeeded()) {
         return false;
     }
-    if (force_ != the_rhs->force())
+    if (force_ != the_rhs->force()) {
         return false;
-    if (pathToNode_ != the_rhs->pathToNode())
+    }
+    if (pathToNode_ != the_rhs->pathToNode()) {
         return false;
-    if (path_to_defs_ != the_rhs->path_to_defs())
+    }
+    if (path_to_defs_ != the_rhs->path_to_defs()) {
         return false;
-    if (clientDefs_ != the_rhs->the_client_defs())
+    }
+    if (clientDefs_ != the_rhs->the_client_defs()) {
         return false;
+    }
     return true;
+}
+
+ecf::authentication_t ReplaceNodeCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t ReplaceNodeCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
@@ -151,20 +167,22 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     return doJobSubmission(as);
 }
 
-bool ReplaceNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, pathToNode_);
-}
+// bool ReplaceNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, pathToNode_);
+// }
 
 void ReplaceNodeCmd::print(std::string& os) const {
     std::string path_to_client_defs = path_to_defs_;
-    if (path_to_client_defs.empty())
+    if (path_to_client_defs.empty()) {
         path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
+    }
     user_cmd(os, CtsApi::to_string(CtsApi::replace(pathToNode_, path_to_client_defs, createNodesAsNeeded_, force_)));
 }
 void ReplaceNodeCmd::print_only(std::string& os) const {
     std::string path_to_client_defs = path_to_defs_;
-    if (path_to_client_defs.empty())
+    if (path_to_client_defs.empty()) {
         path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
+    }
     os += CtsApi::to_string(CtsApi::replace(pathToNode_, path_to_client_defs, createNodesAsNeeded_, force_));
 }
 
@@ -208,8 +226,9 @@ void ReplaceNodeCmd::create(Cmd_ptr& cmd,
                             AbstractClientEnv* clientEnv) const {
     vector<string> args = vm[arg()].as<vector<string>>();
 
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         dumpVecArgs(ReplaceNodeCmd::arg(), args);
+    }
 
     if (args.size() < 2) {
         std::stringstream ss;
@@ -223,10 +242,12 @@ void ReplaceNodeCmd::create(Cmd_ptr& cmd,
     std::string pathToDefsFile = args[1];
     bool createNodesAsNeeded   = true; // parent arg
     bool force                 = false;
-    if (args.size() == 3 && args[2] == "false")
+    if (args.size() == 3 && args[2] == "false") {
         createNodesAsNeeded = false;
-    if (args.size() == 4 && args[3] == "force")
+    }
+    if (args.size() == 4 && args[3] == "force") {
         force = true;
+    }
 
     cmd = std::make_shared<ReplaceNodeCmd>(pathToNode, createNodesAsNeeded, pathToDefsFile, force);
 }

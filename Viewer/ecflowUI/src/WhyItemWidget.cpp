@@ -87,8 +87,9 @@ QWidget* WhyItemWidget::realWidget() {
 void WhyItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 
@@ -135,8 +136,9 @@ void WhyItemWidget::infoFailed(VReply* reply) {
                      Time-related attributes might show out-of-date values.";
 
     QString err = QString::fromStdString(reply->errorText());
-    if (!err.isEmpty())
+    if (!err.isEmpty()) {
         s = s + "\n" + err;
+    }
 
     messageLabel_->showWarning(s);
     load();
@@ -169,8 +171,9 @@ QString WhyItemWidget::why() const {
 
 QString WhyItemWidget::makeHtml(const std::vector<std::string>& bottomUpTxt,
                                 const std::vector<std::string>& topDownTxt) const {
-    if (bottomUpTxt.empty() && topDownTxt.empty())
+    if (bottomUpTxt.empty() && topDownTxt.empty()) {
         return {};
+    }
 
     QString s = "<table width=\'100%\'>";
 
@@ -232,15 +235,18 @@ void WhyItemWidget::anchorClicked(const QUrl& link) {
 
 // After each sync we need to reaload the contents
 void WhyItemWidget::serverSyncFinished() {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 
     // We do not track changes when the item is not selected
-    if (!selected_ || !active_)
+    if (!selected_ || !active_) {
         return;
+    }
 
-    if (!info_)
+    if (!info_) {
         return;
+    }
 
     // For any change we nee to reload
     load();

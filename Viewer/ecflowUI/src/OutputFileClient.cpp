@@ -182,14 +182,16 @@ void OutputFileClient::slotRead() {
             int prog = 0;
             if (expected_ > 0) {
                 prog = static_cast<int>(100. * static_cast<float>(total_) / static_cast<float>(expected_));
-                if (prog > 100)
+                if (prog > 100) {
                     prog = 100;
+                }
                 Q_EMIT progress(QString::number(lastProgress_) + "/" + QString::number(expected_ / progressChunk_) +
                                     " " + progressUnits_ + " transferred",
                                 prog);
             }
-            else
+            else {
                 Q_EMIT progress(QString::number(lastProgress_) + " " + progressUnits_ + " transferred", prog);
+            }
         }
     }
 }
@@ -349,8 +351,9 @@ int OutputFileClient::maxProgress() const {
 }
 
 void OutputFileClient::setDir(VDir_ptr dir) {
-    if (dir_ && dir && dir_.get() == dir.get())
+    if (dir_ && dir && dir_.get() == dir.get()) {
         return;
+    }
 
     dir_ = dir;
     estimateExpectedSize();

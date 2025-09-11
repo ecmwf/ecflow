@@ -35,8 +35,9 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
 #endif
     vec_.clear();
     passwd_file_ = file;
-    if (debug)
+    if (debug) {
         std::cout << __func__ << "  " << passwd_file_ << " opening...\n";
+    }
 
     std::vector<std::string> lines;
     if (!File::splitFileIntoLines(passwd_file_, lines, true /* ignore empty lines */)) {
@@ -45,8 +46,9 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
         errorMsg += " (";
         errorMsg += strerror(errno);
         errorMsg += ")";
-        if (debug)
+        if (debug) {
             std::cout << dump() << "\n";
+        }
         return false;
     }
 
@@ -54,12 +56,14 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
     size_t lines_size       = lines.size();
     for (size_t i = 0; i < lines_size; ++i) {
 
-        if (lines[i].empty())
+        if (lines[i].empty()) {
             continue;
+        }
 
         // ignore/remove all comments
-        if (lines[i][0] == '#')
+        if (lines[i][0] == '#') {
             continue;
+        }
         std::string theLine           = lines[i];
         string::size_type comment_pos = theLine.find("#");
         if (comment_pos != std::string::npos) {
@@ -69,8 +73,9 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
         ecf::algorithm::trim(theLine); // remove leading and trailing spaces
         std::vector<std::string> lineTokens;
         Str::split(theLine, lineTokens);
-        if (lineTokens.empty())
+        if (lineTokens.empty()) {
             continue;
+        }
 
         // version should be at the start
         if (!foundVersionNumber) {
@@ -93,8 +98,9 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
         }
     }
 
-    if (debug)
+    if (debug) {
         std::cout << dump();
+    }
 
     // Now check the user is unique for a given host/port:
     //   fred host 3141 xxxx
@@ -102,8 +108,9 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
     size_t vec_size = vec_.size();
     for (size_t i = 0; i < vec_size; i++) {
         for (size_t k = 0; k < vec_size; k++) {
-            if (i == k)
+            if (i == k) {
                 continue;
+            }
             if (vec_[i].user() == vec_[k].user() && vec_[i].host() == vec_[k].host() &&
                 vec_[i].port() == vec_[k].port()) {
                 std::stringstream ss;

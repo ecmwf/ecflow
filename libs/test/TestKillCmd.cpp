@@ -17,9 +17,9 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -29,8 +29,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 ///
 /// \note This is used to INVOKE a SINGLE test. Easier for debugging
@@ -76,19 +74,23 @@ static bool kill_cmd(bool kill_task) {
     std::string kill_path;
     {
         suite_ptr suite;
-        if (kill_task)
+        if (kill_task) {
             suite = theDefs.add_suite("test_kill_task");
-        else
+        }
+        else {
             suite = theDefs.add_suite("test_kill_suite");
+        }
         suite->addVariable(Variable("ECF_TRIES", "1")); // do not try again
         family_ptr fam = suite->add_family("family");
         task_ptr task  = fam->add_task("t0");
         task->addMeter(Meter("meter", 0, 200, 100)); // Make sure it run long enough, to receive kill, on slow systems
         task->addVerify(VerifyAttr(NState::ABORTED, 1)); // task should abort 1 times
-        if (kill_task)
+        if (kill_task) {
             kill_path = task->absNodePath();
-        else
+        }
+        else {
             kill_path = suite->absNodePath();
+        }
     }
 
     // *******************************************************************

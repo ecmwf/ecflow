@@ -13,14 +13,13 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/Pid.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
-using namespace boost;
 
 void dump_path(const fs::path& path) {
     ECF_TEST_DBG(<< "path = " << path);
@@ -220,8 +219,9 @@ BOOST_AUTO_TEST_CASE(test_get_last_n_lines_from_log) {
 
     // Populate the log file
     std::string msg = "This is message ";
-    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)
+    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i) {
         LOG(Log::MSG, msg << i);
+    }
 
     // Now check, getting the lines
     {
@@ -277,8 +277,9 @@ BOOST_AUTO_TEST_CASE(test_get_first_n_lines_from_log) {
     // Populate the log file
     const int NO_OF_LINES_IN_LOG_FILE = 200;
     std::string msg                   = "This is message ";
-    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)
+    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i) {
         LOG(Log::MSG, msg << i);
+    }
 
     // Now check, getting the lines
     {
@@ -355,8 +356,9 @@ BOOST_AUTO_TEST_CASE(test_get_log_timing) {
     // Populate the log file
     const int NO_OF_LINES_IN_LOG_FILE = 20000;
     std::string msg                   = "This is message ";
-    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)
+    for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i) {
         LOG(Log::MSG, msg << i);
+    }
 
     DurationTimer timer;
 

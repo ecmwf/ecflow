@@ -18,8 +18,9 @@
 #include "TextPagerDocument_p.hpp"
 
 TextPagerSection::~TextPagerSection() {
-    if (d.document)
+    if (d.document) {
         d.document->takeTextSection(this);
+    }
 }
 
 QString TextPagerSection::text() const {

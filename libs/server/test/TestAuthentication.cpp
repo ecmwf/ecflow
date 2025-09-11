@@ -8,12 +8,24 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/core/DurationTimer.hpp"
-
+#include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 
-using namespace ecf;
+#include <boost/test/unit_test.hpp>
 
-ScopedDurationTimer::~ScopedDurationTimer() {
-    std::cout << msg_ << " " << (double)elapsed().total_milliseconds() / (double)1000 << "s\n";
+#include "ecflow/test/scaffold/Naming.hpp"
+
+BOOST_AUTO_TEST_SUITE(U_Server)
+
+BOOST_AUTO_TEST_SUITE(T_Authentication)
+
+BOOST_AUTO_TEST_CASE(test_authentication_basic) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_MESSAGE(false, "Test not implemented");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE_END()

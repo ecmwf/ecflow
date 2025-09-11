@@ -56,7 +56,9 @@ set(test_srcs
   test/TestClientConfigurations.cpp
   test/TestClientEnvironment.cpp
   test/TestClientOptions.cpp
+  test/TestClientRetry.cpp
   test/TestClientInterface.cpp
+  test/TestHostsFile.cpp
   test/TestJobGenOnly.cpp
   test/TestLifeCycle.cpp
   test/TestInitAddVariables.cpp
@@ -100,7 +102,6 @@ ecbuild_add_test(
     test_harness.base
     test_harness.client
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    Boost::timer
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   DEPENDS
     ecflow_server # the server is launched to support tests

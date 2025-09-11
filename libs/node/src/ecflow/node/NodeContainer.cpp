@@ -85,10 +85,12 @@ NodeContainer& NodeContainer::operator=(const NodeContainer& rhs) {
 NodeContainer::~NodeContainer() = default;
 
 bool NodeContainer::check_defaults() const {
-    if (order_state_change_no_ != 0)
+    if (order_state_change_no_ != 0) {
         throw std::runtime_error("NodeContainer::check_defaults(): order_state_change_no_ != 0");
-    if (add_remove_state_change_no_ != 0)
+    }
+    if (add_remove_state_change_no_ != 0) {
         throw std::runtime_error("NodeContainer::check_defaults(): add_remove_state_change_no_ != 0");
+    }
     return Node::check_defaults();
 }
 
@@ -133,8 +135,9 @@ void NodeContainer::requeue(Requeue_args& args) {
     Node::requeue(args);
 
     // For negative numbers, do nothing, i.e. do not clear
-    if (args.clear_suspended_in_child_nodes_ >= 0)
+    if (args.clear_suspended_in_child_nodes_ >= 0) {
         args.clear_suspended_in_child_nodes_++;
+    }
 
     // If the node `default status` == COMPLETE, we don't log the change of state when re-queueing the descendants.
     // Without this optimization, all children would change state to QUEUED, and eventually change back to COMPLETE.
@@ -225,18 +228,21 @@ bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy, bool ht
 void NodeContainer::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) const {
     /// There no point doing a OrderMemento if children have been added/delete
     if (add_remove_state_change_no_ > changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<ChildrenMemento>(nodes_));
     }
     else if (order_state_change_no_ > changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         std::vector<std::string> order_vec;
         order_vec.reserve(nodes_.size());
 
-        for (const auto& n : nodes_)
+        for (const auto& n : nodes_) {
             order_vec.push_back(n->name());
+        }
         comp->add(std::make_shared<OrderMemento>(order_vec));
     }
 
@@ -414,8 +420,9 @@ void NodeContainer::move_peer(Node* src, Node* dest) {
 
 boost::posix_time::time_duration NodeContainer::sum_runtime() {
     boost::posix_time::time_duration rt;
-    for (const auto& n : nodes_)
+    for (const auto& n : nodes_) {
         rt += n->sum_runtime();
+    }
     set_runtime(rt);
     return rt;
 }
@@ -451,11 +458,13 @@ bool NodeContainer::calendarChanged(const ecf::Calendar& c,
 }
 
 bool NodeContainer::hasAutoCancel() const {
-    if (Node::hasAutoCancel())
+    if (Node::hasAutoCancel()) {
         return true;
+    }
     for (const auto& n : nodes_) {
-        if (n->hasAutoCancel())
+        if (n->hasAutoCancel()) {
             return true;
+        }
     }
     return false;
 }
@@ -513,11 +522,13 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam) {
 }
 
 bool NodeContainer::has_time_based_attributes() const {
-    if (Node::has_time_based_attributes())
+    if (Node::has_time_based_attributes()) {
         return true;
+    }
     for (const auto& node : nodes_) {
-        if (node->has_time_based_attributes())
+        if (node->has_time_based_attributes()) {
             return true;
+        }
     }
     return false;
 }
@@ -583,8 +594,9 @@ bool NodeContainer::isAddChildOk(Node* theChild, std::string& errorMsg) const {
     if (theTaskChild) {
 
         node_ptr theTask = find_by_name(theChild->name());
-        if (!theTask.get())
+        if (!theTask.get()) {
             return true;
+        }
 
         std::stringstream ss;
         ss << "Task/Family of name " << theChild->name() << " already exists in container node " << name();
@@ -596,8 +608,9 @@ bool NodeContainer::isAddChildOk(Node* theChild, std::string& errorMsg) const {
     if (theFamilyChild) {
 
         node_ptr theFamily = find_by_name(theChild->name());
-        if (!theFamily.get())
+        if (!theFamily.get()) {
             return true;
+        }
 
         std::stringstream ss;
         ss << "Family/Task of name " << theChild->name() << " already exists in container node " << name();
@@ -749,12 +762,14 @@ node_ptr NodeContainer::find_node_up_the_tree(const std::string& the_name) const
 
     size_t not_used;
     node_ptr fnd_node = findImmediateChild(the_name, not_used);
-    if (fnd_node)
+    if (fnd_node) {
         return fnd_node;
+    }
 
     Node* the_parent = parent();
-    if (the_parent)
+    if (the_parent) {
         return the_parent->find_node_up_the_tree(the_name);
+    }
     return node_ptr();
 }
 
@@ -771,8 +786,9 @@ node_ptr NodeContainer::find_relative_node(const std::vector<std::string>& pathT
     }
     cout << "\n";
 #endif
-    if (pathToNode.empty())
+    if (pathToNode.empty()) {
         return node_ptr();
+    }
     auto pathSize = static_cast<int>(pathToNode.size());
 
 #ifdef DEBUG_FIND_NODE
@@ -786,8 +802,9 @@ node_ptr NodeContainer::find_relative_node(const std::vector<std::string>& pathT
     while (index < pathSize) {
         the_node = the_node->findImmediateChild(pathToNode[index], child_pos);
         if (the_node) {
-            if (index == pathSize - 1)
+            if (index == pathSize - 1) {
                 return the_node;
+            }
             index++;
         }
         else {
@@ -801,8 +818,9 @@ void NodeContainer::find_closest_matching_node(const std::vector<std::string>& p
                                                int indexIntoPathNode,
                                                node_ptr& closest_matching_node) {
     auto pathSize = static_cast<int>(pathToNode.size());
-    if (indexIntoPathNode >= pathSize)
+    if (indexIntoPathNode >= pathSize) {
         return;
+    }
 
     int index = indexIntoPathNode;
     if (name() == pathToNode[indexIntoPathNode]) {
@@ -825,8 +843,9 @@ void NodeContainer::match_closest_children(const std::vector<std::string>& pathT
                                            int indexIntoPathNode,
                                            node_ptr& closest_matching_node) {
     auto pathSize = static_cast<int>(pathToNode.size());
-    if (indexIntoPathNode >= pathSize)
+    if (indexIntoPathNode >= pathSize) {
         return;
+    }
 
     bool lastIndex = (indexIntoPathNode == pathSize - 1);
     if (lastIndex) {
@@ -897,8 +916,9 @@ std::string NodeContainer::find_node_path(const std::string& type, const std::st
 
 bool NodeContainer::hasTimeDependencies() const {
     for (const auto& n : nodes_) {
-        if (n->hasTimeDependencies())
+        if (n->hasTimeDependencies()) {
             return true;
+        }
     }
     return false;
 }
@@ -1076,8 +1096,9 @@ bool NodeContainer::operator==(const NodeContainer& rhs) const {
 }
 
 bool NodeContainer::checkInvariants(std::string& errorMsg) const {
-    if (!Node::checkInvariants(errorMsg))
+    if (!Node::checkInvariants(errorMsg)) {
         return false;
+    }
 
     for (const auto& n : nodes_) {
         if (n->parent() != this) {
@@ -1144,8 +1165,9 @@ std::string NodeContainer::archive_path() const {
     Defs* the_defs   = defs();
     if (the_defs) {
         port = the_defs->server_state().find_variable(ecf::environment::ECF_PORT);
-        if (port.empty())
+        if (port.empty()) {
             port = Str::DEFAULT_PORT_NUMBER();
+        }
     }
     Host host;
     the_archive_file_name = host.prefix_host_and_port(port, the_archive_file_name);
@@ -1156,8 +1178,9 @@ std::string NodeContainer::archive_path() const {
 }
 
 void NodeContainer::archive() {
-    if (nodes_.empty())
+    if (nodes_.empty()) {
         return; // nothing to archive
+    }
 
     SuiteChanged1 changed(suite());
 
@@ -1215,12 +1238,15 @@ void NodeContainer::swap(NodeContainer& rhs) {
 }
 
 void NodeContainer::restore_on_begin_or_requeue() {
-    if (!get_flag().is_set(ecf::Flag::ARCHIVED))
+    if (!get_flag().is_set(ecf::Flag::ARCHIVED)) {
         return;
-    if (!nodes_.empty())
+    }
+    if (!nodes_.empty()) {
         return;
-    if (!fs::exists(archive_path()))
+    }
+    if (!fs::exists(archive_path())) {
         return;
+    }
 
     // Node::requeue(...) will clear ecf::Flag::RESTORED, set in restore()
     try {
@@ -1287,11 +1313,13 @@ void NodeContainer::restore() {
 }
 
 bool NodeContainer::has_archive() const {
-    if (get_flag().is_set(ecf::Flag::ARCHIVED))
+    if (get_flag().is_set(ecf::Flag::ARCHIVED)) {
         return true;
+    }
     for (auto& n : nodes_) {
-        if (n->has_archive())
+        if (n->has_archive()) {
             return true;
+        }
     }
     return false;
 }
@@ -1322,8 +1350,9 @@ void NodeContainer::remove_archived_files() {
     // Find *all* archived files in ECF_HOME
     std::vector<fs::path> archived_file_vec;
     File::find_files_with_extn(ecf_home, ".check", archived_file_vec);
-    if (archived_file_vec.empty())
+    if (archived_file_vec.empty()) {
         return;
+    }
 
     // if this nodes archive file is a prefix for any archived file, then it is child archived file and needs
     // to be deleted. i.e. if /ecflow is being deleted then:

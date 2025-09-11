@@ -15,6 +15,8 @@
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -53,11 +55,21 @@ void AbortCmd::print(std::string& os) const {
 
 bool AbortCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<AbortCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (reason_ != the_rhs->reason())
+    }
+    if (reason_ != the_rhs->reason()) {
         return false;
+    }
     return TaskCmd::equals(rhs);
+}
+
+ecf::authentication_t AbortCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t AbortCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr AbortCmd::doHandleRequest(AbstractServer* as) const {
@@ -73,8 +85,9 @@ STC_Cmd_ptr AbortCmd::doHandleRequest(AbstractServer* as) const {
         SuiteChanged1 changed(submittable_->suite());
 
         string theReason = reason_;
-        if (theReason.empty())
+        if (theReason.empty()) {
             theReason = "Trap raised in job file";
+        }
 
         submittable_->aborted(theReason); // will set task->set_state(NState::ABORTED);
     }
@@ -106,10 +119,11 @@ void AbortCmd::addOption(boost::program_options::options_description& desc) cons
 void AbortCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     std::string reason = vm[arg()].as<std::string>();
 
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         cout << "  AbortCmd::create " << AbortCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
              << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
              << clientEnv->task_try_no() << ") reason(" << reason << ")\n";
+    }
 
     std::string errorMsg;
     if (!clientEnv->checkTaskPathAndPassword(errorMsg)) {

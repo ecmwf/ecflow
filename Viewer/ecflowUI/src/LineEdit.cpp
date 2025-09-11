@@ -41,8 +41,9 @@ LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
 }
 
 void LineEdit::setDecoration(QPixmap pix) {
-    if (!iconLabel_)
+    if (!iconLabel_) {
         iconLabel_ = new QLabel(this);
+    }
 
     iconLabel_->setPixmap(pix);
     iconLabel_->setProperty("lineEdit", "true");

@@ -18,15 +18,12 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-using namespace boost::gregorian;
 
 // #define DEBUG_PARSER 1
 
 template <class T>
-ostream& operator<<(ostream& os, const vector<T>& v) {
-    copy(v.begin(), v.end(), ostream_iterator<T>(cout, ","));
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+    std::copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, ","));
     return os;
 }
 
@@ -68,8 +65,9 @@ bool Parser::doParse(const std::string& line, std::vector<std::string>& lineToke
         cerr << " " << p->keyword();
     }
     cerr << ") Trying parent ";
-    if (parent())
+    if (parent()) {
         cout << "Parser::" << parent()->keyword();
+    }
     cerr << "\n";
 #endif
 
@@ -122,11 +120,13 @@ std::unordered_map<Node*, bool>& Parser::defStatusMap() const {
 
 void Parser::dumpStackTop(const std::string& msg, const std::string& msg2) const {
     std::cout << msg << "  '" << msg2 << "' ++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-    if (rootParser_->nodeStack_.empty())
+    if (rootParser_->nodeStack_.empty()) {
         std::cout << "nodeStack_ is EMPTY\n";
-    else
+    }
+    else {
         std::cout << "TOP = " << rootParser_->nodeStack_.top().first->debugType() << " '"
                   << rootParser_->nodeStack_.top().first->name() << "'\n";
+    }
 }
 
 void Parser::addParser(Parser* p) {
@@ -145,11 +145,11 @@ void Parser::popToContainerNode() const {
 }
 
 void Parser::dump(const std::vector<std::string>& lineTokens) {
-    cout << "tokens:";
+    std::cout << "tokens:";
     for (const auto& lineToken : lineTokens) {
-        cout << " '" << lineToken << "' ";
+        std::cout << " '" << lineToken << "' ";
     }
-    cout << "\n";
+    std::cout << "\n";
 }
 
 #ifdef SHOW_PARSER_STATS

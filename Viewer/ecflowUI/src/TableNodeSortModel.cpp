@@ -44,20 +44,23 @@ QModelIndex TableNodeSortModel::nodeToIndex(const VNode* node) {
 
 void TableNodeSortModel::selectionChanged(QModelIndexList lst) {
     QModelIndexList lstm;
-    Q_FOREACH (QModelIndex idx, lst)
+    Q_FOREACH (QModelIndex idx, lst) {
         lstm << mapToSource(idx);
+    }
 
     nodeModel_->selectionChanged(lstm);
 }
 
 bool TableNodeSortModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
-    if (skipSort_)
+    if (skipSort_) {
         return true;
+    }
 
     auto id = static_cast<TableNodeModel::ColumnType>(left.column());
 
-    if (id == TableNodeModel::PathColumn)
+    if (id == TableNodeModel::PathColumn) {
         return left.row() < right.row();
+    }
 
     else if (id == TableNodeModel::MeterColumn) {
         return left.data(AbstractNodeModel::SortRole).toInt() < right.data(AbstractNodeModel::SortRole).toInt();
@@ -82,8 +85,9 @@ ModelColumn* TableNodeSortModel::columns() const {
 }
 
 void TableNodeSortModel::sort(int column, Qt::SortOrder order) {
-    if (!skipSort_)
+    if (!skipSort_) {
         QSortFilterProxyModel::sort(column, order);
+    }
 }
 
 void TableNodeSortModel::skipSortingBegin() {

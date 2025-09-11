@@ -82,8 +82,9 @@ public:
     Expression& operator=(Expression const& f) = delete;
 
     bool operator==(const Expression& rhs) const {
-        if (free_ != rhs.free_)
+        if (free_ != rhs.free_) {
             return false;
+        }
         return vec_ == rhs.vec_;
     }
     bool operator!=(const Expression& rhs) const { return !operator==(rhs); }

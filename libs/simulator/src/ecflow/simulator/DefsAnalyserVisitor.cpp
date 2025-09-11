@@ -57,11 +57,13 @@ void DefsAnalyserVisitor::analyse(Node* node, std::set<Node*>& dependentNodes, b
     // Do a depth first search to find the root cause of the blockage
     // ***************************************************************
 
-    if (analysedNodes_.find(node) != analysedNodes_.end())
+    if (analysedNodes_.find(node) != analysedNodes_.end()) {
         return;
+    }
     analysedNodes_.insert(node);
-    if (node->state() == NState::COMPLETE)
+    if (node->state() == NState::COMPLETE) {
         return;
+    }
 
     if (node->state() == NState::QUEUED) {
         std::vector<std::string> theReasonWhy;
@@ -111,8 +113,9 @@ void DefsAnalyserVisitor::analyseExpressions(Node* node,
     Indent l1(ctx_);
 
     ss_ << l1;
-    if (dependent)
+    if (dependent) {
         ss_ << "DEPENDENT ";
+    }
     if (trigger) {
         ss_ << node->debugNodePath();
         ss_ << " holding on trigger expression '";

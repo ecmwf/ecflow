@@ -24,8 +24,9 @@ bool GenericParser::doParse(const std::string& line, std::vector<std::string>& l
     // examples:
     //    generic fred va1 val2 # some comment
     //    generic fred # another comment
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("GenericParser::doParse: Invalid generic :" + line);
+    }
 
     if (nodeStack().empty()) {
         throw std::runtime_error("GenericParser::doParse: Could not add generic as node stack is empty at line: " +
@@ -36,8 +37,9 @@ bool GenericParser::doParse(const std::string& line, std::vector<std::string>& l
     std::vector<std::string> values;
     values.reserve(line_tokens_size);
     for (size_t i = 2; i < line_tokens_size; i++) {
-        if (lineTokens[i][0] == '#')
+        if (lineTokens[i][0] == '#') {
             break;
+        }
         values.push_back(lineTokens[i]);
     }
 

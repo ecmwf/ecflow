@@ -12,24 +12,21 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
 
@@ -71,8 +68,9 @@ BOOST_AUTO_TEST_CASE(test_today_single_slot) {
     {
         // Initialise clock with todays date and time, then create a today attribute
         // one hour past the clock todays time. The node should be free to run.
-        boost::posix_time::ptime theLocalTime    = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
-        boost::posix_time::ptime time_minus_hour = theLocalTime - hours(1);
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
+        auto time_minus_hour = theLocalTime - boost::posix_time::hours(1);
 
         suite_ptr suite = theDefs.add_suite("test_today_single_slot");
         ClockAttr clockAttr(theLocalTime, false, true /*positive gain*/);
@@ -88,7 +86,8 @@ BOOST_AUTO_TEST_CASE(test_today_single_slot) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_today_single_slot.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_today_relative_time_series) {
@@ -135,7 +134,8 @@ BOOST_AUTO_TEST_CASE(test_today_relative_time_series) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_today_relative_time_series.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
@@ -163,9 +163,10 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
     {
         // Initialise clock with a fixed date and time, then create a today attribute
         // with a time series, so that task runs 3 times
-        boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010, 6, 21), time_duration(10, 0, 0));
-        boost::posix_time::ptime time1        = theLocalTime + minutes(1);
-        boost::posix_time::ptime time2        = theLocalTime + minutes(7);
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(10, 0, 0));
+        auto time1 = theLocalTime + boost::posix_time::minutes(1);
+        auto time2 = theLocalTime + boost::posix_time::minutes(7);
 
         suite_ptr suite = theDefs.add_suite("test_today_real_time_series");
         ClockAttr clockAttr(theLocalTime, false);
@@ -186,7 +187,8 @@ BOOST_AUTO_TEST_CASE(test_today_real_time_series) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_today_real_time_series.def"));
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

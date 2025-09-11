@@ -1,7 +1,7 @@
 .. _ecflow_as_a_monitoring_device:
 
 ecFlow as a monitoring device
-/////////////////////////////
+*****************************
 
 When hundreds of tiny/frequent jobs must be managed on a single system, it may be more efficient not to let ecFlow server create each instance of a job, and to avoid queuing system submission. ecFlow can still be used for monitoring only purpose.
 

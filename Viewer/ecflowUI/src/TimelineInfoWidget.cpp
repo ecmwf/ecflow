@@ -61,8 +61,9 @@ void TimelineInfoModel::determineRowsInPeriod() {
     firstRowInPeriod_ = -1;
     lastRowInPeriod_  = -1;
 
-    if (!data_)
+    if (!data_) {
         return;
+    }
 
     for (unsigned int i = 0; i < data_->size(); i++) {
         if (viewStartDateSec_ <= data_->start_[i]) {
@@ -102,8 +103,9 @@ int TimelineInfoModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int TimelineInfoModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -123,8 +125,9 @@ QVariant TimelineInfoModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    if (row < 0 || row >= static_cast<int>(data_->size()))
+    if (row < 0 || row >= static_cast<int>(data_->size())) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         if (index.column() == 0) {
@@ -181,8 +184,9 @@ QVariant TimelineInfoModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant TimelineInfoModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     if (role == Qt::DisplayRole) {
         switch (section) {
@@ -311,8 +315,9 @@ void TimelineInfoWidget::load(QString host,
     }
 
     int first = data_.firstInPeriod(viewStartDate, viewEndDate);
-    if (first != -1)
+    if (first != -1) {
         ui_->timeTree->setCurrentIndex(model_->index(first - 1, 0));
+    }
 
     // Set css for the text formatting
     QString cssDoc =
@@ -346,8 +351,9 @@ void TimelineInfoWidget::createSummary() {
 }
 
 void TimelineInfoWidget::createSummary(QString& txt, VNState* state) {
-    if (!state)
+    if (!state) {
         return;
+    }
 
     int num    = 0;
     float mean = 0.;
@@ -355,8 +361,9 @@ void TimelineInfoWidget::createSummary(QString& txt, VNState* state) {
     unsigned char statusId = state->ucId();
     data_.durationStats(statusId, num, mean, stats, tlEndTime_);
 
-    if (num <= 0)
+    if (num <= 0) {
         return;
+    }
 
     txt += R"(<tr><td class='title' bgcolor=')" + state->colour().name() + R"(' align='center' colspan='2' >)" +
            Viewer::formatText(state->label(), state->fontColour()) + "</td></tr>";
@@ -417,8 +424,9 @@ void TimelineInfoWidget::readSettings(QSettings& settings) {
     }
 
     int idx = settings.value("tab", 0).toInt();
-    if (idx >= 0 && idx < ui_->tabWidget->count())
+    if (idx >= 0 && idx < ui_->tabWidget->count()) {
         ui_->tabWidget->setCurrentIndex(idx);
+    }
 
     ui_->dailyW->readSettings(settings);
 }

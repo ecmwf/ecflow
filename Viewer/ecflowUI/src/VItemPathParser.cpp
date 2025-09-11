@@ -16,8 +16,9 @@
 //  [type]server://nodepath:atttibutename
 
 VItemPathParser::VItemPathParser(const std::string& path, PathFormat format) : itemType_(NoType) {
-    if (path.empty())
+    if (path.empty()) {
         return;
+    }
 
     size_t pos    = 0;
     std::string p = path;
@@ -29,8 +30,9 @@ VItemPathParser::VItemPathParser(const std::string& path, PathFormat format) : i
                 type_ = path.substr(1, pos - 1);
                 p     = path.substr(pos + 1);
             }
-            else
+            else {
                 return;
+            }
         }
 
         pos = p.find("://");
@@ -52,10 +54,12 @@ VItemPathParser::VItemPathParser(const std::string& path, PathFormat format) : i
             attribute_ = p.substr(pos + 1);
             itemType_  = AttributeType;
 
-            if (type_ == "gen-variable")
+            if (type_ == "gen-variable") {
                 type_ = "genvar";
-            else if (type_ == "user-variable")
+            }
+            else if (type_ == "user-variable") {
                 type_ = "var";
+            }
 
             if (!VAttributeType::find(type_)) {
                 itemType_ = NoType;
@@ -84,16 +88,18 @@ VItemPathParser::VItemPathParser(const std::string& path, PathFormat format) : i
 }
 
 std::string VItemPathParser::encode(const std::string& path, const std::string& type) {
-    if (type.empty())
+    if (type.empty()) {
         return path;
+    }
 
     return "[" + type + "]" + path;
 }
 
 std::string
 VItemPathParser::encodeWithServer(const std::string& server, const std::string& path, const std::string& type) {
-    if (type.empty())
+    if (type.empty()) {
         return path;
+    }
 
     return "[" + type + "]" + server + ":/" + path;
 }
@@ -101,8 +107,9 @@ VItemPathParser::encodeWithServer(const std::string& server, const std::string& 
 std::string VItemPathParser::encodeAttribute(const std::string& parentPath,
                                              const std::string& attrName,
                                              const std::string& attrType) {
-    if (attrType.empty())
+    if (attrType.empty()) {
         return {};
+    }
 
     VItemPathParser parent(parentPath);
 
@@ -118,10 +125,12 @@ std::string VItemPathParser::parent() const {
             std::size_t pos = node_.find_last_of("/");
             if (pos != std::string::npos) {
                 std::string n = node_.substr(0, pos);
-                if (!n.empty())
+                if (!n.empty()) {
                     return encodeWithServer(server_, n, type_);
-                else
+                }
+                else {
                     return encodeWithServer(server_, "/", "server");
+                }
             }
         } break;
         case AttributeType:
@@ -138,8 +147,9 @@ void VItemPathParser::extractHostPort(const std::string& server) {
     std::size_t pos = server.find("@");
     if (pos != std::string::npos) {
         host_ = server.substr(0, pos);
-        if (server.length() > pos + 1)
+        if (server.length() > pos + 1) {
             port_ = server.substr(pos + 1);
+        }
     }
 }
 

@@ -22,8 +22,9 @@
 //=====================================================
 
 Animation::Animation(QWidget* view, Type type) : view_(view), type_(type) {
-    if (type_ == ServerLoadType)
+    if (type_ == ServerLoadType) {
         setFileName(":/viewer/spinning_wheel.gif");
+    }
 
     setScaledSize(QSize(12, 12));
 
@@ -34,8 +35,9 @@ Animation::Animation(QWidget* view, Type type) : view_(view), type_(type) {
 
 void Animation::addTarget(VNode* n) {
     Q_ASSERT(n);
-    if (!targets_.contains(n))
+    if (!targets_.contains(n)) {
         targets_ << n;
+    }
 
     ServerHandler* s = n->server();
     Q_ASSERT(s);
@@ -47,13 +49,15 @@ void Animation::addTarget(VNode* n) {
 void Animation::removeTarget(VNode* n) {
     targets_.removeAll(n);
 
-    if (targets_.isEmpty())
+    if (targets_.isEmpty()) {
         QMovie::stop();
+    }
 }
 
 void Animation::renderFrame(int /*frame*/) {
-    if (targets_.isEmpty())
+    if (targets_.isEmpty()) {
         QMovie::stop();
+    }
 
     Q_EMIT(repaintRequest(this));
 }

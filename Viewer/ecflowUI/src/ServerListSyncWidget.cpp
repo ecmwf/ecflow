@@ -62,14 +62,18 @@ void ServerListSyncWidget::reload() {
             auto items   = manager->changedItems();
             int matchCnt = 0, addedCnt = 0, setCnt = 0, unsetCnt = 0;
             for (auto item : items) {
-                if (item->type() == ServerListSyncChangeItem::MatchChange)
+                if (item->type() == ServerListSyncChangeItem::MatchChange) {
                     matchCnt++;
-                else if (item->type() == ServerListSyncChangeItem::AddedChange)
+                }
+                else if (item->type() == ServerListSyncChangeItem::AddedChange) {
                     addedCnt++;
-                else if (item->type() == ServerListSyncChangeItem::SetSysChange)
+                }
+                else if (item->type() == ServerListSyncChangeItem::SetSysChange) {
                     setCnt++;
-                else if (item->type() == ServerListSyncChangeItem::UnsetSysChange)
+                }
+                else if (item->type() == ServerListSyncChangeItem::UnsetSysChange) {
                     unsetCnt++;
+                }
             }
 
             if (matchCnt > 0) {
@@ -138,8 +142,9 @@ void ServerListSyncWidget::reload() {
 }
 
 void ServerListSyncWidget::slotTypeChanged(QListWidgetItem* item, QListWidgetItem*) {
-    if (!item)
+    if (!item) {
         return;
+    }
 
     auto manager = ServerList::instance()->systemFileManager();
     if (!manager) {
@@ -153,8 +158,9 @@ void ServerListSyncWidget::slotTypeChanged(QListWidgetItem* item, QListWidgetIte
 
     for (auto item : items) {
         if (item->type() == type) {
-            if (!s.isEmpty())
+            if (!s.isEmpty()) {
                 s += "<hr>";
+            }
 
             switch (type) {
                 case ServerListSyncChangeItem::MatchChange:

@@ -46,8 +46,9 @@ void VParamSet::init(const std::vector<VParam*>& items) {
 
     int maxId = 0;
     for (std::vector<VParam*>::const_iterator it = all_.begin(); it != all_.end(); ++it) {
-        if (static_cast<int>((*it)->id()) > maxId)
+        if (static_cast<int>((*it)->id()) > maxId) {
             maxId = (*it)->id();
+        }
     }
 
     if (maxId > 0) {
@@ -78,8 +79,9 @@ bool VParamSet::isSet(VParam* p) const {
 
 bool VParamSet::isSet(const std::string& name) const {
     for (auto it : current_) {
-        if (it->strName() == name)
+        if (it->strName() == name) {
             return true;
+        }
     }
     return false;
 }
@@ -117,8 +119,9 @@ void VParamSet::setCurrent(const std::vector<VParam*>& items, bool broadcast) {
         }
     }
 
-    if (broadcast)
+    if (broadcast) {
         Q_EMIT changed();
+    }
 }
 
 void VParamSet::setCurrent(const std::vector<std::string>& names, bool broadcast) {
@@ -130,8 +133,9 @@ void VParamSet::setCurrent(const std::vector<std::string>& names, bool broadcast
         }
     }
 
-    if (broadcast)
+    if (broadcast) {
         Q_EMIT changed();
+    }
 }
 
 void VParamSet::setCurrent(QStringList names, bool broadcast) {
@@ -143,8 +147,9 @@ void VParamSet::setCurrent(QStringList names, bool broadcast) {
         }
     }
 
-    if (broadcast)
+    if (broadcast) {
         Q_EMIT changed();
+    }
 }
 
 void VParamSet::writeSettings(VSettings* vs) {
@@ -189,8 +194,9 @@ void VParamSet::readSettings(VSettings* vs) {
         }
 
         for (auto itA = all_.begin(); itA != all_.end(); ++itA) {
-            if ((*itA)->strName() == name)
+            if ((*itA)->strName() == name) {
                 addToCurrent(*itA);
+            }
         }
     }
 }
@@ -223,8 +229,9 @@ AttributeFilter::AttributeFilter() : VParamSet() {
 
 bool AttributeFilter::matchForceShowAttr(const VNode* n, VAttributeType* t) const {
     if (forceShowAttr_) {
-        if (VAttribute* a = forceShowAttr_->attribute())
+        if (VAttribute* a = forceShowAttr_->attribute()) {
             return (a->parent() == n && a->type() == t);
+        }
     }
     return false;
 }
@@ -405,8 +412,9 @@ void NodeFilter::clear() {
 void NodeFilter::setForceShowNode(VNode* n) {
     forceShowNode_ = n;
 #ifdef _UI_VFILTER_DEBUG
-    if (forceShowNode_)
+    if (forceShowNode_) {
         UiLogS(server_).dbg() << "NodeFilter::setForceShowNode --> " << forceShowNode_->absNodePath();
+    }
 #endif
 }
 
@@ -506,8 +514,9 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange, std::vector<VN
 #ifdef _UI_VFILTER_DEBUG
             int diffCnt = 0;
             for (size_t i = 0; i < match_.size(); i++) {
-                if (tree_->vnodeAt(i) != match_[i])
+                if (tree_->vnodeAt(i) != match_[i]) {
                     diffCnt++;
+                }
             }
             UiLogS(server_).dbg() << " number of differences in filter: " << diffCnt;
 #endif
@@ -521,15 +530,17 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange, std::vector<VN
 
 #ifdef _UI_VFILTER_DEBUG
             assert(static_cast<int>(topFilterChange.size()) <= diffCnt);
-            if (diffCnt > 0)
+            if (diffCnt > 0) {
                 assert(topFilterChange.size() > 0);
+            }
 #endif
         }
 
 #ifdef _UI_VFILTER_DEBUG
         UiLogS(server_).dbg() << " top level nodes that changed in filter:";
-        for (auto& i : topFilterChange)
+        for (auto& i : topFilterChange) {
             UiLogS(server_).dbg() << "  " << i->strName();
+        }
 #endif
     }
     else {

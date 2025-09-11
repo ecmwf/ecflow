@@ -148,8 +148,9 @@ QStringList VRepeatAttr::data(bool /*firstLine*/) const {
 std::string VRepeatAttr::strName() const {
     if (parent_->node_) {
         const Repeat& r = parent_->node_->repeat();
-        if (r.empty() == false)
+        if (r.empty() == false) {
             return r.name();
+        }
     }
     return {};
 }
@@ -160,23 +161,31 @@ void VRepeatAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
         if (r.empty() == false && r.repeatBase()) {
             VRepeatAttr* a = nullptr;
 
-            if (r.repeatBase()->isDate())
+            if (r.repeatBase()->isDate()) {
                 a = new VRepeatDateAttr(vnode);
-            else if (r.repeatBase()->isDateTime())
+            }
+            else if (r.repeatBase()->isDateTime()) {
                 a = new VRepeatDateTimeAttr(vnode);
-            else if (r.repeatBase()->isDateList())
+            }
+            else if (r.repeatBase()->isDateList()) {
                 a = new VRepeatDateListAttr(vnode);
-            else if (r.repeatBase()->isInteger())
+            }
+            else if (r.repeatBase()->isInteger()) {
                 a = new VRepeatIntAttr(vnode);
-            else if (r.repeatBase()->isString())
+            }
+            else if (r.repeatBase()->isString()) {
                 a = new VRepeatStringAttr(vnode);
-            else if (r.repeatBase()->isEnumerated())
+            }
+            else if (r.repeatBase()->isEnumerated()) {
                 a = new VRepeatEnumAttr(vnode);
-            else if (r.repeatBase()->isDay())
+            }
+            else if (r.repeatBase()->isDay()) {
                 a = new VRepeatDayAttr(vnode);
+            }
 
-            if (a)
+            if (a) {
                 vec.push_back(a);
+            }
         }
     }
 }
@@ -251,14 +260,18 @@ std::string VRepeatDateAttr::value(int index) const {
 int VRepeatDateAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (r.start() == r.end())
+        if (r.start() == r.end()) {
             return -1;
-        else if (r.value() == r.start())
+        }
+        else if (r.value() == r.start()) {
             return 0;
-        else if (r.value() == r.end() || ecf::CalendarDate(r.value()) + r.step() > ecf::CalendarDate(r.end()))
+        }
+        else if (r.value() == r.end() || ecf::CalendarDate(r.value()) + r.step() > ecf::CalendarDate(r.end())) {
             return 2;
-        else
+        }
+        else {
             return 1;
+        }
     }
 
     return -1;
@@ -334,8 +347,8 @@ int VRepeatDateTimeAttr::currentPosition() const {
         else if (r.value() == r.start()) {
             return 0;
         }
-        else if (r.value() == r.end() ||
-                 ecf::coerce_to_instant(r.value() + r.step()) > ecf::coerce_to_instant(r.end())) {
+        else if (r.value() == r.end() || ecf::coerce_from_seconds_into_instant(r.value() + r.step()) >
+                                             ecf::coerce_from_seconds_into_instant(r.end())) {
             return 2;
         }
         else {
@@ -421,16 +434,18 @@ namespace {
  * @return 0 == First, 1 == Middle, 2 == Last, -1 == Invalid
  */
 template <typename REPEAT>
-static int get_repeat_position(const REPEAT& repeat) {
+int get_repeat_position(const REPEAT& repeat) {
     if (repeat.indexNum() < 2) {
         return -1; // == Invalid
     }
 
-    if (repeat.index_or_value() == 0) {
+    auto limits = ecf::limits_of(&repeat);
+
+    if (limits.is_first()) {
         return 0; // == First
     }
 
-    if (repeat.index_or_value() == repeat.indexNum()) {
+    if (limits.is_last()) {
         return 2; // == Last
     }
 
@@ -474,8 +489,9 @@ int VRepeatIntAttr::endIndex() const {
 int VRepeatIntAttr::currentIndex() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (r.step() > 0)
+        if (r.step() > 0) {
             return (r.index_or_value() - r.start()) / r.step();
+        }
     }
     return 0;
 }
@@ -508,14 +524,18 @@ QString VRepeatIntAttr::endValue() const {
 int VRepeatIntAttr::currentPosition() const {
     if (node_ptr node = parent_->node()) {
         const Repeat& r = node->repeat();
-        if (r.start() == r.end())
+        if (r.start() == r.end()) {
             return -1; // == Invalid
-        else if (r.value() == r.start())
+        }
+        else if (r.value() == r.start()) {
             return 0; // == First
-        else if (r.value() == r.end() || r.value() + r.step() > r.end())
+        }
+        else if (r.value() == r.end() || r.value() + r.step() > r.end()) {
             return 2; // == Last
-        else
+        }
+        else {
             return 1; // == Middle
+        }
     }
     return -1;
 }
@@ -595,8 +615,9 @@ QString VRepeatEnumAttr::allValues() const {
 
         if (end - start > 1) {
             for (int i = start; i <= end; i++) {
-                if (!vals.isEmpty())
+                if (!vals.isEmpty()) {
                     vals += " ";
+                }
                 vals += "\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
             }
             return vals;
@@ -667,8 +688,9 @@ QString VRepeatStringAttr::allValues() const {
 
         if (end - start > 1) {
             for (int i = start; i <= end; i++) {
-                if (!vals.isEmpty())
+                if (!vals.isEmpty()) {
                     vals += " ";
+                }
                 vals += "\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
             }
             return vals;

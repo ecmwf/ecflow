@@ -181,8 +181,9 @@ void AbstractSearchLine::hideEvent(QHideEvent* event) {
 
 void AbstractSearchLine::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
-    if (!event->spontaneous())
+    if (!event->spontaneous()) {
         slotFind(searchLine_->text());
+    }
     // refreshSearch();
     Q_EMIT visibilityChanged();
 }

@@ -54,8 +54,12 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd) {
     // If a new client to server command is added. Make sure to add it here.
     // Could have used static initialisation' but this is less problematic.
 
-    /// The order dictates how the --help is shown *BUT* Since we traverse this list.
-    /// Place the command which require the fastest response first.
+    //
+    // In order to improve server responsiveness, the commands which are more
+    // often required or need the quickest response appear first.
+    //
+    // The order of the following 'list' dictates how the --help is shown.
+    //
     vec_.reserve(90);
 
     vec_.push_back(std::make_shared<CSyncCmd>(CSyncCmd::NEWS, 0, 0, 0));
@@ -138,8 +142,9 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd) {
     /// Command that can *ONLY* be used in a group command
     vec_.push_back(std::make_shared<CtsNodeCmd>(CtsNodeCmd::WHY));
     vec_.push_back(std::make_shared<ShowCmd>());
-    if (addGroupCmd)
+    if (addGroupCmd) {
         vec_.push_back(std::make_shared<GroupCTSCmd>());
+    }
 }
 
 bool CtsCmdRegistry::parse(Cmd_ptr& cmd,
@@ -149,9 +154,10 @@ bool CtsCmdRegistry::parse(Cmd_ptr& cmd,
 
         if (vm.count(registered_cmd->theArg())) {
 
-            if (clientEnv->debug())
+            if (clientEnv->debug()) {
                 std::cout << "  CtsCmdRegistry::parse matched with registered command " << registered_cmd->theArg()
                           << "\n";
+            }
 
             registered_cmd->create(cmd, vm, clientEnv);
             return true;

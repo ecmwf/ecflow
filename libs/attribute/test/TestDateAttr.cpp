@@ -19,10 +19,7 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
@@ -41,23 +38,30 @@ BOOST_AUTO_TEST_CASE(test_date) {
         for (int day = 0; day < 28; day++) {
             for (int month = 0; month < 13; month++) {
                 int year = 2017;
-                if (month == 0)
+                if (month == 0) {
                     year = 0;
+                }
                 std::stringstream ss;
-                if (day == 0)
+                if (day == 0) {
                     ss << "*";
-                else
+                }
+                else {
                     ss << day;
+                }
                 ss << ".";
-                if (month == 0)
+                if (month == 0) {
                     ss << "*";
-                else
+                }
+                else {
                     ss << month;
+                }
                 ss << ".";
-                if (year == 0)
+                if (year == 0) {
                     ss << "*";
-                else
+                }
+                else {
                     ss << year;
+                }
 
                 DateAttr date1(day, month, year);
                 DateAttr date2(ss.str());

@@ -13,14 +13,13 @@
 
 #include <optional>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
 #include "ecflow/base/Cmd.hpp"
 #include "ecflow/base/ServerReply.hpp"
 #include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientOptions.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/NOrder.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
@@ -44,6 +43,7 @@ public:
     ClientInvoker(const std::string& host, const std::string& port);
     ClientInvoker(const std::string& host, int port);
 
+    ClientEnvironment& environment() { return clientEnv_; }
     const ClientEnvironment& environment() const { return clientEnv_; }
 
     /// for debug allow the current client environment to be printed
@@ -403,6 +403,19 @@ public:
                            bool run   = true); // ecFlowview SUBMIT_FILE
 
     std::optional<Cmd_ptr> get_cmd_from_args(const CommandLine& cl) const;
+
+    /**
+     * @brief Check if the client is not retrying connecting to a different server to perform a given command.
+     *
+     * The client should not retry connecting to a different server when:
+     * 1. It is in testing mode.
+     * 2. It is executing a Ping command.
+     * 3. The environment variable ECF_DENIED is set.
+     * 4. It is executing any User command and the HostFile policy is set to "task".
+     *
+     * @return true if the command is not retrying connecting to a different server, false otherwise.
+     */
+    bool is_not_retrying(const ClientToServerCmd& cmd) const;
 
 private:
     /**

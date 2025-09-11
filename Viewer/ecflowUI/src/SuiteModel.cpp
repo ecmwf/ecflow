@@ -32,13 +32,15 @@ SuiteModel::~SuiteModel() {
 void SuiteModel::clearData() {
     server_ = nullptr;
 
-    if (data_)
+    if (data_) {
         delete data_;
+    }
 
     data_ = nullptr;
 
-    if (realData_)
+    if (realData_) {
         realData_->removeObserver(this);
+    }
 
     realData_ = nullptr;
     edited_   = false;
@@ -95,8 +97,9 @@ void SuiteModel::updateData() {
         bool filteredChanged = false;
         beginResetModel();
 
-        if (edited_)
+        if (edited_) {
             filteredChanged = data_->merge(realData_);
+        }
         else {
             delete data_;
             data_ = realData_->clone();
@@ -104,19 +107,22 @@ void SuiteModel::updateData() {
 
         endResetModel();
 
-        if (filteredChanged)
+        if (filteredChanged) {
             Q_EMIT dataUpdated();
+        }
     }
 }
 
 void SuiteModel::resetData() {
     beginResetModel();
 
-    if (data_)
+    if (data_) {
         delete data_;
+    }
 
-    if (realData_)
+    if (realData_) {
         data_ = realData_->clone();
+    }
 
     endResetModel();
 }
@@ -135,8 +141,9 @@ int SuiteModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int SuiteModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -169,8 +176,9 @@ QVariant SuiteModel::data(const QModelIndex& index, int role) const {
     // }
 
     int row = index.row();
-    if (row < 0 || row >= data_->count())
+    if (row < 0 || row >= data_->count()) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
@@ -184,21 +192,25 @@ QVariant SuiteModel::data(const QModelIndex& index, int role) const {
                 if (data_->items().at(row).loaded()) {
                     Q_ASSERT(server_);
                     int n = server_->vRoot()->totalNumOfTopLevel(data_->items().at(row).name());
-                    if (n != -1)
+                    if (n != -1) {
                         return n;
-                    else
+                    }
+                    else {
                         return {};
+                    }
                 }
-                else
+                else {
                     return {};
+                }
             } break;
             default:
                 break;
         }
     }
     else if (role == Qt::CheckStateRole) {
-        if (index.column() == 0)
+        if (index.column() == 0) {
             return (data_->items().at(row).filtered()) ? QVariant(Qt::Checked) : QVariant(Qt::Unchecked);
+        }
     }
     else if (role == Qt::ForegroundRole) {
         if (!data_->isEnabled()) {
@@ -229,8 +241,9 @@ bool SuiteModel::setData(const QModelIndex& index, const QVariant& value, int ro
 }
 
 QVariant SuiteModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     if (role == Qt::DisplayRole) {
         switch (section) {

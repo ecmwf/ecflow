@@ -29,22 +29,25 @@ TcpServer::TcpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvi
 }
 
 void TcpServer::start_accept() {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   TcpServer::start_accept()" << endl;
+    }
     connection_ptr new_conn = std::make_shared<connection>(boost::ref(io_));
     acceptor_.async_accept(new_conn->socket_ll(),
                            [this, new_conn](const boost::system::error_code& e) { handle_accept(e, new_conn); });
 }
 
 void TcpServer::handle_accept(const boost::system::error_code& e, connection_ptr conn) {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   TcpServer::handle_accept" << endl;
+    }
 
     // Check whether the server was stopped by a signal before this completion
     // handler had a chance to run.
     if (!acceptor_.is_open()) {
-        if (serverEnv_.debug())
+        if (serverEnv_.debug()) {
             cout << "   TcpServer::handle_accept:  acceptor is closed, returning" << endl;
+        }
         return;
     }
 
@@ -57,8 +60,9 @@ void TcpServer::handle_accept(const boost::system::error_code& e, connection_ptr
                          [this, conn](const boost::system::error_code& error) { this->handle_read(error, conn); });
     }
     else {
-        if (serverEnv_.debug())
+        if (serverEnv_.debug()) {
             cout << "   TcpServer::handle_accept " << e.message() << endl;
+        }
         if (e != boost::asio::error::operation_aborted) {
             // An error occurred. Log it
             LogToCout toCoutAsWell;
@@ -107,9 +111,10 @@ void TcpServer::handle_write(const boost::system::error_code& e, connection_ptr 
     // Handle completion of a write operation.
     // Nothing to do. The socket will be closed automatically when the last
     // reference to the connection object goes away.
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   TcpServer::handle_write: client request " << inbound_request_ << " replying with  "
              << outbound_response_ << endl;
+    }
 
     if (e) {
         LogFlusher logFlusher;

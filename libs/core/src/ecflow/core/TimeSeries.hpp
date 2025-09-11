@@ -18,8 +18,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/TimeSlot.hpp"
 
 namespace ecf {

@@ -65,8 +65,9 @@ void OverviewProvider::visit(VInfoAttribute* /*ptr*/) {
 }
 
 void OverviewProvider::taskChanged(VTask_ptr task) {
-    if (task_ != task)
+    if (task_ != task) {
         return;
+    }
 
     switch (task->status()) {
         case VTask::FINISHED:
@@ -93,8 +94,9 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     static const std::string inc = "  ";
 
     ServerHandler* server = info->server();
-    if (!server)
+    if (!server) {
         return;
+    }
     VServer* snode = server->vRoot();
 
     ConnectState* cst = server->connectState();
@@ -141,9 +143,6 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
 
     // if(!ServerDefsAccess(server).defs()) return;
 
-    using namespace boost::posix_time;
-    using namespace boost::gregorian;
-
     std::string typeName = "server";
     std::string nodeName = server->name();
     std::string statusName(VSState::toName(server).toStdString());
@@ -154,8 +153,9 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     f << "type    : " << typeName << "\n";
     f << "status  : " << statusName << "\n";
 
-    if (!flags.empty())
+    if (!flags.empty()) {
         f << "flags   : " << flags << "\n";
+    }
 
     f << "----------\n";
 
@@ -204,18 +204,17 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
 
 void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
     ServerHandler* server = info->server();
-    if (!server)
+    if (!server) {
         return;
+    }
     // if(!ServerDefsAccess(server).defs()) return;
 
     VNode* node = info->node();
-    if (!node)
+    if (!node) {
         return;
+    }
 
     static const std::string inc = "  ";
-
-    using namespace boost::posix_time;
-    using namespace boost::gregorian;
 
     std::string typeName = node->nodeType();
     std::string nodeName(node->name().toStdString());
@@ -233,7 +232,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
 
     node_ptr nn = node->node();
 
-    boost::posix_time::ptime state_change_time = nn->state_change_time();
+    auto state_change_time = nn->state_change_time();
     if (!state_change_time.is_special()) {
         f << "at      : " << boost::posix_time::to_simple_string(state_change_time) << "\n";
     }
@@ -266,8 +265,9 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
 
     // Zombies attribute
     const std::vector<ZombieAttr>& vect = nn->zombies();
-    for (const auto& it : vect)
+    for (const auto& it : vect) {
         f << inc << it.toString() << "\n";
+    }
 
     // For suspended nodes
     if (nn->isSuspended()) {
@@ -276,10 +276,12 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
 
     if (nn->hasTimeDependencies()) {
         f << inc << "# time-date-dependencies: ";
-        if (nn->isTimeFree())
+        if (nn->isTimeFree()) {
             f << "free\n";
-        else
+        }
+        else {
             f << "holding\n";
+        }
     }
 
     // Generated variables

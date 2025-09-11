@@ -10,11 +10,11 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -22,10 +22,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 /// Simulate definition files that are created on then fly. This allows us to create
 /// tests with todays date/time this speeds up the testr, we can also validate
@@ -36,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(S_Simulator)
 BOOST_AUTO_TEST_SUITE(T_Today)
 
 BOOST_AUTO_TEST_CASE(test_today) {
-    cout << "Simulator:: ...test_today\n";
+    std::cout << "Simulator:: ...test_today\n";
 
     // suite suite
     //   clock real <fixed date>
@@ -50,9 +47,10 @@ BOOST_AUTO_TEST_CASE(test_today) {
     {
         // Initialise clock   then create a today attribute + minutes
         // such that the task should only run once, in the next minute
-        ptime theLocalTime                        = boost::posix_time::ptime(date(2010, 6, 21), time_duration(1, 2, 0));
-        boost::posix_time::ptime time_plus_minute = theLocalTime + minutes(1);
-        boost::posix_time::ptime time_plus_10_minute = theLocalTime + minutes(10);
+        auto theLocalTime =
+            boost::posix_time::ptime(boost::gregorian::date(2010, 6, 21), boost::posix_time::time_duration(1, 2, 0));
+        auto time_plus_minute    = theLocalTime + boost::posix_time::minutes(1);
+        auto time_plus_10_minute = theLocalTime + boost::posix_time::minutes(10);
 
         suite_ptr suite = theDefs.add_suite("test_today");
         ClockAttr clockAttr(theLocalTime, false /*false means use real clock*/);
@@ -77,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_today) {
 }
 
 BOOST_AUTO_TEST_CASE(test_today_time_series) {
-    cout << "Simulator:: ...test_today_time_series\n";
+    std::cout << "Simulator:: ...test_today_time_series\n";
 
     // suite suite
     //   clock real <monday>
@@ -112,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_today_time_series) {
 }
 
 BOOST_AUTO_TEST_CASE(test_today_time_and_date) {
-    cout << "Simulator:: ...test_today_time_and_date\n";
+    std::cout << "Simulator:: ...test_today_time_and_date\n";
 
     // suite suite
     //   clock real <todays date>
@@ -128,9 +126,9 @@ BOOST_AUTO_TEST_CASE(test_today_time_and_date) {
         // To speed up simulation: start calendar with hour increment AND time attributes with hours only
         //
         // Task will only run if all time dependencies are satisfied
-        boost::posix_time::ptime theLocalTime   = ptime(date(2010, 2, 10), hours(15));
-        boost::gregorian::date todaysDate       = theLocalTime.date();
-        boost::posix_time::ptime time_plus_hour = theLocalTime + hours(1);
+        auto theLocalTime = boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::hours(15));
+        auto todaysDate   = theLocalTime.date();
+        auto time_plus_hour = theLocalTime + boost::posix_time::hours(1);
 
         suite_ptr suite = theDefs.add_suite("test_today_time_and_date");
         ClockAttr clockAttr(theLocalTime, false /*false means use real clock*/);

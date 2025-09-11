@@ -8,7 +8,6 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
@@ -33,10 +32,7 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Serialisation.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 // #define UPDATE_TESTS 1
 
@@ -193,8 +189,8 @@ BOOST_AUTO_TEST_CASE(test_migration_restore) {
     do_restore<Label>(file_name + "Label", label);
     do_restore<Variable>(file_name + "Variable", Variable("var_name", "var_value"));
     do_restore<Event>(file_name + "Event_1", Event(1));
-    do_restore<Event>(file_name + "Event_2", Event(string("event")));
-    do_restore<Event>(file_name + "Event_3", Event(1, string("event"), true));
+    do_restore<Event>(file_name + "Event_2", Event(std::string("event")));
+    do_restore<Event>(file_name + "Event_3", Event(1, std::string("event"), true));
     do_restore<Meter>(file_name + "Meter", Meter("meter", 10, 100, 100));
     do_restore<ZombieAttr>(file_name + "ZombieAttr",
                            ZombieAttr(ecf::Child::USER, child_cmds, ecf::ZombieCtrlAction::FOB));

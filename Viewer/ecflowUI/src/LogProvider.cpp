@@ -39,8 +39,9 @@ void LogProvider::setAutoUpdate(bool autoUpdate) {
             stopWatchFile();
         }
         else {
-            if (!inAutoUpdate_)
+            if (!inAutoUpdate_) {
                 fetchFile();
+            }
         }
     }
     else {
@@ -53,8 +54,9 @@ void LogProvider::visit(VInfoServer*) {
 }
 
 void LogProvider::fetchFile() {
-    if (!active_)
+    if (!active_) {
         return;
+    }
 
     stopWatchFile();
 
@@ -98,8 +100,9 @@ void LogProvider::fetchFile(ServerHandler* server, const std::string& fileName) 
         if (err_msg.empty()) {
             reply_->fileReadMode(VReply::LocalReadMode);
 
-            if (autoUpdate_)
+            if (autoUpdate_) {
                 inAutoUpdate_ = true;
+            }
 
             owner_->infoReady(reply_);
 

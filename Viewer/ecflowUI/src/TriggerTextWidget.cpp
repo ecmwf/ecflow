@@ -49,14 +49,17 @@ QString TriggerTextWidget::makeHtml(TriggerTableItem* ti, QString /*directTitle*
         VItem* t                    = item.dep();
         TriggerCollector::Mode mode = item.mode();
 
-        if (!t)
+        if (!t) {
             continue;
+        }
 
         s += "<tr><td>";
-        if (mode == TriggerCollector::Parent)
+        if (mode == TriggerCollector::Parent) {
             s += "parent";
-        else
+        }
+        else {
             s += "child";
+        }
 
         QString type   = QString::fromStdString(t->typeName());
         QString path   = QString::fromStdString(t->fullPath());

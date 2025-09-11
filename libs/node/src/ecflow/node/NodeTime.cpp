@@ -15,8 +15,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 // #define DEBUG_DAY 1
 
@@ -206,29 +204,37 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
                     // cout << all_children[t]->debugNodePath() << " " << NState::toString(all_children[t]->state()) <<
                     // "\n";
                     if (t->isTask()) {
-                        if (t->state() == NState::SUBMITTED)
+                        if (t->state() == NState::SUBMITTED) {
                             submitted++;
-                        else if (t->state() == NState::ACTIVE)
+                        }
+                        else if (t->state() == NState::ACTIVE) {
                             active++;
-                        else if (t->state() == NState::COMPLETE)
+                        }
+                        else if (t->state() == NState::COMPLETE) {
                             completed++;
-                        else if (t->state() == NState::QUEUED)
+                        }
+                        else if (t->state() == NState::QUEUED) {
                             queued++;
+                        }
                         if (active || submitted) {
-                            if (free_date)
+                            if (free_date) {
                                 clear_date_at_midnight = false;
-                            if (free_day)
+                            }
+                            if (free_day) {
                                 clear_day_at_midnight = false;
+                            }
 #ifdef DEBUG_DAY
                             cout << "  if (active || submitted ) clear_day_date_at_midnight = false\n";
 #endif
                             break;
                         }
                         if (completed && (active || submitted || queued)) {
-                            if (free_date)
+                            if (free_date) {
                                 clear_date_at_midnight = false;
-                            if (free_day)
+                            }
+                            if (free_day) {
                                 clear_day_at_midnight = false;
+                            }
 #ifdef DEBUG_DAY
                             cout << "  if (completed && (active || submitted || queued)) clear_day_date_at_midnight = "
                                     "false\n";
@@ -243,15 +249,17 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
         bool at_least_one_day_free = false;
         for (auto& day : days_) {
             day.calendarChanged(c, clear_day_at_midnight);
-            if (!at_least_one_day_free)
+            if (!at_least_one_day_free) {
                 at_least_one_day_free = day.isFree(c);
+            }
         }
 
         bool at_least_one_date_free = false;
         for (auto& date : dates_) {
             date.calendarChanged(c, clear_date_at_midnight);
-            if (!at_least_one_date_free)
+            if (!at_least_one_date_free) {
                 at_least_one_date_free = date.isFree(c);
+            }
         }
 
         if (at_least_one_day_free || at_least_one_date_free) {
@@ -287,12 +295,15 @@ void Node::markHybridTimeDependentsAsComplete() {
         if (!dates_.empty() || !days_.empty() || !crons_.empty()) {
 
             int noOfTimeDependencies = 0;
-            if (!dates_.empty())
+            if (!dates_.empty()) {
                 noOfTimeDependencies++;
-            if (!days_.empty())
+            }
+            if (!days_.empty()) {
                 noOfTimeDependencies++;
-            if (!crons_.empty())
+            }
+            if (!crons_.empty()) {
                 noOfTimeDependencies++;
+            }
 
             bool oneDateIsFree = false;
             bool oneDayIsFree  = false;
@@ -591,35 +602,44 @@ void Node::freeHoldingTimeDependencies() {
 }
 
 bool Node::has_time_dependencies() const {
-    if (!times_.empty())
+    if (!times_.empty()) {
         return true;
-    if (!todays_.empty())
+    }
+    if (!todays_.empty()) {
         return true;
-    if (!crons_.empty())
+    }
+    if (!crons_.empty()) {
         return true;
-    if (!dates_.empty())
+    }
+    if (!dates_.empty()) {
         return true;
-    if (!days_.empty())
+    }
+    if (!days_.empty()) {
         return true;
-    if (!avisos_.empty())
+    }
+    if (!avisos_.empty()) {
         return true;
+    }
     return false;
 }
 
 bool Node::holding_day_or_date(const ecf::Calendar& c) const {
-    if (days_.empty() && dates_.empty())
+    if (days_.empty() && dates_.empty()) {
         return false;
+    }
 
     bool at_least_one_day_free = false;
     for (auto& day : days_) {
-        if (!at_least_one_day_free)
+        if (!at_least_one_day_free) {
             at_least_one_day_free = day.isFree(c);
+        }
     }
 
     bool at_least_one_date_free = false;
     for (auto& date : dates_) {
-        if (!at_least_one_date_free)
+        if (!at_least_one_date_free) {
             at_least_one_date_free = date.isFree(c);
+        }
     }
 
     if (at_least_one_day_free || at_least_one_date_free) {
@@ -630,22 +650,29 @@ bool Node::holding_day_or_date(const ecf::Calendar& c) const {
 
 bool Node::timeDependenciesFree() const {
     int noOfTimeDependencies = 0;
-    if (!times_.empty())
+    if (!times_.empty()) {
         noOfTimeDependencies++;
-    if (!todays_.empty())
+    }
+    if (!todays_.empty()) {
         noOfTimeDependencies++;
-    if (!dates_.empty())
+    }
+    if (!dates_.empty()) {
         noOfTimeDependencies++;
-    if (!days_.empty())
+    }
+    if (!days_.empty()) {
         noOfTimeDependencies++;
-    if (!crons_.empty())
+    }
+    if (!crons_.empty()) {
         noOfTimeDependencies++;
-    if (!avisos_.empty()) // TODO: Not really time related! Should be moved to another member function
+    }
+    if (!avisos_.empty()) { // TODO: Not really time related! Should be moved to another member function
         noOfTimeDependencies++;
+    }
 
     // if no time dependencies we are free
-    if (noOfTimeDependencies == 0)
+    if (noOfTimeDependencies == 0) {
         return true;
+    }
 
     // if we have a holding day/date don't consider other time attributes
     const Calendar& calendar = suite()->calendar();
@@ -662,32 +689,36 @@ bool Node::timeDependenciesFree() const {
 
     for (const auto& time : times_) {
         if (time.isFree(calendar)) {
-            if (noOfTimeDependencies == 1)
+            if (noOfTimeDependencies == 1) {
                 return true;
+            }
             oneTimeIsFree = true;
             break;
         }
     }
     for (const auto& cron : crons_) {
         if (cron.isFree(calendar)) {
-            if (noOfTimeDependencies == 1)
+            if (noOfTimeDependencies == 1) {
                 return true;
+            }
             oneCronIsFree = true;
             break;
         }
     }
     for (const auto& date : dates_) {
         if (date.isFree(calendar)) {
-            if (noOfTimeDependencies == 1)
+            if (noOfTimeDependencies == 1) {
                 return true;
+            }
             oneDateIsFree = true;
             break;
         }
     }
     for (const auto& day : days_) {
         if (day.isFree(calendar)) {
-            if (noOfTimeDependencies == 1)
+            if (noOfTimeDependencies == 1) {
                 return true;
+            }
             oneDayIsFree = true;
             break;
         }
@@ -714,8 +745,9 @@ bool Node::timeDependenciesFree() const {
         if (todays_.size() == 1) {
             // Single Today Attribute: could be single slot or range
             if (todays_[0].isFree(calendar)) {
-                if (noOfTimeDependencies == 1)
+                if (noOfTimeDependencies == 1) {
                     return true;
+                }
                 oneTodayIsFree = true;
             }
         }
@@ -724,17 +756,20 @@ bool Node::timeDependenciesFree() const {
             size_t free_count = 0;
             for (const auto& today : todays_) {
                 if (today.isFreeMultipleContext(calendar)) {
-                    if (noOfTimeDependencies == 1)
+                    if (noOfTimeDependencies == 1) {
                         return true;
+                    }
                     oneTodayIsFree = true;
                     break;
                 }
-                if (today.isFree(calendar))
+                if (today.isFree(calendar)) {
                     free_count++;
+                }
             }
             if (free_count == todays_.size()) {
-                if (noOfTimeDependencies == 1)
+                if (noOfTimeDependencies == 1) {
                     return true;
+                }
                 oneTodayIsFree = true;
             }
         }
@@ -744,18 +779,24 @@ bool Node::timeDependenciesFree() const {
         if (noOfTimeDependencies > 1) {
             // *When* we have multiple time dependencies of *different types* then the results
             // *MUST* be added for the node to be free.
-            if (!dates_.empty() && !oneDateIsFree)
+            if (!dates_.empty() && !oneDateIsFree) {
                 return false;
-            if (!days_.empty() && !oneDayIsFree)
+            }
+            if (!days_.empty() && !oneDayIsFree) {
                 return false;
-            if (!todays_.empty() && !oneTodayIsFree)
+            }
+            if (!todays_.empty() && !oneTodayIsFree) {
                 return false;
-            if (!times_.empty() && !oneTimeIsFree)
+            }
+            if (!times_.empty() && !oneTimeIsFree) {
                 return false;
-            if (!crons_.empty() && !oneCronIsFree)
+            }
+            if (!crons_.empty() && !oneCronIsFree) {
                 return false;
-            if (!avisos_.empty() && !oneAvisoIsFree)
+            }
+            if (!avisos_.empty() && !oneAvisoIsFree) {
                 return false;
+            }
 
             // We will only get here, if we have a multiple time dependencies and they are free
             return true;
@@ -769,12 +810,15 @@ bool Node::time_today_cron_is_free() const {
     if (!times_.empty() || !todays_.empty() || !crons_.empty()) {
 
         int noOfTimeDependencies = 0;
-        if (!times_.empty())
+        if (!times_.empty()) {
             noOfTimeDependencies++;
-        if (!todays_.empty())
+        }
+        if (!todays_.empty()) {
             noOfTimeDependencies++;
-        if (!crons_.empty())
+        }
+        if (!crons_.empty()) {
             noOfTimeDependencies++;
+        }
 
         bool oneTodayIsFree = false;
         bool oneTimeIsFree  = false;
@@ -783,16 +827,18 @@ bool Node::time_today_cron_is_free() const {
         const Calendar& calendar = suite()->calendar();
         for (const auto& time : times_) {
             if (time.isFree(calendar)) {
-                if (noOfTimeDependencies == 1)
+                if (noOfTimeDependencies == 1) {
                     return true;
+                }
                 oneTimeIsFree = true;
                 break;
             }
         }
         for (const auto& cron : crons_) {
             if (cron.isFree(calendar)) {
-                if (noOfTimeDependencies == 1)
+                if (noOfTimeDependencies == 1) {
                     return true;
+                }
                 oneCronIsFree = true;
                 break;
             }
@@ -805,8 +851,9 @@ bool Node::time_today_cron_is_free() const {
             if (todays_.size() == 1) {
                 // Single Today Attribute: could be single slot or range
                 if (todays_[0].isFree(calendar)) {
-                    if (noOfTimeDependencies == 1)
+                    if (noOfTimeDependencies == 1) {
                         return true;
+                    }
                     oneTodayIsFree = true;
                 }
             }
@@ -814,8 +861,9 @@ bool Node::time_today_cron_is_free() const {
                 // Multiple Today Attributes, each could single, or range
                 for (const auto& today : todays_) {
                     if (today.isFreeMultipleContext(calendar)) {
-                        if (noOfTimeDependencies == 1)
+                        if (noOfTimeDependencies == 1) {
                             return true;
+                        }
                         oneTodayIsFree = true;
                         break;
                     }
@@ -827,12 +875,15 @@ bool Node::time_today_cron_is_free() const {
             if (noOfTimeDependencies > 1) {
                 // *When* we have multiple time dependencies of *different types* then the results
                 // *MUST* be added for the node to be free.
-                if (!todays_.empty() && !oneTodayIsFree)
+                if (!todays_.empty() && !oneTodayIsFree) {
                     return false;
-                if (!times_.empty() && !oneTimeIsFree)
+                }
+                if (!times_.empty() && !oneTimeIsFree) {
                     return false;
-                if (!crons_.empty() && !oneCronIsFree)
+                }
+                if (!crons_.empty() && !oneCronIsFree) {
                     return false;
+                }
 
                 // We will only get here, if we have a multiple time dependencies and they are free
                 return true;
@@ -847,16 +898,16 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
     for (const auto& time : times_) {
         const TimeSeries& time_series = time.time_series();
         if (time_series.start().minute() != 0) {
-            resol = minutes(1);
+            resol = boost::posix_time::minutes(1);
             return;
         }
         if (time_series.hasIncrement()) {
             if (time_series.finish().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
             if (time_series.incr().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
         }
@@ -865,16 +916,16 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
     for (const auto& today : todays_) {
         const TimeSeries& time_series = today.time_series();
         if (time_series.start().minute() != 0) {
-            resol = minutes(1);
+            resol = boost::posix_time::minutes(1);
             return;
         }
         if (time_series.hasIncrement()) {
             if (time_series.finish().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
             if (time_series.incr().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
         }
@@ -883,16 +934,16 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
     for (const auto& cron : crons_) {
         const TimeSeries& time_series = cron.time_series();
         if (time_series.start().minute() != 0) {
-            resol = minutes(1);
+            resol = boost::posix_time::minutes(1);
             return;
         }
         if (time_series.hasIncrement()) {
             if (time_series.finish().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
             if (time_series.incr().minute() != 0) {
-                resol = minutes(1);
+                resol = boost::posix_time::minutes(1);
                 return;
             }
         }
@@ -901,14 +952,19 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
 
 void Node::get_max_simulation_duration(boost::posix_time::time_duration& duration) const {
     // don't override a higher value of duration
-    if ((!times_.empty() || !todays_.empty()) && duration < hours(24))
-        duration = hours(24); // day
-    if (!days_.empty() && duration < hours(168))
-        duration = hours(168); // week
-    if (!dates_.empty() && duration < hours(24 * 7 * 31))
-        duration = hours(24 * 7 * 31); // month
-    if (!crons_.empty())
-        duration = hours(8760); // year
-    if (!repeat_.empty())
-        duration = hours(8760); // year
+    if ((!times_.empty() || !todays_.empty()) && duration < boost::posix_time::hours(24)) {
+        duration = boost::posix_time::hours(24); // day
+    }
+    if (!days_.empty() && duration < boost::posix_time::hours(168)) {
+        duration = boost::posix_time::hours(168); // week
+    }
+    if (!dates_.empty() && duration < boost::posix_time::hours(24 * 7 * 31)) {
+        duration = boost::posix_time::hours(24 * 7 * 31); // month
+    }
+    if (!crons_.empty()) {
+        duration = boost::posix_time::hours(8760); // year
+    }
+    if (!repeat_.empty()) {
+        duration = boost::posix_time::hours(8760); // year
+    }
 }

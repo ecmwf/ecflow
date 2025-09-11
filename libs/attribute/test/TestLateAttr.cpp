@@ -12,18 +12,15 @@
 #include <stdexcept>
 #include <string>
 
-#include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/LateAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/NState.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
@@ -34,7 +31,8 @@ BOOST_AUTO_TEST_CASE(test_late_attr_submitted) {
 
     // REF: ECFLOW-322
     Calendar calendar;
-    calendar.init(ptime(date(2013, 7, 9), minutes(0)), Calendar::REAL); // tuesday
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2013, 7, 9), boost::posix_time::minutes(0)),
+                  Calendar::REAL); // tuesday
 
     /// -s submitted: The time node can stay submitted (format [+]hh:mm). submitted is always
     ///               relative, so + is simple ignored, if present. If the node stays submitted
@@ -47,11 +45,11 @@ BOOST_AUTO_TEST_CASE(test_late_attr_submitted) {
     ecf::LateAttr lateAttr;
     lateAttr.addSubmitted(ecf::TimeSlot(0, 4));
 
-    calendar.update(time_duration(minutes(1)));
-    calendar.update(time_duration(minutes(1)));
-    calendar.update(time_duration(minutes(1)));
-    calendar.update(time_duration(minutes(1)));
-    calendar.update(time_duration(minutes(1)));
+    calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(1)));
+    calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(1)));
+    calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(1)));
+    calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(1)));
+    calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(1)));
 
     // set submitted state at 00:05:00
     std::pair<NState, boost::posix_time::time_duration> state =
@@ -59,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_late_attr_submitted) {
 
     // after four minutes in submitted state, we should be late
     for (int m = 1; m < 10; m++) {
-        calendar.update(time_duration(minutes(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(1)));
 
         lateAttr.checkForLateness(state, calendar);
 
@@ -74,7 +72,8 @@ BOOST_AUTO_TEST_CASE(test_late_attr_active) {
     ECF_NAME_THIS_TEST();
 
     Calendar calendar;
-    calendar.init(ptime(date(2013, 7, 9), minutes(0)), Calendar::REAL); // tuesday
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2013, 7, 9), boost::posix_time::minutes(0)),
+                  Calendar::REAL); // tuesday
 
     /// -s submitted: The time node can stay submitted (format [+]hh:mm). submitted is always
     ///               relative, so + is simple ignored, if present. If the node stays submitted
@@ -94,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_late_attr_active) {
 
     // after 10 hours we, if we are not active, we should be late
     for (int m = 1; m < 23; m++) {
-        calendar.update(time_duration(hours(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
 
         lateAttr.checkForLateness(state, calendar);
 
@@ -109,7 +108,8 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_relative) {
     ECF_NAME_THIS_TEST();
 
     Calendar calendar;
-    calendar.init(ptime(date(2013, 7, 9), minutes(0)), Calendar::REAL); // tuesday
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2013, 7, 9), boost::posix_time::minutes(0)),
+                  Calendar::REAL); // tuesday
 
     /// -s submitted: The time node can stay submitted (format [+]hh:mm). submitted is always
     ///               relative, so + is simple ignored, if present. If the node stays submitted
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_relative) {
 
     // after 15 minutes relative, if we are not complete, we should be late
     for (int m = 1; m < 23; m++) {
-        calendar.update(time_duration(minutes(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(1)));
 
         lateAttr.checkForLateness(state, calendar);
 
@@ -144,7 +144,8 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_real) {
     ECF_NAME_THIS_TEST();
 
     Calendar calendar;
-    calendar.init(ptime(date(2013, 7, 9), minutes(0)), Calendar::REAL); // tuesday
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2013, 7, 9), boost::posix_time::minutes(0)),
+                  Calendar::REAL); // tuesday
 
     /// -s submitted: The time node can stay submitted (format [+]hh:mm). submitted is always
     ///               relative, so + is simple ignored, if present. If the node stays submitted
@@ -165,7 +166,7 @@ BOOST_AUTO_TEST_CASE(test_late_attr_complete_real) {
     // after 3 hours we, if we are not complete, we should be late
     for (int m = 1; m < 7; m++) {
 
-        calendar.update(time_duration(hours(1)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::hours(1)));
 
         lateAttr.checkForLateness(state, calendar);
 

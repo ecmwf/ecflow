@@ -22,13 +22,15 @@
 //========================================================
 
 NodeQueryResultItem::NodeQueryResultItem(VNode* node) : node_(node) {
-    if (node_)
+    if (node_) {
         server_ = node_->server();
+    }
 }
 
 NodeQueryResultItem::NodeQueryResultItem(NodeQueryResultTmp_ptr d) : node_(d->node_), attr_(d->attr_) {
-    if (node_)
+    if (node_) {
         server_ = node_->server();
+    }
 }
 
 void NodeQueryResultItem::invalidateNode() {
@@ -38,8 +40,9 @@ void NodeQueryResultItem::invalidateNode() {
 }
 
 bool NodeQueryResultItem::updateNode() {
-    if (node_)
+    if (node_) {
         return (node_->server() != nullptr);
+    }
 
     else {
         node_ = server_->vRoot()->find(path_);
@@ -55,42 +58,48 @@ QString NodeQueryResultItem::serverStr() const {
 }
 
 QString NodeQueryResultItem::pathStr() const {
-    if (node_)
+    if (node_) {
         return QString::fromStdString(node_->absNodePath());
+    }
 
     return QString::fromStdString(path_);
 }
 
 QString NodeQueryResultItem::typeStr() const {
-    if (node_)
+    if (node_) {
         return QString::fromStdString(node_->nodeType());
+    }
 
     return {"???"};
 }
 
 QString NodeQueryResultItem::stateStr() const {
-    if (node_)
+    if (node_) {
         return node_->stateName();
+    }
     return {"???"};
 }
 
 QColor NodeQueryResultItem::stateColour() const {
-    if (node_)
+    if (node_) {
         return node_->stateColour();
+    }
     return {Qt::transparent};
 }
 
 QString NodeQueryResultItem::stateChangeTimeAsString() const {
     QString s;
-    if (node_)
+    if (node_) {
         node_->statusChangeTime(s);
+    }
 
     return s;
 }
 
 unsigned int NodeQueryResultItem::stateChangeTime() const {
-    if (node_)
+    if (node_) {
         return node_->statusChangeTime();
+    }
 
     return 0;
 }
@@ -100,8 +109,9 @@ QStringList NodeQueryResultItem::attr() const {
 }
 
 void NodeQueryResultBlock::add(VNode* node, int pos) {
-    if (pos_ == -1)
+    if (pos_ == -1) {
         pos_ = pos;
+    }
 
     cnt_++;
 
@@ -142,16 +152,18 @@ NodeQueryResult::~NodeQueryResult() {
 }
 
 NodeQueryResultItem* NodeQueryResult::itemAt(int i) {
-    if (i >= 0 && i < static_cast<int>(data_.size()))
+    if (i >= 0 && i < static_cast<int>(data_.size())) {
         return data_.at(i);
+    }
 
     return nullptr;
 }
 
 void NodeQueryResult::add(NodeQueryResultTmp_ptr item) {
     ServerHandler* s = item->node_->server();
-    if (!s)
+    if (!s) {
         return;
+    }
 
     attach(s);
 
@@ -164,8 +176,9 @@ void NodeQueryResult::add(NodeQueryResultTmp_ptr item) {
 }
 
 void NodeQueryResult::add(QList<NodeQueryResultTmp_ptr> items) {
-    if (items.count() == 0)
+    if (items.count() == 0) {
         return;
+    }
 
     Q_EMIT beginAppendRows(items.count());
 
@@ -181,8 +194,9 @@ void NodeQueryResult::add(QList<NodeQueryResultTmp_ptr> items) {
 }
 
 void NodeQueryResult::add(std::vector<VInfo_ptr> items) {
-    if (items.size() == 0)
+    if (items.size() == 0) {
         return;
+    }
 
     Q_EMIT beginAppendRows(items.size());
 
@@ -262,8 +276,9 @@ void NodeQueryResult::serverScan(ServerHandler* server) {
                 data_.push_back(*it);
                 blocks_[server].add((*it)->node_, data_.size() - 1);
             }
-            else
+            else {
                 delete *it;
+            }
         }
         else {
             data_.push_back(*it);
@@ -271,8 +286,9 @@ void NodeQueryResult::serverScan(ServerHandler* server) {
         }
     }
 
-    if (blocks_[server].cnt_ == 0)
+    if (blocks_[server].cnt_ == 0) {
         detach(server);
+    }
 }
 
 void NodeQueryResult::attach(ServerHandler* s) {
@@ -347,8 +363,9 @@ void NodeQueryResult::notifyBeginNodeChange(const VNode* node,
     if (changed) {
         int pos = -1;
         int cnt = 0;
-        if (range(node, pos, cnt))
+        if (range(node, pos, cnt)) {
             Q_EMIT stateChanged(node, pos, cnt);
+        }
     }
 }
 
@@ -363,8 +380,9 @@ bool NodeQueryResult::range(const VNode* node, int& pos, int& cnt) {
     ServerHandler* server = node->server();
     auto it               = blocks_.find(server);
     if (it != blocks_.end()) {
-        if (it->second.find(node, pos, cnt))
+        if (it->second.find(node, pos, cnt)) {
             return true;
+        }
     }
     return false;
 }

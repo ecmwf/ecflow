@@ -100,14 +100,16 @@ void ServerSettingsItemWidget::slotEditorChanged() {
 }
 
 void ServerSettingsItemWidget::slotClicked(QAbstractButton* button) {
-    if (!active_)
+    if (!active_) {
         return;
+    }
 
     switch (buttonBox_->standardButton(button)) {
         case QDialogButtonBox::Apply: {
             if (editor_->applyChange()) {
-                if (info_ && info_->server())
+                if (info_ && info_->server()) {
                     info_->server()->conf()->saveSettings();
+                }
             }
         } break;
         default:

@@ -51,8 +51,9 @@ public:
         defs_->absorb(d.get(), force);
     }
     void clear_defs() override {
-        if (defs_.get())
+        if (defs_.get()) {
             defs_->clear();
+        }
     } // dont delete since we pass in Fixture defs. Otherwise it will crash
     bool checkPtDefs(ecf::CheckPt::Mode m         = ecf::CheckPt::UNDEFINED,
                      int check_pt_interval        = 0,
@@ -65,27 +66,16 @@ public:
     void shutdown() override { set_server_state(SState::SHUTDOWN); }
     void halted() override { set_server_state(SState::HALTED); }
     void restart() override { set_server_state(SState::RUNNING); }
+
+    ecf::AuthenticationService& authentication() override { return authentication_service_; }
+    const ecf::AuthenticationService& authentication() const override { return authentication_service_; }
+
+    ecf::AuthorisationService& authorisation() override { return authorisation_service_; }
+    const ecf::AuthorisationService& authorisation() const override { return authorisation_service_; }
+
     bool reloadWhiteListFile(std::string&) override { return true; }
     bool reloadPasswdFile(std::string& errorMsg) override { return true; }
     bool reloadCustomPasswdFile(std::string& errorMsg) override { return true; }
-    bool authenticateReadAccess(const std::string&, bool custom_user, const std::string& passwd) override {
-        return true;
-    }
-    bool authenticateReadAccess(const std::string&,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::string&) override {
-        return true;
-    }
-    bool authenticateReadAccess(const std::string&,
-                                bool custom_user,
-                                const std::string& passwd,
-                                const std::vector<std::string>&) override {
-        return true;
-    }
-    bool authenticateWriteAccess(const std::string&) override { return true; }
-    bool authenticateWriteAccess(const std::string&, const std::string&) override { return true; }
-    bool authenticateWriteAccess(const std::string&, const std::vector<std::string>&) override { return true; }
 
     bool lock(const std::string& user) override {
         if (userWhoHasLock_.empty()) {
@@ -123,8 +113,9 @@ public:
         if (state() == SState::RUNNING && defs_.get()) {
             JobsParam jobsParam(poll_interval(), false /* as->allow_job_creation_during_tree_walk() */);
             Jobs jobs(defs_);
-            if (!jobs.generate(jobsParam))
+            if (!jobs.generate(jobsParam)) {
                 ecf::log(ecf::Log::ERR, jobsParam.getErrorMsg()); // will automatically add end of line
+            }
         }
     }
     int poll_interval() const override { return 60; }
@@ -137,6 +128,9 @@ private:
     std::string userWhoHasLock_;
     SState::State serverState_{SState::RUNNING};
     SState::State server_state_to_preserve_{SState::RUNNING};
+
+    ecf::AuthenticationService authentication_service_;
+    ecf::AuthorisationService authorisation_service_;
 };
 
 /// This class is used to create a Mock Server, so that we can make direct

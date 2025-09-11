@@ -20,38 +20,40 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
 /// Output a vector to cout
 template <class T>
-ostream& operator<<(ostream& os, const vector<T>& v) {
-    copy(v.begin(), v.end(), ostream_iterator<T>(cout, " "));
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+    copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, " "));
     return os;
 }
 
 bool Node::findParentVariableValue(const std::string& name, std::string& theValue) const {
-    if (!vars_.empty() && findVariableValue(name, theValue))
+    if (!vars_.empty() && findVariableValue(name, theValue)) {
         return true;
+    }
     if (!repeat_.empty() && repeat_.name() == name) {
         theValue = repeat_.valueAsString();
         return true;
     }
-    if (findGenVariableValue(name, theValue))
+    if (findGenVariableValue(name, theValue)) {
         return true;
+    }
 
     Node* theParent = parent();
     while (theParent) {
 
-        if (theParent->findVariableValue(name, theValue))
+        if (theParent->findVariableValue(name, theValue)) {
             return true;
+        }
         const Repeat& rep = theParent->repeat();
         if (!rep.empty() && rep.name() == name) {
             theValue = rep.valueAsString();
             return true;
         }
-        if (theParent->findGenVariableValue(name, theValue))
+        if (theParent->findGenVariableValue(name, theValue)) {
             return true;
+        }
 
         theParent = theParent->parent();
     }
@@ -64,20 +66,23 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
     Defs* the_defs = defs();
     if (the_defs) {
         theValue = the_defs->server_state().find_variable(name);
-        if (!theValue.empty())
+        if (!theValue.empty()) {
             return true;
+        }
     }
     return false; // the variable cannot be found
 }
 
 bool Node::find_parent_gen_variable_value(const std::string& name, std::string& theValue) const {
-    if (findGenVariableValue(name, theValue))
+    if (findGenVariableValue(name, theValue)) {
         return true;
+    }
 
     Node* theParent = parent();
     while (theParent) {
-        if (theParent->findGenVariableValue(name, theValue))
+        if (theParent->findGenVariableValue(name, theValue)) {
             return true;
+        }
         theParent = theParent->parent();
     }
 
@@ -89,20 +94,23 @@ bool Node::find_parent_gen_variable_value(const std::string& name, std::string& 
     Defs* the_defs = defs();
     if (the_defs) {
         theValue = the_defs->server_state().find_variable(name);
-        if (!theValue.empty())
+        if (!theValue.empty()) {
             return true;
+        }
     }
     return false; // the variable cannot be found
 }
 
 bool Node::findParentUserVariableValue(const std::string& name, std::string& theValue) const {
-    if (findVariableValue(name, theValue))
+    if (findVariableValue(name, theValue)) {
         return true;
+    }
 
     Node* theParent = parent();
     while (theParent) {
-        if (theParent->findVariableValue(name, theValue))
+        if (theParent->findVariableValue(name, theValue)) {
             return true;
+        }
         theParent = theParent->parent();
     }
 
@@ -112,22 +120,25 @@ bool Node::findParentUserVariableValue(const std::string& name, std::string& the
         // Note: when calling ecflow_client --get_state=/suite/task
         // The node can be detached from the defs.
         theValue = the_defs->server_state().find_variable(name);
-        if (!theValue.empty())
+        if (!theValue.empty()) {
             return true;
+        }
     }
     return false; // the variable cannot be found
 }
 
 const std::string& Node::find_parent_user_variable_value(const std::string& name) const {
     const Variable& var = findVariable(name);
-    if (!var.empty())
+    if (!var.empty()) {
         return var.theValue();
+    }
 
     Node* theParent = parent();
     while (theParent) {
         const Variable& pvar = theParent->findVariable(name);
-        if (!pvar.empty())
+        if (!pvar.empty()) {
             return pvar.theValue();
+        }
         theParent = theParent->parent();
     }
 
@@ -142,14 +153,16 @@ const std::string& Node::find_parent_user_variable_value(const std::string& name
 
 bool Node::user_variable_exists(const std::string& name) const {
     const Variable& var = findVariable(name);
-    if (!var.empty())
+    if (!var.empty()) {
         return true;
+    }
 
     Node* theParent = parent();
     while (theParent) {
         const Variable& pvar = theParent->findVariable(name);
-        if (!pvar.empty())
+        if (!pvar.empty()) {
             return true;
+        }
         theParent = theParent->parent();
     }
 
@@ -197,19 +210,21 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
         return ret;
     }
 
-    return string();
+    return std::string();
 }
 
 const Variable& Node::find_parent_variable(const std::string& name) const {
     const Variable& var = findVariable(name);
-    if (!var.empty())
+    if (!var.empty()) {
         return var;
+    }
 
     Node* theParent = parent();
     while (theParent) {
         const Variable& pvar = theParent->findVariable(name);
-        if (!pvar.empty())
+        if (!pvar.empty()) {
             return pvar;
+        }
         theParent = theParent->parent();
     }
 
@@ -254,15 +269,17 @@ limit_ptr Node::find_limit(const std::string& theName) const {
 
 limit_ptr Node::findLimitUpNodeTree(const std::string& name) const {
     limit_ptr theFndLimit = find_limit(name);
-    if (theFndLimit.get())
+    if (theFndLimit.get()) {
         return theFndLimit;
+    }
 
     Node* theParent = parent();
     while (theParent != nullptr) {
 
         limit_ptr theFndLimit2 = theParent->find_limit(name);
-        if (theFndLimit2.get())
+        if (theFndLimit2.get()) {
             return theFndLimit2;
+        }
 
         theParent = theParent->parent();
     }
@@ -333,26 +350,30 @@ bool Node::findMirror(const std::string& name) const {
 }
 
 bool Node::findVerify(const VerifyAttr& v) const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->findVerify(v);
+    }
     return false;
 }
 
 const QueueAttr& Node::find_queue(const std::string& name) const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->find_queue(name);
+    }
     return QueueAttr::EMPTY();
 }
 
 QueueAttr& Node::findQueue(const std::string& name) {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->findQueue(name);
+    }
     return QueueAttr::EMPTY1();
 }
 
 const GenericAttr& Node::find_generic(const std::string& name) const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->find_generic(name);
+    }
     return GenericAttr::EMPTY();
 }
 
@@ -375,20 +396,24 @@ bool Node::findExprVariable(const std::string& name) {
     }
 
     const Variable& user_variable = findVariable(name);
-    if (!user_variable.empty())
+    if (!user_variable.empty()) {
         return true;
+    }
 
     const Repeat& repeat = findRepeat(name);
-    if (!repeat.empty())
+    if (!repeat.empty()) {
         return true;
+    }
 
     const Variable& gen_variable = findGenVariable(name);
-    if (!gen_variable.empty())
+    if (!gen_variable.empty()) {
         return true;
+    }
 
     limit_ptr limit = find_limit(name);
-    if (limit.get())
+    if (limit.get()) {
         return true;
+    }
 
     QueueAttr& queue_attr = findQueue(name);
     if (!queue_attr.empty()) {
@@ -401,16 +426,19 @@ bool Node::findExprVariable(const std::string& name) {
 
 int Node::findExprVariableValue(const std::string& name) const {
     const Event& event = findEventByNameOrNumber(name);
-    if (!event.empty())
+    if (!event.empty()) {
         return (event.value() ? 1 : 0);
+    }
 
     const Meter& meter = findMeter(name);
-    if (!meter.empty())
+    if (!meter.empty()) {
         return meter.value();
+    }
 
     const Variable& variable = findVariable(name);
-    if (!variable.empty())
+    if (!variable.empty()) {
         return variable.value();
+    }
 
     const Repeat& repeat = findRepeat(name);
     if (!repeat.empty()) {
@@ -429,32 +457,38 @@ int Node::findExprVariableValue(const std::string& name) const {
     }
 
     const Variable& gen_variable = findGenVariable(name);
-    if (!gen_variable.empty())
+    if (!gen_variable.empty()) {
         return gen_variable.value();
+    }
 
     limit_ptr limit = find_limit(name);
-    if (limit.get())
+    if (limit.get()) {
         return limit->value();
+    }
 
     const QueueAttr& queue_attr = find_queue(name);
-    if (!queue_attr.empty())
+    if (!queue_attr.empty()) {
         return queue_attr.index_or_value();
+    }
 
     return 0;
 }
 
 int Node::findExprVariableValueAndPlus(const std::string& name, int val) const {
     const Event& event = findEventByNameOrNumber(name);
-    if (!event.empty())
+    if (!event.empty()) {
         return ((event.value() ? 1 : 0) + val);
+    }
 
     const Meter& meter = findMeter(name);
-    if (!meter.empty())
+    if (!meter.empty()) {
         return (meter.value() + val);
+    }
 
     const Variable& variable = findVariable(name);
-    if (!variable.empty())
+    if (!variable.empty()) {
         return (variable.value() + val);
+    }
 
     const Repeat& repeat = findRepeat(name);
     if (!repeat.empty()) {
@@ -472,32 +506,38 @@ int Node::findExprVariableValueAndPlus(const std::string& name, int val) const {
     }
 
     const Variable& gen_variable = findGenVariable(name);
-    if (!gen_variable.empty())
+    if (!gen_variable.empty()) {
         return (gen_variable.value() + val);
+    }
 
     limit_ptr limit = find_limit(name);
-    if (limit.get())
+    if (limit.get()) {
         return (limit->value() + val);
+    }
 
     const QueueAttr& queue_attr = find_queue(name);
-    if (!queue_attr.empty())
+    if (!queue_attr.empty()) {
         return (queue_attr.index_or_value() + val);
+    }
 
     return val;
 }
 
 int Node::findExprVariableValueAndMinus(const std::string& name, int val) const {
     const Event& event = findEventByNameOrNumber(name);
-    if (!event.empty())
+    if (!event.empty()) {
         return ((event.value() ? 1 : 0) - val);
+    }
 
     const Meter& meter = findMeter(name);
-    if (!meter.empty())
+    if (!meter.empty()) {
         return (meter.value() - val);
+    }
 
     const Variable& variable = findVariable(name);
-    if (!variable.empty())
+    if (!variable.empty()) {
         return (variable.value() - val);
+    }
 
     const Repeat& repeat = findRepeat(name);
     if (!repeat.empty()) {
@@ -514,16 +554,19 @@ int Node::findExprVariableValueAndMinus(const std::string& name, int val) const 
     }
 
     const Variable& gen_variable = findGenVariable(name);
-    if (!gen_variable.empty())
+    if (!gen_variable.empty()) {
         return (gen_variable.value() - val);
+    }
 
     limit_ptr limit = find_limit(name);
-    if (limit.get())
+    if (limit.get()) {
         return (limit->value() - val);
+    }
 
     const QueueAttr& queue_attr = find_queue(name);
-    if (!queue_attr.empty())
+    if (!queue_attr.empty()) {
         return (queue_attr.index_or_value() - val);
+    }
 
     return -val;
 }
@@ -569,7 +612,7 @@ int Node::findExprVariableValueAndType(const std::string& name, std::string& var
     return 0;
 }
 
-void Node::findExprVariableAndPrint(const std::string& name, ostream& os) const {
+void Node::findExprVariableAndPrint(const std::string& name, std::ostream& os) const {
     const Event& event = findEventByNameOrNumber(name);
     if (!event.empty()) {
         os << "EVENT value(" << event.value() << ")";
@@ -607,7 +650,8 @@ void Node::findExprVariableAndPrint(const std::string& name, ostream& os) const 
     }
 }
 
-node_ptr findRelativeNode(const vector<std::string>& theExtractedPath, node_ptr triggerNode, std::string& errorMsg) {
+node_ptr
+findRelativeNode(const std::vector<std::string>& theExtractedPath, node_ptr triggerNode, std::string& errorMsg) {
     // The referenced node could be itself(error) or most likely a sibling node.
     auto extractedPathSize = static_cast<int>(theExtractedPath.size());
     if (extractedPathSize == 1 && triggerNode->name() == theExtractedPath[0]) {
@@ -643,10 +687,11 @@ node_ptr findRelativeNode(const vector<std::string>& theExtractedPath, node_ptr 
     }
 
     errorMsg = "Could not find node '";
-    if (extractedPathSize == 1)
+    if (extractedPathSize == 1) {
         errorMsg += theExtractedPath[0];
+    }
     else {
-        for (const string& s : theExtractedPath) {
+        for (const std::string& s : theExtractedPath) {
             errorMsg += s;
             errorMsg += Str::PATH_SEPARATOR();
         }
@@ -663,7 +708,7 @@ node_ptr findRelativeNode(const vector<std::string>& theExtractedPath, node_ptr 
 }
 
 node_ptr Node::non_const_this() const {
-    return const_pointer_cast<Node>(shared_from_this());
+    return std::const_pointer_cast<Node>(shared_from_this());
 }
 
 node_ptr Node::findReferencedNode(const std::string& nodePath, std::string& errorMsg) const {
@@ -695,7 +740,8 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
     ///  On server side:: No externs are stored, hence for unresolved node paths, we return NULL
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
-    string debug_path = "Searching for path " + nodePath + " from " + debugType() + Str::COLON() + absNodePath() + "\n";
+    std::string debug_path =
+        "Searching for path " + nodePath + " from " + debugType() + Str::COLON() + absNodePath() + "\n";
 #endif
 
     // if an absolute path cut in early
@@ -729,7 +775,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
             // OK: the node path appears in the extern list. This may be because that suite  has not been loaded.
             // *** If the suite is loaded, then it's an error that we did not
             // *** locate the node. i.e. in the previous call to defs->findAbsNode(nodePath);
-            vector<string> theExtractedPath;
+            std::vector<std::string> theExtractedPath;
             NodePath::split(nodePath, theExtractedPath);
 
             std::string referenceSuite = theExtractedPath[0];
@@ -759,7 +805,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
     /// =============================================================================
     /// Path is something other than ABSOLUTE path
     /// =============================================================================
-    vector<string> theExtractedPath;
+    std::vector<std::string> theExtractedPath;
     NodePath::split(nodePath, theExtractedPath);
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
@@ -787,7 +833,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
         debug_path += "( theExtractedPath.size() == 1)\n";
 #endif
         // Search for a relative node first
-        string localErrorMsg;
+        std::string localErrorMsg;
         node_ptr res = findRelativeNode(theExtractedPath, non_const_this(), localErrorMsg);
 #ifdef DEBUG_FIND_REFERENCED_NODE
         if (!localErrorMsg.empty()) {
@@ -865,10 +911,12 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
             theParent = theParent->parent(); // for each `..` go up the parent
 #ifdef DEBUG_FIND_REFERENCED_NODE
             debug_path += "..: thepParent = ";
-            if (theParent)
+            if (theParent) {
                 debug_path += theParent->absNodePath();
-            else
+            }
+            else {
                 debug_path += "NULL";
+            }
 #endif
         }
 
@@ -913,8 +961,9 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 }
 
 const ZombieAttr& Node::findZombie(ecf::Child::ZombieType zombie_type) const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->findZombie(zombie_type);
+    }
     return ZombieAttr::EMPTY();
 }
 

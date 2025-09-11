@@ -20,37 +20,43 @@ void NodePath::split(const std::string& path, std::vector<std::string>& thePath)
 }
 
 bool NodePath::extractHostPort(const std::string& path, std::string& host, std::string& port) {
-    if (path.empty())
+    if (path.empty()) {
         return false;
+    }
 
     std::vector<std::string> thePath;
     NodePath::split(path, thePath);
 
-    if (thePath.empty())
+    if (thePath.empty()) {
         return false;
+    }
 
     //<host>:<port>/suite/family/task
     // first path should be of form <host>:<port>
     size_t colonPos = thePath[0].find_first_of(':');
-    if (colonPos == std::string::npos)
+    if (colonPos == std::string::npos) {
         return false;
+    }
 
     host = thePath[0].substr(0, colonPos);
     port = thePath[0].substr(colonPos + 1);
 
     ecf::algorithm::trim(host);
     ecf::algorithm::trim(port);
-    if (host.empty())
+    if (host.empty()) {
         return false;
-    if (port.empty())
+    }
+    if (port.empty()) {
         return false;
+    }
 
     return true;
 }
 
 std::string NodePath::createPath(const std::vector<std::string>& vec) {
-    if (vec.empty())
+    if (vec.empty()) {
         return std::string();
+    }
 
     std::string ret;
     size_t size = vec.size();

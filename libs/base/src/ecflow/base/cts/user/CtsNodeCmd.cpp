@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -42,8 +44,9 @@ void CtsNodeCmd::print(std::string& os) const {
             user_cmd(os, CtsApi::get(absNodePath_));
 #ifdef DEBUG
             std::stringstream ss;
-            if (Ecf::server())
+            if (Ecf::server()) {
                 ss << " [server(" << Ecf::state_change_no() << " " << Ecf::modify_change_no() << ")]";
+            }
             os += ss.str();
 #endif
             break;
@@ -98,14 +101,25 @@ void CtsNodeCmd::print_only(std::string& os) const {
     }
 }
 
+ecf::authentication_t CtsNodeCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t CtsNodeCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
+}
+
 bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<CtsNodeCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (api_ != the_rhs->api())
+    }
+    if (api_ != the_rhs->api()) {
         return false;
-    if (absNodePath_ != the_rhs->absNodePath())
+    }
+    if (absNodePath_ != the_rhs->absNodePath()) {
         return false;
+    }
     return UserCmd::equals(rhs);
 }
 
@@ -170,12 +184,15 @@ const char* CtsNodeCmd::theArg() const {
 }
 
 PrintStyle::Type_t CtsNodeCmd::show_style() const {
-    if (api_ == CtsNodeCmd::GET)
+    if (api_ == CtsNodeCmd::GET) {
         return PrintStyle::DEFS;
-    else if (api_ == CtsNodeCmd::GET_STATE)
+    }
+    else if (api_ == CtsNodeCmd::GET_STATE) {
         return PrintStyle::STATE;
-    else if (api_ == CtsNodeCmd::MIGRATE)
+    }
+    else if (api_ == CtsNodeCmd::MIGRATE) {
         return PrintStyle::MIGRATE;
+    }
     return ClientToServerCmd::show_style();
 }
 
@@ -254,9 +271,9 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::ok_cmd();
 }
 
-bool CtsNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, absNodePath_);
-}
+// bool CtsNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, absNodePath_);
+// }
 
 static const char* job_gen_only_desc() {
     return "Test hierarchical Job generation only, for chosen Node.\n"
@@ -368,8 +385,9 @@ void CtsNodeCmd::addOption(boost::program_options::options_description& desc) co
 void CtsNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     assert(api_ != CtsNodeCmd::NO_CMD);
 
-    if (ac->debug())
+    if (ac->debug()) {
         cout << "  CtsNodeCmd::create = '" << theArg() << "'.\n";
+    }
 
     std::string absNodePath = vm[theArg()].as<std::string>();
 

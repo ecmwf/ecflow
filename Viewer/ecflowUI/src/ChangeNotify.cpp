@@ -78,10 +78,12 @@ void ChangeNotify::add(VNode* node, bool popup, bool sound) {
         dialog()->raise();
     }
     else {
-        if (!dialog()->isVisible())
+        if (!dialog()->isVisible()) {
             dialog()->setCurrent(this);
-        else
+        }
+        else {
             dialog()->raise();
+        }
     }
 
     if (sound) {
@@ -98,8 +100,9 @@ void ChangeNotify::add(VNode* node, bool popup, bool sound) {
             }
         }
 
-        if (fName.empty())
+        if (fName.empty()) {
             return;
+        }
 
         if (VProperty* p = prop_->findChild("sound_loop")) {
             loop = p->value().toInt();
@@ -134,23 +137,29 @@ void ChangeNotify::setEnabled(bool en) {
 void ChangeNotify::setProperty(VProperty* prop) {
     prop_ = prop;
 
-    if (VProperty* p = prop->findChild("use_status_colour"))
+    if (VProperty* p = prop->findChild("use_status_colour")) {
         p->addObserver(this);
+    }
 
-    if (VProperty* p = prop->findChild("fill_colour"))
+    if (VProperty* p = prop->findChild("fill_colour")) {
         p->addObserver(this);
+    }
 
-    if (VProperty* p = prop->findChild("text_colour"))
+    if (VProperty* p = prop->findChild("text_colour")) {
         p->addObserver(this);
+    }
 
-    if (VProperty* p = prop->findChild("count_fill_colour"))
+    if (VProperty* p = prop->findChild("count_fill_colour")) {
         p->addObserver(this);
+    }
 
-    if (VProperty* p = prop->findChild("count_text_colour"))
+    if (VProperty* p = prop->findChild("count_text_colour")) {
         p->addObserver(this);
+    }
 
-    if (VProperty* p = prop->findChild("sound_file_type"))
+    if (VProperty* p = prop->findChild("sound_file_type")) {
         p->addObserver(this);
+    }
 
     if (VProperty* p = prop->findChild("sound_system_file")) {
         p->addObserver(this);
@@ -166,21 +175,25 @@ void ChangeNotify::setProperty(VProperty* prop) {
         p->addObserver(this);
     }
 
-    if (VProperty* p = prop->findChild("sound_user_file"))
+    if (VProperty* p = prop->findChild("sound_user_file")) {
         p->addObserver(this);
+    }
 
-    if (VProperty* p = prop->findChild("sound_volume"))
+    if (VProperty* p = prop->findChild("sound_volume")) {
         p->addObserver(this);
+    }
 
-    if (VProperty* p = prop->findChild("sound_loop"))
+    if (VProperty* p = prop->findChild("sound_loop")) {
         p->addObserver(this);
+    }
 }
 
 void ChangeNotify::notifyChange(VProperty* prop) {
     Q_ASSERT(prop);
 
-    if (prop->name().contains("sound", Qt::CaseInsensitive))
+    if (prop->name().contains("sound", Qt::CaseInsensitive)) {
         return;
+    }
 
     else if (prop->name() == "max_item_num") {
         data_->setMaxNum(prop->value().toInt());
@@ -198,10 +211,12 @@ void ChangeNotify::notifyChange(VProperty* prop) {
 }
 
 void ChangeNotify::updateNotificationState(bool hasEnabledServer) {
-    if (propEnabled_)
+    if (propEnabled_) {
         setEnabled(propEnabled_->value().toBool() || hasEnabledServer);
-    else
+    }
+    else {
         setEnabled(hasEnabledServer);
+    }
 }
 
 void ChangeNotify::clearData() {
@@ -210,41 +225,50 @@ void ChangeNotify::clearData() {
 }
 
 void ChangeNotify::showDialog(ChangeNotify* notifier) {
-    if (notifier)
+    if (notifier) {
         dialog()->setCurrent(notifier);
+    }
 
     dialog()->show();
     dialog()->raise();
 }
 
 QColor ChangeNotify::fillColour() const {
-    if (prop_)
-        if (VProperty* p = prop_->findChild("fill_colour"))
+    if (prop_) {
+        if (VProperty* p = prop_->findChild("fill_colour")) {
             return p->value().value<QColor>();
+        }
+    }
 
     return {};
 }
 
 QColor ChangeNotify::textColour() const {
-    if (prop_)
-        if (VProperty* p = prop_->findChild("text_colour"))
+    if (prop_) {
+        if (VProperty* p = prop_->findChild("text_colour")) {
             return p->value().value<QColor>();
+        }
+    }
 
     return {};
 }
 
 QColor ChangeNotify::countFillColour() const {
-    if (prop_)
-        if (VProperty* p = prop_->findChild("count_fill_colour"))
+    if (prop_) {
+        if (VProperty* p = prop_->findChild("count_fill_colour")) {
             return p->value().value<QColor>();
+        }
+    }
 
     return {};
 }
 
 QColor ChangeNotify::countTextColour() const {
-    if (prop_)
-        if (VProperty* p = prop_->findChild("count_text_colour"))
+    if (prop_) {
+        if (VProperty* p = prop_->findChild("count_text_colour")) {
             return p->value().value<QColor>();
+        }
+    }
 
     return {};
 }
@@ -283,8 +307,9 @@ void ChangeNotify::updateNotificationStateFromServer(const std::string& id, bool
 
 ChangeNotify* ChangeNotify::find(const std::string& id) {
     auto it = items.find(id);
-    if (it != items.end())
+    if (it != items.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
@@ -389,9 +414,11 @@ void ChangeNotify::populate(ChangeNotifyWidget* w) {
 
 QColor AbortedNotify::fillColour() const {
     bool useState = false;
-    if (prop_)
-        if (VProperty* p = prop_->findChild("use_status_colour"))
+    if (prop_) {
+        if (VProperty* p = prop_->findChild("use_status_colour")) {
             useState = p->value().toBool();
+        }
+    }
 
     if (useState) {
         if (VProperty* nsp = VConfig::instance()->find("nstate.aborted")) {
@@ -406,9 +433,11 @@ QColor AbortedNotify::fillColour() const {
 
 QColor AbortedNotify::textColour() const {
     bool useState = false;
-    if (prop_)
-        if (VProperty* p = prop_->findChild("use_status_colour"))
+    if (prop_) {
+        if (VProperty* p = prop_->findChild("use_status_colour")) {
             useState = p->value().toBool();
+        }
+    }
 
     if (useState) {
         if (VProperty* nsp = VConfig::instance()->find("nstate.aborted")) {

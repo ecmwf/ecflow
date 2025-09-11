@@ -182,16 +182,18 @@ std::string Event::toString() const {
 
 void Event::write(std::string& ret) const {
     ret += "event ";
-    if (number_ == std::numeric_limits<int>::max())
+    if (number_ == std::numeric_limits<int>::max()) {
         ret += n_;
+    }
     else {
         ret += ecf::convert_to<std::string>(number_);
         ret += " ";
         ret += n_;
     }
 
-    if (iv_)
+    if (iv_) {
         ret += " set"; // initial value
+    }
 }
 
 std::string Event::dump() const {
@@ -218,8 +220,9 @@ Meter::Meter(const std::string& name, int min, int max, int colorChange, int val
         }
     }
 
-    if (min > max)
+    if (min > max) {
         throw std::out_of_range("Meter::Meter: Invalid Meter(name,min,max,color_change) : min must be less than max");
+    }
 
     if (colorChange == std::numeric_limits<int>::max()) {
         cc_ = max_;
@@ -347,8 +350,9 @@ void Label::write(std::string& ret) const {
     ret += "label ";
     ret += n_;
     ret += " \"";
-    if (v_.find("\n") == std::string::npos)
+    if (v_.find("\n") == std::string::npos) {
         ret += v_;
+    }
     else {
         // replace \n, otherwise re-parse will fail
         std::string value = v_;
@@ -393,8 +397,9 @@ void Label::parse(const std::string& line,
                   std::string& the_value,
                   std::string& the_new_value) {
     size_t line_token_size = lineTokens.size();
-    if (line_token_size < 3)
+    if (line_token_size < 3) {
         throw std::runtime_error("Label::parse: Invalid label :" + line);
+    }
 
     the_name = lineTokens[1];
 
@@ -415,10 +420,12 @@ void Label::parse(const std::string& line,
         std::string value;
         value.reserve(line.size());
         for (size_t i = 2; i < line_token_size; ++i) {
-            if (lineTokens[i].at(0) == '#')
+            if (lineTokens[i].at(0) == '#') {
                 break;
-            if (i != 2)
+            }
+            if (i != 2) {
                 value += " ";
+            }
             value += lineTokens[i];
         }
 
@@ -441,8 +448,9 @@ void Label::parse(const std::string& line,
                     break;
                 }
                 if (line[i] == '"') {
-                    if (last_quote_after_comment == 0)
+                    if (last_quote_after_comment == 0) {
                         last_quote_after_comment = i;
+                    }
                     first_quote_after_comment = i;
                 }
             }

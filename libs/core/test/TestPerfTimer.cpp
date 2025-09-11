@@ -11,10 +11,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/perf_timer.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace boost;
 using namespace std;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
@@ -33,14 +32,14 @@ BOOST_AUTO_TEST_CASE(test_perf_with_chrono) {
 
     // using namespace std::chrono_literals;
 
-    [[maybe_unused]] auto t = perf_timer<>::duration(func, 100000);
+    [[maybe_unused]] auto t = ecf::FunctionPerformanceTimer<>::duration(func, 100000);
 
     // This does not work, ie calling func with no arguments ?? with our hacked invoke, wait till c++ 17
     // auto t0= perf_timer<std::chrono::nanoseconds>::duration(func);
 
-    [[maybe_unused]] auto t1 = perf_timer<std::chrono::nanoseconds>::duration(func, 10);
-    [[maybe_unused]] auto t2 = perf_timer<std::chrono::microseconds>::duration(func, 100);
-    [[maybe_unused]] auto t3 = perf_timer<std::chrono::milliseconds>::duration(func, 100000);
+    [[maybe_unused]] auto t1 = ecf::FunctionPerformanceTimer<std::chrono::nanoseconds>::duration(func, 10);
+    [[maybe_unused]] auto t2 = ecf::FunctionPerformanceTimer<std::chrono::microseconds>::duration(func, 100);
+    [[maybe_unused]] auto t3 = ecf::FunctionPerformanceTimer<std::chrono::milliseconds>::duration(func, 100000);
 
 #if PRINT_TIMING_RESULTS
     ECF_TEST_DBG(<< "   " << std::chrono::duration<double, std::micro>(t).count() << " micro");

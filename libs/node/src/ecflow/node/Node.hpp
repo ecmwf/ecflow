@@ -47,6 +47,7 @@
 #include "ecflow/node/InLimitMgr.hpp"
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/NodeFwd.hpp"
+#include "ecflow/node/Permissions.hpp"
 
 namespace ecf {
 class Simulator;
@@ -68,7 +69,7 @@ protected:
 
 public:
     Node& operator=(const Node&);
-    bool operator<(const Node& rhs) { return name() < rhs.name(); }
+    bool operator<(const Node& rhs) const { return name() < rhs.name(); }
 
     Node(const Node& rhs);
     virtual ~Node();
@@ -83,6 +84,8 @@ public:
     void set_parent(Node* p) { parent_ = p; }
 
     virtual node_ptr clone() const = 0;
+
+    ecf::Permissions permissions() const { return ecf::Permissions::find_in(vars_); }
 
     // Server called functions:
     //   Required when we have time attributes, when time related attribute are free they stay free, until re-queue

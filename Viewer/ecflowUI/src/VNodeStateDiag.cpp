@@ -18,8 +18,9 @@
 #include "VNode.hpp"
 
 VNodeStateDiag::VNodeStateDiag(VInfo_ptr info) {
-    if (!info)
+    if (!info) {
         return;
+    }
 
     if (info->isNode() && info->node()) {
         VNode* node      = info->node();

@@ -19,35 +19,45 @@ namespace ecf {
 
 namespace environment {
 
-constexpr const char* ECF_PORT          = "ECF_PORT";
-constexpr const char* ECF_RID           = "ECF_RID";
-constexpr const char* ECF_TRYNO         = "ECF_TRYNO";
-constexpr const char* ECF_TRIES         = "ECF_TRIES";
-constexpr const char* ECF_NAME          = "ECF_NAME";
-constexpr const char* ECF_HOST          = "ECF_HOST";
-constexpr const char* ECF_HOST_PROTOCOL = "ECF_HOST_PROTOCOL";
-constexpr const char* ECF_PASS          = "ECF_PASS";
-constexpr const char* ECF_JOB           = "ECF_JOB";
-constexpr const char* ECF_JOBOUT        = "ECF_JOBOUT";
-constexpr const char* ECF_SCRIPT        = "ECF_SCRIPT";
-constexpr const char* ECF_DUMMY_TASK    = "ECF_DUMMY_TASK";
-constexpr const char* ECF_NO_SCRIPT     = "ECF_NO_SCRIPT";
-constexpr const char* ECF_MICRO         = "ECF_MICRO";
-constexpr const char* ECF_FILES         = "ECF_FILES";
-constexpr const char* ECF_FETCH         = "ECF_FETCH";
-constexpr const char* ECF_KILL_CMD      = "ECF_KILL_CMD";
-constexpr const char* ECF_STATUS_CMD    = "ECF_STATUS_CMD";
-constexpr const char* ECF_HOME          = "ECF_HOME";
-constexpr const char* ECF_INCLUDE       = "ECF_INCLUDE";
-constexpr const char* ECF_JOB_CMD       = "ECF_JOB_CMD";
-constexpr const char* ECF_OUT           = "ECF_OUT";
-constexpr const char* ECF_EXTN          = "ECF_EXTN";
-constexpr const char* ECF_LOG           = "ECF_LOG";
-constexpr const char* ECF_PASSWD        = "ECF_PASSWD";
-constexpr const char* ECF_CUSTOM_PASSWD = "ECF_CUSTOM_PASSWD";
+constexpr const char* ECF_PORT            = "ECF_PORT";
+constexpr const char* ECF_RID             = "ECF_RID";
+constexpr const char* ECF_TRYNO           = "ECF_TRYNO";
+constexpr const char* ECF_TRIES           = "ECF_TRIES";
+constexpr const char* ECF_NAME            = "ECF_NAME";
+constexpr const char* ECF_HOST            = "ECF_HOST";
+constexpr const char* ECF_HOST_PROTOCOL   = "ECF_HOST_PROTOCOL";
+constexpr const char* ECF_HOSTFILE        = "ECF_HOSTFILE";
+constexpr const char* ECF_HOSTFILE_POLICY = "ECF_HOSTFILE_POLICY";
+constexpr const char* ECF_TIMEOUT         = "ECF_TIMEOUT";
+constexpr const char* ECF_ZOMBIE_TIMEOUT  = "ECF_ZOMBIE_TIMEOUT";
+constexpr const char* ECF_CONNECT_TIMEOUT = "ECF_CONNECT_TIMEOUT";
+constexpr const char* ECF_DENIED          = "ECF_DENIED";
+constexpr const char* ECF_PASS            = "ECF_PASS";
+constexpr const char* NO_ECF              = "NO_ECF";
+constexpr const char* ECF_JOB             = "ECF_JOB";
+constexpr const char* ECF_JOBOUT          = "ECF_JOBOUT";
+constexpr const char* ECF_SCRIPT          = "ECF_SCRIPT";
+constexpr const char* ECF_DUMMY_TASK      = "ECF_DUMMY_TASK";
+constexpr const char* ECF_NO_SCRIPT       = "ECF_NO_SCRIPT";
+constexpr const char* ECF_MICRO           = "ECF_MICRO";
+constexpr const char* ECF_FILES           = "ECF_FILES";
+constexpr const char* ECF_FETCH           = "ECF_FETCH";
+constexpr const char* ECF_KILL_CMD        = "ECF_KILL_CMD";
+constexpr const char* ECF_STATUS_CMD      = "ECF_STATUS_CMD";
+constexpr const char* ECF_HOME            = "ECF_HOME";
+constexpr const char* ECF_INCLUDE         = "ECF_INCLUDE";
+constexpr const char* ECF_JOB_CMD         = "ECF_JOB_CMD";
+constexpr const char* ECF_OUT             = "ECF_OUT";
+constexpr const char* ECF_EXTN            = "ECF_EXTN";
+constexpr const char* ECF_LOG             = "ECF_LOG";
+constexpr const char* ECF_PASSWD          = "ECF_PASSWD";
+constexpr const char* ECF_CUSTOM_PASSWD   = "ECF_CUSTOM_PASSWD";
 
 constexpr const char* ECF_SSL  = "ECF_SSL";
 constexpr const char* ECF_USER = "ECF_USER";
+
+constexpr const char* ECF_DEBUG_CLIENT = "ECF_DEBUG_CLIENT";
+constexpr const char* ECF_DEBUG_LEVEL  = "ECF_DEBUG_LEVEL";
 
 namespace /* anonymous */ {
 

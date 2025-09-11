@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -74,17 +76,30 @@ void CSyncCmd::print_only(std::string& os) const {
 
 bool CSyncCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<CSyncCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (api_ != the_rhs->api())
+    }
+    if (api_ != the_rhs->api()) {
         return false;
-    if (client_handle_ != the_rhs->client_handle())
+    }
+    if (client_handle_ != the_rhs->client_handle()) {
         return false;
-    if (client_state_change_no_ != the_rhs->client_state_change_no())
+    }
+    if (client_state_change_no_ != the_rhs->client_state_change_no()) {
         return false;
-    if (client_modify_change_no_ != the_rhs->client_modify_change_no())
+    }
+    if (client_modify_change_no_ != the_rhs->client_modify_change_no()) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t CSyncCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t CSyncCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 const char* CSyncCmd::theArg() const {
@@ -204,14 +219,16 @@ void CSyncCmd::addOption(boost::program_options::options_description& desc) cons
 }
 
 void CSyncCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    if (ac->debug())
+    if (ac->debug()) {
         cout << "  CSyncCmd::create api = '" << api_ << "'.\n";
+    }
 
     if (api_ == CSyncCmd::NEWS || api_ == CSyncCmd::SYNC || api_ == CSyncCmd::SYNC_CLOCK) {
         vector<unsigned int> args = vm[theArg()].as<vector<unsigned int>>();
-        if (args.size() != 3)
+        if (args.size() != 3) {
             throw std::runtime_error("CSyncCmd::create(SYNC/SYN_CLOCK/NEWS) expects 3 integer arguments, Client "
                                      "handle, state change number, and modify change number");
+        }
         unsigned int client_handle    = args[0];
         unsigned int state_change_no  = args[1];
         unsigned int modify_change_no = args[2];

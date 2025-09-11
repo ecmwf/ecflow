@@ -161,14 +161,25 @@ public:
     static bool valid_name(const std::string& name, std::string& msg);
     static bool valid_name(const std::string& name);
 
-    /// This function checks if the given string actually has any digits before attempting the conversion;
-    /// this approach is faster than using ecf::convert_to<int> directly (and thus always attempt to
-    /// perform the conversion).
-    /// Use this function when it is not possible to ensure the string is convertible to an integer (e.g. user input).
-    ///
-    /// This function return the given `error_return` (by default, numeric_limits<int>::max()),
-    /// in cases where the conversion is invalid.
+    /**
+     * Convert a given string to an integer.
+     *
+     * This function checks if the string has any digits before attempting the conversion -- this approach is deemed
+     * faster than using ecf::convert_to<int> directly (and thus always attempt to perform the conversion).
+     *
+     * Use this function when it is not possible to ensure the string is convertible to an integer (e.g. user input).
+     *
+     * @return upon successful conversion, the converted value; otherwise the given `error_return` value.
+     */
     static int to_int(const std::string&, int error_return = std::numeric_limits<int>::max());
+
+    /**
+     * Check if the string can be converted to an integer.
+     *
+     * @param s the string to check
+     * @return true if the string can be converted to an integer, false otherwise.
+     */
+    static bool is_int(const std::string& s);
 
     /// Truncate the input string at the start/end if exceeds max_lines_ newlines
     /// returns true if truncated false otherwise
@@ -207,8 +218,6 @@ public:
     static const std::string& LOCALHOST();
 
     static const std::string& WHITE_LIST_FILE();
-
-    static const char* cpu_timer_format() { return "%ws wall, (%us user + %ss system = %ts) CPU (%p%)"; }
 };
 
 } // namespace ecf

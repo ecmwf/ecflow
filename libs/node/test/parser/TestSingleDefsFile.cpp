@@ -12,9 +12,7 @@
 #include <iostream>
 #include <string>
 
-#include <boost/chrono.hpp>
 #include <boost/test/unit_test.hpp>
-#include <boost/timer/timer.hpp>
 
 #include "PersistHelper.hpp"
 #include "TemporaryFile.hpp"
@@ -22,6 +20,7 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
@@ -36,7 +35,6 @@
 
 using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(U_Parser)
 
@@ -67,20 +65,19 @@ public:
     bool do_parse_file(std::string& errorMsg) { return DefsStructureParser::do_parse_file(errorMsg); }
 };
 
-double get_seconds(const boost::timer::nanosecond_type& elapsed) {
-    return static_cast<double>(boost::chrono::nanoseconds(elapsed).count()) * boost::chrono::nanoseconds::period::num /
-           boost::chrono::nanoseconds::period::den;
+double get_seconds(const std::chrono::nanoseconds& elapsed) {
+    return std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count() / 1000000.0;
 }
 
 BOOST_AUTO_TEST_CASE(test_single_defs) {
-    boost::timer::auto_cpu_timer auto_cpu_timer;
+    ScopedPerformanceTimer auto_cpu_timer;
     std::string path      = File::test_data("libs/node/test/parser/data/single_defs/mega.def", "parser");
     size_t mega_file_size = fs::file_size(path);
     ECF_NAME_THIS_TEST(<< ", using file: " << path << " of size(" << mega_file_size << "MB)");
 
     // Time parse/resolve dependencies: This will need to be #defined depending on the platform
     // Change for file_iterator to plain string halved the time taken to load operation suite
-    boost::timer::cpu_timer timer;
+    PerformanceTimer timer;
 
 #ifdef DEBUG
     #if defined(HPUX) || defined(_AIX)
@@ -133,11 +130,10 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         std::string errorMsg, warningMsg;
         BOOST_REQUIRE_MESSAGE(defs.restore(path, errorMsg, warningMsg), errorMsg);
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForParse,
-                            "Performance regression, expected < " << expectedTimeForParse
-                                                                  << " seconds for parse/node tree creation but found "
-                                                                  << timer.format(3, Str::cpu_timer_format()));
-        cout << " Parsing Node tree and AST creation time                = " << timer.format(3, Str::cpu_timer_format())
-             << " < limit(" << expectedTimeForParse << ")" << endl;
+                            "Performance regression, expected < "
+                                << expectedTimeForParse << " seconds for parse/node tree creation but found " << timer);
+        cout << " Parsing Node tree and AST creation time                = " << timer << " < limit("
+             << expectedTimeForParse << ")" << endl;
     }
     {
         Defs local_defs;
@@ -148,9 +144,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForParse,
                             "Performance regression, expected < " << expectedTimeForParseOnly
                                                                   << " seconds for parse/node tree creation but found "
-                                                                  << timer.format(3, Str::cpu_timer_format()));
-        cout << " Parsing Node tree *only* time                          = " << timer.format(3, Str::cpu_timer_format())
-             << " < limit(" << expectedTimeForParseOnly << ")" << endl;
+                                                                  << timer);
+        cout << " Parsing Node tree *only* time                          = " << timer << " < limit("
+             << expectedTimeForParseOnly << ")" << endl;
     }
     {
         timer.start();
@@ -159,10 +155,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         }
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForFindAllPaths,
                             "Performance regression, expected < " << expectedTimeForFindAllPaths
-                                                                  << " seconds to find all paths, but found "
-                                                                  << timer.format(3, Str::cpu_timer_format()));
-        cout << " Test all paths can be found. time taken                = " << timer.format(3, Str::cpu_timer_format())
-             << " < limit(" << expectedTimeForFindAllPaths << ")" << endl;
+                                                                  << " seconds to find all paths, but found " << timer);
+        cout << " Test all paths can be found. time taken                = " << timer << " < limit("
+             << expectedTimeForFindAllPaths << ")" << endl;
     }
 
     {
@@ -174,10 +169,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         ofs << ecf::as_string(defs, PrintStyle::DEFS);
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForDefsPersistOnly,
                             "Performance regression, expected < " << expectedTimeForDefsPersistOnly
-                                                                  << " to persist defs file, but found "
-                                                                  << timer.format(3, Str::cpu_timer_format()));
-        cout << " Persist only, time taken                               = " << timer.format(3, Str::cpu_timer_format())
-             << " < limit(" << expectedTimeForDefsPersistOnly << ")" << endl;
+                                                                  << " to persist defs file, but found " << timer);
+        cout << " Persist only, time taken                               = " << timer << " < limit("
+             << expectedTimeForDefsPersistOnly << ")" << endl;
     }
 
     {
@@ -188,17 +182,17 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForDefsPersistAndReload,
                             "Performance regression, expected < " << expectedTimeForDefsPersistAndReload
                                                                   << " seconds to persist and reload, but found "
-                                                                  << timer.format(3, Str::cpu_timer_format()));
-        cout << " Persist and reload(DEFS) and compare, time taken       = " << timer.format(3, Str::cpu_timer_format())
-             << " < limit(" << expectedTimeForDefsPersistAndReload << ")"
+                                                                  << timer);
+        cout << " Persist and reload(DEFS) and compare, time taken       = " << timer << " < limit("
+             << expectedTimeForDefsPersistAndReload << ")"
              << " file_size(" << helper.file_size() << ")" << endl;
     }
     {
         timer.start();
         PersistHelper helper;
         BOOST_CHECK_MESSAGE(helper.test_persist_and_reload(defs, PrintStyle::STATE), helper.errorMsg());
-        cout << " Persist and reload(STATE) and compare, time taken      = " << timer.format(3, Str::cpu_timer_format())
-             << " file_size(" << helper.file_size() << ")" << endl;
+        cout << " Persist and reload(STATE) and compare, time taken      = " << timer << " file_size("
+             << helper.file_size() << ")" << endl;
     }
     {
         timer.start();
@@ -207,10 +201,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForDefsPersistAndReload,
                             "Performance regression, expected < "
                                 << expectedTimeForDefsPersistAndReload
-                                << " seconds to persist and reload *state*, but found "
-                                << timer.format(3, Str::cpu_timer_format()));
-        cout << " Persist and reload(MIGRATE) and compare, time taken    = " << timer.format(3, Str::cpu_timer_format())
-             << " < limit(" << expectedTimeForDefsPersistAndReload << ")"
+                                << " seconds to persist and reload *state*, but found " << timer);
+        cout << " Persist and reload(MIGRATE) and compare, time taken    = " << timer << " < limit("
+             << expectedTimeForDefsPersistAndReload << ")"
              << " file_size(" << helper.file_size() << ")" << endl;
 
         // each platform will have a slightly different size, since the server environment variables
@@ -225,10 +218,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForDefsPersistAndReload,
                             "Performance regression, expected < "
                                 << expectedTimeForDefsPersistAndReload
-                                << " seconds to persist and reload *state*, but found "
-                                << timer.format(3, Str::cpu_timer_format()));
-        cout << " Persist and reload(NET) and compare, time taken        = " << timer.format(3, Str::cpu_timer_format())
-             << " < limit(" << expectedTimeForDefsPersistAndReload << ")"
+                                << " seconds to persist and reload *state*, but found " << timer);
+        cout << " Persist and reload(NET) and compare, time taken        = " << timer << " < limit("
+             << expectedTimeForDefsPersistAndReload << ")"
              << " file_size(" << helper.file_size() << ")" << endl;
 
         // each platform will have a slightly different size, since the server environment variables
@@ -244,9 +236,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForCheckPtPersistAndReload,
                             "Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload
                                                                   << " seconds to persist and reload, but found "
-                                                                  << timer.format(3, Str::cpu_timer_format()));
+                                                                  << timer);
         cout << " Checkpt(CEREAL) and reload and compare, time taken     = ";
-        cout << timer.format(3, Str::cpu_timer_format()) << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")"
+        cout << timer << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")"
              << " file_size(" << helper.file_size() << ")" << endl;
     }
 
@@ -260,15 +252,13 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         for (int i = 0; i < count; i++) {
             jobs.generate(jobsParam);
         }
-        cout << " " << count
-             << " jobSubmissions                                      = " << timer.format(3, Str::cpu_timer_format())
+        cout << " " << count << " jobSubmissions                                      = " << timer
              << "s jobs:" << jobsParam.submitted().size() << " < limit(" << expectedTimeForResolveDependencies << ")"
              << endl;
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForResolveDependencies,
                             "jobSubmission Performance regression, expected < "
                                 << expectedTimeForResolveDependencies
-                                << " seconds for resolving dependencies but found "
-                                << timer.format(3, Str::cpu_timer_format()));
+                                << " seconds for resolving dependencies but found " << timer);
     }
 
     {
@@ -276,12 +266,11 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         timer.start();
         string errorMsg, warningMsg;
         BOOST_CHECK(defs.check(errorMsg, warningMsg));
-        cout << " Defs::check (inlimit resolution)                       = " << timer.format(3, Str::cpu_timer_format())
-             << " < limit(" << checkExprAndLimits << ")" << endl;
+        cout << " Defs::check (inlimit resolution)                       = " << timer << " < limit("
+             << checkExprAndLimits << ")" << endl;
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < checkExprAndLimits,
                             "Defs::check Performance regression, expected < "
-                                << checkExprAndLimits << " seconds for resolving dependencies but found "
-                                << timer.format(3, Str::cpu_timer_format()));
+                                << checkExprAndLimits << " seconds for resolving dependencies but found " << timer);
     }
 
     {
@@ -311,8 +300,7 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_REQUIRE_MESSAGE(defs.suiteVec().empty(),
                               "Expected all Suites to be deleted but found " << defs.suiteVec().size());
 
-        cout << " time for deleting all nodes                            = " << timer.format(3, Str::cpu_timer_format())
-             << endl;
+        cout << " time for deleting all nodes                            = " << timer << endl;
     }
 
     // Explicitly destroy, To keep valgrind happy

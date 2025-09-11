@@ -1,7 +1,7 @@
 .. _overview:
 
 Overview
-//////////////
+********
 
 .. image:: /_static/overview/image2.png
    :width: 4.16667in

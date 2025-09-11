@@ -1,5 +1,6 @@
+
 Native Python tasks
-===================
+*******************
 
 Here is an example of a script as a local native Python task: This example shows that we can still take advantage of pre-processing and variable substitution. This will work on the manual and comments section, these will also be pre-processed.
 

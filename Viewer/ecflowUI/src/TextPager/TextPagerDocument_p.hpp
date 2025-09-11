@@ -126,8 +126,9 @@ static inline QPair<int, int> intersection(int index1, int size1, int index2, in
     ret.first       = qMax(index1, index2);
     const int right = qMin(index1 + size1, index2 + size2);
     ret.second      = right - ret.first;
-    if (ret.second <= 0)
+    if (ret.second <= 0) {
         return qMakePair(-1, 0);
+    }
     return ret;
 }
 
@@ -344,8 +345,9 @@ public:
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
         Q_ASSERT(chunk);
         Q_COMPARE_ASSERT(chunkData.size(), chunk->size());
-        if (pos == end())
+        if (pos == end()) {
             return {};
+        }
 
     // Calling readCharacter is very expensive during find!!! So we try not to call it!!!
     #if 0
@@ -435,8 +437,9 @@ public:
     #endif
 
         // If we are at the start
-        if (pos <= min)
+        if (pos <= min) {
             return 0;
+        }
 
         // Get the QString in the chunk as a const pointer. It is faster to iterate through it than
         // calling QString::at()
@@ -463,8 +466,9 @@ public:
                 --data;
             }
 
-            if (pos == min)
+            if (pos == min) {
                 return 0;
+            }
         }
 
         // Mark the line end position within the chunk
@@ -494,10 +498,12 @@ public:
             if (--offset < 0) {
 
                 // Copy the line portion from this chunk to the result
-                if (str.size() == 0)
+                if (str.size() == 0) {
                     str = chunkData.mid(0, to);
-                else
+                }
+                else {
                     str.prepend(chunkData.mid(0, to));
+                }
 
                 // Get previous chunk
                 bool b = loadPrevChunk();
@@ -552,8 +558,9 @@ public:
                 // qDebug() << "nextLine --->" << pos << offset << chunkData.size() << chunkData.at(offset);
     #endif
         int posEnd = end();
-        if (pos >= posEnd)
+        if (pos >= posEnd) {
             return 0;
+        }
 
         // Get the QString in the chunk as a const pointer. It is faster to iterate through it than
         // calling QString::at()
@@ -585,8 +592,9 @@ public:
                 ++data;
             }
 
-            if (pos >= posEnd)
+            if (pos >= posEnd) {
                 return 0;
+            }
         }
 
         // Mark the line start position within the chunk
@@ -598,10 +606,12 @@ public:
                     // qDebug() << pos << offset << chunkData.at(offset);
     #endif
             if (pos >= posEnd) {
-                if (str.size() == 0)
+                if (str.size() == 0) {
                     str = chunkData.mid(from, offset - from + 1);
-                else
+                }
+                else {
                     str.append(chunkData.mid(from, offset - from + 1));
+                }
 
                 return 0;
             }
@@ -612,10 +622,12 @@ public:
             if (++offset >= chunkData.size()) {
 
                 // Copy the line portion from this chunk to the result
-                if (str.size() == 0)
+                if (str.size() == 0) {
                     str = chunkData.mid(from, offset - from);
-                else
+                }
+                else {
                     str.append(chunkData.mid(from, offset - from));
+                }
 
                 // Get next chunk
                 if (loadNextChunk()) {
@@ -638,8 +650,9 @@ public:
             if (str.size() == 0) {
                 str = chunkData.mid(from, offset - from + 1);
             }
-            else
+            else {
                 str.append(chunkData.mid(from, offset - from + 1));
+            }
         }
 
 #endif

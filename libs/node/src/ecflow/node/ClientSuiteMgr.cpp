@@ -41,8 +41,9 @@ unsigned int ClientSuiteMgr::create_client_suite(bool auto_add_new_suites,
             break;
         }
     }
-    if (!found_hole)
+    if (!found_hole) {
         new_handle = clientSuites_.size() + 1;
+    }
 
     clientSuites_.emplace_back(defs_, new_handle, auto_add_new_suites, suites, the_user);
 

@@ -111,6 +111,7 @@ set(u_tests
   u_TestJobGeneration
   u_TestMirror
   u_TestParent
+  u_TestPrint
   u_TestRemove
   u_TestRepeatArithmetic
   u_TestSimulator

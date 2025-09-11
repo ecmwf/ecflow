@@ -24,6 +24,7 @@ NodeQueryCombo::NodeQueryCombo(QWidget* parent) : QComboBox(parent) {
 }
 
 void NodeQueryCombo::slotCurrentChanged(int current) {
-    if (current != -1)
+    if (current != -1) {
         Q_EMIT changed(itemData(current).toString());
+    }
 }

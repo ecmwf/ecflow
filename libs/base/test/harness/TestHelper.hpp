@@ -48,8 +48,9 @@ public:
             BOOST_CHECK_MESSAGE(defs->checkInvariants(error_msg),
                                 "invokeRequest checkInvariants failed " << error_msg << " for cmd " << cmd_request);
         }
-        if (result)
+        if (result) {
             return result->get_string();
+        }
         return std::string();
     }
 
@@ -78,8 +79,9 @@ public:
             BOOST_CHECK_MESSAGE(server->defs()->checkInvariants(error_msg),
                                 "invokeRequest checkInvariants failed " << error_msg << " for cmd " << cmd_request);
         }
-        if (result)
+        if (result) {
             return result->get_string();
+        }
         return std::string();
     }
 

@@ -20,7 +20,7 @@ ecFlow otherwise ecFlow cannot start.
 
 .. toctree::
     :maxdepth: 1
-   
 
     ecflow_log_file
     ecflow_check_point_file_and_failure_tolerance
+    server_environment.cfg

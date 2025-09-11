@@ -1,7 +1,7 @@
 .. _ecflow_quickstart:
 
 Quickstart
-/////////////////
+**********
 
 This page gives a simple exercise that will allow you to create a very
 simple ecFlow server, load it with a small suite of minimal tasks and

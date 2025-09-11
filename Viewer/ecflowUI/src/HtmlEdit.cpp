@@ -28,8 +28,9 @@ HtmlEdit::HtmlEdit(QWidget* parent) : QTextBrowser(parent) {
 }
 
 HtmlEdit::~HtmlEdit() {
-    if (fontProp_)
+    if (fontProp_) {
         fontProp_->removeObserver(this);
+    }
 }
 
 //---------------------------------------------
@@ -46,20 +47,23 @@ void HtmlEdit::wheelEvent(QWheelEvent* event) {
     int fps = font().pointSize();
 
     QTextBrowser::wheelEvent(event);
-    if (font().pointSize() != fps)
+    if (font().pointSize() != fps) {
         fontSizeChangedByZoom();
+    }
 }
 
 void HtmlEdit::fontSizeChangedByZoom() {
-    if (fontProp_)
+    if (fontProp_) {
         fontProp_->setValue(font());
+    }
 }
 
 void HtmlEdit::updateFont() {
     if (fontProp_) {
         auto f = fontProp_->value().value<QFont>();
-        if (font() != f)
+        if (font() != f) {
             setFont(f);
+        }
     }
 }
 

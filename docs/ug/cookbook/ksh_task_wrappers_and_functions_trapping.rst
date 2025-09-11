@@ -1,7 +1,7 @@
 .. _ksh_task_wrappers_and_functions_trapping:
 
 ksh task wrappers and functions trapping
-//////////////////////////////////////////
+****************************************
 
 On Linux architecture, be aware of the slightly different behaviour of
 ksh functions according to their definition: With the following

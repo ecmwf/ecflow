@@ -22,8 +22,9 @@ using namespace std;
 bool MeterParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // meter 0 100 100 # value
     size_t line_tokens_size = lineTokens.size();
-    if (line_tokens_size < 4)
+    if (line_tokens_size < 4) {
         throw std::runtime_error("MeterParser::doParse: Invalid meter :" + line);
+    }
 
     if (nodeStack().empty()) {
         throw std::runtime_error("MeterParser::doParse: Could not add meter as node stack is empty at line: " + line);
@@ -43,8 +44,9 @@ bool MeterParser::doParse(const std::string& line, std::vector<std::string>& lin
                 value = Extract::theInt(lineTokens[i], "MeterParser::doParse, could not extract meter value");
                 break;
             }
-            if (lineTokens[i] == "#")
+            if (lineTokens[i] == "#") {
                 comment_fnd = true;
+            }
         }
     }
 

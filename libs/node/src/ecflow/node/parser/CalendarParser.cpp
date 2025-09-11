@@ -27,8 +27,9 @@ bool CalendarParser::doParse(const std::string& line, std::vector<std::string>& 
     }
 
     Suite* suite = nodeStack_top()->isSuite();
-    if (!suite)
+    if (!suite) {
         throw std::runtime_error("Calendar can only be added to suites and not " + nodeStack_top()->debugType());
+    }
     suite->set_calendar().read_state(line, lineTokens);
 
     return true;

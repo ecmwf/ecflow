@@ -1,21 +1,20 @@
 .. _cli_scripting_in_batch:
 
-CLI scripting in batch
-//////////////////////
+Using :code:`ecflow_client` in Tasks
+************************************
 
-You can use the CLI from within your tasks. This gives you some very
-powerful tools for controlling your suite and can even allow you to
-set up dynamic suites.
+:code:`ecflow_client` can be used from within Task scripts. This enables some very
+powerful tools for controlling suites, and allows to set up dynamic suites
+(i.e. suites that manage themselves, by updating/adding removing nodes and attributes).
 
-You can alter ecFlow variables (using alter), set particular tasks or
-families complete (using force), and even generate dynamic suites. To
-do this you could modify a definition file template and replace the
-modified part of the suite.
+ecFlow variables can be updated (using the :code:`--alter` options), Tasks and Families can
+be set to Complete (using :code:`--force`), and Suites can be dynamically generated.
 
-Alter examples:
+Dynamic Suite generation can be easily achieved by modifying a Definition file template,
+followed by replacing the modified part of the Suite.
 
 .. code-block:: shell
-   :caption: alter
+   :caption: Examples of how to use :code:`--alter` command
 
     ecflow_client --alter=add variable GLOBAL "value" /           # add server variable
     ecflow_client --alter=add variable FRED "value" /path/to/node # add node variable
@@ -40,4 +39,3 @@ Alter examples:
     
     ecflow_client --alter=delete variable FRED /path/to/node    # delete variable FRED
     ecflow_client --alter=delete variable      /path/to/node    # delete *ALL* variables on the specified node
-

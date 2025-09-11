@@ -10,8 +10,8 @@
 
 #include "ecflow/node/Jobs.hpp"
 
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Operations.hpp"
@@ -29,8 +29,9 @@ bool Jobs::generate(JobsParam& jobsParam) const {
 #ifdef DEBUG_JOB_SUBMISSION
     cout << "\n"
          << "Jobs::generate (" << jobsParam.logDebugMessage() << ") create jobs(" << jobsParam.createJobs() << ")";
-    if (defs_)
+    if (defs_) {
         cout << " server_state(" << SState::to_string(defs_->server().get_state()) << ")\n";
+    }
 #endif
 
     // dependency resolving and job submission must be less than submitJobsInterval seconds

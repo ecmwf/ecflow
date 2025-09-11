@@ -64,8 +64,9 @@ Dashboard* NodePanel::addWidget(QString /*id*/) {
 }
 
 void NodePanel::resetWidgets(QStringList idLst) {
-    if (idLst.count() == 0)
+    if (idLst.count() == 0) {
         return;
+    }
 
     clear();
 
@@ -78,8 +79,9 @@ void NodePanel::resetWidgets(QStringList idLst) {
 void NodePanel::tabBarCommand(QString name, int index) {
     if (name == "reloadTab") {
         Dashboard* w = nodeWidget(index);
-        if (w)
+        if (w) {
             w->reload();
+        }
     }
     else if (name == "closeOtherTabs") {
         removeOtherTabs(index);
@@ -102,8 +104,9 @@ Dashboard* NodePanel::currentDashboard() {
 void NodePanel::slotCurrentWidgetChanged(int /*index*/) {
     for (int i = 0; i < count(); i++) {
         if (QWidget* w = widget(i)) {
-            if (auto* nw = static_cast<Dashboard*>(w))
+            if (auto* nw = static_cast<Dashboard*>(w)) {
                 nw->titleHandler()->setCurrent(i == currentIndex());
+            }
         }
     }
 
@@ -117,32 +120,36 @@ void NodePanel::slotNewTab() {
 }
 
 VInfo_ptr NodePanel::currentSelection() {
-    if (Dashboard* w = currentDashboard())
+    if (Dashboard* w = currentDashboard()) {
         return w->currentSelection();
+    }
 
     return VInfo_ptr();
 }
 
 void NodePanel::slotSelection(VInfo_ptr n) {
-    if (Dashboard* w = currentDashboard())
+    if (Dashboard* w = currentDashboard()) {
         w->currentSelection(n);
+    }
 }
 
 void NodePanel::slotSelectionChangedInWidget(VInfo_ptr n) {
     if (auto* w = static_cast<Dashboard*>(sender())) {
-        if (w == currentDashboard())
+        if (w == currentDashboard()) {
             Q_EMIT selectionChangedInCurrent(n);
+        }
     }
 }
 
 bool NodePanel::selectInTreeView(VInfo_ptr info) {
     for (int i = 0; i < count(); i++) {
         if (QWidget* w = widget(i)) {
-            if (auto* nw = static_cast<Dashboard*>(w))
+            if (auto* nw = static_cast<Dashboard*>(w)) {
                 if (nw->selectInTreeView(info)) {
                     setCurrentIndex(i);
                     return true;
                 }
+            }
         }
     }
     return false;
@@ -150,8 +157,9 @@ bool NodePanel::selectInTreeView(VInfo_ptr info) {
 
 void NodePanel::setViewMode(Viewer::ViewMode mode) {
     Dashboard* w = currentDashboard();
-    if (w)
+    if (w) {
         w->setViewMode(mode);
+    }
     // setDefaults(this);
 }
 
@@ -204,21 +212,24 @@ int NodePanel::tabAreaWidth() const {
 void NodePanel::adjustTabTitle() {
     if (count() > 1) {
         int tabWidth = tabAreaWidth() / count();
-        if (tabWidth < 30)
+        if (tabWidth < 30) {
             tabWidth = 30;
+        }
 
         for (int i = 0; i < count(); i++) {
             if (QWidget* w = widget(i)) {
-                if (auto* nw = static_cast<Dashboard*>(w))
+                if (auto* nw = static_cast<Dashboard*>(w)) {
                     nw->titleHandler()->setMaxPixWidth(tabWidth);
+                }
             }
         }
     }
 }
 
 void NodePanel::resizeEvent(QResizeEvent* e) {
-    if (abs(e->oldSize().width() - width()) > 5)
+    if (abs(e->oldSize().width() - width()) > 5) {
         adjustTabTitle();
+    }
 }
 
 /*void NodePanel::slotNewWindow(bool)
@@ -254,8 +265,9 @@ Viewer::FolderViewMode NodePanel::viewMode()
 void NodePanel::reload() {
     for (int i = 0; i < count(); i++) {
         if (QWidget* w = widget(i)) {
-            if (auto* nw = static_cast<Dashboard*>(w))
+            if (auto* nw = static_cast<Dashboard*>(w)) {
                 nw->reload();
+            }
         }
     }
 }
@@ -263,16 +275,18 @@ void NodePanel::reload() {
 void NodePanel::rerender() {
     for (int i = 0; i < count(); i++) {
         if (QWidget* w = widget(i)) {
-            if (auto* nw = static_cast<Dashboard*>(w))
+            if (auto* nw = static_cast<Dashboard*>(w)) {
                 nw->rerender();
+            }
         }
     }
 }
 
 void NodePanel::refreshCurrent() {
     ServerFilter* filter = serverFilter();
-    if (!filter)
+    if (!filter) {
         return;
+    }
 
     for (auto it : filter->items()) {
         if (ServerHandler* sh = it->serverHandler()) {
@@ -283,8 +297,9 @@ void NodePanel::refreshCurrent() {
 
 void NodePanel::resetCurrent() {
     ServerFilter* filter = serverFilter();
-    if (!filter)
+    if (!filter) {
         return;
+    }
 
     for (auto it : filter->items()) {
         if (ServerHandler* sh = it->serverHandler()) {
@@ -356,8 +371,9 @@ void NodePanel::readSettings(VComboSettings* vs) {
         }
     }
 
-    if (QWidget* w = currentDashboard())
+    if (QWidget* w = currentDashboard()) {
         w->setFocus();
+    }
 
     // We emit it to trigger the whole window ui update!
     Q_EMIT currentWidgetChanged();

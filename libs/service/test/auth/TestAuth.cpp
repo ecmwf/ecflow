@@ -9,9 +9,9 @@
  */
 
 #include <boost/test/unit_test.hpp>
-#include <ecflow/core/Overload.hpp>
 
 #include "TestContentProvider.hpp"
+#include "ecflow/core/Overload.hpp"
 #include "ecflow/service/auth/Credentials.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Auth)

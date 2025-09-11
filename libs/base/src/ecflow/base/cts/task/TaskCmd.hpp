@@ -50,19 +50,20 @@ public:
     bool password_missmatch() const { return password_missmatch_; }
     bool pid_missmatch() const { return pid_missmatch_; }
 
+    /// @see ClientToServer#check_preconditions
+    [[nodiscard]] bool check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) const override;
+
 protected:
     /// Overridden to do nothing since Task based commands don't need _user_ based authentication
     void setup_user_authentification(const std::string& /*user*/, const std::string& /*passwd*/) override {}
     bool setup_user_authentification(AbstractClientEnv&) override { return true; }
     void setup_user_authentification() override {}
 
-    bool authenticate(AbstractServer*,
-                      STC_Cmd_ptr&) const override; /// Task have their own mechanism,can throw std::runtime_error
     Submittable* get_submittable(AbstractServer* as) const; // can throw std::runtime_error
 
 protected:
-    mutable Submittable* submittable_{
-        nullptr}; // stored during authentication and re-used handle request, not persisted, server side only
+    mutable Submittable* submittable_{nullptr};
+    // stored during authentication and re-used handle request, not persisted, server side only
 
 private:
     std::string path_to_submittable_;

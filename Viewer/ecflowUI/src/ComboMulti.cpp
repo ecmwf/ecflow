@@ -64,11 +64,14 @@ void ComboMulti::paintEvent(QPaintEvent*) {
     initStyleOption(&opt);
 
     // if no display text been set , use "..." as default
-    if (dpyText_.isEmpty())
-        if (mode_ == FilterMode)
+    if (dpyText_.isEmpty()) {
+        if (mode_ == FilterMode) {
             opt.currentText = "ALL";
-        else
+        }
+        else {
             opt.currentText = "NONE";
+        }
+    }
     else {
         opt.currentText = dpyText_;
     }
@@ -88,10 +91,12 @@ void ComboMulti::slotChecked() {
         }
     }
 
-    if (selection_.count() == 0)
+    if (selection_.count() == 0) {
         s = "";
-    else
+    }
+    else {
         s = selection_.join(", ");
+    }
 
     setDisplayText(s);
 
@@ -103,8 +108,9 @@ void ComboMulti::slotChecked() {
 void ComboMulti::setSelection(QStringList lst) {
     for (int i = 0; i < count(); i++) {
         setItemData(i, false, Qt::CheckStateRole);
-        if (lst.contains(itemText(i)))
+        if (lst.contains(itemText(i))) {
             setItemData(i, true, Qt::CheckStateRole);
+        }
     }
 
     slotChecked();
@@ -113,8 +119,9 @@ void ComboMulti::setSelection(QStringList lst) {
 void ComboMulti::setSelectionByData(QStringList lst) {
     for (int i = 0; i < count(); i++) {
         setItemData(i, false, Qt::CheckStateRole);
-        if (lst.contains(itemData(i).toString()))
+        if (lst.contains(itemData(i).toString())) {
             setItemData(i, true, Qt::CheckStateRole);
+        }
     }
 
     slotChecked();
@@ -138,8 +145,9 @@ void ComboMulti::selectSoleItem() {
 QStringList ComboMulti::selectionData() const {
     QStringList lst;
     for (int i = 0; i < count(); i++) {
-        if (itemData(i, Qt::CheckStateRole).toBool())
+        if (itemData(i, Qt::CheckStateRole).toBool()) {
             lst << itemData(i, Qt::UserRole).toString();
+        }
     }
     return lst;
 }
@@ -154,8 +162,9 @@ QString ComboMulti::displayText() const {
 
 QStringList ComboMulti::all() const {
     QStringList lst;
-    for (int i = 0; i < count(); i++)
+    for (int i = 0; i < count(); i++) {
         lst << itemText(i);
+    }
 
     return lst;
 }

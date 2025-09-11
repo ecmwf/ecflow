@@ -34,11 +34,15 @@ public:
     CtsNodeCmd() = default;
 
     Api api() const { return api_; }
-    const std::string& absNodePath() const { return absNodePath_; }
+    [[deprecated]] const std::string& absNodePath() const { return absNodePath_; }
+    const std::string& pathToNode() const { return absNodePath_; }
 
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
+
+    [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
+    [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;
 
     PrintStyle::Type_t show_style() const override;
 
@@ -54,7 +58,7 @@ public:
 
 private:
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
-    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+    // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 
 private:
     Api api_{NO_CMD};

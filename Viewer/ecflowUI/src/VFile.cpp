@@ -84,8 +84,9 @@ VFile::~VFile() {
 }
 
 bool VFile::exists() const {
-    if (path_.empty())
+    if (path_.empty()) {
         return false;
+    }
     return (access(path_.c_str(), R_OK) == 0);
 }
 
@@ -112,15 +113,17 @@ VFile_ptr VFile::createTmpFile(bool deleteFile) {
 }
 
 void VFile::setStorageMode(StorageMode mode) {
-    if (storageMode_ == mode)
+    if (storageMode_ == mode) {
         return;
+    }
 
     storageMode_ = mode;
 
     if (storageMode_ == DiskStorage) {
         if (dataSize_ > 0) {
-            if (path_.empty())
+            if (path_.empty()) {
                 path_ = DirectoryHandler::tmpFileName();
+            }
 
             fp_ = fopen(path_.c_str(), "w");
             if (fwrite(data_, 1, dataSize_, fp_) != dataSize_) {}
@@ -165,8 +168,9 @@ bool VFile::write(const char* buf, size_t len, std::string& /*err*/) {
     // Write data to disk
     if (storageMode_ == DiskStorage) {
         if (!fp_) {
-            if (path_.empty())
+            if (path_.empty()) {
                 path_ = DirectoryHandler::tmpFileName();
+            }
 
             fp_ = fopen(path_.c_str(), "a");
         }
@@ -284,8 +288,9 @@ bool VFile::append(VFile_ptr other) {
 }
 
 bool VFile::isEmpty() const {
-    if (storageMode_ == VFile::MemoryStorage)
+    if (storageMode_ == VFile::MemoryStorage) {
         return dataSize_ == 0;
+    }
 
     if (exists()) {
         struct stat info;
@@ -298,8 +303,9 @@ size_t VFile::fileSize() const {
     if (storageMode_ == VFile::DiskStorage) {
         if (exists()) {
             struct stat info;
-            if (::stat(path_.c_str(), &info) == 0)
+            if (::stat(path_.c_str(), &info) == 0) {
                 return info.st_size;
+            }
         }
     }
     return 0;
@@ -310,18 +316,22 @@ size_t VFile::sizeInBytes() const {
 }
 
 int VFile::numberOfLines() const {
-    if (storageMode_ != VFile::DiskStorage || isEmpty())
+    if (storageMode_ != VFile::DiskStorage || isEmpty()) {
         return -1;
+    }
 
     int num  = 0;
     int c    = 0;
     FILE* fp = fopen(path_.c_str(), "r");
-    if (!fp)
+    if (!fp) {
         return -1;
+    }
 
-    for (c = getc(fp); c != EOF; c = getc(fp))
-        if (c == '\n')
+    for (c = getc(fp); c != EOF; c = getc(fp)) {
+        if (c == '\n') {
             num++;
+        }
+    }
 
     fclose(fp);
     return num;

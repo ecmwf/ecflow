@@ -47,8 +47,9 @@ TriggerEditor::TriggerEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(
     // Data is built dynamically so we store it
     QStringList data = a->data();
 
-    if (data.count() != 3)
+    if (data.count() != 3) {
         return;
+    }
 
     QString txt = data[2];
 
@@ -80,8 +81,9 @@ TriggerEditor::~TriggerEditor() {
 }
 
 void TriggerEditor::apply() {
-    if (typeInCmd_.isEmpty())
+    if (typeInCmd_.isEmpty()) {
         return;
+    }
 
     std::string txt = w_->te_->toPlainText().toStdString();
     std::vector<std::string> cmd;
@@ -132,8 +134,9 @@ void TriggerEditor::readSettings() {
     if (settings.contains("fontSize")) {
         QFont f   = w_->te_->font();
         int fSize = settings.value("fontSize").toInt();
-        if (fSize > 0 && fSize < 100)
+        if (fSize > 0 && fSize < 100) {
             f.setPointSize(fSize);
+        }
 
         w_->te_->setFont(f);
     }

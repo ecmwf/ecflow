@@ -49,8 +49,9 @@ public:
     void resetAttrNum();
 
     virtual bool isTopLevel() const {
-        if (parent_)
+        if (parent_) {
             return (parent_->parent()) ? false : true;
+        }
         return false;
     }
     virtual bool isRoot() const { return false; }

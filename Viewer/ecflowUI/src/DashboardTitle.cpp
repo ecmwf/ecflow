@@ -38,8 +38,9 @@ DashboardTitle::~DashboardTitle() {
 }
 
 void DashboardTitle::clear() {
-    if (!filter_)
+    if (!filter_) {
         return;
+    }
 
     filter_->removeObserver(this);
     for (auto it : filter_->items()) {
@@ -119,8 +120,9 @@ int DashboardTitle::fullWidth() const {
     for (auto i : filter_->items()) {
         QString str = QString::fromStdString(i->name());
         int tw      = ViewerUtil::textWidth(fm, str);
-        if (tw > w)
+        if (tw > w) {
             w = tw;
+        }
     }
 
     return 10 + filter_->items().size() * (w + padding) + (filter_->items().size() - 1) * gap;
@@ -140,8 +142,9 @@ void DashboardTitle::updateTitle() {
         return;
     }
 
-    if (maxPixWidth_ == 0)
+    if (maxPixWidth_ == 0) {
         return;
+    }
 
     QStringList texts;
     QList<QColor> fillColors;
@@ -260,10 +263,12 @@ void DashboardTitle::updateTitle() {
                 fillRects[i] = r;
 
                 QColor bgLight;
-                if (bg.value() < 235)
+                if (bg.value() < 235) {
                     bgLight = bg.lighter(130);
-                else
+                }
+                else {
                     bgLight = bg.lighter(lighter_);
+                }
 
                 QLinearGradient grad;
                 grad.setCoordinateMode(QGradient::ObjectBoundingMode);
@@ -316,10 +321,12 @@ void DashboardTitle::updateTitle() {
             QRect r(xp, 0, dw, h);
             QColor bg = fillColors[i];
             QColor bgLight;
-            if (bg.value() < 235)
+            if (bg.value() < 235) {
                 bgLight = bg.lighter(130);
-            else
+            }
+            else {
                 bgLight = bg.lighter(lighter_);
+            }
 
             QColor borderCol = bg.darker(150);
             QLinearGradient grad;
@@ -338,11 +345,13 @@ void DashboardTitle::updateTitle() {
         }
     }
 
-    if (tooltip_.isEmpty())
+    if (tooltip_.isEmpty()) {
         tooltip_ = tr("No server is loaded in this this tab");
+    }
 
-    if (desc_.isEmpty())
+    if (desc_.isEmpty()) {
         desc_ = tr("No server loaded in tab");
+    }
 
     Q_EMIT changed(this);
 }

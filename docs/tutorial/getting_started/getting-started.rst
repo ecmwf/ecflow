@@ -1,7 +1,7 @@
 .. _tutorial-getting-started:
 
 Getting Started
-===================
+***************
 
 .. toctree::
    :maxdepth: 1

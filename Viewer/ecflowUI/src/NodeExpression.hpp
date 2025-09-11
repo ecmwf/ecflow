@@ -228,8 +228,9 @@ class StringMatchCondition : public BaseNodeCondition {
 public:
     StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive);
     ~StringMatchCondition() override {
-        if (matcher_)
+        if (matcher_) {
             delete matcher_;
+        }
     }
     StringMatchCondition(const StringMatchCondition&)            = delete;
     StringMatchCondition& operator=(const StringMatchCondition&) = delete;

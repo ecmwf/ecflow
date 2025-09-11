@@ -11,10 +11,10 @@
 #ifndef ecflow_core_cereal_boost_time_HPP
 #define ecflow_core_cereal_boost_time_HPP
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/time_serialize.hpp>
 #include <cereal/archives/json.hpp>
 #include <cereal/details/traits.hpp>
+
+#include "ecflow/core/Chrono.hpp"
 
 namespace cereal {
 

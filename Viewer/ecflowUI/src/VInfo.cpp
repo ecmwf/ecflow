@@ -26,19 +26,22 @@
 //========================================
 
 VInfo::VInfo(ServerHandler* server, VNode* node, VAttribute* attr) : server_(server), node_(node), attr_(attr) {
-    if (server_)
+    if (server_) {
         server_->addServerObserver(this);
+    }
 }
 
 VInfo::~VInfo() {
 #ifdef _UI_VINFO_DEBUG
     UiLog().dbg() << "VInfo::~VInfo() --> " << this;
 #endif
-    if (server_)
+    if (server_) {
         server_->removeServerObserver(this);
+    }
 
-    for (auto it = observers_.begin(); it != observers_.end(); ++it)
+    for (auto it = observers_.begin(); it != observers_.end(); ++it) {
         (*it)->notifyDelete(this);
+    }
 
 #ifdef _UI_VINFO_DEBUG
     UiLog().dbg() << "<-- ~VInfo()";
@@ -105,8 +108,9 @@ void VInfo::regainData() {
             VItemPathParser p(storedPath_);
             if (p.itemType() == VItemPathParser::NodeType) {
                 node_ = server_->vRoot()->find(p.node());
-                if (node_)
+                if (node_) {
                     return;
+                }
             }
             if (!node_) {
                 dataLost();
@@ -133,44 +137,52 @@ void VInfo::regainData() {
 
 std::string VInfo::storedNodePath() const {
     VItemPathParser p(storedPath_);
-    if (p.itemType() == VItemPathParser::ServerType)
+    if (p.itemType() == VItemPathParser::ServerType) {
         return "/";
-    else
+    }
+    else {
         return p.node();
+    }
 }
 
 void VInfo::addObserver(VInfoObserver* o) {
     auto it = std::find(observers_.begin(), observers_.end(), o);
-    if (it == observers_.end())
+    if (it == observers_.end()) {
         observers_.push_back(o);
+    }
 }
 
 void VInfo::removeObserver(VInfoObserver* o) {
     auto it = std::find(observers_.begin(), observers_.end(), o);
-    if (it != observers_.end())
+    if (it != observers_.end()) {
         observers_.erase(it);
+    }
 }
 
 bool VInfo::operator==(const VInfo& other) {
     if (server_ == other.server_ && node_ == other.node_ && storedPath_ == other.storedPath_) {
-        if ((!attr_ && other.attr_) || (attr_ && !other.attr_))
+        if ((!attr_ && other.attr_) || (attr_ && !other.attr_)) {
             return false;
+        }
 
         else if (attr_ && other.attr_) {
             return (attr_->type() == other.attr_->type() && attr_->data() == other.attr_->data());
         }
-        else
+        else {
             return true;
+        }
     }
     return false;
 }
 
 VInfo_ptr VInfo::createParent(VInfo_ptr info) {
-    if (!info)
+    if (!info) {
         return {};
+    }
 
-    if (info->isServer())
+    if (info->isServer()) {
         return info;
+    }
     else if (info->isNode()) {
         return VInfoServer::create(info->server());
     }
@@ -182,8 +194,9 @@ VInfo_ptr VInfo::createParent(VInfo_ptr info) {
 }
 
 VInfo_ptr VInfo::createFromPath(ServerHandler* s, const std::string& path) {
-    if (!s || path.empty())
+    if (!s || path.empty()) {
         return {};
+    }
 
     VItemPathParser p(path);
 
@@ -191,8 +204,9 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s, const std::string& path) {
         return VInfoServer::create(s);
     }
     else if (p.itemType() == VItemPathParser::NodeType) {
-        if (VNode* n = s->vRoot()->find(p.node()))
+        if (VNode* n = s->vRoot()->find(p.node())) {
             return VInfoNode::create(n);
+        }
     }
     else if (p.itemType() == VItemPathParser::AttributeType) {
         if (VNode* n = s->vRoot()->find(p.node())) {
@@ -206,8 +220,9 @@ VInfo_ptr VInfo::createFromPath(ServerHandler* s, const std::string& path) {
 }
 
 VInfo_ptr VInfo::createFromPath(const std::string& path) {
-    if (path.empty())
+    if (path.empty()) {
         return {};
+    }
 
     VItemPathParser p(path);
     if (!p.server().empty()) {
@@ -219,8 +234,9 @@ VInfo_ptr VInfo::createFromPath(const std::string& path) {
 }
 
 VInfo_ptr VInfo::createFromItem(VItem* item) {
-    if (!item)
+    if (!item) {
         return {};
+    }
 
     if (VServer* s = item->isServer()) {
         return VInfoServer::create(s->server());
@@ -302,41 +318,47 @@ void VInfoNode::accept(VInfoVisitor* v) {
 }
 
 std::string VInfoNode::name() {
-    if (node_ && node_->node())
+    if (node_ && node_->node()) {
         return node_->strName();
+    }
 
     return {};
 }
 
 std::string VInfoNode::path() {
     std::string p;
-    if (server_)
+    if (server_) {
         p = server_->name();
+    }
 
-    if (node_ && node_->node())
+    if (node_ && node_->node()) {
         p += ":/" + node_->absNodePath();
+    }
 
     return p;
 }
 
 std::string VInfoNode::serverAlias() {
     std::string p;
-    if (server_)
+    if (server_) {
         p = server_->name();
+    }
     return p;
 }
 
 std::string VInfoNode::nodePath() {
     std::string p;
-    if (node_ && node_->node())
+    if (node_ && node_->node()) {
         p = node_->absNodePath();
+    }
     return p;
 }
 
 std::string VInfoNode::relativePath() {
     std::string p;
-    if (node_ && node_->node())
+    if (node_ && node_->node()) {
         p = node_->absNodePath();
+    }
     return p;
 }
 
@@ -379,18 +401,21 @@ VInfo_ptr VInfoAttribute::create(VAttribute* att) {
 
 std::string VInfoAttribute::path() {
     std::string p;
-    if (server_)
+    if (server_) {
         p = server_->name();
-    if (attr_)
+    }
+    if (attr_) {
         p += ":/" + attr_->fullPath();
+    }
 
     return p;
 }
 
 std::string VInfoAttribute::nodePath() {
     std::string p;
-    if (node_ && node_->node())
+    if (node_ && node_->node()) {
         p = node_->absNodePath();
+    }
     return p;
 }
 

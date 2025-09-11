@@ -77,10 +77,12 @@ QString formatTableTdBg(QString txt, QColor col) {
 
 QString formatTableRow(QString col1Text, QString col2Text, QColor bg, QColor fg, bool boldCol1) {
     QString txt;
-    if (boldCol1)
+    if (boldCol1) {
         txt = "<td>" + formatBoldText(col1Text, fg) + "</td>";
-    else
+    }
+    else {
         txt = formatTableTdText(col1Text, fg);
+    }
 
     txt += formatTableTdText(col2Text, fg);
 
@@ -88,8 +90,9 @@ QString formatTableRow(QString col1Text, QString col2Text, QColor bg, QColor fg,
 }
 
 QString formatTableRow(QString col1Text, QString col2Text, bool boldCol1) {
-    if (boldCol1)
+    if (boldCol1) {
         col1Text = "<b>" + col1Text + "</b>";
+    }
 
     return formatTableTrText(formatTableTdText(col1Text) + formatTableTdText(col2Text));
 }

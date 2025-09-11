@@ -54,7 +54,7 @@ public:
 
     ~PasswdFile();
 
-    bool empty() const { return vec_.empty(); }
+    [[nodiscard]] bool empty() const { return vec_.empty(); }
 
     // Parse the file if any errors found return false and errorMsg
     // The parser expects version number  4.5.0

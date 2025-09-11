@@ -13,6 +13,8 @@
 #include <stdexcept>
 
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -35,8 +37,9 @@ class Lock {
 public:
     Lock(const std::string& user, AbstractServer* as) : as_(as) { ok_ = as->lock(user); }
     ~Lock() {
-        if (ok_)
+        if (ok_) {
             as_->unlock();
+        }
     }
     bool ok() const { return ok_; }
 
@@ -62,8 +65,9 @@ MoveCmd::~MoveCmd() = default;
 
 bool MoveCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<MoveCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     if (dest_ != the_rhs->dest()) {
         return false;
     }
@@ -71,6 +75,14 @@ bool MoveCmd::equals(ClientToServerCmd* rhs) const {
         return false;
     }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t MoveCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t MoveCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void MoveCmd::print(std::string& os) const {
@@ -137,8 +149,9 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
 
         // If the destination is task, replace with its parent
         Node* thedestNode = destNode.get();
-        if (thedestNode->isTask())
+        if (thedestNode->isTask()) {
             thedestNode = thedestNode->parent();
+        }
 
         // check its ok to add
         std::string errorMsg;
@@ -158,8 +171,9 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
     }
     else {
 
-        if (!src_node->isSuite())
+        if (!src_node->isSuite()) {
             throw std::runtime_error("plug(move): Source node was expected to be a suite");
+        }
 
         // convert node_ptr to suite_ptr
         suite_ptr the_source_suite = std::dynamic_pointer_cast<Suite>(src_node);

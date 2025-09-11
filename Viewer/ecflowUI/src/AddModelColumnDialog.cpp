@@ -31,11 +31,13 @@ void AddModelColumnDialog::init(ModelColumn* mc, const std::set<std::string>& va
         int idx   = -1;
         bool ok   = true;
         QString n = QString::fromStdString(var);
-        if ((idx = modelColumn_->indexOf(n)) != -1)
+        if ((idx = modelColumn_->indexOf(n)) != -1) {
             ok = !modelColumn_->isExtra(idx);
+        }
 
-        if (ok)
+        if (ok) {
             varLst << n;
+        }
     }
 
     auto* c = new QCompleter(varLst, this);

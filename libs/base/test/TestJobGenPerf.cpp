@@ -132,15 +132,17 @@ int main(int argc, char* argv[]) {
     std::vector<node_ptr> all_nodes;
     defs.get_all_nodes(all_nodes);
     for (size_t i = 0; i < all_nodes.size(); ++i) {
-        if (all_nodes[i]->isSuspended())
+        if (all_nodes[i]->isSuspended()) {
             all_nodes[i]->resume();
+        }
         all_nodes[i]->freeTrigger();
         all_nodes[i]->freeHoldingDateDependencies();
         all_nodes[i]->freeHoldingTimeDependencies();
 
         const std::vector<InLimit>& inlimits = all_nodes[i]->inlimits();
-        for (const auto& inlim : inlimits)
+        for (const auto& inlim : inlimits) {
             all_nodes[i]->deleteInlimit(inlim.name());
+        }
 
         if (all_nodes[i]->state() == NState::COMPLETE && all_nodes[i]->isTask()) {
             all_nodes[i]->set_state(NState::QUEUED);
@@ -155,8 +157,9 @@ int main(int argc, char* argv[]) {
 
     JobsParam jobParam(20 /*submitJobsInterval*/, true /*createJobs*/, false /* spawn jobs */);
     Jobs job(&defs);
-    if (!job.generate(jobParam))
+    if (!job.generate(jobParam)) {
         cout << " generate failed: " << jobParam.getErrorMsg();
+    }
     cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
 
     if (jobParam.submitted().size() != tasks.size()) {

@@ -111,8 +111,9 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction, QWidget
     Q_ASSERT(refreshAction_);
 
     // The icon for the round refresh button
-    if (!icon_)
+    if (!icon_) {
         icon_ = new QIcon(QPixmap(":/viewer/reload_green.svg"));
+    }
 
     // Init fonts
     fontServer_ = QFont();
@@ -471,22 +472,25 @@ void ServerRefreshInfoWidget::fetchInfo() {
             nextRefresh_ = currentTime.addSecs(toNext_).time().toString();
 
             mode_ = NormalMode;
-            if (!inRefresh_)
+            if (!inRefresh_) {
                 refreshAction_->setEnabled(true);
+            }
         }
         // the server's automatic refresh is switched off
         else {
             lastRefresh_ = server_->lastRefresh().time().toString();
             mode_        = ManualMode;
-            if (!inRefresh_)
+            if (!inRefresh_) {
                 refreshAction_->setEnabled(true);
+            }
         }
 
         // Determine period text
         determinePeriodText();
 
-        if (geoUpdateNeeded || periodTextWidthAboutToChange())
+        if (geoUpdateNeeded || periodTextWidthAboutToChange()) {
             adjustGeometry(false);
+        }
 
         // if(currentComponent_ == TextComponent)
         adjustToolTip();
@@ -513,8 +517,9 @@ void ServerRefreshInfoWidget::adjustTimer(int toNext) {
             timer_->stop();
             return;
         }
-        else if (total_ == 2)
+        else if (total_ == 2) {
             timer_->setInterval(750);
+        }
         else {
             Q_ASSERT(total_ > 0);
             int progWidth = periodTextWidth_;
@@ -524,24 +529,30 @@ void ServerRefreshInfoWidget::adjustTimer(int toNext) {
             Q_ASSERT(r >= 1.);
 
             if (toNext > 135) {
-                if (r > 30)
+                if (r > 30) {
                     r = 60;
-                else if (r > 15)
+                }
+                else if (r > 15) {
                     r = 30;
-                else
+                }
+                else {
                     r = 15;
+                }
             }
             else if (toNext > 60) {
-                if (r < 10)
+                if (r < 10) {
                     r = 10;
+                }
             }
             else if (toNext > 30) {
-                if (r < 5)
+                if (r < 5) {
                     r = 5;
+                }
             }
             else if (toNext > 5) {
-                if (r < 2.5)
+                if (r < 2.5) {
                     r = 2.5;
+                }
             }
             else {
                 r = 1;
@@ -550,8 +561,9 @@ void ServerRefreshInfoWidget::adjustTimer(int toNext) {
             timer_->setInterval(static_cast<int>(r * 1000.));
         }
 
-        if (!timer_->isActive())
+        if (!timer_->isActive()) {
             timer_->start();
+        }
     }
     else {
         timer_->stop();
@@ -580,8 +592,9 @@ void ServerRefreshInfoWidget::mouseDoubleClickEvent(QMouseEvent* event) {
 }
 
 void ServerRefreshInfoWidget::mousePressEvent(QMouseEvent* event) {
-    if (!refreshAction_->isEnabled())
+    if (!refreshAction_->isEnabled()) {
         return;
+    }
 
     // We are in the button
     if (isInButton(event->pos())) {
@@ -653,14 +666,18 @@ QString ServerRefreshInfoWidget::formatPeriodTime(int timeInSec) const {
     int s = r % 60;
 
     QTime t(h, m, s);
-    if (h > 0)
+    if (h > 0) {
         return QString::number(h) + QString(":%1h").arg(m, 2, 10, QChar('0'));
-    else if (m >= 5)
+    }
+    else if (m >= 5) {
         return QString::number(m) + QString(":%1s").arg(s, 2, 10, QChar('0'));
-    else if (m > 0)
+    }
+    else if (m > 0) {
         return QString::number(m * 60 + s) + "s";
-    else
+    }
+    else {
         return QString::number(s) + "s";
+    }
 
     return QString();
 }
@@ -740,8 +757,9 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo) {
                             h);
         currentRight = serverRect_.x() + serverRect_.width();
 
-        if (doFetchInfo)
+        if (doFetchInfo) {
             fetchInfo();
+        }
 
         // Determine the minimum size for the period text
         periodTextWidthMin_ = determinePeriodTextWidthMin();
@@ -787,8 +805,9 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo) {
             lastRect_ = QRect(currentRight, serverRect_.y(), lastTextWidth_, h);
             currentRight += lastRect_.width() + 6;
         }
-        else
+        else {
             currentRight += 6;
+        }
 
         setFixedWidth(currentRight);
     }
@@ -813,10 +832,12 @@ void ServerRefreshInfoWidget::drawButton(QPainter* painter) {
         else {
             painter->setBrush((currentComponent_ == ButtonComponent) ? buttonBgHoverBrush_ : buttonBgBrush_);
 
-            if (!refreshAction_->isEnabled())
+            if (!refreshAction_->isEnabled()) {
                 painter->setPen(disabledBorderPen_);
-            else
+            }
+            else {
                 painter->setPen((currentComponent_ == ButtonComponent) ? buttonHoverPen_ : buttonBorderPen_);
+            }
         }
     }
     else {
@@ -836,8 +857,9 @@ void ServerRefreshInfoWidget::drawButton(QPainter* painter) {
 }
 
 void ServerRefreshInfoWidget::drawProgress(QPainter* painter) {
-    if (!server_)
+    if (!server_) {
         return;
+    }
 
     // server bg
     painter->setBrush(serverBgBrush_);
@@ -903,20 +925,24 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter) {
         float progress;
         QRect actProgRect = progRect_;
 
-        if (total_ < 2 || inRefresh_)
+        if (total_ < 2 || inRefresh_) {
             progress = 1;
+        }
         else {
             UI_ASSERT(total_ != 0, "total_=" << total_);
             progress = (static_cast<float>(total_ - toNext_) / static_cast<float>(total_));
             UI_ASSERT(progress >= 0. && progress <= 1.0001, "progress=" << progress);
-            if (progress >= 1.)
+            if (progress >= 1.) {
                 progress = 1;
+            }
 
             auto progressW = static_cast<int>(static_cast<float>(actProgRect.width()) * progress);
-            if (progressW < 0)
+            if (progressW < 0) {
                 progressW = 0;
-            else if (progressW > progRect_.width())
+            }
+            else if (progressW > progRect_.width()) {
                 progressW = progRect_.width();
+            }
             actProgRect.setWidth(progressW);
         }
 
@@ -968,10 +994,12 @@ void ServerRefreshInfoWidget::adjustToolTip() {
 
         if (hasInfo_) {
             Q_ASSERT(server_);
-            if (!txt.isEmpty())
+            if (!txt.isEmpty()) {
                 txt += "<br>--------------------------------------------";
-            else
+            }
+            else {
                 txt += "<b>Server:</b> " + serverName_;
+            }
 
             txt += "<br><b>Last refresh:</b> " + lastRefresh_ + "<br><b>Next refresh:</b> " + nextRefresh_ +
                    "<br><b>Total refresh period:</b> " + QString::number(total_) + "s" +
@@ -986,10 +1014,12 @@ void ServerRefreshInfoWidget::adjustToolTip() {
             }*/
         }
         else if (server_) {
-            if (!txt.isEmpty())
+            if (!txt.isEmpty()) {
                 txt += "<br>--------------------------------------------";
-            else
+            }
+            else {
                 txt += "<b>Server:</b> " + serverName_;
+            }
 
             txt += "<br><b>Last refresh:</b> " + lastRefresh_ + "<br>" + "Automatic refresh is disabled!";
         }

@@ -343,8 +343,9 @@ void TimelineWidget::updateInfoLabel(bool showDetails) {
             // fetch method and time
             if (localLog_) {
                 txt += " read from disk ";
-                if (data_->loadedAt().isValid())
+                if (data_->loadedAt().isValid()) {
                     txt += FileInfoLabel::formatHighlight(" at ") + FileInfoLabel::formatDate(data_->loadedAt());
+                }
             }
             else {
                 if (logTransferred_) {
@@ -353,8 +354,9 @@ void TimelineWidget::updateInfoLabel(bool showDetails) {
                 else {
                     txt += " fetch failed from remote host ";
                 }
-                if (transferredAt_.isValid())
+                if (transferredAt_.isValid()) {
                     txt += FileInfoLabel::formatHighlight(" at ") + FileInfoLabel::formatDate(transferredAt_);
+                }
             }
 
             if (data_->loadStatus() == TimelineData::LoadDone) {
@@ -399,11 +401,13 @@ void TimelineWidget::updateInfoLabel(bool showDetails) {
 
         if (showDetails) {
             if (data_->loadStatus() == TimelineData::LoadDone) {
-                if (archiveLogList_.loadableCount() == 1)
+                if (archiveLogList_.loadableCount() == 1) {
                     txt += FileInfoLabel::formatKwPair(" Size", VFileInfo::formatSize(archiveLogList_.totalSize()));
-                else if (archiveLogList_.loadableCount() > 1)
+                }
+                else if (archiveLogList_.loadableCount() > 1) {
                     txt +=
                         FileInfoLabel::formatKwPair(" Total size", VFileInfo::formatSize(archiveLogList_.totalSize()));
+                }
             }
 
             txt += FileInfoLabel::formatKwPair(" Source", "read from disk ");
@@ -458,20 +462,24 @@ void TimelineWidget::slotPeriodBeingZoomedInView(QDateTime start, QDateTime end)
 }
 
 void TimelineWidget::slotLogMode(int) {
-    if (beingCleared_)
+    if (beingCleared_) {
         return;
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QString id = ui_->logModeCombo->currentData().toString();
 #else
     QString id;
-    if (ui_->logModeCombo->currentIndex() >= 0)
+    if (ui_->logModeCombo->currentIndex() >= 0) {
         id = ui_->logModeCombo->itemData(ui_->logModeCombo->currentIndex()).toString();
+    }
 #endif
-    if (id == "latest")
+    if (id == "latest") {
         setLogMode(LatestMode);
-    else if (id == "archive")
+    }
+    else if (id == "archive") {
         setLogMode(ArchiveMode);
+    }
 }
 
 void TimelineWidget::adjustWidgetsToViewMode() {
@@ -542,21 +550,25 @@ void TimelineWidget::pathFilterMatchModeChanged(int) {
 }
 
 void TimelineWidget::slotPathFilterChanged(QString pattern) {
-    if (!filterTriggeredByEnter_)
+    if (!filterTriggeredByEnter_) {
         sortModel_->setPathFilter(pattern);
+    }
 }
 
 void TimelineWidget::slotPathFilterEditFinished() {
-    if (filterTriggeredByEnter_)
+    if (filterTriggeredByEnter_) {
         sortModel_->setPathFilter(ui_->pathFilterLe->text());
+    }
 }
 
 void TimelineWidget::slotSortMode(int) {
     int idx = ui_->sortCombo->currentIndex();
-    if (idx == 0)
+    if (idx == 0) {
         sortModel_->setSortMode(TimelineSortModel::PathSortMode);
-    else if (idx == 1)
+    }
+    else if (idx == 1) {
         sortModel_->setSortMode(TimelineSortModel::TimeSortMode);
+    }
     else if (idx == 2) {
         determineTreeOrder();
         sortModel_->setSortMode(TimelineSortModel::TreeSortMode);
@@ -615,10 +627,12 @@ void TimelineWidget::slotWholePeriod() {
 
 void TimelineWidget::slotDurationViewMode(int) {
     int idx = ui_->durationViewModeCb->currentIndex();
-    if (idx == 0)
+    if (idx == 0) {
         view_->setDurationViewMode(TimelineView::FirstDurationMode);
-    else if (idx == 1)
+    }
+    else if (idx == 1) {
         view_->setDurationViewMode(TimelineView::MeanDurationMode);
+    }
 }
 
 void TimelineWidget::slotLookup(QString nodePath) {
@@ -643,8 +657,9 @@ void TimelineWidget::selectPathInView(const std::string& p) {
 
     QModelIndex idx = sortModel_->mapToSource(view_->currentIndex());
     if (idx.isValid() && idx.row() < static_cast<int>(data_->size())) {
-        if (data_->items()[idx.row()].path() == p)
+        if (data_->items()[idx.row()].path() == p) {
             return;
+        }
     }
 
     size_t pos = 0;
@@ -664,8 +679,9 @@ void TimelineWidget::checkButtonState() {
 }
 
 void TimelineWidget::setLogMode(LogMode logMode) {
-    if (logMode_ == logMode)
+    if (logMode_ == logMode) {
         return;
+    }
 
     logMode_ = logMode;
     if (logMode_ == LatestMode) {
@@ -707,8 +723,9 @@ void TimelineWidget::reloadLatest(bool usePrevState) {
             setMaxReadSize(sh->maxSizeForTimelineData());
 
             if (SuiteFilter* sf = sh->suiteFilter()) {
-                if (sf->isEnabled())
+                if (sf->isEnabled()) {
                     suites = sh->suiteFilter()->filter();
+                }
             }
 
             suites_ = suites;
@@ -722,8 +739,9 @@ void TimelineWidget::reloadLatest(bool usePrevState) {
 void TimelineWidget::slotLoadCustomFile() {
     Q_ASSERT(logMode_ == ArchiveMode);
     QStringList fileNames = QFileDialog::getOpenFileNames(this);
-    if (fileNames.isEmpty())
+    if (fileNames.isEmpty()) {
         return;
+    }
 
     TimelineFileList archiveLogList = TimelineFileList(fileNames);
     TimelinePreLoadDialog dialog;
@@ -745,8 +763,9 @@ void TimelineWidget::initLoad(QString serverName,
                               int maxReadSize,
                               const std::string& currentNodePath,
                               bool detached) {
-    if (logMode_ != LatestMode)
+    if (logMode_ != LatestMode) {
         return;
+    }
 
     // we need to be in a clean state
     clear();
@@ -787,8 +806,9 @@ void TimelineWidget::loadLatest(bool usePrevState) {
         clearData(false);
     }
 
-    if (logFile_.isEmpty())
+    if (logFile_.isEmpty()) {
         return;
+    }
 
     logLoaded_      = false;
     logTransferred_ = false;
@@ -852,8 +872,9 @@ void TimelineWidget::loadArchive() {
 
     // std::vector<std::string> suites;
     for (int i = 0; i < archiveLogList_.items().count(); i++) {
-        if (!archiveLogList_.items()[i].loadable_)
+        if (!archiveLogList_.items()[i].loadable_) {
             continue;
+        }
 
         ui_->messageLabel->showInfo("Loading timeline data from log file [" + QString::number(i + 1) + "/" +
                                     QString::number(archiveLogList_.items().count()) + "] ...");
@@ -940,8 +961,9 @@ void TimelineWidget::slotFileTransferStdOutput(QString msg) {
 
 void TimelineWidget::slotLogLoadProgress(size_t current, size_t total) {
     int percent = 100 * current / total;
-    if (percent >= 0 && percent <= 100)
+    if (percent >= 0 && percent <= 100) {
         ui_->messageLabel->progress("", percent);
+    }
 }
 
 // notification from messagelabel: user cancelled the transfer
@@ -1003,12 +1025,14 @@ void TimelineWidget::loadCore(QString logFile) {
     updateFilterTriggerMode();
 
     // determine node types if task filter is on
-    if (ui_->taskOnlyTb->isChecked())
+    if (ui_->taskOnlyTb->isChecked()) {
         determineNodeTypes();
+    }
 
     // determine tree order when in tree sort mode
-    if (sortModel_->sortMode() == TimelineSortModel::TreeSortMode)
+    if (sortModel_->sortMode() == TimelineSortModel::TreeSortMode) {
         determineTreeOrder();
+    }
 
     ViewerUtil::restoreOverrideCursor();
 
@@ -1024,10 +1048,12 @@ void TimelineWidget::initFromData() {
 
     // try the set the previously used interval - for reload only
     if (prevState_.valid) {
-        if (prevState_.startDt <= data_->qStartTime() || prevState_.fullStart)
+        if (prevState_.startDt <= data_->qStartTime() || prevState_.fullStart) {
             ui_->fromTimeEdit->setDateTime(data_->qStartTime());
-        else if (prevState_.startDt < data_->qEndTime())
+        }
+        else if (prevState_.startDt < data_->qEndTime()) {
             ui_->fromTimeEdit->setDateTime(prevState_.startDt);
+        }
     }
     else {
         ui_->fromTimeEdit->setDateTime(data_->qStartTime());
@@ -1037,10 +1063,12 @@ void TimelineWidget::initFromData() {
     ui_->toTimeEdit->setMaximumDateTime(data_->qEndTime());
 
     if (prevState_.valid) {
-        if (prevState_.endDt >= data_->qEndTime() || prevState_.fullEnd)
+        if (prevState_.endDt >= data_->qEndTime() || prevState_.fullEnd) {
             ui_->toTimeEdit->setDateTime(data_->qEndTime());
-        else if (prevState_.endDt > data_->qStartTime())
+        }
+        else if (prevState_.endDt > data_->qStartTime()) {
             ui_->toTimeEdit->setDateTime(prevState_.endDt);
+        }
     }
     else {
         ui_->toTimeEdit->setDateTime(data_->qEndTime());
@@ -1063,8 +1091,9 @@ void TimelineWidget::setDetached(bool d) {
 
 // Determine missing types
 void TimelineWidget::determineNodeTypes() {
-    if (typesDetermined_)
+    if (typesDetermined_) {
         return;
+    }
 
     if (ServerHandler* sh = ServerHandler::find(serverName_.toStdString())) {
         ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -1072,10 +1101,12 @@ void TimelineWidget::determineNodeTypes() {
         for (size_t i = 0; i < data_->items().size(); i++) {
             if (data_->items()[i].type() == TimelineItem::UndeterminedType) {
                 if (VNode* vn = sh->vRoot()->find(data_->items()[i].path())) {
-                    if (vn->isTask())
+                    if (vn->isTask()) {
                         data_->setItemType(i, TimelineItem::TaskType);
-                    else if (vn->isFamily())
+                    }
+                    else if (vn->isFamily()) {
                         data_->setItemType(i, TimelineItem::FamilyType);
+                    }
                 }
             }
         }
@@ -1088,8 +1119,9 @@ void TimelineWidget::determineNodeTypes() {
 
 // Determine missing types
 void TimelineWidget::determineTreeOrder() {
-    if (treeOrderDetermined_)
+    if (treeOrderDetermined_) {
         return;
+    }
 
     if (ServerHandler* sh = ServerHandler::find(serverName_.toStdString())) {
         ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -1098,8 +1130,9 @@ void TimelineWidget::determineTreeOrder() {
         const std::vector<VNode*>& nv = sh->vRoot()->nodes();
         for (size_t i = 0; i < nv.size(); i++) {
             size_t dataIdx = 0;
-            if (data_->indexOfItem(nv[i]->absNodePath(), dataIdx))
+            if (data_->indexOfItem(nv[i]->absNodePath(), dataIdx)) {
                 data_->setItemTreeIndex(dataIdx, i + 1);
+            }
         }
 
         // Now for all the nodes in the tree we have the treeIndex_ set.
@@ -1124,10 +1157,12 @@ void TimelineWidget::determineTreeOrder() {
 }
 
 void TimelineWidget::setMaxReadSize(int maxReadSizeInMb) {
-    if (maxReadSizeInMb <= 0)
+    if (maxReadSizeInMb <= 0) {
         maxReadSize_ = 0;
-    else
+    }
+    else {
         maxReadSize_ = static_cast<size_t>(maxReadSizeInMb) * 1024 * 1024;
+    }
 }
 
 //-------------------------

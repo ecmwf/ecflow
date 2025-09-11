@@ -57,8 +57,9 @@ QWidget* ServerLoadItemWidget::realWidget() {
 void ServerLoadItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 
@@ -75,8 +76,9 @@ void ServerLoadItemWidget::reload(VInfo_ptr info) {
     // set the info. We do not need to observe the node!!!
     info_ = info;
 
-    if (!same)
+    if (!same) {
         load();
+    }
 }
 
 void ServerLoadItemWidget::load() {
@@ -94,8 +96,9 @@ void ServerLoadItemWidget::load() {
                 if (!logFile.isEmpty()) {
                     std::vector<std::string> suites;
                     if (SuiteFilter* sf = sh->suiteFilter()) {
-                        if (sf->isEnabled())
+                        if (sf->isEnabled()) {
                             suites = sh->suiteFilter()->filter();
+                        }
                     }
 
                     // last 100 MB are read
@@ -145,17 +148,20 @@ bool ServerLoadItemWidget::hasSameContents(VInfo_ptr info) {
 // We are independent of the server's state
 void ServerLoadItemWidget::serverSyncFinished() {
 #ifdef ECFLOW_LOGVIEW
-    if (delayedLoad_)
+    if (delayedLoad_) {
         load();
+    }
 #endif
 }
 
 void ServerLoadItemWidget::connectStateChanged() {
-    if (frozen_)
+    if (frozen_) {
         return;
+    }
 #ifdef ECFLOW_LOGVIEW
-    if (delayedLoad_)
+    if (delayedLoad_) {
         load();
+    }
 #endif
 }
 
@@ -171,8 +177,9 @@ void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
         else {
             if (info_ && info_->node()) {
                 // reloadTb_->setEnabled(true);
-                if (delayedLoad_)
+                if (delayedLoad_) {
                     load();
+                }
             }
             else {
                 clearContents();

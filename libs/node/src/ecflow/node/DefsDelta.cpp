@@ -38,8 +38,9 @@ bool DefsDelta::incremental_sync(defs_ptr client_def,
     // ****************************************************
     // On the client side
     // ****************************************************
-    if (!client_def.get())
+    if (!client_def.get()) {
         return false;
+    }
 
     // Clear the changed nodes since we want it to match number of changed memento's
     // This should have been clear anyway in ServerReply::clear_for_invoke

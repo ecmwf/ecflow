@@ -57,6 +57,11 @@ set(srcs
   # Base -- Headers
   base/src/ecflow/base/AbstractClientEnv.hpp
   base/src/ecflow/base/AbstractServer.hpp
+  base/src/ecflow/base/Algorithms.hpp
+  base/src/ecflow/base/Authentication.hpp
+  base/src/ecflow/base/AuthenticationDetails.hpp
+  base/src/ecflow/base/Authorisation.hpp
+  base/src/ecflow/base/AuthorisationDetails.hpp
   base/src/ecflow/base/Client.hpp
   base/src/ecflow/base/ClientOptionsParser.hpp
   base/src/ecflow/base/ClientToServerRequest.hpp
@@ -64,6 +69,7 @@ set(srcs
   base/src/ecflow/base/Connection.hpp
   base/src/ecflow/base/Gnuplot.hpp
   base/src/ecflow/base/HttpClient.hpp
+  base/src/ecflow/base/Identification.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
   base/src/ecflow/base/ServerProtocol.hpp
   base/src/ecflow/base/ServerReply.hpp
@@ -135,12 +141,15 @@ set(srcs
   base/src/ecflow/base/stc/StcCmd.hpp
   base/src/ecflow/base/stc/ZombieGetCmd.hpp
   # Base -- Sources
+  base/src/ecflow/base/Authentication.cpp
+  base/src/ecflow/base/Authorisation.cpp
   base/src/ecflow/base/Client.cpp
   base/src/ecflow/base/ClientOptionsParser.cpp
   base/src/ecflow/base/ClientToServerRequest.cpp
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
   base/src/ecflow/base/HttpClient.cpp
+  base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerReply.cpp
   base/src/ecflow/base/ServerToClientResponse.cpp
   base/src/ecflow/base/Stats.cpp
@@ -217,6 +226,7 @@ set(srcs
   client/src/ecflow/client/ClientInvoker.hpp
   client/src/ecflow/client/ClientOptions.hpp
   client/src/ecflow/client/Help.hpp
+  client/src/ecflow/client/HostsFile.hpp
   client/src/ecflow/client/Rtt.hpp
   client/src/ecflow/client/UrlCmd.hpp
   # Client -- Sources
@@ -225,6 +235,7 @@ set(srcs
   client/src/ecflow/client/ClientEnvironment.cpp
   client/src/ecflow/client/ClientInvoker.cpp
   client/src/ecflow/client/Help.cpp
+  client/src/ecflow/client/HostsFile.cpp
   client/src/ecflow/client/Rtt.cpp
   client/src/ecflow/client/ClientOptions.cpp
   client/src/ecflow/client/UrlCmd.cpp
@@ -242,7 +253,6 @@ set(srcs
   core/src/ecflow/core/CommandLine.hpp
   core/src/ecflow/core/DState.hpp
   core/src/ecflow/core/DebugPerf.hpp
-  core/src/ecflow/core/DurationTimer.hpp
   core/src/ecflow/core/Ecf.hpp
   core/src/ecflow/core/EcfPortLock.hpp
   core/src/ecflow/core/Enumerate.hpp
@@ -264,11 +274,13 @@ set(srcs
   core/src/ecflow/core/PasswordEncryption.hpp
   core/src/ecflow/core/Pid.hpp
   core/src/ecflow/core/PrintStyle.hpp
+  core/src/ecflow/core/Result.hpp
   core/src/ecflow/core/SState.hpp
   core/src/ecflow/core/Serialization.hpp
   core/src/ecflow/core/Stl.hpp
   core/src/ecflow/core/Str.hpp
   core/src/ecflow/core/StringSplitter.hpp
+  core/src/ecflow/core/Timer.hpp
   core/src/ecflow/core/TimeSeries.hpp
   core/src/ecflow/core/TimeSlot.hpp
   core/src/ecflow/core/TimeStamp.hpp
@@ -278,7 +290,6 @@ set(srcs
   core/src/ecflow/core/ZombieCtrlAction.hpp
   core/src/ecflow/core/cereal_boost_time.hpp
   core/src/ecflow/core/cereal_optional_nvp.hpp
-  core/src/ecflow/core/perf_timer.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
   # Core -- Sources
   core/src/ecflow/core/AssertTimer.cpp
@@ -288,7 +299,6 @@ set(srcs
   core/src/ecflow/core/Chrono.cpp
   core/src/ecflow/core/CommandLine.cpp
   core/src/ecflow/core/DState.cpp
-  core/src/ecflow/core/DurationTimer.cpp
   core/src/ecflow/core/Ecf.cpp
   core/src/ecflow/core/Extract.cpp
   core/src/ecflow/core/File.cpp
@@ -307,6 +317,7 @@ set(srcs
   core/src/ecflow/core/SState.cpp
   core/src/ecflow/core/Str.cpp
   core/src/ecflow/core/StringSplitter.cpp
+  core/src/ecflow/core/Timer.cpp
   core/src/ecflow/core/TimeSeries.cpp
   core/src/ecflow/core/TimeSlot.cpp
   core/src/ecflow/core/TimeStamp.cpp
@@ -353,6 +364,7 @@ set(srcs
   node/src/ecflow/node/NodeStats.hpp
   node/src/ecflow/node/NodeTreeVisitor.hpp
   node/src/ecflow/node/Operations.hpp
+  node/src/ecflow/node/Permissions.hpp
   node/src/ecflow/node/ResolveExternsVisitor.hpp
   node/src/ecflow/node/ServerState.hpp
   node/src/ecflow/node/Signal.hpp
@@ -437,6 +449,7 @@ set(srcs
   node/src/ecflow/node/NodeStats.cpp
   node/src/ecflow/node/NodeTime.cpp
   node/src/ecflow/node/NodeTreeVisitor.cpp
+  node/src/ecflow/node/Permissions.cpp
   node/src/ecflow/node/ResolveExternsVisitor.cpp
   node/src/ecflow/node/ServerState.cpp
   node/src/ecflow/node/Signal.cpp
@@ -480,6 +493,8 @@ set(srcs
   node/src/ecflow/node/parser/ZombieAttrParser.cpp
 
   # Server -- Headers
+  server/src/ecflow/server/AuthenticationService.hpp
+  server/src/ecflow/server/AuthorisationService.hpp
   server/src/ecflow/server/BaseServer.hpp
   server/src/ecflow/server/CheckPtSaver.hpp
   server/src/ecflow/server/HttpServer.hpp
@@ -493,6 +508,8 @@ set(srcs
   server/src/ecflow/server/TcpServer.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:server/src/ecflow/server/SslTcpServer.hpp>
   # Server -- Sources
+  server/src/ecflow/server/AuthenticationService.cpp
+  server/src/ecflow/server/AuthorisationService.cpp
   server/src/ecflow/server/BaseServer.cpp
   server/src/ecflow/server/CheckPtSaver.cpp
   server/src/ecflow/server/HttpServer.cpp

@@ -25,12 +25,14 @@ using namespace std;
 namespace ecf {
 
 TodayAttr::TodayAttr(const std::string& str) {
-    if (str.empty())
+    if (str.empty()) {
         throw std::runtime_error("Today::Today: empty string passed");
+    }
     std::vector<std::string> tokens;
     Str::split(str, tokens);
-    if (tokens.empty())
+    if (tokens.empty()) {
         throw std::runtime_error("Today::Today: incorrect time string ?");
+    }
 
     size_t index = 0;
     ts_          = TimeSeries::create(index, tokens, false /*parse_state*/);
@@ -126,19 +128,22 @@ bool TodayAttr::why(const ecf::Calendar& c,
                     const std::vector<DayAttr>& days,
                     const std::vector<DateAttr>& dates,
                     std::string& theReasonWhy) const {
-    if (isFree(c))
+    if (isFree(c)) {
         return false;
+    }
     theReasonWhy += "is today ";
-    if (!days.empty())
+    if (!days.empty()) {
         theReasonWhy += "and day ";
-    if (!dates.empty())
+    }
+    if (!dates.empty()) {
         theReasonWhy += "and date ";
+    }
     theReasonWhy += "dependent";
 
     // Check to see if time has expired; if not, then report why
     if (ts_.is_valid()) {
         // This can apply to single and series
-        boost::posix_time::time_duration calendar_time = ts_.duration(c);
+        auto calendar_time = ts_.duration(c);
         if (calendar_time < ts_.start().duration()) {
             ts_.why(c, theReasonWhy);
             return true;
@@ -181,24 +186,28 @@ bool TodayAttr::why(const ecf::Calendar& c,
 
             if (!days.empty() || !dates.empty()) {
                 for (auto day : days) {
-                    boost::gregorian::date the_next_matching_date = day.next_matching_date(c);
-                    if (the_min_next_date.is_special())
+                    auto the_next_matching_date = day.next_matching_date(c);
+                    if (the_min_next_date.is_special()) {
                         the_min_next_date = the_next_matching_date;
-                    if (the_next_matching_date < the_min_next_date)
+                    }
+                    if (the_next_matching_date < the_min_next_date) {
                         the_min_next_date = the_next_matching_date;
+                    }
                 }
                 for (const auto& i : dates) {
-                    boost::gregorian::date the_next_matching_date = i.next_matching_date(c);
-                    if (the_min_next_date.is_special())
+                    auto the_next_matching_date = i.next_matching_date(c);
+                    if (the_min_next_date.is_special()) {
                         the_min_next_date = the_next_matching_date;
-                    if (the_next_matching_date < the_min_next_date)
+                    }
+                    if (the_next_matching_date < the_min_next_date) {
                         the_min_next_date = the_next_matching_date;
+                    }
                 }
 
                 theReasonWhy += " next run at ";
             }
             else {
-                boost::gregorian::date_duration one_day(1);
+                auto one_day      = boost::gregorian::date_duration(1);
                 the_min_next_date = c.date(); // today's date
                 the_min_next_date += one_day; // add one day, so its in the future
                 theReasonWhy += " next run tomorrow at ";

@@ -15,6 +15,8 @@
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -30,17 +32,30 @@ namespace po = boost::program_options;
 
 bool QueueCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<QueueCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (name_ != the_rhs->name())
+    }
+    if (name_ != the_rhs->name()) {
         return false;
-    if (action_ != the_rhs->action())
+    }
+    if (action_ != the_rhs->action()) {
         return false;
-    if (step_ != the_rhs->step())
+    }
+    if (step_ != the_rhs->step()) {
         return false;
-    if (path_to_node_with_queue_ != the_rhs->path_to_node_with_queue())
+    }
+    if (path_to_node_with_queue_ != the_rhs->path_to_node_with_queue()) {
         return false;
+    }
     return TaskCmd::equals(rhs);
+}
+
+ecf::authentication_t QueueCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t QueueCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void QueueCmd::print(std::string& os) const {
@@ -128,8 +143,9 @@ STC_Cmd_ptr QueueCmd::doHandleRequest(AbstractServer* as) const {
     // Do job submission in case any triggers dependent on QueueAttr
     as->increment_job_generation_count();
 
-    if (result.empty())
+    if (result.empty()) {
         return PreAllocatedReply::ok_cmd();
+    }
     return PreAllocatedReply::string_cmd(result);
 }
 
@@ -140,16 +156,21 @@ std::string QueueCmd::handle_queue(QueueAttr& queue_attr) const {
         throw std::runtime_error(ss.str());
     }
 
-    if (action_ == "active")
+    if (action_ == "active") {
         return queue_attr.active(); // return current index and value, make active, update index
-    if (action_ == "complete")
+    }
+    if (action_ == "complete") {
         queue_attr.complete(step_);
-    if (action_ == "aborted")
+    }
+    if (action_ == "aborted") {
         queue_attr.aborted(step_);
-    if (action_ == "no_of_aborted")
+    }
+    if (action_ == "no_of_aborted") {
         return queue_attr.no_of_aborted();
-    if (action_ == "reset")
+    }
+    if (action_ == "reset") {
         queue_attr.reset_index_to_first_queued_or_aborted();
+    }
 
     return std::string();
 }
@@ -209,17 +230,20 @@ void QueueCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     std::string queue_name, step;
     std::string path_to_node_with_queue, action;
     for (size_t i = 0; i < args.size(); i++) {
-        if (i == 0)
+        if (i == 0) {
             queue_name = args[i];
+        }
         else {
             if (args[i] == "active" || args[i] == "aborted" || args[i] == "complete" || args[i] == "no_of_aborted" ||
                 args[i] == "reset") {
                 action = args[i];
             }
-            else if (args[i].find('/') != std::string::npos)
+            else if (args[i].find('/') != std::string::npos) {
                 path_to_node_with_queue = args[i];
-            else
+            }
+            else {
                 step = args[i];
+            }
         }
     }
     if (clientEnv->debug()) {

@@ -20,8 +20,9 @@
 static std::map<std::string, InfoPanelItemFactory*>* makers = nullptr;
 
 InfoPanelItemFactory::InfoPanelItemFactory(const std::string& name) {
-    if (makers == nullptr)
+    if (makers == nullptr) {
         makers = new std::map<std::string, InfoPanelItemFactory*>;
+    }
 
     // Put in reverse order...
     (*makers)[name] = this;
@@ -29,8 +30,9 @@ InfoPanelItemFactory::InfoPanelItemFactory(const std::string& name) {
 
 InfoPanelItem* InfoPanelItemFactory::create(const std::string& name) {
     auto j = makers->find(name);
-    if (j != makers->end())
+    if (j != makers->end()) {
         return (*j).second->make();
+    }
 
     return nullptr;
 }
@@ -160,14 +162,16 @@ void InfoPanelItem::setSelected(bool selected, VInfo_ptr info) {
 }
 
 void InfoPanelItem::setSuspended(bool suspended, VInfo_ptr info) {
-    if (suspended_ == suspended)
+    if (suspended_ == suspended) {
         return;
+    }
 
     suspended_ = suspended;
     ChangeFlags flags(SuspendedChanged);
 
-    if (!active_)
+    if (!active_) {
         return;
+    }
 
     // Suspend
     if (suspended_) {}
@@ -185,8 +189,9 @@ void InfoPanelItem::setSuspended(bool suspended, VInfo_ptr info) {
 
 void InfoPanelItem::setFrozen(bool b) {
     frozen_ = b;
-    if (!active_)
+    if (!active_) {
         return;
+    }
 
     // We update the derived class
     updateState(ChangeFlags(FrozenChanged));
@@ -196,8 +201,9 @@ void InfoPanelItem::setDetached(bool b, bool update) {
     detached_ = b;
 
     if (update) {
-        if (!active_)
+        if (!active_) {
             return;
+        }
 
         // We update the derived class
         updateState(ChangeFlags(DetachedChanged));
@@ -246,8 +252,9 @@ void InfoPanelItem::relayDashboardCommand(VInfo_ptr info, QString cmd) {
 void InfoPanelItem::notifyBeginNodeChange(const VNode* node,
                                           const std::vector<ecf::Aspect::Type>& aspect,
                                           const VNodeChange&) {
-    if (!node || frozen_ || !active_ || suspended_)
+    if (!node || frozen_ || !active_ || suspended_) {
         return;
+    }
 
     // Check if there is data in info
     if (info_) {

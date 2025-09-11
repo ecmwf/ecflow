@@ -45,8 +45,9 @@ VConfig::~VConfig() {
 }
 
 VConfig* VConfig::instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new VConfig();
+    }
 
     return instance_;
 }
@@ -150,8 +151,9 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* pro
             auto val = ptProp.get_value<std::string>();
 
             QString prefix = prop->param("prefix");
-            if (!prefix.isEmpty())
+            if (!prefix.isEmpty()) {
                 val = prefix.toStdString() + "." + val;
+            }
 
 #ifdef _UI_CONFIG_LOAD_DEBUG
             UiLog().dbg() << "   VConfig::loadProperty() line: " << val;
@@ -220,8 +222,9 @@ VProperty* VConfig::find(const std::string& path) {
 
 VProperty* VConfig::group(const std::string& name) {
     for (auto it = groups_.begin(); it != groups_.end(); ++it) {
-        if ((*it)->strName() == name)
+        if ((*it)->strName() == name) {
             return *it;
+        }
     }
 
     return nullptr;
@@ -382,9 +385,9 @@ void VConfig::importSettings() {
 bool VConfig::readRcFile(const std::string& rcFile, boost::property_tree::ptree& pt) {
     std::ifstream in(rcFile.c_str());
 
-    if (!in.good())
+    if (!in.good()) {
         return false;
-    ;
+    };
 
     bool hasValue = false;
 

@@ -327,8 +327,9 @@ bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& des
             // so we opted for a Qt based implementation. See ECFLOW-1207
             fs::path destPath    = dest / p.filename();
             std::string destFile = destPath.string();
-            if (!copyFile(srcFile, destFile, errorMessage))
+            if (!copyFile(srcFile, destFile, errorMessage)) {
                 return false;
+            }
 
 #if 0
             try
@@ -399,8 +400,9 @@ bool DirectoryHandler::copyFile(const std::string& srcFile, std::string& destFil
     // The original boost based copy implementation did not work with newer compilers,
     // so we opted for a Qt based implementation. See ECFLOW-1207
 
-    if (srcFile == destFile)
+    if (srcFile == destFile) {
         return true;
+    }
 
     QString src  = QString::fromStdString(srcFile);
     QString dest = QString::fromStdString(destFile);

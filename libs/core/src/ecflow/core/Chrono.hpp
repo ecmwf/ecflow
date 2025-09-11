@@ -14,6 +14,12 @@
 #include <chrono>
 #include <string>
 
+#include <boost/date_time/gregorian/gregorian_types.hpp>
+#include <boost/date_time/local_time/conversion.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>
+#include <boost/date_time/posix_time/time_parsers.hpp>
+
 namespace cereal {
 class access;
 }
@@ -23,8 +29,11 @@ namespace ecf {
 class Instant;
 class Duration;
 
-Instant coerce_to_instant(long value);
-long coerce_from_instant(const Instant& value);
+Instant coerce_from_seconds_into_instant(long value);
+long coerce_from_instant_into_seconds(const Instant& value);
+
+template <typename DURATION = std::chrono::seconds>
+auto coerce_from_instant_into(const Instant& value);
 
 class Instant {
 public:
@@ -46,8 +55,15 @@ public:
     friend Instant operator-(const Instant& rhs, const Duration& lhs);
     friend Duration operator-(const Instant& rhs, const Instant& lhs);
 
-    friend Instant coerce_to_instant(long value);
-    friend long coerce_from_instant(const Instant& value);
+    friend Instant coerce_from_seconds_into_instant(long value);
+    friend long coerce_from_instant_into_seconds(const Instant& value);
+
+    template <typename DURATION>
+    friend auto coerce_from_instant_into(const Instant& value) {
+        return std::chrono::duration_cast<DURATION>(value.instant_.time_since_epoch()).count();
+    }
+
+    const instant_t& tp() const { return instant_; }
 
 private:
     instant_t instant_;

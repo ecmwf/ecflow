@@ -42,21 +42,26 @@ QueueAttr::QueueAttr(const std::string& name, const std::vector<std::string>& th
     if (theQueue.empty()) {
         throw std::runtime_error("QueueAttr::QueueAttr: No queue items specified");
     }
-    for (size_t i = 0; i < theQueue.size(); i++)
+    for (size_t i = 0; i < theQueue.size(); i++) {
         state_vec_.push_back(NState::QUEUED);
+    }
 }
 
 QueueAttr::~QueueAttr() = default;
 
 bool QueueAttr::operator==(const QueueAttr& rhs) const {
-    if (name_ != rhs.name_)
+    if (name_ != rhs.name_) {
         return false;
-    if (theQueue_ != rhs.theQueue_)
+    }
+    if (theQueue_ != rhs.theQueue_) {
         return false;
-    if (state_vec_ != rhs.state_vec_)
+    }
+    if (state_vec_ != rhs.state_vec_) {
         return false;
-    if (currentIndex_ != rhs.currentIndex_)
+    }
+    if (currentIndex_ != rhs.currentIndex_) {
         return false;
+    }
     return true;
 }
 
@@ -82,8 +87,9 @@ int QueueAttr::index_or_value() const {
 NState::State QueueAttr::state(const std::string& step) const {
     for (size_t i = 0; i < theQueue_.size(); i++) {
         if (step == theQueue_[i]) {
-            if (i >= state_vec_.size())
+            if (i >= state_vec_.size()) {
                 throw std::runtime_error("QueueAttr::state: index out of range");
+            }
             return state_vec_[i];
         }
     }
@@ -93,8 +99,9 @@ NState::State QueueAttr::state(const std::string& step) const {
 
 void QueueAttr::requeue() {
     currentIndex_ = 0;
-    for (auto& i : state_vec_)
+    for (auto& i : state_vec_) {
         i = NState::QUEUED;
+    }
     incr_state_change_no();
 }
 
@@ -138,11 +145,13 @@ void QueueAttr::aborted(const std::string& step) {
 std::string QueueAttr::no_of_aborted() const {
     int count = 0;
     for (auto i : state_vec_) {
-        if (i == NState::ABORTED)
+        if (i == NState::ABORTED) {
             count++;
+        }
     }
-    if (count != 0)
+    if (count != 0) {
         return ecf::convert_to<std::string>(count);
+    }
     return std::string();
 }
 
@@ -174,8 +183,9 @@ void QueueAttr::write(std::string& ret) const {
 std::string QueueAttr::dump() const {
     std::stringstream ss;
     ss << toString() << " # " << currentIndex_;
-    for (auto i : state_vec_)
+    for (auto i : state_vec_) {
         ss << " " << i;
+    }
     return ss.str();
 }
 
@@ -202,14 +212,16 @@ void QueueAttr::parse(QueueAttr& queAttr,
     theEnums.reserve(line_tokens_size);
     for (size_t i = 2; i < line_tokens_size; i++) {
         std::string theEnum = lineTokens[i];
-        if (theEnum[0] == '#')
+        if (theEnum[0] == '#') {
             break;
+        }
         Str::removeSingleQuotes(theEnum); // remove quotes, they get added back when we persist
         Str::removeQuotes(theEnum);       // remove quotes, they get added back when we persist
         theEnums.push_back(theEnum);
     }
-    if (theEnums.empty())
+    if (theEnums.empty()) {
         throw std::runtime_error("queue: has no values " + line);
+    }
 
     int index = 0;
     std::vector<NState::State> state_vec;
@@ -236,8 +248,9 @@ void QueueAttr::parse(QueueAttr& queAttr,
 void QueueAttr::set_queue(const std::vector<std::string>& theQueue,
                           int index,
                           const std::vector<NState::State>& state_vec) {
-    if (theQueue.empty())
+    if (theQueue.empty()) {
         throw std::runtime_error("QueueAttr::set_queue: No queue items specified");
+    }
 
     if (!state_vec.empty()) {
         if (state_vec.size() != theQueue.size()) {
@@ -249,8 +262,9 @@ void QueueAttr::set_queue(const std::vector<std::string>& theQueue,
         state_vec_ = state_vec;
     }
     else {
-        for (size_t i = 0; i < theQueue.size(); i++)
+        for (size_t i = 0; i < theQueue.size(); i++) {
             state_vec_.push_back(NState::QUEUED);
+        }
     }
 
     currentIndex_ = index;

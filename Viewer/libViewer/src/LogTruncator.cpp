@@ -31,10 +31,12 @@ LogTruncator::LogTruncator(QString path, int timeout, int sizeLimit, int lineNum
 #else
     int secToM = 86400 - QTime(0, 0).secsTo(QTime::currentTime());
 #endif
-    if (secToM > 5 * 60)
+    if (secToM > 5 * 60) {
         timer_->start(secToM * 1000);
-    else
+    }
+    else {
         timer_->start(secToM * 1000 + timeout_);
+    }
 
     UiLog().dbg() << "LogTruncator --> secs to midnight=" << secToM << "s"
                   << " initial timeout=" << timer_->interval() / 1000 << "s";
@@ -45,8 +47,9 @@ void LogTruncator::truncate() {
     // the startup script decides on whether the main log goes into the stdout or into
     // a file.
     QFileInfo info(path_);
-    if (!info.exists())
+    if (!info.exists()) {
         return;
+    }
 
     Q_EMIT truncateBegin();
 
@@ -62,6 +65,7 @@ void LogTruncator::truncate() {
 
     Q_EMIT truncateEnd();
 
-    if (timeout_ != timer_->interval())
+    if (timeout_ != timer_->interval()) {
         timer_->setInterval(timeout_);
+    }
 }

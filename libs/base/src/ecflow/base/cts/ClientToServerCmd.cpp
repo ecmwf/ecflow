@@ -20,6 +20,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/CmdContext.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Flag.hpp"
@@ -64,9 +65,8 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const {
     }
 #endif
 
-    // LogTimer timer("ClientToServerCmd::handleRequest");
     STC_Cmd_ptr halted;
-    if (!authenticate(as, halted)) {
+    if (!check_preconditions(as, halted)) {
         assert(halted.get());
         return halted;
     }
@@ -156,8 +156,9 @@ void ClientToServerCmd::add_node_for_edit_history(Defs* defs, const std::string&
 }
 
 void ClientToServerCmd::add_node_for_edit_history(node_ptr the_node) const {
-    if (the_node.get())
+    if (the_node.get()) {
         edit_history_nodes_.push_back(the_node);
+    }
 }
 
 void ClientToServerCmd::add_node_path_for_edit_history(const std::string& absNodepath) const {
@@ -178,8 +179,9 @@ void ClientToServerCmd::add_edit_history(Defs* defs) const {
     else {
         // edit_history_node_paths_ is only populated by the delete command
         size_t the_size = edit_history_node_paths_.size();
-        if (the_size != 0)
+        if (the_size != 0) {
             defs->flag().set(ecf::Flag::MESSAGE);
+        }
         for (size_t i = 0; i < the_size; i++) {
             add_delete_edit_history(defs, edit_history_node_paths_[i]);
         }

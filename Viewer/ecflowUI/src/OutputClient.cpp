@@ -23,8 +23,9 @@ OutputClient::OutputClient(const std::string& host, const std::string& portStr, 
       portStr_(portStr),
       port_(19999),
       timeout_(3000) {
-    if (!portStr_.empty())
+    if (!portStr_.empty()) {
         port_ = atoi(portStr.c_str());
+    }
 
     soc_ = new QTcpSocket(nullptr);
 
@@ -44,8 +45,9 @@ OutputClient::OutputClient(const std::string& host, const std::string& portStr, 
 
     connect(soc_, SIGNAL(connected()), this, SLOT(slotConnected()));
 
-    if (char* timeoutStr = getenv("ECFLOWVIEW_LOGTIMEOUT"))
+    if (char* timeoutStr = getenv("ECFLOWVIEW_LOGTIMEOUT")) {
         timeout_ = atoi(timeoutStr) * 1000;
+    }
 }
 
 OutputClient::~OutputClient() {

@@ -55,8 +55,9 @@ void UiFunctionLog::init() {
     std::size_t pos = 0;
     if ((pos = funcName_.find_first_of("(")) != std::string::npos) {
         std::size_t pos1 = funcName_.rfind(" ", pos);
-        if (pos1 != std::string::npos && pos1 + 1 < pos)
+        if (pos1 != std::string::npos && pos1 + 1 < pos) {
             funcName_ = funcName_.substr(pos1 + 1, pos - pos1 - 1);
+        }
     }
 }
 
@@ -74,8 +75,9 @@ std::string UiFunctionLog::formatFuncInfo(const std::string& funcName) {
     std::string resName = funcName;
     if ((pos = funcName.find_first_of("(")) != std::string::npos) {
         std::size_t pos1 = funcName.rfind(" ", pos);
-        if (pos1 != std::string::npos && pos1 + 1 < pos)
+        if (pos1 != std::string::npos && pos1 + 1 < pos) {
             resName = funcName.substr(pos1 + 1, pos - pos1 - 1);
+        }
     }
     return resName + "  ";
 }
@@ -138,18 +140,21 @@ void UiLog::output(const std::string& msg) {
     std::string s;
     appendType(s, type_);
 
-    if (server_.empty())
+    if (server_.empty()) {
         s += " " + ts + msg;
-    else
+    }
+    else {
         s += " " + ts + "[" + server_ + "] " + msg;
+    }
 
     std::cout << s << std::endl;
 }
 
 void UiLog::enableTruncation() {
-    if (!truncator)
+    if (!truncator) {
         truncator = new LogTruncator(
             QString::fromStdString(DirectoryHandler::uiLogFileName()), 86400 * 1000, 10 * 1024 * 1024, 1000);
+    }
 }
 
 //--------------------------------------------
@@ -159,8 +164,9 @@ void UiLog::enableTruncation() {
 std::ostream& operator<<(std::ostream& stream, const std::vector<std::string>& vec) {
     stream << "[";
     for (size_t i = 0; i < vec.size(); i++) {
-        if (i > 0)
+        if (i > 0) {
             stream << ",";
+        }
         stream << vec[i];
     }
     stream << "]";

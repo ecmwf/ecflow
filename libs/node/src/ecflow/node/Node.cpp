@@ -42,8 +42,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 namespace {
 
@@ -105,11 +103,13 @@ Node::Node(const Node& rhs)
       auto_restore_((rhs.auto_restore_) ? new AutoRestoreAttr(*rhs.auto_restore_) : nullptr),
       suspended_(rhs.suspended_) {
     inLimitMgr_.set_node(this);
-    if (misc_attrs_)
+    if (misc_attrs_) {
         misc_attrs_->set_node(this);
+    }
 
-    if (auto_restore_)
+    if (auto_restore_) {
         auto_restore_->set_node(this);
+    }
 
     for (const auto& limit : rhs.limits_) {
         limit_ptr the_limit = std::make_shared<Limit>(*limit);
@@ -119,20 +119,27 @@ Node::Node(const Node& rhs)
 }
 
 bool Node::check_defaults() const {
-    if (parent_ != nullptr)
+    if (parent_ != nullptr) {
         throw std::runtime_error("Node::check_defaults(): parent_ != nullptr");
-    if (graphic_ptr_ != nullptr)
+    }
+    if (graphic_ptr_ != nullptr) {
         throw std::runtime_error("Node::check_defaults(): graphic_ptr_  != nullptr");
-    if (suspended_ != false)
+    }
+    if (suspended_ != false) {
         throw std::runtime_error("Node::check_defaults(): suspended_ != false");
-    if (state_change_no_ != 0)
+    }
+    if (state_change_no_ != 0) {
         throw std::runtime_error("Node::check_defaults(): state_change_no_ != 0");
-    if (variable_change_no_ != 0)
+    }
+    if (variable_change_no_ != 0) {
         throw std::runtime_error("Node::check_defaults(): variable_change_no_  != 0");
-    if (suspended_change_no_ != 0)
+    }
+    if (suspended_change_no_ != 0) {
         throw std::runtime_error("Node::check_defaults():  suspended_change_no_ != 0");
-    if (d_st_.state() != DState::QUEUED)
+    }
+    if (d_st_.state() != DState::QUEUED) {
         throw std::runtime_error("Node::check_defaults(): d_st_.state() != DState::QUEUED");
+    }
     return true;
 }
 
@@ -153,8 +160,9 @@ node_ptr Node::create(const std::string& node_string) {
 node_ptr Node::create(const std::string& node_string, std::string& error_msg) {
     DefsStructureParser parser(node_string);
     std::string warningMsg;
-    if (!parser.doParse(error_msg, warningMsg))
+    if (!parser.doParse(error_msg, warningMsg)) {
         return node_ptr();
+    }
     return parser.the_node_ptr();
 }
 
@@ -181,21 +189,28 @@ Node& Node::operator=(const Node& rhs) {
         dates_  = rhs.dates_;
         days_   = rhs.days_;
 
-        if (rhs.c_expr_)
+        if (rhs.c_expr_) {
             c_expr_ = std::make_unique<Expression>(*rhs.c_expr_);
-        if (rhs.t_expr_)
+        }
+        if (rhs.t_expr_) {
             t_expr_ = std::make_unique<Expression>(*rhs.t_expr_);
-        if (rhs.late_)
+        }
+        if (rhs.late_) {
             late_ = std::make_unique<ecf::LateAttr>(*rhs.late_);
-        if (rhs.misc_attrs_)
+        }
+        if (rhs.misc_attrs_) {
             misc_attrs_ = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
+        }
 
-        if (rhs.auto_cancel_)
+        if (rhs.auto_cancel_) {
             auto_cancel_ = std::make_unique<AutoCancelAttr>(*rhs.auto_cancel_);
-        if (rhs.auto_archive_)
+        }
+        if (rhs.auto_archive_) {
             auto_archive_ = std::make_unique<AutoArchiveAttr>(*rhs.auto_archive_);
-        if (rhs.auto_restore_)
+        }
+        if (rhs.auto_restore_) {
             auto_restore_ = std::make_unique<AutoRestoreAttr>(*rhs.auto_restore_);
+        }
 
         repeat_     = rhs.repeat_;
         inLimitMgr_ = rhs.inLimitMgr_;
@@ -207,11 +222,13 @@ Node& Node::operator=(const Node& rhs) {
         suspended_change_no_ = 0;
         graphic_ptr_         = nullptr;
 
-        if (misc_attrs_)
+        if (misc_attrs_) {
             misc_attrs_->set_node(this);
+        }
 
-        if (auto_restore_)
+        if (auto_restore_) {
             auto_restore_->set_node(this);
+        }
 
         limits_.clear();
         for (const auto& limit : rhs.limits_) {
@@ -228,8 +245,9 @@ Node::~Node() = default;
 bool Node::isParentSuspended() const {
     Node* theParent = parent();
     if (theParent) {
-        if (theParent->isSuspended())
+        if (theParent->isSuspended()) {
             return true;
+        }
         return theParent->isParentSuspended();
     }
     return defs()->isSuspended(); // obtained from the server states
@@ -251,8 +269,9 @@ void Node::suspend() {
 
 void Node::begin() {
     // record effect of defstatus for node changes, for verify attributes
-    if (misc_attrs_)
+    if (misc_attrs_) {
         misc_attrs_->begin();
+    }
 
     // Set the state without causing any side effects
     initState(0);
@@ -278,8 +297,9 @@ void Node::begin() {
         label.reset();
     }
 
-    if (late_)
+    if (late_) {
         late_->reset();
+    }
     for (auto& limit : limits_) {
         limit->reset();
     }
@@ -380,13 +400,16 @@ void Node::requeue(Requeue_args& args) {
     bool edit_history_set = get_flag().is_set(ecf::Flag::MESSAGE);
     bool archived_set     = get_flag().is_set(ecf::Flag::ARCHIVED);
     flag_.reset(); // will CLEAR NO_REQUE_IF_SINGLE_TIME_DEP
-    if (edit_history_set)
+    if (edit_history_set) {
         get_flag().set(ecf::Flag::MESSAGE);
-    if (archived_set)
+    }
+    if (archived_set) {
         get_flag().set(ecf::Flag::ARCHIVED);
+    }
 
-    if (late_)
+    if (late_) {
         late_->reset();
+    }
 
     for (auto& meter : meters_) {
         meter.reset();
@@ -401,8 +424,9 @@ void Node::requeue(Requeue_args& args) {
         }
     }
 
-    if (misc_attrs_)
+    if (misc_attrs_) {
         misc_attrs_->requeue();
+    }
 
     for (auto& limit : limits_) {
         limit->reset();
@@ -416,8 +440,9 @@ void Node::requeue(Requeue_args& args) {
 }
 
 void Node::reset_late_event_meters() {
-    if (late_)
+    if (late_) {
         late_->reset();
+    }
     for (auto& meter : meters_) {
         meter.reset();
     }
@@ -461,8 +486,9 @@ void Node::reset() {
 
     flag_.reset();
 
-    if (late_)
+    if (late_) {
         late_->reset();
+    }
 
     for (auto& meter : meters_) {
         meter.reset();
@@ -544,8 +570,9 @@ void Node::check_for_lateness(const ecf::Calendar& c, const ecf::LateAttr* inher
     if (late_) {
         // Only check for lateness if we are not late.
         if (!late_->isLate()) {
-            if (!inherited_late || inherited_late->isNull())
+            if (!inherited_late || inherited_late->isNull()) {
                 checkForLateness(c);
+            }
             else {
                 LateAttr overridden_late = *inherited_late;
                 overridden_late.override_with(late_.get());
@@ -751,8 +778,9 @@ bool Node::resolveDependencies(JobsParam& jobsParam) {
 #endif
 
     // A node that is archived should not allow any change of state.
-    if (get_flag().is_set(ecf::Flag::ARCHIVED))
+    if (get_flag().is_set(ecf::Flag::ARCHIVED)) {
         return false;
+    }
 
     if (isSuspended()) {
 #ifdef DEBUG_DEPENDENCIES
@@ -827,35 +855,43 @@ bool Node::resolveDependencies(JobsParam& jobsParam) {
 }
 
 bool Node::has_time_based_attributes() const {
-    if (has_time_dependencies())
+    if (has_time_dependencies()) {
         return true;
-    if (auto_cancel_)
+    }
+    if (auto_cancel_) {
         return true;
-    if (auto_archive_)
+    }
+    if (auto_archive_) {
         return true;
-    if (late_)
+    }
+    if (late_) {
         return true;
+    }
     return false;
 }
 
 void Node::freeTrigger() const {
-    if (t_expr_)
+    if (t_expr_) {
         t_expr_->setFree();
+    }
 }
 
 void Node::clearTrigger() const {
-    if (t_expr_)
+    if (t_expr_) {
         t_expr_->clearFree();
+    }
 }
 
 void Node::freeComplete() const {
-    if (c_expr_)
+    if (c_expr_) {
         c_expr_->setFree();
+    }
 }
 
 void Node::clearComplete() const {
-    if (c_expr_)
+    if (c_expr_) {
         c_expr_->clearFree();
+    }
 }
 
 bool Node::evaluateComplete() const {
@@ -969,8 +1005,9 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
 
 void Node::handleStateChange() {
     if (state() == NState::COMPLETE) {
-        if (auto_restore_)
+        if (auto_restore_) {
             auto_restore_->do_autorestore();
+        }
 
         Node* the_parent = parent();
         while (the_parent) {
@@ -1006,8 +1043,9 @@ void Node::setStateOnly(NState::State newState,
     int jobSubmissionInterval = theSuite->defs()->server().jobSubmissionInterval();
     if (isSubmittable() && jobSubmissionInterval != 0 && jobSubmissionInterval < 60) {
 
-        if (newState == NState::SUBMITTED)
+        if (newState == NState::SUBMITTED) {
             submit_to_complete_duration_ = Calendar::second_clock_time();
+        }
         else if (newState == NState::COMPLETE && !submit_to_complete_duration_.is_special()) {
 
             // Under HYBRID we can go from UNKNOWN->COMPLETE, missing out SUBMITTED
@@ -1060,8 +1098,9 @@ void Node::setStateOnly(NState::State newState,
     }
 
     if (newState == NState::ABORTED) {
-        if (force)
+        if (force) {
             get_flag().set(ecf::Flag::FORCE_ABORT);
+        }
         Submittable* submittable = isSubmittable();
         if (submittable) {
             get_flag().set(ecf::Flag::TASK_ABORTED);
@@ -1094,10 +1133,12 @@ void Node::setStateOnly(NState::State newState,
     }
 
     st_.first.setState(newState); // this will update state_change_no
-    if (newState == NState::QUEUED)
+    if (newState == NState::QUEUED) {
         sc_rt_ = boost::posix_time::time_duration(0, 0, 0, 0);
-    else
+    }
+    else {
         sc_rt_ = calendar.duration() - st_.second;
+    }
     st_.second = calendar.duration(); // record state change duration for late, autocancel,autoarchive,etc
 
     // Record state changes for verification
@@ -1111,8 +1152,8 @@ void Node::setStateOnly(NState::State newState,
 }
 
 boost::posix_time::ptime Node::state_change_time() const {
-    const Calendar& calendar                       = suite()->calendar();
-    boost::posix_time::ptime the_state_change_time = calendar.begin_time();
+    const Calendar& calendar   = suite()->calendar();
+    auto the_state_change_time = calendar.begin_time();
     the_state_change_time += st_.second; // st_.second is calendar duration relative to calendar begin_time
     return the_state_change_time;
 }
@@ -1120,8 +1161,9 @@ boost::posix_time::ptime Node::state_change_time() const {
 DState::State Node::dstate() const {
 
     // ECFLOW-139, check for suspended must be done first
-    if (isSuspended())
+    if (isSuspended()) {
         return DState::SUSPENDED;
+    }
 
     switch (state()) {
         case NState::COMPLETE:
@@ -1176,13 +1218,15 @@ void Node::setRepeatToLastValue() {
 }
 
 bool Node::check_in_limit_up_node_tree() const {
-    if (!inLimitMgr_.inLimit())
+    if (!inLimitMgr_.inLimit()) {
         return false;
+    }
 
     Node* theParent = parent();
     while (theParent) {
-        if (!theParent->inLimitMgr_.inLimit())
+        if (!theParent->inLimitMgr_.inLimit()) {
             return false;
+        }
         theParent = theParent->parent();
     }
     return true;
@@ -1285,12 +1329,14 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         //   b/ Allow for recursive substitution. %fred% -> %bill% -> 10
 
         size_t firstPercentPos = cmd.find(micro, pos);
-        if (firstPercentPos == string::npos)
+        if (firstPercentPos == string::npos) {
             break;
+        }
 
         size_t secondPercentPos = cmd.find(micro, firstPercentPos + 1);
-        if (secondPercentPos == string::npos)
+        if (secondPercentPos == string::npos) {
             break;
+        }
 
         pos = 0;
         if (secondPercentPos - firstPercentPos <= 1) {
@@ -1316,16 +1362,21 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitimately override these. ECFLOW-999
         bool generated_variable = false;
         if (percentVar.find("ECF_") == 0) {
-            if (percentVar.find(ecf::environment::ECF_HOST) != std::string::npos)
+            if (percentVar.find(ecf::environment::ECF_HOST) != std::string::npos) {
                 generated_variable = true;
-            else if (percentVar.find(ecf::environment::ECF_PORT) != std::string::npos)
+            }
+            else if (percentVar.find(ecf::environment::ECF_PORT) != std::string::npos) {
                 generated_variable = true;
-            else if (percentVar.find(ecf::environment::ECF_TRYNO) != std::string::npos)
+            }
+            else if (percentVar.find(ecf::environment::ECF_TRYNO) != std::string::npos) {
                 generated_variable = true;
-            else if (percentVar.find(ecf::environment::ECF_NAME) != std::string::npos)
+            }
+            else if (percentVar.find(ecf::environment::ECF_NAME) != std::string::npos) {
                 generated_variable = true;
-            else if (percentVar.find(ecf::environment::ECF_PASS) != std::string::npos)
+            }
+            else if (percentVar.find(ecf::environment::ECF_PASS) != std::string::npos) {
                 generated_variable = true;
+            }
         }
 
         size_t firstColon = percentVar.find(':');
@@ -1401,8 +1452,9 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         }
 
         // Simple Check for infinite recursion
-        if (count > 1000)
+        if (count > 1000) {
             return false;
+        }
         count++;
     }
 
@@ -1420,8 +1472,9 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
                 cmd.erase(cmd.begin() + ecf_double_micro_pos);
                 last_pos = ecf_double_micro_pos + 1;
             }
-            else
+            else {
                 break;
+            }
         }
     }
 
@@ -1439,13 +1492,16 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
         //   b/ Allow for recursive substitution. %fred% -> %bill% -> 10
 
         size_t firstPercentPos = cmd.find(micro);
-        if (firstPercentPos == string::npos)
+        if (firstPercentPos == string::npos) {
             break;
+        }
         size_t secondPercentPos = cmd.find(micro, firstPercentPos + 1);
-        if (secondPercentPos == string::npos)
+        if (secondPercentPos == string::npos) {
             break;
-        if (secondPercentPos - firstPercentPos <= 1)
+        }
+        if (secondPercentPos - firstPercentPos <= 1) {
             break; // handle %% with no characters in between
+        }
 
         string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
 #ifdef DEBUG_S
@@ -1493,16 +1549,18 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
             // Note: When a variable is found, it can have an empty value
             //       which is still valid
             std::string varValue;
-            if (!findParentVariableValue(percentVar, varValue))
+            if (!findParentVariableValue(percentVar, varValue)) {
                 return false;
+            }
 
             used_variables.insert(std::make_pair(percentVar, varValue));
             cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
         }
 
         // Simple Check for infinite recursion
-        if (count > 100)
+        if (count > 100) {
             return false;
+        }
         count++;
     }
     return true;
@@ -1514,14 +1572,17 @@ bool Node::variable_dollar_substitution(std::string& cmd) const {
 
     while (true) {
         size_t firstPos = cmd.find('$');
-        if (firstPos == string::npos)
+        if (firstPos == string::npos) {
             break;
+        }
 
         size_t secondPos = cmd.find_first_not_of(Str::ALPHANUMERIC_UNDERSCORE(), firstPos + 1);
-        if (secondPos == string::npos)
+        if (secondPos == string::npos) {
             secondPos = cmd.size();
-        if (secondPos - firstPos <= 1)
+        }
+        if (secondPos - firstPos <= 1) {
             break; // handle $/ with no characters in between
+        }
 
         string env(cmd.begin() + firstPos + 1, cmd.begin() + secondPos);
         // cout << "find env " << env << "\n";
@@ -1569,10 +1630,12 @@ bool Node::check_expressions(Ast* ast, const std::string& expr, bool trigger, st
         ast->accept(astVisitor);
         if (!astVisitor.errorMsg().empty()) {
             errorMsg += "Error: Expression node tree references failed for '";
-            if (trigger)
+            if (trigger) {
                 errorMsg += "trigger ";
-            else
+            }
+            else {
                 errorMsg += "complete ";
+            }
             errorMsg += expr;
             errorMsg += "' at ";
             errorMsg += debugNodePath();
@@ -1584,10 +1647,12 @@ bool Node::check_expressions(Ast* ast, const std::string& expr, bool trigger, st
         // check divide by zero and module by zero
         if (!ast->check(errorMsg)) {
             errorMsg += " Error: Expression checking failed for '";
-            if (trigger)
+            if (trigger) {
                 errorMsg += "trigger ";
-            else
+            }
+            else {
                 errorMsg += "complete ";
+            }
             errorMsg += expr;
             errorMsg += "' at ";
             errorMsg += debugNodePath();
@@ -1627,16 +1692,18 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const {
     if (ctop) {
         // capture node path resolve errors, and expression divide/module by zero
         std::string expr;
-        if (c_expr_)
+        if (c_expr_) {
             expr = c_expr_->expression();
+        }
         (void)check_expressions(ctop, expr, false, errorMsg);
     }
 
     AstTop* ttop = triggerAst(errorMsg);
     if (ttop) {
         std::string expr;
-        if (t_expr_)
+        if (t_expr_) {
             expr = t_expr_->expression();
+        }
         (void)check_expressions(ttop, expr, true, errorMsg);
     }
 
@@ -1648,8 +1715,9 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const {
     inLimitMgr_.check(errorMsg, warningMsg, reportErrors, reportWarnings);
 
     /// Check that the references to nodes in autorestore resolve
-    if (auto_restore_)
+    if (auto_restore_) {
         auto_restore_->check(errorMsg);
+    }
 
     return errorMsg.empty();
 }
@@ -1700,30 +1768,36 @@ void Node::read_state(const std::string& line, const std::vector<std::string>& l
         token.clear();
         const std::string& line_token_i = lineTokens[i];
         if (line_token_i.find("state:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Node::read_state Invalid state specified for node " + name());
+            }
             std::pair<NState::State, bool> state_pair = NState::to_state(token);
-            if (!state_pair.second)
+            if (!state_pair.second) {
                 throw std::runtime_error("Node::read_state Invalid state specified for node : " + name());
+            }
             set_state_only(state_pair.first);
         }
         else if (line_token_i.find("flag:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Node::read_state invalid flags for node " + name());
+            }
             get_flag().set_flag(token); // this can throw
         }
         else if (line_token_i.find("dur:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Node::read_state invalid duration for node: " + name());
-            st_.second = duration_from_string(token);
+            }
+            st_.second = boost::posix_time::duration_from_string(token);
         }
         else if (line_token_i.find("rt:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, token))
+            if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Node::read_state invalid runtime duration for node: " + name());
-            sc_rt_ = duration_from_string(token);
+            }
+            sc_rt_ = boost::posix_time::duration_from_string(token);
         }
-        else if (line_token_i == "suspended:1")
+        else if (line_token_i == "suspended:1") {
             suspend();
+        }
     }
 }
 
@@ -2202,35 +2276,43 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
     }
     else if (state() != NState::QUEUED && state() != NState::ABORTED) {
         std::stringstream ss;
-        if (html)
+        if (html) {
             ss << path_href() << " (" << NState::to_html(state()) << ") is not queued or aborted";
-        else
+        }
+        else {
             ss << debugNodePath() << " (" << NState::toString(state()) << ") is not queued or aborted";
+        }
         vec.push_back(ss.str());
 
         // When task is active/submitted no point, going any further.
         // However, for FAMILY/SUITE we still need to proceed
-        if (isTask())
+        if (isTask()) {
             return why_found;
+        }
         why_found = true; // return true if why found
     }
 
     // Check limits using in limit manager
-    if (inLimitMgr_.why(vec, html))
+    if (inLimitMgr_.why(vec, html)) {
         why_found = true; // return true if why found
+    }
 
     // Prefix <node-type> <path> <state>
     std::string prefix = debugType();
     prefix += " ";
-    if (html)
+    if (html) {
         prefix += path_href_attribute(absNodePath());
-    else
+    }
+    else {
         prefix += absNodePath();
+    }
     prefix += "(";
-    if (html)
+    if (html) {
         prefix += NState::to_html(state());
-    else
+    }
+    else {
         prefix += NState::toString(state());
+    }
     prefix += ") ";
 
     {
@@ -2330,16 +2412,19 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
 
 bool Node::checkInvariants(std::string& errorMsg) const {
     for (const ecf::TimeAttr& t : times_) {
-        if (!t.checkInvariants(errorMsg))
+        if (!t.checkInvariants(errorMsg)) {
             return false;
+        }
     }
     for (const ecf::TodayAttr& t : todays_) {
-        if (!t.checkInvariants(errorMsg))
+        if (!t.checkInvariants(errorMsg)) {
             return false;
+        }
     }
     for (const CronAttr& cron : crons_) {
-        if (!cron.checkInvariants(errorMsg))
+        if (!cron.checkInvariants(errorMsg)) {
             return false;
+        }
     }
 
     if (misc_attrs_) {
@@ -2420,8 +2505,9 @@ std::string Node::path_href() const {
 }
 
 void Node::verification(std::string& errorMsg) const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         misc_attrs_->verification(errorMsg);
+    }
 }
 
 void Node::getAllAstNodes(std::set<Node*>& theSet) const {
@@ -2457,8 +2543,9 @@ AstTop* Node::completeAst(std::string& errorMsg) const {
 
             c_expr_->createAST(const_cast<Node*>(this), "complete", errorMsg);
 #ifdef DEBUG
-            if (errorMsg.empty())
+            if (errorMsg.empty()) {
                 LOG_ASSERT(c_expr_->get_ast(), "");
+            }
 #endif
         }
         return c_expr_->get_ast();
@@ -2472,8 +2559,9 @@ AstTop* Node::triggerAst(std::string& errorMsg) const {
 
             t_expr_->createAST(const_cast<Node*>(this), "trigger", errorMsg);
 #ifdef DEBUG
-            if (errorMsg.empty())
+            if (errorMsg.empty()) {
                 LOG_ASSERT(t_expr_->get_ast(), "");
+            }
 #endif
         }
         return t_expr_->get_ast();
@@ -2498,8 +2586,9 @@ node_ptr Node::remove() {
     SuiteChanged0 changed(shared_from_this());
 
     Node* theParent = parent();
-    if (theParent)
+    if (theParent) {
         return theParent->removeChild(this);
+    }
     return defs()->removeChild(this);
 }
 
@@ -2507,10 +2596,12 @@ bool Node::getLabelValue(const std::string& labelName, std::string& value) const
     size_t theSize = labels_.size();
     for (size_t i = 0; i < theSize; i++) {
         if (labels_[i].name() == labelName) {
-            if (!(labels_[i].new_value().empty()))
+            if (!(labels_[i].new_value().empty())) {
                 value = labels_[i].new_value();
-            else
+            }
+            else {
                 value = labels_[i].value();
+            }
             return true;
         }
     }
@@ -2712,10 +2803,12 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const {
 
 void Node::stats(NodeStats& stats) {
     stats.vars_ += vars_.size();
-    if (c_expr_)
+    if (c_expr_) {
         stats.c_trigger_++;
-    if (t_expr_)
+    }
+    if (t_expr_) {
         stats.trigger_++;
+    }
     stats.meters_ += meters_.size();
     stats.events_ += events_.size();
     stats.labels_ += labels_.size();
@@ -2725,25 +2818,30 @@ void Node::stats(NodeStats& stats) {
     stats.dates_ += dates_.size();
     stats.days_ += days_.size();
 
-    if (late_)
+    if (late_) {
         stats.late_++;
+    }
     if (misc_attrs_) {
         stats.verifys_ += misc_attrs_->verifys().size();
         stats.zombies_ += misc_attrs_->zombies().size();
         stats.queues_ += misc_attrs_->queues().size();
         stats.generics_ += misc_attrs_->generics().size();
     }
-    if (!repeat_.empty())
+    if (!repeat_.empty()) {
         stats.repeats_++;
+    }
 
     stats.limits_ += limits_.size();
     stats.inlimits_ += inLimitMgr_.inlimits().size();
-    if (auto_cancel_)
+    if (auto_cancel_) {
         stats.auto_cancel_++;
-    if (auto_archive_)
+    }
+    if (auto_archive_) {
         stats.auto_archive_++;
-    if (auto_restore_)
+    }
+    if (auto_restore_) {
         stats.auto_restore_++;
+    }
 }
 
 static std::vector<VerifyAttr> verifys_;
@@ -2751,69 +2849,82 @@ static std::vector<ZombieAttr> zombies_;
 static std::vector<QueueAttr> queues_;
 static std::vector<GenericAttr> generics_;
 const std::vector<VerifyAttr>& Node::verifys() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->verifys();
+    }
     return verifys_;
 }
 const std::vector<ZombieAttr>& Node::zombies() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->zombies();
+    }
     return zombies_;
 }
 const std::vector<QueueAttr>& Node::queues() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->queues();
+    }
     return queues_;
 }
 std::vector<QueueAttr>& Node::ref_queues() {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->ref_queues();
+    }
     return queues_;
 }
 const std::vector<GenericAttr>& Node::generics() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->generics();
+    }
     return generics_;
 }
 
 std::vector<ZombieAttr>::const_iterator Node::zombie_begin() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->zombie_begin();
+    }
     return zombies_.begin();
 }
 std::vector<ZombieAttr>::const_iterator Node::zombie_end() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->zombie_end();
+    }
     return zombies_.end();
 }
 std::vector<VerifyAttr>::const_iterator Node::verify_begin() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->verify_begin();
+    }
     return verifys_.begin();
 }
 std::vector<VerifyAttr>::const_iterator Node::verify_end() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->verify_end();
+    }
     return verifys_.end();
 }
 std::vector<QueueAttr>::const_iterator Node::queue_begin() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->queue_begin();
+    }
     return queues_.begin();
 }
 std::vector<QueueAttr>::const_iterator Node::queue_end() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->queue_end();
+    }
     return queues_.end();
 }
 std::vector<GenericAttr>::const_iterator Node::generic_begin() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->generic_begin();
+    }
     return generics_.begin();
 }
 std::vector<GenericAttr>::const_iterator Node::generic_end() const {
-    if (misc_attrs_)
+    if (misc_attrs_) {
         return misc_attrs_->generic_end();
+    }
     return generics_.end();
 }
 
@@ -2887,12 +2998,15 @@ void Node::serialize(Archive& ar, std::uint32_t const version) {
     CEREAL_OPTIONAL_NVP(ar, auto_restore_, [this]() { return auto_restore_.get(); }); // conditionally save
 
     if (Archive::is_loading::value) {
-        if (auto_restore_)
+        if (auto_restore_) {
             auto_restore_->set_node(this);
-        if (misc_attrs_)
+        }
+        if (misc_attrs_) {
             misc_attrs_->set_node(this);
-        for (auto& limit : limits_)
+        }
+        for (auto& limit : limits_) {
             limit->set_node(this);
+        }
     }
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Node);

@@ -25,13 +25,15 @@
 //==========================================
 
 VTreeNode::VTreeNode(VNode* n, VTreeNode* parent) : vnode_(n), parent_(parent), attrNum_(-1) {
-    if (parent_)
+    if (parent_) {
         parent_->addChild(this);
+    }
 }
 
 VTreeNode::~VTreeNode() {
-    for (auto& it : children_)
+    for (auto& it : children_) {
         delete it;
+    }
 }
 
 VTree* VTreeNode::root() const {
@@ -48,8 +50,9 @@ void VTreeNode::addChild(VTreeNode* ch) {
 
 VTreeNode* VTreeNode::findChild(const std::string& name) const {
     for (auto i : children_) {
-        if (i->vnode_->strName() == name)
+        if (i->vnode_->strName() == name) {
             return i;
+        }
     }
 
     return nullptr;
@@ -57,8 +60,9 @@ VTreeNode* VTreeNode::findChild(const std::string& name) const {
 
 int VTreeNode::indexOfChild(const VTreeNode* vn) const {
     for (std::size_t i = 0; i < children_.size(); i++) {
-        if (children_[i] == vn)
+        if (children_[i] == vn) {
             return static_cast<int>(i);
+        }
     }
 
     return -1;
@@ -83,8 +87,9 @@ int VTreeNode::attrRow(int row,AttributeFilter *filter) const
 #endif
 
 int VTreeNode::attrNum(AttributeFilter* filter) const {
-    if (isAttrInitialised() == false)
+    if (isAttrInitialised() == false) {
         attrNum_ = static_cast<short>(vnode_->attrNum(filter));
+    }
 
     return attrNum_;
 }
@@ -160,8 +165,9 @@ VNode* VTree::vnodeAt(int index) const {
 
 VTreeNode* VTree::find(const VNode* vn) const {
     // This can happen when the tree is empty
-    if (totalNum_ == 0)
+    if (totalNum_ == 0) {
         return nullptr;
+    }
 
     // Otherwise we must find the node!!!
     UI_ASSERT(vn->index() < static_cast<int>(nodeVec_.size()),
@@ -172,8 +178,9 @@ VTreeNode* VTree::find(const VNode* vn) const {
 VTreeNode* VTree::findAncestor(const VNode* vn) {
     VNode* p = vn->parent();
     while (p) {
-        if (VTreeNode* n = find(p))
+        if (VTreeNode* n = find(p)) {
             return n;
+        }
 
         p = p->parent();
     }
@@ -182,12 +189,14 @@ VTreeNode* VTree::findAncestor(const VNode* vn) {
 }
 
 int VTree::totalNumOfTopLevel(VTreeNode* n) const {
-    if (!n->isTopLevel())
+    if (!n->isTopLevel()) {
         return -1;
+    }
 
     int idx = indexOfChild(n);
-    if (idx != -1)
+    if (idx != -1) {
         return totalNumOfTopLevel(idx);
+    }
 
     return -1;
 }
@@ -210,8 +219,9 @@ int VTree::indexOfTopLevelToInsert(VNode* suite) const {
     for (int i = 0; i < numOfChildren(); i++) {
         int idx = s->indexOfChild(children_[i]->vnode_);
         assert(idx >= 0);
-        if (suiteIdx < idx)
+        if (suiteIdx < idx) {
             return i;
+        }
     }
 
     return numOfChildren();
@@ -318,8 +328,9 @@ void VTree::insertTopLevelBranch(VTreeNode* branch, int index) {
 }
 
 void VTree::clear() {
-    for (auto& it : children_)
+    for (auto& it : children_) {
         delete it;
+    }
 
     children_.clear();
     nodeVec_.clear();
@@ -338,8 +349,9 @@ void VTree::build(const std::vector<VNode*>& filter) {
     VTreeNode* nptr = nullptr;
     std::fill(nodeVec_.begin(), nodeVec_.end(), nptr);
 
-    if (filter.empty())
+    if (filter.empty()) {
         return;
+    }
 
     assert(filter.size() == nodeVec_.size());
 
@@ -364,10 +376,12 @@ void VTree::build(const std::vector<VNode*>& filter) {
 bool VTree::build(VTreeNode* parent, VNode* node, const std::vector<VNode*>& filter) {
     if (filter[node->index()]) {
         VTreeNode* n = nullptr;
-        if (node->isSuite())
+        if (node->isSuite()) {
             n = new VTreeSuiteNode(node, parent);
-        else
+        }
+        else {
             n = new VTreeNode(node, parent);
+        }
 
         assert(n);
 
@@ -412,18 +426,21 @@ void VTree::build() {
 
 void VTree::build(VTreeNode* parent, VNode* vnode) {
     VTreeNode* n = nullptr;
-    if (vnode->isSuite())
+    if (vnode->isSuite()) {
         n = new VTreeSuiteNode(vnode, parent);
-    else
+    }
+    else {
         n = new VTreeNode(vnode, parent);
+    }
 
     assert(n);
     nodeVec_[vnode->index()] = n;
     // totalNum_++;
 
     // Preallocates the children. With this we will only use the memory we really need.
-    if (vnode->numOfChildren() > 0)
+    if (vnode->numOfChildren() > 0) {
         n->children_.reserve(vnode->numOfChildren());
+    }
 
     for (int j = 0; j < vnode->numOfChildren(); j++) {
         build(n, vnode->childAt(j));

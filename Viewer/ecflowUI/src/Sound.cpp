@@ -45,8 +45,9 @@ Sound::Sound() {
 }
 
 Sound* Sound::instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new Sound();
+    }
 
     return instance_;
 }
@@ -60,8 +61,9 @@ void Sound::play(const std::string& fName, int loopCount) {
     assert(loopCount < 6);
 
     time_t t = time(nullptr);
-    if (t < prevPlayedAt_ + delay_)
+    if (t < prevPlayedAt_ + delay_) {
         return;
+    }
 
     if (currentCmd_.empty()) {}
     else {
@@ -82,15 +84,17 @@ void Sound::setCurrentPlayer(const std::string& current) {
         currentPlayer_ = it->first;
         currentCmd_    = it->second;
     }
-    else
+    else {
         assert(0);
+    }
 }
 
 bool Sound::isSoundFile(const std::string& fName) const {
     const std::regex expr(formats_);
     std::smatch what;
-    if (std::regex_match(fName, what, expr))
+    if (std::regex_match(fName, what, expr)) {
         return true;
+    }
     return false;
 }
 

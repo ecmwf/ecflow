@@ -37,17 +37,21 @@ PlainTextEdit::PlainTextEdit(QWidget* parent)
 
     connect(this, SIGNAL(cursorPositionChanged()), lineNumArea_, SLOT(update()));
 
-    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaBackground"))
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaBackground")) {
         numAreaBgCol_ = p->value().value<QColor>();
+    }
 
-    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaFontColour"))
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaFontColour")) {
         numAreaFontCol_ = p->value().value<QColor>();
+    }
 
-    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaSeparator"))
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaSeparator")) {
         numAreaSeparatorCol_ = p->value().value<QColor>();
+    }
 
-    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaCurrent"))
+    if (VProperty* p = VConfig::instance()->find("view.textEdit.numAreaCurrent")) {
         numAreaCurrentCol_ = p->value().value<QColor>();
+    }
 
     updateLineNumberAreaWidth(0);
 
@@ -55,11 +59,13 @@ PlainTextEdit::PlainTextEdit(QWidget* parent)
 }
 
 PlainTextEdit::~PlainTextEdit() {
-    if (gotoLineDialog_)
+    if (gotoLineDialog_) {
         delete gotoLineDialog_;
+    }
 
-    if (fontProp_)
+    if (fontProp_) {
         fontProp_->removeObserver(this);
+    }
 }
 
 bool PlainTextEdit::setHyperlinkEnabled(bool h) {
@@ -115,8 +121,9 @@ void PlainTextEdit::cursorRowCol(int* row, int* col) {
     // find the line number - is there a better way than this?
 
     for (b = document()->begin(); b != document()->end(); b = b.next()) {
-        if (b == cb)
+        if (b == cb) {
             break;
+        }
         line++;
     }
 
@@ -195,13 +202,16 @@ void PlainTextEdit::updateLineNumberAreaWidth(int) {
 // ---------------------------------------------------------------------------
 
 void PlainTextEdit::updateLineNumberArea(const QRect& rect, int dy) {
-    if (dy)
+    if (dy) {
         lineNumArea_->scroll(0, dy);
-    else
+    }
+    else {
         lineNumArea_->update(0, rect.y(), lineNumArea_->width(), rect.height());
+    }
 
-    if (rect.contains(viewport()->rect()))
+    if (rect.contains(viewport()->rect())) {
         updateLineNumberAreaWidth(0);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -319,10 +329,13 @@ bool PlainTextEdit::findString(const QString& s, QTextDocument::FindFlags flags,
             QTextCursor original_cursor = textCursor(); // get the document's cursor
             QTextCursor cursor(original_cursor);
 
-            if (flags & QTextDocument::FindBackward) // move to the start or end of the document to continue the search
+            if (flags &
+                QTextDocument::FindBackward) { // move to the start or end of the document to continue the search
                 cursor.movePosition(QTextCursor::End);
-            else
+            }
+            else {
                 cursor.movePosition(QTextCursor::Start);
+            }
 
             setTextCursor(cursor); // send the cursor back to the document
 
@@ -426,18 +439,21 @@ void PlainTextEdit::wheelEvent(QWheelEvent* event) {
 
     if (isReadOnly()) {
         QPlainTextEdit::wheelEvent(event);
-        if (font().pointSize() != fps)
+        if (font().pointSize() != fps) {
             fontSizeChangedByZoom();
+        }
     }
     // For readOnly document the zoom does not work so we
     // need this custom code!
     else {
         if (event->modifiers() & Qt::ControlModifier) {
             auto delta = event->angleDelta();
-            if (delta.y() < 0)
+            if (delta.y() < 0) {
                 slotZoomOut();
-            else if (delta.y() > 0)
+            }
+            else if (delta.y() > 0) {
                 slotZoomIn();
+            }
             return;
         }
 
@@ -471,20 +487,23 @@ void PlainTextEdit::slotZoomOut() {
     }
 #endif
 
-    if (font().pointSize() != oriSize)
+    if (font().pointSize() != oriSize) {
         fontSizeChangedByZoom();
+    }
 }
 
 void PlainTextEdit::fontSizeChangedByZoom() {
-    if (fontProp_)
+    if (fontProp_) {
         fontProp_->setValue(font());
+    }
 }
 
 void PlainTextEdit::updateFont() {
     if (fontProp_) {
         auto f = fontProp_->value().value<QFont>();
-        if (font() != f)
+        if (font() != f) {
             setFont(f);
+        }
     }
 }
 
@@ -500,10 +519,12 @@ void PlainTextEdit::mousePressEvent(QMouseEvent* e) {
         // - we don't want to do anything until the mouse button has been released and
         // we know it hasd not been moved away from the hyperlinked text
 
-        if (e->button() & Qt::LeftButton)
+        if (e->button() & Qt::LeftButton) {
             currentLink_ = anchorAt(e->pos());
-        else
+        }
+        else {
             currentLink_ = QString();
+        }
     }
 
     QPlainTextEdit::mousePressEvent(e);

@@ -55,8 +55,9 @@ void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar) {
             for (std::size_t i = 0; i < nType; i++) {
                 if (VAttribute* a = n->findAttribute(attrTypes[i], astVar->name())) {
                     for (std::size_t k = 0; k < nItem; k++) {
-                        if (a == items_[k])
+                        if (a == items_[k]) {
                             return;
+                        }
                     }
 
                     items_.push_back(a);
@@ -75,8 +76,9 @@ void AstCollateVNodesVisitor::visitParentVariable(AstParentVariable* astVar) {
             for (std::size_t i = 0; i < nType; i++) {
                 if (VAttribute* a = n->findAttribute(attrTypes[i], astVar->name())) {
                     for (std::size_t k = 0; k < nItem; k++) {
-                        if (a == items_[k])
+                        if (a == items_[k]) {
                             return;
+                        }
                     }
 
                     items_.push_back(a);

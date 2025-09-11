@@ -16,8 +16,9 @@ FileWatcher::FileWatcher(const std::string& filePath, qint64 offset, QObject* pa
     connect(this, SIGNAL(fileChanged(QString)), this, SLOT(slotChanged(QString)));
 
     file_.setFileName(QString::fromStdString(filePath));
-    if (!file_.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!file_.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return;
+    }
     file_.seek(offset_);
 
     addPath(file_.fileName());
@@ -26,8 +27,9 @@ FileWatcher::FileWatcher(const std::string& filePath, qint64 offset, QObject* pa
 void FileWatcher::slotChanged(const QString& path) {
     QStringList lst;
     if (path == file_.fileName()) {
-        while (!file_.atEnd())
+        while (!file_.atEnd()) {
             lst << file_.readLine();
+        }
     }
 
     Q_EMIT linesAppended(lst);

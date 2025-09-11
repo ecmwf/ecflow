@@ -420,7 +420,7 @@ private:
 
 class AstInstant : public AstLeaf {
 public:
-    explicit AstInstant(int value) : value_(ecf::coerce_to_instant(value)) {}
+    explicit AstInstant(int value) : value_(ecf::coerce_from_seconds_into_instant(value)) {}
     explicit AstInstant(ecf::Instant value) : value_(std::move(value)) {}
 
     bool is_evaluateable() const override { return true; }
@@ -428,7 +428,7 @@ public:
 
     void accept(ecf::ExprAstVisitor&) override;
     AstInstant* clone() const override;
-    int value() const override { return ecf::coerce_from_instant(value_); }
+    int value() const override { return ecf::coerce_from_instant_into_seconds(value_); }
     void print_flat(std::ostream&, bool add_brackets = false) const override;
     std::string type() const override { return stype(); }
     std::string expression() const override;

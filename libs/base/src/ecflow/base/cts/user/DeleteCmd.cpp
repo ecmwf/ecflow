@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
@@ -27,8 +29,9 @@ using namespace boost;
 namespace po = boost::program_options;
 
 DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force) : group_cmd_(nullptr), force_(force) {
-    if (!absNodePath.empty())
+    if (!absNodePath.empty()) {
         paths_.push_back(absNodePath);
+    }
 }
 
 void DeleteCmd::print(std::string& os) const {
@@ -46,13 +49,24 @@ void DeleteCmd::print(std::string& os, const std::string& path) const {
 
 bool DeleteCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<DeleteCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (paths_ != the_rhs->paths())
+    }
+    if (paths_ != the_rhs->paths()) {
         return false;
-    if (force_ != the_rhs->force())
+    }
+    if (force_ != the_rhs->force()) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t DeleteCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t DeleteCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 const char* DeleteCmd::theArg() const {
@@ -63,15 +77,18 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().node_delete_++;
 
     if (paths_.empty()) {
-        if (!force_)
+        if (!force_) {
             check_for_active_or_submitted_tasks(as, nullptr);
-        else
+        }
+        else {
             as->zombie_ctrl().add_user_zombies(as->defs(), CtsApi::delete_node_arg());
+        }
         as->clear_defs();
 
         // If this command is part of a group command, let the following sync command, know about the new handle
-        if (group_cmd_)
+        if (group_cmd_) {
             group_cmd_->set_client_handle(0);
+        }
 
         // This will reset client defs and set client handle to zero on the client side.
         return PreAllocatedReply::delete_all_cmd();
@@ -90,10 +107,12 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
             // since node is to be deleted, we need to record the paths.
             add_node_path_for_edit_history(path);
 
-            if (!force_)
+            if (!force_) {
                 check_for_active_or_submitted_tasks(as, theNodeToDelete.get());
-            else
+            }
+            else {
                 as->zombie_ctrl().add_user_zombies(theNodeToDelete.get(), CtsApi::delete_node_arg());
+            }
 
             if (!defs->deleteChild(theNodeToDelete.get())) {
                 std::string errorMsg = "Delete: Cannot delete node " + theNodeToDelete->debugNodePath();
@@ -110,9 +129,9 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::ok_cmd();
 }
 
-bool DeleteCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, paths_);
-}
+// bool DeleteCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, paths_);
+// }
 
 void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* theNodeToDelete) {
     vector<Task*> taskVec;
@@ -125,17 +144,21 @@ void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* th
 
     vector<Task*> activeVec, submittedVec;
     for (Task* t : taskVec) {
-        if (t->state() == NState::ACTIVE)
+        if (t->state() == NState::ACTIVE) {
             activeVec.push_back(t);
-        if (t->state() == NState::SUBMITTED)
+        }
+        if (t->state() == NState::SUBMITTED) {
             submittedVec.push_back(t);
+        }
     }
     if (!activeVec.empty() || !submittedVec.empty()) {
         std::stringstream ss;
-        if (theNodeToDelete)
+        if (theNodeToDelete) {
             ss << "Cannot delete node " << theNodeToDelete->debugNodePath() << "\n";
-        else
+        }
+        else {
             ss << "Cannot delete all nodes.\n";
+        }
         if (!activeVec.empty()) {
             ss << " There are " << activeVec.size() << " active tasks. First : " << activeVec.front()->absNodePath()
                << "\n";
@@ -169,8 +192,9 @@ void DeleteCmd::addOption(boost::program_options::options_description& desc) con
 
 void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[theArg()].as<vector<string>>();
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(theArg(), args);
+    }
 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
@@ -180,12 +204,15 @@ void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, 
     bool do_prompt  = true;
     size_t vec_size = options.size();
     for (size_t i = 0; i < vec_size; i++) {
-        if (args[i] == "_all_")
+        if (args[i] == "_all_") {
             all = true;
-        if (args[i] == "force")
+        }
+        if (args[i] == "force") {
             force = true;
-        if (args[i] == "yes")
+        }
+        if (args[i] == "yes") {
             do_prompt = false;
+        }
     }
 
     if (!all && paths.empty()) {
@@ -196,17 +223,20 @@ void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, 
 
     if (do_prompt) {
         std::string confirm;
-        if (paths.empty())
+        if (paths.empty()) {
             confirm = "Are you sure you want to delete all the suites ? ";
+        }
         else {
             confirm          = "Are you sure want to delete nodes at paths:\n";
             size_t path_size = paths.size();
             for (size_t i = 0; i < path_size; i++) {
                 confirm += "  " + paths[i];
-                if (i == path_size - 1)
+                if (i == path_size - 1) {
                     confirm += " ? ";
-                else
+                }
+                else {
                     confirm += "\n";
+                }
             }
         }
         prompt_for_confirmation(confirm);

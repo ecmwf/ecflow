@@ -36,31 +36,39 @@ void VTaskNode::internalState(VNodeInternalState& st) {
 void VTaskNode::updatePrev(int tn, bool aborted, bool zombie, bool late) {
     prevTryNo_ = tn;
 
-    if (aborted)
+    if (aborted) {
         prevFlag_ |= AbortedMask; //(0x01 << AbortedPos);
-    else
+    }
+    else {
         prevFlag_ &= ~AbortedMask; // 0x01 << AbortedPos);
+    }
 
-    if (zombie)
+    if (zombie) {
         prevFlag_ |= ZombieMask;
-    else
+    }
+    else {
         prevFlag_ &= ~ZombieMask;
+    }
 
-    if (late)
+    if (late) {
         prevFlag_ |= LateMask;
-    else
+    }
+    else {
         prevFlag_ &= ~LateMask;
+    }
 }
 
 bool VTaskNode::isZombie() const {
-    if (node_)
+    if (node_) {
         return node_->get_flag().is_set(ecf::Flag::ZOMBIE);
+    }
     return false;
 }
 
 bool VTaskNode::isLate() const {
-    if (node_)
+    if (node_) {
         return node_->get_flag().is_set(ecf::Flag::LATE);
+    }
     return false;
 }
 

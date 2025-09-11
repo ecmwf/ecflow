@@ -55,23 +55,27 @@ bool VSState::isRunningState(ServerHandler* s) {
 }
 
 VSState* VSState::toState(ServerHandler* s) {
-    if (!s)
+    if (!s) {
         return nullptr;
+    }
 
-    if (s->connectState()->state() != ConnectState::Normal)
+    if (s->connectState()->state() != ConnectState::Normal) {
         return items_["disconnected"];
+    }
 
     auto it = stateMap_.find(s->serverState());
-    if (it != stateMap_.end())
+    if (it != stateMap_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }
 
 VSState* VSState::find(const std::string& name) {
     auto it = items_.find(name);
-    if (it != items_.end())
+    if (it != items_.end()) {
         return it->second;
+    }
 
     return nullptr;
 }

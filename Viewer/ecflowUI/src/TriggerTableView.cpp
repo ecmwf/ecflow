@@ -102,8 +102,9 @@ void TriggerTableView::enableContextMenu(bool enable) {
 QModelIndexList TriggerTableView::selectedList() {
     QModelIndexList lst;
     Q_FOREACH (QModelIndex idx, selectedIndexes()) {
-        if (idx.column() == 0)
+        if (idx.column() == 0) {
             lst << idx;
+        }
     }
     return lst;
 }
@@ -167,8 +168,9 @@ void TriggerTableView::handleContextMenu(QModelIndex indexClicked,
         std::vector<VInfo_ptr> nodeLst;
         for (int i = 0; i < indexLst.count(); i++) {
             VInfo_ptr info = model_->nodeInfo(indexLst[i]);
-            if (info && !info->isEmpty())
+            if (info && !info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
 
         actionHandler_->contextMenu(nodeLst, globalPos);
@@ -184,8 +186,9 @@ void TriggerTableView::slotCommandShortcut() {
         std::vector<VInfo_ptr> nodeLst;
         for (int i = 0; i < indexLst.count(); i++) {
             VInfo_ptr info = model_->nodeInfo(indexLst[i]);
-            if (info && !info->isEmpty())
+            if (info && !info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
         actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
     }

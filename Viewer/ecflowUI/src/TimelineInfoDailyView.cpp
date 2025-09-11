@@ -85,8 +85,9 @@ int TimelineInfoDailyModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int TimelineInfoDailyModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -106,8 +107,9 @@ QVariant TimelineInfoDailyModel::data(const QModelIndex& index, int role) const 
     }
 
     int row = index.row();
-    if (row < 0 || row >= static_cast<int>(days_.size()))
+    if (row < 0 || row >= static_cast<int>(days_.size())) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         if (index.column() == 0) {
@@ -122,8 +124,9 @@ QVariant TimelineInfoDailyModel::data(const QModelIndex& index, int role) const 
 }
 
 QVariant TimelineInfoDailyModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     if (role == Qt::DisplayRole) {
         switch (section) {
@@ -276,12 +279,14 @@ void TimelineInfoDailyDelegate::paint(QPainter* painter,
 void TimelineInfoDailyDelegate::renderTimeline(QPainter* painter,
                                                const QStyleOptionViewItem& option,
                                                const QModelIndex& index) const {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
+    }
 
     TimelineItem* item = model_->data();
-    if (!item)
+    if (!item) {
         return;
+    }
 
     // bool selected=option.state & QStyle::State_Selected;
 
@@ -318,14 +323,17 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter* painter,
             continue;
         }
 
-        if (item->start_[i] < sDate)
+        if (item->start_[i] < sDate) {
             continue;
+        }
 
-        if (item->start_[i] > eDate)
+        if (item->start_[i] > eDate) {
             break;
+        }
 
-        if (i == item->size() - 1)
+        if (i == item->size() - 1) {
             handledLast = true;
+        }
 
         int xp = timeToPos(option.rect, item->start_[i]);
 
@@ -364,12 +372,14 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter* painter,
             else {
                 hasGrad = false;
                 xpLeft  = xp;
-                if (item->start_[i] / 86400 < model_->endDateSec() / 86400)
+                if (item->start_[i] / 86400 < model_->endDateSec() / 86400) {
                     xpRight = rightEdge;
+                }
                 else {
                     xpRight = timeToPos(option.rect, model_->endDateSec());
-                    if (xpRight > rightEdge)
+                    if (xpRight > rightEdge) {
                         xpRight = rightEdge;
+                    }
                 }
             }
 
@@ -413,12 +423,14 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter* painter,
             bool lighter = (vn->name() == "complete");
             bool hasGrad = false;
 
-            if (eDate < model_->endDateSec())
+            if (eDate < model_->endDateSec()) {
                 xpRight = rightEdge;
+            }
             else {
                 xpRight = timeToPos(option.rect, model_->endDateSec());
-                if (xpRight > rightEdge)
+                if (xpRight > rightEdge) {
                     xpRight = rightEdge;
+                }
             }
 
             drawCell(painter,
@@ -460,14 +472,17 @@ int TimelineInfoDailyDelegate::timeToPos(QRect r, unsigned int time) const {
 
     time = time % 86400;
 
-    if (time < start)
+    if (time < start) {
         return r.x() - 2;
+    }
 
-    if (time >= end)
+    if (time >= end) {
         return r.x() + r.width() + 2;
+    }
 
-    if (start >= end)
+    if (start >= end) {
         return r.x() - 2;
+    }
 
     return r.x() + static_cast<float>(time - start) * static_cast<float>(r.width()) / static_cast<float>((end - start));
 }

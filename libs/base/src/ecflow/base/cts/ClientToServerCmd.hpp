@@ -13,7 +13,11 @@
 
 #include <boost/program_options.hpp>
 
+#include "ecflow/attribute/Variable.hpp"
+#include "ecflow/base/Authentication.hpp"
+#include "ecflow/base/Authorisation.hpp"
 #include "ecflow/base/Cmd.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/node/NodeFwd.hpp"
@@ -52,6 +56,30 @@ public:
     }
 
     virtual bool equals(ClientToServerCmd* rhs) const;
+
+    virtual void set_identity(ecf::Identity identity) { identity_ = std::move(identity); }
+    [[nodiscard]] ecf::Identity& identity() const { return identity_; }
+
+    [[nodiscard]] virtual ecf::authorisation_t authenticate(AbstractServer& server) const = 0;
+    [[nodiscard]] virtual ecf::authorisation_t authorise(AbstractServer& server) const    = 0;
+
+    /**
+     *  Evaluates the preconditions of the command, thus acting as a command customisation point.
+     *  This method is called after authentication and authorization, but before actually executing
+     *  any command specific 'work'. Each command class overrides to check required preconditions.
+     *
+     *  Note: This mechanism is important for TaskCmds, which use the precondition check
+     *  to detect/handle the presense of Zombie tasks
+     *
+     *  @param server the server executing the command
+     *  @param reply the reply to be sent the client in case preconditions are invalid
+     *  (remains unchanged if preconditions are valid)
+     *
+     *  @return true if preconditions are valid; otherwise, false.
+     */
+    [[nodiscard]] virtual bool check_preconditions(AbstractServer* server, [[maybe_unused]] STC_Cmd_ptr& reply) const {
+        return true;
+    }
 
     /// Called by the _server_ to service the client depending on the Command
     /// The server will pass itself down via the AbstractServer
@@ -138,11 +166,13 @@ protected:
     /// called by handleRequest, part of the template pattern
     virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const = 0;
 
-    /// return true if authentication succeeds, false and STC_Cmd_ptr to return otherwise
-    /// This function is called from doHandleRequest and hence is called
-    /// from within the server. The default implementation will get the current
-    /// user and authenticate with reference to the white list file
-    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const = 0;
+    virtual bool validate() const { return true; }
+
+    // /// return true if authentication succeeds, false and STC_Cmd_ptr to return otherwise
+    // /// This function is called from doHandleRequest and hence is called
+    // /// from within the server. The default implementation will get the current
+    // /// user and authenticate with reference to the white list file
+    // virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const = 0;
 
     /// Log the command. Must typically be done before call doHandleRequest(), in case of crash/exception
     /// In rare case allow override. (i.e for additional debug)
@@ -184,6 +214,8 @@ private:
     mutable std::vector<std::string> edit_history_node_paths_; // NOT persisted, used when deleting
 
     std::string cl_host_; // The host where the client was called
+
+    mutable ecf::Identity identity_ = ecf::Identity::make_none(); // The identity of the user who issued the command
 
 private:
     friend class cereal::access;

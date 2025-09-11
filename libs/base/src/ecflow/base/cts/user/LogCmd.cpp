@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -27,8 +29,9 @@ using namespace std;
 namespace po = boost::program_options;
 
 LogCmd::LogCmd(LogApi a, int get_last_n_lines) : api_(a), get_last_n_lines_(get_last_n_lines) {
-    if (get_last_n_lines_ == 0)
+    if (get_last_n_lines_ == 0) {
         get_last_n_lines_ = Log::get_last_n_lines_default();
+    }
 }
 
 LogCmd::LogCmd() : get_last_n_lines_(Log::get_last_n_lines_default()) {
@@ -91,15 +94,27 @@ void LogCmd::print_only(std::string& os) const {
 
 bool LogCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<LogCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (api_ != the_rhs->api())
+    }
+    if (api_ != the_rhs->api()) {
         return false;
-    if (get_last_n_lines_ != the_rhs->get_last_n_lines())
+    }
+    if (get_last_n_lines_ != the_rhs->get_last_n_lines()) {
         return false;
-    if (new_path_ != the_rhs->new_path())
+    }
+    if (new_path_ != the_rhs->new_path()) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t LogCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t LogCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 // changed for release 4.1.0
@@ -214,8 +229,9 @@ void LogCmd::addOption(boost::program_options::options_description& desc) const 
 void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(LogCmd::arg(), args);
+    }
 
     if (!args.empty() && args[0] == "get") {
 

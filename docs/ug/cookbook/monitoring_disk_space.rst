@@ -1,7 +1,7 @@
 .. _monitoring_disk_space:
 
 Monitoring disk space
-/////////////////////
+*********************
 
 A :term:`meter` can be used to monitor the disk space available in the
 working directory of the suite's tasks. This will enable the

@@ -53,8 +53,9 @@ PropertyDialog::PropertyDialog(QWidget* parent) : QDialog(parent) {
 
     readSettings();
 
-    if (list_->count() > 0 && list_->currentRow() == -1)
+    if (list_->count() > 0 && list_->currentRow() == -1) {
         list_->setCurrentRow(0);
+    }
 
     // Assign name to each object
     WidgetNameProvider::nameChildren(this);
@@ -69,8 +70,9 @@ void PropertyDialog::closeEvent(QCloseEvent* event) {
 void PropertyDialog::build() {
     if (prop_) {
         Q_FOREACH (VProperty* vPage, prop_->children()) {
-            if (vPage->param("visible") == "false")
+            if (vPage->param("visible") == "false") {
                 continue;
+            }
 
             QPixmap pix(32, 32);
             QPixmap edPix;
@@ -117,8 +119,9 @@ void PropertyDialog::addPage(QWidget* w, QPixmap pix, QString txt) {
 }
 
 void PropertyDialog::slotChangePage(QListWidgetItem* current, QListWidgetItem* previous) {
-    if (!current)
+    if (!current) {
         current = previous;
+    }
 
     page_->setCurrentIndex(list_->row(current));
 }
@@ -152,16 +155,19 @@ void PropertyDialog::manageChange(bool inApply) {
             hasChange    = true;
             VProperty* p = ed->property();
             if (p && p->name() != "server") {
-                if (inApply)
+                if (inApply) {
                     Q_EMIT configChanged();
-                else
+                }
+                else {
                     configChanged_ = true;
+                }
             }
         }
     }
 
-    if (hasChange)
+    if (hasChange) {
         VConfig::instance()->saveSettings();
+    }
 }
 
 void PropertyDialog::load(VProperty* p) {

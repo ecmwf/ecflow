@@ -10,11 +10,11 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -24,10 +24,7 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 /// Simulate definition files that are created on then fly. This us to validate
 /// Defs file, to check for correctness
@@ -37,7 +34,7 @@ BOOST_AUTO_TEST_SUITE(S_Simulator)
 BOOST_AUTO_TEST_SUITE(T_Repeat)
 
 BOOST_AUTO_TEST_CASE(test_repeat_integer) {
-    cout << "Simulator:: ...test_repeat_integer\n";
+    std::cout << "Simulator:: ...test_repeat_integer\n";
 
     // suite suite
     //   repeat integer VAR 0 1 1          # run at 0, 1    2 times
@@ -79,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_integer_relative) {
-    cout << "Simulator:: ...test_repeat_integer_relative\n";
+    std::cout << "Simulator:: ...test_repeat_integer_relative\n";
 
     // suite suite
     //   repeat integer VAR 0 1 1          # run at 0, 1    2 times
@@ -124,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_integer_relative) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date) {
-    cout << "Simulator:: ...test_repeat_date\n";
+    std::cout << "Simulator:: ...test_repeat_date\n";
     // suite suite
     //   clock real <fixed date + time>
     //   family family
@@ -164,7 +161,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_2) {
-    cout << "Simulator:: ...test_repeat_date_2\n";
+    std::cout << "Simulator:: ...test_repeat_date_2\n";
     // suite suite
     //   clock real <fixed date + time>
     //   family family
@@ -204,7 +201,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_for_loop) {
-    cout << "Simulator:: ...test_repeat_date_for_loop\n";
+    std::cout << "Simulator:: ...test_repeat_date_for_loop\n";
 
     // suite suite
     //   clock real <todays date>
@@ -249,7 +246,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_for_loop) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_for_loop2) {
-    cout << "Simulator:: ...test_repeat_date_for_loop2\n";
+    std::cout << "Simulator:: ...test_repeat_date_for_loop2\n";
 
     // suite suite
     //   clock real <todays date>
@@ -296,7 +293,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_for_loop2) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
-    cout << "Simulator:: ...test_repeat_date_list\n";
+    std::cout << "Simulator:: ...test_repeat_date_list\n";
     // suite suite
     //   clock real <fixed date + time>
     //   family family
@@ -335,7 +332,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_date_list) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_with_cron) {
-    cout << "Simulator:: ...test_repeat_with_cron\n";
+    std::cout << "Simulator:: ...test_repeat_with_cron\n";
     // suite s
     //   clock real <today date>
     //   endclock <today date> + 1 week
@@ -357,10 +354,10 @@ BOOST_AUTO_TEST_CASE(test_repeat_with_cron) {
 
     Defs theDefs;
     {
-        boost::posix_time::ptime theLocalTime       = Calendar::second_clock_time();
-        boost::posix_time::ptime time_plus_2_minute = theLocalTime + minutes(2);
+        auto theLocalTime       = Calendar::second_clock_time();
+        auto time_plus_2_minute = theLocalTime + boost::posix_time::minutes(2);
         ClockAttr clockAttr(theLocalTime, false /* real clock*/);
-        ClockAttr end_clock(theLocalTime + hours(24 * 7), false /* real clock*/);
+        ClockAttr end_clock(theLocalTime + boost::posix_time::hours(24 * 7), false /* real clock*/);
 
         suite_ptr suite = theDefs.add_suite("test_repeat_with_cron");
         suite->addClock(clockAttr);
@@ -386,8 +383,6 @@ BOOST_AUTO_TEST_CASE(test_repeat_with_cron) {
         cronAttr.addTimeSeries(ecf::TimeSeries(ecf::TimeSlot(time_plus_2_minute.time_of_day())));
         task_checkdata->addCron(cronAttr);
         task_checkdata->addVerify(VerifyAttr(NState::COMPLETE, 8));
-
-        //		cout << theDefs << "\n";
     }
 
     Simulator simulator;
@@ -402,7 +397,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_with_cron) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_enumerated) {
-    cout << "Simulator:: ...test_repeat_enumerated\n";
+    std::cout << "Simulator:: ...test_repeat_enumerated\n";
     // suite suite
     //   family family
     //     repeat enumerated ENUM "hello" "there" "bill" # run 3 times
@@ -454,7 +449,7 @@ BOOST_AUTO_TEST_CASE(test_repeat_enumerated) {
 }
 
 BOOST_AUTO_TEST_CASE(test_repeat_string) {
-    cout << "Simulator:: ...test_repeat_string\n";
+    std::cout << "Simulator:: ...test_repeat_string\n";
     // suite suite
     //   family family
     //     repeat string STRING "hello" "there" # run 2 times

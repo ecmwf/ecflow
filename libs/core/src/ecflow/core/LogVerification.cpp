@@ -77,25 +77,30 @@ bool LogVerification::compareNodeStates(const std::string& logfile,
                                         std::string& errorMsg) {
     // Open log files, and extract just the state changes
     std::vector<std::pair<std::string, std::string>> lines, goldenLines;
-    if (!extractNodePathAndState(logfile, lines, errorMsg))
+    if (!extractNodePathAndState(logfile, lines, errorMsg)) {
         return false;
-    if (!extractNodePathAndState(goldenRefLogFile, goldenLines, errorMsg))
+    }
+    if (!extractNodePathAndState(goldenRefLogFile, goldenLines, errorMsg)) {
         return false;
+    }
 
     if (lines != goldenLines) {
         std::stringstream ss;
         ss << "Log file " << logfile << " does not match golden reference file " << goldenRefLogFile << "\n";
-        if (lines.size() != goldenLines.size())
+        if (lines.size() != goldenLines.size()) {
             ss << "Expected log file size " << goldenLines.size() << " but found " << lines.size() << "\n";
+        }
 
         bool errorFnd = false;
         for (size_t i = 0; i < lines.size() || i < goldenLines.size(); ++i) {
 
             std::string theLine, theGoldenLine;
-            if (i < lines.size())
+            if (i < lines.size()) {
                 theLine = lines[i].second + Str::COLON() + lines[i].first;
-            if (i < goldenLines.size())
+            }
+            if (i < goldenLines.size()) {
                 theGoldenLine = goldenLines[i].second + Str::COLON() + goldenLines[i].first;
+            }
 
             if (i < lines.size() && i < goldenLines.size()) {
 
@@ -123,19 +128,24 @@ bool LogVerification::compareNodeStates(const std::string& logfile,
             else {
                 errorFnd = true;
                 ss << "Mismatch at " << i;
-                if (i < lines.size())
+                if (i < lines.size()) {
                     ss << " log(" << theLine << ")   ";
-                else
+                }
+                else {
                     ss << " log( ---- )   ";
+                }
 
-                if (i < goldenLines.size())
+                if (i < goldenLines.size()) {
                     ss << "golden(" << theGoldenLine << ")\n";
-                else
+                }
+                else {
                     ss << "golden( --- )\n";
+                }
             }
         }
-        if (errorFnd)
+        if (errorFnd) {
             errorMsg = ss.str();
+        }
     }
 
     return errorMsg.empty();

@@ -16,6 +16,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/task/TaskApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Str.hpp"
@@ -44,11 +46,21 @@ void InitCmd::print(std::string& os) const {
 
 bool InitCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<InitCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (var_to_add_ != the_rhs->variables_to_add())
+    }
+    if (var_to_add_ != the_rhs->variables_to_add()) {
         return false;
+    }
     return TaskCmd::equals(rhs);
+}
+
+ecf::authentication_t InitCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t InitCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr InitCmd::doHandleRequest(AbstractServer* as) const {
@@ -95,12 +107,13 @@ void InitCmd::addOption(boost::program_options::options_description& desc) const
 void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     std::string process_or_remote_id = vm[arg()].as<std::string>();
 
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         cout << "  InitCmd::create " << InitCmd::arg() << "  clientEnv->task_path(" << clientEnv->task_path()
              << ") clientEnv->jobs_password(" << clientEnv->jobs_password() << ") clientEnv->process_or_remote_id("
              << clientEnv->process_or_remote_id() << ") clientEnv->task_try_no(" << clientEnv->task_try_no()
              << ") process_or_remote_id(" << process_or_remote_id << ") clientEnv->under_test("
              << clientEnv->under_test() << ")\n";
+    }
 
     std::string errorMsg;
     if (!clientEnv->checkTaskPathAndPassword(errorMsg)) {

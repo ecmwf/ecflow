@@ -73,3 +73,6 @@ IncludeCategories:
   # And finally, include every 'project' header
   - Regex:           '.*'
     Priority:        30
+
+InsertBraces: true
+InsertNewlineAtEOF: true

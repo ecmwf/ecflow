@@ -70,12 +70,15 @@ Submittable::~Submittable() {
 }
 
 bool Submittable::check_defaults() const {
-    if (tryNo_ != 0)
+    if (tryNo_ != 0) {
         throw std::runtime_error("Submittable::check_defaults(): tryNo_ != 0");
-    if (state_change_no_ != 0)
+    }
+    if (state_change_no_ != 0) {
         throw std::runtime_error("Submittable::check_defaults(): state_change_no_ != 0");
-    if (sub_gen_variables_ != nullptr)
+    }
+    if (sub_gen_variables_ != nullptr) {
         throw std::runtime_error("Submittable::check_defaults(): sub_gen_variables_ != nullptr");
+    }
     return Node::check_defaults();
 }
 
@@ -225,17 +228,20 @@ void Submittable::read_state(const std::string& line, const std::vector<std::str
         const std::string& line_token_i = lineTokens[i];
 
         if (line_token_i.find("passwd:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, paswd_))
+            if (!Extract::split_get_second(line_token_i, paswd_)) {
                 throw std::runtime_error("Submittable::read_state failed for jobs password : " + name());
+            }
         }
         else if (line_token_i.find("rid:") != std::string::npos) {
-            if (!Extract::split_get_second(line_token_i, rid_))
+            if (!Extract::split_get_second(line_token_i, rid_)) {
                 throw std::runtime_error("Submittable::read_state failed for rid : " + name());
+            }
         }
         else if (line_token_i.find("try:") != std::string::npos) {
             std::string try_number;
-            if (!Extract::split_get_second(line_token_i, try_number))
+            if (!Extract::split_get_second(line_token_i, try_number)) {
                 throw std::runtime_error("Submittable::read_state failed for try number : " + name());
+            }
             tryNo_ = Extract::theInt(try_number, "Submittable::read_state failed for try number");
         }
     }
@@ -416,8 +422,9 @@ EcfFile Submittable::locatedEcfFile() const {
     EcfFile::EcfFileSearchAlgorithm file_search_algo = EcfFile::PRUNE_ROOT;
     std::string ecf_files_lookup;
     if (findParentUserVariableValue("ECF_FILES_LOOKUP", ecf_files_lookup)) {
-        if (ecf_files_lookup == "prune_leaf" || ecf_files_lookup == "PRUNE_LEAF")
+        if (ecf_files_lookup == "prune_leaf" || ecf_files_lookup == "PRUNE_LEAF") {
             file_search_algo = EcfFile::PRUNE_LEAF;
+        }
     }
 
     std::string ecf_filesDirectory;
@@ -430,21 +437,26 @@ EcfFile Submittable::locatedEcfFile() const {
             // If File::backwardSearch fails it returns an empty string, i.e. failure to locate script (Task/.ecf ||
             // Alias/.usr) file
             std::string searchResult;
-            if (file_search_algo == EcfFile::PRUNE_ROOT)
+            if (file_search_algo == EcfFile::PRUNE_ROOT) {
                 searchResult = File::backwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
-            else
+            }
+            else {
                 searchResult = File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
+            }
             if (searchResult.empty()) {
                 reasonEcfFileNotFound += "   Search of directory ECF_FILES(";
                 reasonEcfFileNotFound += ecf_filesDirectory;
                 reasonEcfFileNotFound += ") failed ";
-                if (file_search_algo == EcfFile::PRUNE_ROOT)
+                if (file_search_algo == EcfFile::PRUNE_ROOT) {
                     reasonEcfFileNotFound += "using prune_root:\n";
-                else
+                }
+                else {
                     reasonEcfFileNotFound += "using prune_leaf:\n";
+                }
             }
-            else
+            else {
                 return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_FILES, file_search_algo);
+            }
         }
         else {
             // Before failing try again but with variable Substitution. ECFLOW-788
@@ -454,25 +466,29 @@ EcfFile Submittable::locatedEcfFile() const {
                 // If search fails it returns an empty string, i.e. failure to locate script (Task/.ecf || Alias/.usr)
                 // file
                 std::string searchResult;
-                if (file_search_algo == EcfFile::PRUNE_ROOT)
+                if (file_search_algo == EcfFile::PRUNE_ROOT) {
                     searchResult = File::backwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
-                else
+                }
+                else {
                     searchResult = File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
+                }
                 if (searchResult.empty()) {
                     std::stringstream ss;
                     ss << "   Search of directory ECF_FILES(variable substituted)(" << ecf_filesDirectory
                        << ") failed:\n";
                     reasonEcfFileNotFound += ss.str();
                 }
-                else
+                else {
                     return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_FILES, file_search_algo);
+                }
             }
             else {
                 std::stringstream ss;
                 ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
-                if (original_ecf_filesDirectory != ecf_filesDirectory)
+                if (original_ecf_filesDirectory != ecf_filesDirectory) {
                     ss << "   Directory ECF_FILES(" << ecf_filesDirectory
                        << ") after variable substitution does not exist:\n";
+                }
                 reasonEcfFileNotFound += ss.str();
             }
         }
@@ -488,18 +504,22 @@ EcfFile Submittable::locatedEcfFile() const {
     if (!ecf_home.empty() && fs::is_directory(ecf_home)) {
         // If search fails it returns an empty string, i.e. failure to locate script (Task/.ecf || Alias/.usr) file
         std::string searchResult;
-        if (file_search_algo == EcfFile::PRUNE_ROOT)
+        if (file_search_algo == EcfFile::PRUNE_ROOT) {
             searchResult = File::backwardSearch(ecf_home, theAbsNodePath, script_extension());
-        else
+        }
+        else {
             searchResult = File::forwardSearch(ecf_home, theAbsNodePath, script_extension());
+        }
         if (searchResult.empty()) {
             reasonEcfFileNotFound += "   Search of directory ECF_HOME(";
             reasonEcfFileNotFound += ecf_home;
             reasonEcfFileNotFound += ") failed ";
-            if (file_search_algo == EcfFile::PRUNE_ROOT)
+            if (file_search_algo == EcfFile::PRUNE_ROOT) {
                 reasonEcfFileNotFound += "using prune_root:\n";
-            else
+            }
+            else {
                 reasonEcfFileNotFound += "using prune_leaf:\n";
+            }
         }
         else {
             return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_HOME, file_search_algo);
@@ -684,10 +704,11 @@ public:
     ~JobCreationTimer() {
         if (enabled_) {
             std::cout << " " << sub_->absNodePath();
-            if (failed_)
+            if (failed_) {
                 std::cout << " (FAILED)\n";
+            }
             else {
-                boost::posix_time::time_duration duration = Calendar::second_clock_time() - start_;
+                auto duration = Calendar::second_clock_time() - start_;
                 std::cout << " (" << duration.total_microseconds() << " ms)\n";
             }
         }
@@ -709,8 +730,9 @@ private:
 
 void Submittable::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
     JobCreationTimer output_tasks_being_checked(this);
-    if (jobCtrl->verbose())
+    if (jobCtrl->verbose()) {
         output_tasks_being_checked.set_enabled();
+    }
 
     // Typically a valid try number is >=1.
     // Since check_job_creation is only used for testing/python, we will initialise tryNum to -1
@@ -980,8 +1002,9 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
 #endif
 
     if (state_change_no_ > changes.client_state_change_no()) {
-        if (!comp.get())
+        if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
+        }
         comp->add(std::make_shared<SubmittableMemento>(paswd_, rid_, abr_, tryNo_));
     }
 
@@ -1010,35 +1033,40 @@ void Submittable::set_memento(const SubmittableMemento* memento,
 // Generated variables ---------------------------------------------------------------------------------
 
 void Submittable::update_generated_variables() const {
-    if (!sub_gen_variables_)
+    if (!sub_gen_variables_) {
         sub_gen_variables_ = new SubGenVariables(this);
+    }
     sub_gen_variables_->update_generated_variables();
     update_repeat_genvar();
 }
 
 void Submittable::update_static_generated_variables(const std::string& ecf_home,
                                                     const std::string& theAbsNodePath) const {
-    if (!sub_gen_variables_)
+    if (!sub_gen_variables_) {
         sub_gen_variables_ = new SubGenVariables(this);
+    }
     sub_gen_variables_->update_static_generated_variables(ecf_home, theAbsNodePath);
 }
 
 const Variable& Submittable::findGenVariable(const std::string& name) const {
     // AST can reference generated variables. Currently, integer based values
     // The task names can be integers, other valid option is try_no
-    if (!sub_gen_variables_)
+    if (!sub_gen_variables_) {
         update_generated_variables();
+    }
 
     const Variable& gen_var = sub_gen_variables_->findGenVariable(name);
-    if (!gen_var.empty())
+    if (!gen_var.empty()) {
         return gen_var;
+    }
 
     return Node::findGenVariable(name);
 }
 
 void Submittable::gen_variables(std::vector<Variable>& vec) const {
-    if (!sub_gen_variables_)
+    if (!sub_gen_variables_) {
         update_generated_variables();
+    }
 
     vec.reserve(vec.size() + 9);
     sub_gen_variables_->gen_variables(vec);
@@ -1046,26 +1074,30 @@ void Submittable::gen_variables(std::vector<Variable>& vec) const {
 }
 
 const Variable& Submittable::get_genvar_ecfrid() const {
-    if (!sub_gen_variables_)
+    if (!sub_gen_variables_) {
         return Variable::EMPTY();
+    }
     return sub_gen_variables_->genvar_ecfrid();
 }
 
 const Variable& Submittable::get_genvar_ecfscript() const {
-    if (!sub_gen_variables_)
+    if (!sub_gen_variables_) {
         return Variable::EMPTY();
+    }
     return sub_gen_variables_->genvar_ecfscript();
 }
 
 void Submittable::set_genvar_ecfjob(const std::string& value) {
-    if (!sub_gen_variables_)
+    if (!sub_gen_variables_) {
         sub_gen_variables_ = new SubGenVariables(this);
+    }
     sub_gen_variables_->set_genvar_ecfjob(value);
 }
 
 void Submittable::set_genvar_ecfrid(const std::string& value) {
-    if (!sub_gen_variables_)
+    if (!sub_gen_variables_) {
         sub_gen_variables_ = new SubGenVariables(this);
+    }
     sub_gen_variables_->set_genvar_ecfrid(value);
 }
 
@@ -1096,10 +1128,12 @@ void SubGenVariables::update_generated_variables() const {
 void SubGenVariables::update_static_generated_variables(const std::string& ecf_home,
                                                         const std::string& theAbsNodePath) const {
     // cache strings that are used in many variables
-    if (submittable_->isAlias() && submittable_->parent())
+    if (submittable_->isAlias() && submittable_->parent()) {
         genvar_task_.set_value(submittable_->parent()->name()); // does *not* modify Variable::state_change_no
-    else
+    }
+    else {
         genvar_task_.set_value(submittable_->name());
+    }
 
     genvar_ecfname_.set_value(theAbsNodePath); // does *not* modify Variable::state_change_no
 
@@ -1155,22 +1189,30 @@ void SubGenVariables::update_dynamic_generated_variables(const std::string& ecf_
 }
 
 const Variable& SubGenVariables::findGenVariable(const std::string& name) const {
-    if (genvar_ecfjob_.name() == name)
+    if (genvar_ecfjob_.name() == name) {
         return genvar_ecfjob_;
-    if (genvar_ecfjobout_.name() == name)
+    }
+    if (genvar_ecfjobout_.name() == name) {
         return genvar_ecfjobout_;
-    if (genvar_ecftryno_.name() == name)
+    }
+    if (genvar_ecftryno_.name() == name) {
         return genvar_ecftryno_;
-    if (genvar_ecfname_.name() == name)
+    }
+    if (genvar_ecfname_.name() == name) {
         return genvar_ecfname_;
-    if (genvar_task_.name() == name)
+    }
+    if (genvar_task_.name() == name) {
         return genvar_task_;
-    if (genvar_ecfpass_.name() == name)
+    }
+    if (genvar_ecfpass_.name() == name) {
         return genvar_ecfpass_;
-    if (genvar_ecfscript_.name() == name)
+    }
+    if (genvar_ecfscript_.name() == name) {
         return genvar_ecfscript_;
-    if (genvar_ecfrid_.name() == name)
+    }
+    if (genvar_ecfrid_.name() == name) {
         return genvar_ecfrid_;
+    }
     return Variable::EMPTY();
 }
 

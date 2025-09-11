@@ -37,13 +37,15 @@ LabelEditor::LabelEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "label");
 
-    if (a->data().count() < 2)
+    if (a->data().count() < 2) {
         return;
+    }
 
     QString name = a->data().at(1);
     QString val;
-    if (a->data().count() > 2)
+    if (a->data().count() > 2) {
         val = a->data().at(2);
+    }
 
     oriVal_ = val;
 

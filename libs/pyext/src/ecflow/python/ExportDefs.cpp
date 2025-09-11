@@ -55,8 +55,9 @@ static defs_ptr create_defs(const std::string& file_name) {
     if (!defs->restore(file_name, errorMsg, warningMsg)) {
         throw std::runtime_error(errorMsg);
     }
-    if (!warningMsg.empty())
+    if (!warningMsg.empty()) {
         std::cerr << warningMsg;
+    }
     return defs;
 }
 
@@ -123,8 +124,9 @@ bool defs_exit(defs_ptr self, const py::object& type, const py::object& value, c
 
 std::string check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose) {
     job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
-    if (verbose)
+    if (verbose) {
         jobCtrl->set_verbose(verbose);
+    }
     defs->check_job_creation(jobCtrl);
     if (!jobCtrl->get_error_msg().empty() && throw_on_error) {
         throw std::runtime_error(jobCtrl->get_error_msg());
@@ -195,41 +197,49 @@ bool defs_container(defs_ptr self, const std::string& name) {
 
 static py::object do_add(defs_ptr self, const py::object& arg) {
     // std::cout << "defs::do_add \n";
-    if (arg.ptr() == py::object().ptr())
+    if (arg.ptr() == py::object().ptr()) {
         return py::object(self); // *IGNORE* None
-    else if (py::extract<suite_ptr>(arg).check())
+    }
+    else if (py::extract<suite_ptr>(arg).check()) {
         self->addSuite(py::extract<suite_ptr>(arg));
-    else if (py::extract<py::dict>(arg).check())
+    }
+    else if (py::extract<py::dict>(arg).check()) {
         add_variable_dict(self, py::extract<py::dict>(arg));
+    }
     else if (py::extract<Edit>(arg).check()) {
         Edit edit                        = py::extract<Edit>(arg);
         const std::vector<Variable>& vec = edit.variables();
-        for (const auto& i : vec)
+        for (const auto& i : vec) {
             self->server_state().add_or_update_user_variables(i.name(), i.theValue());
+        }
     }
     else if (py::extract<py::list>(arg).check()) {
         py::list the_list = py::extract<py::list>(arg);
         int the_list_size = len(the_list);
-        for (int i = 0; i < the_list_size; ++i)
+        for (int i = 0; i < the_list_size; ++i) {
             (void)do_add(self, the_list[i]); // recursive
+        }
     }
     else if (py::extract<Variable>(arg).check()) {
         Variable var = py::extract<Variable>(arg);
         self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     }
-    else
+    else {
         throw std::runtime_error("ExportDefs::add : Unknown type");
+    }
     return py::object(self);
 }
 
 static py::object add(py::tuple args, py::dict kwargs) {
     int the_list_size = len(args);
     defs_ptr self     = py::extract<defs_ptr>(args[0]); // self
-    if (!self)
+    if (!self) {
         throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
+    }
 
-    for (int i = 1; i < the_list_size; ++i)
+    for (int i = 1; i < the_list_size; ++i) {
         (void)do_add(self, args[i]);
+    }
     (void)add_variable_dict(self, kwargs);
 
     return py::object(self); // return defs as python object, relies class_<Defs>... for type registration
@@ -238,20 +248,23 @@ static py::object add(py::tuple args, py::dict kwargs) {
 static py::object defs_iadd(defs_ptr self, const py::list& list) {
     // std::cout << "defs_iadd  list " << self->name() << "\n";
     int the_list_size = len(list);
-    for (int i = 0; i < the_list_size; ++i)
+    for (int i = 0; i < the_list_size; ++i) {
         (void)do_add(self, list[i]);
+    }
     return py::object(self); // return node_ptr as python object, relies class_<Node>... for type registration
 }
 
 static py::object defs_getattr(defs_ptr self, const std::string& attr) {
     // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
     suite_ptr child = self->findSuite(attr);
-    if (child)
+    if (child) {
         return py::object(child);
+    }
 
     Variable var = self->server_state().findVariable(attr);
-    if (!var.empty())
+    if (!var.empty()) {
         return py::object(var);
+    }
 
     std::stringstream ss;
     ss << "ExportDefs::defs_getattr : function of name '" << attr << "' does not exist *OR* suite or defs variable";
@@ -265,14 +278,17 @@ py::object defs_raw_constructor(py::tuple args, py::dict kw) {
     py::list the_list;
     std::string name;
     for (int i = 1; i < len(args); ++i) {
-        if (py::extract<std::string>(args[i]).check())
+        if (py::extract<std::string>(args[i]).check()) {
             name = py::extract<std::string>(args[i]);
-        else
+        }
+        else {
             the_list.append(args[i]);
+        }
     }
-    if (!name.empty() && len(the_list) > 0)
+    if (!name.empty() && len(the_list) > 0) {
         throw std::runtime_error("defs_raw_constructor: Can't mix string with other arguments. String argument "
                                  "specifies a path(loads a definition from disk)");
+    }
     return args[0].attr("__init__")(the_list, kw); // calls -> init(list attr, dict kw)
 }
 

@@ -33,35 +33,42 @@ bool TextPagerSearchHighlighter::isWordCharacter(const QChar& ch) const {
 }
 
 void TextPagerSearchHighlighter::highlightBlock(const QString& string) {
-    if (string.simplified().isEmpty())
+    if (string.simplified().isEmpty()) {
         return;
+    }
 
     if (mode_ == RegexpMode) {
-        if (rx_.isEmpty())
+        if (rx_.isEmpty()) {
             return;
+        }
         int index = 0;
         while ((index = rx_.indexIn(string, index)) != -1) {
 
-            if (rx_.matchedLength() == 0)
+            if (rx_.matchedLength() == 0) {
                 return;
+            }
             setFormat(index, rx_.matchedLength(), format_);
             index += rx_.matchedLength();
         }
     }
     else if (mode_ == TextMode) {
-        if (text_.isEmpty())
+        if (text_.isEmpty()) {
             return;
+        }
         int index = 0;
         while ((index = string.indexOf(text_, index, caseSensitive_ ? Qt::CaseSensitive : Qt::CaseInsensitive)) != -1) {
             bool found = true;
             if (wholeWords_) {
-                if (index > 0)
+                if (index > 0) {
                     found = !isWordCharacter(string.at(index - 1));
-                if (found && index + text_.size() < string.size())
+                }
+                if (found && index + text_.size() < string.size()) {
                     found = !isWordCharacter(string.at(index + text_.size()));
+                }
             }
-            if (found)
+            if (found) {
                 setFormat(index, text_.size(), format_);
+            }
 
             index += string.size();
         }
@@ -93,8 +100,9 @@ void TextPagerSearchHighlighter::reset(QString txt, TextPagerDocument::FindMode 
         changed     = true;
     }
 
-    if (changed && apply)
+    if (changed && apply) {
         rehighlight();
+    }
 }
 
 void TextPagerSearchHighlighter::reset(QRegExp rx, TextPagerDocument::FindMode /*mode*/, bool apply) {
@@ -111,8 +119,9 @@ void TextPagerSearchHighlighter::reset(QRegExp rx, TextPagerDocument::FindMode /
         changed = true;
     }
 
-    if (changed && apply)
+    if (changed && apply) {
         rehighlight();
+    }
 }
 
 void TextPagerSearchHighlighter::clear() {

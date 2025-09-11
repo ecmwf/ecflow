@@ -1,9 +1,8 @@
 .. _how_to_list_variable_used_by_a_task:
 
 How to list variable used by a task?
-/////////////////////////////////////////////////////////////////
+************************************
  
-
 **Example 1**: I need to list all variable accessible by all task's called 'fred' under a given path: /suite/main
 
   .. code-block:: shell

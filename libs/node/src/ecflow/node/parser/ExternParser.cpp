@@ -18,8 +18,9 @@ using namespace std;
 
 bool ExternParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // cout << "line = " << line << "\n";
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("ExternParser::doParse Invalid extern " + line);
+    }
 
     // Guard against
     // extern   # empty extern with a comment

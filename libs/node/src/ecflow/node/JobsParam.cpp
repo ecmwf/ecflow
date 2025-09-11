@@ -11,8 +11,9 @@
 #include "ecflow/node/JobsParam.hpp"
 
 bool JobsParam::check_for_job_generation_timeout() {
-    if (timed_out_of_job_generation_)
+    if (timed_out_of_job_generation_) {
         return true;
+    }
     return check_for_job_generation_timeout(boost::posix_time::microsec_clock::universal_time());
 }
 

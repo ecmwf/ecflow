@@ -18,7 +18,7 @@
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/AssertTimer.hpp"
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -78,8 +78,9 @@ static bool wait_for_state(std::vector<std::pair<std::string, NState::State>>& p
                 break;
             }
         }
-        if (all_states_ok)
+        if (all_states_ok) {
             return true;
+        }
 
         // make sure test does not take too long.
         if (assertTimer.duration() >= assertTimer.timeConstraint()) {

@@ -26,8 +26,9 @@ RichTextEdit::RichTextEdit(QWidget* parent) : QTextBrowser(parent) {
 }
 
 RichTextEdit::~RichTextEdit() {
-    if (fontProp_)
+    if (fontProp_) {
         fontProp_->removeObserver(this);
+    }
 }
 
 //---------------------------------------------
@@ -49,20 +50,23 @@ void RichTextEdit::slotZoomOut() {
     int oriSize = font().pointSize();
     zoomOut();
 
-    if (font().pointSize() != oriSize)
+    if (font().pointSize() != oriSize) {
         fontSizeChangedByZoom();
+    }
 }
 
 void RichTextEdit::fontSizeChangedByZoom() {
-    if (fontProp_)
+    if (fontProp_) {
         fontProp_->setValue(font());
+    }
 }
 
 void RichTextEdit::updateFont() {
     if (fontProp_) {
         auto f = fontProp_->value().value<QFont>();
-        if (font() != f)
+        if (font() != f) {
             setFont(f);
+        }
     }
 }
 

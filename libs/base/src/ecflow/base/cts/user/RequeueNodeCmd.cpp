@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -28,13 +30,24 @@ namespace po = boost::program_options;
 
 bool RequeueNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<RequeueNodeCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (paths_ != the_rhs->paths())
+    }
+    if (paths_ != the_rhs->paths()) {
         return false;
-    if (option_ != the_rhs->option())
+    }
+    if (option_ != the_rhs->option()) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t RequeueNodeCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t RequeueNodeCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 static std::string to_string(RequeueNodeCmd::Option option) {
@@ -109,8 +122,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
 
             // Call handleStateChange on parent, to avoid requeue same node again.
             Node* parent = theNodeToRequeue->parent();
-            if (parent)
+            if (parent) {
                 parent->handleStateChange(); // ECFLOW-359
+            }
         }
         else if (option_ == RequeueNodeCmd::NO_OPTION) {
             // ONLY Re-queue if there no tasks in submitted or active states
@@ -137,8 +151,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
 
             // Call handleStateChange on parent, to avoid requeue same node again.
             Node* parent = theNodeToRequeue->parent();
-            if (parent)
+            if (parent) {
                 parent->handleStateChange(); // ECFLOW-359
+            }
         }
         else if (option_ == RequeueNodeCmd::FORCE) {
 
@@ -154,8 +169,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
 
             // Call handleStateChange on parent, to avoid requeue same node again.
             Node* parent = theNodeToRequeue->parent();
-            if (parent)
+            if (parent) {
                 parent->handleStateChange(); // ECFLOW-359
+            }
         }
     }
 
@@ -168,9 +184,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
     return doJobSubmission(as);
 }
 
-bool RequeueNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, paths_);
-}
+// bool RequeueNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, paths_);
+// }
 
 const char* RequeueNodeCmd::arg() {
     return CtsApi::requeueArg();
@@ -197,8 +213,9 @@ void RequeueNodeCmd::addOption(boost::program_options::options_description& desc
 void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[RequeueNodeCmd::arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(RequeueNodeCmd::arg(), args);
+    }
 
     if (args.size() < 1) {
         std::stringstream ss;
@@ -224,13 +241,15 @@ void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map&
     for (size_t i = 0; i < vec_size; i++) {
         if (options[i] == "abort") {
             option = RequeueNodeCmd::ABORT;
-            if (ac->debug())
+            if (ac->debug()) {
                 cout << "  ABORT selected\n";
+            }
         }
         else if (options[i] == "force") {
             option = RequeueNodeCmd::FORCE;
-            if (ac->debug())
+            if (ac->debug()) {
                 cout << "  FORCE selected\n";
+            }
         }
         else {
             std::stringstream ss;

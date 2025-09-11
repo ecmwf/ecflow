@@ -70,8 +70,9 @@ void ExpandStateNode::setExpandedAll() {
     collapsedAll_ = 0;
     // Set the expand state on all the descendants
     std::size_t num = children_.size();
-    for (std::size_t i = 0; i < num; i++)
+    for (std::size_t i = 0; i < num; i++) {
         children_[i]->setExpandedRecursively(1);
+    }
 }
 
 //"Collapse all children" was called on the node
@@ -80,8 +81,9 @@ void ExpandStateNode::setCollapsedAll() {
     collapsedAll_ = 1;
     // Set the expand state on all the descendants
     std::size_t num = children_.size();
-    for (std::size_t i = 0; i < num; i++)
+    for (std::size_t i = 0; i < num; i++) {
         children_[i]->setExpandedRecursively(0);
+    }
 }
 
 void ExpandStateNode::setExpandedRecursively(unsigned int expanded) {
@@ -96,8 +98,9 @@ void ExpandStateNode::setExpandedRecursively(unsigned int expanded) {
 
 // Find a descendant
 ExpandStateNode* ExpandStateNode::find(const std::vector<std::string>& pathVec) {
-    if (pathVec.size() == 0)
+    if (pathVec.size() == 0) {
         return this;
+    }
 
     if (pathVec.size() == 1) {
         return findChild(pathVec.at(0));
@@ -114,8 +117,9 @@ ExpandStateNode* ExpandStateNode::findChild(const std::string& theName) const {
     std::size_t num = children_.size();
     for (std::size_t i = 0; i < num; i++) {
         // A child can be NULL temporarily
-        if (children_[i] && children_[i]->name_ == theName)
+        if (children_[i] && children_[i]->name_ == theName) {
             return children_[i];
+        }
     }
     return nullptr;
 }
@@ -139,8 +143,9 @@ void ExpandStateNode::print(std::string& indent, bool recursive) const {
     if (recursive) {
         indent += "  ";
         std::size_t num = children_.size();
-        for (std::size_t i = 0; i < num; i++)
+        for (std::size_t i = 0; i < num; i++) {
             children_[i]->print(indent, true);
+        }
 
         indent.resize(indent.size() - 2);
     }
@@ -180,15 +185,17 @@ bool ExpandStateNode::adjustContents(const VNode* node) {
                 chVec.push_back(chExpand);
                 children_[chPos] = nullptr;
             }
-            else
+            else {
                 chVec.push_back(nullptr);
+            }
         }
 
         // Delete the children vector of the expand node. It eaither contains NULLs or
         // children objects which do not exist anymore!
         for (std::size_t i = 0; i < numExpand; i++) {
-            if (children_[i] != nullptr)
+            if (children_[i] != nullptr) {
                 delete children_[i];
+            }
         }
 
         children_.clear();

@@ -20,8 +20,9 @@ const char* TaskApi::initArg() {
 }
 
 std::string TaskApi::abort(const std::string& reason) {
-    if (reason.empty())
+    if (reason.empty()) {
         return "--abort";
+    }
     std::string ret = "--abort=";
     ret += reason;
     return ret;
@@ -66,10 +67,12 @@ std::vector<std::string> TaskApi::queue(const std::string& queueName,
     ret += queueName;
     retVec.push_back(ret);
     retVec.push_back(action);
-    if (!step.empty())
+    if (!step.empty()) {
         retVec.push_back(step);
-    if (!path_to_node_with_queue.empty())
+    }
+    if (!path_to_node_with_queue.empty()) {
         retVec.push_back(path_to_node_with_queue);
+    }
     return retVec;
 }
 const char* TaskApi::queue_arg() {

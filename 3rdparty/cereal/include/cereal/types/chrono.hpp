@@ -34,11 +34,13 @@
 
 namespace cereal
 {
+  using basic_tick = std::chrono::nanoseconds;
+
   //! Saving std::chrono::duration
   template <class Archive, class R, class P> inline
   void CEREAL_SAVE_FUNCTION_NAME( Archive & ar, std::chrono::duration<R, P> const & dur )
   {
-    ar( CEREAL_NVP_("count", dur.count()) );
+    ar( CEREAL_NVP_("count", std::chrono::duration_cast<basic_tick>(dur).count() ) );
   }
 
   //! Loading std::chrono::duration
@@ -48,7 +50,7 @@ namespace cereal
     R count;
     ar( CEREAL_NVP_("count", count) );
 
-    dur = std::chrono::duration<R, P>{count};
+    dur = std::chrono::duration_cast<std::chrono::duration<R, P>>(basic_tick{count});
   }
 
   //! Saving std::chrono::time_point

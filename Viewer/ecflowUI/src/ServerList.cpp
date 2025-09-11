@@ -274,8 +274,9 @@ void ServerListSystemFileManager::loadFile(const std::string& fPath,
         std::string line;
         while (getline(in, line)) {
             std::string buf = boost::trim_left_copy(line);
-            if (buf.size() > 0 && buf[0] == '#')
+            if (buf.size() > 0 && buf[0] == '#') {
                 continue;
+            }
 
             if (buf.size() > 0 && buf[0] == '/') {
                 std::string p = boost::trim_right_copy(buf);
@@ -332,8 +333,9 @@ ServerList::~ServerList() {
 
 // Singleton instance method
 ServerList* ServerList::instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new ServerList();
+    }
     return instance_;
 }
 
@@ -347,16 +349,18 @@ ServerItem* ServerList::itemAt(int index) {
 
 ServerItem* ServerList::find(const std::string& name) {
     for (auto it = items_.begin(); it != items_.end(); ++it) {
-        if ((*it)->name() == name)
+        if ((*it)->name() == name) {
             return *it;
+        }
     }
     return nullptr;
 }
 
 ServerItem* ServerList::find(const std::string& name, const std::string& host, const std::string& port) {
     for (auto it = items_.begin(); it != items_.end(); ++it) {
-        if ((*it)->name() == name && (*it)->host() == host && (*it)->port() == port)
+        if ((*it)->name() == name && (*it)->host() == host && (*it)->port() == port) {
             return *it;
+        }
     }
     return nullptr;
 }
@@ -378,8 +382,9 @@ ServerItem* ServerList::add(const std::string& name,
 
     items_.push_back(item);
 
-    if (saveIt)
+    if (saveIt) {
         save();
+    }
 
     broadcastChanged();
 
@@ -407,8 +412,9 @@ ServerItem* ServerList::reset(ServerItem* item,
     auto it = std::find(items_.begin(), items_.end(), item);
     if (it != items_.end()) {
         // Check if there is an item with the same name. Names have to be unique!
-        if (item->name() != name && find(name))
+        if (item->name() != name && find(name)) {
             return nullptr;
+        }
 
         if (host != item->host() || port != item->port()) {
             items_.erase(it);
@@ -433,8 +439,9 @@ void ServerList::setFavourite(ServerItem* item, bool b) {
     auto it = std::find(items_.begin(), items_.end(), item);
     if (it != items_.end()) {
         item->setFavourite(b);
-        for (auto it = observers_.begin(); it != observers_.end(); ++it)
+        for (auto it = observers_.begin(); it != observers_.end(); ++it) {
             (*it)->notifyServerListFavouriteChanged(item);
+        }
     }
 }
 
@@ -523,8 +530,9 @@ bool ServerList::load() {
     UiLog().dbg() << UI_FN_INFO << "-->";
 
     std::ifstream in(localFile_.c_str());
-    if (!in.good())
+    if (!in.good()) {
         return false;
+    }
 
     std::string errStr;
     std::string line;
@@ -541,12 +549,14 @@ bool ServerList::load() {
         ecf::algorithm::split(sv, line, ",");
 
         bool favourite = false;
-        if (sv.size() >= 4)
+        if (sv.size() >= 4) {
             favourite = (sv[3] == "1") ? true : false;
+        }
 
         bool sys = false;
-        if (sv.size() >= 5)
+        if (sv.size() >= 5) {
             sys = (sv[4] == "1") ? true : false;
+        }
 
         auto protocol = ecf::Protocol::Plain;
         if (sv.size() >= 6) {
@@ -554,8 +564,9 @@ bool ServerList::load() {
         }
 
         std::string user;
-        if (sv.size() >= 7)
+        if (sv.size() >= 7) {
             user = sv[6];
+        }
 
         if (sv.size() >= 3) {
             std::string name = sv[0], host = sv[1], port = sv[2];
@@ -588,8 +599,9 @@ bool ServerList::load() {
         exit(1);
     }
 
-    if (count() == 0)
+    if (count() == 0) {
         return false;
+    }
 
     return true;
 }
@@ -597,8 +609,9 @@ bool ServerList::load() {
 void ServerList::save() {
     std::ofstream out;
     out.open(localFile_.c_str());
-    if (!out.good())
+    if (!out.good()) {
         return;
+    }
 
     out << "# Name, Host, Port, Favourite, System, Protocol, User" << std::endl;
     out << "# " << std::endl;
@@ -728,11 +741,13 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
         }
     }
 
-    if (changed)
+    if (changed) {
         save();
+    }
 
-    if (needBrodcast)
+    if (needBrodcast) {
         broadcastChanged();
+    }
 }
 
 //===========================================================
@@ -754,6 +769,7 @@ void ServerList::removeObserver(ServerListObserver* o) {
 }
 
 void ServerList::broadcastChanged() {
-    for (auto it = observers_.begin(); it != observers_.end(); ++it)
+    for (auto it = observers_.begin(); it != observers_.end(); ++it) {
         (*it)->notifyServerListChanged();
+    }
 }

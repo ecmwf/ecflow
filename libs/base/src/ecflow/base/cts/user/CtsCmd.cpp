@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/Gnuplot.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
@@ -165,11 +167,21 @@ void CtsCmd::print_only(std::string& os) const {
 
 bool CtsCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<CtsCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (api_ != the_rhs->api())
+    }
+    if (api_ != the_rhs->api()) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t CtsCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t CtsCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 bool CtsCmd::isWrite() const {
@@ -307,8 +319,9 @@ bool CtsCmd::cmd_updates_defs() const {
 }
 
 int CtsCmd::timeout() const {
-    if (api_ == CtsCmd::PING)
+    if (api_ == CtsCmd::PING) {
         return 10;
+    }
     return ClientToServerCmd::timeout();
 }
 
@@ -437,8 +450,9 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
             // The default does *not* allow job spawning
             Jobs jobs(as->defs());
             JobsParam jobsParam; // create jobs =  false, spawn_jobs = false
-            if (!jobs.generate(jobsParam))
+            if (!jobs.generate(jobsParam)) {
                 throw std::runtime_error(jobsParam.getErrorMsg());
+            }
             break;
         }
         case CtsCmd::PING:
@@ -729,16 +743,19 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
 }
 
 bool CtsCmd::handleRequestIsTestable() const {
-    if (api_ == CtsCmd::TERMINATE_SERVER)
+    if (api_ == CtsCmd::TERMINATE_SERVER) {
         return false;
-    if (api_ == CtsCmd::RESTORE_DEFS_FROM_CHECKPT)
+    }
+    if (api_ == CtsCmd::RESTORE_DEFS_FROM_CHECKPT) {
         return false;
+    }
     return true;
 }
 
 void CtsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    if (ac->debug())
+    if (ac->debug()) {
         cout << "  CtsCmd::create api = '" << api_ << "'.\n";
+    }
 
     assert(api_ != CtsCmd::NO_CMD);
 
@@ -746,28 +763,34 @@ void CtsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
 
         std::string do_prompt = vm[theArg()].as<std::string>();
         if (do_prompt.empty()) {
-            if (api_ == CtsCmd::HALT_SERVER)
+            if (api_ == CtsCmd::HALT_SERVER) {
                 prompt_for_confirmation("Are you sure you want to halt the server ? ");
-            else if (api_ == CtsCmd::SHUTDOWN_SERVER)
+            }
+            else if (api_ == CtsCmd::SHUTDOWN_SERVER) {
                 prompt_for_confirmation("Are you sure you want to shut down the server ? ");
-            else
+            }
+            else {
                 prompt_for_confirmation("Are you sure you want to terminate the server ? ");
+            }
         }
-        else if (do_prompt != "yes")
+        else if (do_prompt != "yes") {
             throw std::runtime_error(
                 "Halt, shutdown and terminate expected 'yes' as the only argument to bypass the confirmation prompt");
+        }
     }
     else if (api_ == CtsCmd::SERVER_LOAD) {
 
         std::string log_file = vm[theArg()].as<std::string>();
-        if (ac->debug())
+        if (ac->debug()) {
             std::cout << "  CtsCmd::create CtsCmd::SERVER_LOAD " << log_file << "\n";
+        }
 
         if (!log_file.empty()) {
 
             // testing client interface
-            if (ac->under_test())
+            if (ac->under_test()) {
                 return;
+            }
 
             // No need to call server. Parse the log file to create gnu_plot file.
             Gnuplot gnuplot(log_file, ac->host(), ac->port());

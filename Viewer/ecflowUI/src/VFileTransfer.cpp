@@ -154,8 +154,9 @@ void VFileTransferCore::slotProcFinished(int exitCode, QProcess::ExitStatus exit
     UI_FN_DBG
 #endif
 
-    if (!proc_)
+    if (!proc_) {
         return;
+    }
 
     transferDuration_ = stopper_.elapsed();
 
@@ -217,8 +218,9 @@ QString VFileTransferCore::stdErr() {
         QString res;
         QString txt(proc_->readAllStandardError());
         Q_FOREACH (QString s, txt.split("\n")) {
-            if (!s.startsWith("+ "))
+            if (!s.startsWith("+ ")) {
                 res += s + "\n";
+            }
         }
         return res;
     }

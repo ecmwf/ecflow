@@ -12,6 +12,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Version.hpp"
@@ -30,9 +32,18 @@ void ServerVersionCmd::print_only(std::string& os) const {
 
 bool ServerVersionCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<ServerVersionCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t ServerVersionCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t ServerVersionCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 const char* ServerVersionCmd::theArg() const {
@@ -57,12 +68,14 @@ void ServerVersionCmd::addOption(boost::program_options::options_description& de
 }
 
 void ServerVersionCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
-    if (ace->debug())
+    if (ace->debug()) {
         cout << "  ServerVersionCmd::create\n";
+    }
 
     // testing client interface
-    if (ace->under_test())
+    if (ace->under_test()) {
         return;
+    }
 
     cmd = std::make_shared<ServerVersionCmd>();
 }

@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Filesystem.hpp"
@@ -93,13 +95,24 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
 
 bool LoadDefsCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<LoadDefsCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (!UserCmd::equals(rhs))
+    }
+    if (!UserCmd::equals(rhs)) {
         return false;
-    if (defs_ != the_rhs->defs_as_string())
+    }
+    if (defs_ != the_rhs->defs_as_string()) {
         return false;
+    }
     return true;
+}
+
+ecf::authentication_t LoadDefsCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t LoadDefsCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
@@ -175,8 +188,9 @@ void LoadDefsCmd::addOption(boost::program_options::options_description& desc) c
 
 void LoadDefsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     vector<string> args = vm[arg()].as<vector<string>>();
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         dumpVecArgs(LoadDefsCmd::arg(), args);
+    }
 
     bool check_only = false;
     bool force      = false;
@@ -184,19 +198,25 @@ void LoadDefsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm
     bool stats      = false;
     std::string defs_filename;
     for (const auto& arg : args) {
-        if (arg == "force")
+        if (arg == "force") {
             force = true;
-        else if (arg == "check_only")
+        }
+        else if (arg == "check_only") {
             check_only = true;
-        else if (arg == "print")
+        }
+        else if (arg == "print") {
             print = true;
-        else if (arg == "stats")
+        }
+        else if (arg == "stats") {
             stats = true;
-        else
+        }
+        else {
             defs_filename = arg;
+        }
     }
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         cout << "  LoadDefsCmd::create: Defs file '" << defs_filename << "'.\n";
+    }
 
     cmd = LoadDefsCmd::create(defs_filename, force, check_only, print, stats, clientEnv);
 }
@@ -215,8 +235,9 @@ Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename,
         std::make_shared<LoadDefsCmd>(defs_filename, force, check_only, print, stats, clientEnv->env());
 
     // Don't send to server if checking, i.e cmd not set
-    if (check_only || stats || print)
+    if (check_only || stats || print) {
         return Cmd_ptr();
+    }
 
     return load_cmd;
 }

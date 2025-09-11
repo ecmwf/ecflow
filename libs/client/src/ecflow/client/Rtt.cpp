@@ -14,13 +14,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/date_time/posix_time/posix_time.hpp> //include all types plus i/o
-
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/File.hpp"
-
-using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 namespace ecf {
 
@@ -37,7 +32,7 @@ void Rtt::destroy() {
     instance_ = nullptr;
 }
 
-Rtt::Rtt(const std::string& filename) : file_(filename.c_str(), ios::out | ios::app) {
+Rtt::Rtt(const std::string& filename) : file_(filename.c_str(), std::ios::out | std::ios::app) {
     if (!file_.is_open()) {
         std::cerr << "Rtt::Rtt Could not open file '" << filename << "'\n";
         throw std::runtime_error("Rtt::Rtt: Could not open file " + filename);
@@ -47,7 +42,7 @@ Rtt::Rtt(const std::string& filename) : file_(filename.c_str(), ios::out | ios::
 Rtt::~Rtt() = default;
 
 void Rtt::log(const std::string& message) {
-    file_ << message << endl;
+    file_ << message << std::endl;
 }
 
 void rtt(const std::string& message) {
@@ -60,7 +55,7 @@ std::string Rtt::analysis(const std::string& filename) {
     std::vector<std::string> lines;
     if (!File::splitFileIntoLines(filename, lines)) {
         std::cout << "Rtt::analysis: could not open file " << filename << " (" << strerror(errno) << ")\n";
-        return string();
+        return std::string();
     }
 
     // Typical format
@@ -69,39 +64,43 @@ std::string Rtt::analysis(const std::string& filename) {
     // localhost:3141 --zombie_get :ma0 rtt:00:00:00.003982
 
     /// Extract the command name and time, and add to map, to compute averages, min,max & standard deviation
-    map<string, vector<time_duration>> cmd_time_map;
+    std::map<std::string, std::vector<boost::posix_time::time_duration>> cmd_time_map;
     size_t max_cmd_size = 0;
     for (auto& line : lines) {
 
-        if (line.empty())
+        if (line.empty()) {
             continue;
+        }
         //      cout << i << ":" << lines[i] << "   ";
-        string::size_type dash    = line.find("--");
-        string::size_type rtt_pos = line.find(Rtt::tag());
-        if (dash == std::string::npos)
+        std::string::size_type dash    = line.find("--");
+        std::string::size_type rtt_pos = line.find(Rtt::tag());
+        if (dash == std::string::npos) {
             continue;
-        if (rtt_pos == std::string::npos)
+        }
+        if (rtt_pos == std::string::npos) {
             continue;
+        }
 
-        int cmd_length           = 0;
-        string::size_type equals = line.find("=", dash);
-        string::size_type space  = line.find(" ", dash);
-        if (equals != std::string::npos)
+        int cmd_length                = 0;
+        std::string::size_type equals = line.find("=", dash);
+        std::string::size_type space  = line.find(" ", dash);
+        if (equals != std::string::npos) {
             cmd_length = equals;
-        else if (space != std::string::npos)
+        }
+        else if (space != std::string::npos) {
             cmd_length = space;
-        string cmd   = line.substr(0, cmd_length);
-        max_cmd_size = std::max(max_cmd_size, cmd.size());
+        }
+        std::string cmd = line.substr(0, cmd_length);
+        max_cmd_size    = std::max(max_cmd_size, cmd.size());
 
-        string time = line.substr(rtt_pos + 4);
-        time_duration td(duration_from_string(time));
-        //      cout << "  cmd:(" << cmd << ") time(" << to_simple_string(td) << ")\n";
+        std::string time = line.substr(rtt_pos + 4);
+        auto td          = boost::posix_time::duration_from_string(time);
 
         auto cmd_iterator = cmd_time_map.find(cmd);
         if (cmd_iterator == cmd_time_map.end()) {
-            vector<time_duration> vec;
+            std::vector<boost::posix_time::time_duration> vec;
             vec.push_back(td);
-            std::pair<string, vector<time_duration>> p = std::make_pair(cmd, vec);
+            std::pair<std::string, std::vector<boost::posix_time::time_duration>> p = std::make_pair(cmd, vec);
             cmd_time_map.insert(p);
         }
         else {
@@ -109,18 +108,18 @@ std::string Rtt::analysis(const std::string& filename) {
         }
     }
 
-    time_duration total(0, 0, 0, 0);
+    auto total         = boost::posix_time::time_duration(0, 0, 0, 0);
     int total_requests = 0;
 
     // Create title
     std::stringstream ss;
-    ss << left << setw(max_cmd_size + 1) << "Command" << right << setw(5) << "count" << setw(9) << "min" << setw(9)
-       << "average" << setw(9) << "max" << setw(9) << right << "std\n";
-    for (std::pair<string, vector<time_duration>> p : cmd_time_map) {
+    ss << std::left << std::setw(max_cmd_size + 1) << "Command" << std::right << std::setw(5) << "count" << std::setw(9)
+       << "min" << std::setw(9) << "average" << std::setw(9) << "max" << std::setw(9) << std::right << "std\n";
+    for (std::pair<std::string, std::vector<boost::posix_time::time_duration>> p : cmd_time_map) {
 
-        time_duration average_td(0, 0, 0, 0);
-        time_duration min(24, 59, 59, 0);
-        time_duration max(0, 0, 0, 0);
+        auto average_td = boost::posix_time::time_duration(0, 0, 0, 0);
+        auto min        = boost::posix_time::time_duration(24, 59, 59, 0);
+        auto max        = boost::posix_time::time_duration(0, 0, 0, 0);
         for (const auto& i : p.second) {
             average_td += i;
             total_requests++;
@@ -129,12 +128,12 @@ std::string Rtt::analysis(const std::string& filename) {
             max = std::max(max, i);
         }
 
-        ss << left << setw(max_cmd_size + 1) << p.first << setw(5) << right << p.second.size();
+        ss << std::left << std::setw(max_cmd_size + 1) << p.first << std::setw(5) << std::right << p.second.size();
         if (p.second.empty()) {
-            ss << setw(9) << right << p.second[0].total_microseconds() << " ? ";
+            ss << std::setw(9) << std::right << p.second[0].total_microseconds() << " ? ";
         }
         else if (p.second.size() == 1) {
-            ss << setw(9) << right << p.second[0].total_microseconds();
+            ss << std::setw(9) << std::right << p.second[0].total_microseconds();
         }
         else {
             int average = average_td.total_microseconds() / p.second.size();
@@ -156,10 +155,10 @@ std::string Rtt::analysis(const std::string& filename) {
             auto stdd  = (int)sqrt(avg);
             //          if (debug) cout << "avg: " << avg << " stdd: " << stdd << "\n";
 
-            ss << setw(9) << right << min.total_microseconds();
-            ss << setw(9) << right << average;
-            ss << setw(9) << right << max.total_microseconds();
-            ss << setw(9) << right << stdd;
+            ss << std::setw(9) << std::right << min.total_microseconds();
+            ss << std::setw(9) << std::right << average;
+            ss << std::setw(9) << std::right << max.total_microseconds();
+            ss << std::setw(9) << std::right << stdd;
         }
         ss << "\n";
     }

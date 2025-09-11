@@ -25,8 +25,9 @@ VParam::VParam(const std::string& name)
 }
 
 VParam::~VParam() {
-    if (prop_)
+    if (prop_) {
         prop_->removeObserver(this);
+    }
 }
 
 void VParam::setProperty(VProperty* prop) {
@@ -56,12 +57,15 @@ void VParam::setProperty(VProperty* prop) {
 }
 
 void VParam::notifyChange(VProperty* prop) {
-    if (prop->name() == colourPropName_)
+    if (prop->name() == colourPropName_) {
         colour_ = prop->value().value<QColor>();
+    }
 
-    else if (prop->name() == fontColourPropName_)
+    else if (prop->name() == fontColourPropName_) {
         fontColour_ = prop->value().value<QColor>();
+    }
 
-    else if (prop->name() == typeColourPropName_)
+    else if (prop->name() == typeColourPropName_) {
         typeColour_ = prop->value().value<QColor>();
+    }
 }

@@ -50,6 +50,8 @@ public:
     /// replace file extension with a new one
     static void replaceExt(std::string& file, const std::string& newExt);
 
+    static std::vector<std::string> splitStreamIntoLines(std::istream& content, bool ignoreEmptyLine = false);
+
     /// returns the input files, split into a vector of string, where each string
     /// represent a line in the file. returns true if file open ok , false otherwise
     /// The additional parameter ignoreEmptyLine  can be used to ignore empty lines

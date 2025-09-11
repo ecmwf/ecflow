@@ -21,8 +21,9 @@ using namespace std;
 using namespace ecf;
 
 bool EventParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("EventParser::doParse: Invalid event : " + line);
+    }
 
     // Events added to suite/family cannot be signaled by child command
     // However alter/force should allow events to set/cleared on Family/suite
@@ -50,27 +51,31 @@ bool EventParser::doParse(const std::string& line, std::vector<std::string>& lin
             if (lineTokens.size() >= 3 && lineTokens[2][0] != '#') {
                 name = lineTokens[2];
                 // event 1 eventName set
-                if (lineTokens.size() >= 4 && lineTokens[3] == "set")
+                if (lineTokens.size() >= 4 && lineTokens[3] == "set") {
                     initial_value = true;
+                }
             }
             else {
                 // event 0 set
-                if (lineTokens.size() >= 3 && lineTokens[2] == "set")
+                if (lineTokens.size() >= 3 && lineTokens[2] == "set") {
                     initial_value = true;
+                }
             }
         }
         catch (const ecf::bad_conversion&) {
             name = lineTokens[1];
-            if (lineTokens.size() >= 3 && lineTokens[2] == "set")
+            if (lineTokens.size() >= 3 && lineTokens[2] == "set") {
                 initial_value = true;
+            }
         }
     }
     else {
         // event name
         // event name set
         name = lineTokens[1];
-        if (lineTokens.size() >= 3 && lineTokens[2] == "set")
+        if (lineTokens.size() >= 3 && lineTokens[2] == "set") {
             initial_value = true;
+        }
     }
 
     // structure

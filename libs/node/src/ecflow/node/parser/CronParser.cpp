@@ -17,7 +17,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 // #define DEBUG_CRON 1
 
@@ -28,8 +27,9 @@ bool CronParser::doParse(const std::string& line, std::vector<std::string>& line
     // cron -d 10,11,12 12:00     # run 10th, 11th and 12th of each month at noon
     // cron -m 1,2,3 12:00        # run on Jan,Feb and March every day at noon.
     // cron -w 0 -m 5,6,7,8 10:00 20:00 01:00 # run every sunday, between May-Aug, every hour between 10am and 8pm
-    if (lineTokens.size() < 2)
+    if (lineTokens.size() < 2) {
         throw std::runtime_error("CronParser::doParse: Invalid cron: " + line);
+    }
 
 #ifdef DEBUG_CRON
     cerr << "CronParser::doParse " << line << "\n";

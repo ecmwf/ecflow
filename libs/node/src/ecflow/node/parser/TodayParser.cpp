@@ -21,8 +21,9 @@ using namespace std;
 
 bool TodayParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     size_t line_tokens_size = lineTokens.size();
-    if (line_tokens_size < 2)
+    if (line_tokens_size < 2) {
         throw std::runtime_error("TodayParser::doParse: Invalid today :" + line);
+    }
 
     bool parse_state = false;
     bool isFree      = false;
@@ -30,17 +31,20 @@ bool TodayParser::doParse(const std::string& line, std::vector<std::string>& lin
         parse_state      = true;
         bool comment_fnd = false;
         for (size_t i = 2; i < line_tokens_size; i++) {
-            if (comment_fnd && lineTokens[i] == "free")
+            if (comment_fnd && lineTokens[i] == "free") {
                 isFree = true;
-            if (lineTokens[i] == "#")
+            }
+            if (lineTokens[i] == "#") {
                 comment_fnd = true;
+            }
         }
     }
 
     size_t index = 1;
     TodayAttr attr(TimeSeries::create(index, lineTokens, parse_state));
-    if (isFree)
+    if (isFree) {
         attr.setFree();
+    }
 
     nodeStack_top()->addToday(attr);
     return true;

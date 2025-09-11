@@ -15,7 +15,6 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
-using namespace boost;
 
 class Base {
 public:

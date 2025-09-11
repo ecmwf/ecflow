@@ -34,10 +34,11 @@ static void findParentVariableValue(task_ptr t, const std::string& name, const s
     BOOST_CHECK_MESSAGE(t->findParentVariableValue(name, value),
                         "Task " << t->debugNodePath() << " could not find variable of name " << name);
     //   if (expected.empty()) std::cout << name  << " = " << value << "\n";
-    if (!expected.empty())
+    if (!expected.empty()) {
         BOOST_CHECK_MESSAGE(value == expected,
                             "From task " << t->debugNodePath() << " for variable " << name << " expected value "
                                          << expected << " but found " << value);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_generated_variables) {

@@ -10,8 +10,6 @@
 
 #include "ecflow/simulator/Simulator.hpp"
 
-#include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib
-
 #include "ecflow/attribute/QueueAttr.hpp"
 #include "ecflow/core/CalendarUpdateParams.hpp"
 #include "ecflow/core/Log.hpp"
@@ -25,9 +23,6 @@
 #include "ecflow/simulator/Analyser.hpp"
 #include "ecflow/simulator/SimulatorVisitor.hpp"
 
-using namespace boost::gregorian;
-using namespace boost::posix_time;
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG_LONG_RUNNING_SUITES 1
@@ -51,8 +46,9 @@ bool Simulator::run(const std::string& theDefsFile, std::string& errorMsg) const
 
     Defs theDefs;
     std::string warningMsg;
-    if (!theDefs.restore(theDefsFile, errorMsg, warningMsg))
+    if (!theDefs.restore(theDefsFile, errorMsg, warningMsg)) {
         return false;
+    }
     // cout << theDefs << "\n";
     return run(theDefs, theDefsFile, errorMsg, false /* don't do check, allready done */);
 }
@@ -110,8 +106,8 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     }
 
     // Let visitor determine calendar increment. i.e if no time dependencies we will use 1 hour increment
-    time_duration calendarIncrement                        = simiVisitor.calendarIncrement();
-    boost::posix_time::time_duration max_simulation_period = simiVisitor.maxSimulationPeriod();
+    auto calendarIncrement     = simiVisitor.calendarIncrement();
+    auto max_simulation_period = simiVisitor.maxSimulationPeriod();
 
     std::stringstream ss;
     ss << " time dependency(" << simiVisitor.hasTimeDependencies() << ") max_simulation_period("
@@ -127,8 +123,9 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     // Do we have autocancel, must be done before.
     int hasAutoCancel = 0;
     for (suite_ptr s : theDefs.suiteVec()) {
-        if (s->hasAutoCancel())
+        if (s->hasAutoCancel()) {
             hasAutoCancel++;
+        }
     }
 
     // ==================================================================================
@@ -136,7 +133,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     // Assume: User has taken into account autocancel end time.
     // ==================================================================================
     CalendarUpdateParams calUpdateParams(calendarIncrement);
-    boost::posix_time::time_duration duration(0, 0, 0, 0);
+    auto duration = boost::posix_time::time_duration(0, 0, 0, 0);
     while (duration <= max_simulation_period) {
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
@@ -145,19 +142,20 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
                  << " +++++++++++++++++++++++++++++++++++ " << endl;
 
             // use following to snapshot definition state at a given point in time
-            //         {
-            //        	 boost::gregorian::date debug_date(2019,8,5);
-            //        	 ptime debug_time(debug_date, hours(10) );
-            //        	 if (my_suite->calendar().suiteTime() == debug_time) {
-            //        		 cout << theDefs.print(PrintStyle::MIGRATE) << endl;
-            //        	 }
-            //         }
+            //   {
+            //     auto debug_date = boost::gregorian::date(2019,8,5);
+            //     ptime debug_time(debug_date, hours(10) );
+            //     if (my_suite->calendar().suiteTime() == debug_time) {
+            //       cout << theDefs.print(PrintStyle::MIGRATE) << endl;
+            //     }
+            //   }
         }
 #endif
 
         // Resolve dependencies and submit jobs
-        if (!doJobSubmission(theDefs, errorMsg))
+        if (!doJobSubmission(theDefs, errorMsg)) {
             return false;
+        }
 
         // Increment calendar per suite. *MUST* use *COPY* as update_calendar() can remove suites (auto-cancel)
         std::vector<suite_ptr> suiteVec = theDefs.suiteVec();
@@ -183,16 +181,18 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     if (!simiVisitor.foundCrons() && (hasAutoCancel == 0)) {
         size_t completeSuiteCnt = 0;
         for (suite_ptr s : theDefs.suiteVec()) {
-            if (s->state() == NState::COMPLETE)
+            if (s->state() == NState::COMPLETE) {
                 completeSuiteCnt++;
+            }
         }
 
         if ((theDefs.suiteVec().size() != completeSuiteCnt)) {
             std::stringstream mss;
             mss << "\nDefs file " << defs_filename << "\n";
             for (suite_ptr s : theDefs.suiteVec()) {
-                if (s->state() != NState::COMPLETE)
+                if (s->state() != NState::COMPLETE) {
                     mss << "  suite '/" << s->name() << "' has not completed\n";
+                }
             }
             errorMsg += mss.str();
 
@@ -245,16 +245,18 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const {
 #ifdef DEBUG_LONG_RUNNING_SUITES
         // If task repeating themselves, determine what is causing this:
         std::map<Submittable*, int>::iterator i = taskIntMap_.find(t);
-        if (i == taskIntMap_.end())
+        if (i == taskIntMap_.end()) {
             taskIntMap_.insert(std::make_pair(t, 1));
+        }
         else {
             (*i).second++;
             // Find top most node that has a repeat, check if its incrementing:
             Node* nodeWithRepeat = NULL;
             Node* theParent      = t->parent();
             while (theParent) {
-                if (!theParent->repeat().empty())
+                if (!theParent->repeat().empty()) {
                     nodeWithRepeat = theParent;
+                }
                 theParent = theParent->parent();
             }
             // cout << t->suite()->calendar().toString();
@@ -281,10 +283,12 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const {
             if (event.usedInTrigger()) { // event used in trigger/complete expression
                 // initial value, if the value taken by the event on begin/re-queue. Child command is expected to invert
                 // the event
-                if (event.initial_value())
+                if (event.initial_value()) {
                     event.set_value(false); // initial value is set,   hence clear event
-                else
+                }
+                else {
                     event.set_value(true); // initial value is clear, hence set the event , (default)
+                }
 
                 msg.clear();
                 msg += Str::CHILD_CMD();
@@ -332,12 +336,14 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const {
             }
         }
 
-        if (!update_for_queues(t, msg, t->ref_queues(), theDefs, errorMsg))
+        if (!update_for_queues(t, msg, t->ref_queues(), theDefs, errorMsg)) {
             return false;
+        }
         Node* parent = t->parent();
         while (parent) {
-            if (!update_for_queues(t, msg, parent->ref_queues(), theDefs, errorMsg))
+            if (!update_for_queues(t, msg, parent->ref_queues(), theDefs, errorMsg)) {
                 return false;
+            }
             parent = parent->parent();
         }
 
@@ -358,8 +364,9 @@ bool Simulator::update_for_queues(Submittable* t,
         const std::vector<std::string>& queue_list = queue.list();
         for (size_t i = 0; i < queue_list.size(); i++) {
             std::string step = queue.active();
-            if (step != "<NULL>")
+            if (step != "<NULL>") {
                 queue.complete(step);
+            }
             if (queue.used_in_trigger()) {
                 msg.clear();
                 msg += Str::CHILD_CMD();

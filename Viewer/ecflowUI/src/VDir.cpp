@@ -33,13 +33,15 @@ VDir::~VDir() {
 
 void VDir::path(const std::string& path, bool doReload) {
     path_ = path;
-    if (doReload)
+    if (doReload) {
         reload();
+    }
 }
 
 void VDir::clear() {
-    for (auto& item : items_)
+    for (auto& item : items_) {
         delete item;
+    }
 }
 
 void VDir::addItem(const std::string& name, unsigned int size, unsigned int mtime) {
@@ -95,8 +97,9 @@ std::string VDir::fullName(int row) {
 
 int VDir::findByFullName(const std::string& fName) {
     for (std::size_t i = 0; i < items_.size(); i++) {
-        if (fullName(i) == fName)
+        if (fullName(i) == fName) {
             return i;
+        }
     }
     return -1;
 }

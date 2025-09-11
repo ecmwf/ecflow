@@ -1,8 +1,8 @@
 .. _tutorial-intro:
    
-================
+
 Introduction
-================
+************
  
 The aim of this tutorial is to go through most of ecFlow functionality by building 
 a simple suite. Some extension exercises then follow.

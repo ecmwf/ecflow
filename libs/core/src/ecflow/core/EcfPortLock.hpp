@@ -116,12 +116,14 @@ public:
     static bool is_free(int port, bool debug = false) {
         std::string the_port = ecf::convert_to<std::string>(port);
         if (fs::exists(port_file(the_port))) {
-            if (debug)
+            if (debug) {
                 std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE\n ";
+            }
             return false;
         }
-        if (debug)
+        if (debug) {
             std::cout << "  EcfPortLock::is_free(" << port << ") returning TRUE\n ";
+        }
         return true;
     }
 

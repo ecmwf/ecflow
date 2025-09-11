@@ -23,8 +23,9 @@ using namespace std;
 namespace ecf {
 
 std::string Openssl::info() const {
-    if (ssl_ == "1")
+    if (ssl_ == "1") {
         return "1 : enabled : uses shared ssl certificates";
+    }
     return ssl_ + " : enabled : uses server/port specific ssl certificates";
 }
 
@@ -37,8 +38,9 @@ std::string Openssl::selected_crt() const {
 }
 
 bool Openssl::enable_no_throw(std::string host, const std::string& port, const std::string& ecf_ssl_env) {
-    if (host == Str::LOCALHOST())
+    if (host == Str::LOCALHOST()) {
         host = Host().name();
+    }
 
     if (ecf_ssl_env.empty() || ecf_ssl_env == "1") {
         // LOOK for      $HOME/.ecflowrc/ssl/server.crt
@@ -73,8 +75,9 @@ bool Openssl::enable_no_throw(std::string host, const std::string& port, const s
 }
 
 void Openssl::enable(std::string host, const std::string& port) {
-    if (host == Str::LOCALHOST())
+    if (host == Str::LOCALHOST()) {
         host = Host().name();
+    }
 
     if (!enable_no_throw(host, port)) {
         std::stringstream ss;
@@ -88,8 +91,9 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
     if (auto ecf_ssl = ecf::environment::fetch<std::string>(ecf::environment::ECF_SSL); ecf_ssl) {
         std::string ecf_ssl_env = ecf_ssl.value();
 
-        if (host == Str::LOCALHOST())
+        if (host == Str::LOCALHOST()) {
             host = Host().name();
+        }
 
         if (!enable_no_throw(host, port, ecf_ssl_env)) {
             std::stringstream ss;
@@ -148,8 +152,9 @@ std::string Openssl::get_password() const {
         std::string contents;
         if (ecf::File::open(passwd_file, contents)) {
             // remove /n added by editor.
-            if (!contents.empty() && contents[contents.size() - 1] == '\n')
+            if (!contents.empty() && contents[contents.size() - 1] == '\n') {
                 contents.erase(contents.begin() + contents.size() - 1);
+            }
             // std::cout << "Server::get_password() passwd('" << contents << "')\n";
             return contents;
         }
@@ -281,15 +286,17 @@ void Openssl::check_server_certificates() const {
 
     {
         string server_key = key();
-        if (!fs::exists(server_key))
+        if (!fs::exists(server_key)) {
             throw std::runtime_error("Error: The password protected private server key file '" + server_key +
                                      "' does not exist\n\n" + ssl_info());
+        }
     }
     {
         string server_pem = pem();
-        if (!fs::exists(server_pem))
+        if (!fs::exists(server_pem)) {
             throw std::runtime_error("Error: The dhparam file(pem) '" + server_pem + "' does not exist\n\n" +
                                      ssl_info());
+        }
     }
 }
 

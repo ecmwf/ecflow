@@ -19,7 +19,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 static bool hasExtension(const std::string& line, const std::vector<std::string>& lineTokens) {
     //    cout << "hasExtension = ";
@@ -45,8 +44,9 @@ void TriggerCompleteParser::getExpression(const std::string& line,
                                           bool& orExp,
                                           bool& isFree) const {
     assert(*theLineTokens.begin() == keyword());
-    if (theLineTokens.size() < 2)
+    if (theLineTokens.size() < 2) {
         throw std::runtime_error("Invalid " + std::string(keyword()) + " " + line);
+    }
 
     // trigger -a n == complete
     // complete -o n == complete
@@ -91,12 +91,15 @@ void TriggerCompleteParser::getExpression(const std::string& line,
             if (token[token.size() - 1] == '\\') {
                 token.erase(token.begin() + token.size() - 1);
             }
-            if (token.empty())
+            if (token.empty()) {
                 continue;
-            if (token.at(0) == '#')
+            }
+            if (token.at(0) == '#') {
                 break;
-            if (i != 1)
+            }
+            if (i != 1) {
                 expression += " ";
+            }
             expression += token;
         }
     }
@@ -106,10 +109,12 @@ void TriggerCompleteParser::getExpression(const std::string& line,
         size_t line_token_size = theLineTokens.size();
         expression.reserve(line.size());
         for (size_t i = 1; i < line_token_size; i++) {
-            if (theLineTokens[i].at(0) == '#')
+            if (theLineTokens[i].at(0) == '#') {
                 break;
-            if (i != 1)
+            }
+            if (i != 1) {
                 expression += " ";
+            }
             expression += theLineTokens[i];
         }
 
@@ -123,15 +128,17 @@ void TriggerCompleteParser::getExpression(const std::string& line,
                         break;
                     }
                 }
-                if (theLineTokens[i] == "#")
+                if (theLineTokens[i] == "#") {
                     comment_fnd = true;
+                }
             }
         }
     }
 
     //	cout << "expression = '" << expression << "'\n";
-    if (expression.empty())
+    if (expression.empty()) {
         throw std::runtime_error("Invalid trigger " + line);
+    }
 }
 
 bool TriggerParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -143,16 +150,21 @@ bool TriggerParser::doParse(const std::string& line, std::vector<std::string>& l
 
     if (!nodeStack().empty()) {
         Node* node = nodeStack_top();
-        if (!andExp && !orExp)
+        if (!andExp && !orExp) {
             node->add_part_trigger(PartExpression(std::move(expression)));
-        else if (andExp)
+        }
+        else if (andExp) {
             node->add_part_trigger(PartExpression(std::move(expression), true));
-        else if (orExp)
+        }
+        else if (orExp) {
             node->add_part_trigger(PartExpression(std::move(expression), false));
-        else
+        }
+        else {
             throw std::runtime_error("Invalid trigger " + line);
-        if (isFree)
+        }
+        if (isFree) {
             node->freeTrigger();
+        }
     }
 
     return true;
@@ -167,16 +179,21 @@ bool CompleteParser::doParse(const std::string& line, std::vector<std::string>& 
 
     if (!nodeStack().empty()) {
         Node* node = nodeStack_top();
-        if (!andExp && !orExp)
+        if (!andExp && !orExp) {
             node->add_part_complete(PartExpression(std::move(expression)));
-        else if (andExp)
+        }
+        else if (andExp) {
             node->add_part_complete(PartExpression(std::move(expression), true));
-        else if (orExp)
+        }
+        else if (orExp) {
             node->add_part_complete(PartExpression(std::move(expression), false));
-        else
+        }
+        else {
             throw std::runtime_error("Invalid complete trigger " + line);
-        if (isFree)
+        }
+        if (isFree) {
             node->freeComplete();
+        }
     }
     return true;
 }

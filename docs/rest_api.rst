@@ -1,7 +1,7 @@
 .. _rest_api:
 
 REST API
-////////
+********
 
 ..
    This reStructured Text file uses the following convention:
@@ -302,49 +302,49 @@ API Targets
 -----------
 
 attributes
-^^^^^^^^^^
+~~~~~~~~~~
 
 Attributes are properties of a node. Supported REST methods are: GET,
 POST, PUT, DELETE.
 
 definition
-^^^^^^^^^^
+~~~~~~~~~~
 
 Definition is the definition of an ecflow suite or a part of it in the
 ecflow domain specific language. Supported REST methods are: GET, PUT.
 
 output
-^^^^^^
+~~~~~~
 
 Output target is used to retrieve the task output. Supported REST
 methods are: GET
 
 ping
-^^^^
+~~~~
 
 Pings the ecflow server from the REST api. Supported REST methods are:
 GET.
 
 script
-^^^^^^
+~~~~~~
 
 Scripts are the files that ecflow executes when running tasks. It is
 possible to view a script content. Supported REST methods are: GET.
 
 suites
-^^^^^^
+~~~~~~
 
 This target is used to either list all current suites or to create a new
 suite. Supported REST methods are: GET, POST.
 
 status
-^^^^^^
+~~~~~~
 
 This target is used to access the runtime status of a node. Supported
 REST methods are: GET, PUT.
 
 tree
-^^^^
+~~~~
 
 This is a special target that shows a tree-view of the ecflow node
 structure. Supported REST methods are: GET.
@@ -418,7 +418,7 @@ Endpoint :code:`/v1/suites`
 ---------------------------
 
 **Create** a new Suite
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -456,7 +456,7 @@ where
 - :code:`auto_add_extern` indicates whether to automatically add external triggers
 
 List all Suites
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -480,7 +480,7 @@ Endpoint :code:`/v1/suites/tree`
 --------------------------------
 
 Obtain the tree of all Suites
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -656,7 +656,7 @@ Endpoint :code:`/v1/suites/{path}`
 ----------------------------------
 
 Delete a Node
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -680,7 +680,7 @@ Endpoint :code:`/v1/suites/{path}/tree`
 ---------------------------------------
 
 Obtain the tree of a Node
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -709,7 +709,7 @@ Endpoint :code:`/v1/suites/{path}/definition`
 ---------------------------------------------
 
 Obtain the definition of a Node
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -730,7 +730,7 @@ Obtain the definition of a Node
      - :code:`{"definition": "<defs>"}`, where :code:`<defs>` is the content of associated .def file
 
 Update the definition of a Node
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -766,7 +766,7 @@ where
 - :code:`auto_add_extern` indicates whether to automatically add external triggers
 
 Delete a Node
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -790,7 +790,7 @@ Endpoint :code:`/v1/suites/{path}/status`
 -----------------------------------------
 
 Obtain a Node status
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -815,7 +815,7 @@ Obtain a Node status
        :code:`curl https://.../v1/suites/path/to/node/status?filter=default_status`
 
 Update a Node status
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -908,7 +908,7 @@ Endpoint :code:`/v1/suites/{path}/attributes`
 ---------------------------------------------
 
 Create a new Node attribute
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -929,7 +929,7 @@ Create a new Node attribute
      - :code:`{"message": "Attribute added successfully"}`
 
 Obtain all Node attributes
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1028,7 +1028,7 @@ The inherited variables grouped by ancestor node, each identified by the node na
   }
 
 Update a Node attribute
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1170,7 +1170,7 @@ and when the requesting :code:`queue_action` is :code:`no_of_aborted`, the respo
   }
 
 Delete a Node attribute
-^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1194,7 +1194,7 @@ Endpoint :code:`/v1/suites/{path}/script`
 -----------------------------------------
 
 Obtain the Node script
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1217,7 +1217,7 @@ Obtain the Node script
      - :code:`curl https://localhost:8080/v1/suites/path/to/node/script`
 
 Update the Node script
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1254,7 +1254,7 @@ Endpoint :code:`/v1/suites/{path}/output`
 -----------------------------------------
 
 Obtain the Node job output
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1280,7 +1280,7 @@ Endpoint :code:`/v1/server/status`
 ----------------------------------
 
 Obtain the Server status
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1303,7 +1303,7 @@ Obtain the Server status
      - :code:`curl https://localhost:8080/v1/server/status`
 
 Update the Server status
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1336,7 +1336,7 @@ Endpoint :code:`/v1/server/attributes`
 --------------------------------------
 
 Create a new Server attribute
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1357,7 +1357,7 @@ Create a new Server attribute
      - :code:`{"message":"Attribute added successfully"}`
 
 Obtain all Server attributes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1380,7 +1380,7 @@ Obtain all Server attributes
      - :code:`curl https://localhost:8080/v1/server/attributes`
 
 Update a Server attribute
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1401,7 +1401,7 @@ Update a Server attribute
      - :code:`{"message":"Attribute changed successfully"}`
 
 Delete a Server attribute
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1425,7 +1425,7 @@ Endpoint :code:`/v1/server/ping`
 --------------------------------
 
 Ping Server
-^^^^^^^^^^^
+~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1451,7 +1451,7 @@ Endpoint :code:`/v1/statistics`
 -------------------------------
 
 Obtain Server statistics
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :stub-columns: 1
@@ -1494,7 +1494,7 @@ More Examples
 -------------
 
 Authentication options
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -1503,14 +1503,14 @@ Authentication options
   curl [...] https://localhost:8080/v1/suites?key=<MYTOKEN>
 
 Create a new family
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
   curl -X PUT https://localhost:8080/v1/suites/test -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"definition": "family b\nendfamily\n"}'
 
 Create a new attribute
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
     
@@ -1532,7 +1532,7 @@ Create a new attribute
 
 
 Update an attribute value
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -1554,7 +1554,7 @@ Update an attribute value
 
 
 Update status
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 .. code-block:: bash
     
@@ -1563,7 +1563,7 @@ Update status
 
 
 Delete an attribute
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -1584,7 +1584,7 @@ Delete an attribute
   curl -X DELETE https://localhost:8080/v1/suites/test/attributes -H 'content-type: application/json' -H 'authorization: Bearer <MYTOKEN>' -d '{"type":"variable","name":"foo"}'
 
 Delete a suite
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -1684,7 +1684,7 @@ Compiled successfully with following compilers (CMAKE_BUILD_TYPE=Debug):
    -  15.0
 
 Update Interval Drift
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
 By default :code:`ecflow_http` will increase the update interval length for
 ecFlow server if the :code:`ecflow_http` server is inactive. This is called drift.

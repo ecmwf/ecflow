@@ -94,8 +94,9 @@ void TriggerGraphWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 }
 
 void TriggerGraphWidget::scan(bool dependency) {
-    if (!info_ || !info_->node())
+    if (!info_ || !info_->node()) {
         return;
+    }
 
     VNode* node = info_->node();
     Q_ASSERT(node);

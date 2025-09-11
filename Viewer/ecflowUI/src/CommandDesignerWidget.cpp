@@ -79,8 +79,9 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget* parent) : QWidget(parent),
 CommandDesignerWidget::~CommandDesignerWidget() {
     delete clientOptionsDescriptions_;
 
-    if (saveCommandsOnExit_)
+    if (saveCommandsOnExit_) {
         CustomSavedCommandHandler::instance()->writeSettings();
+    }
 
     MenuHandler::refreshCustomMenuCommands();
 }
@@ -328,10 +329,12 @@ bool CommandDesignerWidget::validSaveName(const std::string& name) {
     // is there already a command with this name?
     int commandWithThisName = CustomSavedCommandHandler::instance()->findIndexFromName(name);
     bool nameUnique;
-    if (inCommandEditMode_)
+    if (inCommandEditMode_) {
         nameUnique = (commandWithThisName == -1 || commandWithThisName == savedCommandsTable_->currentRow());
-    else
+    }
+    else {
         nameUnique = (commandWithThisName == -1);
+    }
 
     if (!nameUnique) {
         QMessageBox::critical(nullptr,
@@ -528,8 +531,9 @@ void CommandDesignerWidget::addCommandToSavedList(CustomCommand* command, int ro
 
     int lastRow = savedCommandsTable_->rowCount() - 1;
 
-    if (row > lastRow)
+    if (row > lastRow) {
         savedCommandsTable_->insertRow(row);
+    }
 
     savedCommandsTable_->setItem(row, 0, nameItem);
     savedCommandsTable_->setItem(row, 1, contextItem);

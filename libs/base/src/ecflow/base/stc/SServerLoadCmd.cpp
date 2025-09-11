@@ -20,10 +20,12 @@ using namespace boost;
 
 bool SServerLoadCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SServerLoadCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (log_file_path_ != the_rhs->log_file_path())
+    }
+    if (log_file_path_ != the_rhs->log_file_path()) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 
@@ -36,8 +38,9 @@ std::string SServerLoadCmd::print() const {
 }
 
 bool SServerLoadCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         cout << "  SServerLoadCmd::handle_server_response log_file_path = " << log_file_path() << "\n";
+    }
     Gnuplot gnuplot(log_file_path(), server_reply.host(), server_reply.port());
     gnuplot.show_server_load();
     return true;

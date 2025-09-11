@@ -1,14 +1,14 @@
 .. _udp_api:
 
 ecFlow UDP
-//////////////////////
+**********
 
 .. caution:: 
   ecFlow's UDP server is experimental, actively under implementation, and its details are subject to change.
   The documentation reflects the current implementation status.
 
 Compilation
------------
+===========
 
 ecFlow UDP API provides a lightweight (and low level) proxy to interact with ecFlow server.
 The build of ecFlow UDP server can be enabled (ON) or disabled (OFF) using cmake option:
@@ -31,7 +31,7 @@ When launched, the server will by default listen to port 8080. This can be chang
     no encryption is applied to the exchanged information.
 
 Starting ecFlow UDP server
---------------------------
+==========================
 
 The ecFlow UDP server is started with the following command:
 
@@ -44,7 +44,7 @@ customizing the environment variables ``ECF_HOST`` and ``ECF_PORT`` before start
 using the CLI options ``--ecflow_host`` and ``--ecflow_port`` (n.b. the CLI options override the environment variables).
 
 Command Line Options and Environment Variables
-----------------------------------------------
+==============================================
 
 ecFlow UDP options can be controlled either with command line options or with environment variables.
 All environment variables with "UDP" are new.
@@ -83,7 +83,7 @@ All environment variables with "UDP" are new.
      - Display version information
 
 Authentication
---------------
+==============
 
 ecFlow UDP forwards basic authentication information, as part of the request, to the ecFlow server
 where the authentication takes place considering the available mechanisms (e.g whitelist files,
@@ -91,7 +91,7 @@ password based authentication).
 
 
 ecFlow UDP Requests
--------------------
+===================
 
 The current implementation of ecFlow UDP allows the following task requests:
 
@@ -103,7 +103,7 @@ Each of the operations can be triggered be sending a JSON-formatted request to e
 The following sections present the description of the request format.
 
 Update meter value
-~~~~~~~~~~~~~~~~~~
+------------------
 
 .. code:: json
 
@@ -124,7 +124,7 @@ Update meter value
     }
 
 Update label value
-~~~~~~~~~~~~~~~~~~
+------------------
 
 .. code:: json
 
@@ -145,7 +145,7 @@ Update label value
     }
 
 Set/clear event value
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 .. code:: json
 

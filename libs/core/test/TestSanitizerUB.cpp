@@ -15,9 +15,6 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace boost;
-using namespace std;
-
 static bool is_sanitizer_available() {
 
     /*
@@ -63,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_invalid_object_size) {
 
     // This check detects pointer casts in which the size of the source type is less than the size of the
     // destination type. Using the result of such a cast to access out-of-bounds data has undefined behaviour
-    cout << getDerived()->pad2 << "\n";
+    std::cout << getDerived()->pad2 << "\n";
     BOOST_CHECK_MESSAGE(true, "stop boost test from complaining");
 }
 

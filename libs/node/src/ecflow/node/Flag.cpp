@@ -255,56 +255,81 @@ const char* Flag::enum_to_char_star(Flag::Type flag) {
 }
 
 Flag::Type Flag::string_to_flag_type(const std::string& s) {
-    if (s == "force_aborted")
+    if (s == "force_aborted") {
         return Flag::FORCE_ABORT;
-    if (s == "user_edit")
+    }
+    if (s == "user_edit") {
         return Flag::USER_EDIT;
-    if (s == "task_aborted")
+    }
+    if (s == "task_aborted") {
         return Flag::TASK_ABORTED;
-    if (s == "edit_failed")
+    }
+    if (s == "edit_failed") {
         return Flag::EDIT_FAILED;
-    if (s == "ecfcmd_failed")
+    }
+    if (s == "ecfcmd_failed") {
         return Flag::JOBCMD_FAILED;
-    if (s == "killcmd_failed")
+    }
+    if (s == "killcmd_failed") {
         return Flag::KILLCMD_FAILED;
-    if (s == "statuscmd_failed")
+    }
+    if (s == "statuscmd_failed") {
         return Flag::STATUSCMD_FAILED;
-    if (s == "status")
+    }
+    if (s == "status") {
         return Flag::STATUS;
-    if (s == "no_script")
+    }
+    if (s == "no_script") {
         return Flag::NO_SCRIPT;
-    if (s == "killed")
+    }
+    if (s == "killed") {
         return Flag::KILLED;
-    if (s == "late")
+    }
+    if (s == "late") {
         return Flag::LATE;
-    if (s == "message")
+    }
+    if (s == "message") {
         return Flag::MESSAGE;
-    if (s == "by_rule")
+    }
+    if (s == "by_rule") {
         return Flag::BYRULE;
-    if (s == "queue_limit")
+    }
+    if (s == "queue_limit") {
         return Flag::QUEUELIMIT;
-    if (s == "task_waiting")
+    }
+    if (s == "task_waiting") {
         return Flag::WAIT;
-    if (s == "locked")
+    }
+    if (s == "locked") {
         return Flag::LOCKED;
-    if (s == "zombie")
+    }
+    if (s == "zombie") {
         return Flag::ZOMBIE;
-    if (s == "no_reque")
+    }
+    if (s == "no_reque") {
         return Flag::NO_REQUE_IF_SINGLE_TIME_DEP;
-    if (s == "archived")
+    }
+    if (s == "archived") {
         return Flag::ARCHIVED;
-    if (s == "restored")
+    }
+    if (s == "restored") {
         return Flag::RESTORED;
-    if (s == "threshold")
+    }
+    if (s == "threshold") {
         return Flag::THRESHOLD;
-    if (s == "sigterm")
+    }
+    if (s == "sigterm") {
         return Flag::ECF_SIGTERM;
-    if (s == "log_error")
+    }
+    if (s == "log_error") {
         return Flag::LOG_ERROR;
-    if (s == "checkpt_error")
+    }
+    if (s == "checkpt_error") {
         return Flag::CHECKPT_ERROR;
-    if (s == "remote_error")
+    }
+    if (s == "remote_error") {
         return Flag::REMOTE_ERROR;
+    }
     return Flag::NOT_SET;
 }
 
@@ -348,8 +373,9 @@ void Flag::write(std::string& ret) const {
     auto flag_list = Flag::array();
     for (auto& i : flag_list) {
         if (is_set(i)) {
-            if (added)
+            if (added) {
                 ret += ',';
+            }
             ret += enum_to_char_star(i);
             added = true;
         }
@@ -361,8 +387,9 @@ void Flag::set_flag(const std::string& flags) {
     Str::split(flags, the_flags_vec, ",");
 
     for (const auto& i : the_flags_vec) {
-        if (i == "migrated")
+        if (i == "migrated") {
             continue; // 4.4.x release had migrated ignore. REMOVE when 5.0.0 is default
+        }
 
         Flag::Type ft = string_to_flag_type(i);
         if (ft == Flag::NOT_SET) {

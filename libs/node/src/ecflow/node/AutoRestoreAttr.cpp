@@ -41,8 +41,9 @@ void AutoRestoreAttr::write(std::string& ret) const {
 }
 
 bool AutoRestoreAttr::operator==(const AutoRestoreAttr& rhs) const {
-    if (nodes_to_restore_ == rhs.nodes_to_restore_)
+    if (nodes_to_restore_ == rhs.nodes_to_restore_) {
         return true;
+    }
 
 #ifdef DEBUG
     if (Ecf::debug_equality()) {
@@ -122,8 +123,9 @@ void AutoRestoreAttr::check(std::string& errorMsg) const {
         }
 
         // Check for duplicate references
-        if (find(vec.begin(), vec.end(), nc) == vec.end())
+        if (find(vec.begin(), vec.end(), nc) == vec.end()) {
             vec.push_back(nc);
+        }
         else {
             std::stringstream ss;
             ss << "Error: autorestore on node " << node_->debugType() << ", duplicate references to node '" << i << "'";

@@ -53,8 +53,9 @@ void MenuConfigDialog::updateMenuTree(Menu* menu) {
 }
 
 void MenuConfigDialog::addChildrenToMenuTree(Menu* menu, QTreeWidgetItem* parent) {
-    if (!menu)
+    if (!menu) {
         return;
+    }
 
     const std::vector<MenuItem*>& items = menu->items();
 

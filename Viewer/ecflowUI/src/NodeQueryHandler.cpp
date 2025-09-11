@@ -43,8 +43,9 @@ NodeQuery* NodeQueryHandler::add(const std::string& name, const std::string& /*q
 
 void NodeQueryHandler::add(NodeQuery* item, bool saveToFile) {
     items_.push_back(item);
-    if (saveToFile)
+    if (saveToFile) {
         save(item);
+    }
 }
 
 void NodeQueryHandler::remove(const std::string&) {
@@ -55,8 +56,9 @@ void NodeQueryHandler::remove(NodeQuery*) {
 
 NodeQuery* NodeQueryHandler::find(const std::string& name) const {
     for (auto item : items_) {
-        if (item->name() == name)
+        if (item->name() == name) {
             return item;
+        }
     }
     return nullptr;
 }

@@ -132,8 +132,9 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent* event) {
         }
 
         // In timeline zoom mode we show a zoom cursor
-        if (!hasCursor || cursor().shape() == Qt::SplitHCursor)
+        if (!hasCursor || cursor().shape() == Qt::SplitHCursor) {
             setCursor(zoomCursor_);
+        }
 
         inZoom_     = true;
         zoomEndPos_ = event->pos();
@@ -159,19 +160,22 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent* event) {
         // beginning of the timeline section is clipped
         headerDataChanged(Qt::Horizontal, 0, columnIndex);
 
-        if (isColumnZoomableAtIndex(columnIndex))
+        if (isColumnZoomableAtIndex(columnIndex)) {
             beingZoomedCore();
+        }
     }
     else {
         // When we enter the timeline section we show a zoom cursor
         if (isColumnZoomable(event->pos())) {
-            if ((!hasCursor || cursor().shape() == Qt::SplitHCursor) && (canBeZoomed()))
+            if ((!hasCursor || cursor().shape() == Qt::SplitHCursor) && (canBeZoomed())) {
                 setCursor(zoomCursor_);
+            }
         }
         // Otherwise remove the cursor unless it is the resize indicator
         else {
-            if (hasCursor && cursor().shape() != Qt::SplitHCursor)
+            if (hasCursor && cursor().shape() != Qt::SplitHCursor) {
                 unsetCursor();
+            }
 
             QHeaderView::mouseMoveEvent(event);
         }
@@ -181,8 +185,9 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent* event) {
 void TimelineHeader::mouseReleaseEvent(QMouseEvent* event) {
     if (inZoom_) {
         int columnIndex = logicalIndexAt(zoomStartPos_);
-        if (isColumnZoomableAtIndex(columnIndex))
+        if (isColumnZoomableAtIndex(columnIndex)) {
             doZoom();
+        }
     }
     else {
         QHeaderView::mouseReleaseEvent(event);
@@ -192,16 +197,19 @@ void TimelineHeader::mouseReleaseEvent(QMouseEvent* event) {
 void TimelineHeader::paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const {
     painter->save();
 
-    if (!rect.isValid())
+    if (!rect.isValid()) {
         return;
+    }
 
     QStyleOptionHeader opt;
     initStyleOption(&opt);
     QStyle::State state = QStyle::State_None;
-    if (isEnabled())
+    if (isEnabled()) {
         state |= QStyle::State_Enabled;
-    if (window()->isActiveWindow())
+    }
+    if (window()->isActiveWindow()) {
         state |= QStyle::State_Active;
+    }
 
     // if(isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
     //        opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder)
@@ -221,8 +229,9 @@ void TimelineHeader::paintSection(QPainter* painter, const QRect& rect, int logi
     //                                     Qt::DisplayRole).toString();
 
     QVariant foregroundBrush;
-    if (foregroundBrush.canConvert<QBrush>())
+    if (foregroundBrush.canConvert<QBrush>()) {
         opt.palette.setBrush(QPalette::ButtonText, qvariant_cast<QBrush>(foregroundBrush));
+    }
 
     QPointF oldBO = painter->brushOrigin();
     QVariant backgroundBrush;
@@ -236,14 +245,18 @@ void TimelineHeader::paintSection(QPainter* painter, const QRect& rect, int logi
     int visual = visualIndex(logicalIndex);
     Q_ASSERT(visual != -1);
 
-    if (count() == 1)
+    if (count() == 1) {
         opt.position = QStyleOptionHeader::OnlyOneSection;
-    else if (visual == 0)
+    }
+    else if (visual == 0) {
         opt.position = QStyleOptionHeader::Beginning;
-    else if (visual == count() - 1)
+    }
+    else if (visual == count() - 1) {
         opt.position = QStyleOptionHeader::End;
-    else
+    }
+    else {
         opt.position = QStyleOptionHeader::Middle;
+    }
 
     opt.orientation = Qt::Horizontal;
 
@@ -268,9 +281,10 @@ void TimelineHeader::paintSection(QPainter* painter, const QRect& rect, int logi
 
     int rightPos = rect.right();
     if (view_->isSortingEnabled()) {
-        if (isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
+        if (isSortIndicatorShown() && sortIndicatorSection() == logicalIndex) {
             opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder) ? QStyleOptionHeader::SortDown
                                                                              : QStyleOptionHeader::SortUp;
+        }
 
         if (opt.sortIndicator != QStyleOptionHeader::None) {
             QStyleOptionHeader subopt = opt;
@@ -319,16 +333,18 @@ bool TimelineHeader::isZoomEnabled() const {
 }
 
 void TimelineHeader::setZoomDisabled() {
-    if (zoomInAction_)
+    if (zoomInAction_) {
         zoomInAction_->setChecked(false);
+    }
 }
 
 void TimelineHeader::slotZoomState(bool) {
     Q_ASSERT(zoomInAction_);
     if (!zoomInAction_->isChecked()) {
         bool hasCursor = testAttribute(Qt::WA_SetCursor);
-        if (hasCursor && cursor().shape() != Qt::SplitHCursor)
+        if (hasCursor && cursor().shape() != Qt::SplitHCursor) {
             unsetCursor();
+        }
     }
 
     // headerDataChanged(Qt::Horizontal,0,TimelineModel::TimelineColumn);
@@ -336,24 +352,27 @@ void TimelineHeader::slotZoomState(bool) {
 
 bool TimelineHeader::isColumnZoomable(QPoint pos) const {
     int logicalIndex = logicalIndexAt(pos);
-    if (logicalIndex != -1)
+    if (logicalIndex != -1) {
         return isColumnZoomableAtIndex(logicalIndex);
+    }
 
     return false;
 }
 
 bool TimelineHeader::hasZoomableColumn() const {
     for (int i = 0; i < columnType_.count(); i++) {
-        if (!isSectionHidden(i) && isColumnZoomableAtIndex(i))
+        if (!isSectionHidden(i) && isColumnZoomableAtIndex(i)) {
             return true;
+        }
     }
     return false;
 }
 
 bool TimelineHeader::hasTimeColumn() const {
     for (int i = 0; i < columnType_.count(); i++) {
-        if (!isSectionHidden(i) && isColumnZoomableAtIndex(i))
+        if (!isSectionHidden(i) && isColumnZoomableAtIndex(i)) {
             return true;
+        }
     }
     return false;
 }
@@ -546,8 +565,9 @@ void MainTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
     }
 
     minorTick = majorTick / 4;
-    if (minorTick == 0)
+    if (minorTick == 0) {
         minorTick = majorTick;
+    }
 
     firstTick = (startSec / minorTick) * minorTick + minorTick;
 
@@ -664,8 +684,9 @@ int MainTimelineHeader::secToPos(qint64 t, QRect rect) const {
 // pos is based on the visible portion of the widget - scrollbars are ignored
 QDateTime MainTimelineHeader::posToDate(QPoint pos) const {
     int logicalIndex = logicalIndexAt(pos);
-    if (logicalIndex == -1)
+    if (logicalIndex == -1) {
         return {};
+    }
 
     int xp = sectionPosition(logicalIndex);
     int w  = sectionSize(logicalIndex);
@@ -673,12 +694,14 @@ QDateTime MainTimelineHeader::posToDate(QPoint pos) const {
     // take the scrollbar into account
     QPoint rPos = realPos(pos);
 
-    if (w <= 0 || rPos.x() < xp)
+    if (w <= 0 || rPos.x() < xp) {
         return {};
+    }
 
     double r = static_cast<double>(rPos.x() - xp) / static_cast<double>(w);
-    if (r < 0 || r > 1)
+    if (r < 0 || r > 1) {
         return {};
+    }
 
     // qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
     qint64 period = (endDate_.toMSecsSinceEpoch() - startDate_.toMSecsSinceEpoch()) / 1000;
@@ -879,12 +902,14 @@ void NodeTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
     }
 
     minorTick = majorTick / 4;
-    if (minorTick == 0)
+    if (minorTick == 0) {
         minorTick = majorTick;
+    }
 
     firstTick = (startSec / minorTick) * minorTick;
-    if (firstTick < startSec)
+    if (firstTick < startSec) {
         firstTick += minorTick;
+    }
 
     // Find label positions for days
     QList<QPair<int, QString>> dateLabels;
@@ -961,8 +986,9 @@ int NodeTimelineHeader::secToPos(qint64 t, QRect rect) const {
 // pos is based on the visible portion of the widget - scrollbars are ignored
 QTime NodeTimelineHeader::posToTime(QPoint pos) const {
     int logicalIndex = logicalIndexAt(pos);
-    if (logicalIndex == -1)
+    if (logicalIndex == -1) {
         return {};
+    }
 
     int xp = sectionPosition(logicalIndex);
     int w  = sectionSize(logicalIndex);
@@ -970,12 +996,14 @@ QTime NodeTimelineHeader::posToTime(QPoint pos) const {
     // take the scrollbar into account
     QPoint rPos = realPos(pos);
 
-    if (w <= 0 || rPos.x() < xp)
+    if (w <= 0 || rPos.x() < xp) {
         return {};
+    }
 
     double r = static_cast<double>(rPos.x() - xp) / static_cast<double>(w);
-    if (r < 0 || r > 1)
+    if (r < 0 || r > 1) {
         return {};
+    }
 
     // qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
     qint64 period = endTime_.msecsSinceStartOfDay() / 1000 - startTime_.msecsSinceStartOfDay() / 1000;

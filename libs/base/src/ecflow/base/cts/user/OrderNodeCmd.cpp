@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
@@ -25,13 +27,24 @@ namespace po = boost::program_options;
 
 bool OrderNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<OrderNodeCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (absNodepath_ != the_rhs->absNodepath())
+    }
+    if (absNodepath_ != the_rhs->pathToNode()) {
         return false;
-    if (option_ != the_rhs->option())
+    }
+    if (option_ != the_rhs->option()) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t OrderNodeCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t OrderNodeCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void OrderNodeCmd::print(std::string& os) const {
@@ -50,17 +63,19 @@ STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const {
     node_ptr theNode = find_node_for_edit(defs, absNodepath_);
 
     Node* theParent = theNode->parent();
-    if (theParent)
+    if (theParent) {
         theParent->order(theNode.get(), option_);
-    else
+    }
+    else {
         defs->order(theNode.get(), option_);
+    }
 
     return doJobSubmission(as);
 }
 
-bool OrderNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
-    return do_authenticate(as, cmd, absNodepath_);
-}
+// bool OrderNodeCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const {
+//     return do_authenticate(as, cmd, absNodepath_);
+// }
 
 const char* OrderNodeCmd::arg() {
     return CtsApi::orderArg();
@@ -95,8 +110,9 @@ void OrderNodeCmd::addOption(boost::program_options::options_description& desc) 
 void OrderNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     vector<string> args = vm[OrderNodeCmd::arg()].as<vector<string>>();
 
-    if (ac->debug())
+    if (ac->debug()) {
         dumpVecArgs(OrderNodeCmd::arg(), args);
+    }
 
     if (args.size() != 2) {
         std::stringstream ss;

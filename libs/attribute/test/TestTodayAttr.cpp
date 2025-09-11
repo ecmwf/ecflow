@@ -19,10 +19,7 @@
 #include "ecflow/core/TimeSeries.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
@@ -66,7 +63,8 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
     // See TodayAttr.hpp for rules concerning isFree() and checkForReque()
     // test today attr isFree(), and checkForRequeue
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     // Create a test when we can match a time series. Need to sync hour with suite time
     // at hour 1, suite time should also be 01:00, for test to work
@@ -109,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
     bool cmd_context = true;
     bool day_changed = false; // after midnight make sure we keep day_changed
     for (int m = 1; m < 96; m++) {
-        calendar.update(time_duration(minutes(30)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(30)));
         if (!day_changed) {
             day_changed = calendar.dayChanged();
         }
@@ -140,9 +138,10 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
                     }
                 }
                 // no else branch since once today is free it stays free, unti re-queue
-                if (matches_free_slot)
+                if (matches_free_slot) {
                     BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                         timeSeries.toString() << " should be free at time " << time);
+                }
 
                 /// At the last time checkForRequeue should return false; This ensures that value will
                 /// not get incremented and so, should leave node in the complete state.
@@ -186,9 +185,10 @@ BOOST_AUTO_TEST_CASE(test_today_attr) {
                         break;
                     }
                 }
-                if (matches_free_slot)
+                if (matches_free_slot) {
                     BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),
                                         timeSeries2.toString() << " should be free at time " << time);
+                }
 
                 /// At the last time checkForRequeue should return false; This ensures that value will
                 /// not get incremented and so, should leave node in the complete state.

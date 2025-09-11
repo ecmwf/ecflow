@@ -28,8 +28,9 @@ int run_server(boost::asio::io_context& io, const ServerEnvironment& server_envi
             /// asynchronous operation outstanding: the asynchronous accept call waiting
             /// for new incoming connections.
             io.run();
-            if (server_environment.debug())
+            if (server_environment.debug()) {
                 cout << "Normal exit from server\n";
+            }
             break;
         }
         catch (std::exception& e) {
@@ -39,9 +40,10 @@ int run_server(boost::asio::io_context& io, const ServerEnvironment& server_envi
             std::cerr << msg << endl;
             ecf::log(Log::ERR, msg);
         }
-        if (server_environment.debug())
+        if (server_environment.debug()) {
             cout << "Server EXITING: <------------------------------------------------ port:"
                  << server_environment.port() << endl;
+        }
     }
     return 0;
 }
@@ -57,8 +59,9 @@ int run_boost_services(boost::asio::io_context& io, const ServerEnvironment& ser
             /// asynchronous operation outstanding: the asynchronous accept call waiting
             /// for new incoming connections.
             io.run();
-            if (server_environment.debug())
+            if (server_environment.debug()) {
                 cout << "Normal exit from server\n";
+            }
             break;
         }
         catch (std::exception& e) {
@@ -68,9 +71,10 @@ int run_boost_services(boost::asio::io_context& io, const ServerEnvironment& ser
             std::cerr << msg << endl;
             ecf::log(Log::ERR, msg);
         }
-        if (server_environment.debug())
+        if (server_environment.debug()) {
             cout << "Server EXITING: <------------------------------------------------ port:"
                  << server_environment.port() << endl;
+        }
     }
     return 0;
 }
@@ -86,10 +90,12 @@ int main(int argc, char* argv[]) {
     try {
         // Get the environment settings, and parse argument line and init the log file
         ServerEnvironment server_environment(argc, argv); // This can throw ServerEnvironmentException
-        if (server_environment.help_option())
+        if (server_environment.help_option()) {
             return 0;
-        if (server_environment.version_option())
+        }
+        if (server_environment.version_option()) {
             return 0;
+        }
         std::string errorMsg;
         if (!server_environment.valid(errorMsg)) {
             cerr << errorMsg;
@@ -97,9 +103,10 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        if (server_environment.debug())
+        if (server_environment.debug()) {
             cout << "Server started: ------------------------------------------------>port:"
                  << server_environment.port() << endl;
+        }
 
         boost::asio::io_context io;
 

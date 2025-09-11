@@ -51,6 +51,7 @@ set(test_srcs
   test/TestPasswordEncryption.cpp
   test/TestPerfTimer.cpp
   test/TestRealCalendar.cpp
+  test/TestResult.cpp
   test/TestSanitizerAS.cpp
   test/TestSanitizerUB.cpp
   test/TestSerialisation.cpp
@@ -76,7 +77,6 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    Boost::timer
 )
 target_clangformat(u_core
   CONDITION ENABLE_TESTS

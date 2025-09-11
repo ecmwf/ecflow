@@ -169,12 +169,14 @@ void TimelineDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 }
 
 void TimelineDelegate::renderTimeline(QPainter* painter, const QStyleOptionViewItem& option, int row) const {
-    if (row < 0)
+    if (row < 0) {
         return;
+    }
 
     TimelineData* data = model_->data();
-    if (!data)
+    if (!data) {
         return;
+    }
 
     int leftEdge  = option.rect.x();
     int rightEdge = option.rect.x() + option.rect.width();
@@ -267,8 +269,9 @@ void TimelineDelegate::renderTimeline(QPainter* painter, const QStyleOptionViewI
             //        xpRight-xpLeft+1,option.rect.height()-1),fillBrush);
         }
 
-        if (xp >= rightEdge)
+        if (xp >= rightEdge) {
             break;
+        }
 
         xpPrev = xp;
     }
@@ -280,8 +283,9 @@ void TimelineDelegate::renderTimeline(QPainter* painter, const QStyleOptionViewI
 void TimelineDelegate::renderSubmittedDuration(QPainter* painter,
                                                const QStyleOptionViewItem& option,
                                                const QModelIndex& index) const {
-    if (submittedMaxDuration_ <= 0)
+    if (submittedMaxDuration_ <= 0) {
         return;
+    }
 
     //    int val=index.data().toInt();
     //    if(val >= 0)
@@ -298,8 +302,9 @@ void TimelineDelegate::renderSubmittedDuration(QPainter* painter,
         }
         else {
             int val = index.data().toInt();
-            if (val >= 0)
+            if (val >= 0) {
                 renderDuration(painter, val, submittedMaxDuration_, vn->colour(), option.rect, submittedMaxTextWidth_);
+            }
         }
 
         //            float meanVal=-1;
@@ -323,8 +328,9 @@ void TimelineDelegate::renderSubmittedDuration(QPainter* painter,
 void TimelineDelegate::renderActiveDuration(QPainter* painter,
                                             const QStyleOptionViewItem& option,
                                             const QModelIndex& index) const {
-    if (activeMaxDuration_ <= 0)
+    if (activeMaxDuration_ <= 0) {
         return;
+    }
 
     if (VNState* vn = VNState::find("active")) {
         if (useMeanDuration_) {
@@ -337,8 +343,9 @@ void TimelineDelegate::renderActiveDuration(QPainter* painter,
         }
         else {
             int val = index.data().toInt();
-            if (val >= 0)
+            if (val >= 0) {
                 renderDuration(painter, val, activeMaxDuration_, vn->colour(), option.rect, activeMaxTextWidth_);
+            }
         }
     }
 
@@ -397,11 +404,13 @@ void TimelineDelegate::renderDuration(QPainter* painter,
                                       QColor col,
                                       QRect rect,
                                       int maxTextW) const {
-    if (maxTextW <= 0)
+    if (maxTextW <= 0) {
         return;
+    }
 
-    if (rect.width() <= maxTextW)
+    if (rect.width() <= maxTextW) {
         maxTextW = 0;
+    }
 
     int len = (static_cast<float>(val) / static_cast<float>(maxVal)) * static_cast<float>(rect.width() - maxTextW);
 
@@ -476,11 +485,13 @@ void TimelineDelegate::renderDuration(QPainter* painter,
 
 void TimelineDelegate::renderDuration(QPainter* painter, int val, int maxVal, QColor col, QRect rect, int maxTextW)
     const {
-    if (maxTextW <= 0)
+    if (maxTextW <= 0) {
         return;
+    }
 
-    if (rect.width() <= maxTextW)
+    if (rect.width() <= maxTextW) {
         maxTextW = 0;
+    }
 
     int len = (static_cast<float>(val) / static_cast<float>(maxVal)) * static_cast<float>(rect.width() - maxTextW);
 
@@ -526,14 +537,17 @@ int TimelineDelegate::timeToPos(QRect r, unsigned int time) const {
     unsigned int start = TimelineItem::fromQDateTime(startDate_);
     unsigned int end   = TimelineItem::fromQDateTime(endDate_);
 
-    if (time < start)
+    if (time < start) {
         return r.x() - 2;
+    }
 
-    if (time >= end)
+    if (time >= end) {
         return r.x() + r.width() + 2;
+    }
 
-    if (start >= end)
+    if (start >= end) {
         return r.x() - 2;
+    }
 
     return r.x() + static_cast<float>(time - start) * static_cast<float>(r.width()) / static_cast<float>((end - start));
 }
@@ -697,9 +711,11 @@ void TimelineView::setSortingEnabledNoExec(bool /*b*/) {
 // Collects the selected list of indexes
 QModelIndexList TimelineView::selectedList() {
     QModelIndexList lst;
-    Q_FOREACH (QModelIndex idx, selectedIndexes())
-        if (idx.column() == 0)
+    Q_FOREACH (QModelIndex idx, selectedIndexes()) {
+        if (idx.column() == 0) {
             lst << idx;
+        }
+    }
     return lst;
 }
 
@@ -772,8 +788,9 @@ void TimelineView::handleContextMenu(QModelIndex indexClicked,
                                      QPoint globalPos,
                                      QPoint /*widgetPos*/,
                                      QWidget* /*widget*/) {
-    if (!indexClicked.isValid())
+    if (!indexClicked.isValid()) {
         return;
+    }
 
     auto* menu = new QMenu(this);
 
@@ -818,8 +835,9 @@ void TimelineView::handleContextMenu(QModelIndex indexClicked,
 
 void TimelineView::showDetails(const QModelIndex& indexClicked) {
     QModelIndex idx = model_->mapToSource(indexClicked);
-    if (!idx.isValid())
+    if (!idx.isValid()) {
         return;
+    }
 
     if (!infoDialog_) {
         infoDialog_ = new TimelineInfoDialog(this);
@@ -855,8 +873,9 @@ void TimelineView::dataCleared() {
 
 void TimelineView::lookup(const QModelIndex& indexClicked) {
     QModelIndex idx = model_->mapToSource(indexClicked);
-    if (!idx.isValid())
+    if (!idx.isValid()) {
         return;
+    }
 
     QString nodePath = QString::fromStdString(model_->tlModel()->data()->items()[idx.row()].path());
     Q_EMIT(lookupRequested(nodePath));
@@ -864,16 +883,18 @@ void TimelineView::lookup(const QModelIndex& indexClicked) {
 
 void TimelineView::copyPath(const QModelIndex& indexClicked) {
     QModelIndex idx = model_->mapToSource(indexClicked);
-    if (!idx.isValid())
+    if (!idx.isValid()) {
         return;
+    }
 
     QString nodePath = QString::fromStdString(model_->tlModel()->data()->items()[idx.row()].path());
     Q_EMIT(copyPathRequested(nodePath));
 }
 
 void TimelineView::slotHzScrollbar(int, int) {
-    if (QScrollBar* sb = horizontalScrollBar())
+    if (QScrollBar* sb = horizontalScrollBar()) {
         sb->setValue(sb->maximum());
+    }
 }
 
 void TimelineView::slotViewCommand(VInfo_ptr /*info*/, QString /*cmd*/) {
@@ -1006,8 +1027,9 @@ void TimelineView::setViewMode(ViewMode vm, bool force) {
 }
 
 void TimelineView::adjustHeader() {
-    if (headerBeingAdjusted_)
+    if (headerBeingAdjusted_) {
         return;
+    }
 
     headerBeingAdjusted_ = true;
 
@@ -1035,8 +1057,9 @@ int TimelineView::computeMaxDuration(QString state) {
     else if (state == "active") {
         col = TimelineModel::ActiveDurationColumn;
     }
-    else
+    else {
         return -1;
+    }
 
     for (int i = 0; i < model_->rowCount(); i++) {
         int val         = 0;
@@ -1072,8 +1095,9 @@ void TimelineView::readSettings(VSettings* vs) {
     vs->endGroup();
 
     for (size_t i = 0; i < wVec.size() && i < static_cast<size_t>(model_->columnCount()); i++) {
-        if (wVec[i] > 0)
+        if (wVec[i] > 0) {
             setColumnWidth(i, wVec[i]);
+        }
     }
 }
 

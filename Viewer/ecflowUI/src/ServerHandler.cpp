@@ -135,8 +135,9 @@ void ServerHandler::logoutAndDelete() {
 
     // Remove itself from the server vector
     auto it = std::find(servers_.begin(), servers_.end(), this);
-    if (it != servers_.end())
+    if (it != servers_.end()) {
         servers_.erase(it);
+    }
 
     delete vRoot_;
     delete connectState_;
@@ -175,8 +176,9 @@ void ServerHandler::createClient(bool init) {
     catch (std::exception& e) {
         std::string errMsg = "Could not create ClientInvoker for host=" + host_ + " port=" + port_ + " !";
 
-        if (e.what())
+        if (e.what()) {
             errMsg += " " + std::string(e.what());
+        }
 
         UiLog().err() << errMsg;
         client_ = nullptr;
@@ -319,8 +321,9 @@ void ServerHandler::recreateClient() {
     comQueue_ = nullptr;
     client_   = nullptr;
 
-    if (queueLoggedOut)
+    if (queueLoggedOut) {
         createClient(false);
+    }
 }
 
 void ServerHandler::setProtocol(ecf::Protocol protocol) {
@@ -361,8 +364,9 @@ bool ServerHandler::isInLogout() const {
 //-----------------------------------------------
 
 bool ServerHandler::updateInfo(int& basePeriod, int& currentPeriod, int& drift, int& toNext) {
-    if (!refreshTimer_->isActive())
+    if (!refreshTimer_->isActive()) {
         return false;
+    }
 
     toNext        = secsTillNextRefresh();
     basePeriod    = conf_->intValue(VServerSettings::UpdateRate);
@@ -376,8 +380,9 @@ bool ServerHandler::updateInfo(int& basePeriod, int& currentPeriod, int& drift, 
 }
 
 int ServerHandler::currentRefreshPeriod() const {
-    if (!refreshTimer_->isActive())
+    if (!refreshTimer_->isActive()) {
         return -1;
+    }
 
     return refreshTimer_->interval() / 1000;
 }
@@ -413,13 +418,15 @@ void ServerHandler::startRefreshTimer() {
 
     // If we are not connected to the server the
     // timer should not run.
-    if (isDisabled())
+    if (isDisabled()) {
         return;
+    }
 
     if (!refreshTimer_->isActive()) {
         int rate = conf_->intValue(VServerSettings::UpdateRate);
-        if (rate <= 0)
+        if (rate <= 0) {
             rate = 1;
+        }
         refreshTimer_->setInterval(rate * 1000);
         refreshTimer_->start();
         broadcast(&ServerComObserver::notifyRefreshTimerStarted);
@@ -445,12 +452,14 @@ void ServerHandler::updateRefreshTimer() {
 
     // If we are not connected to the server the
     // timer should not run.
-    if (isDisabled())
+    if (isDisabled()) {
         return;
+    }
 
     int rate = conf_->intValue(VServerSettings::UpdateRate);
-    if (rate <= 0)
+    if (rate <= 0) {
         rate = 1;
+    }
 
     if (refreshTimer_->isActive()) {
         refreshTimer_->stop();
@@ -488,16 +497,18 @@ void ServerHandler::driftRefreshTimer() {
         // doubling mode
         if (conf_->stringValue(VServerSettings::AdaptiveUpdateMode) == "doubling") {
             delta = refreshTimer_->interval() / 1000 - rate;
-            if (delta == 0)
+            if (delta == 0) {
                 delta = baseDelta;
+            }
         }
         // x modes
         else {
             float f = conf_->stringValue(VServerSettings::AdaptiveUpdateMode).toFloat();
             if (f >= 1. && f <= 5.) {
                 delta = (refreshTimer_->interval() / 1000 - rate) * (f - 1);
-                if (delta == 0)
+                if (delta == 0) {
                     delta = 1;
+                }
             }
         }
 
@@ -594,8 +605,9 @@ SState::State ServerHandler::serverState() {
 
 // This function can be called many times so we need to avoid locking the mutex.
 NState::State ServerHandler::state(bool& suspended) {
-    if (connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
+    if (connectState_->state() != ConnectState::Normal || activity() == LoadActivity) {
         return NState::UNKNOWN;
+    }
 
     suspended = false;
 
@@ -647,8 +659,9 @@ defs_ptr ServerHandler::safelyAccessSimpleDefsMembers() {
 // It is protected! Practically it means we
 // we can only run it through CommandHandler!!!
 void ServerHandler::runCommand(const std::vector<std::string>& cmd) {
-    if (isDisabled())
+    if (isDisabled()) {
         return;
+    }
 
     // We do not know if the server is compatible
     if (compatibility_ == CanBeCompatible) {
@@ -671,8 +684,9 @@ void ServerHandler::runCommand(const std::vector<std::string>& cmd) {
 // It is protected! Practically it means we
 // we can only run it through CommandHandler!!!
 void ServerHandler::runCommand(const std::string& cmd) {
-    if (isDisabled())
+    if (isDisabled()) {
         return;
+    }
 
     // We do not know if the server is compatible
     if (compatibility_ == CanBeCompatible) {
@@ -692,8 +706,9 @@ void ServerHandler::runCommand(const std::string& cmd) {
 }
 
 void ServerHandler::run(VTask_ptr task) {
-    if (isDisabled())
+    if (isDisabled()) {
         return;
+    }
 
     // We do not know if the server is compatible
     if (compatibility_ == CanBeCompatible) {
@@ -796,8 +811,9 @@ void ServerHandler::refresh() {
         return;
     }
 
-    if (isDisabled())
+    if (isDisabled()) {
         return;
+    }
 
     // We do not know if the server is compatible
     if (compatibility_ == CanBeCompatible) {
@@ -886,8 +902,9 @@ void ServerHandler::removeNodeObserver(NodeObserver* obs) {
 }
 
 void ServerHandler::broadcast(NoMethod proc, const VNode* node) {
-    for (auto it = nodeObservers_.begin(); it != nodeObservers_.end(); ++it)
+    for (auto it = nodeObservers_.begin(); it != nodeObservers_.end(); ++it) {
         ((*it)->*proc)(node);
+    }
 }
 
 void ServerHandler::broadcast(NoMethodV1 proc,
@@ -935,8 +952,9 @@ void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect) {
 
     // UserMessage::message(UserMessage::DBG, false," --> Update applied");
 
-    for (auto it = serverObservers_.begin(); it != serverObservers_.end(); ++it)
+    for (auto it = serverObservers_.begin(); it != serverObservers_.end(); ++it) {
         (*it)->notifyDefsChanged(this, aspect);
+    }
 }
 
 void ServerHandler::addServerObserver(ServerObserver* obs) {
@@ -985,13 +1003,15 @@ void ServerHandler::broadcast(SoMethod proc) {
 }
 
 void ServerHandler::broadcast(SoMethodV1 proc, const VServerChange& ch) {
-    for (auto it = serverObservers_.begin(); it != serverObservers_.end(); ++it)
+    for (auto it = serverObservers_.begin(); it != serverObservers_.end(); ++it) {
         ((*it)->*proc)(this, ch);
+    }
 }
 
 void ServerHandler::broadcast(SoMethodV2 proc, const std::string& strVal) {
-    for (auto it = serverObservers_.begin(); it != serverObservers_.end(); ++it)
+    for (auto it = serverObservers_.begin(); it != serverObservers_.end(); ++it) {
         ((*it)->*proc)(this, strVal);
+    }
 }
 
 //------------------------------------------------
@@ -1030,8 +1050,9 @@ void ServerHandler::broadcast(SocMethod proc) {
         // We need to check if the given observer is still in the original list. When we delete the server, due to
         // dependencies it is possible that the observer is already deleted at this point.
         if (!checkExistence ||
-            std::find(serverComObservers_.begin(), serverComObservers_.end(), *it) != serverComObservers_.end())
+            std::find(serverComObservers_.begin(), serverComObservers_.end(), *it) != serverComObservers_.end()) {
             ((*it)->*proc)(this);
+        }
     }
 }
 
@@ -1121,8 +1142,9 @@ void ServerHandler::clientTaskFinished(VTask_ptr task, const ServerReply& server
         int majorVersion = 0;
         if (!version.isEmpty()) {
             QStringList versionLst = version.split(".");
-            if (versionLst.count() > 0)
+            if (versionLst.count() > 0) {
                 majorVersion = versionLst[0].toInt();
+            }
         }
         if (majorVersion >= 5) {
             compatibleServer();
@@ -1321,8 +1343,9 @@ void ServerHandler::clientTaskFailed(VTask_ptr task, const std::string& errMsg, 
         UserMessage::message(UserMessage::WARN, true, errMsg);
     }
     else {
-        if (errMsg.empty())
+        if (errMsg.empty()) {
             connectionLost(errMsg);
+        }
 
         task->reply()->setErrorText(errMsg);
         task->status(VTask::ABORTED);
@@ -1636,7 +1659,7 @@ void ServerHandler::rescanTree(bool needNewSuiteList) {
 
 void ServerHandler::setSuiteFilterWithOne(VNode* n) {
     if (n) {
-        if (VNode* sn = n->suite())
+        if (VNode* sn = n->suite()) {
             if (VSuiteNode* suite = sn->isSuite()) {
                 if (suiteFilter_->isEnabled() == false) {
                     suiteFilter_->setEnabled(true);
@@ -1652,14 +1675,16 @@ void ServerHandler::setSuiteFilterWithOne(VNode* n) {
                     reset();
                 }
             }
+        }
     }
 }
 
 void ServerHandler::updateSuiteFilter(SuiteFilter* sf) {
     UI_FUNCTION_LOG_S(this)
 
-    if (isDisabled())
+    if (isDisabled()) {
         return;
+    }
 
     // We do not know if the server is compatible
     if (compatibility_ == CanBeCompatible) {
@@ -1689,8 +1714,9 @@ void ServerHandler::updateSuiteFilterWithLoaded(const std::vector<std::string>& 
     UI_FUNCTION_LOG_S(this)
     if (suiteFilter_->setLoaded(loadedSuites)) {
         // If the filtered state changed and the filter is active we need to reset
-        if (suiteFilter_->isEnabled())
+        if (suiteFilter_->isEnabled()) {
             reset();
+        }
     }
 }
 
@@ -1699,8 +1725,9 @@ void ServerHandler::updateSuiteFilterWithLoaded(const std::vector<std::string>& 
 void ServerHandler::updateSuiteFilterWithDefs() {
     UI_FUNCTION_LOG_S(this)
 
-    if (suiteFilter_->isEnabled())
+    if (suiteFilter_->isEnabled()) {
         return;
+    }
 
     // The filte ris disabled
     std::vector<std::string> defSuites;
@@ -1712,8 +1739,9 @@ void ServerHandler::updateSuiteFilterWithDefs() {
 void ServerHandler::updateSuiteFilter(bool needNewSuiteList) {
     UI_FUNCTION_LOG_S(this)
 
-    if (isDisabled())
+    if (isDisabled()) {
         return;
+    }
 
     // We do not know if the server is compatible
     if (compatibility_ == CanBeCompatible) {
@@ -1819,8 +1847,9 @@ void ServerHandler::confChanged(VServerSettings::Param par, VProperty* /*prop*/)
 
 void ServerHandler::checkNotificationState(VServerSettings::Param par) {
     std::string id = VServerSettings::notificationId(par);
-    if (id.empty())
+    if (id.empty()) {
         return;
+    }
 
     bool enabled = false;
     for (std::vector<ServerHandler*>::const_iterator it = servers_.begin(); it != servers_.end(); ++it) {
@@ -1851,8 +1880,9 @@ bool ServerHandler::checkNotificationState(const std::string& notifierId) {
 }
 
 void ServerHandler::saveSettings() {
-    for (auto it = servers_.begin(); it != servers_.end(); ++it)
+    for (auto it = servers_.begin(); it != servers_.end(); ++it) {
         (*it)->saveConf();
+    }
 }
 
 void ServerHandler::saveConf() {
@@ -1865,8 +1895,9 @@ void ServerHandler::loadConf() {
 }
 
 void ServerHandler::writeDefs(const std::string& fileName) {
-    if (isDisabled() || compatibility_ == CanBeCompatible)
+    if (isDisabled() || compatibility_ == CanBeCompatible) {
         return;
+    }
 
     comQueue_->suspend(true);
     ServerDefsAccess defsAccess(this); // will reliquish its resources on destruction
@@ -1878,11 +1909,13 @@ void ServerHandler::writeDefs(const std::string& fileName) {
 }
 
 void ServerHandler::writeDefs(VInfo_ptr info, const std::string& fileName) {
-    if (isDisabled() || compatibility_ == CanBeCompatible)
+    if (isDisabled() || compatibility_ == CanBeCompatible) {
         return;
+    }
 
-    if (!info || !info->node())
+    if (!info || !info->node()) {
         return;
+    }
 
     comQueue_->suspend(true);
     ServerDefsAccess defsAccess(this); // will reliquish its resources on destruction
@@ -1902,16 +1935,18 @@ void ServerHandler::writeDefs(VInfo_ptr info, const std::string& fileName) {
 //--------------------------------------------
 
 void ServerHandler::searchBegan() {
-    if (isDisabled() || compatibility_ == CanBeCompatible)
+    if (isDisabled() || compatibility_ == CanBeCompatible) {
         return;
+    }
 
     UiLogS(this).dbg() << "ServerHandler::searchBegan --> suspend queue";
     comQueue_->suspend(true);
 }
 
 void ServerHandler::searchFinished() {
-    if (isDisabled() || compatibility_ == CanBeCompatible)
+    if (isDisabled() || compatibility_ == CanBeCompatible) {
         return;
+    }
 
     UiLogS(this).dbg() << "ServerHandler::searchFinished --> start queue";
     comQueue_->start();
@@ -1938,8 +1973,10 @@ int ServerHandler::truncatedLinesFromServer(const std::string& txt) const {
 //--------------------------------------------------------------
 
 ServerHandler* ServerHandler::find(const std::string& name) {
-    for (auto it = servers_.begin(); it != servers_.end(); ++it)
-        if ((*it)->name() == name)
+    for (auto it = servers_.begin(); it != servers_.end(); ++it) {
+        if ((*it)->name() == name) {
             return *it;
+        }
+    }
     return nullptr;
 }

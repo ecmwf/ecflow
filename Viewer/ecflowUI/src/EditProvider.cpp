@@ -49,8 +49,9 @@ void EditProvider::visit(VInfoNode* info) {
 }
 
 void EditProvider::submit(const std::vector<std::string>& txt, bool alias) {
-    if (!(info_ && info_.get() && info_->isNode() && info_->node()) && info_->server())
+    if (!(info_ && info_.get() && info_->isNode() && info_->node()) && info_->server()) {
         return;
+    }
 
     VNode* node           = info_->node();
     ServerHandler* server = info_->server();
@@ -91,11 +92,13 @@ void EditProvider::submit(const std::vector<std::string>& txt, bool alias) {
             }
         }
 
-        if (line == comStart)
+        if (line == comStart) {
             inVars = true;
+        }
 
-        if (line == comEnd)
+        if (line == comEnd) {
             break;
+        }
     }
 
     if (vars.empty()) {

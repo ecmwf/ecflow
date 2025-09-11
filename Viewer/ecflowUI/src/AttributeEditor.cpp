@@ -149,8 +149,9 @@ void AttributeEditor::detachInfo() {
 }
 
 void AttributeEditor::slotButton(QAbstractButton* b) {
-    if (b && buttonBox_->buttonRole(b) == QDialogButtonBox::ResetRole)
+    if (b && buttonBox_->buttonRole(b) == QDialogButtonBox::ResetRole) {
         resetValue();
+    }
 }
 
 void AttributeEditor::checkButtonStatus() {
@@ -302,8 +303,9 @@ void AttributeEditor::notifyEndServerScan(ServerHandler* server) {
             info_->regainData();
 
             // If the node is not available dataLost() was already called.
-            if (!info_ || !info_->hasData())
+            if (!info_ || !info_->hasData()) {
                 return;
+            }
 
             Q_ASSERT(info_->server() && info_->node());
 
@@ -344,6 +346,7 @@ void AttributeEditor::doNotUseReset() {
 }
 
 void AttributeEditor::disableCancel() {
-    if (QPushButton* cancelPb = buttonBox_->button(QDialogButtonBox::Cancel))
+    if (QPushButton* cancelPb = buttonBox_->button(QDialogButtonBox::Cancel)) {
         cancelPb->hide();
+    }
 }

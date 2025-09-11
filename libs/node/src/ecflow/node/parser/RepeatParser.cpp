@@ -20,22 +20,24 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     size_t line_token_size = lineTokens.size();
-    if (line_token_size < 3)
+    if (line_token_size < 3) {
         throw std::runtime_error("RepeatParser::doParse: Invalid repeat " + line);
-    if (nodeStack().empty())
+    }
+    if (nodeStack().empty()) {
         throw std::runtime_error("RepeatParser::doParse: Could not add repeat as node stack is empty at line: " + line);
+    }
 
     string errorMsg = "Invalid repeat : ";
     errorMsg += line;
 
     if (lineTokens[1] == "date") {
         // repeat date VARIABLE yyyymmdd yyyymmdd [delta]
-        if (line_token_size < 5)
+        if (line_token_size < 5) {
             throw std::runtime_error(errorMsg);
+        }
 
         string name  = lineTokens[2];
         int startYMD = Extract::ymd(lineTokens[3], errorMsg);
@@ -43,15 +45,17 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         int delta    = Extract::optionalInt(lineTokens, 5, 1, errorMsg);
         RepeatDate rep(name, startYMD, endYMD, delta);
         int value = 0;
-        if (get_value(lineTokens, value))
+        if (get_value(lineTokens, value)) {
             rep.set_value(value);
+        }
 
         nodeStack_top()->addRepeat(Repeat(rep));
     }
     else if (lineTokens[1] == "datetime") {
         // repeat datetime VARIABLE yyyy-mm-ddTMM:HH:SS yyyy-mm-ddTMM:HH:SS [HH[:MM[:SS]]]
-        if (line_token_size < 5)
+        if (line_token_size < 5) {
             throw std::runtime_error(errorMsg);
+        }
 
         string name      = lineTokens[2];
         Instant startYMD = Instant::parse(lineTokens[3]);
@@ -63,15 +67,16 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         RepeatDateTime rep(name, startYMD, endYMD, delta);
         ecf::Instant value;
         if (get_value(lineTokens, value)) {
-            rep.set_value(coerce_from_instant(value));
+            rep.set_value(coerce_from_instant_into_seconds(value));
         }
 
         nodeStack_top()->addRepeat(Repeat(rep));
     }
     else if (lineTokens[1] == "datelist") {
 
-        if (line_token_size < 4)
+        if (line_token_size < 4) {
             throw std::runtime_error(errorMsg);
+        }
 
         // repeat datelist VARIABLE "YYYYMMDD" "YYYYMMDD" "YYYYMMDD" # comment
         string name = lineTokens[2];
@@ -79,8 +84,9 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         theEnums.reserve(line_token_size);
         for (size_t i = 3; i < line_token_size; i++) {
             std::string theEnum = lineTokens[i];
-            if (theEnum[0] == '#')
+            if (theEnum[0] == '#') {
                 break;
+            }
             Str::removeSingleQuotes(theEnum); // remove quotes, they get added back when we persist
             Str::removeQuotes(theEnum);       // remove quotes, they get added back when we persist
 
@@ -94,20 +100,23 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
             }
             theEnums.push_back(date);
         }
-        if (theEnums.empty())
+        if (theEnums.empty()) {
             throw std::runtime_error(errorMsg);
+        }
 
         RepeatDateList rep(name, theEnums);
         int index = 0; // This is *assumed to be the index* and not the value
-        if (get_value(lineTokens, index))
+        if (get_value(lineTokens, index)) {
             rep.set_value(index);
+        }
 
         nodeStack_top()->addRepeat(Repeat(rep));
     }
     else if (lineTokens[1] == "enumerated") {
 
-        if (line_token_size < 4)
+        if (line_token_size < 4) {
             throw std::runtime_error(errorMsg);
+        }
 
         // repeat enumerated VARIABLE "first" "second" "last" # comment
         string name = lineTokens[2];
@@ -115,26 +124,30 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         theEnums.reserve(line_token_size);
         for (size_t i = 3; i < line_token_size; i++) {
             std::string theEnum = lineTokens[i];
-            if (theEnum[0] == '#')
+            if (theEnum[0] == '#') {
                 break;
+            }
             Str::removeSingleQuotes(theEnum); // remove quotes, they get added back when we persist
             Str::removeQuotes(theEnum);       // remove quotes, they get added back when we persist
             theEnums.push_back(theEnum);
         }
-        if (theEnums.empty())
+        if (theEnums.empty()) {
             throw std::runtime_error(errorMsg);
+        }
 
         RepeatEnumerated rep(name, theEnums);
         int index = 0; // This is *assumed to be the index* and not the value
-        if (get_value(lineTokens, index))
+        if (get_value(lineTokens, index)) {
             rep.set_value(index);
+        }
 
         nodeStack_top()->addRepeat(Repeat(rep));
     }
     else if (lineTokens[1] == "integer") {
         // repeat integer VARIABLE start end [step]
-        if (line_token_size < 5)
+        if (line_token_size < 5) {
             throw std::runtime_error(errorMsg);
+        }
 
         string name = lineTokens[2];
         int start   = Extract::theInt(lineTokens[3], errorMsg);
@@ -142,8 +155,9 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         int step    = Extract::optionalInt(lineTokens, 5, 1, errorMsg);
         RepeatInteger rep(name, start, end, step);
         int value = 0;
-        if (get_value(lineTokens, value))
+        if (get_value(lineTokens, value)) {
             rep.set_value(value);
+        }
 
         nodeStack_top()->addRepeat(Repeat(rep));
     }
@@ -162,27 +176,31 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
     }
     else if (lineTokens[1] == "string") {
 
-        if (line_token_size < 4)
+        if (line_token_size < 4) {
             throw std::runtime_error(errorMsg);
+        }
 
         string name = lineTokens[2];
         std::vector<std::string> theEnums;
         theEnums.reserve(line_token_size);
         for (size_t i = 3; i < line_token_size; i++) {
             std::string theEnum = lineTokens[i];
-            if (theEnum[0] == '#')
+            if (theEnum[0] == '#') {
                 break;
+            }
             Str::removeSingleQuotes(theEnum); // remove quotes, they get added back when we persist
             Str::removeQuotes(theEnum);       // remove quotes, they get added back when we persist
             theEnums.push_back(theEnum);
         }
-        if (theEnums.empty())
+        if (theEnums.empty()) {
             throw std::runtime_error(errorMsg);
+        }
 
         RepeatString rep(name, theEnums);
         int index = 0;
-        if (get_value(lineTokens, index))
+        if (get_value(lineTokens, index)) {
             rep.set_value(index);
+        }
 
         nodeStack_top()->addRepeat(Repeat(rep));
     }
@@ -239,8 +257,9 @@ bool RepeatParser::get_value(const std::vector<std::string>& lineTokens, int& va
                 value = Extract::theInt(token_after_comment, "RepeatParser::doParse, could not extract repeat value");
                 return true;
             }
-            else
+            else {
                 token_after_comment = lineTokens[i];
+            }
         }
     }
     return false;
@@ -258,8 +277,9 @@ bool RepeatParser::get_value(const std::vector<std::string>& lineTokens, Instant
                 value = Instant::parse(token_after_comment);
                 return true;
             }
-            else
+            else {
                 token_after_comment = lineTokens[i];
+            }
         }
     }
     return false;

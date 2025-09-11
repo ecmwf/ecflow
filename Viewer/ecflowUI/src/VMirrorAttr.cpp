@@ -95,8 +95,9 @@ QStringList VMirrorAttr::data(bool firstLine) const {
     QStringList s;
     if (parent_->node_) {
         const std::vector<ecf::MirrorAttr>& v = parent_->node_->mirrors();
-        if (index_ < static_cast<int>(v.size()))
+        if (index_ < static_cast<int>(v.size())) {
             atype->encode(v[index_], s, firstLine);
+        }
 
         // this can happen temporarily during update when:
         //
@@ -108,8 +109,9 @@ QStringList VMirrorAttr::data(bool firstLine) const {
         // * In this case, as safety measure, we encode an empty attribute.
         //   When the notification arrives all the attributes of the given node will be rescanned
         //   and will be set with the correct state.
-        else
+        else {
             atype->encode_empty(s);
+        }
     }
     return s;
 }

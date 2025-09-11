@@ -52,8 +52,9 @@ void VariableSearchLine::setView(QTreeView* view) {
 }
 
 void VariableSearchLine::slotFind(QString txt) {
-    if (!view_)
+    if (!view_) {
         return;
+    }
 
     if (txt.simplified().isEmpty() && resultItems_.isEmpty()) {
         return;
@@ -80,8 +81,9 @@ void VariableSearchLine::slotFind(QString txt) {
 }
 
 void VariableSearchLine::slotFindNext() {
-    if (!view_)
+    if (!view_) {
         return;
+    }
 
     if (status_ == true && resultItems_.count() > 0) {
         currentResultItem_++;
@@ -93,8 +95,9 @@ void VariableSearchLine::slotFindNext() {
 }
 
 void VariableSearchLine::slotFindPrev() {
-    if (!view_)
+    if (!view_) {
         return;
+    }
 
     if (status_ == true && resultItems_.count() > 0) {
         currentResultItem_--;
@@ -106,8 +109,9 @@ void VariableSearchLine::slotFindPrev() {
 }
 
 void VariableSearchLine::selectIndex(const QModelIndex& index) {
-    if (!view_)
+    if (!view_) {
         return;
+    }
 
     view_->setCurrentIndex(index);
     // emit indexSelected(index);

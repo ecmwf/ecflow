@@ -13,15 +13,14 @@
 #include <string>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/timer/timer.hpp>
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/StringSplitter.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
-using namespace boost;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 
@@ -164,8 +163,9 @@ static void check(const std::string& line,
                   const std::vector<std::string>& expected) {
     std::vector<std::string> result;
     typedef boost::split_iterator<std::string::const_iterator> split_iter_t;
-    for (; res != split_iter_t(); res++)
+    for (; res != split_iter_t(); res++) {
         result.push_back(boost::copy_range<std::string>(*res));
+    }
     check(line, result, expected);
 }
 
@@ -501,6 +501,22 @@ BOOST_AUTO_TEST_CASE(test_str_to_int) {
     BOOST_CHECK_MESSAGE(Str::to_int("99 99", 0) == 0, "Expected 0 for failure");
 }
 
+BOOST_AUTO_TEST_CASE(test_str_is_int) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_EQUAL(Str::is_int("0"), true);
+    BOOST_CHECK_EQUAL(Str::is_int("1"), true);
+    BOOST_CHECK_EQUAL(Str::is_int("-0"), true);
+    BOOST_CHECK_EQUAL(Str::is_int("-1"), true);
+    BOOST_CHECK_EQUAL(Str::is_int(""), false);
+    BOOST_CHECK_EQUAL(Str::is_int("-"), false);
+    BOOST_CHECK_EQUAL(Str::is_int(" "), false);
+    BOOST_CHECK_EQUAL(Str::is_int("q"), false);
+    BOOST_CHECK_EQUAL(Str::is_int("q22"), false);
+    BOOST_CHECK_EQUAL(Str::is_int("99 99"), false);
+    BOOST_CHECK_EQUAL(Str::is_int("99 99"), false);
+}
+
 BOOST_AUTO_TEST_CASE(test_extract_data_member_value) {
     ECF_NAME_THIS_TEST();
 
@@ -672,39 +688,39 @@ BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
     }
 
     {
-        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        PerformanceTimer timer;
         for (auto& fred : vec) {
             fred.inc();
         }
         ECF_TEST_DBG(<< "Time: for(auto &fred : vec) { fred.inc(); }                                                "
-                     << timer.format(3, Str::cpu_timer_format()));
+                     << timer);
     }
 
     {
-        boost::timer::cpu_timer timer;
+        PerformanceTimer timer;
         std::for_each(vec.begin(), vec.end(), [](Fred& fred) { fred.inc(); });
         ECF_TEST_DBG(<< "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 "
-                     << timer.format(3, Str::cpu_timer_format()));
+                     << timer);
     }
 
     {
-        boost::timer::cpu_timer timer;
+        PerformanceTimer timer;
         auto theEnd = vec.end();
         for (auto i = vec.begin(); i < theEnd; i++) {
             (*i).inc();
         }
         ECF_TEST_DBG(<< "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } "
-                     << timer.format(3, Str::cpu_timer_format()));
+                     << timer);
     }
 
     {
-        boost::timer::cpu_timer timer;
+        PerformanceTimer timer;
         size_t theSize = vec.size();
         for (size_t i = 0; i < theSize; i++) {
             vec[i].inc();
         }
         ECF_TEST_DBG(<< "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              "
-                     << timer.format(3, Str::cpu_timer_format()));
+                     << timer);
     }
 }
 
@@ -784,14 +800,14 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     numberRes.reserve(expectedNumberRes.size());
 
     {
-        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        PerformanceTimer timer;
         for (size_t i = 0; i < stringTokens.size(); i++) {
             method1(stringTokens[i], stringRes, numberRes);
         }
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method1(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for method1  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
+        ECF_TEST_DBG(<< "Time for method1  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method 1 wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method 1 wrong");
         numberRes.clear();
@@ -799,14 +815,14 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     }
 
     {
-        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        PerformanceTimer timer;
         for (size_t i = 0; i < stringTokens.size(); i++) {
             methodX(stringTokens[i], stringRes, numberRes);
         }
         for (size_t i = 0; i < numberTokens.size(); i++) {
             methodX(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for methodX  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
+        ECF_TEST_DBG(<< "Time for methodX  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method X wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method X wrong");
         numberRes.clear();
@@ -814,14 +830,14 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     }
 
     {
-        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        PerformanceTimer timer;
         for (size_t i = 0; i < stringTokens.size(); i++) {
             method2(stringTokens[i], stringRes, numberRes);
         }
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method2(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG("Time for method2  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
+        ECF_TEST_DBG("Time for method2  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, "method 2 wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method 2 wrong");
         numberRes.clear();
@@ -829,14 +845,14 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     }
 
     {
-        boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+        PerformanceTimer timer;
         for (size_t i = 0; i < stringTokens.size(); i++) {
             method3(stringTokens[i], stringRes, numberRes);
         }
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method3(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for method3  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
+        ECF_TEST_DBG(<< "Time for method3  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes,
                             " method3 wrong numberRes.size()=" << numberRes.size()
                                                                << " expected size = " << expectedNumberRes.size());
@@ -857,23 +873,21 @@ BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
 
     const int the_size = 1000000;
     {
-        boost::timer::cpu_timer timer;
+        PerformanceTimer timer;
         for (size_t i = 0; i < the_size; i++) {
             std::ostringstream st;
             st << i;
             std::string s = st.str();
         }
-        ECF_TEST_DBG(
-            "Time for int to string using ostringstream  elapsed time = " << timer.format(3, Str::cpu_timer_format()));
+        ECF_TEST_DBG("Time for int to string using ostringstream  elapsed time = " << timer);
     }
 
     {
-        boost::timer::cpu_timer timer;
+        PerformanceTimer timer;
         for (size_t i = 0; i < the_size; i++) {
             std::string s = ecf::convert_to<std::string>(i);
         }
-        ECF_TEST_DBG(
-            "Time for int to string using ecf::convert_to elapsed time = " << timer.format(3, Str::cpu_timer_format()));
+        ECF_TEST_DBG("Time for int to string using ecf::convert_to elapsed time = " << timer);
     }
 }
 

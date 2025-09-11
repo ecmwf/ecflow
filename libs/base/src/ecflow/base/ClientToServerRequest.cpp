@@ -12,11 +12,27 @@
 
 #include <stdexcept>
 
+#include "ecflow/base/Authentication.hpp"
+#include "ecflow/base/Authorisation.hpp"
+#include "ecflow/base/stc/PreAllocatedReply.hpp"
+
 using namespace std;
 
 STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
     if (cmd_.get()) {
-        return cmd_->handleRequest(as);
+        // Perform Authentication (i.e. user/task identity) control
+        if (auto result = ecf::is_authentic(*cmd_, *as); !result.ok()) {
+            return PreAllocatedReply::error_cmd(std::string{"Command not accepted, due to: "} + result.reason());
+        }
+
+        // Perform Autorisation (i.e. access rules) control
+        if (auto result = ecf::is_authorised(*cmd_, *as); result.ok()) {
+            return cmd_->handleRequest(as);
+        }
+        else {
+            // The command is not accepted, return an error
+            return PreAllocatedReply::error_cmd(std::string{"Command not accepted, due to: "} + result.reason());
+        }
     }
 
     /// means programming error somewhere

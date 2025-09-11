@@ -1,6 +1,17 @@
 
+..
+   This is the documentation for ecFlow, a workflow management system developed by ECMWF.
+   The documentation is built using Sphinx and, by convention, we use the following heading markup in our reStructuredText files:
+ 
+     ******************************************** (h1)
+     ============================================ (h2)
+     -------------------------------------------- (h3)
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ (h4)
+     """""""""""""""""""""""""""""""""""""""""""" (h5)
+     '''''''''''''''''''''''''''''''''''''''''''' (h6)
+
 Welcome to ecFlow's documentation
-====================================
+*********************************
 
 .. image:: /_static/overview/image1.png
    :width: 300px
@@ -14,8 +25,8 @@ Welcome to ecFlow's documentation
    overview
    quickstart.rst
    tutorial/tutorial.rst
-   python_api/python_api.rst
    client_api/index.rst
+   python_api/python_api.rst
    rest_api.rst
    udp_api.rst
    ug/index.rst
@@ -34,7 +45,7 @@ Welcome to ecFlow's documentation
 
 
 Indices and tables
-==================
+******************
 
 * :ref:`genindex`
   

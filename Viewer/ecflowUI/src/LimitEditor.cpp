@@ -59,8 +59,9 @@ LimitEditor::LimitEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info
     Q_ASSERT(a->type()->name() == "limit");
     QStringList aData = a->data();
 
-    if (aData.count() < 4)
+    if (aData.count() < 4) {
         return;
+    }
 
     QString name = aData[1];
     oriVal_      = aData[2].toInt();
@@ -177,8 +178,9 @@ void LimitEditor::slotRemoveAll() {
 }
 
 void LimitEditor::remove(bool all) {
-    if (!info_)
+    if (!info_) {
         return;
+    }
 
     // We cannot cancel the setting after remove is callled
     disableCancel();
@@ -213,8 +215,9 @@ void LimitEditor::remove(bool all) {
 }
 
 void LimitEditor::slotKill() {
-    if (!info_)
+    if (!info_) {
         return;
+    }
 
     Q_ASSERT(model_);
 
@@ -226,13 +229,16 @@ void LimitEditor::slotKill() {
     std::vector<VNode*> items;
     Q_FOREACH (QModelIndex idx, w_->pathView_->selectionModel()->selectedRows()) {
         std::string p = model_->data(idx, Qt::DisplayRole).toString().toStdString();
-        if (VNode* n = info_->server()->vRoot()->find(p))
-            if (n->isNode())
+        if (VNode* n = info_->server()->vRoot()->find(p)) {
+            if (n->isNode()) {
                 items.push_back(n);
+            }
+        }
     }
 
-    if (items.empty())
+    if (items.empty()) {
         return;
+    }
 
     if (CommandHandler::kill(items, true)) {
         // We cannot cancel the setting after kill is callled
@@ -251,8 +257,9 @@ void LimitEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect) {
         Q_ASSERT(lim);
 
         QStringList aData = a->data();
-        if (aData.count() < 4)
+        if (aData.count() < 4) {
             return;
+        }
 
         oriVal_ = aData[2].toInt();
         w_->valueLabel_->setText(QString::number(oriVal_));
@@ -304,8 +311,9 @@ void LimitEditor::slotDoubleClicked(const QModelIndex& index) {
 }
 
 void LimitEditor::lookup(const QModelIndex& idx) {
-    if (!info_)
+    if (!info_) {
         return;
+    }
 
     Q_ASSERT(model_);
 

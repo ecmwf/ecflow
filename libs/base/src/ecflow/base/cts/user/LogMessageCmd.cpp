@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
@@ -31,11 +33,21 @@ void LogMessageCmd::print_only(std::string& os) const {
 
 bool LogMessageCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<LogMessageCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (msg_ != the_rhs->msg())
+    }
+    if (msg_ != the_rhs->msg()) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t LogMessageCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t LogMessageCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 STC_Cmd_ptr LogMessageCmd::doHandleRequest(AbstractServer* as) const {

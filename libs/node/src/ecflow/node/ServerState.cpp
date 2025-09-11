@@ -20,7 +20,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 // When a Defs is loaded into a server:
 //       	o the jobSubmissionInterval_ is set
@@ -104,12 +103,14 @@ bool ServerState::compare(const ServerState& rhs) const {
         if (Ecf::debug_equality()) {
             std::cout << "ServerState::compare user_variables_ != rhs.user_variables_\n";
             std::cout << "user_variables_:\n";
-            for (const auto& u : user_variables_)
+            for (const auto& u : user_variables_) {
                 std::cout << "   " << u.name() << " " << u.theValue() << "\n";
+            }
 
             std::cout << "rhs.user_variables_:\n";
-            for (const auto& u : rhs.user_variables_)
+            for (const auto& u : rhs.user_variables_) {
                 std::cout << "   " << u.name() << " " << u.theValue() << "\n";
+            }
         }
 #endif
         return false;
@@ -120,12 +121,14 @@ bool ServerState::compare(const ServerState& rhs) const {
         if (Ecf::debug_equality()) {
             std::cout << "ServerState::compare server_variables_ != rhs.server_variables_\n";
             std::cout << "server_variables_:\n";
-            for (const auto& s : server_variables_)
+            for (const auto& s : server_variables_) {
                 std::cout << "   " << s.name() << " " << s.theValue() << "\n";
+            }
 
             std::cout << "rhs.server_variables_:\n";
-            for (const auto& s : rhs.server_variables_)
+            for (const auto& s : rhs.server_variables_) {
                 std::cout << "   " << s.name() << " " << s.theValue() << "\n";
+            }
         }
 #endif
         return false;
@@ -276,14 +279,16 @@ const Variable& ServerState::findVariable(const std::string& name) const {
 bool ServerState::variable_exists(const std::string& name) const {
     // SEARCH USER variables FIRST
     for (const auto& u : user_variables_) {
-        if (u.name() == name)
+        if (u.name() == name) {
             return true;
+        }
     }
 
     // NOW search server variables
     for (const auto& s : server_variables_) {
-        if (s.name() == name)
+        if (s.name() == name) {
             return true;
+        }
     }
 
     return false;
@@ -309,8 +314,9 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
     // To prevent this we will use a simple count
     char micro                = '%';
     const Variable& micro_var = findVariable(ecf::environment::ECF_MICRO);
-    if (!micro_var.empty() && !micro_var.theValue().empty())
+    if (!micro_var.empty() && !micro_var.theValue().empty()) {
         micro = micro_var.theValue()[0];
+    }
 
     bool double_micro_found    = false;
     std::string::size_type pos = 0;
@@ -321,12 +327,14 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
         //    b/ Allow for recursive substitution. %fred% -> %bill%--> 10
 
         size_t firstPercentPos = cmd.find(micro, pos);
-        if (firstPercentPos == string::npos)
+        if (firstPercentPos == string::npos) {
             break;
+        }
 
         size_t secondPercentPos = cmd.find(micro, firstPercentPos + 1);
-        if (secondPercentPos == string::npos)
+        if (secondPercentPos == string::npos) {
             break;
+        }
 
         if (secondPercentPos - firstPercentPos <= 1) {
             // handle %% with no characters in between, skip over
@@ -335,8 +343,9 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
             double_micro_found = true;
             continue;
         }
-        else
+        else {
             pos = 0;
+        }
 
         string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
 
@@ -374,8 +383,9 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
         }
 
         // Simple Check for infinite recursion
-        if (count > 100)
+        if (count > 100) {
             return false;
+        }
         count++;
     }
 
@@ -393,8 +403,9 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
                 cmd.erase(cmd.begin() + ecf_double_micro_pos);
                 last_pos = ecf_double_micro_pos + 1;
             }
-            else
+            else {
                 break;
+            }
         }
     }
 

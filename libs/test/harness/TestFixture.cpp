@@ -192,9 +192,10 @@ void TestFixture::init(const std::string& project_test_dir) {
             if (0 == client().new_log(the_log_file)) {
                 client().logMsg("Created new log file. msg sent to force new log file to be written to disk");
             }
-            else
+            else {
                 cout << "   Log file " << TestFixture::pathToLogFile() << " creation failed " << client().errorMsg()
                      << "\n";
+            }
         }
         else {
             cout << "   Log file " << the_log_file << " already exists\n";
@@ -433,8 +434,9 @@ std::string TestFixture::taskAbsNodePath(const Defs& theDefs, const std::string&
     std::vector<Task*> vec;
     theDefs.getAllTasks(vec);
     for (Task* t : vec) {
-        if (t->name() == taskName)
+        if (t->name() == taskName) {
             return t->absNodePath();
+        }
     }
 
     cout << "TestFixture::taskAbsNodePath: assert failed: Could not find task " << taskName << "\n";

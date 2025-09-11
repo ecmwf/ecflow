@@ -91,10 +91,12 @@ int main(int argc, char** argv) {
     // Set fontsize if defined in env var
     if (const char* fontSizeCh = getenv("ECFLOWUI_FONT_SIZE")) {
         int fontSize = atoi(fontSizeCh);
-        if (fontSize < 8)
+        if (fontSize < 8) {
             fontSize = 8;
-        else if (fontSize > 32)
+        }
+        else if (fontSize > 32) {
             fontSize = 32;
+        }
         QFont f = app.font();
         f.setPointSize(fontSize);
         app.setFont(f);
@@ -128,8 +130,9 @@ int main(int argc, char** argv) {
     // some settings VConfig loads are session-dependent.
     if (SessionHandler::requestStartupViaSessionManager()) {
         SessionDialog sessionDialog;
-        if (sessionDialog.exec() != QDialog::Accepted)
+        if (sessionDialog.exec() != QDialog::Accepted) {
             startMainWindow = false;
+        }
     }
     else {
         SessionHandler::setTemporarySessionIfReqested(); // user starts with -ts command-line switch?

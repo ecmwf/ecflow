@@ -78,6 +78,23 @@ ecbuild_add_test(
 
 target_clangformat(u_server CONDITION ENABLE_TESTS)
 
+ecbuild_add_test(
+  TARGET
+    u_server_authentication
+  LABELS
+    unit
+  SOURCES
+    test/TestAuthentication.cpp
+    test/TestAuthentication_main.cpp
+  LIBS
+    ecflow_all
+    test_scaffold
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+  TEST_DEPENDS
+    u_base
+)
+target_clangformat(u_server_authentication CONDITION ENABLE_TESTS)
+
 # ================================================================================
 # TEST
 ecbuild_add_test(

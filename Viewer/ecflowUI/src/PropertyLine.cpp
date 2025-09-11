@@ -49,8 +49,9 @@ void FontSizeSpin::setFamily(QString family) {
 }
 
 QString FontSizeSpin::textFromValue(int value) const {
-    if (value >= 0 && value < vals_.count())
+    if (value >= 0 && value < vals_.count()) {
         return QString::number(vals_.at(value));
+    }
 
     return {};
 }
@@ -127,8 +128,9 @@ QList<PropertyLine*> PropertyAndRule::propertyLines() const {
 //=========================================================================
 
 PropertyLineFactory::PropertyLineFactory(VProperty::GuiType type) {
-    if (makers == nullptr)
+    if (makers == nullptr) {
         makers = new std::map<VProperty::GuiType, PropertyLineFactory*>;
+    }
 
     (*makers)[type] = this;
 }
@@ -138,13 +140,15 @@ PropertyLineFactory::~PropertyLineFactory() {
 }
 
 PropertyLine* PropertyLineFactory::create(VProperty* p, bool addLabel, QWidget* parent) {
-    if (!p || !p->link())
+    if (!p || !p->link()) {
         return nullptr;
+    }
 
     VProperty::GuiType t = p->link()->guiType();
     auto j               = makers->find(t);
-    if (j != makers->end())
+    if (j != makers->end()) {
         return (*j).second->make(p, addLabel, parent);
+    }
 
     return nullptr;
 }
@@ -200,18 +204,21 @@ PropertyLine::~PropertyLine() = default;
 void PropertyLine::init() {
     doNotEmitChange_ = true;
     if (prop_->master()) {
-        if (masterTb_->isChecked() != prop_->useMaster())
+        if (masterTb_->isChecked() != prop_->useMaster()) {
             masterTb_->setChecked(prop_->useMaster());
-        else
+        }
+        else {
             slotMaster(prop_->useMaster());
+        }
     }
     else {
         slotReset(prop_->value());
     }
     doNotEmitChange_ = false;
 
-    if (item())
+    if (item()) {
         item()->setToolTip(prop_->param("tooltip"));
+    }
 }
 
 void PropertyLine::slotResetToDefault(bool) {
@@ -243,14 +250,17 @@ void PropertyLine::checkState() {
 
     setEnabledEditable(enabled_);
 
-    if (masterTb_ && masterTb_->isChecked())
+    if (masterTb_ && masterTb_->isChecked()) {
         return;
+    }
 
     if (enabled_) {
-        if (prop_->defaultValue() != currentValue())
+        if (prop_->defaultValue() != currentValue()) {
             defaultTb_->setEnabled(true);
-        else
+        }
+        else {
             defaultTb_->setEnabled(false);
+        }
     }
 }
 
@@ -281,18 +291,21 @@ void PropertyLine::slotMaster(bool b) {
 }
 
 void PropertyLine::slotReset(VProperty* prop, QVariant v) {
-    if (prop == prop_)
+    if (prop == prop_) {
         slotReset(v);
+    }
 }
 
 void PropertyLine::valueChanged() {
-    if (!doNotEmitChange_)
+    if (!doNotEmitChange_) {
         Q_EMIT changed();
+    }
 }
 
 void PropertyLine::addHelper(PropertyLine* line) {
-    if (line)
+    if (line) {
         helpers_[line->property()->name()] = line;
+    }
 }
 
 // A simple dependency on other properties' values
@@ -349,8 +362,9 @@ void PropertyLine::slotRule() {
 
 StringPropertyLine::StringPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
     : PropertyLine(guiProp, addLabel, parent) {
-    if (label_)
+    if (label_) {
         label_->setText(label_->text() + ":");
+    }
 
     le_ = new QLineEdit(parent);
     le_->setObjectName(prop_->name());
@@ -405,8 +419,9 @@ void StringPropertyLine::setEnabledEditable(bool b) {
 
 ColourPropertyLine::ColourPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
     : PropertyLine(guiProp, addLabel, parent) {
-    if (label_)
+    if (label_) {
         label_->setText(label_->text() + ":");
+    }
 
     QFont f;
     QFontMetrics fm(f);
@@ -509,8 +524,9 @@ void ColourPropertyLine::setEnabledEditable(bool b) {
 
 FontPropertyLine::FontPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
     : PropertyLine(guiProp, addLabel, parent) {
-    if (label_)
+    if (label_) {
         label_->setText(label_->text() + ":");
+    }
 
     holderW_ = new QWidget(parent);
 
@@ -561,9 +577,11 @@ QWidget* FontPropertyLine::button() {
 void FontPropertyLine::slotReset(QVariant v) {
     font_ = v.value<QFont>();
 
-    for (int i = 0; i < familyCb_->count(); i++)
-        if (familyCb_->itemText(i) == font_.family())
+    for (int i = 0; i < familyCb_->count(); i++) {
+        if (familyCb_->itemText(i) == font_.family()) {
             familyCb_->setCurrentIndex(i);
+        }
+    }
 
     sizeSpin_->setValue(font_.pointSize());
 
@@ -630,8 +648,9 @@ void FontPropertyLine::setEnabledEditable(bool /*b*/) {
 
 IntPropertyLine::IntPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
     : PropertyLine(guiProp, addLabel, parent) {
-    if (label_)
+    if (label_) {
         label_->setText(label_->text() + ":");
+    }
 
     le_ = new QLineEdit(parent);
     le_->setObjectName(prop_->name());
@@ -760,8 +779,9 @@ void BoolPropertyLine::setEnabledEditable(bool b) {
 
 ComboPropertyLine::ComboPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
     : PropertyLine(guiProp, addLabel, parent) {
-    if (label_)
+    if (label_) {
         label_->setText(label_->text() + ":");
+    }
 
     cb_ = new QComboBox(parent); //(vProp->param("label"));
     cb_->setObjectName(prop_->name());
@@ -770,12 +790,14 @@ ComboPropertyLine::ComboPropertyLine(VProperty* guiProp, bool addLabel, QWidget*
 
     QStringList lst     = prop_->param("values_label").split("/");
     QStringList lstData = prop_->param("values").split("/");
-    if (prop_->param("values_label").simplified().isEmpty())
+    if (prop_->param("values_label").simplified().isEmpty()) {
         lst = lstData;
+    }
 
     assert(lst.count() == lstData.count());
-    for (int i = 0; i < lst.count(); i++)
+    for (int i = 0; i < lst.count(); i++) {
         cb_->addItem(lst[i], lstData[i]);
+    }
 }
 
 QWidget* ComboPropertyLine::item() {
@@ -789,8 +811,9 @@ QWidget* ComboPropertyLine::button() {
 void ComboPropertyLine::slotReset(QVariant v) {
     QStringList lst = prop_->param("values").split("/");
     int idx         = lst.indexOf(v.toString());
-    if (idx != -1)
+    if (idx != -1) {
         cb_->setCurrentIndex(idx);
+    }
 
     PropertyLine::checkState();
     valueChanged();
@@ -840,8 +863,9 @@ void ComboPropertyLine::setEnabledEditable(bool b) {
 
 ComboMultiPropertyLine::ComboMultiPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
     : PropertyLine(guiProp, addLabel, parent) {
-    if (label_)
+    if (label_) {
         label_->setText(label_->text() + ":");
+    }
 
     cb_ = new ComboMulti(parent); //(vProp->param("label"));
     cb_->setObjectName(prop_->name());
@@ -852,8 +876,9 @@ ComboMultiPropertyLine::ComboMultiPropertyLine(VProperty* guiProp, bool addLabel
 
     QStringList lst     = prop_->param("values_label").split("/");
     QStringList lstData = prop_->param("values").split("/");
-    if (prop_->param("values_label").simplified().isEmpty())
+    if (prop_->param("values_label").simplified().isEmpty()) {
         lst = lstData;
+    }
 
     assert(lst.count() == lstData.count());
     for (int i = 0; i < lst.count(); i++) {
@@ -940,8 +965,9 @@ void SoundComboPropertyLine::setEnabledEditable(bool b) {
 
 void SoundComboPropertyLine::slotPlay(bool) {
     int loopCount = 1;
-    if (PropertyLine* line = helpers_.value("sound_loop", NULL))
+    if (PropertyLine* line = helpers_.value("sound_loop", NULL)) {
         loopCount = line->currentValue().toInt();
+    }
 
     Sound::instance()->playSystem(currentValue().toString().toStdString(), loopCount);
 }

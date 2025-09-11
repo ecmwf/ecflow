@@ -30,8 +30,9 @@ py::object Edit::init(py::tuple args, py::dict kw) {
             py::dict d = py::extract<py::dict>(args[i]);
             return args[0].attr("__init__")(d, kw); // calls -> .def(init<dict,dict>() -> Edit(dict,dict)
         }
-        else
+        else {
             throw std::runtime_error("Edit::Edit: only accepts dictionary and key word arguments");
+        }
     }
     py::tuple rest(args.slice(1, py::_));
     return args[0].attr("__init__")(kw); // calls -> .def(init<dict>() -> Edit(const py::dict& dict)

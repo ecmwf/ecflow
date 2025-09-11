@@ -16,6 +16,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/ClientOptionsParser.hpp"
 #include "ecflow/base/cts/CtsCmdRegistry.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
@@ -38,8 +40,9 @@ namespace po = boost::program_options;
 GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* clientEnv) {
     std::vector<std::string> individualCmdVec;
     Str::split(cmdSeries, individualCmdVec, ";");
-    if (individualCmdVec.empty())
+    if (individualCmdVec.empty()) {
         throw std::runtime_error("GroupCTSCmd::GroupCTSCmd: Please provide a list of ';' separated commands\n");
+    }
     if (clientEnv->debug()) {
         for (const auto& i : individualCmdVec) {
             cout << "  CHILD COMMAND = " << i << "\n";
@@ -58,8 +61,9 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         ecf::algorithm::trim(aCmd);
 
         subCmd.clear();
-        if (aCmd.find("--") == std::string::npos)
+        if (aCmd.find("--") == std::string::npos) {
             subCmd = "--";
+        }
         subCmd += aCmd;
 
         // handle case like: alter add variable FRED "fre d ddy" /suite
@@ -70,16 +74,18 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         bool replaced_spaces = false;
         for (char& i : subCmd) {
             if (start_quote) {
-                if (i == '"' || i == '\'')
+                if (i == '"' || i == '\'') {
                     start_quote = false;
+                }
                 else if (i == ' ') {
                     i               = '\b'; // "fre d ddy"  => "fre\bd\bddy"
                     replaced_spaces = true;
                 }
             }
             else {
-                if (i == '"' || i == '\'')
+                if (i == '"' || i == '\'') {
                     start_quote = true;
+                }
             }
         }
 
@@ -90,8 +96,9 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         if (replaced_spaces) {
             for (auto& str : subCmdArgs) {
                 for (char& j : str) {
-                    if (j == '\b')
+                    if (j == '\b') {
                         j = ' '; // "fre\bd\bddy"  => "fre d ddy"
+                    }
                 }
             }
         }
@@ -142,24 +149,34 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
 
 bool GroupCTSCmd::isWrite() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->isWrite())
+        if (subCmd->isWrite()) {
             return true;
+        }
     }
     return false;
 }
 
 bool GroupCTSCmd::cmd_updates_defs() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->cmd_updates_defs())
+        if (subCmd->cmd_updates_defs()) {
             return true;
+        }
     }
     return false;
 }
 
+void GroupCTSCmd::set_identity(ecf::Identity identity) {
+    for (const auto& subCmd : cmdVec_) {
+        subCmd->set_identity(identity);
+    }
+    ClientToServerCmd::set_identity(identity);
+}
+
 bool GroupCTSCmd::get_cmd() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->get_cmd())
+        if (subCmd->get_cmd()) {
             return true;
+        }
     }
     return false;
 }
@@ -168,32 +185,36 @@ PrintStyle::Type_t GroupCTSCmd::show_style() const {
     // Only return non default style( PrintStyle::NOTHING ) if sub command
     // contains a show cmd
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->show_cmd())
+        if (subCmd->show_cmd()) {
             return subCmd->show_style();
+        }
     }
     return PrintStyle::NOTHING;
 }
 
 bool GroupCTSCmd::task_cmd() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->task_cmd())
+        if (subCmd->task_cmd()) {
             return true;
+        }
     }
     return false;
 }
 
 bool GroupCTSCmd::terminate_cmd() const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->terminate_cmd())
+        if (subCmd->terminate_cmd()) {
             return true;
+        }
     }
     return false;
 }
 
 bool GroupCTSCmd::why_cmd(std::string& nodePath) const {
     for (Cmd_ptr subCmd : cmdVec_) {
-        if (subCmd->why_cmd(nodePath))
+        if (subCmd->why_cmd(nodePath)) {
             return true;
+        }
     }
     return false;
 }
@@ -202,8 +223,9 @@ void GroupCTSCmd::print(std::string& os) const {
     std::string ret;
     size_t the_size = cmdVec_.size();
     for (size_t i = 0; i < the_size; i++) {
-        if (i != 0)
+        if (i != 0) {
             ret += "; ";
+        }
         cmdVec_[i]->print_only(ret); //  avoid overhead of user@host for each child command
     }
     user_cmd(os, CtsApi::group(ret));
@@ -213,8 +235,9 @@ std::string GroupCTSCmd::print_short() const {
     std::string ret;
     size_t the_size = cmdVec_.size();
     for (size_t i = 0; i < the_size; i++) {
-        if (i != 0)
+        if (i != 0) {
             ret += "; ";
+        }
         ret +=
             cmdVec_[i]
                 ->print_short(); // limit number of paths shown and avoid overhead of user@host for each child command
@@ -224,12 +247,14 @@ std::string GroupCTSCmd::print_short() const {
 
 bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<GroupCTSCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
 
     const std::vector<Cmd_ptr>& rhsCmdVec = the_rhs->cmdVec();
-    if (cmdVec_.size() != rhsCmdVec.size())
+    if (cmdVec_.size() != rhsCmdVec.size()) {
         return false;
+    }
 
     for (size_t i = 0; i < cmdVec_.size(); i++) {
         if (!cmdVec_[i]->equals(rhsCmdVec[i].get())) {
@@ -238,6 +263,14 @@ bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const {
     }
 
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t GroupCTSCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t GroupCTSCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void GroupCTSCmd::addChild(Cmd_ptr childCmd) {
@@ -253,11 +286,13 @@ void GroupCTSCmd::setup_user_authentification(const std::string& user, const std
 }
 
 bool GroupCTSCmd::setup_user_authentification(AbstractClientEnv& env) {
-    if (!UserCmd::setup_user_authentification(env))
+    if (!UserCmd::setup_user_authentification(env)) {
         return false;
+    }
     for (auto& i : cmdVec_) {
-        if (!i->setup_user_authentification(env))
+        if (!i->setup_user_authentification(env)) {
             return false;
+        }
     }
     return true;
 }
@@ -281,29 +316,29 @@ void GroupCTSCmd::cleanup() {
     }
 }
 
-bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const {
-    // Can only run Group cmd if all child commands authenticate
-    size_t cmd_vec_size = cmdVec_.size();
-    for (size_t i = 0; i < cmd_vec_size; i++) {
-        if (!cmdVec_[i]->authenticate(as, errorMsg)) {
-
-            // Log authentication failure:
-            std::string ss;
-            ss += "GroupCTSCmd::authenticate failed: for ";
-            cmdVec_[i]->print(ss);
-            std::stringstream stream;
-            stream << errorMsg;
-            ss += stream.str();
-            log(Log::ERR, ss); // will automatically add end of line
-
-#ifdef DEBUG_GROUP_CMD
-            std::cout << "GroupCTSCmd::authenticate failed for " << ss << "\n";
-#endif
-            return false;
-        }
-    }
-    return true;
-}
+// bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const {
+//     // Can only run Group cmd if all child commands authenticate
+//     size_t cmd_vec_size = cmdVec_.size();
+//     for (size_t i = 0; i < cmd_vec_size; i++) {
+//         if (!cmdVec_[i]->authenticate(as, errorMsg)) {
+//
+//             // Log authentication failure:
+//             std::string ss;
+//             ss += "GroupCTSCmd::authenticate failed: for ";
+//             cmdVec_[i]->print(ss);
+//             std::stringstream stream;
+//             stream << errorMsg;
+//             ss += stream.str();
+//             log(Log::ERR, ss); // will automatically add end of line
+//
+// #ifdef DEBUG_GROUP_CMD
+//             std::cout << "GroupCTSCmd::authenticate failed for " << ss << "\n";
+// #endif
+//             return false;
+//         }
+//     }
+//     return true;
+// }
 
 // in the server
 void GroupCTSCmd::set_client_handle(int client_handle) const {
@@ -332,13 +367,20 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const {
         cmdVec_[i]->print(ret);
         cout << ret << "\n"; // std::cout << "\n";
 #endif
+
         // Let child know about Group command.
         // Only used by ClientHandleCmd and DeleteCmd to transfer client_handle to the sync cmd, in *this* group
         cmdVec_[i]->set_group_cmd(this);
 
         STC_Cmd_ptr theReturnCmd;
         try {
-            theReturnCmd = cmdVec_[i]->doHandleRequest(as);
+            auto& cmd = cmdVec_[i];
+
+            if (auto valid = cmd->check_preconditions(as, theReturnCmd); valid) {
+                // If command preconditions are valid, we just handle the request as usual
+                theReturnCmd = cmdVec_[i]->doHandleRequest(as);
+            }
+            // Otherwise, theReturnCmd has been set in the process of checking the precondictions
         }
         catch (std::exception& e) {
             cmdVec_[i]->cleanup(); // recover memory asap, important when cmd has a large number of paths.
@@ -388,8 +430,9 @@ void GroupCTSCmd::addOption(boost::program_options::options_description& desc) c
 }
 
 void GroupCTSCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    if (clientEnv->debug())
+    if (clientEnv->debug()) {
         cout << "  " << arg() << ": Group Cmd '" << vm[arg()].as<std::string>() << "'\n";
+    }
 
     // Parse and split commands and then parse individually. Assumes commands are separated by ';'
     std::string cmdSeries = vm[GroupCTSCmd::arg()].as<std::string>();

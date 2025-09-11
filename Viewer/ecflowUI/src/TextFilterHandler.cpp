@@ -51,8 +51,9 @@ bool TextFilterItem::operator==(const TextFilterItem& o) const {
 //==============================================
 
 TextFilterHandler* TextFilterHandler::Instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new TextFilterHandler();
+    }
 
     return instance_;
 }
@@ -64,13 +65,15 @@ TextFilterHandler::TextFilterHandler()
 }
 
 int TextFilterHandler::indexOf(const std::string& filter, bool matched, bool caseSensitive) const {
-    if (filter.empty())
+    if (filter.empty()) {
         return -1;
+    }
 
     TextFilterItem item(filter, matched, caseSensitive);
     for (size_t i = 0; i < items_.size(); i++) {
-        if (items_[i] == item)
+        if (items_[i] == item) {
             return i;
+        }
     }
 
     return -1;
@@ -84,20 +87,23 @@ bool TextFilterHandler::containsExceptOne(int index,
                                           const std::string& filter,
                                           bool matched,
                                           bool caseSensitive) const {
-    if (filter.empty())
+    if (filter.empty()) {
         return false;
+    }
 
     TextFilterItem item(filter, matched, caseSensitive);
     for (int i = 0; i < static_cast<int>(items_.size()); i++) {
-        if (i != index && items_[i] == item)
+        if (i != index && items_[i] == item) {
             return true;
+        }
     }
     return false;
 }
 
 bool TextFilterHandler::add(const TextFilterItem& item) {
-    if (item.filter().empty())
+    if (item.filter().empty()) {
         return false;
+    }
 
     items_.push_back(item);
     writeSettings();
@@ -110,13 +116,15 @@ bool TextFilterHandler::add(const std::string& filter, bool matched, bool caseSe
 }
 
 void TextFilterHandler::addLatest(const TextFilterItem& item) {
-    if (item.filter().empty())
+    if (item.filter().empty()) {
         return;
+    }
 
     // Remove if exists
     auto it = std::find(latest_.begin(), latest_.end(), item);
-    if (it != latest_.end())
+    if (it != latest_.end()) {
         latest_.erase(it);
+    }
 
     // trim size
     while (static_cast<int>(latest_.size()) >= maxLatestNum_) {
@@ -135,16 +143,18 @@ void TextFilterHandler::addLatest(const std::string& filter, bool matched, bool 
 }
 
 void TextFilterHandler::remove(int index) {
-    if (index < 0 || index >= static_cast<int>(items_.size()))
+    if (index < 0 || index >= static_cast<int>(items_.size())) {
         return;
+    }
 
     items_.erase(items_.begin() + index);
     writeSettings();
 }
 
 void TextFilterHandler::update(int index, const TextFilterItem& item) {
-    if (index < 0 || index >= static_cast<int>(items_.size()))
+    if (index < 0 || index >= static_cast<int>(items_.size())) {
         return;
+    }
 
     items_[index] = item;
     writeSettings();

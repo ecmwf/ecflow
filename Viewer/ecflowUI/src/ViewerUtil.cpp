@@ -44,8 +44,9 @@ void ViewerUtil::initComboBox(QSettings& settings, QString key, QComboBox* cb) {
         }
     }
 
-    if (cb->currentIndex() == -1)
+    if (cb->currentIndex() == -1) {
         cb->setCurrentIndex(0);
+    }
 }
 
 void ViewerUtil::initComboBoxByData(QString dataValue, QComboBox* cb) {
@@ -57,8 +58,9 @@ void ViewerUtil::initComboBoxByData(QString dataValue, QComboBox* cb) {
         }
     }
 
-    if (cb->currentIndex() == -1)
+    if (cb->currentIndex() == -1) {
         cb->setCurrentIndex(0);
+    }
 }
 
 bool ViewerUtil::initTreeColumnWidth(QSettings& settings, QString key, QTreeView* tree) {
@@ -84,8 +86,9 @@ void ViewerUtil::initStacked(QSettings& settings, QString key, QStackedWidget* s
     Q_ASSERT(stacked);
 
     int v = settings.value(key).toInt();
-    if (v >= 0 && v < stacked->count())
+    if (v >= 0 && v < stacked->count()) {
         stacked->setCurrentIndex(v);
+    }
 }
 
 void ViewerUtil::initButtonGroup(QSettings& settings, QString key, QButtonGroup* bg) {
@@ -280,14 +283,17 @@ QString ViewerUtil::wildcardToRegex(const QString& wc_str) {
                 }
                 else {
                     rx += c;
-                    if (wc[i] == QLatin1Char('^'))
+                    if (wc[i] == QLatin1Char('^')) {
                         rx += wc[i++];
+                    }
                     if (i < wclen) {
-                        if (rx[i] == QLatin1Char(']'))
+                        if (rx[i] == QLatin1Char(']')) {
                             rx += wc[i++];
+                        }
                         while (i < wclen && wc[i] != QLatin1Char(']')) {
-                            if (wc[i] == QLatin1Char('\\'))
+                            if (wc[i] == QLatin1Char('\\')) {
                                 rx += QLatin1Char('\\');
+                            }
                             rx += wc[i++];
                         }
                     }

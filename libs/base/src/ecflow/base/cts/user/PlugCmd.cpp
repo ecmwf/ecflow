@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/Client.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/MoveCmd.hpp"
@@ -39,8 +41,9 @@ class Lock {
 public:
     Lock(const std::string& user, AbstractServer* as) : as_(as) { ok_ = as->lock(user); }
     ~Lock() {
-        if (ok_)
+        if (ok_) {
             as_->unlock();
+        }
     }
     bool ok() const { return ok_; }
 
@@ -65,8 +68,9 @@ static void restore(NodeContainer* container) {
 
 bool PlugCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<PlugCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
+    }
     if (source_ != the_rhs->source()) {
         return false;
     }
@@ -74,6 +78,14 @@ bool PlugCmd::equals(ClientToServerCmd* rhs) const {
         return false;
     }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t PlugCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t PlugCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 void PlugCmd::print(std::string& os) const {
@@ -97,8 +109,9 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
     }
 
     node_ptr sourceNode = defs->findAbsNode(source_);
-    if (!sourceNode.get())
+    if (!sourceNode.get()) {
         throw std::runtime_error("Plug command failed. Could not find source path " + source_);
+    }
 
     // Moving a node which is active, or submitted, will lead to zombie's. hence prevent
     if (sourceNode->state() == NState::ACTIVE || sourceNode->state() == NState::SUBMITTED) {
@@ -177,8 +190,9 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
 #ifdef ECF_OPENSSL
                 if (!as->ssl().empty()) {
                     ecf::Openssl openssl;
-                    if (!openssl.enable_no_throw(host, port, as->ssl()))
+                    if (!openssl.enable_no_throw(host, port, as->ssl())) {
                         throw std::runtime_error("PlugCmd::doHandleRequest Could not enable ssl for " + as->ssl());
+                    }
                     openssl.init_for_client();
 
                     SslClient theClient(io, openssl.context(), cts_cmd, host, port);
@@ -223,17 +237,20 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
 
     if (sourceNode->parent() == destNode->parent()) {
         Node* parent = sourceNode->parent();
-        if (parent)
+        if (parent) {
             parent->move_peer(sourceNode.get(), destNode.get());
-        else
+        }
+        else {
             defs->move_peer(sourceNode.get(), destNode.get());
+        }
     }
     else {
 
         // If the destination is task, replace with its parent
         Node* theDestNode = destNode.get();
-        if (theDestNode->isTask())
+        if (theDestNode->isTask()) {
             theDestNode = theDestNode->parent();
+        }
 
         // Before we do remove the source node, check its ok to add it as a child
         std::string errorMsg;
@@ -283,8 +300,9 @@ void PlugCmd::addOption(boost::program_options::options_description& desc) const
 void PlugCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     vector<string> args = vm[arg()].as<vector<string>>();
 
-    if (ace->debug())
+    if (ace->debug()) {
         dumpVecArgs(PlugCmd::arg(), args);
+    }
 
     if (args.size() != 2) {
         std::stringstream ss;

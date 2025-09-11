@@ -158,9 +158,11 @@ void TableNodeView::setSortingEnabledNoExec(bool b) {
 // Collects the selected list of indexes
 QModelIndexList TableNodeView::selectedList() {
     QModelIndexList lst;
-    Q_FOREACH (QModelIndex idx, selectedIndexes())
-        if (idx.column() == 0)
+    Q_FOREACH (QModelIndex idx, selectedIndexes()) {
+        if (idx.column() == 0) {
             lst << idx;
+        }
+    }
     return lst;
 }
 
@@ -198,15 +200,17 @@ VInfo_ptr TableNodeView::currentSelection() {
 void TableNodeView::setCurrentSelection(VInfo_ptr info) {
     // While the current is being selected we do not allow
     // another setCurrent call go through
-    if (setCurrentIsRunning_)
+    if (setCurrentIsRunning_) {
         return;
+    }
 
     setCurrentIsRunning_ = true;
     QModelIndex idx      = model_->infoToIndex(info);
     if (idx.isValid()) {
 #ifdef _UI_TABLENODEVIEW_DEBUG
-        if (info)
+        if (info) {
             UiLog().dbg() << "TableNodeView::setCurrentSelection --> " << info->path();
+        }
 #endif
         setCurrentIndex(idx);
     }
@@ -216,8 +220,9 @@ void TableNodeView::setCurrentSelection(VInfo_ptr info) {
 void TableNodeView::setCurrentSelectionAfterUpdate(VInfo_ptr info) {
     // While the current is being selected we do not allow
     // another setCurrent call go through
-    if (setCurrentAfterUpdateIsRunning_)
+    if (setCurrentAfterUpdateIsRunning_) {
         return;
+    }
 
     setCurrentAfterUpdateIsRunning_ = true;
     setCurrentSelection(info);
@@ -276,8 +281,9 @@ void TableNodeView::handleContextMenu(QModelIndex indexClicked,
         std::vector<VInfo_ptr> nodeLst;
         for (int i = 0; i < indexLst.count(); i++) {
             VInfo_ptr info = model_->nodeInfo(indexLst[i]);
-            if (!info->isEmpty())
+            if (!info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
 
         actionHandler_->contextMenu(nodeLst, globalPos);
@@ -293,8 +299,9 @@ void TableNodeView::slotCommandShortcut() {
         std::vector<VInfo_ptr> nodeLst;
         for (int i = 0; i < indexLst.count(); i++) {
             VInfo_ptr info = model_->nodeInfo(indexLst[i]);
-            if (info && !info->isEmpty())
+            if (info && !info->isEmpty()) {
                 nodeLst.push_back(info);
+            }
         }
         actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
     }
@@ -383,13 +390,15 @@ void TableNodeView::changeVariableColumn(QString varName) {
 
 void TableNodeView::slotHeaderContextMenu(const QPoint& position) {
     int section = header_->logicalIndexAt(position);
-    if (section < 0 || section >= header_->count())
+    if (section < 0 || section >= header_->count()) {
         return;
+    }
 
     int visCnt = 0;
     for (int i = 0; i < header_->count(); i++) {
-        if (!header_->isSectionHidden(i))
+        if (!header_->isSectionHidden(i)) {
             visCnt++;
+        }
     }
 
     QList<QAction*> lst;
@@ -494,18 +503,21 @@ void TableNodeView::readSettings(VSettings* vs) {
 
     vs->endGroup();
 
-    if (orderVec.size() != visVec.size() || orderVec.size() != wVec.size())
+    if (orderVec.size() != visVec.size() || orderVec.size() != wVec.size()) {
         return;
+    }
 
     for (size_t i = 0; i < orderVec.size(); i++) {
         std::string id = orderVec[i];
         for (int j = 0; j < model_->columnCount(QModelIndex()); j++) {
             if (model_->headerData(j, Qt::Horizontal, Qt::UserRole).toString().toStdString() == id) {
-                if (visVec[i] == 0)
+                if (visVec[i] == 0) {
                     header()->setSectionHidden(j, true);
+                }
 
-                else if (wVec[i] > 0)
+                else if (wVec[i] > 0) {
                     setColumnWidth(j, wVec[i]);
+                }
 
                 break;
             }
@@ -514,12 +526,15 @@ void TableNodeView::readSettings(VSettings* vs) {
 
     if (header_->count() > 0) {
         int visCnt = 0;
-        for (int i = 0; i < header_->count(); i++)
-            if (!header_->isSectionHidden(i))
+        for (int i = 0; i < header_->count(); i++) {
+            if (!header_->isSectionHidden(i)) {
                 visCnt++;
+            }
+        }
 
-        if (visCnt == 0)
+        if (visCnt == 0) {
             header()->setSectionHidden(0, false);
+        }
     }
 
     sortByColumn(sortColumn, (sortOrder == 0) ? Qt::AscendingOrder : Qt::DescendingOrder);
@@ -608,8 +623,9 @@ void TableNodeHeader::setModel(QAbstractItemModel* model) {
     if (model) {
         for (int i = 0; i < model->columnCount(); i++) {
             QString id = model->headerData(i, Qt::Horizontal, Qt::UserRole).toString();
-            if (id == "status")
+            if (id == "status") {
                 customButton_.insert(i, TableNodeHeaderButton(id));
+            }
         }
     }
     QHeaderView::setModel(model);
@@ -626,16 +642,19 @@ QRect cbRect(0,0,12,12);
     customButton_[logicalIndex].setRect(cbRect);
     painter->drawPixmap(cbRect,pix);*/
 
-    if (!rect.isValid())
+    if (!rect.isValid()) {
         return;
+    }
 
     QStyleOptionHeader opt;
     initStyleOption(&opt);
     QStyle::State state = QStyle::State_None;
-    if (isEnabled())
+    if (isEnabled()) {
         state |= QStyle::State_Enabled;
-    if (window()->isActiveWindow())
+    }
+    if (window()->isActiveWindow()) {
         state |= QStyle::State_Active;
+    }
 
     bool clickable;
 
@@ -676,8 +695,9 @@ QRect cbRect(0,0,12,12);
     //                                     Qt::DisplayRole).toString();
 
     QVariant foregroundBrush;
-    if (foregroundBrush.canConvert<QBrush>())
+    if (foregroundBrush.canConvert<QBrush>()) {
         opt.palette.setBrush(QPalette::ButtonText, qvariant_cast<QBrush>(foregroundBrush));
+    }
 
     QPointF oldBO = painter->brushOrigin();
     QVariant backgroundBrush;
@@ -691,14 +711,18 @@ QRect cbRect(0,0,12,12);
     int visual = visualIndex(logicalIndex);
     assert(visual != -1);
 
-    if (count() == 1)
+    if (count() == 1) {
         opt.position = QStyleOptionHeader::OnlyOneSection;
-    else if (visual == 0)
+    }
+    else if (visual == 0) {
         opt.position = QStyleOptionHeader::Beginning;
-    else if (visual == count() - 1)
+    }
+    else if (visual == count() - 1) {
         opt.position = QStyleOptionHeader::End;
-    else
+    }
+    else {
         opt.position = QStyleOptionHeader::Middle;
+    }
 
     opt.orientation = Qt::Horizontal;
 
@@ -722,9 +746,10 @@ QRect cbRect(0,0,12,12);
     painter->restore();
 
     int rightPos = rect.right();
-    if (isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
+    if (isSortIndicatorShown() && sortIndicatorSection() == logicalIndex) {
         opt.sortIndicator =
             (sortIndicatorOrder() == Qt::AscendingOrder) ? QStyleOptionHeader::SortDown : QStyleOptionHeader::SortUp;
+    }
 
     if (opt.sortIndicator != QStyleOptionHeader::None) {
         QStyleOptionHeader subopt = opt;

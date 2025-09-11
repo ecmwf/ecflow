@@ -10,7 +10,6 @@
 
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
@@ -25,10 +24,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 /// Simulate definition files that are created on then fly. This allows us to validate
 /// Defs file, to check for correctness
@@ -38,13 +34,13 @@ BOOST_AUTO_TEST_SUITE(S_Simulator)
 BOOST_AUTO_TEST_SUITE(T_AutoRestore)
 
 BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
-    cout << "Simulator:: ...test_autorestore_suite\n";
+    std::cout << "Simulator:: ...test_autorestore_suite\n";
     // ****: Since we have no time dependencies the simulator calendar increment
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
     theDefs.server_state().add_or_update_user_variables(
         ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
-    string s1_path;
+    std::string s1_path;
     {
         ClockAttr clockAttr(true);
         clockAttr.date(12, 10, 2009); // 12 October 2009 was a Monday
@@ -89,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
 }
 
 BOOST_AUTO_TEST_CASE(test_autorestore_family) {
-    cout << "Simulator:: ...test_autorestore_family\n";
+    std::cout << "Simulator:: ...test_autorestore_family\n";
 
     // *** Autoarchiving takes place in Defs::updatecalendar(..) which happens every 60/seconds
     // *** Autorestore   takes place immediately after state change, hence if could occur before updateCalendar has run
@@ -153,8 +149,9 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
     std::vector<Family*> famVec;
     theDefs.getAllFamilies(famVec);
     for (auto f : famVec) {
-        if (f->name() == "do_autorestore")
+        if (f->name() == "do_autorestore") {
             continue;
+        }
         BOOST_CHECK_MESSAGE(f->get_flag().is_set(ecf::Flag::RESTORED),
                             "Expected family " << f->absNodePath() << " to be restored");
         BOOST_CHECK_MESSAGE(!f->get_flag().is_set(ecf::Flag::ARCHIVED),

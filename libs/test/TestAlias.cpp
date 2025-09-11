@@ -9,9 +9,8 @@
  */
 
 #include <iostream>
-#include <limits> // for std::numeric_limits<int>::max()
+#include <limits>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
@@ -19,9 +18,9 @@
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/cts/user/CFileCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/NOrder.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -29,10 +28,7 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 ///
 ///    This test will TEST:
@@ -57,8 +53,9 @@ void wait_for_alias_to_complete(const std::string& alias_path) {
         BOOST_REQUIRE_MESSAGE(alias.get(),
                               "Could not locate created alias at path " << alias_path << "\n"
                                                                         << TestFixture::client().errorMsg());
-        if (alias->state() == NState::COMPLETE)
+        if (alias->state() == NState::COMPLETE) {
             break;
+        }
         sleep(2);
     }
 }
@@ -237,7 +234,8 @@ BOOST_AUTO_TEST_CASE(test_alias) {
     defs->get_all_aliases(aliases);
     BOOST_REQUIRE_MESSAGE(aliases.empty(), "Alias deletion falied\n" << TestFixture::client().errorMsg());
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

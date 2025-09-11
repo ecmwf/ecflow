@@ -51,11 +51,13 @@ bool TextPagerSearchInterface::findString(QString str,
                                           QTextCursor::MoveOperation move,
                                           int /*iteration*/,
                                           StringMatchMode::Mode matchMode) {
-    if (!editor_)
+    if (!editor_) {
         return false;
+    }
 
-    if (editor_->document()->documentSize() == 0)
+    if (editor_->document()->documentSize() == 0) {
         return false;
+    }
 
     bool doSearch = true;
     if (str.simplified().isEmpty()) {
@@ -68,14 +70,17 @@ bool TextPagerSearchInterface::findString(QString str,
 
     TextPagerDocument::FindMode mode = TextPagerDocument::FindWrap;
 
-    if (flags & QTextDocument::FindCaseSensitively)
+    if (flags & QTextDocument::FindCaseSensitively) {
         mode |= TextPagerDocument::FindCaseSensitively;
+    }
 
-    if (flags & QTextDocument::FindBackward)
+    if (flags & QTextDocument::FindBackward) {
         mode |= TextPagerDocument::FindBackward;
+    }
 
-    if (flags & QTextDocument::FindWholeWords)
+    if (flags & QTextDocument::FindWholeWords) {
         mode |= TextPagerDocument::FindWholeWords;
+    }
 
     bool found = false;
 
@@ -143,8 +148,9 @@ bool TextPagerSearchInterface::findString(QString str,
 }
 
 void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload) {
-    if (editor_->document()->documentSize() == 0)
+    if (editor_->document()->documentSize() == 0) {
         return;
+    }
 
     bool performSearch = vpPerformAutomaticSearch_->value().toBool();
 
@@ -170,8 +176,9 @@ void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload
 
         // case sensitivity
         bool caseSensitive = vpAutomaticSearchCase_->value().toBool();
-        if (caseSensitive)
+        if (caseSensitive) {
             findFlags = findFlags | QTextDocument::FindCaseSensitively;
+        }
 
         // string match mode
         std::string matchMode(vpAutomaticSearchMode_->valueAsStdString());
@@ -202,8 +209,9 @@ void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload
 }
 
 void TextPagerSearchInterface::refreshSearch() {
-    if (!editor_)
+    if (!editor_) {
         return;
+    }
 
     TextPagerCursor cursor(editor_->textCursor());
     if (cursor.hasSelection()) {
@@ -213,18 +221,21 @@ void TextPagerSearchInterface::refreshSearch() {
 }
 
 void TextPagerSearchInterface::clearHighlights() {
-    if (editor_)
+    if (editor_) {
         editor_->clearSearchHighlighter();
+    }
 }
 
 void TextPagerSearchInterface::enableHighlights() {
-    if (editor_)
+    if (editor_) {
         editor_->setEnableSearchHighlighter(true);
+    }
 }
 
 void TextPagerSearchInterface::disableHighlights() {
-    if (editor_)
+    if (editor_) {
         editor_->setEnableSearchHighlighter(false);
+    }
 }
 
 void TextPagerSearchInterface::gotoLastLine() {

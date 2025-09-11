@@ -94,8 +94,9 @@ void DashboardDockTitleWidget::addActions(QList<QAction*> lst) {
 
         actionLayout_->addWidget(tb);
 
-        if (!ac->isEnabled())
+        if (!ac->isEnabled()) {
             tb->hide();
+        }
 
         actionTbList_ << tb;
 

@@ -33,15 +33,17 @@ MeterEditor::MeterEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "meter");
 
-    if (a->data().count() < 5)
+    if (a->data().count() < 5) {
         return;
+    }
 
     oriVal_ = a->data().at(2).toInt();
     int min = a->data().at(3).toInt();
     int max = a->data().at(4).toInt();
 
-    if (min > max || oriVal_ < min || oriVal_ > max)
+    if (min > max || oriVal_ < min || oriVal_ > max) {
         return;
+    }
 
     w_->nameLabel_->setText(a->data().at(1));
     w_->valueSpin_->setRange(min, max);

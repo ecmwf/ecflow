@@ -135,8 +135,9 @@ void TriggerTableWidget::setInfo(VInfo_ptr info, bool dependency) {
     info_       = info;
     dependency_ = dependency;
 
-    if (!info_ || !info_->isNode() || !info_->node())
+    if (!info_ || !info_->isNode() || !info_->node()) {
         return;
+    }
 
     VNode* n = info_->node();
     Q_ASSERT(n);
@@ -170,8 +171,9 @@ void TriggerTableWidget::slotTriggerClicked(TriggerTableItem* item) {
     Q_ASSERT(item);
 
     if (!depBrowser_->document()->isEmpty() && lastSelectedItem_ && lastSelectedItem_->hasData()) {
-        if (item->item() && item->item()->sameContents(lastSelectedItem_->item()))
+        if (item->item() && item->item()->sameContents(lastSelectedItem_->item())) {
             return;
+        }
     }
 
     slotTriggerSelection(item);
@@ -183,16 +185,18 @@ void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item) {
 
     lastSelectedItem_ = VInfo::createFromItem(item->item());
 
-    if (!depInfoWidget_->isVisible())
+    if (!depInfoWidget_->isVisible()) {
         return;
+    }
 
     QString txt = tr("&nbsp; <TGTYPE> <TG> triggers these parents/children of <CTYPE> <CITEM>");
     QString tgName, tgType;
     QColor col(255, 255, 255);
 
     VItem* currentItem = nullptr;
-    if (info_)
+    if (info_) {
         currentItem = info_->item();
+    }
 
     if (currentItem) {
         tgName = currentItem->name();
@@ -218,8 +222,9 @@ void TriggerTableWidget::slotTriggeredClicked(TriggerTableItem* item) {
     Q_ASSERT(item);
 
     if (!depBrowser_->document()->isEmpty() && lastSelectedItem_ && lastSelectedItem_->hasData()) {
-        if (item->item() && item->item()->sameContents(lastSelectedItem_->item()))
+        if (item->item() && item->item()->sameContents(lastSelectedItem_->item())) {
             return;
+        }
     }
 
     slotTriggeredSelection(item);
@@ -231,16 +236,18 @@ void TriggerTableWidget::slotTriggeredSelection(TriggerTableItem* item) {
 
     lastSelectedItem_ = VInfo::createFromItem(item->item());
 
-    if (!depInfoWidget_->isVisible())
+    if (!depInfoWidget_->isVisible()) {
         return;
+    }
 
     QString txt = tr("&nbsp; <TYPE> <ITEM> is triggered by these parents/children of <CTYPE> <CITEM>");
     QString tgType, tgName;
     QColor col(255, 255, 255);
 
     VItem* currentItem = nullptr;
-    if (info_)
+    if (info_) {
         currentItem = info_->item();
+    }
 
     if (currentItem) {
         tgName = currentItem->name();
@@ -284,14 +291,16 @@ void TriggerTableWidget::slotShowDependencyInfo(bool b) {
 }
 
 void TriggerTableWidget::on_depInfoCloseTb__clicked() {
-    if (depInfoWidget_->isVisible())
+    if (depInfoWidget_->isVisible()) {
         Q_EMIT depInfoWidgetClosureRequested();
+    }
 }
 
 void TriggerTableWidget::anchorClicked(const QUrl& link) {
     VInfo_ptr info = VInfo::createFromPath(info_->server(), link.toString().toStdString());
-    if (info)
+    if (info) {
         Q_EMIT linkSelected(info);
+    }
 }
 
 void TriggerTableWidget::beginTriggerUpdate() {
@@ -336,8 +345,9 @@ void TriggerTableWidget::setTriggeredScanner(TriggeredScanner* scanner) {
 void TriggerTableWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect) {
     // The node view only contains one item (=info_) so we simply rerender it to get the
     // update
-    if (info_ && info_->node() == node)
+    if (info_ && info_->node() == node) {
         nodeView_->rerender();
+    }
 
     triggerModel_->nodeChanged(node, aspect);
     triggeredModel_->nodeChanged(node, aspect);

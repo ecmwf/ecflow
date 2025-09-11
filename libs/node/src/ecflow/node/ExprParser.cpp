@@ -533,14 +533,18 @@ AstRoot* createRootNode(const tree_iter_t& i, const std::map<parser_id, std::str
     }
 #endif
 
-    if (i->value.id() == ExpressionGrammer::equal_1_ID)
+    if (i->value.id() == ExpressionGrammer::equal_1_ID) {
         return new AstEqual();
-    if (i->value.id() == ExpressionGrammer::equal_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::equal_2_ID) {
         return new AstEqual();
-    if (i->value.id() == ExpressionGrammer::and_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::and_ID) {
         return new AstAnd();
-    if (i->value.id() == ExpressionGrammer::or_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::or_ID) {
         return new AstOr();
+    }
     // Needed so that testing , when recreating expression uses same name for not.
     if (i->value.id() == ExpressionGrammer::not1_ID) {
         auto* astnot = new AstNot();
@@ -557,38 +561,53 @@ AstRoot* createRootNode(const tree_iter_t& i, const std::map<parser_id, std::str
         astnot->set_root_name("! ");
         return astnot;
     }
-    if (i->value.id() == ExpressionGrammer::plus_ID)
+    if (i->value.id() == ExpressionGrammer::plus_ID) {
         return new AstPlus();
+    }
 
-    if (i->value.id() == ExpressionGrammer::not_equal_1_ID)
+    if (i->value.id() == ExpressionGrammer::not_equal_1_ID) {
         return new AstNotEqual();
-    if (i->value.id() == ExpressionGrammer::not_equal_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::not_equal_2_ID) {
         return new AstNotEqual();
-    if (i->value.id() == ExpressionGrammer::greater_equals_1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::greater_equals_1_ID) {
         return new AstGreaterEqual();
-    if (i->value.id() == ExpressionGrammer::greater_equals_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::greater_equals_2_ID) {
         return new AstGreaterEqual();
-    if (i->value.id() == ExpressionGrammer::less_equals_1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::less_equals_1_ID) {
         return new AstLessEqual();
-    if (i->value.id() == ExpressionGrammer::less_equals_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::less_equals_2_ID) {
         return new AstLessEqual();
-    if (i->value.id() == ExpressionGrammer::less_than_1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::less_than_1_ID) {
         return new AstLessThan();
-    if (i->value.id() == ExpressionGrammer::less_than_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::less_than_2_ID) {
         return new AstLessThan();
-    if (i->value.id() == ExpressionGrammer::greater_than_1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::greater_than_1_ID) {
         return new AstGreaterThan();
-    if (i->value.id() == ExpressionGrammer::greater_than_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::greater_than_2_ID) {
         return new AstGreaterThan();
+    }
 
-    if (i->value.id() == ExpressionGrammer::minus_ID)
+    if (i->value.id() == ExpressionGrammer::minus_ID) {
         return new AstMinus();
-    if (i->value.id() == ExpressionGrammer::multiply_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::multiply_ID) {
         return new AstMultiply();
-    if (i->value.id() == ExpressionGrammer::divide_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::divide_ID) {
         return new AstDivide();
-    if (i->value.id() == ExpressionGrammer::modulo_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::modulo_ID) {
         return new AstModulo();
+    }
     LOG_ASSERT(false, "");
     return nullptr;
 }
@@ -637,68 +656,94 @@ AstRoot* createRootNode(const tree_iter_t& i, const std::map<parser_id, std::str
 // }
 
 static bool is_not(const tree_iter_t& i) {
-    if (i->value.id() == ExpressionGrammer::not1_ID)
+    if (i->value.id() == ExpressionGrammer::not1_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::not2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::not2_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::not3_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::not3_ID) {
         return true;
+    }
     return false;
 }
 static bool child_has(const tree_iter_t& i, int id) {
     for (auto& t : i->children) {
-        if (t.value.id() == id)
+        if (t.value.id() == id) {
             return true;
+        }
     }
     return false;
 }
 static bool is_root_node(const tree_iter_t& i) {
-    if (i->value.id() == ExpressionGrammer::equal_1_ID)
+    if (i->value.id() == ExpressionGrammer::equal_1_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::equal_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::equal_2_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::and_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::and_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::or_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::or_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::not1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::not1_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::not2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::not2_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::not3_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::not3_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::plus_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::plus_ID) {
         return true;
+    }
 
-    if (i->value.id() == ExpressionGrammer::not_equal_1_ID)
+    if (i->value.id() == ExpressionGrammer::not_equal_1_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::not_equal_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::not_equal_2_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::greater_equals_1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::greater_equals_1_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::greater_equals_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::greater_equals_2_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::less_equals_1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::less_equals_1_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::less_equals_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::less_equals_2_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::less_than_1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::less_than_1_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::less_than_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::less_than_2_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::greater_than_1_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::greater_than_1_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::greater_than_2_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::greater_than_2_ID) {
         return true;
+    }
 
-    if (i->value.id() == ExpressionGrammer::minus_ID)
+    if (i->value.id() == ExpressionGrammer::minus_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::multiply_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::multiply_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::divide_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::divide_ID) {
         return true;
-    if (i->value.id() == ExpressionGrammer::modulo_ID)
+    }
+    if (i->value.id() == ExpressionGrammer::modulo_ID) {
         return true;
+    }
     return false;
 }
 
@@ -774,8 +819,9 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
 
         string thevalue(i->value.begin(), i->value.end());
         ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
-        if (thevalue == Event::SET())
+        if (thevalue == Event::SET()) {
             return new AstEventState(true);
+        }
         assert(thevalue == Event::CLEAR());
         return new AstEventState(false);
     }
@@ -851,16 +897,20 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         AstRoot* someRoot = createRootNode(i->children.begin() + 1, rule_names);
         if (someRoot) {
             Ast* left = doCreateAst(i->children.begin(), rule_names, someRoot);
-            if (left)
+            if (left) {
                 someRoot->addChild(left);
+            }
             Ast* right = doCreateAst(i->children.begin() + 2, rule_names, someRoot);
-            if (right)
+            if (right) {
                 someRoot->addChild(right);
+            }
 
-            if (top)
+            if (top) {
                 top->addChild(someRoot);
-            else
+            }
+            else {
                 return someRoot;
+            }
         }
     }
     else if (is_root_node(i) && i->children.size() == 2) {
@@ -868,16 +918,20 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         AstRoot* someRoot = createRootNode(i, rule_names);
 
         Ast* left = doCreateAst(i->children.begin(), rule_names, someRoot);
-        if (left)
+        if (left) {
             someRoot->addChild(left);
+        }
         Ast* right = doCreateAst(i->children.begin() + 1, rule_names, someRoot);
-        if (right)
+        if (right) {
             someRoot->addChild(right);
+        }
 
-        if (top)
+        if (top) {
             top->addChild(someRoot);
-        else
+        }
+        else {
             return someRoot;
+        }
     }
     else if (i->children.size() == 4 && is_not(i->children.begin())) {
         // child 0: notRoot                 0
@@ -892,19 +946,23 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         AstRoot* notRoot = createRootNode(i->children.begin(), rule_names);
 
         Ast* notChild = doCreateAst(i->children.begin() + 1, rule_names, notRoot /*top*/);
-        if (notChild)
+        if (notChild) {
             notRoot->addChild(notChild);
+        }
 
         AstRoot* someRoot = createRootNode(i->children.begin() + 2, rule_names);
         someRoot->addChild(notRoot); // left
 
         Ast* right = doCreateAst(i->children.begin() + 3, rule_names, someRoot /* top*/);
-        if (right)
+        if (right) {
             someRoot->addChild(right);
-        if (top)
+        }
+        if (top) {
             top->addChild(someRoot);
-        else
+        }
+        else {
             return someRoot;
+        }
     }
     else if (i->children.size() == 4 && is_root_node(i->children.begin() + 1) && is_not(i->children.begin() + 2)) {
         // child 0: child                   0
@@ -918,20 +976,24 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
 
         AstRoot* someRoot = createRootNode(i->children.begin() + 1, rule_names);
         Ast* varPath      = doCreateAst(i->children.begin(), rule_names, someRoot /*top*/);
-        if (varPath)
+        if (varPath) {
             someRoot->addChild(varPath); // left
+        }
 
         AstRoot* notRoot = createRootNode(i->children.begin() + 2, rule_names);
         someRoot->addChild(notRoot); // right
 
         Ast* notChild = doCreateAst(i->children.begin() + 3, rule_names, notRoot /*top*/);
-        if (notChild)
+        if (notChild) {
             notRoot->addChild(notChild);
+        }
 
-        if (top)
+        if (top) {
             top->addChild(someRoot);
-        else
+        }
+        else {
             return someRoot;
+        }
     }
     else if (i->children.size() == 2 && is_not(i->children.begin())) {
         // child 1: not     0
@@ -945,14 +1007,17 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         }
         else {
             Ast* left = doCreateAst(i->children.begin() + 1, rule_names, notRoot);
-            if (left)
+            if (left) {
                 notRoot->addChild(left);
+            }
         }
 
-        if (top)
+        if (top) {
             top->addChild(notRoot);
-        else
+        }
+        else {
             return notRoot;
+        }
     }
     else if (i->children.size() >= 5) {
         // Must be multiple and's could have nots  Could have:
@@ -1005,15 +1070,18 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         }
         assert(top);
         assert(childs.size() == 1);
-        if (top)
+        if (top) {
             top->addChild(childs.top());
+        }
     }
     else {
         Ast* child = createAst(i, rule_names);
-        if (top && child)
+        if (top && child) {
             top->addChild(child);
-        else
+        }
+        else {
             return child;
+        }
     }
     return nullptr;
 }
@@ -1057,52 +1125,75 @@ AstTop* createTopAst(tree_parse_info<> info,
 
 bool has_complex_expressions(const std::string& expr) {
     // we allow . and /
-    if (expr.find('(') != string::npos)
+    if (expr.find('(') != string::npos) {
         return true;
-    if (expr.find(':') != string::npos)
+    }
+    if (expr.find(':') != string::npos) {
         return true;
-    if (expr.find('.') != string::npos)
+    }
+    if (expr.find('.') != string::npos) {
         return true;
-    if (expr.find('/') != string::npos)
+    }
+    if (expr.find('/') != string::npos) {
         return true;
-    if (expr.find(" not ") != string::npos)
+    }
+    if (expr.find(" not ") != string::npos) {
         return true;
-    if (expr.find(" and ") != string::npos)
+    }
+    if (expr.find(" and ") != string::npos) {
         return true;
-    if (expr.find(" or ") != string::npos)
+    }
+    if (expr.find(" or ") != string::npos) {
         return true;
-    if (expr.find('!') != string::npos)
+    }
+    if (expr.find('!') != string::npos) {
         return true;
-    if (expr.find("&&") != string::npos)
+    }
+    if (expr.find("&&") != string::npos) {
         return true;
-    if (expr.find("||") != string::npos)
+    }
+    if (expr.find("||") != string::npos) {
         return true;
-    if (expr.find('<') != string::npos)
+    }
+    if (expr.find('<') != string::npos) {
         return true;
-    if (expr.find('>') != string::npos)
+    }
+    if (expr.find('>') != string::npos) {
         return true;
-    if (expr.find('+') != string::npos)
+    }
+    if (expr.find('+') != string::npos) {
         return true;
-    if (expr.find('-') != string::npos)
+    }
+    if (expr.find('-') != string::npos) {
         return true;
-    if (expr.find('*') != string::npos)
+    }
+    if (expr.find('*') != string::npos) {
         return true;
-    if (expr.find('~') != string::npos)
+    }
+    if (expr.find('~') != string::npos) {
         return true;
-    if (expr.find(" ne ") != string::npos)
+    }
+    if (expr.find(" ne ") != string::npos) {
         return true;
-    if (expr.find(" ge ") != string::npos)
+    }
+    if (expr.find(" ge ") != string::npos) {
         return true;
-    if (expr.find("<=") != string::npos)
+    }
+    if (expr.find("<=") != string::npos) {
         return true;
-    if (expr.find(">=") != string::npos)
+    }
+    if (expr.find(">=") != string::npos) {
         return true;
-    if (expr.find(" le ") != string::npos)
+    }
+    if (expr.find(" le ") != string::npos) {
         return true;
-    if (expr.find(" gt ") != string::npos)
+    }
+    if (expr.find(" gt ") != string::npos) {
         return true;
-    if (expr.find(" lt ") != string::npos)
+    }
+    if (expr.find(" lt ") != string::npos) {
         return true;
+    }
     return false;
 }
 

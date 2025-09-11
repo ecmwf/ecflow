@@ -11,6 +11,8 @@
 #ifndef ecflow_core_Log_HPP
 #define ecflow_core_Log_HPP
 
+#include "ecflow/core/Message.hpp"
+
 ///
 /// \brief Simple singleton implementation of log
 ///
@@ -39,7 +41,7 @@
 #include <string>
 #include <vector>
 
-#include "ecflow/core/DurationTimer.hpp"
+#include "ecflow/core/Timer.hpp"
 
 namespace ecf {
 
@@ -216,20 +218,9 @@ bool log_no_newline(Log::LogType, const std::string& message);
 bool log_append(const std::string& message);
 void log_assert(char const* expr, char const* file, long line, const std::string& message);
 
-// allow user to do the following:
-// LOG(Log::WAR,"this is " << path << " ok ");
-//
-// helper, see STRINGIZE() macro
-template <typename Functor>
-std::string stringize_f(Functor const& f) {
-    std::ostringstream out;
-    f(out);
-    return out.str();
-}
-#define STRINGIZE(EXPRESSION) (ecf::stringize_f([&](std::ostringstream& os) { os << EXPRESSION; }))
-#define LOG(level, EXPRESSION) ecf::log(level, STRINGIZE(EXPRESSION))
+#define LOG(level, EXPRESSION) ecf::log(level, MESSAGE(EXPRESSION))
 #define LOG_ASSERT(expr, EXPRESSION) \
-    ((expr) ? (static_cast<void>(0)) : ecf::log_assert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
+    ((expr) ? (static_cast<void>(0)) : ecf::log_assert(#expr, __FILE__, __LINE__, MESSAGE(EXPRESSION)))
 
 } // namespace ecf
 

@@ -25,9 +25,8 @@
 #ifdef DEBUG_TRAVERSER
     #include <iostream>
 #endif
-using namespace std;
+
 using namespace ecf;
-using namespace boost::posix_time;
 
 // ***********************************************************************
 // It was noticed that having a poll of 60 seconds was not very accurate
@@ -85,7 +84,7 @@ void NodeTreeTraverser::start() {
             /// ==========================================================================
             if (60 == serverEnv_.submitJobsInterval()) {
 
-                time_duration time_of_day      = last_time_.time_of_day();
+                auto time_of_day               = last_time_.time_of_day();
                 int seconds_to_minute_boundary = 60 - time_of_day.seconds();
 
 #ifdef DEBUG_TRAVERSER
@@ -96,7 +95,7 @@ void NodeTreeTraverser::start() {
                 if (seconds_to_minute_boundary != 0) {
 
                     // Make sure subsequent polls are *ALIGNED* to minute boundary
-                    next_poll_time_ = last_time_ + seconds(seconds_to_minute_boundary);
+                    next_poll_time_ = last_time_ + boost::posix_time::seconds(seconds_to_minute_boundary);
 #ifdef DEBUG_TRAVERSER
                     std::cout << "  NodeTreeTraverser::start: next_poll_time_(" << to_simple_string(next_poll_time_)
                               << ")\n";
@@ -142,7 +141,7 @@ void NodeTreeTraverser::terminate() {
 
 void NodeTreeTraverser::do_traverse() {
     // since we poll every second, if less than next poll (every 60 seconds) continue.
-    ptime time_now = Calendar::second_clock_time();
+    auto time_now = Calendar::second_clock_time();
     if (time_now < next_poll_time_) {
 
         // minimise the number of node tree traversal, to once every second, but only *IF* required
@@ -164,7 +163,7 @@ void NodeTreeTraverser::do_traverse() {
     // We have SOFT real time, we poll every second, BUT only update the suite calendar at job submission interval.
     // However, we cannot guarantee to hit exactly at the next poll time
     // *** traverse node tree and increment next_poll_time_ ***
-    time_duration duration          = time_now - last_time_;
+    auto duration                   = time_now - last_time_;
     int diff_from_last_time         = duration.total_seconds();
     int submitJobsIntervalInSeconds = serverEnv_.submitJobsInterval();
 
@@ -173,8 +172,9 @@ void NodeTreeTraverser::do_traverse() {
     std::stringstream ss;
     ss << "   NodeTreeTraverser::traverse() diff_from_last_time:" << diff_from_last_time << " running:" << running_
        << " count:" << count_ << " real_diff:" << real_diff << "  time_now:" << to_simple_string(time_now);
-    if (diff_from_last_time == 0)
+    if (diff_from_last_time == 0) {
         ss << ": FIRST time: ";
+    }
 #endif
 
     /// Update server stat's. ie records number of requests for each poll period
@@ -196,7 +196,7 @@ void NodeTreeTraverser::do_traverse() {
     server_->zombie_ctrl().remove_stale_zombies(time_now);
 
 #ifdef DEBUG_TRAVERSER
-    time_duration traverse_duration = Calendar::second_clock_time() - time_now;
+    boost::posix_time::time_duration traverse_duration = Calendar::second_clock_time() - time_now;
     ss << " Traverse duration:" << traverse_duration.total_seconds();
 #endif
 
@@ -227,7 +227,7 @@ void NodeTreeTraverser::do_traverse() {
         {
             ss << ": Shorten the poll time : Current time(" << to_simple_string(time_now) << ") > current poll_time("
                << to_simple_string(next_poll_time_) << ")";
-            time_duration diff = time_now - next_poll_time_;
+            boost::posix_time::time_duration diff = time_now - next_poll_time_;
             ss << " by " << diff.total_seconds() << " seconds: ";
         }
 #endif
@@ -382,14 +382,14 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
         }
         if (jobsParam.timed_out_of_job_generation()) {
             // Implies we timed out, hence time_out_time >= next_poll_time_
-            const ptime& time_out_time = jobsParam.time_out_time();
+            const auto& time_out_time = jobsParam.time_out_time();
 
             // Timeout could occur because job generation started just a few seconds before the poll time.
             // Excessive warnings are avoided by issuing warnings only if `time_out_time > next_poll_time_`.
             // Notice: the following implementation considers 5 seconds of leeway.
             if (!time_out_time.is_special() && time_out_time > next_poll_time_) {
-                const int leeway       = 5;
-                time_duration duration = time_out_time - next_poll_time_;
+                const int leeway = 5;
+                auto duration    = time_out_time - next_poll_time_;
                 if (duration.total_seconds() >= leeway || serverEnv_.submitJobsInterval() != 60) {
 
                     std::stringstream ss;

@@ -29,8 +29,9 @@ InfoPanelDef::InfoPanelDef(const std::string& name)
 InfoPanelHandler::InfoPanelHandler() = default;
 
 InfoPanelHandler* InfoPanelHandler::instance() {
-    if (!instance_)
+    if (!instance_) {
         instance_ = new InfoPanelHandler();
+    }
 
     return instance_;
 }
@@ -105,11 +106,13 @@ void InfoPanelHandler::init(const std::string& configFile) {
 }
 
 void InfoPanelHandler::visible(VInfo_ptr info, std::vector<InfoPanelDef*>& lst) {
-    if (!info || !info.get())
+    if (!info || !info.get()) {
         return;
+    }
 
     for (const auto& panel : panels_) {
-        if (!panel->hidden() && panel->visibleCondition()->execute(info))
+        if (!panel->hidden() && panel->visibleCondition()->execute(info)) {
             lst.push_back(panel);
+        }
     }
 }

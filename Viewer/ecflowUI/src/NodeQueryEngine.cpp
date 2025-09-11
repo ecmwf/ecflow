@@ -40,15 +40,17 @@ NodeQueryEngine::NodeQueryEngine(QObject* parent) : QThread(parent), query_(new 
 NodeQueryEngine::~NodeQueryEngine() {
     delete query_;
 
-    if (parser_)
+    if (parser_) {
         delete parser_;
+    }
 }
 
 bool NodeQueryEngine::runQuery(NodeQuery* query, QStringList allServers) {
     UiLog().dbg() << "NodeQueryEngine::runQuery -->";
 
-    if (isRunning())
+    if (isRunning()) {
         wait();
+    }
 
     stopIt_     = false;
     maxReached_ = false;
@@ -85,8 +87,9 @@ bool NodeQueryEngine::runQuery(NodeQuery* query, QStringList allServers) {
     }
 
     QStringList serverNames = query_->servers();
-    if (query_->servers().isEmpty())
+    if (query_->servers().isEmpty()) {
         serverNames = allServers;
+    }
 
     Q_FOREACH (QString s, serverNames) {
         if (ServerHandler* server = ServerHandler::find(s.toStdString())) {
@@ -95,8 +98,9 @@ bool NodeQueryEngine::runQuery(NodeQuery* query, QStringList allServers) {
     }
 
     if (!query_->rootNode().empty()) {
-        if (servers_.size() != 1)
+        if (servers_.size() != 1) {
             return false;
+        }
 
         rootNode_ = servers_.at(0)->vRoot()->find(query_->rootNode());
         if (!rootNode_) {
@@ -170,8 +174,9 @@ void NodeQueryEngine::run(ServerHandler*, VNode* root) {
 }
 
 void NodeQueryEngine::runRecursively(VNode* node) {
-    if (stopIt_)
+    if (stopIt_) {
         return;
+    }
 
     // Execute the node part
     if (parser_->execute(node)) {
@@ -207,8 +212,9 @@ void NodeQueryEngine::runRecursively(VNode* node) {
 
     for (int i = 0; i < node->numOfChildren(); i++) {
         runRecursively(node->childAt(i));
-        if (stopIt_)
+        if (stopIt_) {
             return;
+        }
     }
 }
 
@@ -285,15 +291,17 @@ NodeFilterEngine::NodeFilterEngine(NodeFilter* owner) : query_(new NodeQuery("tm
 NodeFilterEngine::~NodeFilterEngine() {
     delete query_;
 
-    if (parser_)
+    if (parser_) {
         delete parser_;
+    }
 }
 
 void NodeFilterEngine::setQuery(NodeQuery* query) {
     query_->swap(query);
 
-    if (parser_)
+    if (parser_) {
         delete parser_;
+    }
 
     parser_ = NodeExpressionParser::instance()->parseWholeExpression(query_->query().toStdString());
     if (parser_ == nullptr) {
@@ -306,15 +314,18 @@ void NodeFilterEngine::setQuery(NodeQuery* query) {
 bool NodeFilterEngine::runQuery(ServerHandler* server) {
     rootNode_ = nullptr;
 
-    if (!query_)
+    if (!query_) {
         return false;
+    }
 
     server_ = server;
-    if (!server_)
+    if (!server_) {
         return false;
+    }
 
-    if (!parser_)
+    if (!parser_) {
         return false;
+    }
 
     if (!query_->rootNode().empty() &&
         (query_->servers().count() == 1 && !query_->servers()[0].simplified().isEmpty())) {
@@ -330,10 +341,12 @@ bool NodeFilterEngine::runQuery(ServerHandler* server) {
         }
     }
 
-    if (rootNode_)
+    if (rootNode_) {
         runRecursively(rootNode_);
-    else
+    }
+    else {
         runRecursively(server_->vRoot());
+    }
 
     return true;
 }

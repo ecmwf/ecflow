@@ -362,6 +362,7 @@ static void test_persistence(const Defs& theFixtureDefs) {
     int getRequest       = 0;
     int terminateRequest = 0;
     int groupRequest     = 0;
+    int i                = 0;
     for (const Cmd_ptr& theCmd : cmd_vec) {
 
         // std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
@@ -378,6 +379,7 @@ static void test_persistence(const Defs& theFixtureDefs) {
                 // Avoid TERMINATE_SERVER cmd as this will prematurely cause an exit, wont appear as an error
                 // cerr << "cmd_request = " << cmd_request << "\n";
                 try {
+                    ++i;
                     STC_Cmd_ptr ok_or_error_cmd = cmd_request.handleRequest(&mockServer);
                     if (ok_or_error_cmd) {
                         // Commands like ErrorCmd, OkCmd don't return a cmd_ptr from handleRequest
@@ -407,12 +409,15 @@ static void test_persistence(const Defs& theFixtureDefs) {
             BOOST_REQUIRE_MESSAGE(restoredRequest == cmd_request,
                                   "restoredRequest " << restoredRequest << " cmd_request " << cmd_request);
 
-            if (restoredRequest.getRequest())
+            if (restoredRequest.getRequest()) {
                 getRequest++;
-            if (restoredRequest.terminateRequest())
+            }
+            if (restoredRequest.terminateRequest()) {
                 terminateRequest++;
-            if (restoredRequest.groupRequest())
+            }
+            if (restoredRequest.groupRequest()) {
                 groupRequest++;
+            }
         }
         {
             ClientToServerRequest restoredRequest;

@@ -79,8 +79,9 @@ QWidget* ZombieItemWidget::realWidget() {
 void ZombieItemWidget::reload(VInfo_ptr info) {
     assert(active_);
 
-    if (suspended_)
+    if (suspended_) {
         return;
+    }
 
     clearContents();
 
@@ -196,8 +197,9 @@ void ZombieItemWidget::command(const std::string& cmdName) {
 }
 
 void ZombieItemWidget::lookup(const QModelIndex& index) {
-    if (!info_ || !info_->server())
+    if (!info_ || !info_->server()) {
         return;
+    }
 
     QModelIndex idx = sortModel_->mapToSource(index);
 

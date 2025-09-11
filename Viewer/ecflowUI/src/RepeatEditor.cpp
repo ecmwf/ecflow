@@ -113,8 +113,9 @@ void RepeatEditor::buildList(VRepeatAttr* rep) {
     modelData_.clear();
     int cnt = end - start;
     if (cnt > 1) {
-        for (int i = start; i <= end; i++)
+        for (int i = start; i <= end; i++) {
             modelData_ << QString::fromStdString(rep->value(i));
+        }
 
         model_ = new QStringListModel(this);
         model_->setStringList(modelData_);

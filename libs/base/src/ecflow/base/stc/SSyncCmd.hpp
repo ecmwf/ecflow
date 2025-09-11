@@ -96,8 +96,9 @@ private:
             if (full_defs_) {
                 ar& DefsCache::full_server_defs_as_string_;
             }
-            else
+            else {
                 ar & full_server_defs_as_string_;
+            }
         }
         else {
             ar & full_server_defs_as_string_;

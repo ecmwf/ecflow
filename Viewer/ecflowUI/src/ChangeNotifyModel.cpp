@@ -57,8 +57,9 @@ int ChangeNotifyModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int ChangeNotifyModel::rowCount(const QModelIndex& parent) const {
-    if (!hasData())
+    if (!hasData()) {
         return 0;
+    }
 
     // Parent is the root:
     if (!parent.isValid()) {
@@ -73,8 +74,9 @@ QVariant ChangeNotifyModel::data(const QModelIndex& index, int role) const {
         return {};
     }
     int row = index.row();
-    if (row < 0 || row >= data_->size())
+    if (row < 0 || row >= data_->size()) {
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         VNodeListItem* item = data_->itemAt(row);
@@ -99,8 +101,9 @@ QVariant ChangeNotifyModel::data(const QModelIndex& index, int role) const {
 }
 
 QVariant ChangeNotifyModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole))
+    if (orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::ToolTipRole)) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
     if (role == Qt::DisplayRole || role == Qt::ToolTipRole) {
         switch (section) {
@@ -142,18 +145,21 @@ VInfo_ptr ChangeNotifyModel::nodeInfo(const QModelIndex& index) const {
     }
 
     int row = index.row();
-    if (row < 0 || row >= data_->size())
+    if (row < 0 || row >= data_->size()) {
         return res;
+    }
 
     VNodeListItem* item = data_->itemAt(row);
     Q_ASSERT(item);
     VNode* vnode = item->node();
     Q_ASSERT(vnode);
 
-    if (vnode->isServer())
+    if (vnode->isServer()) {
         return VInfoServer::create(vnode->server());
-    else
+    }
+    else {
         return VInfoNode::create(vnode);
+    }
 
     return res;
 }

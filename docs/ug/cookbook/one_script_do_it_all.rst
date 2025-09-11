@@ -1,7 +1,7 @@
 .. _one_script_do_it_all:
 
 One script Do It All
-//////////////////////
+********************
 
 Thanks to python syntax, provided there is no need to use include to
 merge code, one single python script can be used on the command line,

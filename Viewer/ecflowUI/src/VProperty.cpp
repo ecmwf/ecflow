@@ -40,13 +40,15 @@ VProperty::~VProperty() {
 
     children_.clear();
 
-    if (master_)
+    if (master_) {
         master_->removeObserver(this);
+    }
 }
 
 QVariant VProperty::value() const {
-    if (master_ && useMaster_)
+    if (master_ && useMaster_) {
         return master_->value();
+    }
 
     return value_;
 }
@@ -89,13 +91,15 @@ void VProperty::setDefaultValue(const std::string& val) {
         guiType_      = StringGui;
     }
 
-    if (value_.isNull())
+    if (value_.isNull()) {
         value_ = defaultValue_;
+    }
 }
 
 void VProperty::setValue(const std::string& val) {
-    if (master_ && useMaster_)
+    if (master_ && useMaster_) {
         return;
+    }
 
     bool changed = false;
 
@@ -143,13 +147,15 @@ void VProperty::setValue(const std::string& val) {
         // An error message should be shown!
     }
 
-    if (changed)
+    if (changed) {
         dispatchChange();
+    }
 }
 
 void VProperty::setValue(QVariant val) {
-    if (master_ && useMaster_)
+    if (master_ && useMaster_) {
         return;
+    }
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     if (!defaultValue_.isNull() && defaultValue_.typeId() != val.typeId()) {
 #else
@@ -162,8 +168,9 @@ void VProperty::setValue(QVariant val) {
 
     value_ = val;
 
-    if (changed)
+    if (changed) {
         dispatchChange();
+    }
 }
 
 QString VProperty::valueAsString() const {
@@ -252,8 +259,9 @@ void VProperty::setParam(QString name, QString value) {
 
 QString VProperty::param(QString name) const {
     QMap<QString, QString>::const_iterator it = params_.find(name);
-    if (it != params_.end())
+    if (it != params_.end()) {
         return it.value();
+    }
 
     return {};
 }
@@ -268,8 +276,9 @@ QString VProperty::valueLabel() const {
             QStringList labelLst = vl.split("/");
             if (valLst.count() == labelLst.count()) {
                 int idx = valLst.indexOf(v);
-                if (idx >= 0)
+                if (idx >= 0) {
                     return labelLst[idx];
+                }
             }
         }
     }
@@ -281,8 +290,9 @@ void VProperty::adjustAfterLoad() {
     QString multi = param("multi");
 
     if (!vals.isEmpty()) {
-        if (type_ == SoundType)
+        if (type_ == SoundType) {
             guiType_ = SoundComboGui;
+        }
         else {
             if (multi == "true") {
                 guiType_ = MultiStringComboGui;
@@ -315,26 +325,30 @@ void VProperty::dispatchChange() {
 
 VProperty* VProperty::findChild(QString name) {
     Q_FOREACH (VProperty* p, children_) {
-        if (p->name() == name)
+        if (p->name() == name) {
             return p;
+        }
     }
 
     return nullptr;
 }
 
 VProperty* VProperty::find(const std::string& fullPath) {
-    if (fullPath.empty())
+    if (fullPath.empty()) {
         return nullptr;
+    }
 
-    if (fullPath == strName_)
+    if (fullPath == strName_) {
         return this;
+    }
 
     std::vector<std::string> pathVec;
     ecf::algorithm::split(pathVec, fullPath, ".");
 
     if (pathVec.size() > 0) {
-        if (pathVec.at(0) != strName_)
+        if (pathVec.at(0) != strName_) {
             return nullptr;
+        }
     }
 
     return VProperty::find(pathVec);
@@ -369,8 +383,9 @@ bool VProperty::changed() const {
 }
 
 void VProperty::collectLinks(std::vector<VProperty*>& linkVec) {
-    if (link_)
+    if (link_) {
         linkVec.push_back(link_);
+    }
 
     Q_FOREACH (VProperty* p, children_) {
         p->collectLinks(linkVec);
@@ -378,15 +393,17 @@ void VProperty::collectLinks(std::vector<VProperty*>& linkVec) {
 }
 
 std::string VProperty::path() {
-    if (parent_)
+    if (parent_) {
         return parent_->path() + "." + strName_;
+    }
 
     return strName_;
 }
 
 void VProperty::setMaster(VProperty* m, bool useMaster) {
-    if (master_)
+    if (master_) {
         master_->removeObserver(this);
+    }
 
     master_ = m;
     master_->addObserver(this);
@@ -498,11 +515,13 @@ QFont VProperty::toFont(const std::string& name) {
         QString family = rx.cap(1);
         int size       = rx.cap(2).toInt();
 
-        if (!family.isEmpty())
+        if (!family.isEmpty()) {
             f.setFamily(family);
+        }
 
-        if (size >= 1 && size < 200)
+        if (size >= 1 && size < 200) {
             f.setPointSize(size);
+        }
     }
 
     return f;

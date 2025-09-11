@@ -78,14 +78,16 @@ void VariableModelData::removeDuplicates(const std::vector<Variable>& vars, std:
                 break;
             }
         }
-        if (!hasIt)
+        if (!hasIt) {
             genVars.push_back(it);
+        }
     }
 }
 
 std::string VariableModelData::fullPath() {
-    if (info_ && info_->node())
+    if (info_ && info_->node()) {
         return info_->path();
+    }
 
     return {};
 }
@@ -96,26 +98,30 @@ std::string VariableModelData::name() {
 
 std::string VariableModelData::type() {
     if (info_) {
-        if (info_->isServer())
+        if (info_->isServer()) {
             return "server";
-        else if (info_->node())
+        }
+        else if (info_->node()) {
             return info_->node()->nodeType();
+        }
     }
 
     return {};
 }
 
 VNode* VariableModelData::node() const {
-    if (info_ && info_->isNode())
+    if (info_ && info_->isNode()) {
         return info_->node();
+    }
 
     return nullptr;
 }
 
 VInfo_ptr VariableModelData::info(int index) const {
     if (info_) {
-        if (index < 0 || index >= varNum())
+        if (index < 0 || index >= varNum()) {
             return {};
+        }
 
         std::string p = info_->storedPath();
         if (!isGenVar(index)) {
@@ -132,8 +138,9 @@ VInfo_ptr VariableModelData::info(int index) const {
 }
 
 const std::string& VariableModelData::name(int index) const {
-    if (index < 0 || index >= varNum())
+    if (index < 0 || index >= varNum()) {
         return defaultStr;
+    }
 
     if (!isGenVar(index)) {
         return vars_.at(index).name();
@@ -146,8 +153,9 @@ const std::string& VariableModelData::name(int index) const {
 }
 
 const std::string& VariableModelData::value(int index) const {
-    if (index < 0 || index >= varNum())
+    if (index < 0 || index >= varNum()) {
         return defaultStr;
+    }
 
     if (!isGenVar(index)) {
         return vars_.at(index).theValue();
@@ -161,8 +169,9 @@ const std::string& VariableModelData::value(int index) const {
 
 const std::string& VariableModelData::value(const std::string& n, bool& hasIt) const {
     hasIt = false;
-    if (n.empty())
+    if (n.empty()) {
         return defaultStr;
+    }
 
     for (const auto& var : vars_) {
         if (var.name() == n) {
@@ -205,8 +214,9 @@ int VariableModelData::indexOf(const std::string& varName, bool genVar) const {
         }
     }
 
-    if (!genVar)
+    if (!genVar) {
         return -1;
+    }
 
     for (const auto& genVar : genVars_) {
         idx++;
@@ -334,8 +344,9 @@ bool VariableModelData::updateShadowed(std::set<std::string>& names) {
     for (const auto& name : names) {
         if (hasName(name)) {
             shadowed_.insert(name);
-            if (ori.find(name) == ori.end())
+            if (ori.find(name) == ori.end()) {
                 changed = true;
+            }
         }
     }
 
@@ -405,11 +416,13 @@ bool VariableModelData::update(const std::vector<Variable>& v, const std::vector
 
 #ifdef UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " new list of variables:";
-    for (const auto& i : v)
+    for (const auto& i : v) {
         UiLog().dbg() << "  " << i.name() << "=" << i.theValue();
+    }
     UiLog().dbg() << "   new list of generated variables:";
-    for (const auto& i : vg)
+    for (const auto& i : vg) {
         UiLog().dbg() << "  " << i.name() << "=" << i.theValue();
+    }
 #endif
 
     // We must have the same number of variables
@@ -532,8 +545,9 @@ bool VariableModelDataHandler::updateShadowed() {
 
     names_.clear();
 
-    if (data_.size() == 0)
+    if (data_.size() == 0) {
         return shadowChanged;
+    }
 
     // There are no shadowed vars in the first node
     std::size_t num = data_[0]->varNum();
@@ -543,8 +557,9 @@ bool VariableModelDataHandler::updateShadowed() {
 
     std::size_t dataNum = data_.size();
     for (std::size_t i = 1; i < dataNum; i++) {
-        if (data_[i]->updateShadowed(names_))
+        if (data_[i]->updateShadowed(names_)) {
             shadowChanged = true;
+        }
     }
 
 // #ifdef UI_VARIABLEMODELDATA_DEBUG
@@ -560,8 +575,9 @@ bool VariableModelDataHandler::updateShadowed() {
 }
 
 void VariableModelDataHandler::clear(bool emitSignal) {
-    if (emitSignal)
+    if (emitSignal) {
         Q_EMIT reloadBegin();
+    }
 
     for (auto& it : data_) {
         delete it;
@@ -573,20 +589,23 @@ void VariableModelDataHandler::clear(bool emitSignal) {
 
     broadcastClear();
 
-    if (emitSignal)
+    if (emitSignal) {
         Q_EMIT reloadEnd();
+    }
 }
 
 int VariableModelDataHandler::varNum(int index) const {
-    if (index >= 0 && index < static_cast<int>(data_.size()))
+    if (index >= 0 && index < static_cast<int>(data_.size())) {
         return data_.at(index)->varNum();
+    }
 
     return -1;
 }
 
 VariableModelData* VariableModelDataHandler::data(int index) const {
-    if (index >= 0 && index < static_cast<int>(data_.size()))
+    if (index >= 0 && index < static_cast<int>(data_.size())) {
         return data_.at(index);
+    }
 
     return nullptr;
 }
@@ -618,16 +637,18 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
     if (!data_[dataIndex]->node()->isSuite()) {
         for (std::size_t i = dataIndex + 1; i < data_.size(); i++) {
             if (data_[i]->node()->isSuite()) {
-                if (updateVariables(i))
+                if (updateVariables(i)) {
                     retVal = true;
+                }
 
                 break;
             }
         }
     }
 
-    if (retVal)
+    if (retVal) {
         broadcastUpdate();
+    }
 
     return retVal;
 }
@@ -650,8 +671,9 @@ bool VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>&
 
     bool retVal = updateVariables(dataIndex);
 
-    if (retVal)
+    if (retVal) {
         broadcastUpdate();
+    }
 
     return retVal;
 }
@@ -756,8 +778,9 @@ void VariableModelDataHandler::findVariable(VInfo_ptr info, int& block, int& row
 void VariableModelDataHandler::findBlock(VInfo_ptr info, int& block) const {
     block = -1;
 
-    if (!info)
+    if (!info) {
         return;
+    }
 
     std::string p = info->nodePath();
     if (!p.empty()) {
@@ -773,14 +796,16 @@ void VariableModelDataHandler::findBlock(VInfo_ptr info, int& block) const {
 
 void VariableModelDataHandler::addObserver(VariableModelDataObserver* o) {
     auto it = std::find(observers_.begin(), observers_.end(), o);
-    if (it == observers_.end())
+    if (it == observers_.end()) {
         observers_.push_back(o);
+    }
 }
 
 void VariableModelDataHandler::removeObserver(VariableModelDataObserver* o) {
     auto it = std::find(observers_.begin(), observers_.end(), o);
-    if (it != observers_.end())
+    if (it != observers_.end()) {
         observers_.erase(it);
+    }
 }
 
 void VariableModelDataHandler::broadcastClear() {

@@ -98,8 +98,9 @@ void StandardView::layout(int parentId, bool recursiveExpanding, bool afterIsUni
             }
         }
         // ExpandAll from the root
-        else if (count > 0)
+        else if (count > 0) {
             viewItems_.resize(viewItems_.size() + count);
+        }
     }
     else {
         expanding = false;
@@ -149,16 +150,18 @@ void StandardView::layout(int parentId, bool recursiveExpanding, bool afterIsUni
 
         item->x = xp;
 
-        if (item->alignedRight() > maxRowWidth_)
+        if (item->alignedRight() > maxRowWidth_) {
             maxRowWidth_ = item->right();
+        }
 
 #ifdef _UI_STANDARDVIEW_DEBUG
         // UiLog().dbg() <<  " item=" << currentIndex.data().toString();
 #endif
         // We need to expand the item
         if (recursiveExpanding || isIndexExpanded(currentIndex)) {
-            if (recursiveExpanding)
+            if (recursiveExpanding) {
                 expandedIndexes.insert(currentIndex);
+            }
 
             item->expanded = true;
 
@@ -185,8 +188,9 @@ void StandardView::layout(int parentId, bool recursiveExpanding, bool afterIsUni
         }
     }
 
-    if (!expanding)
+    if (!expanding) {
         return; // nothing changed
+    }
 
 #ifdef _UI_STANDARDVIEW_DEBUG
     // UiLog().dbg() << " update parent total";
@@ -235,8 +239,9 @@ void StandardView::paint(QPainter* painter, const QRegion& region) {
     // UiLog().dbg() << "firstVisible " << firstVisible;
 #endif
 
-    if (firstVisible < 0)
+    if (firstVisible < 0) {
         return;
+    }
 
 #ifdef _UI_STANDARDVIEW_DEBUG
     // UiLog().dbg() << "scrollX" << horizontalScrollBar()->value() << " " << viewport()->width();
@@ -304,16 +309,18 @@ void StandardView::paint(QPainter* painter, const QRegion& region) {
                 if (viewItems_[i].hasMoreSiblings) {
                     indentVec[viewItems_[i].level] = connectorPos(&viewItems_[i]);
                 }
-                else
+                else {
                     indentVec[viewItems_[i].level] = 0;
+                }
             }
 
 #ifdef _UI_STANDARDVIEW_DEBUG
             // UiLog().dbg() << "row: " << i << " " << itemHeight;
 #endif
             // Try to find the first item int the current rect
-            if (y + itemHeight > area.top())
+            if (y + itemHeight > area.top()) {
                 break;
+            }
             y += itemHeight;
         }
 
@@ -339,8 +346,9 @@ void StandardView::paint(QPainter* painter, const QRegion& region) {
 #endif
             }
 
-            if (multipleRects)
+            if (multipleRects) {
                 drawn.append(i);
+            }
         }
     }
 }
@@ -364,12 +372,14 @@ void StandardView::drawRow(QPainter* painter, int start, int /*xOffset*/, int& y
 
     // Init style option
     QStyleOptionViewItem opt;
-    if (selectionModel_->isSelected(item->index))
+    if (selectionModel_->isSelected(item->index)) {
         opt.state |= QStyle::State_Selected;
+    }
 
     int optWidth = 2000;
-    if (item->width > optWidth)
+    if (item->width > optWidth) {
         optWidth = item->width;
+    }
     opt.rect = QRect(item->x, yp, optWidth, item->height);
 
     // We do not render the item if it is outisde the viewport and
@@ -478,8 +488,9 @@ void StandardView::drawRow(QPainter* painter, int start, int /*xOffset*/, int& y
             if (item->hasMoreSiblings) {
                 indentVec[item->level] = lineX1;
             }
-            else
+            else {
                 indentVec[item->level] = 0;
+            }
 
             // If not a top level item (e.i. not a server) and a leaf we need to draw
             // a connector line straight to the item
@@ -524,8 +535,9 @@ void StandardView::drawRow(QPainter* painter, int start, int /*xOffset*/, int& y
             painter->setPen(connectorColour_);
             for (int j = 0; j < firstLevel; j++) {
                 int xp = indentVec[j];
-                if (xp != 0)
+                if (xp != 0) {
                     painter->drawLine(xp, yp, xp, yp + rh);
+                }
             }
         }
     }
@@ -551,8 +563,9 @@ int StandardView::firstVisibleItem(int& offset) const {
         offset = 0;
         // value is the row number
 
-        if (value < 0 || value >= rowCount_)
+        if (value < 0 || value >= rowCount_) {
             return -1;
+        }
 
         return value;
     }
@@ -575,8 +588,9 @@ void StandardView::updateScrollBars() {
 #endif
 
     QSize viewportSize = viewport()->size();
-    if (!viewportSize.isValid())
+    if (!viewportSize.isValid()) {
         viewportSize = QSize(0, 0);
+    }
 
     if (viewItems_.empty()) {
         // doItemsLayout();
@@ -585,15 +599,17 @@ void StandardView::updateScrollBars() {
     int itemsInViewport = 0;
 
     const int itemsCount = viewItems_.size();
-    if (itemsCount == 0)
+    if (itemsCount == 0) {
         return;
+    }
 
     const int viewportHeight = viewportSize.height();
     for (int height = 0, item = itemsCount - 1; item >= 0; item--) {
         // UiLog().dbg() << "item=" << item;
         height += viewItems_[item].height;
-        if (height > viewportHeight)
+        if (height > viewportHeight) {
             break;
+        }
         itemsInViewport++;
     }
 #ifdef _UI_STANDARDVIEW_DEBUG
@@ -602,8 +618,9 @@ void StandardView::updateScrollBars() {
 #endif
 
     if (verticalScrollMode_ == ScrollPerItem) {
-        if (!viewItems_.empty())
+        if (!viewItems_.empty()) {
             itemsInViewport = qMax(1, itemsInViewport);
+        }
 
         // verticalScrollBar()->setRange(0, itemsCount - itemsInViewport);
         verticalScrollBar()->setRange(0, rowCount_ - itemsInViewport);
@@ -636,8 +653,9 @@ QRect StandardView::visualRect(const QModelIndex& index) const {
     // d->executePostedLayout();
 
     int vi = viewIndex(index);
-    if (vi < 0)
+    if (vi < 0) {
         return {};
+    }
 
     int y = coordinateForItem(vi);
     if (y >= 0) {
@@ -681,8 +699,9 @@ int StandardView::coordinateForItem(int item) const {
 // coordinate is in viewport coordinates
 int StandardView::itemAtCoordinate(const QPoint& coordinate) const {
     const std::size_t itemCount = viewItems_.size();
-    if (itemCount == 0)
+    if (itemCount == 0) {
         return -1;
+    }
 
     if (verticalScrollMode_ == ScrollPerItem) {
         // int topRow = verticalScrollBar()->value();
@@ -713,10 +732,12 @@ bool StandardView::isPointInExpandIndicator(int item, QPoint p) const {
 }
 
 void StandardView::updateViewport(const QRect rect) {
-    if (rect.right() < viewport()->rect().right())
+    if (rect.right() < viewport()->rect().right()) {
         viewport()->update(rect.adjusted(0, 0, viewport()->rect().right() - rect.right(), 0));
-    else
+    }
+    else {
         viewport()->update(rect);
+    }
 }
 
 void StandardView::navigateLeft(const QModelIndex& idx) {

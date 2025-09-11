@@ -44,8 +44,9 @@ std::string WhyCmd::why() const {
     std::string reason;
     for (size_t i = 0; i < theReasonWhy.size(); ++i) {
         reason += theReasonWhy[i];
-        if (i != theReasonWhy.size() - 1)
+        if (i != theReasonWhy.size() - 1) {
             reason += "\n";
+        }
     }
     return reason;
 }

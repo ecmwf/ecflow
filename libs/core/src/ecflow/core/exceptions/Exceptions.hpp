@@ -13,6 +13,8 @@
 
 #include <stdexcept>
 
+#include "ecflow/core/Message.hpp"
+
 namespace ecf {
 
 struct Exception : public std::runtime_error
@@ -28,5 +30,12 @@ struct InvalidArgument : public Exception
 };
 
 } // namespace ecf
+
+#define THROW_EXCEPTION(exception, message) \
+    do {                                    \
+        throw exception(MESSAGE(message));  \
+    } while (0)
+
+#define THROW_RUNTIME(message) THROW_EXCEPTION(std::runtime_error, message)
 
 #endif /* ecflow_core_exceptions_Exceptions_HPP */

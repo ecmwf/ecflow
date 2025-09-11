@@ -89,12 +89,14 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
 
         auto h   = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
         iconSize = h;
-        if (iconSize % 2 == 1)
+        if (iconSize % 2 == 1) {
             iconSize += 1;
+        }
 
         iconGap = 1;
-        if (iconSize > 16)
+        if (iconSize > 16) {
             iconGap = 2;
+        }
 
         iconPreGap = ViewerUtil::textWidth(fm, 'A') / 2;
     }
@@ -119,12 +121,14 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
 
         int h    = static_cast<int>(static_cast<float>(fm.height()) * 0.7);
         iconSize = h;
-        if (iconSize % 2 == 1)
+        if (iconSize % 2 == 1) {
             iconSize += 1;
+        }
 
         iconGap = 1;
-        if (iconSize > 16)
+        if (iconSize > 16) {
             iconGap = 2;
+        }
 
         iconPreGap = ViewerUtil::textWidth(fm, 'A') / 2;
     }

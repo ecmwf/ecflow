@@ -32,21 +32,35 @@ If both are specified the command line argument takes precedence
 **Note:** the ECFs are started in different directories so that the
 output and checkpoint files are not overwritten
 
+.. rubric:: ecflow_ui configuration
+
 Adding a new server to ecflow_ui adds the definition to the file::
 
   ~/.ecflowrc/servers. 
 
 This can be modified directly.
 
-You cannot start two ecFlow servers on the same machine with the same
-port number. To simplify users wanting their own ecFlow servers we have
-a script **ecflow_start.sh** that sets up an ecFlow server using a port
-number based on the users own unique user ID
+.. rubric:: Start-up scripts
 
-You can check what port numbers are being used, with netstat: To list
-all open network ports on your machine, run::
-  
-  netstat -lnptu
+A start-up script, :code:`ecflow_start.sh`, is a useful way of starting and configuring ecFlow server.
+An example start-up script is included in the default installation of ecFlow. A start-up script can be used to:
+
+- configure some of the default ecFlow variables
+- check that an ecFlow server is not already running (by using :code:`ecflow_client --ping`)
+- set the appropriate environment (or do it in .profile or .cshrc)
+- backup previous log files and checkpoint files
+- and, eventually, launch :code:`ecflow_server` in the background, and alert operators if a problem occurs while starting the server.
+
+Two ecFlow servers cannot be started on the same host machine with the same port number.
+To allow users that want to run multiple ecFlow servers on the same host machine, the script
+:code:`ecflow_start.sh` can choose a difference port number based on the unique user ID.
+
+Which ports are being used can be checked with netstat. To list
+all open network ports on your machine, consider running the following command:
+
+.. code-block:: shell
+
+   netstat -lnptu
   
 Here is a breakdown of the parameters:
 
@@ -61,11 +75,11 @@ Here is a breakdown of the parameters:
 
 -  u - List all UDP connections
 
+When using non-default ecFlow servers, ecflow_ui needs to be configured
+to recognise the port used. This can be done in the Manage servers dialog.
+
 .. figure:: /_static/ug/starting_the_ecflow_server/image1.png
    :width: 4.02282in
    :height: 2.60417in
 
    Viewing new ECFLOW servers with ecflow_ui
-
-When using non-default ecFlow servers, ecflow_ui needs to be configured
-to recognise the port used. This can be done in the Manage servers dialog.

@@ -13,9 +13,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
@@ -41,8 +40,9 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
       checkPtSaver_(this, io, &serverEnv),
       serverState_(SState::HALTED),
       serverEnv_(serverEnv) {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "-->Server::server starting server on port " << serverEnv.port() << endl;
+    }
 
     // Must be set before checkpt file is loaded.
     defs_->ecf_prune_node_log(serverEnv.ecf_prune_node_log());
@@ -86,8 +86,9 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
 }
 
 BaseServer::~BaseServer() {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "<--BaseServer::~Baseserver exiting server on port " << serverEnv_.port() << endl;
+    }
 
     // Defs destructor may get called after we have returned from main. See ECFLOW-1291
     // In this case the static memory used in ExprDuplicate will not be reclaimed. hence do it here:
@@ -108,8 +109,9 @@ BaseServer::~BaseServer() {
 void BaseServer::handle_terminate() {
     // if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling
     // checkpt and traverser timers, and signals" << endl;
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
+    }
 
     // Cancel signal
     signals_.clear();
@@ -244,8 +246,9 @@ std::pair<std::string, std::string> BaseServer::hostPort() const {
 }
 
 void BaseServer::updateDefs(defs_ptr defs, bool force) {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         std::cout << "   BaseServer::updateDefs: Loading new suites" << endl;
+    }
 
     // After the absorb, input defs will be left with NO suites.
     defs_->absorb(defs.get(), force);
@@ -259,16 +262,18 @@ void BaseServer::updateDefs(defs_ptr defs, bool force) {
 }
 
 void BaseServer::clear_defs() {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   BaseServer::clear_defs()" << endl;
+    }
 
     defs_->clear();
 }
 
 bool BaseServer::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm) {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   BaseServer::checkPtDefs() mode(" << m << ") check_pt_interval(" << check_pt_interval
              << ") check_pt_save_time_alarm(" << check_pt_save_time_alarm << ")" << endl;
+    }
 
     if (m == ecf::CheckPt::UNDEFINED && check_pt_interval == 0 && check_pt_save_time_alarm == 0) {
         return checkPtSaver_.explicitSave(); // will always save
@@ -291,8 +296,9 @@ bool BaseServer::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int ch
 }
 
 void BaseServer::restore_defs_from_checkpt() {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   BaseServer::restore_defs_from_checkpt()" << endl;
+    }
 
     if (serverState_ != SState::HALTED) {
         throw std::runtime_error("Cannot restore from checkpt the server must be halted first");
@@ -307,8 +313,9 @@ void BaseServer::restore_defs_from_checkpt() {
 }
 
 void BaseServer::nodeTreeStateChanged() {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   BaseServer::nodeTreeStateChanged()" << endl;
+    }
 
     // will only actually save if configuration allows it
     checkPtSaver_.saveIfAllowed();
@@ -397,58 +404,36 @@ void BaseServer::restart() {
     ecf::visit_all(*defs_, BootstrapDefs{});
 }
 
+bool BaseServer::reloadPasswdFile(std::string& errorMsg) {
+    if (serverEnv_.debug()) {
+        cout << "   BaseServer::reloadPasswdFile" << endl;
+    }
+    return authentication().reload_passwd_file(errorMsg);
+}
+
+bool BaseServer::reloadCustomPasswdFile(std::string& errorMsg) {
+    if (serverEnv_.debug()) {
+        cout << "   BaseServer::reloadCustomPasswdFile " << endl;
+    }
+    return authentication().reload_custom_passwd_file(errorMsg);
+}
+
 void BaseServer::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,
                                                      bool user_cmd_context) const {
     traverser_.traverse_node_tree_and_job_generate(time_now, user_cmd_context);
 }
 
 bool BaseServer::reloadWhiteListFile(std::string& errorMsg) {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "   BaseServer::reloadWhiteListFile" << endl;
+    }
     return serverEnv_.reloadWhiteListFile(errorMsg);
 }
 
-bool BaseServer::reloadPasswdFile(std::string& errorMsg) {
-    if (serverEnv_.debug())
-        cout << "   BaseServer::reloadPasswdFile" << endl;
-    return serverEnv_.reloadPasswdFile(errorMsg);
-}
-
-bool BaseServer::reloadCustomPasswdFile(std::string& errorMsg) {
-    if (serverEnv_.debug())
-        cout << "   BaseServer::reloadCustomPasswdFile " << endl;
-    return serverEnv_.reloadCustomPasswdFile(errorMsg);
-}
-
-bool BaseServer::authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) {
-    return serverEnv_.authenticateReadAccess(user, custom_user, passwd);
-}
-bool BaseServer::authenticateReadAccess(const std::string& user,
-                                        bool custom_user,
-                                        const std::string& passwd,
-                                        const std::string& path) {
-    return serverEnv_.authenticateReadAccess(user, custom_user, passwd, path);
-}
-bool BaseServer::authenticateReadAccess(const std::string& user,
-                                        bool custom_user,
-                                        const std::string& passwd,
-                                        const std::vector<std::string>& paths) {
-    return serverEnv_.authenticateReadAccess(user, custom_user, passwd, paths);
-}
-
-bool BaseServer::authenticateWriteAccess(const std::string& user) {
-    return serverEnv_.authenticateWriteAccess(user);
-}
-bool BaseServer::authenticateWriteAccess(const std::string& user, const std::string& path) {
-    return serverEnv_.authenticateWriteAccess(user, path);
-}
-bool BaseServer::authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) {
-    return serverEnv_.authenticateWriteAccess(user, paths);
-}
-
 bool BaseServer::lock(const std::string& user) {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         std::cout << "   BaseServer::lock " << user << endl;
+    }
 
     if (userWhoHasLock_.empty()) {
         userWhoHasLock_           = user;
@@ -464,8 +449,9 @@ bool BaseServer::lock(const std::string& user) {
     return false;
 }
 void BaseServer::unlock() {
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         std::cout << "   BaseServer::unlock " << userWhoHasLock_ << endl;
+    }
 
     userWhoHasLock_.clear();
     stats().locked_by_user_.clear();
@@ -506,21 +492,24 @@ bool BaseServer::debug() const {
 
 void BaseServer::sigterm_signal_handler() {
     if (io_.stopped()) {
-        if (serverEnv_.debug())
+        if (serverEnv_.debug()) {
             cout << "-->BaseServer::sigterm_signal_handler(): io_context has stopped returning " << endl;
+        }
         return;
     }
 
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "BaseServer::sigterm_signal_handler(): Received SIGTERM : starting check pointing" << endl;
+    }
     ecf::log(Log::MSG, "BaseServer::sigterm_signal_handler(): Received SIGTERM : starting check pointing");
 
     defs_->flag().set(ecf::Flag::ECF_SIGTERM);
     checkPtDefs();
 
     ecf::log(Log::MSG, "BaseServer::sigterm_signal_handler(): finished check pointing");
-    if (serverEnv_.debug())
+    if (serverEnv_.debug()) {
         cout << "BaseServer::sigterm_signal_handler(): finished check pointing" << endl;
+    }
 
     // We need re-wait each time signal handler is called
     signals_.async_wait([this](boost::system::error_code /*ec*/, int /*signo*/) { sigterm_signal_handler(); });

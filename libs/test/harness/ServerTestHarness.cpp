@@ -19,11 +19,11 @@
 #include "ecflow/base/WhyCmd.hpp"
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/DurationTimer.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
@@ -101,12 +101,14 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
         s->addVariable(Variable("ECF_CLIENT_EXE_PATH", theClientExePath));
         s->addVariable(Variable(ecf::environment::ECF_INCLUDE, TestFixture::includes()));
 
-        if (s->findVariable("SLEEPTIME").empty())
+        if (s->findVariable("SLEEPTIME").empty()) {
             s->addVariable(Variable("SLEEPTIME", "1"));
+        }
 
         if (check_task_duration_less_than_server_poll_) {
-            if (s->findVariable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL").empty())
+            if (s->findVariable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL").empty()) {
                 s->addVariable(Variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL", "_any_"));
+            }
         }
         suiteName = s->name();
 
@@ -377,10 +379,12 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
             serverUpdateCalendarCount_ = full_defs->updateCalendarCount();
 
             for (suite_ptr s : full_defs->suiteVec()) {
-                if (s->state() == NState::COMPLETE)
+                if (s->state() == NState::COMPLETE) {
                     completeSuiteCnt++;
-                if (s->hasAutoCancel())
+                }
+                if (s->hasAutoCancel()) {
                     hasAutoCancel++;
+                }
             }
 
 #ifdef DEBUG_TEST_WAITER_DEFS
@@ -419,8 +423,9 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
         }
         BOOST_REQUIRE_MESSAGE(assertTimer.duration() < assertTimer.timeConstraint(),
                               "\n" << ecf::as_string(*full_defs, PrintStyle::MIGRATE));
-        if (assertTimer.duration() >= assertTimer.timeConstraint())
+        if (assertTimer.duration() >= assertTimer.timeConstraint()) {
             break; // fix warning on AIX
+        }
 
         // auto adjust sleep time.
         sleepTime = timer.duration() + sleep_fudgeFactor;
@@ -437,10 +442,12 @@ void ServerTestHarness::createDirAndEcfFiles(NodeContainer* nc,
     cout << "creating directory  " << directory << "\n";
 #endif
 
-    if (!fs::exists(smshome))
+    if (!fs::exists(smshome)) {
         fs::create_directory(smshome);
-    if (!fs::exists(directory))
+    }
+    if (!fs::exists(directory)) {
         fs::create_directory(directory);
+    }
 
     if (generateManFileForNodeContainers_) {
         std::string manFileName = smshome + nc->absNodePath() + File::MAN_EXTN();
@@ -461,8 +468,9 @@ void ServerTestHarness::createDirAndEcfFiles(NodeContainer* nc,
             // Create ECF file with default template or custom  file.
             std::ofstream theEcfFile(ecf_file.c_str());
             auto it = customTaskSmsMap.find(t->absNodePath());
-            if (it == customTaskSmsMap.end())
+            if (it == customTaskSmsMap.end()) {
                 theEcfFile << getDefaultTemplateEcfFile(t);
+            }
             else {
                 theEcfFile << (*it).second;
                 customSmsCnt++;
@@ -509,10 +517,12 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const {
     for (const Event& e : t->events()) {
         // if initial value is set, then child cmd clears
         // else if initial value is clear, then child cmd sets (default)
-        if (e.initial_value())
+        if (e.initial_value()) {
             templateEcfFile += "%ECF_CLIENT_EXE_PATH% --event=" + e.name_or_number() + " clear\n";
-        else
+        }
+        else {
             templateEcfFile += "%ECF_CLIENT_EXE_PATH% --event=" + e.name_or_number() + "\n";
+        }
     }
     for (const Meter& m : t->meters()) {
         templateEcfFile += "for i in";

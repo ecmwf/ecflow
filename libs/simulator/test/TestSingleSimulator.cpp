@@ -11,7 +11,6 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "TestUtil.hpp"
@@ -23,17 +22,14 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE(S_Simulator)
 
 BOOST_AUTO_TEST_SUITE(T_SingleSimulator)
 
 BOOST_AUTO_TEST_CASE(test_analysys, *boost::unit_test::disabled()) {
-    cout << "Simulator:: ...test_analysys\n";
+    std::cout << "Simulator:: ...test_analysys\n";
     // suite suite
     //   family family
     //     task t1
@@ -76,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_analysys, *boost::unit_test::disabled()) {
 }
 
 BOOST_AUTO_TEST_CASE(test_single_from_file) {
-    cout << "Simulator:: ...test_single_from_file\n";
+    std::cout << "Simulator:: ...test_single_from_file\n";
 
     std::string path = File::test_data("libs/simulator/test/data/good_defs/day/family.def", "libs/simulator");
 

@@ -111,15 +111,17 @@ void Node::changeEvent(const std::string& event_name_or_number, const std::strin
         }
         value = (setOrClear == Event::SET());
     }
-    else
+    else {
         value = true;
+    }
 
     changeEvent(event_name_or_number, value);
 }
 
 void Node::changeEvent(const std::string& event_name_or_number, bool value) {
-    if (set_event(event_name_or_number, value))
+    if (set_event(event_name_or_number, value)) {
         return;
+    }
     throw std::runtime_error("Node::changeEvent: Could not find event " + event_name_or_number);
 }
 
@@ -155,8 +157,9 @@ void Node::changeMeter(const std::string& meter_name, const std::string& value) 
 }
 
 void Node::changeMeter(const std::string& meter_name, int value) {
-    if (set_meter(meter_name, value))
+    if (set_meter(meter_name, value)) {
         return;
+    }
     throw std::runtime_error("Node::changeMeter: Could not find meter " + meter_name);
 }
 
@@ -248,14 +251,16 @@ void Node::changeComplete(const std::string& expression) {
 }
 
 void Node::changeRepeat(const std::string& value) {
-    if (repeat_.empty())
+    if (repeat_.empty()) {
         throw std::runtime_error("Node::changeRepeat: Could not find repeat on " + absNodePath());
+    }
     repeat_.change(value); // this can throw std::runtime_error
 }
 
 void Node::increment_repeat() {
-    if (repeat_.empty())
+    if (repeat_.empty()) {
         throw std::runtime_error("Node::increment_repeat: Could not find repeat on " + absNodePath());
+    }
     repeat_.increment();
 }
 
@@ -272,8 +277,9 @@ void Node::changeLimitMax(const std::string& name, const std::string& maxValue) 
 
 void Node::changeLimitMax(const std::string& name, int maxValue) {
     limit_ptr limit = find_limit(name);
-    if (!limit.get())
+    if (!limit.get()) {
         throw std::runtime_error("Node::changeLimitMax: Could not find limit " + name);
+    }
     limit->setLimit(maxValue);
 }
 
@@ -290,8 +296,9 @@ void Node::changeLimitValue(const std::string& name, const std::string& value) {
 
 void Node::changeLimitValue(const std::string& name, int value) {
     limit_ptr limit = find_limit(name);
-    if (!limit.get())
+    if (!limit.get()) {
         throw std::runtime_error("Node::changeLimitValue: Could not find limit " + name);
+    }
     limit->setValue(value);
 }
 

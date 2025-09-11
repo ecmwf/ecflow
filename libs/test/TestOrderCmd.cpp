@@ -9,28 +9,22 @@
  */
 
 #include <iostream>
-#include <limits> // for std::numeric_limits<int>::max()
+#include <limits>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
-#include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
-#include "ecflow/core/AssertTimer.hpp"
-#include "ecflow/core/DurationTimer.hpp"
-#include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/core/Chrono.hpp"
+#include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 ///
 /// \note This is used to INVOKE a SINGLE test.
@@ -44,16 +38,18 @@ BOOST_AUTO_TEST_SUITE(T_OrderCmd)
 std::vector<std::string> to_string_vec(const std::vector<suite_ptr>& sv) {
     std::vector<std::string> r;
     r.reserve(sv.size());
-    for (size_t i = 0; i < sv.size(); i++)
+    for (size_t i = 0; i < sv.size(); i++) {
         r.push_back(sv[i]->name());
+    }
     return r;
 }
 
 std::vector<std::string> to_string_vec(const std::vector<node_ptr>& sv) {
     std::vector<std::string> r;
     r.reserve(sv.size());
-    for (size_t i = 0; i < sv.size(); i++)
+    for (size_t i = 0; i < sv.size(); i++) {
         r.push_back(sv[i]->name());
+    }
     return r;
 }
 
@@ -185,7 +181,8 @@ BOOST_AUTO_TEST_CASE(test_change_order) {
 
     test_ordering();
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_handle_change_order) {
@@ -247,7 +244,8 @@ BOOST_AUTO_TEST_CASE(test_handle_change_order) {
     // Ording should still be applied to the whole suite.
     test_ordering();
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

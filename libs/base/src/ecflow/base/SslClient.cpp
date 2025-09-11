@@ -19,8 +19,6 @@
 
 #ifdef DEBUG_CLIENT
     #include <iostream>
-
-    #include <boost/date_time/posix_time/time_formatters.hpp> // requires boost date and time lib, for to_simple_string
 #endif
 
 /// The timeout will typically happen when the server has died, but socket is still open
@@ -40,8 +38,9 @@ SslClient::SslClient(boost::asio::io_context& io,
       deadline_(io),
       timeout_(timeout) {
     /// Avoid sending a NULL request to the server
-    if (!cmd_ptr.get())
+    if (!cmd_ptr.get()) {
         throw std::runtime_error("SslClient::SslClient: No request specified !");
+    }
 
     // The timeout can be set externally for testing.
     // When the timeout is not set it is obtained from the command.
@@ -97,7 +96,7 @@ void SslClient::start(endpoints_iterator_t endpoints_iterator) {
 bool SslClient::start_connect(endpoints_iterator_t endpoints_iterator) {
     if (endpoints_iterator != endpoints_iterator_t()) {
 #ifdef DEBUG_CLIENT
-        std::cout << "   SslClient::start_connect: Trying " << endpoint_iterator->endpoint() << "..." << std::endl;
+        std::cout << "   SslClient::start_connect: Trying " << endpoints_iterator->endpoint() << "..." << std::endl;
 #endif
 
         // expires_from_now cancels any pending asynchronous waits, and returns the number of asynchronous waits that
@@ -125,8 +124,9 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
     std::cout << "   SslClient::handle_connect stopped_=" << stopped_ << std::endl;
 #endif
 
-    if (stopped_)
+    if (stopped_) {
         return;
+    }
 
     // The async_connect() function automatically opens the socket at the start
     // of the asynchronous operation. If the socket is closed at this time then
@@ -140,12 +140,14 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
             // Ran out of end points, An error occurred
             stop();
             std::stringstream ss;
-            if (e)
+            if (e) {
                 ss << "SslClient::handle_connect: Ran out of end points : connection error( " << e.message()
                    << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;
-            else
+            }
+            else {
                 ss << "SslClient::handle_connect: Ran out of end points : connection error for request( "
                    << outbound_request_ << " ) on " << host_ << ":" << port_;
+            }
             throw std::runtime_error(ss.str());
         }
     }
@@ -230,8 +232,9 @@ void SslClient::handle_write(const boost::system::error_code& e) {
 #ifdef DEBUG_CLIENT
     std::cout << "   SslClient::handle_write stopped_ = " << stopped_ << std::endl;
 #endif
-    if (stopped_)
+    if (stopped_) {
         return;
+    }
 
     if (!e) {
 
@@ -274,8 +277,9 @@ void SslClient::handle_read(const boost::system::error_code& e) {
 #ifdef DEBUG_CLIENT
     std::cout << "   SslClient::handle_read stopped_ = " << stopped_ << std::endl;
 #endif
-    if (stopped_)
+    if (stopped_) {
         return;
+    }
 
     // close socket, & cancel timer.
     stop();
@@ -345,8 +349,9 @@ void SslClient::stop() {
 /// Handle completion of a write operation.
 /// Handle completion of a read operation.
 bool SslClient::handle_server_response(ServerReply& server_reply, bool debug) const {
-    if (debug)
+    if (debug) {
         std::cout << "  SslClient::handle_server_response" << std::endl;
+    }
     server_reply.set_host_port(host_, port_); // client context, needed by some commands, i.e. SServerLoadCmd
     return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
 }
@@ -357,8 +362,9 @@ void SslClient::check_deadline() {
               << to_simple_string(deadline_.expires_at()) << ") time now("
               << to_simple_string(boost::asio::deadline_timer::traits_type::now()) << ")" << std::endl;
 #endif
-    if (stopped_)
+    if (stopped_) {
         return;
+    }
 
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the

@@ -124,8 +124,9 @@ int TableNodeModel::rowCount(const QModelIndex& parent) const {
         // The total number of nodes displayed
         int cnt = 0;
         for (int i = 0; i < data_->count(); i++) {
-            if (!data_->server(i)->inScan())
+            if (!data_->server(i)->inScan()) {
                 cnt += data_->numOfNodes(i);
+            }
         }
 #ifdef _UI_TABLENODEMODEL_DEBUG
         // UiLog().dbg() << "table count " << cnt;
@@ -150,11 +151,13 @@ QVariant TableNodeModel::data(const QModelIndex& index, int role) const {
 
 QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const {
     VNode* vnode = indexToNode(index);
-    if (!vnode || !vnode->node())
+    if (!vnode || !vnode->node()) {
         return {};
+    }
 
-    if (index.column() < 0)
+    if (index.column() < 0) {
         return {};
+    }
 
     ColumnType id = ExtraColumn;
     if (index.column() < ExtraColumn) {
@@ -167,17 +170,21 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const {
         if (id == PathColumn) {
             return QString::fromStdString(vnode->absNodePath());
         }
-        else if (id == StatusColumn)
+        else if (id == StatusColumn) {
             return vnode->stateName();
-        else if (id == TypeColumn)
+        }
+        else if (id == TypeColumn) {
             return QString::fromStdString(vnode->nodeType());
+        }
 
         // Attributes
         else if (id == EventColumn || id == LabelColumn || id == MeterColumn || id == TriggerColumn) {
-            if (VAttribute* a = vnode->attributeForType(0, columnToAttrType(id)))
+            if (VAttribute* a = vnode->attributeForType(0, columnToAttrType(id))) {
                 return a->data(true);
-            else
+            }
+            else {
                 return {};
+            }
         }
 
         else if (id == StatusChangeColumn) {
@@ -191,14 +198,16 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const {
             QString n = columns_->id(index.column());
             if (!n.isEmpty()) {
                 // Standard variable column
-                if (columns_->isEditable(index.column()))
+                if (columns_->isEditable(index.column())) {
                     return QString::fromStdString(vnode->findInheritedVariable(n.toStdString()));
+                }
                 // extra diagnostic column
                 else {
                     DiagData* diag = DiagData::instance();
                     int diagCol    = index.column() - columns_->diagStartIndex();
-                    if (diagCol >= 0)
+                    if (diagCol >= 0) {
                         return QString::fromStdString(diag->dataAt(vnode, diagCol));
+                    }
                 }
             }
         }
@@ -207,17 +216,20 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const {
         return vnode->stateColour();
     }
     else if (role == IconRole) {
-        if (id == PathColumn)
+        if (id == PathColumn) {
             return VIcon::pixmapList(vnode, nullptr);
-        else
+        }
+        else {
             return {};
+        }
     }
     else if (role == SortRole) {
         if (id == MeterColumn) {
             if (VAttribute* a = vnode->attributeForType(0, columnToAttrType(id))) {
                 std::string val;
-                if (a->value("meter_value", val))
+                if (a->value("meter_value", val)) {
                     return QString::fromStdString(val).toInt();
+                }
             }
             return -9999;
         }
@@ -230,11 +242,13 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const {
 }
 
 QVariant TableNodeModel::headerData(const int section, const Qt::Orientation orient, const int role) const {
-    if (orient != Qt::Horizontal)
+    if (orient != Qt::Horizontal) {
         return QAbstractItemModel::headerData(section, orient, role);
+    }
 
-    if (section < 0 || section >= columns_->count()) // this can happen during a server reset
+    if (section < 0 || section >= columns_->count()) { // this can happen during a server reset
         return {};
+    }
 
     if (role == Qt::DisplayRole) {
         return columns_->label(section);
@@ -297,8 +311,9 @@ VNode* TableNodeModel::indexToNode(const QModelIndex& index) const {
 }
 
 QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const {
-    if (!node)
+    if (!node) {
         return {};
+    }
 
     int row = 0;
     if ((row = data_->position(node)) != -1) {
@@ -309,8 +324,9 @@ QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const {
 
 // Find the index for the node when we know what the server is!
 QModelIndex TableNodeModel::nodeToIndex(VTableServer* server, const VNode* node, int column) const {
-    if (!node)
+    if (!node) {
         return {};
+    }
 
     int row = 0;
     if ((row = data_->position(server, node)) != -1) {
@@ -320,12 +336,14 @@ QModelIndex TableNodeModel::nodeToIndex(VTableServer* server, const VNode* node,
 }
 
 QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) const {
-    if (!a)
+    if (!a) {
         return {};
+    }
 
     VNode* node = a->parent();
-    if (!node)
+    if (!node) {
         return {};
+    }
 
     int row = 0;
     if ((row = data_->position(node)) != -1) {
@@ -389,19 +407,22 @@ void TableNodeModel::slotServerRemoveBegin(VModelServer* server, int num) {
 void TableNodeModel::slotServerRemoveEnd(int num) {
     assert(active_ == true);
 
-    if (num > 0)
+    if (num > 0) {
         endRemoveRows();
+    }
 }
 
 // The node changed (it status etc)
 void TableNodeModel::slotNodeChanged(VTableServer* server, const VNode* node) {
-    if (!node)
+    if (!node) {
         return;
+    }
 
     QModelIndex index = nodeToIndex(server, node, 0);
 
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
+    }
 
     Q_EMIT dataChanged(index, index);
 }
@@ -465,8 +486,9 @@ void TableNodeModel::slotBeginServerClear(VModelServer* server, int num) {
 void TableNodeModel::slotEndServerClear(VModelServer* /*server*/, int num) {
     assert(active_ == true);
 
-    if (num > 0)
+    if (num > 0) {
         endRemoveRows();
+    }
 }
 
 //=======================================

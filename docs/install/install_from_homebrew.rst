@@ -1,7 +1,7 @@
 .. _brew:
 
 Install from Homebrew
-/////////////////////
+*********************
 
 
 ecFlow's graphical user interface,

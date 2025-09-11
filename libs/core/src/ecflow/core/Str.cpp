@@ -144,8 +144,9 @@ bool Str::extract_data_member_value(const std::string& str,
         start += data_member_name.size();
         data_member_value.clear();
         for (size_t i = start; i < str.size(); i++) {
-            if (str[i] == ' ')
+            if (str[i] == ' ') {
                 break;
+            }
             data_member_value += str[i];
         }
         return true;
@@ -213,11 +214,13 @@ void Str::split_orig1(const std::string& line, std::vector<std::string>& tokens,
     while (first != end) {
         const auto second = std::find_first_of(first, end, std::cbegin(delims), std::cend(delims));
 
-        if (first != second)
+        if (first != second) {
             tokens.emplace_back(first, second);
+        }
 
-        if (second == end)
+        if (second == end) {
             break;
+        }
 
         first = std::next(second);
     }
@@ -229,8 +232,9 @@ void Str::split_using_string_view(std::string_view strv, std::vector<std::string
          first = second + 1) {
         second = std::find_first_of(first, last, std::cbegin(delims), std::cend(delims));
 
-        if (first != second)
+        if (first != second) {
             output.emplace_back(first, second - first);
+        }
     }
 }
 
@@ -246,8 +250,9 @@ void Str::split_using_string_view2(std::string_view strv, std::vector<std::strin
             output.emplace_back(ref.begin(), ref.end());
         }
 
-        if (second == std::string_view::npos)
+        if (second == std::string_view::npos) {
             break;
+        }
 
         first = second + 1;
     }
@@ -314,8 +319,9 @@ bool Str::get_token(std::string_view str, size_t pos, std::string& token, std::s
             current_pos++;
         }
 
-        if (second == end)
+        if (second == end) {
             break;
+        }
 
         first = std::next(second);
     }
@@ -337,8 +343,9 @@ bool Str::get_token2(std::string_view strv, size_t pos, std::string& token, std:
             current_pos++;
         }
 
-        if (second == std::string_view::npos)
+        if (second == std::string_view::npos) {
             break;
+        }
 
         first = second + 1;
     }
@@ -420,8 +427,9 @@ bool Str::valid_name(const std::string& name, std::string& msg) {
         if (!result) {
             msg = "Valid names can only consist of alphanumeric characters, "
                   "underscores and dots (The first character cannot be a dot). ";
-            if (name.find('\r') != string::npos)
+            if (name.find('\r') != string::npos) {
                 msg += "Windows line ending ? ";
+            }
             msg += "'";
             msg += name;
             msg += "'"; // use '<name>' to show if PC format, i.e. carriage return
@@ -465,15 +473,27 @@ int Str::to_int(const std::string& the_str, int error_return) {
     return error_return;
 }
 
-bool Str::truncate_at_start(std::string& fileContents, size_t max_lines) {
-    if (fileContents.empty())
+bool Str::is_int(const std::string& s) {
+    try {
+        boost::lexical_cast<int>(s);
+        return true;
+    }
+    catch (...) {
         return false;
+    }
+}
+
+bool Str::truncate_at_start(std::string& fileContents, size_t max_lines) {
+    if (fileContents.empty()) {
+        return false;
+    }
 
     /// Truncate from the front
     size_t no_of_new_lines = 0;
     for (size_t i = fileContents.size() - 1; i > 0; --i) {
-        if (fileContents[i] == '\n')
+        if (fileContents[i] == '\n') {
             no_of_new_lines++;
+        }
         if (no_of_new_lines >= max_lines) {
             fileContents.erase(fileContents.begin(), fileContents.begin() + i + 1); // skip new line at start of file
             return true;
@@ -483,15 +503,17 @@ bool Str::truncate_at_start(std::string& fileContents, size_t max_lines) {
 }
 
 bool Str::truncate_at_end(std::string& fileContents, size_t max_lines) {
-    if (fileContents.empty())
+    if (fileContents.empty()) {
         return false;
+    }
 
     /// Truncate from the back
     size_t no_of_new_lines = 0;
     size_t the_size        = fileContents.size();
     for (size_t i = 0; i < the_size; ++i) {
-        if (fileContents[i] == '\n')
+        if (fileContents[i] == '\n') {
             no_of_new_lines++;
+        }
         if (no_of_new_lines >= max_lines) {
             fileContents.erase(fileContents.begin() + i + 1, fileContents.end()); // skip new line at end of file
             return true;

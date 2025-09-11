@@ -417,22 +417,27 @@ BOOST_AUTO_TEST_CASE(test_server_variable_substitution) {
 
     std::vector<std::string> vec = required_server_variables();
     for (const auto& i : vec) {
-        if (i == "ECF_PID")
+        if (i == "ECF_PID") {
             continue; // CANT test since, this is process ID of server
+        }
         std::string value;
         BOOST_CHECK_MESSAGE(s->findParentVariableValue(i, value), "Could not find Server variable " << i);
         BOOST_CHECK_MESSAGE(!value.empty(), "Empty server variable value for " << i);
     }
 
     for (const auto& i : vec) {
-        if (i == "ECF_JOB_CMD")
+        if (i == "ECF_JOB_CMD") {
             continue; // CANT test since it requires %ECF_JOB% and %ECF_JOBOUT%
-        if (i == "ECF_KILL_CMD")
+        }
+        if (i == "ECF_KILL_CMD") {
             continue; // CANT test since it requires %ECF_PID%
-        if (i == "ECF_STATUS_CMD")
+        }
+        if (i == "ECF_STATUS_CMD") {
             continue; // CANT test since it requires %ECF_RID%
-        if (i == "ECF_PID")
+        }
+        if (i == "ECF_PID") {
             continue; // CANT test since, this is process ID of server
+        }
         std::string cmd = "%";
         cmd += i;
         cmd += "%";

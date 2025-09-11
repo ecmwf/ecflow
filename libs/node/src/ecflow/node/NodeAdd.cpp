@@ -65,28 +65,34 @@ bool Node::update_variable(const std::string& name, const std::string& value) {
 
 void Node::addVariable(const Variable& v) {
     state_change_no_ = Ecf::incr_state_change_no();
-    if (update_variable(v.name(), v.theValue()))
+    if (update_variable(v.name(), v.theValue())) {
         return;
-    if (vars_.capacity() == 0)
+    }
+    if (vars_.capacity() == 0) {
         vars_.reserve(5);
+    }
     vars_.push_back(v);
 }
 
 void Node::add_variable(const std::string& name, const std::string& value) {
     state_change_no_ = Ecf::incr_state_change_no();
-    if (update_variable(name, value))
+    if (update_variable(name, value)) {
         return;
-    if (vars_.capacity() == 0)
+    }
+    if (vars_.capacity() == 0) {
         vars_.reserve(5);
+    }
     vars_.emplace_back(name, value);
 }
 
 void Node::add_variable_bypass_name_check(const std::string& name, const std::string& value) {
     state_change_no_ = Ecf::incr_state_change_no();
-    if (update_variable(name, value))
+    if (update_variable(name, value)) {
         return;
-    if (vars_.capacity() == 0)
+    }
+    if (vars_.capacity() == 0) {
         vars_.reserve(5);
+    }
     vars_.emplace_back(name, value, false);
 }
 
@@ -114,8 +120,9 @@ void Node::add_trigger_expression(const Expression& t) {
         ss << "to add large triggers use multiple calls to Node::add_part_trigger( PartExpression('t1 == complete') )";
         throw std::runtime_error(ss.str());
     }
-    if (isSuite())
+    if (isSuite()) {
         throw std::runtime_error("Cannot add trigger on a suite");
+    }
 
     t_expr_          = std::make_unique<Expression>(t);
     state_change_no_ = Ecf::incr_state_change_no();
@@ -129,8 +136,9 @@ void Node::add_complete_expression(const Expression& t) {
               "complete') )";
         throw std::runtime_error(ss.str());
     }
-    if (isSuite())
+    if (isSuite()) {
         throw std::runtime_error("Cannot add complete trigger on a suite");
+    }
 
     c_expr_          = std::make_unique<Expression>(t);
     state_change_no_ = Ecf::incr_state_change_no();
@@ -138,49 +146,57 @@ void Node::add_complete_expression(const Expression& t) {
 
 void Node::py_add_trigger_expr(const std::vector<PartExpression>& vec) {
     if (t_expr_) {
-        if (isSuite())
+        if (isSuite()) {
             throw std::runtime_error("Cannot add trigger on a suite");
+        }
         t_expr_->add_expr(vec);
         state_change_no_ = Ecf::incr_state_change_no();
     }
     else {
         Expression expr;
-        for (const auto& i : vec)
+        for (const auto& i : vec) {
             expr.add(i);
+        }
         add_trigger_expression(expr);
     }
 }
 
 void Node::py_add_complete_expr(const std::vector<PartExpression>& vec) {
     if (c_expr_) {
-        if (isSuite())
+        if (isSuite()) {
             throw std::runtime_error("Cannot add complete on a suite");
+        }
         c_expr_->add_expr(vec);
         state_change_no_ = Ecf::incr_state_change_no();
     }
     else {
         Expression expr;
-        for (const auto& i : vec)
+        for (const auto& i : vec) {
             expr.add(i);
+        }
         add_complete_expression(expr);
     }
 }
 
 void Node::add_part_trigger(const PartExpression& part) {
-    if (isSuite())
+    if (isSuite()) {
         throw std::runtime_error("Cannot add trigger on a suite");
+    }
 
-    if (!t_expr_)
+    if (!t_expr_) {
         t_expr_ = std::make_unique<Expression>();
+    }
     t_expr_->add(part);
     state_change_no_ = Ecf::incr_state_change_no();
 }
 void Node::add_part_complete(const PartExpression& part) {
-    if (isSuite())
+    if (isSuite()) {
         throw std::runtime_error("Cannot add complete trigger on a suite");
+    }
 
-    if (!c_expr_)
+    if (!c_expr_) {
         c_expr_ = std::make_unique<Expression>();
+    }
     c_expr_->add(part);
     state_change_no_ = Ecf::incr_state_change_no();
 }
@@ -458,13 +474,15 @@ void Node::addZombie(const ZombieAttr& z) {
 }
 
 void Node::add_queue(const QueueAttr& q) {
-    if (!misc_attrs_)
+    if (!misc_attrs_) {
         misc_attrs_ = std::make_unique<MiscAttrs>(this);
+    }
     misc_attrs_->add_queue(q);
 }
 
 void Node::add_generic(const GenericAttr& q) {
-    if (!misc_attrs_)
+    if (!misc_attrs_) {
         misc_attrs_ = std::make_unique<MiscAttrs>(this);
+    }
     misc_attrs_->add_generic(q);
 }

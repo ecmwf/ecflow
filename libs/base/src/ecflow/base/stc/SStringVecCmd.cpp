@@ -19,10 +19,12 @@ using namespace boost;
 
 bool SStringVecCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SStringVecCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (vec_ != the_rhs->get_string_vec())
+    }
+    if (vec_ != the_rhs->get_string_vec()) {
         return false;
+    }
     return ServerToClientCmd::equals(rhs);
 }
 
@@ -31,15 +33,17 @@ std::string SStringVecCmd::print() const {
 }
 
 bool SStringVecCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
-    if (debug)
+    if (debug) {
         cout << "  SStringVecCmd::handle_server_response str.size()= " << vec_.size() << "\n";
+    }
     if (server_reply.cli()) {
         for (const auto& i : vec_) {
             std::cout << i << "\n";
         }
     }
-    else
+    else {
         server_reply.set_string_vec(vec_);
+    }
     return true;
 }
 

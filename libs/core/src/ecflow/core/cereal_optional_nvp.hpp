@@ -77,8 +77,9 @@ void make_optional_nvp(OutputArchive<Archive>& ar, const char* name, T&& value) 
 // Saves NVP if predicate is true. Useful for avoiding splitting into save & load if also saving optionally.
 template <class Archive, class T, class Predicate>
 void make_optional_nvp(OutputArchive<Archive>& ar, const char* name, T&& value, Predicate predicate) {
-    if (predicate())
+    if (predicate()) {
         ar(make_nvp(name, std::forward<T>(value)));
+    }
 }
 
 template <class Archive, class T, class Predicate>

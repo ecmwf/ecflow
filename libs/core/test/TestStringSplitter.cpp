@@ -19,7 +19,6 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;
-using namespace boost;
 
 BOOST_AUTO_TEST_SUITE(U_Core)
 

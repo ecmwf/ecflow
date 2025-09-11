@@ -60,8 +60,9 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
             // ECFLOW-434
             const std::vector<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
             size_t edit_history_size_after               = edit_history_size_before + paths.size();
-            if (edit_history_size_after > Defs::max_edit_history_size_per_node())
+            if (edit_history_size_after > Defs::max_edit_history_size_per_node()) {
                 edit_history_size_after = Defs::max_edit_history_size_per_node();
+            }
             BOOST_CHECK_MESSAGE(edit_history.size() == edit_history_size_after,
                                 "Expected   " << edit_history_size_after << " edit history but found "
                                               << edit_history.size());
@@ -94,8 +95,9 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
         {
             const std::vector<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
             size_t edit_history_size_after               = edit_history_size_before + paths.size();
-            if (edit_history_size_after > Defs::max_edit_history_size_per_node())
+            if (edit_history_size_after > Defs::max_edit_history_size_per_node()) {
                 edit_history_size_after = Defs::max_edit_history_size_per_node();
+            }
             BOOST_CHECK_MESSAGE(edit_history.size() == edit_history_size_after,
                                 "Expected   " << edit_history_size_after << " edit history but found "
                                               << edit_history.size());
@@ -148,8 +150,9 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
                         const std::vector<std::string>& edit_history =
                             fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
                         size_t edit_history_size_after = edit_history_size_before + paths.size();
-                        if (edit_history_size_after > Defs::max_edit_history_size_per_node())
+                        if (edit_history_size_after > Defs::max_edit_history_size_per_node()) {
                             edit_history_size_after = Defs::max_edit_history_size_per_node();
+                        }
                         BOOST_CHECK_MESSAGE(edit_history.size() == edit_history_size_after,
                                             "Expected   " << edit_history_size_after << " edit history but found "
                                                           << edit_history.size());
@@ -167,8 +170,9 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
             {
                 const std::vector<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
                 size_t edit_history_size_after               = edit_history_size_before + 1;
-                if (edit_history_size_after > Defs::max_edit_history_size_per_node())
+                if (edit_history_size_after > Defs::max_edit_history_size_per_node()) {
                     edit_history_size_after = Defs::max_edit_history_size_per_node();
+                }
                 BOOST_CHECK_MESSAGE(edit_history.size() == edit_history_size_after,
                                     "Expected   " << edit_history_size_after << " edit history but found "
                                                   << edit_history.size());

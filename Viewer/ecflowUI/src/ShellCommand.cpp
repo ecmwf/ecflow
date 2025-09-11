@@ -113,25 +113,29 @@ ShellCommand* ShellCommand::run(const std::string& cmd, const std::string& cmdDe
 }
 
 void ShellCommand::procFinished(int exitCode, QProcess::ExitStatus exitStatus) {
-    if (!addToDialog_ && exitCode == 0 && exitStatus == QProcess::NormalExit)
+    if (!addToDialog_ && exitCode == 0 && exitStatus == QProcess::NormalExit) {
         return;
+    }
 
     if (!item_) {
         item_ = CommandOutputHandler::instance()->addItem(
             command_, commandDef_, startTime_, CommandOutputHandler::NormalContext);
     }
     Q_ASSERT(item_);
-    if (exitCode == 0 && exitStatus == QProcess::NormalExit)
+    if (exitCode == 0 && exitStatus == QProcess::NormalExit) {
         CommandOutputHandler::instance()->finished(item_);
-    else
+    }
+    else {
         CommandOutputHandler::instance()->failed(item_);
+    }
 
     deleteLater();
 }
 
 void ShellCommand::slotStdOutput() {
-    if (!addToDialog_)
+    if (!addToDialog_) {
         return;
+    }
 
     if (!item_) {
         item_ = CommandOutputHandler::instance()->addItem(

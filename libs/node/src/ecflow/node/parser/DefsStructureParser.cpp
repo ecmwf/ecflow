@@ -22,7 +22,6 @@
 
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 /////////////////////////////////////////////////////////////////////////////////////
 DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file_name)
@@ -140,8 +139,9 @@ bool DefsStructureParser::do_parse_line(const std::string& line,
                                         std::string& errorMsg) {
     lineTokens.clear(); // This is re-used, hence clear up front
     Str::split(line, lineTokens);
-    if (lineTokens.empty())
+    if (lineTokens.empty()) {
         return true; // ignore empty lines
+    }
 
     // Process each line, according to the parser which is on *top* of the stack
     // If the *top* of the stack is empty use the DefsParser
@@ -175,10 +175,12 @@ void DefsStructureParser::getNextLine(std::string& line) {
     // *ALL* the handling of multiple statements per line are handled in this function
     // The presence of ';' signals multiple statements per line.
     if (multi_statements_per_line_vec_.empty()) {
-        if (defs_as_string_.empty())
+        if (defs_as_string_.empty()) {
             infile_.getline(line);
-        else
+        }
+        else {
             defs_as_string_.getline(line);
+        }
         lineNumber_++;
         if (PrintStyle::is_persist_style(file_type_)) {
             return; // ignore multiline for migrate, *BECAUSE* *history* for group command uses ';'
@@ -211,10 +213,11 @@ void DefsStructureParser::getNextLine(std::string& line) {
                 //      suite fred; task a; task b; endsuite   # suite fred; task a; task b; endsuite
                 // Remove comment at the end, to avoid adding to list of tokens
                 std::string::size_type commentPos = line.find('#');
-                if (commentPos != std::string::npos)
+                if (commentPos != std::string::npos) {
                     line = line.substr(0, commentPos);
+                }
 
-                char_separator<char> sep(";");
+                boost::char_separator<char> sep(";");
                 typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
                 tokenizer tokens(line, sep);
                 std::copy(tokens.begin(), tokens.end(), back_inserter(multi_statements_per_line_vec_));
@@ -246,15 +249,18 @@ void DefsStructureParser::getNextLine(std::string& line) {
     }
     else {
         cout << lineNumber_ << ": '" << line << "'              parser(" << theParser->keyword() << ") ";
-        if (theParser->parent())
+        if (theParser->parent()) {
             cout << " parent_parser(" << theParser->parent()->keyword() << ")";
+        }
         cout << " node(";
     }
 
-    if (!nodeStack_.empty())
+    if (!nodeStack_.empty()) {
         cout << nodeStack_top()->debugType() << " : " << nodeStack_top()->name() << ")\n";
-    else
+    }
+    else {
         cout << "NULL)\n";
+    }
 #endif
 }
 

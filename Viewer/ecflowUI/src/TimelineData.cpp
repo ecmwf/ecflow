@@ -50,8 +50,9 @@ int TimelineItem::firstInPeriod(QDateTime startDt, QDateTime /*endDt*/) const {
     unsigned int start = fromQDateTime(startDt);
     unsigned int end   = fromQDateTime(startDt);
     for (size_t i = 0; i < start_.size(); i++) {
-        if (start_[i] >= start && start_[i] <= end)
+        if (start_[i] >= start && start_[i] <= end) {
             return static_cast<int>(i);
+        }
     }
     return -1;
 }
@@ -61,15 +62,17 @@ bool TimelineItem::hasSubmittedOrActiveDuration(QDateTime startDt, QDateTime end
     unsigned int end   = fromQDateTime(endDt);
     for (size_t i = 0; i < start_.size(); i++) {
         if (start_[i] >= start) {
-            if (VNState::isActive(status_[i]))
+            if (VNState::isActive(status_[i])) {
                 return true;
+            }
 
             if (i < start_.size() - 1 && VNState::isSubmitted(status_[i]) && VNState::isActive(status_[i + 1])) {
                 return true;
             }
         }
-        else if (start_[i] >= end)
+        else if (start_[i] >= end) {
             return false;
+        }
     }
     return false;
 }
@@ -80,15 +83,17 @@ int TimelineItem::firstSubmittedDuration(QDateTime startDt, QDateTime endDt) con
     unsigned int end   = fromQDateTime(endDt);
     for (size_t i = 0; i < start_.size() - 1; i++) {
         if (start_[i] >= start) {
-            if (VNState::isActive(status_[i]))
+            if (VNState::isActive(status_[i])) {
                 return -1;
+            }
 
             if (VNState::isSubmitted(status_[i]) && VNState::isActive(status_[i + 1])) {
                 return start_[i + 1] - start_[i]; // secs
             }
         }
-        else if (start_[i] >= end)
+        else if (start_[i] >= end) {
             return -1;
+        }
     }
     return -1;
 }
@@ -103,8 +108,9 @@ int TimelineItem::firstActiveDuration(QDateTime startDt, QDateTime endDt, unsign
                 return ((i != start_.size() - 1) ? start_[i + 1] : tlEndTime) - start_[i]; // secs
             }
         }
-        else if (start_[i] >= end)
+        else if (start_[i] >= end) {
             return -1;
+        }
     }
     return -1;
 }
@@ -121,8 +127,9 @@ void TimelineItem::meanSubmittedDuration(float& meanVal, int& num, unsigned int 
         }
     }
 
-    if (num > 0)
+    if (num > 0) {
         meanVal = static_cast<float>(sum) / static_cast<float>(num);
+    }
 }
 
 void TimelineItem::meanActiveDuration(float& meanVal, int& num, unsigned int tlEndTime) const {
@@ -137,8 +144,9 @@ void TimelineItem::meanActiveDuration(float& meanVal, int& num, unsigned int tlE
         }
     }
 
-    if (num > 0)
+    if (num > 0) {
         meanVal = static_cast<float>(sum) / static_cast<float>(num);
+    }
 }
 
 void TimelineItem::durationStats(unsigned char statusId,
@@ -266,13 +274,15 @@ void TimelineData::loadLogFileCore(const std::string& logFile,
     QFileInfo fInfo(QString::fromStdString(logFile));
     size_t fSize         = fInfo.size();
     size_t progressChunk = fSize / 200;
-    if (progressChunk == 0)
+    if (progressChunk == 0) {
         progressChunk = fSize;
+    }
     size_t currentProgressChunk = 0;
     size_t percent              = 0;
 
-    if (fSize == 0)
+    if (fSize == 0) {
         return;
+    }
 
     if (maxReadSize_ > 0) {
         if (fSize > maxReadSize_) {
@@ -302,15 +312,18 @@ void TimelineData::loadLogFileCore(const std::string& logFile,
                     suite = name.substr(1);
                 }
 
-                if (std::find(suites.begin(), suites.end(), suite) == suites.end())
+                if (std::find(suites.begin(), suites.end(), suite) == suites.end()) {
                     continue;
+                }
             }
 
-            if (startTime_ == 0)
+            if (startTime_ == 0) {
                 startTime_ = statusTime;
+            }
 
-            if (statusTime > endTime_)
+            if (statusTime > endTime_) {
                 endTime_ = statusTime;
+            }
 
             size_t idx = 0;
             // exsiting item
@@ -330,8 +343,9 @@ void TimelineData::loadLogFileCore(const std::string& logFile,
             if (current / progressChunk > currentProgressChunk) {
                 currentProgressChunk = current / progressChunk;
                 percent              = current / fSize;
-                if (percent <= 100)
+                if (percent <= 100) {
                     Q_EMIT loadProgress(current, fSize);
+                }
             }
 
             numOfRows_++;
@@ -353,15 +367,18 @@ bool TimelineData::parseLine(const std::string& line,
     // LOG:[22:45:30 21.4.2018]  submitted: path job_size:16408
 
     /// We are only interested in status changes (i.e LOG:)
-    if (line.empty())
+    if (line.empty()) {
         return false;
+    }
 
-    if (line[0] != 'L')
+    if (line[0] != 'L') {
         return false;
+    }
 
     std::string::size_type log_pos = line.find("LOG:");
-    if (log_pos != 0)
+    if (log_pos != 0) {
         return false;
+    }
 
     /// LOG:[HH:MM:SS D.M.YYYY] status: fullname [+additional information]
     /// EXTRACT the date
@@ -379,26 +396,31 @@ bool TimelineData::parseLine(const std::string& line,
 
     /// extract the status
     std::string::size_type first_colon = line.find(':', first_closed_bracket);
-    if (first_colon == std::string::npos)
+    if (first_colon == std::string::npos) {
         return false;
+    }
 
     std::string::size_type first_char = line.find_first_not_of(' ', first_closed_bracket + 1);
-    if (first_char == std::string::npos)
+    if (first_char == std::string::npos) {
         return false;
+    }
 
     std::string status = line.substr(first_char, first_colon - first_char);
 
     // get the status id
     // unsigned char statusId;
-    if (VNState* vn = VNState::find(status))
+    if (VNState* vn = VNState::find(status)) {
         statusId = vn->ucId();
-    else
+    }
+    else {
         return false;
+    }
 
     // extract the full name
     first_char = line.find_first_not_of(' ', first_colon + 1);
-    if (first_char == std::string::npos)
+    if (first_char == std::string::npos) {
         return false;
+    }
 
     std::string::size_type next_ws = line.find(' ', first_char + 1);
     if (next_ws == std::string::npos) {
@@ -419,8 +441,9 @@ bool TimelineData::parseLine(const std::string& line,
 void TimelineData::guessNodeType() {
     std::vector<size_t> taskIndex;
     for (size_t i = 0; i < items_.size(); i++) {
-        if (items_[i].isTask())
+        if (items_[i].isTask()) {
             taskIndex.push_back(i);
+        }
     }
 
     for (auto& item : items_) {
@@ -446,8 +469,9 @@ TimelineItem::Type TimelineData::guessNodeType(const std::string& line, const st
 TimelineItem::Type TimelineData::guessNodeType(const std::string& line) const {
     // Try to figure out if it is a taks when status=submitted. If there is
     // an item with "job_size:" it must be a task.
-    if (line.find("job_size:") != std::string::npos)
+    if (line.find("job_size:") != std::string::npos) {
         return TimelineItem::TaskType;
+    }
 
     return TimelineItem::UndeterminedType;
 }

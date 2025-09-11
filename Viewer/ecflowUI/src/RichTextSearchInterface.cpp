@@ -27,19 +27,23 @@ bool RichTextSearchInterface::findString(QString str,
                                          QTextCursor::MoveOperation move,
                                          int iteration,
                                          StringMatchMode::Mode matchMode) {
-    if (!editor_)
+    if (!editor_) {
         return false;
+    }
 
-    if (editor_->document()->isEmpty())
+    if (editor_->document()->isEmpty()) {
         return false;
+    }
 
     QTextCursor cursor(editor_->textCursor());
 
-    if (highlightAll) // if highlighting all matches, start from the start of the document
+    if (highlightAll) { // if highlighting all matches, start from the start of the document
         cursor.movePosition(QTextCursor::Start);
+    }
 
-    else // move the cursor?
+    else { // move the cursor?
         cursor.movePosition(move);
+    }
 
     QList<QTextEdit::ExtraSelection> extraSelections;
     bool found     = false;
@@ -59,8 +63,9 @@ bool RichTextSearchInterface::findString(QString str,
                 QRegularExpression regexp;
                 // regexp.setPattern(QRegularExpression::wildcardToRegularExpression(str));
                 regexp.setPattern(ViewerUtil::wildcardToRegex(str));
-                if (cs == Qt::CaseInsensitive)
+                if (cs == Qt::CaseInsensitive) {
                     regexp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+                }
 #else
                 QRegExp regexp(str);
                 regexp.setPatternSyntax(QRegExp::Wildcard);
@@ -73,8 +78,9 @@ bool RichTextSearchInterface::findString(QString str,
             case StringMatchMode::RegexpMatch: {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
                 QRegularExpression regexp(str);
-                if (cs == Qt::CaseInsensitive)
+                if (cs == Qt::CaseInsensitive) {
                     regexp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+                }
 #else
                 QRegExp regexp(str);
                 regexp.setCaseSensitivity(cs);
@@ -101,24 +107,29 @@ bool RichTextSearchInterface::findString(QString str,
             }
         }
 
-        if (found && !highlightAll) // found a match and we only want one - stop here and select it
+        if (found && !highlightAll) { // found a match and we only want one - stop here and select it
             keepGoing = false;
+        }
 
         else if (!found && !highlightAll &&
-                 (iteration != 0)) // didn't find a match, only want one, we HAVE wrapped around
+                 (iteration != 0)) { // didn't find a match, only want one, we HAVE wrapped around
             keepGoing = false;
+        }
 
-        if (!found && highlightAll) // want to highlight all, but no more matches found
+        if (!found && highlightAll) { // want to highlight all, but no more matches found
             keepGoing = false;
+        }
 
         // not found, and we only want one match, then we need to wrap around and keep going
         if (keepGoing) {
             if (!highlightAll) {
                 cursor = editor_->textCursor();
-                if (flags & QTextDocument::FindBackward)
+                if (flags & QTextDocument::FindBackward) {
                     cursor.movePosition(QTextCursor::End);
-                else
+                }
+                else {
                     cursor.movePosition(QTextCursor::Start);
+                }
                 iteration = 1; // iteration=1 to avoid infinite wraparound!
             }
         }
@@ -136,8 +147,9 @@ bool RichTextSearchInterface::findString(QString str,
 }
 
 void RichTextSearchInterface::automaticSearchForKeywords(bool userClickedReload) {
-    if (editor_->document()->isEmpty())
+    if (editor_->document()->isEmpty()) {
         return;
+    }
 
     bool performSearch = vpPerformAutomaticSearch_->value().toBool();
 
@@ -156,8 +168,9 @@ void RichTextSearchInterface::automaticSearchForKeywords(bool userClickedReload)
 
         // case sensitivity
         bool caseSensitive = vpAutomaticSearchCase_->value().toBool();
-        if (caseSensitive)
+        if (caseSensitive) {
             findFlags = findFlags | QTextDocument::FindCaseSensitively;
+        }
 
         // string match mode
         std::string matchMode(vpAutomaticSearchMode_->valueAsStdString());
@@ -184,8 +197,9 @@ void RichTextSearchInterface::automaticSearchForKeywords(bool userClickedReload)
 }
 
 void RichTextSearchInterface::refreshSearch() {
-    if (!editor_)
+    if (!editor_) {
         return;
+    }
 
     QTextCursor cursor(editor_->textCursor());
     if (cursor.hasSelection()) {
@@ -195,8 +209,9 @@ void RichTextSearchInterface::refreshSearch() {
 }
 
 void RichTextSearchInterface::clearHighlights() {
-    if (!editor_)
+    if (!editor_) {
         return;
+    }
 
     QList<QTextEdit::ExtraSelection> empty;
     editor_->setExtraSelections(empty);

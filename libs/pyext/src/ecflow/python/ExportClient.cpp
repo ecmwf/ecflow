@@ -142,8 +142,9 @@ py::list suites(ClientInvoker* self) {
     const std::vector<std::string>& the_suites = self->server_reply().get_string_vec();
     py::list list;
     size_t the_size = the_suites.size();
-    for (size_t i = 0; i < the_size; i++)
+    for (size_t i = 0; i < the_size; i++) {
         list.append(the_suites[i]);
+    }
     return list;
 }
 

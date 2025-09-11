@@ -10,20 +10,16 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <string>
 
-#include <boost/date_time/posix_time/time_formatters.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ecflow/attribute/TimeAttr.hpp"
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/core/Chrono.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
@@ -67,7 +63,8 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     // Create a test when we can match a time series. Need to sync hour with suite time
     // at hour 1, suite time should also be 01:00, for test to work
@@ -115,9 +112,10 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
     bool cmd_context = true;
     bool day_changed = false; // after midnight make sure we keep day_changed
     for (int m = 1; m < 96; m++) {
-        calendar.update(time_duration(minutes(30)));
-        if (!day_changed)
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(30)));
+        if (!day_changed) {
             day_changed = calendar.dayChanged();
+        }
 
         boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
 
@@ -152,12 +150,14 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
                     break;
                 }
             }
-            if (matches_free_slot)
+            if (matches_free_slot) {
                 BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should be free at time " << time);
-            else
+            }
+            else {
                 BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should be fail at time " << time);
+            }
 
             /// At the last hour checkForRequeue should return false; This ensures that value will
             /// not get incremented and so, should leave node in the complete state.
@@ -198,12 +198,14 @@ BOOST_AUTO_TEST_CASE(test_time_attr) {
                     break;
                 }
             }
-            if (matches_free_slot)
+            if (matches_free_slot) {
                 BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),
                                     timeSeries2.toString() << " should be free at time " << time);
-            else
+            }
+            else {
                 BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),
                                     timeSeries2.toString() << " should be fail at time " << time);
+            }
 
             /// At the last time checkForRequeue should return false; This ensures that value will
             /// not get incremented and so, should leave node in the complete state.
@@ -280,7 +282,8 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
     ECF_NAME_THIS_TEST();
 
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     TimeSeries timeSeriesX(TimeSlot(10, 0), TimeSlot(20, 0), TimeSlot(1, 0), false /* relative */);
     TimeSeries timeSeries2X(TimeSlot(11, 0), TimeSlot(15, 0), TimeSlot(1, 0), false /* relative */);
@@ -294,7 +297,7 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
 
     bool day_changed = false; // after midnight make sure we keep day_changed
     for (int m = 1; m < 96; m++) {
-        calendar.update(time_duration(minutes(30)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(30)));
         if (!day_changed) {
             day_changed = calendar.dayChanged();
         }
@@ -311,12 +314,14 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
         // ***********************************************************************************
 
         if (time < timeSeries.time_series().start().duration()) {
-            if (!day_changed)
+            if (!day_changed) {
                 BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should NOT be free at time " << time);
-            else
+            }
+            else {
                 BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should be free at time " << time);
+            }
         }
         else if (time >= timeSeries.time_series().start().duration()) {
             BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
@@ -324,12 +329,14 @@ BOOST_AUTO_TEST_CASE(test_time_once_free_stays_free) {
         }
 
         if (time < timeSeries2.time_series().start().duration()) {
-            if (!day_changed)
+            if (!day_changed) {
                 BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),
                                     timeSeries2.toString() << " should NOT be free at time " << time);
-            else
+            }
+            else {
                 BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),
                                     timeSeries.toString() << " should be free at time " << time);
+            }
         }
         else if (time >= timeSeries2.time_series().start().duration()) {
             BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),
@@ -378,7 +385,8 @@ BOOST_AUTO_TEST_CASE(test_time_attr_multiples) {
     // See TimeAttr.hpp for rules concerning isFree() and checkForReque()
     // test time attr isFree(), and checkForRequeue
     Calendar calendar;
-    calendar.init(ptime(date(2010, 2, 10), minutes(0)), Calendar::REAL);
+    calendar.init(boost::posix_time::ptime(boost::gregorian::date(2010, 2, 10), boost::posix_time::minutes(0)),
+                  Calendar::REAL);
 
     TimeSeries timeSeries1530(TimeSlot(15, 30), false /* relative */);
     TimeSeries timeSeries1630(TimeSlot(16, 30), false /* relative */);
@@ -396,7 +404,7 @@ BOOST_AUTO_TEST_CASE(test_time_attr_multiples) {
 
     bool day_changed = false; // after midnight make sure we keep day_changed
     for (int m = 1; m < 96; m++) {
-        calendar.update(time_duration(minutes(30)));
+        calendar.update(boost::posix_time::time_duration(boost::posix_time::minutes(30)));
         if (!day_changed) {
             day_changed = calendar.dayChanged();
         }

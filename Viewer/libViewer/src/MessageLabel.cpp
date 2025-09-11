@@ -135,8 +135,9 @@ void MessageLabelProgWidget::stopProgress() {
 void MessageLabelProgWidget::progress(QString text, int value) {
     Q_ASSERT(value >= 0 && value <= 100);
 
-    if (progBar_->maximum() == 0)
+    if (progBar_->maximum() == 0) {
         progBar_->setMaximum(100);
+    }
 
     if (delayedProgressTimer_->isActive()) {
         delayedProgressDef_.progText_ = text;
@@ -327,11 +328,13 @@ void MessageLabel::showMessage(const Type& type, QString msg) {
 
     QString s = message_;
     s.replace("\n", "<br>");
-    if (showTypeTitle_)
+    if (showTypeTitle_) {
         s = "<b>" + it->second.title_ + ": </b>" + s;
+    }
 
-    if (s.endsWith("<br>"))
+    if (s.endsWith("<br>")) {
         s = s.left(s.size() - 4);
+    }
 
     msgLabel_->setText(s);
 
@@ -374,8 +377,9 @@ void MessageLabel::setShowTypeTitle(bool b) {
 }
 
 void MessageLabel::setNarrowMode(bool b) {
-    if (b == narrowMode_)
+    if (b == narrowMode_) {
         return;
+    }
 
     narrowMode_ = b;
 

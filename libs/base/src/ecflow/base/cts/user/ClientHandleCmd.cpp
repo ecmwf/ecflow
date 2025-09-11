@@ -14,6 +14,8 @@
 
 #include "ecflow/base/AbstractClientEnv.hpp"
 #include "ecflow/base/AbstractServer.hpp"
+#include "ecflow/base/AuthenticationDetails.hpp"
+#include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/GroupCTSCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
@@ -42,10 +44,12 @@ void ClientHandleCmd::print(std::string& os) const {
             user_cmd(os, CtsApi::ch_drop(client_handle_));
             break;
         case ClientHandleCmd::DROP_USER: {
-            if (drop_user_.empty())
+            if (drop_user_.empty()) {
                 user_cmd(os, CtsApi::ch_drop_user(user()));
-            else
+            }
+            else {
                 user_cmd(os, CtsApi::ch_drop_user(drop_user_));
+            }
             break;
         }
         case ClientHandleCmd::ADD:
@@ -75,10 +79,12 @@ void ClientHandleCmd::print_only(std::string& os) const {
             os += CtsApi::ch_drop(client_handle_);
             break;
         case ClientHandleCmd::DROP_USER: {
-            if (drop_user_.empty())
+            if (drop_user_.empty()) {
                 os += CtsApi::ch_drop_user(user());
-            else
+            }
+            else {
                 os += CtsApi::ch_drop_user(drop_user_);
+            }
             break;
         }
         case ClientHandleCmd::ADD:
@@ -101,13 +107,24 @@ void ClientHandleCmd::print_only(std::string& os) const {
 
 bool ClientHandleCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<ClientHandleCmd*>(rhs);
-    if (!the_rhs)
+    if (!the_rhs) {
         return false;
-    if (api_ != the_rhs->api())
+    }
+    if (api_ != the_rhs->api()) {
         return false;
-    if (drop_user_ != the_rhs->drop_user())
+    }
+    if (drop_user_ != the_rhs->drop_user()) {
         return false;
+    }
     return UserCmd::equals(rhs);
+}
+
+ecf::authentication_t ClientHandleCmd::authenticate(AbstractServer& server) const {
+    return implementation::do_authenticate(*this, server);
+}
+
+ecf::authorisation_t ClientHandleCmd::authorise(AbstractServer& server) const {
+    return implementation::do_authorise(*this, server);
 }
 
 const char* ClientHandleCmd::theArg() const {
@@ -185,8 +202,9 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
 
             // If this command is part of a group command, let the following sync command, know about the new handle
             // So it return the defs with the right set of suites.
-            if (group_cmd_)
+            if (group_cmd_) {
                 group_cmd_->set_client_handle(client_handle);
+            }
 
             // return the handle to the client
             return PreAllocatedReply::client_handle_cmd(client_handle);
@@ -198,8 +216,9 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
             // If this command is part of a group command, let the following sync command, know about the new handle
             // So it return the defs with the right set of suites.
             // If used with following sync, will return *FULL* defs. Can be expensive
-            if (group_cmd_)
+            if (group_cmd_) {
                 group_cmd_->set_client_handle(0);
+            }
 
             // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
             return PreAllocatedReply::client_handle_cmd(0);
@@ -207,18 +226,21 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
 
         case ClientHandleCmd::DROP_USER: {
             // will throw if no users handles dropped
-            if (drop_user_.empty())
+            if (drop_user_.empty()) {
                 as->defs()->client_suite_mgr().remove_client_suites(user());
-            else
+            }
+            else {
                 as->defs()->client_suite_mgr().remove_client_suites(drop_user_);
+            }
 
             if (drop_user_.empty() || drop_user_ == user()) {
 
                 // If this command is part of a group command, let the following sync command, know about the new handle
                 // So it return the defs with the right set of suites.
                 // If used with following sync, will return *FULL* defs.
-                if (group_cmd_)
+                if (group_cmd_) {
                     group_cmd_->set_client_handle(0);
+                }
 
                 // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
                 return PreAllocatedReply::client_handle_cmd(0);
@@ -368,8 +390,9 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 }
 
 void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    if (ac->debug())
+    if (ac->debug()) {
         cout << "  ClientHandleCmd::create api = '" << api_ << "'.\n";
+    }
 
     switch (api_) {
 
@@ -386,21 +409,26 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
                 try {
                     client_handle = ecf::convert_to<int>(args[0]);
                     if (args.size() > 1) {
-                        if (args[1] == "true")
+                        if (args[1] == "true") {
                             auto_add_new_suites = true;
-                        else if (args[1] == "false")
+                        }
+                        else if (args[1] == "false") {
                             auto_add_new_suites = false;
+                        }
                         suite_names_index = 2;
                     }
                 }
                 catch (...) {
-                    if (args[0] == "true")
+                    if (args[0] == "true") {
                         auto_add_new_suites = true;
-                    else if (args[0] == "false")
+                    }
+                    else if (args[0] == "false") {
                         auto_add_new_suites = false;
-                    else
+                    }
+                    else {
                         throw std::runtime_error(
                             "ClientHandleCmd::create: First argument should be integer | true | false. See help");
+                    }
                 }
                 for (size_t i = suite_names_index; i < args.size(); i++) {
                     suite_names.push_back(args[i]);
@@ -412,8 +440,9 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
 
         case ClientHandleCmd::DROP: {
             int client_handle = vm[theArg()].as<int>();
-            if (0 == client_handle)
+            if (0 == client_handle) {
                 throw std::runtime_error("ClientHandleCmd::create: handles must have a value > 0");
+            }
             cmd = std::make_shared<ClientHandleCmd>(client_handle);
             break;
         }
@@ -426,9 +455,10 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
 
         case ClientHandleCmd::ADD: {
             vector<string> args = vm[theArg()].as<vector<string>>();
-            if (args.size() < 2)
+            if (args.size() < 2) {
                 throw std::runtime_error(
                     "To few arguments. First arg should be a integer handle, then a list of suite names. See help");
+            }
             int client_handle = 0;
             try {
                 client_handle = ecf::convert_to<int>(args[0]);
@@ -436,8 +466,9 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
             catch (std::exception&) {
                 throw std::runtime_error("The first argument must be an integer. See help");
             }
-            if (0 == client_handle)
+            if (0 == client_handle) {
                 throw std::runtime_error("ClientHandleCmd::create: handles must have a value > 0");
+            }
             std::vector<std::string> suite_names;
             suite_names.reserve(args.size());
             for (size_t i = 1; i < args.size(); i++) {
@@ -449,9 +480,10 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
 
         case ClientHandleCmd::REMOVE: {
             vector<string> args = vm[theArg()].as<vector<string>>();
-            if (args.size() < 2)
+            if (args.size() < 2) {
                 throw std::runtime_error(
                     "To few arguments. First arg should be a integer handle, then a list of suite names. See help");
+            }
             int client_handle = 0;
             try {
                 client_handle = ecf::convert_to<int>(args[0]);
@@ -459,8 +491,9 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
             catch (std::exception&) {
                 throw std::runtime_error("ClientHandleCmd::create: The first argument must be an integer. See help");
             }
-            if (0 == client_handle)
+            if (0 == client_handle) {
                 throw std::runtime_error("ClientHandleCmd::create: handles must have a value > 0");
+            }
             std::vector<std::string> suite_names;
             suite_names.reserve(args.size());
             for (size_t i = 1; i < args.size(); i++) {
@@ -472,9 +505,10 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
 
         case ClientHandleCmd::AUTO_ADD: {
             vector<string> args = vm[theArg()].as<vector<string>>();
-            if (args.size() != 2)
+            if (args.size() != 2) {
                 throw std::runtime_error("Two argument expected. First arg should be a integer handle, second should "
                                          "be true or false. See help");
+            }
             int client_handle = 0;
             try {
                 client_handle = ecf::convert_to<int>(args[0]);
@@ -482,15 +516,19 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
             catch (std::exception&) {
                 throw std::runtime_error("ClientHandleCmd::create: The first argument must be an integer. See help");
             }
-            if (0 == client_handle)
+            if (0 == client_handle) {
                 throw std::runtime_error("ClientHandleCmd::create: handles must have a value > 0");
+            }
             bool auto_add_new_suites = false;
-            if (args[1] == "true")
+            if (args[1] == "true") {
                 auto_add_new_suites = true;
-            else if (args[1] == "false")
+            }
+            else if (args[1] == "false") {
                 auto_add_new_suites = false;
-            else
+            }
+            else {
                 throw std::runtime_error("ClientHandleCmd::create: First argument should be true | false. See help");
+            }
             cmd = std::make_shared<ClientHandleCmd>(client_handle, auto_add_new_suites);
             break;
         }
