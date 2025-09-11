@@ -29,7 +29,7 @@ using namespace ecf;
 //-------------------------------------------------------------------------------------
 CheckPtSaver::CheckPtSaver(BaseServer* s, boost::asio::io_context& io, const ServerEnvironment* serverEnv)
     : server_(s),
-      timer_(io, boost::posix_time::seconds(0)),
+      timer_(io, std::chrono::seconds(0)),
       firstTime_(true),
       running_(false),
       serverEnv_(serverEnv),
@@ -67,7 +67,7 @@ void CheckPtSaver::start() {
     //               with explicit save each time server is halted/started.
     if (firstTime_) {
         firstTime_ = false;
-        timer_.expires_from_now(boost::posix_time::seconds(serverEnv_->checkPtInterval()));
+        timer_.expires_after(std::chrono::seconds(serverEnv_->checkPtInterval()));
         timer_.async_wait(boost::asio::bind_executor(
             server_->io_, [this](const boost::system::error_code& error) { periodicSaveCheckPt(error); }));
     }
@@ -170,7 +170,7 @@ void CheckPtSaver::periodicSaveCheckPt(const boost::system::error_code& error) {
     }
 
     /// Appears that expires_from_now is more accurate then expires_at
-    timer_.expires_from_now(boost::posix_time::seconds(serverEnv_->checkPtInterval()));
+    timer_.expires_after(std::chrono::seconds(serverEnv_->checkPtInterval()));
     timer_.async_wait(boost::asio::bind_executor(
         server_->io_, [this](const boost::system::error_code& error) { periodicSaveCheckPt(error); }));
 }
