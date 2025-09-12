@@ -19,12 +19,13 @@ ecbuild_dont_pack(
     # ignore local notes
     .scratch
     .sandbox
-    .deploy
+    .scratch
     SCRATCH
     CUSTOMER
     # ignore source control directories
     .git
     # ignore build directories
+    .deploy
     bamboo
     ecbuild
     build_scripts/nightly
