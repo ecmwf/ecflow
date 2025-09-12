@@ -77,10 +77,14 @@ void VDir::reload() {
             item->name_ = p.filename().string();
             item->size_ = fs::file_size(p);
             item->size_ = fs::file_size(p);
+
+            auto lw_time = ecf::fsx::last_write_time(p);
+            auto seconds = std::chrono::duration_cast<std::chrono::seconds>(lw_time.time_since_epoch()).count();
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-            item->mtime_ = QDateTime::fromSecsSinceEpoch(fs::last_write_time(p));
+            item->mtime_ = QDateTime::fromSecsSinceEpoch(seconds);
 #else
-            item->mtime_ = QDateTime::fromTime_t(fs::last_write_time(p));
+            item->mtime_ = QDateTime::fromTime_t(seconds);
 #endif
             items_.push_back(item);
         }

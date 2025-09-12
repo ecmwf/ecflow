@@ -12,6 +12,8 @@
 #define ecflow_client_HostsFile_HPP
 
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "ecflow/core/Filesystem.hpp"
 

@@ -10,10 +10,10 @@
 
 #include "TemporaryFile.hpp"
 
-TemporaryFile::TemporaryFile() : path_{fs::unique_path("tmp_%%%%-%%%%-%%%%-%%%%")} {
+TemporaryFile::TemporaryFile() : path_{ecf::fsx::unique_path("tmp_%%%%-%%%%-%%%%-%%%%")} {
 }
 
-TemporaryFile::TemporaryFile(const std::string& pattern) : path_{fs::unique_path(pattern)} {
+TemporaryFile::TemporaryFile(const std::string& pattern) : path_{ecf::fsx::unique_path(pattern)} {
 }
 
 TemporaryFile::~TemporaryFile() {

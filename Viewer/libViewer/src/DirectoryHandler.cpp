@@ -280,7 +280,7 @@ std::string DirectoryHandler::tmpFileName() {
         try {
             fs::path model = tmp;
             model /= "%%%%-%%%%-%%%%-%%%%";
-            return fs::unique_path(model).string();
+            return ecf::fsx::unique_path(model).string();
         }
         catch (const fs::filesystem_error& err) {
             UiLog().warn() << "Could not generate tmp filename! Reason: " << err.what();

@@ -584,8 +584,7 @@ ecbuild_add_library(
     nlohmann::json
     cereal::cereal # this needs to be public as it appears in public header files used downstream
     httplib::httplib
-    $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
-    Boost::filesystem
+    $<$<VERSION_LESS:${SELECTED_BOOST_VERSION},1.69.0>:Boost::system>
     Boost::date_time
     Boost::program_options
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>

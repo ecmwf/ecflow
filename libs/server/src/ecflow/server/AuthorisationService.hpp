@@ -11,6 +11,9 @@
 #ifndef ecflow_server_AuthorisationService_HPP
 #define ecflow_server_AuthorisationService_HPP
 
+#include <string>
+#include <vector>
+
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Result.hpp"

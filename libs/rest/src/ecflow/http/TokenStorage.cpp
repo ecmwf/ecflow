@@ -213,8 +213,7 @@ void TokenStorage::ReadStorage() {
 
     while (true) {
         try {
-            auto current_modified =
-                std::chrono::system_clock::from_time_t(fs::last_write_time(fs::path(opts.tokens_file)));
+            auto current_modified = ecf::fsx::last_write_time(fs::path(opts.tokens_file));
             if (current_modified > last_modified) {
                 auto new_tokens = ReadTokens(opts.tokens_file);
                 {

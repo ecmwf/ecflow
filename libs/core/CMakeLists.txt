@@ -42,6 +42,7 @@ set(test_srcs
   test/TestCore_main.cpp # contains main() function for test driver
   test/TestExtract.cpp
   test/TestFile.cpp
+  test/TestFilesystem.cpp
   test/TestGetUserDetails.cpp
   test/TestLog.cpp
   test/TestMessage.cpp

@@ -194,7 +194,7 @@ void OutputDirFetchLocalTask::run() {
     fs::path p(filePath_);
 
     // Is it a directory?
-    boost::system::error_code errorCode;
+    std::error_code errorCode;
     if (fs::is_directory(p, errorCode)) {
         fail();
         return;

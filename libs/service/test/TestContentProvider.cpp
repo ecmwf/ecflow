@@ -14,7 +14,7 @@
 #include <cstdio>
 #include <fstream>
 
-#include <boost/filesystem.hpp>
+#include "ecflow/core/Filesystem.hpp"
 
 namespace ecf::test {
 
@@ -39,7 +39,7 @@ void store_content_to_file(const std::string& file_path, const std::string& cont
 }
 
 void clear_content_from_file(const std::string& file_path) {
-    boost::filesystem::remove(file_path);
+    std::filesystem::remove(file_path);
 }
 
 } // namespace

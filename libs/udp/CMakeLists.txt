@@ -55,7 +55,7 @@ ecbuild_add_executable(
   LIBS
     pthread
     Boost::boost
-    Boost::filesystem
+    $<$<VERSION_LESS:${SELECTED_BOOST_VERSION},1.69.0>:Boost::system>
 )
 set_target_properties(${CLIENT_TARGET} PROPERTIES
   INSTALL_RPATH ""

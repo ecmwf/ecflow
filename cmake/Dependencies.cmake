@@ -162,7 +162,7 @@ if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
   list(APPEND _boost_needed_libs system )
 endif ()
 
-list(APPEND _boost_needed_libs filesystem program_options date_time )
+list(APPEND _boost_needed_libs program_options date_time )
 
 if ( Boost_MINOR_VERSION GREATER_EQUAL 86 )
   message(STATUS "Using Boost::process, since using ${Boost_VERSION}" )

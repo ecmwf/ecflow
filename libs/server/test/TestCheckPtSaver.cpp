@@ -39,7 +39,7 @@ public:
     [[nodiscard]] std::string load() const { return f_load(absolute_path_); }
 
     static fs::path unique_absolute_path(const std::string& basename) {
-        return fs::absolute(fs::unique_path(basename));
+        return fs::absolute(ecf::fsx::unique_path(basename));
     }
 
 private:

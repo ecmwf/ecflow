@@ -130,3 +130,12 @@ endif ()
 if (HAVE_EXPORT_COMPILE_COMMANDS)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif ()
+
+# =========================================================================================
+# Support for std::filesystem
+# =========================================================================================
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0")
+  # GCC 8.x needs explicit stdc++fs linking
+  link_libraries(stdc++fs)
+endif()
