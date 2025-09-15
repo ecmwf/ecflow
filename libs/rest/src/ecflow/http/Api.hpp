@@ -11,7 +11,7 @@
 #ifndef ecflow_http_Api_HPP
 #define ecflow_http_Api_HPP
 
-#include "ecflow/http/HttpLibrary.hpp"
+#include "ecflow/core/HttpLibrary.hpp"
 
 namespace ecf::http {
 

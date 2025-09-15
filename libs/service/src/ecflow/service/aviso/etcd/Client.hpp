@@ -11,22 +11,10 @@
 #ifndef ecflow_service_aviso_etcd_Client_HPP
 #define ecflow_service_aviso_etcd_Client_HPP
 
-#if defined(ECF_OPENSSL)
-    #include <openssl/ssl.h>
-    #if OPENSSL_VERSION_NUMBER < 0x1010100fL
-        #warning OpenSSL versions prior to 1.1.1 detected. Aviso ETCD HTTP client will be build without OpenSSL support!
-    #else
-        #define CPPHTTPLIB_OPENSSL_SUPPORT
-    #endif
-#endif
-
-#define CPPHTTPLIB_THREAD_POOL_COUNT 1
-#define CPPHTTPLIB_ZLIB_SUPPORT 1
-
-#include <httplib.h>
-#include <memory>
 #include <string>
 #include <vector>
+
+#include "ecflow/core/HttpLibrary.hpp"
 
 namespace ecf::service::aviso::etcd {
 

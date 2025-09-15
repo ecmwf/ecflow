@@ -13,8 +13,8 @@
 
 #include <memory>
 
+#include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/http/HttpLibrary.hpp"
 #include "ecflow/http/JSON.hpp"
 
 namespace ecf::http {

@@ -8,20 +8,12 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifdef ECF_OPENSSL
-    #define CPPHTTPLIB_OPENSSL_SUPPORT 1
-#endif
-
-#define CPPHTTPLIB_THREAD_POOL_COUNT 1
-#define CPPHTTPLIB_ZLIB_SUPPORT 1
-
-#include <httplib.h>
-
 #include <boost/test/unit_test.hpp>
 
 #include "Certificate.hpp"
 #include "InvokeServer.hpp"
 #include "TokenFile.hpp"
+#include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/HttpServer.hpp"
 #include "ecflow/http/HttpServerException.hpp"
 #include "ecflow/http/JSON.hpp"

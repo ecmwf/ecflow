@@ -26,8 +26,8 @@
 #if defined(ECF_OPENSSL)
     #include "ecflow/http/TokenStorage.hpp"
 #endif
+#include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/DefsStorage.hpp"
-#include "ecflow/http/HttpLibrary.hpp"
 #include "ecflow/http/TreeGeneration.hpp"
 #include "ecflow/http/TypeToJson.hpp"
 #include "ecflow/node/Alias.hpp"

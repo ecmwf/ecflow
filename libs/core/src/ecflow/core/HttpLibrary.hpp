@@ -8,8 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_http_HttpLibrary_HPP
-#define ecflow_http_HttpLibrary_HPP
+#ifndef ecflow_core_HttpLibrary_HPP
+#define ecflow_core_HttpLibrary_HPP
 
 #include <sys/socket.h>
 #if defined(MSG_NOSIGNAL)
@@ -28,14 +28,18 @@
     #if OPENSSL_VERSION_NUMBER < 0x1010100fL
         #warning OpenSSL versions prior to 1.1.1 detected. Aviso ETCD HTTP client will be build without OpenSSL support!
     #else
-        #define CPPHTTPLIB_OPENSSL_SUPPORT
+        #define CPPHTTPLIB_OPENSSL_SUPPORT 1
     #endif
 #endif
 
-#ifdef ECF_HTTP_COMPRESSION
-    #define CPPHTTPLIB_ZLIB_SUPPORT
+#if defined(ECF_HTTP_COMPRESSION)
+    #define CPPHTTPLIB_ZLIB_SUPPORT 1
+#endif
+
+#if defined(ECF_HTTP_CUSTOM_THREAD_POOL_COUNT)
+    #define CPPHTTPLIB_THREAD_POOL_COUNT ECF_HTTP_CUSTOM_THREAD_POOL_COUNT
 #endif
 
 #include <httplib.h>
 
-#endif /* ecflow_http_HttpLibrary_HPP */
+#endif /* ecflow_core_HttpLibrary_HPP */

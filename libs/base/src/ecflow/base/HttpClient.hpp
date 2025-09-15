@@ -12,15 +12,16 @@
 #ifndef ecflow_base_HttpClient_HPP
 #define ecflow_base_HttpClient_HPP
 
-#define CPPHTTPLIB_THREAD_POOL_COUNT 1
-#define CPPHTTPLIB_OPENSSL_SUPPORT 1
-#define CPPHTTPLIB_ZLIB_SUPPORT 1
-
-#include <httplib.h>
+/*
+ * The following enforces the HTTP client to run on a single thread.
+ * It acts as a flag to the HttpLibrary.hpp file.
+ */
+#define ECF_HTTP_CUSTOM_THREAD_POOL_COUNT 1
 
 #include "ecflow/base/ClientToServerRequest.hpp"
 #include "ecflow/base/Connection.hpp"
 #include "ecflow/base/ServerToClientResponse.hpp"
+#include "ecflow/core/HttpLibrary.hpp"
 
 namespace ecf::http {
 

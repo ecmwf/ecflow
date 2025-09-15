@@ -262,6 +262,7 @@ set(srcs
   core/src/ecflow/core/File_r.hpp
   core/src/ecflow/core/Filesystem.hpp
   core/src/ecflow/core/Host.hpp
+  core/src/ecflow/core/HttpLibrary.hpp
   core/src/ecflow/core/Log.hpp
   core/src/ecflow/core/LogVerification.hpp
   core/src/ecflow/core/Message.hpp
