@@ -51,4 +51,5 @@ PerformanceMeasure PerformanceMeasure::current() {
 
     return {wall, system, user};
 }
-}; // namespace ecf
+
+} // namespace ecf
