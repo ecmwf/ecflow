@@ -13,6 +13,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -66,12 +67,12 @@ BOOST_AUTO_TEST_CASE(can_do_permissions) {
 
     Defs d;
     auto s = d.add_suite("s1");
-    s->addVariable(Variable("PERMISSIONS", "u1:rwx,u2:rw"));
+    s->addVariable(Variable(ecf::environment::ECF_PERMISSIONS, "u1:rwx,u2:rw"));
     auto f = s->add_family("f1");
-    f->addVariable(Variable("PERMISSIONS", "u2:rx,u3:rw"));
+    f->addVariable(Variable(ecf::environment::ECF_PERMISSIONS, "u2:rx,u3:rw"));
     auto t = f->add_task("t1");
 
-    d.server_state().add_or_update_server_variable("PERMISSIONS", "a:rwxos");
+    d.server_state().add_or_update_server_variable(ecf::environment::ECF_PERMISSIONS, "a:rwxos");
 
     AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
 

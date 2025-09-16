@@ -386,7 +386,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
     theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_);            // server PID
     theRetVec.emplace_back(std::string("ECF_VERSION"), Version::full()); // server version
 
-    theRetVec.emplace_back(std::string("PERMISSIONS"), permissions_);
+    theRetVec.emplace_back(std::string(ecf::environment::ECF_PERMISSIONS), permissions_);
 
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {
@@ -533,7 +533,7 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(ecf::environment::ECF_CUSTOM_PASSWD), "Path name to custom passwd file, for user who don't use login name")
             ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
             ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded")
-            ("PERMISSIONS",po::value<std::string>(&permissions_)->default_value(""), "")
+            (ecf::environment::ECF_PERMISSIONS,po::value<std::string>(&permissions_)->default_value(""), "")
         ;
 
         // clang-format on
@@ -705,7 +705,7 @@ std::string ServerEnvironment::dump() const {
     ss << "ECF_SSL = " << ssl_ << "\n";
 #endif
 
-    ss << "PERMISSIONS = " << permissions_ << "\n";
+    ss << ecf::environment::ECF_PERMISSIONS << " = " << permissions_ << "\n";
 
     ss << white_list_file_.dump_valid_users();
     return ss.str();
@@ -733,7 +733,7 @@ std::vector<std::string> ServerEnvironment::expected_variables() {
     expected_variables.emplace_back("ECF_INTERVAL");
     expected_variables.emplace_back(ecf::environment::ECF_PASSWD);
     expected_variables.emplace_back(ecf::environment::ECF_CUSTOM_PASSWD);
-    expected_variables.emplace_back(ecf::environment::PERMISSIONS);
+    expected_variables.emplace_back(ecf::environment::ECF_PERMISSIONS);
 #ifdef ECF_OPENSSL
     if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         expected_variables.emplace_back(ecf::environment::ECF_SSL);
