@@ -76,8 +76,10 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
         ecf::Identity identity = ecf::Identity::make_none();
 
         // If possible, the Identify is retrieved from request header fields
-        bool identity_headers = false;
-        bool identity_secure  = false;
+        bool found_header_username = false;
+        bool found_header_password = false;
+        bool found_basic_security  = false;
+        bool found_bearer_security = false;
         std::string username;
         std::string password;
         {
@@ -85,8 +87,8 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
                 return field.name_string() == "X-Auth-Username";
             });
             if (found != std::end(request)) {
-                identity_headers = true;
-                username         = std::string{found->value()};
+                found_header_username = true;
+                username              = std::string{found->value()};
             }
         }
         {
@@ -94,8 +96,8 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
                 return field.name_string() == "X-Auth-Password";
             });
             if (found != std::end(request)) {
-                identity_headers = true;
-                password         = std::string{found->value()};
+                found_header_password = true;
+                password              = std::string{found->value()};
             }
         }
         {
@@ -109,41 +111,50 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
 
                 auto space_separator = header.find(' ');
                 if (space_separator == std::string::npos) {
-                    LOG_ERROR("HttpServer::handle_request", "Malformed Authorization header");
-                    response = bad_request("Malformed Authorization header");
+                    auto error = std::string{"Incorrect Authorization header, unable to find space separator"};
+                    LOG_ERROR("HttpServer::handle_request", error);
+                    response = bad_request(error);
                     return;
                 }
                 else {
                     auto tag   = header.substr(0, space_separator);
                     auto value = header.substr(space_separator + 1, std::string::npos);
                     if (tag == "Basic") {
-                        identity_secure = true;
-                        auto decoded    = ecf::decode_base64(value);
+                        // The Basic tag is processed to extract username and password
+                        found_basic_security = true;
+                        auto decoded         = ecf::decode_base64(value);
                         std::cout << "Found Authorization: decoded:" << decoded << std::endl;
                         auto colon_separator = decoded.find(':');
                         username             = decoded.substr(0, colon_separator);
                         password             = decoded.substr(colon_separator + 1, std::string::npos);
                     }
+                    else if (tag == "Bearer") {
+                        // The Bearer tag is not handled in ecFlow, and the actual authentication is expected to be
+                        // performed by the reverse proxy.
+                        found_bearer_security = true;
+                    }
                     else {
-                        // Assume Bearer token, which we do not handle here. A reverse proxy should handle this!
+                        // If no Basic or Bearer tag, then ignore the Authorisation header,
+                        // and use the username and password from the inbound_request
                     }
                 }
             }
         }
 
-        if (identity_secure && identity_headers) {
-            LOG_DEBUG("HttpServer::handle_request", "Identity extracted from HTTP(s) request header (Authorisation)");
+        if (found_bearer_security && found_header_username) {
+            LOG_DEBUG("HttpServer::handle_request",
+                      "Identity extracted from HTTP(s) request header (Authorisation: Bearer)");
             identity = ecf::Identity::make_secure_user(username);
         }
-        else if (!identity_secure && identity_headers) {
-            LOG_DEBUG("HttpServer::handle_request",
-                      "Identity extracted from HTTP(s) request header (X-Auth-Username/X-Auth-Password)");
-            identity = ecf::Identity::make_user(username, password);
-        }
-        else if (identity_secure && !identity_headers) {
+        else if (found_basic_security && found_header_username) {
             LOG_DEBUG("HttpServer::handle_request",
                       "Identity extracted from HTTP(s) request header (Authorization: Basic)");
             identity = ecf::Identity::make_secure_user(username);
+        }
+        else if (!found_basic_security && found_bearer_security && found_header_username && found_header_password) {
+            LOG_DEBUG("HttpServer::handle_request",
+                      "Identity extracted from HTTP(s) request header (X-Auth-Username/X-Auth-Password)");
+            identity = ecf::Identity::make_user(username, password);
         }
         else {
             LOG_DEBUG("HttpServer::handle_request", "Identity extracted from inbound Command");
