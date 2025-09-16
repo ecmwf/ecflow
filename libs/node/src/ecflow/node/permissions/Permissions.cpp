@@ -11,6 +11,7 @@
 #include "ecflow/node/permissions/Permissions.hpp"
 
 #include "ecflow/attribute/Variable.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 
 namespace ecf {
@@ -43,7 +44,7 @@ Permissions Permissions::make_from_variable(const std::string& value) {
 }
 
 Permissions Permissions::find_in(const std::vector<Variable>& variables) {
-    static std::string permissions_var_name = "PERMISSIONS";
+    static std::string permissions_var_name = ecf::environment::ECF_PERMISSIONS;
     if (auto found = std::find_if(
             std::begin(variables), std::end(variables), [](auto&& var) { return var.name() == permissions_var_name; });
         found != std::end(variables)) {
