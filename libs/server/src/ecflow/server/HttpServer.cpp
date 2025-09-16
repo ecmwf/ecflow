@@ -106,8 +106,8 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
             });
             if (found != std::end(request)) {
 
-                std::cout << "Found Authorization: raw: " << found->value() << std::endl;
                 auto header = std::string{found->value()};
+                LOG_DEBUG("HttpServer::handle_request", "Found Authorization header");
 
                 auto space_separator = header.find(' ');
                 if (space_separator == std::string::npos) {
@@ -116,27 +116,25 @@ void handle_request(const boost::beast::http::request<Body, boost::beast::http::
                     response = bad_request(error);
                     return;
                 }
+
+                auto tag   = header.substr(0, space_separator);
+                auto value = header.substr(space_separator + 1, std::string::npos);
+                if (tag == "Basic") {
+                    // The Basic tag is processed to extract username and password
+                    found_basic_security = true;
+                    auto decoded         = ecf::decode_base64(value);
+                    auto colon_separator = decoded.find(':');
+                    username             = decoded.substr(0, colon_separator);
+                    password             = decoded.substr(colon_separator + 1, std::string::npos);
+                }
+                else if (tag == "Bearer") {
+                    // The Bearer tag is not handled in ecFlow, and the actual authentication is expected to be
+                    // performed by the reverse proxy.
+                    found_bearer_security = true;
+                }
                 else {
-                    auto tag   = header.substr(0, space_separator);
-                    auto value = header.substr(space_separator + 1, std::string::npos);
-                    if (tag == "Basic") {
-                        // The Basic tag is processed to extract username and password
-                        found_basic_security = true;
-                        auto decoded         = ecf::decode_base64(value);
-                        std::cout << "Found Authorization: decoded:" << decoded << std::endl;
-                        auto colon_separator = decoded.find(':');
-                        username             = decoded.substr(0, colon_separator);
-                        password             = decoded.substr(colon_separator + 1, std::string::npos);
-                    }
-                    else if (tag == "Bearer") {
-                        // The Bearer tag is not handled in ecFlow, and the actual authentication is expected to be
-                        // performed by the reverse proxy.
-                        found_bearer_security = true;
-                    }
-                    else {
-                        // If no Basic or Bearer tag, then ignore the Authorisation header,
-                        // and use the username and password from the inbound_request
-                    }
+                    // If no Basic or Bearer tag, then ignore the Authorisation header,
+                    // and use the username and password from the inbound_request
                 }
             }
         }
