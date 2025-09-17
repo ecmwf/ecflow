@@ -64,7 +64,7 @@ Start an ecFlow server
 ======================
 
 We will start a new running instance of an :term:`ecflow_server` using the
-default port. It is possible to use a different port by adding
+default port, which is 3141. It is possible to use a different port by adding
 --port=3500 (for example) to every ecFlow command-line action, or by setting
 the environment variable ECF_PORT to the desired port number. Note also
 that we start it as a background task - it will run until the server is
@@ -109,8 +109,8 @@ to the Servers → Manage Servers menu, click "Add server", then enter the
 details of your server. **Name** can be anything you want - it's for you
 to identify the server to your self; something like "localtest" would be
 fine here. **Host** should in this case be "localhost", and **Port**
-should be XXX. The other fields can be left blank, but keep the "Add
-server to current view" box ticked.
+should be 3141 unless you changed it as described above. The other fields can be
+left blank, but keep the "Add server to current view" box ticked.
 
 You should now see your suite loaded into the GUI! To make the server
 active, right-click on the top-level node representing the server
