@@ -27,7 +27,7 @@ Download the example suite definition
 Click the following link to download the files needed to define our
 sample suite:
 
-`ecflow_quickstart.tar.gz <https://get.ecmwf.int/repository/test-data/ecflow/tutorial/ecflow_quickstart.tar.gz>`__
+`ecflow_quickstart.tar.gz <https://sites.ecmwf.int/repository/ecflow/test-data/tutorial/ecflow_quickstart.tar.gz>`__
 
 Now, move it into your chosen working directory and untar it:
 
@@ -65,7 +65,8 @@ Start an ecFlow server
 
 We will start a new running instance of an :term:`ecflow_server` using the
 default port. It is possible to use a different port by adding
---port=3500 (for example) to every ecFlow command-line action. Note also
+--port=3500 (for example) to every ecFlow command-line action, or by setting
+the environment variable ECF_PORT to the desired port number. Note also
 that we start it as a background task - it will run until the server is
 stopped. It can be run in the foreground, but in that case you will need
 to use a new terminal for any subsequent commands!
