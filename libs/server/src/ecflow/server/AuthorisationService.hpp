@@ -16,7 +16,6 @@
 
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Identity.hpp"
-#include "ecflow/core/Result.hpp"
 #include "ecflow/node/permissions/ActivePermissions.hpp"
 
 class AbstractServer;
@@ -28,7 +27,6 @@ class AuthorisationService {
 public:
     static constexpr auto ROOT = "/";
 
-    using result_t = Result<AuthorisationService>;
     using path_t   = std::string;
     using paths_t  = std::vector<std::string>;
 
@@ -44,11 +42,6 @@ public:
 
     [[nodiscard]]
     bool good() const;
-
-    [[nodiscard]]
-    bool authenticate(const Identity& identity) const {
-        return true;
-    }
 
     ActivePermissions permissions_at(const Defs& defs, const path_t& path) const;
 
@@ -69,8 +62,16 @@ public:
     [[nodiscard]]
     bool allows(const Identity& identity, const Defs& defs, const paths_t& paths, Allowed required) const;
 
+    /**
+     * Creates an Authentication Service with the 'strategy' based on the given Defs.
+     *
+     * If ECF_PERMISSIONS is defined at Defs' server state level, then the 'strategy' will be to apply Node-based ACL;
+     * otherwise, the 'strategy' will be to have unrestricted access.
+     *
+     * @return the configured AuthenticationService
+     */
     [[nodiscard]]
-    static result_t load_permissions_from_nodes();
+    static AuthorisationService make_for(const Defs& defs);
 
 private:
     struct Impl;

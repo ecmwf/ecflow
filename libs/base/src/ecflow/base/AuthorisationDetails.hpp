@@ -11,9 +11,6 @@
 #ifndef ecflow_base_AuthorisationDetails_HPP
 #define ecflow_base_AuthorisationDetails_HPP
 
-#include <boost/beast/http/field.hpp>
-#include <boost/property_tree/ptree_fwd.hpp>
-
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/Authorisation.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
