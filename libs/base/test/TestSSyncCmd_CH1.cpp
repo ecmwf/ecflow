@@ -20,6 +20,7 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
@@ -371,11 +372,10 @@ static bool s0_add_some_attributes(defs_ptr defs) {
     BOOST_REQUIRE_MESSAGE(suite, "Could not find suite");
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-    std::vector<task_ptr> tasks;
-    suite->get_all_tasks(tasks);
+    auto tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
 
-    for (task_ptr task : tasks) {
+    for (auto task : tasks) {
         SuiteChanged1 changed(suite.get());
         task->addDay(DayAttr(DayAttr::TUESDAY));
     }
@@ -396,8 +396,7 @@ static bool s0_add_alias(defs_ptr defs) {
     BOOST_REQUIRE_MESSAGE(suite, "Could not find suite");
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-    std::vector<task_ptr> tasks;
-    suite->get_all_tasks(tasks);
+    auto tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
 
     SuiteChanged1 changed(tasks[0]->suite());
@@ -411,16 +410,14 @@ static bool s0_remove_all_tasks(defs_ptr defs) {
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
     // Remove tasks should force a incremental sync
-    std::vector<task_ptr> tasks;
-    suite->get_all_tasks(tasks);
+    auto tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
-    for (task_ptr task : tasks) {
+    for (auto task : tasks) {
         SuiteChanged1 changed(task->suite());
         task->remove();
     }
 
-    tasks.clear();
-    suite->get_all_tasks(tasks);
+    tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(tasks.empty(), "Failed to delete tasks");
     return true;
 }

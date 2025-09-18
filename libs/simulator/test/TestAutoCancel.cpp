@@ -17,6 +17,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
@@ -259,8 +260,7 @@ BOOST_AUTO_TEST_CASE(test_autocancel_task) {
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_task.def"), errorMsg), errorMsg);
 
     // make sure autocancel deletes the tasks and leaves families intact.
-    std::vector<task_ptr> task_vec;
-    theDefs.get_all_tasks(task_vec);
+    auto task_vec = ecf::get_all_tasks(theDefs);
 
     std::vector<Family*> famVec;
     theDefs.getAllFamilies(famVec);
@@ -296,8 +296,7 @@ BOOST_AUTO_TEST_CASE(test_two_autocancel_in_hierarchy) {
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_two_autocancel_in_hierarchy.def"), errorMsg),
                         errorMsg);
 
-    std::vector<task_ptr> task_vec;
-    theDefs.get_all_tasks(task_vec);
+    auto task_vec = ecf::get_all_tasks(theDefs);
 
     std::vector<Family*> famVec;
     theDefs.getAllFamilies(famVec);

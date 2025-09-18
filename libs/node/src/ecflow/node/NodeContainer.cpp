@@ -972,12 +972,6 @@ void NodeContainer::get_all_active_submittables(std::vector<Submittable*>& tasks
     }
 }
 
-void NodeContainer::get_all_tasks(std::vector<task_ptr>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->get_all_tasks(tasks);
-    }
-}
-
 void NodeContainer::get_all_nodes(std::vector<node_ptr>& nodes) const {
     nodes.push_back(non_const_this());
     for (const auto& n : nodes_) {

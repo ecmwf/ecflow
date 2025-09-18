@@ -216,7 +216,8 @@ public:
     std::string find_node_path(const std::string& type, const std::string& name) const;
     node_ptr find_node(const std::string& type, const std::string& pathToNode) const;
 
-    const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }
+    [[deprecated]] const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }
+    const auto& suites() const { return suiteVec_; }
 
     /// Given a path, /suite/family/task, find node which is the closest
     node_ptr find_closest_matching_node(const std::string& pathToNode) const;
@@ -227,7 +228,6 @@ public:
     void getAllSubmittables(std::vector<Submittable*>&) const;
     void get_all_active_submittables(std::vector<Submittable*>&) const;
     void get_all_nodes(std::vector<node_ptr>&) const;
-    void get_all_tasks(std::vector<task_ptr>&) const;
     void get_all_aliases(std::vector<alias_ptr>&) const;
     void getAllAstNodes(std::set<Node*>&) const;
     const std::set<std::string>& externs() const { return externs_; }

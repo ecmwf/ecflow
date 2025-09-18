@@ -15,6 +15,7 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/python/DefsDoc.hpp"
@@ -103,10 +104,8 @@ suite_ptr add_suite(defs_ptr self, suite_ptr s) {
     return s;
 }
 
-std::vector<task_ptr> get_all_tasks(defs_ptr self) {
-    std::vector<task_ptr> tasks;
-    self->get_all_tasks(tasks);
-    return tasks;
+std::vector<Task*> get_all_tasks(defs_ptr self) {
+    return ecf::get_all_tasks(*self);
 }
 std::vector<node_ptr> get_all_nodes(defs_ptr self) {
     std::vector<node_ptr> nodes;

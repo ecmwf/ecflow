@@ -65,7 +65,8 @@ public:
     void addFamily(const family_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
     void add_child(const node_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
 
-    const std::vector<node_ptr>& children() const { return nodes_; }
+    const auto& children() const { return nodes_; }
+
     void immediateChildren(std::vector<node_ptr>&) const override;
     void allChildren(std::vector<node_ptr>&) const override;
 
@@ -89,11 +90,10 @@ public:
     void getAllTasks(std::vector<Task*>&) const override;
     void getAllSubmittables(std::vector<Submittable*>&) const override;
     void get_all_active_submittables(std::vector<Submittable*>&) const override;
-    void get_all_tasks(std::vector<task_ptr>&) const override;
     void get_all_nodes(std::vector<node_ptr>&) const override;
     void get_all_aliases(std::vector<alias_ptr>&) const override;
     void getAllAstNodes(std::set<Node*>&) const override;
-    const std::vector<node_ptr>& nodeVec() const { return nodes_; }
+    [[deprecated]] const std::vector<node_ptr>& nodeVec() const { return nodes_; }
     std::vector<task_ptr> taskVec() const;
     std::vector<family_ptr> familyVec() const;
 

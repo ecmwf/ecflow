@@ -405,10 +405,6 @@ void Task::get_all_active_submittables(std::vector<Submittable*>& vec) const {
     }
 }
 
-void Task::get_all_tasks(std::vector<task_ptr>& vec) const {
-    vec.push_back(std::dynamic_pointer_cast<Task>(non_const_this()));
-}
-
 void Task::get_all_nodes(std::vector<node_ptr>& nodes) const {
     nodes.push_back(non_const_this());
     size_t vec_size = aliases_.size();

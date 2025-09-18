@@ -18,6 +18,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 
 #ifdef DEBUG
     #include <ostream>
@@ -245,7 +246,7 @@ void InLimitMgr::decrementInLimit(std::set<Limit*>& limitSet, const std::string&
 
     resolveInLimitReferences();
 
-    std::vector<task_ptr> task_vec;
+    std::vector<Task*> tasks;
     for (InLimit& inlimit : vec_) {
         Limit* limit = inlimit.limit();
         if (limit && limitSet.find(limit) == limitSet.end()) {
@@ -258,10 +259,10 @@ void InLimitMgr::decrementInLimit(std::set<Limit*>& limitSet, const std::string&
                     // Can only decrement this once, i.e when all child tasks are completed or aborted or queued or
                     // unknown
                     bool at_least_one_active = false;
-                    if (task_vec.empty()) {
-                        node_->get_all_tasks(task_vec); // Get tasks once, inside for loop
+                    if (tasks.empty()) {
+                        tasks = ecf::get_all_tasks(*node_); // Get tasks once, inside for loop
                     }
-                    for (task_ptr task : task_vec) {
+                    for (auto task : tasks) {
                         if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                             at_least_one_active = true;
                             break;

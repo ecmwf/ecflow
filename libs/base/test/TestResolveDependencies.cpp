@@ -21,6 +21,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
@@ -256,9 +257,8 @@ BOOST_AUTO_TEST_CASE(test_trigger_after_delete) {
 
     // evalate the triggers in suite2
     {
-        node_ptr suite2 = defs.findAbsNode("/suite2");
-        std::vector<task_ptr> suite2_tasks;
-        suite2->get_all_tasks(suite2_tasks);
+        node_ptr suite2   = defs.findAbsNode("/suite2");
+        auto suite2_tasks = ecf::get_all_tasks(*suite2);
         BOOST_REQUIRE_MESSAGE(suite2_tasks.size() == 5, "Expected 5 tasks on suite2 but found " << suite2_tasks.size());
 
         for (auto& suite2_task : suite2_tasks) {
@@ -280,8 +280,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_after_delete) {
     // revaluate the triggers in suite2. This should fail, since we have delete suite1
     {
         node_ptr suite2 = defs.findAbsNode("/suite2");
-        std::vector<task_ptr> suite2_tasks;
-        suite2->get_all_tasks(suite2_tasks);
+        auto suite2_tasks = ecf::get_all_tasks(*suite2);
         BOOST_REQUIRE_MESSAGE(suite2_tasks.size() == 5, "Expected 5 tasks on suite2 but found " << suite2_tasks.size());
 
         for (auto& suite2_task : suite2_tasks) {

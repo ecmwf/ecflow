@@ -23,6 +23,7 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -184,11 +185,10 @@ void time_load_and_downloads(ClientInvoker& theClient,
                                                              << full_threshold_s);
             }
             {
-                std::vector<task_ptr> all_tasks;
                 if (!theClient.defs()) {
                     theClient.sync_local();
                 }
-                theClient.defs()->get_all_tasks(all_tasks);
+                auto all_tasks = ecf::get_all_tasks(*theClient.defs());
                 paths.clear();
                 paths.reserve(all_tasks.size());
                 for (size_t i = 0; i < all_tasks.size(); i++) {

@@ -24,6 +24,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
@@ -207,9 +208,8 @@ void delete_misc_attributes(defs_ptr defs) {
 }
 
 void add_some_attributes(defs_ptr defs) {
-    std::vector<task_ptr> tasks;
-    defs->get_all_tasks(tasks);
-    for (task_ptr task : tasks) {
+    auto tasks = ecf::get_all_tasks(*defs);
+    for (auto task : tasks) {
         SuiteChanged1 changed(task->suite());
         task->addDay(DayAttr(DayAttr::TUESDAY));
     }
@@ -220,9 +220,7 @@ void begin(defs_ptr defs) {
 } // reset all attributes
 
 void add_alias(defs_ptr defs) {
-
-    std::vector<task_ptr> tasks;
-    defs->get_all_tasks(tasks);
+    auto tasks = ecf::get_all_tasks(*defs);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
 
     SuiteChanged1 changed(tasks[0]->suite());
@@ -247,15 +245,13 @@ void remove_all_aliases(defs_ptr defs) {
 void remove_all_tasks(defs_ptr defs) {
 
     // Remove tasks should force a incremental sync
-    std::vector<task_ptr> tasks;
-    defs->get_all_tasks(tasks);
-    for (task_ptr task : tasks) {
+    auto tasks = ecf::get_all_tasks(*defs);
+    for (auto task : tasks) {
         SuiteChanged1 changed(task->suite());
         task->remove();
     }
 
-    tasks.clear();
-    defs->get_all_tasks(tasks);
+    tasks = ecf::get_all_tasks(*defs);
     BOOST_REQUIRE_MESSAGE(tasks.empty(), "Failed to delete tasks");
 }
 

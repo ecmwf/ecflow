@@ -30,6 +30,7 @@
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Memento.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeState.hpp"
 #include "ecflow/node/NodeStats.hpp"
 #include "ecflow/node/NodeTreeVisitor.hpp"
@@ -1065,12 +1066,6 @@ void Defs::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
     }
 }
 
-void Defs::get_all_tasks(std::vector<task_ptr>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_tasks(tasks);
-    }
-}
-
 void Defs::get_all_nodes(std::vector<node_ptr>& nodes) const {
     for (const auto& s : suiteVec_) {
         s->get_all_nodes(nodes);
@@ -2026,8 +2021,7 @@ std::string Defs::stats() const {
     std::vector<Family*> family_vec;
     getAllFamilies(family_vec);
 
-    std::vector<task_ptr> task_vec;
-    get_all_tasks(task_vec);
+    auto task_vec = ecf::get_all_tasks(*this);
 
     size_t alias = 0;
     for (auto task : task_vec) {

@@ -444,7 +444,6 @@ public:
     std::string triggerExpression() const;
     std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string(); }
 
-    virtual void get_all_tasks(std::vector<task_ptr>&) const                   = 0;
     virtual void get_all_nodes(std::vector<node_ptr>&) const                   = 0;
     virtual void get_all_aliases(std::vector<alias_ptr>&) const                = 0;
     virtual void getAllTasks(std::vector<Task*>&) const                        = 0;

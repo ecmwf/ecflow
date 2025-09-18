@@ -359,6 +359,7 @@ set(srcs
   node/src/ecflow/node/MirrorAttr.hpp
   node/src/ecflow/node/MiscAttrs.hpp
   node/src/ecflow/node/Node.hpp
+  node/src/ecflow/node/NodeAlgorithms.hpp
   node/src/ecflow/node/NodeContainer.hpp
   node/src/ecflow/node/NodeFwd.hpp
   node/src/ecflow/node/NodeState.hpp
