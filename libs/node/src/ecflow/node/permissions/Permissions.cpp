@@ -16,10 +16,10 @@
 
 namespace ecf {
 
-Permissions Permissions::make_from_variable(const std::string& value) {
+Result<Permissions> Permissions::make_from_variable(const std::string& value) {
 
     if (value.empty()) {
-        return Permissions::make_empty();
+        return Result<Permissions>::success(Permissions::make_empty());
     }
 
     // Expecting a comma-separated list of user/permissions, e.g. "USER1:RWXO,USER2:R"
@@ -32,15 +32,32 @@ Permissions Permissions::make_from_variable(const std::string& value) {
         std::vector<std::string> user_permissions;
         ecf::algorithm::split(user_permissions, entry, ":");
         if (user_permissions.size() != 2) {
-            throw std::runtime_error("Invalid permission entry: " + entry + ". Expected format: <user>:<rwxo>");
+            return Result<Permissions>::failure("Invalid permission entry: " + entry +
+                                                ". Expected format: <user>:<rwxo>");
         }
 
-        auto username = Username{user_permissions[0]};
-        auto perms    = allowed_from_string(user_permissions[1]);
-        allowed.emplace_back(username, perms);
+        const auto& first = user_permissions[0];
+        const auto& second = user_permissions[1];
+
+        if (first.empty()) {
+            return Result<Permissions>::failure("Invalid permission entry: empty username is not allowed");
+        }
+        if (second.empty()) {
+            return Result<Permissions>::failure("Invalid permission entry: empty permissions are not allowed");
+        }
+
+        auto username = Username{first};
+
+        try {
+            auto perms = allowed_from_string(second);
+            allowed.emplace_back(username, perms);
+        }
+        catch (const InvalidPermissionValue& e) {
+            return Result<Permissions>::failure("Invalid permission value in entry: " + entry + ". " + e.what());
+        }
     }
 
-    return Permissions(std::move(allowed));
+    return Result<Permissions>::success(Permissions(std::move(allowed)));
 }
 
 Permissions Permissions::find_in(const std::vector<Variable>& variables) {
@@ -49,7 +66,12 @@ Permissions Permissions::find_in(const std::vector<Variable>& variables) {
             std::begin(variables), std::end(variables), [](auto&& var) { return var.name() == permissions_var_name; });
         found != std::end(variables)) {
         auto var_value = found->theValue();
-        return ecf::Permissions::make_from_variable(var_value);
+        if (auto permisions = ecf::Permissions::make_from_variable(var_value); permisions.ok()) {
+            return permisions.value();
+        }
+        else {
+            return Permissions::make_empty();
+        }
     }
     else {
         return ecf::Permissions::make_empty();

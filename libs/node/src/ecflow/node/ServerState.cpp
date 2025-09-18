@@ -136,13 +136,18 @@ bool ServerState::compare(const ServerState& rhs) const {
     return true;
 }
 
-ecf::Permissions ServerState::permissions() const {
-    // Find the permissions in the server variables first
-    if (auto permissions = ecf::Permissions::find_in(server_variables_); !permissions.is_empty()) {
+Permissions ServerState::permissions() const {
+    // Find the permissions in the user variables first, as these override the server variables
+    if (auto permissions = Permissions::find_in(user_variables_); !permissions.is_empty()) {
         return permissions;
     }
-    // If permissions not found in server variables, then check in the user variables
-    return ecf::Permissions::find_in(user_variables_);
+
+    // Then, find the permissions in the server variables
+    if (auto permissions = Permissions::find_in(server_variables_); !permissions.is_empty()) {
+        return permissions;
+    }
+
+    return Permissions::make_empty();
 }
 
 void ServerState::sort_variables() {

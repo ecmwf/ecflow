@@ -1803,8 +1803,8 @@ struct Writer<Alias, Stream>
             // An Alias can be created in isolation, e.g. by using the Python API.
             // When a node is not included in a Defs, it does not make sense to perform Permission checks.
 
-            AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
-            auto perms                   = service.permissions_at(*item.defs(), item.absNodePath());
+            AuthorisationService service = AuthorisationService::make_for(*defs);
+            auto perms                   = service.permissions_at(*defs, item.absNodePath());
             if (ctx.username && !perms.allows(ctx.username.value(), Allowed::READ)) {
                 // User is not allowed to read this alias, so we skip writing it
                 return;
@@ -1840,8 +1840,8 @@ struct Writer<Family, Stream>
             // A Family can be created in isolation, e.g. by using the Python API.
             // When a node is not included in a Defs, it does not make sense to perform Permission checks.
 
-            AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
-            auto perms                   = service.permissions_at(*item.defs(), item.absNodePath());
+            AuthorisationService service = AuthorisationService::make_for(*defs);
+            auto perms                   = service.permissions_at(*defs, item.absNodePath());
             if (ctx.username && !perms.allows(ctx.username.value(), Allowed::READ)) {
                 // User is not allowed to read this family, so we skip writing it
                 return;
@@ -1884,8 +1884,8 @@ struct Writer<Task, Stream>
             // A Task can be created in isolation, e.g. by using the Python API.
             // When a node is not included in a Defs, it does not make sense to perform Permission checks.
 
-            AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
-            auto perms                   = service.permissions_at(*item.defs(), item.absNodePath());
+            AuthorisationService service = AuthorisationService::make_for(*defs);
+            auto perms                   = service.permissions_at(*defs, item.absNodePath());
             if (ctx.username && !perms.allows(ctx.username.value(), Allowed::READ)) {
                 // User is not allowed to read this task, so we skip writing it
                 return;
@@ -2144,7 +2144,7 @@ struct Writer<Suite, Stream>
             // A Suite can be created in isolation, e.g. by using the Python API.
             // When a node is not included in a Defs, it does not make sense to perform Permission checks.
 
-            AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
+            AuthorisationService service = AuthorisationService::make_for(*defs);
             auto perms                   = service.permissions_at(*defs, item.absNodePath());
             if (ctx.username && !perms.allows(ctx.username.value(), Allowed::READ)) {
                 // User is not allowed to read this suite, so we skip writing it

@@ -313,12 +313,18 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         return false;
     }
 
-    if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
-        authorisation_service_ = result.value();
-        std::cout << "Loaded server permissions file\n";
-    }
-    else {
-        std::cout << "Unable to load server permissions file, due to: " << result.reason() << '\n';
+    if (!permissions_.empty()) {
+        //
+        // Note: The ECF_PERMISSIONS is not a mandatory field.
+        //       If it is not set, then the eventual AuthorizationService will not impose any restriction
+        //       and all users will be able to access the server.
+        //
+
+        if (auto permissions = Permissions::make_from_variable(permissions_); !permissions.ok()) {
+            ss << "Invalid ECF_PERMISSIONS value specified, due to: " << permissions.reason() << "\n";
+            errorMsg = ss.str();
+            return false;
+        }
     }
 
     // Check that Authentication information is valid
