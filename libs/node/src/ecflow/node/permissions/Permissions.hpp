@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "ecflow/core/Identity.hpp"
+#include "ecflow/core/Result.hpp"
 #include "ecflow/node/permissions/Permission.hpp"
 
 class Variable;
@@ -32,7 +33,7 @@ namespace ecf {
 class Permissions {
 public:
     static Permissions make_empty() { return Permissions(); }
-    static Permissions make_from_variable(const std::string& var_value);
+    static Result<Permissions> make_from_variable(const std::string& var_value);
 
     static Permissions find_in(const std::vector<Variable>& variables);
 

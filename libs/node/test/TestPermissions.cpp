@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(can_do_permissions) {
 
     d.server_state().add_or_update_server_variable(ecf::environment::ECF_PERMISSIONS, "a:rwxos");
 
-    AuthorisationService service = AuthorisationService::load_permissions_from_nodes().value();
+    AuthorisationService service = AuthorisationService::make_for(d);
 
     auto a  = Username{"a"};
     auto u1 = Username{"u1"};
@@ -139,13 +139,14 @@ BOOST_AUTO_TEST_CASE(can_do_permissions) {
 }
 
 BOOST_AUTO_TEST_CASE(can_calculate_permission_superseeding_basic_rules) {
+    ECF_NAME_THIS_TEST();
     using namespace ecf;
 
     auto a  = Username{"a"};
     auto u1 = Username{"u1"};
     auto u2 = Username{"u2"};
 
-    auto p = Permissions::make_from_variable("a:rws,u1:rw");
+    auto p = Permissions::make_from_variable("a:rws,u1:rw").value();
     BOOST_CHECK(p.allows(a, Allowed::READ));
     BOOST_CHECK(p.allows(a, Allowed::WRITE));
     BOOST_CHECK(!p.allows(a, Allowed::EXECUTE));
@@ -157,7 +158,7 @@ BOOST_AUTO_TEST_CASE(can_calculate_permission_superseeding_basic_rules) {
     BOOST_CHECK(!p.allows(u1, Allowed::OWNER));
     BOOST_CHECK(!p.allows(u1, Allowed::STICKY));
 
-    auto q = Permissions::make_from_variable("a:r,u1:rwx,u2:rw");
+    auto q = Permissions::make_from_variable("a:r,u1:rwx,u2:rw").value();
     BOOST_CHECK(q.allows(a, Allowed::READ));
     BOOST_CHECK(!q.allows(a, Allowed::WRITE));
     BOOST_CHECK(!q.allows(a, Allowed::EXECUTE));
@@ -193,19 +194,20 @@ BOOST_AUTO_TEST_CASE(can_calculate_permission_superseeding_basic_rules) {
 }
 
 BOOST_AUTO_TEST_CASE(can_calculate_permission_overriding_basic_rules) {
+    ECF_NAME_THIS_TEST();
     using namespace ecf;
 
     auto u1 = Username{"u1"};
     auto u2 = Username{"u2"};
 
-    auto p = Permissions::make_from_variable("u1:rwx");
+    auto p = Permissions::make_from_variable("u1:rwx").value();
     BOOST_CHECK(p.allows(u1, Allowed::READ));
     BOOST_CHECK(p.allows(u1, Allowed::WRITE));
     BOOST_CHECK(p.allows(u1, Allowed::EXECUTE));
     BOOST_CHECK(!p.allows(u1, Allowed::OWNER));
     BOOST_CHECK(!p.allows(u1, Allowed::STICKY));
 
-    auto q = Permissions::make_from_variable("u1:rw,u2:rwxo");
+    auto q = Permissions::make_from_variable("u1:rw,u2:rwxo").value();
     BOOST_CHECK(q.allows(u1, Allowed::READ));
     BOOST_CHECK(q.allows(u1, Allowed::WRITE));
     BOOST_CHECK(!q.allows(u1, Allowed::EXECUTE));
@@ -226,18 +228,19 @@ BOOST_AUTO_TEST_CASE(can_calculate_permission_overriding_basic_rules) {
 }
 
 BOOST_AUTO_TEST_CASE(can_calculate_permission_overriding_does_not_extend_allowances) {
+    ECF_NAME_THIS_TEST();
     using namespace ecf;
 
     auto u1 = Username{"u1"};
 
-    auto p = Permissions::make_from_variable("u1:rw");
+    auto p = Permissions::make_from_variable("u1:rw").value();
     BOOST_CHECK(p.allows(u1, Allowed::READ));
     BOOST_CHECK(p.allows(u1, Allowed::WRITE));
     BOOST_CHECK(!p.allows(u1, Allowed::EXECUTE));
     BOOST_CHECK(!p.allows(u1, Allowed::OWNER));
     BOOST_CHECK(!p.allows(u1, Allowed::STICKY));
 
-    auto q = Permissions::make_from_variable("u1:rwxo");
+    auto q = Permissions::make_from_variable("u1:rwxo").value();
     BOOST_CHECK(q.allows(u1, Allowed::READ));
     BOOST_CHECK(q.allows(u1, Allowed::WRITE));
     BOOST_CHECK(q.allows(u1, Allowed::EXECUTE));
@@ -253,18 +256,19 @@ BOOST_AUTO_TEST_CASE(can_calculate_permission_overriding_does_not_extend_allowan
 }
 
 BOOST_AUTO_TEST_CASE(can_calculate_permission_overriding_keeps_sticky_allowances) {
+    ECF_NAME_THIS_TEST();
     using namespace ecf;
 
     auto u1 = Username{"u1"};
 
-    auto p = Permissions::make_from_variable("u1:rwxs");
+    auto p = Permissions::make_from_variable("u1:rwxs").value();
     BOOST_CHECK(p.allows(u1, Allowed::READ));
     BOOST_CHECK(p.allows(u1, Allowed::WRITE));
     BOOST_CHECK(p.allows(u1, Allowed::EXECUTE));
     BOOST_CHECK(!p.allows(u1, Allowed::OWNER));
     BOOST_CHECK(p.allows(u1, Allowed::STICKY));
 
-    auto q = Permissions::make_from_variable("u1:r");
+    auto q = Permissions::make_from_variable("u1:r").value();
     BOOST_CHECK(q.allows(u1, Allowed::READ));
     BOOST_CHECK(!q.allows(u1, Allowed::WRITE));
     BOOST_CHECK(!q.allows(u1, Allowed::EXECUTE));
@@ -277,6 +281,38 @@ BOOST_AUTO_TEST_CASE(can_calculate_permission_overriding_keeps_sticky_allowances
     BOOST_CHECK(r.allows(u1, Allowed::EXECUTE));
     BOOST_CHECK(!r.allows(u1, Allowed::OWNER));
     BOOST_CHECK(r.allows(u1, Allowed::STICKY));
+}
+
+BOOST_AUTO_TEST_CASE(can_detect_valid_permission_values) {
+    ECF_NAME_THIS_TEST();
+    using namespace ecf;
+    using namespace std::string_literals;
+
+    std::array perms = {"a:RWXS,b:rwx"s};
+    for (const auto& actual : perms) {
+        BOOST_CHECK_MESSAGE(Permissions::make_from_variable(actual).ok(),
+                            ">" << actual << "< has valid permission format");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(can_detect_invalid_permission_values) {
+    ECF_NAME_THIS_TEST();
+    using namespace ecf;
+    using namespace std::string_literals;
+
+    std::array perms = {":rwxs,:rwx"s,
+                        "a:,b:"s,
+                        "a:rwxs;b:rwx"s,
+                        "a:rwxZ"s,
+                        "a:rwx,b:rwx!"s,
+                        "a:rwx,b:rwx,"s,
+                        ",a:rwx,b:rwx,"s,
+                        "a:rwx,,b:rwx"s,
+                        "a:rwx,x,b:rwx"s};
+    for (const auto& actual : perms) {
+        BOOST_CHECK_MESSAGE(!Permissions::make_from_variable(actual).ok(),
+                            ">" << actual << "< has invalid permission format");
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

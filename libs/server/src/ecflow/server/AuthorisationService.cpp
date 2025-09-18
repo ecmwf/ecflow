@@ -11,7 +11,6 @@
 #include "ecflow/server/AuthorisationService.hpp"
 
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/core/Overload.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/permissions/ActivePermissions.hpp"
 
@@ -19,7 +18,7 @@ namespace ecf {
 
 struct AuthorisationService::Impl
 {
-    Impl() : permissions_(Unrestricted{}) {}
+    explicit Impl(Unrestricted&& unrestricted) : permissions_(std::move(unrestricted)) {}
     explicit Impl(Rules&& rules) : permissions_(std::move(rules)) {}
 
     std::variant<Unrestricted, Rules> permissions_;
@@ -81,8 +80,13 @@ bool AuthorisationService::allows(const Identity& identity,
     return true;
 }
 
-AuthorisationService::result_t AuthorisationService::load_permissions_from_nodes() {
-    return result_t::success(AuthorisationService(std::make_unique<Impl>(Rules{})));
+AuthorisationService AuthorisationService::make_for(const Defs& defs) {
+    if (defs.server_state().permissions().is_empty()) {
+        return AuthorisationService(std::make_unique<Impl>(Unrestricted{}));
+    }
+    else {
+        return AuthorisationService(std::make_unique<Impl>(Rules{}));
+    }
 }
 
 } // namespace ecf
