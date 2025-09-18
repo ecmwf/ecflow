@@ -11,6 +11,7 @@
 #include <cassert>
 #include <stdexcept>
 
+#include "NodeAlgorithms.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
@@ -2769,10 +2770,9 @@ bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const {
 
             /// *Only* delete this node if we don't create zombies
             /// anywhere for our children
-            vector<Task*> taskVec;
-            getAllTasks(taskVec);
-            for (Task* t : taskVec) {
-                if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+            auto tasks = ecf::get_all_tasks(*this);
+            for (auto task : tasks) {
+                if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                     return false;
                 }
             }
@@ -2788,10 +2788,9 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const {
 
             /// *Only* archive this node if we don't create zombies anywhere for our children
             /// The most significant state could be ABORTED in family, but we could still have active tasks.
-            vector<Task*> taskVec;
-            getAllTasks(taskVec);
-            for (Task* t : taskVec) {
-                if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+            auto tasks = ecf::get_all_tasks(*this);
+            for (auto task : tasks) {
+                if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                     return false;
                 }
             }

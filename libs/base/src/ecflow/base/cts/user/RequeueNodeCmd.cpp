@@ -19,6 +19,7 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
@@ -111,9 +112,8 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
 
         if (option_ == RequeueNodeCmd::ABORT) {
             // ONLY Re-queue the aborted tasks
-            std::vector<Task*> taskVec;
-            theNodeToRequeue->getAllTasks(taskVec);
-            for (auto& task : taskVec) {
+            auto tasks = ecf::get_all_tasks(*theNodeToRequeue);
+            for (auto& task : tasks) {
                 if (task->state() == NState::ABORTED) {
                     task->requeue(args);
                     task->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
@@ -128,9 +128,8 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
         }
         else if (option_ == RequeueNodeCmd::NO_OPTION) {
             // ONLY Re-queue if there no tasks in submitted or active states
-            std::vector<Task*> taskVec;
-            theNodeToRequeue->getAllTasks(taskVec);
-            for (auto& task : taskVec) {
+            auto tasks = ecf::get_all_tasks(*theNodeToRequeue);
+            for (auto& task : tasks) {
                 if (task->state() == NState::SUBMITTED || task->state() == NState::ACTIVE) {
                     return PreAllocatedReply::ok_cmd();
                 }

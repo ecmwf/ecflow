@@ -224,7 +224,6 @@ public:
 
     void getAllFamilies(std::vector<Family*>&) const;
     void getAllNodes(std::vector<Node*>&) const;
-    void getAllTasks(std::vector<Task*>&) const;
     void getAllSubmittables(std::vector<Submittable*>&) const;
     void get_all_active_submittables(std::vector<Submittable*>&) const;
     void get_all_nodes(std::vector<node_ptr>&) const;

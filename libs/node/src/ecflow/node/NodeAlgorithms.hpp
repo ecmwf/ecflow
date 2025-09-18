@@ -12,7 +12,9 @@
 #define ecflow_node_NodeAlgorithms_hpp
 
 #include "ecflow/node/Alias.hpp"
+#include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeContainer.hpp"
 #include "ecflow/node/Task.hpp"
 
 namespace ecf {
@@ -36,8 +38,40 @@ void select(Node& node, Collector& collector, Selector selector) {
             select(*child, collector, selector);
         }
     }
+    else if (auto f_alias = dynamic_cast<Alias*>(&node); f_alias) {
+        // We don't need to do anything in this case
+    }
     else {
-        throw std::runtime_error("NodeAlgorithms::select: unexpected node type");
+        std::ostringstream ss;
+        ss << "NodeAlgorithms::select: unexpected node type: " << typeid(node).name();
+        throw std::runtime_error(ss.str());
+    }
+}
+
+template <typename Selector, typename Collector>
+void select(const Node& node, Collector& collector, Selector selector) {
+
+    if (auto f_container = dynamic_cast<const NodeContainer*>(&node); f_container) {
+        for (auto& child : f_container->children()) {
+            select(*child, collector, selector);
+        }
+    }
+    else if (auto f_task = dynamic_cast<const Task*>(&node); f_task) {
+        if (selector(*f_task)) {
+            collector(f_task);
+        }
+
+        for (auto& child : f_task->aliases()) {
+            select(*child, collector, selector);
+        }
+    }
+    else if (auto f_alias = dynamic_cast<const Alias*>(&node); f_alias) {
+        // We don't need to do anything in this case
+    }
+    else {
+        std::ostringstream ss;
+        ss << "NodeAlgorithms::select: unexpected node type: " << typeid(node).name();
+        throw std::runtime_error(ss.str());
     }
 }
 
@@ -66,6 +100,17 @@ inline std::vector<Task*> get_all_tasks(Node& node) {
     std::vector<Task*> tasks;
 
     auto collector = [&tasks](Task* task) { tasks.push_back(task); };
+    auto selector  = [](const Node& node) { return node.isTask(); };
+
+    implementation::select(node, collector, selector);
+
+    return tasks;
+}
+
+inline std::vector<const Task*> get_all_tasks(const Node& node) {
+    std::vector<const Task*> tasks;
+
+    auto collector = [&tasks](const Task* task) { tasks.push_back(task); };
     auto selector  = [](const Node& node) { return node.isTask(); };
 
     implementation::select(node, collector, selector);

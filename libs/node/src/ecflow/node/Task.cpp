@@ -361,10 +361,6 @@ void Task::immediateChildren(std::vector<node_ptr>& vec) const {
     }
 }
 
-void Task::getAllTasks(std::vector<Task*>& vec) const {
-    vec.push_back(const_cast<Task*>(this));
-}
-
 void Task::getAllSubmittables(std::vector<Submittable*>& vec) const {
     // *DO NOT reserve here, as it dominate time , for very large defs */
     // * Previously we had::

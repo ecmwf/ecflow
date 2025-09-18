@@ -19,6 +19,7 @@
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
@@ -171,9 +172,8 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_bubbles_up_state_changes) {
 
     defs_ptr the_defs = create_defs();
     std::vector<Node*> nodes;
-    std::vector<Task*> tasks;
+    std::vector<Task*> tasks = ecf::get_all_tasks(*the_defs);
     the_defs->getAllNodes(nodes);
-    the_defs->getAllTasks(tasks);
     node_ptr suite = the_defs->findAbsNode("/s1");
 
     MockServer mockServer(the_defs);

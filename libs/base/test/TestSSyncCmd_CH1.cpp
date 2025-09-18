@@ -356,8 +356,7 @@ static bool s0_delete_some_attributes(defs_ptr defs) {
     BOOST_REQUIRE_MESSAGE(suite, "Could not find suite");
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-    std::vector<Task*> tasks;
-    suite->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
 
     for (Task* task : tasks) {

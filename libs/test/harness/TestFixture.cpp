@@ -26,6 +26,7 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
 
 #ifdef DEBUG
@@ -431,11 +432,10 @@ std::string TestFixture::includes() {
 
 /// Given a task name like "a" find the first task matching that name and return the absolute node path
 std::string TestFixture::taskAbsNodePath(const Defs& theDefs, const std::string& taskName) {
-    std::vector<Task*> vec;
-    theDefs.getAllTasks(vec);
-    for (Task* t : vec) {
-        if (t->name() == taskName) {
-            return t->absNodePath();
+    auto tasks = ecf::get_all_tasks(theDefs);
+    for (auto task : tasks) {
+        if (task->name() == taskName) {
+            return task->absNodePath();
         }
     }
 

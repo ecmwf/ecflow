@@ -14,6 +14,7 @@
 
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -48,9 +49,8 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
 
     // Get all nodes and tasks for ease of test
     vector<Node*> nodes;
-    vector<Task*> tasks;
+    auto tasks = ecf::get_all_tasks(theDefs);
     theDefs.getAllNodes(nodes);
-    theDefs.getAllTasks(tasks);
 
     BOOST_CHECK_MESSAGE(!suite->begun(), "Expected suite not to be begun ");
 
@@ -146,8 +146,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_139) {
     f2_t2->addDefStatus(DState::SUSPENDED);
 
     // Get all nodes and tasks for ease of test
-    vector<Task*> tasks;
-    theDefs.getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(theDefs);
 
     /// It should be noted that once a suite has begun, it stays begun, however for test purposes we had
     /// added ability to reset the begin state.

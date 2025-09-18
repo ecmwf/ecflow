@@ -19,6 +19,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
@@ -429,11 +430,10 @@ BOOST_AUTO_TEST_CASE(test_repeat_enumerated) {
                         errorMsg << "\n"
                                  << ecf::as_string(theDefs, PrintStyle::DEFS));
 
-    std::vector<Task*> theServerTasks;
-    theDefs.getAllTasks(theServerTasks);
-    for (Task* t : theServerTasks) {
+    auto tasks = ecf::get_all_tasks(theDefs);
+    for (auto task : tasks) {
         // verify repeat has the last value
-        auto* family         = dynamic_cast<Family*>(t->parent());
+        auto* family         = dynamic_cast<Family*>(task->parent());
         const Repeat& repeat = family->findRepeat("ENUM");
         BOOST_REQUIRE_MESSAGE(!repeat.empty(), "Expected to find repeat on family " << family->absNodePath());
         BOOST_REQUIRE_MESSAGE(!repeat.valid(), "Expected invalid repeat");
@@ -480,11 +480,10 @@ BOOST_AUTO_TEST_CASE(test_repeat_string) {
                         errorMsg << "\n"
                                  << ecf::as_string(theDefs, PrintStyle::DEFS));
 
-    std::vector<Task*> theServerTasks;
-    theDefs.getAllTasks(theServerTasks);
-    for (Task* t : theServerTasks) {
+    auto tasks = ecf::get_all_tasks(theDefs);
+    for (auto task : tasks) {
         // verify repeat has the last value
-        auto* family         = dynamic_cast<Family*>(t->parent());
+        auto* family         = dynamic_cast<Family*>(task->parent());
         const Repeat& repeat = family->findRepeat("STRING");
         BOOST_REQUIRE_MESSAGE(!repeat.empty(), "Expected to find repeat on family " << family->absNodePath());
         BOOST_REQUIRE_MESSAGE(!repeat.valid(), "Expected invalid repeat");

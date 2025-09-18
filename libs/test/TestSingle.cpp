@@ -22,6 +22,7 @@
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -98,13 +99,12 @@ BOOST_AUTO_TEST_CASE(test_stress) {
         if (defs) {
             int no_of_active_tasks    = 0;
             int no_of_submitted_tasks = 0;
-            std::vector<Task*> vec;
-            defs->getAllTasks(vec);
-            for (size_t i = 0; i < vec.size(); i++) {
-                if (vec[i]->get_state().first == NState::ACTIVE) {
+            auto tasks                = ecf::get_all_tasks(*defs);
+            for (auto task : tasks) {
+                if (task->get_state().first == NState::ACTIVE) {
                     no_of_active_tasks++;
                 }
-                else if (vec[i]->get_state().first == NState::SUBMITTED) {
+                else if (task->get_state().first == NState::SUBMITTED) {
                     no_of_submitted_tasks++;
                 }
             }

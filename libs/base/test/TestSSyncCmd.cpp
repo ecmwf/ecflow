@@ -121,8 +121,7 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
 
 // The modifiers
 void delete_some_attributes(defs_ptr defs) {
-    std::vector<Task*> tasks;
-    defs->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*defs);
     for (Task* task : tasks) {
 
         SuiteChanged1 changed(task->suite());

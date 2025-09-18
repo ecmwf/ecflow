@@ -16,6 +16,7 @@
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;
@@ -76,8 +77,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
 
     // Delete all tasks
     {
-        std::vector<Task*> vec;
-        fixtureDef.defsfile_.getAllTasks(vec);
+        auto vec = ecf::get_all_tasks(fixtureDef.defsfile_);
         BOOST_CHECK_MESSAGE(vec.size() > 0, "Expected > 0 tasks but found " << vec.size());
 
         std::vector<std::string> paths;
@@ -103,8 +103,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
                                               << edit_history.size());
         }
 
-        std::vector<Task*> afterDeleteVec;
-        fixtureDef.defsfile_.getAllTasks(afterDeleteVec);
+        auto afterDeleteVec = ecf::get_all_tasks(fixtureDef.defsfile_);
         BOOST_REQUIRE_MESSAGE(afterDeleteVec.empty(),
                               "Expected all tasks to be deleted but found " << afterDeleteVec.size());
     }
@@ -211,8 +210,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_edit_history_ECFLOW_1684) {
         BOOST_CHECK_MESSAGE(edit_history_before == 0,
                             "Expected edit_history_before == 0 but found " << edit_history_before);
 
-        std::vector<Task*> task_vec;
-        fixtureDef.defsfile_.getAllTasks(task_vec);
+        auto task_vec = ecf::get_all_tasks(fixtureDef.defsfile_);
         BOOST_CHECK_MESSAGE(task_vec.size() > 0, "Expected > 0 tasks but found " << task_vec.size());
         std::vector<std::string> paths;
         paths.reserve(task_vec.size());

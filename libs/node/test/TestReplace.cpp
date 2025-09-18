@@ -18,6 +18,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -1043,13 +1044,12 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
 
         // Now check the Trigger reference. The old reference to nodes in the trigger expressions should have been
         // removed
-        std::vector<Task*> theTasks;
-        server_suite->getAllTasks(theTasks);
-        BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
-        for (auto& theTask : theTasks) {
+        auto tasks = ecf::get_all_tasks(*server_suite);
+        BOOST_REQUIRE_MESSAGE(tasks.size() == 3, "Expected 3 tasks but found, " << tasks.size());
+        for (auto& task : tasks) {
 
             std::set<Node*> referenced_nodes;
-            theTask->getAllAstNodes(referenced_nodes);
+            task->getAllAstNodes(referenced_nodes);
             BOOST_REQUIRE_MESSAGE(referenced_nodes.size() == 1, " expected 1 referenced node");
 
             // The reference nodes must exist in the server. Otherwise replace has still kept references to old nodes in

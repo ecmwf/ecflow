@@ -87,7 +87,6 @@ public:
 
     void getAllFamilies(std::vector<Family*>&) const;
     void getAllNodes(std::vector<Node*>&) const override;
-    void getAllTasks(std::vector<Task*>&) const override;
     void getAllSubmittables(std::vector<Submittable*>&) const override;
     void get_all_active_submittables(std::vector<Submittable*>&) const override;
     void get_all_nodes(std::vector<node_ptr>&) const override;

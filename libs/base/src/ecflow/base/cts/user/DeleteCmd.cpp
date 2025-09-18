@@ -21,10 +21,10 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
@@ -134,21 +134,15 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
 // }
 
 void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* theNodeToDelete) {
-    vector<Task*> taskVec;
-    if (theNodeToDelete) {
-        theNodeToDelete->getAllTasks(taskVec);
-    }
-    else {
-        as->defs()->getAllTasks(taskVec);
-    }
+    auto tasks = theNodeToDelete ? ecf::get_all_tasks(*theNodeToDelete) : ecf::get_all_tasks(*as->defs());
 
-    vector<Task*> activeVec, submittedVec;
-    for (Task* t : taskVec) {
-        if (t->state() == NState::ACTIVE) {
-            activeVec.push_back(t);
+    std::vector<Task*> activeVec, submittedVec;
+    for (auto task : tasks) {
+        if (task->state() == NState::ACTIVE) {
+            activeVec.push_back(task);
         }
-        if (t->state() == NState::SUBMITTED) {
-            submittedVec.push_back(t);
+        if (task->state() == NState::SUBMITTED) {
+            submittedVec.push_back(task);
         }
     }
     if (!activeVec.empty() || !submittedVec.empty()) {
@@ -187,11 +181,12 @@ static const char* delete_node_desc() {
 }
 
 void DeleteCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CtsApi::delete_node_arg(), po::value<vector<string>>()->multitoken(), delete_node_desc());
+    desc.add_options()(
+        CtsApi::delete_node_arg(), po::value<std::vector<std::string>>()->multitoken(), delete_node_desc());
 }
 
 void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[theArg()].as<vector<string>>();
+    std::vector<std::string> args = vm[theArg()].as<std::vector<std::string>>();
     if (ac->debug()) {
         dumpVecArgs(theArg(), args);
     }

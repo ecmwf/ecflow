@@ -23,6 +23,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Limit.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
@@ -347,9 +348,8 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
             defs_ptr defs       = TestFixture::client().defs();
             updateCalendarCount = defs->updateCalendarCount();
             bool wait           = false;
-            std::vector<Task*> tasks;
-            defs->getAllTasks(tasks);
-            for (Task* task : tasks) {
+            auto tasks          = ecf::get_all_tasks(*defs);
+            for (auto task : tasks) {
                 if (task->state() != NState::COMPLETE) {
                     wait = true;
                 }

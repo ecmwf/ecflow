@@ -20,6 +20,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
@@ -167,8 +168,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     }
 
     // get all the task
-    std::vector<Task*> theTasks;
-    theDefs.getAllTasks(theTasks);
+    auto tasks = ecf::get_all_tasks(theDefs);
 
     // Override ECF_HOME.   ECF_HOME is need to locate the ecf files
     theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
@@ -178,18 +178,18 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     theDefs.beginAll();
 
     // Test Job creator, this will pre-process and perform variable substitution on ecf files
-    for (Task* t : theTasks) {
+    for (auto task : tasks) {
 
         // cout << "  task " << t->absNodePath() << "\n";
         JobsParam jobsParam; // create jobs =  false, spawn_jobs = false
-        bool ok = t->submitJob(jobsParam);
+        bool ok = task->submitJob(jobsParam);
 
         if (pass) { // Test expected to pass
             BOOST_CHECK_MESSAGE(ok, "Failed to create jobs. " << jobsParam.getErrorMsg());
         }
         else { // test expected to fail
             BOOST_CHECK_MESSAGE(!ok, "Expected failure " << jobsParam.getErrorMsg());
-            BOOST_CHECK_MESSAGE(!ok, "expected no passes but found " << t->absNodePath() << " passes");
+            BOOST_CHECK_MESSAGE(!ok, "expected no passes but found " << task->absNodePath() << " passes");
             // cerr << "\n" << jobsParam.getErrorMsg() << " \n"; // un-comment to ensure correct error message
         }
     }

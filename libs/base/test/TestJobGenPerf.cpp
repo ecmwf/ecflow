@@ -20,6 +20,7 @@
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
 
 using namespace std;
@@ -115,8 +116,7 @@ int main(int argc, char* argv[]) {
     //   exit(0);
 
     // Check number of tasks, if the submitted output below is too low
-    std::vector<Task*> tasks;
-    defs.getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(defs);
 
     // #ifdef DEBUG
     //    cout << "Total number of tasks: " << tasks.size() << "\n";

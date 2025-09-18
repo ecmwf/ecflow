@@ -446,7 +446,6 @@ public:
 
     virtual void get_all_nodes(std::vector<node_ptr>&) const                   = 0;
     virtual void get_all_aliases(std::vector<alias_ptr>&) const                = 0;
-    virtual void getAllTasks(std::vector<Task*>&) const                        = 0;
     virtual void getAllSubmittables(std::vector<Submittable*>&) const          = 0;
     virtual void get_all_active_submittables(std::vector<Submittable*>&) const = 0;
     virtual void getAllNodes(std::vector<Node*>&) const                        = 0;

@@ -19,6 +19,7 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
@@ -160,8 +161,7 @@ static void reorder_task(defs_ptr theDefs) {
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d/d", NOrder::ALPHA)));
 
-    std::vector<Task*> tasks;
-    theDefs->findAbsNode("/d/d")->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*theDefs->findAbsNode("/d/d"));
     BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(tasks) == vector_abcd(),
                           "NOrder::ALPHA  expected "
                               << ecf::algorithm::join(vector_abcd()) << " but found: "
