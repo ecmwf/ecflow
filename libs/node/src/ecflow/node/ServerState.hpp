@@ -52,9 +52,12 @@ public:
 
     /**
      * Returns the permissions, as defined at server level.
+     *
      * The permissions can be either defined in the server configuration file (server variables), or
      * explicitly set by the user (user variables). The permissions set by the user override the
      * ones defined in the server configuration file.
+     *
+     * If permissions are not defined, an empty Permissions object is returned.
      *
      * @return the server level permissions
      */

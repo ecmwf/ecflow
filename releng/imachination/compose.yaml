@@ -10,7 +10,7 @@ services:
       - ./revproxy/cfgs/nginx/default.conf:/etc/nginx/conf.d/default.conf
 
   authotron:
-    image: eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.5
+    image: eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.8
     ports:
       - "8080:8080"
     volumes:
