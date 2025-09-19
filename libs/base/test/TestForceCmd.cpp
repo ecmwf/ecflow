@@ -157,8 +157,7 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_recursive) {
 
     defs_ptr the_defs = create_defs();
     node_ptr suite    = the_defs->findAbsNode("/s1");
-    std::vector<Node*> nodes;
-    suite->getAllNodes(nodes);
+    auto nodes = ecf::get_all_nodes(*suite);
 
     MockServer mockServer(the_defs);
     std::vector<std::string> all_states = NState::allStates();
@@ -171,9 +170,9 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_bubbles_up_state_changes) {
     ECF_NAME_THIS_TEST();
 
     defs_ptr the_defs = create_defs();
-    std::vector<Node*> nodes;
-    std::vector<Task*> tasks = ecf::get_all_tasks(*the_defs);
-    the_defs->getAllNodes(nodes);
+    auto nodes = ecf::get_all_nodes(*the_defs);
+    auto tasks = ecf::get_all_tasks(*the_defs);
+
     node_ptr suite = the_defs->findAbsNode("/s1");
 
     MockServer mockServer(the_defs);
@@ -204,14 +203,13 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_alias_does_not_bubble_up_state_changes) {
     ECF_NAME_THIS_TEST();
 
     defs_ptr the_defs = create_defs();
-    std::vector<Node*> nodes;
+    auto nodes = ecf::get_all_nodes(*the_defs);
     std::vector<alias_ptr> aliases;
-    the_defs->getAllNodes(nodes);
     the_defs->get_all_aliases(aliases);
     node_ptr suite = the_defs->findAbsNode("/s1");
 
     // initialize by setting all nodes to state QUEUED
-    for (Node* n : nodes) {
+    for (auto n : nodes) {
         n->set_state(NState::QUEUED);
     }
 
@@ -240,8 +238,7 @@ BOOST_AUTO_TEST_CASE(test_force_events) {
 
     node_ptr suite = fixtureDef.fixtureDefsFile().findAbsNode("/suiteName");
     BOOST_REQUIRE_MESSAGE(suite.get(), "Could not find suite");
-    std::vector<Node*> nodes;
-    suite->getAllNodes(nodes);
+    auto nodes = ecf::get_all_nodes(*suite);
 
     /// Set and clear events
     for (Node* node : nodes) {
@@ -278,11 +275,10 @@ BOOST_AUTO_TEST_CASE(test_force_events_errors) {
 
     node_ptr suite = fixtureDef.fixtureDefsFile().findAbsNode("/suiteName");
     BOOST_REQUIRE_MESSAGE(suite.get(), "Could not find suite");
-    std::vector<Node*> nodes;
-    suite->getAllNodes(nodes);
+    auto nodes = ecf::get_all_nodes(*suite);
 
     /// Make a path that does not exist
-    for (Node* node : nodes) {
+    for (auto node : nodes) {
         for (const Event& e : node->events()) {
             std::string path = node->absNodePath() + "/path/doesnot/exist" + ":" + e.name_or_number();
             ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);

@@ -223,7 +223,6 @@ public:
     node_ptr find_closest_matching_node(const std::string& pathToNode) const;
 
     void getAllFamilies(std::vector<Family*>&) const;
-    void getAllNodes(std::vector<Node*>&) const;
     void getAllSubmittables(std::vector<Submittable*>&) const;
     void get_all_active_submittables(std::vector<Submittable*>&) const;
     void get_all_nodes(std::vector<node_ptr>&) const;

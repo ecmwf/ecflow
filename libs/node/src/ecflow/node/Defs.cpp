@@ -1076,14 +1076,6 @@ void Defs::getAllFamilies(std::vector<Family*>& vec) const {
     }
 }
 
-void Defs::getAllNodes(std::vector<Node*>& vec) const {
-    vec.reserve(vec.size() + suiteVec_.size());
-    for (const auto& s : suiteVec_) {
-        vec.push_back(s.get());
-        s->getAllNodes(vec);
-    }
-}
-
 void Defs::getAllAstNodes(std::set<Node*>& theSet) const {
     for (const auto& s : suiteVec_) {
         s->getAllAstNodes(theSet);

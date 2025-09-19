@@ -148,9 +148,8 @@ void delete_some_attributes(defs_ptr defs) {
 }
 
 void delete_time_attributes(defs_ptr defs) {
-    std::vector<Node*> nodes;
-    defs->getAllNodes(nodes);
-    for (Node* node : nodes) {
+    auto nodes = ecf::get_all_nodes(*defs);
+    for (auto node : nodes) {
 
         SuiteChanged1 changed(node->suite());
 
@@ -186,9 +185,8 @@ void delete_time_attributes(defs_ptr defs) {
 }
 
 void delete_misc_attributes(defs_ptr defs) {
-    std::vector<Node*> nodes;
-    defs->getAllNodes(nodes);
-    for (Node* node : nodes) {
+    auto nodes = ecf::get_all_nodes(*defs);
+    for (auto node : nodes) {
 
         SuiteChanged1 changed(node->suite());
 
@@ -347,13 +345,12 @@ void change_limit_value(defs_ptr defs) {
 
 void update_repeat(defs_ptr defs) {
 
-    std::vector<Node*> nodes;
-    defs->getAllNodes(nodes);
+    auto nodes = ecf::get_all_nodes(*defs);
 
-    for (Node* n : nodes) {
-        if (!n->repeat().empty()) {
-            SuiteChanged1 changed(n->suite());
-            n->increment_repeat();
+    for (auto node : nodes) {
+        if (!node->repeat().empty()) {
+            SuiteChanged1 changed(node->suite());
+            node->increment_repeat();
         }
     }
 }

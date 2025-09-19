@@ -1039,8 +1039,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
         BOOST_REQUIRE_MESSAGE(errorMsg.empty(), "Expected no message " << errorMsg);
     }
     {
-        std::vector<Node*> all_server_nodes;
-        serverDefs.getAllNodes(all_server_nodes);
+        auto all_server_nodes = ecf::get_all_nodes(serverDefs);
 
         // Now check the Trigger reference. The old reference to nodes in the trigger expressions should have been
         // removed

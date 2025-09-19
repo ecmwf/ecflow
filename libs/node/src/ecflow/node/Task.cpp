@@ -345,14 +345,6 @@ const std::string& Task::debugType() const {
     return ecf::Str::TASK();
 }
 
-void Task::getAllNodes(std::vector<Node*>& vec) const {
-    // See notes: getAllSubmittables, about reserve
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        vec.push_back(aliases_[i].get());
-    }
-}
-
 void Task::immediateChildren(std::vector<node_ptr>& vec) const {
     size_t vec_size = aliases_.size();
     vec.reserve(vec.size() + vec_size);

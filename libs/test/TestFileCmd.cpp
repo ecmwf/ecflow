@@ -20,6 +20,7 @@
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
@@ -81,10 +82,9 @@ BOOST_AUTO_TEST_CASE(test_file_cmd) {
     // the contents of the string returned from the server
     TestFixture::client().set_throw_on_error(false);
 
-    std::vector<Node*> nodeVec;
-    theDefs.getAllNodes(nodeVec);
+    auto nodes = ecf::get_all_nodes(theDefs);
 
-    for (Node* node : nodeVec) {
+    for (auto node : nodes) {
 
         std::string nodePath                       = node->absNodePath();
         std::vector<CFileCmd::File_t> fileTypesVec = CFileCmd::fileTypesVec();

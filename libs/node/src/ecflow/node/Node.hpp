@@ -448,7 +448,6 @@ public:
     virtual void get_all_aliases(std::vector<alias_ptr>&) const                = 0;
     virtual void getAllSubmittables(std::vector<Submittable*>&) const          = 0;
     virtual void get_all_active_submittables(std::vector<Submittable*>&) const = 0;
-    virtual void getAllNodes(std::vector<Node*>&) const                        = 0;
     virtual void getAllAstNodes(std::set<Node*>&) const;
 
     /// returns the immediate children
