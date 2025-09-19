@@ -107,10 +107,9 @@ suite_ptr add_suite(defs_ptr self, suite_ptr s) {
 std::vector<Task*> get_all_tasks(defs_ptr self) {
     return ecf::get_all_tasks(*self);
 }
-std::vector<node_ptr> get_all_nodes(defs_ptr self) {
-    std::vector<node_ptr> nodes;
-    self->get_all_nodes(nodes);
-    return nodes;
+
+std::vector<Node*> get_all_nodes(defs_ptr self) {
+    return ecf::get_all_nodes(*self);
 }
 
 // Context management, Only used to provide indentation

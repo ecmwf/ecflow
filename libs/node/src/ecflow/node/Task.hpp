@@ -81,7 +81,6 @@ public:
 
     void getAllSubmittables(std::vector<Submittable*>&) const override;
     void get_all_active_submittables(std::vector<Submittable*>&) const override;
-    void get_all_nodes(std::vector<node_ptr>&) const override;
     void get_all_aliases(std::vector<alias_ptr>&) const override;
 
     const std::string& debugType() const override;

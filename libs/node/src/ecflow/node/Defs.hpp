@@ -225,7 +225,6 @@ public:
     void getAllFamilies(std::vector<Family*>&) const;
     void getAllSubmittables(std::vector<Submittable*>&) const;
     void get_all_active_submittables(std::vector<Submittable*>&) const;
-    void get_all_nodes(std::vector<node_ptr>&) const;
     void get_all_aliases(std::vector<alias_ptr>&) const;
     void getAllAstNodes(std::set<Node*>&) const;
     const std::set<std::string>& externs() const { return externs_; }

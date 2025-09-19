@@ -13,6 +13,7 @@
 #include "MyDefsFixture.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
@@ -61,24 +62,23 @@ BOOST_AUTO_TEST_CASE(test_node_defs_persistence) {
     ECF_NAME_THIS_TEST();
 
     const Defs& defs = fixtureDefsFile();
-    std::vector<node_ptr> all_nodes;
-    defs.get_all_nodes(all_nodes);
-    BOOST_REQUIRE_MESSAGE(all_nodes.size() > 0, "Expected nodes");
-    for (auto& all_node : all_nodes) {
-        std::string node_as_defs_string = ecf::as_string(all_node, PrintStyle::MIGRATE);
+    auto nodes       = ecf::get_all_nodes(defs);
+    BOOST_REQUIRE_MESSAGE(nodes.size() > 0, "Expected nodes");
+    for (auto& node : nodes) {
+        std::string node_as_defs_string = ecf::as_string(node, PrintStyle::MIGRATE);
         node_ptr the_copy               = Node::create(node_as_defs_string);
         BOOST_REQUIRE_MESSAGE(the_copy,
-                              "Failed to create node " << all_node->absNodePath() << " from string:\n"
+                              "Failed to create node " << node->absNodePath() << " from string:\n"
                                                        << node_as_defs_string);
-        BOOST_REQUIRE_MESSAGE(*the_copy == *all_node, "Nodes not the same");
+        BOOST_REQUIRE_MESSAGE(*the_copy == *node, "Nodes not the same");
     }
-    for (auto& all_node : all_nodes) {
-        std::string node_as_defs_string = ecf::as_string(all_node, PrintStyle::NET);
+    for (auto& node : nodes) {
+        std::string node_as_defs_string = ecf::as_string(node, PrintStyle::NET);
         node_ptr the_copy               = Node::create(node_as_defs_string);
         BOOST_REQUIRE_MESSAGE(the_copy,
-                              "Failed to create node " << all_node->absNodePath() << " from string:\n"
+                              "Failed to create node " << node->absNodePath() << " from string:\n"
                                                        << node_as_defs_string);
-        BOOST_REQUIRE_MESSAGE(*the_copy == *all_node, "Nodes not the same");
+        BOOST_REQUIRE_MESSAGE(*the_copy == *node, "Nodes not the same");
     }
 }
 

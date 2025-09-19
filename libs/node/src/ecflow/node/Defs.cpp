@@ -489,8 +489,8 @@ suite_ptr Defs::removeSuite(suite_ptr s) {
     }
 
     // Something serious has gone wrong. Cannot find the suite
-    std::cout << "Defs::removeSuite: assert failure:  suite '" << s->name() << "' suiteVec_.size() = " << suiteVec_.size()
-         << "\n";
+    std::cout << "Defs::removeSuite: assert failure:  suite '" << s->name()
+              << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
     for (unsigned si = 0; si < suiteVec_.size(); ++si) {
         std::cout << si << " " << suiteVec_[si]->name() << "\n";
     }
@@ -522,8 +522,8 @@ node_ptr Defs::removeChild(Node* child) {
     }
 
     // Something has gone wrong.
-    std::cout << "Defs::removeChild: assert failed:  suite '" << child->name() << "' suiteVec_.size() = " << suiteVec_.size()
-         << "\n";
+    std::cout << "Defs::removeChild: assert failed:  suite '" << child->name()
+              << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
     for (unsigned i = 0; i < suiteVec_.size(); ++i) {
         std::cout << i << " " << suiteVec_[i]->name() << "\n";
     }
@@ -652,7 +652,7 @@ void Defs::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
 void Defs::check_suite_can_begin(const suite_ptr& suite) const {
     NState::State suiteState = suite->state();
     if (!suite->begun() && suiteState != NState::UNKNOWN && suiteState != NState::COMPLETE) {
-        int count = 0;
+        int count  = 0;
         auto tasks = ecf::get_all_tasks(*this);
         std::stringstream ts;
         for (auto& task : tasks) {
@@ -1058,12 +1058,6 @@ void Defs::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
     }
 }
 
-void Defs::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_nodes(nodes);
-    }
-}
-
 void Defs::get_all_aliases(std::vector<alias_ptr>& aliases) const {
     for (const auto& s : suiteVec_) {
         s->get_all_aliases(aliases);
@@ -1145,7 +1139,7 @@ node_ptr Defs::replaceChild(const std::string& path,
     if (!force && serverNode.get()) {
         // Check if serverNode has child tasks in submitted or active states
         auto taskVec = ecf::get_all_tasks(*serverNode); // taskVec will be empty if serverNode is a task
-        int count = 0;
+        int count    = 0;
         for (Task* t : taskVec) {
             if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
                 count++;
@@ -1868,12 +1862,9 @@ void Defs::remove_edit_history(Node* node) {
     }
 
     // When removing a node *it* and all its children also need to be removed.
-    std::vector<node_ptr> node_children;
-    node->get_all_nodes(node_children);
-    for (const auto& c : node_children) {
-
-        auto it = edit_history_.find(c->absNodePath());
-        if (it != edit_history_.end()) {
+    auto children = ecf::get_all_nodes(*node);
+    for (auto node : children) {
+        if (auto it = edit_history_.find(node->absNodePath()); it != edit_history_.end()) {
             edit_history_.erase(it);
         }
     }
@@ -1998,8 +1989,7 @@ std::string::size_type DefsHistoryParser::find_log(const std::string& line, std:
 }
 
 std::string Defs::stats() const {
-    std::vector<node_ptr> node_vec;
-    get_all_nodes(node_vec);
+    auto node_vec = ecf::get_all_nodes(*this);
 
     std::vector<Family*> family_vec;
     getAllFamilies(family_vec);

@@ -129,23 +129,22 @@ int main(int argc, char* argv[]) {
     //    cout << "Free all dependencies, free suspended time and trigger dependencies\n";
     // #endif
 
-    std::vector<node_ptr> all_nodes;
-    defs.get_all_nodes(all_nodes);
-    for (size_t i = 0; i < all_nodes.size(); ++i) {
-        if (all_nodes[i]->isSuspended()) {
-            all_nodes[i]->resume();
+    auto nodes = ecf::get_all_nodes(defs);
+    for (auto node : nodes) {
+        if (node->isSuspended()) {
+            node->resume();
         }
-        all_nodes[i]->freeTrigger();
-        all_nodes[i]->freeHoldingDateDependencies();
-        all_nodes[i]->freeHoldingTimeDependencies();
+        node->freeTrigger();
+        node->freeHoldingDateDependencies();
+        node->freeHoldingTimeDependencies();
 
-        const std::vector<InLimit>& inlimits = all_nodes[i]->inlimits();
+        const std::vector<InLimit>& inlimits = node->inlimits();
         for (const auto& inlim : inlimits) {
-            all_nodes[i]->deleteInlimit(inlim.name());
+            node->deleteInlimit(inlim.name());
         }
 
-        if (all_nodes[i]->state() == NState::COMPLETE && all_nodes[i]->isTask()) {
-            all_nodes[i]->set_state(NState::QUEUED);
+        if (node->state() == NState::COMPLETE && node->isTask()) {
+            node->set_state(NState::QUEUED);
         }
     }
 

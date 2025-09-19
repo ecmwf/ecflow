@@ -59,8 +59,6 @@ public:
     // Pure node Functions that are not implemented for aliases
     node_ptr find_relative_node(const std::vector<std::string>&) override { return node_ptr(); }
 
-    void get_all_nodes(std::vector<node_ptr>& nodes) const override;
-
     // Functions unique to aliases
     // Alias variable names by pass checking of valid names, allowing anything
     void add_alias_variable(const std::string& name, const std::string& value);

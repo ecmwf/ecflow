@@ -393,14 +393,6 @@ void Task::get_all_active_submittables(std::vector<Submittable*>& vec) const {
     }
 }
 
-void Task::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    nodes.push_back(non_const_this());
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        aliases_[i]->get_all_nodes(nodes);
-    }
-}
-
 void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const {
     destinationVec.reserve(destinationVec.size() + aliases_.size());
     std::copy(aliases_.begin(), aliases_.end(), std::back_inserter(destinationVec));

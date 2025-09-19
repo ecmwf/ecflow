@@ -158,7 +158,7 @@ inline std::vector<const Task*> get_all_tasks(const Node& node) {
     return tasks;
 }
 
-inline std::vector<Node*> get_all_nodes(Defs& defs) {
+inline std::vector<Node*> get_all_nodes(const Defs& defs) {
     std::vector<Node*> nodes;
 
     auto collector = [&nodes](Node* node) { nodes.push_back(node); };
