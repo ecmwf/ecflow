@@ -272,4 +272,40 @@ std::vector<Submittable*> get_all_active_submittables(Node& node) {
     return submittables;
 }
 
+std::vector<Family*> get_all_families(const Defs& defs) {
+    // Select all Families
+    std::vector<Node*> selected;
+    auto collector = [&selected](Node& node) { selected.push_back(&node); };
+    auto selector  = [](const Node& node) { return node.isFamily(); };
+    implementation::select_nodes_from_defs(defs, collector, selector);
+
+    // Downcast to return type
+    std::vector<Family*> families;
+    for (auto& family : selected) {
+        if (auto t = dynamic_cast<Family*>(family)) {
+            families.push_back(t);
+        }
+    }
+
+    return families;
+}
+
+std::vector<Family*> get_all_families(Node& node) {
+    // Select all Families
+    std::vector<Node*> selected;
+    auto collector = [&selected](Node& node) { selected.push_back(&node); };
+    auto selector  = [](const Node& node) { return node.isFamily(); };
+    implementation::select_nodes_from_node(node, collector, selector);
+
+    // Downcast to return type
+    std::vector<Family*> families;
+    for (auto& family : selected) {
+        if (auto t = dynamic_cast<Family*>(family)) {
+            families.push_back(t);
+        }
+    }
+
+    return families;
+}
+
 } // namespace ecf

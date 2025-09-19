@@ -85,7 +85,6 @@ public:
 
     std::string find_node_path(const std::string& type, const std::string& name) const override;
 
-    void getAllFamilies(std::vector<Family*>&) const;
     void getAllAstNodes(std::set<Node*>&) const override;
     [[deprecated]] const std::vector<node_ptr>& nodeVec() const { return nodes_; }
     std::vector<task_ptr> taskVec() const;

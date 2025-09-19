@@ -426,18 +426,16 @@ static bool s0_remove_a_family(defs_ptr defs) {
     BOOST_REQUIRE_MESSAGE(suite, "Could not find suite");
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-    std::vector<Family*> vec;
-    suite->getAllFamilies(vec);
-    size_t family_size = vec.size();
-    BOOST_REQUIRE_MESSAGE(!vec.empty(), "Expected at least one family");
-    if (!vec.empty()) {
-        SuiteChanged1 changed(vec[0]->suite());
-        vec[0]->remove();
+    auto families      = ecf::get_all_families(*suite);
+    size_t family_size = families.size();
+    BOOST_REQUIRE_MESSAGE(!families.empty(), "Expected at least one family");
+    if (!families.empty()) {
+        SuiteChanged1 changed(families[0]->suite());
+        families[0]->remove();
     }
 
-    vec.clear();
-    suite->getAllFamilies(vec);
-    BOOST_REQUIRE_MESSAGE(vec.size() < family_size, "Failed to delete family");
+    families = ecf::get_all_families(*suite);
+    BOOST_REQUIRE_MESSAGE(families.size() < family_size, "Failed to delete family");
     return true;
 }
 

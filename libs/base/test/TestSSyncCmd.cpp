@@ -253,18 +253,16 @@ void remove_all_tasks(defs_ptr defs) {
 void remove_a_family(defs_ptr defs) {
 
     // Remove tasks should force a incremental sync
-    std::vector<Family*> vec;
-    defs->getAllFamilies(vec);
-    size_t family_size = vec.size();
-    BOOST_REQUIRE_MESSAGE(!vec.empty(), "Expected at least one family");
-    if (!vec.empty()) {
-        SuiteChanged1 changed(vec[0]->suite());
-        vec[0]->remove();
+    auto families = ecf::get_all_families(*defs);
+    size_t family_size = families.size();
+    BOOST_REQUIRE_MESSAGE(!families.empty(), "Expected at least one family");
+    if (!families.empty()) {
+        SuiteChanged1 changed(families[0]->suite());
+        families[0]->remove();
     }
 
-    vec.clear();
-    defs->getAllFamilies(vec);
-    BOOST_REQUIRE_MESSAGE(vec.size() < family_size, "Failed to delete family");
+    families = ecf::get_all_families(*defs);
+    BOOST_REQUIRE_MESSAGE(families.size() < family_size, "Failed to delete family");
 }
 
 void change_clock_gain(defs_ptr defs) {

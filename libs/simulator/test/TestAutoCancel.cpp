@@ -208,10 +208,9 @@ BOOST_AUTO_TEST_CASE(test_autocancel_family_and_task) {
                         errorMsg);
 
     // make sure autocancel deletes the families.
-    std::vector<Family*> famVec;
-    theDefs.getAllFamilies(famVec);
-    BOOST_CHECK_MESSAGE(famVec.size() == 0,
-                        "Expected to have 0 families but found " << famVec.size() << "\n"
+    auto families = ecf::get_all_families(theDefs);
+    BOOST_CHECK_MESSAGE(families.size() == 0,
+                        "Expected to have 0 families but found " << families.size() << "\n"
                                                                  << ecf::as_string(theDefs, PrintStyle::DEFS));
 
     // remove generated log file. Comment out to debug
@@ -262,10 +261,9 @@ BOOST_AUTO_TEST_CASE(test_autocancel_task) {
     // make sure autocancel deletes the tasks and leaves families intact.
     auto task_vec = ecf::get_all_tasks(theDefs);
 
-    std::vector<Family*> famVec;
-    theDefs.getAllFamilies(famVec);
+    auto families = ecf::get_all_families(theDefs);
 
-    BOOST_CHECK_MESSAGE(famVec.size() == 3, "Expected to have 3 families but found " << famVec.size());
+    BOOST_CHECK_MESSAGE(families.size() == 3, "Expected to have 3 families but found " << families.size());
     BOOST_CHECK_MESSAGE(task_vec.size() == 0, "Expected to have 0 tasks but found " << task_vec.size());
 
     // remove generated log file. Comment out to debug
@@ -298,10 +296,9 @@ BOOST_AUTO_TEST_CASE(test_two_autocancel_in_hierarchy) {
 
     auto task_vec = ecf::get_all_tasks(theDefs);
 
-    std::vector<Family*> famVec;
-    theDefs.getAllFamilies(famVec);
+    auto families = ecf::get_all_families(theDefs);
 
-    BOOST_CHECK_MESSAGE(famVec.size() == 0, "Expected to have 0 families but found " << famVec.size());
+    BOOST_CHECK_MESSAGE(families.size() == 0, "Expected to have 0 families but found " << families.size());
     BOOST_CHECK_MESSAGE(task_vec.size() == 0, "Expected to have 0 tasks but found " << task_vec.size());
 
     // remove generated log file. Comment out to debug

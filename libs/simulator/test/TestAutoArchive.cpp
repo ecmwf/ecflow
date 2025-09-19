@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
+#include <ecflow/node/NodeAlgorithms.hpp>
 
 #include "TestUtil.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
@@ -242,21 +243,23 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
                         errorMsg);
 
     // make sure all familes has been archived
-    std::vector<Family*> famVec;
-    theDefs.getAllFamilies(famVec);
-    for (auto f : famVec) {
-        BOOST_CHECK_MESSAGE(f->get_flag().is_set(ecf::Flag::ARCHIVED),
-                            "Expected family " << f->absNodePath() << " to be archived");
-        BOOST_CHECK_MESSAGE(fs::exists(f->archive_path()), "Expected family " << f->absNodePath() << " to be archived");
-        BOOST_CHECK_MESSAGE(f->nodeVec().empty(), "Expected family " << f->absNodePath() << " to be empty");
+    auto families = ecf::get_all_families(theDefs);
+    for (auto family : families) {
+        BOOST_CHECK_MESSAGE(family->get_flag().is_set(ecf::Flag::ARCHIVED),
+                            "Expected family " << family->absNodePath() << " to be archived");
+        BOOST_CHECK_MESSAGE(fs::exists(family->archive_path()),
+                            "Expected family " << family->absNodePath() << " to be archived");
+        BOOST_CHECK_MESSAGE(family->nodeVec().empty(), "Expected family " << family->absNodePath() << " to be empty");
 
-        f->restore();
-        BOOST_CHECK_MESSAGE(f->get_flag().is_set(ecf::Flag::RESTORED),
-                            "Expected family " << f->absNodePath() << " to be restored");
-        BOOST_CHECK_MESSAGE(!f->get_flag().is_set(ecf::Flag::ARCHIVED),
-                            "Expected family " << f->absNodePath() << " to be restored");
-        BOOST_CHECK_MESSAGE(!fs::exists(f->archive_path()), "Expected file " << f->absNodePath() << " to be removed");
-        BOOST_CHECK_MESSAGE(!f->nodeVec().empty(), "Expected family " << f->absNodePath() << " to be restored");
+        family->restore();
+        BOOST_CHECK_MESSAGE(family->get_flag().is_set(ecf::Flag::RESTORED),
+                            "Expected family " << family->absNodePath() << " to be restored");
+        BOOST_CHECK_MESSAGE(!family->get_flag().is_set(ecf::Flag::ARCHIVED),
+                            "Expected family " << family->absNodePath() << " to be restored");
+        BOOST_CHECK_MESSAGE(!fs::exists(family->archive_path()),
+                            "Expected file " << family->absNodePath() << " to be removed");
+        BOOST_CHECK_MESSAGE(!family->nodeVec().empty(),
+                            "Expected family " << family->absNodePath() << " to be restored");
     }
 
     // remove generated log file. Comment out to debug

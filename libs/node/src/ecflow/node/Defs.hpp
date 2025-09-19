@@ -223,7 +223,6 @@ public:
     /// Given a path, /suite/family/task, find node which is the closest
     node_ptr find_closest_matching_node(const std::string& pathToNode) const;
 
-    void getAllFamilies(std::vector<Family*>&) const;
     void getAllAstNodes(std::set<Node*>&) const;
     const std::set<std::string>& externs() const { return externs_; }
 

@@ -13,6 +13,8 @@
 
 #include <vector>
 
+#include "Family.hpp"
+
 class Alias;
 class Defs;
 class Node;
@@ -46,8 +48,12 @@ std::vector<const Alias*> get_all_aliases(const Node& node);
 // Select Active Submittables
 
 std::vector<Submittable*> get_all_active_submittables(Defs& defs);
-
 std::vector<Submittable*> get_all_active_submittables(Node& node);
+
+// Select Families
+
+std::vector<Family*> get_all_families(const Defs& defs);
+std::vector<Family*> get_all_families(Node& node);
 
 } // namespace ecf
 

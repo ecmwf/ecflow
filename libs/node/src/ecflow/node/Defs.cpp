@@ -1046,12 +1046,6 @@ bool Defs::check(std::string& errorMsg, std::string& warningMsg) const {
     return errorMsg.empty();
 }
 
-void Defs::getAllFamilies(std::vector<Family*>& vec) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllFamilies(vec);
-    }
-}
-
 void Defs::getAllAstNodes(std::set<Node*>& theSet) const {
     for (const auto& s : suiteVec_) {
         s->getAllAstNodes(theSet);
@@ -1973,9 +1967,7 @@ std::string::size_type DefsHistoryParser::find_log(const std::string& line, std:
 std::string Defs::stats() const {
     auto node_vec = ecf::get_all_nodes(*this);
 
-    std::vector<Family*> family_vec;
-    getAllFamilies(family_vec);
-
+    auto family_vec = ecf::get_all_families(*this);
     auto task_vec = ecf::get_all_tasks(*this);
 
     size_t alias = 0;

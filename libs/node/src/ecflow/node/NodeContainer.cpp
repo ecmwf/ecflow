@@ -937,16 +937,6 @@ void NodeContainer::allChildren(std::vector<node_ptr>& vec) const {
     }
 }
 
-void NodeContainer::getAllFamilies(std::vector<Family*>& vec) const {
-    for (const auto& n : nodes_) {
-        Family* family = n->isFamily();
-        if (family) {
-            vec.push_back(family);
-            family->getAllFamilies(vec);
-        }
-    }
-}
-
 void NodeContainer::getAllAstNodes(std::set<Node*>& vec) const {
     Node::getAllAstNodes(vec);
     for (const auto& n : nodes_) {
