@@ -20,7 +20,6 @@
 #include "ecflow/node/JobProfiler.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
 
 using namespace std;

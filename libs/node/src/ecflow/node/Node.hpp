@@ -993,6 +993,32 @@ std::vector<Variable> inherited_variables(const Node& node);
  */
 std::vector<Variable> generated_variables(const Node& node);
 
+// Select Nodes
+
+std::vector<Node*> get_all_nodes(Node& node);
+
+// Select Tasks
+
+std::vector<Task*> get_all_tasks(Node& node);
+std::vector<const Task*> get_all_tasks(const Node& node);
+
+// Select Alias
+
+std::vector<Alias*> get_all_aliases(Node& node);
+std::vector<const Alias*> get_all_aliases(const Node& node);
+
+// Select Active Submittables
+
+std::vector<Submittable*> get_all_active_submittables(Node& node);
+
+// Select Families
+
+std::vector<Family*> get_all_families(Node& node);
+
+// Select Nodes that have ASTs (i.e. either Trigger or Complete)
+
+std::set<const Node*> get_all_ast_nodes(const Node& node);
+
 } // namespace ecf
 
 #endif /* ecflow_node_Node_HPP */

@@ -11,7 +11,6 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "NodeAlgorithms.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"

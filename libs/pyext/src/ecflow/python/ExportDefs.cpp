@@ -15,7 +15,6 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/python/DefsDoc.hpp"

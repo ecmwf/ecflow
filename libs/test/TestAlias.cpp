@@ -12,7 +12,6 @@
 #include <limits>
 
 #include <boost/test/unit_test.hpp>
-#include <ecflow/node/NodeAlgorithms.hpp>
 
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"

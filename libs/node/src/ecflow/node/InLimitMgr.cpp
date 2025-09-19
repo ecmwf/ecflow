@@ -18,7 +18,6 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/node/Node.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 
 #ifdef DEBUG
     #include <ostream>

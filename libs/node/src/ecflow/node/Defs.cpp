@@ -30,7 +30,6 @@
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Memento.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeState.hpp"
 #include "ecflow/node/NodeStats.hpp"
 #include "ecflow/node/NodeTreeVisitor.hpp"

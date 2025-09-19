@@ -16,7 +16,6 @@
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Str.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace std;

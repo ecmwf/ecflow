@@ -19,7 +19,6 @@
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 

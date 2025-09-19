@@ -8,12 +8,11 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/node/NodeAlgorithms.hpp"
-
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/ExprAstVisitor.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/Node.hpp"
 #include "ecflow/node/Task.hpp"
 
 namespace ecf {

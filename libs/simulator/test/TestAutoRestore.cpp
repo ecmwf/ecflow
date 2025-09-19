@@ -11,7 +11,6 @@
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
-#include <ecflow/node/NodeAlgorithms.hpp>
 
 #include "TestUtil.hpp"
 #include "ecflow/attribute/AutoArchiveAttr.hpp"

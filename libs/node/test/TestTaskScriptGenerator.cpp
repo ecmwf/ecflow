@@ -22,7 +22,6 @@
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"

@@ -18,7 +18,6 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 

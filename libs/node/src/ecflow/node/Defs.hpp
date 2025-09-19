@@ -511,4 +511,34 @@ private:
     defs_ptr defs_ptr_;
 };
 
+namespace ecf {
+
+// Select Nodes
+
+std::vector<Node*> get_all_nodes(Defs& defs);
+std::vector<const Node*> get_all_nodes(const Defs& defs);
+
+// Select Tasks
+
+std::vector<Task*> get_all_tasks(Defs& defs);
+std::vector<const Task*> get_all_tasks(const Defs& defs);
+
+// Select Alias
+
+std::vector<Alias*> get_all_aliases(Defs& defs);
+
+// Select Active Submittables
+
+std::vector<Submittable*> get_all_active_submittables(Defs& defs);
+
+// Select Families
+
+std::vector<Family*> get_all_families(const Defs& defs);
+
+// Select Nodes that have ASTs (i.e. either Trigger or Complete)
+
+std::set<const Node*> get_all_ast_nodes(const Defs& defs);
+
+}
+
 #endif /* ecflow_node_Defs_HPP */

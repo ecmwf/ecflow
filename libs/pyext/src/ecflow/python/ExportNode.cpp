@@ -22,7 +22,6 @@
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
-#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeContainer.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"

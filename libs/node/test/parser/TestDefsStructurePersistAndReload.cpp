@@ -12,7 +12,6 @@
 #include <string>
 
 #include <boost/test/unit_test.hpp>
-#include <ecflow/node/NodeAlgorithms.hpp>
 
 #include "MyDefsFixture.hpp"
 #include "PersistHelper.hpp"
