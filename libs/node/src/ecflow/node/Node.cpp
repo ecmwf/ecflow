@@ -2800,7 +2800,7 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const {
     return false;
 }
 
-void Node::stats(NodeStats& stats) {
+void Node::stats(NodeStats& stats) const {
     stats.vars_ += vars_.size();
     if (c_expr_) {
         stats.c_trigger_++;

@@ -217,6 +217,7 @@ public:
     node_ptr find_node(const std::string& type, const std::string& pathToNode) const;
 
     [[deprecated]] const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }
+    auto& suites() { return suiteVec_; }
     const auto& suites() const { return suiteVec_; }
 
     /// Given a path, /suite/family/task, find node which is the closest

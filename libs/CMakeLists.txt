@@ -443,6 +443,7 @@ set(srcs
   node/src/ecflow/node/MiscAttrs.cpp
   node/src/ecflow/node/Node.cpp
   node/src/ecflow/node/NodeAdd.cpp
+  node/src/ecflow/node/NodeAlgorithms.cpp
   node/src/ecflow/node/NodeChange.cpp
   node/src/ecflow/node/NodeContainer.cpp
   node/src/ecflow/node/NodeDelete.cpp

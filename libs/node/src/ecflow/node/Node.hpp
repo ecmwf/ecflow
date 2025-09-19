@@ -708,7 +708,7 @@ public:
     /// If not attached to parent returns std::numeric_limits<std::size_t>::max();
     size_t position() const;
 
-    void stats(NodeStats&);
+    void stats(NodeStats&) const;
 
     /// called at the end of state change function
     /// ** Every time we set the state on a nodecontainer, we call handleStateChange

@@ -155,23 +155,23 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_139) {
 
     /// Test 1: Check NODE state All nodes should be set to NState::QUEUED
     theDefs.beginAll();
-    for (Task* n : tasks) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED, "Expected queued but found " << NState::toString(n->state()));
+    for (auto task : tasks) {
+        BOOST_CHECK_MESSAGE(task->state() == NState::QUEUED, "Expected queued but found " << NState::toString(task->state()));
     }
 
     /// Check: DSTATE
-    for (Task* n : tasks) {
+    for (auto n : tasks) {
         BOOST_CHECK_MESSAGE(n->dstate() == DState::SUSPENDED,
                             "Expected suspended but found " << DState::toString(n->dstate()));
     }
 
     theDefs.requeue();
-    for (Task* n : tasks) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED, "Expected queued but found " << NState::toString(n->state()));
+    for (auto task : tasks) {
+        BOOST_CHECK_MESSAGE(task->state() == NState::QUEUED, "Expected queued but found " << NState::toString(task->state()));
     }
-    for (Task* n : tasks) {
-        BOOST_CHECK_MESSAGE(n->dstate() == DState::SUSPENDED,
-                            "Expected suspended but found " << DState::toString(n->dstate()));
+    for (auto task : tasks) {
+        BOOST_CHECK_MESSAGE(task->dstate() == DState::SUSPENDED,
+                            "Expected suspended but found " << DState::toString(task->dstate()));
     }
 }
 

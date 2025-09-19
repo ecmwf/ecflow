@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_change_mgr_singleton) {
 
             // Do some updates
             std::vector<ecf::Aspect::Type> aspects;
-            for (auto& i : nodes) {
+            for (auto i : nodes) {
                 i->notify(aspects);
                 i->notify(aspects);
             }
