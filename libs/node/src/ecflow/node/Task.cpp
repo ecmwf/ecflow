@@ -353,19 +353,6 @@ void Task::immediateChildren(std::vector<node_ptr>& vec) const {
     }
 }
 
-void Task::getAllSubmittables(std::vector<Submittable*>& vec) const {
-    // *DO NOT reserve here, as it dominate time , for very large defs */
-    // * Previously we had::
-    //    vec.reserve(vec.size() + vec_size + 1);
-    // * This took 47 seconds when delete the full defs, i.e when check for active tasks
-
-    vec.push_back(const_cast<Task*>(this));
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        vec.push_back(aliases_[i].get());
-    }
-}
-
 node_ptr Task::find_node_up_the_tree(const std::string& name) const {
     size_t vec_size = aliases_.size();
     for (size_t i = 0; i < vec_size; i++) {

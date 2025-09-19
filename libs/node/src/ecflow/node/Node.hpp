@@ -444,7 +444,6 @@ public:
     std::string triggerExpression() const;
     std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string(); }
 
-    virtual void getAllSubmittables(std::vector<Submittable*>&) const          = 0;
     virtual void get_all_active_submittables(std::vector<Submittable*>&) const = 0;
     virtual void getAllAstNodes(std::set<Node*>&) const;
 
