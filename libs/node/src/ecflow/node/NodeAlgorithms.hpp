@@ -11,12 +11,12 @@
 #ifndef ecflow_node_NodeAlgorithms_hpp
 #define ecflow_node_NodeAlgorithms_hpp
 
+#include <set>
 #include <vector>
-
-#include "Family.hpp"
 
 class Alias;
 class Defs;
+class Family;
 class Node;
 class Submittable;
 class Task;
@@ -54,6 +54,11 @@ std::vector<Submittable*> get_all_active_submittables(Node& node);
 
 std::vector<Family*> get_all_families(const Defs& defs);
 std::vector<Family*> get_all_families(Node& node);
+
+// Select Nodes that have ASTs (i.e. either Trigger or Complete)
+
+std::set<const Node*> get_all_ast_nodes(const Defs& defs);
+std::set<const Node*> get_all_ast_nodes(const Node& node);
 
 } // namespace ecf
 

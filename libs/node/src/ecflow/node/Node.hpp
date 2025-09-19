@@ -444,8 +444,6 @@ public:
     std::string triggerExpression() const;
     std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string(); }
 
-    virtual void getAllAstNodes(std::set<Node*>&) const;
-
     /// returns the immediate children
     virtual void immediateChildren(std::vector<node_ptr>&) const {}
 

@@ -1047,8 +1047,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
         BOOST_REQUIRE_MESSAGE(tasks.size() == 3, "Expected 3 tasks but found, " << tasks.size());
         for (auto& task : tasks) {
 
-            std::set<Node*> referenced_nodes;
-            task->getAllAstNodes(referenced_nodes);
+            auto referenced_nodes = ecf::get_all_ast_nodes(*task);
             BOOST_REQUIRE_MESSAGE(referenced_nodes.size() == 1, " expected 1 referenced node");
 
             // The reference nodes must exist in the server. Otherwise replace has still kept references to old nodes in

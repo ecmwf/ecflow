@@ -1046,12 +1046,6 @@ bool Defs::check(std::string& errorMsg, std::string& warningMsg) const {
     return errorMsg.empty();
 }
 
-void Defs::getAllAstNodes(std::set<Node*>& theSet) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllAstNodes(theSet);
-    }
-}
-
 bool Defs::deleteChild(Node* nodeToBeDeleted) {
     // Find node and children of the node to be deleted and remove them from node history
     remove_edit_history(nodeToBeDeleted);

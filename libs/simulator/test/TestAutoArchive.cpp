@@ -160,8 +160,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
     }
 
     // Check number of AST nodes. The AST should be created on the fly
-    std::set<Node*> theSet;
-    theDefs.getAllAstNodes(theSet);
+    auto theSet = ecf::get_all_ast_nodes(theDefs);
     BOOST_CHECK_MESSAGE(theSet.size() == 2,
                         "Expected to have 2 AST nodes in trigger/complete expressions but found " << theSet.size());
 
@@ -182,8 +181,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
 
     // The references to nodes in suites s2, s3 should have been cleared in suite s1
     {
-        std::set<Node*> theSet;
-        theDefs.getAllAstNodes(theSet);
+        auto theSet = ecf::get_all_ast_nodes(theDefs);
         BOOST_CHECK_MESSAGE(theSet.empty(),
                             "Expected to have 0 AST nodes in trigger/complete expressions but found " << theSet.size());
     }

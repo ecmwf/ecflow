@@ -2511,17 +2511,6 @@ void Node::verification(std::string& errorMsg) const {
     }
 }
 
-void Node::getAllAstNodes(std::set<Node*>& theSet) const {
-    if (completeAst()) {
-        AstCollateNodesVisitor astVisitor(theSet);
-        completeAst()->accept(astVisitor);
-    }
-    if (triggerAst()) {
-        AstCollateNodesVisitor astVisitor(theSet);
-        triggerAst()->accept(astVisitor);
-    }
-}
-
 AstTop* Node::completeAst() const {
     if (c_expr_) {
         std::string ignoredErrorMsg;

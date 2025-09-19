@@ -12,6 +12,8 @@
 
 #include "ecflow/node/Alias.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/ExprAstVisitor.hpp"
+#include "ecflow/node/Family.hpp"
 #include "ecflow/node/Task.hpp"
 
 namespace ecf {
@@ -306,6 +308,56 @@ std::vector<Family*> get_all_families(Node& node) {
     }
 
     return families;
+}
+
+std::set<const Node*> get_all_ast_nodes(const Defs& defs) {
+    // Select all Nodes with ASTs
+    std::set<Node*> selected;
+    auto collector = [&selected](const Node& node) {
+        if (node.completeAst()) {
+            AstCollateNodesVisitor astVisitor(selected);
+            node.completeAst()->accept(astVisitor);
+        }
+        if (node.triggerAst()) {
+            AstCollateNodesVisitor astVisitor(selected);
+            node.triggerAst()->accept(astVisitor);
+        };
+    };
+    auto selector = [](const Node& node) { return node.completeAst() || node.triggerAst(); };
+    implementation::select_nodes_from_defs(defs, collector, selector);
+
+    // Convert to const
+    std::set<const Node*> nodes;
+    for (auto& node : selected) {
+        nodes.insert(node);
+    }
+
+    return nodes;
+}
+
+std::set<const Node*> get_all_ast_nodes(const Node& node) {
+    // Select all Nodes with ASTs
+    std::set<Node*> selected;
+    auto collector = [&selected](const Node& node) {
+        if (node.completeAst()) {
+            AstCollateNodesVisitor astVisitor(selected);
+            node.completeAst()->accept(astVisitor);
+        }
+        if (node.triggerAst()) {
+            AstCollateNodesVisitor astVisitor(selected);
+            node.triggerAst()->accept(astVisitor);
+        };
+    };
+    auto selector = [](const Node& node) { return node.completeAst() || node.triggerAst(); };
+    implementation::select_nodes_from_node(node, collector, selector);
+
+    // Convert to const
+    std::set<const Node*> nodes;
+    for (auto& node : selected) {
+        nodes.insert(node);
+    }
+
+    return nodes;
 }
 
 } // namespace ecf

@@ -937,13 +937,6 @@ void NodeContainer::allChildren(std::vector<node_ptr>& vec) const {
     }
 }
 
-void NodeContainer::getAllAstNodes(std::set<Node*>& vec) const {
-    Node::getAllAstNodes(vec);
-    for (const auto& n : nodes_) {
-        n->getAllAstNodes(vec);
-    }
-}
-
 bool NodeContainer::check(std::string& errorMsg, std::string& warningMsg) const {
     Node::check(errorMsg, warningMsg);
 
