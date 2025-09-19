@@ -41,14 +41,13 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
 
     // Delete all Aliases
     {
-        std::vector<alias_ptr> vec;
-        fixtureDef.defsfile_.get_all_aliases(vec);
-        BOOST_CHECK_MESSAGE(vec.size() > 0, "Expected > 0 aliases but found " << vec.size());
+        auto aliases = ecf::get_all_aliases(fixtureDef.defsfile_);
+        BOOST_CHECK_MESSAGE(aliases.size() > 0, "Expected > 0 aliases but found " << aliases.size());
 
         std::vector<std::string> paths;
-        paths.reserve(vec.size());
-        for (alias_ptr t : vec) {
-            paths.push_back(t->absNodePath());
+        paths.reserve(aliases.size());
+        for (auto alias : aliases) {
+            paths.push_back(alias->absNodePath());
         }
 
         size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
@@ -69,8 +68,7 @@ BOOST_AUTO_TEST_CASE(test_delete_node_cmd) {
                                               << edit_history.size());
         }
 
-        std::vector<alias_ptr> afterDeleteVec;
-        fixtureDef.defsfile_.get_all_aliases(afterDeleteVec);
+        auto afterDeleteVec = ecf::get_all_aliases(fixtureDef.defsfile_);
         BOOST_REQUIRE_MESSAGE(afterDeleteVec.empty(),
                               "Expected all aliases to be deleted but found " << afterDeleteVec.size());
     }

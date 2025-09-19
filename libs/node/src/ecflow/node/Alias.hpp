@@ -77,7 +77,6 @@ private:
     // Pure node Functions that are not implemented for aliases
     void accept(ecf::NodeTreeVisitor&) override {}
     void acceptVisitTraversor(ecf::NodeTreeVisitor&) override {}
-    void get_all_aliases(std::vector<alias_ptr>&) const override {}
     void getAllSubmittables(std::vector<Submittable*>&) const override {}
     void get_all_active_submittables(std::vector<Submittable*>&) const override {}
 

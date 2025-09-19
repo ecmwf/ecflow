@@ -88,7 +88,6 @@ public:
     void getAllFamilies(std::vector<Family*>&) const;
     void getAllSubmittables(std::vector<Submittable*>&) const override;
     void get_all_active_submittables(std::vector<Submittable*>&) const override;
-    void get_all_aliases(std::vector<alias_ptr>&) const override;
     void getAllAstNodes(std::set<Node*>&) const override;
     [[deprecated]] const std::vector<node_ptr>& nodeVec() const { return nodes_; }
     std::vector<task_ptr> taskVec() const;

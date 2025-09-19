@@ -64,8 +64,7 @@ BOOST_AUTO_TEST_CASE(test_find_abs_node_path) {
                                                                     << all_nodes.size());
 
     // Test Defs::get_all_aliases()
-    std::vector<alias_ptr> alias_vec;
-    theDefs.get_all_aliases(alias_vec);
+    auto alias_vec = ecf::get_all_aliases(theDefs);
     BOOST_CHECK_MESSAGE(alias_vec.size() == no_of_alias,
                         "Expected theDefs.get_all_aliases() to return " << no_of_alias << " node, but found "
                                                                         << alias_vec.size());

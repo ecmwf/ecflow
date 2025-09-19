@@ -226,16 +226,14 @@ void add_alias(defs_ptr defs) {
 
 void remove_all_aliases(defs_ptr defs) {
 
-    std::vector<alias_ptr> aliases;
-    defs->get_all_aliases(aliases);
+    auto aliases = ecf::get_all_aliases(*defs);
     BOOST_REQUIRE_MESSAGE(!aliases.empty(), "Expected at least one alias");
 
-    for (alias_ptr alias : aliases) {
+    for (auto alias : aliases) {
         TestHelper::invokeRequest(defs.get(), Cmd_ptr(new DeleteCmd(alias->absNodePath())));
     }
 
-    aliases.clear();
-    defs->get_all_aliases(aliases);
+    aliases = ecf::get_all_aliases(*defs);
     BOOST_REQUIRE_MESSAGE(aliases.empty(), "Expected at no  alias");
 }
 

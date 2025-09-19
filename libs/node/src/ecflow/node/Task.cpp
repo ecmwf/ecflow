@@ -393,11 +393,6 @@ void Task::get_all_active_submittables(std::vector<Submittable*>& vec) const {
     }
 }
 
-void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const {
-    destinationVec.reserve(destinationVec.size() + aliases_.size());
-    std::copy(aliases_.begin(), aliases_.end(), std::back_inserter(destinationVec));
-}
-
 bool Task::resolveDependencies(JobsParam& jobsParam) {
     if (jobsParam.timed_out_of_job_generation()) {
         return false;

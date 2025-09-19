@@ -13,9 +13,10 @@
 
 #include <vector>
 
+class Alias;
 class Defs;
-class Task;
 class Node;
+class Task;
 
 namespace ecf {
 
@@ -33,6 +34,13 @@ std::vector<const Task*> get_all_tasks(const Defs& defs);
 
 std::vector<Task*> get_all_tasks(Node& node);
 std::vector<const Task*> get_all_tasks(const Node& node);
+
+// Select Alias
+
+std::vector<Alias*> get_all_aliases(Defs& defs);
+
+std::vector<Alias*> get_all_aliases(Node& node);
+std::vector<const Alias*> get_all_aliases(const Node& node);
 
 } // namespace ecf
 

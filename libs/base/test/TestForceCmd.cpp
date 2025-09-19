@@ -204,8 +204,7 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_alias_does_not_bubble_up_state_changes) {
 
     defs_ptr the_defs = create_defs();
     auto nodes = ecf::get_all_nodes(*the_defs);
-    std::vector<alias_ptr> aliases;
-    the_defs->get_all_aliases(aliases);
+    auto aliases = ecf::get_all_aliases(*the_defs);
     node_ptr suite = the_defs->findAbsNode("/s1");
 
     // initialize by setting all nodes to state QUEUED
@@ -217,7 +216,7 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_alias_does_not_bubble_up_state_changes) {
     std::vector<std::string> all_states = NState::allStates();
     for (const std::string& state : all_states) {
 
-        for (alias_ptr alias : aliases) {
+        for (auto alias : aliases) {
             ForceCmd cmd(alias->absNodePath(), state, false /*recursive */, false /* set Repeat to last value */);
             cmd.setup_user_authentification();
             STC_Cmd_ptr returnCmd = cmd.handleRequest(&mockServer);

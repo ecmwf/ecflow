@@ -1058,12 +1058,6 @@ void Defs::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
     }
 }
 
-void Defs::get_all_aliases(std::vector<alias_ptr>& aliases) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_aliases(aliases);
-    }
-}
-
 void Defs::getAllFamilies(std::vector<Family*>& vec) const {
     for (const auto& s : suiteVec_) {
         s->getAllFamilies(vec);
