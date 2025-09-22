@@ -79,8 +79,6 @@ public:
     void accept(ecf::NodeTreeVisitor&) override;
     void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
 
-    void get_all_active_submittables(std::vector<Submittable*>&) const override;
-
     const std::string& debugType() const override;
 
     /// submits the jobs of the dependencies resolve

@@ -16,6 +16,7 @@
 class Alias;
 class Defs;
 class Node;
+class Submittable;
 class Task;
 
 namespace ecf {
@@ -41,6 +42,12 @@ std::vector<Alias*> get_all_aliases(Defs& defs);
 
 std::vector<Alias*> get_all_aliases(Node& node);
 std::vector<const Alias*> get_all_aliases(const Node& node);
+
+// Select Active Submittables
+
+std::vector<Submittable*> get_all_active_submittables(Defs& defs);
+
+std::vector<Submittable*> get_all_active_submittables(Node& node);
 
 } // namespace ecf
 

@@ -58,6 +58,8 @@ if (ENABLE_ALL_TESTS)
       test_scaffold
       test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server
     TEST_DEPENDS
       s_client
   )
@@ -78,6 +80,8 @@ if (ENABLE_ALL_TESTS)
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
     ENVIRONMENT
       ECF_TEST_USING_HTTP=1
+    DEPENDS
+      ecflow_server
     TEST_DEPENDS
       s_client
   )
@@ -96,6 +100,8 @@ if (ENABLE_ALL_TESTS)
       test_scaffold
       test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server
     TEST_DEPENDS
       s_test
   )
@@ -115,6 +121,8 @@ if (ENABLE_ALL_TESTS)
       test_scaffold
       test_harness.test
       $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+    DEPENDS
+      ecflow_server
     TEST_DEPENDS
       s_client
   )

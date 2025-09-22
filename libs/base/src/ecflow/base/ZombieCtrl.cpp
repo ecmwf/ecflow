@@ -16,6 +16,7 @@
 #include "ecflow/base/cts/task/TaskCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
 
@@ -445,18 +446,16 @@ void ZombieCtrl::add_user_zombies(Node* node, const std::string& user_cmd) {
     if (!node) {
         return;
     }
-    std::vector<Submittable*> tasks;
-    node->get_all_active_submittables(tasks);
-    add_user_zombies(tasks, user_cmd);
+    auto submittables = ecf::get_all_active_submittables(*node);
+    add_user_zombies(submittables, user_cmd);
 }
 
 void ZombieCtrl::add_user_zombies(defs_ptr defs, const std::string& user_cmd) {
     if (!defs.get()) {
         return;
     }
-    std::vector<Submittable*> tasks;
-    defs->get_all_active_submittables(tasks);
-    add_user_zombies(tasks, user_cmd);
+    auto submittables = ecf::get_all_active_submittables(*defs);
+    add_user_zombies(submittables, user_cmd);
 }
 
 /// Returns the list of zombies, **updated** with seconds since creation

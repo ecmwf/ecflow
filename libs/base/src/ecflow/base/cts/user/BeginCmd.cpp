@@ -18,6 +18,7 @@
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
 
@@ -82,7 +83,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
             }
         }
         else {
-            defs->get_all_active_submittables(tasks);
+            tasks = ecf::get_all_active_submittables(*defs);
             as->zombie_ctrl().add_user_zombies(tasks, CtsApi::beginArg());
 
             defs->reset_begin(); // Force should *only* be used for test
@@ -105,7 +106,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
         }
         else {
 
-            suite->get_all_active_submittables(tasks);
+            tasks = ecf::get_all_active_submittables(*suite);
             as->zombie_ctrl().add_user_zombies(tasks, CtsApi::beginArg());
 
             suite->reset_begin(); // Force should *only* be used for test

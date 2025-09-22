@@ -947,12 +947,6 @@ void NodeContainer::getAllFamilies(std::vector<Family*>& vec) const {
     }
 }
 
-void NodeContainer::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->get_all_active_submittables(tasks);
-    }
-}
-
 void NodeContainer::getAllAstNodes(std::set<Node*>& vec) const {
     Node::getAllAstNodes(vec);
     for (const auto& n : nodes_) {

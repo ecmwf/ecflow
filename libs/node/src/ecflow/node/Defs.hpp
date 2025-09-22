@@ -224,7 +224,6 @@ public:
     node_ptr find_closest_matching_node(const std::string& pathToNode) const;
 
     void getAllFamilies(std::vector<Family*>&) const;
-    void get_all_active_submittables(std::vector<Submittable*>&) const;
     void getAllAstNodes(std::set<Node*>&) const;
     const std::set<std::string>& externs() const { return externs_; }
 

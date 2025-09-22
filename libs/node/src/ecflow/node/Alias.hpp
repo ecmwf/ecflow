@@ -77,7 +77,6 @@ private:
     // Pure node Functions that are not implemented for aliases
     void accept(ecf::NodeTreeVisitor&) override {}
     void acceptVisitTraversor(ecf::NodeTreeVisitor&) override {}
-    void get_all_active_submittables(std::vector<Submittable*>&) const override {}
 
     friend class cereal::access;
     template <class Archive>

@@ -1046,12 +1046,6 @@ bool Defs::check(std::string& errorMsg, std::string& warningMsg) const {
     return errorMsg.empty();
 }
 
-void Defs::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_active_submittables(tasks);
-    }
-}
-
 void Defs::getAllFamilies(std::vector<Family*>& vec) const {
     for (const auto& s : suiteVec_) {
         s->getAllFamilies(vec);

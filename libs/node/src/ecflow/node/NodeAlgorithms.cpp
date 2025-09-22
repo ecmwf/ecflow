@@ -232,4 +232,44 @@ std::vector<const Alias*> get_all_aliases(const Node& node) {
     return aliases;
 }
 
+std::vector<Submittable*> get_all_active_submittables(Defs& defs) {
+    // Select all Active Submittables
+    std::vector<Node*> selected;
+    auto collector = [&selected](Node& node) { selected.push_back(&node); };
+    auto selector  = [](const Node& node) {
+        return node.isSubmittable() && (node.state() == NState::ACTIVE || node.state() == NState::SUBMITTED);
+    };
+    implementation::select_nodes_from_defs(defs, collector, selector);
+
+    // Downcast to return type
+    std::vector<Submittable*> submittables;
+    for (auto& submittable : selected) {
+        if (auto t = submittable->isSubmittable()) {
+            submittables.push_back(t);
+        }
+    }
+
+    return submittables;
+}
+
+std::vector<Submittable*> get_all_active_submittables(Node& node) {
+    // Select all Active Submittables
+    std::vector<Node*> selected;
+    auto collector = [&selected](Node& node) { selected.push_back(&node); };
+    auto selector  = [](const Node& node) {
+        return node.isSubmittable() && (node.state() == NState::ACTIVE || node.state() == NState::SUBMITTED);
+    };
+    implementation::select_nodes_from_node(node, collector, selector);
+
+    // Downcast to return type
+    std::vector<Submittable*> submittables;
+    for (auto& submittable : selected) {
+        if (auto t = submittable->isSubmittable()) {
+            submittables.push_back(t);
+        }
+    }
+
+    return submittables;
+}
+
 } // namespace ecf

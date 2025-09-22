@@ -367,19 +367,6 @@ node_ptr Task::find_node_up_the_tree(const std::string& name) const {
     return node_ptr();
 }
 
-void Task::get_all_active_submittables(std::vector<Submittable*>& vec) const {
-    // See notes: getAllSubmittables, about reserve
-    if (state() == NState::ACTIVE || state() == NState::SUBMITTED) {
-        vec.push_back(const_cast<Task*>(this));
-    }
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        if (aliases_[i]->state() == NState::ACTIVE || aliases_[i]->state() == NState::SUBMITTED) {
-            vec.push_back(aliases_[i].get());
-        }
-    }
-}
-
 bool Task::resolveDependencies(JobsParam& jobsParam) {
     if (jobsParam.timed_out_of_job_generation()) {
         return false;
