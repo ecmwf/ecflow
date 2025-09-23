@@ -63,8 +63,8 @@ void Alias::begin() {
     Submittable::begin();
 }
 
-void Alias::requeue(Requeue_args& args) {
-    Submittable::requeue(args);
+void Alias::requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) {
+    Submittable::requeue(args, authorisation);
 }
 
 const std::string& Alias::debugType() const {

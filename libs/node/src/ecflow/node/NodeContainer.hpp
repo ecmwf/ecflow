@@ -35,7 +35,7 @@ public:
     void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
     void reset() override;
     void begin() override;
-    void requeue(Requeue_args&) override;
+    void requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) override;
     void requeue_time_attrs() override;
     void handle_migration(const ecf::Calendar&) override;
     void reset_late_event_meters() override;

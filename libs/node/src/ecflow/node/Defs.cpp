@@ -619,6 +619,10 @@ void Defs::reset_begin() {
 }
 
 void Defs::requeue() {
+    requeue([](Node*) { return true; });
+}
+
+void Defs::requeue(std::function<bool(Node*)> authorization) {
     bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
     flag_.reset();
     if (edit_history_set) {
@@ -628,7 +632,7 @@ void Defs::requeue() {
     Node::Requeue_args args;
     size_t theSuiteVecSize = suiteVec_.size();
     for (size_t s = 0; s < theSuiteVecSize; s++) {
-        suiteVec_[s]->requeue(args);
+        suiteVec_[s]->requeue(args, authorization);
     }
 
     set_most_significant_state();

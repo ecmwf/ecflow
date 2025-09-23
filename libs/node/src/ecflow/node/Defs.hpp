@@ -185,6 +185,7 @@ public:
 
     /// Will requeue all suites. Current used in test only
     void requeue();
+    void requeue(std::function<bool(Node*)> authorisation);
 
     /// returns true if defs has cron,time,day,date or today time dependencies
     bool hasTimeDependencies() const;
