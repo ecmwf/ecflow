@@ -39,7 +39,8 @@ public:
 
     void begin() override;
     bool resolveDependencies(JobsParam&) override; // overriden to speicy family for job profiler
-    void requeue(Requeue_args&) override;
+    using Node::requeue;
+    void requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) override;
     void accept(ecf::NodeTreeVisitor&) override;
     void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
     void update_generated_variables() const override;

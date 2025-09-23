@@ -344,10 +344,19 @@ void Node::begin() {
 }
 
 void Node::requeue(Requeue_args& args) {
+    requeue(args, [](Node*) { return true; });
+}
+
+void Node::requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) {
 #ifdef DEBUG_REQUEUE
     LOG(Log::DBG, "      Node::requeue() " << absNodePath() << " resetRepeats = " << args.resetRepeats_);
 #endif
     // Note: we don't reset verify attributes as they record state stat's
+
+    if (!authorisation(this)) {
+        // User not authorised to requeue this node
+        return;
+    }
 
     if (!mirrors_.empty()) {
         // In case mirror attributes are available, the node state becomes UNKNOWN

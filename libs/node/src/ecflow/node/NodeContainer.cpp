@@ -128,11 +128,11 @@ void NodeContainer::handle_migration(const ecf::Calendar& c) {
     }
 }
 
-void NodeContainer::requeue(Requeue_args& args) {
+void NodeContainer::requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) {
     //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
 
     restore_on_begin_or_requeue();
-    Node::requeue(args);
+    Node::requeue(args, authorisation);
 
     // For negative numbers, do nothing, i.e. do not clear
     if (args.clear_suspended_in_child_nodes_ >= 0) {
@@ -153,7 +153,7 @@ void NodeContainer::requeue(Requeue_args& args) {
                              log_state_changes_descendents);
 
     for (const auto& n : nodes_) {
-        n->requeue(largs);
+        n->requeue(largs, authorisation);
     }
 
     handle_defstatus_propagation();

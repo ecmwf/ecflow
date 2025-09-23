@@ -196,7 +196,8 @@ public:
         const bool reset_relative_duration_{true};
         const bool log_state_changes_{true};
     };
-    virtual void requeue(Requeue_args&);
+    void requeue(Requeue_args& args);
+    virtual void requeue(Requeue_args& args, std::function<bool(Node*)> authorisation);
 
     // force queued allows a job to re-run preserving job output.
     // However, other nodes may reference this node's events/meters/late in trigger expression,
