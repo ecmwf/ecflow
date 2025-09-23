@@ -51,7 +51,8 @@ public:
     void reset() override;
     void handle_migration(const ecf::Calendar&) override;
     void begin() override;
-    void requeue(Requeue_args& args) override;
+    using Node::requeue;
+    void requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) override;
     bool begun() const { return begun_; }
     void reset_begin();
     void update_generated_variables() const override;

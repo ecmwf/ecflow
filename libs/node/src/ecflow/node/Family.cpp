@@ -84,8 +84,8 @@ bool Family::resolveDependencies(JobsParam& jobsParam) {
     return NodeContainer::resolveDependencies(jobsParam);
 }
 
-void Family::requeue(Requeue_args& args) {
-    NodeContainer::requeue(args);
+void Family::requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) {
+    NodeContainer::requeue(args, authorisation);
     update_generated_variables();
 }
 

@@ -319,14 +319,14 @@ void Task::begin() {
 #endif
 }
 
-void Task::requeue(Requeue_args& args) {
+void Task::requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) {
     if (aliases_.empty()) {
         if (alias_no_ != 0) {
             reset_alias_number();
         }
     }
 
-    Submittable::requeue(args);
+    Submittable::requeue(args, authorisation);
 
 #ifdef DEBUG_STATE_CHANGE_NO
     std::cout << "Task::requeue\n";

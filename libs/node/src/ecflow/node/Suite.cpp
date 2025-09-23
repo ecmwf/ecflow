@@ -145,7 +145,7 @@ void Suite::begin() {
     }
 }
 
-void Suite::requeue(Requeue_args& args) {
+void Suite::requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) {
     if (false == begun_) {
         std::stringstream ss;
         ss << "Suite::requeue: The suite " << name() << " must be 'begun' first\n";
@@ -163,7 +163,7 @@ void Suite::requeue(Requeue_args& args) {
 
     requeue_calendar();
 
-    NodeContainer::requeue(args);
+    NodeContainer::requeue(args, authorisation);
 
     update_generated_variables();
 }
