@@ -139,7 +139,19 @@ endif ()
 # Support for std::filesystem
 # =========================================================================================
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0")
+if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0" )
   # GCC 8.x needs explicit stdc++fs linking
+  link_libraries(stdc++fs)
+endif()
+if( CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "2026.0")
+  # Intel compilers (available on Atos HPC) need explicit stdc++fs linking
+  link_libraries(stdc++fs)
+endif()
+if( CMAKE_CXX_COMPILER_ID STREQUAL "NVHPC" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL "25.0")
+  # NVidia compilers (available on Atos HPC) need explicit stdc++fs linking
+  link_libraries(stdc++fs)
+endif()
+if( NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "15.0")
+  # ARM-based Clang (available on Atos HPC) needs explicit stdc++fs linking
   link_libraries(stdc++fs)
 endif()
