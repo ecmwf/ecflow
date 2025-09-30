@@ -932,8 +932,8 @@ bool TimeSeries::getTime(const std::string& time, int& hour, int& min, bool chec
         throw std::runtime_error("TimeSeries::getTime: Invalid minute :" + theMin);
     }
 
-    hour = Extract::theInt(theHour, "TimeSeries::getTime: hour must be a integer : " + theHour);
-    min  = Extract::theInt(theMin, "TimeSeries::getTime: minute must be integer : " + theMin);
+    hour = Extract::value<int>(theHour, "TimeSeries::getTime: hour must be a integer : " + theHour);
+    min  = Extract::value<int>(theMin, "TimeSeries::getTime: minute must be integer : " + theMin);
 
     if (check_time) {
         testTime(hour, min);

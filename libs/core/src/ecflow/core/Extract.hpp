@@ -46,14 +46,6 @@ public:
     static bool split_get_second(const std::string& str, std::string& ret, char separator = ':');
 
     ///
-    /// Extract an integer from the given token
-    ///
-    /// @returns the extracted integer
-    /// @throws std::runtime_error if extractions fails, with the provided error message included in exception message
-    ///
-    static int theInt(const std::string& token, const std::string& errorMsg);
-
-    ///
     /// Extract a value of the given type from the provided token
     ///
     /// @tparam TO the type of the value to extract
@@ -115,7 +107,15 @@ public:
     /// @returns the extracted integer, if extraction succeeded; default value if selected token starts with '#'
     /// @throws std::runtime_error if extractions fails, with the provided error message included in exception message
     ///
-    static int optionalInt(const std::vector<std::string>& tokens, int pos, int defValue, const std::string& errorMsg);
+    ///
+    template <typename TO>
+    static int
+    optional_value(const std::vector<std::string>& tokens, size_t pos, int defaultValue, const std::string& errorMsg) {
+        if (pos < tokens.size() && tokens[pos][0] != '#') {
+            return value<TO>(tokens[pos], errorMsg);
+        }
+        return defaultValue;
+    }
 };
 
 #endif /* ecflow_core_Extract_HPP */

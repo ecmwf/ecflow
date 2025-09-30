@@ -328,7 +328,7 @@ void DateAttr::getDate(const std::string& date, int& day, int& month, int& year)
         day = 0;
     }
     else {
-        day = Extract::theInt(theDay, "DateAttr::getDate: Invalid day :" + date);
+        day = Extract::value<int>(theDay, "DateAttr::getDate: Invalid day :" + date);
         if (day < 1 || day > 31) {
             throw std::runtime_error("DateAttr::getDate: Invalid clock date: " + date);
         }
@@ -338,7 +338,7 @@ void DateAttr::getDate(const std::string& date, int& day, int& month, int& year)
         month = 0;
     }
     else {
-        month = Extract::theInt(theMonth, "DateAttr::getDate: Invalid month :" + date);
+        month = Extract::value<int>(theMonth, "DateAttr::getDate: Invalid month :" + date);
         if (month < 1 || month > 12) {
             throw std::runtime_error("DateAttr::getDate Invalid clock date: " + date);
         }
@@ -348,7 +348,7 @@ void DateAttr::getDate(const std::string& date, int& day, int& month, int& year)
         year = 0;
     }
     else {
-        year = Extract::theInt(theYear, "DateAttr::getDate: Invalid year :" + date);
+        year = Extract::value<int>(theYear, "DateAttr::getDate: Invalid year :" + date);
     }
 
     if (day == -1 || month == -1 || year == -1) {

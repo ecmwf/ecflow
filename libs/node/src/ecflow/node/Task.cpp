@@ -117,7 +117,7 @@ void Task::read_state(const std::string& line, const std::vector<std::string>& l
                 if (!Extract::split_get_second(lineTokens[i], token)) {
                     THROW_RUNTIME("Task::read_state could not read alias_no for task " + name());
                 }
-                alias_no_ = Extract::theInt(token, "Task::read_state: invalid alias_no specified : " + line);
+                alias_no_ = Extract::value<int>(token, "Task::read_state: invalid alias_no specified : " + line);
                 break;
             }
         }

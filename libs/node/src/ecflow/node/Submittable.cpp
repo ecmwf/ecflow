@@ -242,7 +242,7 @@ void Submittable::read_state(const std::string& line, const std::vector<std::str
             if (!Extract::split_get_second(line_token_i, try_number)) {
                 throw std::runtime_error("Submittable::read_state failed for try number : " + name());
             }
-            tryNo_ = Extract::theInt(try_number, "Submittable::read_state failed for try number");
+            tryNo_ = Extract::value<int>(try_number, "Submittable::read_state failed for try number");
         }
     }
 
