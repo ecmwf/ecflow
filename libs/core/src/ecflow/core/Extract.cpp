@@ -13,15 +13,6 @@
 #include <stdexcept>
 
 #include "ecflow/core/Chrono.hpp"
-#include "ecflow/core/Converter.hpp"
-
-// #define DEBUG_PARSER 1
-
-template <class T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
-    std::copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, ","));
-    return os;
-}
 
 bool Extract::pathAndName(const std::string& token, std::string& path, std::string& name) {
     if (token.empty()) {
@@ -56,18 +47,6 @@ bool Extract::split_get_second(const std::string& str, std::string& ret, char se
     return true;
 }
 
-/// extract integer or throw a std::runtime exception on failure
-int Extract::theInt(const std::string& token, const std::string& errorMsg) {
-    int the_int = -1;
-    try {
-        the_int = ecf::convert_to<int>(token);
-    }
-    catch (const ecf::bad_conversion&) {
-        throw std::runtime_error(errorMsg);
-    }
-    return the_int;
-}
-
 /// extract YMD, integer of the form yyyymmdd
 int Extract::ymd(const std::string& ymdToken, std::string& errorMsg) {
     if (ymdToken.size() != 8) {
@@ -84,17 +63,5 @@ int Extract::ymd(const std::string& ymdToken, std::string& errorMsg) {
         throw std::runtime_error(errorMsg + " YMD is not a valid date");
     }
 
-    return theInt(ymdToken, errorMsg);
-}
-
-int Extract::optionalInt(const std::vector<std::string>& tokens,
-                         int pos,
-                         int defaultValue,
-                         const std::string& errorMsg) {
-    int the_int = defaultValue;
-    if (static_cast<int>(tokens.size()) >= pos + 1 && tokens[pos][0] != '#') {
-
-        the_int = theInt(tokens[pos], errorMsg);
-    }
-    return the_int;
+    return value<int>(ymdToken, errorMsg);
 }
