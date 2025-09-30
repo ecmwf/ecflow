@@ -30,6 +30,9 @@
 // By choosing RUNNING, it allows the Defs related test, to run without explicitly setting the state
 class ServerState {
 public:
+    using state_change_no_t         = uint64_t;
+    using variable_state_change_no_t = uint64_t;
+
     ServerState();
     explicit ServerState(const std::string& port); // used in test to init server variables
     ServerState(const ServerState& other)            = default;
@@ -99,8 +102,8 @@ public:
     std::pair<std::string, std::string> hostPort() const { return hostPort_; }
 
     /// Currently only SState::State server_state_ recorded
-    unsigned int state_change_no() const { return state_change_no_; }
-    unsigned int variable_state_change_no() const { return variable_state_change_no_; }
+    state_change_no_t state_change_no() const { return state_change_no_; }
+    variable_state_change_no_t variable_state_change_no() const { return variable_state_change_no_; }
 
     /// determines why the node is not running.
     bool why(std::vector<std::string>& theReasonWhy) const; // return true if why found
@@ -112,9 +115,9 @@ private:
     void setup_default_env(const std::string& port);
 
 private:
-    int jobSubmissionInterval_{60};            // NOT persisted, since set in the server
-    unsigned int state_change_no_{0};          // *not* persisted, only used on server side
-    unsigned int variable_state_change_no_{0}; // *not* persisted, only used on server side
+    int jobSubmissionInterval_{60};                          // NOT persisted, since set in the server
+    state_change_no_t state_change_no_{0};                   // *not* persisted, only used on server side
+    variable_state_change_no_t variable_state_change_no_{0}; // *not* persisted, only used on server side
 
     SState::State server_state_;
     std::vector<Variable> server_variables_;

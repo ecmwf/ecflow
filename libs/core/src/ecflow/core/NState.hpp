@@ -11,6 +11,7 @@
 #ifndef ecflow_core_NState_HPP
 #define ecflow_core_NState_HPP
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -27,6 +28,8 @@ class access;
 //
 class NState {
 public:
+    using state_change_no_t = uint64_t;
+
     enum State { UNKNOWN = 0, COMPLETE = 1, QUEUED = 2, ABORTED = 3, SUBMITTED = 4, ACTIVE = 5 };
 
     explicit NState(State s) : st_(s), state_change_no_(0) {}
@@ -37,7 +40,7 @@ public:
     void setState(State);
 
     // The state_change_no is never reset. Must be incremented if it can affect equality
-    unsigned int state_change_no() const { return state_change_no_; }
+    state_change_no_t state_change_no() const { return state_change_no_; }
 
     bool operator==(const NState& rhs) const { return st_ == rhs.st_; }
     bool operator!=(const NState& rhs) const { return st_ != rhs.st_; }
@@ -67,7 +70,7 @@ public:
 
 private:
     State st_;
-    unsigned int state_change_no_{0}; // *not* persisted, only used on server side
+    state_change_no_t state_change_no_{0}; // *not* persisted, only used on server side
 
     // *IMPORTANT* no version for a simple class
     friend class cereal::access;

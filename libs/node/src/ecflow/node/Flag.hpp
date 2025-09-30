@@ -43,6 +43,8 @@ namespace ecf {
 
 class Flag {
 public:
+    using state_change_no_t = uint64_t;
+
     using underlying_type_t = int;
     static_assert(sizeof(underlying_type_t) >= 4, "Flag's underlying type must have at least 4 bytes");
 
@@ -153,8 +155,8 @@ public:
     static const char* enum_to_char_star(Flag::Type flag);
 
     /// Used to determine change in state relative to client
-    void set_state_change_no(unsigned int n) { state_change_no_ = n; }
-    unsigned int state_change_no() const { return state_change_no_; }
+    void set_state_change_no(state_change_no_t n) { state_change_no_ = n; }
+    state_change_no_t state_change_no() const { return state_change_no_; }
 
     /// returns the list of all flag types
     static std::vector<Flag::Type> list();
@@ -168,7 +170,7 @@ public:
 
 private:
     underlying_type_t flag_{0};
-    unsigned int state_change_no_{0}; // *not* persisted, only used on server side
+    state_change_no_t state_change_no_{0}; // *not* persisted, only used on server side
 
     friend class cereal::access;
     template <class Archive>

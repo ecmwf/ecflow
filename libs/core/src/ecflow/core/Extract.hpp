@@ -14,6 +14,9 @@
 #include <string>
 #include <vector>
 
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Result.hpp"
+
 class Extract {
 public:
     // Disable default construction
@@ -49,6 +52,41 @@ public:
     /// @throws std::runtime_error if extractions fails, with the provided error message included in exception message
     ///
     static int theInt(const std::string& token, const std::string& errorMsg);
+
+    ///
+    /// Extract a value of the given type from the provided token
+    ///
+    /// @tparam TO the type of the value to extract
+    /// @param token the input token
+    /// @return a Result object, containing either the extracted value, or an error message
+    ///
+    template <typename TO, typename = std::enable_if_t<std::is_arithmetic_v<TO>>>
+    static ecf::Result<TO> value(const std::string& token) {
+        try {
+            TO v = ecf::convert_to<TO>(token);
+            return ecf::Result<TO>::success(v);
+        }
+        catch (const ecf::bad_conversion&) {
+            return ecf::Result<TO>::failure("Unable to convert '" + token + "' as " + typeid(TO).name() + "");
+        }
+    }
+
+    ///
+    /// Extract a value of the given type from the provided token
+    ///
+    /// @tparam TO the type of the value to extract
+    /// @param token the input token
+    /// @param error the error message to the included in the thrown exception
+    /// @return the extracted value, or throws std::runtime_error exception with the specified error message
+    ///
+    template <typename TO>
+    static TO value(const std::string& token, const std::string& error) {
+        if (auto result = Extract::value<TO>(token); result.ok()) {
+            return result.value();
+        }
+
+        throw std::runtime_error(error);
+    }
 
     ///
     /// Extract YMD integer, of the form yyyymmdd, from the given token
