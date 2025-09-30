@@ -136,7 +136,8 @@ if [[ $THERE == OK ]]; then
   # which netstat && res="$(netstat -lnptu 2>/dev/null | grep ecflow | grep $ECF_PORT)"
   echo "$res $(${ECFLOW_BINDIR}/ecflow_client --stats)"
   if [ "$res" == "" ] ; then
-    mail $USER -s "server is already started - server hijack?" <<EOF
+    if command -v mail > /dev/null 2>&1; then
+      mail $USER -s "server is already started - server hijack?" <<EOF
 Hello.
 
 there was an attempt to start the ecFlow server while port is already in use
@@ -144,6 +145,7 @@ by another user, see the ecflow stats output below.
 
 $(${ECFLOW_BINDIR}/ecflow_client --stats)
 EOF
+    fi
     exit 1
   fi
   exit 0 || :
