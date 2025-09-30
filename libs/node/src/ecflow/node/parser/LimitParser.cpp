@@ -30,7 +30,7 @@ bool LimitParser::doParse(const std::string& line, std::vector<std::string>& lin
         throw std::runtime_error("LimitParser::doParse: Could not add limit as node stack is empty at line: " + line);
     }
 
-    int limitValue = Extract::theInt(lineTokens[2], "LimitParser::doParse: Invalid limit value: " + line);
+    int limitValue = Extract::value<int>(lineTokens[2], "LimitParser::doParse: Invalid limit value: " + line);
 
     Node* node = nodeStack_top();
 
@@ -43,7 +43,7 @@ bool LimitParser::doParse(const std::string& line, std::vector<std::string>& lin
         for (size_t i = 3; i < line_tokens_size; i++) {
             if (comment_fnd) {
                 if (!value_processed) {
-                    value           = Extract::theInt(lineTokens[i],
+                    value           = Extract::value<int>(lineTokens[i],
                                             "LimitParser::doParse: Could not extract limit value: " + lineTokens[i]);
                     value_processed = true;
                 }

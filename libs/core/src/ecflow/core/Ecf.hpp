@@ -38,7 +38,7 @@
 
 class Ecf {
 public:
-    using counter_t        = unsigned int;
+    using counter_t        = uint64_t;
     using atomic_counter_t = std::atomic<counter_t>;
 
     // Disable default construction

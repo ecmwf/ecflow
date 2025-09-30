@@ -56,7 +56,7 @@ bool InlimitParser::doParse(const std::string& line, std::vector<std::string>& l
     }
 
     token_pos++;
-    int tokens = Extract::optionalInt(lineTokens, token_pos, 1, "Invalid in limit : " + line);
+    int tokens = Extract::optional_value<int>(lineTokens, token_pos, 1, "Invalid in limit : " + line);
 
     bool check = (rootParser()->get_file_type() != PrintStyle::NET);
 

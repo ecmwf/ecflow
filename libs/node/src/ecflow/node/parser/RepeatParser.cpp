@@ -42,7 +42,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         string name  = lineTokens[2];
         int startYMD = Extract::ymd(lineTokens[3], errorMsg);
         int endYMD   = Extract::ymd(lineTokens[4], errorMsg);
-        int delta    = Extract::optionalInt(lineTokens, 5, 1, errorMsg);
+        int delta    = Extract::optional_value<int>(lineTokens, 5, 1, errorMsg);
         RepeatDate rep(name, startYMD, endYMD, delta);
         int value = 0;
         if (get_value(lineTokens, value)) {
@@ -150,9 +150,9 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         }
 
         string name = lineTokens[2];
-        int start   = Extract::theInt(lineTokens[3], errorMsg);
-        int end     = Extract::theInt(lineTokens[4], errorMsg);
-        int step    = Extract::optionalInt(lineTokens, 5, 1, errorMsg);
+        auto start  = Extract::value<int>(lineTokens[3], errorMsg);
+        auto end    = Extract::value<int>(lineTokens[4], errorMsg);
+        auto step   = Extract::optional_value<int>(lineTokens, 5, 1, errorMsg);
         RepeatInteger rep(name, start, end, step);
         int value = 0;
         if (get_value(lineTokens, value)) {
@@ -165,7 +165,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         // repeat day step [ yyyymmdd ]  # the step can be positive or negative
         // *** See RepeatAttr.h ***
         // *** We will not support end date until there is a clear requirement for this
-        int step = Extract::theInt(lineTokens[2], "Invalid repeat day:");
+        auto step = Extract::value<int>(lineTokens[2], "Invalid repeat day:");
 
         // report end date as a parser error
         if (line_token_size >= 4 && lineTokens[3][0] != '#') {
@@ -254,7 +254,8 @@ bool RepeatParser::get_value(const std::vector<std::string>& lineTokens, int& va
         for (size_t i = lineTokens.size() - 1; i > 3; i--) {
             if (lineTokens[i] == "#") {
                 // token after comment is the value
-                value = Extract::theInt(token_after_comment, "RepeatParser::doParse, could not extract repeat value");
+                value =
+                    Extract::value<int>(token_after_comment, "RepeatParser::doParse, could not extract repeat value");
                 return true;
             }
             else {

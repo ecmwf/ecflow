@@ -48,8 +48,8 @@ bool VerifyParser::doParse(const std::string& line, std::vector<std::string>& li
             throw std::runtime_error("VerifyParser::doParse: Invalid state :" + line);
         }
 
-        NState::State theState  = NState::toState(state);
-        int theExpectedStateCnt = Extract::theInt(expected, "Invalid verify");
+        auto theState            = NState::toState(state);
+        auto theExpectedStateCnt = Extract::value<int>(expected, "Invalid verify");
 
         // STATE
         int actual = 0;

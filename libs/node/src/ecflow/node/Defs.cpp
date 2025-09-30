@@ -739,14 +739,16 @@ void Defs::read_state(const std::string& line, const std::vector<std::string>& l
             if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: Invalid state_change specified : " + line);
             }
-            int sc = Extract::theInt(token, "Defs::read_state: invalid state_change specified : " + line);
+            auto sc = Extract::value<Defs::state_change_no_t>(
+                token, "Defs::read_state: invalid state_change specified : " + line);
             set_state_change_no(sc);
         }
         else if (line_token_i.find("modify_change:") != std::string::npos) {
             if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: Invalid modify_change specified : " + line);
             }
-            int mc = Extract::theInt(token, "Defs::read_state: invalid state_change specified : " + line);
+            auto mc = Extract::value<Defs::modify_change_no_t>(
+                token, "Defs::read_state: invalid state_change specified : " + line);
             set_modify_change_no(mc);
         }
         else if (line_token_i.find("server_state:") != std::string::npos) {
@@ -762,7 +764,8 @@ void Defs::read_state(const std::string& line, const std::vector<std::string>& l
             if (!Extract::split_get_second(line_token_i, token)) {
                 throw std::runtime_error("Defs::read_state: Invalid cal_count specified : " + line);
             }
-            updateCalendarCount_ = Extract::theInt(token, "Defs::read_state: invalid cal_count specified : " + line);
+            updateCalendarCount_ = Extract::value<Defs::calendar_count_t>(
+                token, "Defs::read_state: invalid cal_count specified : " + line);
         }
     }
 }
@@ -1763,12 +1766,12 @@ unsigned int Defs::defs_only_max_state_change_no() const {
     // ************************************************************************************************
     // make sure this is in sync with collate_defs_changes_only()
     // ************************************************************************************************
-    unsigned int max_change_no = 0;
-    max_change_no              = std::max(max_change_no, state_.state_change_no());
-    max_change_no              = std::max(max_change_no, order_state_change_no_);
-    max_change_no              = std::max(max_change_no, flag_.state_change_no());
-    max_change_no              = std::max(max_change_no, server_.state_change_no());
-    max_change_no              = std::max(max_change_no, server_.variable_state_change_no());
+    uint64_t max_change_no = 0;
+    max_change_no          = std::max(max_change_no, state_.state_change_no());
+    max_change_no          = std::max(max_change_no, order_state_change_no_);
+    max_change_no          = std::max(max_change_no, flag_.state_change_no());
+    max_change_no          = std::max(max_change_no, server_.state_change_no());
+    max_change_no          = std::max(max_change_no, server_.variable_state_change_no());
     return max_change_no;
 }
 

@@ -12,7 +12,6 @@
 
 #include <stdexcept>
 
-#include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Serialization.hpp"
@@ -231,7 +230,7 @@ void QueueAttr::parse(QueueAttr& queAttr,
         for (size_t i = 3; i < line_tokens_size; i++) {
             if (lineTokens[i] == "#" && i + 1 < line_tokens_size) {
                 i++;
-                index = Extract::theInt(lineTokens[i], "QueueAttr::parse, could not extract index");
+                index = Extract::value<int>(lineTokens[i], "QueueAttr::parse, could not extract index");
                 i++;
                 for (; i < line_tokens_size; i++) {
                     NState::State state = NState::toState(lineTokens[i]);
