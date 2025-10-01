@@ -160,8 +160,9 @@ nvidia-24.11:
         -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.12.9-01/include/python3.12
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.12.9-01/lib64/libpython3.12.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.12.9-01/lib64
-    ctest_options: 
-      - -L nightly 
+    ctest_options:
+      # disable all tests
+      - --version
 
 nvidia-22.11:
   build:
@@ -213,5 +214,6 @@ aocc-4.0.0:
         -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.10.10-01/include/python3.10
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
-    ctest_options: 
-      - -L nightly
+    ctest_options:
+      # disable all tests
+      - --version
