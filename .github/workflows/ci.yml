@@ -40,4 +40,5 @@ jobs:
       skip_matrix_jobs: |
         intel-2021.4.0
         nvidia-22.11
+        aocc-4.0.0
     secrets: inherit
