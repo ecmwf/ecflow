@@ -80,6 +80,14 @@ gnu-8.5.0:
       - >-
         -DCMAKE_VERBOSE_MAKEFILE=ON
         -DENABLE_ALL_TESTS=ON
+        -DBoost_ROOT=/usr/local/apps/boost/1.84.0/GNU/8.5 
+        -DBoost_INCLUDE_DIR=/usr/local/apps/boost/1.84.0/GNU/8.5/include 
+        -DBoost_PYTHON310_LIBRARY_RELEASE=/usr/local/apps/boost/1.84.0/GNU/8.5/lib/libboost_python311.so 
+        -DPython3_ROOT_DIR=/usr/local/apps/python3/3.11.8-01
+        -DPython3_EXECUTABLE=/usr/local/apps/python3/3.11.8-01/bin/python3 
+        -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.11.8-01/include/python3.11
+        -DPython3_LIBRARIES=/usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so 
+        -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.11.8-01/lib64
     ctest_options:
       - -L nightly
 
