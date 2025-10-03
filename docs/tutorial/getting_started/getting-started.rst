@@ -9,8 +9,7 @@ Getting Started
 
    defining-a-new-suite
    defining-the-first-task
-   checking-job-creation
-   checking-the-job
+   validating-jobs
    understanding-the-client
    load-the-file
    starting-the-suite

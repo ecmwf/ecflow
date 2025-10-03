@@ -1,13 +1,19 @@
-import os
+#!/usr/bin/env python3
+
+import pathlib
 from ecflow import Defs, Suite, Task, Edit
 
-print("Creating suite definition")
-home = os.path.join(os.getenv("HOME"), "course")
-defs = Defs(Suite("test", Edit(ECF_HOME=home), Task("t1")))
-print(defs)
+if __name__ == '__main__':
 
-print("Checking job creation: .ecf -> .job0")
-print(defs.check_job_creation())
+    base = pathlib.Path.home() / "course"
 
-# We can assert, so that we only progress once job creation works
-# assert len(defs.check_job_creation()) == 0, "Job generation failed"
+    print("[1] Creating suite definition")
+
+    defs = Defs(Suite("test", Edit(ECF_HOME=str(base)), Task("t1")))
+    print(defs)
+
+    print("[2] Checking job creation: .ecf -> .job0")
+    print(defs.check_job_creation())
+
+    # Consider asserting, to progress once job creation works
+    # assert len(defs.check_job_creation()) == 0, "Job generation failed"

@@ -84,6 +84,8 @@ This tutorial will give examples for both the plain text and Python methods.
 
       .. code-block:: shell
 
+         cd $HOME/course
+
          # Either run by explicitly invoking python
          python3 ./test.py
 
