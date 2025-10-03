@@ -8,7 +8,6 @@ Getting Started
    :hidden:
 
    defining-a-new-suite
-   understanding-includes
    defining-the-first-task
    checking-job-creation
    checking-the-job
