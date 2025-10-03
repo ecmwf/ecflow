@@ -7,7 +7,7 @@ Getting Started
    :maxdepth: 1
    :hidden:
 
-   defining-a-new-suite 
+   defining-a-new-suite
    understanding-includes
    defining-the-first-task
    checking-job-creation
@@ -19,98 +19,128 @@ Getting Started
    using-ecflowui
    execute_rerun_and_requeue
 
-First ensure that the paths to ecFlow executables are accessible. On the ECMWF HPC this is done using the **module** command. Hence type the following in the command line:
+This section will guide you through the steps needed to get ecFlow up and running on your environment.
+ecFlow is available on several platforms such as Linux and MacOS, including HPC environments as the one available at ECMWF.
 
-.. code-block:: shell
-
-      module load ecflow/new
-      module load python3
-
-Create a directory called course in your home directory and enter that directory:
-
-.. code-block:: shell
-      
-      cd $HOME
-      mkdir course; cd course
-
-If you do not use modules (or outside ECMWF) you will need to add the correct path to your ecFlow binaries, e.g. : 
-
-.. code-block:: shell
-
-      export PATH=path_to_your_ecflow_bin:$PATH
+The instructions below will help you to get started on your individual machine, a shared machine or the ECMWF HPC.
 
 
-In order to use ecFlow we first need to start the :term:`ecflow_server`
+.. tabs::
 
-**Shared Machine**
+    .. tab:: Single Machine
 
-On a shared machine multiple users and ecFlow servers can coexist. To allow this we have a startup script "ecflow_start.sh" that will start an :term:`ecflow_server`.  This will start an :term:`ecflow_server` running on your system with a port number unique to your user ID. By default this script creates ecFlow log and :term:`check point` files in the directory $HOME/ecflow_server. You can change the location of the log and checkpoint files using the -d option, e.g. to output these file in the course directory:
+        An individual machine is a machine that is used by a single user, and typically where the user has full control of the environment.
 
-.. code-block:: shell
-      
-      ecflow_start.sh -d $HOME/course
+        In an individual machine, an :term:`ecflow_server` can be started by simply calling the following command at the unix prompt:
 
-.. note::
-      
-      Please keep a note of the **Host** and **Port** given from your ecf_start.sh output for later. 
-      The host and port number uniquely identify your :term:`ecflow_server`. 
-      When you want to access this server using :term:`ecflow_client`, :ref:`python_api` 
-      or :term:`ecflow_ui` you need to know these information.
+        .. code-block:: shell
 
-      By setting the value of the environment variables ECF_HOST and ECF_PORT you 
-      identify the server you wish to access. Multiple :term:`ecflow_server`\ s can run on the same system.
+              ecflow_server
 
-**Local Machine**
+        This will launch the server in the foreground, which can be stopped by typing Ctrl-C. To enable a verbose output, use the :code:`-d` option, as follows:
 
-We prefer to start the ecFlow server with the ecflow_start.sh script to help prevent unintentional shared usage of the server. You could have used the default ECF_PORT and started a server running on your own local machine using the following command:
+        .. code-block:: shell
 
-.. code-block:: shell
-  
-      ecflow_server
-  
-at the unix prompt. 
+              ecflow_server -d
 
-This will start an :term:`ecflow_server` running on your system with a default host name of "localhost" and port number of 3141. If another program on your machine is using this same port number, then you will get an "Address in use" error. To start the server on a specific port number you can use:
+        This command will start an :term:`ecflow_server` running on your system with a default host name of :code:`localhost` and port number :code:`3141`.
 
-.. code-block:: shell
-   
-      ecflow_server --port=3500
-      
-or
+        .. warning::
 
-.. code-block:: shell
-   
-      export ECF_PORT=3500; ecflow_server
+              If another program on the machine is already using the same port number, then an "Address in use" error will be reported and
+              the server will not start.
 
-:term:`ecflow_server` log files and :term:`check point` files are created in the current directory by default, and have a prefix ``<machine_name>.<port_number>``. As this allows multiple servers to run on the same machine. If you had previously run the same :term:`ecflow_server` in the past it will also attempt to recover the :term:`suite definition` from the :term:`check point` file. 
- 
+        To start the server on a specific port number you can either specify the :code:`--port` option or define the :code:`ECF_PORT` environment
+        variable, as follows:
+
+        .. code-block:: shell
+
+              # using --port option
+              ecflow_server --port 3500
+
+              # using ECF_PORT environment variable
+              export ECF_PORT=3500; ecflow_server
+
+
+        While the above is the simplest way to start ecflow_server, the preferred way to start an :term:`ecflow_server` is to use the script
+        :code:`ecflow_start.sh`, as this script prevents unintentional shared usage of the server by automatically selecting a port number
+        unique to your user ID.
+
+    .. tab:: Shared Machine
+
+        A machine can be shared by multiple users, and multiple ecFlow servers can be executed in parallel.
+
+        To launch an :term:`ecflow_server` on a shared machine, consider using the :code:`ecflow_start.sh` startup script as it will automatically
+        run on a port number unique to the user ID.
+
+        By default, this script defines the :term:`ecflow_server` working directory as :code:`$HOME/ecflow_server`, where the log and
+        :term:`check point` files are stored. The  :term:`ecflow_server` working directory can be customised using the `-d` option, as follows:
+
+        .. code-block:: shell
+
+              ecflow_start.sh -d /alternative/working/directory/for/ecflow_server
+
+        .. note::
+
+              Please take note of the *host* and *port* reported by :code:`ecf_start.sh`.
+
+              The *host* and *port* number uniquely identify the :term:`ecflow_server`, and will be needed to access the
+              server when using :term:`ecflow_client`, :ref:`python_api` or :term:`ecflow_ui`.
+
+    .. tab:: ECMWF HPC
+
+        .. warning::
+
+              The execution of :term:`ecflow_server` directly on the ECMWF HPC environment is **strongly** discouraged.
+
+              Users are instead recommended to request a dedicated ecFlow virtual machine (VM) and run their own Single/Shared machine.
+
+
+        In the ECMWF HPC environment, the ecFlow executables are made available by the :code:`module` command.
+        Run the following commands to load Python 3 and ecFlow:
+
+        .. code-block:: shell
+
+              module load python3
+              module load ecflow/new
+
+        As in a Single or Shared machine, an :term:`ecflow_server` can be started by running the following command at the unix prompt:
+
+        .. code-block:: shell
+
+              ecflow_server
+
+
+Regardless of the selected way to run the :term:`ecflow_server`, the log files and :term:`check point` files are by default created in the working
+directory, and will have the prefix :code:`<machine_name>.<port_number>`. This naming schema avoids overwriting information when multiple servers are,
+for example, run on different ports.
+
+When relaunching an :term:`ecflow_server`, the server will attempt to automatically reload the :term:`suite definition` from the :term:`check point` file.
+
 **What to do**
 
-#. Type 'use ecflow' to setup up the paths.
+#. Ensure that ecFlow is installed and accessible on your system. Run the following command to check that ecFlow is installed:
 
-      .. code-block:: shell
-        :caption: Access ecFlow command line interface and python interface on ECMWF HPC
+    .. code-block:: shell
+        :caption: Check ecFlow installation
             
-        module load ecflow/new
-        module load python3
+        ecflow_server --version
+        ecflow_client --version
 
-#. Create $HOME/course directory
-#. Start the server using:
+#. Setup the Tutorial directory, and start the :term:`ecflow_server` using:
       
       .. code-block:: shell
-        :caption: Start the server, and set ECF_HOME
-      
-        ecflow_start.sh -d $HOME/course
+        :caption: Start the ecflow_server (with verbose output)
 
-#. Make a note of the **ECF_HOST** and **ECF_PORT** variables.  
-#. Make sure the following does not error:
+        mkdir $HOME/course
+        cd $HOME/course
+
+        ecflow_server -d
+        # n.b. the server runs in the foreground, on port 3141 -- use Ctrl-C to stop it
+
+#. Check if the server is running by using the command:
  
       .. code-block:: shell
-        :caption: Check ecFlow python API
+        :caption: Ping the server
       
-        python3 -c "import ecflow"
-
-.. note::
-
-      If in the subsequent sections, you have the need to start a new shell and want access to the server, then ensure ECF_PORT is set (also call **module load ecflow/new**, and **module load python3** in each new shell). Python is needed to access ecFlow Python API only.
-
+        ecflow_client --ping
