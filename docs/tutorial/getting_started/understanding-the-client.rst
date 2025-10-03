@@ -6,60 +6,60 @@
 Understanding the client
 ========================
 
-All communication with the :term:`ecflow_server` is done with :term:`ecflow_client`
+There are multiple ways to communicate with an :term:`ecflow_server`, including using CLI (Command Line Interface)
+:term:`ecflow_client`, programmatically via the :ref:`Python API <python_api>` or using the GUI (Graphical User Interface)
+:term:`ecflow_ui`.
 
-For any communication with the server, the client needs to know the machine where the server is running and the port on the server. There can be multiple servers running on the same machine, each with unique port numbers.
+For any kink of communication with the server, since there can be multiple servers running in parallel on the same machine,
+the client needs to know the machine host name and port to access the server.
 
-This tutorial will show examples of using the client via the shell and in a Python script.
+This section shows how to contact the server using the CLI client and via the Python API.
 
-Client Shell Interface
-----------------------
-For a full list of available commands type:
+To configure the client (CLI and Python API) to contact a server on the given _host_ and _port_ consider the following:
 
-.. code-block:: shell
+* The default _host_:_port_ is :code:`localhost:3141`.
+* These defaults are overridden by setting the environment variables: :code:`ECF_HOST` and :code:`ECF_PORT`.
+* The explicitly defined options :code:`--port` and :code:`--host` will always be used whenever provided.
 
-   ecflow_client --help
-   
-The :term:`ecflow_client` uses the following method of determining the **host** and **port**
+.. tabs::
 
-* Default host and port is **localhost**:**3141**
+    .. tab:: CLI
 
-* These defaults are overridden by ECF_HOST and ECF_PORT environment variables
+        The :term:`ecflow_client` is a command line tool that allows sending commands to the :term:`ecflow_server`,
+        and retrieving information about the current state of the elements that compose the :term:`suite definition`.
 
-* This can be further overridden by using --port and --host options and can be used for any of shell level command shown with --help option. For example to ping a server on the command line we can use:
-  
-  .. code-block:: shell
+        A list of available commands can be found by using the :code:`--help` option:
 
-     ecflow_client --ping --host=machineX --port=4141
-   
+        .. code-block:: shell
 
-Client Python Interface
------------------------
+           ecflow_client --help
 
-The functionality provided by :term:`ecflow_client` is also available via the :ref:`python_api`.  
+        To assess the connectivity to a server, explicitly define the :code:`--port` and :code:`--host` options, and use the :code:`--ping` command:
 
-The python interface uses the same algorithm for determining the host and port, and allows the host and port to be set explicitly. See class :py:class:`ecflow.Client`
+        .. code-block:: shell
+           :caption: Ping an ecFlow server using the Python API
 
-This is shown by the following python example:
-  
-.. literalinclude:: src/understanding-the-client.py
-   :language: python
-   :caption: How to ping ecFlow server in python
-    
+           ecflow_client --host machinex --port 4141  --ping
+
+    .. tab:: Python
+
+        The :ref:`Python API <python_api>` provides the same functionality as the CLI :term:`ecflow_client`,
+        with the added bonus that allows to leverage on Python for automation.
+
+        In terms of connectivity to the server, the :ref:`Python API <python_api>` uses the same logic as the CLI,
+        including the ability to explicitly set :code:`host` and :code:`port` options.
+
+        The class :py:class:`ecflow.Client` provides the interface to the :term:`ecflow_server`, such as assessing the connectivity to a server
+        using the :py:meth:`ecflow.Client.ping` method:
+
+        .. literalinclude:: src/understanding-the-client.py
+           :language: python
+           :caption: Ping an ecFlow server using the Python API
     
 **What to do**
 
-If your :term:`ecflow_server` was started with **ecf_start.sh** and you want to use the shell interface, then set ECF_HOST and ECF_PORT environment variables.
- 
-It should be noted that, if the server was started with :file:`ecf_start.sh` script then the default "localhost:3141" will be incorrect, e.g. in ksh:
+#. List the available commands of :term:`ecflow_client` using the :code:`--help` option.
 
-.. code-block:: shell
+#. Ping the :term:`ecflow_server` using the CLI :term:`ecflow_client`, explicitly defining the :code:`--host` and :code:`--port` options.
 
-   export ECF_HOST=<HOST> # as given when setting up ecFlow server
-   export ECF_PORT=<PORT> # as given when setting up ecFlow server
-
-**netstat** can be used to determine the port number if the server was started on your local machine:
-
-.. code-block:: shell
-  
-   netstat -lnptu
+#. Ping the :term:`ecflow_server` using the CLI :term:`ecflow_client`, exporting environment variables :code:`ECF_HOST` and :code:`ECF_PORT`.
