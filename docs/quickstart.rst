@@ -95,6 +95,8 @@ Start an ecFlow server
         .. code-block:: shell
 
             ecflow_client --ping --host=ecfg-$USER-1
+            ecflow_client --stats
+
        
        If that succeeds, then it would be a good idea to do the following in order to avoid
        adding ``--host`` to each command:
