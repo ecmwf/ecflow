@@ -3,12 +3,13 @@
 
 .. _tutorial-query_state:
 
-Query state
-=============
+Using query command
+===================
 
-In this exercise, we will use one of the command-line features of ecflow. We will use **query** command, to determine the state of a node, event, meter.  An alternative to the query command would be to use the python API.
+The :term:`ecflow_client` command :code:`--query` can be used to determine the current value of several characteristics (e.g. node state, node default state, event, meter, variable, trigger).
+The same capability is provided by the :ref:`python_api`.
 
-The general format is:
+The general format of the :term:`ecflow_client` command :code:`--query` is as follows:
 
 .. code-block:: shell
     :caption: query command
@@ -17,11 +18,11 @@ The general format is:
 
 Where:
 
-* arg1 = [ state | event | meter | label | variable | trigger | limit | limit_max ]
+* arg1 = [ state | event | meter | label | variable | trigger | limit | limit_max | ... ]
 * arg2 = <path> | <path>:name     where name is name of a event, meter,limit or variable
 * arg3 = trigger expression (optional)  | prev | next    # prev,next only used when arg1 is repeat
 
-Here are some examples using the query command:
+Some examples using the query command:
 
 .. code-block:: shell
     
@@ -61,10 +62,10 @@ Here are some examples using the query command:
     # return true if expression evaluates false otherwise
     value=$(ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\") 
 
-Ecf Script
----------------
+Update Task Script
+------------------
 
-We will create a new query task.
+Create a :term:`task script <ecf script>` for a new :term:`task` named :code:`query`, as follows:
 
 .. code-block:: shell
     :caption: $HOME/course/f1/query.ecf
@@ -84,59 +85,63 @@ We will create a new query task.
     
     %include <tail.h>
 
-Text
-------
+Update Suite Definition
+-----------------------
 
-.. code-block:: shell
+Modify the :term:`suite definition` to add a new task :code:`query` to the family :code:`f1` as follows:
 
-    # Definition of the suite test.
-    suite test
-        edit ECF_INCLUDE "$HOME/course"    # replace '$HOME' with the path to your home directory
-        edit ECF_HOME    "$HOME/course"
-        family f1
-            edit SLEEP 20
-            task t1
-                meter progress 1 100 90
-            task t2
-                trigger t1 eq complete
-                event a
-                event b
-            task t3
-                trigger t2:a
-            task t4
-                trigger t2 eq complete
-                complete t2:b
-            task t5
-                trigger t1:progress ge 30
-            task t6
-                trigger t1:progress ge 60
-            task t7
-                trigger t1:progress ge 90
-            task query
-                label query ""
-        endfamily
-    endsuite
+.. tabs::
 
-Python
-------
+    .. tab:: Text
 
-.. literalinclude:: src/query-state.py
-   :language: python
-   :caption: $HOME/course/test.py
+        .. code-block:: shell
+
+            # Definition of the suite test.
+            suite test
+                edit ECF_INCLUDE "{{HOME}}/course" # replace '{{HOME}}' appropriately
+                edit ECF_HOME    "{{HOME}}/course"
+                family f1
+                    edit SLEEP 20
+
+                    [... previously defined tasks omitted ...]
+
+                    task query
+                        label query ""
+                endfamily
+            endsuite
+
+    .. tab:: Python
+
+        .. literalinclude:: src/query-state.py
+           :language: python
+           :caption: $HOME/course/test.py
 
 **What to do**
 
-#. Go back to the previous exercise where we finished adding a meter.
-#. Edit the definition file or python to add the modifications. You should only need to add a task query.
-#. create file :file:`query.ecf` to call :term:`ecflow_client` –query
-#. Replace the :term:`suite`.
+#. Add the new task script :file:`query.ecf`, as shown above.
+#. Modify suite definition to add a new task :code:`query` to the family :code:`f1`, as shown above.
+#. Replace the :term:`suite`, using:
 
-   | Python: ``python3 test.py ; python3 client.py``
-   | Text: ``ecflow_client --suspend=/test ;  ecflow_client --replace=/test test.def``
+   .. tabs::
+
+      .. tab:: Text
+
+         .. code-block:: shell
+
+            ecflow_client --suspend /test
+            ecflow_client --replace /test test.def
+
+      .. tab:: Python
+
+         .. code-block:: shell
+
+            python3 test.py
+            python3 client.py
 
 #. Observe the tasks in :term:`ecflow_ui`
-#. Modify :file:`query.ecf`, to use ecflow_client --query variable, and show this variable in the query label. 
+#. Modify the task script to query variable :code:`SLEEP`, and add this variable to the query label.
 
 .. note::
 
-    Although a variable is accessible in the script by using %VAR%, ecflow_client --query variable might be more useful in an interactive shell or a different server
+    Although a variable can be made accessible in the script by using :code:`%VAR%`, using the query command
+    allows to dynamically access the current value or a value from a different server.

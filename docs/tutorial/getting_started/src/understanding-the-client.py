@@ -1,25 +1,25 @@
-import ecflow
+#!/usr/bin/env python3
 
-try:
-    # When no arguments specified uses ECF_HOST and/or ECF_PORT,
-    # otherwise defaults to localhost:3141
-    ci = ecflow.Client()  # inherit from shell variables
-    ci.ping()
+from ecflow import Client
 
-    # Explicitly set host and port using the same client
-    # For alternative argument list see ecflow.Client.set_host_port()
-    ci.set_host_port(
-        "machineX:4141"
-    )  # actually set the host and port (change to your host and port)
-    ci.ping()
+if __name__ == "__main__":
 
-    # Create a new client, Explicitly setting host and port.
-    # For alternative argument list see ecflow.Client
-    ci = ecflow.Client("oetzi:3444")  # another server
-    ci.ping()
+    try:
+        # The default is to contact localhost:3141, but will
+        # use ECF_HOST and/or ECF_PORT env variables if set.
+        ci = Client()
+        ci.ping()
 
-    # Ping inlined
-    ecflow.Client("polonius:4266").ping()
+        # Explicitly set host and port (n.b. reuses the existing Client)
+        ci.set_host_port("machineX:4141")
+        ci.ping()
 
-except RuntimeError as e:
-    print("ping failed: ", str(e))
+        # Explicitly set host and port when creating the Client
+        ci = Client("oetzi:3444")
+        ci.ping()
+
+        # Ping inlined
+        Client("polonius:4266").ping()
+
+    except RuntimeError as e:
+        print(f"ping failed: {e}", )
