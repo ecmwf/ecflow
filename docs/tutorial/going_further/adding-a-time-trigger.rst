@@ -31,7 +31,7 @@ The following example maps several time dependencies and the corresponding time 
     date 1.*.*    # trigger :DD == 1
     day monday    # trigger :DOW == 1
 
-.. node::
+.. note::
 
     The :code:`:` indicates that the variable is found by searching up the node tree.
 
@@ -60,7 +60,7 @@ Triggers can also use :code:`AND`/:code:`OR` logic, and the full range of operat
 Update Suite Definition
 -----------------------
 
-Update the suite definition file so that :term:`family` :code:`f2` uses several :term:`time triggers`.
+Update the suite definition file so that :term:`family` :code:`f2` uses several time triggers.
 
 .. tabs::
 

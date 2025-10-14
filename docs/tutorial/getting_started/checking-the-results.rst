@@ -1,7 +1,7 @@
 .. _tutorial-checking-the-results:
 
 Inspecting the results
-====================
+======================
 
 The state of a :term:`suite` can be checked using the CLI :term:`ecflow_client` or programmatically via the :ref:`Python API <python_api>`.
 

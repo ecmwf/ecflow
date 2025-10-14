@@ -46,24 +46,26 @@ Using the ecFlow Python API it is possible to execute the :term:`job creation` p
 
             .. literalinclude:: src/checking-job-creation.py
                 :language: python
-                :caption: $HOME/course/test.py
+                :caption: $HOME/course/validate.py
 
-            The check is performed via the call to :py:class:`ecflow.Defs.check_job_creation`.
+            The script above loads the suite definition from the :file:`$HOME/course/test/t1.ecf` file and
+            performs the check via the call to :py:class:`ecflow.Defs.check_job_creation`. An all-in-one script
+            could also create the suite definition programmatically, followed by the job creation check.
 
 **What to do:**
 
-#. Create the :code:`$HOME/course/test.py` script as shown above, and execute it as follows:
+#. Create the :code:`$HOME/course/validate.py` script as shown above, and execute it as follows:
 
     .. code-block:: shell
 
        cd $HOME/course
 
        # Either run by explicitly invoking python
-       python3 ./test.py
+       python3 ./validate.py
 
        # Or make the script executable, and run it directly
-       chmod +x test.py
-       ./test.py
+       chmod +x validate.py
+       ./validate.py
 
 #. Examine the job file :file:`$HOME/course/test/t1.job0`, in particular note the variable substitutions made by the ecFlow server (e.g. :code:`ECF_PORT`, :code:`ECF_HOST`).
 
