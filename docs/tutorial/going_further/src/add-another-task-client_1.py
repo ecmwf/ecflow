@@ -1,11 +1,20 @@
-import ecflow
+#!/usr/bin/env python3
 
-print("Client -> Server: replacing suite '/test' in the server, with a new definition")
-try:
-    ci = ecflow.Client()
-    ci.suspend("/test")  # so that we can resume manually in ecflow_ui
-    ci.replace(
-        "/test", "test.def"
-    )  # replace suite /test with suite of same name in test.def
-except RuntimeError as e:
-    print("Failed:", e)
+import pathlib
+from ecflow import Client
+
+if __name__ == '__main__':
+
+    base = pathlib.Path.home() / "course"
+
+    try:
+        ci = Client()
+
+        print("[1] Suspend the 'test' suite")
+        ci.suspend("/test")
+
+        print("[2] Replace the 'test' suite")
+        ci.replace( "/test", str(base / "test.def"))
+
+    except RuntimeError as e:
+        print("Failed:", e)

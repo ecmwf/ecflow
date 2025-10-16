@@ -5,43 +5,52 @@
    
 Starting the suite
 ==================
- 
-The **ecf_start.sh** script will automatically set up and start your :term:`ecflow_server`. 
 
-If you started an ecFlow manually then your server will start in a :term:`halted` state. In this case you you will have to "restart" your server before you can use it. In a :term:`halted` state the server will not schedule any tasks.
- 
-Text
-----
+A manually launched :term:`ecflow_server` will start in a :term:`halted` state, meaning that no tasks will be scheduled.
+In order to start task scheduling, the server must be *restarted* and the :term:`suite` must be commanded to *begin*.
 
-To check the status of the server, type the following at the unix prompt:
+.. note::
 
-.. code-block:: shell
+    The :code:`ecflow_start.sh` script, referred in :ref:`tutorial-getting-started`, will automatically launch and start
+    the :term:`ecflow_server`, thus skipping the need for explicitly restarting the server.
 
-   ecflow_client --stats
+As before there are multiple ways to restart the :term:`ecflow_server` and begin the :term:`suite`,
+including using the CLI :term:`ecflow_client` or programmatically via the :ref:`Python API <python_api>`.
 
-Examine the output. If the :term:`ecflow_server` is :term:`halted` you would restart with:
+.. tabs::
 
-.. code-block:: shell
+    .. tab:: CLI
 
-   ecflow_client --restart
- 
-Once the :term:`ecflow_server` is :term:`running` you have to start the :term:`suite` by typing:
+        To check the status of the server, use the :code:`--stats` command:
 
-.. code-block:: shell
+        .. code-block:: shell
 
-   ecflow_client --begin=test
+           ecflow_client --stats
 
-Python
-------
+        The output will indicate the server state.
+        If the :term:`ecflow_server` is :term:`halted`, restart it with the :code:`--restart` command:
 
-Restarting and begin'ing the suite can also be done with the :ref:`python_api`. Modify your :file:`client.py` file and then run it.
+        .. code-block:: shell
 
-.. literalinclude:: src/starting-the-suite.py
-   :language: python
-   :caption: $HOME/course/client.py
+           ecflow_client --restart
 
+        With the :term:`ecflow_server` :term:`running`, begin the :term:`suite` with the :code:`--begin` command:
+
+        .. code-block:: shell
+
+           ecflow_client --begin test
+
+    .. tab:: Python
+
+        The following Python script demonstrates how to *restart* the :term:`ecflow_server` and begin the :term:`suite`, using the :ref:`Python API <python_api>`.
+        The script also loads the :term:`suite definition` file, in case it was not loaded previously.
+
+        .. literalinclude:: src/starting-the-suite.py
+           :language: python
+           :caption: $HOME/course/client.py
 
 **What to do**
 
-#. Restart the :term:`ecflow_server`
-#. Begin the :term:`suite`, ``python3 client.py``
+#. Restart the :term:`ecflow_server` using the CLI :term:`ecflow_client`.
+#. Begin the :code:`test` :term:`suite` using the CLI :term:`ecflow_client`.
+#. (Optiona) Use the provided Python script to restart the :term:`ecflow_server` and begin the :term:`suite`

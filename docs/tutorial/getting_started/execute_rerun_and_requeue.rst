@@ -1,31 +1,47 @@
 .. _tutorial-execute_rerun_and_requeue:
 
 Execute, rerun and requeue
-//////////////////////////
+==========================
 
-In :ref:`ecflow_ui` it is important to understand the distinction between
-**execute rerun** and **re-queue** .
+When using the :ref:`ecflow_ui` it is important to understand the distinction between
+**execute**, **rerun** and **re-queue** .
 
-These options are available with the right mouse button over a task.
+These options are available for tasks via the context menu of the the tree view panel:
 
-- **Execute**: This means run the task immediately. (Hence ignores any dependency that holds the task). This option preserves the previous output, from the job. You should see output files **t1.1 t1.2 t1.3** , each time the task is run.                                                               
+- **Execute**
+
+  This means run the task immediately, ignoring any dependency that holds the task from executing.
+  This option preserves previous job outputs, by incrementing and including a counter in the name of the output files
+  each time the task is run (e.g. *task.1, task.2, task.3*).
                                                                        
-- **Rerun**: This places the task, back into the queued state. The task will now honour any dependencies that would hold the job. i.e. time dependencies, limits, triggers, suspend, etc. (You will be introduced to these terms later on in the tutorial). If the task does run, the previous output is preserved.
+- **Rerun**
 
-- **Re-queue**: This resets the task back to the queued state. If the task has a default status, this is applied. The task output  number is reset, such that the next output will be written to **t1.1**. This will **overwrite** any existing output with that extension when the task runs. Any subsequent calls to execute or rerun will now **overwrite** the output files, **t1.2 t1.3** etc.                               
+  This places the task, back into the queued state. The task will now honour any dependencies that would
+  hold the job (e.g. time dependencies, trigger, limits), and when it does run, it will preserve previous outputs.
+
+- **Re-queue**
+
+  This resets the task back to the queued state, including setting a default status if defined.
+  The task output counter is reset, such that the next output will be written to **task.1**.
+  This option will **overwrite** any existing output with that extension when the task runs.
+  Any subsequent calls to execute or rerun will now **overwrite** the output files, **t1.2 t1.3**.
 
 **What to do**
 
-#. Suspend the suite. i.e. select the node 'test', then with the right mouse button select 'suspend' from the menu. 
+#. Suspend the suite, by selecting the suite node :code:`test`, and then selecting the *suspend* option from the context menu.
    
-#. Select task t1, and select execute from the right mouse button menu. Even though the parent is suspended, that task will run. Do this
-   several times. Notice that the output is preserved for each run. **Click on output tab, in the info panel**.
+#. Select task :code:`t1`, and select *Execute* from the context menu.
+   Even though the parent is suspended, that task will run. Do this several times.
+   Notice that the output is preserved for each run -- see list of files on the *Output* tab.
 
-#. Select task t1, and select rerun from the right mouse button menu. The node is placed into the re-queue state. But because we had suspended its parent it will not run. Resume the parent node 'test'. Task t1 will now run. Notice that old output is preserved.
+#. Select task :code:`t1`, and select *Rerun* from the context menu.
+   The node is placed in the queued state, but because we had suspended its parent it will not run.
+   Resume the parent node :code:`test`. Task :code:`t1` will start execution.
+   Notice that previous output is preserved.
 
-#. Select node 'test' and with right mouse button select 'suspend'.
+#. Suspent the suit again.
 
-#. Select task t1, and select re-queue from the right mouse button menu. The node is placed in a queued state. The parent node is suspended and will prevent the task from running. 
-
-#. Resume the parent node. This task t1 will now run. However, it will
-   overwrite the output file, **t1.1**
+#. Select task :code:`t1`, and select *Requeue* from the context menu.
+   The node is placed in the queued state. The parent node is suspended and will prevent the task from running.
+   Resume the parent node :code:`test`. Task :code:`t1` will start execution.
+   Notice that execution overwrites the output file.

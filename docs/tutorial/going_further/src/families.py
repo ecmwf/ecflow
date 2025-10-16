@@ -1,18 +1,25 @@
-import os
-from ecflow import Defs, Suite, Family, Task, Edit
+#!/usr/bin/env python3
 
+import pathlib
+from ecflow import Defs, Suite, Family, Task, Edit
 
 def create_family_f1():
     return Family("f1", Task("t1"), Task("t2"))
 
+if __name__ == '__main__':
 
-print("Creating suite definition")
-home = os.path.join(os.getenv("HOME"), "course")
-defs = Defs(Suite("test", Edit(ECF_INCLUDE=home, ECF_HOME=home), create_family_f1()))
-print(defs)
+    base = pathlib.Path.home() / "course"
 
-print("Checking job creation: .ecf -> .job0")
-print(defs.check_job_creation())
+    print("[1] Creating suite definition")
 
-print("Saving definition to file 'test.def'")
-defs.save_as_defs("test.def")
+    defs = Defs(
+        Suite("test",
+              Edit(ECF_INCLUDE=str(base), ECF_HOME=str(base)),
+              create_family_f1()))
+    print(defs)
+
+    print("[2] Checking job creation: .ecf -> .job0")
+    print(defs.check_job_creation())
+
+    print("[3] Saving definition to file 'test.def'")
+    defs.save_as_defs(str(base / "test.def"))

@@ -39,7 +39,7 @@ Node attribute overview
      -
      -
      - ❎
-     - ❎
+     - 
      -
      -
    * - :term:`complete`

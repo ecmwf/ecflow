@@ -109,11 +109,11 @@ Update meter value
 
     {
         "method": "put",
-        "version: "1",
+        "version": "1",
         "header": {
             "task_rid": "<task-remote-identifier>",
-            "task_password": "<task-password>"},
-            "task_try_no": "<task-try-number>"}
+            "task_password": "<task-password>",
+            "task_try_no": "<task-try-number>"
         },
         "payload": {
             "command": "meter",
@@ -130,11 +130,11 @@ Update label value
 
     {
         "method": "put",
-        "version: "1",
+        "version": "1",
         "header": {
             "task_rid": "<task-remote-identifier>",
-            "task_password": "<task-password>"},
-            "task_try_no": "<task-try-number>"}
+            "task_password": "<task-password>",
+            "task_try_no": "<task-try-number>"
         },
         "payload": {
             "command": "label",
@@ -151,11 +151,11 @@ Set/clear event value
 
     {
         "method": "put",
-        "version: "1",
+        "version": "1",
         "header": {
             "task_rid": "<task-remote-identifier>",
-            "task_password": "<task-password>"},
-            "task_try_no": "<task-try-number>"}
+            "task_password": "<task-password>",
+            "task_try_no": "<task-try-number>"
         },
         "payload": {
             "command": "event",
