@@ -31,7 +31,7 @@ If the :term:`suite definition` was programmatically generated, e.g. by a Python
         .. code-block:: shell
 
             cd $HOME/course
-            ecflow_client --load=test.def
+            ecflow_client --load test.def
 
 
         The :term:`suite definition` will be validated and loaded into the :term:`ecflow_server`. If the validation fails, the suite is not loaded.

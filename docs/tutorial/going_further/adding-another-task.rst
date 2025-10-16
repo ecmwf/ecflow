@@ -1,30 +1,26 @@
 .. index::
    single: Add another task (tutorial)
-   module: os
-   module: ecflow
 
 .. _tutorial-add-task:
 
 Adding another task
 ===================
 
-To add another task to the existing :term:`suite` :code:`test`, implies the following steps:
+To add another task to the existing :term:`suite` :code:`test` perform the following steps:
 
 #. Modify the :term:`suite definition` file to include the new task.
 #. Create a new :term:`ecf script` for the new task.
 #. Reload and begin the modified :term:`suite definition` into the :term:`ecflow_server`.
 
 The following shows the two methods of reloading the modified :term:`suite definition` into
-the :term:`ecflow_server`. The options presented are: manually updating the text definition, and
-loading it via the CLI :term:`ecflow_client`; or, to use the :ref:`Python API <python_api>` to
-programmatically update and load the :term:`suite definition`.
+the :term:`ecflow_server`. The options presented are: 
+
+* manually updating the text definition, and loading it via the CLI :term:`ecflow_client`
+* to use the :ref:`Python API <python_api>` to programmatically update and load the :term:`suite definition`
 
 .. tabs::
 
     .. tab:: Text
-
-        Text
-        ----
 
         It is good practice to suspend a suite before starting to update any part of it.
 
@@ -60,7 +56,7 @@ programmatically update and load the :term:`suite definition`.
            ecflow_client --delete _all_
 
            # Load the modified suite definition
-           ecflow_client --load=test.def
+           ecflow_client --load test.def
 
            # or, equivalently, replace the suite if it already exists
            ecflow_client --replace /test test.def     # replace the whole suite

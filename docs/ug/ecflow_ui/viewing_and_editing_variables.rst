@@ -108,8 +108,9 @@ dialogue allows for the modification of the variable's value:
 .. image:: /_static/ecflow_ui/viewing_and_editing_variables/image6.png
    :width: 4.11875in
    :height: 2.16851in
-|
+
 .. note::
+
     ecFlow allows the definition of variable values with multi-line content.
 
     However, both ecFlowUI and ecFlow CLI client display the content of
