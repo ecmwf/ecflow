@@ -78,7 +78,7 @@ Update the suite definition file so that :term:`family` :code:`f2` uses several 
                 family f2
                     edit SLEEP 20
                     task t1
-                        trigger :ECF_DATE ==20200720 and :TIME >= 1000
+                        trigger :ECF_DATE == 20200720 and :TIME >= 1000
                     task t2
                         trigger :DOW == 4 and :TIME >= 1300
                     task t3

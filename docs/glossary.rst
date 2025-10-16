@@ -801,7 +801,7 @@ Glossary
       The following variables affect the execution of ecflow_client. 
       
       Since the :term:`ecf script` can call ecflow_client(i.e :term:`child command`) then typically
-      some are set in an include header. i.e. :ref:`tutorial-head_h`.
+      some are set in an include header.
       
       .. list-table:: Environment variables common for User and Task commands
          :header-rows: 1
@@ -1177,7 +1177,7 @@ Glossary
              
       The process of job creation includes:
       
-      - Generating a unique password :term:`ECF_PASS`, which is placed in :term:`ecf script` during :term:`pre-processing`. See :ref:`tutorial-head_h`
+      - Generating a unique password :term:`ECF_PASS`, which is placed in :term:`ecf script` during :term:`pre-processing`.
           
       - Locating :term:`ecf script` files , corresponding to the :term:`task` in the :term:`suite definition`, See :term:`ecf file location algorithm`
          

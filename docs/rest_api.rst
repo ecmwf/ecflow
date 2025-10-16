@@ -1684,7 +1684,7 @@ Compiled successfully with following compilers (CMAKE_BUILD_TYPE=Debug):
    -  15.0
 
 Update Interval Drift
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 By default :code:`ecflow_http` will increase the update interval length for
 ecFlow server if the :code:`ecflow_http` server is inactive. This is called drift.
