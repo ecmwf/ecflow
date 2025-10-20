@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #==========================================================================
 ##.TITLE   ECMWF utility for ecFlow
 ##.NAME    ecflow_stop.sh
