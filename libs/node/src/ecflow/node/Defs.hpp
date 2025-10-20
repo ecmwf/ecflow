@@ -48,6 +48,11 @@ class CalendarUpdateParams;
 
 class Defs {
 public:
+    using state_change_no_t       = uint64_t;
+    using modify_change_no_t      = uint64_t;
+    using calendar_count_t        = uint64_t;
+    using order_state_change_no_t = uint64_t;
+
     static defs_ptr create();
     static defs_ptr create(const std::string& port);
     Defs();
@@ -347,9 +352,9 @@ public:
     unsigned int defs_only_max_state_change_no() const;
 
     /// Change functions, used for *transferring* change number, from server to client
-    void set_state_change_no(unsigned int x) { state_change_no_ = x; }
+    void set_state_change_no(state_change_no_t x) { state_change_no_ = x; }
     unsigned int state_change_no() const { return state_change_no_; }
-    void set_modify_change_no(unsigned int x) { modify_change_no_ = x; }
+    void set_modify_change_no(modify_change_no_t x) { modify_change_no_ = x; }
     unsigned int modify_change_no() const { return modify_change_no_; }
 
     ClientSuiteMgr& client_suite_mgr() { return client_suite_mgr_; }
@@ -436,14 +441,14 @@ private:
 private:
     /// Note: restoring from a check point file will reset, defs state and modify numbers
     mutable size_t print_cache_{0}; // NOT persisted
-    unsigned int state_change_no_{
-        0}; // persisted since passed to client, however side effect, is it will be in checkpoint file
-    unsigned int modify_change_no_{
-        0}; // persisted since passed to client, however side effect, is it will be in checkpoint file
-    unsigned int updateCalendarCount_{0};
-    unsigned int order_state_change_no_{0}; // *NOT* persisted
-    unsigned int ecf_prune_node_log_{0};    // *NOT* persisted, only used on the server side
-    NState state_;                          // state & change_no, i,e attribute changed
+    // the following is persisted, since it is passed to client, with the side-effect that it will be in checkpoint file
+    state_change_no_t state_change_no_{0};
+    // the following is persisted, since it is passed to client, with the side-effect that it will be in checkpoint file
+    modify_change_no_t modify_change_no_{0};
+    calendar_count_t updateCalendarCount_{0};
+    order_state_change_no_t order_state_change_no_{0}; // *NOT* persisted
+    unsigned int ecf_prune_node_log_{0};               // *NOT* persisted, only used on the server side
+    NState state_;                                     // state & change_no, i,e attribute changed
     ServerState server_;
     std::vector<suite_ptr> suiteVec_;
     std::unordered_map<std::string, std::vector<std::string>> edit_history_; // path,request

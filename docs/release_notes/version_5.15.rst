@@ -6,6 +6,17 @@ Version 5.15 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.15.1
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2025-10-20
+
+Server
+------
+
+- **Bug Fix** correct handling of :code:`state_change` in checkpoint file :jiraissue:`ECFLOW-2042`
+- **Improvement** allow use of :code:`ecflow_start.sh` script when mail command is not available :jiraissue:`ECFLOW-2040`
+
 Version 5.15.0
 ==============
 

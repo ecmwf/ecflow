@@ -30,14 +30,13 @@ static void extractTheGain(const std::string& theGainToken, ClockAttr& clockAttr
         return;
     }
 
-    long theGain           = 0;
     std::string theGainStr = theGainToken;
     bool positiveGain      = false;
     if (theGainStr[0] == '+') {
         positiveGain = true;
         theGainStr.erase(theGainStr.begin());
     }
-    theGain = Extract::theInt(theGainStr, "Invalid clock gain:" + theGainToken);
+    auto theGain = Extract::value<int>(theGainStr, "Invalid clock gain:" + theGainToken);
     clockAttr.set_gain_in_seconds(theGain, positiveGain);
 }
 
