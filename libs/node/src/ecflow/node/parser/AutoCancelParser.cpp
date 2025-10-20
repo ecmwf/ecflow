@@ -38,8 +38,7 @@ bool AutoCancelParser::doParse(const std::string& line, std::vector<std::string>
         // Must be of the form:
         // autocancel 10        # cancel 10 days after complete
         // autocancel 0         # cancel immediately after complete
-        int days = Extract::theInt(lineTokens[1], "invalid autocancel " + line);
-
+        auto days = Extract::value<int>(lineTokens[1], "invalid autocancel " + line);
         nodeStack_top()->addAutoCancel(AutoCancelAttr(days));
     }
     else {
