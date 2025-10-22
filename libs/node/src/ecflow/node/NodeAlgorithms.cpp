@@ -276,13 +276,13 @@ std::set<const Node*> get_all_ast_nodes(const Defs& defs) {
     // Select all Nodes with ASTs
     std::set<Node*> selected;
     auto visitor = [&selected](const Node& node) {
-        if (node.completeAst()) {
+        if (auto complete = node.completeAst(); complete) {
             AstCollateNodesVisitor astVisitor(selected);
-            node.completeAst()->accept(astVisitor);
+            complete->accept(astVisitor);
         }
-        if (node.triggerAst()) {
+        if (auto trigger = node.triggerAst(); trigger) {
             AstCollateNodesVisitor astVisitor(selected);
-            node.triggerAst()->accept(astVisitor);
+            trigger->accept(astVisitor);
         }
     };
     implementation::select_nodes_from_defs(defs, visitor);
@@ -300,13 +300,13 @@ std::set<const Node*> get_all_ast_nodes(const Node& node) {
     // Select all Nodes with ASTs
     std::set<Node*> selected;
     auto visitor = [&selected](const Node& node) {
-        if (node.completeAst()) {
+        if (auto complete = node.completeAst(); complete) {
             AstCollateNodesVisitor astVisitor(selected);
-            node.completeAst()->accept(astVisitor);
+            complete->accept(astVisitor);
         }
-        if (node.triggerAst()) {
+        if (auto trigger = node.triggerAst(); trigger) {
             AstCollateNodesVisitor astVisitor(selected);
-            node.triggerAst()->accept(astVisitor);
+            trigger->accept(astVisitor);
         }
     };
     implementation::select_nodes_from_node(node, visitor);
