@@ -518,10 +518,15 @@ namespace ecf {
 std::vector<Node*> get_all_nodes(Defs& defs);
 std::vector<const Node*> get_all_nodes(const Defs& defs);
 
+std::vector<node_ptr> get_all_nodes_ptr(Defs& defs);
+std::vector<node_ptr> get_all_nodes_ptr(node_ptr& node);
+
 // Select Tasks
 
 std::vector<Task*> get_all_tasks(Defs& defs);
 std::vector<const Task*> get_all_tasks(const Defs& defs);
+
+std::vector<task_ptr> get_all_tasks_ptr(Defs& defs);
 
 // Select Alias
 

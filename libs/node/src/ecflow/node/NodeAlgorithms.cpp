@@ -215,6 +215,7 @@ std::vector<Alias*> get_all_aliases(Node& node) {
 
     return aliases;
 }
+
 std::vector<const Alias*> get_all_aliases(const Node& node) {
     // Select all Aliases
     std::vector<const Node*> selected;
@@ -357,6 +358,100 @@ std::set<const Node*> get_all_ast_nodes(const Node& node) {
     }
 
     return nodes;
+}
+
+namespace implementation {
+
+template <typename Selector, typename Collector>
+void select_nodes_ptr_from_node(const node_ptr& node, Collector& collector, Selector selector) {
+
+    if (selector(node)) {
+        collector(node);
+    }
+
+    // Handle: (non-const) N&
+    if (auto container = std::dynamic_pointer_cast<NodeContainer>(node); container) {
+        // Process children: Family, Task
+        for (auto& child : container->children()) {
+            select_nodes_ptr_from_node(child, collector, selector);
+        }
+    }
+    else if (auto task = std::dynamic_pointer_cast<Task>(node); task) {
+        // Process children: Alias
+        for (auto& child : task->aliases()) {
+            select_nodes_ptr_from_node(child, collector, selector);
+        }
+    }
+}
+
+template <typename Function, typename Collection>
+void select_nodes_ptr_from_defs(Defs& defs, Collection& selected, Function selector) {
+
+    // Handle: Defs (non-const)
+    for (const auto& s : defs.suites()) {
+        select_nodes_from_node(s, selected, selector);
+    }
+}
+
+template <typename Function, typename Collection>
+void select_nodes_ptr_from_defs(const Defs& defs, Collection& selected, Function selector) {
+
+    // Handle: Defs (const)
+    for (const auto& s : defs.suites()) {
+        select_nodes_ptr_from_node(s, selected, selector);
+    }
+}
+
+template <typename T, typename Filter>
+std::vector<std::shared_ptr<T>> get_all_t_ptr(const node_ptr& node, Filter filter) {
+    // Select all Nodes, according to filter
+    std::vector<node_ptr> selected;
+    auto collector = [&selected](const node_ptr& node) { selected.push_back(node); };
+    auto selector  = [filter](const node_ptr& node) { return filter(node); };
+    implementation::select_nodes_ptr_from_node(node, collector, selector);
+
+    // Downcast to return type
+    std::vector<std::shared_ptr<T>> tasks;
+    for (auto& task : selected) {
+        if (auto t = std::dynamic_pointer_cast<T>(task)) {
+            tasks.push_back(t);
+        }
+    }
+
+    return tasks;
+}
+
+template <typename T, typename Filter>
+std::vector<std::shared_ptr<T>> get_all_t_ptr(const Defs& defs, Filter filter) {
+    // Select all Nodes, according to filter
+    std::vector<node_ptr> selected;
+    auto collector = [&selected](const node_ptr& node) { selected.push_back(node); };
+    auto selector  = [filter](const node_ptr& node) { return filter(node); };
+    implementation::select_nodes_ptr_from_defs(defs, collector, selector);
+
+    // Downcast to return type
+    std::vector<std::shared_ptr<T>> tasks;
+    for (auto& task : selected) {
+        if (auto t = std::dynamic_pointer_cast<T>(task)) {
+            tasks.push_back(t);
+        }
+    }
+
+    return tasks;
+}
+
+} // namespace implementation
+
+std::vector<task_ptr> get_all_tasks_ptr(Defs& defs) {
+    return implementation::get_all_t_ptr<Task>(defs, [](const node_ptr& node) { return node->isTask() != nullptr; });
+}
+
+std::vector<node_ptr> get_all_nodes_ptr(Defs& defs) {
+    return implementation::get_all_t_ptr<Node>(defs, [](const node_ptr&) { return true; });
+}
+
+std::vector<node_ptr> get_all_nodes_ptr(node_ptr& node) {
+    return implementation::get_all_t_ptr<Node>(node, [](const node_ptr&) { return true; });
 }
 
 } // namespace ecf
