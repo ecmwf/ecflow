@@ -19,42 +19,49 @@ namespace ecf {
 
 namespace implementation {
 
-template <typename N, typename Selector, typename Collector>
-void select_nodes_from_node(N& node, Collector& collector, Selector selector) {
+template <typename N, typename Visitor>
+void select_nodes_from_node(N& node, Visitor& visitor) {
 
-    if (selector(node)) {
-        collector(node);
-    }
+    visitor(node);
 
     if (auto container = dynamic_cast<const NodeContainer*>(&node); container) {
         // Process children: Family, Task
         for (auto& child : container->children()) {
-            select_nodes_from_node(*child, collector, selector);
+            select_nodes_from_node(*child, visitor);
         }
     }
     else if (auto task = dynamic_cast<const Task*>(&node); task) {
         // Process children: Alias
         for (auto& child : task->aliases()) {
-            select_nodes_from_node(*child, collector, selector);
+            select_nodes_from_node(*child, visitor);
         }
     }
 }
 
-template <typename Function, typename Collection>
-void select_nodes_from_defs(Defs& defs, Collection& selected, Function selector) {
+template <typename Visitor>
+void select_nodes_from_defs(Defs& defs, Visitor& visitor) {
 
     // Handle: Defs (non-const)
     for (const auto& s : defs.suites()) {
-        select_nodes_from_node(*s, selected, selector);
+        select_nodes_from_node(*s, visitor);
     }
 }
 
-template <typename Function, typename Collection>
-void select_nodes_from_defs(const Defs& defs, Collection& selected, Function selector) {
+template <typename Visitor>
+void select_nodes_from_defs(const Defs& defs, Visitor& visitor) {
 
     // Handle: Defs (const)
     for (const auto& s : defs.suites()) {
-        select_nodes_from_node(*s, selected, selector);
+        select_nodes_from_node(*s, visitor);
+    }
+}
+
+template <typename Derived, typename Base>
+void downcast_to(const std::vector<Base*>& selected, std::vector<Derived*>& downcasts) {
+    for (auto& base : selected) {
+        if (auto derived = dynamic_cast<Derived*>(base)) {
+            downcasts.push_back(derived);
+        }
     }
 }
 
@@ -63,9 +70,8 @@ void select_nodes_from_defs(const Defs& defs, Collection& selected, Function sel
 std::vector<Node*> get_all_nodes(Defs& defs) {
     // Select all Suite, Family, Tasks and Aliases
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return true; };
-    implementation::select_nodes_from_defs(defs, collector, selector);
+    auto visitor = [&selected](Node& node) { selected.push_back(&node); };
+    implementation::select_nodes_from_defs(defs, visitor);
 
     return selected;
 }
@@ -73,9 +79,8 @@ std::vector<Node*> get_all_nodes(Defs& defs) {
 std::vector<const Node*> get_all_nodes(const Defs& defs) {
     // Select all Suite, Family, Tasks and Aliases
     std::vector<const Node*> selected;
-    auto collector = [&selected](const Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return true; };
-    implementation::select_nodes_from_defs(defs, collector, selector);
+    auto visitor = [&selected](const Node& node) { selected.push_back(&node); };
+    implementation::select_nodes_from_defs(defs, visitor);
 
     return selected;
 }
@@ -83,9 +88,8 @@ std::vector<const Node*> get_all_nodes(const Defs& defs) {
 std::vector<Node*> get_all_nodes(Node& node) {
     // Select all Suite, Family, Tasks and Aliases
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return true; };
-    implementation::select_nodes_from_node(node, collector, selector);
+    auto visitor = [&selected](Node& node) { selected.push_back(&node); };
+    implementation::select_nodes_from_node(node, visitor);
 
     return selected;
 }
@@ -93,209 +97,167 @@ std::vector<Node*> get_all_nodes(Node& node) {
 std::vector<Task*> get_all_tasks(Defs& defs) {
     // Select all Tasks
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isTask(); };
-    implementation::select_nodes_from_defs(defs, collector, selector);
+    auto visitor = [&selected](Node& node) {
+        if (node.isTask()) {
+            selected.push_back(&node);
+        }
+    };
+    implementation::select_nodes_from_defs(defs, visitor);
 
     // Downcast to return type
     std::vector<Task*> tasks;
-    for (auto& task : selected) {
-        if (auto t = dynamic_cast<Task*>(task)) {
-            tasks.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<Task>(selected, tasks);
     return tasks;
 }
 
 std::vector<const Task*> get_all_tasks(const Defs& defs) {
     // Select all Tasks
     std::vector<const Node*> selected;
-    auto collector = [&selected](const Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isTask(); };
-    implementation::select_nodes_from_defs(defs, collector, selector);
+    auto visitor = [&selected](Node& node) {
+        if (node.isTask()) {
+            selected.push_back(&node);
+        }
+    };
+    implementation::select_nodes_from_defs(defs, visitor);
 
     // Downcast to return type
     std::vector<const Task*> tasks;
-    for (auto& task : selected) {
-        if (auto t = dynamic_cast<const Task*>(task)) {
-            tasks.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<const Task>(selected, tasks);
     return tasks;
 }
 
 std::vector<Task*> get_all_tasks(Node& node) {
     // Select all Tasks
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isTask(); };
-    implementation::select_nodes_from_node(node, collector, selector);
+    auto visitor = [&selected](Node& node) {
+        if (node.isTask()) {
+            selected.push_back(&node);
+        }
+    };
+    implementation::select_nodes_from_node(node, visitor);
 
     // Downcast to return type
     std::vector<Task*> tasks;
-    for (auto& task : selected) {
-        if (auto t = dynamic_cast<Task*>(task)) {
-            tasks.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<Task>(selected, tasks);
     return tasks;
 }
 
 std::vector<const Task*> get_all_tasks(const Node& node) {
     // Select all Tasks
     std::vector<const Node*> selected;
-    auto collector = [&selected](const Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isTask(); };
-    implementation::select_nodes_from_node(node, collector, selector);
+    auto visitor = [&selected](const Node& node) {
+        if (node.isTask()) {
+            selected.push_back(&node);
+        }
+    };
+    implementation::select_nodes_from_node(node, visitor);
 
     // Downcast to return type
     std::vector<const Task*> tasks;
-    for (auto& task : selected) {
-        if (auto t = dynamic_cast<const Task*>(task)) {
-            tasks.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<const Task>(selected, tasks);
     return tasks;
 }
 
 std::vector<Alias*> get_all_aliases(Defs& defs) {
     // Select all Aliases
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isAlias(); };
-    implementation::select_nodes_from_defs(defs, collector, selector);
+    auto visitor = [&selected](Node& node) {
+        if (node.isAlias()) {
+            selected.push_back(&node);
+        }
+    };
+    implementation::select_nodes_from_defs(defs, visitor);
 
     // Downcast to return type
     std::vector<Alias*> aliases;
-    for (auto& alias : selected) {
-        if (auto t = dynamic_cast<Alias*>(alias)) {
-            aliases.push_back(t);
-        }
-    }
-
-    return aliases;
-}
-
-std::vector<Alias*> get_all_aliases(Node& node) {
-    // Select all Aliases
-    std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isAlias(); };
-    implementation::select_nodes_from_node(node, collector, selector);
-
-    // Downcast to return type
-    std::vector<Alias*> aliases;
-    for (auto& alias : selected) {
-        if (auto t = dynamic_cast<Alias*>(alias)) {
-            aliases.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<Alias>(selected, aliases);
     return aliases;
 }
 
 std::vector<const Alias*> get_all_aliases(const Node& node) {
     // Select all Aliases
     std::vector<const Node*> selected;
-    auto collector = [&selected](const Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isAlias(); };
-    implementation::select_nodes_from_node(node, collector, selector);
+    auto visitor = [&selected](const Node& node) {
+        if (node.isAlias()) {
+            selected.push_back(&node);
+        }
+    };
+    implementation::select_nodes_from_node(node, visitor);
 
     // Downcast to return type
     std::vector<const Alias*> aliases;
-    for (auto& alias : selected) {
-        if (auto t = dynamic_cast<const Alias*>(alias)) {
-            aliases.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<const Alias>(selected, aliases);
     return aliases;
 }
 
 std::vector<Submittable*> get_all_active_submittables(Defs& defs) {
     // Select all Active Submittables
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) {
-        return node.isSubmittable() && (node.state() == NState::ACTIVE || node.state() == NState::SUBMITTED);
+    auto visitor = [&selected](Node& node) {
+        if (node.isSubmittable() && (node.state() == NState::ACTIVE || node.state() == NState::SUBMITTED)) {
+            selected.push_back(&node);
+        }
     };
-    implementation::select_nodes_from_defs(defs, collector, selector);
+    implementation::select_nodes_from_defs(defs, visitor);
 
     // Downcast to return type
     std::vector<Submittable*> submittables;
-    for (auto& submittable : selected) {
-        if (auto t = submittable->isSubmittable()) {
-            submittables.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<Submittable>(selected, submittables);
     return submittables;
 }
 
 std::vector<Submittable*> get_all_active_submittables(Node& node) {
     // Select all Active Submittables
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) {
-        return node.isSubmittable() && (node.state() == NState::ACTIVE || node.state() == NState::SUBMITTED);
+    auto visitor = [&selected](Node& node) {
+        if (node.isSubmittable() && (node.state() == NState::ACTIVE || node.state() == NState::SUBMITTED)) {
+            selected.push_back(&node);
+        }
     };
-    implementation::select_nodes_from_node(node, collector, selector);
+    implementation::select_nodes_from_node(node, visitor);
 
     // Downcast to return type
     std::vector<Submittable*> submittables;
-    for (auto& submittable : selected) {
-        if (auto t = submittable->isSubmittable()) {
-            submittables.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<Submittable>(selected, submittables);
     return submittables;
 }
 
 std::vector<Family*> get_all_families(const Defs& defs) {
     // Select all Families
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isFamily(); };
-    implementation::select_nodes_from_defs(defs, collector, selector);
+    auto visitor = [&selected](Node& node) {
+        if (node.isFamily()) {
+            selected.push_back(&node);
+        }
+    };
+    implementation::select_nodes_from_defs(defs, visitor);
 
     // Downcast to return type
     std::vector<Family*> families;
-    for (auto& family : selected) {
-        if (auto t = dynamic_cast<Family*>(family)) {
-            families.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<Family>(selected, families);
     return families;
 }
 
 std::vector<Family*> get_all_families(Node& node) {
     // Select all Families
     std::vector<Node*> selected;
-    auto collector = [&selected](Node& node) { selected.push_back(&node); };
-    auto selector  = [](const Node& node) { return node.isFamily(); };
-    implementation::select_nodes_from_node(node, collector, selector);
+    auto visitor = [&selected](Node& node) {
+        if (node.isFamily()) {
+            selected.push_back(&node);
+        }
+    };
+    implementation::select_nodes_from_node(node, visitor);
 
     // Downcast to return type
     std::vector<Family*> families;
-    for (auto& family : selected) {
-        if (auto t = dynamic_cast<Family*>(family)) {
-            families.push_back(t);
-        }
-    }
-
+    implementation::downcast_to<Family>(selected, families);
     return families;
 }
 
 std::set<const Node*> get_all_ast_nodes(const Defs& defs) {
     // Select all Nodes with ASTs
     std::set<Node*> selected;
-    auto collector = [&selected](const Node& node) {
+    auto visitor = [&selected](const Node& node) {
         if (node.completeAst()) {
             AstCollateNodesVisitor astVisitor(selected);
             node.completeAst()->accept(astVisitor);
@@ -303,10 +265,9 @@ std::set<const Node*> get_all_ast_nodes(const Defs& defs) {
         if (node.triggerAst()) {
             AstCollateNodesVisitor astVisitor(selected);
             node.triggerAst()->accept(astVisitor);
-        };
+        }
     };
-    auto selector = [](const Node& node) { return node.completeAst() || node.triggerAst(); };
-    implementation::select_nodes_from_defs(defs, collector, selector);
+    implementation::select_nodes_from_defs(defs, visitor);
 
     // Convert to const
     std::set<const Node*> nodes;
@@ -320,7 +281,7 @@ std::set<const Node*> get_all_ast_nodes(const Defs& defs) {
 std::set<const Node*> get_all_ast_nodes(const Node& node) {
     // Select all Nodes with ASTs
     std::set<Node*> selected;
-    auto collector = [&selected](const Node& node) {
+    auto visitor = [&selected](const Node& node) {
         if (node.completeAst()) {
             AstCollateNodesVisitor astVisitor(selected);
             node.completeAst()->accept(astVisitor);
@@ -328,10 +289,9 @@ std::set<const Node*> get_all_ast_nodes(const Node& node) {
         if (node.triggerAst()) {
             AstCollateNodesVisitor astVisitor(selected);
             node.triggerAst()->accept(astVisitor);
-        };
+        }
     };
-    auto selector = [](const Node& node) { return node.completeAst() || node.triggerAst(); };
-    implementation::select_nodes_from_node(node, collector, selector);
+    implementation::select_nodes_from_node(node, visitor);
 
     // Convert to const
     std::set<const Node*> nodes;
@@ -344,43 +304,50 @@ std::set<const Node*> get_all_ast_nodes(const Node& node) {
 
 namespace implementation {
 
-template <typename Selector, typename Collector>
-void select_nodes_ptr_from_node(const node_ptr& node, Collector& collector, Selector selector) {
+template <typename Visitor>
+void select_nodes_ptr_from_node(const node_ptr& node, Visitor& visitor) {
 
-    if (selector(node)) {
-        collector(node);
-    }
+    visitor(node);
 
     // Handle: (non-const) N&
     if (auto container = std::dynamic_pointer_cast<NodeContainer>(node); container) {
         // Process children: Family, Task
         for (auto& child : container->children()) {
-            select_nodes_ptr_from_node(child, collector, selector);
+            select_nodes_ptr_from_node(child, visitor);
         }
     }
     else if (auto task = std::dynamic_pointer_cast<Task>(node); task) {
         // Process children: Alias
         for (auto& child : task->aliases()) {
-            select_nodes_ptr_from_node(child, collector, selector);
+            select_nodes_ptr_from_node(child, visitor);
         }
     }
 }
 
-template <typename Function, typename Collection>
-void select_nodes_ptr_from_defs(Defs& defs, Collection& selected, Function selector) {
+template <typename Visitor>
+void select_nodes_ptr_from_defs(Defs& defs, Visitor& visitor) {
 
     // Handle: Defs (non-const)
     for (const auto& s : defs.suites()) {
-        select_nodes_from_node(s, selected, selector);
+        select_nodes_from_node(s, visitor);
     }
 }
 
-template <typename Function, typename Collection>
-void select_nodes_ptr_from_defs(const Defs& defs, Collection& selected, Function selector) {
+template <typename Visitor>
+void select_nodes_ptr_from_defs(const Defs& defs, Visitor& visitor) {
 
     // Handle: Defs (const)
     for (const auto& s : defs.suites()) {
-        select_nodes_ptr_from_node(s, selected, selector);
+        select_nodes_ptr_from_node(s, visitor);
+    }
+}
+
+template <typename Derived, typename Base>
+void downcast_to(const std::vector<std::shared_ptr<Base>>& selected, std::vector<std::shared_ptr<Derived>>& downcasts) {
+    for (auto& base : selected) {
+        if (auto derived = std::dynamic_pointer_cast<Derived>(base)) {
+            downcasts.push_back(derived);
+        }
     }
 }
 
@@ -388,18 +355,16 @@ template <typename T, typename Filter>
 std::vector<std::shared_ptr<T>> get_all_t_ptr(const node_ptr& node, Filter filter) {
     // Select all Nodes, according to filter
     std::vector<node_ptr> selected;
-    auto collector = [&selected](const node_ptr& node) { selected.push_back(node); };
-    auto selector  = [filter](const node_ptr& node) { return filter(node); };
-    implementation::select_nodes_ptr_from_node(node, collector, selector);
+    auto visitor = [&selected, filter](const node_ptr& node) {
+        if (filter(node)) {
+            selected.push_back(node);
+        }
+    };
+    implementation::select_nodes_ptr_from_node(node, visitor);
 
     // Downcast to return type
     std::vector<std::shared_ptr<T>> tasks;
-    for (auto& task : selected) {
-        if (auto t = std::dynamic_pointer_cast<T>(task)) {
-            tasks.push_back(t);
-        }
-    }
-
+    downcast_to<T>(selected, tasks);
     return tasks;
 }
 
@@ -407,18 +372,16 @@ template <typename T, typename Filter>
 std::vector<std::shared_ptr<T>> get_all_t_ptr(const Defs& defs, Filter filter) {
     // Select all Nodes, according to filter
     std::vector<node_ptr> selected;
-    auto collector = [&selected](const node_ptr& node) { selected.push_back(node); };
-    auto selector  = [filter](const node_ptr& node) { return filter(node); };
-    implementation::select_nodes_ptr_from_defs(defs, collector, selector);
+    auto visitor = [&selected, filter](const node_ptr& node) {
+        if (filter(node)) {
+            selected.push_back(node);
+        }
+    };
+    implementation::select_nodes_ptr_from_defs(defs, visitor);
 
     // Downcast to return type
     std::vector<std::shared_ptr<T>> tasks;
-    for (auto& task : selected) {
-        if (auto t = std::dynamic_pointer_cast<T>(task)) {
-            tasks.push_back(t);
-        }
-    }
-
+    downcast_to<T>(selected, tasks);
     return tasks;
 }
 
