@@ -1001,6 +1001,7 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
     std::cout << "Submittable::incremental_changes() " << debugNodePath() << "\n";
 #endif
 
+    // Create SubmittableMemento, in case the node state changes, to signal the updated submission parameters
     if (state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());

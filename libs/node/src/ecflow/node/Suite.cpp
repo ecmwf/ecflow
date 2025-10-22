@@ -621,12 +621,14 @@ void Suite::collateChanges(DefsDelta& changes) const {
         size_t before = changes.size();
 
         compound_memento_ptr suite_compound_mememto;
+        // Create a SuiteClockMemento to signal a change in the suite clock
         if (clockAttr_.get() && clockAttr_->state_change_no() > changes.client_state_change_no()) {
             if (!suite_compound_mememto.get()) {
                 suite_compound_mememto = std::make_shared<CompoundMemento>(absNodePath());
             }
             suite_compound_mememto->add(std::make_shared<SuiteClockMemento>(*clockAttr_));
         }
+        // Create a SuiteBeginDeltaMemento to signal a change in the suite begin state
         if (begun_change_no_ > changes.client_state_change_no()) {
             if (!suite_compound_mememto.get()) {
                 suite_compound_mememto = std::make_shared<CompoundMemento>(absNodePath());
@@ -650,6 +652,7 @@ void Suite::collateChanges(DefsDelta& changes) const {
         /// Hence as side affect why command with reference to time will only be accurate
         /// after some kind of state change. Fixed with ECFLOW-631 (Client must do sync_clock, before calling why)
         size_t after = changes.size();
+        // Create SuiteCalendarMemento to signal a change in suite calendar
         if ((before != after || changes.sync_suite_clock()) && calendar_change_no_ > changes.client_state_change_no()) {
             compound_memento_ptr compound_ptr = std::make_shared<CompoundMemento>(absNodePath());
             compound_ptr->add(std::make_shared<SuiteCalendarMemento>(cal_));

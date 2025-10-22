@@ -1657,13 +1657,18 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // ************************************************************************************************
     // determine if defs state changed. make sure this is in sync with defs_only_max_state_change_no()
     // ************************************************************************************************
+
     compound_memento_ptr comp;
+
+    // Create StateMemento to signal a change in state change of the Defs
     if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
         }
         comp->add(std::make_shared<StateMemento>(state_.state()));
     }
+
+    // Create OrderMemento to signal a change in Suite order
     if (order_state_change_no_ > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
@@ -1676,7 +1681,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
         comp->add(std::make_shared<OrderMemento>(order));
     }
 
-    // Determine if the flag changed
+    // Create FlagMemento to signal a change in the flag value
     if (flag_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
@@ -1684,13 +1689,16 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
         comp->add(std::make_shared<FlagMemento>(flag_));
     }
 
-    // determine if defs server state, currently only watch server state. i.e HALTED, SHUTDOWN, RUNNING
+    // Create a ServerStateMemento to signal a change in the server state
+    // Currently only watching server state i.e., HALTED, SHUTDOWN, RUNNING.
     if (server_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
         }
         comp->add(std::make_shared<ServerStateMemento>(server_.get_state()));
     }
+
+    // Create a ServerVariableMemento to signal a change in the list of server variables
     if (server_.variable_state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
@@ -1723,10 +1731,10 @@ void Defs::set_memento(const StateMemento* memento, std::vector<ecf::Aspect::Typ
 
     if (aspect_only) {
         aspects.push_back(ecf::Aspect::STATE);
+        return;
     }
-    else {
-        set_state(memento->state_);
-    }
+
+    set_state(memento->state_);
 }
 
 void Defs::set_memento(const ServerStateMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
@@ -1736,10 +1744,10 @@ void Defs::set_memento(const ServerStateMemento* memento, std::vector<ecf::Aspec
 
     if (aspect_only) {
         aspects.push_back(ecf::Aspect::SERVER_STATE);
+        return;
     }
-    else {
-        server_.set_state(memento->state_);
-    }
+
+    server_.set_state(memento->state_);
 }
 
 void Defs::set_memento(const ServerVariableMemento* memento,
@@ -1780,19 +1788,20 @@ void Defs::set_memento(const OrderMemento* memento, std::vector<ecf::Aspect::Typ
 
     std::vector<suite_ptr> vec;
     vec.reserve(suiteVec_.size());
-    size_t node_vec_size = suiteVec_.size();
     for (const auto& i : order) {
-        for (size_t t = 0; t < node_vec_size; t++) {
-            if (i == suiteVec_[t]->name()) {
-                vec.push_back(suiteVec_[t]);
+        for (auto& suite : suiteVec_) {
+            if (i == suite->name()) {
+                vec.push_back(suite);
                 break;
             }
         }
     }
+
     if (vec.size() != suiteVec_.size()) {
         std::cout << "Defs::set_memento could not find all the names\n";
         return;
     }
+
     suiteVec_ = vec;
 }
 
@@ -1804,10 +1813,10 @@ void Defs::set_memento(const FlagMemento* memento, std::vector<ecf::Aspect::Type
 
     if (aspect_only) {
         aspects.push_back(ecf::Aspect::FLAG);
+        return;
     }
-    else {
-        flag_.set_flag(memento->flag_.flag());
-    }
+
+    flag_.set_flag(memento->flag_.flag());
 }
 
 // =====================================================================
@@ -1961,7 +1970,7 @@ std::string Defs::stats() const {
     auto node_vec = ecf::get_all_nodes(*this);
 
     auto family_vec = ecf::get_all_families(*this);
-    auto task_vec = ecf::get_all_tasks(*this);
+    auto task_vec   = ecf::get_all_tasks(*this);
 
     size_t alias = 0;
     for (auto task : task_vec) {

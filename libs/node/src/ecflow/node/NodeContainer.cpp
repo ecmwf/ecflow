@@ -226,20 +226,26 @@ bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy, bool ht
 }
 
 void NodeContainer::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) const {
-    /// There no point doing a OrderMemento if children have been added/delete
+
+    // Create ChildrenMemento to signal removal/addition of children
+    //
+    // n.b. When signalling the removal/addition of children,
+    //      any order change is irrelevant as the complete updated list of
+    //      children is made part of the synchronisation
     if (add_remove_state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
         comp->add(std::make_shared<ChildrenMemento>(nodes_));
     }
+    // Create OrderMemento to signal reordering of children
     else if (order_state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
+
         std::vector<std::string> order_vec;
         order_vec.reserve(nodes_.size());
-
         for (const auto& n : nodes_) {
             order_vec.push_back(n->name());
         }
