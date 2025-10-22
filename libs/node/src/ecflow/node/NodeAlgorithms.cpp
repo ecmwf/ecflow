@@ -26,34 +26,16 @@ void select_nodes_from_node(N& node, Collector& collector, Selector selector) {
         collector(node);
     }
 
-    if constexpr (std::is_const_v<N>) {
-        // Handle: const N&
-        if (auto container = dynamic_cast<const NodeContainer*>(&node); container) {
-            // Process children: Family, Task
-            for (auto& child : container->children()) {
-                select_nodes_from_node(*child, collector, selector);
-            }
-        }
-        else if (auto task = dynamic_cast<const Task*>(&node); task) {
-            // Process children: Alias
-            for (auto& child : task->aliases()) {
-                select_nodes_from_node(*child, collector, selector);
-            }
+    if (auto container = dynamic_cast<const NodeContainer*>(&node); container) {
+        // Process children: Family, Task
+        for (auto& child : container->children()) {
+            select_nodes_from_node(*child, collector, selector);
         }
     }
-    else {
-        // Handle: (non-const) N&
-        if (auto container = dynamic_cast<NodeContainer*>(&node); container) {
-            // Process children: Family, Task
-            for (auto& child : container->children()) {
-                select_nodes_from_node(*child, collector, selector);
-            }
-        }
-        else if (auto task = dynamic_cast<Task*>(&node); task) {
-            // Process children: Alias
-            for (auto& child : task->aliases()) {
-                select_nodes_from_node(*child, collector, selector);
-            }
+    else if (auto task = dynamic_cast<const Task*>(&node); task) {
+        // Process children: Alias
+        for (auto& child : task->aliases()) {
+            select_nodes_from_node(*child, collector, selector);
         }
     }
 }
