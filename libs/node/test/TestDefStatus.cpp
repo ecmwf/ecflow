@@ -47,10 +47,8 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
     task_ptr f2_t2 = f2->add_task("t2");
 
     // Get all nodes and tasks for ease of test
-    vector<Node*> nodes;
-    vector<Task*> tasks;
-    theDefs.getAllNodes(nodes);
-    theDefs.getAllTasks(tasks);
+    auto nodes = ecf::get_all_nodes(theDefs);
+    auto tasks = ecf::get_all_tasks(theDefs);
 
     BOOST_CHECK_MESSAGE(!suite->begun(), "Expected suite not to be begun ");
 
@@ -60,13 +58,14 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
     /// Test 1: with no defstatus. All nodes should be set to NState::QUEUED
     theDefs.beginAll();
     BOOST_CHECK_MESSAGE(suite->begun(), "Expected suite to be begun ");
-    for (Node* n : nodes) {
+    for (auto n : nodes) {
         BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED, "Expected queued but found " << NState::toString(n->state()));
     }
 
     theDefs.requeue();
-    for (Node* n : nodes) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED, "Expected queued but found " << NState::toString(n->state()));
+    for (auto node : nodes) {
+        BOOST_CHECK_MESSAGE(node->state() == NState::QUEUED,
+                            "Expected queued but found " << NState::toString(node->state()));
     }
 
     /// Test 2: with defstatus on suite. With complete the status should have been propagated down
@@ -75,15 +74,15 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
     BOOST_CHECK_MESSAGE(!suite->begun(), "Expected suite not to be begun ");
 
     theDefs.beginAll();
-    for (Node* n : nodes) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::COMPLETE,
-                            "Expected complete but found " << NState::toString(n->state()));
+    for (auto node : nodes) {
+        BOOST_CHECK_MESSAGE(node->state() == NState::COMPLETE,
+                            "Expected complete but found " << NState::toString(node->state()));
     }
 
     theDefs.requeue();
-    for (Node* n : nodes) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::COMPLETE,
-                            "Expected complete but found " << NState::toString(n->state()));
+    for (auto node : nodes) {
+        BOOST_CHECK_MESSAGE(node->state() == NState::COMPLETE,
+                            "Expected complete but found " << NState::toString(node->state()));
     }
 
     /// Test 3: defstatus of family f1 and f2. The parent node(suite) should reflect status of children
@@ -93,15 +92,15 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
     f2->addDefStatus(DState::COMPLETE);
     theDefs.reset_begin(); // for test purposes only
     theDefs.beginAll();
-    for (Node* n : nodes) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::COMPLETE,
-                            "Expected complete but found " << NState::toString(n->state()));
+    for (auto node : nodes) {
+        BOOST_CHECK_MESSAGE(node->state() == NState::COMPLETE,
+                            "Expected complete but found " << NState::toString(node->state()));
     }
 
     theDefs.requeue();
-    for (Node* n : nodes) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::COMPLETE,
-                            "Expected complete but found " << NState::toString(n->state()));
+    for (auto node : nodes) {
+        BOOST_CHECK_MESSAGE(node->state() == NState::COMPLETE,
+                            "Expected complete but found " << NState::toString(node->state()));
     }
 
     // Suspend is really a user interaction the real state suould be queued
@@ -110,13 +109,15 @@ BOOST_AUTO_TEST_CASE(test_defstatus) {
     suite->addDefStatus(DState::SUSPENDED);    // reset defstatus
     theDefs.reset_begin();                     // for test purposes only
     theDefs.beginAll();
-    for (Node* n : nodes) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED, "Expected queued but found " << NState::toString(n->state()));
+    for (auto node : nodes) {
+        BOOST_CHECK_MESSAGE(node->state() == NState::QUEUED,
+                            "Expected queued but found " << NState::toString(node->state()));
     }
 
     theDefs.requeue();
-    for (Node* n : nodes) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED, "Expected queued but found " << NState::toString(n->state()));
+    for (auto node : nodes) {
+        BOOST_CHECK_MESSAGE(node->state() == NState::QUEUED,
+                            "Expected queued but found " << NState::toString(node->state()));
     }
 }
 
@@ -146,31 +147,30 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_139) {
     f2_t2->addDefStatus(DState::SUSPENDED);
 
     // Get all nodes and tasks for ease of test
-    vector<Task*> tasks;
-    theDefs.getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(theDefs);
 
     /// It should be noted that once a suite has begun, it stays begun, however for test purposes we had
     /// added ability to reset the begin state.
 
     /// Test 1: Check NODE state All nodes should be set to NState::QUEUED
     theDefs.beginAll();
-    for (Task* n : tasks) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED, "Expected queued but found " << NState::toString(n->state()));
+    for (auto task : tasks) {
+        BOOST_CHECK_MESSAGE(task->state() == NState::QUEUED, "Expected queued but found " << NState::toString(task->state()));
     }
 
     /// Check: DSTATE
-    for (Task* n : tasks) {
+    for (auto n : tasks) {
         BOOST_CHECK_MESSAGE(n->dstate() == DState::SUSPENDED,
                             "Expected suspended but found " << DState::toString(n->dstate()));
     }
 
     theDefs.requeue();
-    for (Task* n : tasks) {
-        BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED, "Expected queued but found " << NState::toString(n->state()));
+    for (auto task : tasks) {
+        BOOST_CHECK_MESSAGE(task->state() == NState::QUEUED, "Expected queued but found " << NState::toString(task->state()));
     }
-    for (Task* n : tasks) {
-        BOOST_CHECK_MESSAGE(n->dstate() == DState::SUSPENDED,
-                            "Expected suspended but found " << DState::toString(n->dstate()));
+    for (auto task : tasks) {
+        BOOST_CHECK_MESSAGE(task->dstate() == DState::SUSPENDED,
+                            "Expected suspended but found " << DState::toString(task->dstate()));
     }
 }
 

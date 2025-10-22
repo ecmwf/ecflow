@@ -15,7 +15,6 @@
 #include "PersistHelper.hpp"
 #include "TemporaryFile.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Timer.hpp"
@@ -25,7 +24,6 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/NodeContainer.hpp"
 #include "ecflow/node/Suite.hpp"
-#include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
@@ -209,15 +207,13 @@ int main(int argc, char* argv[]) {
     {
         // Time how long it takes to delete all nodes/ references. Delete all tasks and then suites/families.
         timer.start();
-        std::vector<Task*> tasks;
-        defs.getAllTasks(tasks);
+        auto tasks = ecf::get_all_tasks(defs);
         for (Task* ta : tasks) {
             if (!defs.deleteChild(ta)) {
                 cout << "Failed to delete task\n";
             }
         }
-        tasks.clear();
-        defs.getAllTasks(tasks);
+        tasks = ecf::get_all_tasks(defs);
         if (!tasks.empty()) {
             cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";
         }

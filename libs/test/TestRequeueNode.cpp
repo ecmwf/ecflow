@@ -18,7 +18,6 @@
 #include "TestFixture.hpp"
 #include "ecflow/attribute/VerifyAttr.hpp"
 #include "ecflow/core/Converter.hpp"
-#include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
@@ -94,8 +93,7 @@ BOOST_AUTO_TEST_CASE(test_requeue_node) {
     // std::cout << *serverDefs.get();
 
     // since we requeue, each task should have completed 8 times
-    std::vector<Task*> taskVec;
-    serverDefs->getAllTasks(taskVec);
+    auto taskVec = ecf::get_all_tasks(*serverDefs);
     for (Task* t : taskVec) {
         for (const VerifyAttr& v : t->verifys()) {
             if (v.state() == NState::COMPLETE) {

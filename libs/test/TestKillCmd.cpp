@@ -126,10 +126,10 @@ static bool waitForTaskState(NState::State state, int max_time_to_wait) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());
-        defs_ptr defs = TestFixture::client().defs();
-        vector<Task*> tasks;
-        defs->getAllTasks(tasks);
-        for (Task* task : tasks) {
+
+        auto defs  = TestFixture::client().defs();
+        auto tasks = ecf::get_all_tasks(*defs);
+        for (auto task : tasks) {
             if (task->state() == state) {
                 return true;
             }

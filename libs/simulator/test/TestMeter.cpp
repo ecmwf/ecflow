@@ -71,12 +71,11 @@ BOOST_AUTO_TEST_CASE(test_meter) {
 
     // The simulator will set all the meter values, so final value must be the max value.
     bool found_task = false;
-    std::vector<Task*> theServerTasks;
-    theDefs.getAllTasks(theServerTasks);
-    for (Task* t : theServerTasks) {
-        if (t->name() == "fc") {
+    auto tasks      = ecf::get_all_tasks(theDefs);
+    for (auto task : tasks) {
+        if (task->name() == "fc") {
             found_task                       = true;
-            const std::vector<Meter>& meters = t->meters();
+            const std::vector<Meter>& meters = task->meters();
             BOOST_REQUIRE_MESSAGE(meters.size() == 1, "Expected one meter but found " << meters.size());
             BOOST_CHECK_MESSAGE(meters[0].value() == meters[0].max(),
                                 "Expected meter to have value of " << meters[0].max() << " but found "

@@ -171,19 +171,15 @@ BOOST_AUTO_TEST_CASE(test_archive_and_restore_all) {
     // *** Each time we restore, we have a new set of pointers *FOR* the children of archived/restored NODE
     // *** Hence use paths
     // ****************************************************************************************
-    std::vector<node_ptr> nodes;
-    theDefs.get_all_nodes(nodes);
+    auto nodes = ecf::get_all_nodes(theDefs);
     std::vector<std::string> nc_vec;
-    for (auto& node : nodes) {
-        NodeContainer* nc = node->isNodeContainer();
-        if (!nc) {
-            continue;
+    for (auto node : nodes) {
+        if (NodeContainer* nc = node->isNodeContainer(); nc) {
+            nc_vec.push_back(nc->absNodePath());
         }
-        nc_vec.push_back(nc->absNodePath());
     }
 
     for (const auto& i : nc_vec) {
-        // cout << "archive and restore " << nc_vec[i]  << "\n";
         {
             TestHelper::invokeRequest(
                 &theDefs, Cmd_ptr(new PathsCmd(PathsCmd::ARCHIVE, i, true))); // use force since jobs are active

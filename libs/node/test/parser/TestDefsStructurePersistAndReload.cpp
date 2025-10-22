@@ -40,11 +40,10 @@ BOOST_AUTO_TEST_CASE(test_defs_structure_persistence_and_reload) {
 
     // Note: Aliases are *NOT* written in PrintStyle::DEFS file
     // Hence in order for this test to pass, we must delete the alias first & reset task alias_no
-    std::vector<alias_ptr> alias_vec;
-    theDefsFixture.defsfile_.get_all_aliases(alias_vec);
-    for (alias_ptr al : alias_vec) {
-        al->parent()->isTask()->reset_alias_number();
-        al->remove();
+    auto aliases = ecf::get_all_aliases(theDefsFixture.defsfile_);
+    for (auto alias : aliases) {
+        alias->parent()->isTask()->reset_alias_number();
+        alias->remove();
     }
     BOOST_CHECK_MESSAGE(helper.test_persist_and_reload(theDefsFixture.defsfile_, PrintStyle::DEFS), helper.errorMsg());
 }
@@ -59,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_defs_checkpt_persistence_and_reload) {
 }
 
 // This test is used to find a task given a path of the form:
-// 	  suite/family/task
+//   suite/family/task
 //    suite/family/family/task
 //
 void test_find_task_using_path(NodeContainer* f, const Defs& defs) {

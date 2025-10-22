@@ -89,8 +89,7 @@ static std::string dump_tasks(const std::vector<Task*>& tasks) {
 static std::string dump_task_status() {
     TestFixture::client().sync_local();
     defs_ptr defs = TestFixture::client().defs();
-    std::vector<Task*> tasks;
-    defs->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*defs);
     return dump_tasks(tasks);
 }
 
@@ -129,8 +128,7 @@ static bool waitForTaskStates(WaitType num_of_tasks, NState::State state1, NStat
                               "waitForTaskStates:*error* sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());
         defs_ptr defs = TestFixture::client().defs();
-        std::vector<Task*> tasks;
-        defs->getAllTasks(tasks);
+        auto tasks = ecf::get_all_tasks(*defs);
         if (num_of_tasks == SINGLE) {
             for (Task* task : tasks) {
                 if (task->state() == state1 || task->state() == state2) {
@@ -532,8 +530,7 @@ create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::s
     size_t number_submitted_or_active = 0;
     TestFixture::client().sync_local();
     defs_ptr defs = TestFixture::client().defs();
-    std::vector<Task*> tasks;
-    defs->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*defs);
     for (const auto& task : tasks) {
         if (task->state() == NState::SUBMITTED || task->state() == NState::ACTIVE) {
             number_submitted_or_active++;
@@ -582,8 +579,7 @@ create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::s
             std::cout
                 << "   Zombies(first set) will have try_no:1 and the queued tasks(second set) will have try number2\n";
         }
-        std::vector<Task*> tasks;
-        theDefs.getAllTasks(tasks);
+        auto tasks = ecf::get_all_tasks(theDefs);
         std::vector<std::string> paths;
         for (auto task : tasks) {
             paths.emplace_back(task->absNodePath());

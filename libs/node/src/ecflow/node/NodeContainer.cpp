@@ -937,67 +937,6 @@ void NodeContainer::allChildren(std::vector<node_ptr>& vec) const {
     }
 }
 
-void NodeContainer::getAllFamilies(std::vector<Family*>& vec) const {
-    for (const auto& n : nodes_) {
-        Family* family = n->isFamily();
-        if (family) {
-            vec.push_back(family);
-            family->getAllFamilies(vec);
-        }
-    }
-}
-
-void NodeContainer::getAllNodes(std::vector<Node*>& vec) const {
-    for (const auto& n : nodes_) {
-        vec.push_back(n.get());
-        n->getAllNodes(vec);
-    }
-}
-
-void NodeContainer::getAllTasks(std::vector<Task*>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->getAllTasks(tasks);
-    }
-}
-
-void NodeContainer::getAllSubmittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->getAllSubmittables(tasks);
-    }
-}
-
-void NodeContainer::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->get_all_active_submittables(tasks);
-    }
-}
-
-void NodeContainer::get_all_tasks(std::vector<task_ptr>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->get_all_tasks(tasks);
-    }
-}
-
-void NodeContainer::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    nodes.push_back(non_const_this());
-    for (const auto& n : nodes_) {
-        n->get_all_nodes(nodes);
-    }
-}
-
-void NodeContainer::get_all_aliases(std::vector<alias_ptr>& aliases) const {
-    for (const auto& n : nodes_) {
-        n->get_all_aliases(aliases);
-    }
-}
-
-void NodeContainer::getAllAstNodes(std::set<Node*>& vec) const {
-    Node::getAllAstNodes(vec);
-    for (const auto& n : nodes_) {
-        n->getAllAstNodes(vec);
-    }
-}
-
 bool NodeContainer::check(std::string& errorMsg, std::string& warningMsg) const {
     Node::check(errorMsg, warningMsg);
 

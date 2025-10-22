@@ -147,8 +147,7 @@ static void reorder_family(defs_ptr theDefs) {
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d", NOrder::ALPHA)));
 
-    std::vector<Family*> families;
-    theDefs->findSuite("d")->getAllFamilies(families);
+    auto families = ecf::get_all_families(*theDefs->findAbsNode("/d"));
     BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
                           "NOrder::ALPHA  expected "
                               << ecf::algorithm::join(vector_abcd()) << " but found: "
@@ -160,8 +159,7 @@ static void reorder_task(defs_ptr theDefs) {
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d/d", NOrder::ALPHA)));
 
-    std::vector<Task*> tasks;
-    theDefs->findAbsNode("/d/d")->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*theDefs->findAbsNode("/d/d"));
     BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(tasks) == vector_abcd(),
                           "NOrder::ALPHA  expected "
                               << ecf::algorithm::join(vector_abcd()) << " but found: "
@@ -225,8 +223,7 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
                     << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
 
     suite_ptr suite_a = theDefs->findSuite("d");
-    std::vector<Family*> families;
-    suite_a->getAllFamilies(families);
+    auto families = ecf::get_all_families(*suite_a);
     BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
                           "NOrder::ALPHA  expected "
                               << ecf::algorithm::join(vector_abcd()) << " but found: "

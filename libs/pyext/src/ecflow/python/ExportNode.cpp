@@ -317,9 +317,7 @@ void sort_attributes3(node_ptr self, const std::string& attribute_name, bool rec
 }
 
 std::vector<node_ptr> get_all_nodes(node_ptr self) {
-    std::vector<node_ptr> nodes;
-    self->get_all_nodes(nodes);
-    return nodes;
+    return ecf::get_all_nodes_ptr(self);
 }
 
 node_ptr add_trigger(node_ptr self, const std::string& expr) {

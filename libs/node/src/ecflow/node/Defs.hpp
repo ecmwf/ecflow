@@ -216,20 +216,13 @@ public:
     std::string find_node_path(const std::string& type, const std::string& name) const;
     node_ptr find_node(const std::string& type, const std::string& pathToNode) const;
 
-    const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }
+    [[deprecated]] const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }
+    auto& suites() { return suiteVec_; }
+    const auto& suites() const { return suiteVec_; }
 
     /// Given a path, /suite/family/task, find node which is the closest
     node_ptr find_closest_matching_node(const std::string& pathToNode) const;
 
-    void getAllFamilies(std::vector<Family*>&) const;
-    void getAllNodes(std::vector<Node*>&) const;
-    void getAllTasks(std::vector<Task*>&) const;
-    void getAllSubmittables(std::vector<Submittable*>&) const;
-    void get_all_active_submittables(std::vector<Submittable*>&) const;
-    void get_all_nodes(std::vector<node_ptr>&) const;
-    void get_all_tasks(std::vector<task_ptr>&) const;
-    void get_all_aliases(std::vector<alias_ptr>&) const;
-    void getAllAstNodes(std::set<Node*>&) const;
     const std::set<std::string>& externs() const { return externs_; }
 
     /// Access the server state (i.e., State, Variables, etc.)
@@ -517,5 +510,77 @@ public:
 private:
     defs_ptr defs_ptr_;
 };
+
+namespace ecf {
+
+// Select Nodes
+
+/**
+ * Retrieve all 'sub-nodes' of the given defs.
+ *
+ * @param defs The defs being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Node*> get_all_nodes(Defs& defs);
+std::vector<const Node*> get_all_nodes(const Defs& defs);
+
+std::vector<node_ptr> get_all_nodes_ptr(Defs& defs);
+std::vector<node_ptr> get_all_nodes_ptr(node_ptr& node);
+
+// Select Tasks
+
+/**
+ * Retrieve all 'sub-nodes' of the given defs, that are of type Task.
+ *
+ * @param defs The defs being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Task*> get_all_tasks(Defs& defs);
+std::vector<const Task*> get_all_tasks(const Defs& defs);
+
+std::vector<task_ptr> get_all_tasks_ptr(Defs& defs);
+
+// Select Alias
+
+/**
+ * Retrieve all 'sub-nodes' of the given defs, that are of type Alias.
+ *
+ * @param defs The defs being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Alias*> get_all_aliases(Defs& defs);
+
+// Select Active Submittables
+
+/**
+ * Retrieve all 'sub-nodes' of the given defs, that are both Active and of type Submittable.
+ *
+ * @param defs The defs being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Submittable*> get_all_active_submittables(Defs& defs);
+
+// Select Families
+
+/**
+ * Retrieve all 'sub-nodes' of the given defs, that are of type Family.
+ *
+ * @param defs The defs being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Family*> get_all_families(const Defs& defs);
+
+// Select Nodes that have ASTs (i.e. either Trigger or Complete)
+
+/**
+ * Retrieve the set of 'sub-nodes' of the given defs,
+ * that are referenced in either a Trigger or a Complete.
+ *
+ * @param defs The defs being queried
+ * @return The set of 'sub-nodes'
+ */
+std::set<const Node*> get_all_ast_nodes(const Defs& defs);
+
+}
 
 #endif /* ecflow_node_Defs_HPP */

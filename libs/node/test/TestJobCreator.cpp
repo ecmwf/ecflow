@@ -86,9 +86,8 @@ BOOST_AUTO_TEST_CASE(test_job_creator) {
     // 	cerr << theDefs << "\n";
 
     // get all the task, assume non hierarchical families
-    std::vector<Task*> theTasks;
-    theDefs.getAllTasks(theTasks);
-    BOOST_REQUIRE_MESSAGE(theTasks.size() == 6, "Expected 6 tasks but found, " << theTasks.size());
+    auto tasks = ecf::get_all_tasks(theDefs);
+    BOOST_REQUIRE_MESSAGE(tasks.size() == 6, "Expected 6 tasks but found, " << tasks.size());
 
     // Override ECF_HOME.   ECF_HOME is need to locate to the .ecf files
     theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);

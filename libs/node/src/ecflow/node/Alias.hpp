@@ -59,8 +59,6 @@ public:
     // Pure node Functions that are not implemented for aliases
     node_ptr find_relative_node(const std::vector<std::string>&) override { return node_ptr(); }
 
-    void get_all_nodes(std::vector<node_ptr>& nodes) const override;
-
     // Functions unique to aliases
     // Alias variable names by pass checking of valid names, allowing anything
     void add_alias_variable(const std::string& name, const std::string& value);
@@ -79,12 +77,6 @@ private:
     // Pure node Functions that are not implemented for aliases
     void accept(ecf::NodeTreeVisitor&) override {}
     void acceptVisitTraversor(ecf::NodeTreeVisitor&) override {}
-    void get_all_tasks(std::vector<task_ptr>&) const override {}
-    void get_all_aliases(std::vector<alias_ptr>&) const override {}
-    void getAllNodes(std::vector<Node*>&) const override {}
-    void getAllTasks(std::vector<Task*>&) const override {}
-    void getAllSubmittables(std::vector<Submittable*>&) const override {}
-    void get_all_active_submittables(std::vector<Submittable*>&) const override {}
 
     friend class cereal::access;
     template <class Archive>

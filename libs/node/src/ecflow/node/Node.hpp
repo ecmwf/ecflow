@@ -444,15 +444,6 @@ public:
     std::string triggerExpression() const;
     std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string(); }
 
-    virtual void get_all_tasks(std::vector<task_ptr>&) const                   = 0;
-    virtual void get_all_nodes(std::vector<node_ptr>&) const                   = 0;
-    virtual void get_all_aliases(std::vector<alias_ptr>&) const                = 0;
-    virtual void getAllTasks(std::vector<Task*>&) const                        = 0;
-    virtual void getAllSubmittables(std::vector<Submittable*>&) const          = 0;
-    virtual void get_all_active_submittables(std::vector<Submittable*>&) const = 0;
-    virtual void getAllNodes(std::vector<Node*>&) const                        = 0;
-    virtual void getAllAstNodes(std::set<Node*>&) const;
-
     /// returns the immediate children
     virtual void immediateChildren(std::vector<node_ptr>&) const {}
 
@@ -712,7 +703,7 @@ public:
     /// If not attached to parent returns std::numeric_limits<std::size_t>::max();
     size_t position() const;
 
-    void stats(NodeStats&);
+    void stats(NodeStats&) const;
 
     /// called at the end of state change function
     /// ** Every time we set the state on a nodecontainer, we call handleStateChange
@@ -1001,6 +992,68 @@ std::vector<Variable> inherited_variables(const Node& node);
  * @return The set of variables
  */
 std::vector<Variable> generated_variables(const Node& node);
+
+// Select Nodes
+
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself).
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Node*> get_all_nodes(Node& node);
+
+// Select Tasks
+
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Task.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Task*> get_all_tasks(Node& node);
+std::vector<const Task*> get_all_tasks(const Node& node);
+
+// Select Alias
+
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Alias.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<const Alias*> get_all_aliases(const Node& node);
+
+// Select Active Submittables
+
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself), that are both Active and of type Submittable.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Submittable*> get_all_active_submittables(Node& node);
+
+// Select Families
+
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Family.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
+std::vector<Family*> get_all_families(Node& node);
+
+// Select Nodes that have ASTs (i.e. either Trigger or Complete)
+
+/**
+ * Retrieve the set of 'sub-nodes' of the given node (including the node itself),
+ * that are referenced in either a Trigger or a Complete.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
+std::set<const Node*> get_all_ast_nodes(const Node& node);
 
 } // namespace ecf
 

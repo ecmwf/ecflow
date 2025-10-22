@@ -100,10 +100,9 @@ private:
             // Visit task itself
             v_.begin_visit(*found);
             // Visit task children (i.e. aliases)
-            std::vector<alias_ptr> aliases;
-            found->get_all_aliases(aliases);
+            auto aliases = ecf::get_all_aliases(*found);
             for (const auto& entry : aliases) {
-                visit(*entry.get());
+                visit(*entry);
             }
             v_.end_visit(*found);
             return;

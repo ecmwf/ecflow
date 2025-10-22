@@ -129,17 +129,16 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
     BOOST_REQUIRE_MESSAGE(fs::exists(tail), "Tail file " << tail << " not created");
 
     // get all the task, assume non hierarchical families
-    std::vector<Task*> theTasks;
-    theDefs.getAllTasks(theTasks);
+    auto tasks = ecf::get_all_tasks(theDefs);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
     theDefs.beginAll();
 
     // Test for ECF_ file location
-    for (Task* t : theTasks) {
+    for (auto task : tasks) {
         try {
-            EcfFile ecf_file = t->locatedEcfFile();
+            EcfFile ecf_file = task->locatedEcfFile();
             BOOST_REQUIRE_MESSAGE(ecf_file.valid(), "Could not locate ecf file for task ");
         }
         catch (std::exception& e) {

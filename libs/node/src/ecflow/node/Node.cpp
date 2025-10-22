@@ -2510,17 +2510,6 @@ void Node::verification(std::string& errorMsg) const {
     }
 }
 
-void Node::getAllAstNodes(std::set<Node*>& theSet) const {
-    if (completeAst()) {
-        AstCollateNodesVisitor astVisitor(theSet);
-        completeAst()->accept(astVisitor);
-    }
-    if (triggerAst()) {
-        AstCollateNodesVisitor astVisitor(theSet);
-        triggerAst()->accept(astVisitor);
-    }
-}
-
 AstTop* Node::completeAst() const {
     if (c_expr_) {
         std::string ignoredErrorMsg;
@@ -2769,10 +2758,9 @@ bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const {
 
             /// *Only* delete this node if we don't create zombies
             /// anywhere for our children
-            vector<Task*> taskVec;
-            getAllTasks(taskVec);
-            for (Task* t : taskVec) {
-                if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+            auto tasks = ecf::get_all_tasks(*this);
+            for (auto task : tasks) {
+                if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                     return false;
                 }
             }
@@ -2788,10 +2776,9 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const {
 
             /// *Only* archive this node if we don't create zombies anywhere for our children
             /// The most significant state could be ABORTED in family, but we could still have active tasks.
-            vector<Task*> taskVec;
-            getAllTasks(taskVec);
-            for (Task* t : taskVec) {
-                if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+            auto tasks = ecf::get_all_tasks(*this);
+            for (auto task : tasks) {
+                if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                     return false;
                 }
             }
@@ -2801,7 +2788,7 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const {
     return false;
 }
 
-void Node::stats(NodeStats& stats) {
+void Node::stats(NodeStats& stats) const {
     stats.vars_ += vars_.size();
     if (c_expr_) {
         stats.c_trigger_++;

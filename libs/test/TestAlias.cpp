@@ -131,8 +131,7 @@ BOOST_AUTO_TEST_CASE(test_alias) {
                               "Could not get the defs from server\n"
                                   << TestFixture::client().errorMsg());
         defs_ptr defs = TestFixture::client().defs();
-        std::vector<alias_ptr> aliases;
-        defs->get_all_aliases(aliases);
+        auto aliases  = ecf::get_all_aliases(*defs);
         BOOST_REQUIRE_MESSAGE(aliases.size() == 2, "Expected 2 aliases\n" << TestFixture::client().errorMsg());
     }
 
@@ -230,8 +229,7 @@ BOOST_AUTO_TEST_CASE(test_alias) {
                           "Could not get the defs from server\n"
                               << TestFixture::client().errorMsg());
     defs_ptr defs = TestFixture::client().defs();
-    std::vector<alias_ptr> aliases;
-    defs->get_all_aliases(aliases);
+    auto aliases  = ecf::get_all_aliases(*defs);
     BOOST_REQUIRE_MESSAGE(aliases.empty(), "Alias deletion falied\n" << TestFixture::client().errorMsg());
 
     std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()

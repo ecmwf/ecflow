@@ -78,8 +78,7 @@ BOOST_AUTO_TEST_CASE(test_free_dep_cmd) {
         fam->add_task("t2");
         //  	cout << theDefs << "\n";
     }
-    std::vector<task_ptr> vec;
-    theDefs.get_all_tasks(vec);
+    auto vec = ecf::get_all_tasks(theDefs);
     BOOST_REQUIRE_MESSAGE(vec.size() == 2, "Error in number of tasks");
 
     // This will initialise the calendar from the Clock attribute

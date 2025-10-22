@@ -355,8 +355,7 @@ static bool s0_delete_some_attributes(defs_ptr defs) {
     BOOST_REQUIRE_MESSAGE(suite, "Could not find suite");
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-    std::vector<Task*> tasks;
-    suite->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
 
     for (Task* task : tasks) {
@@ -371,11 +370,10 @@ static bool s0_add_some_attributes(defs_ptr defs) {
     BOOST_REQUIRE_MESSAGE(suite, "Could not find suite");
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-    std::vector<task_ptr> tasks;
-    suite->get_all_tasks(tasks);
+    auto tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
 
-    for (task_ptr task : tasks) {
+    for (auto task : tasks) {
         SuiteChanged1 changed(suite.get());
         task->addDay(DayAttr(DayAttr::TUESDAY));
     }
@@ -396,8 +394,7 @@ static bool s0_add_alias(defs_ptr defs) {
     BOOST_REQUIRE_MESSAGE(suite, "Could not find suite");
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-    std::vector<task_ptr> tasks;
-    suite->get_all_tasks(tasks);
+    auto tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
 
     SuiteChanged1 changed(tasks[0]->suite());
@@ -411,16 +408,14 @@ static bool s0_remove_all_tasks(defs_ptr defs) {
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
     // Remove tasks should force a incremental sync
-    std::vector<task_ptr> tasks;
-    suite->get_all_tasks(tasks);
+    auto tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
-    for (task_ptr task : tasks) {
+    for (auto task : tasks) {
         SuiteChanged1 changed(task->suite());
         task->remove();
     }
 
-    tasks.clear();
-    suite->get_all_tasks(tasks);
+    tasks = ecf::get_all_tasks(*suite);
     BOOST_REQUIRE_MESSAGE(tasks.empty(), "Failed to delete tasks");
     return true;
 }
@@ -430,18 +425,16 @@ static bool s0_remove_a_family(defs_ptr defs) {
     BOOST_REQUIRE_MESSAGE(suite, "Could not find suite");
     MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
 
-    std::vector<Family*> vec;
-    suite->getAllFamilies(vec);
-    size_t family_size = vec.size();
-    BOOST_REQUIRE_MESSAGE(!vec.empty(), "Expected at least one family");
-    if (!vec.empty()) {
-        SuiteChanged1 changed(vec[0]->suite());
-        vec[0]->remove();
+    auto families      = ecf::get_all_families(*suite);
+    size_t family_size = families.size();
+    BOOST_REQUIRE_MESSAGE(!families.empty(), "Expected at least one family");
+    if (!families.empty()) {
+        SuiteChanged1 changed(families[0]->suite());
+        families[0]->remove();
     }
 
-    vec.clear();
-    suite->getAllFamilies(vec);
-    BOOST_REQUIRE_MESSAGE(vec.size() < family_size, "Failed to delete family");
+    families = ecf::get_all_families(*suite);
+    BOOST_REQUIRE_MESSAGE(families.size() < family_size, "Failed to delete family");
     return true;
 }
 

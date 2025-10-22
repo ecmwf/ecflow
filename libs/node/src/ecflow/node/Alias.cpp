@@ -110,10 +110,6 @@ void Alias::collateChanges(DefsDelta& changes) const {
     Submittable::incremental_changes(changes, comp);
 }
 
-void Alias::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    nodes.push_back(non_const_this());
-}
-
 // Functions unique to aliases
 void Alias::add_alias_variable(const std::string& name, const std::string& value) {
     if (name.empty()) {

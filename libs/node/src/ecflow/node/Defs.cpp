@@ -42,7 +42,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_JOB_SUBMISSION 1
 // #define DEBUG_MEMENTO 1
@@ -190,7 +189,7 @@ void Defs::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
     }
 
     if (jobCtrl->verbose()) {
-        cout << "Defs::check_job_creation(verbose):\n";
+        std::cout << "Defs::check_job_creation(verbose):\n";
     }
 
     // This function should NOT really change the data model
@@ -249,7 +248,7 @@ static void remove_autocancelled(const std::vector<node_ptr>& auto_cancelled_nod
     // Permanently remove any auto-cancelled nodes.
     if (!auto_cancelled_nodes.empty()) {
         auto theNodeEnd = auto_cancelled_nodes.end();
-        string msg;
+        std::string msg;
         for (auto n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
             // If we have two autocancel in the hierarchy, with same attributes. Then
             // (*n)->remove() on the second will fail( with a crash, SuiteChanged0 destructor,  no suite pointer)
@@ -379,7 +378,7 @@ void Defs::absorb(Defs* input_defs, bool force) {
     server_state().add_or_update_user_variables(input_defs->server_state().user_variables());
 
     // This only works on the client side. since server does not store externs
-    const set<string>& ex = input_defs->externs();
+    const std::set<std::string>& ex = input_defs->externs();
     for (const auto& i : ex) {
         add_extern(i);
     }
@@ -489,10 +488,10 @@ suite_ptr Defs::removeSuite(suite_ptr s) {
     }
 
     // Something serious has gone wrong. Cannot find the suite
-    cout << "Defs::removeSuite: assert failure:  suite '" << s->name() << "' suiteVec_.size() = " << suiteVec_.size()
-         << "\n";
+    std::cout << "Defs::removeSuite: assert failure:  suite '" << s->name()
+              << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
     for (unsigned si = 0; si < suiteVec_.size(); ++si) {
-        cout << si << " " << suiteVec_[si]->name() << "\n";
+        std::cout << si << " " << suiteVec_[si]->name() << "\n";
     }
     LOG_ASSERT(false, "Defs::removeSuite the suite not found");
     return suite_ptr();
@@ -522,10 +521,10 @@ node_ptr Defs::removeChild(Node* child) {
     }
 
     // Something has gone wrong.
-    cout << "Defs::removeChild: assert failed:  suite '" << child->name() << "' suiteVec_.size() = " << suiteVec_.size()
-         << "\n";
+    std::cout << "Defs::removeChild: assert failed:  suite '" << child->name()
+              << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
     for (unsigned i = 0; i < suiteVec_.size(); ++i) {
-        cout << i << " " << suiteVec_[i]->name() << "\n";
+        std::cout << i << " " << suiteVec_[i]->name() << "\n";
     }
     LOG_ASSERT(false, "Defs::removeChild,the suite not found");
     return node_ptr();
@@ -652,9 +651,8 @@ void Defs::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
 void Defs::check_suite_can_begin(const suite_ptr& suite) const {
     NState::State suiteState = suite->state();
     if (!suite->begun() && suiteState != NState::UNKNOWN && suiteState != NState::COMPLETE) {
-        int count = 0;
-        std::vector<Task*> tasks;
-        getAllTasks(tasks);
+        int count  = 0;
+        auto tasks = ecf::get_all_tasks(*this);
         std::stringstream ts;
         for (auto& task : tasks) {
             if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
@@ -1006,7 +1004,7 @@ std::string Defs::find_node_path(const std::string& type, const std::string& nam
             return res;
         }
     }
-    return string();
+    return std::string();
 }
 
 node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode) const {
@@ -1045,62 +1043,6 @@ bool Defs::check(std::string& errorMsg, std::string& warningMsg) const {
         s->check(errorMsg, warningMsg);
     }
     return errorMsg.empty();
-}
-
-void Defs::getAllTasks(std::vector<Task*>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllTasks(tasks);
-    }
-}
-
-void Defs::getAllSubmittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllSubmittables(tasks);
-    }
-}
-
-void Defs::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_active_submittables(tasks);
-    }
-}
-
-void Defs::get_all_tasks(std::vector<task_ptr>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_tasks(tasks);
-    }
-}
-
-void Defs::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_nodes(nodes);
-    }
-}
-
-void Defs::get_all_aliases(std::vector<alias_ptr>& aliases) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_aliases(aliases);
-    }
-}
-
-void Defs::getAllFamilies(std::vector<Family*>& vec) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllFamilies(vec);
-    }
-}
-
-void Defs::getAllNodes(std::vector<Node*>& vec) const {
-    vec.reserve(vec.size() + suiteVec_.size());
-    for (const auto& s : suiteVec_) {
-        vec.push_back(s.get());
-        s->getAllNodes(vec);
-    }
-}
-
-void Defs::getAllAstNodes(std::set<Node*>& theSet) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllAstNodes(theSet);
-    }
 }
 
 bool Defs::deleteChild(Node* nodeToBeDeleted) {
@@ -1165,9 +1107,8 @@ node_ptr Defs::replaceChild(const std::string& path,
     node_ptr serverNode = findAbsNode(path);
     if (!force && serverNode.get()) {
         // Check if serverNode has child tasks in submitted or active states
-        vector<Task*> taskVec;
-        serverNode->getAllTasks(taskVec); // taskVec will be empty if serverNode is a task
-        int count = 0;
+        auto taskVec = ecf::get_all_tasks(*serverNode); // taskVec will be empty if serverNode is a task
+        int count    = 0;
         for (Task* t : taskVec) {
             if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
                 count++;
@@ -1890,12 +1831,9 @@ void Defs::remove_edit_history(Node* node) {
     }
 
     // When removing a node *it* and all its children also need to be removed.
-    std::vector<node_ptr> node_children;
-    node->get_all_nodes(node_children);
-    for (const auto& c : node_children) {
-
-        auto it = edit_history_.find(c->absNodePath());
-        if (it != edit_history_.end()) {
+    auto children = ecf::get_all_nodes(*node);
+    for (auto node : children) {
+        if (auto it = edit_history_.find(node->absNodePath()); it != edit_history_.end()) {
             edit_history_.erase(it);
         }
     }
@@ -1982,12 +1920,12 @@ void DefsHistoryParser::parse(const std::string& line) {
     }
 
     // fallback, split line based on looking for logType like 'MSG:[' | 'LOG:['
-    string::size_type first = find_log(line, 0);
+    std::string::size_type first = find_log(line, 0);
     if (first == std::string::npos) {
         return;
     }
 
-    string::size_type next = find_log(line, first + 4);
+    std::string::size_type next = find_log(line, first + 4);
     if (next == std::string::npos) {
         parsed_messages_.push_back(line.substr(first));
         return;
@@ -2005,13 +1943,13 @@ void DefsHistoryParser::parse(const std::string& line) {
     }
 }
 
-string::size_type DefsHistoryParser::find_log(const std::string& line, string::size_type pos) const {
+std::string::size_type DefsHistoryParser::find_log(const std::string& line, std::string::size_type pos) const {
     std::vector<std::string> log_types;
     Log::get_log_types(log_types);
 
     for (auto log_type : log_types) {
         log_type += ":[";
-        string::size_type log_type_pos = line.find(log_type, pos);
+        std::string::size_type log_type_pos = line.find(log_type, pos);
         if (log_type_pos != std::string::npos) {
             return log_type_pos;
         }
@@ -2020,14 +1958,10 @@ string::size_type DefsHistoryParser::find_log(const std::string& line, string::s
 }
 
 std::string Defs::stats() const {
-    std::vector<node_ptr> node_vec;
-    get_all_nodes(node_vec);
+    auto node_vec = ecf::get_all_nodes(*this);
 
-    std::vector<Family*> family_vec;
-    getAllFamilies(family_vec);
-
-    std::vector<task_ptr> task_vec;
-    get_all_tasks(task_vec);
+    auto family_vec = ecf::get_all_families(*this);
+    auto task_vec = ecf::get_all_tasks(*this);
 
     size_t alias = 0;
     for (auto task : task_vec) {

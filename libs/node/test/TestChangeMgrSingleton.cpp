@@ -98,17 +98,16 @@ BOOST_AUTO_TEST_CASE(test_change_mgr_singleton) {
             }
 
             // get all nodes and observer them.
-            std::vector<node_ptr> node_vec;
-            theDefs->get_all_nodes(node_vec);
+            auto nodes = ecf::get_all_nodes(*theDefs);
 
             // Need to make sure life time of observer is greater than Node tree
-            for (auto& i : node_vec) {
-                obs_vec.push_back(new MyObserver(i.get()));
+            for (auto node : nodes) {
+                obs_vec.push_back(new MyObserver(node));
             }
 
             // Do some updates
             std::vector<ecf::Aspect::Type> aspects;
-            for (auto& i : node_vec) {
+            for (auto i : nodes) {
                 i->notify(aspects);
                 i->notify(aspects);
             }

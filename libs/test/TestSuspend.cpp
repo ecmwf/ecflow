@@ -47,9 +47,8 @@ static void waitForTimeDependenciesToBeFree(int max_time_to_wait) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());
-        defs_ptr defs = TestFixture::client().defs();
-        std::vector<Task*> tasks;
-        defs->getAllTasks(tasks);
+        defs_ptr defs            = TestFixture::client().defs();
+        auto tasks               = ecf::get_all_tasks(*defs);
         size_t taskTimeDepIsFree = 0;
         for (Task* task : tasks) {
             size_t attSetFree = 0;

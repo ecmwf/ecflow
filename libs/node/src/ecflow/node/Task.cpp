@@ -345,36 +345,11 @@ const std::string& Task::debugType() const {
     return ecf::Str::TASK();
 }
 
-void Task::getAllNodes(std::vector<Node*>& vec) const {
-    // See notes: getAllSubmittables, about reserve
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        vec.push_back(aliases_[i].get());
-    }
-}
-
 void Task::immediateChildren(std::vector<node_ptr>& vec) const {
     size_t vec_size = aliases_.size();
     vec.reserve(vec.size() + vec_size);
     for (size_t i = 0; i < vec_size; i++) {
         vec.push_back(std::dynamic_pointer_cast<Node>(aliases_[i]));
-    }
-}
-
-void Task::getAllTasks(std::vector<Task*>& vec) const {
-    vec.push_back(const_cast<Task*>(this));
-}
-
-void Task::getAllSubmittables(std::vector<Submittable*>& vec) const {
-    // *DO NOT reserve here, as it dominate time , for very large defs */
-    // * Previously we had::
-    //    vec.reserve(vec.size() + vec_size + 1);
-    // * This took 47 seconds when delete the full defs, i.e when check for active tasks
-
-    vec.push_back(const_cast<Task*>(this));
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        vec.push_back(aliases_[i].get());
     }
 }
 
@@ -390,36 +365,6 @@ node_ptr Task::find_node_up_the_tree(const std::string& name) const {
         return the_parent->find_node_up_the_tree(name);
     }
     return node_ptr();
-}
-
-void Task::get_all_active_submittables(std::vector<Submittable*>& vec) const {
-    // See notes: getAllSubmittables, about reserve
-    if (state() == NState::ACTIVE || state() == NState::SUBMITTED) {
-        vec.push_back(const_cast<Task*>(this));
-    }
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        if (aliases_[i]->state() == NState::ACTIVE || aliases_[i]->state() == NState::SUBMITTED) {
-            vec.push_back(aliases_[i].get());
-        }
-    }
-}
-
-void Task::get_all_tasks(std::vector<task_ptr>& vec) const {
-    vec.push_back(std::dynamic_pointer_cast<Task>(non_const_this()));
-}
-
-void Task::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    nodes.push_back(non_const_this());
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        aliases_[i]->get_all_nodes(nodes);
-    }
-}
-
-void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const {
-    destinationVec.reserve(destinationVec.size() + aliases_.size());
-    std::copy(aliases_.begin(), aliases_.end(), std::back_inserter(destinationVec));
 }
 
 bool Task::resolveDependencies(JobsParam& jobsParam) {

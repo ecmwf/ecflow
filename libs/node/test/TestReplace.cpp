@@ -1038,18 +1038,15 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
         BOOST_REQUIRE_MESSAGE(errorMsg.empty(), "Expected no message " << errorMsg);
     }
     {
-        std::vector<Node*> all_server_nodes;
-        serverDefs.getAllNodes(all_server_nodes);
+        auto all_server_nodes = ecf::get_all_nodes(serverDefs);
 
         // Now check the Trigger reference. The old reference to nodes in the trigger expressions should have been
         // removed
-        std::vector<Task*> theTasks;
-        server_suite->getAllTasks(theTasks);
-        BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
-        for (auto& theTask : theTasks) {
+        auto tasks = ecf::get_all_tasks(*server_suite);
+        BOOST_REQUIRE_MESSAGE(tasks.size() == 3, "Expected 3 tasks but found, " << tasks.size());
+        for (auto& task : tasks) {
 
-            std::set<Node*> referenced_nodes;
-            theTask->getAllAstNodes(referenced_nodes);
+            auto referenced_nodes = ecf::get_all_ast_nodes(*task);
             BOOST_REQUIRE_MESSAGE(referenced_nodes.size() == 1, " expected 1 referenced node");
 
             // The reference nodes must exist in the server. Otherwise replace has still kept references to old nodes in

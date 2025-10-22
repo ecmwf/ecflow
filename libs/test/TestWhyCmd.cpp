@@ -347,9 +347,8 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
             defs_ptr defs       = TestFixture::client().defs();
             updateCalendarCount = defs->updateCalendarCount();
             bool wait           = false;
-            std::vector<Task*> tasks;
-            defs->getAllTasks(tasks);
-            for (Task* task : tasks) {
+            auto tasks          = ecf::get_all_tasks(*defs);
+            for (auto task : tasks) {
                 if (task->state() != NState::COMPLETE) {
                     wait = true;
                 }

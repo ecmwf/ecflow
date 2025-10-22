@@ -276,14 +276,13 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
     {
         // Time how long it takes to delete all nodes/ references. Delete all tasks and then suites/families.
         timer.start();
-        std::vector<Task*> tasks;
-        defs.getAllTasks(tasks);
+        auto tasks = ecf::get_all_tasks(defs);
         BOOST_CHECK_MESSAGE(tasks.size() > 0, "Expected > 0 tasks but found " << tasks.size());
         for (Task* t : tasks) {
             BOOST_REQUIRE_MESSAGE(defs.deleteChild(t), " Failed to delete task");
         }
-        tasks.clear();
-        defs.getAllTasks(tasks);
+
+        tasks = ecf::get_all_tasks(defs);
         BOOST_REQUIRE_MESSAGE(tasks.empty(), "Expected all tasks to be deleted but found " << tasks.size());
 
         std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators

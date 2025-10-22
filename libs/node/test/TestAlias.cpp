@@ -133,17 +133,15 @@ BOOST_AUTO_TEST_CASE(test_alias_create) {
     BOOST_CHECK_MESSAGE(fs::exists(usr_file1), "Expected alias1.usr file to be created " + usr_file1.string());
 
     // Test Defs::get_all_aliases()
-    std::vector<alias_ptr> alias_vec;
-    theDefs.get_all_aliases(alias_vec);
-    BOOST_CHECK_MESSAGE(alias_vec.size() == 2, "Expected 2 aliases but found " << alias_vec.size());
+    auto aliases = ecf::get_all_aliases(theDefs);
+    BOOST_CHECK_MESSAGE(aliases.size() == 2, "Expected 2 aliases but found " << aliases.size());
 
     // Check alias remove
-    for (alias_ptr al : alias_vec) {
-        al->remove();
+    for (auto alias : aliases) {
+        alias->remove();
     }
-    alias_vec.clear();
-    theDefs.get_all_aliases(alias_vec);
-    BOOST_CHECK_MESSAGE(alias_vec.empty(), "Expected no aliases but found " << alias_vec.size());
+    aliases = ecf::get_all_aliases(theDefs);
+    BOOST_CHECK_MESSAGE(aliases.empty(), "Expected no aliases but found " << aliases.size());
 
     // Cleanup by removing the created directory
     fs::remove_all(ecf_home);

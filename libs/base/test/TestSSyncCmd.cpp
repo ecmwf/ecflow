@@ -120,8 +120,7 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
 
 // The modifiers
 void delete_some_attributes(defs_ptr defs) {
-    std::vector<Task*> tasks;
-    defs->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*defs);
     for (Task* task : tasks) {
 
         SuiteChanged1 changed(task->suite());
@@ -148,9 +147,8 @@ void delete_some_attributes(defs_ptr defs) {
 }
 
 void delete_time_attributes(defs_ptr defs) {
-    std::vector<Node*> nodes;
-    defs->getAllNodes(nodes);
-    for (Node* node : nodes) {
+    auto nodes = ecf::get_all_nodes(*defs);
+    for (auto node : nodes) {
 
         SuiteChanged1 changed(node->suite());
 
@@ -186,9 +184,8 @@ void delete_time_attributes(defs_ptr defs) {
 }
 
 void delete_misc_attributes(defs_ptr defs) {
-    std::vector<Node*> nodes;
-    defs->getAllNodes(nodes);
-    for (Node* node : nodes) {
+    auto nodes = ecf::get_all_nodes(*defs);
+    for (auto node : nodes) {
 
         SuiteChanged1 changed(node->suite());
 
@@ -207,9 +204,8 @@ void delete_misc_attributes(defs_ptr defs) {
 }
 
 void add_some_attributes(defs_ptr defs) {
-    std::vector<task_ptr> tasks;
-    defs->get_all_tasks(tasks);
-    for (task_ptr task : tasks) {
+    auto tasks = ecf::get_all_tasks(*defs);
+    for (auto task : tasks) {
         SuiteChanged1 changed(task->suite());
         task->addDay(DayAttr(DayAttr::TUESDAY));
     }
@@ -220,9 +216,7 @@ void begin(defs_ptr defs) {
 } // reset all attributes
 
 void add_alias(defs_ptr defs) {
-
-    std::vector<task_ptr> tasks;
-    defs->get_all_tasks(tasks);
+    auto tasks = ecf::get_all_tasks(*defs);
     BOOST_REQUIRE_MESSAGE(!tasks.empty(), "Expected at least one task");
 
     SuiteChanged1 changed(tasks[0]->suite());
@@ -231,49 +225,43 @@ void add_alias(defs_ptr defs) {
 
 void remove_all_aliases(defs_ptr defs) {
 
-    std::vector<alias_ptr> aliases;
-    defs->get_all_aliases(aliases);
+    auto aliases = ecf::get_all_aliases(*defs);
     BOOST_REQUIRE_MESSAGE(!aliases.empty(), "Expected at least one alias");
 
-    for (alias_ptr alias : aliases) {
+    for (auto alias : aliases) {
         TestHelper::invokeRequest(defs.get(), Cmd_ptr(new DeleteCmd(alias->absNodePath())));
     }
 
-    aliases.clear();
-    defs->get_all_aliases(aliases);
+    aliases = ecf::get_all_aliases(*defs);
     BOOST_REQUIRE_MESSAGE(aliases.empty(), "Expected at no  alias");
 }
 
 void remove_all_tasks(defs_ptr defs) {
 
     // Remove tasks should force a incremental sync
-    std::vector<task_ptr> tasks;
-    defs->get_all_tasks(tasks);
-    for (task_ptr task : tasks) {
+    auto tasks = ecf::get_all_tasks(*defs);
+    for (auto task : tasks) {
         SuiteChanged1 changed(task->suite());
         task->remove();
     }
 
-    tasks.clear();
-    defs->get_all_tasks(tasks);
+    tasks = ecf::get_all_tasks(*defs);
     BOOST_REQUIRE_MESSAGE(tasks.empty(), "Failed to delete tasks");
 }
 
 void remove_a_family(defs_ptr defs) {
 
     // Remove tasks should force a incremental sync
-    std::vector<Family*> vec;
-    defs->getAllFamilies(vec);
-    size_t family_size = vec.size();
-    BOOST_REQUIRE_MESSAGE(!vec.empty(), "Expected at least one family");
-    if (!vec.empty()) {
-        SuiteChanged1 changed(vec[0]->suite());
-        vec[0]->remove();
+    auto families = ecf::get_all_families(*defs);
+    size_t family_size = families.size();
+    BOOST_REQUIRE_MESSAGE(!families.empty(), "Expected at least one family");
+    if (!families.empty()) {
+        SuiteChanged1 changed(families[0]->suite());
+        families[0]->remove();
     }
 
-    vec.clear();
-    defs->getAllFamilies(vec);
-    BOOST_REQUIRE_MESSAGE(vec.size() < family_size, "Failed to delete family");
+    families = ecf::get_all_families(*defs);
+    BOOST_REQUIRE_MESSAGE(families.size() < family_size, "Failed to delete family");
 }
 
 void change_clock_gain(defs_ptr defs) {
@@ -352,13 +340,12 @@ void change_limit_value(defs_ptr defs) {
 
 void update_repeat(defs_ptr defs) {
 
-    std::vector<Node*> nodes;
-    defs->getAllNodes(nodes);
+    auto nodes = ecf::get_all_nodes(*defs);
 
-    for (Node* n : nodes) {
-        if (!n->repeat().empty()) {
-            SuiteChanged1 changed(n->suite());
-            n->increment_repeat();
+    for (auto node : nodes) {
+        if (!node->repeat().empty()) {
+            SuiteChanged1 changed(node->suite());
+            node->increment_repeat();
         }
     }
 }
