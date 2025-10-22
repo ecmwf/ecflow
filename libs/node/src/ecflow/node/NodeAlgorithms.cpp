@@ -19,6 +19,12 @@ namespace ecf {
 
 namespace implementation {
 
+/**
+ * Visit recursively all 'sub-nodes' of the given node (including itself), and call _visitor_ on each visited node.
+ *
+ * @param node The node being queried
+ * @param visitor The function that selects/collects nodes
+ */
 template <typename N, typename Visitor>
 void select_nodes_from_node(N& node, Visitor& visitor) {
 
@@ -38,6 +44,12 @@ void select_nodes_from_node(N& node, Visitor& visitor) {
     }
 }
 
+/**
+ * Visit recursively all 'sub-nodes' of the given Defs, and call _visitor_ on each visited node.
+ *
+ * @param defs The defs being queried
+ * @param visitor The function that selects/collects nodes
+ */
 template <typename Visitor>
 void select_nodes_from_defs(Defs& defs, Visitor& visitor) {
 
@@ -47,6 +59,12 @@ void select_nodes_from_defs(Defs& defs, Visitor& visitor) {
     }
 }
 
+/**
+ * Visit recursively all 'sub-nodes' of the given Defs, and call _visitor_ on each visited node.
+ *
+ * @param defs The defs being queried
+ * @param visitor The function that selects/collects nodes
+ */
 template <typename Visitor>
 void select_nodes_from_defs(const Defs& defs, Visitor& visitor) {
 
@@ -304,6 +322,13 @@ std::set<const Node*> get_all_ast_nodes(const Node& node) {
 
 namespace implementation {
 
+/**
+ * Visit recursively all 'sub-nodes' of the given node (including itself), and call _visitor_ on each visited node.
+ *
+ * @param node The node being queried
+ * @param visitor The function that selects/collects nodes
+ */
+
 template <typename Visitor>
 void select_nodes_ptr_from_node(const node_ptr& node, Visitor& visitor) {
 
@@ -324,6 +349,12 @@ void select_nodes_ptr_from_node(const node_ptr& node, Visitor& visitor) {
     }
 }
 
+/**
+ * Visit recursively all 'sub-nodes' of the given Defs, and call _visitor_ on each visited node.
+ *
+ * @param defs The defs being queried
+ * @param visitor The function that selects/collects nodes
+ */
 template <typename Visitor>
 void select_nodes_ptr_from_defs(Defs& defs, Visitor& visitor) {
 
@@ -333,6 +364,12 @@ void select_nodes_ptr_from_defs(Defs& defs, Visitor& visitor) {
     }
 }
 
+/**
+ * Visit recursively all 'sub-nodes' of the given Defs, and call _visitor_ on each visited node.
+ *
+ * @param defs The defs being queried
+ * @param visitor The function that selects/collects nodes
+ */
 template <typename Visitor>
 void select_nodes_ptr_from_defs(const Defs& defs, Visitor& visitor) {
 

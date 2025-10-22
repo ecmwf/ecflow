@@ -995,28 +995,64 @@ std::vector<Variable> generated_variables(const Node& node);
 
 // Select Nodes
 
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself).
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
 std::vector<Node*> get_all_nodes(Node& node);
 
 // Select Tasks
 
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Task.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
 std::vector<Task*> get_all_tasks(Node& node);
 std::vector<const Task*> get_all_tasks(const Node& node);
 
 // Select Alias
 
-std::vector<Alias*> get_all_aliases(Node& node);
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Alias.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
 std::vector<const Alias*> get_all_aliases(const Node& node);
 
 // Select Active Submittables
 
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself), that are both Active and of type Submittable.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
 std::vector<Submittable*> get_all_active_submittables(Node& node);
 
 // Select Families
 
+/**
+ * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Family.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
 std::vector<Family*> get_all_families(Node& node);
 
 // Select Nodes that have ASTs (i.e. either Trigger or Complete)
 
+/**
+ * Retrieve the set of 'sub-nodes' of the given node (including the node itself),
+ * that are referenced in either a Trigger or a Complete.
+ *
+ * @param node The node being queried
+ * @return The set of 'sub-nodes'
+ */
 std::set<const Node*> get_all_ast_nodes(const Node& node);
 
 } // namespace ecf
