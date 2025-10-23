@@ -86,7 +86,7 @@ public:
     bool checkInvariants(std::string& errorMsg) const override;
 
     // Memento functions
-    void collateChanges(DefsDelta&) const override;
+    void collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const override;
     void set_memento(const SuiteClockMemento*, std::vector<ecf::Aspect::Type>& aspects, bool);
     void set_memento(const SuiteBeginDeltaMemento*, std::vector<ecf::Aspect::Type>& aspects, bool);
     void set_memento(const SuiteCalendarMemento*, std::vector<ecf::Aspect::Type>& aspects, bool);

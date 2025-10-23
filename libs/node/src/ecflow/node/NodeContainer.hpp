@@ -43,7 +43,7 @@ public:
     void kill(const std::string& zombie_pid = "") override;
     void status() override;
     bool top_down_why(std::vector<std::string>& theReasonWhy, bool html_tags = false) const override;
-    void collateChanges(DefsDelta&) const override;
+    void collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const override;
     void set_memento(const OrderMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const ChildrenMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void order(Node* immediateChild, NOrder::Order) override;

@@ -567,8 +567,12 @@ bool Suite::checkInvariants(std::string& errorMsg) const {
     return NodeContainer::checkInvariants(errorMsg);
 }
 
-void Suite::collateChanges(DefsDelta& changes) const {
+void Suite::collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const {
     /// The suite hold the max state change no, for all its children and attributes
+
+    if (!ctx.allows(this->absNodePath(), ecf::Allowed::READ)) {
+        return;
+    }
 
     // Optimising updates:
     // Problem:
@@ -641,7 +645,7 @@ void Suite::collateChanges(DefsDelta& changes) const {
 
         // Traversal, we have finished with this node:
         // Traverse children : *SEPARATE* compound_memento_ptr created on demand
-        NodeContainer::collateChanges(changes);
+        NodeContainer::collateChanges(changes, ctx);
 
         /// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
         /// *OR* if it has been specifically requested. see ECFLOW-631
