@@ -1078,8 +1078,32 @@ void NodeContainer::setStateOnlyHierarchically(NState::State s, bool force) {
     }
 }
 
+void NodeContainer::setStateOnlyHierarchically(NState::State s, const Ctx& ctx, bool force) {
+    if (!ctx.allows(this->absNodePath(), ecf::Allowed::WRITE)) {
+        return;
+    }
+
+    setStateOnly(s, force);
+    for (const auto& n : nodes_) {
+        n->setStateOnlyHierarchically(s, ctx, force);
+    }
+}
+
 void NodeContainer::set_state_hierarchically(NState::State s, bool force) {
     setStateOnlyHierarchically(s, force);
+    if (force) {
+        // *force* is only set via ForceCmd.
+        update_limits(); // hierarchical
+    }
+    handleStateChange(); // non-hierarchical
+}
+
+void NodeContainer::set_state_hierarchically(NState::State s, const Ctx& ctx, bool force) {
+    if (!ctx.allows(this->absNodePath(), ecf::Allowed::WRITE)) {
+        return;
+    }
+
+    setStateOnlyHierarchically(s, ctx, force);
     if (force) {
         // *force* is only set via ForceCmd.
         update_limits(); // hierarchical

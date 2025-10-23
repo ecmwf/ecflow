@@ -318,6 +318,12 @@ public:
     /// 	** meaningless, since it will always be the computed state.
     void set_state(NState::State s, bool force = false, const std::string& additional_info_to_log = "");
     virtual void set_state_hierarchically(NState::State s, bool force) { set_state(s, force); }
+    virtual void set_state_hierarchically(NState::State s, const ecf::Ctx& ctx, bool force) {
+        if (!ctx.allows(this->absNodePath(), ecf::Allowed::WRITE)) {
+            return;
+        }
+        set_state(s, force);
+    }
 
     /// Set state only, has no side effects
     void setStateOnly(NState::State s,
@@ -325,6 +331,12 @@ public:
                       const std::string& additional_info_to_log = "",
                       bool log_state_changes                    = true);
     virtual void setStateOnlyHierarchically(NState::State s, bool force = false) { setStateOnly(s, force); }
+    virtual void setStateOnlyHierarchically(NState::State s, const ecf::Ctx& ctx, bool force = false) {
+        if (!ctx.allows(this->absNodePath(), ecf::Allowed::WRITE)) {
+            return;
+        }
+        setStateOnly(s, force);
+    }
 
     /// This returns the time of state change: (relative to real time when the suite calendar was begun)
     /// The returned time is *real time/computer UTC time* and *not* suite real time.
