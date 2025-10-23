@@ -107,7 +107,9 @@ public:
 
     void setRepeatToLastValueHierarchically() override;
     void setStateOnlyHierarchically(NState::State s, bool force = false) override;
+    void setStateOnlyHierarchically(NState::State s, const ecf::Ctx& ctx, bool force = false) override;
     void set_state_hierarchically(NState::State s, bool force) override;
+    void set_state_hierarchically(NState::State s, const ecf::Ctx& ctx, bool force) override;
     void update_limits() override;
     void sort_attributes(ecf::Attr::Type attr,
                          bool recursive                          = true,

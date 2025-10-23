@@ -15,7 +15,9 @@
 namespace ecf {
 
 bool Ctx::allows(const path_t& path, Allowed required) const {
-    return service_.allows(identity_, defs_, path, required);
+    auto x = service_.allows(identity_, defs_, path, required);
+    std::cout << "Ctx :: Checking path=" << path << " required=" << allowed_to_string(required) << " found=" << x << std::endl;
+    return x;
 }
 
 bool Ctx::allows(const paths_t& paths, Allowed required) const {
