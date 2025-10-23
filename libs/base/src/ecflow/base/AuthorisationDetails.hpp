@@ -88,8 +88,8 @@ authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractS
     std::vector<std::string> paths = get_affected_paths(command);
 
     auto required    = Authoriser<COMMAND>::required(command);
-    const Defs& defs = *server.defs();
-    if (server.authorisation().allows(command.identity(), defs, paths, required)) {
+    Ctx ctx{command.identity(), *server.defs()};
+    if (ctx.allows(paths, required)) {
         return authorisation_t::success("Authorisation (user) granted");
     }
 

@@ -1633,7 +1633,7 @@ std::string Defs::toString() const {
 }
 
 // Memento functions
-void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_changes) const {
+void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_changes, const ecf::Ctx& ctx) const {
     // Collate any small scale changes to the defs
     collate_defs_changes_only(incremental_changes);
 
@@ -1647,7 +1647,7 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
             //   *IF* node/attribute change no > client_state_change_no
             //   *THEN*
             //       Create a memento, and store in incremental_changes_
-            s->collateChanges(incremental_changes);
+            s->collateChanges(incremental_changes, ctx);
         }
     }
     else {
@@ -1657,7 +1657,7 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
         //   *IF* node/attribute change no > client_state_change_no
         //   *THEN*
         //       Create a memento, and store in incremental_changes_
-        client_suite_mgr_.collateChanges(client_handle, incremental_changes);
+        client_suite_mgr_.collateChanges(client_handle, incremental_changes, ctx);
     }
 }
 

@@ -128,11 +128,11 @@ void ClientSuites::suite_deleted_in_defs(suite_ptr suite) {
     }
 }
 
-void ClientSuites::collateChanges(DefsDelta& changes) const {
+void ClientSuites::collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const {
     for (const HSuite& s : suites_) {
         suite_ptr suite = s.weak_suite_ptr_.lock();
         if (suite.get()) {
-            suite->collateChanges(changes);
+            suite->collateChanges(changes, ctx);
         }
     }
 }

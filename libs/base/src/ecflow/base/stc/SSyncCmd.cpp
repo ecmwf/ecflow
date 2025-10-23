@@ -103,12 +103,15 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
         //         return;
         //      }
 
+        // Setup authorisation callback
+        Ctx ctx{identity, *as->defs()};
+
         // small scale changes. Collate changes over *defs* and all suites.
         // Suite stores the maximum state change, over *all* its children, this is used by client handle mechanism
         // and here to avoid traversing down the hierarchy.
         // ******** We must trap all child changes under the suite. See class SuiteChanged
         // ******** otherwise some attribute sync's will be missed
-        as->defs()->collateChanges(client_handle, incremental_changes_);
+        as->defs()->collateChanges(client_handle, incremental_changes_, ctx);
         incremental_changes_.set_server_state_change_no(Ecf::state_change_no());
         incremental_changes_.set_server_modify_change_no(Ecf::modify_change_no());
 #ifdef DEBUG_SERVER_SYNC
@@ -176,8 +179,11 @@ void SSyncCmd::init(unsigned int client_handle, // a reference to a set of suite
         return;
     }
 
+    // Setup authorisation callback
+    Ctx ctx{identity, *as->defs()};
+
     // small scale changes
-    as->defs()->collateChanges(client_handle, incremental_changes_);
+    as->defs()->collateChanges(client_handle, incremental_changes_, ctx);
     incremental_changes_.set_server_state_change_no(max_client_handle_state_change_no);
     incremental_changes_.set_server_modify_change_no(max_client_handle_modify_change_no);
 #ifdef DEBUG_SERVER_SYNC
