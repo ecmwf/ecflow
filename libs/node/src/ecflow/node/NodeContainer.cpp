@@ -311,7 +311,7 @@ void NodeContainer::set_memento(const ChildrenMemento* memento,
     }
 }
 
-void NodeContainer::collateChanges(DefsDelta& changes) const {
+void NodeContainer::collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const {
     /// Theres no point in traversing children if we have added/removed children
     /// since ChildrenMemento will copy all children.
     if (add_remove_state_change_no_ > changes.client_state_change_no()) {
@@ -320,7 +320,7 @@ void NodeContainer::collateChanges(DefsDelta& changes) const {
 
     // Traversal to children
     for (const auto& n : nodes_) {
-        n->collateChanges(changes);
+        n->collateChanges(changes, ctx);
     }
 }
 

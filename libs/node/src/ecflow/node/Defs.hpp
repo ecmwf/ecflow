@@ -33,6 +33,7 @@
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
+#include "ecflow/node/Ctx.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 #include "ecflow/node/ServerState.hpp"
@@ -334,7 +335,7 @@ public:
     constexpr static size_t max_edit_history_size_per_node() { return 10; }
 
     /// Memento functions:
-    void collateChanges(unsigned int client_handle, DefsDelta&) const;
+    void collateChanges(unsigned int client_handle, DefsDelta&, const ecf::Ctx& ctx) const;
     void set_memento(const StateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const ServerStateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const ServerVariableMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);

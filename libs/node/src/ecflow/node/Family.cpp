@@ -104,13 +104,18 @@ const std::string& Family::debugType() const {
     return ecf::Str::FAMILY();
 }
 
-void Family::collateChanges(DefsDelta& changes) const {
+void Family::collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const {
+
+    if (!ctx.allows(this->absNodePath(), ecf::Allowed::READ)) {
+        return;
+    }
+
     /// All changes to family should be on ONE compound_memento_ptr
     compound_memento_ptr compound;
     NodeContainer::incremental_changes(changes, compound);
 
     // Traversal
-    NodeContainer::collateChanges(changes);
+    NodeContainer::collateChanges(changes, ctx);
 }
 
 // generated variables --------------------------------------------------------------------------

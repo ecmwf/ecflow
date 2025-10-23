@@ -50,7 +50,7 @@ public:
 
     const std::string& script_extension() const override;
 
-    void collateChanges(DefsDelta&) const override;
+    void collateChanges(DefsDelta&, const ecf::Ctx& ctx) const override;
     void set_memento(const SubmittableMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool f) {
         Submittable::set_memento(m, aspects, f);
     }
