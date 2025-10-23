@@ -96,7 +96,7 @@ public:
 
     bool checkInvariants(std::string& errorMsg) const override;
 
-    void collateChanges(DefsDelta&) const override;
+    void collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const override;
     void set_memento(const OrderMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool);
     void set_memento(const AliasChildrenMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool);
     void set_memento(const AliasNumberMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool);

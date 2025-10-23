@@ -41,6 +41,7 @@
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
 #include "ecflow/node/AvisoAttr.hpp"
+#include "ecflow/node/Ctx.hpp"
 #include "ecflow/node/Expression.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/InLimit.hpp"
@@ -577,7 +578,7 @@ public:
 
     // mementos functions:
     /// Collect all the state changes, so that only small subset is returned to client
-    virtual void collateChanges(DefsDelta&) const = 0;
+    virtual void collateChanges(DefsDelta& chnages, const ecf::Ctx& ctx) const = 0;
     void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
 
     void set_memento(const NodeStateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);

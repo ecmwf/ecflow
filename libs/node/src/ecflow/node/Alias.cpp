@@ -104,7 +104,12 @@ const std::string& Alias::script_extension() const {
     return File::USR_EXTN();
 }
 
-void Alias::collateChanges(DefsDelta& changes) const {
+void Alias::collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const {
+
+    if (!ctx.allows(this->absNodePath(), ecf::Allowed::READ)) {
+        return;
+    }
+
     /// All changes to Alias should be on ONE compound_memento_ptr
     compound_memento_ptr comp;
     Submittable::incremental_changes(changes, comp);
