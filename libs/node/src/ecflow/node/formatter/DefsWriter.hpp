@@ -11,6 +11,8 @@
 #ifndef ecflow_node_formatter_DefsWriter_HPP
 #define ecflow_node_formatter_DefsWriter_HPP
 
+#include <ecflow/base/Authorisation.hpp>
+
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
@@ -37,7 +39,7 @@ struct Style
 {
     Style(PrintStyle::Type_t s) : selected_(s) {}
 
-    PrintStyle::Type_t selected() { return selected_; }
+    PrintStyle::Type_t selected() const { return selected_; }
 
     template <PrintStyle::Type_t... Args>
     bool is_one_of() const {
@@ -69,19 +71,22 @@ struct Context
 {
     Style style;
     Format format;
+    std::optional<Username> username;
 
-    static Context make_for(PrintStyle::Type_t style) {
+    static Context make_for(PrintStyle::Type_t style) { return make_for(style, std::nullopt); }
+
+    static Context make_for(PrintStyle::Type_t style, const std::optional<Username>& username) {
         switch (style) {
             case PrintStyle::DEFS:
-                return Context{Style{PrintStyle::DEFS}, Format{true, 2, 0}};
+                return Context{Style{PrintStyle::DEFS}, Format{true, 2, 0}, username};
             case PrintStyle::STATE:
-                return Context{Style{PrintStyle::STATE}, Format{false, 0, 0}};
+                return Context{Style{PrintStyle::STATE}, Format{false, 0, 0}, username};
             case PrintStyle::NET:
-                return Context{Style{PrintStyle::NET}, Format{false, 0, 0}};
+                return Context{Style{PrintStyle::NET}, Format{false, 0, 0}, username};
             case PrintStyle::MIGRATE:
-                return Context{Style{PrintStyle::MIGRATE}, Format{false, 0, 0}};
+                return Context{Style{PrintStyle::MIGRATE}, Format{false, 0, 0}, username};
             default:
-                return Context{Style{PrintStyle::NOTHING}, Format{true, 2, 0}};
+                return Context{Style{PrintStyle::NOTHING}, Format{true, 2, 0}, username};
         }
     }
 };
@@ -1794,6 +1799,18 @@ struct Writer<Alias, Stream>
     static void write(Stream& output, const Alias& item, Context& ctx) {
         // taken from Alias::print(std::string& os) const
 
+        if (auto* defs = item.defs(); defs) {
+            // An Alias can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            AuthorisationService service = AuthorisationService::make_for(*defs);
+            auto perms                   = service.permissions_at(*defs, item.absNodePath());
+            if (ctx.username && !perms.allows(ctx.username.value(), Allowed::READ)) {
+                // User is not allowed to read this alias, so we skip writing it
+                return;
+            }
+        }
+
         Indent l1(ctx);
 
         // Write the alias header
@@ -1818,6 +1835,18 @@ struct Writer<Family, Stream>
 {
     static void write(Stream& output, const Family& item, Context& ctx) {
         // taken from Family::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Family can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            AuthorisationService service = AuthorisationService::make_for(*defs);
+            auto perms                   = service.permissions_at(*defs, item.absNodePath());
+            if (ctx.username && !perms.allows(ctx.username.value(), Allowed::READ)) {
+                // User is not allowed to read this family, so we skip writing it
+                return;
+            }
+        }
 
         Indent l1(ctx);
 
@@ -1850,6 +1879,18 @@ struct Writer<Task, Stream>
 {
     static void write(Stream& output, const Task& item, Context& ctx) {
         // taken from Task::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Task can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            AuthorisationService service = AuthorisationService::make_for(*defs);
+            auto perms                   = service.permissions_at(*defs, item.absNodePath());
+            if (ctx.username && !perms.allows(ctx.username.value(), Allowed::READ)) {
+                // User is not allowed to read this task, so we skip writing it
+                return;
+            }
+        }
 
         Indent l1(ctx);
 
@@ -2098,6 +2139,18 @@ struct Writer<Suite, Stream>
 {
     static void write(Stream& output, const Suite& item, Context& ctx) {
         // taken from Suite::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Suite can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            AuthorisationService service = AuthorisationService::make_for(*defs);
+            auto perms                   = service.permissions_at(*defs, item.absNodePath());
+            if (ctx.username && !perms.allows(ctx.username.value(), Allowed::READ)) {
+                // User is not allowed to read this suite, so we skip writing it
+                return;
+            }
+        }
 
         // Write the suite header
         output << "suite ";

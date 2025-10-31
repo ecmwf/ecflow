@@ -115,7 +115,7 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
     //   cout << "test_sync_scaffold AFTER Command before SYNC: Client:\n" << *server_reply.client_defs() << "\n";
 
     MockServer mock_server(server_defs);
-    SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
+    SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, Identity::make_none(), &mock_server);
     string error_msg;
     BOOST_REQUIRE_MESSAGE(mock_server.defs()->checkInvariants(error_msg), error_msg);
     BOOST_CHECK_MESSAGE(cmd.do_sync(server_reply), "Expected server to change");

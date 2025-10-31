@@ -52,6 +52,7 @@ constexpr const char* ECF_EXTN            = "ECF_EXTN";
 constexpr const char* ECF_LOG             = "ECF_LOG";
 constexpr const char* ECF_PASSWD          = "ECF_PASSWD";
 constexpr const char* ECF_CUSTOM_PASSWD   = "ECF_CUSTOM_PASSWD";
+constexpr const char* ECF_PERMISSIONS     = "ECF_PERMISSIONS";
 
 constexpr const char* ECF_SSL  = "ECF_SSL";
 constexpr const char* ECF_USER = "ECF_USER";

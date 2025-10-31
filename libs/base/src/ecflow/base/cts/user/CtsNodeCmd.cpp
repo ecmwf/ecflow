@@ -218,11 +218,12 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const {
             as->update_stats().get_defs_++;
             if (absNodePath_.empty()) {
                 // with migrate we need to get edit history.
-                return PreAllocatedReply::defs_cmd(as, (api_ == MIGRATE)); // if true, save edit history
+                return PreAllocatedReply::defs_cmd(
+                    this->identity(), as, (api_ == MIGRATE)); // if true, save edit history
             }
-            // however request for a particular node, thats not there, treated as an error
+            // however request for a particular node, that does not exist, treated as an error
             node_ptr theNodeToReturn = find_node(defs, absNodePath_);
-            return PreAllocatedReply::node_cmd(as, theNodeToReturn);
+            return PreAllocatedReply::node_cmd(this->identity(), as, theNodeToReturn);
         }
 
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY: {
