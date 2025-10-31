@@ -7,102 +7,119 @@
 .. _tutorial-running-the-jobs:
 
 Running (remote) jobs
-=========================
+======================
 
-To start a job, :term:`ecflow_server` uses the content of the ECF_JOB_CMD :term:`variable`.  By modifying this variable, it is possible to control where and how a :term:`job file` will run. The command should be used in conjunctions with the :term:`variable` ECF_JOB and ECF_JOBOUT. The ECF_JOB variable contains the :term:`job file` path and ECF_JOBOUT contains the path of a file where the output of the job will be written.
+To start a job, the :term:`ecflow_server` uses the content of the :code:`ECF_JOB_CMD` :term:`variable`.
+By modifying this variable, it is possible to control where and how a :term:`job file` will run.
+The command should be used in conjunctions with the :term:`variable` :code:`ECF_JOB` and :code:`ECF_JOBOUT`.
+The :code:`ECF_JOB` variable specifies the :term:`job file` path and the :code:`ECF_JOBOUT` defines the path of a file where the output of the job is stored.
 
 .. code-block:: bash
+   :caption: A typical :code:`ECF_JOB_CMD`, spawns the job on the local machine in the background
 
    ECF_JOB_CMD = %ECF_JOB% 1> %ECF_JOBOUT% 2>&1 &
 
-Let us run the tasks on a remote machine. For that we could use the unix command rsh. We would like the name of the host to be defined by an :term:`variable` called HOST. We assume that all the files are visible on all the hosts, i.e. using NFS.
+Updating :code:`ECF_JOB_CMD` allows to run the tasks on a remote machine, taking advantage of the unix command rsh.
 
-In the examples below replace the string ?????? with a host name of your choice.
+
+In the following examples, consider a variable :code:`HOST` that defines the name of the remote host, and assume that all the files are visible on all the hosts (i.e. using NFS).
+replace the string :code:`<REMOTE-HOSTNAME>` with a host name of your choice.
 
 .. note:: 
 
-   The environment of a task running on a remote host is different from that of a task running locally. This depends on how your system is set up. Here we need to set PATH, to allow :term:`child command`\ s to be used.
-   So add the following line into your :code:`head.h` file before the call to :term:`ecflow_client` --init ::
+   The environment of a task running on a remote host is different from that of a task running locally.
+   This depends on how the local and remote systems are set up.
 
-    export PATH=$PATH:/usr/local/apps/ecflow/%ECF_VERSION%/bin
+   On the remote system, it is likely that the environment variablel :code:`PATH` needs to be adjusted to allow using :term:`task commands <child command>`.
 
-To use ssh requires your public key to be available on the destination machine.
-Check if you can log on to the remote machine through ssh without a password check.
-If you need to enter a password you will need to add your public key on the destination machine. To do this issue the following commands:
+   Consider adding the following line to the :code:`head.h` file, before calling :code:`ecflow_client --init ...`.
+
+   .. code-block:: bash
+
+      export PATH=$PATH:/usr/local/apps/ecflow/%ECF_VERSION%/bin
+
+For the following setup ensure an Ssh connection, based on private/public key, is available to the remote machine.
+
+Attempt to access to the remote machine through ssh without a password.
+In case a password is requested, consider adding the public key on the remote machine, with the following commands:
 
 .. code-block:: bash
    :caption: no password for ssh connection
 
-   REMOTE_HOST=??????  # change me
-   ssh $USER@$REMOTE_HOST mkdir -p \$HOME/.ssh      # if you are prompted for a password use your Training password that was provided
+   REMOTE_HOST=<REMOTE-HOSTNAME>  # change this to the remote host name
+   ssh $USER@$REMOTE_HOST mkdir -p \$HOME/.ssh
    cat $HOME/.ssh/id_rsa.pub || ssh-keygen -t rsa -b 2048
    cat $HOME/.ssh/id_rsa.pub | ssh $USER@$REMOTE_HOST 'cat &gt;&gt; $HOME/.ssh/authorized_keys'
 
+Suite Definition
+----------------
 
-Modify the :term:`family` f5 so that all its tasks will run on another machine in the classroom
+.. tabs::
 
-Text
-----
+    .. tab:: Text
 
-.. code-block:: shell
+        Modify the :term:`suite definition` file as follows:
 
-   # Definition of the suite test
-   suite test
-    edit ECF_INCLUDE "$HOME/course"
-    edit ECF_HOME    "$HOME/course"
-    limit l1 2
+        .. code-block:: shell
 
-    family f5
-        edit HOST ??????
-        edit ECF_OUT /tmp/$USER
-        edit ECF_JOB_CMD "ssh %HOST% 'mkdir -p %ECF_OUT%/%SUITE%/%FAMILY% &amp;&amp; %ECF_JOB% &gt; %ECF_JOBOUT% 2&gt;&amp;1 &amp;'"
-        inlimit l1
-        edit SLEEP 20
-        task t1
-        task t2
-        task t3
-        task t4
-        task t5
-        task t6
-        task t7
-        task t8
-        task t9
-    endfamily
-   endsuite
+            # Definition of the suite test
+            suite test
+             edit ECF_INCLUDE "$HOME/course"
+             edit ECF_HOME    "$HOME/course"
+             limit l1 2
 
-   
-If your login shell is csh, you should define ECF_JOB_CMD as:
+             family f5
+                 edit HOST <REMOTE-HOSTNAME>
+                 edit ECF_OUT /tmp/$USER
+                 edit ECF_JOB_CMD "ssh %HOST% 'mkdir -p %ECF_OUT%/%SUITE%/%FAMILY% &amp;&amp; %ECF_JOB% &gt; %ECF_JOBOUT% 2&gt;&amp;1 &amp;'"
+                 inlimit l1
+                 edit SLEEP 20
+                 task t1
+                 task t2
+                 task t3
+                 task t4
+                 task t5
+                 task t6
+                 task t7
+                 task t8
+                 task t9
+             endfamily
+            endsuite
 
-.. code-block:: shell
+        When using csh as login shell, define :code:`ECF_JOB_CMD` as:
 
-   edit ECF_JOB_CMD "ssh %HOST% 'mkdir -p %ECF_OUT%/%SUITE%/%FAMILY%; %ECF_JOB% &gt;&amp; %ECF_JOBOUT%'"
+        .. code-block:: shell
+
+            edit ECF_JOB_CMD "ssh %HOST% 'mkdir -p %ECF_OUT%/%SUITE%/%FAMILY%; %ECF_JOB% &gt;&amp; %ECF_JOBOUT%'"
 
 
-Python
-------
+    .. tab:: Python
 
-In python modify the function create_family_f5() created in the earlier page, to add HOST,ECF_OUT,ECF_LOGHOST,ECF_LOGPORT, and ECF_JOB_CMD:
 
-.. literalinclude:: src/running-the-jobs.py
-   :language: python
-   :caption: $HOME/course/test.py
+        Modify the function :code:`create_family_f5()` created earlier, to add :code:`HOST`, :code:`ECF_OUT`, :code:`ECF_LOGHOST`, :code:`ECF_LOGPORT`, and :code:`ECF_JOB_CMD`.
+
+        .. literalinclude:: src/running-the-jobs.py
+           :language: python
+           :caption: $HOME/course/test.py
 
 Logserver
 -----------
 
-We can view the output on the remote machine (class??) by using a log server. This assumes you have defined variables ECF_LOGHOST and ECF_LOGPORT in your definition. Launch the log server on a remote machine:
+The job output generated on the remote machine can be inspected by using a *log server*.
+This assumes that variables :code:`ECF_LOGHOST` and :code:`ECF_LOGPORT` are present in the :term:`suite definition`.
+
+Launch the log server on a remote machine:
 
 .. code-block:: bash
 
-   ssh $USER@class01 /usr/local/apps/ecflow/5.5.1/bin/ecflow_logserver.sh -d /tmp/$USER -m /tmp/$USER:/tmp/$USER
+   ssh $USER@<REMOTE-HOSTNAME> /path/to/ecflow/%ECF_VERSION%/bin/ecflow_logserver.sh -d /tmp/$USER -m /tmp/$USER:/tmp/$USER
 
 
 **What to do**
 
-#. Modify PATH environment variable in head.h
-#. Change the :term:`suite definition`
-#. Replace the :term:`suite definition`
-#. It may not work immediately. Have a look in the file :file:`$HOME/course/{host}.{port}.ecf.log` to see why.
-#. Add a ``uname -n`` to your ECF script to see what machine the task is running on.
-#. What do you need to do in order to have the task **/test/f5/t9** run on another machine? Try your solution. 
-#. Create a log server, to access the remote output
+#. Adjust the :code:`PATH` environment variable in :file:`head.h`
+#. Apply the changes to :term:`suite definition`.
+#. In the :term:`ecflow_ui`, execute the suite.
+#. In case of errors, inspect the ecflow server log file (i.e. :file:`{host}.{port}.ecf.log`) and determine what is the cause of the error.
+#. Add :code:`uname -n` to the :term:`task script <ecf script>` to determine in which machine the task is running.
+#. Launch the log server, and access the remote job output using the :term:`ecflow_ui`.

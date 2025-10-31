@@ -3,9 +3,9 @@
 Advanced Topics
 ***************
 
-The topics covered in this chapter are more advanced. 
-
-You are more than welcome to browse through those pages on your own and ask us any questions. 
+This section covers more advanced topics, including techniques for managing complex
+:suites <suite> and :term:`tasks <task>`, as well as strategies for optimizing performance
+and ensuring security.
 
 .. toctree::
    :maxdepth: 2
