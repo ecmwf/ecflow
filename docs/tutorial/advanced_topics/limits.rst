@@ -4,34 +4,76 @@
 
 .. _tutorial-limits:
 
-Limits
-======
+Limit
+=====
 
 Limits provide simple load management by limiting the number of tasks submitted by a specific :term:`ecflow_server`
       
-We have learnt from experience that suite designers were using :term:`trigger`\ s in two different ways: as data dependency triggers and as courtesy triggers. Triggers where designed for the former. The latter are used to prevent too many jobs running at once and are actually an artificial way of queueing jobs. 
+At ECMWF, suite designers tend to use :term:`triggers <trigger>` in two different ways: to represent data dependency, or as *courtesy* triggers (i.e. a means to manage resources).
+Triggers where originally designed to represent data dependency, but can artificially prevent too many jobs from executing at once and thus be used to manage queues.
 
-Because ecFlow does not distinguish between the two sorts of triggers, suites can become difficult to maintain after a while. So the concept of :term:`limit` was introduced. Limits are declared with the **limit** keyword 
+The use of triggers to manage queues, although possible, is undesired as it results in suites difficult to maintain.
+
+The concept of :term:`limit` was introduced as better and first class alternative to manage limited resources. Limits are declared with the :code:`limit` keyword.
 
 .. _tutorial-inlimit:
 
-inlimit
+InLimit
 -------
 
-Limits are used in conjunction with :term:`inlimit` keyword.
+Limits are used in conjunction with :term:`inlimit`, which defines a need to consider the referred :term:`limit`.
 
-First, a :term:`limit` must be defined using the 'limit NAME N'. The limit definition is typically placed at the :term:`suite` scope.
+A :term:`limit` must be defined using :code:`limit NAME N` -- the limit definition is typically placed at the :term:`suite` scope.
+Then, a limit can be imposed on a group of tasks by attaching :code:`inlimit NAME` attribute to the restricted nodes.
+Attaching the attribute to a :term:`task` adds the task to the group. Attaching it to a :term:`family` adds all tasks from that :term:`family`.
 
-Next we create a group of tasks to which we want to apply the limit. This is done by attaching an 'inlimit NAME' attribute to the nodes. Attaching the attribute to a :term:`task` adds the task to the group. Attaching it to a :term:`family` adds all tasks from that :term:`family`.
-
-The effect of a :term:`limit` is that no more than N tasks of a group will run at once.
+The effect of a :term:`limit` is that no more than :code:`N` tasks of a group will run at once.
 
 A :term:`node` can be limited by several limits.
 
-Ecf script
-----------
 
-We will create :term:`family` f5 with nine tasks. Create new :term:`ecf script` s in :file:`$HOME/course/test/f5/` directory, each one containing:
+Suite Definition
+----------------
+
+.. tabs::
+
+    .. tab:: Text
+
+        Create :term:`family` f5 with nine tasks, modifying the :term:`suite definition` file, as follows:
+
+        .. code-block:: shell
+
+           # Definition of the suite test.
+           suite test
+            edit ECF_INCLUDE "$HOME/course"
+            edit ECF_HOME    "$HOME/course"
+            limit l1 2
+
+            family f5
+                inlimit l1
+                edit SLEEP 20
+                task t1
+                task t2
+                task t3
+                task t4
+                task t5
+                task t6
+                task t7
+                task t8
+                task t9
+            endfamily
+           endsuite
+
+    .. tab:: Python
+
+        .. literalinclude:: src/limits.py
+           :language: python
+           :caption: $HOME/course/test.py
+
+Task script
+-----------
+
+Create new :term:`task scripts <ecf script>` in :file:`$HOME/course/test/f5/` directory, each one containing:
 
 .. code-block:: bash
    :caption: $HOME/course/test/f5/t1.ecf,t2.ecf.....t9.ecf
@@ -41,54 +83,13 @@ We will create :term:`family` f5 with nine tasks. Create new :term:`ecf script` 
    sleep %SLEEP%
    %include <tail.h>
 
-Text
-----
-
-Let us modify our :term:`suite definition` file:
-
-.. code-block:: shell
-
-   # Definition of the suite test.
-   suite test
-    edit ECF_INCLUDE "$HOME/course"
-    edit ECF_HOME    "$HOME/course"
-    limit l1 2
-
-    family f5
-        inlimit l1
-        edit SLEEP 20
-        task t1
-        task t2
-        task t3
-        task t4
-        task t5
-        task t6
-        task t7
-        task t8
-        task t9
-    endfamily
-   endsuite
-
-
-Python
-------
-
-.. literalinclude:: src/limits.py
-   :language: python
-   :caption: $HOME/course/test.py
-
-
 **What to do**
 
-#. Edit the changes
-#. Replace the :term:`suite definition`
-#. In :term:`ecflow_ui`, observe the triggers of the :term:`limit` **l1**
-#. Open the Info panel for **l1**
-#. Change the value of the :term:`limit`
-#. Open the Why? panel for one of the :term:`queued` tasks of **/test/f5**
-#. Introduce an error in the limits and make sure this error is trapped. i.e. change the Limit.
+#. Apply the changes to :term:`suite definition`.
+#. Apply the changes to :term:`task script <ecf script>`.
+#. In :term:`ecflow_ui`
 
-   .. code-block:: python
-      :caption: Check  InLimit/Limit references
-
-      Limit("unknown",2)
+   * Observe the triggers of the :term:`limit` :code:`l1`
+   * Open the Info panel for :code:`l1`
+   * Change the value of the :term:`limit`
+   * Open the *Why?* panel for one of the :term:`queued` tasks of :code:`/test/f5`

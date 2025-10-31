@@ -4,7 +4,7 @@
 .. _tutorial-alias:
 
 Alias
-================== 
+=====
 
 A very useful addition to "edit" is the ability to clone a task, perform some minor modifications to its script, and run it as an "alias". (This can be very useful to debug your scripts)
 Such a task can run under the control of the ecFlow but has no impact on the activity of the suite itself i.e. it will have no dependencies.
