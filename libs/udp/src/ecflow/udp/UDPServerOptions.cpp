@@ -41,7 +41,7 @@ UDPServerOptions::UDPServerOptions(int argc, const char* argv[]) : general{creat
         po::store(cli_options, variables);
 
         // Collect environment options
-        // note: by being processed later, environment options don't override cli options)
+        // note: even though being processed later, environment options do not override cli options!
         UDPServerEnvironment environment;
         std::stringstream ss;
         ss << environment.as_configuration_file();

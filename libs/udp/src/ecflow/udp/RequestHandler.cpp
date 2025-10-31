@@ -294,10 +294,10 @@ public:
         std::string value = obj.at("value");
 
         bool event_value;
-        if (value == "1") {
+        if (value == "1" or value == "true" or value == "set") {
             event_value = true;
         }
-        else if (value == "0") {
+        else if (value == "0" or value == "false" or value == "clear") {
             event_value = false;
         }
         else {
