@@ -677,6 +677,10 @@ void OutputItemWidget::slotSaveFileAs() {
 // Copy file path
 //-----------------------------------------
 
+void OutputItemWidget::on_copyFilePathToClipboard__clicked() {
+    slotCopyPath();
+}
+
 void OutputItemWidget::slotCopyPath() {
     auto f = browser_->file();
     if (f) {
