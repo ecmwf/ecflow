@@ -45,7 +45,10 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter, bool interactive, Q
     // pop up the editor to define a filter. Only when the users
     // creates a new table view
     if (interactive) {
-        filterW_->slotEdit();
+        auto accepted = filterW_->setupFilterInteractive();
+        if (!accepted) {
+            throw UserCancelledOperation("TableNodeWidget: filter definition cancelled by user");
+        }
     }
 
     // Create the table model. It uses the datahandler to access the data.
