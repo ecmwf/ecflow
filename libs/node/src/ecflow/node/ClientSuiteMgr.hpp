@@ -66,7 +66,7 @@ public:
     /// the whole defs is returned. Both integers are returned back to the client
     /// so that, the client then sends the integers back to server, so we can determine
     /// what's changed.
-    void collateChanges(unsigned int client_handle, DefsDelta&) const;
+    void collateChanges(unsigned int client_handle, DefsDelta&, const ecf::Ctx& ctx) const;
 
     // Only return the defs state and suites that the client has registered in the client handle
     // *HOWEVER* if the client has registered all the suites, just return the server defs

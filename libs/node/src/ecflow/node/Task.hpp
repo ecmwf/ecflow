@@ -67,7 +67,8 @@ public:
     /// there are multiple runs.  re-queue/begin() resets the try Number
     void reset() override;
     void begin() override;
-    void requeue(Requeue_args&) override;
+    using Node::requeue;
+    void requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) override;
 
     Suite* suite() const override { return parent()->suite(); }
     Defs* defs() const override {
@@ -95,7 +96,7 @@ public:
 
     bool checkInvariants(std::string& errorMsg) const override;
 
-    void collateChanges(DefsDelta&) const override;
+    void collateChanges(DefsDelta& changes, const ecf::Ctx& ctx) const override;
     void set_memento(const OrderMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool);
     void set_memento(const AliasChildrenMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool);
     void set_memento(const AliasNumberMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool);

@@ -15,6 +15,7 @@
 
 #include "ecflow/base/Cmd.hpp"
 #include "ecflow/core/Child.hpp"
+#include "ecflow/core/Identity.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 class AbstractServer;
@@ -36,8 +37,8 @@ public:
     static STC_Cmd_ptr block_client_zombie_cmd(ecf::Child::ZombieType zt);
     static STC_Cmd_ptr delete_all_cmd();
 
-    static STC_Cmd_ptr defs_cmd(AbstractServer*, bool save_edit_history);
-    static STC_Cmd_ptr node_cmd(AbstractServer*, node_ptr);
+    static STC_Cmd_ptr defs_cmd(const ecf::Identity& identity, AbstractServer*, bool save_edit_history);
+    static STC_Cmd_ptr node_cmd(const ecf::Identity& identity, AbstractServer*, node_ptr);
     static STC_Cmd_ptr stats_cmd(AbstractServer*);
     static STC_Cmd_ptr suites_cmd(AbstractServer*);
     static STC_Cmd_ptr zombie_get_cmd(AbstractServer*);
@@ -54,12 +55,14 @@ public:
     static STC_Cmd_ptr sync_cmd(unsigned int client_handle,
                                 unsigned int client_state_change_no,
                                 unsigned int client_modify_change_no,
+                                const ecf::Identity& identity,
                                 AbstractServer* as);
     static STC_Cmd_ptr sync_clock_cmd(unsigned int client_handle,
                                       unsigned int client_state_change_no,
                                       unsigned int client_modify_change_no,
+                                      const ecf::Identity& identity,
                                       AbstractServer* as);
-    static STC_Cmd_ptr sync_full_cmd(unsigned int client_handle, AbstractServer* as);
+    static STC_Cmd_ptr sync_full_cmd(unsigned int client_handle, const ecf::Identity& identity, AbstractServer* as);
 
 private:
     static STC_Cmd_ptr stc_cmd_;

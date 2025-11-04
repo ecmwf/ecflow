@@ -332,10 +332,10 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     stc_cmd_vec.push_back(STC_Cmd_ptr(new BlockClientZombieCmd(ecf::Child::ECF)));
     stc_cmd_vec.push_back(STC_Cmd_ptr(new SStringCmd("Dummy contents")));
     stc_cmd_vec.push_back(STC_Cmd_ptr(new SServerLoadCmd("/path/to/log_file")));
-    stc_cmd_vec.push_back(STC_Cmd_ptr(new SSyncCmd(0, 0, 0, mock_server)));
+    stc_cmd_vec.push_back(STC_Cmd_ptr(new SSyncCmd(0, 0, 0, Identity::make_none(), mock_server)));
     stc_cmd_vec.push_back(STC_Cmd_ptr(new SNewsCmd(0, 0, 0, mock_server)));
-    stc_cmd_vec.push_back(STC_Cmd_ptr(new DefsCmd(mock_server)));
-    stc_cmd_vec.push_back(STC_Cmd_ptr(new SNodeCmd(mock_server, node_ptr())));
+    stc_cmd_vec.push_back(STC_Cmd_ptr(new DefsCmd(Identity::make_none(), mock_server)));
+    stc_cmd_vec.push_back(STC_Cmd_ptr(new SNodeCmd(Identity::make_none(), mock_server, node_ptr())));
 
     std::shared_ptr<GroupSTCCmd> theSTCGroupCmd = std::make_shared<GroupSTCCmd>();
     theSTCGroupCmd->addChild(STC_Cmd_ptr(new ErrorCmd()));
@@ -345,8 +345,8 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
     theSTCGroupCmd->addChild(STC_Cmd_ptr(new BlockClientZombieCmd(ecf::Child::ECF)));
     theSTCGroupCmd->addChild(STC_Cmd_ptr(new SStringCmd()));
     theSTCGroupCmd->addChild(STC_Cmd_ptr(new SServerLoadCmd()));
-    theSTCGroupCmd->addChild(STC_Cmd_ptr(new DefsCmd(mock_server)));
-    theSTCGroupCmd->addChild(STC_Cmd_ptr(new SNodeCmd(mock_server, node_ptr())));
+    theSTCGroupCmd->addChild(STC_Cmd_ptr(new DefsCmd(Identity::make_none(), mock_server)));
+    theSTCGroupCmd->addChild(STC_Cmd_ptr(new SNodeCmd(Identity::make_none(), mock_server, node_ptr())));
     stc_cmd_vec.push_back(theSTCGroupCmd);
 }
 
