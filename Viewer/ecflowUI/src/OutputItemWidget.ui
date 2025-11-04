@@ -110,6 +110,23 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="copyFilePathToClipboard_">
+           <property name="toolTip">
+            <string>Copy file path to Clipboard</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/editcopy.svg</normaloff>:/viewer/editcopy.svg</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="toStartTb_">
            <property name="toolTip">
             <string>Go to start of document</string>

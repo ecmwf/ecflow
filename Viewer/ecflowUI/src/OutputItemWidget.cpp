@@ -677,6 +677,10 @@ void OutputItemWidget::slotSaveFileAs() {
 // Copy file path
 //-----------------------------------------
 
+void OutputItemWidget::on_copyFilePathToClipboard__clicked() {
+    slotCopyPath();
+}
+
 void OutputItemWidget::slotCopyPath() {
     auto f = browser_->file();
     if (f) {
@@ -685,14 +689,14 @@ void OutputItemWidget::slotCopyPath() {
             QString txt = QString::fromStdString(fPath);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-            QClipboard* cb = QGuiApplication::clipboard();
-            cb->setText(txt, QClipboard::Clipboard);
-            cb->setText(txt, QClipboard::Selection);
+            using Application = QGuiApplication;
 #else
-            QClipboard* cb = QApplication::clipboard();
+            using Application = QApplication;
+#endif
+
+            auto cb = Application::clipboard();
             cb->setText(txt, QClipboard::Clipboard);
             cb->setText(txt, QClipboard::Selection);
-#endif
         }
     }
 }

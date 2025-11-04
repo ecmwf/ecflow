@@ -27,6 +27,17 @@ public:
 
     void build(NodeFilterDef*, ServerFilter*);
 
+    /**
+     * Setup the Table Filter Widget, using an interactive a Node Filter dialog to define the which nodes
+     * are displayed.
+     *
+     * This implies showing a Node Filter dialog to the user and allow the user defining the new filter
+     * (creating the widget) or cancelling the filter/widget creation.
+     *
+     * @return true if a new filter is created ("Apply" button selected), false otherwise ("Cancel" button selected).
+     */
+    bool setupFilterInteractive();
+
 public Q_SLOTS:
     void slotEdit();
     void slotDefChanged();
