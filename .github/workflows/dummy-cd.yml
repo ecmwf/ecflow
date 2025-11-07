@@ -1,0 +1,11 @@
+name: Dummy CD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dummy-cd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy CD
+        run: echo "Dummy CD"
