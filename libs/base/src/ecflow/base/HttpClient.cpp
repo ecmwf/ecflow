@@ -74,7 +74,7 @@ bool HttpClient::handle_server_response(ServerReply& server_reply, bool debug) c
     if (debug) {
         std::cout << "  Client::handle_server_response" << std::endl;
     }
-    server_reply.set_host_port(host_, port_); // client context, needed by some commands, ie. SServerLoadCmd
+    server_reply.set_host_port(host_, port_); // client context, needed by some commands, i.e., SServerLoadCmd
 
     if (status_ == ecf::http::Status::OK) {
         return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);

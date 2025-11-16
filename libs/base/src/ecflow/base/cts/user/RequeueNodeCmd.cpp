@@ -109,12 +109,19 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
 
         SuiteChangedPtr changed(theNodeToRequeue.get());
 
+        // Setup authorisation callback
+        auto service                = AuthorisationService::make_for(*defs);
+        std::function authorisation = [&](const Node* node) -> bool {
+            auto& identity = this->identity();
+            return service.allows(identity, *defs, node->absNodePath(), Allowed::EXECUTE);
+        };
+
         if (option_ == RequeueNodeCmd::ABORT) {
             // ONLY Re-queue the aborted tasks
             auto tasks = ecf::get_all_tasks(*theNodeToRequeue);
             for (auto& task : tasks) {
                 if (task->state() == NState::ABORTED) {
-                    task->requeue(args);
+                    task->requeue(args, authorisation);
                     task->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
                 }
             }
@@ -144,7 +151,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
             // Therefore *any* *MANUAL* re-queue afterward will NOT reset the next valid time slot.
             // To overcome this manual re-queue will always clear NO_REQUE_IF_SINGLE_TIME_DEP and hence reset next valid
             // time slot
-            theNodeToRequeue->requeue(args);
+            theNodeToRequeue->requeue(args, authorisation);
             theNodeToRequeue->set_most_significant_state_up_node_tree();
 
             // Call handleStateChange on parent, to avoid requeue same node again.
@@ -162,7 +169,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
             // The GUI: that calls this command should call a separate request
             // the returns the active/submitted tasks first. This can then be
             // presented to the user, who can elect to kill them if required.
-            theNodeToRequeue->requeue(args);
+            theNodeToRequeue->requeue(args, authorisation);
             theNodeToRequeue->set_most_significant_state_up_node_tree();
 
             // Call handleStateChange on parent, to avoid requeue same node again.

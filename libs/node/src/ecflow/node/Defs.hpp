@@ -33,6 +33,7 @@
 #include "ecflow/node/Aspect.hpp"
 #include "ecflow/node/Attr.hpp"
 #include "ecflow/node/ClientSuiteMgr.hpp"
+#include "ecflow/node/Ctx.hpp"
 #include "ecflow/node/Flag.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 #include "ecflow/node/ServerState.hpp"
@@ -44,6 +45,7 @@ class access;
 namespace ecf {
 class NodeTreeVisitor;
 class CalendarUpdateParams;
+struct Context;
 } // namespace ecf
 
 class Defs {
@@ -184,6 +186,7 @@ public:
 
     /// Will requeue all suites. Current used in test only
     void requeue();
+    void requeue(std::function<bool(Node*)> authorisation);
 
     /// returns true if defs has cron,time,day,date or today time dependencies
     bool hasTimeDependencies() const;
@@ -286,6 +289,7 @@ public:
      * @param st the print style to use for writing the defs
      */
     void write_to_string(std::string& os, PrintStyle::Type_t st = PrintStyle::MIGRATE) const;
+    void write_to_string(std::string& os, ecf::Context ctx) const;
 
     /**
      * @brief Write the defs to a file at the given path.
@@ -331,7 +335,7 @@ public:
     constexpr static size_t max_edit_history_size_per_node() { return 10; }
 
     /// Memento functions:
-    void collateChanges(unsigned int client_handle, DefsDelta&) const;
+    void collateChanges(unsigned int client_handle, DefsDelta&, const ecf::Ctx& ctx) const;
     void set_memento(const StateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const ServerStateMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
     void set_memento(const ServerVariableMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
@@ -581,6 +585,6 @@ std::vector<Family*> get_all_families(const Defs& defs);
  */
 std::set<const Node*> get_all_ast_nodes(const Defs& defs);
 
-}
+} // namespace ecf
 
 #endif /* ecflow_node_Defs_HPP */

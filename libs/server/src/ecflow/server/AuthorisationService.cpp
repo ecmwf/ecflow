@@ -11,22 +11,14 @@
 #include "ecflow/server/AuthorisationService.hpp"
 
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/Algorithms.hpp"
-#include "ecflow/core/Overload.hpp"
+#include "ecflow/node/Defs.hpp"
+#include "ecflow/node/permissions/ActivePermissions.hpp"
 
 namespace ecf {
 
-struct Rules
-{
-};
-
-struct Unrestricted
-{
-};
-
 struct AuthorisationService::Impl
 {
-    Impl() : permissions_(Unrestricted{}) {}
+    explicit Impl(Unrestricted&& unrestricted) : permissions_(std::move(unrestricted)) {}
     explicit Impl(Rules&& rules) : permissions_(std::move(rules)) {}
 
     std::variant<Unrestricted, Rules> permissions_;
@@ -53,86 +45,48 @@ bool AuthorisationService::good() const {
     return impl_ != nullptr;
 }
 
-bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
-                                  const std::string& permission) const {
-    return allows(identity, server, paths_t{ROOT}, permission);
+ActivePermissions AuthorisationService::permissions_at(const Defs& defs, const path_t& path) const {
+    assert(good()); // It is up to the caller to check has been properly configured
+    return ecf::permissions_at(defs, path, impl_->permissions_);
+}
+
+bool AuthorisationService::allows(const Identity& identity, const Defs& defs, Allowed required) const {
+    return allows(identity, defs, paths_t{ROOT}, required);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
+                                  const Defs& defs,
                                   const path_t& path,
-                                  const std::string& permission) const {
-    return allows(identity, server, paths_t{path}, permission);
+                                  Allowed required) const {
+    return allows(identity, defs, paths_t{path}, required);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
+                                  const Defs& defs,
                                   const paths_t& paths,
-                                  const std::string& permission) const {
+                                  Allowed required) const {
     if (!good()) {
         // When no rules are loaded, we allow everything...
         // Dangerous, but backward compatible!
         return true;
     }
 
-    bool allowed = false;
-    std::visit(
-        overload{[&allowed](const Unrestricted&) {
-                     // when no rules are loaded, we allow everything...
-                     // Dangerous, but backward compatible!
-                     allowed = true;
-                 },
-                 [&server, &identity, &paths, &permission, &allowed](const Rules& rules) {
-                     for (auto&& path : paths) {
+    for (auto&& path : paths) {
+        if (auto&& perms = permissions_at(defs, path); !perms.allows(identity.username(), required)) {
+            return false;
+        }
+    }
 
-                         auto u = identity.as_string();
-                         auto a = permission;
-
-                         struct Visitor
-                         {
-                             void handle(const Defs& defs) {
-                                 auto p      = defs.server_state().permissions();
-                                 permissions = p.is_empty() ? permissions : p;
-                             }
-                             void handle(const Node& s) {
-                                 auto p      = s.permissions();
-                                 permissions = p.is_empty() ? permissions : p;
-                             }
-
-                             void not_found() { permissions = Permissions::make_empty(); }
-
-                             Permissions permissions = Permissions::make_empty();
-                         };
-
-                         auto d = server.defs();
-                         auto p = Path::make(path).value();
-                         auto v = Visitor{};
-
-                         ecf::visit(*d, p, v);
-
-                         if (v.permissions.is_empty()) {
-                             std::cout << "Allowed! No custom permissions found for: " << p.to_string() << std::endl;
-                             allowed = true;
-                         }
-                         else if (v.permissions.allows(identity.username())) {
-                             std::cout << "Allowed! Specific permissions found for: " << p.to_string() << std::endl;
-                             allowed = true;
-                         }
-                         else {
-                             std::cout << "Not allowed! Specific permissions found for: " << p.to_string() << std::endl;
-                             allowed = false;
-                             break;
-                         }
-                     }
-                 }},
-        impl_->permissions_);
-
-    return allowed;
+    return true;
 }
 
-AuthorisationService::result_t AuthorisationService::load_permissions_from_nodes() {
-    return result_t::success(AuthorisationService(std::make_unique<Impl>(Rules{})));
+AuthorisationService AuthorisationService::make_for(const Defs& defs) {
+    if (defs.server_state().permissions().is_empty()) {
+        return AuthorisationService(std::make_unique<Impl>(Unrestricted{}));
+    }
+    else {
+        return AuthorisationService(std::make_unique<Impl>(Rules{}));
+    }
 }
 
 } // namespace ecf

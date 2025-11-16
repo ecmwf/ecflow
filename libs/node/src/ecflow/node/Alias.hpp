@@ -32,7 +32,8 @@ public:
     /// the output. The try number is used in SMSJOB/SMSJOBOUT to preserve the output when
     /// there are multiple runs.  re-queue/begin() resets the try Number
     void begin() override;
-    void requeue(Requeue_args&) override;
+    using Node::requeue;
+    void requeue(Requeue_args& args, std::function<bool(Node*)> authorisation) override;
 
     Suite* suite() const override { return parent()->suite(); }
     Defs* defs() const override {
@@ -49,7 +50,7 @@ public:
 
     const std::string& script_extension() const override;
 
-    void collateChanges(DefsDelta&) const override;
+    void collateChanges(DefsDelta&, const ecf::Ctx& ctx) const override;
     void set_memento(const SubmittableMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool f) {
         Submittable::set_memento(m, aspects, f);
     }

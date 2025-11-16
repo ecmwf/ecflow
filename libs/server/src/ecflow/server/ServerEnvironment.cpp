@@ -313,12 +313,18 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         return false;
     }
 
-    if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
-        authorisation_service_ = result.value();
-        std::cout << "Loaded server permissions file\n";
-    }
-    else {
-        std::cout << "Unable to load server permissions file, due to: " << result.reason() << '\n';
+    if (!permissions_.empty()) {
+        //
+        // Note: The ECF_PERMISSIONS is not a mandatory field.
+        //       If it is not set, then the eventual AuthorizationService will not impose any restriction
+        //       and all users will be able to access the server.
+        //
+
+        if (auto permissions = Permissions::make_from_variable(permissions_); !permissions.ok()) {
+            ss << "Invalid ECF_PERMISSIONS value specified, due to: " << permissions.reason() << "\n";
+            errorMsg = ss.str();
+            return false;
+        }
     }
 
     // Check that Authentication information is valid
@@ -385,6 +391,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
     // Reference variable, these should be read only
     theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_);            // server PID
     theRetVec.emplace_back(std::string("ECF_VERSION"), Version::full()); // server version
+
+    theRetVec.emplace_back(std::string(ecf::environment::ECF_PERMISSIONS), permissions_);
 
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {
@@ -530,7 +538,10 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(ecf::environment::ECF_PASSWD), "Path name to passwd file")
             ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(ecf::environment::ECF_CUSTOM_PASSWD), "Path name to custom passwd file, for user who don't use login name")
             ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
-            ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
+            ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded")
+            (ecf::environment::ECF_PERMISSIONS,po::value<std::string>(&permissions_)->default_value(""), "")
+        ;
+
         // clang-format on
 
         ifstream ifs(path_to_config_file.c_str());
@@ -700,6 +711,8 @@ std::string ServerEnvironment::dump() const {
     ss << "ECF_SSL = " << ssl_ << "\n";
 #endif
 
+    ss << ecf::environment::ECF_PERMISSIONS << " = " << permissions_ << "\n";
+
     ss << white_list_file_.dump_valid_users();
     return ss.str();
 }
@@ -726,6 +739,7 @@ std::vector<std::string> ServerEnvironment::expected_variables() {
     expected_variables.emplace_back("ECF_INTERVAL");
     expected_variables.emplace_back(ecf::environment::ECF_PASSWD);
     expected_variables.emplace_back(ecf::environment::ECF_CUSTOM_PASSWD);
+    expected_variables.emplace_back(ecf::environment::ECF_PERMISSIONS);
 #ifdef ECF_OPENSSL
     if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         expected_variables.emplace_back(ecf::environment::ECF_SSL);
