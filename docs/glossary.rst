@@ -1441,6 +1441,11 @@ Glossary
         - :code:`polling`, the value (in seconds) used to periodically contact the remote ecFlow server
         - :code:`auth`, the location to the Mirror authentication credentials file
 
+      .. warning::
+
+        The minimum value allowed for :code:`polling` is 60 seconds. When a lower value is provided,
+        it will be automatically reset to the minimum value.
+
       The value of the properties :code:`remote_host`, :code:`remote_port`, :code:`polling`,
       and :code:`auth` can be composed of :term:`Variables<variable>`. When
       these properties are not provided, the following default values are used:
