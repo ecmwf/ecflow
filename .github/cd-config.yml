@@ -2,3 +2,9 @@ builds:
   - name: "hpc-build"
     type: "hpc-module"
     enabled: true
+    config:
+      platforms:
+        - gnu-12.2.0
+        - gnu-8.5.0
+        - nvidia-22.11
+        - intel-2021.4.0
