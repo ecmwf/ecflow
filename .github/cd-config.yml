@@ -3,6 +3,7 @@ builds:
     type: "hpc-module"
     enabled: true
     config:
+      config_path: .github/ci-hpc-config.yml
       platforms:
         - gnu-12.2.0
         - gnu-8.5.0
