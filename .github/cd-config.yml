@@ -1,0 +1,4 @@
+builds:
+  - name: "hpc-build"
+    type: "hpc"
+    enabled: true
