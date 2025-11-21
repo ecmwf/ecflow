@@ -445,11 +445,9 @@ QModelIndex TreeNodeModel::parent(const QModelIndex& child) const {
         return {};
     }
 
-    int row = -1;
-
     // If the "child"'s internal pointer is a server it can be a server attribute or a topLevel node (suite)
     // and the parent is this server.
-    if ((row = data_->indexOfServer(child.internalPointer())) != -1) {
+    if (auto row = data_->indexOfServer(child.internalPointer()); row != -1) {
         return createIndex(row, 0, (void*)nullptr);
     }
 
@@ -559,8 +557,7 @@ VTreeServer* TreeNodeModel::nameToServer(const std::string& name) const {
 
 QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const {
     // For servers the internal id is set to their position in servers_ + 1
-    int i = 0;
-    if ((i = data_->indexOfServer(server)) != -1) {
+    if (int i = data_->indexOfServer(server); i != -1) {
         return createIndex(i, 0, (void*)nullptr);
     }
 
@@ -569,8 +566,7 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const {
 
 QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const {
     // For servers the internal id is set to their position in servers_ + 1
-    int i = 0;
-    if ((i = data_->indexOfServer(server)) != -1) {
+    if (int i = data_->indexOfServer(server); i != -1) {
         return createIndex(i, 0, (void*)nullptr);
     }
 
@@ -585,8 +581,8 @@ QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const {
 
 // We can only call it when the index is valid!
 VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex& index) const {
-    void* ip = nullptr;
-    if ((ip = index.internalPointer()) == nullptr) {
+    void* ip = index.internalPointer();
+    if (ip == nullptr) {
         return nullptr;
     }
 
@@ -616,8 +612,8 @@ VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex& index) const 
 
 // We can only call it when the index is valid!
 VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex& index, bool& itIsANode) const {
-    void* ip = nullptr;
-    if ((ip = index.internalPointer()) == nullptr) {
+    void* ip = index.internalPointer();
+    if (ip == nullptr) {
         return nullptr;
     }
 

@@ -136,22 +136,22 @@ int System::sys(System::CmdType cmd_type,
      |  The stdin, stdout and stderr are closed (or redirected to /dev/null)
      =  PID in case of success or 0 in case of errors.
      ************************************o*************************************/
-    pid_t child_pid;
-    if ((child_pid = fork()) == 0) { /* The child */
+    pid_t child_pid = fork();
 
-        int f;
+    if (child_pid == 0) { /* The child */
+
         close(2);
-        if ((f = open("/dev/null", O_WRONLY)) != 2) {
+        if (auto f = open("/dev/null", O_WRONLY); f != 2) {
             close(f);
         }
 
         close(1);
-        if ((f = open("/dev/null", O_WRONLY)) != 1) {
+        if (auto f = open("/dev/null", O_WRONLY); f != 1) {
             close(f);
         }
 
         close(0);
-        if ((f = open("/dev/null", O_RDONLY)) != 0) {
+        if (auto f = open("/dev/null", O_RDONLY); f != 0) {
             close(f);
         }
 

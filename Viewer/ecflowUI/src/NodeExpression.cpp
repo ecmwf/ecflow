@@ -272,8 +272,6 @@ BaseNodeCondition* NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 updatedOperands = true;
             }
             else {
-                bool attr                = false;
-                VAttributeType* attrType = nullptr;
                 // NodeExpressionParser::AttributeType attrType=NodeExpressionParser::BADATTRIBUTE;
 
                 // node types
@@ -324,7 +322,7 @@ BaseNodeCondition* NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 }
                 // node attribute type
                 // else if ((attrType = toAttrType(*i_)) != NodeExpressionParser::BADATTRIBUTE)
-                else if ((attrType = toAttrType(*i_)) != nullptr) {
+                else if (VAttributeType* attrType = toAttrType(*i_); attrType != nullptr) {
                     auto* attrCond = new AttributeCondition(attrType);
                     operandStack.push_back(attrCond);
                     result          = attrCond;
@@ -347,7 +345,7 @@ BaseNodeCondition* NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     updatedOperands = true;
                 }
 
-                else if (isWhatToSearchIn(*i_, attr)) {
+                else if (bool attr = false; isWhatToSearchIn(*i_, attr)) {
                     auto* searchCond = new WhatToSearchInOperand(*i_, attr);
                     operandStack.push_back(searchCond);
                     result          = searchCond;

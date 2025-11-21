@@ -315,8 +315,7 @@ QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const {
         return {};
     }
 
-    int row = 0;
-    if ((row = data_->position(node)) != -1) {
+    if (int row = data_->position(node); row != -1) {
         return createIndex(row, column, const_cast<VNode*>(node));
     }
     return {};
@@ -328,8 +327,7 @@ QModelIndex TableNodeModel::nodeToIndex(VTableServer* server, const VNode* node,
         return {};
     }
 
-    int row = 0;
-    if ((row = data_->position(server, node)) != -1) {
+    if (int row = data_->position(server, node); row != -1) {
         return createIndex(row, column, const_cast<VNode*>(node));
     }
     return {};
@@ -345,8 +343,7 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
         return {};
     }
 
-    int row = 0;
-    if ((row = data_->position(node)) != -1) {
+    if (int row = data_->position(node); row != -1) {
         return createIndex(row, column, const_cast<VNode*>(node));
     }
     return {};

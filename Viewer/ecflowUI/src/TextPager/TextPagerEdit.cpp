@@ -1308,7 +1308,7 @@ void TextEditPrivate::scrollLines(int lines) {
         else {
             pos += add;
             if (bufferReadCharacter(pos) == '\n') {
-                if ((lines -= add) == 0) {
+                if (lines -= add; lines == 0) {
                     break;
                 }
             }
