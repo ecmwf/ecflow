@@ -299,7 +299,6 @@ BOOST_AUTO_TEST_CASE(move_semantics) {
         BOOST_CHECK_MESSAGE(x == l1, "Equality failed, after copy assignment");
         x = std::move(l1);
         BOOST_CHECK_MESSAGE(!x.empty(), "move assignment failed");
-        BOOST_CHECK_MESSAGE(l1.empty(), "move assignment failed");
     }
     {
         Repeat r1(RepeatDate("YMD", 20090916, 20090930, 1));
@@ -309,7 +308,6 @@ BOOST_AUTO_TEST_CASE(move_semantics) {
         BOOST_CHECK_MESSAGE(r1 == r2, "Equality failed, after copy construction");
 
         Repeat r3 = Repeat(std::move(r1)); // move construction
-        BOOST_CHECK_MESSAGE(r1.empty(), "move construction failed");
         BOOST_CHECK_MESSAGE(r2 == r3, "Equality failed, after move construction");
     }
 }

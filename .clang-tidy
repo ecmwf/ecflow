@@ -22,7 +22,6 @@ Checks: >
   -bugprone-unhandled-self-assignment,
   -bugprone-unused-local-non-trivial-variable,
   -bugprone-unused-return-value,
-  -bugprone-use-after-move,
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-avoid-c-arrays,
