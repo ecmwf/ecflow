@@ -43,6 +43,10 @@ ojson update_node_status(const httplib::Request& request);
 
 ojson get_node_output(const httplib::Request& request);
 
+ojson get_node_dirlist(const httplib::Request& request);
+
+ojson get_node_logfile(const httplib::Request& request);
+
 ojson update_script_content(const httplib::Request& request);
 
 } // namespace ecf::http

@@ -569,6 +569,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /suites/{nodeName}/logfile:
+    get:
+      summary: Retrieve the task output/logfile, by directly connecting to the machine running the task
+      operationId: showTaskLogFile
+      tags:
+        - nodes
+      parameters:
+        - name: nodeName
+          in: path
+          required: true
+          description: The name of the node to retrieve (must be a task)
+          schema:
+            type: string
+        - name: filter
+          in: query
+          required: false
+          description: Filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path:
+                    type: string
+                  file:
+                    type: string
+                  size:
+                    type: integer
+                  seek:
+                    type: integer
+                  contents:
+                    type: string
+                  seek:
+                    type: available
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /server/status:
     get:
       summary: Show ecFlow server status

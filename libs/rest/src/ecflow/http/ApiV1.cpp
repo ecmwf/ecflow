@@ -461,6 +461,40 @@ void node_output_read(const httplib::Request& request, httplib::Response& respon
     });
 }
 
+void node_dirlist_options(const httplib::Request& request, httplib::Response& response) {
+    trycatch(request, response, [&]() {
+        response.status = HttpStatusCode::success_no_content;
+        set_allowed_methods(response, "GET, HEAD");
+    });
+}
+
+void node_dirlist_read(const httplib::Request& request, httplib::Response& response) {
+    trycatch(request, response, [&]() {
+        const std::string path = request.matches[1];
+        ojson j                = filter_json(get_node_dirlist(request), request);
+        response.status        = HttpStatusCode::success_ok;
+        response.set_content(j.dump(), "application/json");
+        set_cors(response);
+    });
+}
+
+void node_logfile_options(const httplib::Request& request, httplib::Response& response) {
+    trycatch(request, response, [&]() {
+        response.status = HttpStatusCode::success_no_content;
+        set_allowed_methods(response, "GET, HEAD");
+    });
+}
+
+void node_logfile_read(const httplib::Request& request, httplib::Response& response) {
+    trycatch(request, response, [&]() {
+        const std::string path = request.matches[1];
+        ojson j                = filter_json(get_node_logfile(request), request);
+        response.status        = HttpStatusCode::success_ok;
+        response.set_content(j.dump(), "application/json");
+        set_cors(response);
+    });
+}
+
 void server_ping_options(const httplib::Request& request, httplib::Response& response) {
     trycatch(request, response, [&]() {
         response.status = HttpStatusCode::success_no_content;
@@ -693,6 +727,28 @@ void routing(httplib::Server& http_server) {
         http_server.Get(resource_path, v1::node_output_read);        // Read
         http_server.Put(resource_path, v1::not_implemented);         // Update
         http_server.Delete(resource_path, v1::not_implemented);      // Delete
+    }
+
+    /* .../suites/<path>/dirlist */
+    {
+        std::string resource_path = R"(/v1/suites([A-Za-z0-9_\/\.]+)/dirlist$)";
+
+        http_server.Options(resource_path, v1::node_dirlist_options); // Options
+        http_server.Post(resource_path, v1::not_implemented);         // Create
+        http_server.Get(resource_path, v1::node_dirlist_read);        // Read
+        http_server.Put(resource_path, v1::not_implemented);          // Update
+        http_server.Delete(resource_path, v1::not_implemented);       // Delete
+    }
+
+    /* .../suites/<path>/logfile */
+    {
+        std::string resource_path = R"(/v1/suites([A-Za-z0-9_\/\.]+)/logfile$)";
+
+        http_server.Options(resource_path, v1::node_logfile_options); // Options
+        http_server.Post(resource_path, v1::not_implemented);         // Create
+        http_server.Get(resource_path, v1::node_logfile_read);        // Read
+        http_server.Put(resource_path, v1::not_implemented);          // Update
+        http_server.Delete(resource_path, v1::not_implemented);       // Delete
     }
 
     /* .../server/ping */

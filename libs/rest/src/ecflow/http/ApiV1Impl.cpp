@@ -341,6 +341,222 @@ ojson get_node_output(const httplib::Request& request) {
     return j;
 }
 
+struct RemoteCommand
+{
+public:
+    explicit RemoteCommand(std::string command, std::string user, std::string host)
+        : command_(std::move(command)),
+          user_(std::move(user)),
+          host_(std::move(host)) {}
+
+    std::string execute() {
+        // execute the command over Ssh
+        std::string remote_command = "ssh -l " + user_ + " " + host_ + " \"" + command_ + "\"";
+
+        std::cout << "Running command: '" << remote_command << "'" << std::endl;
+
+        std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(remote_command.c_str(), "r"), pclose);
+        if (!pipe) {
+            throw HttpServerException(HttpStatusCode::server_error_internal_server_error, "popen() failed!");
+        }
+
+        // collect the output
+        std::array<char, 128> buffer;
+        std::string result;
+        while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+            result += buffer.data();
+        }
+        return result;
+    }
+
+private:
+    std::string command_;
+    std::string user_;
+    std::string host_;
+};
+
+struct DirEntry
+{
+    std::string perms;
+    std::string nlink;
+    std::string owner;
+    std::string group;
+    std::string size;
+    std::string date;
+    std::string name;
+};
+
+std::vector<DirEntry> retrieve_dirlist(const std::string& result) {
+    // split per lines
+    std::vector<std::string> lines;
+    Str::split(result, lines, "\n");
+
+    // handle each line: -rw-r--r-- 1 mamb hpc-users  4096 2024-06-10T14:23:45.123456789000000000 file1.txt
+    std::vector<DirEntry> entries;
+    for (auto& line : lines) {
+        if (line.empty()) {
+            continue;
+        }
+
+        std::vector<std::string> tokens;
+        Str::split(line, tokens, " ");
+
+        if (tokens.size() < 7) {
+            // Ignore!?
+            continue;
+        }
+
+        DirEntry entry;
+        entry.perms = tokens[0];
+        entry.nlink = tokens[1];
+        entry.owner = tokens[2];
+        entry.group = tokens[3];
+        entry.size  = tokens[4];
+        entry.date  = tokens[5];
+
+        entry.name = tokens[6];
+        // in case the name is 'a b c.txt', gets tokenized as [..., "'a", "b", "c.txt'"] needs to be put together
+        // TODO: Need further work, to handle also 'a     a.txt' (multiple consecutive spaces in name!)
+        if (tokens.size() > 7) {
+            std::string name = tokens[6];
+            for (size_t i = 7; i < tokens.size(); i++) {
+                name += " " + tokens[i];
+            }
+        }
+
+        entries.push_back(entry);
+    }
+
+    return entries;
+}
+
+ojson get_node_dirlist(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+
+    auto node = get_node(path);
+
+    // ssh to machine, and get dirlist
+
+    std::string cmd = R"xxx(ls -C -l --time-style '+%Y-%m-%dT%H:%M:%S.%N' ~)xxx" + path;
+    auto remote_cmd = RemoteCommand(cmd, "mamb", "hpc-login");
+
+    auto result = remote_cmd.execute();
+
+    // process result, to retrieve dirlist as array
+
+    std::vector<std::string> dirlist;
+    ecf::Str::split(result, dirlist, "\n");
+
+    struct DirEntry
+    {
+        std::string perms;
+        std::string nlink;
+        std::string owner;
+        std::string group;
+        std::string size;
+        std::string date;
+        std::string name;
+    };
+    std::vector<DirEntry> entries;
+
+    for (auto& l : dirlist) {
+        if (l.empty()) {
+            continue;
+        }
+
+        // -rw-r--r-- 1 mamb hpc-users  4096 2024-06-10T14:23:45.123456789000000000 file1.txt
+        std::vector<std::string> tokens;
+        ecf::Str::split(l, tokens, " ");
+
+        if (tokens.size() < 7) {
+            continue;
+        }
+
+        DirEntry entry;
+        entry.perms = tokens[0];
+        entry.nlink = tokens[1];
+        entry.owner = tokens[2];
+        entry.group = tokens[3];
+        entry.size  = tokens[4];
+        entry.date  = tokens[5];
+        entry.name  = tokens[6];
+
+        entries.push_back(entry);
+    }
+
+    // pack the dirlist into the response
+
+    ojson j;
+    j["path"]     = path;
+    j["contents"] = ojson::array();
+    for (auto& entry : entries) {
+        j["contents"].push_back(ojson::object({{"perms", entry.perms},
+                                               {"nlink", entry.nlink},
+                                               {"owner", entry.owner},
+                                               {"group", entry.group},
+                                               {"size", entry.size},
+                                               {"date", entry.date},
+                                               {"name", entry.name}}));
+    }
+    return j;
+}
+
+ojson get_node_logfile(const httplib::Request& request) {
+    const std::string path = request.matches[1];
+
+    std::string file;
+    if (request.has_param("file")) {
+        file = request.get_param_value("file");
+    }
+
+    int64_t seek = 0;
+    if (request.has_param("seek")) {
+        try {
+            seek = std::stoll(request.get_param_value("seek"));
+        }
+        catch (const std::exception& e) {
+            // ...
+        }
+    }
+
+    int64_t size = 250;
+    if (request.has_param("size")) {
+        try {
+            size = std::stoll(request.get_param_value("size"));
+        }
+        catch (const std::exception& e) {
+            // ...
+        }
+    }
+
+    // ssh to machine, and get dirlist
+    std::ostringstream cmd;
+    cmd << R"xxx(dd if=.)xxx";
+    cmd << path << "/" << file;
+    cmd << R"xxx( bs=1 skip=)xxx";
+    cmd << seek;
+    cmd << R"xxx( count=)xxx";
+    cmd << size;
+    cmd << R"xxx( 2> /dev/null)xxx";
+
+    auto remote_cmd = RemoteCommand(cmd.str(), "mamb", "hpc-login");
+
+    auto result = remote_cmd.execute();
+
+    // process result, to retrieve dirlist as array
+    // ssh to machine, and get logfile
+
+    ojson j;
+    j["path"]      = path;
+    j["file"]      = file;
+    j["seek"]      = seek;
+    j["size"]      = size;
+    j["contents"]  = result;
+    j["available"] = result.size();
+
+    return j;
+}
+
 void add_suite(const httplib::Request& request, httplib::Response& response) {
     const ojson payload = ojson::parse(request.body);
 

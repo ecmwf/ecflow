@@ -51,6 +51,12 @@ void node_script_update(const httplib::Request& request, httplib::Response& resp
 void node_output_options(const httplib::Request& request, httplib::Response& response);
 void node_output_read(const httplib::Request& request, httplib::Response& response);
 
+void node_dirlist_options(const httplib::Request& request, httplib::Response& response);
+void node_dirlist_read(const httplib::Request& request, httplib::Response& response);
+
+void node_logfile_options(const httplib::Request& request, httplib::Response& response);
+void node_logfile_read(const httplib::Request& request, httplib::Response& response);
+
 void server_ping_options(const httplib::Request& request, httplib::Response& response);
 void server_ping_read(const httplib::Request& request, httplib::Response& response);
 
