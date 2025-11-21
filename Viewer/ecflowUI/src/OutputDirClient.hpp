@@ -16,6 +16,9 @@
 #include "OutputClient.hpp"
 #include "VDir.hpp"
 
+/**
+ * This client handles the retrieval of directory listings, using the (perl-based) Log Server
+ */
 class OutputDirClient : public OutputClient {
     Q_OBJECT
 

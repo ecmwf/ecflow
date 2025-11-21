@@ -25,7 +25,14 @@ public:
     virtual ~VFile();
 
     enum StorageMode { MemoryStorage, DiskStorage };
-    enum FetchMode { NoFetchMode, LocalFetchMode, ServerFetchMode, LogServerFetchMode, TransferFetchMode };
+
+    enum FetchMode {
+        NoFetchMode,
+        LocalFetchMode,     // access local file system
+        ServerFetchMode,    // access ecflow server, using the client invoker (CFileCmd)
+        LogServerFetchMode, // directly access the (perl-based) log server
+        TransferFetchMode   // access the (perl-based) log server, via a Socks connection
+    };
 
     const std::string& path() const { return path_; }
     const std::string& sourcePath() const { return sourcePath_; }

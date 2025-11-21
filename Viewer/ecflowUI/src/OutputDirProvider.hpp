@@ -34,6 +34,9 @@ protected:
     void addTryLog(VReply* r, const std::string& txt) const;
 };
 
+/**
+ * Task to retrieve the directory listing, by directly accessing the (perl-based) Log Server
+ */
 class OutputDirFetchLogServerTask : public QObject, public OutputDirFetchTask {
     Q_OBJECT
 public:
@@ -54,12 +57,18 @@ protected:
     OutputDirClient* client_{nullptr};
 };
 
+/**
+ * Task to retrieve the directory listing, by accessing the local file system
+ */
 class OutputDirFetchLocalTask : public OutputDirFetchTask {
 public:
     explicit OutputDirFetchLocalTask(FetchQueueOwner* owner);
     void run() override;
 };
 
+/**
+ * Task to retrieve the directory listing, by accessing the (perl-based) Log Server via Socks
+ */
 class OutputDirFetchTransferTask : public QObject, public OutputDirFetchTask {
     Q_OBJECT
 public:

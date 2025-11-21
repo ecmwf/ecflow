@@ -36,7 +36,14 @@ public:
     VDir(const std::string& path, const std::string& pattern);
     ~VDir();
 
-    enum FetchMode { NoFetchMode, LocalFetchMode, ServerFetchMode, LogServerFetchMode, TransferFetchMode };
+    enum FetchMode
+    {
+        NoFetchMode,
+        LocalFetchMode,     // access local file system
+        ServerFetchMode,    // access ecflow server, using the client invoker (CFileCmd)
+        LogServerFetchMode, // directly access the (perl-based) log server
+        TransferFetchMode   // access the (perl-based) log server, via a Socks connection
+    };
 
     const std::string& path() const { return path_; }
     void path(const std::string& path, bool reload = true);

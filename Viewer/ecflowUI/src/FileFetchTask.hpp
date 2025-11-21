@@ -24,12 +24,18 @@ class OutputFileClient;
 class VFileTransfer;
 class VReply;
 
+/**
+ * Task to retrieve the task log file, by accessing the local file system
+ */
 class FileFetchLocalTask : public AbstractFetchTask {
 public:
     explicit FileFetchLocalTask(FetchQueueOwner* owner);
     void run() override;
 };
 
+/**
+ * Task to retrieve the task log file, by accessing the (perl-based) log server via a Socks transfer
+ */
 class FileFetchTransferTask : public QObject, public AbstractFetchTask {
     Q_OBJECT
 public:
@@ -55,6 +61,9 @@ public:
     void run() override;
 };
 
+/**
+ * Task to retrieve the task log file, by directly accessing the (perl-based) log server
+ */
 class FileFetchLogServerTask : public QObject, public AbstractFetchTask {
     Q_OBJECT
 public:

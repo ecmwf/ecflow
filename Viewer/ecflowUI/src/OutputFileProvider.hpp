@@ -29,6 +29,9 @@ class OutputFileFetchQueueManager;
 class OutputCache;
 struct OutputCacheItem;
 
+/**
+ * Task to retrieve the task output file, by accessing the ecflow server (CFileCmd)
+ */
 class OutputFileFetchServerTask : public AbstractFetchTask {
 public:
     explicit OutputFileFetchServerTask(FetchQueueOwner* owner);
