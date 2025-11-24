@@ -43,6 +43,9 @@ function package() {
     # Create the package
     cmake --build --preset linux.gcc.serveronly.relwithdebinfo --target package
 
+    # Copy the generated .deb package to the root ecflow directory
+    cmake -E copy ${ECFLOW_DIR}/.deploy/build/linux.gcc.serveronly.relwithdebinfo/*.deb ${ECFLOW_DIR}/
+
     popd
 }
 
