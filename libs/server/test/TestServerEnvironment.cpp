@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
             Host host;
             std::string port = Str::DEFAULT_PORT_NUMBER();
             if (ecf::environment::has("ECF_PORT")) {
-                port = ecf::environment::has("ECF_PORT");
+                port = ecf::environment::get("ECF_PORT");
             }
             std::string expected = host.prefix_host_and_port(port, ecf::environment::ECF_PASSWD);
 
