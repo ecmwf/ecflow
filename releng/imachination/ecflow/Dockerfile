@@ -41,4 +41,4 @@ COPY ${ECFLOW_PACKAGE} /tmp/${ECFLOW_PACKAGE}
 RUN dpkg -i /tmp/${ECFLOW_PACKAGE} \
     && rm /tmp/${ECFLOW_PACKAGE}
 
-ENTRYPOINT ["/opt/ecflow/bin/ecflow_server", "-d", "--http", "--port", "8888"]
+ENTRYPOINT ["/usr/local/bin/ecflow_server", "-d", "--http", "--port", "8888"]
