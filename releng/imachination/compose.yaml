@@ -20,6 +20,8 @@ services:
     build: 
       context: ./ecflow
       target: deploy
+      args:
+        - ECFLOW_VERSION=5.15.1
     ports:
       - "8888:8888"
     volumes:
