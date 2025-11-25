@@ -33,9 +33,10 @@ ENTRYPOINT ["/workspace/build.workflow.sh"]
 FROM base AS deploy
 
 # Provision ecFlow package
-## This Dockerfile assumes that the ecFlow package is available in the build context.
+## This Dockerfile assumes that the ecFlow package is available in the build context i.e. .../imachination/ecflow.
 # If you are using a different version, change the ECFLOW_PACKAGE variable accordingly.
-ARG ECFLOW_PACKAGE="ecflow-5.14.0-Linux.deb"
+ARG ECFLOW_VERSION="latest"
+ARG ECFLOW_PACKAGE="ecflow-${ECFLOW_VERSION}-Linux.deb"
 COPY ${ECFLOW_PACKAGE} /tmp/${ECFLOW_PACKAGE}
 RUN dpkg -i /tmp/${ECFLOW_PACKAGE} \
     && rm /tmp/${ECFLOW_PACKAGE}
