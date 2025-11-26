@@ -1,6 +1,7 @@
 services:
 
   revproxy:
+    hostname: revproxy
     build: ./revproxy
     ports:
       - "80:80"
@@ -13,6 +14,7 @@ services:
         ipv4_address: 172.42.0.2
 
   authotron:
+    hostname: authotron
     image: eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.5
     ports:
       - "8080:8080"
@@ -23,6 +25,7 @@ services:
         ipv4_address: 172.42.0.3
 
   ecflow-deploy:
+    hostname: ecflow-server
     build: 
       context: ./ecflow
       target: deploy
