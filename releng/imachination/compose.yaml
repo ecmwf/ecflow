@@ -33,6 +33,7 @@ services:
         - ECFLOW_VERSION=5.15.1
     ports:
       - "8888:8888"
+      - "8889:8889"
     volumes:
       - ./ecflow/deploy/workspace:/workspace
     networks:

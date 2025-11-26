@@ -47,4 +47,8 @@ COPY ${ECFLOW_PACKAGE} /tmp/${ECFLOW_PACKAGE}
 RUN dpkg -i /tmp/${ECFLOW_PACKAGE} \
     && rm /tmp/${ECFLOW_PACKAGE}
 
-ENTRYPOINT ["/usr/local/bin/ecflow_server", "-d", "--http", "--port", "8888"]
+ARG ECFLOW_LAUNCH="launch.sh"
+COPY ${ECFLOW_LAUNCH} /opt/local/bin/${ECFLOW_LAUNCH}
+RUN chmod +x /opt/local/bin/${ECFLOW_LAUNCH}
+
+ENTRYPOINT ["/opt/local/bin/launch.sh"]
