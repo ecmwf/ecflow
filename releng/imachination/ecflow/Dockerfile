@@ -3,6 +3,8 @@ FROM debian:12.11-slim AS base
 
 RUN apt-get update \
     && apt-get install -y \
+        python3 \
+        python3-venv \
         libssl-dev \
         libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -31,6 +33,10 @@ ENTRYPOINT ["/workspace/build.workflow.sh"]
 
 
 FROM base AS deploy
+
+# Provision ecFlow dependencies
+RUN python3 -m venv /opt/local/python \
+    && /opt/local/python/bin/pip install "troika>=0.2.6"
 
 # Provision ecFlow package
 ## This Dockerfile assumes that the ecFlow package is available in the build context i.e. .../imachination/ecflow.
