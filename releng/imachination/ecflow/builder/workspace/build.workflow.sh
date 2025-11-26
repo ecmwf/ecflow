@@ -23,7 +23,8 @@ function configure() {
     pushd "${ECFLOW_DIR}"
 
     # Configure the project
-    cmake --preset linux.gcc.serveronly.relwithdebinfo -DBoost_LIBRARY_DIR="/usr/lib/x86_64-linux-gnu"
+    ARCH=$(uname -m)
+    cmake --preset linux.gcc.serveronly.relwithdebinfo -DBoost_LIBRARY_DIR="/usr/lib/${ARCH}-linux-gnu"
 
     popd
 }
