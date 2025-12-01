@@ -166,7 +166,17 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
         ecf_white_list_file_ = host_name_.prefix_host_and_port(port, ecf_white_list_file_);
     }
 
-    authentication_service_.init(host_name_, port);
+    {
+        // Init the authentication service
+        authentication_service_.init(host_name_, port);
+    }
+
+    {
+        // Init the authorisation service
+        if (auto perms = Permissions::make_from_variable(permissions_); perms.ok()) {
+            authorisation_service_.init(perms.value());
+        }
+    }
 
     // Change directory to ECF_HOME and check that it is accessible
     change_dir_to_ecf_home_and_check_accesibility();

@@ -63,15 +63,17 @@ public:
     bool allows(const Identity& identity, const Defs& defs, const paths_t& paths, Allowed required) const;
 
     /**
-     * Creates an Authentication Service with the 'strategy' based on the given Defs.
+     * Creates an Authorisation Service with the 'strategy' based on the given Defs.
      *
      * If ECF_PERMISSIONS is defined at Defs' server state level, then the 'strategy' will be to apply Node-based ACL;
      * otherwise, the 'strategy' will be to have unrestricted access.
      *
-     * @return the configured AuthenticationService
+     * @return the configured AuthorisationService
      */
     [[nodiscard]]
     static AuthorisationService make_for(const Defs& defs);
+
+    void init(const Permissions& permissions);
 
 private:
     struct Impl;

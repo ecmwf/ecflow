@@ -89,4 +89,13 @@ AuthorisationService AuthorisationService::make_for(const Defs& defs) {
     }
 }
 
+void AuthorisationService::init(const Permissions& permissions) {
+    if (permissions.is_empty()) {
+        impl_ = std::make_unique<AuthorisationService::Impl>(Unrestricted{});
+    }
+    else {
+        impl_ = std::make_unique<AuthorisationService::Impl>(Rules{});
+    }
+}
+
 } // namespace ecf
