@@ -28,6 +28,16 @@ jobs:
     with:
       ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
       codecov_upload: true
+      clang_format: true
+      clang_format_ignore: |
+        3rdparty
+        docs
+        tools
+        releng
+        libs/client/test/data
+        libs/node/test/data
+        libs/pyext/test/data
+        libs/test/data
     secrets: inherit
 
   # Build downstream packages on HPC
