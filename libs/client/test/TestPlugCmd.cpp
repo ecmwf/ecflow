@@ -45,8 +45,9 @@ static void get_defs(Defs& defs) {
     std::string path = File::test_data("libs/client/test/data/lifecycle.txt", "libs/client");
     std::string errorMsg, warningMsg;
     bool parse = defs.restore(path, errorMsg, warningMsg);
-    if (!parse)
+    if (!parse) {
         std::cerr << errorMsg;
+    }
     BOOST_CHECK(parse);
 }
 

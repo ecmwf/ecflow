@@ -135,8 +135,9 @@ BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
 
         // make sure to use same ECF_RID if its specified
         std::string remote_id = "process_or_remote_id";
-        if (!theClient.process_or_remote_id().empty())
+        if (!theClient.process_or_remote_id().empty()) {
             remote_id = theClient.process_or_remote_id();
+        }
         std::string groupRequest = "begin=suite1;  init=";
         groupRequest += remote_id;
         groupRequest += "; event=myEvent; force-dep-eval; get";

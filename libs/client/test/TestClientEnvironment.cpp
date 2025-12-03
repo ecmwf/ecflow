@@ -34,8 +34,9 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_parsing) {
 
     // local host should be implicitly added to internal host list
     std::string the_host = ClientEnvironment::hostSpecified();
-    if (the_host.empty())
+    if (the_host.empty()) {
         the_host = Str::LOCALHOST();
+    }
 
     std::vector<std::string> expectedHost;
     expectedHost.push_back(the_host);

@@ -45,8 +45,9 @@ BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
     Defs defs;
     std::string errorMsg, warningMsg;
     bool parse = defs.restore(path, errorMsg, warningMsg);
-    if (!parse)
+    if (!parse) {
         std::cerr << errorMsg;
+    }
     BOOST_CHECK(parse);
 
     // Now go through and simulate client request to change Node tree state.
