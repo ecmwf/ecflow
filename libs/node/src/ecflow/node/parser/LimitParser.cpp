@@ -43,8 +43,8 @@ bool LimitParser::doParse(const std::string& line, std::vector<std::string>& lin
         for (size_t i = 3; i < line_tokens_size; i++) {
             if (comment_fnd) {
                 if (!value_processed) {
-                    value           = Extract::value<int>(lineTokens[i],
-                                            "LimitParser::doParse: Could not extract limit value: " + lineTokens[i]);
+                    value = Extract::value<int>(
+                        lineTokens[i], "LimitParser::doParse: Could not extract limit value: " + lineTokens[i]);
                     value_processed = true;
                 }
                 else {

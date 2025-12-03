@@ -155,8 +155,10 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
                             "Expected family " << family->absNodePath() << " to be restored");
         BOOST_CHECK_MESSAGE(!family->get_flag().is_set(ecf::Flag::ARCHIVED),
                             "Expected family " << family->absNodePath() << " to be restored");
-        BOOST_CHECK_MESSAGE(!fs::exists(family->archive_path()), "Expected file " << family->absNodePath() << " to be removed");
-        BOOST_CHECK_MESSAGE(!family->nodeVec().empty(), "Expected family " << family->absNodePath() << " to be restored");
+        BOOST_CHECK_MESSAGE(!fs::exists(family->archive_path()),
+                            "Expected file " << family->absNodePath() << " to be removed");
+        BOOST_CHECK_MESSAGE(!family->nodeVec().empty(),
+                            "Expected family " << family->absNodePath() << " to be restored");
     }
 
     // remove generated log file. Comment out to debug

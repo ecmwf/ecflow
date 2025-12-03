@@ -155,7 +155,8 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_139) {
     /// Test 1: Check NODE state All nodes should be set to NState::QUEUED
     theDefs.beginAll();
     for (auto task : tasks) {
-        BOOST_CHECK_MESSAGE(task->state() == NState::QUEUED, "Expected queued but found " << NState::toString(task->state()));
+        BOOST_CHECK_MESSAGE(task->state() == NState::QUEUED,
+                            "Expected queued but found " << NState::toString(task->state()));
     }
 
     /// Check: DSTATE
@@ -166,7 +167,8 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_139) {
 
     theDefs.requeue();
     for (auto task : tasks) {
-        BOOST_CHECK_MESSAGE(task->state() == NState::QUEUED, "Expected queued but found " << NState::toString(task->state()));
+        BOOST_CHECK_MESSAGE(task->state() == NState::QUEUED,
+                            "Expected queued but found " << NState::toString(task->state()));
     }
     for (auto task : tasks) {
         BOOST_CHECK_MESSAGE(task->dstate() == DState::SUSPENDED,

@@ -581,6 +581,6 @@ std::vector<Family*> get_all_families(const Defs& defs);
  */
 std::set<const Node*> get_all_ast_nodes(const Defs& defs);
 
-}
+} // namespace ecf
 
 #endif /* ecflow_node_Defs_HPP */

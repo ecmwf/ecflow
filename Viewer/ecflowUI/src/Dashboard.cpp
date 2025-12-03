@@ -89,7 +89,8 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type, bool userAdde
         NodeWidget* ctl;
         try {
             ctl = new TableNodeWidget(serverFilter_, userAddedView, this);
-        } catch (const UserCancelledOperation&) {
+        }
+        catch (const UserCancelledOperation&) {
             return nullptr;
         }
 

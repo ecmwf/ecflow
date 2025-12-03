@@ -27,7 +27,6 @@ namespace fsx {
  */
 std::filesystem::path unique_path(std::string model);
 
-
 /**
  * Get the last write time of the given path, as a std::chrono::system_clock::time_point.
  *

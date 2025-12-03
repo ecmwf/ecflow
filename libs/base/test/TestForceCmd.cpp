@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_recursive) {
 
     defs_ptr the_defs = create_defs();
     node_ptr suite    = the_defs->findAbsNode("/s1");
-    auto nodes = ecf::get_all_nodes(*suite);
+    auto nodes        = ecf::get_all_nodes(*suite);
 
     MockServer mockServer(the_defs);
     std::vector<std::string> all_states = NState::allStates();
@@ -169,8 +169,8 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_bubbles_up_state_changes) {
     ECF_NAME_THIS_TEST();
 
     defs_ptr the_defs = create_defs();
-    auto nodes = ecf::get_all_nodes(*the_defs);
-    auto tasks = ecf::get_all_tasks(*the_defs);
+    auto nodes        = ecf::get_all_nodes(*the_defs);
+    auto tasks        = ecf::get_all_tasks(*the_defs);
 
     node_ptr suite = the_defs->findAbsNode("/s1");
 
@@ -202,9 +202,9 @@ BOOST_AUTO_TEST_CASE(test_force_cmd_alias_does_not_bubble_up_state_changes) {
     ECF_NAME_THIS_TEST();
 
     defs_ptr the_defs = create_defs();
-    auto nodes = ecf::get_all_nodes(*the_defs);
-    auto aliases = ecf::get_all_aliases(*the_defs);
-    node_ptr suite = the_defs->findAbsNode("/s1");
+    auto nodes        = ecf::get_all_nodes(*the_defs);
+    auto aliases      = ecf::get_all_aliases(*the_defs);
+    node_ptr suite    = the_defs->findAbsNode("/s1");
 
     // initialize by setting all nodes to state QUEUED
     for (auto n : nodes) {
