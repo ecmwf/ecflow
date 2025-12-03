@@ -19,7 +19,7 @@
 class VNode;
 
 struct NodeQueryResultTmp;
-typedef std::shared_ptr<NodeQueryResultTmp> NodeQueryResultTmp_ptr;
+using NodeQueryResultTmp_ptr = std::shared_ptr<NodeQueryResultTmp>;
 
 struct NodeQueryResultTmp
 {

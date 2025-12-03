@@ -141,7 +141,7 @@ public:
     //    }
     //
     //    std::vector<std::string> vec;
-    //    typedef boost::split_iterator<std::string::const_iterator> split_iter_t;
+    //    using split_iter_t = boost::split_iterator<std::string::const_iterator>;
     //    for(split_iter_t i = Str::split(s,delim); i != split_iter_t(); i++) {
     //       vec.push_back(boost::copy_range<std::string>(*i));
     //    }

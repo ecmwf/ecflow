@@ -218,7 +218,7 @@ void DefsStructureParser::getNextLine(std::string& line) {
                 }
 
                 boost::char_separator<char> sep(";");
-                typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+                using tokenizer = boost::tokenizer<boost::char_separator<char>>;
                 tokenizer tokens(line, sep);
                 std::copy(tokens.begin(), tokens.end(), back_inserter(multi_statements_per_line_vec_));
                 assert(!multi_statements_per_line_vec_.empty());

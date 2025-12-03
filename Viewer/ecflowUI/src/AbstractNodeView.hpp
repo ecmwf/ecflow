@@ -173,7 +173,7 @@ protected:
     TreeNodeViewDelegate* delegate_;
     QSet<QPersistentModelIndex> expandedIndexes; // used when expanding and collapsing items
 
-    typedef std::vector<TreeNodeViewItem>::iterator ViewItemIterator;
+    using ViewItemIterator = std::vector<TreeNodeViewItem>::iterator;
     ScrollMode verticalScrollMode_;
     mutable std::vector<TreeNodeViewItem> viewItems_;
     int rowCount_;

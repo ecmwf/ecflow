@@ -50,28 +50,28 @@ class AutoArchiveAttr;
 class AutoRestoreAttr;
 } // namespace ecf
 
-typedef std::shared_ptr<Memento> memento_ptr;
-typedef std::shared_ptr<CompoundMemento> compound_memento_ptr;
-typedef std::shared_ptr<ClockAttr> clock_ptr;
+using memento_ptr          = std::shared_ptr<Memento>;
+using compound_memento_ptr = std::shared_ptr<CompoundMemento>;
+using clock_ptr            = std::shared_ptr<ClockAttr>;
 
-typedef std::shared_ptr<JobCreationCtrl> job_creation_ctrl_ptr;
-typedef std::shared_ptr<Node> node_ptr;
-typedef std::shared_ptr<Task> task_ptr;
-typedef std::shared_ptr<Alias> alias_ptr;
-typedef std::shared_ptr<Submittable> submittable_ptr;
-typedef std::shared_ptr<Family> family_ptr;
-typedef std::shared_ptr<Suite> suite_ptr;
-typedef std::shared_ptr<Defs> defs_ptr;
+using job_creation_ctrl_ptr = std::shared_ptr<JobCreationCtrl>;
+using node_ptr              = std::shared_ptr<Node>;
+using task_ptr              = std::shared_ptr<Task>;
+using alias_ptr             = std::shared_ptr<Alias>;
+using submittable_ptr       = std::shared_ptr<Submittable>;
+using family_ptr            = std::shared_ptr<Family>;
+using suite_ptr             = std::shared_ptr<Suite>;
+using defs_ptr              = std::shared_ptr<Defs>;
 
-typedef std::weak_ptr<Defs> weak_defs_ptr;
-typedef std::weak_ptr<Suite> weak_suite_ptr;
-typedef std::weak_ptr<Task> weak_task_ptr;
-typedef std::weak_ptr<Alias> weak_alias_ptr;
-typedef std::weak_ptr<Submittable> weak_submittable_ptr;
-typedef std::weak_ptr<Node> weak_node_ptr;
+using weak_defs_ptr        = std::weak_ptr<Defs>;
+using weak_suite_ptr       = std::weak_ptr<Suite>;
+using weak_task_ptr        = std::weak_ptr<Task>;
+using weak_alias_ptr       = std::weak_ptr<Alias>;
+using weak_submittable_ptr = std::weak_ptr<Submittable>;
+using weak_node_ptr        = std::weak_ptr<Node>;
 
-typedef std::map<std::string, std::string> NameValueMap;
-typedef std::vector<std::pair<std::string, std::string>> NameValueVec;
+using NameValueMap = std::map<std::string, std::string>;
+using NameValueVec = std::vector<std::pair<std::string, std::string>>;
 
 class NodeContainer;
 class DefsDelta;

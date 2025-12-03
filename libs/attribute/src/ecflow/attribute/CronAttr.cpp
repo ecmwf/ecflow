@@ -686,7 +686,7 @@ std::vector<int> extract_month(size_t& index, const std::vector<std::string>& li
     // should have 0,1,2,3
     std::vector<int> theIntVec;
     boost::char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    using tokenizer = boost::tokenizer<boost::char_separator<char>>;
     tokenizer theTokenizer(theIntList, sep);
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
@@ -723,7 +723,7 @@ void extract_days_of_week(size_t& index,
 
     // should have 0,1,2,3,4L
     boost::char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    using tokenizer = boost::tokenizer<boost::char_separator<char>>;
     tokenizer theTokenizer(theIntList, sep);
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
@@ -771,7 +771,7 @@ void extract_days_of_month(size_t& index,
 
     // should have 0,1,2,3,4L
     boost::char_separator<char> sep(",", nullptr, boost::drop_empty_tokens);
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    using tokenizer = boost::tokenizer<boost::char_separator<char>>;
     tokenizer theTokenizer(theIntList, sep);
 
     for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {

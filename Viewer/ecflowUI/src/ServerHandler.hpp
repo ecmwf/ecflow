@@ -229,21 +229,21 @@ private:
 
     void setActivity(Activity activity);
 
-    typedef void (ServerObserver::*SoMethod)(ServerHandler*);
-    typedef void (ServerObserver::*SoMethodV1)(ServerHandler*, const VServerChange&);
-    typedef void (ServerObserver::*SoMethodV2)(ServerHandler*, const std::string&);
+    using SoMethod   = void (ServerObserver::*)(ServerHandler*);
+    using SoMethodV1 = void (ServerObserver::*)(ServerHandler*, const VServerChange&);
+    using SoMethodV2 = void (ServerObserver::*)(ServerHandler*, const std::string&);
     void broadcast(SoMethod);
     void broadcast(SoMethodV1, const VServerChange&);
     void broadcast(SoMethodV2, const std::string&);
 
-    typedef void (NodeObserver::*NoMethod)(const VNode*);
-    typedef void (NodeObserver::*NoMethodV1)(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&);
-    typedef void (NodeObserver::*NoMethodV2)(const VNode*, const VNodeChange&);
+    using NoMethod   = void (NodeObserver::*)(const VNode*);
+    using NoMethodV1 = void (NodeObserver::*)(const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&);
+    using NoMethodV2 = void (NodeObserver::*)(const VNode*, const VNodeChange&);
     void broadcast(NoMethod, const VNode*);
     void broadcast(NoMethodV1, const VNode*, const std::vector<ecf::Aspect::Type>&, const VNodeChange&);
     void broadcast(NoMethodV2, const VNode*, const VNodeChange&);
 
-    typedef void (ServerComObserver::*SocMethod)(ServerHandler*);
+    using SocMethod = void (ServerComObserver::*)(ServerHandler*);
     void broadcast(SocMethod);
 
     void saveConf();

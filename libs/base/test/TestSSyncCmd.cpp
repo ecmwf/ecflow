@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_SSyncCmd)
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
-typedef boost::function<void(defs_ptr)> defs_change_cmd;
+using defs_change_cmd = boost::function<void(defs_ptr)>;
 
 /// Re-use the same test scaffold to modify and then resync, by passing
 /// in a function that will modify the defs
@@ -252,7 +252,7 @@ void remove_all_tasks(defs_ptr defs) {
 void remove_a_family(defs_ptr defs) {
 
     // Remove tasks should force a incremental sync
-    auto families = ecf::get_all_families(*defs);
+    auto families      = ecf::get_all_families(*defs);
     size_t family_size = families.size();
     BOOST_REQUIRE_MESSAGE(!families.empty(), "Expected at least one family");
     if (!families.empty()) {

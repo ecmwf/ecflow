@@ -260,8 +260,8 @@ public:
 
     /// Will return either second_clock::universal_time()/UTC ( the other alternative is second_clock::local_time() )
     /// This is because boost deadline timer is based on UTC clock
-    /// >>> The deadline_timer typedef is based on a UTC clock, and all operations (expires_at, expires_from_now) work
-    /// in UTC time.
+    /// >>> The deadline_timer type alias is based on a UTC clock, and all operations (expires_at, expires_from_now)
+    /// work in UTC time.
     /// >>> If you want it to use a different clock (such as the local time clock), you can use basic_deadline_timer<>
     /// with your own traits class.
     /// >>> Please see the "Timers" example.

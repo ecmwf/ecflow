@@ -96,6 +96,6 @@ protected:
     std::vector<ServerItemObserver*> observers_;
 };
 
-typedef std::shared_ptr<ServerItem> ServerItem_ptr;
+using ServerItem_ptr = std::shared_ptr<ServerItem>;
 
 #endif /* ecflow_viewer_ServerItem_HPP */

@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
     serverEnv.variables(server_vars);
 
     bool found_var = false;
-    typedef std::pair<std::string, std::string> mpair;
+    using mpair    = std::pair<std::string, std::string>;
     for (const mpair& p : server_vars) {
         if (ecf::environment::ECF_LOG == p.first) {
             BOOST_CHECK_MESSAGE(p.second == Log::instance()->path(),
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
     for (const std::string& expected_var : expected_variables) {
 
         bool found_var = false;
-        typedef std::pair<std::string, std::string> s_pair;
+        using s_pair   = std::pair<std::string, std::string>;
         for (const s_pair& p : server_vars) {
             if (expected_var == p.first) {
                 found_var = true;
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
 
     {
         // check other way, so that this test gets updated
-        typedef std::pair<std::string, std::string> mpair;
+        using mpair = std::pair<std::string, std::string>;
         for (const mpair& p : server_vars) {
             bool found_var = false;
             for (const std::string& expected_var : expected_variables) {
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
     //                     since we add root path, and append with host/port
     // o ignore ECF_CHECKMODE: not a server variable
     //
-    typedef std::pair<std::string, std::string> mpair;
+    using mpair = std::pair<std::string, std::string>;
     for (const mpair& p : server_vars) {
         // std::cout << "server variables " << p.first << "  " << p.second << "\n";
         if (ecf::environment::ECF_HOME == p.first) {
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
     for (const std::string& expected_var : expected_variables) {
 
         bool found_var = false;
-        typedef std::pair<std::string, std::string> mpair;
+        using mpair    = std::pair<std::string, std::string>;
         for (const mpair& p : server_vars) {
             if (expected_var == p.first) {
                 found_var = true;
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
     }
 
     // check other way, so that this test gets updated
-    typedef std::pair<std::string, std::string> mpair;
+    using mpair = std::pair<std::string, std::string>;
     for (const mpair& p : server_vars) {
         bool found_var = false;
         for (const std::string& expected_var : expected_variables) {

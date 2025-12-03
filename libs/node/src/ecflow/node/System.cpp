@@ -339,8 +339,8 @@ int System::process() const {
 //       this is different to the signal(..) which on some system needs
 //       to be reinstalled at start/end of SignalFunction.
 // ============================================================================
-typedef void SignalFunction(int);
-SignalFunction* signal_(int signo, SignalFunction* func) {
+using SignalFunction = void (*)(int);
+SignalFunction signal_(int signo, SignalFunction func) {
     struct sigaction act, oact;
     act.sa_handler = func;
     sigemptyset(&act.sa_mask);

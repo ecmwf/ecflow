@@ -35,7 +35,7 @@
 /// \note If you change this file then Connection.hpp may also need changing
 ///
 
-typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
+using ssl_socket = boost::asio::ssl::stream<boost::asio::ip::tcp::socket>;
 
 /// The connection class provides serialisation primitives on top of a socket.
 /**
@@ -219,6 +219,6 @@ private:
     std::vector<char> inbound_data_;     /// Holds the in-bound data.
 };
 
-typedef std::shared_ptr<ssl_connection> ssl_connection_ptr;
+using ssl_connection_ptr = std::shared_ptr<ssl_connection>;
 
 #endif /* ecflow_base_ssl_connection_HPP */

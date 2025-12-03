@@ -216,7 +216,7 @@ bool ZombieAttr::kill(ecf::Child::CmdType child_cmd) const {
 ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
     /// Use boost tokenizer instead of Str::split, as it allows preservation of empty tokens
     char_separator<char> sep(":", "", boost::keep_empty_tokens);
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+    using tokenizer = boost::tokenizer<boost::char_separator<char>>;
     tokenizer tokenise(string_to_parse, sep);
     std::vector<std::string> tokens;
     std::copy(tokenise.begin(), tokenise.end(), back_inserter(tokens));

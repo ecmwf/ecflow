@@ -120,13 +120,13 @@ std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool 
 
     if (ignoreEmptyLine) {
         char_separator<char> sep("\n", 0, boost::drop_empty_tokens);
-        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        using tokenizer = boost::tokenizer<boost::char_separator<char>>;
         tokenizer tokens(theFileAsString, sep);
         std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
     }
     else {
         char_separator<char> sep("\n", 0, boost::keep_empty_tokens);
-        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        using tokenizer = boost::tokenizer<boost::char_separator<char>>;
         tokenizer tokens(theFileAsString, sep);
         std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
     }
@@ -138,7 +138,7 @@ std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool 
     std::istreambuf_iterator<char> file_iter(ifs);
     std::istreambuf_iterator<char> end_of_stream;
 
-    typedef boost::tokenizer<boost::char_separator<char>, std::istreambuf_iterator<char>> tokenizer;
+    using tokenizer = boost::tokenizer<boost::char_separator<char>, std::istreambuf_iterator<char>>;
 
     boost::char_separator<char> sep("\n");
     tokenizer tokens(file_iter, end_of_stream, sep);

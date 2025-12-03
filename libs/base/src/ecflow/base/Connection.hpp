@@ -207,6 +207,6 @@ private:
     std::vector<char> inbound_data_;      /// Holds the in-bound data.
 };
 
-typedef std::shared_ptr<connection> connection_ptr;
+using connection_ptr = std::shared_ptr<connection>;
 
 #endif /* ecflow_base_Connection_HPP */

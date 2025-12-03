@@ -59,8 +59,8 @@ using namespace phoenix;
 using namespace BOOST_SPIRIT_CLASSIC_NS;
 
 /////////////////////////////////////////////////////////////////////////////
-typedef tree_match<const char*> treematch_t;
-typedef treematch_t::tree_iterator tree_iter_t;
+using treematch_t = tree_match<const char*>;
+using tree_iter_t = treematch_t::tree_iterator;
 
 //////////////////////////////////////////////////////////////////////////////
 

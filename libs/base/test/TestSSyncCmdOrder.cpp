@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_SSyncCmdOrder)
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
-typedef boost::function<void(defs_ptr)> defs_change_cmd;
+using defs_change_cmd = boost::function<void(defs_ptr)>;
 
 static std::vector<std::string> vector_abcd() {
     std::vector<std::string> names;
@@ -223,7 +223,7 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
                     << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
 
     suite_ptr suite_a = theDefs->findSuite("d");
-    auto families = ecf::get_all_families(*suite_a);
+    auto families     = ecf::get_all_families(*suite_a);
     BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
                           "NOrder::ALPHA  expected "
                               << ecf::algorithm::join(vector_abcd()) << " but found: "

@@ -25,8 +25,8 @@
 template <class K, class T>
 struct pair_to_tuple
 {
-    typedef pair_to_tuple<K, T> converter;
-    typedef std::pair<K, T> ctype;
+    using converter = pair_to_tuple<K, T>;
+    using ctype     = std::pair<K, T>;
 
     static PyObject* convert(ctype const& v) { return py::incref(py::make_tuple(v.first, v.second).ptr()); }
     static void register_to_python() { py::to_python_converter<ctype, converter>(); }

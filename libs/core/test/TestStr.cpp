@@ -162,7 +162,7 @@ static void check(const std::string& line,
                   boost::split_iterator<std::string::const_iterator> res,
                   const std::vector<std::string>& expected) {
     std::vector<std::string> result;
-    typedef boost::split_iterator<std::string::const_iterator> split_iter_t;
+    using split_iter_t = boost::split_iterator<std::string::const_iterator>;
     for (; res != split_iter_t(); res++) {
         result.push_back(boost::copy_range<std::string>(*res));
     }

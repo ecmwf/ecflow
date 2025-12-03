@@ -75,7 +75,7 @@ static defs_ptr create_server_defs() {
 }
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
-typedef boost::function<bool(defs_ptr)> defs_change_cmd;
+using defs_change_cmd = boost::function<bool(defs_ptr)>;
 
 /// Re-use the same test scaffold to modify and then resync, by passing
 /// in a function that will modify the defs

@@ -182,7 +182,7 @@ public:
     static MenuItem* findItemById(int id);
 
 private:
-    typedef std::map<std::string, std::string> ConfirmationMap;
+    using ConfirmationMap = std::map<std::string, std::string>;
     static MenuItem* findItem(QAction*);
     static ConfirmationMap& getCommandsThatRequireConfirmation();
 

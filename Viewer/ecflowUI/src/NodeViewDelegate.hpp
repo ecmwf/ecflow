@@ -169,11 +169,11 @@ protected:
 
     virtual void renderStatus(QPainter* painter, const QModelIndex& index, const QStyleOptionViewItem& option) const;
 
-    typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter* painter,
-                                                            QStringList data,
-                                                            const QStyleOptionViewItem& option,
-                                                            QSize&,
-                                                            const QColor& foregroundColour) const;
+    using AttributeRendererProc = void (NodeViewDelegate::*)(QPainter* painter,
+                                                             QStringList data,
+                                                             const QStyleOptionViewItem& option,
+                                                             QSize&,
+                                                             const QColor& foregroundColour) const;
 
     virtual void renderMeter(QPainter* painter,
                              QStringList data,

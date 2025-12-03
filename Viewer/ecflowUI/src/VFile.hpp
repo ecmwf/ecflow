@@ -18,7 +18,7 @@
 #include <QDateTime>
 
 class VFile;
-typedef std::shared_ptr<VFile> VFile_ptr;
+using VFile_ptr = std::shared_ptr<VFile>;
 
 class VFile : public std::enable_shared_from_this<VFile> {
 public:

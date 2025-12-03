@@ -22,7 +22,7 @@
 #include "VProperty.hpp"
 
 class CommandOutput;
-typedef std::shared_ptr<CommandOutput> CommandOutput_ptr;
+using CommandOutput_ptr = std::shared_ptr<CommandOutput>;
 
 class CommandOutputHandler;
 
