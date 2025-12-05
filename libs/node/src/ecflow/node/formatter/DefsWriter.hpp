@@ -181,11 +181,9 @@ struct Writer<AstTop, Stream>
         // taken from AstTop::print(std::string& os) const
 
         Indent l1(ctx);
-        Indent l2(ctx);
-
-        output << l2;
-
+        output << l1;
         output << "# Trigger Evaluation Tree\n";
+
         if (const auto* root = item.left(); root) {
             detail::write_ast_type<Stream>(output, root, ctx);
         }
@@ -881,7 +879,6 @@ struct Writer<AstParentVariable, Stream>
             std::ostringstream os;
             ref_node->findExprVariableAndPrint(item.name(), os);
             output << os.str();
-            output << "\n";
             return;
         }
         output << " node(?not-found?) value(0)";
