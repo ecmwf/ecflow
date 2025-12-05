@@ -146,40 +146,38 @@ void VTriggerAttr::expressions(const VNode* vnode, std::string& trigger, std::st
     }
 }
 
+namespace detail {
+
+template <typename STREAM>
+void render_expression(Expression* e, const Node& node, STREAM& stream) {
+    auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
+
+    ecf::Indent l1(ctx);
+
+    if (e->isFree()) {
+        stream << l1 << "# (free)\n";
+    }
+
+    // show the Abstract Syntax Tree for the expression. This also uses Indentor
+    if (auto ast = node.triggerAst(); ast != nullptr) {
+        ecf::write_t(stream, *ast, ctx);
+    }
+}
+
+} // namespace detail
+
 std::string VTriggerAttr::ast_str() const {
     std::string buffer;
     ecf::stringstreambuf ss{buffer};
     if (node_ptr node = parent_->node()) {
         if (index_ == 0) {
             if (Expression* e = node->get_trigger()) {
-                auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
-
-                ecf::Indent l1(ctx);
-
-                if (e->isFree()) {
-                    ss << l1 << "# (free)\n";
-                }
-
-                // show the Abstract Syntax Tree for the expression. This also uses Indentor
-                if (Ast* ast = node->triggerAst()) {
-                    ecf::write_t(ss, *ast, ctx);
-                }
+                detail::render_expression(e, *node, ss);
             }
         }
         else {
             if (Expression* e = node->get_complete()) {
-                auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
-
-                ecf::Indent l1(ctx);
-
-                if (e->isFree()) {
-                    ss << l1 << "# (free)\n";
-                }
-
-                // show the Abstract Syntax Tree for the expression. This also uses Indentor
-                if (Ast* ast = node->completeAst()) {
-                    ecf::write_t(ss, *ast, ctx);
-                }
+                detail::render_expression(e, *node, ss);
             }
         }
     }
