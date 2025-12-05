@@ -140,6 +140,7 @@ void write_ast_derived_types(Stream& output, const Ast* root, Context& ctx) {
 template <typename Stream>
 void write_ast_type(Stream& output, const Ast* root, Context& ctx) {
     write_ast_derived_types<Stream,
+                            AstTop,
                             AstNot,
                             AstPlus,
                             AstMinus,
