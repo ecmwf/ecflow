@@ -172,7 +172,7 @@ public:
 
 private:
     template <class T>
-    explicit Identity(T&& t) : handle_{std::make_unique<WrappingIdentity<T>>(std::move(t))} {}
+    explicit Identity(T&& t) : handle_{std::make_unique<WrappingIdentity<T>>(std::forward<T>(t))} {}
 
     std::unique_ptr<AbstractIdentity> handle_;
 };
