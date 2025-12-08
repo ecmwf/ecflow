@@ -31,7 +31,7 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/Submittable.hpp"
 
-// #define _UI_NODEXPRESSIONPARSEER_DEBUG
+// #define UI_NODEXPRESSIONPARSER_DEBUG
 
 // -------------------------
 // Expression parser classes
@@ -551,7 +551,7 @@ bool AndNodeCondition::execute(VItem* node) {
 //=========================================================================
 
 bool OrNodeCondition::execute(VItem* node) {
-#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+#ifdef UI_NODEXPRESSIONPARSER_DEBUG
     UiLog().dbg() << "OrNodeCondition::execute --->";
     UiLog().dbg() << operands_[0]->execute(node) << " " << operands_[1]->execute(node);
 #endif
@@ -580,38 +580,38 @@ bool TypeNodeCondition::execute(VItem* item) {
     }
 
     else if (item->isNode()) {
-#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+#ifdef UI_NODEXPRESSIONPARSER_DEBUG
         UiLog().dbg() << "TypeNodeCondition::execute --> " << NodeExpressionParser::instance()->typeName(type_);
         UiLog().dbg() << item->isNode() << " " << item->isSuite() << " " << item->isFamily() << " " << item->isTask()
                       << " " << item->isAlias();
 #endif
         switch (type_) {
             case NodeExpressionParser::NODE:
-#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+#ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   NODE";
 #endif
                 return true;
                 break;
             case NodeExpressionParser::SUITE:
-#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+#ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   SUITE";
 #endif
                 return (item->isSuite() != nullptr);
                 break;
             case NodeExpressionParser::TASK:
-#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+#ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   TASK";
 #endif
                 return (item->isTask() != nullptr);
                 break;
             case NodeExpressionParser::FAMILY:
-#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+#ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   FAMILY";
 #endif
                 return (item->isFamily() != nullptr);
                 break;
             case NodeExpressionParser::ALIAS:
-#ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
+#ifdef UI_NODEXPRESSIONPARSER_DEBUG
                 UiLog().dbg() << "   ALIAS";
 #endif
                 return (item->isAlias() != nullptr);

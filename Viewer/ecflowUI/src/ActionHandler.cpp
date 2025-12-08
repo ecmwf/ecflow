@@ -41,7 +41,7 @@
 #include "VReportMaker.hpp"
 #include "ecflow/core/Str.hpp"
 
-#define _UI_ACTIONHANDLER_DEBUG
+#define UI_ACTIONHANDLER_DEBUG
 
 ActionHandler::ActionHandler(QObject* actionSender, QWidget* menuParent)
     : QObject(actionSender),
@@ -113,7 +113,7 @@ void ActionHandler::filterNodes(const std::vector<VInfo_ptr>& nodesLst, std::vec
 
 void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& filteredNodes) {
     if (item) {
-#ifdef _UI_ACTIONHANDLER_DEBUG
+#ifdef UI_ACTIONHANDLER_DEBUG
         UiLog().dbg() << "ActionHandler::contextMenu --> item=" + item->name();
 #endif
         UI_ASSERT(filteredNodes.size() > 0, "filteredNodes is empty");

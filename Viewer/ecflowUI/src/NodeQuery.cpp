@@ -17,7 +17,7 @@
 
 int NodeQuery::defaultMaxNum_ = 50000;
 
-#define _UI_NODEQUERY_DEBUG
+#define UI_NODEQUERY_DEBUG
 
 QString NodeQueryAttrGroup::query() const {
     QStringList lst;
@@ -46,7 +46,7 @@ bool NodeQueryVarAttrGroup::hasType(VAttributeType* t) const {
         Q_FOREACH (NodeQueryOption* op, options_) {
             if (op->name() == "var_type") {
                 QString v = op->valueAsString();
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERY_DEBUG
                 UiLog().dbg() << "NodeQueryVarAttrGroup::hasType  var_type=" << v.toStdString();
 #endif
                 if (v == "any") {
@@ -70,7 +70,7 @@ NodeQuery::NodeQuery(const std::string& name, bool ignoreMaxNum)
       caseSensitive_(false),
       maxNum_(defaultMaxNum_),
       ignoreMaxNum_(ignoreMaxNum) {
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERY_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -118,7 +118,7 @@ void NodeQuery::setName(const std::string& name) {
 }
 
 bool NodeQuery::hasServer(const std::string& name) const {
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERY_DEBUG
     UiLog().dbg() << "NodeQuery::hasServer -->";
 #endif
 
@@ -275,7 +275,7 @@ bool NodeQuery::renameServer(const std::string& newName, const std::string& oldN
 }
 
 void NodeQuery::buildQueryString() {
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERY_DEBUG
     UI_FUNCTION_LOG
 #endif
 

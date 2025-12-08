@@ -17,7 +17,7 @@
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
 
-// #define _UI_VINFO_DEBUG
+// #define UI_VINFO_DEBUG
 
 //========================================
 //
@@ -32,7 +32,7 @@ VInfo::VInfo(ServerHandler* server, VNode* node, VAttribute* attr) : server_(ser
 }
 
 VInfo::~VInfo() {
-#ifdef _UI_VINFO_DEBUG
+#ifdef UI_VINFO_DEBUG
     UiLog().dbg() << "VInfo::~VInfo() --> " << this;
 #endif
     if (server_) {
@@ -43,7 +43,7 @@ VInfo::~VInfo() {
         (*it)->notifyDelete(this);
     }
 
-#ifdef _UI_VINFO_DEBUG
+#ifdef UI_VINFO_DEBUG
     UiLog().dbg() << "<-- ~VInfo()";
 #endif
 }

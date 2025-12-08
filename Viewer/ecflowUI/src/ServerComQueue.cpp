@@ -20,7 +20,7 @@
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Log.hpp"
 
-#define _UI_SERVERCOMQUEUE_DEBUG
+#define UI_SERVERCOMQUEUE_DEBUG
 
 // This class manages the tasks to be sent to the ServerComThread, which controls
 // the communication with the ClientInvoker. The ClientInvoker is hidden from the
@@ -369,7 +369,7 @@ void ServerComQueue::slotRun() {
     }
 
     if (state_ == DisabledState || state_ == SuspendedState) {
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
         UI_FUNCTION_LOG_S(server_);
         UiLogS(server_).dbg() << " queue is either disabled or suspended";
 #endif
@@ -377,7 +377,7 @@ void ServerComQueue::slotRun() {
     }
 
     if (taskIsBeingFinished_ || taskIsBeingFailed_) {
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
         UI_FUNCTION_LOG_S(server_);
         UiLogS(server_).dbg() << " task is either being finished or failed";
 #endif
@@ -385,7 +385,7 @@ void ServerComQueue::slotRun() {
     }
 
     if (tasks_.empty() && !current_) {
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
         UI_FUNCTION_LOG_S(server_);
         UiLogS(server_).dbg() << " there are no tasks! Stop timer!";
 #endif
@@ -394,7 +394,7 @@ void ServerComQueue::slotRun() {
     }
 
 #if 0
-    #ifdef _UI_SERVERCOMQUEUE_DEBUG
+    #ifdef UI_SERVERCOMQUEUE_DEBUG
     if(tasks_.size() > 0)
     {
         UI_FUNCTION_LOG_S(server_);
@@ -485,7 +485,7 @@ void ServerComQueue::slotRun() {
                 return;
             }
             else {
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
                 UiLogS(server_).dbg() << "  current_ aborted or cancelled. Reset current_ !";
 #endif
                 current_.reset();
@@ -494,14 +494,14 @@ void ServerComQueue::slotRun() {
     }
 
     if (current_) {
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
         // UiLog(server_).dbg() << " still processing reply from previous task";
 #endif
         return;
     }
 
     if (comThread_->isRunning()) {
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
         // UiLog(server_).dbg() << " thread is active";
 #endif
         return;
@@ -522,7 +522,7 @@ void ServerComQueue::slotRun() {
         return;
     }
 
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
     UiLogS(server_).dbg() << " run task: " << current_->typeString();
 #endif
 
@@ -555,7 +555,7 @@ void ServerComQueue::slotTaskFinished() {
     // If the current task is empty there must have been an error that was
     // handled by the sloTaskFailed slot.
     if (current_) {
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
         UiLogS(server_).dbg() << " reset current_";
 #endif
 
@@ -582,7 +582,7 @@ void ServerComQueue::slotTaskFailed(std::string msg) {
     startTimeoutTryCnt_ = 0;
 
     UiLogS(server_).dbg() << "ComQueue::slotTaskFailed -->";
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
     if (current_) {
         UiLogS(server_).dbg() << " current_ exists";
     }
@@ -594,7 +594,7 @@ void ServerComQueue::slotTaskFailed(std::string msg) {
     // We need to leave the load mode
     endReset();
 
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
     if (current_) {
         UiLogS(server_).dbg() << " current_ exists";
     }
@@ -603,7 +603,7 @@ void ServerComQueue::slotTaskFailed(std::string msg) {
     }
 #endif
 
-#ifdef _UI_SERVERCOMQUEUE_DEBUG
+#ifdef UI_SERVERCOMQUEUE_DEBUG
     UiLogS(server_).dbg() << " reset current_";
 #endif
     assert(current_);

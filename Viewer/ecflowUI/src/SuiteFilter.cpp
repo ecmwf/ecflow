@@ -19,7 +19,7 @@
 #include "VProperty.hpp"
 #include "VSettings.hpp"
 
-#define SUITEFILTER_UI_DEBUG_
+#define UI_SUITEFILTER_DEBUG
 
 std::string SuiteFilter::dummySuite_ = "__DUMMY_FOR_UI__";
 
@@ -42,13 +42,13 @@ void SuiteFilter::clear() {
 }
 
 bool SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded) {
-#ifdef SUITEFILTER_UI_DEBUG_
+#ifdef UI_SUITEFILTER_DEBUG
     UI_FUNCTION_LOG
 #endif
     bool changed         = false;
     bool filteredChanged = false;
 
-#ifdef SUITEFILTER_UI_DEBUG_
+#ifdef UI_SUITEFILTER_DEBUG
     UiLog().dbg() << "loaded=" << loaded;
     UiLog().dbg() << "items_=" << *this;
 #endif
@@ -92,7 +92,7 @@ bool SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded) {
         broadcastChange();
     }
 
-#ifdef SUITEFILTER_UI_DEBUG_
+#ifdef UI_SUITEFILTER_DEBUG
     UiLog().dbg() << "(2) items_=" << *this;
 #endif
 
@@ -145,7 +145,7 @@ std::vector<std::string> SuiteFilter::filter() const {
         }
     }
 
-#ifdef SUITEFILTER_UI_DEBUG_
+#ifdef UI_SUITEFILTER_DEBUG
     UI_FUNCTION_LOG
     UiLog().dbg() << "filter=" << fv;
 #endif

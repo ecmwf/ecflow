@@ -27,7 +27,7 @@
 #include "VSState.hpp"
 #include "VTree.hpp"
 
-// #define _UI_TREENODEMODEL_DEBUG
+// #define UI_TREENODEMODEL_DEBUG
 
 //=======================================
 //
@@ -1030,14 +1030,14 @@ void TreeNodeModel::slotServerAddEnd() {
 
 // Server is about to be removed
 void TreeNodeModel::slotServerRemoveBegin(VModelServer* server, int /*nodeNum*/) {
-#ifdef _UI_TREENODEMODEL_DEBUG
+#ifdef UI_TREENODEMODEL_DEBUG
     UiLog().dbg() << "TreeNodeModel::slotServerRemoveBegin -->";
 #endif
 
     int row = data_->indexOfServer(server);
     Q_ASSERT(row >= 0);
 
-#ifdef _UI_TREENODEMODEL_DEBUG
+#ifdef UI_TREENODEMODEL_DEBUG
     UiLog().dbg() << "  row: " << row;
 #endif
     beginRemoveRows(QModelIndex(), row, row);
@@ -1045,7 +1045,7 @@ void TreeNodeModel::slotServerRemoveBegin(VModelServer* server, int /*nodeNum*/)
 
 // Removal of the server has finished
 void TreeNodeModel::slotServerRemoveEnd(int /*nodeNum*/) {
-#ifdef _UI_TREENODEMODEL_DEBUG
+#ifdef UI_TREENODEMODEL_DEBUG
     UiLog().dbg() << "TreeNodeModel::slotServerRemoveEnd -->";
 #endif
 

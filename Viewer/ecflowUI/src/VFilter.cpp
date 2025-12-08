@@ -31,7 +31,7 @@
 #include "VSettings.hpp"
 #include "VTree.hpp"
 
-#define _UI_VFILTER_DEBUG
+#define UI_VFILTER_DEBUG
 
 //==============================================
 //
@@ -411,7 +411,7 @@ void NodeFilter::clear() {
 
 void NodeFilter::setForceShowNode(VNode* n) {
     forceShowNode_ = n;
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
     if (forceShowNode_) {
         UiLogS(server_).dbg() << "NodeFilter::setForceShowNode --> " << forceShowNode_->absNodePath();
     }
@@ -449,7 +449,7 @@ bool TreeNodeFilter::isComplete() {
 
 //
 bool TreeNodeFilter::update(const std::vector<VNode*>& topChange, std::vector<VNode*>& topFilterChange) {
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
     UI_FUNCTION_LOG_S(server_);
 #endif
 
@@ -460,13 +460,13 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange, std::vector<VN
         // deallocate the match vector
         match_ = std::vector<VNode*>();
         // assert(match_.capacity() == 0);
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
         UiLogS(server_).dbg() << " no filter is defined!";
 #endif
         return false;
     }
 
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
     QElapsedTimer timer;
     timer.start();
 #endif
@@ -511,7 +511,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange, std::vector<VN
                 filterState(i, def_->nodeState_);
             }
 
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
             int diffCnt = 0;
             for (size_t i = 0; i < match_.size(); i++) {
                 if (tree_->vnodeAt(i) != match_[i]) {
@@ -528,7 +528,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange, std::vector<VN
                 collectTopFilterChange(i, topFilterChange);
             }
 
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
             assert(static_cast<int>(topFilterChange.size()) <= diffCnt);
             if (diffCnt > 0) {
                 assert(topFilterChange.size() > 0);
@@ -536,7 +536,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange, std::vector<VN
 #endif
         }
 
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
         UiLogS(server_).dbg() << " top level nodes that changed in filter:";
         for (auto& i : topFilterChange) {
             UiLogS(server_).dbg() << "  " << i->strName();
@@ -547,7 +547,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange, std::vector<VN
         match_.clear();
     }
 
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
     UiLogS(server_).dbg() << " elapsed time: " << timer.elapsed() << " ms";
     UiLogS(server_).dbg() << " filter size: " << match_.size();
     UiLogS(server_).dbg() << " capacity:" << match_.capacity();
@@ -664,7 +664,7 @@ VNode* TableNodeFilter::nodeAt(int index) const {
 }
 
 bool TableNodeFilter::update() {
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
     UiLogS(server_).dbg() << "TableNodeFilter::update -->";
 #endif
 
@@ -676,7 +676,7 @@ bool TableNodeFilter::update() {
         match_      = std::vector<VNode*>();
         index_      = std::vector<int>();
         matchCount_ = 0;
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
         UiLogS(server_).dbg() << " no nodes are filtered!";
 #endif
         return true;
@@ -688,13 +688,13 @@ bool TableNodeFilter::update() {
         match_      = std::vector<VNode*>();
         index_      = std::vector<int>();
         matchCount_ = server_->vRoot()->totalNum();
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
         UiLogS(server_).dbg() << " all the nodes are filtered!";
 #endif
         return true;
     }
 
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
     QElapsedTimer timer;
     timer.start();
 #endif
@@ -722,7 +722,7 @@ bool TableNodeFilter::update() {
         std::fill(index_.begin(), index_.end(), -1);
     }
 
-#ifdef _UI_VFILTER_DEBUG
+#ifdef UI_VFILTER_DEBUG
     UiLogS(server_).dbg() << " elapsed time: " << timer.elapsed() << " ms";
     UiLogS(server_).dbg() << " filter size: " << match_.size();
     UiLogS(server_).dbg() << " capacity: " << match_.capacity();

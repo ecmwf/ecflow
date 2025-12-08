@@ -42,7 +42,7 @@ int NodePathItem::height_   = 0;
 int NodePathItem::hPadding_ = 2;
 int NodePathItem::vPadding_ = 0;
 
-// #define _UI_NODEPATHWIDGET_DEBUG
+// #define UI_NODEPATHWIDGET_DEBUG
 
 BcWidget::BcWidget(QWidget* parent) : QWidget(parent), font_(QFont()) {
     font_ = QFont();
@@ -152,7 +152,7 @@ void BcWidget::reset(int idx, QString text, QColor bgCol, QColor fontCol) {
 }
 
 void BcWidget::reset(QList<NodePathItem*> items, int maxWidth) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "BcWidget::reset -->";
     UiLog().dbg() << "   maxWidth=" << maxWidth;
 #endif
@@ -209,7 +209,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth) {
         // The total width
         width_ = xp + NodePathItem::triLen_ + hMargin_;
 
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
         UiLog().dbg() << "   full width=" << width_;
 #endif
 
@@ -219,7 +219,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth) {
         //(with the execption of the last item)
         int redTextLen = 0;
         if (width_ > maxWidth) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   try elided text";
 #endif
             // Try different elided text lengths
@@ -255,7 +255,7 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth) {
         // and insert an ellipsis item to the front.
         int xpAfterEllipsis = 0;
         if (width_ > maxWidth) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   insert ellipsis to front + remove items";
             UiLog().dbg() << "     redTextLen=" << redTextLen;
 #endif
@@ -273,11 +273,11 @@ void BcWidget::reset(QList<NodePathItem*> items, int maxWidth) {
             for (int i = 0; i < items_.count() - 1; i++) {
                 xp                  = xpAfterEllipsis;
                 items_[i]->visible_ = false;
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
                 UiLog().dbg() << "     omit item " << i;
 #endif
                 estWidth = estimateWidth(i + 1, xp, redTextLen);
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
                 UiLog().dbg() << "     estWidth " << estWidth;
 #endif
                 if (estWidth < maxWidth) {
@@ -875,7 +875,7 @@ void NodePathWidget::reset() {
 }
 
 void NodePathWidget::setPath(VInfo_ptr info) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::setPath -->";
 #endif
 
@@ -938,7 +938,7 @@ void NodePathWidget::setPath(VInfo_ptr info) {
 
         VNode* n = lst.at(i);
         col      = n->stateColour();
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
         UiLog().dbg() << "   state=" << n->stateName();
 #endif
         QColor fontCol   = n->stateFontColour();
@@ -957,7 +957,7 @@ void NodePathWidget::setPath(VInfo_ptr info) {
 
     bc_->reset(nodeItems_, bcWidth());
 
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "<-- setPath";
 #endif
 }
@@ -990,7 +990,7 @@ void NodePathWidget::slotMenuSelected(int idx, QPoint bcPos) {
 //--------------------------------------------------------------------------------------------
 
 VInfo_ptr NodePathWidget::nodeAt(int idx) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::nodeAt idx=" << idx;
 #endif
 
@@ -1033,7 +1033,7 @@ void NodePathWidget::loadMenu(const QPoint& pos, VInfo_ptr p) {
         }
 
         if (acLst.count() > 0) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
             UiLog().info() << "NodePathWidget::loadMenu";
 #endif
 
@@ -1095,7 +1095,7 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node,
 }
 
 void NodePathWidget::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& aspect) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::notifyDefsChanged -->";
 #endif
 
@@ -1115,7 +1115,7 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server, const std::vector<
         // State changed
         for (auto it : aspect) {
             if (it == ecf::Aspect::STATE || it == ecf::Aspect::SERVER_STATE) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
                 UiLog().dbg() << "   update server item";
 #endif
                 if (nodeItems_.count() > 0) {
@@ -1125,14 +1125,14 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server, const std::vector<
             }
         }
     }
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "<-- notifyDefsChanged";
 #endif
 }
 
 // This must be called at the beginning of a reset
 void NodePathWidget::notifyBeginServerClear(ServerHandler* server) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::notifyBeginServerClear -->";
 #endif
     if (info_) {
@@ -1140,24 +1140,24 @@ void NodePathWidget::notifyBeginServerClear(ServerHandler* server) {
             setEnabled(false);
         }
     }
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "<-- notifyBeginServerClear";
 #endif
 }
 
 // This must be called at the end of a reset
 void NodePathWidget::notifyEndServerScan(ServerHandler* server) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::notifyEndServerScan -->";
 #endif
     if (info_) {
         if (info_->server() && info_->server() == server) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   setEnabled(true)";
 #endif
             setEnabled(true);
 
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   regainData";
 #endif
             // We try to ressurect the info. We have to do it explicitly because it is not guaranteed that
@@ -1173,14 +1173,14 @@ void NodePathWidget::notifyEndServerScan(ServerHandler* server) {
 
             Q_ASSERT(info_->server() && info_->node());
 
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
             UiLog().dbg() << "   reset";
 #endif
             reset();
         }
     }
 
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "<-- notifyEndServerScan";
 #endif
 }
@@ -1209,17 +1209,17 @@ void NodePathWidget::notifyServerRenamed(ServerHandler*, const std::string& /*ol
 }
 
 void NodePathWidget::notifyDataLost(VInfo* info) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "NodePathWidget::notifyDataLost -->";
 #endif
 
     if (info_ && info_.get() == info) {
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
         UiLog().dbg() << "   clear(true)";
 #endif
         clear(true);
     }
-#ifdef _UI_NODEPATHWIDGET_DEBUG
+#ifdef UI_NODEPATHWIDGET_DEBUG
     UiLog().dbg() << "<-- notifyDataLost";
 #endif
 }

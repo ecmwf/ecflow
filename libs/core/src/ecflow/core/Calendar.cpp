@@ -511,7 +511,7 @@ void Calendar::write_state(std::string& ret) const {
         return;
     }
 
-    bool increment__changed = (!increment_.is_special() && increment_.total_seconds() != 0);
+    bool increment_changed = (!increment_.is_special() && increment_.total_seconds() != 0);
 
     // cType is obtained from the suite clock attribute, and not persisted
     ret += " initTime:";
@@ -524,7 +524,7 @@ void Calendar::write_state(std::string& ret) const {
     ret += to_simple_string(initLocalTime_);
     ret += " lastTime:";
     ret += to_simple_string(lastTime_);
-    if (increment__changed) {
+    if (increment_changed) {
         ret += " calendarIncrement:";
         ret += to_simple_string(increment_);
     }

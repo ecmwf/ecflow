@@ -26,13 +26,15 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 
 BOOST_AUTO_TEST_SUITE(T_ClientHandleCmd)
 
-BOOST_AUTO_TEST_CASE(test_add_log3) {
+BOOST_AUTO_TEST_CASE(is_able_to_create_log_file) {
+    ECF_NAME_THIS_TEST();
+
     // create once for all test below, then remove at the end
     Log::create("test_add_log3.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");
 }
 
-BOOST_AUTO_TEST_CASE(test_client_handle_cmd_empty_server) {
+BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_empty_server) {
     ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
@@ -87,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_empty_server) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register_and_drop) {
+BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_register_and_drop) {
     ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
@@ -122,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register_and_drop) {
                         "Expected  no client handles, but found " << defs.client_suite_mgr().clientSuites().size());
 }
 
-BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register__with_drop) {
+BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_register_with_drop) {
     ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
@@ -168,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_register__with_drop) {
                         "Expected  no client handles, but found " << defs.client_suite_mgr().clientSuites().size());
 }
 
-BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
+BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_auto_add) {
     ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
@@ -230,7 +232,7 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd_auto_add) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_client_handle_cmd_add_remove) {
+BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_add_remove) {
     ECF_NAME_THIS_TEST();
 
     std::vector<std::string> suite_names;
@@ -324,7 +326,7 @@ static bool check_ordering(Defs& defs) {
     return true;
 }
 
-BOOST_AUTO_TEST_CASE(test_client_handle_suite_ordering) {
+BOOST_AUTO_TEST_CASE(is_able_to_handle_suite_ordering) {
     ECF_NAME_THIS_TEST();
     // ensure order of suites in a handle is the same as server suites
 
@@ -373,7 +375,9 @@ BOOST_AUTO_TEST_CASE(test_client_handle_suite_ordering) {
     BOOST_CHECK_MESSAGE(check_ordering(defs), "Ordering not preserved after adding a new suite");
 }
 
-BOOST_AUTO_TEST_CASE(test_destroy_log3) {
+BOOST_AUTO_TEST_CASE(is_able_to_destroy_log_file) {
+    ECF_NAME_THIS_TEST();
+
     Log::destroy();
     fs::remove("test_add_log3.log");
     BOOST_CHECK_MESSAGE(true, "stop boost test form complaining");

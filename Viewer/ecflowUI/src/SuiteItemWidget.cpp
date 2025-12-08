@@ -20,8 +20,6 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 
-#define SuiteItemWidget__DEBUG__
-
 //========================================================
 //
 // SuiteItemWidget

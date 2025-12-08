@@ -18,8 +18,6 @@
 #include "VItemPathParser.hpp"
 #include "VNode.hpp"
 
-#define _UI_TRIGGERCOLLECTOR_DEBUG
-
 TriggerListCollector::~TriggerListCollector() {
     clear();
 }

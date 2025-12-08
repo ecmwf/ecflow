@@ -26,7 +26,7 @@
 #include "VNState.hpp"
 #include "VNode.hpp"
 
-// #define _UI_TABLENODEMODEL_DEBUG
+// #define UI_TABLENODEMODEL_DEBUG
 
 // static int hitCount=0;
 
@@ -107,7 +107,7 @@ int TableNodeModel::columnCount(const QModelIndex& /*parent */) const {
 }
 
 int TableNodeModel::rowCount(const QModelIndex& parent) const {
-#ifdef _UI_TABLENODEMODEL_DEBUG
+#ifdef UI_TABLENODEMODEL_DEBUG
     UiLog().dbg() << "rowCount=" << parent;
 #endif
 
@@ -128,7 +128,7 @@ int TableNodeModel::rowCount(const QModelIndex& parent) const {
                 cnt += data_->numOfNodes(i);
             }
         }
-#ifdef _UI_TABLENODEMODEL_DEBUG
+#ifdef UI_TABLENODEMODEL_DEBUG
         // UiLog().dbg() << "table count " << cnt;
 #endif
         return cnt;
@@ -428,7 +428,7 @@ void TableNodeModel::slotBeginServerScan(VModelServer* server, int num) {
     Q_ASSERT(active_ == true);
     Q_ASSERT(server);
 
-#ifdef _UI_TABLENODEMODEL_DEBUG
+#ifdef UI_TABLENODEMODEL_DEBUG
     UiLog().dbg() << "TableNodeModel::slotBeginServerScan --> " << server->realServer()->name() << " " << num;
 #endif
 
@@ -442,7 +442,7 @@ void TableNodeModel::slotBeginServerScan(VModelServer* server, int num) {
 void TableNodeModel::slotEndServerScan(VModelServer* /*server*/, int num) {
     assert(active_ == true);
 
-#ifdef _UI_TABLENODEMODEL_DEBUG
+#ifdef UI_TABLENODEMODEL_DEBUG
     UiLog().dbg() << "TableNodeModel::slotEndServerScan --> " << server->realServer()->name() << " " << num;
     QTime t;
     t.start();
@@ -458,7 +458,7 @@ void TableNodeModel::slotEndServerScan(VModelServer* /*server*/, int num) {
         Q_EMIT skipSortingEnd();
     }
 
-#ifdef _UI_TABLENODEMODEL_DEBUG
+#ifdef UI_TABLENODEMODEL_DEBUG
     UiLog().dbg() << "  elapsed: " << t.elapsed() << " ms";
     UiLog().dbg() << "<-- slotEndServerScan";
 #endif

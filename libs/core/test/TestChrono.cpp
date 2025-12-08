@@ -19,14 +19,14 @@ BOOST_AUTO_TEST_SUITE(U_Core)
 
 BOOST_AUTO_TEST_SUITE(T_Chrono)
 
-BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_create_reference_instant) {
+BOOST_AUTO_TEST_CASE(is_able_to_create_reference_instant) {
     ECF_NAME_THIS_TEST();
 
     Instant instant;
     BOOST_CHECK_EQUAL(Instant::format(instant), "19700101T000000");
 }
 
-BOOST_AUTO_TEST_CASE(test_chrono__is_able_to_create_instant_based_on_std_chrono_time_point) {
+BOOST_AUTO_TEST_CASE(is_able_to_create_instant_based_on_std_chrono_time_point) {
     ECF_NAME_THIS_TEST();
 
     Instant original{std::chrono::system_clock::now()};
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_chrono__is_able_to_create_instant_based_on_std_chrono_
     BOOST_CHECK_EQUAL(original, reconstructed);
 }
 
-BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_parse_and_format_instant) {
+BOOST_AUTO_TEST_CASE(is_able_to_parse_and_format_instant) {
     ECF_NAME_THIS_TEST();
 
     {
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_parse_and_format_instant) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_compare_instants_for_equality) {
+BOOST_AUTO_TEST_CASE(is_able_to_compare_instants_for_equality) {
     ECF_NAME_THIS_TEST();
 
     Instant instant0 = Instant::parse("20000101T235959");
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_compare_instants_for_equality) {
     BOOST_CHECK(instant3 == instant3);
 }
 
-BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_compare_instants_for_inequality) {
+BOOST_AUTO_TEST_CASE(is_able_to_compare_instants_for_inequality) {
     ECF_NAME_THIS_TEST();
 
     Instant instant1 = Instant::parse("20000101T235959");
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_compare_instants_for_inequality) {
     BOOST_CHECK(instant3 > instant2);
 }
 
-BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_add_duration_to_instant) {
+BOOST_AUTO_TEST_CASE(is_able_to_add_duration_to_instant) {
     ECF_NAME_THIS_TEST();
 
     {
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_add_duration_to_instant) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_subtract_duration_from_instant) {
+BOOST_AUTO_TEST_CASE(is_able_to_subtract_duration_from_instant) {
     ECF_NAME_THIS_TEST();
 
     {
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_chrono_is_able_to_subtract_duration_from_instant) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_chrono_parsing_invalid_value_throws) {
+BOOST_AUTO_TEST_CASE(parsing_invalid_value_throws) {
     ECF_NAME_THIS_TEST();
 
     using expected = std::runtime_error;
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_chrono_parsing_invalid_value_throws) {
     BOOST_CHECK_THROW(Instant::parse("20000631T000000"), expected);
 }
 
-BOOST_AUTO_TEST_CASE(test_chrono_experimental) {
+BOOST_AUTO_TEST_CASE(is_able_to_cast_instant_to_duration) {
     ECF_NAME_THIS_TEST();
 
     {

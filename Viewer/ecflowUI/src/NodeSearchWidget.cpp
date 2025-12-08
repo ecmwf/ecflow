@@ -29,7 +29,7 @@
 #include "VNState.hpp"
 #include "ViewerUtil.hpp"
 
-#define _UI_NODESEARCHWIDGET_DEBUG
+#define UI_NODESEARCHWIDGET_DEBUG
 
 //======================================================
 //
@@ -158,7 +158,7 @@ void NodeSearchWidget::slotQueryEnabledChanged(bool /*queryEnabled*/) {
 }
 
 void NodeSearchWidget::slotFind() {
-#ifdef _UI_NODESEARCHWIDGET_DEBUG
+#ifdef UI_NODESEARCHWIDGET_DEBUG
     UiLog().dbg() << "NodeSearchWidget::slotFind -->";
 #endif
 
@@ -168,7 +168,7 @@ void NodeSearchWidget::slotFind() {
         return;
     }
 
-#ifdef _UI_NODESEARCHWIDGET_DEBUG
+#ifdef UI_NODESEARCHWIDGET_DEBUG
     UiLog().dbg() << " isRunning=" << engine_->isRunning();
 #endif
 
@@ -190,7 +190,7 @@ void NodeSearchWidget::slotFind() {
         // if we are here we could not start the query and we need to reset the button state
         adjustButtonState();
     }
-#ifdef _UI_NODESEARCHWIDGET_DEBUG
+#ifdef UI_NODESEARCHWIDGET_DEBUG
     UiLog().dbg() << "<-- NodeSearchWidget::slotFind";
 #endif
 }
@@ -208,7 +208,7 @@ void NodeSearchWidget::slotClose() {
 }
 
 void NodeSearchWidget::slotQueryStarted() {
-#ifdef _UI_NODESEARCHWIDGET_DEBUG
+#ifdef UI_NODESEARCHWIDGET_DEBUG
     UiLog().dbg() << "NodeSearchWidget::slotQueryStarted -->";
 #endif
     adjustButtonState();
@@ -217,13 +217,13 @@ void NodeSearchWidget::slotQueryStarted() {
     queryProgress_->show();
 
     progressLabel_->setText("Search in progress ...");
-#ifdef _UI_NODESEARCHWIDGET_DEBUG
+#ifdef UI_NODESEARCHWIDGET_DEBUG
     UiLog().dbg() << "<-- slotQueryStarted";
 #endif
 }
 
 void NodeSearchWidget::slotQueryFinished() {
-#ifdef _UI_NODESEARCHWIDGET_DEBUG
+#ifdef UI_NODESEARCHWIDGET_DEBUG
     UiLog().dbg() << "NodeSearchWidget::slotQueryFinished -->";
     UiLog().dbg() << "  Search finished. Total node scanned: " << engine_->scannedCount();
 #endif
@@ -247,7 +247,7 @@ void NodeSearchWidget::slotQueryFinished() {
     }
     progressLabel_->setText(s);
 
-#ifdef _UI_NODESEARCHWIDGET_DEBUG
+#ifdef UI_NODESEARCHWIDGET_DEBUG
     UiLog().dbg() << " isRunning=" << engine_->isRunning();
     UiLog().dbg() << "<-- NodeSearchWidget::slotQueryFinished";
 #endif

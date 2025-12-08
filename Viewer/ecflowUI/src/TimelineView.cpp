@@ -35,7 +35,7 @@
 #include "VSettings.hpp"
 #include "ViewerUtil.hpp"
 
-#define _UI_TimelineView_DEBUG
+#define UI_TimelineView_DEBUG
 
 static std::vector<std::string> propVec;
 
@@ -730,7 +730,7 @@ void TimelineView::selectionChanged(const QItemSelection& selected, const QItemS
         VInfo_ptr info=model_->nodeInfo(lst.front());
         if(info && !info->isEmpty())
         {
-    #ifdef _UI_TimelineView_DEBUG
+    #ifdef UI_TimelineView_DEBUG
             UiLog().dbg() << "TimelineView::selectionChanged --> emit=" << info->path();
     #endif
             Q_EMIT selectionChanged(info);
@@ -762,7 +762,7 @@ void TimelineView::setCurrentSelection(VInfo_ptr /*info*/) {
     QModelIndex idx=model_->infoToIndex(info);
     if(idx.isValid())
     {
-    #ifdef _UI_TimelineView_DEBUG
+    #ifdef UI_TimelineView_DEBUG
         if(info)
             UiLog().dbg() << "TimelineView::setCurrentSelection --> " <<  info->path();
     #endif

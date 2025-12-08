@@ -15,8 +15,6 @@
 #include "UiLog.hpp"
 #include "VNode.hpp"
 
-// #define SUITEMODEL_UI_DEBUG_
-
 SuiteModel::SuiteModel(QObject* parent)
     : QAbstractItemModel(parent),
       presentCol_(QColor(1, 128, 73)),

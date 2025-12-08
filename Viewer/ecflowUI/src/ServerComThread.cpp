@@ -23,7 +23,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 
-#define _UI_SERVERCOMTHREAD_DEBUG
+#define UI_SERVERCOMTHREAD_DEBUG
 
 ServerComThread::ServerComThread(ServerHandler* server, ClientInvoker* ci) : server_(server), ci_(ci) {
     assert(server_);
@@ -133,7 +133,7 @@ void ServerComThread::run() {
                     //  - the 'tokenised' command
                     // Once the CommandLine is created, the handling is the same.
                     CommandLine cl = commandAsStr_.empty() ? CommandLine(command_) : CommandLine(commandAsStr_);
-#ifdef _UI_SERVERCOMTHREAD_DEBUG
+#ifdef UI_SERVERCOMTHREAD_DEBUG
                     UiLog(serverName_).dbg() << " args=" << cl;
 #endif
                     ci_->invoke(cl);

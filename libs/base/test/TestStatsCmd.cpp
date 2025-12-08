@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 
 BOOST_AUTO_TEST_SUITE(T_StatsCmd)
 
-BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_number_of_suites) {
+BOOST_AUTO_TEST_CASE(is_able_to_report_number_of_suites) {
 
     ecf::TestLog test_log("test_stats_cmd__reports_number_of_suites.log");
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_number_of_suites) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_requests_per_second) {
+BOOST_AUTO_TEST_CASE(is_able_to_report_requests_per_second) {
 
     ecf::TestLog test_log("test_stats_cmd__reports_requests_per_second.log");
 

@@ -31,11 +31,11 @@
 #include "VConfig.hpp"
 #include "ViewerUtil.hpp"
 
-// #define _UI_TEXTPAGER_DEBUG
-// #define DEBUG_TEXTPAGER_LASTPAGESIZE
-// #define DEBUG_TEXTPAGER
+// #define UI_TEXTPAGER_DEBUG
+// #define UI_TEXTPAGER_EXTRA_DEBUG
+// #define UI_TEXTPAGER_LASTPAGESIZE_DEBUG
 
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
 bool doLog = false;
 QString logFileName;
 #endif
@@ -49,7 +49,7 @@ TextPagerEdit::TextPagerEdit(QWidget* parent) : QAbstractScrollArea(parent), d(n
 
     setProperty("pager", "1");
 
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
     if (logFileName.isEmpty()) {
         logFileName = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz.log");
     }
@@ -314,7 +314,7 @@ bool TextPagerEdit::load(QIODevice *dev, TextPagerDocument::DeviceMode mode, QTe
 #endif
 
 bool TextPagerEdit::load(const QString& file, TextPagerDocument::DeviceMode mode, TextCodecWrapper codec) {
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
     if (doLog) {
         QFile f(logFileName);
         f.open(QIODevice::WriteOnly);
@@ -458,7 +458,7 @@ int TextPagerEdit::viewportPosition() const {
 void TextPagerEdit::mousePressEvent(QMouseEvent* e) {
     d->inMouseEvent = true;
     if (e->button() == Qt::LeftButton) {
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
         if (doLog) {
             QFile file(logFileName);
             file.open(QIODevice::Append);
@@ -498,7 +498,7 @@ void TextPagerEdit::mousePressEvent(QMouseEvent* e) {
 
 void TextPagerEdit::mouseDoubleClickEvent(QMouseEvent* e) {
     if (e->button() == Qt::LeftButton) {
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
         if (doLog) {
             QFile file(logFileName);
             file.open(QIODevice::Append);
@@ -525,7 +525,7 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent* e) {
         d->updateCursorPosition(e->pos());
     }
     else if (e->buttons() == Qt::LeftButton && d->document->documentSize()) {
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
         if (doLog) {
             QFile file(logFileName);
             file.open(QIODevice::Append);
@@ -599,7 +599,7 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent* e) {
 void TextPagerEdit::mouseReleaseEvent(QMouseEvent* e) {
     d->inMouseEvent = false;
     if (e->button() == Qt::LeftButton) {
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
         if (doLog) {
             QFile file(logFileName);
             file.open(QIODevice::Append);
@@ -621,7 +621,7 @@ void TextPagerEdit::mouseReleaseEvent(QMouseEvent* e) {
 }
 
 void TextPagerEdit::resizeEvent(QResizeEvent* e) {
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
     if (doLog) {
         QFile file(logFileName);
         file.open(QIODevice::Append);
@@ -797,7 +797,7 @@ void TextPagerEdit::changeEvent(QEvent* e) {
 }
 
 void TextPagerEdit::keyPressEvent(QKeyEvent* e) {
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
     if (doLog) {
         QFile file(logFileName);
         file.open(QIODevice::Append);
@@ -814,7 +814,7 @@ void TextPagerEdit::keyPressEvent(QKeyEvent* e) {
 }
 
 void TextPagerEdit::keyReleaseEvent(QKeyEvent* e) {
-#ifdef DEBUG_TEXTPAGER
+#ifdef UI_TEXTPAGER_EXTRA_DEBUG
     if (doLog) { // ### does it make any sense to replay these? Probably not
         QFile file(logFileName);
         file.open(QIODevice::Append);
@@ -917,7 +917,7 @@ void TextEditPrivate::adjustVerticalScrollBar() {
 
     int size = (document != nullptr) ? (document->documentSize()) : 0;
 
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
     qDebug() << "last page position" << s;
 #endif
     if (s == 0) {
@@ -1462,7 +1462,7 @@ void TextEditPrivate::relayout() {
 
     textEdit->horizontalScrollBar()->setPageStep(s.width());
     textEdit->horizontalScrollBar()->setMaximum(qMax(0, widest - s.width()));
-#ifdef _UI_TEXTPAGER_DEBUG
+#ifdef UI_TEXTPAGER_DEBUG
     qDebug() << widest << s.width() << textEdit->horizontalScrollBar()->maximum();
 #endif
 }
@@ -1510,7 +1510,7 @@ int TextEditPrivate::findLastPageSize() const {
         return -1;
     }
 
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
     qDebug() << "TextEditPrivate::findLastPageSize -->";
 #endif
     TextEditPrivate p(textEdit);
@@ -1528,7 +1528,7 @@ int TextEditPrivate::findLastPageSize() const {
 
     // We use the lastpage cache to find a better start position
 
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
     qDebug() << "  lastPageCache height:" << lastPage.height << "position:" << lastPage.position
              << "documentSize:" << lastPage.documentSize << "widest:" << lastPage.widest;
 #endif
@@ -1561,7 +1561,7 @@ int TextEditPrivate::findLastPageSize() const {
     if (start < 0) {
         start = 0;
     }
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
     QTime tm;
     tm.start();
 #endif
@@ -1572,14 +1572,14 @@ int TextEditPrivate::findLastPageSize() const {
     bool reachedTop   = (start == 0);
 
     while (step < maxStep) {
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
         qDebug() << "  ITERATION STEP:" << step;
         qDebug() << "  start:" << start << "maxCharNum:" << maxCharNum;
 #endif
         // We get the viewportPosition closest to start
         p.updateViewportPosition(start, sizeChangeDir, false);
 
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
         qDebug() << "  after updateviewport> start-viewportPos:" << start - p.viewportPosition;
 #endif
         // adjust the max number of characters
@@ -1590,7 +1590,7 @@ int TextEditPrivate::findLastPageSize() const {
         // Relayout using the max number of characters
         p.relayoutByPosition(maxCharNum);
 
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
         qDebug() << "  vh:" << vh << "fontSize:" << font.pointSize();
         qDebug() << "  viewport size" << textEdit->viewport()->size();
         qDebug() << "  layoutEnd:" << p.layoutEnd << "documentSize:" << documentSize
@@ -1607,11 +1607,11 @@ int TextEditPrivate::findLastPageSize() const {
             for (int i = p.textLayouts.count() - 2; i >= 0; i--) {
 
                 if (p.textLayouts.at(i)->boundingRect().top() <= top) {
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
                     qDebug() << "  find position:" << pos; // << "line:" << p.document->lineNumber(pos);
 #endif
                     p.updateViewportPosition(pos, Backward, false);
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+#ifdef UI_TEXTPAGER_LASTPAGESIZE_DEBUG
                     qDebug() << "  viewPortPosition:" << p.viewportPosition
                              << "time:" << tm.elapsed(); // << "line:" << p.document->lineNumber(p.viewportPosition);
 #endif

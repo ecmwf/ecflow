@@ -41,7 +41,7 @@
 #include "VNode.hpp"
 #include "VTree.hpp"
 
-#define _UI_TREENODEVIEW_DEBUG
+#define UI_TREENODEVIEW_DEBUG
 
 TreeNodeView::TreeNodeView(AbstractNodeView* view, TreeNodeModel* model, NodeFilterDef* filterDef, QWidget* parent)
     : QObject(parent),
@@ -152,7 +152,7 @@ QModelIndexList TreeNodeView::selectedList() {
 
 // This slot is called when the selection changed in the view
 void TreeNodeView::selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/) {
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
     UI_FUNCTION_LOG
 #endif
     QModelIndexList lst = view_->selectedIndexes();
@@ -162,7 +162,7 @@ void TreeNodeView::selectionChanged(const QItemSelection& /*selected*/, const QI
     if (lst.count() > 0 && !setCurrentFromExpandIsRunning_) {
         VInfo_ptr info = model_->nodeInfo(lst.back());
         if (info && !info->isEmpty()) {
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
             UiLog().dbg() << " emit=" << info->path();
 #endif
             Q_EMIT selectionChanged(info);
@@ -193,7 +193,7 @@ VInfo_ptr TreeNodeView::currentSelection() {
 //   -from outside of the view when the selection is broadcast from another view
 //   -from within the view when the tree expand state was restored
 void TreeNodeView::setCurrentSelection(VInfo_ptr info) {
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
     UI_FUNCTION_LOG
 #endif
     // We cannot call it recursively.
@@ -206,7 +206,7 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info) {
     // Indicate that setCurrent started
     setCurrentIsRunning_ = true;
 
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
     UiLog().dbg() << " info=" << info->path();
 #endif
 
@@ -244,14 +244,14 @@ void TreeNodeView::setCurrentSelection(VInfo_ptr info) {
 // Sets the current selection to the given VInfo item
 // when the tree expand state is restored
 void TreeNodeView::setCurrentSelectionFromExpand(VInfo_ptr info) {
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
     UI_FUNCTION_LOG
 #endif
     if (!info || setCurrentFromExpandIsRunning_) {
         return;
     }
 
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
     UiLog().dbg() << " info=" << info->path();
 #endif
 
@@ -271,7 +271,7 @@ void TreeNodeView::selectFirstServer() {
 }
 
 void TreeNodeView::slotContextMenu(const QPoint& position) {
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
     UI_FUNCTION_LOG
 #endif
     QModelIndex indexClicked = view_->indexAt(position);
@@ -337,13 +337,13 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info, QString cmd) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
             QElapsedTimer t;
             t.start();
 #endif
             // apply expand in the view
             view_->expandAll(idx);
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
             UiLog().dbg() << "expandAll time=" << t.elapsed() / 1000. << "s";
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -505,7 +505,7 @@ void TreeNodeView::slotSaveExpand(const VTreeNode* node) {
     VTreeServer* ts = node->server();
     Q_ASSERT(ts);
 
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
     UiLog().dbg() << " node=" << node->vnode()->fullPath();
 #endif
 
@@ -530,7 +530,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node) {
     VTreeServer* ts = node->server();
     Q_ASSERT(ts);
 
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
     UiLog().dbg() << " node=" << node->vnode()->fullPath();
 #endif
 
@@ -540,7 +540,7 @@ void TreeNodeView::slotRestoreExpand(const VTreeNode* node) {
             bool expandedOri = view_->isExpanded(idx);
             view_->collapse(idx);
             es->collectExpanded(node->vnode(), view_->expandedIndexes);
-#ifdef _UI_TREENODEVIEW_DEBUG
+#ifdef UI_TREENODEVIEW_DEBUG
             UiLog().dbg() << " expanded=" << view_->isExpanded(idx);
 #endif
             if (expandedOri || view_->isExpanded(idx)) {

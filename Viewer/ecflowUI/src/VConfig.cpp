@@ -26,7 +26,7 @@
 
 VConfig* VConfig::instance_ = nullptr;
 
-// #define _UI_CONFIG_LOAD_DEBUG
+// #define UI_CONFIG_LOAD_DEBUG
 
 VConfig::VConfig() {
     appLongName_ = appName_ + " (" + ecf::Version::full() + ")";
@@ -135,7 +135,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* pro
         std::string name = it->first;
         ptree ptProp     = it->second;
 
-#ifdef _UI_CONFIG_LOAD_DEBUG
+#ifdef UI_CONFIG_LOAD_DEBUG
         UiLog().dbg() << "   VConfig::loadProperty() read item: " << name;
 #endif
         // Default value
@@ -155,17 +155,17 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* pro
                 val = prefix.toStdString() + "." + val;
             }
 
-#ifdef _UI_CONFIG_LOAD_DEBUG
+#ifdef UI_CONFIG_LOAD_DEBUG
             UiLog().dbg() << "   VConfig::loadProperty() line: " << val;
 #endif
             if (VProperty* lineEditProp = find(val)) {
-#ifdef _UI_CONFIG_LOAD_DEBUG
+#ifdef UI_CONFIG_LOAD_DEBUG
                 UiLog().dbg() << "     --> link found";
 #endif
                 chProp->setLink(lineEditProp);
             }
             else {
-#ifdef _UI_CONFIG_LOAD_DEBUG
+#ifdef UI_CONFIG_LOAD_DEBUG
                 UiLog().dbg() << "     --> link NOT found";
 #endif
             }
@@ -174,17 +174,17 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* pro
         else if (prop->name() == "line" && name == "link") {
             auto val = ptProp.get_value<std::string>();
 
-#ifdef _UI_CONFIG_LOAD_DEBUG
+#ifdef UI_CONFIG_LOAD_DEBUG
             UiLog().dbg() << "   VConfig::loadProperty() line link: " << val;
 #endif
             if (VProperty* lineEditProp = find(val)) {
-#ifdef _UI_CONFIG_LOAD_DEBUG
+#ifdef UI_CONFIG_LOAD_DEBUG
                 UiLog().dbg() << "     --> link found";
 #endif
                 prop->setLink(lineEditProp);
             }
             else {
-#ifdef _UI_CONFIG_LOAD_DEBUG
+#ifdef UI_CONFIG_LOAD_DEBUG
                 UiLog().dbg() << "     --> link NOT found";
 #endif
             }

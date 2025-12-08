@@ -16,7 +16,6 @@ Checks: >
   -bugprone-move-forwarding-reference,
   -bugprone-narrowing-conversions,
   -bugprone-parent-virtual-call,
-  -bugprone-reserved-identifier,
   -bugprone-string-integer-assignment,
   -bugprone-unchecked-optional-access,
   -bugprone-unhandled-self-assignment,

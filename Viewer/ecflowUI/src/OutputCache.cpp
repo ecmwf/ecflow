@@ -14,7 +14,7 @@
 
 #include "UiLog.hpp"
 
-// #define _UI_OUTPUTCACHE_DEBUG
+// #define UI_OUTPUTCACHE_DEBUG
 
 OutputCacheItem::OutputCacheItem(QString id, VFile_ptr file) : id_(id), file_(file), used_(false) {
 }
@@ -105,7 +105,7 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info, const std::string& sourcePath,
             auto* item = new OutputCacheItem(id, file);
             items_[id] = item;
             item->attach();
-#ifdef _UI_OUTPUTCACHE_DEBUG
+#ifdef UI_OUTPUTCACHE_DEBUG
             UiLog().dbg() << UI_FN_INFO << "add " << *item;
             // print();
 #endif
@@ -144,7 +144,7 @@ OutputCacheItem* OutputCache::attachOne(VInfo_ptr info, const std::string& fileN
 void OutputCache::detach() {
     QMap<QString, OutputCacheItem*>::iterator it = items_.begin();
     while (it != items_.end()) {
-#ifdef _UI_OUTPUTCACHE_DEBUG
+#ifdef UI_OUTPUTCACHE_DEBUG
         // print();
         UiLog().dbg() << UI_FN_INFO << *(it.value());
 #endif
@@ -161,13 +161,13 @@ void OutputCache::slotTimeOut() {
     while (it != items_.end()) {
         OutputCacheItem* item = it.value();
         if (!item->isAttached() && item->inTimeOut_.elapsed() > maxAttachedPeriod_) {
-#ifdef _UI_OUTPUTCACHE_DEBUG
+#ifdef UI_OUTPUTCACHE_DEBUG
             UiLog().dbg() << UI_FN_INFO << "remove=" << it.value() << " use_count:" << it.value()->file_.use_count();
 #endif
             it = items_.erase(it);
             delete item;
             // item->deleteLater();
-#ifdef _UI_OUTPUTCACHE_DEBUG
+#ifdef UI_OUTPUTCACHE_DEBUG
             print();
 #endif
         }

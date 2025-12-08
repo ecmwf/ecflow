@@ -21,8 +21,8 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 
-// #define UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
-// #define UI_OUTPUTFILEPROVIDER_DEBUG__
+// #define UI_OUTPUTFILEPROVIDER_TASK_DEBUG
+// #define UI_OUTPUTFILEPROVIDER_DEBUG
 
 //=================================
 //
@@ -36,7 +36,7 @@ OutputFileFetchServerTask::OutputFileFetchServerTask(FetchQueueOwner* owner)
 
 // try to fetch the logfile from the server if it is the jobout file
 void OutputFileFetchServerTask::run() {
-#ifdef UI_OUTPUTFILEPROVIDER_TASK_DEBUG__
+#ifdef UI_OUTPUTFILEPROVIDER_TASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     // we delegate it back to the FileProvider (this is its built-in task)
@@ -143,9 +143,7 @@ void OutputFileFetchQueueManager::runFull(ServerHandler* server,
         fetchQueue_->add(t);
     }
 
-    // #ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-    // #endif
     fetchQueue_->run();
 }
 
@@ -190,9 +188,7 @@ void OutputFileFetchQueueManager::runMode(VFile::FetchMode fetchMode,
         fetchQueue_->add(t);
     }
 
-    // #ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "fetchMode=" << fetchMode << "queue=" << fetchQueue_;
-    // #endif
     fetchQueue_->run();
 }
 
@@ -508,7 +504,7 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler* server, VNode* n, c
     // Define a task for getting the info from the server.
     task_ = VTask::create(taskType_, n, this);
 
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+#ifdef UI_OUTPUTFILEPROVIDER_DEBUG
     UiLog().dbg() << UI_FN_INFO << "fileName=" << fileName;
 #endif
     task_->reply()->fileReadMode(VReply::ServerReadMode);
