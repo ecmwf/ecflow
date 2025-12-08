@@ -130,6 +130,25 @@ bool is_a(const U& object) {
     return IsA<D>()(object);
 }
 
+namespace detail {
+
+template <typename X, typename Y, typename... Ys>
+struct is_one_of
+{
+    constexpr static bool value = std::is_same_v<X, Y> || is_one_of<X, Ys...>::value;
+};
+
+template <typename X, typename Y>
+struct is_one_of<X, Y>
+{
+    constexpr static bool value = std::is_same_v<X, Y>;
+};
+
+template <typename X, typename... Xs>
+constexpr bool is_one_of_v = is_one_of<X, Xs...>::value;
+
+} // namespace detail
+
 class Identity {
 public:
     [[nodiscard]] static Identity make_none() { return Identity{None{}}; }
@@ -171,7 +190,8 @@ public:
     [[nodiscard]] std::string as_string() const { return handle_->as_string(); }
 
 private:
-    template <class T>
+    template <class T,
+              typename = std::enable_if_t<detail::is_one_of_v<T, None, UserX, CustomUserX, SecureUserX, TaskX>>>
     explicit Identity(T&& t) : handle_{std::make_unique<WrappingIdentity<T>>(std::forward<T>(t))} {}
 
     std::unique_ptr<AbstractIdentity> handle_;
