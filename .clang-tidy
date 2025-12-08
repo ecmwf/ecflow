@@ -10,7 +10,6 @@ Checks: >
   -bugprone-forwarding-reference-overload,
   -bugprone-integer-division,
   -bugprone-implicit-widening-of-multiplication-result,
-  -bugprone-macro-parentheses,
   -bugprone-misplaced-widening-cast,
   -bugprone-move-forwarding-reference,
   -bugprone-narrowing-conversions,

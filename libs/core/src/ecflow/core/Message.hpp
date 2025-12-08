@@ -61,7 +61,9 @@ std::string stringize_f(Functor const& f) {
     return out.str();
 }
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define MESSAGE(EXPRESSION) (ecf::stringize_f([&](std::ostringstream& os) { os << EXPRESSION; }))
+// NOLINTEND(bugprone-macro-parentheses)
 
 } // namespace ecf
 

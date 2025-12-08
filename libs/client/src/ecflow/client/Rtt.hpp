@@ -58,7 +58,9 @@ std::string stringize_rtt(Functor const& f) {
     return out.str();
 }
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define STRINGIZE_RTT(EXPRESSION) (ecf::stringize_rtt([](std::ostringstream& os) { os << EXPRESSION };))
+// NOLINTEND(bugprone-macro-parentheses)
 #define RTT(EXPRESSION) ecf::rtt(STRINGIZE_RTT(EXPRESSION))
 
 } // namespace ecf

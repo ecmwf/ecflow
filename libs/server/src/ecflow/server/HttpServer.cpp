@@ -23,11 +23,13 @@ inline void log_error(char const* where, boost::beast::error_code ec) {
     LOG(Log::ERR, where << ": " << ec.message());
 }
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define LOG_LEVEL(LEVEL, WHERE, MESSAGE)                                      \
     {                                                                         \
         using namespace ecf;                                                  \
         std::cout << LEVEL << " (" << WHERE << "): " << MESSAGE << std::endl; \
     }
+// NOLINTEND(bugprone-macro-parentheses)
 
 #define LOG_ERROR(WHERE, MESSAGE) LOG_LEVEL("ERR", WHERE, MESSAGE)
 #define LOG_DEBUG(WHERE, MESSAGE) LOG_LEVEL("DBG", WHERE, MESSAGE)
