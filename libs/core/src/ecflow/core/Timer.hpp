@@ -172,7 +172,7 @@ inline PerformanceMeasure operator-(const PerformanceMeasure& lhs, const Perform
 
 class PerformanceTimer {
 public:
-    PerformanceTimer() noexcept : times_{PerformanceMeasure::current()} {}
+    PerformanceTimer() : times_{PerformanceMeasure::current()} {}
 
     void start() noexcept { times_ = PerformanceMeasure::current(); }
     PerformanceMeasure elapsed() const { return PerformanceMeasure::current() - times_; }

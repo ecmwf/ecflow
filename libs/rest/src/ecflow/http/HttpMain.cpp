@@ -25,7 +25,8 @@ int main(int argc, char* argv[]) {
     sigaddset(&set, SIGPIPE);
 
     if (pthread_sigmask(SIG_BLOCK, &set, nullptr) != 0) {
-        throw std::runtime_error("Failed to set signal mask");
+        std::cerr << "Failed to set signal mask" << std::endl;
+        return 1;
     }
 
     try {
