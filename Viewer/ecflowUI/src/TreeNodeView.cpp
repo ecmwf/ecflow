@@ -91,7 +91,6 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view, TreeNodeModel* model, NodeFil
     prop_ = new PropertyMapper(propVec, this);
 
     VProperty* prop = nullptr;
-    std::string propName;
 
     // Initialise indentation
     prop = prop_->find("view.tree.indentation", true);

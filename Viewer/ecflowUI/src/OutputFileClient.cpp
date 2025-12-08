@@ -446,7 +446,6 @@ void OutputVersionClient::slotRead() {
         UiLog().dbg() << UI_FN_INFO << "buf=" << buf;
 #endif
 
-        std::string err;
         if (dataSize_ + len < maxDataSize_) {
             memcpy(data_ + dataSize_, buf, len);
             dataSize_ += len;

@@ -198,48 +198,9 @@ bool MenuHandler::readMenuConfigFile(const std::string& configFile) {
                 }
 
                 addItemToMenu(item, menuName);
-                // std::cout << "   added" << std::endl;
-
-                // parse the valid node types/states for this menu item
-
-                // if( ItemDef.count("valid_types") > 0 )  // does this node exist on the tree?
-                //{
-                //     ptree ptValidTypes = ItemDef.get_child("valid_types");
-                //     for (ptree::const_iterator itTypes = ptValidTypes.begin(); itTypes != ptValidTypes.end();
-                //     ++itTypes)
-                //    {
-                //        std::string type(itTypes->second.data());
-                //        //item->addValidType(type);
-                //    }
-                //}
-                // else
-                //{
-                //    //item->addValidType("all");
-                //}
-
-                if (ItemDef.count("valid_states") > 0) // does this node exist on the tree?
-                {
-                    ptree ptValidStates = ItemDef.get_child("valid_states");
-                    for (ptree::const_iterator itStates = ptValidStates.begin(); itStates != ptValidStates.end();
-                         ++itStates) {
-                        std::string state(itStates->second.data());
-                        // item->addValidState(state);
-                    }
-                }
-                else {
-                    // item->addValidState("all");
-                }
             }
         }
     }
-
-    // ptree ptMenus = pt.get_child("menus");
-
-    // for (ptree::const_iterator itTopLevel = pt.begin(); itTopLevel != pt.end(); ++itTopLevel)
-    //{
-    //    if (itTopLevel->first == "menus")
-
-    //}
 
     return true;
 }

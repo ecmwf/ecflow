@@ -188,8 +188,7 @@ void DiagData::loadFile(const std::string& fileName) {
             continue;
         }
 
-        std::string path = lst[pathColumnIndex].toStdString();
-        std::string host, port;
+        std::string path         = lst[pathColumnIndex].toStdString();
         DiagDataServerItem* data = nullptr;
         VItemPathParser parser(path, VItemPathParser::DiagFormat);
         if (parser.itemType() != VItemPathParser::NoType) {

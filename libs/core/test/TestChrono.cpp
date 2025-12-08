@@ -36,6 +36,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_create_instant_based_on_std_chrono_time_point) {
     auto timestamp2       = Instant::format(reconstructed);
 
     BOOST_CHECK_EQUAL(original, reconstructed);
+    BOOST_CHECK_EQUAL(timestamp, timestamp2);
 }
 
 BOOST_AUTO_TEST_CASE(is_able_to_parse_and_format_instant) {

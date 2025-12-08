@@ -626,7 +626,6 @@ void LogLoadWidget::loadArchive() {
             logModel_->endLoadFromReader();
             // logLoaded_=false;
             ui_->messageLabel->stopProgress();
-            std::string errTxt(e.what());
         }
 
         UiLog().dbg() << "Logfile parsed: " << timer.elapsed() / 1000 << "s";

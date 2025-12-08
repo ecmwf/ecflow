@@ -72,7 +72,6 @@ public:
     static bool try_port_lock(int port, bool debug = false) {
         std::string the_port = ecf::convert_to<std::string>(port);
         std::string the_file = port_file(the_port);
-        std::string error;
         if (debug) {
             std::cout << "  EcfPortLock::try_port_lock(" << port << "), creating file: " << the_file;
         }
