@@ -213,17 +213,23 @@ BOOST_AUTO_TEST_CASE(can_detect_matching_key) {
 
     {
         auto match = listener.accepts("/aaa/bbb/0/dontcare/valid1", "value", 1);
-        BOOST_CHECK(match.has_value());
-        BOOST_CHECK_EQUAL(match.value().key(), "/aaa/bbb/0/dontcare/valid1");
-        BOOST_CHECK_EQUAL(match.value().value(), "value");
-        BOOST_CHECK_EQUAL(match.value().revision(), static_cast<uint64_t>(1));
+        BOOST_REQUIRE(match.has_value());
+        if (match.has_value()) {
+            auto value = match.value();
+            BOOST_CHECK_EQUAL(value.key(), "/aaa/bbb/0/dontcare/valid1");
+            BOOST_CHECK_EQUAL(value.value(), "value");
+            BOOST_CHECK_EQUAL(value.revision(), static_cast<uint64_t>(1));
+        }
     }
     {
         auto match = listener.accepts("/aaa/bbb/0/dontcare/valid2", "value", 2);
-        BOOST_CHECK(match.has_value());
-        BOOST_CHECK_EQUAL(match.value().key(), "/aaa/bbb/0/dontcare/valid2");
-        BOOST_CHECK_EQUAL(match.value().value(), "value");
-        BOOST_CHECK_EQUAL(match.value().revision(), static_cast<uint64_t>(2));
+        BOOST_REQUIRE(match.has_value());
+        if (match.has_value()) {
+            auto value = match.value();
+            BOOST_CHECK_EQUAL(value.key(), "/aaa/bbb/0/dontcare/valid2");
+            BOOST_CHECK_EQUAL(value.value(), "value");
+            BOOST_CHECK_EQUAL(value.revision(), static_cast<uint64_t>(2));
+        }
     }
     {
         auto match = listener.accepts("/aaa/bbb/0/dontcare/invalid", "value", 3);

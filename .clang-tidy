@@ -15,7 +15,6 @@ Checks: >
   -bugprone-move-forwarding-reference,
   -bugprone-narrowing-conversions,
   -bugprone-parent-virtual-call,
-  -bugprone-unchecked-optional-access,
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-avoid-c-arrays,

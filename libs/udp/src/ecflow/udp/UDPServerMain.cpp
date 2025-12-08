@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) try {
         }
         auto ecflow_http = options.has_http();
         if (ecflow_http) {
-            const std::string selected{ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Http).value()};
+            const auto selected = std::string{ecf::Enumerate<ecf::Protocol>::as_string(ecf::Protocol::Http)};
             setenv(ecf::environment::ECF_HOST_PROTOCOL, selected.c_str(), 1);
         }
         // Avoid that the Client automatically uses environment passwords
