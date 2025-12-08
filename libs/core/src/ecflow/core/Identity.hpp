@@ -151,13 +151,9 @@ public:
     Identity(Identity&& other) noexcept : handle_{std::move(other.handle_)} {}
     ~Identity() = default;
 
-    Identity& operator=(const Identity& other) {
-        handle_ = other.handle_->clone();
-        return *this;
-    }
-
-    Identity& operator=(Identity&& other) noexcept {
-        handle_ = std::move(other.handle_);
+    Identity& operator=(Identity other) {
+        using std::swap;
+        std::swap(handle_, other.handle_);
         return *this;
     }
 

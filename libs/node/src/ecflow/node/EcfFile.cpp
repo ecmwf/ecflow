@@ -71,6 +71,10 @@ static void vector_to_string(const std::vector<std::string>& vec, std::string& s
 EcfFile::EcfFile() = default;
 
 EcfFile& EcfFile::operator=(const EcfFile& rhs) {
+    if (this == &rhs) {
+        return *this;
+    }
+
     /// This preserves the caches, used to avoid opening/stat of include file more than once.
     // assign in order or declaration
     node_               = rhs.node_;

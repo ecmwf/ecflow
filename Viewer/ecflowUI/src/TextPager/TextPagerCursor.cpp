@@ -90,6 +90,10 @@ TextPagerCursor::TextPagerCursor(const TextPagerCursor& cursor) : d(cursor.d), t
 }
 
 TextPagerCursor& TextPagerCursor::operator=(const TextPagerCursor& other) {
+    if (this == &other) {
+        return *this;
+    }
+
     deref();
     d        = other.d;
     textEdit = nullptr;
