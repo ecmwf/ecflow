@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(can_update_labels) {
         auto label = ecflow_server.get_label("/s1/f2/f3/t4", "label_at_t4");
         BOOST_TEST(label.new_value() == "");
     }
-    std::string values[] = {"a", "b", "c", "d"};
+    std::array<std::string, 4> values = {"a", "b", "c", "d"};
     for (auto value : values) {
         ecflow_udp.update_label("/s1/f2/f3/t4", "label_at_t4", value);
         auto label = ecflow_server.get_label("/s1/f2/f3/t4", "label_at_t4");
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(can_update_meters) {
         auto meter = ecflow_server.get_meter("/s1/f2/f3/t4", "meter_at_t4");
         BOOST_TEST(meter.value() == 0);
     }
-    int values[] = {0, 10, 25, 50, 75, 100};
+    std::array values = {0, 10, 25, 50, 75, 100};
     for (auto value : values) {
         ecflow_udp.update_meter("/s1/f2/f3/t4", "meter_at_t4", value);
         auto meter = ecflow_server.get_meter("/s1/f2/f3/t4", "meter_at_t4");

@@ -10,6 +10,7 @@
 
 #include "VFile.hpp"
 
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -204,10 +205,10 @@ bool VFile::appendContentsTo(FILE* fpTarget) const {
         if (fp == nullptr) {
             return false;
         }
-        char buf[8 * 1024];
+        std::array<char, 8 * 1024> buf;
         size_t n = 0;
-        while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
-            if (fwrite(buf, 1, n, fpTarget) != n) {
+        while ((n = fread(buf.data(), 1, buf.size(), fp)) > 0) {
+            if (fwrite(buf.data(), 1, n, fpTarget) != n) {
                 fclose(fp);
                 return false;
             }

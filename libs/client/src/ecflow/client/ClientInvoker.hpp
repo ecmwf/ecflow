@@ -113,8 +113,9 @@ public:
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
     /// Will attempt to connect to the server a number of times. If this fails it will
     /// try the next server, and so on until a timeout period is reached.
-    int invoke(int argc, char* argv[]) const;
     int invoke(const CommandLine& cl) const;
+    int invoke(const std::string& arg) const;
+    int invoke(const std::vector<std::string>& args) const;
 
     /// If testing, overwrite the task path set in the environment, required for
     /// testing the task based commands.
@@ -425,8 +426,6 @@ private:
     int get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const;
 
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
-    int invoke(const std::string& arg) const;
-    int invoke(const std::vector<std::string>& args) const;
     int invoke(Cmd_ptr) const; // assumes clients of Cmd_ptr constructor has caught exceptions
 
     int do_invoke_cmd(Cmd_ptr) const;

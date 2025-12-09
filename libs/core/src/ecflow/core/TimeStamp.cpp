@@ -10,6 +10,7 @@
 
 #include "ecflow/core/TimeStamp.hpp"
 
+#include <array>
 #include <ctime>
 
 namespace ecf {
@@ -32,9 +33,9 @@ struct brief
 template <typename FMT = regular>
 std::string format_now() {
     std::time_t now = std::time(nullptr);
-    char buffer[FMT::size];
-    std::strftime(buffer, sizeof(buffer), FMT::format, std::localtime(&now));
-    return buffer;
+    std::array<char, FMT::size> buffer;
+    std::strftime(buffer.data(), buffer.size(), FMT::format, std::localtime(&now));
+    return std::string{buffer.data()};
 }
 
 } // namespace

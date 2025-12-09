@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
@@ -72,13 +73,9 @@ public:
 };
 
 void test_the_server(const std::string& port) {
-    std::string server_port = "--port=" + port;
-    int argc                = 3;
-    char* argv[]            = {const_cast<char*>("ServerEnvironment"),
-                               const_cast<char*>(server_port.c_str()),
-                               const_cast<char*>("--ecfinterval=12")};
 
-    ServerEnvironment server_environment(argc, argv); // This can throw ServerEnvironmentException
+    std::vector<std::string> args = {"ServerEnvironment", "--port=" + port, "--ecfinterval=12"};
+    ServerEnvironment server_environment(args); // This can throw ServerEnvironmentException
     std::string errorMsg;
     BOOST_CHECK_MESSAGE(server_environment.valid(errorMsg), errorMsg);
 

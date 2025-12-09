@@ -153,7 +153,7 @@ public:
 
     static void cleanup(const hostname_t& host, port_t port) {
         // Clean up temporary files created by the server instance
-        std::string temporaries[]{host + '.' + std::to_string(port) + ".ecf.check",
+        std::array temporaries = {host + '.' + std::to_string(port) + ".ecf.check",
                                   host + '.' + std::to_string(port) + ".ecf.check.b",
                                   host + '.' + std::to_string(port) + ".ecf.log"};
         for (const auto& t : temporaries) {

@@ -8,6 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <array>
 #include <cstdlib>
 
 #include <boost/test/unit_test.hpp>
@@ -104,7 +105,7 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_out_of_bounds_array_access) {
 
     // This check detects out-of-bounds access of arrays with fixed or variable-length sizes.
     // Out-of-bounds array accesses have undefined behaviour, and can result in crashes or incorrect program output.
-    int array[5] = {0, 0, 0, 0, 0};
+    std::array<int, 5> array = {0, 1, 2, 3, 4};
     for (int i = 0; i <= 5; ++i) {
         array[i] += 1; // Error: out-of-bounds access on the last iteration
         BOOST_REQUIRE_NO_THROW(array[i] += 1);

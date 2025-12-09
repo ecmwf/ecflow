@@ -10,6 +10,7 @@
 
 #include "ecflow/node/Suite.hpp"
 
+#include <array>
 #include <sstream>
 #include <stdexcept>
 
@@ -818,13 +819,12 @@ void SuiteGenVariables::update_generated_variables() const {
     int hours   = time_of_day.hours();
     int minutes = time_of_day.minutes();
 
-    constexpr int buff_size = 255;
-    char buffer[buff_size];
-    snprintf(buffer, buff_size, "%02d%02d", hours, minutes);
-    genvar_time_.set_value(buffer);
+    std::array<char, 255> buffer;
+    snprintf(buffer.data(), buffer.size(), "%02d%02d", hours, minutes);
+    genvar_time_.set_value(buffer.data());
 
-    snprintf(buffer, buff_size, "%02d:%02d", hours, minutes);
-    genvar_ecf_time_.set_value(buffer);
+    snprintf(buffer.data(), buffer.size(), "%02d:%02d", hours, minutes);
+    genvar_ecf_time_.set_value(buffer.data());
 
     // cout << "genvar_time_ = " << genvar_time_.theValue() << "\n";
     // cout << "genvar_ecf_time_ = " << genvar_ecf_time_.theValue() << "\n";
@@ -843,63 +843,61 @@ void SuiteGenVariables::update_generated_variables() const {
         // cout << "genvar_dow_ = " << genvar_dow_.theValue() << "\n";
         // cout << "genvar_doy_ = " << genvar_doy_.theValue() << "\n";
 
-        snprintf(buffer,
-                 buff_size,
+        snprintf(buffer.data(),
+                 buffer.size(),
                  "%02d.%02d.%04d",
                  suite_->cal_.day_of_month(),
                  suite_->cal_.month(),
                  suite_->cal_.year());
-        genvar_date_.set_value(buffer);
+        genvar_date_.set_value(buffer.data());
         // cout << "genvar_date_ = " << genvar_date_.theValue() << "\n";
 
-        char* day_name[] = {const_cast<char*>("sunday"),
-                            const_cast<char*>("monday"),
-                            const_cast<char*>("tuesday"),
-                            const_cast<char*>("wednesday"),
-                            const_cast<char*>("thursday"),
-                            const_cast<char*>("friday"),
-                            const_cast<char*>("saturday"),
-                            nullptr};
+        std::array day_name = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
         genvar_day_.set_value(day_name[suite_->cal_.day_of_week()]);
         // cout << "genvar_day_ = " << genvar_day_.theValue() << "\n";
 
-        snprintf(buffer, buff_size, "%02d", suite_->cal_.day_of_month());
-        genvar_dd_.set_value(buffer);
+        snprintf(buffer.data(), buffer.size(), "%02d", suite_->cal_.day_of_month());
+        genvar_dd_.set_value(buffer.data());
         // cout << "genvar_dd_ = " << genvar_dd_.theValue() << "\n";
 
-        snprintf(buffer, buff_size, "%02d", suite_->cal_.month());
-        genvar_mm_.set_value(buffer);
+        snprintf(buffer.data(), buffer.size(), "%02d", suite_->cal_.month());
+        genvar_mm_.set_value(buffer.data());
         // cout << "genvar_mm_ = " << genvar_mm_.theValue() << "\n";
 
-        char* month_name[] = {const_cast<char*>("january"),
-                              const_cast<char*>("february"),
-                              const_cast<char*>("march"),
-                              const_cast<char*>("april"),
-                              const_cast<char*>("may"),
-                              const_cast<char*>("june"),
-                              const_cast<char*>("july"),
-                              const_cast<char*>("august"),
-                              const_cast<char*>("september"),
-                              const_cast<char*>("october"),
-                              const_cast<char*>("november"),
-                              const_cast<char*>("december"),
-                              nullptr};
-        genvar_month_.set_value(month_name[suite_->cal_.month() - 1]);
+        std::array month_name = {"january",
+                                 "february",
+                                 "march",
+                                 "april",
+                                 "may",
+                                 "june",
+                                 "july",
+                                 "august",
+                                 "september",
+                                 "october",
+                                 "november",
+                                 "december"};
+
+        auto month_idx = suite_->cal_.month() - 1;
+        genvar_month_.set_value(month_name[month_idx]);
         // cout << "genvar_month_ = " << genvar_month_.theValue() << "\n";
 
-        snprintf(
-            buffer, buff_size, "%04d%02d%02d", suite_->cal_.year(), suite_->cal_.month(), suite_->cal_.day_of_month());
-        genvar_ecf_date_.set_value(buffer);
+        snprintf(buffer.data(),
+                 buffer.size(),
+                 "%04d%02d%02d",
+                 suite_->cal_.year(),
+                 suite_->cal_.month(),
+                 suite_->cal_.day_of_month());
+        genvar_ecf_date_.set_value(buffer.data());
         // cout << "genvar_ecf_date_ = " << genvar_ecf_date_.theValue() << "\n";
 
-        snprintf(buffer,
-                 buff_size,
+        snprintf(buffer.data(),
+                 buffer.size(),
                  "%s:%s:%d:%d",
                  day_name[suite_->cal_.day_of_week()],
-                 month_name[suite_->cal_.month() - 1],
+                 month_name[month_idx],
                  suite_->cal_.day_of_week(),
                  suite_->cal_.day_of_year());
-        genvar_ecf_clock_.set_value(buffer);
+        genvar_ecf_clock_.set_value(buffer.data());
         // cout << "genvar_ecf_clock_ = " << genvar_ecf_clock_.theValue() << "\n";
 
         genvar_ecf_julian_.set_value(ecf::convert_to<std::string>(suite_->cal_.suiteTime().date().julian_day()));

@@ -1771,8 +1771,8 @@ match(int pos, int size, const TextPagerSection* section, TextPagerSection::Text
         return true;
     }
     else if (flags & TextPagerSection::IncludePartial) {
-        const int boundaries[] = {pos, pos + size - 1};
-        for (int boundarie : boundaries) {
+        const std::array boundaries = {pos, pos + size - 1};
+        for (auto boundarie : boundaries) {
             if (::match(boundarie, sectionPos, sectionSize)) {
                 return true;
             }

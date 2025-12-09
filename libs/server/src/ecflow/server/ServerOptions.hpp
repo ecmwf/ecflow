@@ -19,12 +19,13 @@
 #include <boost/program_options.hpp>
 
 #include "ecflow/core/CommandLine.hpp"
+
 class ServerEnvironment;
 
 class ServerOptions {
 public:
     ServerOptions(const CommandLine& cl, ServerEnvironment*);
-    ServerOptions(int argc, char* argv[], ServerEnvironment*);
+
     // Disable copy (and move) semantics
     ServerOptions(const ServerOptions&)                  = delete;
     const ServerOptions& operator=(const ServerOptions&) = delete;

@@ -10,6 +10,7 @@
 
 #include "OutputFileClient.hpp"
 
+#include <array>
 #include <cstring>
 
 #include "UIDebug.hpp"
@@ -148,16 +149,15 @@ void OutputFileClient::getFile(const std::string& name,
 }
 
 void OutputFileClient::slotRead() {
-    const qint64 size = 64 * 1024;
-    char buf[size];
+    std::array<char, 64 * 1024 + 1> buffer;
     quint64 len = 0;
 
-    while ((len = soc_->read(buf, size)) > 0) {
+    while ((len = soc_->read(buffer.data(), buffer.size() - 1)) > 0) {
         // parse+remove "header" in "getf" and "delta" modes from the beginnig of the resulting data
         if (!readStarted_ && (reqType_ == GetFRequest || reqType_ == DeltaRequest)) {
             readStarted_ = true;
             // an error code was sent back
-            if (!parseResultHeader(buf, len)) {
+            if (!parseResultHeader(buffer.data(), len)) {
                 soc_->abort();
                 clearResult();
 #ifdef UI_OUTPUTFILECLIENT_DEBUG
@@ -169,7 +169,7 @@ void OutputFileClient::slotRead() {
         }
 
         std::string err;
-        if (!out_->write(buf, len, err)) {
+        if (!out_->write(buffer.data(), len, err)) {
             soc_->abort();
             Q_EMIT error("write failed");
             return;
@@ -305,14 +305,13 @@ bool OutputFileClient::getHeaderValue(char* buf, quint64 len, int pos1, int& pos
 #endif
     val = std::string();
     if (pos1 == 0 || buf[pos1] == ':') {
-        const int dLenMax = 200;
-        char d[dLenMax];
+        std::array<char, 200> d;
         int dLen = 0;
         if (pos1 > 0) {
             pos1++;
         }
         pos2 = pos1;
-        for (quint64 i = pos1; i < len && dLen < dLenMax - 1; i++) {
+        for (quint64 i = pos1; i < len && dLen < d.size() - 1; i++) {
             if (buf[i] == ':') {
                 pos2 = i;
 #ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
@@ -323,7 +322,7 @@ bool OutputFileClient::getHeaderValue(char* buf, quint64 len, int pos1, int& pos
                     return true;
                 }
                 d[dLen] = '\0';
-                val     = std::string(d);
+                val     = std::string{d.data()};
 #ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
                 UiLog().dbg() << " -1=" << d[dLen - 1] << " d=" << d << " dLen=" << dLen;
                 UiLog().dbg() << " val=" << val << " dLen=" << dLen;
@@ -437,17 +436,16 @@ void OutputVersionClient::slotError(QAbstractSocket::SocketError err) {
 }
 
 void OutputVersionClient::slotRead() {
-    const qint64 size = 64 * 1024;
-    char buf[size];
+    std::array<char, 64 * 1024 + 1> buffer;
     qint64 len = 0;
 
-    while ((len = soc_->read(buf, size)) > 0) {
+    while ((len = soc_->read(buffer.data(), buffer.size() - 1)) > 0) {
 #ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
         UiLog().dbg() << UI_FN_INFO << "buf=" << buf;
 #endif
 
         if (dataSize_ + len < maxDataSize_) {
-            memcpy(data_ + dataSize_, buf, len);
+            memcpy(data_ + dataSize_, buffer.data(), len);
             dataSize_ += len;
             data_[dataSize_] = '\0';
         }

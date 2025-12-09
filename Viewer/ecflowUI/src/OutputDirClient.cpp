@@ -10,6 +10,7 @@
 
 #include "OutputDirClient.hpp"
 
+#include <array>
 #include <memory>
 
 #include "UiLog.hpp"
@@ -114,12 +115,11 @@ void OutputDirClient::getDir(const std::string& name) {
 }
 
 void OutputDirClient::slotRead() {
-    const qint64 size = 64 * 1024;
-    char buf[size + 1];
+    std::array<char, 64 * 1024 + 1> buffer;
     quint64 len = 0;
 
-    while ((len = soc_->read(buf, size)) > 0) {
-        data_.append(buf, len);
+    while ((len = soc_->read(buffer.data(), buffer.size() - 1)) > 0) {
+        data_.append(buffer.data(), len);
     }
 }
 

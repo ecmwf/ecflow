@@ -10,6 +10,7 @@
 
 #include "ecflow/node/EcfFile.hpp"
 
+#include <array>
 #include <cerrno>
 #include <memory>
 #include <sstream>
@@ -672,9 +673,9 @@ bool EcfFile::do_popen(const std::string& the_cmd,
         errormsg += ss.str();
         return false;
     }
-    char line[LINE_MAX];
-    while (fgets(line, LINE_MAX, fp)) {
-        lines.emplace_back(line);
+    std::array<char, LINE_MAX> line;
+    while (fgets(line.data(), line.size(), fp)) {
+        lines.emplace_back(std::string{line.data()});
         // remove any trailing new lines
         std::string& the_line = lines.back();
         if (!the_line.empty() && the_line[the_line.size() - 1] == '\n') {

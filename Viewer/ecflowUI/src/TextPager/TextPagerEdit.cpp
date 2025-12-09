@@ -61,14 +61,17 @@ TextPagerEdit::TextPagerEdit(QWidget* parent) : QAbstractScrollArea(parent), d(n
 
     setDocument(new TextPagerDocument(this));
     setViewportMargins(0, 0, 0, 0);
-    struct
+
+    struct shortcuts_t
     {
         QString text;
         const char* member;
         QKeySequence::StandardKey key;
-    } shortcuts[] = {{tr("Copy"), SLOT(copy()), QKeySequence::Copy},
-                     {tr("Select All"), SLOT(selectAll()), QKeySequence::SelectAll},
-                     {QString(), nullptr, QKeySequence::UnknownKey}};
+    };
+
+    std::array shortcuts = {shortcuts_t{tr("Copy"), SLOT(copy()), QKeySequence::Copy},
+                            shortcuts_t{tr("Select All"), SLOT(selectAll()), QKeySequence::SelectAll},
+                            shortcuts_t{QString(), nullptr, QKeySequence::UnknownKey}};
     for (int i = 0; shortcuts[i].member; ++i) {
         d->actions[i] = new QAction(shortcuts[i].text, this);
         d->actions[i]->setShortcutContext(Qt::WidgetShortcut);

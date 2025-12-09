@@ -27,14 +27,14 @@ std::string as_string(Args... args) {
 
 } // namespace
 
-UDPServerOptions::UDPServerOptions(int argc, const char* argv[]) : general{create_options()}, variables{} {
+UDPServerOptions::UDPServerOptions(const std::vector<std::string>& argv) : general{create_options()}, variables{} {
 
     po::options_description all_options("All");
     all_options.add(general);
 
     try {
         // Collect command line options
-        po::command_line_parser parser{argc, argv};
+        po::command_line_parser parser{argv};
         parser.options(all_options)
             .style(po::command_line_style::default_style | po::command_line_style::allow_slash_for_short);
         auto cli_options = parser.run();

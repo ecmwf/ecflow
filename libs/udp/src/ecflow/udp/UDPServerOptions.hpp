@@ -32,7 +32,7 @@ public:
  */
 class UDPServerOptions {
 public:
-    UDPServerOptions(int argc, const char* argv[]);
+    UDPServerOptions(const std::vector<std::string>& argv);
 
     ~UDPServerOptions() = default;
 

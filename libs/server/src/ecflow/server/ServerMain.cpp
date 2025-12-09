@@ -87,9 +87,10 @@ int run(BaseServer& server) {
 
 int main(int argc, char* argv[]) {
 
+    std::vector<std::string> args(argv, argv + argc);
     try {
         // Get the environment settings, and parse argument line and init the log file
-        ServerEnvironment server_environment(argc, argv); // This can throw ServerEnvironmentException
+        ServerEnvironment server_environment(args); // This can throw ServerEnvironmentException
         if (server_environment.help_option()) {
             return 0;
         }
@@ -143,7 +144,7 @@ int main(int argc, char* argv[]) {
 
         // dump server environment
         cerr << "\nServer environment:\n";
-        ServerEnvironment server_env(argc, argv); // This can throw ServerEnvironmentException
+        ServerEnvironment server_env(args); // This can throw ServerEnvironmentException
         std::cerr << server_env.dump();
     }
     catch (...) {

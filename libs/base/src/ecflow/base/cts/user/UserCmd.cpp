@@ -181,8 +181,8 @@ void UserCmd::setup_user_authentification() {
 
 void UserCmd::prompt_for_confirmation(const std::string& prompt) {
     cout << prompt;
-    char reply[256];
-    cin.getline(reply, 256);
+    std::array<char, 256> reply;
+    cin.getline(reply.data(), reply.size());
     if (reply[0] != 'y' && reply[0] != 'Y') {
         exit(1);
     }

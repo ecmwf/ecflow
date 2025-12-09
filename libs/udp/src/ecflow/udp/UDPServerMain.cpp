@@ -62,7 +62,8 @@ static int launch_server(const ecf::UDPServerOptions& options) {
 
 int main(int argc, char* argv[]) try {
 
-    ecf::UDPServerOptions options(argc, const_cast<const char**>(argv));
+    std::vector<std::string> args(argv + 1, argv + argc);
+    ecf::UDPServerOptions options(args);
 
     if (options.has_help()) {
         std::cout << std::endl << "  ecFlow UDP" << std::endl << std::endl;

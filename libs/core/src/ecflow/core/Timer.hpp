@@ -11,6 +11,7 @@
 #ifndef ecflow_core_Timer_HPP
 #define ecflow_core_Timer_HPP
 
+#include <array>
 #include <chrono>
 #include <functional>
 #include <iostream>
@@ -117,16 +118,16 @@ public:
         d -= ms;
         auto us = duration_cast<microseconds>(d);
 
-        char buffer[100];
-        snprintf(buffer,
-                 sizeof(buffer),
+        std::array<char, 100> buffer;
+        snprintf(buffer.data(),
+                 buffer.size(),
                  "%02lld:%02lld:%02lld.%03lld%03lld",
                  static_cast<long long>(h.count()),
                  static_cast<long long>(m.count()),
                  static_cast<long long>(s.count()),
                  static_cast<long long>(ms.count()),
                  static_cast<long long>(us.count()));
-        return std::string(buffer);
+        return std::string{buffer.data()};
     }
 
 private:
