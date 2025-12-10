@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(test_server) {
 
     Host h;
     int count = 0;
-    while (1) {
+    while (true) {
         try {
             test_the_server(port);
             cout << "\n";

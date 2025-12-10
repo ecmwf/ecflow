@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_stress) {
               << std::endl;
     AssertTimer assertTimer(max_time_for_suspended_suite_to_complete,
                             false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         sleep(3);
 
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,

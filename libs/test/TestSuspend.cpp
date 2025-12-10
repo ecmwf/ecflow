@@ -43,7 +43,7 @@ static void waitForTimeDependenciesToBeFree(int max_time_to_wait) {
     // wait for a period of time, while time dependencies fire.
     TestFixture::client().set_throw_on_error(false);
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());

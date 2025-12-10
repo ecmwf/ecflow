@@ -122,7 +122,7 @@ static bool kill_cmd(bool kill_task) {
 
 static bool waitForTaskState(NState::State state, int max_time_to_wait) {
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());

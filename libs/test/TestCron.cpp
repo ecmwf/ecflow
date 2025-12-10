@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_SUITE(T_Cron)
 static void wait_for_cron(int max_time_to_wait, const std::string& path) {
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
     TestFixture::client().set_throw_on_error(false);
-    while (1) {
+    while (true) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());

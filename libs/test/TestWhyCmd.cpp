@@ -38,7 +38,7 @@ static unsigned int waitForWhy(const std::string& path, const std::string& why, 
     unsigned int updateCalendarCount = 0;
     TestFixture::client().set_throw_on_error(false);
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
 
         /// Why command relies on the Suite serializing the calendar. If this is changed we need to get the full defs
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
     TestFixture::client().set_throw_on_error(false);
     {
         AssertTimer assertTimer(50, false); // Bomb out after n seconds, fall back if test fail
-        while (1) {
+        while (true) {
             BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,
                                   CtsApi::get() << " failed should return 0\n"
                                                 << TestFixture::client().errorMsg());

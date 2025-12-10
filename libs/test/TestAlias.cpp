@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_SUITE(T_Alias)
 
 void wait_for_alias_to_complete(const std::string& alias_path) {
     AssertTimer assertTimer(10, false); // Bomb out after 10 seconds, fall back if test fail
-    while (1) {
+    while (true) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
                               "Could not get the defs from server\n"
                                   << TestFixture::client().errorMsg());

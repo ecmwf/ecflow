@@ -1413,7 +1413,7 @@ void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent* e) {
     // ensure that the user does not miss any lines of text when they page up and down through
     // the document. The same change was made in onScrollBarActionTriggered.
 
-    if (1) {
+    if (true) {
         if (e == QKeySequence::MoveToNextLine) {
             scrollLines(1);
         }
