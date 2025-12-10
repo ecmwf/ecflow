@@ -174,8 +174,8 @@ void stop_update_defs_loop() {
     loop_thread->join();
 }
 
-template <typename T>
-void trigger_defs_update_predicate(T&& func) {
+template <typename F>
+void trigger_defs_update_predicate(F f) {
     {
         std::unique_lock lock(cv_mutex);
         update_defs = true;
@@ -186,7 +186,7 @@ void trigger_defs_update_predicate(T&& func) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
-    func();
+    f();
 }
 
 void trigger_defs_update() {

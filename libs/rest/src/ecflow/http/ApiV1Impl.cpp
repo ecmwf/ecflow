@@ -117,10 +117,10 @@ ojson get_node_status(const httplib::Request& request) {
     return j;
 }
 
-template <typename T>
-void apply_to_parents(const Node* node, T&& func) {
+template <typename F>
+void apply_to_parents(const Node* node, F f) {
     for (const Node* up = node; up != nullptr; up = up->parent()) {
-        func(up);
+        f(up);
     }
 }
 

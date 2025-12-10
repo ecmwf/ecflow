@@ -20,7 +20,6 @@ Checks: >
   -cppcoreguidelines-init-variables,
   -cppcoreguidelines-interfaces-global-init,
   -cppcoreguidelines-macro-usage,
-  -cppcoreguidelines-missing-std-forward,
   -cppcoreguidelines-narrowing-conversions,
   -cppcoreguidelines-noexcept-move-operations,
   -cppcoreguidelines-noexcept-swap,

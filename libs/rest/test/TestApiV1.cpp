@@ -233,11 +233,11 @@ httplib::Response handle_response(const httplib::Result& r,
     return httplib::Response(*r);
 }
 
-template <typename T>
-bool wait_until(T&& func, int wait_time = 1, int wait_count = 10) {
+template <typename F>
+bool wait_until(F f, int wait_time = 1, int wait_count = 10) {
     int c = 0;
 
-    while (func() == false) {
+    while (f() == false) {
         c++;
         if (c > wait_count) {
             BOOST_FAIL("Test failed");
