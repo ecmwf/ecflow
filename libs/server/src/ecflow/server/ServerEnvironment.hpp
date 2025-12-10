@@ -56,6 +56,8 @@ public:
     // Disable copy (and move) semantics
     ServerEnvironment(const ServerEnvironment&)                  = delete;
     const ServerEnvironment& operator=(const ServerEnvironment&) = delete;
+    ServerEnvironment(ServerEnvironment&&)                       = delete;
+    ServerEnvironment& operator=(ServerEnvironment&&)            = delete;
 
     ~ServerEnvironment();
 

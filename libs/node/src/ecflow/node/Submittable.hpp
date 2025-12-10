@@ -171,9 +171,14 @@ private:
 class SubGenVariables {
 public:
     explicit SubGenVariables(const Submittable*);
+
     // Disable copy (and move) semantics
-    SubGenVariables(const SubGenVariables&)                  = delete;
-    const SubGenVariables& operator=(const SubGenVariables&) = delete;
+    SubGenVariables(const SubGenVariables&)            = delete;
+    SubGenVariables& operator=(const SubGenVariables&) = delete;
+    SubGenVariables(SubGenVariables&&)                 = delete;
+    SubGenVariables& operator=(SubGenVariables&&)      = delete;
+
+    ~SubGenVariables() = default;
 
     void update_generated_variables() const;
 

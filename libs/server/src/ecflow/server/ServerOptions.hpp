@@ -29,6 +29,10 @@ public:
     // Disable copy (and move) semantics
     ServerOptions(const ServerOptions&)                  = delete;
     const ServerOptions& operator=(const ServerOptions&) = delete;
+    ServerOptions(ServerOptions&&)                       = delete;
+    ServerOptions& operator=(ServerOptions&&)            = delete;
+
+    ~ServerOptions() = default;
 
     /// return true if help selected, else false
     bool help_option() const;

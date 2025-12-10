@@ -49,10 +49,17 @@ namespace ecf {
 /// created by ecf_submit.
 
 class System {
+private:
+    System();
+
 public:
     // Disable copy (and move) semantics
-    System(const System&)                  = delete;
-    const System& operator=(const System&) = delete;
+    System(const System&)            = delete;
+    System& operator=(const System&) = delete;
+    System(System&&)                 = delete;
+    System& operator=(System&&)      = delete;
+
+    ~System();
 
     static System* instance();
 
@@ -82,9 +89,6 @@ public:
     int process() const;
 
 private:
-    ~System();
-    System();
-
     /// Install signals that can catch signal from child process termination
     static void catchChildProcessTermination();
 

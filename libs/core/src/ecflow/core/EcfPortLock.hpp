@@ -58,9 +58,6 @@ class EcfPortLock {
 public:
     // Disable default construction
     EcfPortLock() = delete;
-    // Disable copy (and move) semantics
-    EcfPortLock(const EcfPortLock&)                  = delete;
-    const EcfPortLock& operator=(const EcfPortLock&) = delete;
 
     /**
      * Attempts to lock the given port

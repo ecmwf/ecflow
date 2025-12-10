@@ -32,8 +32,12 @@ struct ClientAPIException : public std::runtime_error
 class ClientAPI {
 public:
     ClientAPI();
-    ClientAPI(const ClientAPI&) = delete;
-    ClientAPI(ClientAPI&&)      = delete;
+
+    ClientAPI(const ClientAPI&)            = delete;
+    ClientAPI& operator=(const ClientAPI&) = delete;
+    ClientAPI(ClientAPI&&)                 = delete;
+    ClientAPI& operator=(ClientAPI&&)      = delete;
+
     ~ClientAPI();
 
     /// Define the User Name

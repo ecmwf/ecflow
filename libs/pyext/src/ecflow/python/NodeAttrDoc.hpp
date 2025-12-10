@@ -18,9 +18,7 @@
 // ===========================================================================
 class NodeAttrDoc {
 public:
-    NodeAttrDoc()                              = delete;
-    NodeAttrDoc(const NodeAttrDoc&)            = delete;
-    NodeAttrDoc& operator=(const NodeAttrDoc&) = delete;
+    NodeAttrDoc() = delete;
 
     static const char* variable_doc();
     static const char* zombie_doc();

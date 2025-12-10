@@ -32,9 +32,6 @@ class CommandLine;
 /// This is more efficient than creating a ClientInvoker for each request
 class ClientInvoker {
 public:
-    ClientInvoker(const ClientInvoker&)                  = delete;
-    const ClientInvoker& operator=(const ClientInvoker&) = delete;
-
     /// Will create the *ClientEnvironment* once on construction
     /// By default will throw exception std::runtime_error for errors
     ClientInvoker();
@@ -42,6 +39,13 @@ public:
     ClientInvoker(bool GUI, const std::string& host, const std::string& port);
     ClientInvoker(const std::string& host, const std::string& port);
     ClientInvoker(const std::string& host, int port);
+
+    ClientInvoker(const ClientInvoker&)            = delete;
+    ClientInvoker& operator=(const ClientInvoker&) = delete;
+    ClientInvoker(ClientInvoker&&)                 = delete;
+    ClientInvoker& operator=(ClientInvoker&&)      = delete;
+
+    ~ClientInvoker() = default;
 
     ClientEnvironment& environment() { return clientEnv_; }
     const ClientEnvironment& environment() const { return clientEnv_; }

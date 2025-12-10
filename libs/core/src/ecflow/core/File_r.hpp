@@ -19,9 +19,12 @@ namespace ecf {
 class File_r {
 public:
     explicit File_r(const std::string& file_name);
+
     // Disable copy (and move) semantics
     File_r(const File_r&)                  = delete;
     const File_r& operator=(const File_r&) = delete;
+    File_r(File_r&&)                       = delete;
+    File_r& operator=(File_r&&)            = delete;
 
     ~File_r();
 

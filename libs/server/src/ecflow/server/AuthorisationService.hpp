@@ -33,10 +33,10 @@ public:
 
     AuthorisationService();
 
-    AuthorisationService(const AuthorisationService& rhs) = delete;
-    AuthorisationService(AuthorisationService&& rhs) noexcept;
-
+    AuthorisationService(const AuthorisationService& rhs)            = delete;
     AuthorisationService& operator=(const AuthorisationService& rhs) = delete;
+
+    AuthorisationService(AuthorisationService&& rhs) noexcept;
     AuthorisationService& operator=(AuthorisationService&& rhs) noexcept;
 
     ~AuthorisationService();

@@ -19,11 +19,16 @@ class Host {
 public:
     /// can throw std::runtime_error if the gethostname fails
     Host();
+
     explicit Host(const std::string& host);
 
     // Disable copy (and move) semantics
-    Host(const Host&)                  = delete;
-    const Host& operator=(const Host&) = delete;
+    Host(const Host&)            = delete;
+    Host& operator=(const Host&) = delete;
+    Host(Host&&)                 = delete;
+    Host& operator=(Host&&)      = delete;
+
+    ~Host() = default;
 
     /// return the host name
     std::string name() const;

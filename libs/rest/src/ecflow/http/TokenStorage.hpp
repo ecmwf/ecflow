@@ -41,21 +41,25 @@ struct Token
 };
 
 class TokenStorage {
+private:
+    TokenStorage();
+
 public:
-    static const TokenStorage& instance() {
-        static TokenStorage instance_;
-        return instance_;
-    }
     TokenStorage(const TokenStorage&)            = delete;
     TokenStorage(TokenStorage&&)                 = delete;
     TokenStorage& operator=(const TokenStorage&) = delete;
     TokenStorage& operator=(TokenStorage&&)      = delete;
 
+    ~TokenStorage() = default;
+
+    static const TokenStorage& instance() {
+        static TokenStorage instance_;
+        return instance_;
+    }
+
     bool verify(const std::string& token) const;
 
 private:
-    TokenStorage();
-    ~TokenStorage() = default;
     void ReadStorage();
 
     std::vector<Token> tokens_;

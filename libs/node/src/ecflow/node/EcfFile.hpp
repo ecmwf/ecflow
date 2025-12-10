@@ -23,9 +23,12 @@
 class IncludeFileCache {
 public:
     explicit IncludeFileCache(const std::string& path);
+
     // Disable copy (and move) semantics
     IncludeFileCache(const IncludeFileCache&)                  = delete;
     const IncludeFileCache& operator=(const IncludeFileCache&) = delete;
+    IncludeFileCache(IncludeFileCache&&)                       = delete;
+    IncludeFileCache& operator=(IncludeFileCache&&)            = delete;
 
     ~IncludeFileCache();
 

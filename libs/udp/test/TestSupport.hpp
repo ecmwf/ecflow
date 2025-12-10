@@ -47,8 +47,11 @@ public:
         server_ = std::move(SERVER::launch(host_, port_, std::forward<Args>(args)...));
         ECF_TEST_DBG(<< "   MOCK: " << SERVER::designation << " has been started!");
     }
-    BaseMockServer(const BaseMockServer&) = delete;
-    BaseMockServer(BaseMockServer&&)      = delete;
+
+    BaseMockServer(const BaseMockServer&)            = delete;
+    BaseMockServer& operator=(const BaseMockServer&) = delete;
+    BaseMockServer(BaseMockServer&&)                 = delete;
+    BaseMockServer& operator=(BaseMockServer&&)      = delete;
 
     ~BaseMockServer() {
         server_.terminate();

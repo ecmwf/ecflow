@@ -21,9 +21,6 @@ public:
 
     // Disable default construction
     Attr() = delete;
-    // Disable copy (and move) semantics
-    Attr(const Attr&)                  = delete;
-    const Attr& operator=(const Attr&) = delete;
 
     static const char* to_string(Attr::Type s);
     static Attr::Type to_attr(const std::string& attr);

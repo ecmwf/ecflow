@@ -33,8 +33,12 @@ public:
     }
 
     // Disable copy (and move) semantics
-    JobsParam(const JobsParam&)                  = delete;
-    const JobsParam& operator=(const JobsParam&) = delete;
+    JobsParam(const JobsParam&)            = delete;
+    JobsParam& operator=(const JobsParam&) = delete;
+    JobsParam(JobsParam&&)                 = delete;
+    JobsParam& operator=(JobsParam&&)      = delete;
+
+    ~JobsParam() = default;
 
     // Allow JobsParam to be re-used. Preserve cache in EcfFile. ECFLOW-1210
     void clear();

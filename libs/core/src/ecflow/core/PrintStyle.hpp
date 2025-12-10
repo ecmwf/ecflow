@@ -38,9 +38,6 @@ public:
 
     // Disable default construction
     PrintStyle() = delete;
-    // Disable copy (and move) semantics
-    PrintStyle(const PrintStyle&)            = delete;
-    PrintStyle& operator=(const PrintStyle&) = delete;
 
     static bool is_persist_style(Type_t);
 

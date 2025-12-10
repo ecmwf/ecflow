@@ -23,6 +23,8 @@ namespace ecf {
 
 class SCPort {
 public:
+    SCPort() = delete;
+
     /// Check ECF_HOST and ECF_PORT first, otherwise calls next_only
     static std::string next();
 
@@ -47,9 +49,6 @@ public:
     [[deprecated]] static std::string find_free_port(int seed_port_number, bool debug = false);
 
 private:
-    SCPort()  = delete;
-    ~SCPort() = delete;
-
     static int thePort_;
 };
 

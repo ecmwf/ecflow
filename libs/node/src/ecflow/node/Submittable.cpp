@@ -697,9 +697,12 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
 class JobCreationTimer {
 public:
     explicit JobCreationTimer(Submittable* sub) : enabled_(false), failed_(false), sub_(sub) {}
+
     // Disable copy (and move) semantics
     JobCreationTimer(const JobCreationTimer&)                  = delete;
     const JobCreationTimer& operator=(const JobCreationTimer&) = delete;
+    JobCreationTimer(JobCreationTimer&&)                       = delete;
+    const JobCreationTimer& operator=(JobCreationTimer&&)      = delete;
 
     ~JobCreationTimer() {
         if (enabled_) {

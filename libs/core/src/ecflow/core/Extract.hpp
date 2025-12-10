@@ -21,9 +21,6 @@ class Extract {
 public:
     // Disable default construction
     Extract() = delete;
-    // Disable copy (and move) semantics
-    Extract(const Extract&)                  = delete;
-    const Extract& operator=(const Extract&) = delete;
 
     ///
     /// Extract path and name from given token.

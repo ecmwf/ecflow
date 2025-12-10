@@ -17,13 +17,16 @@ class FamGenVariables;
 
 class Family final : public NodeContainer {
 public:
-    explicit Family(const std::string& name, bool check = true) : NodeContainer(name, check) {}
     Family() = default;
+
+    explicit Family(const std::string& name, bool check = true) : NodeContainer(name, check) {}
+
     Family(const Family& rhs) : NodeContainer(rhs) {}
     Family& operator=(const Family&);
-    node_ptr clone() const override;
 
     ~Family() override;
+
+    node_ptr clone() const override;
 
     static family_ptr create(const std::string& name, bool check = true);
     static family_ptr create_me(const std::string& name); // python api, to pick correct init function
@@ -79,9 +82,12 @@ private:
 class FamGenVariables {
 public:
     explicit FamGenVariables(const Family*);
+
     // Disable copy (and move) semantics
-    FamGenVariables(const FamGenVariables&)                  = delete;
-    const FamGenVariables& operator=(const FamGenVariables&) = delete;
+    FamGenVariables(const FamGenVariables&)            = delete;
+    FamGenVariables& operator=(const FamGenVariables&) = delete;
+    FamGenVariables(FamGenVariables&&)                 = delete;
+    FamGenVariables& operator=(FamGenVariables&&)      = delete;
 
     void update_generated_variables() const;
     const Variable& findGenVariable(const std::string& name) const;

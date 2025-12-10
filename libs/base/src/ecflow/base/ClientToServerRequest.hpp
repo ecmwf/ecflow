@@ -17,11 +17,14 @@
 // This class is used in the IPC messaging from  client to server.
 class ClientToServerRequest {
 public:
-    ClientToServerRequest()                             = default;
-    ClientToServerRequest(const ClientToServerRequest&) = delete;
-    ~ClientToServerRequest()                            = default;
+    ClientToServerRequest() = default;
 
+    ClientToServerRequest(const ClientToServerRequest&)            = delete;
     ClientToServerRequest& operator=(const ClientToServerRequest&) = delete;
+    ClientToServerRequest(ClientToServerRequest&&)                 = delete;
+    ClientToServerRequest& operator=(ClientToServerRequest&&)      = delete;
+
+    ~ClientToServerRequest() = default;
 
     void set_cmd(const Cmd_ptr& cmd) {
         cmd_ = cmd;

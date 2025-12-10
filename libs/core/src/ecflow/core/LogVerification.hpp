@@ -20,9 +20,6 @@ class LogVerification {
 public:
     // Disable default construction
     LogVerification() = delete;
-    // Disable copy (and move) semantics
-    LogVerification(const LogVerification&)                  = delete;
-    const LogVerification& operator=(const LogVerification&) = delete;
 
     /// Given a log file, extract in order. The node_path and the state
     static bool extractNodePathAndState(const std::string& logfile,

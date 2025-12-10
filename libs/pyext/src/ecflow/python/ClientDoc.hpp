@@ -18,9 +18,7 @@
 // ===========================================================================
 class ClientDoc {
 public:
-    ClientDoc()                            = delete;
-    ClientDoc(const ClientDoc&)            = delete;
-    ClientDoc& operator=(const ClientDoc&) = delete;
+    ClientDoc() = delete;
 
     static const char* class_client();
     static const char* set_host_port();

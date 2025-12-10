@@ -485,9 +485,12 @@ private:
 class DefsHistoryParser {
 public:
     DefsHistoryParser();
+
     // Disable copy (and move) semantics
-    DefsHistoryParser(const DefsHistoryParser&)                  = delete;
-    const DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
+    DefsHistoryParser(const DefsHistoryParser&)            = delete;
+    DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
+    DefsHistoryParser(DefsHistoryParser&&)                 = default;
+    DefsHistoryParser& operator=(DefsHistoryParser&&)      = default;
 
     void parse(const std::string& line);
     const std::vector<std::string>& parsed_messages() const { return parsed_messages_; }
@@ -502,8 +505,10 @@ class ChangeStartNotification {
 public:
     explicit ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start(); }
     // Disable copy (and move) semantics
-    ChangeStartNotification(const ChangeStartNotification&)                  = delete;
-    const ChangeStartNotification& operator=(const ChangeStartNotification&) = delete;
+    ChangeStartNotification(const ChangeStartNotification&)            = delete;
+    ChangeStartNotification& operator=(const ChangeStartNotification&) = delete;
+    ChangeStartNotification(ChangeStartNotification&&)                 = delete;
+    ChangeStartNotification& operator=(ChangeStartNotification&&)      = delete;
 
     ~ChangeStartNotification() { defs_ptr_->notify_end(); }
 

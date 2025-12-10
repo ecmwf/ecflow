@@ -17,9 +17,6 @@ class Pid {
 public:
     // Disable default construction
     Pid() = delete;
-    // Disable copy (and move) semantics
-    Pid(const Pid&)                  = delete;
-    const Pid& operator=(const Pid&) = delete;
 
     /// Returns the current Process ID (as a string); otherwise, throws exception(std::runtime_error)
     static std::string getpid();

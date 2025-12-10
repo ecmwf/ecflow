@@ -67,9 +67,6 @@ class Str {
 public:
     // Disable default construction
     Str() = delete;
-    // Disable copy (and move) semantics
-    Str(const Str&)                  = delete;
-    const Str& operator=(const Str&) = delete;
 
     static int reserve_4() { return 4; }
     static int reserve_8() { return 8; }

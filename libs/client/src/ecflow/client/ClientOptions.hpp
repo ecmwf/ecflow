@@ -32,10 +32,12 @@ class ClientOptions {
 public:
     /// Will create command register, & ask each cmd to describe their arguments
     ClientOptions();
+
     ClientOptions(const ClientOptions&)            = delete;
-    ClientOptions(ClientOptions&&)                 = delete;
     ClientOptions& operator=(const ClientOptions&) = delete;
+    ClientOptions(ClientOptions&&)                 = delete;
     ClientOptions& operator=(ClientOptions&&)      = delete;
+
     ~ClientOptions();
 
     /// parse the arguments and create the client request that is to be sent
