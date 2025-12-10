@@ -48,7 +48,7 @@ void print_polling_interval_notification(long long sleeptime,
 } // namespace
 
 std::shared_ptr<Defs> get_defs() {
-    std::lock_guard lock(def_mutex);
+    std::scoped_lock lock(def_mutex);
     return defs_;
 }
 
@@ -65,7 +65,7 @@ void defs_update(int interval) {
 
     auto update = [&] {
         {
-            std::lock_guard lock(def_mutex);
+            std::scoped_lock lock(def_mutex);
             if (defs_ != nullptr) {
                 client.sync(defs_);
             }

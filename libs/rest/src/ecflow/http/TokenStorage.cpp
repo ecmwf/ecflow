@@ -13,6 +13,7 @@
 #include <atomic> // shared mutex only with c++14
 #include <fstream>
 #include <iomanip>
+#include <mutex>
 #include <shared_mutex>
 #include <sstream>
 #include <thread>
@@ -217,7 +218,7 @@ void TokenStorage::ReadStorage() {
             if (current_modified > last_modified) {
                 auto new_tokens = ReadTokens(opts.tokens_file);
                 {
-                    std::lock_guard lock(m);
+                    std::scoped_lock lock(m);
                     tokens_ = new_tokens;
                 }
                 last_modified = current_modified;
