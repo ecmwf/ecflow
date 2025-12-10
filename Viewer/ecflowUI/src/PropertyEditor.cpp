@@ -121,7 +121,7 @@ void PropertyEditor::addHelpers() {
         QString h = line->guiProperty()->param("helpers");
         if (!h.isEmpty()) {
             Q_FOREACH (QString s, h.split("/")) {
-                if (PropertyLine* hl = lineMap.value(s.toStdString(), NULL)) {
+                if (PropertyLine* hl = lineMap.value(s.toStdString(), nullptr)) {
                     line->addHelper(hl);
                 }
             }

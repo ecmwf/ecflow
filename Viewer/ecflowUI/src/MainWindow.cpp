@@ -763,7 +763,7 @@ MainWindow* MainWindow::findWindow(QWidget* childW) {
 }
 
 MainWindow* MainWindow::firstWindow() {
-    return (!windows_.isEmpty()) ? (windows_[0]) : NULL;
+    return (!windows_.isEmpty()) ? (windows_[0]) : nullptr;
 }
 
 void MainWindow::startPreferences(QString option) {

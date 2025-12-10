@@ -965,7 +965,7 @@ void SoundComboPropertyLine::setEnabledEditable(bool b) {
 
 void SoundComboPropertyLine::slotPlay(bool) {
     int loopCount = 1;
-    if (PropertyLine* line = helpers_.value("sound_loop", NULL)) {
+    if (PropertyLine* line = helpers_.value("sound_loop", nullptr)) {
         loopCount = line->currentValue().toInt();
     }
 

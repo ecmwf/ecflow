@@ -83,7 +83,6 @@ Checks: >
   -modernize-use-emplace,
   -modernize-use-equals-default,
   -modernize-use-nodiscard,
-  -modernize-use-nullptr,
   -modernize-use-scoped-lock,
   -modernize-use-trailing-return-type,
   -modernize-use-transparent-functors,

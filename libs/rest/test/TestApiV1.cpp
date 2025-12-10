@@ -157,7 +157,7 @@ struct SetupTest
         sigemptyset(&set);
         sigaddset(&set, SIGPIPE);
 
-        if (pthread_sigmask(SIG_BLOCK, &set, NULL) != 0) {
+        if (pthread_sigmask(SIG_BLOCK, &set, nullptr) != 0) {
             throw std::runtime_error("Failed to set signal mask");
         }
 
@@ -215,7 +215,7 @@ httplib::Response handle_response(const httplib::Result& r,
 
     if (throw_on_error) {
         if (!r) {
-            throw std::runtime_error("NULL reply from server");
+            throw std::runtime_error("nullptr reply from server");
         }
         else if (r->status != expected_code) {
             throw std::runtime_error(
