@@ -29,7 +29,7 @@ public:
     // if standardVerification is true, we test task goes through normal life cycle
     // changes. else we compare the log file states with golden log file
     // Comparing log files across platforms is not reliable, and ignored
-    ServerTestHarness();
+    ServerTestHarness() = default;
 
     ServerTestHarness(const ServerTestHarness&)            = delete;
     ServerTestHarness& operator=(const ServerTestHarness&) = delete;

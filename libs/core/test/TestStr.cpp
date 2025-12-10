@@ -660,16 +660,9 @@ public:
     explicit Fred(int i = 0) : i_(i) {
         // Do nothing...
     }
-    Fred(const Fred& rhs) : i_(rhs.i_) {
-        // Do nothing...
-    }
-    Fred& operator=(const Fred& rhs) {
-        i_ = rhs.i_;
-        return *this;
-    }
-    ~Fred() {
-        // Do nothing...
-    }
+    Fred(const Fred& rhs)            = default;
+    Fred& operator=(const Fred& rhs) = default;
+    ~Fred()                          = default;
 
     void inc() { i_++; }
 

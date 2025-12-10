@@ -39,7 +39,7 @@ public:
     //    date          // 1 month
     //    cron          // 1 year
     //    repeat        // 1 year
-    Simulator();
+    Simulator() = default;
 
     Simulator(const Simulator&)            = delete;
     Simulator& operator=(const Simulator&) = delete;

@@ -25,7 +25,7 @@ class SessionDialog : public QDialog, protected Ui::SessionDialog {
 
 public:
     explicit SessionDialog(QWidget* parent = nullptr);
-    ~SessionDialog() override;
+    ~SessionDialog() override = default;
 
 public Q_SLOTS:
     void on_savedSessionsList__currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);

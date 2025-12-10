@@ -91,7 +91,7 @@ protected:
 class PropertyLineFactory {
 public:
     explicit PropertyLineFactory(VProperty::GuiType);
-    virtual ~PropertyLineFactory();
+    virtual ~PropertyLineFactory() = default;
 
     virtual PropertyLine* make(VProperty* p, bool, QWidget* w) = 0;
     static PropertyLine* create(VProperty* p, bool, QWidget* w);

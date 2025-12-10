@@ -25,10 +25,6 @@ SaveSessionAsDialog::SaveSessionAsDialog(QWidget* parent) : QDialog(parent) {
     on_sessionNameEdit__textChanged();
 }
 
-SaveSessionAsDialog::~SaveSessionAsDialog() {
-    // delete ui;
-}
-
 void SaveSessionAsDialog::refreshListOfSavedSessions() {
     // sessionsTable_->clearContents();
     savedSessionsList_->clear();

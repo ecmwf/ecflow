@@ -36,9 +36,6 @@ public:
     ~LogDestroyer() { Log::destroy(); }
 };
 
-Simulator::Simulator() {
-}
-
 bool Simulator::run(const std::string& theDefsFile, std::string& errorMsg) const {
 #ifdef DEBUG_LONG_RUNNING_SUITES
     cout << "Simulator::run parsing file " << theDefsFile << endl;

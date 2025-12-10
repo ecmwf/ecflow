@@ -81,7 +81,6 @@ Checks: >
   -modernize-use-bool-literals,
   -modernize-use-default-member-init,
   -modernize-use-emplace,
-  -modernize-use-equals-default,
   -modernize-use-nodiscard,
   -modernize-use-scoped-lock,
   -modernize-use-trailing-return-type,

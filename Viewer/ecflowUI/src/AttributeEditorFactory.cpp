@@ -22,10 +22,6 @@ AttributeEditorFactory::AttributeEditorFactory(const std::string& type) {
     (*makers)[type] = this;
 }
 
-AttributeEditorFactory::~AttributeEditorFactory() {
-    // Not called
-}
-
 AttributeEditor* AttributeEditorFactory::create(const std::string& type, VInfo_ptr info, QWidget* parent) {
     auto j = makers->find(type);
     if (j != makers->end()) {

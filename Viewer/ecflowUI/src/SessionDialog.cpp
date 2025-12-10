@@ -47,10 +47,6 @@ SessionDialog::SessionDialog(QWidget* parent) : QDialog(parent) {
     setButtonsEnabledStatus();
 }
 
-SessionDialog::~SessionDialog() {
-    // delete ui;
-}
-
 void SessionDialog::refreshListOfSavedSessions() {
 
     // sessionsTable_->clearContents();

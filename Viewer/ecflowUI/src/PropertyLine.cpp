@@ -135,10 +135,6 @@ PropertyLineFactory::PropertyLineFactory(VProperty::GuiType type) {
     (*makers)[type] = this;
 }
 
-PropertyLineFactory::~PropertyLineFactory() {
-    // Not called
-}
-
 PropertyLine* PropertyLineFactory::create(VProperty* p, bool addLabel, QWidget* parent) {
     if (!p || !p->link()) {
         return nullptr;
