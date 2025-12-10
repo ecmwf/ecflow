@@ -696,7 +696,7 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
 
 class JobCreationTimer {
 public:
-    explicit JobCreationTimer(Submittable* sub) : enabled_(false), failed_(false), sub_(sub) {}
+    explicit JobCreationTimer(Submittable* sub) : sub_(sub) {}
 
     // Disable copy (and move) semantics
     JobCreationTimer(const JobCreationTimer&)                  = delete;
@@ -725,10 +725,10 @@ public:
     void set_failed() { failed_ = true; }
 
 private:
-    bool enabled_;
-    bool failed_;
-    Submittable* sub_;
-    boost::posix_time::ptime start_;
+    bool enabled_{false};
+    bool failed_{false};
+    Submittable* sub_{nullptr};
+    boost::posix_time::ptime start_{};
 };
 
 void Submittable::check_job_creation(job_creation_ctrl_ptr jobCtrl) {

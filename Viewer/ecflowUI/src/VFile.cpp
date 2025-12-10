@@ -32,14 +32,7 @@ const size_t VFile::maxDataSize_ = 1024 * 1024 * 10;
 VFile::VFile(const std::string& name, const std::string& str, bool deleteFile)
     : path_(name),
       deleteFile_(deleteFile),
-      storageMode_(DiskStorage),
-      data_(nullptr),
-      dataSize_(0),
-      fp_(nullptr),
-      fetchMode_(NoFetchMode),
-      transferDuration_(0),
-      truncatedTo_(0),
-      cached_(false) {
+      storageMode_(DiskStorage) {
     std::ofstream f(path_.c_str());
     if (f.is_open()) {
         f << str;
@@ -50,14 +43,7 @@ VFile::VFile(const std::string& name, const std::string& str, bool deleteFile)
 VFile::VFile(const std::string& name, bool deleteFile)
     : path_(name),
       deleteFile_(deleteFile),
-      storageMode_(DiskStorage),
-      data_(nullptr),
-      dataSize_(0),
-      fp_(nullptr),
-      fetchMode_(NoFetchMode),
-      transferDuration_(0),
-      truncatedTo_(0),
-      cached_(false) {
+      storageMode_(DiskStorage) {
 }
 
 VFile::VFile(bool deleteFile) : path_(""), deleteFile_(deleteFile) {

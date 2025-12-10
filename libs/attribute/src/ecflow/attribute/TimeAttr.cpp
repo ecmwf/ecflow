@@ -23,7 +23,7 @@
 
 namespace ecf {
 
-TimeAttr::TimeAttr(const std::string& str) : state_change_no_(0) {
+TimeAttr::TimeAttr(const std::string& str) {
     if (str.empty()) {
         throw std::runtime_error("Time::Time: empty string passed");
     }

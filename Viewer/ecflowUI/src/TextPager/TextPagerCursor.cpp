@@ -23,7 +23,7 @@
 
 class SelectionChangedEmitter {
 public:
-    explicit SelectionChangedEmitter(TextPagerEdit* t) : selectionStart(-1), selectionEnd(-1), textEdit(t) {
+    explicit SelectionChangedEmitter(TextPagerEdit* t) : textEdit(t) {
         if (textEdit) {
             selectionStart = textEdit->textCursor().selectionStart();
             selectionEnd   = textEdit->textCursor().selectionEnd();
@@ -42,13 +42,14 @@ public:
     }
 
 private:
-    int selectionStart, selectionEnd;
-    TextPagerEdit* textEdit;
+    int selectionStart{-1};
+    int selectionEnd{-1};
+    TextPagerEdit* textEdit{nullptr};
 };
 
 TextPagerCursor::TextPagerCursor() = default;
 
-TextPagerCursor::TextPagerCursor(const TextPagerDocument* document, int pos, int anc) : d(nullptr), textEdit(nullptr) {
+TextPagerCursor::TextPagerCursor(const TextPagerDocument* document, int pos, int anc) {
     if (document) {
         const int documentSize = document->d->documentSize;
         if (pos < 0 || pos > documentSize || anc < -1 || anc > documentSize) {
@@ -66,7 +67,7 @@ TextPagerCursor::TextPagerCursor(const TextPagerDocument* document, int pos, int
     }
 }
 
-TextPagerCursor::TextPagerCursor(const TextPagerEdit* edit, int pos, int anc) : d(nullptr), textEdit(nullptr) {
+TextPagerCursor::TextPagerCursor(const TextPagerEdit* edit, int pos, int anc) {
     if (edit) {
         TextPagerDocument* document = edit->document();
         const int documentSize      = document->d->documentSize;
@@ -85,7 +86,7 @@ TextPagerCursor::TextPagerCursor(const TextPagerEdit* edit, int pos, int anc) : 
     }
 }
 
-TextPagerCursor::TextPagerCursor(const TextPagerCursor& cursor) : d(cursor.d), textEdit(nullptr) {
+TextPagerCursor::TextPagerCursor(const TextPagerCursor& cursor) : d(cursor.d) {
     ref();
 }
 

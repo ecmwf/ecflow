@@ -47,17 +47,15 @@ public:
         : absNodePath_(absPath),
           cmd_(cmdToSpawn),
           cmd_type_(cmd_type),
-          have_status_(0),
-          pid_(pid),
-          status_(0) {}
+          pid_(pid) {}
 
-    std::string absNodePath_;  // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
-    std::string cmd_;          // the command that was spawned
-    System::CmdType cmd_type_; // Type of command
-    sig_atomic_t have_status_; // Nonzero if this process has stopped or terminated.  */
-    pid_t pid_;                // The process ID of this child.
-    int status_;               // The status of this child; 0 if running,
-                               // otherwise a status value from waitpid
+    std::string absNodePath_;     // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
+    std::string cmd_;             // the command that was spawned
+    System::CmdType cmd_type_;    // Type of command
+    sig_atomic_t have_status_{0}; // Nonzero if this process has stopped or terminated.  */
+    pid_t pid_;                   // The process ID of this child.
+    int status_{0};               // The status of this child; 0 if running,
+                                  // otherwise a status value from waitpid
 };
 std::vector<Process> processVec_;
 

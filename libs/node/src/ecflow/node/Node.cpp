@@ -78,7 +78,6 @@ Node::Node() = default;
 
 Node::Node(const Node& rhs)
     : enable_shared_from_this(rhs),
-      parent_(nullptr),
       n_(rhs.n_),
       st_(rhs.st_),
       d_st_(rhs.d_st_),
