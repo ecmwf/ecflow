@@ -76,7 +76,6 @@ Checks: >
   -modernize-raw-string-literal,
   -modernize-redundant-void-arg,
   -modernize-return-braced-init-list,
-  -modernize-type-traits,
   -modernize-use-auto,
   -modernize-use-bool-literals,
   -modernize-use-default-member-init,
