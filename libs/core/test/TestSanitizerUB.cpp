@@ -83,8 +83,8 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_misaligned_structure_pointer_assignment) {
         int32_t i32;
         int64_t i64;
     };
-    int8_t* buffer    = (int8_t*)malloc(32);
-    struct A* pointer = (struct A*)(buffer + 1);
+    int8_t* buffer    = new int8_t[32];
+    struct A* pointer = reinterpret_cast<struct A*>(buffer + 1);
     pointer->i32      = 7; // Error: pointer is misaligned
 
     BOOST_CHECK_MESSAGE(pointer->i32 == 7, "expected error");
