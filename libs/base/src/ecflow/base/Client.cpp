@@ -103,7 +103,7 @@ bool Client::start_connect(endpoints_iterator_t endpoints_iterator) {
         // will soon be executed. If it returns 1 then the wait handler was successfully cancelled.
 
         // Set a deadline for the connect operation.
-        deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
+        deadline_.expires_after(std::chrono::seconds(timeout_));
 
         auto endpoint = endpoints_iterator->endpoint();
         connection_.socket_ll().async_connect(endpoint,
@@ -190,7 +190,7 @@ void Client::start_write() {
     // executed. If it returns 1 then the wait handler was successfully cancelled.
 
     // Set a deadline for the write operation.
-    deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
+    deadline_.expires_after(std::chrono::seconds(timeout_));
 
     connection_.async_write(outbound_request_,
                             [this](const boost::system::error_code& error) { this->handle_write(error); });
@@ -235,7 +235,7 @@ void Client::start_read() {
     // executed. If it returns 1 then the wait handler was successfully cancelled.
 
     // Set a deadline for the read operation.
-    deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
+    deadline_.expires_after(std::chrono::seconds(timeout_));
 
     connection_.async_read(inbound_response_,
                            [this](const boost::system::error_code& error) { this->handle_read(error); });
@@ -340,7 +340,7 @@ void Client::check_deadline() {
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
-    if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {
+    if (deadline_.expiry() <= boost::asio::chrono::system_clock::now()) {
 #ifdef DEBUG_CLIENT
         std::cout << "   Client::check_deadline timed out" << std::endl;
 #endif

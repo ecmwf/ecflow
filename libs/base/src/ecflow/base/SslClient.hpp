@@ -72,7 +72,7 @@ private:
     ClientToServerRequest outbound_request_;  /// The request we will send to the server
     ServerToClientResponse inbound_response_; /// The response we get back from the server
 
-    boost::asio::deadline_timer deadline_;
+    boost::asio::system_timer deadline_;
 
     //    connect        : timeout_ second
     //    send request   : timeout_ second

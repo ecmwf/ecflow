@@ -24,7 +24,7 @@ namespace ecf {
 
 class Timer {
 public:
-    explicit Timer(boost::asio::io_context& io) : io_{io}, timer_{io_, boost::posix_time::seconds(0)} {}
+    explicit Timer(boost::asio::io_context& io) : io_{io}, timer_{io_, std::chrono::seconds(0)} {}
     Timer(const Timer&) = delete;
 
     Timer& operator=(const Timer&) = delete;
@@ -33,15 +33,13 @@ public:
 
     template <typename CALLBACK>
     void set(CALLBACK callback, std::chrono::seconds expiry) {
-        /// Appears that `expires_from_now` is more accurate `then expires_at`
-        ///   i.e. timer_.expires_at( timer_.expires_at() + boost::posix_time::seconds( poll_at ) );
-        timer_.expires_from_now(boost::posix_time::seconds(expiry.count()));
+        timer_.expires_after(expiry);
         timer_.async_wait(boost::asio::bind_executor(io_, callback));
     }
 
 private:
     boost::asio::io_context& io_;
-    boost::asio::deadline_timer timer_;
+    boost::asio::system_timer timer_;
 };
 
 ///
