@@ -6,6 +6,16 @@ Version 5.15 updates
 .. role:: jiraissue
    :class: hidden
 
+Version 5.15.2
+==============
+
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2025-12-17
+
+Server
+------
+
+- **Bug Fix** correct use of whitelist for authorisation purposes :jiraissue:`ECFLOW-2055`
+
 Version 5.15.1
 ==============
 
