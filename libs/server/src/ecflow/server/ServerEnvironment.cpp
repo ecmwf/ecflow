@@ -315,10 +315,7 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
 
     if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
         authorisation_service_ = result.value();
-        std::cout << "Loaded server permissions file\n";
-    }
-    else {
-        std::cout << "Unable to load server permissions file, due to: " << result.reason() << '\n';
+        std::cout << "Loaded server permissions based on Nodes\n";
     }
 
     // Check that Authentication information is valid
@@ -338,7 +335,20 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
     /// read in the ecf white list file that specifies valid users and their access rights
     /// If the file can't be opened returns false and an error message and false;
     /// Automatically add server admin(user) with write access, as this will allow admin reload
-    return load_whitelist_file(errorMsg);
+    if (auto loaded = load_whitelist_file(errorMsg); loaded) {
+        if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
+            authorisation_service_ = result.value();
+            std::cout << "Loaded server permissions based on Whitelist file\n";
+            return true;
+        }
+        else {
+            std::cout << "Unable to load server permissions, due to: " << result.reason() << '\n';
+            return false;
+        }
+    }
+    else {
+        return false;
+    }
 }
 
 std::pair<std::string, std::string> ServerEnvironment::hostPort() const {

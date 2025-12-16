@@ -13,13 +13,29 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/Algorithms.hpp"
 #include "ecflow/core/Overload.hpp"
+#include "ecflow/core/WhiteListFile.hpp"
 
 namespace ecf {
 
-struct Rules
+///
+/// NodeRules represent permissions derived from the nodes themselves (based on ECF_PERMISSIONS permissions)
+///
+struct NodeRules
 {
 };
 
+///
+/// WhiteListRules represent permissions define by a white list file
+///
+struct WhiteListRules
+{
+    WhiteListRules(const WhiteListFile& file) : file_(file) {}
+    const WhiteListFile& file_;
+};
+
+///
+/// Unrestricted represent no restrictions at all
+///
 struct Unrestricted
 {
 };
@@ -27,9 +43,10 @@ struct Unrestricted
 struct AuthorisationService::Impl
 {
     Impl() : permissions_(Unrestricted{}) {}
-    explicit Impl(Rules&& rules) : permissions_(std::move(rules)) {}
+    explicit Impl(NodeRules&& rules) : permissions_(std::move(rules)) {}
+    explicit Impl(WhiteListRules&& rules) : permissions_(std::move(rules)) {}
 
-    std::variant<Unrestricted, Rules> permissions_;
+    std::variant<Unrestricted, NodeRules, WhiteListRules> permissions_;
 };
 
 AuthorisationService::AuthorisationService() = default;
@@ -83,7 +100,19 @@ bool AuthorisationService::allows(const Identity& identity,
                      // Dangerous, but backward compatible!
                      allowed = true;
                  },
-                 [&server, &identity, &paths, &permission, &allowed](const Rules& rules) {
+                 [&allowed, &identity, &paths, &permission](const WhiteListRules& rules) {
+                     // Apply white list rules
+                     if (permission == "read") {
+                         allowed = rules.file_.verify_read_access(identity.username(), paths);
+                     }
+                     else if (permission == "write") {
+                         allowed = rules.file_.verify_write_access(identity.username(), paths);
+                     }
+                     else {
+                         allowed = false;
+                     }
+                 },
+                 [&server, &identity, &paths, &permission, &allowed](const NodeRules& rules) {
                      for (auto&& path : paths) {
 
                          auto u = identity.as_string();
@@ -132,7 +161,11 @@ bool AuthorisationService::allows(const Identity& identity,
 }
 
 AuthorisationService::result_t AuthorisationService::load_permissions_from_nodes() {
-    return result_t::success(AuthorisationService(std::make_unique<Impl>(Rules{})));
+    return result_t::success(AuthorisationService(std::make_unique<Impl>(NodeRules{})));
+}
+
+AuthorisationService::result_t AuthorisationService::load_permissions_from_whitelist(const WhiteListFile& whitelist) {
+    return result_t::success(AuthorisationService(std::make_unique<Impl>(WhiteListRules{whitelist})));
 }
 
 } // namespace ecf
