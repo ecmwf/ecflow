@@ -17,6 +17,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Result.hpp"
+#include "ecflow/core/WhiteListFile.hpp"
 
 class AbstractServer;
 
@@ -73,6 +74,7 @@ public:
 
     [[nodiscard]]
     static result_t load_permissions_from_nodes();
+    static result_t load_permissions_from_whitelist(const WhiteListFile& whitelist);
 
 private:
     struct Impl;
