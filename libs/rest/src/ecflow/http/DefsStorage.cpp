@@ -48,7 +48,7 @@ void print_polling_interval_notification(long long sleeptime,
 } // namespace
 
 std::shared_ptr<Defs> get_defs() {
-    std::lock_guard lock(def_mutex);
+    std::scoped_lock lock(def_mutex);
     return defs_;
 }
 
@@ -65,7 +65,7 @@ void defs_update(int interval) {
 
     auto update = [&] {
         {
-            std::lock_guard lock(def_mutex);
+            std::scoped_lock lock(def_mutex);
             if (defs_ != nullptr) {
                 client.sync(defs_);
             }
@@ -174,8 +174,8 @@ void stop_update_defs_loop() {
     loop_thread->join();
 }
 
-template <typename T>
-void trigger_defs_update_predicate(T&& func) {
+template <typename F>
+void trigger_defs_update_predicate(F f) {
     {
         std::unique_lock lock(cv_mutex);
         update_defs = true;
@@ -186,7 +186,7 @@ void trigger_defs_update_predicate(T&& func) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
-    func();
+    f();
 }
 
 void trigger_defs_update() {

@@ -56,11 +56,14 @@
 
 class Memento {
 public:
-    Memento()               = default;
-    Memento(const Memento&) = delete;
-    virtual ~Memento();
+    Memento() = default;
 
+    Memento(const Memento&)            = delete;
     Memento& operator=(const Memento&) = delete;
+    Memento(Memento&&)                 = delete;
+    Memento& operator=(Memento&&)      = delete;
+
+    virtual ~Memento();
 
 private:
     /// Applies the mementos to the client side defs. Can raise std::runtime_error

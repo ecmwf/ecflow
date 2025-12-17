@@ -102,7 +102,8 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
             cout << "->remove write permission for " << ecf_home << "\n";
         }
         BOOST_CHECK_MESSAGE(chdir("..") == 0, "Can't change directory to parent  error: " << strerror(errno));
-        BOOST_CHECK_MESSAGE(chmod(ecf_home.c_str(), strtol("0444", 0, 8)) == 0, "Can't chmod : " << strerror(errno));
+        BOOST_CHECK_MESSAGE(chmod(ecf_home.c_str(), strtol("0444", nullptr, 8)) == 0,
+                            "Can't chmod : " << strerror(errno));
 
         if (debug_me) {
             cout << "->write the checkpoint file, should fail, this should also try to re-open the log file and fail\n";
@@ -137,7 +138,8 @@ BOOST_AUTO_TEST_CASE(test_log_and_checkpt_write_errors) {
         if (debug_me) {
             cout << "->add write permission to " << ecf_home << "\n";
         }
-        BOOST_CHECK_MESSAGE(chmod(ecf_home.c_str(), strtol("0755", 0, 8)) == 0, "Can't chmod : " << strerror(errno));
+        BOOST_CHECK_MESSAGE(chmod(ecf_home.c_str(), strtol("0755", nullptr, 8)) == 0,
+                            "Can't chmod : " << strerror(errno));
 
         if (debug_me) {
             cout << "->flush log file again\n";

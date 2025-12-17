@@ -32,9 +32,6 @@ class CommandLine;
 /// This is more efficient than creating a ClientInvoker for each request
 class ClientInvoker {
 public:
-    ClientInvoker(const ClientInvoker&)                  = delete;
-    const ClientInvoker& operator=(const ClientInvoker&) = delete;
-
     /// Will create the *ClientEnvironment* once on construction
     /// By default will throw exception std::runtime_error for errors
     ClientInvoker();
@@ -42,6 +39,13 @@ public:
     ClientInvoker(bool GUI, const std::string& host, const std::string& port);
     ClientInvoker(const std::string& host, const std::string& port);
     ClientInvoker(const std::string& host, int port);
+
+    ClientInvoker(const ClientInvoker&)            = delete;
+    ClientInvoker& operator=(const ClientInvoker&) = delete;
+    ClientInvoker(ClientInvoker&&)                 = delete;
+    ClientInvoker& operator=(ClientInvoker&&)      = delete;
+
+    ~ClientInvoker() = default;
 
     ClientEnvironment& environment() { return clientEnv_; }
     const ClientEnvironment& environment() const { return clientEnv_; }
@@ -113,8 +117,9 @@ public:
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
     /// Will attempt to connect to the server a number of times. If this fails it will
     /// try the next server, and so on until a timeout period is reached.
-    int invoke(int argc, char* argv[]) const;
     int invoke(const CommandLine& cl) const;
+    int invoke(const std::string& arg) const;
+    int invoke(const std::vector<std::string>& args) const;
 
     /// If testing, overwrite the task path set in the environment, required for
     /// testing the task based commands.
@@ -425,8 +430,6 @@ private:
     int get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) const;
 
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
-    int invoke(const std::string& arg) const;
-    int invoke(const std::vector<std::string>& args) const;
     int invoke(Cmd_ptr) const; // assumes clients of Cmd_ptr constructor has caught exceptions
 
     int do_invoke_cmd(Cmd_ptr) const;

@@ -17,10 +17,10 @@ namespace ecf {
 namespace /* __anonymous__ */ {
 
 // all variables to be collected
-const char* const variables[] = {UDPServerEnvironment::ECF_UDP_VERBOSE,
-                                 UDPServerEnvironment::ECF_UDP_PORT,
-                                 UDPServerEnvironment::ECF_HOST,
-                                 UDPServerEnvironment::ECF_PORT};
+std::array<const char*, 4> variables = {UDPServerEnvironment::ECF_UDP_VERBOSE,
+                                        UDPServerEnvironment::ECF_UDP_PORT,
+                                        UDPServerEnvironment::ECF_HOST,
+                                        UDPServerEnvironment::ECF_PORT};
 
 // the options related to each of the variables
 const std::unordered_map<std::string, std::string> options_map = {{UDPServerEnvironment::ECF_UDP_VERBOSE, "verbose"},

@@ -631,8 +631,6 @@ TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent) {
 
     prop_ = new PropertyMapper(propVec, this);
 
-    std::string propName;
-
     // init
     adjustBackground(prop_->find("view.trigger.background", true));
     adjustParentConnectColour(prop_->find("view.trigger.parentConnectorColour", true));

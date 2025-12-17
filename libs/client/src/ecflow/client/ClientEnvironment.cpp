@@ -42,9 +42,9 @@
     #define DEFAULT_ZOMBIE_TIMEOUT 120 // Max time in seconds for client to deliver message
     #define MIN_TIMEOUT 5              // Some reasonable value
 #else
-    #define MAX_TIMEOUT 24 * 3600            // We don't try forever, only 24 hours
-    #define DEFAULT_ZOMBIE_TIMEOUT 12 * 3600 // We don't try forever, only 12 hours
-    #define MIN_TIMEOUT 10 * 60              // Some reasonable value
+    #define MAX_TIMEOUT (24 * 3600)            // We don't try forever, only 24 hours
+    #define DEFAULT_ZOMBIE_TIMEOUT (12 * 3600) // We don't try forever, only 12 hours
+    #define MIN_TIMEOUT (10 * 60)              // Some reasonable value
 #endif
 
 // #define DEBUG_ENVIRONMENT 1

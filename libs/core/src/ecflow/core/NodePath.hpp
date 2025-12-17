@@ -18,9 +18,6 @@ class NodePath {
 public:
     // Disable default construction
     NodePath() = delete;
-    // Disable copy (and move) semantics
-    NodePath(const NodePath&)                  = delete;
-    const NodePath& operator=(const NodePath&) = delete;
 
     /// returns the path as a vector of strings, preserving the order
     /// Note: multiple path separator '/' are treated as one separator.

@@ -16,9 +16,7 @@
 
 class NodeUtil {
 public:
-    NodeUtil()                           = delete;
-    NodeUtil(const NodeUtil&)            = delete;
-    NodeUtil& operator=(const NodeUtil&) = delete;
+    NodeUtil() = delete;
 
     /// Any nodes and attributes to be added
     static py::object do_add(node_ptr self, const py::object& arg);

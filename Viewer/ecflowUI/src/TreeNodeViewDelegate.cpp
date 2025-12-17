@@ -347,8 +347,7 @@ void TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index, int& w, int
             w = 300;
 
             // For multiline labels we need to compute the height
-            int attLineNum = 0;
-            if ((attLineNum = index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 1) {
+            if (int attLineNum = index.data(AbstractNodeModel::AttributeLineRole).toInt(); attLineNum > 1) {
                 h = labelHeight(attLineNum);
             }
         }
@@ -558,12 +557,11 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
 
     // The load icon (optional)
     QRect loadRect;
-    bool hasLoad  = index.data(AbstractNodeModel::LoadRole).toBool();
-    Animation* an = nullptr;
+    bool hasLoad = index.data(AbstractNodeModel::LoadRole).toBool();
 
     // Update load animation
     if (hasLoad) {
-        an = animation_->find(Animation::ServerLoadType, true);
+        auto an = animation_->find(Animation::ServerLoadType, true);
 
         loadRect = QRect(currentRight + ViewerUtil::textWidth(fm, 'A'),
                          itemRect.top() + (itemRect.height() - an->scaledSize().height()) / 2,
@@ -578,7 +576,7 @@ int TreeNodeViewDelegate::renderServer(QPainter* painter,
     }
     // Stops load animation
     else {
-        if ((an = animation_->find(Animation::ServerLoadType, false)) != nullptr) {
+        if (auto an = animation_->find(Animation::ServerLoadType, false); an != nullptr) {
             an->removeTarget(server->vRoot());
         }
     }

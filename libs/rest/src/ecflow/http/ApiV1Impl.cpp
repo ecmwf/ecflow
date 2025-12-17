@@ -117,10 +117,10 @@ ojson get_node_status(const httplib::Request& request) {
     return j;
 }
 
-template <typename T>
-void apply_to_parents(const Node* node, T&& func) {
+template <typename F>
+void apply_to_parents(const Node* node, F f) {
     for (const Node* up = node; up != nullptr; up = up->parent()) {
-        func(up);
+        f(up);
     }
 }
 
@@ -342,8 +342,7 @@ ojson get_node_output(const httplib::Request& request) {
 }
 
 void add_suite(const httplib::Request& request, httplib::Response& response) {
-    const std::string path = request.matches[1];
-    const ojson payload    = ojson::parse(request.body);
+    const ojson payload = ojson::parse(request.body);
 
     const std::string defs = payload.at("definition");
 
@@ -819,8 +818,6 @@ ojson update_node_attribute_by_user(const httplib::Request& request) {
 ojson update_node_attribute(const httplib::Request& request) {
 
     const ojson payload = ojson::parse(request.body);
-
-    std::string type = payload.at("type");
 
     //
     // Important: updating node attributes is not a straightforward matter!

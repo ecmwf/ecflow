@@ -1122,7 +1122,7 @@ QChart* LogRequestView::addChartById(QString id) {
 }
 
 void LogRequestView::removeChartById(QString id) {
-    if (ChartView* chartView = viewIds_.value(id, NULL)) {
+    if (ChartView* chartView = viewIds_.value(id, nullptr)) {
         viewLayout_->removeWidget(chartView);
         views_.removeOne(chartView);
         delete chartView;
@@ -1867,7 +1867,7 @@ void LogCmdSuiteRequestView::addRemoveSuite(int suiteIdx, bool st) {
         if (st) {
             addSuite(suiteIdx);
             QString id      = QString::number(suiteIdx);
-            ChartView* view = viewIds_.value(id, NULL);
+            ChartView* view = viewIds_.value(id, nullptr);
             Q_ASSERT(view);
             // It only woks if the chart is already displayed, so we need a delayed
             // adjustment
@@ -1885,7 +1885,7 @@ void LogCmdSuiteRequestView::addSuite(int suiteIdx) {
     // maxval
     QString id = QString::number(suiteIdx);
     addChartById(id);
-    ChartView* view = viewIds_.value(id, NULL);
+    ChartView* view = viewIds_.value(id, nullptr);
     Q_ASSERT(view);
 
     QString title = "suite: " + QString::fromStdString(data_->suites()[suiteIdx].name());
@@ -1906,7 +1906,7 @@ void LogCmdSuiteRequestView::addTotal() {
 
     QString id = "total";
     addChartById(id);
-    ChartView* view = viewIds_.value(id, NULL);
+    ChartView* view = viewIds_.value(id, nullptr);
     Q_ASSERT(view);
 
     QString title = "All suites";
@@ -2097,7 +2097,7 @@ void LogSuiteCmdRequestView::addRemoveCmd(int reqIdx, bool st) {
     // Add
     if (st) {
         addCmd(reqIdx);
-        ChartView* view = viewIds_.value(cmdChartId(reqIdx), NULL);
+        ChartView* view = viewIds_.value(cmdChartId(reqIdx), nullptr);
         Q_ASSERT(view);
         // It only woks if the chart is already displayed, so we need a delayed
         // adjustment
@@ -2114,7 +2114,7 @@ void LogSuiteCmdRequestView::addCmd(int reqIdx) {
     // maxval
     QString id = cmdChartId(reqIdx);
     addChartById(id);
-    ChartView* view = viewIds_.value(id, NULL);
+    ChartView* view = viewIds_.value(id, nullptr);
     Q_ASSERT(view);
 
     QString title = "cmd: " + data_->subReqName(reqIdx);
@@ -2135,7 +2135,7 @@ void LogSuiteCmdRequestView::addTotal() {
 
     QString id = "total";
     addChartById(id);
-    ChartView* view = viewIds_.value(id, NULL);
+    ChartView* view = viewIds_.value(id, nullptr);
     Q_ASSERT(view);
 
     QString title = "All commands";
@@ -2391,7 +2391,7 @@ void LogUidCmdRequestView::addRemoveCmd(int reqIdx, bool st) {
     if (st) {
         addCmd(reqIdx);
         QString id      = QString::number(reqIdx);
-        ChartView* view = viewIds_.value(id, NULL);
+        ChartView* view = viewIds_.value(id, nullptr);
         Q_ASSERT(view);
         // It only woks if the chart is already displayed, so we need a delayed
         // adjustment
@@ -2405,7 +2405,7 @@ void LogUidCmdRequestView::addRemoveCmd(int reqIdx, bool st) {
 void LogUidCmdRequestView::addCmd(int reqIdx) {
     QString id = cmdChartId(reqIdx);
     addChartById(id);
-    ChartView* view = viewIds_.value(id, NULL);
+    ChartView* view = viewIds_.value(id, nullptr);
     Q_ASSERT(view);
 
     QString title = "command: " + data_->subReqName(reqIdx);
@@ -2425,7 +2425,7 @@ void LogUidCmdRequestView::addTotal() {
 
     QString id = "total";
     addChartById(id);
-    ChartView* view = viewIds_.value(id, NULL);
+    ChartView* view = viewIds_.value(id, nullptr);
     Q_ASSERT(view);
 
     QString title = "All commands";
@@ -2615,7 +2615,7 @@ void LogCmdUidRequestView::addRemoveUid(int uidIdx, bool st) {
     if (st) {
         addUid(uidIdx);
         QString id      = QString::number(uidIdx);
-        ChartView* view = viewIds_.value(id, NULL);
+        ChartView* view = viewIds_.value(id, nullptr);
         Q_ASSERT(view);
         // It only woks if the chart is already displayed, so we need a delayed
         // adjustment
@@ -2629,7 +2629,7 @@ void LogCmdUidRequestView::addRemoveUid(int uidIdx, bool st) {
 void LogCmdUidRequestView::addUid(int uidIdx) {
     QString id = uidChartId(uidIdx);
     addChartById(id);
-    ChartView* view = viewIds_.value(id, NULL);
+    ChartView* view = viewIds_.value(id, nullptr);
     Q_ASSERT(view);
 
     QString title = "user: " + data_->uidName(uidIdx);
@@ -2649,7 +2649,7 @@ void LogCmdUidRequestView::addTotal() {
 
     QString id = "total";
     addChartById(id);
-    ChartView* view = viewIds_.value(id, NULL);
+    ChartView* view = viewIds_.value(id, nullptr);
     Q_ASSERT(view);
 
     QString title = "All users";

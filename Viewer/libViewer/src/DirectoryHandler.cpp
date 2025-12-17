@@ -318,16 +318,13 @@ bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& des
     bool ok = true;
     fs::directory_iterator it(src), eod;
     BOOST_FOREACH (fs::path const& p, std::make_pair(it, eod)) {
-        std::string fileName = p.filename().string();
-        std::string srcFile  = p.string();
-
         if (is_regular_file(p)) // file? then copy it into its new home
         {
             // The original boost based copy implementation did not work with newer compilers,
             // so we opted for a Qt based implementation. See ECFLOW-1207
             fs::path destPath    = dest / p.filename();
             std::string destFile = destPath.string();
-            if (!copyFile(srcFile, destFile, errorMessage)) {
+            if (!copyFile(p.string(), destFile, errorMessage)) {
                 return false;
             }
 

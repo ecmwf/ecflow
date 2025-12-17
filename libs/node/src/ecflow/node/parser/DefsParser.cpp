@@ -383,7 +383,7 @@ private:
 // See ECFLOW-106, and SUP-1198, why we don't allow time,today,date,day ate the suite level.
 class SuiteParser : public Parser {
 public:
-    explicit SuiteParser(DefsStructureParser* p) : Parser(p), started_(false) {
+    explicit SuiteParser(DefsStructureParser* p) : Parser(p) {
         reserve_vec(25);
         addParser(new VariableParser(p));
         addParser(new FamilyParser(p));
@@ -466,7 +466,7 @@ private:
         rootParser()->set_node_ptr(suite);
     }
 
-    bool started_;
+    bool started_{false};
 };
 
 //================================================================================

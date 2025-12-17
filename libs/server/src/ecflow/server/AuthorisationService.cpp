@@ -112,11 +112,8 @@ bool AuthorisationService::allows(const Identity& identity,
                          allowed = false;
                      }
                  },
-                 [&server, &identity, &paths, &permission, &allowed](const NodeRules& rules) {
+                 [&server, &identity, &paths, &allowed](const NodeRules& rules) {
                      for (auto&& path : paths) {
-
-                         auto u = identity.as_string();
-                         auto a = permission;
 
                          struct Visitor
                          {

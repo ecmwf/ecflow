@@ -43,9 +43,7 @@
 //================================================================================
 class DefsCache {
 public:
-    DefsCache()                            = delete;
-    DefsCache(const DefsCache&)            = delete;
-    DefsCache& operator=(const DefsCache&) = delete;
+    DefsCache() = delete;
 
     // Server side
     static void update_cache_if_state_changed(Defs* defs);

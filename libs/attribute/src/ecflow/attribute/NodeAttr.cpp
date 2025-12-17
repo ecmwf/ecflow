@@ -330,8 +330,7 @@ std::string Meter::dump() const {
 Label::Label(const std::string& name, const std::string& value, const std::string& new_value, bool check_name)
     : n_(name),
       v_(value),
-      new_v_(new_value),
-      state_change_no_(0) {
+      new_v_(new_value) {
     if (check_name && !Str::valid_name(n_)) {
         throw std::runtime_error("Label::Label: Invalid Label name :" + n_);
     }

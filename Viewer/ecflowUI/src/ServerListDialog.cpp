@@ -816,7 +816,7 @@ void ServerListModel::dataChangeFinished() {
 }
 
 int ServerListModel::columnCount(const QModelIndex& /*parent*/) const {
-    return std::underlying_type<Columns>::type(ServerListModel::UseColumn);
+    return std::underlying_type_t<Columns>(ServerListModel::UseColumn);
 }
 
 int ServerListModel::rowCount(const QModelIndex& parent) const {

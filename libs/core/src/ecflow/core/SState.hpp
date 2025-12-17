@@ -25,9 +25,6 @@ public:
 
     // Disable default construction
     SState() = delete;
-    // Disable copy (and move) semantics
-    SState(const SState&)                  = delete;
-    const SState& operator=(const SState&) = delete;
 
     /// Given an integer return the server state as a string.
     /// If status is not 0, 1, or 2, returns "UNKNOWN".

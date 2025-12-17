@@ -32,9 +32,6 @@ class Passwd {
 public:
     // Disable default construction
     Passwd() = delete;
-    // Disable copy (and move) semantics
-    Passwd(const Passwd&)                  = delete;
-    const Passwd& operator=(const Passwd&) = delete;
 
     /// generate a random password
     static std::string generate();

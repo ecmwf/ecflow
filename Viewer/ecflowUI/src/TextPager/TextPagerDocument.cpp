@@ -521,7 +521,6 @@ TextPagerDocument::find(const QRegExp& regexp, const TextPagerCursor& cursor, Fi
     }
 
     QString line;
-    int index;
     int from;
 #ifdef TEXTDOCUMENT_FIND_DEBUG
     QElapsedTimer lap;
@@ -550,7 +549,7 @@ TextPagerDocument::find(const QRegExp& regexp, const TextPagerCursor& cursor, Fi
         // QRegExp::lastIndexIn()  is 3 times slower than QRegExp::indexIn()!! So we always call
         // indexIn() first the lastIndexIn() if we need the reverse order.
 
-        if ((index = regexp.indexIn(line, 0)) != -1) {
+        if (int index = regexp.indexIn(line, 0); index != -1) {
 
 #ifdef TEXTDOCUMENT_FIND_DEBUG
             qDebug() << line;
@@ -730,7 +729,6 @@ TextPagerDocument::find(const QString& in, const TextPagerCursor& cursor, FindMo
     }
 
     QString line;
-    int index;
     int from;
 #ifdef TEXTDOCUMENT_FIND_DEBUG
     QTime lap;
@@ -772,7 +770,7 @@ TextPagerDocument::find(const QString& in, const TextPagerCursor& cursor, FindMo
         // qDebug() << line;
 #endif
 
-        if ((index = line.indexOf(word)) != -1) {
+        if (int index = line.indexOf(word); index != -1) {
 
             // Backward:
             // The iterator is positioned at the linebreak character of the previous line, or at
@@ -1773,8 +1771,8 @@ match(int pos, int size, const TextPagerSection* section, TextPagerSection::Text
         return true;
     }
     else if (flags & TextPagerSection::IncludePartial) {
-        const int boundaries[] = {pos, pos + size - 1};
-        for (int boundarie : boundaries) {
+        const std::array boundaries = {pos, pos + size - 1};
+        for (auto boundarie : boundaries) {
             if (::match(boundarie, sectionPos, sectionSize)) {
                 return true;
             }

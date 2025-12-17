@@ -27,6 +27,7 @@ public:
           host_(host),
           port_(port),
           passwd_(passwd) {}
+
     ~Pass_wd() = default;
 
     bool operator==(const Pass_wd& rhs) const {
@@ -48,9 +49,12 @@ private:
 class PasswdFile {
 public:
     PasswdFile();
+
     // Disable copy (and move) semantics
     PasswdFile(const PasswdFile&)                  = delete;
     const PasswdFile& operator=(const PasswdFile&) = delete;
+    PasswdFile(PasswdFile&&)                       = delete;
+    PasswdFile& operator=(PasswdFile&&)            = delete;
 
     ~PasswdFile();
 

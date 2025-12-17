@@ -8,6 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <array>
 #include <iostream>
 #include <string>
 
@@ -32,52 +33,21 @@ BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
         "arg1", po::value<string>()->implicit_value(string("")), "optional arg1 description");
 
     {
-        char* argv[] = {const_cast<char*>("test_program_options_implicit_value"),
-                        const_cast<char*>("--help"),
-                        const_cast<char*>("--arg1")};
+        std::array argv = {"test_program_options_implicit_value", "--help", "--arg1"};
 
         po::variables_map vm;
-        po::store(po::parse_command_line(3, argv, desc), vm); // populate variable map
-        po::notify(vm);                                       // raise any errors
+        po::store(po::parse_command_line(argv.size(), argv.data(), desc), vm); // populate variable map
+        po::notify(vm);                                                        // raise any errors
 
         BOOST_CHECK_MESSAGE(vm.count("help"), "Expected help");
         BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
         BOOST_CHECK_MESSAGE(vm["arg1"].as<string>() == "", "Expected arg1 to be empty");
     }
-    //   {
-    //      // This test fails on boost 1.59, can't cope --arg1 10, only --arg1=10 *******
-    //      // See: ECFLOW-509 and https://svn.boost.org/trac/boost/ticket/11893
-    //      char* argv[] = {
-    //            const_cast<char*>("test_program_options_implicit_value"),
-    //            const_cast<char*>("--arg1"),
-    //            const_cast<char*>("10")
-    //      };
-    //
-    //      po::variables_map vm;
-    ////      po::store(po::parse_command_line(3, argv, desc,
-    ////                        po::command_line_style::unix_style ^ po::command_line_style::allow_short ^
-    ////                        po::command_line_style::long_allow_adjacent |
-    ////                        po::command_line_style::short_allow_adjacent |
-    ////                        po::command_line_style::allow_long_disguise
-    ////                ), vm);
-    //
-    //      po::store(po::command_line_parser(3,argv).options(desc).style(
-    //                       po::command_line_style::long_allow_next |
-    //                       po::command_line_style::allow_long_disguise |
-    //                       po::command_line_style::long_allow_adjacent).run(),
-    //                vm);
-    //      po::notify(vm);
-    //
-    //      BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
-    //      BOOST_CHECK_MESSAGE(vm["arg1"].as<string>() == "10", "Expected arg1 with value of 10 but found '" <<
-    //      vm["arg1"].as<string>() << "'");
-    //   }
-
     {
-        char* argv[] = {const_cast<char*>("test_program_options_implicit_value"), const_cast<char*>("--arg1=11")};
+        std::array argv = {"test_program_options_implicit_value", "--arg1=11"};
 
         po::variables_map vm;
-        po::store(po::parse_command_line(2, argv, desc), vm);
+        po::store(po::parse_command_line(argv.size(), argv.data(), desc), vm);
         po::notify(vm);
 
         BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
@@ -94,14 +64,10 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken) {
     desc.add_options()("help",
                        "produce help message")("arg1", po::value<vector<string>>()->multitoken(), "arg1 description");
 
-    char* argv[] = {const_cast<char*>("test_program_options_multitoken"),
-                    const_cast<char*>("--help"),
-                    const_cast<char*>("--arg1"),
-                    const_cast<char*>("a"),
-                    const_cast<char*>("b")};
+    std::array argv = {"test_program_options_multitoken", "--help", "--arg1", "a", "b"};
 
     po::variables_map vm;
-    po::store(po::parse_command_line(5, argv, desc), vm);
+    po::store(po::parse_command_line(argv.size(), argv.data(), desc), vm);
     po::notify(vm);
 
     BOOST_CHECK_MESSAGE(vm.count("help"), "Expected help");
@@ -121,11 +87,7 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken_with_negative_values) {
     desc.add_options()("help",
                        "produce help message")("arg1", po::value<vector<string>>()->multitoken(), "arg1 description");
 
-    char* argv[] = {const_cast<char*>("test_program_options_multitoken_1"),
-                    const_cast<char*>("--help"),
-                    const_cast<char*>("--arg1"),
-                    const_cast<char*>("-1"),
-                    const_cast<char*>("-w")};
+    std::array argv{"test_program_options_multitoken_1", "--help", "--arg1", "-1", "-w"};
 
     //  --alter delete cron -w 0,1 10:00 /s1     # -w treated as option
     //  --alter=/s1 change meter name -1         # -1 treated as option
@@ -135,7 +97,8 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken_with_negative_values) {
 
     po::variables_map vm;
     po::store(
-        po::parse_command_line(5, argv, desc, po::command_line_style::unix_style ^ po::command_line_style::allow_short),
+        po::parse_command_line(
+            argv.size(), argv.data(), desc, po::command_line_style::unix_style ^ po::command_line_style::allow_short),
         vm);
     po::notify(vm);
 

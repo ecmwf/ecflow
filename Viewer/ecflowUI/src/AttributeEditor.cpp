@@ -21,10 +21,10 @@
 #include "VConfig.hpp"
 #include "VRepeatAttr.hpp"
 
-#define _USE_MODELESS_ATTRIBUTEDITOR
-#define _UI_ATTRIBUTEDITOR_DEBUG
+#define USE_MODELESS_ATTRIBUTEDITOR
+#define UI_ATTRIBUTEDITOR_DEBUG
 
-#ifdef _USE_MODELESS_ATTRIBUTEDITOR
+#ifdef USE_MODELESS_ATTRIBUTEDITOR
 static QList<AttributeEditor*> editors;
 #endif
 
@@ -36,7 +36,7 @@ AttributeEditor::AttributeEditor(VInfo_ptr info, QString type, QWidget* parent)
     setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
 
-#ifdef _USE_MODELESS_ATTRIBUTEDITOR
+#ifdef USE_MODELESS_ATTRIBUTEDITOR
     setModal(false);
 #endif
 
@@ -57,11 +57,11 @@ AttributeEditor::AttributeEditor(VInfo_ptr info, QString type, QWidget* parent)
 }
 
 AttributeEditor::~AttributeEditor() {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
     detachInfo();
-#ifdef _USE_MODELESS_ATTRIBUTEDITOR
+#ifdef USE_MODELESS_ATTRIBUTEDITOR
     editors.removeOne(this);
 #endif
 }
@@ -73,7 +73,7 @@ void AttributeEditor::edit(VInfo_ptr info, QWidget* /*parent*/) {
     auto aType = a->type();
     Q_ASSERT(aType);
 
-#ifdef _USE_MODELESS_ATTRIBUTEDITOR
+#ifdef USE_MODELESS_ATTRIBUTEDITOR
     Q_FOREACH (AttributeEditor* e, editors) {
         if ((e->info_ && info) && *(e->info_.get()) == *(info.get())) {
             e->raise();
@@ -90,7 +90,7 @@ void AttributeEditor::edit(VInfo_ptr info, QWidget* /*parent*/) {
 
     // The edtior will be automatically deleted on close (Qt::WA_DeleteOnClose is set)
     if (AttributeEditor* e = AttributeEditorFactory::create(typeStr, info, nullptr)) {
-#ifdef _USE_MODELESS_ATTRIBUTEDITOR
+#ifdef USE_MODELESS_ATTRIBUTEDITOR
         editors << e;
         e->show();
 #else
@@ -110,7 +110,7 @@ void AttributeEditor::accept() {
 }
 
 void AttributeEditor::attachInfo() {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -125,21 +125,21 @@ void AttributeEditor::attachInfo() {
 }
 
 void AttributeEditor::detachInfo() {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
     if (info_) {
         if (info_->server()) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
             UiLog().dbg() << " remove NodeObserver " << this;
 #endif
             info_->server()->removeNodeObserver(this);
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
             UiLog().dbg() << " remove ServerObserver " << this;
 #endif
             info_->server()->removeServerObserver(this);
         }
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
         UiLog().dbg() << " remove InfoObserver";
 #endif
         info_->removeObserver(this);
@@ -172,7 +172,7 @@ void AttributeEditor::setSaveStatus(bool st) {
 }
 
 void AttributeEditor::setSuspended(bool st) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
     UiLog().dbg() << " status=" << st;
 #endif
@@ -190,7 +190,7 @@ void AttributeEditor::setSuspended(bool st) {
 }
 
 void AttributeEditor::notifyDataLost(VInfo* info) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
     if (info_ && info_.get() == info) {
@@ -204,13 +204,13 @@ void AttributeEditor::notifyDataLost(VInfo* info) {
 void AttributeEditor::notifyBeginNodeChange(const VNode* vn,
                                             const std::vector<ecf::Aspect::Type>& aspect,
                                             const VNodeChange&) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG
 #endif
     if (info_ && info_->node() && info_->node() == vn) {
         bool attrNumCh = (std::find(aspect.begin(), aspect.end(), ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
         if (attrNumCh) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
             UiLog().dbg() << " ADD_REMOVE_ATTR";
 #endif
             // try to regain the data
@@ -218,7 +218,7 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn,
 
             // If the attribute is not available dataLost() was already called.
             if (!info_ || !info_->hasData()) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
                 UiLog().dbg() << " attribute does not exist";
 #endif
                 return;
@@ -230,7 +230,7 @@ void AttributeEditor::notifyBeginNodeChange(const VNode* vn,
 #if 0
             if(1)
             {
-    #ifdef _UI_ATTRIBUTEDITOR_DEBUG
+    #ifdef UI_ATTRIBUTEDITOR_DEBUG
                 UiLog().dbg() << " attribute does not exist";
     #endif
                 detachInfo();
@@ -253,7 +253,7 @@ void AttributeEditor::notifyDefsChanged(ServerHandler* server, const std::vector
 }
 
 void AttributeEditor::notifyServerDelete(ServerHandler* server) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG_S(server)
 #endif
     if (info_ && info_->server() == server) {
@@ -267,7 +267,7 @@ void AttributeEditor::notifyServerDelete(ServerHandler* server) {
 
 // This must be called at the beginning of a reset
 void AttributeEditor::notifyBeginServerClear(ServerHandler* server) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG_S(server)
 #endif
 
@@ -288,7 +288,7 @@ void AttributeEditor::notifyBeginServerClear(ServerHandler* server) {
 
 // This must be called at the end of a reset
 void AttributeEditor::notifyEndServerScan(ServerHandler* server) {
-#ifdef _UI_ATTRIBUTEDITOR_DEBUG
+#ifdef UI_ATTRIBUTEDITOR_DEBUG
     UI_FUNCTION_LOG_S(server)
 #endif
 

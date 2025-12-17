@@ -10,6 +10,7 @@
 
 #include "ecflow/core/Host.hpp"
 
+#include <array>
 #include <cassert>
 #include <stdexcept>
 #include <unistd.h> // for gethostname
@@ -35,9 +36,9 @@ Host::Host(const std::string& host) : the_host_name_(host) {
 void Host::get_host_name() {
     static std::string the_host_name;
     if (the_host_name.empty()) {
-        char hostNameArray[255];
-        if (gethostname(hostNameArray, 255) != -1) {
-            the_host_name = string(hostNameArray);
+        std::array<char, 255> hostNameArray;
+        if (gethostname(hostNameArray.data(), hostNameArray.size()) != -1) {
+            the_host_name = hostNameArray.data();
         }
         else {
             throw std::runtime_error("Host::Host() failed, could not get host name?\n");

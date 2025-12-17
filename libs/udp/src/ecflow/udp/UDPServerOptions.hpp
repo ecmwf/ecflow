@@ -24,7 +24,7 @@ class InvalidCLIOption : public std::logic_error {
 public:
     explicit InvalidCLIOption(const std::string& error) : logic_error(error) {}
     InvalidCLIOption(const InvalidCLIOption&) = default;
-    virtual ~InvalidCLIOption();
+    ~InvalidCLIOption() override;
 };
 
 /**
@@ -32,7 +32,7 @@ public:
  */
 class UDPServerOptions {
 public:
-    UDPServerOptions(int argc, const char* argv[]);
+    UDPServerOptions(const std::vector<std::string>& argv);
 
     ~UDPServerOptions() = default;
 

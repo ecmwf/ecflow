@@ -8,6 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <vector>
+
 #include <boost/test/unit_test.hpp>
 
 #include "InvokeServer.hpp"
@@ -159,9 +161,8 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
     {
         theClient.taskPath(suite1_family1_a);
         {
-            char* argv[] = {
-                const_cast<char*>("ClientInvoker"), const_cast<char*>("--meter=myMeter"), const_cast<char*>("100")};
-            BOOST_REQUIRE_MESSAGE(theClient.invoke(3, argv) == 0, " should return 0\n" << theClient.errorMsg());
+            std::vector<std::string> args = {"ClientInvoker", "--meter=myMeter", "100"};
+            BOOST_REQUIRE_MESSAGE(theClient.invoke(args) == 0, " should return 0\n" << theClient.errorMsg());
             BOOST_REQUIRE_MESSAGE(theClient.forceDependencyEval() == 0,
                                   CtsApi::forceDependencyEval() << " failed should return 0\n"
                                                                 << theClient.errorMsg());

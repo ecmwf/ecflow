@@ -46,9 +46,6 @@ public:
 
     // Disable default construction
     Child() = delete;
-    // Disable copy (and move) semantics
-    Child(const Child&)                  = delete;
-    const Child& operator=(const Child&) = delete;
 
     static std::string to_string(ZombieType);
     static bool valid_zombie_type(const std::string&);

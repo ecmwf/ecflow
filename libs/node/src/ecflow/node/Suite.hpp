@@ -22,14 +22,16 @@ class CalendarUpdateParams;
 
 class Suite final : public NodeContainer {
 public:
-    explicit Suite(const std::string& name, bool check = true) : NodeContainer(name, check) {}
     Suite() = default;
+
+    explicit Suite(const std::string& name, bool check = true) : NodeContainer(name, check) {}
 
     Suite(const Suite&);
     Suite& operator=(const Suite&);
-    node_ptr clone() const override;
 
     ~Suite() override;
+
+    node_ptr clone() const override;
 
     static suite_ptr create(const std::string& name, bool check = true);
     static suite_ptr create_me(const std::string& name); // python api, to pick correct init function
@@ -136,9 +138,14 @@ private:
 class SuiteGenVariables {
 public:
     explicit SuiteGenVariables(const Suite*);
+
     // Disable copy (and move) semantics
-    SuiteGenVariables(const SuiteGenVariables&)                  = delete;
-    const SuiteGenVariables& operator=(const SuiteGenVariables&) = delete;
+    SuiteGenVariables(const SuiteGenVariables&)            = delete;
+    SuiteGenVariables& operator=(const SuiteGenVariables&) = delete;
+    SuiteGenVariables(SuiteGenVariables&&)                 = delete;
+    SuiteGenVariables& operator=(SuiteGenVariables&&)      = delete;
+
+    ~SuiteGenVariables() = default;
 
     void force_update() { force_update_ = true; }
     void update_generated_variables() const;

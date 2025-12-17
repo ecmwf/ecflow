@@ -18,9 +18,7 @@
 // ===========================================================================
 class GlossaryDoc {
 public:
-    GlossaryDoc()                              = delete;
-    GlossaryDoc(const GlossaryDoc&)            = delete;
-    GlossaryDoc& operator=(const GlossaryDoc&) = delete;
+    GlossaryDoc() = delete;
 
     static const char* list();
 };

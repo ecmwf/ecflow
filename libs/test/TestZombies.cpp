@@ -123,7 +123,7 @@ static bool waitForTaskStates(WaitType num_of_tasks, NState::State state1, NStat
         }
     }
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
                               "waitForTaskStates:*error* sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());
@@ -198,7 +198,7 @@ static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait) {
     }
 
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0,
                               "zombieGet failed should return 0\n"
                                   << TestFixture::client().errorMsg());
@@ -264,7 +264,7 @@ static void wait_for_zombies_of_type(Child::ZombieType zt, int no_of_tasks, int 
 
     std::vector<Zombie> zombies;
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0,
                               "*error* zombieGet failed should return 0\n"
                                   << TestFixture::client().errorMsg());
@@ -346,7 +346,7 @@ static bool wait_for_zombie_termination(int max_time_to_wait) {
     }
 
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         TestFixture::client().zombieGet();
         std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
         if (zombies.empty()) {
@@ -390,7 +390,7 @@ static void wait_for_zombies_child_cmd(WaitType wait_type,
 
     bool child_type_found = false;
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         TestFixture::client().zombieGet();
         std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
         if (ecf_debug_enabled) {
@@ -457,7 +457,7 @@ static void wait_for_no_zombies(int max_time_to_wait) {
     }
 
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         TestFixture::client().zombieGet();
         std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
         if (ecf_debug_enabled) {
@@ -1096,7 +1096,7 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait) {
         std::cout << "\n   wait_for_killed_zombies\n";
     }
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         int killed = 0;
         TestFixture::client().zombieGet();
         std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
@@ -1152,7 +1152,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_kill) {
         // have got to the complete, before the process is killed.
         // Once the complete is fobed it terminate the process.
         AssertTimer assertTimer(timeout, false); // Bomb out after n seconds, fall back if test fail
-        while (1) {
+        while (true) {
             int completed = 0;
             int aborted   = 0;
             TestFixture::client().zombieGet();
@@ -1183,7 +1183,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_kill) {
         bool task_became_blocked = false;
         // wait for process to be die
         AssertTimer assertTimer(timeout, false); // Bomb out after n seconds, fall back if test fail
-        while (1) {
+        while (true) {
             TestFixture::client().zombieGet();
             std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
             for (const Zombie& z : zombies) {

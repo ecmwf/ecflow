@@ -24,6 +24,10 @@ public:
     // Disable copy (and move) semantics
     TaskScriptGenerator(const TaskScriptGenerator&)                  = delete;
     const TaskScriptGenerator& operator=(const TaskScriptGenerator&) = delete;
+    TaskScriptGenerator(TaskScriptGenerator&&)                       = delete;
+    TaskScriptGenerator& operator=(TaskScriptGenerator&&)            = delete;
+
+    ~TaskScriptGenerator() = default;
 
     void generate(const std::map<std::string, std::string>& override);
 

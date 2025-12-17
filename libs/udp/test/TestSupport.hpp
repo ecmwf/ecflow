@@ -47,8 +47,11 @@ public:
         server_ = std::move(SERVER::launch(host_, port_, std::forward<Args>(args)...));
         ECF_TEST_DBG(<< "   MOCK: " << SERVER::designation << " has been started!");
     }
-    BaseMockServer(const BaseMockServer&) = delete;
-    BaseMockServer(BaseMockServer&&)      = delete;
+
+    BaseMockServer(const BaseMockServer&)            = delete;
+    BaseMockServer& operator=(const BaseMockServer&) = delete;
+    BaseMockServer(BaseMockServer&&)                 = delete;
+    BaseMockServer& operator=(BaseMockServer&&)      = delete;
 
     ~BaseMockServer() {
         server_.terminate();
@@ -153,7 +156,7 @@ public:
 
     static void cleanup(const hostname_t& host, port_t port) {
         // Clean up temporary files created by the server instance
-        std::string temporaries[]{host + '.' + std::to_string(port) + ".ecf.check",
+        std::array temporaries = {host + '.' + std::to_string(port) + ".ecf.check",
                                   host + '.' + std::to_string(port) + ".ecf.check.b",
                                   host + '.' + std::to_string(port) + ".ecf.log"};
         for (const auto& t : temporaries) {

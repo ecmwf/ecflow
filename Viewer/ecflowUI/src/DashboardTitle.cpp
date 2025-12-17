@@ -22,7 +22,7 @@
 
 int DashboardTitle::lighter_ = 150;
 
-// #define _UI_DASHBOARDTITLE_DEBUG
+// #define UI_DASHBOARDTITLE_DEBUG
 
 DashboardTitle::DashboardTitle(ServerFilter* filter, Dashboard* parent)
     : QObject(parent),
@@ -202,11 +202,11 @@ void DashboardTitle::updateTitle() {
         bool noText = false;
 
         for (int i = 0; i < texts.count(); i++) {
-#ifdef _UI_DASHBOARDTITLE_DEBUG
+#ifdef UI_DASHBOARDTITLE_DEBUG
             UiLog().dbg() << i << texts[i] << dw << fm.width(texts[0]);
 #endif
             QString txt = fm.elidedText(texts[i], Qt::ElideRight, dw);
-#ifdef _UI_DASHBOARDTITLE_DEBUG
+#ifdef UI_DASHBOARDTITLE_DEBUG
             UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
             QString ellips(QChar(0x2026)); // horizontal ellipsis
@@ -215,20 +215,20 @@ void DashboardTitle::updateTitle() {
                 txt = texts[i].left(2);
                 txt = fm.elidedText(txt, Qt::ElideRight, dw);
             }
-#ifdef _UI_DASHBOARDTITLE_DEBUG
+#ifdef UI_DASHBOARDTITLE_DEBUG
             UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
             if (txt.startsWith(ellips)) {
                 txt = texts[i].left(1);
                 txt = fm.elidedText(txt, Qt::ElideRight, dw);
             }
-#ifdef _UI_DASHBOARDTITLE_DEBUG
+#ifdef UI_DASHBOARDTITLE_DEBUG
             UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
             if (txt.isEmpty()) {
                 txt = texts[i].left(1);
             }
-#ifdef _UI_DASHBOARDTITLE_DEBUG
+#ifdef UI_DASHBOARDTITLE_DEBUG
             UiLog().dbg() << "  " << txt << fm.width(txt);
 #endif
             if (ViewerUtil::textWidth(fm, txt) > dw) {
@@ -238,7 +238,7 @@ void DashboardTitle::updateTitle() {
             else {
                 texts[i] = txt;
             }
-#ifdef _UI_DASHBOARDTITLE_DEBUG
+#ifdef UI_DASHBOARDTITLE_DEBUG
             UiLog().dbg() << "  " << texts[i] << fm.width(texts[i]);
 #endif
             textRects << QRect(xp, yp, dw, fm.height());

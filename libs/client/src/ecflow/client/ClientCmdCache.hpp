@@ -16,9 +16,12 @@
 class ClientCmdCache {
 public:
     ClientCmdCache() = default;
+
     // Disable copy (and move) semantics
     ClientCmdCache(const ClientCmdCache&)                  = delete;
     const ClientCmdCache& operator=(const ClientCmdCache&) = delete;
+    ClientCmdCache(ClientCmdCache&&)                       = delete;
+    ClientCmdCache& operator=(ClientCmdCache&&)            = delete;
 
     ~ClientCmdCache() = default;
 

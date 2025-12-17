@@ -62,7 +62,7 @@ static void create_defs(Defs& theDefs, const std::string& suite_name) {
 
 static bool wait_for_state(std::vector<std::pair<std::string, NState::State>>& path_state_vec, int max_time_to_wait) {
     AssertTimer assertTimer(max_time_to_wait, false); // Bomb out after n seconds, fall back if test fail
-    while (1) {
+    while (true) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());

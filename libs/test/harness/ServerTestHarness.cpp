@@ -38,9 +38,6 @@ using namespace ecf;
 // #define DEBUG_TEST_HARNESS 1
 // #define DEBUG_DIFF 1
 
-ServerTestHarness::ServerTestHarness() {
-}
-
 void ServerTestHarness::run(Defs& theClientDefs,
                             const std::string& defs_filename,
                             const std::map<std::string, std::string>& customTaskSmsMap,

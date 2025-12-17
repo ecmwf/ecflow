@@ -311,7 +311,7 @@ std::string to_python_string(const AvisoAttr& aviso) {
     s += ", polling=";
     s += aviso.polling();
     s += ", revision=";
-    s += aviso.revision();
+    s += std::to_string(aviso.revision());
     s += ", auth=";
     s += aviso.auth();
     s += ", reason=";

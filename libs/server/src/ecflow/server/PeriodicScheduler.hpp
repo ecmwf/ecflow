@@ -25,9 +25,13 @@ namespace ecf {
 class Timer {
 public:
     explicit Timer(boost::asio::io_context& io) : io_{io}, timer_{io_, std::chrono::seconds(0)} {}
-    Timer(const Timer&) = delete;
 
+    Timer(const Timer&)            = delete;
     Timer& operator=(const Timer&) = delete;
+    Timer(Timer&&)                 = delete;
+    Timer& operator=(Timer&&)      = delete;
+
+    ~Timer() = default;
 
     void cancel() { timer_.cancel(); }
 
@@ -73,7 +77,6 @@ public:
     using duration_t = clock_t::duration;
 
 public:
-    PeriodicScheduler(const PeriodicScheduler&) = delete;
     PeriodicScheduler(boost::asio::io_context& io, std::chrono::seconds interval, TASK& activity)
         : timer_(io),
           last_execution_(),
@@ -83,9 +86,12 @@ public:
           running_(false),
           activity_(activity) {}
 
-    ~PeriodicScheduler() = default;
-
+    PeriodicScheduler(const PeriodicScheduler&)            = delete;
     PeriodicScheduler& operator=(const PeriodicScheduler&) = delete;
+    PeriodicScheduler(PeriodicScheduler&&)                 = delete;
+    PeriodicScheduler& operator=(PeriodicScheduler&&)      = delete;
+
+    ~PeriodicScheduler() = default;
 
     void start();
     void stop();

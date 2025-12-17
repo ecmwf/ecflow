@@ -62,16 +62,13 @@ Repeat::Repeat(const Repeat& rhs) {
     }
 }
 
-Repeat& Repeat::operator=(const Repeat& rhs) {
-    type_.reset(nullptr);
-    if (rhs.type_) {
-        type_.reset(rhs.type_->clone());
-    }
-    return *this;
+Repeat::Repeat(Repeat&& rhs) : type_(std::move(rhs.type_)) {
 }
 
-Repeat& Repeat::operator=(Repeat&& rhs) {
-    type_ = std::move(rhs.type_); // since rhs.type_ is a unique_ptr no need to set rhs.type_ to NULL
+Repeat& Repeat::operator=(Repeat rhs) {
+    using std::swap;
+    swap(this->type_, rhs.type_);
+
     return *this;
 }
 

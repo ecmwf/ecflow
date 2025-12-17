@@ -204,10 +204,6 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
 #endif
 }
 
-ServerOptions::ServerOptions(int argc, char* argv[], ServerEnvironment* env)
-    : ServerOptions(CommandLine(argc, argv), env) {
-}
-
 bool ServerOptions::help_option() const {
     return vm_.count("help");
 }

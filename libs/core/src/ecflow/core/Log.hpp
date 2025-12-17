@@ -55,9 +55,15 @@ public:
     static void destroy();
     static Log* instance() { return instance_; }
 
+private:
+    explicit Log(const std::string& fileName);
+
+public:
     // Disable copy (and move) semantics
-    Log(const Log&)                  = delete;
-    const Log& operator=(const Log&) = delete;
+    Log(const Log&)            = delete;
+    Log& operator=(const Log&) = delete;
+    Log(Log&&)                 = delete;
+    Log& operator=(Log&&)      = delete;
 
     /// If file is closed will open it
     /// Outputs t the file a message of type XXX:[HH:MM:SS D.M.YYYY] message
@@ -118,7 +124,6 @@ private:
     void create_logimpl();
 
 private:
-    explicit Log(const std::string& fileName);
     static Log* instance_;
 
     std::unique_ptr<LogImpl> logImpl_;

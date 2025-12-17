@@ -20,7 +20,7 @@
 #define STRINGIFY(x) #x
 
 template <typename T>
-inline const char* typeName(void) {
+inline const char* typeName() {
     return "unknown";
 }
 

@@ -320,10 +320,6 @@ int ClientInvoker::get_cmd_from_args(const CommandLine& cl, Cmd_ptr& cts_cmd) co
     return 1;
 }
 
-int ClientInvoker::invoke(int argc, char* argv[]) const {
-    return invoke(CommandLine(argc, argv));
-}
-
 int ClientInvoker::invoke(const CommandLine& cl) const {
     // Enable logging of request, and allow logging of round trip time.
     // RequestLogger must be placed *before* RoundTripRecorder.
@@ -361,9 +357,8 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
 }
 
 int ClientInvoker::invoke(const std::string& arg) const {
-    int argc     = 2;
-    char* argv[] = {const_cast<char*>("ClientInvoker"), const_cast<char*>(arg.c_str())};
-    return invoke(argc, argv);
+    std::vector<std::string> args = {"ClientInvoker", arg};
+    return invoke(args);
 }
 
 int ClientInvoker::invoke(const std::vector<std::string>& args) const {

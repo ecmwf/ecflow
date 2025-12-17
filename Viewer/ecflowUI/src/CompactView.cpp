@@ -26,7 +26,7 @@
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
-// #define _UI_COMPACTVIEW_DEBUG
+// #define UI_COMPACTVIEW_DEBUG
 
 CompactView::CompactView(TreeNodeModel* model, QWidget* parent) : AbstractNodeView(model, parent) {
     // This is needed for making the context menu work
@@ -120,12 +120,12 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
                 widest = w;
             }
         }
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
         UiLog().dbg() << "  item=" << currentIndex.data().toString() << " w=" << w;
 #endif
     }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     if (parentId >= 0) {
         UiLog().dbg() << "layout parent=" << viewItems_[parentId].index.data().toString() << " widest child=" << widest;
     }
@@ -174,7 +174,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
 
             item->expanded = true;
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
             UiLog().dbg() << "  before " << item->index.data().toString() << " total=" << item->total;
 #endif
             // Add the children to the layout
@@ -182,7 +182,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
 
             item = &viewItems_[last];
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
             UiLog().dbg() << "  after " << item->index.data().toString() << " total=" << item->total;
 #endif
             children += item->total;
@@ -197,7 +197,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
         return; // nothing changed
     }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << " update parent total";
 #endif
 
@@ -205,7 +205,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding, bool afterIsUnin
     while (pp > -1) {
         viewItems_[pp].total += count;
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
         UiLog().dbg() << "  parent=" << viewItems_[pp].index.data().toString() << "  total=" << viewItems_[pp].total;
 #endif
 
@@ -229,7 +229,7 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
         }
     }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactView::paint -->";
     // UiLog().dbg() << "sizeof(TreeNodeViewItem)=" << sizeof(TreeNodeViewItem);
     // UiLog().dbg() << "region=" << region;
@@ -239,7 +239,7 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
 
     // The first visible item at the top of the viewport
     int firstVisible = firstVisibleItem(firstVisibleOffset);
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "firstVisible " << firstVisible;
 #endif
 
@@ -247,7 +247,7 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
         return;
     }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "scrollX" << horizontalScrollBar()->value() << " " << viewport()->width();
 #endif
 
@@ -274,7 +274,7 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
     // Iterate through the rectangles in the region
     for (auto rect : rects) {
         const QRect area = (multipleRects ? QRect(0, rect.y(), viewportWidth, rect.height()) : rect);
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
         UiLog().dbg() << " area=" << area;
 #endif
 
@@ -306,7 +306,7 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
             int itemHeight = 0;
             rowProperties(i, itemHeight, itemsInRow, indentVec);
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
             UiLog().dbg() << "row: " << i << " " << itemHeight << " " << itemsInRow;
 #endif
             // Try to find the first item int the current rect
@@ -316,7 +316,7 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
             y += itemHeight;
         }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
         UiLog().dbg() << "y: " << y << " " << area.bottom();
 #endif
 
@@ -326,14 +326,14 @@ void CompactView::paint(QPainter* painter, const QRegion& region) {
                 // Draw a whole row. It will update y,itemsInRow and indentVec!!
                 drawRow(painter, i, xOffset, y, itemsInRow, indentVec);
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
                 UiLog().dbg() << " row rendered - item=" << i << " y=" << y << " itemsInRow=" << itemsInRow;
 #endif
             }
             else {
                 int rh = rowHeight(i, 1, itemsInRow);
                 y += rh;
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
                 UiLog().dbg() << " row skipped  - item=" << i << " y=" << y << " itemsInRow=" << itemsInRow;
 #endif
             }
@@ -369,7 +369,7 @@ void CompactView::drawRow(QPainter* painter,
     // We iterate through the items in the row
     for (int i = start; i < itemsCount && !leaf; ++i) {
         TreeNodeViewItem* item = &(viewItems_[i]);
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
         UiLog().dbg() << "  item=" << i << " " << item->index.data().toString();
 #endif
         leaf = (item->total == 0);
@@ -408,13 +408,6 @@ void CompactView::drawRow(QPainter* painter,
                     opt.rect.moveTop(yp + (rh - item->height) / 2);
                 }
             }
-
-            // QRect vr=visualRect(item->index);
-            // painter->fillRect(vr,QColor(120,120,120,120));
-
-            // #ifdef _UI_COMPACTVIEW_DEBUG
-            //           UiLog().dbg() << "  optRect=" << opt.rect << " visRect=" << vr;
-            // #endif
 
             // Draw the item with the delegate
             QSize paintedSize;
@@ -505,7 +498,7 @@ void CompactView::drawRow(QPainter* painter,
                 int lineX2 = item->x - connectorGap_;
                 int lineX  = (pt->right() + item->x) / 2;
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
                 UiLog().dbg() << "  lineX=" << lineX << " " << item->x << " " << connectorPos(item, pt);
 #endif
                 UI_ASSERT(lineX == connectorPos(item, pt),
@@ -761,7 +754,7 @@ int CompactView::itemRow(int item) const {
 
 int CompactView::firstVisibleItem(int& offset) const {
     const int value = verticalScrollBar()->value();
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::firstVisibleItem --> value=" << value;
 #endif
 
@@ -778,7 +771,7 @@ int CompactView::firstVisibleItem(int& offset) const {
         const std::size_t itemsCount = viewItems_.size();
         for (std::size_t i = 0; i < itemsCount; i += itemsInRow) {
             if (cnt == value) {
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
                 UiLog().dbg() << " i=" << i << " itemsInRow=" << itemsInRow;
 #endif
                 return i;
@@ -802,13 +795,13 @@ void CompactView::updateRowCount() {
         }
     }
 
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::updateRowCount --> " << rowCount_;
 #endif
 }
 
 void CompactView::updateScrollBars() {
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "CompactNodeView::updateScrollBars -->";
 #endif
 
@@ -838,7 +831,7 @@ void CompactView::updateScrollBars() {
         }
         itemsInViewport++;
     }
-#ifdef _UI_COMPACTVIEW_DEBUG
+#ifdef UI_COMPACTVIEW_DEBUG
     UiLog().dbg() << "  itemsCount=" << itemsCount << " rowCount=" << rowCount_;
     UiLog().dbg() << "  itemsInViewport " << itemsInViewport;
 #endif

@@ -25,10 +25,6 @@ VConfigLoader::VConfigLoader(const std::string& name) {
     makers->insert(Map::value_type(name, this));
 }
 
-VConfigLoader::~VConfigLoader() {
-    // Not called
-}
-
 bool VConfigLoader::process(const std::string& name, VProperty* prop) {
     Map::size_type entries = makers->count(name);
     auto it                = makers->find(name);

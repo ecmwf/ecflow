@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_sanitizer_use_of_out_of_scope_stack_memory) {
         return;
     }
 
-    int* pointer = NULL;
+    int* pointer = nullptr;
     if (bool_returning_function()) {
         int value = integer_returning_function();
         pointer   = &value;

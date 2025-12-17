@@ -27,9 +27,6 @@ class Version {
 public:
     // Disable default construction
     Version() = delete;
-    // Disable copy (and move) semantics
-    Version(const Version&)                  = delete;
-    const Version& operator=(const Version&) = delete;
 
     static std::string major();
     static std::string minor();

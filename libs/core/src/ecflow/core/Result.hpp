@@ -28,9 +28,12 @@ public:
     using value_t = V;
     using error_t = E;
 
-    Result()              = delete;
-    Result(const Result&) = default;
-    Result(Result&&)      = default;
+    Result() = delete;
+
+    Result(const Result&)            = default;
+    Result& operator=(const Result&) = default;
+    Result(Result&&)                 = default;
+    Result& operator=(Result&&)      = default;
 
 private:
     explicit Result(const V& value) : success_{true}, data_{value} {}
@@ -39,9 +42,6 @@ private:
 
 public:
     ~Result() = default;
-
-    Result& operator=(const Result&) = default;
-    Result& operator=(Result&&)      = default;
 
     static Result success(const V& value) { return Result(value); }
     static Result success(V&& value) { return Result(std::move(value)); }

@@ -47,17 +47,15 @@ public:
         : absNodePath_(absPath),
           cmd_(cmdToSpawn),
           cmd_type_(cmd_type),
-          have_status_(0),
-          pid_(pid),
-          status_(0) {}
+          pid_(pid) {}
 
-    std::string absNodePath_;  // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
-    std::string cmd_;          // the command that was spawned
-    System::CmdType cmd_type_; // Type of command
-    sig_atomic_t have_status_; // Nonzero if this process has stopped or terminated.  */
-    pid_t pid_;                // The process ID of this child.
-    int status_;               // The status of this child; 0 if running,
-                               // otherwise a status value from waitpid
+    std::string absNodePath_;     // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
+    std::string cmd_;             // the command that was spawned
+    System::CmdType cmd_type_;    // Type of command
+    sig_atomic_t have_status_{0}; // Nonzero if this process has stopped or terminated.  */
+    pid_t pid_;                   // The process ID of this child.
+    int status_{0};               // The status of this child; 0 if running,
+                                  // otherwise a status value from waitpid
 };
 std::vector<Process> processVec_;
 
@@ -136,22 +134,22 @@ int System::sys(System::CmdType cmd_type,
      |  The stdin, stdout and stderr are closed (or redirected to /dev/null)
      =  PID in case of success or 0 in case of errors.
      ************************************o*************************************/
-    pid_t child_pid;
-    if ((child_pid = fork()) == 0) { /* The child */
+    pid_t child_pid = fork();
 
-        int f;
+    if (child_pid == 0) { /* The child */
+
         close(2);
-        if ((f = open("/dev/null", O_WRONLY)) != 2) {
+        if (auto f = open("/dev/null", O_WRONLY); f != 2) {
             close(f);
         }
 
         close(1);
-        if ((f = open("/dev/null", O_WRONLY)) != 1) {
+        if (auto f = open("/dev/null", O_WRONLY); f != 1) {
             close(f);
         }
 
         close(0);
-        if ((f = open("/dev/null", O_RDONLY)) != 0) {
+        if (auto f = open("/dev/null", O_RDONLY); f != 0) {
             close(f);
         }
 

@@ -29,7 +29,7 @@
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
-// #define _UI_QABSTRACTNODEVIEW_DEBUG
+// #define UI_ABSTRACTNODEVIEW_DEBUG
 
 AbstractNodeView::AbstractNodeView(TreeNodeModel* model, QWidget* parent)
     : QAbstractScrollArea(parent),
@@ -131,7 +131,7 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event) {
     else if (event->button() == Qt::MiddleButton) {
         int viewItemIndex = itemAtCoordinate(event->pos());
         if (viewItemIndex != -1 && viewItems_[viewItemIndex].hasChildren) {
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
             UiLog().dbg() << " midbutton index=" << viewItemIndex
                           << " name=" << viewItems_[viewItemIndex].index.data().toString();
 #endif
@@ -163,7 +163,7 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event) {
 
     noSelectionOnMousePress_ = (command == QItemSelectionModel::NoUpdate || !index.isValid());
 
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << "TreeNodeViewBase::mousePressEvent --> current=" << currentIndex().data().toString()
                   << " pressed=" << pressedIndex_.data().toString() << " pos=" << pos
                   << " pressedRef=" << pressedRefIndex_.data().toString();
@@ -180,7 +180,7 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event) {
     // viewport.
     QPoint pressedRefPosition = visualRect(pressedRefIndex_).center();
 
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << " pressedRefPosition=" << pressedRefPosition << " visrect=" << visualRect(currentIndex())
                   << " center=" << visualRect(currentIndex()).center()
                   << " pressedRef=" << indexAt(pressedRefPosition).data().toString()
@@ -194,7 +194,7 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event) {
         autoScroll_ = autoScroll;
         QPoint p1   = pressedRefPosition;
         QRect rect(p1, QSize(pos.x() - p1.x(), pos.y() - p1.y()));
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
         UiLog().dbg() << " rect=" << rect << " p1=" << p1 << " p2=" << pos;
 #endif
 #if 0
@@ -230,7 +230,7 @@ void AbstractNodeView::mouseDoubleClickEvent(QMouseEvent* event) {
         int viewItemIndex = itemAtCoordinate(event->pos());
         if (viewItemIndex != -1) {
             if (viewItems_[viewItemIndex].hasChildren) {
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
                 UiLog().dbg() << "CompactNodeView::mousePressEvent " << viewItemIndex
                               << " name=" << viewItems_[viewItemIndex].index.data().toString();
 #endif
@@ -429,7 +429,7 @@ void AbstractNodeView::update(const QModelIndex& index) {
         // For example in dataChanged if we simply update all the cells without checking
         // it can be a major bottleneck to update rects that aren't even part of the viewport
         if (viewport()->rect().intersects(rect)) {
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
             UiLog().dbg() << "update -->" << index.data().toString() << " rect=" << rect;
 #endif
             updateViewport(rect);
@@ -994,7 +994,7 @@ void AbstractNodeView::setSelection(const QRect& rect,
         return;
     }
 
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << "TreeNodeViewBase::setSelection --> rect=" << rect;
 #endif
 
@@ -1008,7 +1008,7 @@ void AbstractNodeView::setSelection(const QRect& rect,
     QModelIndex topLeft     = indexAt(tl);
     QModelIndex bottomRight = indexAt(br);
 
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << " tl=" << tl << " " << topLeft.data().toString() << " br=" << br << " "
                   << bottomRight.data().toString();
 #endif
@@ -1058,7 +1058,7 @@ void AbstractNodeView::select(const QModelIndex& topIndex,
     QItemSelection selection;
     const int top = viewIndex(topIndex), bottom = viewIndex(bottomIndex);
 
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << "TreeNodeViewBase::select --> command=" << command;
     UiLog().dbg() << "top=" << top << " " << topIndex.data().toString() << " bottom=" << bottom << " "
                   << bottomIndex.data().toString();
@@ -1325,7 +1325,7 @@ void AbstractNodeView::selectionChanged(const QItemSelection& selected, const QI
         QRegion des = visualRegionForSelection(deselected);
         QRegion sel = visualRegionForSelection(selected);
 
-#ifdef _UI_QABSTRACTNODEVIEW_DEBUG
+#ifdef UI_ABSTRACTNODEVIEW_DEBUG
         UiLog().dbg() << "TreeNodeViewBase::selectionChanged -->";
         UiLog().dbg() << "  deselect=" << des.boundingRect() << " select=" << sel.boundingRect();
         QRegion un = des | sel;

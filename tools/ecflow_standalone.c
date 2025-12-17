@@ -74,7 +74,7 @@ ssh localhost $std -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # OK
 #  define FALSE 0
 #endif
 
-#define MAXLEN 1024                /* Maximum line length */
+const int32_t MAXLEN = 1024; /* Maximum line length */
 
 char *nameof(char *name) {
   char *s;
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
     infile = fname;
     close(fd);
 
-    if (!(input_fp = fopen(infile, "w"))) {
+    if (!(input_fp = fopen(infile, "w"))) { // NOLINT(bugprone-assignment-in-if-condition)
       perror("ecflow_standalone.c, temp file creation error");
       exit(1);
     } 
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
     }
   }
   else {
-     if( !(input_fp=fopen(infile,"r")) ) {
+     if( !(input_fp=fopen(infile,"r")) ) { // NOLINT(bugprone-assignment-in-if-condition)
         perror("STANDALONE-INPUT-FILE cannot open");
         exit(1);
      }
@@ -182,7 +182,7 @@ int main(int argc, char** argv)
   close(0);                         /* close standard in , in child */
 
   /* make sure infile exists and is readable */
-  if( !(input_fp=fopen(infile,"r")) ) {
+  if( !(input_fp=fopen(infile,"r")) ) { // NOLINT(bugprone-assignment-in-if-condition)
     perror("STANDALONE-INPUT-FILE-FOR-SHELL");
     exit(1);
   }

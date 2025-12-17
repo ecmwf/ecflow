@@ -43,9 +43,6 @@ public:
 
     // Disable default construction
     Ecf() = delete;
-    // Disable copy (and move) semantics
-    Ecf(const Ecf&)                  = delete;
-    const Ecf& operator=(const Ecf&) = delete;
 
     /// Increment and then return state change no
     static counter_t incr_state_change_no() {
@@ -120,9 +117,12 @@ private:
 class DebugEquality {
 public:
     DebugEquality() { Ecf::set_debug_equality(true); }
+
     // Disable copy (and move) semantics
     DebugEquality(const DebugEquality&)                  = delete;
     const DebugEquality& operator=(const DebugEquality&) = delete;
+    DebugEquality(DebugEquality&&)                       = delete;
+    DebugEquality& operator=(DebugEquality&&)            = delete;
 
     ~DebugEquality() {
         Ecf::set_debug_equality(false);

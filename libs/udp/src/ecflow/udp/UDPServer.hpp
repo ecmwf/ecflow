@@ -81,8 +81,13 @@ public:
         : io_{},
           server_endpoint_{boost::asio::ip::udp::v4(), port},
           connection_{handler, io_, server_endpoint_} {}
-    BaseUdpServer(const BaseUdpServer&) = delete;
-    BaseUdpServer(BaseUdpServer&&)      = delete;
+
+    BaseUdpServer(const BaseUdpServer&)            = delete;
+    BaseUdpServer& operator=(const BaseUdpServer&) = delete;
+    BaseUdpServer(BaseUdpServer&&)                 = delete;
+    BaseUdpServer& operator=(BaseUdpServer&&)      = delete;
+
+    ~BaseUdpServer() = default;
 
     void run() { io_.run(); }
 

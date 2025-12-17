@@ -10,13 +10,14 @@
 
 #include "OutputFileClient.hpp"
 
+#include <array>
 #include <cstring>
 
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
-// #define UI_OUTPUTFILECLIENT_DEBUG__
-// #define UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+// #define UI_OUTPUTFILECLIENT_DEBUG
+// #define UI_OUTPUTFILECLIENT_DETAILED_DEBUG
 
 OutputFileClient::OutputFileClient(const std::string& host, const std::string& portStr, QObject* parent)
     : OutputClient(host, portStr, parent) {
@@ -59,7 +60,7 @@ void OutputFileClient::slotConnected() {
 }
 
 void OutputFileClient::slotError(QAbstractSocket::SocketError err) {
-#ifdef UI_OUTPUTFILECLIENT_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DEBUG
     UiLog().dbg() << UI_FN_INFO << "err=" << soc_->errorString();
 #endif
 
@@ -103,7 +104,7 @@ void OutputFileClient::getFile(const std::string& name,
     soc_->abort();
     clearResult();
 
-#ifdef UI_OUTPUTFILECLIENT_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DEBUG
     UiLog().dbg() << UI_FN_INFO << "name=" << name << " deltaPos=" << deltaPos << " modTime=" << modTime
                   << " checksum=" << checkSum;
 #endif
@@ -115,7 +116,7 @@ void OutputFileClient::getFile(const std::string& name,
 
     // we need to know the version. When it finishes will call getFile again
     if (versionClient_->versionStatus() == OutputVersionClient::VersionNotFetched) {
-#ifdef UI_OUTPUTFILECLIENT_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DEBUG
         UiLog().dbg() << "OutputFileClient::getFile --> Try to get logserver version";
 #endif
         versionClient_->getVersion();
@@ -124,7 +125,7 @@ void OutputFileClient::getFile(const std::string& name,
 
     // only verson 2 can handle delta increments
     if (versionClient_->version() != 2) {
-#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
         UiLog().dbg() << "OutputFileClient::getFile --> deltaPos set to 0";
 #endif
         deltaPos_ = 0;
@@ -148,19 +149,18 @@ void OutputFileClient::getFile(const std::string& name,
 }
 
 void OutputFileClient::slotRead() {
-    const qint64 size = 64 * 1024;
-    char buf[size];
+    std::array<char, 64 * 1024 + 1> buffer;
     quint64 len = 0;
 
-    while ((len = soc_->read(buf, size)) > 0) {
+    while ((len = soc_->read(buffer.data(), buffer.size() - 1)) > 0) {
         // parse+remove "header" in "getf" and "delta" modes from the beginnig of the resulting data
         if (!readStarted_ && (reqType_ == GetFRequest || reqType_ == DeltaRequest)) {
             readStarted_ = true;
             // an error code was sent back
-            if (!parseResultHeader(buf, len)) {
+            if (!parseResultHeader(buffer.data(), len)) {
                 soc_->abort();
                 clearResult();
-#ifdef UI_OUTPUTFILECLIENT_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DEBUG
                 UiLog().dbg() << UI_FN_INFO << "error in parsing reult";
 #endif
                 Q_EMIT error("transfer failed");
@@ -169,7 +169,7 @@ void OutputFileClient::slotRead() {
         }
 
         std::string err;
-        if (!out_->write(buf, len, err)) {
+        if (!out_->write(buffer.data(), len, err)) {
             soc_->abort();
             Q_EMIT error("write failed");
             return;
@@ -229,7 +229,7 @@ bool OutputFileClient::parseResultHeader(char* buf, quint64& len) {
             out_->setSourceCheckSum(remoteCheckSum_);
             return true;
         }
-#ifdef UI_OUTPUTFILECLIENT_DETAILD_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
         UiLog().dbg() << UI_FN_INFO << "len=" << len << " buf=" << buf;
 #endif
         int pos1 = 0;
@@ -300,22 +300,21 @@ bool OutputFileClient::parseResultHeader(char* buf, quint64& len) {
 }
 
 bool OutputFileClient::getHeaderValue(char* buf, quint64 len, int pos1, int& pos2, std::string& val) {
-#ifdef UI_OUTPUTFILECLIENT_DETAILD_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
     UiLog().dbg() << UI_FN_INFO << "pos1=" << pos1 << " pos2=" << pos2;
 #endif
     val = std::string();
     if (pos1 == 0 || buf[pos1] == ':') {
-        const int dLenMax = 200;
-        char d[dLenMax];
+        std::array<char, 200> d;
         int dLen = 0;
         if (pos1 > 0) {
             pos1++;
         }
         pos2 = pos1;
-        for (quint64 i = pos1; i < len && dLen < dLenMax - 1; i++) {
+        for (quint64 i = pos1; i < len && dLen < d.size() - 1; i++) {
             if (buf[i] == ':') {
                 pos2 = i;
-#ifdef UI_OUTPUTFILECLIENT_DETAILD_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
                 UiLog().dbg() << " pos2=" << pos2;
 #endif
                 int dSize = pos2 - pos1;
@@ -323,8 +322,8 @@ bool OutputFileClient::getHeaderValue(char* buf, quint64 len, int pos1, int& pos
                     return true;
                 }
                 d[dLen] = '\0';
-                val     = std::string(d);
-#ifdef UI_OUTPUTFILECLIENT_DETAILD_DEBUG__
+                val     = std::string{d.data()};
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
                 UiLog().dbg() << " -1=" << d[dLen - 1] << " d=" << d << " dLen=" << dLen;
                 UiLog().dbg() << " val=" << val << " dLen=" << dLen;
 #endif
@@ -360,7 +359,7 @@ void OutputFileClient::setDir(VDir_ptr dir) {
 }
 
 void OutputFileClient::estimateExpectedSize() {
-#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
     UI_FN_DBG
 #endif
     if (!dir_ || deltaPos_ > 0) {
@@ -369,12 +368,9 @@ void OutputFileClient::estimateExpectedSize() {
     }
 
     for (int i = 0; i < dir_->count(); i++) {
-        // #ifdef _UI_OUTPUTFILECLIENT_DETAILED_DEBUG
-        //         UiLog().dbg() << " file: " << dir_->fullName(i);
-        // #endif
         if (dir_->fullName(i) == remoteFile_) {
             expected_ = dir_->items().at(i)->size_;
-#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
             UiLog().dbg() << " expected size=" << expected_;
 #endif
             return;
@@ -382,13 +378,13 @@ void OutputFileClient::estimateExpectedSize() {
     }
 
     expected_ = 0;
-#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
     UiLog().dbg() << " expected size=" << QString::number(expected_);
 #endif
 }
 
 void OutputFileClient::slotVersionFinished() {
-#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
     UI_FN_DBG
 #endif
     Q_ASSERT(versionClient_->versionStatus() != OutputVersionClient::VersionNotFetched);
@@ -396,7 +392,7 @@ void OutputFileClient::slotVersionFinished() {
 }
 
 void OutputFileClient::slotVersionError(QString /*errorText*/) {
-#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
     UiLog().dbg() << UI_FN_INFO << "errorText=" << errorText;
 #endif
     Q_ASSERT(versionClient_->versionStatus() != OutputVersionClient::VersionNotFetched);
@@ -440,18 +436,16 @@ void OutputVersionClient::slotError(QAbstractSocket::SocketError err) {
 }
 
 void OutputVersionClient::slotRead() {
-    const qint64 size = 64 * 1024;
-    char buf[size];
+    std::array<char, 64 * 1024 + 1> buffer;
     qint64 len = 0;
 
-    while ((len = soc_->read(buf, size)) > 0) {
-#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG__
+    while ((len = soc_->read(buffer.data(), buffer.size() - 1)) > 0) {
+#ifdef UI_OUTPUTFILECLIENT_DETAILED_DEBUG
         UiLog().dbg() << UI_FN_INFO << "buf=" << buf;
 #endif
 
-        std::string err;
         if (dataSize_ + len < maxDataSize_) {
-            memcpy(data_ + dataSize_, buf, len);
+            memcpy(data_ + dataSize_, buffer.data(), len);
             dataSize_ += len;
             data_[dataSize_] = '\0';
         }

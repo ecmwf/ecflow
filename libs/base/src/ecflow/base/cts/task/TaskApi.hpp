@@ -21,8 +21,7 @@
 
 class TaskApi {
 public:
-    TaskApi(const TaskApi&)                  = delete;
-    const TaskApi& operator=(const TaskApi&) = delete;
+    TaskApi() = delete;
 
     /// Used to construct arguments, for argc,argv
     static std::string init(const std::string& process_id);

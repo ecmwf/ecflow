@@ -32,9 +32,12 @@ class ServerEnvironment;
 class NodeTreeTraverser {
 public:
     NodeTreeTraverser(BaseServer* s, boost::asio::io_context& io, const ServerEnvironment& serverEnv);
+
     // Disable copy (and move) semantics
-    NodeTreeTraverser(const NodeTreeTraverser&)                  = delete;
-    const NodeTreeTraverser& operator=(const NodeTreeTraverser&) = delete;
+    NodeTreeTraverser(const NodeTreeTraverser&)            = delete;
+    NodeTreeTraverser& operator=(const NodeTreeTraverser&) = delete;
+    NodeTreeTraverser(NodeTreeTraverser&&)                 = delete;
+    NodeTreeTraverser& operator=(NodeTreeTraverser&&)      = delete;
 
     ~NodeTreeTraverser();
 

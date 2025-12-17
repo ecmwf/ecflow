@@ -26,9 +26,12 @@
 class WhiteListFile {
 public:
     WhiteListFile();
+
     // Disable copy (and move) semantics
     WhiteListFile(const WhiteListFile&)                  = delete;
     const WhiteListFile& operator=(const WhiteListFile&) = delete;
+    WhiteListFile(WhiteListFile&&)                       = delete;
+    WhiteListFile& operator=(WhiteListFile&&)            = delete;
 
     ~WhiteListFile();
 

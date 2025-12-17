@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <mutex>
 #include <stdexcept>
 #include <vector>
 
@@ -52,7 +53,7 @@ void Log::create_logimpl() {
 }
 
 bool Log::log(Log::LogType lt, const std::string& message) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     create_logimpl();
 
@@ -68,7 +69,7 @@ bool Log::log(Log::LogType lt, const std::string& message) {
 }
 
 bool Log::log_no_newline(Log::LogType lt, const std::string& message) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     create_logimpl();
 
@@ -84,7 +85,7 @@ bool Log::log_no_newline(Log::LogType lt, const std::string& message) {
 }
 
 bool Log::append(const std::string& message) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     create_logimpl();
 
@@ -100,20 +101,20 @@ bool Log::append(const std::string& message) {
 }
 
 void Log::cache_time_stamp() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     create_logimpl();
     logImpl_->create_time_stamp();
 }
 
 const std::string& Log::get_cached_time_stamp() const {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     return (logImpl_) ? logImpl_->get_cached_time_stamp() : Str::EMPTY();
 }
 
 void Log::flush() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     // will close ofstream and force data to be written to disk.
     // Forcing writing to physical medium can't be guaranteed though!
@@ -121,7 +122,7 @@ void Log::flush() {
 }
 
 void Log::flush_only() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     if (logImpl_) {
         logImpl_->flush();
@@ -129,7 +130,7 @@ void Log::flush_only() {
 }
 
 void Log::clear() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
     flush();
 
     // Open and truncate the file.
@@ -140,7 +141,7 @@ void Log::clear() {
 }
 
 void Log::new_path(const std::string& the_new_path) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     check_new_path(the_new_path);
 
@@ -180,7 +181,7 @@ void Log::check_new_path(const std::string& new_path) {
 }
 
 std::string Log::path() const {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     if (!fileName_.empty() && fileName_[0] == '/') {
         // Path is absolute return as is
@@ -193,7 +194,7 @@ std::string Log::path() const {
 }
 
 std::string Log::contents(int get_last_n_lines) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     if (get_last_n_lines == 0) {
         return string();
@@ -210,7 +211,7 @@ std::string Log::contents(int get_last_n_lines) {
 }
 
 std::string Log::handle_write_failure() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     std::string msg = logImpl_->log_open_error();
     if (msg.empty()) {

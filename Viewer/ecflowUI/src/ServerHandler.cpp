@@ -49,9 +49,9 @@
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;
 
-// #define __UI_SERVEROBSERVER_DEBUG
-// #define __UI_SERVERCOMOBSERVER_DEBUG
-#define __UI_SERVERUPDATE_DEBUG
+// #define UI_SERVEROBSERVER_DEBUG
+// #define UI_SERVERCOMOBSERVER_DEBUG
+#define UI_SERVERUPDATE_DEBUG
 
 ServerHandler::ServerHandler(const std::string& name,
                              const std::string& host,
@@ -403,7 +403,7 @@ int ServerHandler::secsTillNextRefresh() const {
 
 void ServerHandler::stopRefreshTimer() {
     refreshTimer_->stop();
-#ifdef __UI_SERVERUPDATE_DEBUG
+#ifdef UI_SERVERUPDATE_DEBUG
     UiLogS(this).dbg() << "ServerHandler::stopRefreshTimer -->";
 #endif
     broadcast(&ServerComObserver::notifyRefreshTimerStopped);
@@ -432,7 +432,7 @@ void ServerHandler::startRefreshTimer() {
         broadcast(&ServerComObserver::notifyRefreshTimerStarted);
     }
 
-#ifdef __UI_SERVERUPDATE_DEBUG
+#ifdef UI_SERVERUPDATE_DEBUG
     UiLogS(this).dbg() << " refreshTimer interval: " << refreshTimer_->interval();
 #endif
 }
@@ -469,7 +469,7 @@ void ServerHandler::updateRefreshTimer() {
     refreshTimer_->start();
     broadcast(&ServerComObserver::notifyRefreshTimerChanged);
 
-#ifdef __UI_SERVERUPDATE_DEBUG
+#ifdef UI_SERVERUPDATE_DEBUG
     UiLogS(this).dbg() << " refreshTimer interval: " << refreshTimer_->interval();
 #endif
 }
@@ -486,7 +486,7 @@ void ServerHandler::driftRefreshTimer() {
 
     // We increase the update frequency
     if (activity_ != LoadActivity && conf_->boolValue(VServerSettings::AdaptiveUpdate)) {
-#ifdef __UI_SERVERUPDATE_DEBUG
+#ifdef UI_SERVERUPDATE_DEBUG
         UiLogS(this).dbg() << "driftRefreshTimer -->";
 #endif
 
@@ -517,7 +517,7 @@ void ServerHandler::driftRefreshTimer() {
         broadcast(&ServerComObserver::notifyRefreshTimerChanged);
     }
 
-#ifdef __UI_SERVERUPDATE_DEBUG
+#ifdef UI_SERVERUPDATE_DEBUG
     UiLogS(this).dbg() << "driftRefreshTimer interval: " << refreshTimer_->interval();
 #endif
 }
@@ -961,27 +961,27 @@ void ServerHandler::addServerObserver(ServerObserver* obs) {
     auto it = std::find(serverObservers_.begin(), serverObservers_.end(), obs);
     if (it == serverObservers_.end()) {
         serverObservers_.push_back(obs);
-#ifdef __UI_SERVEROBSERVER_DEBUG
+#ifdef UI_SERVEROBSERVER_DEBUG
         UiLog(this).dbg() << "ServerHandler::addServerObserver -->  " << obs;
 #endif
     }
 }
 
 void ServerHandler::removeServerObserver(ServerObserver* obs) {
-#ifdef __UI_SERVEROBSERVER_DEBUG
+#ifdef UI_SERVEROBSERVER_DEBUG
     UI_FUNCTION_LOG_S(this)
 #endif
     auto it = std::find(serverObservers_.begin(), serverObservers_.end(), obs);
     if (it != serverObservers_.end()) {
         serverObservers_.erase(it);
-#ifdef __UI_SERVEROBSERVER_DEBUG
+#ifdef UI_SERVEROBSERVER_DEBUG
         UiLog(this).dbg() << " remove: " << obs;
 #endif
     }
 }
 
 void ServerHandler::broadcast(SoMethod proc) {
-#ifdef __UI_SERVEROBSERVER_DEBUG
+#ifdef UI_SERVEROBSERVER_DEBUG
     UI_FUNCTION_LOG_S(this)
 #endif
 
@@ -1022,7 +1022,7 @@ void ServerHandler::addServerComObserver(ServerComObserver* obs) {
     auto it = std::find(serverComObservers_.begin(), serverComObservers_.end(), obs);
     if (it == serverComObservers_.end()) {
         serverComObservers_.push_back(obs);
-#ifdef __UI_SERVERCOMOBSERVER_DEBUG
+#ifdef UI_SERVERCOMOBSERVER_DEBUG
         UiLog(this).dbg() << "ServerHandler::addServerComObserver -->  " << obs;
 #endif
     }
@@ -1032,7 +1032,7 @@ void ServerHandler::removeServerComObserver(ServerComObserver* obs) {
     auto it = std::find(serverComObservers_.begin(), serverComObservers_.end(), obs);
     if (it != serverComObservers_.end()) {
         serverComObservers_.erase(it);
-#ifdef __UI_SERVERCOMOBSERVER_DEBUG
+#ifdef UI_SERVERCOMOBSERVER_DEBUG
         UiLog(this).dbg() << "ServerHandler::removeServerComObserver --> " << obs;
 #endif
     }

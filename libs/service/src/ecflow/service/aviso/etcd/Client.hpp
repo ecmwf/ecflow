@@ -23,8 +23,10 @@ public:
     Client(const std::string& address);
     Client(const std::string& address, const std::string& auth_token);
 
-    Client(const Client&) = delete;
-    Client(Client&&)      = delete;
+    Client(const Client&)            = delete;
+    Client& operator=(const Client&) = delete;
+    Client(Client&&)                 = delete;
+    Client& operator=(Client&&)      = delete;
 
     ~Client();
 

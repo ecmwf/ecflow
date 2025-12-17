@@ -35,6 +35,14 @@ template <typename COMMAND>
 class DefaultCommand : public BasicCommand {
 public:
     void execute(ClientAPI& client) final { static_cast<COMMAND*>(this)->actually_execute(client); }
+
+private:
+    /* The private default ctor prevents incorrect instantiation of the DefaultCommand,
+     * while the friendship allows access the default ctor,  enforcing the CRTP pattern
+     * (i.e. COMMAND must be the derived class)
+     */
+    DefaultCommand() = default;
+    friend COMMAND;
 };
 
 /// The `command` to update an ecFlow meter (issued by an ecFlow user)

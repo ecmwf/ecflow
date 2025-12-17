@@ -596,6 +596,7 @@ ecbuild_add_library(
   PUBLIC_DEFINITIONS
     CMAKE
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+    $<$<VERSION_GREATER_EQUAL:${SELECTED_BOOST_VERSION},1.69.0>:BOOST_ASIO_NO_DEPRECATED>
 )
 target_clangformat(ecflow_all)
 

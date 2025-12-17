@@ -97,7 +97,13 @@ public:
     using value_t = long;
 
     CalendarDate() = delete;
+
     explicit CalendarDate(value_t value) : value_(value) {}
+
+    CalendarDate(const CalendarDate&)            = default;
+    CalendarDate& operator=(const CalendarDate&) = default;
+    CalendarDate(CalendarDate&&)                 = default;
+    CalendarDate& operator=(CalendarDate&&)      = default;
 
     value_t value() const { return value_; }
 

@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 #include <boost/test/unit_test.hpp>
 
@@ -40,11 +41,9 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     std::string port = Str::DEFAULT_PORT_NUMBER();
     for (int i = -10; i < 70; ++i) {
         string errorMsg;
-        string argument = "--ecfinterval=" + ecf::convert_to<std::string>(i);
-
-        int argc     = 2;
-        char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>(argument.c_str())};
-        ServerEnvironment serverEnv(argc, argv);
+        string argument               = "--ecfinterval=" + ecf::convert_to<std::string>(i);
+        std::vector<std::string> args = {"ServerEnvironment", argument};
+        ServerEnvironment serverEnv(args);
         bool valid = serverEnv.valid(errorMsg);
         if (i > 0 && i < 61) {
             BOOST_REQUIRE_MESSAGE(valid, "Server environment ecfinterval valid range is [1-60] " << errorMsg);
@@ -72,33 +71,31 @@ BOOST_AUTO_TEST_CASE(test_server_environment_port) {
     //  o Dynamic and/or Private Ports.                    49151 -65535\n\n";
     //  Please set in the range 1024-49151 via argument or \n";
     Host h;
-    int argc = 2;
     {
         std::string errorMsg;
-        char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=0")};
-        ServerEnvironment serverEnv(argc, argv);
+        std::vector<std::string> args = {"ServerEnvironment", "--port=0"};
+        ServerEnvironment serverEnv(args);
         BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
         fs::remove(h.ecf_log_file(serverEnv.the_port()));
     }
     {
         std::string errorMsg;
-        char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=1000")};
-        ServerEnvironment serverEnv(argc, argv);
+        std::vector<std::string> args = {"ServerEnvironment", "--port=1000"};
+        ServerEnvironment serverEnv(args);
         BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
         fs::remove(h.ecf_log_file(serverEnv.the_port()));
     }
     {
         std::string errorMsg;
-        char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=49151")};
-        ServerEnvironment serverEnv(argc, argv);
+        std::vector<std::string> args = {"ServerEnvironment", "--port=49151"};
+        ServerEnvironment serverEnv(args);
         BOOST_CHECK_MESSAGE(!serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
         fs::remove(h.ecf_log_file(serverEnv.the_port()));
     }
-
     {
         std::string errorMsg;
-        char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=3144")};
-        ServerEnvironment serverEnv(argc, argv);
+        std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+        ServerEnvironment serverEnv(args);
         BOOST_CHECK_MESSAGE(serverEnv.valid(errorMsg), " Server environment not valid " << errorMsg);
         BOOST_CHECK_MESSAGE(serverEnv.port() == 3144, "Expected 3144 but found " << serverEnv.port());
         fs::remove(h.ecf_log_file(serverEnv.the_port()));
@@ -110,9 +107,8 @@ BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
 
     // Regression test log file creation
 
-    int argc     = 2;
-    char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=3144")};
-    ServerEnvironment serverEnv(argc, argv);
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args);
 
     BOOST_CHECK_MESSAGE(Log::instance(), "Log singleton not created");
     BOOST_CHECK_MESSAGE(fs::exists(Log::instance()->path()), "Log file not created");
@@ -146,10 +142,8 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
 
     // Regression test to make sure the server environment variable don't get removed
 
-    int argc     = 1;
-    char* argv[] = {const_cast<char*>("ServerEnvironment")};
-
-    ServerEnvironment serverEnv(argc, argv, File::test_data("Server/server_environment.cfg", "Server"));
+    std::vector<std::string> args = {"ServerEnvironment"};
+    ServerEnvironment serverEnv(args, File::test_data("Server/server_environment.cfg", "Server"));
 
     std::vector<std::string> expected_variables = ServerEnvironment::expected_variables();
 
@@ -270,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
             Host host;
             std::string port = Str::DEFAULT_PORT_NUMBER();
             if (ecf::environment::has("ECF_PORT")) {
-                port = ecf::environment::has("ECF_PORT");
+                port = ecf::environment::get("ECF_PORT");
             }
             std::string expected = host.prefix_host_and_port(port, ecf::environment::ECF_PASSWD);
 
@@ -290,9 +284,8 @@ BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
 
     // Regression test to make sure the server environment variable don't get removed
 
-    int argc     = 2;
-    char* argv[] = {const_cast<char*>("ServerEnvironment"), const_cast<char*>("--port=3144")};
-    ServerEnvironment serverEnv(argc, argv);
+    std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
+    ServerEnvironment serverEnv(args);
 
     std::vector<std::string> expected_variables = ServerEnvironment::expected_variables();
 
@@ -335,13 +328,12 @@ BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
 BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
     ECF_NAME_THIS_TEST();
 
-    int argc     = 1;
-    char* argv[] = {const_cast<char*>("ServerEnvironment")};
+    std::vector<std::string> args = {"ServerEnvironment"};
     {
         auto* put = const_cast<char*>("ECF_TASK_THRESHOLD=9");
         BOOST_CHECK_MESSAGE(putenv(put) == 0, "putenv failed for " << put);
     }
-    ServerEnvironment serverEnv(argc, argv);
+    ServerEnvironment serverEnv(args);
     BOOST_CHECK_MESSAGE(JobProfiler::task_threshold() == 9,
                         "Expected task threshold of 9 but found " << JobProfiler::task_threshold());
 
@@ -357,7 +349,7 @@ BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
         // cout << "check -------> " << dodgy_thresholds[i] << endl;
         BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(dodgy_threshold.c_str())) == 0,
                             "putenv failed for " << dodgy_threshold);
-        BOOST_CHECK_THROW(ServerEnvironment serverEnv(argc, argv), std::runtime_error);
+        BOOST_CHECK_THROW(ServerEnvironment serverEnv(args), std::runtime_error);
     }
 
     unsetenv(const_cast<char*>(

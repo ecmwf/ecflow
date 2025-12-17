@@ -10,6 +10,7 @@
 
 #include "ecflow/node/EcfFile.hpp"
 
+#include <array>
 #include <cerrno>
 #include <memory>
 #include <sstream>
@@ -71,6 +72,10 @@ static void vector_to_string(const std::vector<std::string>& vec, std::string& s
 EcfFile::EcfFile() = default;
 
 EcfFile& EcfFile::operator=(const EcfFile& rhs) {
+    if (this == &rhs) {
+        return *this;
+    }
+
     /// This preserves the caches, used to avoid opening/stat of include file more than once.
     // assign in order or declaration
     node_               = rhs.node_;
@@ -668,9 +673,9 @@ bool EcfFile::do_popen(const std::string& the_cmd,
         errormsg += ss.str();
         return false;
     }
-    char line[LINE_MAX];
-    while (fgets(line, LINE_MAX, fp)) {
-        lines.emplace_back(line);
+    std::array<char, LINE_MAX> line;
+    while (fgets(line.data(), line.size(), fp)) {
+        lines.emplace_back(std::string{line.data()});
         // remove any trailing new lines
         std::string& the_line = lines.back();
         if (!the_line.empty() && the_line[the_line.size() - 1] == '\n') {

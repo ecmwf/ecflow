@@ -39,9 +39,12 @@ public:
     //    date          // 1 month
     //    cron          // 1 year
     //    repeat        // 1 year
-    Simulator();
+    Simulator() = default;
+
     Simulator(const Simulator&)            = delete;
     Simulator& operator=(const Simulator&) = delete;
+    Simulator(Simulator&&)                 = delete;
+    Simulator& operator=(Simulator&&)      = delete;
 
     /// return true if all ok else returns false;
     bool run(Defs&, const std::string& defs_filename, std::string& errorMsg, bool do_checks = true) const;

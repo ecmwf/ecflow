@@ -25,7 +25,7 @@
 StringMatchMode::Mode NodeQueryStringOption::defaultMatchMode_ = StringMatchMode::ContainsMatch;
 bool NodeQueryStringOption::defaultCaseSensitive_              = false;
 
-#define _UI_NODEQUERY_DEBUG
+#define UI_NODEQUERYOPTION_DEBUG
 
 class NodeQueryOptionFactory;
 static std::map<std::string, NodeQueryOptionFactory*>* makers = nullptr;
@@ -92,20 +92,20 @@ NodeQueryOption::NodeQueryOption(VProperty* p)
 }
 
 void NodeQueryOption::build(NodeQuery* query) {
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERYOPTION_DEBUG
     UI_FUNCTION_LOG
 #endif
 
     // Node query part
     VProperty* prop = VConfig::instance()->find("node_query");
     Q_ASSERT(prop);
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERYOPTION_DEBUG
     UiLog().dbg() << " load node_query";
 #endif
     for (int i = 0; i < prop->children().size(); i++) {
         VProperty* p = prop->children().at(i);
         QString type = p->param("type");
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERYOPTION_DEBUG
         UiLog().dbg() << "  name=" << p->strName() << " type=" << type.toStdString();
 #endif
         NodeQueryOption* op = NodeQueryOptionFactory::create(p);
@@ -116,7 +116,7 @@ void NodeQueryOption::build(NodeQuery* query) {
     // Attr query part
     prop = VConfig::instance()->find("attribute_query");
     Q_ASSERT(prop);
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERYOPTION_DEBUG
     UiLog().dbg() << " load attribute_query";
 #endif
     for (int i = 0; i < prop->children().size(); i++) {
@@ -125,7 +125,7 @@ void NodeQueryOption::build(NodeQuery* query) {
             query->options_[p->name()] = NodeQueryOptionFactory::create(p);
         }
         else {
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERYOPTION_DEBUG
             UiLog().dbg() << "  name=" << p->strName();
 #endif
             // Q_ASSERT(def_["attribute"]->values().contains(p->name()));
@@ -150,7 +150,7 @@ void NodeQueryOption::build(NodeQuery* query) {
             Q_ASSERT(!typeLst.empty());
 
             Q_FOREACH (VProperty* ch, p->children()) {
-#ifdef _UI_NODEQUERY_DEBUG
+#ifdef UI_NODEQUERYOPTION_DEBUG
                 UiLog().dbg() << "  option: name=" << ch->strName() << " type=" << ch->param("type").toStdString();
 #endif
                 NodeQueryOption* op         = NodeQueryOptionFactory::create(ch);

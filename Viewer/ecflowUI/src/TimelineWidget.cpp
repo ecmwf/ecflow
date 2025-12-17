@@ -892,7 +892,6 @@ void TimelineWidget::loadArchive() {
 
         catch (const std::runtime_error& e) {
             ui_->messageLabel->stopProgress();
-            std::string errTxt(e.what());
         }
 
         UiLog().dbg() << "Logfile parsed: " << timer.elapsed() / 1000 << "s";

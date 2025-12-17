@@ -28,10 +28,9 @@ void AddModelColumnDialog::init(ModelColumn* mc, const std::set<std::string>& va
     modelColumn_ = mc;
     QStringList varLst;
     for (const auto& var : vars) {
-        int idx   = -1;
         bool ok   = true;
         QString n = QString::fromStdString(var);
-        if ((idx = modelColumn_->indexOf(n)) != -1) {
+        if (int idx = modelColumn_->indexOf(n); idx != -1) {
             ok = !modelColumn_->isExtra(idx);
         }
 

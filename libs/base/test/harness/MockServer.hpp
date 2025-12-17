@@ -141,12 +141,16 @@ private:
 ///   o Update Suite state/modify change number
 class MockSuiteChangedServer {
 public:
-    MockSuiteChangedServer()                              = delete;
-    MockSuiteChangedServer(const MockSuiteChangedServer&) = delete;
-    explicit MockSuiteChangedServer(suite_ptr suite) : suiteChanged_(suite) { Ecf::set_server(true); }
-    ~MockSuiteChangedServer() { Ecf::set_server(false); }
+    MockSuiteChangedServer() = delete;
 
+    explicit MockSuiteChangedServer(suite_ptr suite) : suiteChanged_(suite) { Ecf::set_server(true); }
+
+    MockSuiteChangedServer(const MockSuiteChangedServer&)            = delete;
     MockSuiteChangedServer& operator=(const MockSuiteChangedServer&) = delete;
+    MockSuiteChangedServer(MockSuiteChangedServer&&)                 = delete;
+    MockSuiteChangedServer& operator=(MockSuiteChangedServer&&)      = delete;
+
+    ~MockSuiteChangedServer() { Ecf::set_server(false); }
 
 private:
     ecf::SuiteChanged suiteChanged_;

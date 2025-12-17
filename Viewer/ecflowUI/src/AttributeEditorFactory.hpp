@@ -21,7 +21,7 @@ class QWidget;
 class AttributeEditorFactory {
 public:
     explicit AttributeEditorFactory(const std::string& type);
-    virtual ~AttributeEditorFactory();
+    virtual ~AttributeEditorFactory() = default;
 
     virtual AttributeEditor* make(VInfo_ptr, QWidget*) = 0;
     static AttributeEditor* create(const std::string&, VInfo_ptr, QWidget*);

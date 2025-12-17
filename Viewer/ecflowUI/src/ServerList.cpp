@@ -33,8 +33,8 @@
 
 ServerList* ServerList::instance_ = nullptr;
 
-#define _UI_SERVERLIST_DEBUG
-#define _UI_SERVERSYSTEMLIST_DEBUG
+#define UI_SERVERLIST_DEBUG
+#define UI_SERVERSYSTEMLIST_DEBUG
 
 //==================================
 //
@@ -127,7 +127,7 @@ bool ServerListSystemFileManager::fileListSameAs(const std::vector<std::string>&
                 return false;
             }
         }
-#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+#ifdef UI_SERVERSYSTEMLIST_DEBUG
         UiLog().dbg() << UI_FN_INFO << "new paths are the same as the old ones";
 #endif
         return true;
@@ -145,7 +145,7 @@ void ServerListSystemFileManager::sync() {
     clear();
     files_ = buildFileList();
     if (!files_.empty()) {
-#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+#ifdef UI_SERVERSYSTEMLIST_DEBUG
         UiLog().dbg() << UI_FN_INFO << "start fetch";
 #endif
         state_ = FetchState;
@@ -161,7 +161,7 @@ void ServerListSystemFileManager::syncInternal(const std::vector<std::string>& n
     clear();
     files_ = newFiles;
     if (!files_.empty()) {
-#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+#ifdef UI_SERVERSYSTEMLIST_DEBUG
         UiLog().dbg() << UI_FN_INFO << "start fetch";
 #endif
         state_ = FetchState;
@@ -184,7 +184,7 @@ void ServerListSystemFileManager::concludeSync() {
 
 // callbacks from the file provider
 void ServerListSystemFileManager::fileFetchFinished(VReply* r) {
-#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+#ifdef UI_SERVERSYSTEMLIST_DEBUG
     UiLog().dbg() << UI_FN_INFO;
 #endif
 
@@ -193,7 +193,7 @@ void ServerListSystemFileManager::fileFetchFinished(VReply* r) {
         syncDate_ = QDateTime::currentDateTime();
         for (auto f : r->tmpFiles()) {
             if (f) {
-#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+#ifdef UI_SERVERSYSTEMLIST_DEBUG
                 UiLog().dbg() << " f=" << f->sourcePath();
 #endif
                 paths.emplace_back(f->path());
@@ -249,7 +249,7 @@ void ServerListSystemFileManager::loadFiles(const std::vector<std::string>& path
             }
         }
         if (!mp.empty()) {
-#ifdef _UI_SERVERSYSTEMLIST_DEBUG
+#ifdef UI_SERVERSYSTEMLIST_DEBUG
             UiLog().dbg() << UI_FN_INFO << "includedPaths=" << mp;
 #endif
             // we need to allow time for the manager to clean up
@@ -646,13 +646,13 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
     bool changed      = false;
     bool needBrodcast = false;
 
-#ifdef _UI_SERVERLIST_DEBUG
+#ifdef UI_SERVERLIST_DEBUG
     UiLog().dbg() << UI_FN_INFO << "Load system server list:";
 #endif
 
     // See what changed or was added
     for (auto& sysItem : sysVec) {
-#ifdef _UI_SERVERLIST_DEBUG
+#ifdef UI_SERVERLIST_DEBUG
         UiLog().dbg() << sysItem.name() << " " + sysItem.host() << " " + sysItem.port();
 #endif
         ServerItem* item = nullptr;
@@ -662,7 +662,7 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
         item = find(sysItem.name(), sysItem.host(), sysItem.port());
         if (item) {
             if (!item->isSystem()) {
-#ifdef _UI_SERVERLIST_DEBUG
+#ifdef UI_SERVERLIST_DEBUG
                 UiLog().dbg() << " -> already in server-list (same name, host, port). Mark as system server";
 #endif
                 changed = true;
@@ -676,7 +676,7 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
         // There is no server with the same name in the local list
         item = find(sysItem.name());
         if (!item) {
-#ifdef _UI_SERVERLIST_DEBUG
+#ifdef UI_SERVERLIST_DEBUG
             UiLog().dbg() << "  -> name is not in server-list. Import as system server";
 #endif
             changed          = true;
@@ -697,7 +697,7 @@ void ServerList::loadSystemItems(const std::vector<ServerListTmpItem>& sysVec,
         }
         // There is a server with the same name but with different host or/and port
         else {
-#ifdef _UI_SERVERLIST_DEBUG
+#ifdef UI_SERVERLIST_DEBUG
             UiLog().dbg() << "  -> name exsist in server-list with different port or/and host: " << item->host() << "@"
                           << item->port() << " ! Reset host and port";
 #endif

@@ -76,11 +76,15 @@ public:
           listeners_{},
           notify_{notify},
           subscribe_{subscribe} {};
-    AvisoService()                    = delete;
-    AvisoService(const AvisoService&) = delete;
-    ~AvisoService() { stop(); }
 
+    AvisoService() = delete;
+
+    AvisoService(const AvisoService&)            = delete;
     AvisoService& operator=(const AvisoService&) = delete;
+    AvisoService(AvisoService&&)                 = delete;
+    AvisoService& operator=(AvisoService&&)      = delete;
+
+    ~AvisoService() { stop(); }
 
     void start();
     void stop() { executor_.stop(); }

@@ -25,14 +25,18 @@
 // See class TestFixture.hpp
 //
 class ServerTestHarness {
-    ServerTestHarness(const ServerTestHarness&)                  = delete;
-    const ServerTestHarness& operator=(const ServerTestHarness&) = delete;
-
 public:
     // if standardVerification is true, we test task goes through normal life cycle
     // changes. else we compare the log file states with golden log file
     // Comparing log files across platforms is not reliable, and ignored
-    ServerTestHarness();
+    ServerTestHarness() = default;
+
+    ServerTestHarness(const ServerTestHarness&)            = delete;
+    ServerTestHarness& operator=(const ServerTestHarness&) = delete;
+    ServerTestHarness(ServerTestHarness&&)                 = delete;
+    ServerTestHarness& operator=(ServerTestHarness&&)      = delete;
+
+    ~ServerTestHarness() = default;
 
     /// generate man files for Suite and family nodes
     void generateManFileForNodeContainers() { generateManFileForNodeContainers_ = true; }

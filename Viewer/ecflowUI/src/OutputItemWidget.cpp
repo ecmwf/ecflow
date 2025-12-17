@@ -44,7 +44,7 @@
 #include <QTime>
 #include <QWidgetAction>
 
-#define _UI_OUTPUTITEMWIDGET_DEBUG
+#define UI_OUTPUTITEMWIDGET_DEBUG
 
 //========================================================
 //
@@ -465,7 +465,7 @@ void OutputItemWidget::reloadCurrentFile(bool wholeFile) {
         fileLabel_->clear();
         browser_->clear();
         fPath = op->joboutFileName();
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+#ifdef UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg() << UI_FN_INFO << "load jobout - fPath=" << fPath;
 #endif
         op->fetchFile(fPath, 0, useCache);
@@ -479,7 +479,7 @@ void OutputItemWidget::reloadCurrentFile(bool wholeFile) {
             browser_->reloadBegin();
             deltaPos = browser_->sizeInBytes();
         }
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+#ifdef UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg() << UI_FN_INFO << "reload - mode=" << f->fetchMode() << " fPath=" << fPath;
 #endif
         op->fetchFileForMode(f, deltaPos, useCache);
@@ -511,7 +511,7 @@ void OutputItemWidget::loadCurrentDirItemFile() {
     if (hasSelection) {
         auto* op = dynamic_cast<OutputFileProvider*>(infoProvider_);
 
-#ifdef _UI_OUTPUTITEMWIDGET_DEBUG
+#ifdef UI_OUTPUTITEMWIDGET_DEBUG
         UiLog().dbg() << UI_FN_INFO << " mode=" << mode << " fPath=" << fPath;
 #endif
         // if the fetchmode is not defined we use the normal fetch policy

@@ -38,7 +38,7 @@ public:
     auto end() { return storage_.end(); }
 
     template <typename F>
-    void for_each(F&& f) {
+    void for_each(F f) {
         for (auto item : storage_) {
             f(item.first, item.second);
         }

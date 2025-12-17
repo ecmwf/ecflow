@@ -23,9 +23,12 @@ namespace ecf {
 class Signal {
 public:
     Signal();
+
     // Disable copy (and move) semantics
-    Signal(const Signal&)                  = delete;
-    const Signal& operator=(const Signal&) = delete;
+    Signal(const Signal&)            = delete;
+    Signal& operator=(const Signal&) = delete;
+    Signal(Signal&&)                 = delete;
+    Signal& operator=(Signal&&)      = delete;
 
     /// UNBLOCK SIGCHLD at start of destructor
     /// BLOCK SIGCHLD and the end of the destructor

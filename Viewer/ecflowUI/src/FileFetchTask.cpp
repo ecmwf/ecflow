@@ -19,7 +19,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 
-#define UI_FILEPROVIDER_TASK_DEBUG__
+#define UI_FILEFETCHTASK_DEBUG
 
 //=================================
 //
@@ -32,7 +32,7 @@ FileFetchLocalTask::FileFetchLocalTask(FetchQueueOwner* owner) : AbstractFetchTa
 
 // try to read the logfile from the disk (if the settings allow it)
 void FileFetchLocalTask::run() {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     auto reply = owner_->theReply();
@@ -89,7 +89,7 @@ void FileFetchTransferTask::clear() {
 // Fetch the file asynchronously via ssh. The output client will call clientFinished() or
 // clientError eventually!!
 void FileFetchTransferTask::run() {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " deltaPos=" << deltaPos_;
 #endif
 
@@ -153,7 +153,7 @@ void FileFetchTransferTask::transferFinished() {
     auto tmp = transfer_->result();
     assert(tmp);
     if (tmp) {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
         UiLog().dbg() << UI_FN_INFO << "tmp size=" << tmp->sizeInBytes();
 #endif
 
@@ -185,7 +185,7 @@ void FileFetchTransferTask::transferProgress(QString /*msg*/, int /*value*/) {
 }
 
 void FileFetchTransferTask::transferFailed(QString msg) {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "msg=" << msg;
 #endif
     assert(transfer_);
@@ -208,7 +208,7 @@ FileFetchCacheTask::FileFetchCacheTask(FetchQueueOwner* owner) : AbstractFetchTa
 
 // Try to fetch the logfile from the local cache
 void FileFetchCacheTask::run() {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_ << " useCache=" << useCache_;
 #endif
 
@@ -219,7 +219,7 @@ void FileFetchCacheTask::run() {
         // Check if the given output is already in the cache
         VFile_ptr f = owner_->findInCache(filePath_);
         if (f) {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
             UiLog().dbg() << " File found in cache";
 #endif
             f->setCached(true);
@@ -261,7 +261,7 @@ FileFetchLogServerTask::~FileFetchLogServerTask() {
 
 void FileFetchLogServerTask::deleteClient() {
     if (client_) {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
         UI_FN_DBG
 #endif
         client_->disconnect(this);
@@ -271,7 +271,7 @@ void FileFetchLogServerTask::deleteClient() {
 }
 
 void FileFetchLogServerTask::stop() {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
     UI_FN_DBG
 #endif
     AbstractFetchTask::clear();
@@ -281,7 +281,7 @@ void FileFetchLogServerTask::stop() {
 }
 
 void FileFetchLogServerTask::clear() {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
     UI_FN_DBG
 #endif
     stop();
@@ -291,7 +291,7 @@ void FileFetchLogServerTask::clear() {
 // file asynchronously. The output client will call clientFinished() or
 // clientError() eventually!!
 void FileFetchLogServerTask::run() {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     std::string host, port;
@@ -308,7 +308,7 @@ void FileFetchLogServerTask::run() {
     if (userLogServerUsed || sysLogServerUsed) {
         Q_ASSERT(userLogServerUsed || sysLogServerUsed);
         if (client_ && (client_->host() != host || client_->portStr() != port)) {
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
             UiLog().dbg() << " host/port does not match! Create new client";
 #endif
             deleteClient();
@@ -325,7 +325,7 @@ void FileFetchLogServerTask::run() {
         }
 
         Q_ASSERT(client_);
-#ifdef UI_FILEPROVIDER_TASK_DEBUG__
+#ifdef UI_FILEFETCHTASK_DEBUG
         UiLog().dbg() << " use logserver=" << client_->longName();
 #endif
 

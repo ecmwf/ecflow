@@ -619,13 +619,10 @@ public:
     Repeat(const RepeatString&);
     Repeat(const RepeatDay&);
 
-    // Enable copy semantics
+    // Enable copy & move semantics
     Repeat(const Repeat&);
-    Repeat& operator=(const Repeat& rhs);
-
-    // Enable move semantics
-    Repeat(Repeat&& rhs) : type_(std::move(rhs.type_)) {}
-    Repeat& operator=(Repeat&& rhs);
+    Repeat(Repeat&& rhs);
+    Repeat& operator=(Repeat rhs);
 
     ~Repeat();
 

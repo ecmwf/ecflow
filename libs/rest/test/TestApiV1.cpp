@@ -8,6 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <array>
+
 #include <boost/test/unit_test.hpp>
 
 #include "Certificate.hpp"
@@ -70,27 +72,12 @@ void start_api_server() {
 
     api_server = std::make_unique<std::thread>([] {
 #if defined(ECF_TEST_HTTP_BACKEND)
-        char* argv[] = {(char*)"ecflow_http",
-                        (char*)"-v",
-                        (char*)"--polling_interval",
-                        (char*)"1",
-                        (char*)"--port",
-                        (char*)"8081",
-                        (char*)"--http",
-                        NULL};
-        int argc     = 7;
+        std::array argv = {"ecflow_http", "-v", "--polling_interval", "1", "--port", "8081", "--http"};
 #else
-        char* argv[] = {(char*)"ecflow_http",
-                        (char*)"-v",
-                        (char*)"--polling_interval",
-                        (char*)"1",
-                        (char*)"--port",
-                        (char*)"8080",
-                        NULL};
-        int argc     = 6;
+        std::array argv = {"ecflow_http", "-v", "--polling_interval", "1", "--port", "8080"};
 #endif
 
-        HttpServer server(argc, argv);
+        HttpServer server(argv.size(), const_cast<char**>(argv.data()));
         server.run();
     });
 
@@ -170,7 +157,7 @@ struct SetupTest
         sigemptyset(&set);
         sigaddset(&set, SIGPIPE);
 
-        if (pthread_sigmask(SIG_BLOCK, &set, NULL) != 0) {
+        if (pthread_sigmask(SIG_BLOCK, &set, nullptr) != 0) {
             throw std::runtime_error("Failed to set signal mask");
         }
 
@@ -228,7 +215,7 @@ httplib::Response handle_response(const httplib::Result& r,
 
     if (throw_on_error) {
         if (!r) {
-            throw std::runtime_error("NULL reply from server");
+            throw std::runtime_error("nullptr reply from server");
         }
         else if (r->status != expected_code) {
             throw std::runtime_error(
@@ -246,11 +233,11 @@ httplib::Response handle_response(const httplib::Result& r,
     return httplib::Response(*r);
 }
 
-template <typename T>
-bool wait_until(T&& func, int wait_time = 1, int wait_count = 10) {
+template <typename F>
+bool wait_until(F f, int wait_time = 1, int wait_count = 10) {
     int c = 0;
 
-    while (func() == false) {
+    while (f() == false) {
         c++;
         if (c > wait_count) {
             BOOST_FAIL("Test failed");

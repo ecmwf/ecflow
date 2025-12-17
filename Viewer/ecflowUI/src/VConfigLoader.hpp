@@ -18,7 +18,7 @@ class VProperty;
 class VConfigLoader {
 public:
     explicit VConfigLoader(const std::string& name);
-    virtual ~VConfigLoader();
+    virtual ~VConfigLoader() = default;
 
     virtual void load(VProperty* group) = 0;
     static bool process(const std::string& name, VProperty*);

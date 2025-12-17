@@ -18,9 +18,7 @@
 // ===========================================================================
 class DefsDoc {
 public:
-    DefsDoc()                          = delete;
-    DefsDoc(const DefsDoc&)            = delete;
-    DefsDoc& operator=(const DefsDoc&) = delete;
+    DefsDoc() = delete;
 
     static const char* add();
     static const char* abs_node_path_doc();

@@ -654,9 +654,14 @@ class VariableHelper {
 public:
     explicit VariableHelper(const AstVariable* astVariable);
     VariableHelper(const AstVariable* astVariable, std::string& errorMsg);
+
     // Disable copy (and move) semantics
     VariableHelper(const VariableHelper&)                  = delete;
     const VariableHelper& operator=(const VariableHelper&) = delete;
+    VariableHelper(VariableHelper&&)                       = delete;
+    VariableHelper& operator=(VariableHelper&&)            = delete;
+
+    ~VariableHelper() = default;
 
     int value() const;
     int plus(int) const;
