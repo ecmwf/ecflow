@@ -37,7 +37,7 @@ jobs:
         libs/client/test/data
         libs/node/test/data
         libs/pyext/test/data
-        libs/test/data
+        libs/test/overall/data
     secrets: inherit
 
   # Build downstream packages on HPC

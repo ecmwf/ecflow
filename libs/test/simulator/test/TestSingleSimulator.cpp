@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_analysys, *boost::unit_test::disabled()) {
 BOOST_AUTO_TEST_CASE(test_single_from_file) {
     std::cout << "Simulator:: ...test_single_from_file\n";
 
-    std::string path = File::test_data("libs/simulator/test/data/good_defs/day/family.def", "libs/simulator");
+    std::string path = File::test_data("libs/test/simulator/test/data/good_defs/day/family.def", "libs/test/simulator");
 
     Simulator simulator;
     std::string errorMsg;
