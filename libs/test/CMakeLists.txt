@@ -9,6 +9,7 @@
 #
 
 if (ENABLE_SERVER)
+  add_subdirectory(foolproof)
   add_subdirectory(overall)
 endif ()
 add_subdirectory(simulator)
