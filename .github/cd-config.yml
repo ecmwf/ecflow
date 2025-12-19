@@ -1,0 +1,7 @@
+builds:
+  - name: "conda-build"
+    type: "conda"
+    enabled: true
+
+release:
+  enabled: true
