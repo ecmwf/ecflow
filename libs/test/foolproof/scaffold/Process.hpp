@@ -17,7 +17,7 @@
 
 #include "ecflow/core/Filesystem.hpp"
 
-namespace foolproof::scaffolf {
+namespace foolproof::scaffold {
 
 class Process {
 public:
@@ -47,6 +47,6 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace foolproof::scaffolf
+} // namespace foolproof::scaffold
 
 #endif /* ecflow_test_foolproof_scaffold_Process_HPP */

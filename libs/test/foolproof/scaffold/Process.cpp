@@ -44,7 +44,7 @@ namespace bp = boost::process;
 
 #endif
 
-namespace foolproof::scaffolf {
+namespace foolproof::scaffold {
 
 #if BOOST_PROCESS_VERSION == 1
 
@@ -208,4 +208,4 @@ std::string Process::read_stderr() const {
     return impl_->read_stderr();
 }
 
-} // namespace foolproof::scaffolf
+} // namespace foolproof::scaffold
