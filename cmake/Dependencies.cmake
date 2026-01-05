@@ -192,6 +192,10 @@ find_package( Boost ${ECFLOW_BOOST_VERSION} QUIET REQUIRED COMPONENTS ${_boost_n
 
 set(SELECTED_BOOST_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
 
+if(${SELECTED_BOOST_VERSION} VERSION_GREATER_EQUAL 1.86.0)
+  set(ADDITIONAL_BOOST_COMPONENTS Boost::process)
+endif()
+
 ecbuild_info( " * Boost_FOUND                : ${Boost_FOUND}" )
 ecbuild_info( " * Boost_NO_BOOST_CMAKE       : ${Boost_NO_BOOST_CMAKE}" )
 ecbuild_info( " * Boost_USE_MULTITHREADED    : ${Boost_USE_MULTITHREADED}" )
