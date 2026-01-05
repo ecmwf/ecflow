@@ -327,20 +327,7 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
     /// read in the ecf white list file that specifies valid users and their access rights
     /// If the file can't be opened returns false and an error message and false;
     /// Automatically add server admin(user) with write access, as this will allow admin reload
-    if (auto loaded = load_whitelist_file(errorMsg); loaded) {
-        if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
-            authorisation_service_ = result.value();
-            std::cout << "Loaded server permissions based on Whitelist file\n";
-            return true;
-        }
-        else {
-            std::cout << "Unable to load server permissions, due to: " << result.reason() << '\n';
-            return false;
-        }
-    }
-    else {
-        return false;
-    }
+    return load_whitelist_file(errorMsg);
 }
 
 std::pair<std::string, std::string> ServerEnvironment::hostPort() const {
@@ -426,7 +413,16 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
         // (Requires terminate, modify white list, restart to fix)
         // Hence always allow server user write access *IF* required for non-empty file
         white_list_file_.allow_write_access_for_server_user();
-        return true;
+
+        if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
+            authorisation_service_ = result.value();
+            std::cout << "Loaded server permissions based on Whitelist file\n";
+            return true;
+        }
+        else {
+            std::cout << "Unable to load server permissions, due to: " << result.reason() << '\n';
+            return false;
+        }
     }
     return false;
 }

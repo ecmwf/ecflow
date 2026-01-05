@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_reload_whitelist) {
     /*
      * Description
      *
-     * This test case ensures that the 'reloadwsfile' command effectively reloads the content of white list.
+     * This test case ensures that the 'reloadwsfile' command effectively reloads the content of a white list file.
      *
      * Requirements
      *
@@ -446,6 +446,130 @@ endsuite;
         auto c = client.value();
 
         ECF_TEST_DBG("Output of --alter label:\n" << c.stdout_buffer);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_e2e_reload_whitelist_created_after_server_is_launched) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case ensures that the 'reloadwsfile' command effectively reloads the content of a white list file,
+     * created after the server is launched.
+     *
+     * Requirements
+     *
+     * - The 'reloadwsfile' command loads the content of the whitelist file, created after the server is launched.
+     *
+     */
+
+    using namespace foolproof::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto user_a = User{"alice", "somesecret", "rw"};
+    auto user_b = User{"bob", "anothersecret", "r"};
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto authentication = MakeTestFile{}
+                              .with(SpecificFileLocation{"custom.passwds", cwd})
+                              .with(PasswordsFile{host, port, user_a, user_b}.data())
+                              .create();
+
+    auto authorisation_file = fs::path{"custom.lists"};
+
+    auto server_environment_cfg =
+        MakeTestFile{}
+            .with(SpecificFileLocation{"server_environment.cfg", cwd})
+            .with(ServerEnvironmentFile{std::make_tuple("ECF_PASSWD", authentication.filename()),
+                                        std::make_tuple("ECF_CUSTOM_PASSWD", authentication.filename()),
+                                        std::make_tuple("ECF_LISTS", authorisation_file)}
+                      .data())
+            .create();
+
+    const auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    auto defs = MakeTestFile{}
+                    .with(SpecificFileLocation{"suite.def", cwd})
+                    .with(R"--(
+suite s
+  family f
+    task task
+      label l "original_value"
+  endfamily
+endsuite;
+)--")
+                    .create();
+
+    { // #authorisation, perform write operation (without whitelist) -- load defs file % [success]
+        auto client =
+            RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(RunClient::CommandLoad{defs.path()});
+        BOOST_REQUIRE(client.ok());
+        auto& c = client.value();
+
+        ECF_TEST_DBG("Output of --load:\n" << c.stdout_buffer);
+    }
+
+    { // #authorisation, perform write operation (without whitelist) -- update label value % [success]
+        auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
+            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+        BOOST_REQUIRE(client.ok());
+        auto c = client.value();
+
+        ECF_TEST_DBG("Output of --alter label:\n" << c.stdout_buffer);
+    }
+
+    { // #authorisation, perform write operation (without whitelist) -- update label value % [success]
+        auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
+            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+        BOOST_REQUIRE(client.ok());
+        auto c = client.value();
+
+        ECF_TEST_DBG("Output of --alter label:\n" << c.stdout_buffer);
+    }
+
+    auto authorisation = MakeTestFile{}
+                             .with(SpecificFileLocation{authorisation_file, cwd})
+                             .with(WhitelistFile{user_a, user_b}.data())
+                             .create();
+
+    { // #authorisation, perform write operation (without whitelist) -- reload whitelist file % [success]
+        auto client =
+            RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(RunClient::CommandReloadWhitelist{});
+        BOOST_REQUIRE(client.ok());
+        auto c = client.value();
+
+        ECF_TEST_DBG("Output of --reloadwsfile:\n" << c.stdout_buffer);
+    }
+
+    { // #authorisation, perform write operation with "rw" access -- update label value % [success]
+        auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
+            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+        BOOST_REQUIRE(client.ok());
+        auto c = client.value();
+
+        ECF_TEST_DBG("Output of --alter label:\n" << c.stdout_buffer);
+    }
+
+    { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
+        auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
+            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+        BOOST_REQUIRE(!client.ok());
+
+        BOOST_CHECK(
+            client.reason().find(
+                "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions") !=
+            std::string::npos);
     }
 }
 
