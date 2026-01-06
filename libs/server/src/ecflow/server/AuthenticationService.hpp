@@ -12,6 +12,7 @@
 #define ecflow_server_AuthenticationService_HPP
 
 #include <string>
+#include <string_view>
 
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Identity.hpp"
@@ -41,6 +42,9 @@ public:
 
     bool reload_passwd_file(std::string& error);
     bool reload_custom_passwd_file(std::string& error);
+
+    static inline std::string_view default_passwd_file() { return "ecf.passwd"; }
+    static inline std::string_view default_custom_passwd_file() { return "ecf.custom_passwd"; }
 
 private:
     bool debug_{false};

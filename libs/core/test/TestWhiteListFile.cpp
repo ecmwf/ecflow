@@ -49,7 +49,7 @@ void test_white_list_files(const std::string& directory, bool pass) {
 
             WhiteListFile theFile;
             std::string errorMsg;
-            bool parsedOk = theFile.load(relPath.string(), false /*debug*/, errorMsg);
+            bool parsedOk = theFile.load(relPath.string(), errorMsg);
             if (pass) {
                 // Test expected to pass
                 BOOST_CHECK_MESSAGE(parsedOk,
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_empty_file) {
 
     WhiteListFile theFile;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
+    BOOST_CHECK_MESSAGE(theFile.load(path, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     BOOST_REQUIRE_MESSAGE(0 == theFile.read_access_size(),
                           "expected 0 users with read access but found " << theFile.read_access_size());
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_white_list) {
 
     WhiteListFile theFile;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
+    BOOST_CHECK_MESSAGE(theFile.load(path, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     // make sure we find all the users and the access right are correct
     // 	uid1    # a comment
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_read_access) {
 
     WhiteListFile theFile;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
+    BOOST_CHECK_MESSAGE(theFile.load(path, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     // make sure we find all the users and the access right are correct
     // # These user have read and write access to the server
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_users_have_write_access) {
 
     WhiteListFile theFile;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
+    BOOST_CHECK_MESSAGE(theFile.load(path, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     // make sure we find all the users and the access right are correct
     //   uid1  # a comment
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_write_access) {
 
     WhiteListFile theFile;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
+    BOOST_CHECK_MESSAGE(theFile.load(path, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     //   4.4.14
     //   * /  # same as '*'
@@ -420,7 +420,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_all_path_users_have_read_access) {
 
     WhiteListFile theFile;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
+    BOOST_CHECK_MESSAGE(theFile.load(path, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     //   4.4.14
     //   -* /  # same as '*'
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(test_white_list_path_access_list) {
 
     WhiteListFile theFile;
     std::string errorMsg;
-    BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
+    BOOST_CHECK_MESSAGE(theFile.load(path, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     //   4.4.14
     //

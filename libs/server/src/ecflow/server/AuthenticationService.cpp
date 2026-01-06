@@ -18,18 +18,21 @@
 namespace ecf {
 
 void AuthenticationService::init(const Host& host, const std::string& port) {
-    if (ecf_passwd_file_ == ecf::environment::ECF_PASSWD) {
+    if (ecf_passwd_file_ == default_passwd_file()) {
         ecf_passwd_file_ = host.prefix_host_and_port(port, ecf_passwd_file_);
     }
 
-    if (ecf_passwd_custom_file_ == ecf::environment::ECF_CUSTOM_PASSWD) {
+    if (ecf_passwd_custom_file_ == default_custom_passwd_file()) {
         ecf_passwd_custom_file_ = host.prefix_host_and_port(port, ecf_passwd_custom_file_);
     }
 }
 
 bool AuthenticationService::valid(const std::string& host, const std::string& port, std::string& error) const {
     if (!ecf_passwd_file_.empty() && fs::exists(ecf_passwd_file_)) {
-        if (!passwd_file_.load(ecf_passwd_file_, debug_, error)) {
+        if (passwd_file_.load(ecf_passwd_file_, debug_, error)) {
+            std::cout << "*** Password file loaded from '" << ecf_passwd_file_ << "'\n";
+        }
+        else {
             std::cout << "Error: could not parse ECF_PASSWD file " << ecf_passwd_file_ << "\n" << error << "\n";
             return false;
         }
@@ -41,7 +44,10 @@ bool AuthenticationService::valid(const std::string& host, const std::string& po
     }
 
     if (!ecf_passwd_custom_file_.empty() && fs::exists(ecf_passwd_custom_file_)) {
-        if (!passwd_custom_file_.load(ecf_passwd_custom_file_, debug_, error)) {
+        if (passwd_custom_file_.load(ecf_passwd_custom_file_, debug_, error)) {
+            std::cout << "*** Custom Password file loaded from '" << ecf_passwd_file_ << "'.\n";
+        }
+        else {
             std::cout << "Error: could not parse ECF_CUSTOM_PASSWD file " << ecf_passwd_custom_file_ << "\n"
                       << error << "\n";
             return false;
@@ -103,7 +109,11 @@ bool AuthenticationService::reload_passwd_file(std::string& error) {
     }
 
     // Only override valid users if we successfully opened and parsed file
-    return passwd_file_.load(ecf_passwd_file_, debug_, error);
+    auto loaded = passwd_file_.load(ecf_passwd_file_, debug_, error);
+    if (loaded) {
+        std::cout << "*** Password file loaded from '" << ecf_passwd_file_ << "'\n";
+    }
+    return loaded;
 }
 
 bool AuthenticationService::reload_custom_passwd_file(std::string& error) {
@@ -125,7 +135,11 @@ bool AuthenticationService::reload_custom_passwd_file(std::string& error) {
     }
 
     // Only override valid users if we successfully opened and parsed file
-    return passwd_custom_file_.load(ecf_passwd_custom_file_, debug_, error);
+    auto loaded = passwd_custom_file_.load(ecf_passwd_custom_file_, debug_, error);
+    if (loaded) {
+        std::cout << "Password file " << ecf_passwd_file_ << " opening...\n";
+    }
+    return loaded;
 }
 
 } // namespace ecf
