@@ -1,0 +1,18 @@
+builds:
+  - name: "hpc-build"
+    type: "hpc-module"
+    enabled: false
+    config:
+      config_path: .github/cd-hpc-config.yml
+      platforms:
+        - gnu-12.2.0
+        - gnu-8.5.0
+        - nvidia-22.11
+        - intel-2021.4.0
+
+  - name: "tarball"
+    type: "tarball"
+    enabled: true
+    config:
+      confluence_space: "ECFLOW"
+      confluence_page_title: "For testing tarball uploads"

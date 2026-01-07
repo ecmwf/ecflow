@@ -1,11 +1,24 @@
 name: Dummy CD
 
 on:
+  push:
+    tags:
+      - 'v?[0-9]+.[0-9]+.[0-9]+'
+      - 'v?[0-9]+.[0-9]+.[0-9]+-*'
+    branches:
+      - '*'
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  dummy-cd:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dummy CD
-        run: echo "Dummy CD"
+  build-and-release:
+    if: |
+      true
+    uses: ecmwf/reusable-workflows/.github/workflows/main-cd.yml@cd-hpc
+    with:
+      ref_name: ${{ github.ref_name }}
+    secrets: inherit
