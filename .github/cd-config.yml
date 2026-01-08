@@ -2,6 +2,7 @@ builds:
   - name: "conda-build"
     type: "conda"
     enabled: true
+    conda_build_args: "--no-anaconda-upload -m .cd/.conda/conda_build_config_common.yaml -m .cd/.conda/conda_build_config_py312.yaml"
 
 release:
   enabled: true
