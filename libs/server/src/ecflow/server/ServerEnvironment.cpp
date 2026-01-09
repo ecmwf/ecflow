@@ -407,7 +407,11 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
 
 bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     // Only override valid users if we successfully opened and parsed file
-    if (white_list_file_.load(ecf_white_list_file_, debug(), errorMsg)) {
+    if (white_list_file_.load(ecf_white_list_file_, errorMsg)) {
+        std::cout << "*** White list file loaded from '" << ecf_white_list_file_ << "'\n";
+        if (debug()) {
+            std::cout << white_list_file_.dump_valid_users() << "\n";
+        }
         // If the user accidentally removes the server/user from whitelist,
         // they will not be able to reload the whitelist, since it requires write access.
         // (Requires terminate, modify white list, restart to fix)
@@ -525,8 +529,8 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_URL", po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
             ("ECF_MICRODEF", po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
             ("ECF_LISTS", po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and their access rights")
-            ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(ecf::environment::ECF_PASSWD), "Path name to passwd file")
-            ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(ecf::environment::ECF_CUSTOM_PASSWD), "Path name to custom passwd file, for user who don't use login name")
+            ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(std::string{AuthenticationService::default_passwd_file()}), "Path name to passwd file")
+            ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(std::string{AuthenticationService::default_custom_passwd_file()}), "Path name to custom passwd file, for user who don't use login name")
             ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
             ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
         // clang-format on

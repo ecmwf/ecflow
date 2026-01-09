@@ -66,7 +66,7 @@ public:
 
     // Parse the file if any errors found return false and errorMsg
     // The parser expects version number  4.4.5
-    bool load(const std::string& file, bool debug, std::string& errorMsg);
+    bool load(const std::string& file, std::string& errorMsg);
 
     // Function used in test:
     // Will overwrite the existing file

@@ -295,7 +295,7 @@ public:
     File& operator=(File&&) noexcept = default;
 
     ~File() {
-        // fs::remove(location_);
+        fs::remove(location_);
         ECF_TEST_DBG("Removed file: " << location_);
     }
 
@@ -925,6 +925,8 @@ private:
 
 class Server {
 public:
+    using streams_t = std::tuple<std::string, std::string>;
+
     struct UnableToShutdownServer : public std::runtime_error
     {
         explicit UnableToShutdownServer(std::string msg) : std::runtime_error(std::move(msg)) {}
@@ -951,19 +953,27 @@ public:
         }
     }
 
+    streams_t shutdown() {
+        if (process_.is_running()) {
+            auto [out, err] = shutdown_ecflow_server();
+            return {out, err};
+        }
+        return {"", ""};
+    }
+
     pid_t pid() const { return process_.pid(); }
     const Host& host() const { return host_; }
     const Port& port() const { return port_; }
     const Directory& cwd() const { return cwd_; }
 
 private:
-    void shutdown_ecflow_server() {
+    streams_t shutdown_ecflow_server() {
         if (auto o = process_.terminate(); o == 0) {
-            dump_server_execution_report(cwd_, process_);
+            return dump_server_execution_report(cwd_, process_);
             ECF_TEST_DBG("Shutdown server: [OK]");
         }
         else {
-            dump_server_execution_report(cwd_, process_);
+            return dump_server_execution_report(cwd_, process_);
             ECF_TEST_DBG("Shutdown server: [FAIL]");
         }
 
@@ -997,7 +1007,7 @@ private:
         return Outcome<std::string>::success("ecflow server is shutdown");
     }
 
-    static void dump_server_execution_report(const Directory& cwd, const Process& server) {
+    static streams_t dump_server_execution_report(const Directory& cwd, const Process& server) {
         std::string report_file =
             std::string{"ecflow_server__execution_report."} + std::to_string(server.pid()) + ".txt";
         fs::path report_path = cwd.path() / report_file;
@@ -1008,6 +1018,8 @@ private:
         ofs << "Report STDERR \n <<< STDERR BEGIN >>>\n" << err << " <<< STDERR END >>>\n";
 
         ECF_TEST_DBG("Server execution report written to " << pretty_print_path(report_path));
+
+        return std::make_tuple(out, err);
     }
 
     const Host& host_;
