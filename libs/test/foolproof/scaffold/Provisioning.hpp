@@ -843,6 +843,7 @@ private:
         BOOST_REQUIRE_MESSAGE(cwd != nullptr, "The working directory is non-null");
 
         auto client_path = find_ecflow_client_path();
+        ECF_TEST_DBG("----> found client at " << client_path.string());
 
         BOOST_REQUIRE_MESSAGE(!client_path.empty(), "The ecflow client path is non-empty");
         BOOST_REQUIRE_MESSAGE(fs::exists(client_path), "The ecflow client executable exist at " << client_path);
@@ -858,7 +859,14 @@ private:
             options.push_back(option);
         }
 
+        ECF_TEST_DBG("----> using options:");
+        for (const auto& option : options) {
+            ECF_TEST_DBG("       " << option);
+        }
+
         auto ecflow_client = Process(client_path, options, cwd->path());
+
+        ECF_TEST_DBG("----> process started with pid: " << ecflow_client.pid());
 
         auto print = [](const auto& executable, const auto& options) {
             std::string buffer = "[ " + pretty_print_path(executable) + (options.empty() ? "" : ", ");
@@ -870,6 +878,8 @@ private:
             }
             return buffer + " ]";
         };
+
+        ECF_TEST_DBG("----> waiting next!");
 
         if (auto r = ecflow_client.wait(); r == 0) {
             ECF_TEST_DBG("Executed " << print(client_path, options));
@@ -1105,6 +1115,7 @@ private:
                                     std::chrono::seconds timeout = std::chrono::seconds(10)) {
         auto start = std::chrono::system_clock::now();
         for (;;) {
+            ECF_TEST_DBG("----> pinging!!!");
             auto r = RunClient{}.with(host).with(port).with(cwd).execute(RunClient::CommandPing{});
             if (r.ok()) {
                 // Important: this checks that the client finished with SUCCESS!
