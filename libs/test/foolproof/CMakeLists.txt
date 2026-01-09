@@ -31,7 +31,9 @@ ecbuild_add_test(
     # Test entry point
     TestFoolproof_main.cpp # test entry point
     # Test sources
-    TestFoolproof.cpp
+    TestFoolproof.Basic.cpp
+    TestFoolproof.PasswordsAndWhiteLists.cpp
+    TestFoolproof.Scaffold.cpp
   LIBS
     ecflow_all
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)

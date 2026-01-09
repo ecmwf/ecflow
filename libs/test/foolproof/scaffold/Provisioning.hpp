@@ -40,7 +40,7 @@ namespace foolproof::scaffold {
  * environment variables).
  */
 
-std::string pretty_print_path(const fs::path& path) {
+inline std::string pretty_print_path(const fs::path& path) {
     auto canonical  = fs::canonical(path);
     std::string in  = canonical.string();
     std::string fst = std::regex_replace(in, std::regex(CMAKE_ECFLOW_BUILD_DIR), "/~~~build~~~");
