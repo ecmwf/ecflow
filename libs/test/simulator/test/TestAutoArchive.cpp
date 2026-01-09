@@ -38,7 +38,8 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
     theDefs.server_state().add_or_update_user_variables(
-        ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
+        ecf::environment::ECF_HOME,
+        File::test_data("libs/test/simulator/test", "libs/test/simulator")); // required for archive
     suite_ptr s1, s2, s3;
     {
         ClockAttr clockAttr(true);
@@ -123,7 +124,8 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
     // ****: is in hours. Hence autoarchive at hour resolution
     Defs theDefs;
     theDefs.server_state().add_or_update_user_variables(
-        ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
+        ecf::environment::ECF_HOME,
+        File::test_data("libs/test/simulator/test", "libs/test/simulator")); // required for archive
 
     suite_ptr suite_s2;
     suite_ptr suite_s3;
@@ -196,7 +198,8 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
     std::cout << "Simulator:: ...test_autoarchive_family\n";
     Defs theDefs;
     theDefs.server_state().add_or_update_user_variables(
-        ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
+        ecf::environment::ECF_HOME,
+        File::test_data("libs/test/simulator/test", "libs/test/simulator")); // required for archive
 
     {
         ClockAttr clockAttr(true);
@@ -268,7 +271,8 @@ BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
     std::cout << "Simulator:: ...test_two_autoarchive_in_hierarchy\n";
     Defs theDefs;
     theDefs.server_state().add_or_update_user_variables(
-        ecf::environment::ECF_HOME, File::test_data("libs/simulator/test", "libs/simulator")); // required for archive
+        ecf::environment::ECF_HOME,
+        File::test_data("libs/test/simulator/test", "libs/test/simulator")); // required for archive
 
     suite_ptr suite;
     {

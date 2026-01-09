@@ -8,12 +8,5 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_core_ecflow_source_build_dir_H
-#define ecflow_core_ecflow_source_build_dir_H
- 
-#define CMAKE_ECFLOW_SOURCE_DIR "@PROJECT_SOURCE_DIR@"
-#define CMAKE_ECFLOW_BUILD_DIR  "@PROJECT_BINARY_DIR@"
-
-#define CMAKE_ECFLOW_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
-
-#endif /* ecflow_core_ecflow_source_build_dir_H */
+#define BOOST_TEST_MODULE TestFoolproof
+#include <boost/test/included/unit_test.hpp>

@@ -16,7 +16,7 @@ using namespace std;
 using namespace ecf;
 
 std::string findTestDataLocation(const std::string& defsFile) {
-    std::string testData = File::test_data("libs/simulator/test/data", "libs/simulator");
+    std::string testData = File::test_data("libs/test/simulator/test/data", "libs/test/simulator");
     testData += "/";
     testData += defsFile;
     return testData;

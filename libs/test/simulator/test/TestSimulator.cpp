@@ -76,7 +76,7 @@ void simulate(const std::string& directory, bool pass) {
 BOOST_AUTO_TEST_CASE(test_simulate_good_defs) {
     cout << "Simulator:: ...test_simulate_good_defs\n";
 
-    std::string path = File::test_data("libs/simulator/test/data/good_defs", "libs/simulator");
+    std::string path = File::test_data("libs/test/simulator/test/data/good_defs", "libs/test/simulator");
 
     // All the defs in this directory are expected to pass
     simulate(path, true);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_simulate_good_defs) {
 BOOST_AUTO_TEST_CASE(test_simulate_bad_defs) {
     cout << "Simulator:: ...test_simulate_bad_defs\n";
 
-    std::string path = File::test_data("libs/simulator/test/data/bad_defs", "libs/simulator");
+    std::string path = File::test_data("libs/test/simulator/test/data/bad_defs", "libs/test/simulator");
 
     // All the defs in this directory are expected to fail
     simulate(path, false);

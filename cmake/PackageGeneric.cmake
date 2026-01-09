@@ -39,7 +39,7 @@ ecbuild_dont_pack(
     libs/attributes/doc
     libs/node/doc
     libs/client/doc
-    libs/simulator/doc
+    libs/test/simulator/doc
     libs/pyext/doc
     libs/server/doc
     # ignore IDE configuration directories

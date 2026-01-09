@@ -36,7 +36,7 @@ std::unique_ptr<ScratchDir> TestFixture::scratch_dir_;
 std::string TestFixture::host_;
 std::string TestFixture::port_;
 std::string TestFixture::test_dir_;
-std::string TestFixture::project_test_dir_ = "libs/test";
+std::string TestFixture::project_test_dir_ = "libs/test/overall";
 
 using namespace std;
 using namespace ecf;
@@ -81,7 +81,7 @@ TestFixture::TestFixture(const std::string& project_test_dir) {
 }
 
 TestFixture::TestFixture() {
-    init("libs/test");
+    init("libs/test/overall");
 }
 
 ClientInvoker& TestFixture::client() {

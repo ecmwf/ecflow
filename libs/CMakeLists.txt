@@ -606,12 +606,10 @@ add_subdirectory(service)
 add_subdirectory(attribute)
 add_subdirectory(node)
 add_subdirectory(base)
-add_subdirectory(simulator)
 add_subdirectory(client)
 
 if (ENABLE_SERVER)
   add_subdirectory(server)
-  add_subdirectory(test)
 endif ()
 
 if (ENABLE_PYTHON)
@@ -628,3 +626,5 @@ endif ()
 if (ENABLE_UDP)
   add_subdirectory(udp)
 endif ()
+
+add_subdirectory(test)
