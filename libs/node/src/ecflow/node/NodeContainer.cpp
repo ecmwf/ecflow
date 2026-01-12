@@ -15,8 +15,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <boost/filesystem/operations.hpp>
-
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"

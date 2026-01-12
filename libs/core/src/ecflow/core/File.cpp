@@ -13,7 +13,7 @@
 #include <fstream>
 #include <stdexcept>
 
-#include <boost/filesystem.hpp>
+#include <ecflow/core/Filesystem.hpp>
 
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
