@@ -42,5 +42,7 @@ ecbuild_add_test(
   DEPENDS
     ecflow_server
     ecflow_client
+  ARGS
+    --random=1
 )
 target_clangformat(s_foolproof CONDITION ENABLE_TESTS)
