@@ -27,7 +27,7 @@ jobs:
       matrix:
         os:
           - alpine-3.23
-          - arch-20251019
+          - arch-20260104
           - debian-11.11
           - debian-12.12
           - debian-13.2
