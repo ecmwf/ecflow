@@ -24,6 +24,7 @@ jobs:
 
     strategy:
       max-parallel: 4
+      fail-fast: false
       matrix:
         os:
           - alpine-3.23
