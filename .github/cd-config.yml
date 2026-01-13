@@ -3,7 +3,7 @@ builds:
     type: hpc
     enabled: true
     config:
-      platform: gnu-12.2.0
+      platform: gnu-14.2.0
       install_type: module
 
       dependencies: |
