@@ -45,10 +45,9 @@ builds:
             -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.11.8-01/include/python3.11
             -DPython3_LIBRARIES=/usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so
             -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.11.8-01/lib64
-          build_command: cd libs/pyext && ninja -j64
           install_command: |
             chmod u+w $INSTALL_PREFIX/lib
-            cd libs/pyext && ninja install
+            cmake --install . --component python
 
         - name: python310
           modules:
@@ -64,10 +63,9 @@ builds:
             -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.10.10-01/include/python3.10
             -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
             -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
-          build_command: cd libs/pyext && ninja -j64
           install_command: |
             chmod u+w $INSTALL_PREFIX/lib
-            cd libs/pyext && ninja install
+            cmake --install . --component python
 
       finalize:
         lock_permissions: true
