@@ -16,7 +16,6 @@ builds:
         - name: python312
           modules:
             - boost/1.87.0
-            - ninja
             - python3/3.12.9-01
             - qt/6.6.1
             - cmake/new
@@ -32,11 +31,9 @@ builds:
             -DPython3_LIBRARIES=/usr/local/apps/python3/3.12.9-01/lib64/libpython3.12.so
             -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.12.9-01/lib64
 
-
         - name: python311
           modules:
             - boost/1.84.0
-            - ninja
             - python3/3.11.8-01
             - qt/5.12.0
             - cmake/new
@@ -49,15 +46,14 @@ builds:
             -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.11.8-01/include/python3.11
             -DPython3_LIBRARIES=/usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so
             -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.11.8-01/lib64
-          build_command: cd libs/pyext && make -j64
+          build_command: cd libs/pyext && ninja -j64
           install_command: |
             chmod u+w $INSTALL_PREFIX/lib
-            cd libs/pyext && make install
+            cd libs/pyext && ninja install
 
         - name: python310
           modules:
             - boost/1.81.0
-            - ninja
             - python3/3.10.10-01
             - qt/6.2.0
             - cmake/new
@@ -70,10 +66,10 @@ builds:
             -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.10.10-01/include/python3.10
             -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
             -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
-          build_command: cd libs/pyext && make -j64
+          build_command: cd libs/pyext && ninja -j64
           install_command: |
             chmod u+w $INSTALL_PREFIX/lib
-            cd libs/pyext && make install
+            cd libs/pyext && ninja install
 
       finalize:
         lock_permissions: true
