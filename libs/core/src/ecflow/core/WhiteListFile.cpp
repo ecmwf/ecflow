@@ -255,10 +255,7 @@ bool WhiteListFile::verify_path_access(const std::string& user,
     return false;
 }
 
-bool WhiteListFile::load(const std::string& file, bool debug, std::string& errorMsg) {
-    if (debug) {
-        std::cout << "  White list file " << file << " opening...\n";
-    }
+bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
 
     white_list_file_             = file;
     all_users_have_read_access_  = false;
@@ -326,11 +323,6 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
             std::sort(paths.begin(), paths.end());
             paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
         }
-
-        if (debug) {
-            std::cout << dump_valid_users() << "\n";
-        }
-
         return true;
     }
 
@@ -339,9 +331,6 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
     errorMsg += " (";
     errorMsg += strerror(errno);
     errorMsg += ")";
-    if (debug) {
-        std::cout << dump_valid_users() << "\n";
-    }
     return false;
 }
 
