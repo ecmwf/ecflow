@@ -24,7 +24,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 bool EventCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<EventCmd*>(rhs);
@@ -103,7 +102,8 @@ const char* EventCmd::desc() {
 }
 
 void EventCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(EventCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), EventCmd::desc());
+    desc.add_options()(
+        EventCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), EventCmd::desc());
 }
 void EventCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     auto args = vm[arg()].as<std::vector<std::string>>();

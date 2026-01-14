@@ -20,7 +20,6 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 void LogMessageCmd::print(std::string& os) const {
     user_cmd(os, CtsApi::logMsg(msg_));
@@ -65,7 +64,7 @@ const char* LogMessageCmd::desc() {
 }
 
 void LogMessageCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LogMessageCmd::arg(), po::value<std::string>(), LogMessageCmd::desc());
+    desc.add_options()(LogMessageCmd::arg(), boost::program_options::value<std::string>(), LogMessageCmd::desc());
 }
 
 void LogMessageCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {

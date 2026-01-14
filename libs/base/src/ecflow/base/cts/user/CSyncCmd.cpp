@@ -22,7 +22,6 @@
 #include "ecflow/node/Defs.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 void CSyncCmd::print(std::string& os) const {
     /// Note: Be careful how the *debug* output is interpreted, since the:
@@ -173,7 +172,7 @@ void CSyncCmd::addOption(boost::program_options::options_description& desc) cons
     if (api_ == CSyncCmd::NEWS) {
         desc.add_options()(
             CtsApi::newsArg(),
-            po::value<std::vector<unsigned int>>()->multitoken(),
+            boost::program_options::value<std::vector<unsigned int>>()->multitoken(),
             "Returns true if state of server definition changed.\n"
             "*Important* for use with c++/python interface only.\n"
             "Requires Given a client handle, change and modify number determine if server changed since last call\n"
@@ -185,7 +184,7 @@ void CSyncCmd::addOption(boost::program_options::options_description& desc) cons
     if (api_ == CSyncCmd::SYNC) {
         desc.add_options()(
             CtsApi::syncArg(),
-            po::value<std::vector<unsigned int>>()->multitoken(),
+            boost::program_options::value<std::vector<unsigned int>>()->multitoken(),
             "Incrementally synchronise the local definition with the one in the server.\n"
             "*Important* for use with c++/python interface only.\n"
             "Preference should be given to this method as only the changes are returned.\n"
@@ -198,7 +197,7 @@ void CSyncCmd::addOption(boost::program_options::options_description& desc) cons
     if (api_ == CSyncCmd::SYNC_CLOCK) {
         desc.add_options()(
             CtsApi::sync_clock_arg(),
-            po::value<std::vector<unsigned int>>()->multitoken(),
+            boost::program_options::value<std::vector<unsigned int>>()->multitoken(),
             "Incrementally synchronise the local definition with the one in the server.\n"
             "*Important* for use with c++/python interface only.\n"
             "Same as sync, but will *always* sync with suite clock if it has changed.\n"
@@ -210,7 +209,7 @@ void CSyncCmd::addOption(boost::program_options::options_description& desc) cons
     }
 
     desc.add_options()(CtsApi::sync_full_arg(),
-                       po::value<unsigned int>(),
+                       boost::program_options::value<unsigned int>(),
                        "Returns the full definition from the server.\n"
                        "*Important* for use with c++/python interface only.\n"
                        "Requires a client_handle. The returned definition is stored on the client.");

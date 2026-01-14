@@ -17,14 +17,14 @@
 
 #include "ecflow/test/scaffold/Naming.hpp"
 
-namespace po = boost::program_options;
-
 BOOST_AUTO_TEST_SUITE(U_Base)
 
 BOOST_AUTO_TEST_SUITE(T_ProgramOptions)
 
 BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
     ECF_NAME_THIS_TEST();
+
+    namespace po = boost::program_options;
 
     // Declare the supported options.
     po::options_description desc("Allowed options");
@@ -58,6 +58,8 @@ BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
 BOOST_AUTO_TEST_CASE(test_program_options_multitoken) {
     ECF_NAME_THIS_TEST();
 
+    namespace po = boost::program_options;
+
     // Declare the supported options.
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")(
@@ -80,6 +82,8 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken) {
 
 BOOST_AUTO_TEST_CASE(test_program_options_multitoken_with_negative_values) {
     ECF_NAME_THIS_TEST();
+
+    namespace po = boost::program_options;
 
     // Declare the supported options.
     po::options_description desc("Allowed options");

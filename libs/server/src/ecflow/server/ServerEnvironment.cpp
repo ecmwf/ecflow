@@ -28,7 +28,6 @@
 #include "ecflow/server/ServerOptions.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 static std::string the_check_mode(ecf::CheckPt::Mode mode) {
     switch (mode) {
@@ -504,6 +503,8 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
 
         std::string passwd_file;
         std::string custom_passwd_file;
+
+        namespace po = boost::program_options;
 
         // read the environment from the config file.
         // **** Port *must* be read before log file, and check pt files

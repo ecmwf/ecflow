@@ -57,6 +57,7 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     }
 
     namespace po = boost::program_options;
+
     po::options_description description("AvisoParser");
     description.add_options()(option_name, po::value<std::string>());
     description.add_options()(option_listener, po::value<std::string>());

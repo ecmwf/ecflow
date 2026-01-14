@@ -25,7 +25,6 @@
 #include "ecflow/node/JobsParam.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 // *IMPORTANT*: STATS_RESET was introduced in release 4.0.5
 
@@ -558,7 +557,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::SHUTDOWN_SERVER: {
             desc.add_options()(CtsApi::shutdownServerArg(),
-                               po::value<std::string>()->implicit_value(std::string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string("")),
                                "Stop server from scheduling new jobs.\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e\n"
                                "  --shutdown=yes\n"
@@ -574,7 +573,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::HALT_SERVER: {
             desc.add_options()(CtsApi::haltServerArg(),
-                               po::value<std::string>()->implicit_value(std::string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string("")),
                                "Stop server communication with jobs, and new job scheduling.\n"
                                "Also stops automatic check pointing\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.\n"
@@ -591,7 +590,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::TERMINATE_SERVER: {
             desc.add_options()(CtsApi::terminateServerArg(),
-                               po::value<std::string>()->implicit_value(std::string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string("")),
                                "Terminate the server.\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt.i.e\n"
                                "  --terminate=yes");
@@ -793,7 +792,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::SERVER_LOAD: {
             desc.add_options()(CtsApi::server_load_arg(),
-                               po::value<std::string>()->implicit_value(std::string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string("")),
                                server_load_desc());
             break;
         }

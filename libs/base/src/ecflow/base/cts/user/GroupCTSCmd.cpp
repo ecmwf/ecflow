@@ -29,7 +29,6 @@
 #include "ecflow/core/Str.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 // #define DEBUG_GROUP_CMD 1
 
@@ -48,7 +47,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
     }
 
     // Create a list of allowable commands for a group. i.e excludes help, group
-    po::options_description desc("Allowed group options");
+    boost::program_options::options_description desc("Allowed group options");
     CtsCmdRegistry cmdRegistry(false /* don't add group option */);
     cmdRegistry.addCmdOptions(desc);
 
@@ -128,6 +127,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         boost::program_options::variables_map group_vm;
 
         // 1) Parse the CLI options
+        namespace po = boost::program_options;
         po::parsed_options parsed_options =
             po::command_line_parser(cl.tokens())
                 .options(desc)
@@ -424,7 +424,7 @@ const char* GroupCTSCmd::desc() {
 }
 
 void GroupCTSCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(GroupCTSCmd::arg(), po::value<std::string>(), GroupCTSCmd::desc());
+    desc.add_options()(GroupCTSCmd::arg(), boost::program_options::value<std::string>(), GroupCTSCmd::desc());
 }
 
 void GroupCTSCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

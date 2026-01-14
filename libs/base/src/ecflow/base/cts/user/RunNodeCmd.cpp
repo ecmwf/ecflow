@@ -24,7 +24,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 bool RunNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<RunNodeCmd*>(rhs);
@@ -154,7 +153,8 @@ const char* RunNodeCmd::desc() {
 }
 
 void RunNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(RunNodeCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), RunNodeCmd::desc());
+    desc.add_options()(
+        RunNodeCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), RunNodeCmd::desc());
 }
 void RunNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     auto args = vm[RunNodeCmd::arg()].as<std::vector<std::string>>();

@@ -25,7 +25,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 void InitCmd::print(std::string& os) const {
     os += Str::CHILD_CMD();
@@ -96,9 +95,9 @@ const char* InitCmd::desc() {
 }
 
 void InitCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(InitCmd::arg(), po::value<std::string>(), InitCmd::desc())(
+    desc.add_options()(InitCmd::arg(), boost::program_options::value<std::string>(), InitCmd::desc())(
         "add",
-        po::value<std::vector<std::string>>()->multitoken(),
+        boost::program_options::value<std::vector<std::string>>()->multitoken(),
         "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.");
 }
 

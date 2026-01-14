@@ -26,7 +26,6 @@
 #endif
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 bool CtsNodeCmd::why_cmd(std::string& nodePath) const {
     if (api_ == CtsNodeCmd::WHY) {
@@ -346,32 +345,39 @@ const char* migrate_desc() {
 void CtsNodeCmd::addOption(boost::program_options::options_description& desc) const {
     switch (api_) {
         case CtsNodeCmd::GET: {
-            desc.add_options()(CtsApi::getArg(), po::value<std::string>()->implicit_value(std::string()), get_desc());
+            desc.add_options()(CtsApi::getArg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string()),
+                               get_desc());
             break;
         }
         case CtsNodeCmd::GET_STATE: {
-            desc.add_options()(
-                CtsApi::get_state_arg(), po::value<std::string>()->implicit_value(std::string()), get_state_desc());
+            desc.add_options()(CtsApi::get_state_arg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string()),
+                               get_state_desc());
             break;
         }
         case CtsNodeCmd::MIGRATE: {
-            desc.add_options()(
-                CtsApi::migrate_arg(), po::value<std::string>()->implicit_value(std::string()), migrate_desc());
+            desc.add_options()(CtsApi::migrate_arg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string()),
+                               migrate_desc());
             break;
         }
         case CtsNodeCmd::JOB_GEN: {
-            desc.add_options()(
-                CtsApi::job_genArg(), po::value<std::string>()->implicit_value(std::string()), job_gen_desc());
+            desc.add_options()(CtsApi::job_genArg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string()),
+                               job_gen_desc());
             break;
         }
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY: {
             desc.add_options()(CtsApi::checkJobGenOnlyArg(),
-                               po::value<std::string>()->implicit_value(std::string()),
+                               boost::program_options::value<std::string>()->implicit_value(std::string()),
                                job_gen_only_desc());
             break;
         }
         case CtsNodeCmd::WHY: {
-            desc.add_options()(CtsApi::whyArg(), po::value<std::string>()->implicit_value(std::string()), why_desc());
+            desc.add_options()(CtsApi::whyArg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string()),
+                               why_desc());
             break;
         }
         case CtsNodeCmd::NO_CMD:

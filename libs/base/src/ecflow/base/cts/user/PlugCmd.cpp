@@ -30,7 +30,6 @@
 #endif
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 namespace {
 
@@ -292,7 +291,8 @@ const char* PlugCmd::desc() {
 }
 
 void PlugCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(PlugCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), PlugCmd::desc());
+    desc.add_options()(
+        PlugCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), PlugCmd::desc());
 }
 
 void PlugCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {

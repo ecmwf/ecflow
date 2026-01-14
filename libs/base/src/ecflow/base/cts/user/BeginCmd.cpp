@@ -22,7 +22,6 @@
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 BeginCmd::BeginCmd(const std::string& suiteName, bool force) : suiteName_(suiteName), force_(force) {
     // The begin command actually requires the suite name without the lead '/'
@@ -146,7 +145,8 @@ void BeginCmd::addOption(boost::program_options::options_description& desc) cons
     // allow options like
     // client --begin=suitename       // begin <suitename>
     // client --begin                 // means begin all suites
-    desc.add_options()(BeginCmd::arg(), po::value<std::string>()->implicit_value(std::string("")), BeginCmd::desc());
+    desc.add_options()(
+        BeginCmd::arg(), boost::program_options::value<std::string>()->implicit_value(std::string{}), BeginCmd::desc());
 }
 void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     std::string beginArg = vm[arg()].as<std::string>();

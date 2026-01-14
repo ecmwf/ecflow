@@ -19,7 +19,6 @@
 #include "ecflow/core/Version.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 void ServerVersionCmd::print(std::string& os) const {
     user_cmd(os, CtsApi::server_version());

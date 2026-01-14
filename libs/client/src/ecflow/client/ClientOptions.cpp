@@ -30,11 +30,13 @@
 #include "ecflow/core/Version.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 static std::string print_variable_map(const boost::program_options::variables_map& vm);
 
 ClientOptions::ClientOptions() {
+
+    namespace po = boost::program_options;
+
     // This could have been moved to parse(). However, since the same ClientInvoker can be
     // used for multiple commands, we have separated out the parts.
     // As this needs to be done only once, this approach improves the performance.
@@ -90,6 +92,9 @@ ClientOptions::~ClientOptions() {
 }
 
 Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) const {
+
+    namespace po = boost::program_options;
+
     // We expect two hyphen/minus, However sometimes we get a weird/rogue kind of hyphen
     // This rogue hyphen can mess up the parsing.
     // # ecflow_client ––group="halt=yes; check_pt; terminate=yes"  // *BAD* hyphens 2 of them
@@ -282,6 +287,9 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
 }
 
 static std::string print_variable_map(const boost::program_options::variables_map& vm) {
+
+    namespace po = boost::program_options;
+
     std::stringstream ss;
     ss << "boost::program_options::variables_map:    vm.size() " << vm.size() << "\n";
     for (po::variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {

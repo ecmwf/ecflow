@@ -26,7 +26,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 AbortCmd::AbortCmd(const std::string& pathToTask,
                    const std::string& jobsPassword,
@@ -112,7 +111,8 @@ const char* AbortCmd::desc() {
 }
 
 void AbortCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(AbortCmd::arg(), po::value<std::string>()->implicit_value(std::string()), AbortCmd::desc());
+    desc.add_options()(
+        AbortCmd::arg(), boost::program_options::value<std::string>()->implicit_value(std::string()), AbortCmd::desc());
 }
 void AbortCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     std::string reason = vm[arg()].as<std::string>();

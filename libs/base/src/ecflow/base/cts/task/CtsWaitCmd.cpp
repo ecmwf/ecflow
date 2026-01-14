@@ -27,7 +27,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 // #define DEBUG_ZOMBIE 1
 
@@ -113,7 +112,7 @@ const char* CtsWaitCmd::desc() {
 }
 
 void CtsWaitCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CtsWaitCmd::arg(), po::value<std::string>(), CtsWaitCmd::desc());
+    desc.add_options()(CtsWaitCmd::arg(), boost::program_options::value<std::string>(), CtsWaitCmd::desc());
 }
 void CtsWaitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     std::string expression = vm[arg()].as<std::string>();

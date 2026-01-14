@@ -65,6 +65,7 @@ ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, Node* p
     }
 
     namespace po = boost::program_options;
+
     po::options_description description("MirrorParser");
     description.add_options()(option_name, po::value<std::string>());
     description.add_options()(option_remote_path, po::value<std::string>());

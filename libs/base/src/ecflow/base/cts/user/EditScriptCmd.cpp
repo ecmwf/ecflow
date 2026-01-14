@@ -26,7 +26,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 bool EditScriptCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<EditScriptCmd*>(rhs);
@@ -350,8 +349,9 @@ const char* EditScriptCmd::desc() {
 }
 
 void EditScriptCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        EditScriptCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), EditScriptCmd::desc());
+    desc.add_options()(EditScriptCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       EditScriptCmd::desc());
 }
 
 void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {

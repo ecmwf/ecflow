@@ -26,7 +26,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 bool QueueCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<QueueCmd*>(rhs);
@@ -211,7 +210,8 @@ const char* QueueCmd::desc() {
 }
 
 void QueueCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(QueueCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), QueueCmd::desc());
+    desc.add_options()(
+        QueueCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), QueueCmd::desc());
 }
 void QueueCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     auto args = vm[arg()].as<std::vector<std::string>>();

@@ -24,7 +24,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force) : force_(force) {
     if (defs) {
@@ -181,7 +180,9 @@ const char* LoadDefsCmd::desc() {
 }
 
 void LoadDefsCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LoadDefsCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), LoadDefsCmd::desc());
+    desc.add_options()(LoadDefsCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       LoadDefsCmd::desc());
 }
 
 void LoadDefsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

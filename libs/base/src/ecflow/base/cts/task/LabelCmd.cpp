@@ -24,7 +24,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 bool LabelCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<LabelCmd*>(rhs);
@@ -98,7 +97,8 @@ const char* LabelCmd::desc() {
 }
 
 void LabelCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LabelCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), LabelCmd::desc());
+    desc.add_options()(
+        LabelCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), LabelCmd::desc());
 }
 void LabelCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     auto args = vm[arg()].as<std::vector<std::string>>();

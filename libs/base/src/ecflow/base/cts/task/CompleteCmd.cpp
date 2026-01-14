@@ -23,7 +23,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 void CompleteCmd::print(std::string& os) const {
     os += Str::CHILD_CMD();
@@ -98,8 +97,10 @@ const char* CompleteCmd::desc() {
 }
 
 void CompleteCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CompleteCmd::arg(), CompleteCmd::desc())(
-        "remove", po::value<std::vector<std::string>>()->multitoken(), "remove variables i.e name name2");
+    desc.add_options()(CompleteCmd::arg(),
+                       CompleteCmd::desc())("remove",
+                                            boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                                            "remove variables i.e name name2");
 }
 void CompleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     if (clientEnv->debug()) {

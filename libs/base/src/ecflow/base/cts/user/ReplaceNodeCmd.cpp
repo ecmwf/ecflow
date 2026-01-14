@@ -21,7 +21,6 @@
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force)
     : createNodesAsNeeded_(createNodesAsNeeded),
@@ -217,8 +216,9 @@ const char* ReplaceNodeCmd::desc() {
 }
 
 void ReplaceNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        ReplaceNodeCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), ReplaceNodeCmd::desc());
+    desc.add_options()(ReplaceNodeCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       ReplaceNodeCmd::desc());
 }
 void ReplaceNodeCmd::create(Cmd_ptr& cmd,
                             boost::program_options::variables_map& vm,

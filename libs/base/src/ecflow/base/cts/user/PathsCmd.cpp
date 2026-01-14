@@ -27,7 +27,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 PathsCmd::PathsCmd(Api api, const std::string& absNodePath, bool force) : api_(api), force_(force) {
     if (!absNodePath.empty()) {
@@ -606,6 +605,9 @@ const char* restore_desc() {
 }
 
 void PathsCmd::addOption(boost::program_options::options_description& desc) const {
+
+    namespace po = boost::program_options;
+
     switch (api_) {
         case PathsCmd::CHECK: {
             desc.add_options()(

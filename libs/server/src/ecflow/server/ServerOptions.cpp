@@ -20,9 +20,11 @@
 #endif
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
+
+    namespace po = boost::program_options;
+
     std::stringstream ss;
     ss << "\n" << Version::description() << "\nServer options";
     po::options_description desc(ss.str(), po::options_description::m_default_line_length + 80);

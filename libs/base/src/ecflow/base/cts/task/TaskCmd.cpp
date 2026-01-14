@@ -19,7 +19,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 // #define DEBUG_ZOMBIE 1
 

@@ -24,7 +24,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-namespace po = boost::program_options;
 
 bool RequeueNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<RequeueNodeCmd*>(rhs);
@@ -204,8 +203,9 @@ const char* RequeueNodeCmd::desc() {
 }
 
 void RequeueNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        RequeueNodeCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), RequeueNodeCmd::desc());
+    desc.add_options()(RequeueNodeCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       RequeueNodeCmd::desc());
 }
 void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[RequeueNodeCmd::arg()].as<std::vector<std::string>>();
