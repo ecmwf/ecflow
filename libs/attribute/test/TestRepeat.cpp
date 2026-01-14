@@ -17,8 +17,6 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-
 static const std::vector<std::string> stringList = {std::string("a"), std::string("b"), std::string("c")};
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
@@ -50,19 +48,19 @@ BOOST_AUTO_TEST_CASE(construction) {
     Repeat another(empty);
     BOOST_CHECK_MESSAGE(another == empty, "Copy construction failed");
 
-    BOOST_CHECK_MESSAGE(empty.name() == string(), " empty  failed");
+    BOOST_CHECK_MESSAGE(empty.name() == std::string(), " empty  failed");
     BOOST_CHECK_MESSAGE(empty.valid() == false, " empty  failed");
     BOOST_CHECK_MESSAGE(empty.value() == 0, " empty  failed");
     empty.setToLastValue();
-    BOOST_CHECK_MESSAGE(empty.valueAsString() == string(), " empty  failed");
+    BOOST_CHECK_MESSAGE(empty.valueAsString() == std::string(), " empty  failed");
     empty.reset();
     empty.increment();
     empty.change("fred");
-    BOOST_CHECK_MESSAGE(empty.valueAsString() == string(), " empty  failed");
+    BOOST_CHECK_MESSAGE(empty.valueAsString() == std::string(), " empty  failed");
     empty.changeValue(10);
-    BOOST_CHECK_MESSAGE(empty.valueAsString() == string(), " empty  failed");
+    BOOST_CHECK_MESSAGE(empty.valueAsString() == std::string(), " empty  failed");
     BOOST_CHECK_MESSAGE(empty.isInfinite() == false, " empty  failed");
-    BOOST_CHECK_MESSAGE(empty.toString() == string(), " empty  failed");
+    BOOST_CHECK_MESSAGE(empty.toString() == std::string(), " empty  failed");
     BOOST_CHECK_MESSAGE(empty.state_change_no() == 0, " empty  failed");
 }
 
@@ -666,8 +664,8 @@ BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
         while (rep.valid()) {
 
             // xref repeat date with boost date, essentially checking bdate with rep
-            string str_value = boost::lexical_cast<std::string>(rep.value());
-            auto date2       = boost::gregorian::from_undelimited_string(str_value);
+            std::string str_value = boost::lexical_cast<std::string>(rep.value());
+            auto date2            = boost::gregorian::from_undelimited_string(str_value);
             BOOST_CHECK_MESSAGE(bdate == date2, "expected same value, but found " << bdate << "  " << date2);
 
             // check change value

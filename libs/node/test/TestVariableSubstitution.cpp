@@ -23,7 +23,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -49,8 +48,8 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution) {
     }
 
     // See page 31, section 5.1 variable inheritance, of SMS users guide
-    std::string cmd = "%AVI%-%BAHRA%-%LOWER%-%AVI%";
-    string expected = "avi-bahra-10-avi";
+    std::string cmd      = "%AVI%-%BAHRA%-%LOWER%-%AVI%";
+    std::string expected = "avi-bahra-10-avi";
     BOOST_CHECK_MESSAGE(s->variableSubstitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
@@ -225,20 +224,20 @@ BOOST_AUTO_TEST_CASE(test_user_variable_substitution) {
     }
 
     NameValueMap user_variables;
-    user_variables.insert(std::make_pair(string("AVI"), string("_avi")));
-    user_variables.insert(std::make_pair(string("BAHRA"), string("_bahra")));
-    user_variables.insert(std::make_pair(string("LOWER"), string("_10")));
-    user_variables.insert(std::make_pair(string("PATH"), string("_/fred/bill/joe")));
-    user_variables.insert(std::make_pair(string("EMPTY_VARIABLE"), string("_")));
-    user_variables.insert(std::make_pair(string("fred"), string("%bill%")));
-    user_variables.insert(std::make_pair(string("bill"), string("%fred%")));
-    user_variables.insert(std::make_pair(string("hello"), string("%hello%")));
-    user_variables.insert(std::make_pair(string("mary"), string("%jane%")));
-    user_variables.insert(std::make_pair(string("jane"), string("_10")));
+    user_variables.insert(std::make_pair(std::string("AVI"), std::string("_avi")));
+    user_variables.insert(std::make_pair(std::string("BAHRA"), std::string("_bahra")));
+    user_variables.insert(std::make_pair(std::string("LOWER"), std::string("_10")));
+    user_variables.insert(std::make_pair(std::string("PATH"), std::string("_/fred/bill/joe")));
+    user_variables.insert(std::make_pair(std::string("EMPTY_VARIABLE"), std::string("_")));
+    user_variables.insert(std::make_pair(std::string("fred"), std::string("%bill%")));
+    user_variables.insert(std::make_pair(std::string("bill"), std::string("%fred%")));
+    user_variables.insert(std::make_pair(std::string("hello"), std::string("%hello%")));
+    user_variables.insert(std::make_pair(std::string("mary"), std::string("%jane%")));
+    user_variables.insert(std::make_pair(std::string("jane"), std::string("_10")));
 
     // See page 31, section 5.1 variable inheritance, of SMS users guide
-    std::string cmd = "%AVI%-%BAHRA%-%LOWER%-%AVI%";
-    string expected = "_avi-_bahra-_10-_avi";
+    std::string cmd      = "%AVI%-%BAHRA%-%LOWER%-%AVI%";
+    std::string expected = "_avi-_bahra-_10-_avi";
     BOOST_CHECK_MESSAGE(s->variable_substitution(cmd, user_variables), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
@@ -355,7 +354,7 @@ BOOST_AUTO_TEST_CASE(test_user_variable_substitution_1) {
     s->addVariable(Variable("AVI", "avi"));
 
     NameValueMap user_variables;
-    user_variables.insert(std::make_pair(string("AVI:goblly gook"), string("avtar")));
+    user_variables.insert(std::make_pair(std::string("AVI:goblly gook"), std::string("avtar")));
 
     // new rules
     // %<VAR>:substitute %
@@ -478,7 +477,7 @@ BOOST_AUTO_TEST_CASE(test_generated_variable_substitution) {
 
     // cout << defs;
 
-    string value;
+    std::string value;
     value.clear();
     t->findParentVariableValue(ecf::environment::ECF_JOBOUT, value);
     BOOST_CHECK_MESSAGE(value == "/fred/bill/joe/suite/f/t.0",

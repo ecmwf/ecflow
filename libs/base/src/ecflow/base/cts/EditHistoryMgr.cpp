@@ -15,10 +15,6 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/node/Defs.hpp"
 
-using namespace std;
-using namespace boost;
-using namespace ecf;
-
 EditHistoryMgr::EditHistoryMgr(const ClientToServerCmd* c, AbstractServer* a)
     : cts_cmd_(c),
       as_(a),
@@ -49,13 +45,13 @@ EditHistoryMgr::~EditHistoryMgr() {
                 if (!cts_cmd_->is_mutable()) {
                     std::string ss;
                     cts_cmd_->print(ss);
-                    cout << "cmd " << ss << " should return true from isWrite() ******************\n";
-                    cout << "Read only command is making data changes to defs ?????\n";
-                    cout << "Ecf::state_change_no() " << Ecf::state_change_no() << " Ecf::modify_change_no() "
-                         << Ecf::modify_change_no() << "\n";
-                    cout << "state_change_no_       " << state_change_no_ << " modify_change_no_       "
-                         << modify_change_no_ << "\n";
-                    cout.flush();
+                    std::cout << "cmd " << ss << " should return true from isWrite() ******************\n";
+                    std::cout << "Read only command is making data changes to defs ?????\n";
+                    std::cout << "Ecf::state_change_no() " << Ecf::state_change_no() << " Ecf::modify_change_no() "
+                              << Ecf::modify_change_no() << "\n";
+                    std::cout << "state_change_no_       " << state_change_no_ << " modify_change_no_       "
+                              << modify_change_no_ << "\n";
+                    std::cout.flush();
                 }
             }
         }

@@ -27,7 +27,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 ///
@@ -50,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_kill_cmd) {
     DurationTimer timer;
     TestClean clean_at_start_and_end;
     BOOST_REQUIRE_MESSAGE(kill_cmd(true), " kill of task '/test_kill_cmd/family/t0' failed");
-    cout << timer.duration() << "\n";
+    std::cout << timer.duration() << "\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_hierarchical_kill_cmd) {
@@ -59,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_hierarchical_kill_cmd) {
     DurationTimer timer;
     TestClean clean_at_start_and_end;
     BOOST_REQUIRE_MESSAGE(kill_cmd(false), "kill of suite '/test_kill_cmd' failed");
-    cout << timer.duration() << "\n";
+    std::cout << timer.duration() << "\n";
 }
 
 static bool kill_cmd(bool kill_task) {

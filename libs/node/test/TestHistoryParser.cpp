@@ -17,7 +17,6 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -34,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_defs_history_parser) {
     ECF_NAME_THIS_TEST();
 
     {
-        string str1("MSG:[12:03:55 21.8.2013] --shutdown=yes :map");
+        std::string str1("MSG:[12:03:55 21.8.2013] --shutdown=yes :map");
         DefsHistoryParser parser;
         parser.parse(str1);
 
@@ -47,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_defs_history_parser) {
                                 << dump(parser.parsed_messages()));
     }
     {
-        string str1("MSG:[12:03:55 21.8.2013] --shutdown=yes :mapMSG:[12:34:08 21.8.2013] --restart :map");
+        std::string str1("MSG:[12:03:55 21.8.2013] --shutdown=yes :mapMSG:[12:34:08 21.8.2013] --restart :map");
         DefsHistoryParser parser;
         parser.parse(str1);
 
@@ -60,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_defs_history_parser) {
                                 << dump(parser.parsed_messages()));
     }
     {
-        string str1(
+        std::string str1(
             "MSG:[12:03:55 21.8.2013] --shutdown=yes :mapMSG:[12:34:08 21.8.2013] --restart :mapMSG:[12:47:22 "
             "21.8.2013] --alter add variable SMSNODE 0 /  :mapMSG:[13:38:45 21.8.2013] --alter add variable SMSTRYNO 0 "
             "/  :mapMSG:[13:44:09 21.8.2013] --alter add variable SMSHOME /vol/emos/output /  :mapMSG:[15:36:14 "
@@ -83,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_defs_history_parser) {
                                 << dump(parser.parsed_messages()));
     }
     {
-        string str1(
+        std::string str1(
             "MSG:[12:03:55 21.8.2013] --shutdown=yes :mapLOG:[12:34:08 21.8.2013] --restart :mapERR:[12:47:22 "
             "21.8.2013] --alter add variable SMSNODE 0 /  :mapWAR:[13:38:45 21.8.2013] --alter add variable SMSTRYNO 0 "
             "/  :mapDBG:[13:44:09 21.8.2013] --alter add variable SMSHOME /vol/emos/output /  :mapOTH:[15:36:14 "

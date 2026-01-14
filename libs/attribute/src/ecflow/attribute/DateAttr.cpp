@@ -20,7 +20,6 @@
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Serialization.hpp"
 
-using namespace std;
 using namespace ecf;
 
 //==========================================================================================

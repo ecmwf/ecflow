@@ -25,7 +25,6 @@
 #include "ecflow/node/parser/MirrorParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 void Node::changeVariable(const std::string& name, const std::string& value) {
     auto found = ecf::algorithm::find_by_name(vars_, name);

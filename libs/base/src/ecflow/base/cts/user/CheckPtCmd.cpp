@@ -21,8 +21,6 @@
 #include "ecflow/core/Converter.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 void CheckPtCmd::print(std::string& os) const {
@@ -133,7 +131,7 @@ static const char* arg_desc() {
 }
 
 void CheckPtCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CtsApi::checkPtDefsArg(), po::value<string>()->implicit_value(string("")), arg_desc());
+    desc.add_options()(CtsApi::checkPtDefsArg(), po::value<std::string>()->implicit_value(std::string("")), arg_desc());
 }
 
 static int parse_check_pt_interval(const std::string& the_arg) {
@@ -180,13 +178,13 @@ static int parse_check_pt_alarm_time(const std::string& the_arg, int colon_pos) 
 
 void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     if (ace->debug()) {
-        cout << "CheckPtCmd::create\n";
+        std::cout << "CheckPtCmd::create\n";
     }
 
     std::string the_arg = vm[theArg()].as<std::string>();
 
     if (ace->debug()) {
-        cout << "  CheckPtCmd::create arg = " << the_arg << "\n";
+        std::cout << "  CheckPtCmd::create arg = " << the_arg << "\n";
     }
 
     ecf::CheckPt::Mode m         = ecf::CheckPt::UNDEFINED;
@@ -245,7 +243,7 @@ void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     }
 
     if (ace->debug()) {
-        cout << "  CheckPtCmd::create mode = " << m << " check_pt_interval = " << check_pt_interval << "\n";
+        std::cout << "  CheckPtCmd::create mode = " << m << " check_pt_interval = " << check_pt_interval << "\n";
     }
 
     cmd = std::make_shared<CheckPtCmd>(m, check_pt_interval, check_pt_save_time_alarm);

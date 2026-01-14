@@ -20,7 +20,6 @@
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_ZOMBIE  1
 

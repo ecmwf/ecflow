@@ -16,7 +16,6 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // init static's

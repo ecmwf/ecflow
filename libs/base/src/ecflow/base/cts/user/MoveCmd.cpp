@@ -26,8 +26,6 @@
 #endif
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 namespace {
@@ -200,7 +198,7 @@ const char* MoveCmd::desc() {
 }
 
 void MoveCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(MoveCmd::arg(), po::value<vector<string>>()->multitoken(), MoveCmd::desc());
+    desc.add_options()(MoveCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), MoveCmd::desc());
 }
 
 void MoveCmd::create(Cmd_ptr&, boost::program_options::variables_map&, AbstractClientEnv*) const {

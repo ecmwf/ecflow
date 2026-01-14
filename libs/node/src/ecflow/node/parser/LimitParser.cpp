@@ -17,8 +17,6 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-using namespace std;
-
 bool LimitParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // limit name the_limit # value path1 path2
     size_t line_tokens_size = lineTokens.size();

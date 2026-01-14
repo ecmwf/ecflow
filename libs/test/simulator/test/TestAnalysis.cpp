@@ -21,7 +21,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Simulator)
@@ -32,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(T_Analysis)
 /// to Test Simulator. This is a separate exe
 
 BOOST_AUTO_TEST_CASE(test_analysys) {
-    cout << "Simulator:: ...test_analysys\n";
+    std::cout << "Simulator:: ...test_analysys\n";
     // suite suite
     //   family family
     //     task t1

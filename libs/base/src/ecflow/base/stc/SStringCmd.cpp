@@ -12,9 +12,6 @@
 
 #include <iostream>
 
-using namespace std;
-using namespace boost;
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SStringCmd::equals(ServerToClientCmd* rhs) const {
@@ -34,7 +31,7 @@ std::string SStringCmd::print() const {
 
 bool SStringCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
     if (debug) {
-        cout << "  SStringCmd::handle_server_response str.size()= " << str_.size() << "\n";
+        std::cout << "  SStringCmd::handle_server_response str.size()= " << str_.size() << "\n";
     }
     if (server_reply.cli()) {
         // The following uses std::endl to ensure the output is flushed.

@@ -27,7 +27,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -73,10 +72,10 @@ BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
     suite_ptr suite                        = suiteVec.back();
     BOOST_CHECK_MESSAGE(suite->state() == NState::UNKNOWN, " Initial suite state should be NState::UNKNOWN");
 
-    string suite1_family1_a  = "suite1/family1/a";
-    string suite1_family1_b  = "suite1/family1/b";
-    string suite1_family2_aa = "suite1/family2/aa";
-    string suite1_family2_bb = "suite1/family2/bb";
+    std::string suite1_family1_a  = "suite1/family1/a";
+    std::string suite1_family1_b  = "suite1/family1/b";
+    std::string suite1_family2_aa = "suite1/family2/aa";
+    std::string suite1_family2_bb = "suite1/family2/bb";
 
     // Pick the suite that is allowed to resolve dependencies
     // The suite must be loaded and be in state UNKNOWN or COMPLETE

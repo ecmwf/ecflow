@@ -29,8 +29,6 @@
 #include "ecflow/core/Str.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 // #define DEBUG_GROUP_CMD 1
@@ -45,7 +43,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
     }
     if (clientEnv->debug()) {
         for (const auto& i : individualCmdVec) {
-            cout << "  CHILD COMMAND = " << i << "\n";
+            std::cout << "  CHILD COMMAND = " << i << "\n";
         }
     }
 
@@ -123,7 +121,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         CommandLine cl(theArgs);
 
         if (clientEnv->debug()) {
-            cout << "  PROCESSING COMMAND = '" << subCmd << "' " << cl << "\n";
+            std::cout << "  PROCESSING COMMAND = '" << subCmd << "' " << cl << "\n";
         }
 
         // Treat each sub command  separately
@@ -426,12 +424,12 @@ const char* GroupCTSCmd::desc() {
 }
 
 void GroupCTSCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(GroupCTSCmd::arg(), po::value<string>(), GroupCTSCmd::desc());
+    desc.add_options()(GroupCTSCmd::arg(), po::value<std::string>(), GroupCTSCmd::desc());
 }
 
 void GroupCTSCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     if (clientEnv->debug()) {
-        cout << "  " << arg() << ": Group Cmd '" << vm[arg()].as<std::string>() << "'\n";
+        std::cout << "  " << arg() << ": Group Cmd '" << vm[arg()].as<std::string>() << "'\n";
     }
 
     // Parse and split commands and then parse individually. Assumes commands are separated by ';'

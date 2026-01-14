@@ -26,8 +26,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 bool QueueCmd::equals(ClientToServerCmd* rhs) const {
@@ -213,16 +211,16 @@ const char* QueueCmd::desc() {
 }
 
 void QueueCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(QueueCmd::arg(), po::value<vector<string>>()->multitoken(), QueueCmd::desc());
+    desc.add_options()(QueueCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), QueueCmd::desc());
 }
 void QueueCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (clientEnv->debug()) {
         dumpVecArgs(QueueCmd::arg(), args);
-        cout << "  QueueCmd::create " << QueueCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
-             << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
-             << clientEnv->task_try_no() << ")\n";
+        std::cout << "  QueueCmd::create " << QueueCmd::arg() << " task_path(" << clientEnv->task_path()
+                  << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
+                  << ") try_no(" << clientEnv->task_try_no() << ")\n";
     }
 
     // expect:
@@ -247,9 +245,9 @@ void QueueCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         }
     }
     if (clientEnv->debug()) {
-        cout << "  QueueCmd::create "
-             << "queue-name:(" << queue_name << ") action:(" << action << ") step:(" << step
-             << ") path_to_node_with_queue:(" << path_to_node_with_queue << ")\n";
+        std::cout << "  QueueCmd::create "
+                  << "queue-name:(" << queue_name << ") action:(" << action << ") step:(" << step
+                  << ") path_to_node_with_queue:(" << path_to_node_with_queue << ")\n";
     }
 
     if (args.size() == 4 && path_to_node_with_queue.empty()) {
@@ -285,7 +283,7 @@ void QueueCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         throw std::runtime_error("QueueCmd: step should not be used with active, reset or no_of_aborted.");
     }
 
-    string msg;
+    std::string msg;
     if (!Str::valid_name(queue_name, msg)) {
         throw std::runtime_error("QueueCmd: Invalid queue name : " + msg);
     }

@@ -30,7 +30,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG_TEST_WAITER 1
@@ -396,7 +395,7 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
 
                 if (verifyAttr && verify_attribute_verification()) {
                     // Do verification of expected state changes
-                    string localErrorMessage;
+                    std::string localErrorMessage;
                     BOOST_REQUIRE_MESSAGE(full_defs->verification(localErrorMessage),
                                           localErrorMessage << "\n"
                                                             << ecf::as_string(*full_defs, PrintStyle::STATE));
@@ -408,11 +407,11 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
         // make sure test does not take too long.
         if (assertTimer.duration() >= assertTimer.timeConstraint()) {
             // Give clues why we are not finishing on time, by using Why and by dumping out node tree
-            cout << "Test time " << assertTimer.duration() << " taking longer than time constraint of "
-                 << assertTimer.timeConstraint() << " aborting\n";
-            cout << "   completeSuiteCnt = " << completeSuiteCnt << "\n";
-            cout << "   full_defs->suiteVec().size() = " << full_defs->suiteVec().size() << "\n";
-            cout << "   hasAutoCancel = " << hasAutoCancel << "\n";
+            std::cout << "Test time " << assertTimer.duration() << " taking longer than time constraint of "
+                      << assertTimer.timeConstraint() << " aborting\n";
+            std::cout << "   completeSuiteCnt = " << completeSuiteCnt << "\n";
+            std::cout << "   full_defs->suiteVec().size() = " << full_defs->suiteVec().size() << "\n";
+            std::cout << "   hasAutoCancel = " << hasAutoCancel << "\n";
             std::cout << "update-calendar-count(" << serverUpdateCalendarCount_ << ")\n";
             std::cout << "WHY:\n";
             WhyCmd reason(full_defs, "" /* do a top down why */);

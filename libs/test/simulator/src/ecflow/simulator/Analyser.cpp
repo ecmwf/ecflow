@@ -16,8 +16,6 @@
 #include "ecflow/simulator/DefsAnalyserVisitor.hpp"
 #include "ecflow/simulator/FlatAnalyserVisitor.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 Analyser::Analyser() = default;
@@ -45,7 +43,7 @@ void Analyser::run(Defs& theDefs) {
 
         std::string fileName = "defs.depth";
 
-        std::ofstream file(fileName.c_str(), ios::out);
+        std::ofstream file(fileName.c_str(), std::ios::out);
         if (!file.is_open()) {
             throw std::runtime_error("Analyser::run: Failed to open file \"" + fileName + "\"");
         }

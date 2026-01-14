@@ -24,7 +24,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace boost;
 namespace po = boost::program_options;
 
 DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force) : force_(force) {

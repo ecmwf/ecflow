@@ -40,8 +40,6 @@
 #include "ecflow/node/parser/MirrorParser.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 static std::string dump_args(const std::vector<std::string>& options, const std::vector<std::string>& paths) {
@@ -571,8 +569,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 }
                 case AlterCmd::ADD_INLIMIT: {
-                    string path_to_limit; // This can be empty
-                    string limitName;
+                    std::string path_to_limit; // This can be empty
+                    std::string limitName;
                     if (!Extract::pathAndName(name_, path_to_limit, limitName)) {
                         throw std::runtime_error("AlterCmd::ADD_INLIMIT: Invalid inlimit : " + name_);
                     }
@@ -739,13 +737,13 @@ const char* AlterCmd::desc() {
 
 void AlterCmd::addOption(boost::program_options::options_description& desc) const {
     // Important: this option is, in practice, multi-token (and thus should use
-    // po::value<vector<string>>()->multitoken()). However, because of the special handling
+    // po::value<std::vector<std::string>>()->multitoken()). However, because of the special handling
     // necessary to allow positional values, such as "--help", a custom `style_parser` is used
     // instead when parsing the CLI options -- see ClientOptions for details.
-    desc.add_options()(AlterCmd::arg(), po::value<vector<string>>(), AlterCmd::desc());
+    desc.add_options()(AlterCmd::arg(), po::value<std::vector<std::string>>(), AlterCmd::desc());
 }
 void AlterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(AlterCmd::arg(), args);
@@ -848,7 +846,7 @@ void AlterCmd::createAdd(Cmd_ptr& cmd, std::vector<std::string>& options, std::v
         throw std::runtime_error(ss.str());
     }
 
-    string name, value;
+    std::string name, value;
     try {
         extract_name_and_value_for_add(theAttrType, name, value, options, paths);
         check_for_add(theAttrType, name, value);
@@ -1063,8 +1061,8 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
             // options[1]  - [ inlimit ]
             // options[2]  - [ path_to_limit:limit_name ]  ---> name
             // options[3]  - integer (optional)            ---> value
-            string path_to_limit; // This can be empty
-            string limitName;
+            std::string path_to_limit; // This can be empty
+            std::string limitName;
             if (!Extract::pathAndName(name, path_to_limit, limitName)) {
                 throw std::runtime_error("AlterCmd add inlimit Invalid inlimit : " + name);
             }
@@ -1289,8 +1287,8 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
                 // name can be:
                 //    limit_name
                 //    /path/to/limit:limit_name
-                string path_to_limit; // This can be empty
-                string limitName;
+                std::string path_to_limit; // This can be empty
+                std::string limitName;
                 if (!Extract::pathAndName(name, path_to_limit, limitName)) {
                     throw std::runtime_error("AlterCmd::DEL_INLIMIT : Invalid inlimit : " + name);
                 }

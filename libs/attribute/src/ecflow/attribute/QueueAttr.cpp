@@ -17,7 +17,6 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
 using namespace ecf;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +33,7 @@ QueueAttr& QueueAttr::EMPTY1() {
 QueueAttr::QueueAttr(const std::string& name, const std::vector<std::string>& theQueue)
     : theQueue_(theQueue),
       name_(name) {
-    string msg;
+    std::string msg;
     if (!Str::valid_name(name, msg)) {
         throw std::runtime_error("QueueAttr::QueueAttr: Invalid queue name : " + msg);
     }
@@ -279,7 +278,7 @@ void QueueAttr::set_state_vec(const std::vector<NState::State>& state_vec) {
 }
 
 void QueueAttr::set_name(const std::string& name) {
-    string msg;
+    std::string msg;
     if (!Str::valid_name(name, msg)) {
         throw std::runtime_error("QueueAttr::set_name: Invalid queue name : " + msg);
     }

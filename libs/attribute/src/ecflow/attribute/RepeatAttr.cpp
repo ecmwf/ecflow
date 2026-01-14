@@ -21,7 +21,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
-using namespace std;
 using namespace ecf;
 
 const Repeat& Repeat::EMPTY() {
@@ -350,7 +349,7 @@ std::string RepeatDate::valueAsString() const {
     catch (const ecf::bad_conversion&) {
         LOG_ASSERT(false, "RepeatDate::valueAsString(): could not convert value " << value_ << " to a string");
     }
-    return string();
+    return std::string();
 }
 
 std::string RepeatDate::value_as_string(int index) const {
@@ -360,7 +359,7 @@ std::string RepeatDate::value_as_string(int index) const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string();
 }
 
 std::string RepeatDate::next_value_as_string() const {
@@ -372,7 +371,7 @@ std::string RepeatDate::next_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string();
 }
 
 std::string RepeatDate::prev_value_as_string() const {
@@ -384,7 +383,7 @@ std::string RepeatDate::prev_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string();
 }
 
 void RepeatDate::increment() {
@@ -988,7 +987,7 @@ std::string RepeatDateList::valueAsString() const {
 
 std::string RepeatDateList::value_as_string(int index) const {
     if (list_.empty()) {
-        return string("0");
+        return std::string("0");
     }
     if (index >= 0 && index < static_cast<int>(list_.size())) {
         return ecf::convert_to<std::string>(list_[index]);
@@ -1004,7 +1003,7 @@ std::string RepeatDateList::value_as_string(int index) const {
 
 std::string RepeatDateList::next_value_as_string() const {
     if (list_.empty()) {
-        return string("0");
+        return std::string("0");
     }
 
     int index = currentIndex_;
@@ -1014,7 +1013,7 @@ std::string RepeatDateList::next_value_as_string() const {
 
 std::string RepeatDateList::prev_value_as_string() const {
     if (list_.empty()) {
-        return string("0");
+        return std::string("0");
     }
 
     int index = currentIndex_;
@@ -1276,7 +1275,7 @@ std::string RepeatInteger::valueAsString() const {
     catch (const ecf::bad_conversion&) {
         LOG_ASSERT(false, "");
     }
-    return string();
+    return std::string();
 }
 
 std::string RepeatInteger::value_as_string(int index) const {
@@ -1286,7 +1285,7 @@ std::string RepeatInteger::value_as_string(int index) const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string();
 }
 
 std::string RepeatInteger::next_value_as_string() const {
@@ -1297,7 +1296,7 @@ std::string RepeatInteger::next_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string();
 }
 
 std::string RepeatInteger::prev_value_as_string() const {
@@ -1308,7 +1307,7 @@ std::string RepeatInteger::prev_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string();
 }
 
 //======================================================================================
@@ -1428,7 +1427,7 @@ std::string RepeatEnumerated::value_as_string(int index) const {
 
 std::string RepeatEnumerated::next_value_as_string() const {
     if (theEnums_.empty()) {
-        return string();
+        return std::string();
     }
 
     int index = currentIndex_;
@@ -1444,7 +1443,7 @@ std::string RepeatEnumerated::next_value_as_string() const {
 
 std::string RepeatEnumerated::prev_value_as_string() const {
     if (theEnums_.empty()) {
-        return string();
+        return std::string();
     }
 
     int index = currentIndex_;
@@ -1597,7 +1596,7 @@ std::string RepeatString::next_value_as_string() const {
         }
         return theStrings_[index];
     }
-    return string();
+    return std::string();
 }
 
 std::string RepeatString::prev_value_as_string() const {
@@ -1612,7 +1611,7 @@ std::string RepeatString::prev_value_as_string() const {
         }
         return theStrings_[index];
     }
-    return string();
+    return std::string();
 }
 
 void RepeatString::increment() {

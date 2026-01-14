@@ -18,8 +18,6 @@
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 std::string Openssl::info() const {
@@ -285,14 +283,14 @@ void Openssl::check_server_certificates() const {
     //   cout << "Openssl::check_server_certificates: ssl'" << ssl_ << "'\n";
 
     {
-        string server_key = key();
+        std::string server_key = key();
         if (!fs::exists(server_key)) {
             throw std::runtime_error("Error: The password protected private server key file '" + server_key +
                                      "' does not exist\n\n" + ssl_info());
         }
     }
     {
-        string server_pem = pem();
+        std::string server_pem = pem();
         if (!fs::exists(server_pem)) {
             throw std::runtime_error("Error: The dhparam file(pem) '" + server_pem + "' does not exist\n\n" +
                                      ssl_info());

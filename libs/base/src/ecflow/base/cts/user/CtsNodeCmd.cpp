@@ -26,8 +26,6 @@
 #endif
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 bool CtsNodeCmd::why_cmd(std::string& nodePath) const {
@@ -348,29 +346,32 @@ const char* migrate_desc() {
 void CtsNodeCmd::addOption(boost::program_options::options_description& desc) const {
     switch (api_) {
         case CtsNodeCmd::GET: {
-            desc.add_options()(CtsApi::getArg(), po::value<string>()->implicit_value(string()), get_desc());
+            desc.add_options()(CtsApi::getArg(), po::value<std::string>()->implicit_value(std::string()), get_desc());
             break;
         }
         case CtsNodeCmd::GET_STATE: {
             desc.add_options()(
-                CtsApi::get_state_arg(), po::value<string>()->implicit_value(string()), get_state_desc());
+                CtsApi::get_state_arg(), po::value<std::string>()->implicit_value(std::string()), get_state_desc());
             break;
         }
         case CtsNodeCmd::MIGRATE: {
-            desc.add_options()(CtsApi::migrate_arg(), po::value<string>()->implicit_value(string()), migrate_desc());
+            desc.add_options()(
+                CtsApi::migrate_arg(), po::value<std::string>()->implicit_value(std::string()), migrate_desc());
             break;
         }
         case CtsNodeCmd::JOB_GEN: {
-            desc.add_options()(CtsApi::job_genArg(), po::value<string>()->implicit_value(string()), job_gen_desc());
+            desc.add_options()(
+                CtsApi::job_genArg(), po::value<std::string>()->implicit_value(std::string()), job_gen_desc());
             break;
         }
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY: {
-            desc.add_options()(
-                CtsApi::checkJobGenOnlyArg(), po::value<string>()->implicit_value(string()), job_gen_only_desc());
+            desc.add_options()(CtsApi::checkJobGenOnlyArg(),
+                               po::value<std::string>()->implicit_value(std::string()),
+                               job_gen_only_desc());
             break;
         }
         case CtsNodeCmd::WHY: {
-            desc.add_options()(CtsApi::whyArg(), po::value<string>()->implicit_value(string()), why_desc());
+            desc.add_options()(CtsApi::whyArg(), po::value<std::string>()->implicit_value(std::string()), why_desc());
             break;
         }
         case CtsNodeCmd::NO_CMD:
@@ -386,7 +387,7 @@ void CtsNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     assert(api_ != CtsNodeCmd::NO_CMD);
 
     if (ac->debug()) {
-        cout << "  CtsNodeCmd::create = '" << theArg() << "'.\n";
+        std::cout << "  CtsNodeCmd::create = '" << theArg() << "'.\n";
     }
 
     std::string absNodePath = vm[theArg()].as<std::string>();

@@ -19,8 +19,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 // #define DEBUG_ZOMBIE 1
@@ -197,7 +195,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
                 // Client then sends init again. In this case rather than treating it as a zombie, we will let it
                 // through providing the password and pid matches.
                 if (!password_missmatch_ && !pid_missmatch_) {
-                    string ret = " [ overloaded || --init*2 ](pid and passwd match) : chd:";
+                    std::string ret = " [ overloaded || --init*2 ](pid and passwd match) : chd:";
                     ret += ecf::Child::to_string(child_type());
                     ret += " : ";
                     ret += path_to_submittable_;
@@ -235,7 +233,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
                 submittable_->get_flag().clear(ecf::Flag::ZOMBIE);
                 server->zombie_ctrl().remove_by_path(path_to_submittable_);
 
-                string ret = " [ overloaded || zombie || --complete*2 ] : chd:";
+                std::string ret = " [ overloaded || zombie || --complete*2 ] : chd:";
                 ret += ecf::Child::to_string(child_type());
                 ret += " : ";
                 ret += path_to_submittable_;
@@ -263,7 +261,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
 
                     server->zombie_ctrl().remove(submittable_);
 
-                    string ret = " [ overloaded || --abort*2 ] (pid and passwd match) : chd:";
+                    std::string ret = " [ overloaded || --abort*2 ] (pid and passwd match) : chd:";
                     ret += ecf::Child::to_string(child_type());
                     ret += " : ";
                     ret += path_to_submittable_;

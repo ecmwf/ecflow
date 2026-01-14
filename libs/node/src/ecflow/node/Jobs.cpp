@@ -21,7 +21,6 @@
 #include "ecflow/node/System.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_JOB_SUBMISSION 1
 

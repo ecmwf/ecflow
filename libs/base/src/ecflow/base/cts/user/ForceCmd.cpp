@@ -25,8 +25,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 // ===================================================================================
@@ -115,8 +113,8 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
         false; // will add edit history ourselves. Quicker than EditHistoryMgr when we have > 200000 paths
 
     Defs* defs = as->defs().get();
-    string the_path;
-    string the_event;
+    std::string the_path;
+    std::string the_event;
     std::stringstream error_ss;
     for (const auto& path : paths_) {
 
@@ -244,10 +242,10 @@ const char* ForceCmd::desc() {
 }
 
 void ForceCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(ForceCmd::arg(), po::value<vector<string>>()->multitoken(), ForceCmd::desc());
+    desc.add_options()(ForceCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), ForceCmd::desc());
 }
 void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(ForceCmd::arg(), args);
@@ -316,7 +314,7 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         // When set or clear used the path needs to include the name of the event:
         size_t path_size = paths.size();
         for (size_t i = 0; i < path_size; i++) {
-            string the_event, the_path;
+            std::string the_event, the_path;
             Extract::pathAndName(paths[i], the_path, the_event);
             if (the_path.empty() || the_event.empty()) {
                 std::stringstream ss;

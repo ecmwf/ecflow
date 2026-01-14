@@ -21,8 +21,6 @@
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force)
@@ -52,7 +50,7 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
     client_defs->write_to_string(clientDefs_, PrintStyle::NET);
 
     // Out put any warning's to standard output
-    cout << warningMsg;
+    std::cout << warningMsg;
 }
 
 ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
@@ -91,7 +89,7 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
     client_defs->write_to_string(clientDefs_, PrintStyle::NET);
 
     // Out put any warning's to standard output
-    cout << warningMsg;
+    std::cout << warningMsg;
 }
 
 bool ReplaceNodeCmd::equals(ClientToServerCmd* rhs) const {
@@ -219,12 +217,13 @@ const char* ReplaceNodeCmd::desc() {
 }
 
 void ReplaceNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(ReplaceNodeCmd::arg(), po::value<vector<string>>()->multitoken(), ReplaceNodeCmd::desc());
+    desc.add_options()(
+        ReplaceNodeCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), ReplaceNodeCmd::desc());
 }
 void ReplaceNodeCmd::create(Cmd_ptr& cmd,
                             boost::program_options::variables_map& vm,
                             AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (clientEnv->debug()) {
         dumpVecArgs(ReplaceNodeCmd::arg(), args);

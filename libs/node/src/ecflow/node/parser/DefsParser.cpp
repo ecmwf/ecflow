@@ -49,13 +49,12 @@
 #include "ecflow/node/parser/ZombieAttrParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_PARSER 1
 
 template <class T>
-ostream& operator<<(ostream& os, const vector<T>& v) {
-    copy(v.begin(), v.end(), ostream_iterator<T>(cout, ","));
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+    copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, ","));
     return os;
 }
 

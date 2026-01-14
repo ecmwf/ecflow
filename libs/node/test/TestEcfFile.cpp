@@ -27,7 +27,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 boost::test_tools::assertion_result is_testing_on_cray([[maybe_unused]] boost::unit_test::test_unit_id id) {
@@ -75,7 +74,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -105,18 +105,18 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string header   = "%include <simple_head.h>\n";
-    string body     = "#body\n";
-    string tail     = "%include <simple_tail.h>\n";
-    string ecf_file = header;
+    std::string header   = "%include <simple_head.h>\n";
+    std::string body     = "#body\n";
+    std::string tail     = "%include <simple_tail.h>\n";
+    std::string ecf_file = header;
     ecf_file += body;
     ecf_file += tail;
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
         BOOST_CHECK_MESSAGE(false, "Expected job creation to succeed " << e.what());
     }
 
-    string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+    std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
     BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
 
     // Open the job file/
@@ -158,7 +158,8 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
 
     // This tests for a regression where, *NOT* all the include file were processed.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -185,14 +186,14 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
     theDefs.beginAll();
 
     // Create the ecf file; *NOTE* <a.h> includes <b.h>
-    string ecf_file = "%include <a.h>\n";
+    std::string ecf_file = "%include <a.h>\n";
     ecf_file += "%PAR_EXE:parallel% --gnu --verbose -j $PAR_THR ${run:-0} ::: $(seq %PAR_BEG:0% %PAR_END:50%)\n";
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -210,7 +211,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
         BOOST_CHECK_MESSAGE(false, "Expected job creation to succeed " << e.what());
     }
 
-    string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+    std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
     BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
 
     // Open the job file and check job file contents match what we expected
@@ -231,7 +232,8 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     ECF_NAME_THIS_TEST();
 
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -262,12 +264,12 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string header = "%include <simple_head.h>\n";
-    string body   = "#%body%\n";
+    std::string header = "%include <simple_head.h>\n";
+    std::string body   = "#%body%\n";
     body += "%manual\nThis is a manual\n%end\n";
     body += "%comment\nThis is a comment\n%end\n";
-    string tail     = "%include <simple_tail.h>\n";
-    string ecf_file = header;
+    std::string tail     = "%include <simple_tail.h>\n";
+    std::string ecf_file = header;
     ecf_file += body;
     ecf_file += tail;
 
@@ -280,11 +282,11 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     // *******************************************************************************************************
     // CREATE the file after locatedEcfFile() otherwise it will just use script as is, and NOT ECF_SCRIPT_CMD
     // *******************************************************************************************************
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -300,7 +302,7 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
             BOOST_CHECK_MESSAGE(false, "Expected job creation to succeed " << e.what());
         }
 
-        string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+        std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
         BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
 
         // Open the job file and check contents
@@ -317,12 +319,12 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     {
         task_t1->update_generated_variables();
 
-        string ecf_file_location = ecf_home + task_t1->absNodePath() + ".ecf";
+        std::string ecf_file_location = ecf_home + task_t1->absNodePath() + ".ecf";
         std::vector<std::string> user_edit_file;
         BOOST_CHECK_MESSAGE(File::splitFileIntoLines(ecf_file_location, user_edit_file),
                             "Could not open file " << ecf_file_location);
 
-        string processed_file;
+        std::string processed_file;
         try {
             ecfFile.pre_process_user_file(user_edit_file, processed_file);
         }
@@ -360,7 +362,7 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
         catch (std::exception& e) {
             BOOST_CHECK_MESSAGE(false, "Expected script extraction to succeed " << e.what());
         }
-        string the_ecf_file = ecfFile.ecf_file_origin_dump() + "\n" + ecf_file;
+        std::string the_ecf_file = ecfFile.ecf_file_origin_dump() + "\n" + ecf_file;
         BOOST_CHECK_MESSAGE(script == the_ecf_file,
                             "Expected:\n'" << the_ecf_file << "' but found:\n'" << script << "'");
     }
@@ -378,7 +380,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -413,18 +416,18 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string header   = "%include <head.h>\n\n";
-    string body     = "%include <common.h>\n\n";
-    string tail     = "%include <tail.h>\n# ===================================";
-    string ecf_file = header;
+    std::string header   = "%include <head.h>\n\n";
+    std::string body     = "%include <common.h>\n\n";
+    std::string tail     = "%include <tail.h>\n# ===================================";
+    std::string ecf_file = header;
     ecf_file += body;
     ecf_file += tail;
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -435,7 +438,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
     EcfFile ecfFile(task_t1.get(), ecf_file_location);
 
     /// Check generation of '.usr' and job files
-    string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+    std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
     JobsParam jobsParam(true); // spawn_jobs = false
     try {
         ecfFile.create_job(jobsParam);
@@ -461,7 +464,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -495,18 +499,18 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string header   = "%include <head.h>\n\n";
-    string body     = "%include <fred.h>\n\n"; // this is only defined in libs/node/test/data/includes2
-    string tail     = "%include <tail.h>\n# ===================================";
-    string ecf_file = header;
+    std::string header   = "%include <head.h>\n\n";
+    std::string body     = "%include <fred.h>\n\n"; // this is only defined in libs/node/test/data/includes2
+    std::string tail     = "%include <tail.h>\n# ===================================";
+    std::string ecf_file = header;
     ecf_file += body;
     ecf_file += tail;
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -517,7 +521,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
     EcfFile ecfFile(task_t1.get(), ecf_file_location);
 
     /// Check generation of job files
-    string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+    std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
     JobsParam jobsParam(true); // spawn_jobs = false
     try {
         ecfFile.create_job(jobsParam);
@@ -544,7 +548,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -576,25 +581,25 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string header   = "%include <head.h>\n\n";
-    string body     = "%include \"./t1.h\"\n\n";
-    string tail     = "%include <tail.h>\n# ===================================";
-    string ecf_file = header;
+    std::string header   = "%include <head.h>\n\n";
+    std::string body     = "%include \"./t1.h\"\n\n";
+    std::string tail     = "%include <tail.h>\n# ===================================";
+    std::string ecf_file = header;
     ecf_file += body;
     ecf_file += tail;
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    //   cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    //   std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
     // generate bill.h
-    string header_file          = "# in t1.h";
-    string header_file_location = ecf_home + task_t1->absNodePath() + ".h";
-    //   cout << "file_location = " << header_file_location << "\n";
+    std::string header_file          = "# in t1.h";
+    std::string header_file_location = ecf_home + task_t1->absNodePath() + ".h";
+    //   std::cout << "file_location = " << header_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::create(header_file_location, header_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(header_file_location), "Expected File " << header_file_location << " to exist");
 
@@ -605,7 +610,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
     EcfFile ecfFile(task_t1.get(), ecf_file_location);
 
     /// Check generation of job files
-    string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+    std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
     JobsParam jobsParam(true); // spawn_jobs = false
     try {
         ecfFile.create_job(jobsParam);
@@ -625,7 +630,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
         fs::remove_all(ecf_home + suite->absNodePath());
     }
     catch (const fs::filesystem_error& e) {
-        cout << "Could not remove directory " << ecf_home + suite->absNodePath() << " : " << e.what() << "\n";
+        std::cout << "Could not remove directory " << ecf_home + suite->absNodePath() << " : " << e.what() << "\n";
     }
 }
 
@@ -639,7 +644,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -670,12 +676,12 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string ecf_file          = "%include <used_variables.h>\n";
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file          = "%include <used_variables.h>\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -685,9 +691,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
     /// Now finally the test
     EcfFile ecfFile(task_t1.get(), ecf_file_location);
 
-    string file_with_used_variables;
+    std::string file_with_used_variables;
     ecfFile.edit_used_variables(file_with_used_variables);
-    string expected_used_variables =
+    std::string expected_used_variables =
         "%comment - ecf user variables\nESUITE = suite\n%end - ecf user variables\n%include <used_variables.h>\n";
     BOOST_CHECK_MESSAGE(file_with_used_variables == expected_used_variables,
                         "Expected\n"
@@ -711,7 +717,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -745,12 +752,12 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string ecf_file          = "%include <used_variables_with_comments.h>\n";
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file          = "%include <used_variables_with_comments.h>\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -760,10 +767,10 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
     /// Now finally the test
     EcfFile ecfFile(task_t1.get(), ecf_file_location);
 
-    string file_with_used_variables;
+    std::string file_with_used_variables;
     ecfFile.edit_used_variables(file_with_used_variables);
-    string expected_used_variables = "%comment - ecf user variables\nETASK = suite\nFRED = fred\n%end - ecf user "
-                                     "variables\n%include <used_variables_with_comments.h>\n";
+    std::string expected_used_variables = "%comment - ecf user variables\nETASK = suite\nFRED = fred\n%end - ecf user "
+                                          "variables\n%include <used_variables_with_comments.h>\n";
     BOOST_CHECK_MESSAGE(file_with_used_variables == expected_used_variables,
                         "Expected\n"
                             << expected_used_variables << "\nBut found:\n"
@@ -782,7 +789,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -815,12 +823,12 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string ecf_file          = "%include <used_variables_with_comments.h>\n";
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file          = "%include <used_variables_with_comments.h>\n";
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -831,7 +839,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
     EcfFile ecfFile(task_t1.get(), ecf_file_location);
 
     // Expect a throw since %FRED% is not defined, on the suite, but exists in used_variables_with_comments.h
-    string file_with_used_variables;
+    std::string file_with_used_variables;
     BOOST_REQUIRE_THROW(ecfFile.edit_used_variables(file_with_used_variables), std::runtime_error);
 
     /// Remove all the generated files
@@ -843,7 +851,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -861,9 +870,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     // endsuite
 
     NameValueMap expected_used_variables;
-    expected_used_variables.insert(std::make_pair(string("VAR1"), string("_val1_")));
-    expected_used_variables.insert(std::make_pair(string("VAR2"), string("_val2_")));
-    expected_used_variables.insert(std::make_pair(string("VAR2_fred"), string("<ignored>")));
+    expected_used_variables.insert(std::make_pair(std::string("VAR1"), std::string("_val1_")));
+    expected_used_variables.insert(std::make_pair(std::string("VAR2"), std::string("_val2_")));
+    expected_used_variables.insert(std::make_pair(std::string("VAR2_fred"), std::string("<ignored>")));
 
     // Create a defs file, where the task name mirrors the sms files in the given directory
     task_ptr task_t1 = Task::create("t1");
@@ -888,25 +897,25 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string header      = "%include <head.h>\n\n";
-    string manual_head = "%manual\n";
-    string manual_body = " manual. The contents of the manual\n";
+    std::string header      = "%include <head.h>\n\n";
+    std::string manual_head = "%manual\n";
+    std::string manual_body = " manual. The contents of the manual\n";
     manual_body += " end.\n";
-    string manual_tail  = "%end\n\n";
-    string comment_head = "%comment\n";
-    string comment_body = " comment. The contents of the comment\n";
+    std::string manual_tail  = "%end\n\n";
+    std::string comment_head = "%comment\n";
+    std::string comment_body = " comment. The contents of the comment\n";
     comment_body += " end.\n";
-    string comment_tail = "%end\n\n";
-    string ecf_body;
+    std::string comment_tail = "%end\n\n";
+    std::string ecf_body;
     {
         for (std::pair<std::string, std::string> p : expected_used_variables) {
             ecf_body += Ecf::MICRO() + p.first + Ecf::MICRO() + "\n";
         }
         ecf_body += "%VAR3:substitute_var%\n";
     }
-    string tail = "\n%include <tail.h>\n# ===================================";
+    std::string tail = "\n%include <tail.h>\n# ===================================";
 
-    string ecf_file = header;
+    std::string ecf_file = header;
     ecf_file += manual_head;
     ecf_file += manual_body;
     ecf_file += manual_tail;
@@ -916,11 +925,11 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     ecf_file += ecf_body;
     ecf_file += tail;
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
     //	cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -936,7 +945,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     std::string expected_manual = "#This is the manual from the head.h file\n manual. The contents of the manual\n "
                                   "end.\n#This is the manual from the tail.h file\n";
 
-    string theExtractedManual;
+    std::string theExtractedManual;
     try {
         ecfFile.manual(theExtractedManual);
     }
@@ -947,7 +956,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
                         "Expected \n'" << expected_manual << "' but found \n'" << theExtractedManual << "'");
 
     /// Test script extraction
-    string theExtractedScript;
+    std::string theExtractedScript;
     try {
         ecfFile.script(theExtractedScript);
     }
@@ -960,7 +969,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
                             << theExtractedScript << "\nsize = " << theExtractedScript.size());
 
     /// Test User edit script, this should return all the used variables, between %comment -%end
-    string file_with_used_variables;
+    std::string file_with_used_variables;
     ecfFile.edit_used_variables(file_with_used_variables);
     //    std::cout << "file_with_used_variables:----------------------------------------------------------------\n" <<
     //    file_with_used_variables << "\n";
@@ -968,12 +977,12 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
                         "Expected to find variable %comment on the very first line: but found at: "
                             << file_with_used_variables.find("%comment"));
     for (std::pair<std::string, std::string> p : expected_used_variables) {
-        BOOST_CHECK_MESSAGE(file_with_used_variables.find(p.first) != string::npos,
+        BOOST_CHECK_MESSAGE(file_with_used_variables.find(p.first) != std::string::npos,
                             "Expected to find variable" << p.first);
     }
 
     /// Test extraction of all the used variables
-    std::vector<string> script_lines;
+    std::vector<std::string> script_lines;
     Str::split(file_with_used_variables, script_lines, "\n"); //  will ignore empty lines, but will do for this case
     NameValueMap extracted_used_variables;
     EcfFile::extract_used_variables(extracted_used_variables, script_lines);
@@ -981,20 +990,22 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
         BOOST_CHECK_MESSAGE(extracted_used_variables.find(p.first) != extracted_used_variables.end(),
                             " expected to find variable " << p.first << " in the extracted variables\n");
     }
-    //    cout << "Expected:----\n"; for(p:expected_used_variables) { cout << p.first << " " << p.second << "\n";}
-    //    cout << "Actual:------\n"; for(p:extracted_used_variables) { cout << p.first << " " << p.second << "\n";}
+    //    std::cout << "Expected:----\n"; for(p:expected_used_variables) { std::cout << p.first << " " << p.second <<
+    //    "\n";} std::cout << "Actual:------\n"; for(p:extracted_used_variables) { std::cout << p.first << " " <<
+    //    p.second << "\n";}
 
     /// Test pre-processing
-    string pre_processed_file;
+    std::string pre_processed_file;
     ecfFile.pre_process(pre_processed_file);
     //	cout << "pre_processed_file\n" << pre_processed_file << "\n";
     BOOST_CHECK_MESSAGE(!pre_processed_file.empty(), "Expected file not to be empty");
-    BOOST_CHECK_MESSAGE(pre_processed_file.find("%include") == string::npos, "Expected all includes to be removed");
+    BOOST_CHECK_MESSAGE(pre_processed_file.find("%include") == std::string::npos,
+                        "Expected all includes to be removed");
 
     /// Check generation of '.usr' and job files
-    string man_file_location = ecf_home + task_t1->absNodePath() + File::MAN_EXTN();
-    string usr_file_location = ecf_home + task_t1->absNodePath() + File::USR_EXTN();
-    string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+    std::string man_file_location = ecf_home + task_t1->absNodePath() + File::MAN_EXTN();
+    std::string usr_file_location = ecf_home + task_t1->absNodePath() + File::USR_EXTN();
+    std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
     JobsParam jobsParam(true); // spawn_jobs = false
     jobsParam.set_user_edit_variables(extracted_used_variables);
     jobsParam.set_user_edit_file(script_lines);
@@ -1013,17 +1024,24 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
                         "Could not open job file " << job_file_location << " (" << strerror(errno) << ")");
 
     // Test the contents of the job file.
-    //    cout << "\n" << job_file_contents << "\n";
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PORT%") == string::npos, "Expected variables to be substituted:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_HOST%") == string::npos, "Expected variables to be substituted:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NAME%") == string::npos, "Expected variables to be substituted:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PASS%") == string::npos, "Expected variables to be substituted");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_TRYNO%") == string::npos, "Expected variables to be substituted");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%include") == string::npos, "Expected all includes to be expanded");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%manual") == string::npos, "%manual should have been removed");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%comment") == string::npos, "%comment should have been removed:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%end") == string::npos, "%end should have been removed:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ecfmicro") == string::npos, "%ecfmicro should have been removed:");
+    //    std::cout << "\n" << job_file_contents << "\n";
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PORT%") == std::string::npos,
+                        "Expected variables to be substituted:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_HOST%") == std::string::npos,
+                        "Expected variables to be substituted:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NAME%") == std::string::npos,
+                        "Expected variables to be substituted:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PASS%") == std::string::npos,
+                        "Expected variables to be substituted");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_TRYNO%") == std::string::npos,
+                        "Expected variables to be substituted");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%include") == std::string::npos,
+                        "Expected all includes to be expanded");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%manual") == std::string::npos, "%manual should have been removed");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%comment") == std::string::npos, "%comment should have been removed:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%end") == std::string::npos, "%end should have been removed:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ecfmicro") == std::string::npos,
+                        "%ecfmicro should have been removed:");
 
     /// Remove all the generated files
     fs::remove(man_file_location);
@@ -1038,7 +1056,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -1059,7 +1078,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
-    // cout << theDefs << "\n";
+    // std::cout << theDefs << "\n";
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
     theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
@@ -1069,16 +1088,16 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
     theDefs.beginAll();
 
     // generate the ecf file;
-    string header   = "%includenopp <head.h>\n";
-    string tail     = "%includenopp <tail.h>";
-    string ecf_file = header;
+    std::string header   = "%includenopp <head.h>\n";
+    std::string tail     = "%includenopp <tail.h>";
+    std::string ecf_file = header;
     ecf_file += tail;
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),
                         "Could not create missing dir " << ecf_file_location << "\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -1087,8 +1106,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
     EcfFile ecfFile(task_t1.get(), ecf_file_location);
 
     /// Check generation of job files
-    string man_file_location = ecf_home + task_t1->absNodePath() + File::MAN_EXTN();
-    string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+    std::string man_file_location = ecf_home + task_t1->absNodePath() + File::MAN_EXTN();
+    std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
     JobsParam jobsParam(true); // spawn_jobs = false
     try {
         ecfFile.create_job(jobsParam);
@@ -1105,18 +1124,19 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
 
     // Test the contents of the job file. We expect includenopp to be expanded
     // The contents should be left as is: i.e no pre_processing,hence expect to find %manual %comment, %VARIABLES%
-    // cout << "\n" << job_file_contents << "\n";
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%includenopp") == string::npos, "Expected all includes to be removed");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PORT%") != string::npos, "Expected variables as is:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_HOST%") != string::npos, "Expected variables as is:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NAME%") != string::npos, "Expected variables as is:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PASS%") != string::npos, "Expected variables as is:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_TRYNO%") != string::npos, "Expected variables as is:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%manual") != string::npos,
+    // std::cout << "\n" << job_file_contents << "\n";
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%includenopp") == std::string::npos,
+                        "Expected all includes to be removed");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PORT%") != std::string::npos, "Expected variables as is:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_HOST%") != std::string::npos, "Expected variables as is:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_NAME%") != std::string::npos, "Expected variables as is:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_PASS%") != std::string::npos, "Expected variables as is:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%ECF_TRYNO%") != std::string::npos, "Expected variables as is:");
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%manual") != std::string::npos,
                         "%manual should exist inside %nopp/%end pair:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%comment") != string::npos,
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%comment") != std::string::npos,
                         "%comment should exist inside %nopp/%end pair:");
-    BOOST_CHECK_MESSAGE(job_file_contents.find("%end") != string::npos,
+    BOOST_CHECK_MESSAGE(job_file_contents.find("%end") != std::string::npos,
                         "%end associated with comment and manual should exist:");
 
     // Remove all the generated files
@@ -1131,7 +1151,8 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -1156,7 +1177,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
-    // cout << theDefs << "\n";
+    // std::cout << theDefs << "\n";
 
     // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
     theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
@@ -1166,17 +1187,17 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
     theDefs.beginAll();
 
     // generate the dummy ecf file;
-    string header   = "%include <head.h>\n";
-    string tail     = "%include <tail.h>";
-    string ecf_file = header;
+    std::string header   = "%include <head.h>\n";
+    std::string tail     = "%include <tail.h>";
+    std::string ecf_file = header;
     ecf_file += "# ";
     ecf_file += tail;
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),
                         "Could not create missing dir " << ecf_file_location << "\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -1256,10 +1277,10 @@ BOOST_AUTO_TEST_CASE(test_manual_files) {
         BOOST_CHECK_MESSAGE(manual.find("ECF_MICRO=%") != std::string::npos,
                             "Variable pre-processing failed during manual extraction");
         BOOST_CHECK_MESSAGE(manual.find("manual-1") != std::string::npos,
-                            "Pre-processing of ecfmicro in manuals failed, expected to find string 'manual-1'\n"
+                            "Pre-processing of ecfmicro in manuals failed, expected to find std::string 'manual-1'\n"
                                 << manual);
         BOOST_CHECK_MESSAGE(manual.find("end-1") != std::string::npos,
-                            "Pre-processing of ecfmicro in manuals failed, expected to find string 'end-1'\n"
+                            "Pre-processing of ecfmicro in manuals failed, expected to find std::string 'end-1'\n"
                                 << manual);
         BOOST_CHECK_MESSAGE(manual.find("Test manual files are pre-processed") != std::string::npos,
                             "%include <manual.h> pre-processing failed inside manual->end\n"
@@ -1275,7 +1296,7 @@ BOOST_AUTO_TEST_CASE(test_manual_files) {
 
         std::string manual;
         ecf_file.manual(manual);
-        // cout << manual << "\n";
+        // std::cout << manual << "\n";
         BOOST_CHECK_MESSAGE(!manual.empty(), "Manual not found");
         BOOST_CHECK_MESSAGE(manual.find("Test manual files are pre-processed") != std::string::npos,
                             "Pre-processing in manual failed");
@@ -1290,7 +1311,7 @@ BOOST_AUTO_TEST_CASE(test_manual_files) {
 
         std::string manual;
         ecf_file.manual(manual);
-        // cout << manual << "\n";
+        // std::cout << manual << "\n";
         BOOST_CHECK_MESSAGE(!manual.empty(), "Manual not found");
         BOOST_CHECK_MESSAGE(manual.find("Test manual files are pre-processed") != std::string::npos,
                             "Pre-processing in manual failed");
@@ -1304,7 +1325,8 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
     // test for recursive includes that are not recursive
 
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -1327,7 +1349,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
     /// are use in client scripts and used to locate the ecf files
     theDefs.beginAll();
 
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
     // Create the generated variables
@@ -1344,7 +1366,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
         BOOST_CHECK_MESSAGE(false, "Expected job creation to succeed " << e.what());
     }
 
-    string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+    std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
     BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
 
     /// Remove generate file
@@ -1358,7 +1380,8 @@ static void basic_test_template(const std::string& test_name,
                                 bool expect_success          = true) {
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+        std::cout
+            << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
         return;
     }
 
@@ -1393,12 +1416,12 @@ static void basic_test_template(const std::string& test_name,
     theDefs.beginAll();
 
     // generate the ecf file;
-    string ecf_file          = ecf_file1;
-    string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
-    // cout << "file_location = " << ecf_file_location << "\n";
+    std::string ecf_file          = ecf_file1;
+    std::string ecf_file_location = ecf_home + task_t1->absNodePath() + File::ECF_EXTN();
+    // std::cout << "file_location = " << ecf_file_location << "\n";
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
 
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 
@@ -1426,7 +1449,7 @@ static void basic_test_template(const std::string& test_name,
             BOOST_CHECK_MESSAGE(false, "Expected job creation to succeed " << e.what());
         }
 
-        string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+        std::string job_file_location = ecf_home + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
         BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
 
         // Open the job file, make sure it matches our expected file
@@ -1451,7 +1474,7 @@ BOOST_AUTO_TEST_CASE(test_includeonce) {
 
     // simplest test of include once, no hierarchy
     // generate the ecf file;
-    string ecf_file = "%includeonce <simple_head.h>\n";
+    std::string ecf_file = "%includeonce <simple_head.h>\n";
     ecf_file += "%includeonce <simple_head.h>\n";
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
@@ -1468,7 +1491,7 @@ BOOST_AUTO_TEST_CASE(test_includeonce_hierarchical) {
 
     // Test the pre-processing is done depth first, ( < 4.1.1 it was done breadth first)
     // generate the ecf file;
-    string ecf_file = "%includeonce <AA.h>\n";
+    std::string ecf_file = "%includeonce <AA.h>\n";
     ecf_file += "%includeonce <BB.h>\n";
     ecf_file += "%includeonce <CC.h>\n";
 
@@ -1482,7 +1505,7 @@ BOOST_AUTO_TEST_CASE(test_include_with_variables) {
 
     // Test includes with variables %include <%head%.h> ECFLOW-765
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include <%simple%_head.h>\n";
     ecf_file += "#body\n";
     ecf_file += "%include <simple_%tail%.h>\n";
@@ -1495,7 +1518,7 @@ BOOST_AUTO_TEST_CASE(test_include_with_variables) {
 BOOST_AUTO_TEST_CASE(test_include_with_variable_alternative) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include %FRED:<simple_head.h>%\n";
     ecf_file += "#body\n";
     ecf_file += "%include %TAIL:<simple_tail.h>%\n";
@@ -1508,7 +1531,7 @@ BOOST_AUTO_TEST_CASE(test_include_with_variable_alternative) {
 BOOST_AUTO_TEST_CASE(test_include_with_variables_change_micro) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%ecfmicro &\n"; // ecf_micro in script OVERRIDES ECF_MICRO variable, but *only* in script
     ecf_file += "&include <&simple&_head.h>\n";
     ecf_file += "#body\n";
@@ -1523,7 +1546,7 @@ BOOST_AUTO_TEST_CASE(test_include_with_variables_change_micro) {
 BOOST_AUTO_TEST_CASE(test_script_override_ecf_micro) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;             // ecf_micro in script OVERRIDES ECF_MICRO variable, but *only* in script
+    std::string ecf_file;        // ecf_micro in script OVERRIDES ECF_MICRO variable, but *only* in script
     ecf_file += "$simple$\n";    // ECF_MICRO is set to $
     ecf_file += "$ecfmicro &\n"; // ecfmicro change from $ -> &
     ecf_file += "&include <&simple&_head.h>\n";
@@ -1540,7 +1563,7 @@ BOOST_AUTO_TEST_CASE(test_mistyped_ecf_micro) {
     ECF_NAME_THIS_TEST();
 
     // same test as above, but we have mistyped ecf_micro. Make sure we don't ignore this.
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "$simple$\n";
     ecf_file += "$ecf_micro &\n"; // ecfmicro has been mistyped
     ecf_file += "&include <&simple&_head.h>\n";
@@ -1557,7 +1580,7 @@ BOOST_AUTO_TEST_CASE(test_include_with_variables_mismatched_micros) {
     ECF_NAME_THIS_TEST();
 
     // generate the ecf file, where include file has missmatched ecf_micro
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include <%simple%_head%.h>\n";
     ecf_file += "#body\n";
     ecf_file += "%include <simple_%tail%.h>\n";
@@ -1574,7 +1597,7 @@ BOOST_AUTO_TEST_CASE(test_include_with_variables_mismatched_micros) {
 BOOST_AUTO_TEST_CASE(test_include_with_variable_not_defined) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include %simple_head.h%\n";
     ecf_file += "#body\n";
     ecf_file += "%include <simple_%tail%.h>\n";
@@ -1591,7 +1614,7 @@ BOOST_AUTO_TEST_CASE(test_include_with_variable_not_defined) {
 BOOST_AUTO_TEST_CASE(test_nopp_preserves_contents) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
     ecf_file += "%nopp\n";
@@ -1613,7 +1636,7 @@ BOOST_AUTO_TEST_CASE(test_nopp_preserves_contents) {
 BOOST_AUTO_TEST_CASE(test_nopp_preserves_contents2) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
     ecf_file += "%nopp\n";
@@ -1629,7 +1652,7 @@ BOOST_AUTO_TEST_CASE(test_nopp_preserves_contents2) {
 BOOST_AUTO_TEST_CASE(test_comment_and_manual_removal) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
     ecf_file += "%comment\n";
@@ -1648,7 +1671,7 @@ BOOST_AUTO_TEST_CASE(test_comment_and_manual_removal) {
 BOOST_AUTO_TEST_CASE(test_unterminated_manual) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "#body\n";
     ecf_file += "%comment\n";
@@ -1665,7 +1688,7 @@ BOOST_AUTO_TEST_CASE(test_unterminated_manual) {
 BOOST_AUTO_TEST_CASE(test_ecf_micro_with_comments_ECFLOW_1686) {
     ECF_NAME_THIS_TEST();
 
-    string ecf_file;
+    std::string ecf_file;
     ecf_file += "%include <simple_head.h>\n";
     ecf_file += "var=%XXXX:2 # fred%\n";
     ecf_file += "# %comment\n";

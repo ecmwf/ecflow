@@ -16,7 +16,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -28,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_move_peer) {
 
     Defs defs;
     {
-        std::vector<string> vec{"3", "2", "1"};
+        std::vector<std::string> vec{"3", "2", "1"};
         for (const auto& str0 : vec) {
             suite_ptr s = defs.add_suite("s" + str0);
             for (const auto& str : vec) {
@@ -41,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_move_peer) {
     }
     Defs expectedDefs;
     {
-        std::vector<string> vec{"1", "2", "3"};
+        std::vector<std::string> vec{"1", "2", "3"};
         for (const auto& str0 : vec) {
             suite_ptr s = expectedDefs.add_suite("s" + str0);
             for (const auto& str : vec) {

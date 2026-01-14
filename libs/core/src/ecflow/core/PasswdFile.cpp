@@ -19,10 +19,9 @@
 #include "ecflow/core/User.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
-PasswdFile::PasswdFile()  = default;
+PasswdFile::PasswdFile() = default;
+
 PasswdFile::~PasswdFile() = default;
 
 // #define DEBUG_ME 1
@@ -64,8 +63,8 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
         if (lines[i][0] == '#') {
             continue;
         }
-        std::string theLine           = lines[i];
-        string::size_type comment_pos = theLine.find("#");
+        std::string theLine                = lines[i];
+        std::string::size_type comment_pos = theLine.find("#");
         if (comment_pos != std::string::npos) {
             theLine.erase(comment_pos);
         }
@@ -143,7 +142,7 @@ std::string PasswdFile::get_passwd(const std::string& user, const std::string& h
             return vec_[i].passwd();
         }
     }
-    return string();
+    return std::string();
 }
 
 bool PasswdFile::authenticate(const std::string& user, const std::string& passwd) const {
@@ -214,8 +213,8 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
 bool PasswdFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const {
     // Expect 4.5.0
     // If first character is NUMERIC and we have dots
-    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != string::npos;
-    if (firstCharIsNumeric && line.find(".") != string::npos) {
+    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != std::string::npos;
+    if (firstCharIsNumeric && line.find(".") != std::string::npos) {
 
         std::vector<std::string> versionNumberTokens;
         Str::split(line, versionNumberTokens, ".");
@@ -302,7 +301,7 @@ bool PasswdFile::createWithAccess(const std::string& pathToFile,
 
     auto username = get_login_name();
 
-    string line;
+    std::string line;
     line += username;
     line += " ";
     line += host;

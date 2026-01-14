@@ -17,7 +17,6 @@
 #include "ecflow/core/Ecf.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_HANDLE 1
 

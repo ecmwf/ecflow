@@ -41,7 +41,6 @@
     #include <iostream>
 #endif
 
-using namespace std;
 using namespace ecf;
 
 static const char* T_NOPP        = "nopp";
@@ -142,7 +141,7 @@ void EcfFile::manual(std::string& theManual) {
     catch (...) {
     }
 
-    vector<string> theManualLines;
+    std::vector<std::string> theManualLines;
     if (!extractManual(jobLines_, theManualLines, error_msg)) {
         std::stringstream ss;
         ss << "EcfFile::manual: extraction failed for task " << node_->absNodePath() << " " << error_msg;
@@ -163,7 +162,7 @@ void EcfFile::manual(std::string& theManual) {
 }
 
 std::string EcfFile::origin_str(EcfFile::Origin origin) {
-    string ret;
+    std::string ret;
     switch (origin) {
         case ECF_FILES:
             ret = "ECF_FILES";
@@ -185,7 +184,7 @@ std::string EcfFile::origin_str(EcfFile::Origin origin) {
 }
 
 std::string EcfFile::search_algorithm_str(EcfFile::EcfFileSearchAlgorithm sa) {
-    string ret;
+    std::string ret;
     switch (sa) {
         case PRUNE_ROOT:
             ret = "PRUNE_ROOT";
@@ -198,7 +197,7 @@ std::string EcfFile::search_algorithm_str(EcfFile::EcfFileSearchAlgorithm sa) {
 }
 
 std::string EcfFile::ecf_file_origin_dump() const {
-    string origin = "# ecf_script_origin :";
+    std::string origin = "# ecf_script_origin :";
     switch (script_origin_) {
         case ECF_FILES: {
             origin += " ECF_FILES(";
@@ -410,7 +409,7 @@ void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,
         }
 
         // take into account micro char during variable substitution
-        string::size_type ecfmicro_pos = script_lines[i].find(Ecf::MICRO());
+        std::string::size_type ecfmicro_pos = script_lines[i].find(Ecf::MICRO());
         if (ecfmicro_pos == 0) {
 
             // We cannot do variable substitution between %nopp/%end
@@ -432,12 +431,12 @@ void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,
         if (comment) {
 
             // expect  name =  value
-            string::size_type equal_pos = script_lines[i].find("=");
-            if (equal_pos == string::npos) {
+            auto equal_pos = script_lines[i].find("=");
+            if (equal_pos == std::string::npos) {
                 continue;
             }
-            string name  = script_lines[i].substr(0, equal_pos);
-            string value = script_lines[i].substr(equal_pos + 1);
+            std::string name  = script_lines[i].substr(0, equal_pos);
+            std::string value = script_lines[i].substr(equal_pos + 1);
             ecf::algorithm::trim(name);
             ecf::algorithm::trim(value);
 
@@ -522,8 +521,8 @@ bool EcfFile::open_script_file(const std::string& file_or_cmd,
 
         case ECF_FETCH_CMD: {
             // Not tested.
-            string theFile;
-            string theCommand = file_or_cmd; // variables have already been substituted
+            std::string theFile;
+            std::string theCommand = file_or_cmd; // variables have already been substituted
             switch (type) {
                 case EcfFile::SCRIPT: {
                     theCommand += " -s ";
@@ -732,15 +731,15 @@ std::string EcfFile::fileType(EcfFile::Type t) {
             break;
     }
     assert(false);
-    return string();
+    return std::string();
 }
 
-static void replace(string::size_type commentPos,
+static void replace(std::string::size_type commentPos,
                     std::string& jobLine,
                     const std::string& smsChildCmd,
                     const std::string& ecfEquiv,
                     const std::string& clientPath) {
-    string::size_type childPos = jobLine.find(smsChildCmd);
+    std::string::size_type childPos = jobLine.find(smsChildCmd);
     if (childPos != std::string::npos) {
         if (commentPos == std::string::npos) {
             std::string replace1 = clientPath;
@@ -767,7 +766,7 @@ bool EcfFile::replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::str
     for (size_t i = 0; i < jobLines_size; ++i) {
 
         // ONLY do the replacement if there is no leading comment
-        string::size_type commentPos = jobLines_[i].find("#");
+        std::string::size_type commentPos = jobLines_[i].find("#");
         replace(commentPos, jobLines_[i], "smsinit", " --init ", clientPath);
         replace(commentPos, jobLines_[i], "smscomplete", " --complete ", clientPath);
         replace(commentPos, jobLines_[i], "smsabort", " --abort ", clientPath);
@@ -802,8 +801,8 @@ void EcfFile::variableSubstitution(const JobsParam& jobsParam) {
     // But if it fails, don't report as an error
 
     // get the cached ECF_MICRO variable, typically its one char.
-    string ecfMicro = ecfMicroCache_;
-    char microChar  = ecfMicro[0];
+    std::string ecfMicro = ecfMicroCache_;
+    char microChar       = ecfMicro[0];
 
     // We need a stack to properly implement nopp. This is required since we need to pair
     // the %end, with nopp. i.e. need to handle
@@ -821,7 +820,7 @@ void EcfFile::variableSubstitution(const JobsParam& jobsParam) {
     for (size_t i = 0; i < jobLines_size; ++i) {
 
         // take into account micro char during variable substitution
-        string::size_type ecfmicro_pos = jobLines_[i].find(ecfMicro);
+        std::string::size_type ecfmicro_pos = jobLines_[i].find(ecfMicro);
         if (ecfmicro_pos == 0) {
 
             // We cannot do variable substitution between %nopp/%end
@@ -865,7 +864,7 @@ void EcfFile::variableSubstitution(const JobsParam& jobsParam) {
         }
 
         /// For variable substitution % can occur anywhere on the line
-        if (ecfmicro_pos != string::npos) {
+        if (ecfmicro_pos != std::string::npos) {
 
             /// In the *NORMAL* flow jobsParam.user_edit_variables() will be EMPTY
             if (!node_->variable_substitution(jobLines_[i], jobsParam.user_edit_variables(), microChar)) {
@@ -968,7 +967,7 @@ void EcfFile::get_used_variables(std::string& used_variables) const {
 
 bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& errormsg) const {
     // get the cached ECF_MICRO variable, typically its one char.
-    string ecfMicro = ecfMicroCache_;
+    std::string ecfMicro = ecfMicroCache_;
 
     char microChar = ecfMicro[0];
 
@@ -994,7 +993,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
         }
 
         // take into account micro char during variable substitution
-        string::size_type ecfmicro_pos = jobLines_[i].find(ecfMicro);
+        std::string::size_type ecfmicro_pos = jobLines_[i].find(ecfMicro);
         if (ecfmicro_pos == 0) {
 
             // We cannot do variable substitution between %nopp/%end
@@ -1037,7 +1036,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
             continue;
         }
 
-        if (ecfmicro_pos != string::npos) {
+        if (ecfmicro_pos != std::string::npos) {
 
             /// *Note:* currently this modifies jobLines_[i]
             std::string line_copy = jobLines_[i]; // avoid modifying the jobs Lines, end up doing  variable substitution
@@ -1165,7 +1164,7 @@ std::string EcfFile::script_or_job_path() const {
 }
 
 bool EcfFile::doCreateManFile(std::string& errormsg) {
-    vector<string> manFile;
+    std::vector<std::string> manFile;
     if (!extractManual(jobLines_, manFile, errormsg)) {
         return false;
     }
@@ -1221,7 +1220,7 @@ bool EcfFile::extractManual(const std::vector<std::string>& lines,
     // Note: we have already done pre-processing, ie since the manual is obtained after
     // all the includes have been pre-procssed, hence most errors should have been caught
     // get the cached ECF_MICRO variable, typically its one char.
-    string ecfMicro = ecfMicroCache_;
+    std::string ecfMicro = ecfMicroCache_;
 
     bool add = false;
     for (const auto& line : lines) {
@@ -1264,7 +1263,7 @@ void EcfFile::remove_comment_manual_and_nopp_tokens() {
     // remove tokens %nopp,%end,%ecfmicro and only remove %comment,%manual if they not embedded in %nopp/%end
 
     // get the cached ECF_MICRO variable, typically its one char.
-    string ecfMicro = ecfMicroCache_;
+    std::string ecfMicro = ecfMicroCache_;
 
     // We need a stack to properly implement nopp. This is required since we need to pair
     // the %end, with nopp. i.e. need to handle
@@ -1290,7 +1289,7 @@ void EcfFile::remove_comment_manual_and_nopp_tokens() {
 
     for (auto i = jobLines_.begin(); i != jobLines_.end(); ++i) {
 
-        string::size_type ecfmicro_pos = (*i).find(ecfMicro);
+        std::string::size_type ecfmicro_pos = (*i).find(ecfMicro);
         if (ecfmicro_pos == 0) {
             if ((*i).find(T_MANUAL) == 1) {
                 if (manual_erase) {
@@ -1520,8 +1519,8 @@ void PreProcessor::preProcess_line() {
 
     // For variable substitution % can occur anywhere on the line, for pre -processing of
     // %ecfmicro,%manual,%comment,%end,%include,%includenopp it must be the very *first* character
-    string::size_type ecfmicro_pos = script_line.find(ecf_micro_);
-    if (ecfmicro_pos == string::npos) {
+    std::string::size_type ecfmicro_pos = script_line.find(ecf_micro_);
+    if (ecfmicro_pos == std::string::npos) {
         return;
     }
 
@@ -1923,7 +1922,7 @@ bool IncludeFileCache::lines(std::vector<std::string>& lns) {
     }
 
     // Note if we use: while( getline( theEcfFile, line)), then we will miss the *last* *empty* line
-    string line;
+    std::string line;
     while (std::getline(fp_, line)) {
         lns.push_back(line);
     } // c++11

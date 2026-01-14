@@ -19,8 +19,6 @@
 #include "ecflow/core/Version.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 void ServerVersionCmd::print(std::string& os) const {
@@ -69,7 +67,7 @@ void ServerVersionCmd::addOption(boost::program_options::options_description& de
 
 void ServerVersionCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     if (ace->debug()) {
-        cout << "  ServerVersionCmd::create\n";
+        std::cout << "  ServerVersionCmd::create\n";
     }
 
     // testing client interface

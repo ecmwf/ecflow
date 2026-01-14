@@ -29,9 +29,7 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost;
 namespace po = boost::program_options;
 
 static std::string print_variable_map(const boost::program_options::variables_map& vm);
@@ -54,23 +52,23 @@ ClientOptions::ClientOptions() {
     // clang-format off
     desc_->add_options()(
         "rid",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string("")),
         "When specified overrides the environment variable ECF_RID. Can only be used for child commands.");
     desc_->add_options()(
         "port",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string("")),
         "When specified overrides the environment variable ECF_PORT and default port: '3141'");
     desc_->add_options()(
         "host",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string("")),
         "When specified overrides the environment variable ECF_HOST and default host: 'localhost'");
     desc_->add_options()(
         "user",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string("")),
         "Specifies the user name used to contact the server. Must be used in combination with option --password.");
     desc_->add_options()(
         "password",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string("")),
         "Specifies the password used to contact the server. Must be used in combination with option --user.");
 #ifdef ECF_OPENSSL
     desc_->add_options()(
@@ -105,7 +103,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     // The correct hyphen has:
     //   dec:45 hex:2D oct:55 -
     if (env->debug()) {
-        cout << "  ClientOptions::parse " << cl << "\n";
+        std::cout << "  ClientOptions::parse " << cl << "\n";
         std::cout << "  help column width = " << po::options_description::m_default_line_length + 80 << "\n";
     }
 
@@ -246,13 +244,13 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         //         --server_load         // this is sent to server
         //         --server_load=<path>  // no command returned, command executed by client
         if (vm.count("help")) {
-            string topic = vm["help"].as<std::string>();
+            std::string topic = vm["help"].as<std::string>();
             std::cout << Help{*desc_, topic};
             return client_request;
         }
 
         if (vm.count("version")) {
-            cout << Version::description() << "\n";
+            std::cout << Version::description() << "\n";
             exit(0);
         }
 

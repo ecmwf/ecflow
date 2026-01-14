@@ -22,7 +22,6 @@
 #include "ecflow/node/JobsParam.hpp"
 #include "ecflow/node/Task.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG 1
@@ -77,8 +76,8 @@ using namespace ecf;
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        cout << "TestJobGenPerf.cpp --> " << argv[0] << "\n";
-        cout << "Expect single argument which is path to a defs file\n";
+        std::cout << "TestJobGenPerf.cpp --> " << argv[0] << "\n";
+        std::cout << "Expect single argument which is path to a defs file\n";
         return 1;
     }
 
@@ -88,13 +87,13 @@ int main(int argc, char* argv[]) {
     std::string path = argv[1];
 
 #ifdef DEBUG
-    cout << "Loading file " << path << " log file " << log_path << "\n";
+    std::cout << "Loading file " << path << " log file " << log_path << "\n";
 #endif
     Defs defs;
     std::string errorMsg, warningMsg;
     if (!defs.restore(path, errorMsg, warningMsg)) {
-        cout << errorMsg << "\n";
-        cout << warningMsg << "\n";
+        std::cout << errorMsg << "\n";
+        std::cout << warningMsg << "\n";
         return 1;
     }
 
@@ -156,28 +155,29 @@ int main(int argc, char* argv[]) {
     JobsParam jobParam(20 /*submitJobsInterval*/, true /*createJobs*/, false /* spawn jobs */);
     Jobs job(&defs);
     if (!job.generate(jobParam)) {
-        cout << " generate failed: " << jobParam.getErrorMsg();
+        std::cout << " generate failed: " << jobParam.getErrorMsg();
     }
-    cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
+    std::cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
 
     if (jobParam.submitted().size() != tasks.size()) {
         for (size_t i = 0; i < tasks.size(); i++) {
             if (tasks[i]->state() != NState::SUBMITTED &&
                 tasks[i]->findVariable("ECF_DUMMY_TASK") == Variable::EMPTY()) {
                 // We are NOT a dummy task
-                cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
+                std::cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state())
+                          << "\n";
 
                 Node* parent = tasks[i]->parent();
                 while (parent) {
-                    cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state())
-                         << "\n";
+                    std::cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state())
+                              << "\n";
                     parent = parent->parent();
                 }
 
                 std::vector<std::string> theReasonWhy;
                 tasks[i]->bottom_up_why(theReasonWhy, false /*html tags*/);
                 for (const auto& r : theReasonWhy) {
-                    cout << "  Reason: " << r << "\n";
+                    std::cout << "  Reason: " << r << "\n";
                 }
             }
         }

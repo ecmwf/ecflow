@@ -38,7 +38,6 @@ std::string TestFixture::port_;
 std::string TestFixture::test_dir_;
 std::string TestFixture::project_test_dir_ = "libs/test/overall";
 
-using namespace std;
 using namespace ecf;
 
 namespace /* anonymous */ {
@@ -192,12 +191,12 @@ void TestFixture::init(const std::string& project_test_dir) {
                 client().logMsg("Created new log file. msg sent to force new log file to be written to disk");
             }
             else {
-                cout << "   Log file " << TestFixture::pathToLogFile() << " creation failed " << client().errorMsg()
-                     << "\n";
+                std::cout << "   Log file " << TestFixture::pathToLogFile() << " creation failed "
+                          << client().errorMsg() << "\n";
             }
         }
         else {
-            cout << "   Log file " << the_log_file << " already exists\n";
+            std::cout << "   Log file " << the_log_file << " already exists\n";
         }
     }
     else {
@@ -235,15 +234,15 @@ void TestFixture::init(const std::string& project_test_dir) {
     /// Either way, we wait for 60 seconds for server, for it to respond to pings
     /// This is important when server is started locally. We must wait for it to come alive.
     if (!client().wait_for_server_reply()) {
-        cout << "   Ping server on " << client().host() << Str::COLON() << client().port()
-             << " failed. Is the server running ? " << client().errorMsg() << "\n";
+        std::cout << "   Ping server on " << client().host() << Str::COLON() << client().port()
+                  << " failed. Is the server running ? " << client().errorMsg() << "\n";
         assert(false);
     }
-    cout << "   Ping OK: server running on:  " << client().host() << Str::COLON() << client().port() << "\n";
+    std::cout << "   Ping OK: server running on:  " << client().host() << Str::COLON() << client().port() << "\n";
 
     // Log file must exist, otherwise test will not work. Log file required for comparison
     if (!fs::exists(TestFixture::pathToLogFile())) {
-        cout << "   Log file " << TestFixture::pathToLogFile() << " does not exist *************************** \n";
+        std::cout << "   Log file " << TestFixture::pathToLogFile() << " does not exist *************************** \n";
         assert(false);
     }
 
@@ -304,9 +303,10 @@ TestFixture::~TestFixture() {
         std::cout << "   Rtt::destroy(), so that we flush the rtt_filename\n";
         Rtt::destroy();
 
-        cout << "\nTiming: *NOTE*: The child commands *NOT* recorded. Since its a separate exe(ecflow_client), called "
-                "via .ecf script\n";
-        cout << Rtt::analysis(rtt_filename); // report round trip times
+        std::cout
+            << "\nTiming: *NOTE*: The child commands *NOT* recorded. Since its a separate exe(ecflow_client), called "
+               "via .ecf script\n";
+        std::cout << Rtt::analysis(rtt_filename); // report round trip times
         fs::remove(rtt_filename);
     }
     catch (std::exception& ex) {
@@ -349,10 +349,10 @@ std::string TestFixture::theClientExePath() {
             return path + extra_options;
         }
 
-        cout << "Please set ECF_CLIENT_EXE_PATH. This needs to be set to path to the client executable\n";
-        cout << "The client must be the one that was built on the same platform as the server\n";
+        std::cout << "Please set ECF_CLIENT_EXE_PATH. This needs to be set to path to the client executable\n";
+        std::cout << "The client must be the one that was built on the same platform as the server\n";
         assert(false);
-        return string(); // This is needed to silence compiler warnings about no return
+        return std::string(); // This is needed to silence compiler warnings about no return
     }
 }
 
@@ -372,11 +372,11 @@ std::string TestFixture::pathToLogFile() {
         return var.value();
     }
     else {
-        cout << "TestFixture::pathToLogFile(): assert failed\n";
-        cout << "Please set ECF_LOG. This needs to be set to path to the log file\n";
-        cout << "that can be seen by the client and server\n";
+        std::cout << "TestFixture::pathToLogFile(): assert failed\n";
+        std::cout << "Please set ECF_LOG. This needs to be set to path to the log file\n";
+        std::cout << "that can be seen by the client and server\n";
         assert(false);
-        return string(); // This is needed to silence compiler warnings about no return
+        return std::string(); // This is needed to silence compiler warnings about no return
     }
 }
 
@@ -437,9 +437,9 @@ std::string TestFixture::taskAbsNodePath(const Defs& theDefs, const std::string&
         }
     }
 
-    cout << "TestFixture::taskAbsNodePath: assert failed: Could not find task " << taskName << "\n";
+    std::cout << "TestFixture::taskAbsNodePath: assert failed: Could not find task " << taskName << "\n";
     assert(false); // could not find the task ??
-    return string();
+    return std::string();
 }
 
 const std::string& TestFixture::server_version() {

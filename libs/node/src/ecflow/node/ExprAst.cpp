@@ -21,7 +21,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -1463,7 +1462,7 @@ void AstFlag::print_flat(std::ostream& os, bool /*add_bracket*/) const {
 }
 
 std::string AstFlag::expression() const {
-    string ret = nodePath_;
+    std::string ret = nodePath_;
     ret += "<flag>";
     ret += ecf::Flag::enum_to_string(flag_);
     return ret;

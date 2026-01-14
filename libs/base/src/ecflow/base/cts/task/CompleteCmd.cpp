@@ -23,8 +23,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 void CompleteCmd::print(std::string& os) const {
@@ -101,13 +99,13 @@ const char* CompleteCmd::desc() {
 
 void CompleteCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(CompleteCmd::arg(), CompleteCmd::desc())(
-        "remove", po::value<vector<string>>()->multitoken(), "remove variables i.e name name2");
+        "remove", po::value<std::vector<std::string>>()->multitoken(), "remove variables i.e name name2");
 }
 void CompleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     if (clientEnv->debug()) {
-        cout << "  CompleteCmd::create " << CompleteCmd::arg() << " task_path(" << clientEnv->task_path()
-             << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
-             << ") try_no(" << clientEnv->task_try_no() << ")\n";
+        std::cout << "  CompleteCmd::create " << CompleteCmd::arg() << " task_path(" << clientEnv->task_path()
+                  << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
+                  << ") try_no(" << clientEnv->task_try_no() << ")\n";
     }
 
     std::string errorMsg;
@@ -117,7 +115,7 @@ void CompleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm
 
     std::vector<std::string> variable_vec;
     if (vm.count("remove")) {
-        variable_vec = vm["remove"].as<vector<string>>();
+        variable_vec = vm["remove"].as<std::vector<std::string>>();
     }
 
     cmd = std::make_shared<CompleteCmd>(clientEnv->task_path(),

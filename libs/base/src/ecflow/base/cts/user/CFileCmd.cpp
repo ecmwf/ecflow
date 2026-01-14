@@ -27,8 +27,6 @@
 #include "ecflow/node/Submittable.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 namespace po = boost::program_options;
 
 CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, const std::string& input_max_lines)
@@ -364,10 +362,10 @@ const char* CFileCmd::desc() {
 }
 
 void CFileCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CFileCmd::arg(), po::value<vector<string>>()->multitoken(), CFileCmd::desc());
+    desc.add_options()(CFileCmd::arg(), po::value<std::vector<std::string>>()->multitoken(), CFileCmd::desc());
 }
 void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(CFileCmd::arg(), args);

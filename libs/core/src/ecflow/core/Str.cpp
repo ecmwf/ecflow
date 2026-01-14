@@ -12,8 +12,6 @@
 
 #include "ecflow/core/Converter.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 const char* VALID_NODE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.";
@@ -85,12 +83,12 @@ const std::string& Str::WHITE_LIST_FILE() {
 }
 
 const std::string& Str::ALPHANUMERIC_UNDERSCORE() {
-    static string ALPHANUMERIC_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+    static std::string ALPHANUMERIC_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
     return ALPHANUMERIC_UNDERSCORE;
 }
 
 const std::string& Str::NUMERIC() {
-    static string NUMERIC = "0123456789";
+    static std::string NUMERIC = "0123456789";
     return NUMERIC;
 }
 
@@ -114,7 +112,7 @@ void Str::removeSingleQuotes(std::string& s) {
 
 bool Str::replace(std::string& jobLine, const std::string& stringToFind, const std::string& stringToReplace) {
     size_t pos = jobLine.find(stringToFind);
-    if (pos != string::npos) {
+    if (pos != std::string::npos) {
         jobLine.replace(pos, stringToFind.length(), stringToReplace);
         return true;
     }
@@ -195,12 +193,12 @@ void Str::split(const std::string& line, std::vector<std::string>& tokens, const
 
 void Str::split_orig(const std::string& line, std::vector<std::string>& tokens, const std::string& delimiters) {
     // Skip delimiters at beginning.
-    string::size_type lastPos = line.find_first_not_of(delimiters, 0);
+    auto lastPos = line.find_first_not_of(delimiters, 0);
 
     // Find first "non-delimiter".
-    string::size_type pos = line.find_first_of(delimiters, lastPos);
+    auto pos = line.find_first_of(delimiters, lastPos);
 
-    while (string::npos != pos || string::npos != lastPos) {
+    while (std::string::npos != pos || std::string::npos != lastPos) {
         tokens.push_back(line.substr(lastPos, pos - lastPos)); // Found a token, add it to the vector.
         lastPos = line.find_first_not_of(delimiters, pos);     // Skip delimiters.  Note the "not_of"
         pos     = line.find_first_of(delimiters, lastPos);     // Find next "non-delimiter"
@@ -412,7 +410,7 @@ bool Str::valid_name(const std::string& name, std::string& msg) {
     }
 
     // verify that the first character is alphanumeric or is an underscore
-    bool result = Str::ALPHANUMERIC_UNDERSCORE().find(name[0], 0) != string::npos;
+    bool result = Str::ALPHANUMERIC_UNDERSCORE().find(name[0], 0) != std::string::npos;
     if (!result) {
         msg = "Valid names can only consist of alphanumeric characters, "
               "underscores and dots (The first character cannot be a dot). "
@@ -423,11 +421,11 @@ bool Str::valid_name(const std::string& name, std::string& msg) {
 
     // verify that any other characters are alphanumeric or underscore
     if (name.size() > 1) {
-        result = name.find_first_not_of(VALID_NODE_CHARS, 1) == string::npos;
+        result = name.find_first_not_of(VALID_NODE_CHARS, 1) == std::string::npos;
         if (!result) {
             msg = "Valid names can only consist of alphanumeric characters, "
                   "underscores and dots (The first character cannot be a dot). ";
-            if (name.find('\r') != string::npos) {
+            if (name.find('\r') != std::string::npos) {
                 msg += "Windows line ending ? ";
             }
             msg += "'";
@@ -449,14 +447,14 @@ bool Str::valid_name(const std::string& name) {
     }
 
     // verify that the first character is alphabetic or has underscore
-    bool result = Str::ALPHANUMERIC_UNDERSCORE().find(name[0], 0) != string::npos;
+    bool result = Str::ALPHANUMERIC_UNDERSCORE().find(name[0], 0) != std::string::npos;
     if (!result) {
         return false;
     }
 
     // verify that any other characters are alphanumeric or underscore
     if (name.size() > 1) {
-        result = name.find_first_not_of(VALID_NODE_CHARS, 1) == string::npos;
+        result = name.find_first_not_of(VALID_NODE_CHARS, 1) == std::string::npos;
     }
 
     return result;

@@ -27,8 +27,6 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 
-using namespace std;
-using namespace boost;
 using namespace ecf;
 
 // #define DEBUG_INVARIANTS 1
@@ -132,11 +130,11 @@ node_ptr ClientToServerCmd::find_node(Defs* defs, const std::string& absNodepath
 }
 
 void ClientToServerCmd::dumpVecArgs(const char* argOption, const std::vector<std::string>& args) {
-    cout << "  " << argOption;
+    std::cout << "  " << argOption;
     for (size_t i = 0; i < args.size(); i++) {
-        cout << " args[" << i << "]='" << args[i] << "'";
+        std::cout << " args[" << i << "]='" << args[i] << "'";
     }
-    cout << "\n";
+    std::cout << "\n";
 }
 
 node_ptr ClientToServerCmd::find_node_for_edit(Defs* defs, const std::string& absNodepath) const {

@@ -18,7 +18,6 @@
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-using namespace std;
 
 static void extractTheGain(const std::string& theGainToken, ClockAttr& clockAttr) {
     if (theGainToken.find(Str::COLON()) != std::string::npos) {

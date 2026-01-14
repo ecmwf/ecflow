@@ -15,7 +15,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // Connection and client timeout issues can be replicated  by adding
 //   - sleep(1) in EcfFile , i.e when creating the job output

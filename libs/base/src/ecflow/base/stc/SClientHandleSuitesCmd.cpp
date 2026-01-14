@@ -17,8 +17,6 @@
 #include "ecflow/node/ClientSuiteMgr.hpp"
 #include "ecflow/node/Defs.hpp"
 
-using namespace std;
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 SClientHandleSuitesCmd::SClientHandleSuitesCmd(AbstractServer* as) {
@@ -88,24 +86,24 @@ bool SClientHandleSuitesCmd::handle_server_response(ServerReply& server_reply, C
         //       2 s1 s2
         for (size_t u = 0; u < users_.size(); u++) {
             if (u == 0) {
-                cout << "\n";
-                cout << left << setw(10) << "User" << setw(6) << "handle"
-                     << "  suites\n";
+                std::cout << "\n";
+                std::cout << std::left << std::setw(10) << "User" << std::setw(6) << "handle"
+                          << "  suites\n";
             }
-            cout << left << setw(10) << users_[u].first;
+            std::cout << std::left << std::setw(10) << users_[u].first;
             for (size_t h = 0; h < users_[u].second.size(); h++) {
                 unsigned int handle = users_[u].second[h];
                 for (const auto& client_handle : client_handles_) {
                     if (handle == client_handle.first) {
                         if (h != 0) {
-                            cout << "          "; // 10 spaces to align handles
+                            std::cout << "          "; // 10 spaces to align handles
                         }
-                        cout << right << setw(6) << handle << "  ";
+                        std::cout << std::right << std::setw(6) << handle << "  ";
                         const std::vector<std::string>& suites = client_handle.second;
                         for (const auto& suite : suites) {
-                            cout << suite << "  ";
+                            std::cout << suite << "  ";
                         }
-                        cout << "\n";
+                        std::cout << "\n";
                     }
                 }
             }
