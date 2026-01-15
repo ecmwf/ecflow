@@ -15,7 +15,7 @@
 
 class ServerHandler;
 
-#define UI_FUNCTION_LOG_S(server) UiFunctionLogS __fclog(server, BOOST_CURRENT_FUNCTION);
+#define UI_FUNCTION_LOG_S(server) UiFunctionLogS __fclog(server, __func__);
 
 class UiFunctionLogS : public UiFunctionLog {
 public:
