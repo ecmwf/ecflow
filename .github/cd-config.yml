@@ -21,6 +21,9 @@ builds:
             - qt/6.6.1
             - cmake/new
           test_command: "ctest --output-on-failure -j 8 -L nightly"
+          install_command: |
+            chmod -R u+w $INSTALL_PREFIX || true
+            cmake --install .
           cmake_options: >-
             -DCMAKE_VERBOSE_MAKEFILE=ON
             -DENABLE_ALL_TESTS=OFF
