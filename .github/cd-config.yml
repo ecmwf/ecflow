@@ -5,6 +5,7 @@ builds:
     config:
       platform: gnu-14.2.0
       install_type: module
+      install_lib_dir: lib
 
       dependencies: |
         ecmwf/ecbuild@develop
@@ -19,6 +20,7 @@ builds:
             - python3/3.12.9-01
             - qt/6.6.1
             - cmake/new
+          test_command: "ctest --output-on-failure -j 8 -L nightly"
           cmake_options: >-
             -DCMAKE_VERBOSE_MAKEFILE=ON
             -DENABLE_ALL_TESTS=OFF
@@ -63,6 +65,21 @@ builds:
             -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.10.10-01/include/python3.10
             -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
             -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
+          install_command: |
+            chmod u+w $INSTALL_PREFIX/lib
+            cmake --install . --component python
+
+        - name: python38
+          modules:
+            - python3/3.8.8-01
+            - qt/5.12.0
+            - cmake/new
+          cmake_options: >-
+            -DPython3_ROOT_DIR=/usr/local/apps/python3/3.8.8-01
+            -DPython3_EXECUTABLE=/usr/local/apps/python3/3.8.8-01/bin/python3
+            -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.8.8-01/include/python3.8
+            -DPython3_LIBRARIES=/usr/local/apps/python3/3.8.8-01/lib64/libpython3.8.so
+            -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.8.8-01/lib64
           install_command: |
             chmod u+w $INSTALL_PREFIX/lib
             cmake --install . --component python
