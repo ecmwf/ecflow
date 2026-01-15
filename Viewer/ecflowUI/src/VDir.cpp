@@ -11,7 +11,6 @@
 #include "VDir.hpp"
 
 #include <QtGlobal>
-#include <boost/foreach.hpp>
 
 #include "DirectoryHandler.hpp"
 #include "ecflow/core/Filesystem.hpp"
@@ -68,10 +67,8 @@ void VDir::reload() {
 
     fs::path path(path_);
 
-    fs::directory_iterator it(path), eod;
-
-    BOOST_FOREACH (fs::path const& p, std::make_pair(it, eod)) {
-        if (is_regular_file(p) && ecf::algorithm::starts_with(p.filename().string(), pattern_)) {
+    for (fs::path p : fs::directory_iterator(path)) {
+        if (fs::is_regular_file(p) && ecf::algorithm::starts_with(p.filename().string(), pattern_)) {
             auto* item = new VDirItem;
 
             item->name_ = p.filename().string();
