@@ -142,7 +142,7 @@ std::string PasswdFile::get_passwd(const std::string& user, const std::string& h
             return vec_[i].passwd();
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 bool PasswdFile::authenticate(const std::string& user, const std::string& passwd) const {

@@ -169,7 +169,7 @@ std::string QueueCmd::handle_queue(QueueAttr& queue_attr) const {
         queue_attr.reset_index_to_first_queued_or_aborted();
     }
 
-    return std::string();
+    return std::string{};
 }
 
 const char* QueueCmd::arg() {

@@ -914,7 +914,7 @@ std::string NodeContainer::find_node_path(const std::string& type, const std::st
             return res;
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 bool NodeContainer::hasTimeDependencies() const {

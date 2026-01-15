@@ -50,7 +50,7 @@ ecf::authorisation_t RequeueNodeCmd::authorise(AbstractServer& server) const {
 static std::string to_string(RequeueNodeCmd::Option option) {
     switch (option) {
         case RequeueNodeCmd::NO_OPTION:
-            return std::string();
+            return std::string{};
         case RequeueNodeCmd::FORCE:
             return "force";
         case RequeueNodeCmd::ABORT:
@@ -59,7 +59,7 @@ static std::string to_string(RequeueNodeCmd::Option option) {
             assert(false);
             break;
     }
-    return std::string();
+    return std::string{};
 }
 
 void RequeueNodeCmd::print(std::string& os) const {

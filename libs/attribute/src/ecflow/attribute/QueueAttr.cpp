@@ -150,7 +150,7 @@ std::string QueueAttr::no_of_aborted() const {
     if (count != 0) {
         return ecf::convert_to<std::string>(count);
     }
-    return std::string();
+    return std::string{};
 }
 
 void QueueAttr::reset_index_to_first_queued_or_aborted() {

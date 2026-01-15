@@ -440,9 +440,9 @@ public:
     AstTop* completeAst() const; // Will create AST on demand
     AstTop* triggerAst() const;  // Will create AST on demand
     std::string completeExpression() const;
-    std::string basicCompleteExpression() const { return c_expr_ ? c_expr_->expression() : std::string(); }
+    std::string basicCompleteExpression() const { return c_expr_ ? c_expr_->expression() : std::string{}; }
     std::string triggerExpression() const;
-    std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string(); }
+    std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string{}; }
 
     /// returns the immediate children
     virtual void immediateChildren(std::vector<node_ptr>&) const {}
@@ -643,7 +643,7 @@ public:
     virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr(); }
     virtual node_ptr find_immediate_child(const std::string_view&) const { return node_ptr(); }
     virtual std::string find_node_path(const std::string& /*type*/, const std::string& /*name*/) const {
-        return std::string();
+        return std::string{};
     }
     const Variable& findVariable(const std::string& name) const;
     std::string find_parent_variable_sub_value(const std::string& name) const;

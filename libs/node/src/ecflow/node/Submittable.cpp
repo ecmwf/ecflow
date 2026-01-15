@@ -319,7 +319,7 @@ std::string Submittable::tryNo() const {
     }
 
     LOG_ASSERT(false, "Submittable::tryNo() corrupt?");
-    return std::string();
+    return std::string{};
 }
 
 EcfFile Submittable::locatedEcfFile() const {

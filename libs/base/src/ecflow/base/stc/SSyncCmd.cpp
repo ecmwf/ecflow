@@ -248,8 +248,8 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
 void SSyncCmd::cleanup() {
     /// run in the server, after command sent to client
     incremental_changes_.cleanup();
-    std::string().swap(server_defs_);
-    std::string().swap(full_server_defs_as_string_); // will typically be empty in server
+    std::string{}.swap(server_defs_);
+    std::string{}.swap(full_server_defs_as_string_); // will typically be empty in server
 }
 
 bool SSyncCmd::equals(ServerToClientCmd* rhs) const {

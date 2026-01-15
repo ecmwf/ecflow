@@ -131,7 +131,7 @@ static const char* arg_desc() {
 
 void CheckPtCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(CtsApi::checkPtDefsArg(),
-                       boost::program_options::value<std::string>()->implicit_value(std::string("")),
+                       boost::program_options::value<std::string>()->implicit_value(std::string{}),
                        arg_desc());
 }
 

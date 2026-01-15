@@ -46,7 +46,7 @@ static std::string the_check_mode(ecf::CheckPt::Mode mode) {
     }
     std::cout << "ServerEnvironment.cpp theCheckMode: assert failed\n";
     assert(false);
-    return std::string();
+    return std::string{};
 }
 
 // This can be overridden by calling "server --ecfinterval 3" for test purposes

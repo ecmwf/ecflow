@@ -195,7 +195,7 @@ std::string Log::contents(int get_last_n_lines) {
     std::scoped_lock lock(mx_);
 
     if (get_last_n_lines == 0) {
-        return std::string();
+        return std::string{};
     }
 
     // Close the file. Log file may be buffered, hence flush first

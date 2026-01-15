@@ -93,7 +93,7 @@ struct Indent
 
     template <typename Stream>
     void write(Stream& output) const {
-        output << (ctx_.format.is_indenting() ? std::string(ctx_.format.indentation_spaces(), ' ') : std::string(""));
+        output << (ctx_.format.is_indenting() ? std::string(ctx_.format.indentation_spaces(), ' ') : std::string{});
     }
 
     template <typename Stream>

@@ -31,7 +31,7 @@ public:
     std::string print() const override;
     bool equals(ServerToClientCmd*) const override;
     void cleanup() override {
-        std::string().swap(full_server_defs_as_string_);
+        std::string{}.swap(full_server_defs_as_string_);
     } /// run in the server, after command send to client
 
 private:

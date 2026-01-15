@@ -731,7 +731,7 @@ std::string EcfFile::fileType(EcfFile::Type t) {
             break;
     }
     assert(false);
-    return std::string();
+    return std::string{};
 }
 
 static void replace(std::string::size_type commentPos,

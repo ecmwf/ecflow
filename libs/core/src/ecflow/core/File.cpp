@@ -73,7 +73,7 @@ std::string File::which(const std::string& file) {
             }
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string File::getExt(const std::string& file) {
@@ -81,7 +81,7 @@ std::string File::getExt(const std::string& file) {
     if (i != std::string::npos) {
         return file.substr(i + 1);
     }
-    return std::string();
+    return std::string{};
 }
 
 void File::replaceExt(std::string& file, const std::string& newExt) {
@@ -177,7 +177,7 @@ std::string
 File::get_last_n_lines(const std::string& filename, int last_n_lines, size_t& file_size, std::string& error_msg) {
     file_size = 0;
     if (last_n_lines <= 0) {
-        return std::string();
+        return std::string{};
     }
 
     std::ifstream source(filename.c_str(), std::ios_base::in);
@@ -186,7 +186,7 @@ File::get_last_n_lines(const std::string& filename, int last_n_lines, size_t& fi
         error_msg += " (";
         error_msg += strerror(errno);
         error_msg += ")";
-        return std::string();
+        return std::string{};
     }
 
     size_t const granularity = 100 * last_n_lines;
@@ -218,7 +218,7 @@ std::string File::get_last_n_lines(const std::string& filename, int last_n_lines
 
 std::string File::get_first_n_lines(const std::string& filename, int n_lines, std::string& error_msg) {
     if (n_lines <= 0) {
-        return std::string();
+        return std::string{};
     }
 
     std::ifstream source(filename.c_str(), std::ios_base::in);
@@ -227,7 +227,7 @@ std::string File::get_first_n_lines(const std::string& filename, int n_lines, st
         error_msg += " (";
         error_msg += strerror(errno);
         error_msg += ")";
-        return std::string();
+        return std::string{};
     }
 
     std::string ret;
@@ -454,7 +454,7 @@ std::string File::findPath(const fs::path& dir_path,     // from this directory 
             }
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string File::findPath(const fs::path& dir_path,              // from this directory downwards
@@ -479,7 +479,7 @@ std::string File::findPath(const fs::path& dir_path,              // from this d
             }
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 // #define INTEL_DEBUG_ME 1
@@ -616,11 +616,11 @@ std::string File::diff(const std::string& file,
                        bool ignoreBlanksLine) {
     if (!fs::exists(file)) {
         errorMsg += "First argument File " + file + " does not exist";
-        return std::string();
+        return std::string{};
     }
     if (!fs::exists(file2)) {
         errorMsg += "Second argument File " + file2 + " does not exist";
-        return std::string();
+        return std::string{};
     }
 
     std::vector<std::string> fileLines;
@@ -628,11 +628,11 @@ std::string File::diff(const std::string& file,
 
     if (!splitFileIntoLines(file, fileLines, ignoreBlanksLine)) {
         errorMsg += "First argument File " + file + " could not be opened : " + strerror(errno);
-        return std::string();
+        return std::string{};
     }
     if (!splitFileIntoLines(file2, file2Lines, ignoreBlanksLine)) {
         errorMsg += "Second argument File " + file2 + " could not be opened : " + strerror(errno);
-        return std::string();
+        return std::string{};
     }
 
     if (fileLines != file2Lines) {
@@ -684,7 +684,7 @@ std::string File::diff(const std::string& file,
         }
         return ss.str();
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string
@@ -755,7 +755,7 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
     }
 
     // failed to find file via backward search
-    return std::string();
+    return std::string{};
 }
 
 std::string File::forwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn) {
@@ -840,7 +840,7 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
     }
 
     // failed to find file via forward search
-    return std::string();
+    return std::string{};
 }
 
 // Remove a directory recursively ****
@@ -1104,7 +1104,7 @@ std::string File::root_source_dir() {
         }
     }
 
-    return std::string();
+    return std::string{};
 }
 
 std::string File::root_build_dir() {
@@ -1156,7 +1156,7 @@ std::string File::root_build_dir() {
     }
 
     throw std::runtime_error("File::root_build_dir() failed to find root build directory");
-    return std::string();
+    return std::string{};
 }
 
 int File::max_open_file_allowed() {

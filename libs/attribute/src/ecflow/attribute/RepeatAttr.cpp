@@ -349,7 +349,7 @@ std::string RepeatDate::valueAsString() const {
     catch (const ecf::bad_conversion&) {
         LOG_ASSERT(false, "RepeatDate::valueAsString(): could not convert value " << value_ << " to a string");
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatDate::value_as_string(int index) const {
@@ -359,7 +359,7 @@ std::string RepeatDate::value_as_string(int index) const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatDate::next_value_as_string() const {
@@ -371,7 +371,7 @@ std::string RepeatDate::next_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatDate::prev_value_as_string() const {
@@ -383,7 +383,7 @@ std::string RepeatDate::prev_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return std::string();
+    return std::string{};
 }
 
 void RepeatDate::increment() {
@@ -998,7 +998,7 @@ std::string RepeatDateList::value_as_string(int index) const {
     if (index >= static_cast<int>(list_.size())) {
         return ecf::convert_to<std::string>(list_[list_.size() - 1]);
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatDateList::next_value_as_string() const {
@@ -1275,7 +1275,7 @@ std::string RepeatInteger::valueAsString() const {
     catch (const ecf::bad_conversion&) {
         LOG_ASSERT(false, "");
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatInteger::value_as_string(int index) const {
@@ -1285,7 +1285,7 @@ std::string RepeatInteger::value_as_string(int index) const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatInteger::next_value_as_string() const {
@@ -1296,7 +1296,7 @@ std::string RepeatInteger::next_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatInteger::prev_value_as_string() const {
@@ -1307,7 +1307,7 @@ std::string RepeatInteger::prev_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return std::string();
+    return std::string{};
 }
 
 //======================================================================================
@@ -1415,19 +1415,19 @@ std::string RepeatEnumerated::valueAsString() const {
 
         return theEnums_[currentIndex_];
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatEnumerated::value_as_string(int index) const {
     if (index >= 0 && index < static_cast<int>(theEnums_.size())) {
         return theEnums_[index];
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatEnumerated::next_value_as_string() const {
     if (theEnums_.empty()) {
-        return std::string();
+        return std::string{};
     }
 
     int index = currentIndex_;
@@ -1443,7 +1443,7 @@ std::string RepeatEnumerated::next_value_as_string() const {
 
 std::string RepeatEnumerated::prev_value_as_string() const {
     if (theEnums_.empty()) {
-        return std::string();
+        return std::string{};
     }
 
     int index = currentIndex_;
@@ -1596,7 +1596,7 @@ std::string RepeatString::next_value_as_string() const {
         }
         return theStrings_[index];
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatString::prev_value_as_string() const {
@@ -1611,7 +1611,7 @@ std::string RepeatString::prev_value_as_string() const {
         }
         return theStrings_[index];
     }
-    return std::string();
+    return std::string{};
 }
 
 void RepeatString::increment() {
@@ -1631,14 +1631,14 @@ std::string RepeatString::valueAsString() const {
     if (!theStrings_.empty()) {
         return theStrings_[last_valid_value()];
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatString::value_as_string(int index) const {
     if (index >= 0 && index < static_cast<int>(theStrings_.size())) {
         return theStrings_[index];
     }
-    return std::string();
+    return std::string{};
 }
 
 void RepeatString::change(const std::string& newValue) {

@@ -1607,7 +1607,7 @@ std::string Node::completeExpression() const {
         ret += c_expr_->expression();
         return ret;
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string Node::triggerExpression() const {
@@ -1616,7 +1616,7 @@ std::string Node::triggerExpression() const {
         ret += t_expr_->expression();
         return ret;
     }
-    return std::string();
+    return std::string{};
 }
 
 bool Node::check_expressions(Ast* ast, const std::string& expr, bool trigger, std::string& errorMsg) const {

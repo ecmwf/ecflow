@@ -171,7 +171,7 @@ static std::string show_checkpt_mode(ecf::CheckPt::Mode m) {
             return "UNDEFINED";
             break;
     }
-    return std::string();
+    return std::string{};
 }
 
 void Stats::show(std::ostream& os) const {

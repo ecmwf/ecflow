@@ -30,7 +30,7 @@ const char* Str::SVR_CMD() {
 } // Only for automatic check_pt
 
 const std::string& Str::EMPTY() {
-    static std::string empty = std::string();
+    static std::string empty = std::string{};
     return empty;
 }
 const std::string& Str::ROOT_PATH() {

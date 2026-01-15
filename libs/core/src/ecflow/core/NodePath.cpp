@@ -55,7 +55,7 @@ bool NodePath::extractHostPort(const std::string& path, std::string& host, std::
 
 std::string NodePath::createPath(const std::vector<std::string>& vec) {
     if (vec.empty()) {
-        return std::string();
+        return std::string{};
     }
 
     std::string ret;

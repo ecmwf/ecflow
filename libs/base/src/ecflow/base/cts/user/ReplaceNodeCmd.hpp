@@ -47,7 +47,7 @@ private:
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
-    void cleanup() override { std::string().swap(clientDefs_); } /// run in the server, after command send to client
+    void cleanup() override { std::string{}.swap(clientDefs_); } /// run in the server, after command send to client
 
     bool createNodesAsNeeded_{false};
     bool force_{false};

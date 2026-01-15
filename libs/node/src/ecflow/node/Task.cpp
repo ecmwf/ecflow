@@ -293,7 +293,7 @@ std::string Task::find_node_path(const std::string& type, const std::string& nod
             return absNodePath();
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 void Task::reset() {

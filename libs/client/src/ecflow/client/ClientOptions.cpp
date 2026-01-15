@@ -54,23 +54,23 @@ ClientOptions::ClientOptions() {
     // clang-format off
     desc_->add_options()(
         "rid",
-        po::value<std::string>()->implicit_value(std::string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "When specified overrides the environment variable ECF_RID. Can only be used for child commands.");
     desc_->add_options()(
         "port",
-        po::value<std::string>()->implicit_value(std::string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "When specified overrides the environment variable ECF_PORT and default port: '3141'");
     desc_->add_options()(
         "host",
-        po::value<std::string>()->implicit_value(std::string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "When specified overrides the environment variable ECF_HOST and default host: 'localhost'");
     desc_->add_options()(
         "user",
-        po::value<std::string>()->implicit_value(std::string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "Specifies the user name used to contact the server. Must be used in combination with option --password.");
     desc_->add_options()(
         "password",
-        po::value<std::string>()->implicit_value(std::string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "Specifies the password used to contact the server. Must be used in combination with option --user.");
 #ifdef ECF_OPENSSL
     desc_->add_options()(

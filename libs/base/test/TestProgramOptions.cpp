@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
     // Declare the supported options.
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")(
-        "arg1", po::value<std::string>()->implicit_value(std::string("")), "optional arg1 description");
+        "arg1", po::value<std::string>()->implicit_value(std::string{}), "optional arg1 description");
 
     {
         std::array argv = {"test_program_options_implicit_value", "--help", "--arg1"};

@@ -320,7 +320,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
         case ClientHandleCmd::DROP_USER: {
             desc.add_options()(
                 CtsApi::ch_drop_user_arg(),
-                boost::program_options::value<std::string>()->implicit_value(std::string("")),
+                boost::program_options::value<std::string>()->implicit_value(std::string{}),
                 "Drop/de-register all handles associated with the given user.\n"
                 "If no user provided will drop for current user. Client must ensure un-used handle are dropped\n"
                 "otherwise they will stay, in the server.\n"
