@@ -78,6 +78,9 @@ builds:
             - qt/5.12.0
             - cmake/new
           cmake_options: >-
+            -DBoost_ROOT=/usr/local/apps/boost/1.75.0/GNU/8.5
+            -DBoost_INCLUDE_DIR=/usr/local/apps/boost/1.75.0/GNU/8.5/include
+            -DBoost_PYTHON38_LIBRARY_RELEASE=/usr/local/apps/boost/1.75.0/GNU/8.5/lib/libboost_python38.so
             -DPython3_ROOT_DIR=/usr/local/apps/python3/3.8.8-01
             -DPython3_EXECUTABLE=/usr/local/apps/python3/3.8.8-01/bin/python3
             -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.8.8-01/include/python3.8
