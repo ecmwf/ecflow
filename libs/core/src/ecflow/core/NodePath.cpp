@@ -73,3 +73,7 @@ std::string NodePath::removeHostPortFromPath(const std::string& path) {
     pathVec.erase(pathVec.begin());
     return NodePath::createPath(pathVec);
 }
+
+bool NodePath::isAbsolutePath(const std::string& path) {
+    return !path.empty() && path[0] == '/';
+}

@@ -36,6 +36,13 @@ public:
     /// Given a path like:   //localhost:3141/suite/family/task
     /// returns              /suite/family/task
     static std::string removeHostPortFromPath(const std::string& path);
+
+    ///
+    /// @brief Check if the given path is an absolute path.
+    ///
+    /// @return true if absolute path, false otherwise.
+    ///
+    static bool isAbsolutePath(const std::string& path);
 };
 
 #endif /* ecflow_core_NodePath_HPP */

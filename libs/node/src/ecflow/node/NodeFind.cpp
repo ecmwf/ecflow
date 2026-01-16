@@ -745,7 +745,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
 
     // if an absolute path cut in early
-    if (!nodePath.empty() && nodePath[0] == '/') {
+    if (NodePath::isAbsolutePath(nodePath)) {
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
         debug_path += "(!nodePath.empty() && nodePath[0] == '/') \n";
