@@ -211,7 +211,20 @@ public:
 
     /// Assumes input argument is of the form /suite/family/task, /suite/family/family/task
     node_ptr findAbsNode(const std::string& pathToNode) const;
+
+    ///
+    /// @brief Check if the given path + attribute is listed as an extern.
+    ///
+    /// When the attribute is empty, the function simply checks if the node itself is listed as an extern;
+    /// othersise, the function checks if the the attribute of the node (in the form of '<nodePath>:<externObj>')
+    /// is listed as an extern.
+    ///
+    /// @param pathToNode The path to the node
+    /// @param node_attr_name The attribute name, can be empty
+    /// @return true if found, false otherwise
+    ///
     bool find_extern(const std::string& pathToNode, const std::string& node_attr_name) const;
+
     suite_ptr findSuite(const std::string& name) const;
     std::string find_node_path(const std::string& type, const std::string& name) const;
     node_ptr find_node(const std::string& type, const std::string& pathToNode) const;
