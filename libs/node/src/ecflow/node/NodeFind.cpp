@@ -752,9 +752,8 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
 
         // Must be an absolute path. i.e. /suite/family/path
-        node_ptr constNode = theDefs->findAbsNode(nodePath);
-        if (constNode.get()) {
-            return constNode;
+        if (node_ptr found = theDefs->findAbsNode(nodePath); found.get()) {
+            return found;
         }
 
         // *NOTE*: The server does *NOT* store externs, hence the check below, will always return false, for the server:
