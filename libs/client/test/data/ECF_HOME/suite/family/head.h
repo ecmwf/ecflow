@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/usr/bin/env bash
 
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
@@ -25,10 +25,10 @@ smsinit $$
 # Defined a error hanlder
 
 ERROR() {
-	set +e        # Clear -e flag, so we don't fail
-	smsabort      # Notify ECF_ that something went wrong
-	trap 0        # Remove the trap
-	exit 0        # End the script
+    set +e        # Clear -e flag, so we don't fail
+    smsabort      # Notify ECF_ that something went wrong
+    trap 0        # Remove the trap
+    exit 0        # End the script
 }
 
 # Trap any calls to exit and errors caught by the -e flag

@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_abort_cmd) {
 
     // Create the defs file corresponding to the text below
     //
-    // The following variables are automatically added by the test harness:
+    // The test harness automatically adds the following variables:
     //  * ECF_HOME
     //  * ECF_INCLUDE
     //  * SLEEPTIME
