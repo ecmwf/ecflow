@@ -1,19 +1,8 @@
 name: extra
 
 on:
-  # Trigger the workflow on every push
-  push:
-    branches:
-      - '**'
-    tags:
-      - '**'
-
   # Trigger the workflow manually
   workflow_dispatch: ~
-
-  # Trigger after public PR approved for CI
-  pull_request_target:
-    types: [labeled]
 
 jobs:
 
