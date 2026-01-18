@@ -42,6 +42,12 @@ jobs:
           - linux.gcc.all.relwithdebinfo
           - linux.clang.all.relwithdebinfo
         jobs: [ 4 ]
+        exclude:
+          - os: almalinux-9.7
+            preset: linux.clang.all.relwithdebinfo
+            # This combination is not supported, as Clang fails to compile Chrono.hpp which does #include <boost/date_time/local_time/conversion.hpp
+            # and ends up with the following error:
+            #   /usr/include/boost/mpl/aux_/integral_wrapper.hpp:73:31: error: non-type template argument is not a constant expression
 
     runs-on: [self-hosted, Linux, platform-builder-docker-xl]
 
