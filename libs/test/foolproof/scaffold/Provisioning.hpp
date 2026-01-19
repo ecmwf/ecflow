@@ -765,6 +765,16 @@ public:
         fs::path defs_;
     };
 
+    struct CommandReplace
+    {
+        explicit CommandReplace(fs::path defs, std::string node) : defs_{defs}, node_{std::move(node)} {}
+
+        std::vector<std::string> options() const { return {"--replace", node_, defs_.string()}; }
+
+        fs::path defs_;
+        std::string node_;
+    };
+
     struct CommandDelete
     {
         explicit CommandDelete(std::string path) : path_{path} {}
