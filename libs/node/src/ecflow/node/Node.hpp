@@ -679,10 +679,34 @@ public:
     const ZombieAttr& findZombie(ecf::Child::ZombieType) const;
     bool findParentZombie(ecf::Child::ZombieType, ZombieAttr&) const;
 
-    /// Finds the referenced node. The node path can be relative or absolute or a extern path
-    /// however if its an extern path, and corresponding suite is loaded, but we still
-    /// can't find the path, then an error is returned
+    ///
+    /// @brief Finds the node at the given path.
+    ///
+    /// Important:
+    ///   When the node path is found to be an extern path, if the corresponding suite is available
+    ///   but the node cannot be found an error is returned.
+    ///
+    /// @param nodePath The path of the node to find -- can be relative, absolute, or an 'extern' path.
+    /// @param errorMsg A reference to a string where an error message will be stored if the node cannot be found.
+    /// @return A pointer to the found node, or nullptr if not found.
+    ///
     node_ptr findReferencedNode(const std::string& nodePath, std::string& errorMsg) const;
+
+    ///
+    /// @brief Finds the node or object (e.g. Variable, Meter, ...) at the given path.
+    ///
+    /// If '<externObj>' is empty, a simple node look up is performed; otherwise, the function will concatenate
+    /// '<nodePath>:<externObj>' to form the full path to the object to be found.
+    ///
+    /// Important:
+    ///   When the node path is found to be an extern path, if the corresponding suite is available
+    ///   but the node cannot be found an error is returned.
+    ///
+    /// @param nodePath The path of the node to find -- can be relative, absolute, or an 'extern' path.
+    /// @param externObj The name of the object to use when resolving extern paths.
+    /// @param errorMsg A reference to a string where an error message will be stored if the node cannot be found.
+    /// @return A pointer to the found node, or nullptr if not found.
+    ///
     node_ptr findReferencedNode(const std::string& nodePath, const std::string& externObj, std::string& errorMsg) const;
 
     /// return true if we can find a event, meter, user, repeat or generated variable with the given name
