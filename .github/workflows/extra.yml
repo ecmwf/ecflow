@@ -55,6 +55,8 @@ jobs:
       image: marcosbento/lumen:${{ matrix.os }}
       options: --user root
 
+    timeout-minutes: 60
+
     steps:
 
       - name: Display build context
