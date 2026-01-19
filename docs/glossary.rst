@@ -1055,20 +1055,30 @@ Glossary
       Events can be referenced in :term:`trigger` and :term:`complete expression` s.
      
    extern
-      This allows an external :term:`node` to be used in a :term:`trigger` expression. 
+      An extern declares the presence of a :term:`node` (or node attribute) so that it can
+      be included in a :term:`trigger` expression. The extern declaration informs that this
+      *object* is guaranteed, by the user, to exist in the server even if not present in the local
+      :term:`suite definition`.
+
+      The objects declared as extern are usually in another :term:`suite`; but, if the user has
+      partially defined a suite (e.g. just a specific family, to be replaced), the extern can also
+      declare a *local* object.
       
-      All :term:`node`\ s in :term:`trigger`\ s must be known to :term:`ecflow_server` by the end of the load command. 
-      No cross-suite :term:`dependencies` are allowed unless the names of tasks outside the suite are declared as external. 
-      An external :term:`trigger` reference is considered unknown if it is not defined when the :term:`trigger` is evaluated. 
-      You are strongly advised to avoid cross-suite :term:`dependencies`. 
+      All :term:`nodes <node>` in :term:`triggers <trigger>` must be known to :term:`ecflow_server`
+      by the end of the load command. No :term:`dependencies` are allowed unless the names of the
+      objects are declared as extern.
+      An extern :term:`trigger` reference is considered *unknown* if it is not defined when the
+      :term:`trigger` is evaluated. 
+
+      See :token:`extern` in grammar.
+
+      .. important::
+         The use of cross-suite :term:`dependencies` is strongly discouraged. 
       
-      Families and suites that depend on one another should be placed in a single :term:`suite`. 
-      If you think you need cross-suite dependencies, you should consider merging the suites 
-      together and have each as a top-level family in the merged suite.
-      
-      For grammar see :token:`extern`.
-      
-          
+         Suites and families that depend on each other should be placed in a single :term:`suite`.
+         Whenever cross-suite dependencies are needed, consider merging the suites together by 
+         turn each suite into a top-level family under a merging suite.
+
    family
       A family is an organisational entity that is used to provide hierarchy and grouping. 
       It consists of a collection of :term:`task`\ s and families.
