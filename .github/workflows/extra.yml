@@ -85,7 +85,6 @@ jobs:
           cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }}
 
       - name: Test ecflow
-        if: ${{ !always() }} # Disable until we have a stable build
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -j ${{ matrix.jobs }}
