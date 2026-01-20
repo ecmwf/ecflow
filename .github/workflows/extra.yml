@@ -86,10 +86,17 @@ jobs:
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }}
 
-      - name: Test ecflow
+      - name: Test ecflow (default)
+        if: ${{ matrix.os != 'alpine-3.23' }}
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -j ${{ matrix.jobs }}
+
+      - name: Test ecflow (specific to Alpine, due to Boost.Test crash)
+        if: ${{ matrix.os == 'alpine-3.23' }}
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -E s_foolproof -j ${{ matrix.jobs }}
 
       - name: Lint ecflow
         if: ${{ matrix.preset == 'linux.clang.all.relwithdebinfo' && matrix.os == 'ubuntu-24.04' && !always() }} # Disable until we have a stable build
