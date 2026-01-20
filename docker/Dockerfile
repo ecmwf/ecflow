@@ -67,4 +67,4 @@ RUN cd ecFlow-${ECVERSION}-Source/build && \
 
 ENV PATH="/modules/rhel9/user-apps/ecflow/${ECVERSION}/bin:${PATH}"
 
-CMD ["ecflow_server --debug"]
+CMD ["ecflow_server", "--debug"]
