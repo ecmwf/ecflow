@@ -4,7 +4,12 @@
 
 # Build:
 # docker build -t ecflowrocky9 --build-arg ECVERSION="5.14.0" -f Dockerfile.rocky .
-# docker run -it --rm ecflowrocky9 bash
+
+# Run server:
+# docker run -it --rm --network=host ecflowrocky9
+#
+# Run client:
+# docker run -it --rm --network=host ecflowrocky9 ecflow_client --ping
 
 FROM docker.io/rockylinux/rockylinux:9.5
 
@@ -16,7 +21,8 @@ RUN dnf upgrade --quiet -y && \
     cmake python3-devel wget \
     qt5-qtbase-devel qt5-qtbase-gui qt5-qtconnectivity-devel qt5-qtsvg-devel \
     motif-devel libX11-devel libXext-devel libXpm-devel libXt-devel \
-    gcc-toolset-14 openssl-devel which
+    gcc-toolset-14 openssl-devel which && \
+    dnf clean all
 
 WORKDIR /ecflow_build
 ENV BUILD_DIR=/ecflow_build/
@@ -28,12 +34,14 @@ ARG ECVERSION="5.14.1" \
 
 ## Download, extract and cache files. Wget is required for this step
 
-# tarball from github doesn't contain tools we need
-# https://www.boost.org/users/download/
+# Tarball from github doesn't contain tools we need. See versions at https://www.boost.org/users/download/
 RUN wget https://archives.boost.io/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION_SUB}.tar.gz && \
-    tar xzf boost_${BOOST_VERSION_SUB}.tar.gz
+    tar xzf boost_${BOOST_VERSION_SUB}.tar.gz && \
+    rm -f boost_${BOOST_VERSION_SUB}.tar.gz
 
-RUN wget https://github.com/ecmwf/ecflow/releases/download/${ECVERSION}/ecFlow-${ECVERSION}-Source.tar.gz && tar -xvf ecFlow-${ECVERSION}-Source.tar.gz
+RUN wget https://github.com/ecmwf/ecflow/releases/download/${ECVERSION}/ecFlow-${ECVERSION}-Source.tar.gz && \
+    tar -xvf ecFlow-${ECVERSION}-Source.tar.gz && \
+    rm -f ecFlow-${ECVERSION}-Source.tar.gz
 
 
 ## Build boost
@@ -57,4 +65,6 @@ RUN cd ecFlow-${ECVERSION}-Source && rm -rf ${BUILD_DIR}/build ; mkdir -p ${BUIL
 RUN cd ecFlow-${ECVERSION}-Source/build && \
   source scl_source enable gcc-toolset-14 && make -j${MAKEJ} && make install && make test || true
 
-CMD ["/modules/rhel9/user-apps/ecflow/5.14.1/bin/ecflow_server"]
+ENV PATH="/modules/rhel9/user-apps/ecflow/${ECVERSION}/bin:${PATH}"
+
+CMD ["ecflow_server --debug"]
