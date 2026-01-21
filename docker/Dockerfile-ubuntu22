@@ -1,6 +1,7 @@
 # Building ecflow from source
 # https://ecflow.readthedocs.io/en/5.14.0/install/build_from_source.html
 # https://gitlab.met.no/ecflow-modellprod/build-ecflow
+# Ubuntu 22.04 has Python3.10 and a valid version of boost.
 
 # Build:
 # docker build -t ecflowubuntu22 --build-arg ECVERSION="5.14.0" -f Dockerfile-ubuntu22 .
@@ -11,7 +12,7 @@
 # Run client:
 # docker run -it --rm --network=host ecflowubuntu22 ecflow_client --ping
 
-FROM ubuntu:22.04 # Python3.10
+FROM ubuntu:22.04
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
