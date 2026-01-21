@@ -1,0 +1,58 @@
+# Building ecflow from source
+# https://ecflow.readthedocs.io/en/5.14.0/install/build_from_source.html
+# https://gitlab.met.no/ecflow-modellprod/build-ecflow
+
+# Build:
+# docker build -t ecflowubuntu22 --build-arg ECVERSION="5.14.0" -f Dockerfile-ubuntu22 .
+
+# Run server:
+# docker run -it --rm --network=host ecflowubuntu22
+#
+# Run client:
+# docker run -it --rm --network=host ecflowubuntu22 ecflow_client --ping
+
+FROM ubuntu:22.04 # Python3.10
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# System
+RUN apt update && \
+  apt install -y cmake python3-dev wget build-essential \
+    qtbase5-dev qtconnectivity5-dev libqt5svg5-dev \
+    libmotif-dev libx11-dev libxext-dev libxpm-dev libxt-dev \
+    libssl-dev libboost-all-dev libboost-python-dev libboost-python1.74-dev
+
+WORKDIR /ecflow_build
+
+ARG ECVERSION="5.14.1"
+
+## Download, extract and cache files. Wget is required for this step
+RUN wget https://github.com/ecmwf/ecflow/releases/download/${ECVERSION}/ecFlow-${ECVERSION}-Source.tar.gz && \
+    tar -xvf ecFlow-${ECVERSION}-Source.tar.gz && \
+    rm -f ecFlow-${ECVERSION}-Source.tar.gz
+
+## Build ecflow
+RUN cd ecFlow-${ECVERSION}-Source && rm -rf build ; mkdir -p build && \
+  cmake -B build \
+  -DCMAKE_INSTALL_PREFIX=/ecflow \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_CXX_FLAGS=-w \
+  -DENABLE_GUI=OFF -DENABLE_SERVER=ON -DENABLE_PYTHON=ON -DENABLE_UI=ON \
+  -DPYTHON_EXECUTABLE=/usr/bin/python3 \
+  -DBOOST_LIBRARYDIR=/usr/lib/x86_64-linux-gnu \
+  -DBoost_INCLUDE_DIR=/usr/include \
+  -DENABLE_STATIC_BOOST_LIBS=OFF \
+  -S .
+
+# Install ecflow
+RUN cd ecFlow-${ECVERSION}-Source/build && \
+   make
+RUN cd ecFlow-${ECVERSION}-Source/build && \
+  make install
+RUN cd ecFlow-${ECVERSION}-Source/build && \
+  make test
+
+ENV PATH="/ecflow/bin:${PATH}"
+
+CMD ["ecflow_server", "--debug"]
