@@ -37,7 +37,14 @@ struct MirrorClient::Impl
 
     ~Impl() {
         // Release Suite filter handle
-        invoker_.ch1_drop();
+        try {
+            invoker_.ch1_drop();
+        }
+        catch (const std::runtime_error& e) {
+            SLOG(E,
+                 "MirrorClient: Unable to release handle for " << invoker_.host() << ":" << invoker_.port()
+                                                               << ", due to: " << e.what());
+        }
     }
 };
 
