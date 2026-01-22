@@ -25,6 +25,7 @@
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
 
 #ifdef DEBUG

@@ -21,6 +21,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;

@@ -16,6 +16,7 @@
 #include "MyDefsFixture.hpp"
 #include "PersistHelper.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 using namespace ecf;

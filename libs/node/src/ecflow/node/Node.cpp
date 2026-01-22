@@ -33,6 +33,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeStats.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"

@@ -17,6 +17,7 @@
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/service/Log.hpp"
 
 namespace ecf::service::mirror {
