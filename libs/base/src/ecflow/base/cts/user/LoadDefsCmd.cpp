@@ -128,6 +128,9 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
             throw std::runtime_error(ss.str());
         }
 
+        // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server
+        ensure_all_mirrors_are_valid(*defs.get(), as->hostPort().first, as->hostPort().second);
+
         // After the updateDefs, defs will be left with NO suites.
         // Can't really used defs after this point
         // *NOTE* Externs are not persisted. Hence calling check() will report
