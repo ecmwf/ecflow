@@ -24,7 +24,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
 
 void Node::deleteTime(const std::string& name) {
     if (name.empty()) {

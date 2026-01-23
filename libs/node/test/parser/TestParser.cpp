@@ -21,7 +21,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 std::vector<std::string> defs_with_expected_warnings() {

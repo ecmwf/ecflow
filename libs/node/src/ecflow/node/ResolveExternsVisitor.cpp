@@ -18,8 +18,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,7 +137,7 @@ void AstResolveExternVisitor::visitFlag(AstFlag* astVar) {
 }
 
 void AstResolveExternVisitor::addExtern(const std::string& absNodePath, const std::string& var) {
-    string ext = absNodePath;
+    std::string ext = absNodePath;
     if (!var.empty()) {
         ext += Str::COLON();
         ext += var;

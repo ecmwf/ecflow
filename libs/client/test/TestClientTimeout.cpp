@@ -21,7 +21,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -68,9 +67,9 @@ BOOST_AUTO_TEST_CASE(test_client_timeout, *boost::unit_test::disabled()) {
     for (int i = 2; i < 30; ++i) {
         theClient.set_connect_timeout(i);
         try {
-            cout << "Trying with timeout of " << i << " seconds\n";
+            std::cout << "Trying with timeout of " << i << " seconds\n";
             theClient.loadDefs(path);
-            cout << "   loaded mega defs with a timeout of " << i << " seconds\n";
+            std::cout << "   loaded mega defs with a timeout of " << i << " seconds\n";
             loaded_defs = true;
             break;
         }

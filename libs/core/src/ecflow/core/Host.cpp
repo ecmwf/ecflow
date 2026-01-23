@@ -19,8 +19,6 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 Host::Host() {

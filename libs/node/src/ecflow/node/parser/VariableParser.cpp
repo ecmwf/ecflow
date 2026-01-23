@@ -18,7 +18,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool VariableParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // Note: For migrate the defs can have variables

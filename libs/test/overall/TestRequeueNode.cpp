@@ -25,7 +25,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
@@ -105,7 +104,8 @@ BOOST_AUTO_TEST_CASE(test_requeue_node) {
         }
     }
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

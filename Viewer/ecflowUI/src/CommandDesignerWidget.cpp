@@ -11,7 +11,6 @@
 #include "CommandDesignerWidget.hpp"
 
 #include <QMessageBox>
-#include <boost/enable_shared_from_this.hpp>
 
 #include "CustomCommandHandler.hpp"
 #include "NodeExpression.hpp"
@@ -19,7 +18,6 @@
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace boost;
 namespace po = boost::program_options;
 
 CommandDesignerWidget::CommandDesignerWidget(QWidget* parent) : QWidget(parent), menuItem_("") {
@@ -182,9 +180,9 @@ const std::vector<VInfo_ptr>& CommandDesignerWidget::selectedNodes() {
 
 void CommandDesignerWidget::addClientCommandsToComponentList() {
     // sort the commands into alphabetical order
-    std::vector<boost::shared_ptr<po::option_description>> options = clientOptionsDescriptions_->options();
+    auto options = clientOptionsDescriptions_->options();
 
-    using opt_desc = boost::shared_ptr<po::option_description>;
+    using opt_desc = decltype(options)::value_type;
     std::sort(options.begin(), options.end(), [](const opt_desc& a, const opt_desc& b) {
         return a->long_name() < b->long_name();
     });

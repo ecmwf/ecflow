@@ -33,7 +33,7 @@ public:
     bool equals(ServerToClientCmd*) const override;
     const std::string& get_string() const override { return str_; }
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
-    void cleanup() override { std::string().swap(str_); } /// run in the server, after command send to client
+    void cleanup() override { std::string{}.swap(str_); } /// run in the server, after command send to client
 
 private:
     std::string str_;

@@ -20,8 +20,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Task.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dummy_task_(false) {

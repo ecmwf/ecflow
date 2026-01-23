@@ -13,7 +13,6 @@
 #include "ecflow/server/ServerEnvironment.hpp"
 
 using namespace ecf;
-using namespace std;
 
 ///
 /// \brief The Server entrypoint
@@ -29,7 +28,7 @@ int run_server(boost::asio::io_context& io, const ServerEnvironment& server_envi
             /// for new incoming connections.
             io.run();
             if (server_environment.debug()) {
-                cout << "Normal exit from server\n";
+                std::cout << "Normal exit from server\n";
             }
             break;
         }
@@ -37,12 +36,12 @@ int run_server(boost::asio::io_context& io, const ServerEnvironment& server_envi
             // deal with errors from the handlers
             std::string msg = "run_server:: ";
             msg += e.what();
-            std::cerr << msg << endl;
+            std::cerr << msg << std::endl;
             ecf::log(Log::ERR, msg);
         }
         if (server_environment.debug()) {
-            cout << "Server EXITING: <------------------------------------------------ port:"
-                 << server_environment.port() << endl;
+            std::cout << "Server EXITING: <------------------------------------------------ port:"
+                      << server_environment.port() << std::endl;
         }
     }
     return 0;
@@ -60,7 +59,7 @@ int run_boost_services(boost::asio::io_context& io, const ServerEnvironment& ser
             /// for new incoming connections.
             io.run();
             if (server_environment.debug()) {
-                cout << "Normal exit from server\n";
+                std::cout << "Normal exit from server\n";
             }
             break;
         }
@@ -68,12 +67,12 @@ int run_boost_services(boost::asio::io_context& io, const ServerEnvironment& ser
             // deal with errors from the handlers
             std::string msg = "run_server:: ";
             msg += e.what();
-            std::cerr << msg << endl;
+            std::cerr << msg << std::endl;
             ecf::log(Log::ERR, msg);
         }
         if (server_environment.debug()) {
-            cout << "Server EXITING: <------------------------------------------------ port:"
-                 << server_environment.port() << endl;
+            std::cout << "Server EXITING: <------------------------------------------------ port:"
+                      << server_environment.port() << std::endl;
         }
     }
     return 0;
@@ -99,14 +98,14 @@ int main(int argc, char* argv[]) {
         }
         std::string errorMsg;
         if (!server_environment.valid(errorMsg)) {
-            cerr << errorMsg;
+            std::cerr << errorMsg;
             ecf::log(Log::ERR, errorMsg);
             return 1;
         }
 
         if (server_environment.debug()) {
-            cout << "Server started: ------------------------------------------------>port:"
-                 << server_environment.port() << endl;
+            std::cout << "Server started: ------------------------------------------------>port:"
+                      << server_environment.port() << std::endl;
         }
 
         boost::asio::io_context io;
@@ -139,17 +138,17 @@ int main(int argc, char* argv[]) {
         // *** deal with errors from the server constructor ****
         std::string msg = "Exception in ServerMain:: ";
         msg += e.what();
-        std::cerr << msg << endl;
+        std::cerr << msg << std::endl;
         ecf::log(Log::ERR, msg);
 
         // dump server environment
-        cerr << "\nServer environment:\n";
+        std::cerr << "\nServer environment:\n";
         ServerEnvironment server_env(args); // This can throw ServerEnvironmentException
         std::cerr << server_env.dump();
     }
     catch (...) {
         std::string msg = "ServerMain:: unknown exception";
-        std::cerr << msg << endl;
+        std::cerr << msg << std::endl;
         ecf::log(Log::ERR, msg);
     }
     return 1;

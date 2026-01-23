@@ -22,8 +22,6 @@
     #include "ecflow/core/Ecf.hpp"
 #endif
 
-using namespace std;
-
 namespace ecf {
 
 std::string AutoRestoreAttr::toString() const {
@@ -55,7 +53,7 @@ bool AutoRestoreAttr::operator==(const AutoRestoreAttr& rhs) const {
 }
 
 void AutoRestoreAttr::do_autorestore() {
-    string warning_message;
+    std::string warning_message;
     for (const auto& i : nodes_to_restore_) {
 
         warning_message.clear();
@@ -91,7 +89,7 @@ void AutoRestoreAttr::do_autorestore() {
 
 void AutoRestoreAttr::check(std::string& errorMsg) const {
     std::vector<NodeContainer*> vec;
-    string warning_message;
+    std::string warning_message;
     for (const auto& i : nodes_to_restore_) {
 
         warning_message.clear();

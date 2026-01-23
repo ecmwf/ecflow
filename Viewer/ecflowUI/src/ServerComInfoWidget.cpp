@@ -18,7 +18,6 @@
 #include <QPainter>
 #include <QTimer>
 #include <QToolButton>
-#include <boost/current_function.hpp>
 
 #include "ConnectState.hpp"
 #include "FontMetrics.hpp"

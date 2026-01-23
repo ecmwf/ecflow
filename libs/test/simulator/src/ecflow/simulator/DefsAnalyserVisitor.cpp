@@ -18,8 +18,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/AstAnalyserVisitor.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,7 +138,7 @@ void DefsAnalyserVisitor::analyseExpressions(Node* node,
     }
 
     // Warn about NULL node references in the trigger expressions
-    for (const string& nodePath : astVisitor.dependentNodePaths()) {
+    for (const std::string& nodePath : astVisitor.dependentNodePaths()) {
         Indent l2(ctx_);
 
         ss_ << l2;

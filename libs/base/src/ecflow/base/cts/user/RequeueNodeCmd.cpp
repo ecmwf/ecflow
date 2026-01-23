@@ -24,9 +24,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool RequeueNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<RequeueNodeCmd*>(rhs);
@@ -53,7 +50,7 @@ ecf::authorisation_t RequeueNodeCmd::authorise(AbstractServer& server) const {
 static std::string to_string(RequeueNodeCmd::Option option) {
     switch (option) {
         case RequeueNodeCmd::NO_OPTION:
-            return string();
+            return std::string{};
         case RequeueNodeCmd::FORCE:
             return "force";
         case RequeueNodeCmd::ABORT:
@@ -62,7 +59,7 @@ static std::string to_string(RequeueNodeCmd::Option option) {
             assert(false);
             break;
     }
-    return string();
+    return std::string{};
 }
 
 void RequeueNodeCmd::print(std::string& os) const {
@@ -206,10 +203,12 @@ const char* RequeueNodeCmd::desc() {
 }
 
 void RequeueNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(RequeueNodeCmd::arg(), po::value<vector<string>>()->multitoken(), RequeueNodeCmd::desc());
+    desc.add_options()(RequeueNodeCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       RequeueNodeCmd::desc());
 }
 void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[RequeueNodeCmd::arg()].as<vector<string>>();
+    auto args = vm[RequeueNodeCmd::arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(RequeueNodeCmd::arg(), args);
@@ -240,13 +239,13 @@ void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map&
         if (options[i] == "abort") {
             option = RequeueNodeCmd::ABORT;
             if (ac->debug()) {
-                cout << "  ABORT selected\n";
+                std::cout << "  ABORT selected\n";
             }
         }
         else if (options[i] == "force") {
             option = RequeueNodeCmd::FORCE;
             if (ac->debug()) {
-                cout << "  FORCE selected\n";
+                std::cout << "  FORCE selected\n";
             }
         }
         else {

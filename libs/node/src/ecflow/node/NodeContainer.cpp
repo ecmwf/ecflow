@@ -35,7 +35,6 @@
 #include "ecflow/node/move_peer.hpp"
 
 using namespace ecf;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // #define DEBUG_FIND_NODE 1
@@ -915,7 +914,7 @@ std::string NodeContainer::find_node_path(const std::string& type, const std::st
             return res;
         }
     }
-    return string();
+    return std::string{};
 }
 
 bool NodeContainer::hasTimeDependencies() const {
@@ -1168,7 +1167,7 @@ void NodeContainer::archive() {
 
     std::vector<node_ptr>().swap(nodes_);                      // reclaim vector memory
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
-    string msg                  = " autoarchive ";
+    std::string msg             = " autoarchive ";
     msg += debugNodePath(); // inform user via log
     ecf::log(Log::LOG, msg);
 }
@@ -1248,7 +1247,7 @@ void NodeContainer::restore() {
     get_flag().set(ecf::Flag::RESTORED);                       // set restored flag, to stop automatic autoarchive
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
 
-    string msg = " autorestore ";
+    std::string msg = " autorestore ";
     msg += debugNodePath(); // inform user via log
     ecf::log(Log::LOG, msg);
 

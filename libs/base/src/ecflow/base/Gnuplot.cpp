@@ -24,8 +24,6 @@
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 Gnuplot::Gnuplot(const std::string& log_file,
@@ -109,7 +107,7 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
     size_t child_requests_per_second   = 0;
     size_t user_request_per_second     = 0;
     unsigned int plot_data_line_number = 0;
-    string line;
+    std::string line;
     while (log_file.good()) {
         log_file.getline(line); // default delimiter is /n
 
@@ -146,7 +144,7 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
         {
             /// MSG:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information] ---> HH:MM:SS D.M.YYYY
             /// EXTRACT the date
-            string::size_type first_open_bracket = line.find('[');
+            std::string::size_type first_open_bracket = line.find('[');
             if (first_open_bracket == std::string::npos) {
                 std::cout << line << "\n";
                 assert(false);
@@ -154,7 +152,7 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
             }
             line.erase(0, first_open_bracket + 1);
 
-            string::size_type first_closed_bracket = line.find(']');
+            std::string::size_type first_closed_bracket = line.find(']');
             if (first_closed_bracket == std::string::npos) {
                 std::cout << line << "\n";
                 assert(false);

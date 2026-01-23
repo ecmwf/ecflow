@@ -27,7 +27,7 @@ public:
     std::string print() const override;
     bool equals(ServerToClientCmd*) const override;
     bool handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const override;
-    void cleanup() override { std::string().swap(log_file_path_); } /// run in the server, after command send to client
+    void cleanup() override { std::string{}.swap(log_file_path_); } /// run in the server, after command send to client
 
 private:
     std::string log_file_path_;

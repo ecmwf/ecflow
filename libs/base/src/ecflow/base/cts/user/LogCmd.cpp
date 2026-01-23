@@ -25,8 +25,6 @@
 #include "ecflow/node/Defs.hpp"
 
 using namespace ecf;
-using namespace std;
-namespace po = boost::program_options;
 
 LogCmd::LogCmd(LogApi a, int get_last_n_lines) : api_(a), get_last_n_lines_(get_last_n_lines) {
     if (get_last_n_lines_ == 0) {
@@ -223,11 +221,12 @@ const char* LogCmd::desc() {
 }
 
 void LogCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LogCmd::arg(), po::value<vector<string>>()->multitoken(), LogCmd::desc());
+    desc.add_options()(
+        LogCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), LogCmd::desc());
 }
 
 void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(LogCmd::arg(), args);

@@ -22,7 +22,6 @@
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 struct Fixture

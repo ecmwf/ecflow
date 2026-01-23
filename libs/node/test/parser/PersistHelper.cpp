@@ -18,7 +18,6 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
-using namespace std;
 using namespace ecf;
 
 bool PersistHelper::test_persist_and_reload(const Defs& theInMemoryDefs,
@@ -295,7 +294,7 @@ bool PersistHelper::reload_from_cereal_checkpt_file(const Defs& theInMemoryDefs,
         }
     }
     catch (std::exception& e) {
-        errorMsg_ = "PersistHelper::reload_from_cereal_checkpt_file: " + string(e.what());
+        errorMsg_ = "PersistHelper::reload_from_cereal_checkpt_file: " + std::string(e.what());
     }
 
     file_size_ = temporary.size();

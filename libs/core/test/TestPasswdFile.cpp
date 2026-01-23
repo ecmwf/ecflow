@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_passwd_empty_file) {
     BOOST_CHECK_MESSAGE(theFile.load(path, false, errorMsg), "Failed to parse file " << path << "\n" << errorMsg);
 
     BOOST_REQUIRE_MESSAGE(theFile.passwds().empty(), "expected empty file ");
-    BOOST_REQUIRE_MESSAGE(theFile.get_passwd("fred", "host", "port") == std::string(), "expected empty string");
+    BOOST_REQUIRE_MESSAGE(theFile.get_passwd("fred", "host", "port") == std::string{}, "expected empty string");
     BOOST_REQUIRE_MESSAGE(theFile.authenticate("fred", ""),
                           "expected to authenticate. TEST CASE with empty password file");
     BOOST_REQUIRE_MESSAGE(!theFile.authenticate("fred", "passwd"), "expected not to authenticate");

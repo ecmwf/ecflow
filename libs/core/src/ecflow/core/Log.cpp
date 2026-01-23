@@ -21,8 +21,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeStamp.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 Log* Log::instance_   = nullptr;
@@ -134,7 +132,7 @@ void Log::clear() {
     flush();
 
     // Open and truncate the file.
-    std::ofstream logfile(fileName_.c_str(), ios::out | ios::trunc);
+    std::ofstream logfile(fileName_.c_str(), std::ios::out | std::ios::trunc);
     if (logfile.is_open()) {
         logfile.close(); // force buffers to flush
     }
@@ -197,7 +195,7 @@ std::string Log::contents(int get_last_n_lines) {
     std::scoped_lock lock(mx_);
 
     if (get_last_n_lines == 0) {
-        return string();
+        return std::string{};
     }
 
     // Close the file. Log file may be buffered, hence flush first
@@ -279,7 +277,7 @@ void log_assert(char const* expr, char const* file, long line, const std::string
     std::stringstream ss;
     ss << "ASSERT failure: " << expr << " at " << file << ":" << line << " " << message;
     std::string assert_msg = ss.str();
-    cerr << assert_msg << "\n";
+    std::cerr << assert_msg << "\n";
     if (Log::instance()) {
         Log::instance()->log(Log::ERR, assert_msg);
         exit(1);
@@ -333,7 +331,7 @@ LogTimer::~LogTimer() {
 }
 
 //======================================================================================================
-LogImpl::LogImpl(const std::string& filename) : file_(filename.c_str(), ios::out | ios::app) {
+LogImpl::LogImpl(const std::string& filename) : file_(filename.c_str(), std::ios::out | std::ios::app) {
     if (!file_.is_open()) {
         log_open_error_ = "Could not open log file '";
         log_open_error_ += filename;

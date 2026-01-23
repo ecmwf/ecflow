@@ -23,7 +23,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 static void get_defs(Defs& defs) {
@@ -223,7 +222,7 @@ static void test_plug_on_multiple_server(const std::string& host1,
                                          const std::string& port1,
                                          const std::string& host2,
                                          const std::string& port2) {
-    std::cout << " on host1(" << host1 << ":" << port1 << ") host2(" << host2 << ":" << port2 << ")" << endl;
+    std::cout << " on host1(" << host1 << ":" << port1 << ") host2(" << host2 << ":" << port2 << ")" << std::endl;
     ClientInvoker server1Client(host1, port1);
     server1Client.set_throw_on_error(false);
     ClientInvoker server2Client(host2, port2);

@@ -15,8 +15,6 @@
 
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-
 // #define DEBUG_ME 1
 
 class MyType {

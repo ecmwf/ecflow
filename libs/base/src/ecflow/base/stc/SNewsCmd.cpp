@@ -17,7 +17,6 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 
-using namespace std;
 using namespace ecf;
 
 /// Custom handling of command logging so that we can add additional debug.

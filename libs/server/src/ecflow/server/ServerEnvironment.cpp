@@ -28,9 +28,6 @@
 #include "ecflow/server/ServerOptions.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 static std::string the_check_mode(ecf::CheckPt::Mode mode) {
     switch (mode) {
@@ -47,9 +44,9 @@ static std::string the_check_mode(ecf::CheckPt::Mode mode) {
             return "UNDEFINED";
             break;
     }
-    cout << "ServerEnvironment.cpp theCheckMode: assert failed\n";
+    std::cout << "ServerEnvironment.cpp theCheckMode: assert failed\n";
     assert(false);
-    return std::string();
+    return std::string{};
 }
 
 // This can be overridden by calling "server --ecfinterval 3" for test purposes
@@ -386,8 +383,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
 
 bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
     if (debug()) {
-        cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD("
-             << fs::current_path().string() << ")\n";
+        std::cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD("
+                  << fs::current_path().string() << ")\n";
     }
     if (ecf_white_list_file_.empty()) {
         errorMsg += "The ECF_LISTS file ";
@@ -497,7 +494,7 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
 
 void ServerEnvironment::read_config_file(std::string& log_file_name, const std::string& path_to_config_file) {
     if (debug()) {
-        cout << "ServerEnvironment::read_config_file() current_path = " << fs::current_path() << "\n";
+        std::cout << "ServerEnvironment::read_config_file() current_path = " << fs::current_path() << "\n";
     }
 
     try {
@@ -506,6 +503,8 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
 
         std::string passwd_file;
         std::string custom_passwd_file;
+
+        namespace po = boost::program_options;
 
         // read the environment from the config file.
         // **** Port *must* be read before log file, and check pt files
@@ -535,10 +534,10 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
         // clang-format on
 
-        ifstream ifs(path_to_config_file.c_str());
+        std::ifstream ifs(path_to_config_file.c_str());
         if (!ifs) {
             if (debug()) {
-                cout << "Could not load server_environment.cfg " << path_to_config_file << "\n";
+                std::cout << "Could not load server_environment.cfg " << path_to_config_file << "\n";
             }
         }
 
@@ -566,13 +565,13 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
         }
     }
     catch (std::exception& e) {
-        cerr << "ServerEnvironment::read_config_file() " << e.what() << "\n";
+        std::cerr << "ServerEnvironment::read_config_file() " << e.what() << "\n";
     }
 }
 
 void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     if (debug()) {
-        cout << "ServerEnvironment::read_environment_variables()\n";
+        std::cout << "ServerEnvironment::read_environment_variables()\n";
     }
 
     if (auto var = ecf::environment::fetch<std::string>(ecf::environment::ECF_PORT); var) {

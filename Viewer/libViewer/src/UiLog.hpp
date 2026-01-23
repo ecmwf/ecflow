@@ -16,7 +16,6 @@
 #include <vector>
 
 #include <QStringList>
-#include <boost/current_function.hpp>
 
 class QModelIndex;
 class QVariant;
@@ -77,9 +76,9 @@ private:
     UiLog& operator=(const UiLog&) = delete;
 };
 
-#define UI_FUNCTION_LOG UiFunctionLog __fclog(BOOST_CURRENT_FUNCTION);
-#define UI_FN_DBG UiLog().dbg() << UiFunctionLog::formatFuncInfo(BOOST_CURRENT_FUNCTION);
-#define UI_FN_INFO UiFunctionLog::formatFuncInfo(BOOST_CURRENT_FUNCTION)
+#define UI_FUNCTION_LOG UiFunctionLog __fclog(__func__);
+#define UI_FN_DBG UiLog().dbg() << UiFunctionLog::formatFuncInfo(__func__);
+#define UI_FN_INFO UiFunctionLog::formatFuncInfo(__func__)
 
 // Overload ostringstream for various objects
 std::ostream& operator<<(std::ostream&, const std::vector<std::string>&);

@@ -23,7 +23,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
@@ -86,7 +85,8 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_1589) {
     BOOST_CHECK_MESSAGE(task->get_flag().is_set(ecf::Flag::JOBCMD_FAILED),
                         "expected JOBCMD_FAILED failed flag to be set\n");
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

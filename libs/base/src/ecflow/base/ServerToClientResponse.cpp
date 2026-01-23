@@ -15,7 +15,6 @@
 
 #include "ecflow/base/ClientToServerRequest.hpp" // for throw
 
-using namespace std;
 using namespace ecf;
 
 bool ServerToClientResponse::handle_server_response(ServerReply& r, Cmd_ptr cts_cmd, bool debug) const {

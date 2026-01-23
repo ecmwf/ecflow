@@ -15,8 +15,6 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/node/Memento.hpp"
 
-using namespace std;
-
 // #define DEBUG_MEMENTO 1
 
 //===============================================================

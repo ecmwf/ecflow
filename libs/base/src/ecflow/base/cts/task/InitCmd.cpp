@@ -25,9 +25,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 void InitCmd::print(std::string& os) const {
     os += Str::CHILD_CMD();
@@ -98,9 +95,9 @@ const char* InitCmd::desc() {
 }
 
 void InitCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(InitCmd::arg(), po::value<string>(), InitCmd::desc())(
+    desc.add_options()(InitCmd::arg(), boost::program_options::value<std::string>(), InitCmd::desc())(
         "add",
-        po::value<vector<string>>()->multitoken(),
+        boost::program_options::value<std::vector<std::string>>()->multitoken(),
         "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.");
 }
 
@@ -108,11 +105,11 @@ void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
     std::string process_or_remote_id = vm[arg()].as<std::string>();
 
     if (clientEnv->debug()) {
-        cout << "  InitCmd::create " << InitCmd::arg() << "  clientEnv->task_path(" << clientEnv->task_path()
-             << ") clientEnv->jobs_password(" << clientEnv->jobs_password() << ") clientEnv->process_or_remote_id("
-             << clientEnv->process_or_remote_id() << ") clientEnv->task_try_no(" << clientEnv->task_try_no()
-             << ") process_or_remote_id(" << process_or_remote_id << ") clientEnv->under_test("
-             << clientEnv->under_test() << ")\n";
+        std::cout << "  InitCmd::create " << InitCmd::arg() << "  clientEnv->task_path(" << clientEnv->task_path()
+                  << ") clientEnv->jobs_password(" << clientEnv->jobs_password() << ") clientEnv->process_or_remote_id("
+                  << clientEnv->process_or_remote_id() << ") clientEnv->task_try_no(" << clientEnv->task_try_no()
+                  << ") process_or_remote_id(" << process_or_remote_id << ") clientEnv->under_test("
+                  << clientEnv->under_test() << ")\n";
     }
 
     std::string errorMsg;
@@ -134,7 +131,7 @@ void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
 
     std::vector<Variable> variable_vec;
     if (vm.count("add")) {
-        vector<string> var_args = vm["add"].as<vector<string>>();
+        auto var_args = vm["add"].as<std::vector<std::string>>();
         if (!var_args.empty()) {
             variable_vec.reserve(var_args.size());
             for (const auto& v : var_args) {

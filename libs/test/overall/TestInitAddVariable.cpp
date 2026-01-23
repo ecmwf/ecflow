@@ -26,7 +26,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
@@ -101,7 +100,8 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
         BOOST_CHECK_MESSAGE(v1.empty() && v2.empty(), "Expected not to find variables NAME1 and NAME2");
     }
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -17,7 +17,6 @@
 #include "ecflow/node/System.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Simulator)
@@ -74,7 +73,7 @@ void simulate(const std::string& directory, bool pass) {
 }
 
 BOOST_AUTO_TEST_CASE(test_simulate_good_defs) {
-    cout << "Simulator:: ...test_simulate_good_defs\n";
+    std::cout << "Simulator:: ...test_simulate_good_defs\n";
 
     std::string path = File::test_data("libs/test/simulator/test/data/good_defs", "libs/test/simulator");
 
@@ -83,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_simulate_good_defs) {
 }
 
 BOOST_AUTO_TEST_CASE(test_simulate_bad_defs) {
-    cout << "Simulator:: ...test_simulate_bad_defs\n";
+    std::cout << "Simulator:: ...test_simulate_bad_defs\n";
 
     std::string path = File::test_data("libs/test/simulator/test/data/bad_defs", "libs/test/simulator");
 

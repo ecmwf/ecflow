@@ -12,8 +12,6 @@
 
 #include "ecflow/node/ExprAst.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 AstAnalyserVisitor::AstAnalyserVisitor()  = default;

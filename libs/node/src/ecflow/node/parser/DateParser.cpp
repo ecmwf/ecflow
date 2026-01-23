@@ -16,7 +16,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool DateParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     //  date 15.11.2009 # <value>   // with PersistStyle::STATE & MIGRATE

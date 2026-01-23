@@ -19,8 +19,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/simulator/AstAnalyserVisitor.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,7 +99,7 @@ bool FlatAnalyserVisitor::analyse(Node* node) {
 
             AstAnalyserVisitor astVisitor;
             node->completeAst()->accept(astVisitor);
-            for (const string& nodePath : astVisitor.dependentNodePaths()) {
+            for (const std::string& nodePath : astVisitor.dependentNodePaths()) {
                 Indent l2(ctx_);
                 ss_ << l2;
                 ss_ << "'";
@@ -121,7 +119,7 @@ bool FlatAnalyserVisitor::analyse(Node* node) {
 
             AstAnalyserVisitor astVisitor;
             node->triggerAst()->accept(astVisitor);
-            for (const string& nodePath : astVisitor.dependentNodePaths()) {
+            for (const std::string& nodePath : astVisitor.dependentNodePaths()) {
                 Indent l2(ctx_);
                 ss_ << l2;
                 ss_ << "'";

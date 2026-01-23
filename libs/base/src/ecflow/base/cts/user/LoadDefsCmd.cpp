@@ -24,9 +24,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force) : force_(force) {
     if (defs) {
@@ -72,10 +69,10 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
         defs->server_state().add_or_update_user_variables(client_env); // use in test environment
 
         if (print) {
-            cout << ecf::as_string(*defs, PrintStyle::NET); // should be same as MIGRATE, only differ on reload
+            std::cout << ecf::as_string(*defs, PrintStyle::NET); // should be same as MIGRATE, only differ on reload
         }
         if (stats) {
-            cout << defs->stats();
+            std::cout << defs->stats();
         }
 
         if (!check_only && !stats && !print) {
@@ -83,7 +80,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
         }
 
         // Output any warning to standard output
-        cout << warningMsg;
+        std::cout << warningMsg;
     }
     else {
         std::stringstream ss;
@@ -183,11 +180,13 @@ const char* LoadDefsCmd::desc() {
 }
 
 void LoadDefsCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LoadDefsCmd::arg(), po::value<vector<string>>()->multitoken(), LoadDefsCmd::desc());
+    desc.add_options()(LoadDefsCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       LoadDefsCmd::desc());
 }
 
 void LoadDefsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
     if (clientEnv->debug()) {
         dumpVecArgs(LoadDefsCmd::arg(), args);
     }
@@ -215,7 +214,7 @@ void LoadDefsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm
         }
     }
     if (clientEnv->debug()) {
-        cout << "  LoadDefsCmd::create: Defs file '" << defs_filename << "'.\n";
+        std::cout << "  LoadDefsCmd::create: Defs file '" << defs_filename << "'.\n";
     }
 
     cmd = LoadDefsCmd::create(defs_filename, force, check_only, print, stats, clientEnv);

@@ -17,7 +17,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
@@ -29,7 +28,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
 
     {
         std::string line = "label name \"value\"";
-        std::vector<string> linetokens;
+        std::vector<std::string> linetokens;
         Str::split(line, linetokens);
 
         Label label;
@@ -42,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
     }
     {
         std::string line = R"(label name "value\nvalue")";
-        std::vector<string> linetokens;
+        std::vector<std::string> linetokens;
         Str::split(line, linetokens);
 
         Label label;
@@ -55,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
     }
     {
         std::string line = "label name \"value that is multiple token !!!! 23445 !^ & * ( )\"";
-        std::vector<string> linetokens;
+        std::vector<std::string> linetokens;
         Str::split(line, linetokens);
 
         Label label;
@@ -68,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
     }
     {
         std::string line = R"(label name "value\n that\n is\n multiple\n token\n and\n new\n \nlines")";
-        std::vector<string> linetokens;
+        std::vector<std::string> linetokens;
         Str::split(line, linetokens);
 
         Label label;

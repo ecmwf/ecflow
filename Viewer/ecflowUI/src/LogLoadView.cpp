@@ -1639,7 +1639,7 @@ void LogRequestView::writeSettings(VComboSettings* vs) {
 
 void LogRequestView::readSettings(VComboSettings* vs) {
     // sort mode
-    //    QString resMode=QString::fromStdString(vs->get<std::string>("plotResolution", std::string()));
+    //    QString resMode=QString::fromStdString(vs->get<std::string>("plotResolution", std::string{}));
     //    ViewerUtil::initComboBoxByData(resMode,ui_->resCombo);
 
     splitterSavedState_ = vs->getQs("splitter").toByteArray();

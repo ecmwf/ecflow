@@ -18,8 +18,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/User.hpp"
 
-using namespace std;
-using namespace boost;
 using namespace ecf;
 
 bool UserCmd::equals(ClientToServerCmd* rhs) const {
@@ -180,9 +178,9 @@ void UserCmd::setup_user_authentification() {
 }
 
 void UserCmd::prompt_for_confirmation(const std::string& prompt) {
-    cout << prompt;
+    std::cout << prompt;
     std::array<char, 256> reply;
-    cin.getline(reply.data(), reply.size());
+    std::cin.getline(reply.data(), reply.size());
     if (reply[0] != 'y' && reply[0] != 'Y') {
         exit(1);
     }

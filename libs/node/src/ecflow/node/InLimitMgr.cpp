@@ -26,7 +26,6 @@
 #endif
 
 using namespace ecf;
-using namespace std;
 
 void InLimitMgr::reset() {
     for (auto& i : vec_) {
@@ -80,8 +79,8 @@ bool InLimitMgr::deleteInlimit(const std::string& name) {
         return true;
     }
 
-    string path_to_limit; // This can be empty
-    string limit_name;
+    std::string path_to_limit; // This can be empty
+    std::string limit_name;
     (void)Extract::pathAndName(name, path_to_limit, limit_name); // already checked for empty name
     // cout << "   path_to_limit:" << path_to_limit << "\n";
     // cout << "   limit_name:" <<  limit_name << "\n";
@@ -438,7 +437,7 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
 
     // *FIND* the node referenced by the In-Limit, this should hold the Limit.
     // cout << "Inlimit path not empty \n";
-    string warning_message;
+    std::string warning_message;
     node_ptr referenceNode = node_->findReferencedNode(inLimit.pathToNode(), inLimit.name(), warning_message);
     if (!referenceNode.get()) {
         /// Could not find the node which *HOLDS* the limit

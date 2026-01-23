@@ -25,9 +25,6 @@
 #include "ecflow/node/JobsParam.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 // *IMPORTANT*: STATS_RESET was introduced in release 4.0.5
 
@@ -560,7 +557,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::SHUTDOWN_SERVER: {
             desc.add_options()(CtsApi::shutdownServerArg(),
-                               po::value<string>()->implicit_value(string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
                                "Stop server from scheduling new jobs.\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e\n"
                                "  --shutdown=yes\n"
@@ -576,7 +573,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::HALT_SERVER: {
             desc.add_options()(CtsApi::haltServerArg(),
-                               po::value<string>()->implicit_value(string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
                                "Stop server communication with jobs, and new job scheduling.\n"
                                "Also stops automatic check pointing\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.\n"
@@ -593,7 +590,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::TERMINATE_SERVER: {
             desc.add_options()(CtsApi::terminateServerArg(),
-                               po::value<string>()->implicit_value(string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
                                "Terminate the server.\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt.i.e\n"
                                "  --terminate=yes");
@@ -794,8 +791,9 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
             break;
         }
         case CtsCmd::SERVER_LOAD: {
-            desc.add_options()(
-                CtsApi::server_load_arg(), po::value<std::string>()->implicit_value(string("")), server_load_desc());
+            desc.add_options()(CtsApi::server_load_arg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                               server_load_desc());
             break;
         }
         case CtsCmd::NO_CMD:
@@ -819,7 +817,7 @@ bool CtsCmd::handleRequestIsTestable() const {
 
 void CtsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     if (ac->debug()) {
-        cout << "  CtsCmd::create api = '" << api_ << "'.\n";
+        std::cout << "  CtsCmd::create api = '" << api_ << "'.\n";
     }
 
     assert(api_ != CtsCmd::NO_CMD);

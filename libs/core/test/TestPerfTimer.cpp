@@ -14,8 +14,6 @@
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-
 BOOST_AUTO_TEST_SUITE(U_Core)
 
 BOOST_AUTO_TEST_SUITE(T_PerfTimer)
@@ -29,8 +27,6 @@ static void func(int const count = 100000) {
 
 BOOST_AUTO_TEST_CASE(test_perf_with_chrono) {
     ECF_NAME_THIS_TEST();
-
-    // using namespace std::chrono_literals;
 
     [[maybe_unused]] auto t = ecf::FunctionPerformanceTimer<>::duration(func, 100000);
 

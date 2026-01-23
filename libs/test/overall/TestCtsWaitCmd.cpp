@@ -26,7 +26,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
@@ -130,7 +129,8 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd) {
     ServerTestHarness serverTestHarness;
     serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_wait_cmd.def"), taskEcfFileMap);
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_wait_cmd_parse_fail) {
@@ -176,7 +176,8 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_parse_fail) {
     path_state_vec.push_back(std::make_pair(std::string("/test_wait_cmd_parse_fail/family0/wait"), NState::ABORTED));
     wait_for_state(path_state_vec, 10);
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
@@ -225,7 +226,8 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
         std::make_pair(std::string("/test_wait_cmd_non_existant_paths/family0/wait"), NState::ABORTED));
     wait_for_state(path_state_vec, 10);
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

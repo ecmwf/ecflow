@@ -16,8 +16,6 @@
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 bool LogVerification::extractNodePathAndState(const std::string& logfile,

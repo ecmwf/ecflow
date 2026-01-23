@@ -1004,7 +1004,7 @@ std::string Defs::find_node_path(const std::string& type, const std::string& nam
             return res;
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode) const {

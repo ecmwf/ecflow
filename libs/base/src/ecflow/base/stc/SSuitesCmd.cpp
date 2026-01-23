@@ -15,8 +15,6 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Suite.hpp"
 
-using namespace std;
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 SSuitesCmd::SSuitesCmd(AbstractServer* as) {
@@ -55,7 +53,7 @@ bool SSuitesCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_c
     if (server_reply.cli() && !cts_cmd->group_cmd()) {
         /// This Could be part of a group command, hence ONLY if NOT group command
         if (suites_.empty()) {
-            cout << "No suites\n";
+            std::cout << "No suites\n";
         }
 
         size_t max_suite_name_size = 0;
@@ -67,13 +65,13 @@ bool SSuitesCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_c
 
         int newline_at = 4;
         for (size_t i = 0; i < the_size; i++) {
-            cout << left << setw(max_suite_name_size) << suites_[i];
+            std::cout << std::left << std::setw(max_suite_name_size) << suites_[i];
             if (i != 0 && (i % newline_at) == 0) {
-                cout << "\n";
+                std::cout << "\n";
                 newline_at += 5;
             }
         }
-        cout << "\n";
+        std::cout << "\n";
     }
     else {
         server_reply.set_string_vec(suites_);

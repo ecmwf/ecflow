@@ -48,8 +48,6 @@
 #include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
 
-namespace po = boost::program_options;
-
 CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd) {
     // If a new client to server command is added. Make sure to add it here.
     // Could have used static initialisation' but this is less problematic.
@@ -180,7 +178,8 @@ void CtsCmdRegistry::addCmdOptions(boost::program_options::options_description& 
 
 void CtsCmdRegistry::addHelpOption(boost::program_options::options_description& desc) const {
     /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    desc.add_options()("help,h", po::value<std::string>()->implicit_value(std::string("")), "Produce help message");
+    desc.add_options()(
+        "help,h", boost::program_options::value<std::string>()->implicit_value(std::string{}), "Produce help message");
     desc.add_options()("version,v", "Show ecflow client version number, and version of the boost library used");
     desc.add_options()("debug,d",
                        "Enables the display of client environment settings and execution details.\n"

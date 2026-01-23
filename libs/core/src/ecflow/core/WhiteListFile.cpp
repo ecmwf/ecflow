@@ -19,8 +19,6 @@
 #include "ecflow/core/User.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
 WhiteListFile::WhiteListFile() = default;
 
@@ -278,8 +276,8 @@ bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
             if (lines[i][0] == '#') {
                 continue;
             }
-            std::string theLine           = lines[i];
-            string::size_type comment_pos = theLine.find("#");
+            std::string theLine                = lines[i];
+            std::string::size_type comment_pos = theLine.find("#");
             if (comment_pos != std::string::npos) {
                 theLine.erase(comment_pos);
             }
@@ -371,8 +369,8 @@ std::string WhiteListFile::dump_valid_users() const {
 bool WhiteListFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const {
     // Expect 4.4.14, Current syntax in force after 4.4.5
     // If first character is NUMERIC and we have dots
-    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != string::npos;
-    if (firstCharIsNumeric && line.find(".") != string::npos) {
+    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != std::string::npos;
+    if (firstCharIsNumeric && line.find(".") != std::string::npos) {
 
         std::vector<std::string> versionNumberTokens;
         Str::split(line, versionNumberTokens, ".");

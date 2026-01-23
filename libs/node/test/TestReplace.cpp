@@ -22,7 +22,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 class ExpectStateChange {

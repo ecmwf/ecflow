@@ -24,8 +24,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace boost;
-namespace po = boost::program_options;
 
 DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force) : force_(force) {
     if (!absNodePath.empty()) {
@@ -180,8 +178,9 @@ static const char* delete_node_desc() {
 }
 
 void DeleteCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        CtsApi::delete_node_arg(), po::value<std::vector<std::string>>()->multitoken(), delete_node_desc());
+    desc.add_options()(CtsApi::delete_node_arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       delete_node_desc());
 }
 
 void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {

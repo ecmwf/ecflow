@@ -22,7 +22,6 @@
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Server)
@@ -131,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_server) {
     if (auto port = ecf::environment::fetch("ECF_FREE_PORT"); port) { // from metabuilder, allow parallel tests
         the_port1 = port.value();
     }
-    cout << "  Find free port to start server, starting with port " << the_port1 << "\n";
+    std::cout << "  Find free port to start server, starting with port " << the_port1 << "\n";
 
     auto the_port = ecf::convert_to<int>(the_port1);
     while (!EcfPortLock::is_free(the_port)) {
@@ -139,14 +138,14 @@ BOOST_AUTO_TEST_CASE(test_server) {
     }
     std::string port = ecf::convert_to<std::string>(the_port);
     EcfPortLock::create(port);
-    cout << "  Found free port: " << port << " ";
+    std::cout << "  Found free port: " << port << " ";
 
     Host h;
     int count = 0;
     while (true) {
         try {
             test_the_server(port);
-            cout << "\n";
+            std::cout << "\n";
             break;
         }
         catch (...) {
@@ -156,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_server) {
             fs::remove(h.ecf_log_file(port));
             EcfPortLock::remove(port);
 
-            cout << " : port " << port << " is used, trying next port\n";
+            std::cout << " : port " << port << " is used, trying next port\n";
 
             the_port = ecf::convert_to<int>(port);
             the_port++;
@@ -166,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_server) {
             }
             port = ecf::convert_to<std::string>(the_port);
             EcfPortLock::create(port);
-            cout << "  Found free port: " << port << "\n";
+            std::cout << "  Found free port: " << port << "\n";
 
             BOOST_REQUIRE_MESSAGE(count < 20, "Could not find new port after 20 attempts");
         }

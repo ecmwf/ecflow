@@ -13,8 +13,6 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/node/Defs.hpp"
 
-using namespace std;
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 SStatsCmd::SStatsCmd(AbstractServer* as) {

@@ -27,9 +27,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -74,15 +71,16 @@ ecf::authorisation_t QueryCmd::authorise(AbstractServer& server) const {
 }
 
 void QueryCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(QueryCmd::arg(), po::value<vector<string>>()->multitoken(), QueryCmd::desc());
+    desc.add_options()(
+        QueryCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), QueryCmd::desc());
 }
 
 void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (clientEnv->debug()) {
         dumpVecArgs(QueryCmd::arg(), args);
-        cout << "  QueryCmd::create " << QueryCmd::arg() << " task_path(" << clientEnv->task_path() << ")\n";
+        std::cout << "  QueryCmd::create " << QueryCmd::arg() << " task_path(" << clientEnv->task_path() << ")\n";
     }
 
     std::string query_type;
@@ -114,7 +112,7 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         }
         if (attribute.empty()) {
             throw std::runtime_error("QueryCmd: no attribute specified: query type: " + query_type +
-                                     " path+attribute: " + path_and_name + "\n" + string(QueryCmd::desc()));
+                                     " path+attribute: " + path_and_name + "\n" + std::string(QueryCmd::desc()));
         }
     }
     else if (query_type == "trigger") {
@@ -129,7 +127,7 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         }
         if (attribute.empty()) {
             throw std::runtime_error("QueryCmd: no attribute specified: query type: trigger\n" +
-                                     string(QueryCmd::desc()));
+                                     std::string(QueryCmd::desc()));
         }
     }
     else if (query_type == "state" || query_type == "dstate") {

@@ -19,11 +19,12 @@
     #include "ecflow/base/Openssl.hpp"
 #endif
 
-using namespace std;
 using namespace ecf;
-namespace po = boost::program_options;
 
 ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
+
+    namespace po = boost::program_options;
+
     std::stringstream ss;
     ss << "\n" << Version::description() << "\nServer options";
     po::options_description desc(ss.str(), po::options_description::m_default_line_length + 80);
@@ -134,11 +135,11 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
     po::notify(vm_);
 
     if (vm_.count("help")) {
-        cout << desc << "\n";
+        std::cout << desc << "\n";
     }
 
     if (vm_.count("version")) {
-        cout << Version::description() << "\n";
+        std::cout << Version::description() << "\n";
     }
 
     if (vm_.count("debug")) {
@@ -147,32 +148,32 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
 
     if (vm_.count("http")) {
         if (env->debug_) {
-            cout << "ServerOptions:: Deploying HTTP Server\n";
+            std::cout << "ServerOptions:: Deploying HTTP Server\n";
         }
         env->protocol_ = ecf::Protocol::Http;
     }
 
     if (vm_.count("port")) {
         if (env->debug_) {
-            cout << "ServerOptions:: The port number set to '" << vm_["port"].as<int>() << "'\n";
+            std::cout << "ServerOptions:: The port number set to '" << vm_["port"].as<int>() << "'\n";
         }
         env->serverPort_ = vm_["port"].as<int>();
     }
     if (vm_.count("ecfinterval")) {
         if (env->debug_) {
-            cout << "ServerOptions: The ecfinterval set to '" << vm_["ecfinterval"].as<int>() << "'\n";
+            std::cout << "ServerOptions: The ecfinterval set to '" << vm_["ecfinterval"].as<int>() << "'\n";
         }
         env->submitJobsInterval_ = vm_["ecfinterval"].as<int>();
     }
     if (vm_.count("v6")) {
         if (env->debug_) {
-            cout << "ServerOptions: The tcp protocol set to v6\n";
+            std::cout << "ServerOptions: The tcp protocol set to v6\n";
         }
         env->tcp_protocol_ = boost::asio::ip::tcp::v6();
     }
     if (vm_.count("dis_job_gen")) {
         if (env->debug_) {
-            cout << "ServerOptions: The dis_job_gen is set\n";
+            std::cout << "ServerOptions: The dis_job_gen is set\n";
         }
         env->jobGeneration_ = false;
     }
