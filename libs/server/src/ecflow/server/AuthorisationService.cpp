@@ -138,15 +138,12 @@ bool AuthorisationService::allows(const Identity& identity,
                          ecf::visit(*d, p, v);
 
                          if (v.permissions.is_empty()) {
-                             std::cout << "Allowed! No custom permissions found for: " << p.to_string() << std::endl;
                              allowed = true;
                          }
                          else if (v.permissions.allows(identity.username())) {
-                             std::cout << "Allowed! Specific permissions found for: " << p.to_string() << std::endl;
                              allowed = true;
                          }
                          else {
-                             std::cout << "Not allowed! Specific permissions found for: " << p.to_string() << std::endl;
                              allowed = false;
                              break;
                          }
