@@ -3,17 +3,17 @@ builds:
     type: "conda"
     enabled: true
     config:
-      conda_build_args: "-m .cd/.conda/conda_build_config_common.yaml -m .cd/.conda/conda_build_config_py311.yaml --no-anaconda-upload"
+      conda_build_args: "-m .cd/conda/conda_build_config_common.yaml -m .cd/conda/conda_build_config_py311.yaml --no-anaconda-upload"
   - name: "conda-build Python3.12"
     type: "conda"
     enabled: true
     config:
-      conda_build_args: "-m .cd/.conda/conda_build_config_common.yaml -m .cd/.conda/conda_build_config_py312.yaml --no-anaconda-upload"
+      conda_build_args: "-m .cd/conda/conda_build_config_common.yaml -m .cd/conda/conda_build_config_py312.yaml --no-anaconda-upload"
   - name: "conda-build Python3.13"
     type: "conda"
     enabled: true
     config:
-      conda_build_args: "-m .cd/.conda/conda_build_config_common.yaml -m .cd/.conda/conda_build_config_py313.yaml --no-anaconda-upload"
+      conda_build_args: "-m .cd/conda/conda_build_config_common.yaml -m .cd/conda/conda_build_config_py313.yaml --no-anaconda-upload"
 
 release:
   enabled: true
