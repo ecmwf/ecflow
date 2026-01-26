@@ -1440,6 +1440,12 @@ Glossary
 
         Operations to execute synchronised Tasks have been disabled from the :term:`ecflow_ui`.
 
+      .. warning::
+
+        It is highly discouraged to mirror entities within the same server
+        (e.g. a suite mirrors a task from another suite living in the same server).
+        as this may lead to undesired behaviour, including deadlocks.
+
       `Only one mirror attribute is allowed per node`, and each attribute is
       defined by the following properties:
 
