@@ -42,7 +42,7 @@ public:
     std::string print_short() const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
-    int timeout() const override;
+    time_duration_t timeout() const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
     [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;

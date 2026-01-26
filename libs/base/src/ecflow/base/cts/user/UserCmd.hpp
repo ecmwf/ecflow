@@ -41,7 +41,7 @@ protected:
     /// All user commands will be pre_fixed with "--" and post_fixed with :user@host
     void user_cmd(std::string& os, const std::string& the_cmd) const;
 
-    static int time_out_for_load_sync_and_get();
+    static time_duration_t timeout_for_load_sync_and_get();
 
     // The order is preserved during the split. Paths assumed to start with '/' char
     static void split_args_to_options_and_paths(const std::vector<std::string>& args,

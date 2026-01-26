@@ -46,7 +46,7 @@ public:
 
     PrintStyle::Type_t show_style() const override;
 
-    int timeout() const override;
+    time_duration_t timeout() const override;
     bool isWrite() const override;
     bool handleRequestIsTestable() const override { return !terminate_cmd(); }
     bool why_cmd(std::string& nodePath) const override;

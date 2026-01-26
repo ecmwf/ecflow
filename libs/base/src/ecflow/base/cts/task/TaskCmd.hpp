@@ -35,7 +35,7 @@ protected:
 
 public:
     bool isWrite() const override { return true; }
-    int timeout() const override { return 190; } // ECFLOW-157 80 -> 190
+    time_duration_t timeout() const override { return std::chrono::seconds{190}; } // ECFLOW-157 80 -> 190
 
     const std::string& path_to_node() const { return path_to_submittable_; }
     const std::string& jobs_password() const { return jobs_password_; }

@@ -11,6 +11,7 @@
 #ifndef ecflow_core_Environment_HPP
 #define ecflow_core_Environment_HPP
 
+#include <chrono>
 #include <optional>
 
 #include "ecflow/core/Message.hpp"
@@ -122,6 +123,19 @@ struct Wrapper<bool>
     static std::optional<bool> get(const char* name) {
         if (auto var = std::getenv(name); var) {
             return true;
+        }
+        return std::nullopt;
+    }
+};
+
+template <>
+struct Wrapper<std::chrono::milliseconds>
+{
+    static std::optional<std::chrono::milliseconds> get(const char* name) {
+        if (auto var = std::getenv(name); var) {
+            // IMPORTANT: The value in the environment variable is provided in seconds!
+            auto value = atol(var);
+            return std::make_optional(std::chrono::seconds{value});
         }
         return std::nullopt;
     }

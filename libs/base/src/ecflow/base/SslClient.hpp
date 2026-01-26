@@ -25,6 +25,11 @@
 
 class SslClient {
 public:
+    ///
+    /// @brief The type used to configure a specific amount of time (e.g. for timeouts or time between retries).
+    ///
+    using time_duration_t = std::chrono::milliseconds;
+
     using resolver_t           = boost::asio::ip::tcp::resolver;
     using endpoints_set_t      = resolver_t::results_type;
     using endpoints_iterator_t = endpoints_set_t::iterator;
@@ -35,7 +40,7 @@ public:
               Cmd_ptr cmd_ptr,
               const std::string& host,
               const std::string& port,
-              int timout = 0);
+              time_duration_t timeout = std::chrono::seconds{0});
     ~SslClient();
 
     /// Client side, get the server response, handles reply from server
@@ -74,11 +79,7 @@ private:
 
     boost::asio::system_timer deadline_;
 
-    //    connect        : timeout_ second
-    //    send request   : timeout_ second
-    //    receive reply  : timeout_ second
-    // Default value of 0 means take the timeout from the command
-    int timeout_;
+    time_duration_t timeout_;
 };
 
 #endif /* ecflow_base_SslClient_HPP */

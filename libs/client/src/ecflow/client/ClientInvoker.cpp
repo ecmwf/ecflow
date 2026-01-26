@@ -223,8 +223,12 @@ void ClientInvoker::disable_logging() {
     Rtt::destroy();
 }
 
-void ClientInvoker::set_connect_timeout(int t) {
-    clientEnv_.set_connect_timeout(t);
+void ClientInvoker::set_connect_timeout(time_duration_t timeout) {
+    clientEnv_.set_connect_timeout(timeout);
+}
+
+void ClientInvoker::set_connect_timeout(int timeout) {
+    set_connect_timeout(std::chrono::seconds{timeout});
 }
 
 void ClientInvoker::set_connection_attempts(unsigned int attempts) {
@@ -445,10 +449,10 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                         std::cout << TimeStamp::now() << "ClientInvoker: >>> " << cts_cmd->print_short();
                         std::cout << " on " << client_env_host_port() << " : retry_connection_period("
                                   << retry_connection_period.count() << "ms) no_of_tries(" << no_of_tries
-                                  << ") cmd_connect_timeout(" << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT("
-                                  << clientEnv_.connect_timeout()
+                                  << ") cmd_connect_timeout(" << cts_cmd->timeout().count()
+                                  << "ms) ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout().count() << "ms)"
 #ifdef ECF_OPENSSL
-                                  << ") SSL(" << clientEnv_.ssl()
+                                  << " SSL(" << clientEnv_.ssl()
 #endif
                                   << ")<<<" << std::endl;
                     }

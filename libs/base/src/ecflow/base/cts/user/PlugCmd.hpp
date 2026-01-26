@@ -22,7 +22,7 @@ public:
     const std::string& source() const { return source_; }
     const std::string& dest() const { return dest_; }
 
-    int timeout() const override { return 120; }
+    time_duration_t timeout() const override { return std::chrono::seconds{120}; }
     bool handleRequestIsTestable() const override { return false; }
     bool isWrite() const override { return true; }
     void print(std::string&) const override;

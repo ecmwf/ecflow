@@ -193,12 +193,12 @@ PrintStyle::Type_t CtsNodeCmd::show_style() const {
     return ClientToServerCmd::show_style();
 }
 
-int CtsNodeCmd::timeout() const {
+ClientToServerCmd::time_duration_t CtsNodeCmd::timeout() const {
     if (api_ == CtsNodeCmd::GET) {
-        return time_out_for_load_sync_and_get();
+        return timeout_for_load_sync_and_get();
     }
     if (api_ == CtsNodeCmd::MIGRATE) {
-        return 120;
+        return std::chrono::seconds{120};
     }
     return ClientToServerCmd::timeout();
 }

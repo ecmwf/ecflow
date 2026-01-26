@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_client_timeout, *boost::unit_test::disabled()) {
     //    send request   : 1 second
     //    receive reply  : 1 second
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
-    theClient.set_connect_timeout(0);
+    theClient.set_connect_timeout(std::chrono::seconds{0});
 
     std::string path = File::test_data("libs/node/test/parser/data/single_defs/mega.def", "parser");
     BOOST_REQUIRE_THROW(theClient.loadDefs(path),
