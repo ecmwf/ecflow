@@ -29,7 +29,9 @@ public:
           client_handle_(client_handle),
           client_state_change_no_(client_state_change_no),
           client_modify_change_no_(client_modify_change_no) {}
-    explicit CSyncCmd(unsigned int client_handle) : api_(SYNC_FULL), client_handle_(client_handle) {}
+    explicit CSyncCmd(unsigned int client_handle)
+        : api_(SYNC_FULL),
+          client_handle_(client_handle) {}
     CSyncCmd() = default;
 
     Api api() const { return api_; }

@@ -29,7 +29,10 @@ public:
 
 class TestClean {
 public:
-    explicit TestClean(int timeout = 25) : timeout_(timeout) { ZombieUtil::test_clean_up(timeout); }
+    explicit TestClean(int timeout = 25)
+        : timeout_(timeout) {
+        ZombieUtil::test_clean_up(timeout);
+    }
 
     TestClean(const TestClean&)            = delete;
     TestClean& operator=(const TestClean&) = delete;

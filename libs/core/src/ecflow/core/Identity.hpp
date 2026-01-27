@@ -31,7 +31,8 @@ public:
 template <class T>
 class WrappingIdentity : public AbstractIdentity {
 public:
-    explicit WrappingIdentity(T&& id) : id_(std::move(id)) {}
+    explicit WrappingIdentity(T&& id)
+        : id_(std::move(id)) {}
 
     [[nodiscard]] std::unique_ptr<AbstractIdentity> clone() const override {
         T clone = id_;
@@ -89,7 +90,9 @@ private:
 
 class SecureUserX {
 public:
-    explicit SecureUserX(std::string username) : username_(std::move(username)), password_{} {}
+    explicit SecureUserX(std::string username)
+        : username_(std::move(username)),
+          password_{} {}
 
     [[nodiscard]] std::string username() const { return username_; }
     [[nodiscard]] std::string password() const { return password_; }
@@ -166,8 +169,10 @@ public:
         return Identity{TaskX{pid, pass, tryno}};
     }
 
-    Identity(const Identity& other) : handle_{other.handle_->clone()} {}
-    Identity(Identity&& other) noexcept : handle_{std::move(other.handle_)} {}
+    Identity(const Identity& other)
+        : handle_{other.handle_->clone()} {}
+    Identity(Identity&& other) noexcept
+        : handle_{std::move(other.handle_)} {}
     ~Identity() = default;
 
     Identity& operator=(Identity other) {
@@ -192,7 +197,8 @@ public:
 private:
     template <class T,
               typename = std::enable_if_t<detail::is_one_of_v<T, None, UserX, CustomUserX, SecureUserX, TaskX>>>
-    explicit Identity(T&& t) : handle_{std::make_unique<WrappingIdentity<T>>(std::forward<T>(t))} {}
+    explicit Identity(T&& t)
+        : handle_{std::make_unique<WrappingIdentity<T>>(std::forward<T>(t))} {}
 
     std::unique_ptr<AbstractIdentity> handle_;
 };

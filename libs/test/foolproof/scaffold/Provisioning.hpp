@@ -50,7 +50,8 @@ inline std::string pretty_print_path(const fs::path& path) {
 
 class Directory {
 public:
-    explicit Directory(fs::path location) : location_{std::move(location)} {
+    explicit Directory(fs::path location)
+        : location_{std::move(location)} {
         ECF_TEST_DBG("Created working directory at: " << location_.string());
     }
 
@@ -131,7 +132,8 @@ public:
         }
     };
 
-    MakeDirectory() : location_{make_working_directory()} {}
+    MakeDirectory()
+        : location_{make_working_directory()} {}
 
     Directory create() const {
         // ensure the directory exists
@@ -159,7 +161,9 @@ private:
 
 class EnvironmentVariable {
 public:
-    EnvironmentVariable(std::string name, std::string value) : name_{std::move(name)}, value_{std::move(value)} {
+    EnvironmentVariable(std::string name, std::string value)
+        : name_{std::move(name)},
+          value_{std::move(value)} {
         ECF_TEST_DBG("Setting environment variable: " << name_ << "=" << value_);
         setenv(name_.c_str(), value_.c_str(), true);
     }
@@ -195,10 +199,13 @@ class MakeEnvironmentVariable {
 public:
     struct InvalidVariableName : public std::runtime_error
     {
-        explicit InvalidVariableName(std::string message) : std::runtime_error(message) {}
+        explicit InvalidVariableName(std::string message)
+            : std::runtime_error(message) {}
     };
 
-    MakeEnvironmentVariable() : name_{}, value_{} {}
+    MakeEnvironmentVariable()
+        : name_{},
+          value_{} {}
 
     MakeEnvironmentVariable(const MakeEnvironmentVariable&)                = delete;
     MakeEnvironmentVariable& operator=(const MakeEnvironmentVariable&)     = delete;
@@ -230,7 +237,8 @@ public:
     explicit SpecificFileLocation(const std::string& name, const Directory& cwd)
         : SpecificFileLocation(name, cwd.path()) {}
 
-    explicit SpecificFileLocation(const std::string& name, const fs::path& location) : path_{location / name} {}
+    explicit SpecificFileLocation(const std::string& name, const fs::path& location)
+        : path_{location / name} {}
 
     constexpr const fs::path& path() const { return path_; }
 
@@ -283,7 +291,8 @@ private:
 
 class File {
 public:
-    explicit File(fs::path location) : location_{std::move(location)} {
+    explicit File(fs::path location)
+        : location_{std::move(location)} {
         assert(fs::exists(location_));
         assert(fs::is_regular_file(location_));
         ECF_TEST_DBG("Created file: " << location_);
@@ -308,7 +317,9 @@ private:
 
 class MakeTestFile {
 public:
-    explicit MakeTestFile() : location_{}, content_{} {}
+    explicit MakeTestFile()
+        : location_{},
+          content_{} {}
 
     MakeTestFile(const MakeTestFile&)                = delete;
     MakeTestFile& operator=(const MakeTestFile&)     = delete;
@@ -372,7 +383,8 @@ public:
     };
 
 private:
-    LockFile(const fs::path& lock_file) : lock_file_(lock_file) {
+    LockFile(const fs::path& lock_file)
+        : lock_file_(lock_file) {
         assert(!lock_file_.empty());
         assert(fs::exists(lock_file_));
         assert(fs::is_regular_file(lock_file_));
@@ -421,7 +433,8 @@ struct Host
     using host_t = std::string;
 
     Host() = default;
-    Host(host_t host) : host_{host} {
+    Host(host_t host)
+        : host_{host} {
         if (host_.empty()) {
             throw std::runtime_error("host name cannot be empty\n");
         }
@@ -468,7 +481,9 @@ struct Port
     using port_t     = uint32_t;
     using location_t = fs::path;
 
-    Port(port_t port, LockFile&& lock) : port_{port}, lock_{std::move(lock)} {}
+    Port(port_t port, LockFile&& lock)
+        : port_{port},
+          lock_{std::move(lock)} {}
 
     Port(const Port&)                = delete;
     Port& operator=(const Port&)     = delete;
@@ -497,7 +512,8 @@ private:
 struct PasswordsFile
 {
     template <typename... Entry>
-    PasswordsFile(const Host& host, const Port& port, const Entry&... entries) : content_{} {
+    PasswordsFile(const Host& host, const Port& port, const Entry&... entries)
+        : content_{} {
         content_ += ECFLOW_VERSION;
         content_ += "\n";
         auto print = [this, host, &port](auto& user) {
@@ -522,7 +538,8 @@ private:
 struct WhitelistFile
 {
     template <typename... Entry>
-    WhitelistFile(Entry... entries) : content_{} {
+    WhitelistFile(Entry... entries)
+        : content_{} {
         content_ += ECFLOW_VERSION;
         content_ += "\n";
         auto print = [this](auto& user) {
@@ -542,7 +559,8 @@ private:
 struct ServerEnvironmentFile
 {
     template <typename... Entry>
-    ServerEnvironmentFile(Entry... entries) : content_{} {
+    ServerEnvironmentFile(Entry... entries)
+        : content_{} {
         content_ += "\n";
         auto print = [this](auto& entry) {
             auto [variable, value] = entry;
@@ -586,7 +604,8 @@ struct SpecificPortValue
 {
     using port_t = Port::port_t;
 
-    explicit SpecificPortValue(port_t port = Port::default_port) : base_port{port} {}
+    explicit SpecificPortValue(port_t port = Port::default_port)
+        : base_port{port} {}
 
     port_t base_port;
 
@@ -608,7 +627,8 @@ struct AutomaticPortValue
 {
     using port_t = Port::port_t;
 
-    explicit AutomaticPortValue(port_t port = Port::default_port) : base_port{port} {}
+    explicit AutomaticPortValue(port_t port = Port::default_port)
+        : base_port{port} {}
 
     port_t base_port;
 
@@ -628,17 +648,20 @@ class MakePort {
 public:
     class UnableToLockPort : public std::runtime_error {
     public:
-        explicit UnableToLockPort(std::string msg) : std::runtime_error(std::move(msg)) {}
+        explicit UnableToLockPort(std::string msg)
+            : std::runtime_error(std::move(msg)) {}
     };
 
     class NoLockCurrentlyAvailable : public std::runtime_error {
     public:
-        explicit NoLockCurrentlyAvailable(std::string msg) : std::runtime_error(std::move(msg)) {}
+        explicit NoLockCurrentlyAvailable(std::string msg)
+            : std::runtime_error(std::move(msg)) {}
     };
 
     using location_t = fs::path;
 
-    MakePort() : strategy_{SpecificPortValue{}} {}
+    MakePort()
+        : strategy_{SpecificPortValue{}} {}
 
     MakePort(const MakePort&)                = delete;
     MakePort& operator=(const MakePort&)     = delete;
@@ -702,9 +725,15 @@ public:
     Outcome& operator=(Outcome&&)      = default;
 
 private:
-    explicit Outcome(const V& value) : success_{true}, data_{value} {}
-    explicit Outcome(V&& value) : success_{true}, data_{std::move(value)} {}
-    explicit Outcome(const Error& error) : success_{false}, data_{error} {}
+    explicit Outcome(const V& value)
+        : success_{true},
+          data_{value} {}
+    explicit Outcome(V&& value)
+        : success_{true},
+          data_{std::move(value)} {}
+    explicit Outcome(const Error& error)
+        : success_{false},
+          data_{error} {}
 
 public:
     ~Outcome() = default;
@@ -758,7 +787,8 @@ public:
 
     struct CommandLoad
     {
-        explicit CommandLoad(fs::path defs) : defs_{defs} {}
+        explicit CommandLoad(fs::path defs)
+            : defs_{defs} {}
 
         std::vector<std::string> options() const { return {"--load", defs_.string(), "-d"}; }
 
@@ -767,7 +797,9 @@ public:
 
     struct CommandReplace
     {
-        explicit CommandReplace(fs::path defs, std::string node) : defs_{defs}, node_{std::move(node)} {}
+        explicit CommandReplace(fs::path defs, std::string node)
+            : defs_{defs},
+              node_{std::move(node)} {}
 
         std::vector<std::string> options() const { return {"--replace", node_, defs_.string()}; }
 
@@ -777,7 +809,8 @@ public:
 
     struct CommandDelete
     {
-        explicit CommandDelete(std::string path) : path_{path} {}
+        explicit CommandDelete(std::string path)
+            : path_{path} {}
 
         std::vector<std::string> options() const { return {"--delete", "force", "yes", path_}; }
 
@@ -805,7 +838,11 @@ public:
         std::vector<std::string> options() const { return {"--reloadwsfile"}; }
     };
 
-    explicit RunClient() : host_{nullptr}, port_{nullptr}, user_{nullptr}, cwd_{nullptr} {};
+    explicit RunClient()
+        : host_{nullptr},
+          port_{nullptr},
+          user_{nullptr},
+          cwd_{nullptr} {};
 
     RunClient(const RunClient&)            = delete;
     RunClient& operator=(const RunClient&) = delete;
@@ -939,7 +976,8 @@ public:
 
     struct UnableToShutdownServer : public std::runtime_error
     {
-        explicit UnableToShutdownServer(std::string msg) : std::runtime_error(std::move(msg)) {}
+        explicit UnableToShutdownServer(std::string msg)
+            : std::runtime_error(std::move(msg)) {}
     };
 
     explicit Server(const Host& host, const Port& port, const Directory& cwd, Process&& process)
@@ -1040,7 +1078,10 @@ private:
 
 class MakeServer {
 public:
-    explicit MakeServer() : host_{nullptr}, port_{nullptr}, cwd_{nullptr} {};
+    explicit MakeServer()
+        : host_{nullptr},
+          port_{nullptr},
+          cwd_{nullptr} {};
 
     MakeServer(const MakeServer&)            = delete;
     MakeServer& operator=(const MakeServer&) = delete;

@@ -33,7 +33,8 @@ BOOST_AUTO_TEST_SUITE(T_PasswdFile)
 
 class Add_ECF_PASSWD_env {
 public:
-    explicit Add_ECF_PASSWD_env(const std::string& passwd_file) : env_("ECF_PASSWD=") {
+    explicit Add_ECF_PASSWD_env(const std::string& passwd_file)
+        : env_("ECF_PASSWD=") {
         env_ += passwd_file;
         auto* put = const_cast<char*>(env_.c_str());
         BOOST_CHECK_MESSAGE(putenv(put) == 0, "putenv failed for " << put);

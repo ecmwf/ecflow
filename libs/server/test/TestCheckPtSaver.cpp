@@ -24,7 +24,8 @@ public:
     /**
      * Create a handle for a 'non-existent' data file
      */
-    explicit TestFile(const std::string& basename) : absolute_path_(TestFile::unique_absolute_path(basename)) {}
+    explicit TestFile(const std::string& basename)
+        : absolute_path_(TestFile::unique_absolute_path(basename)) {}
 
     /**
      * Create a handle for a data file, with the given content

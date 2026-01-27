@@ -14,7 +14,8 @@
 
 #include "PlainTextSearchInterface.hpp"
 
-PlainTextSearchLine::PlainTextSearchLine(QWidget* parent) : TextEditSearchLine(parent) {
+PlainTextSearchLine::PlainTextSearchLine(QWidget* parent)
+    : TextEditSearchLine(parent) {
     interface_ = new PlainTextSearchInterface;
     TextEditSearchLine::setSearchInterface(interface_);
 }

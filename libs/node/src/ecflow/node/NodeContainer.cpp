@@ -41,7 +41,8 @@ using namespace ecf;
 // #define DEBUG_DEPENDENCIES 1
 
 /////////////////////////////////////////////////////////////////////////////////////////
-NodeContainer::NodeContainer(const std::string& name, bool check) : Node(name, check) {
+NodeContainer::NodeContainer(const std::string& name, bool check)
+    : Node(name, check) {
 }
 
 NodeContainer::NodeContainer() = default;
@@ -64,7 +65,8 @@ void NodeContainer::copy(const NodeContainer& rhs) {
     }
 }
 
-NodeContainer::NodeContainer(const NodeContainer& rhs) : Node(rhs) {
+NodeContainer::NodeContainer(const NodeContainer& rhs)
+    : Node(rhs) {
     copy(rhs);
 }
 

@@ -24,7 +24,9 @@
 
 using namespace ecf;
 
-BeginCmd::BeginCmd(const std::string& suiteName, bool force) : suiteName_(suiteName), force_(force) {
+BeginCmd::BeginCmd(const std::string& suiteName, bool force)
+    : suiteName_(suiteName),
+      force_(force) {
     // The begin command actually requires the suite name without the lead '/'
     // i.e if we provide /suite --> change to suite
     if (!suiteName_.empty() && suiteName_[0] == '/') {

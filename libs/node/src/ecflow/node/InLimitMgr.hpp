@@ -34,8 +34,10 @@ class access;
 //
 class InLimitMgr {
 public:
-    explicit InLimitMgr(Node* n) : node_(n) {}
-    InLimitMgr(const InLimitMgr& rhs) : vec_(rhs.vec_) {}
+    explicit InLimitMgr(Node* n)
+        : node_(n) {}
+    InLimitMgr(const InLimitMgr& rhs)
+        : vec_(rhs.vec_) {}
     InLimitMgr() = default;
 
     // needed by node copy constructor

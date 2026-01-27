@@ -24,7 +24,8 @@
 //
 //========================================================
 
-EditItemWidget::EditItemWidget(QWidget* parent) : QWidget(parent) {
+EditItemWidget::EditItemWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     infoProvider_ = new EditProvider(this);

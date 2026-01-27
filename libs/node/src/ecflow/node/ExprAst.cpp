@@ -1741,7 +1741,9 @@ std::string AstParentVariable::why_expression(bool html) const {
 // ===============================================================================
 // class VariableHelper:
 // ===============================================================================
-VariableHelper::VariableHelper(const AstVariable* astVariable) : astVariable_(astVariable), theReferenceNode_(nullptr) {
+VariableHelper::VariableHelper(const AstVariable* astVariable)
+    : astVariable_(astVariable),
+      theReferenceNode_(nullptr) {
     // For *this* constructor we don't care about errors'
     std::string errorMsg;
     theReferenceNode_ = astVariable_->referencedNode(errorMsg);

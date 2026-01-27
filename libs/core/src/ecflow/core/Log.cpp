@@ -41,7 +41,9 @@ void Log::destroy() {
     instance_ = nullptr;
 }
 
-Log::Log(const std::string& fileName) : logImpl_(std::make_unique<LogImpl>(fileName)), fileName_(fileName) {
+Log::Log(const std::string& fileName)
+    : logImpl_(std::make_unique<LogImpl>(fileName)),
+      fileName_(fileName) {
 }
 
 void Log::create_logimpl() {
@@ -306,7 +308,8 @@ LogFlusher::~LogFlusher() {
 
 //======================================================================================================
 
-TestLog::TestLog(const std::string& log_path) : log_path_(log_path) {
+TestLog::TestLog(const std::string& log_path)
+    : log_path_(log_path) {
     Log::create(log_path);
 }
 
@@ -331,7 +334,8 @@ LogTimer::~LogTimer() {
 }
 
 //======================================================================================================
-LogImpl::LogImpl(const std::string& filename) : file_(filename.c_str(), std::ios::out | std::ios::app) {
+LogImpl::LogImpl(const std::string& filename)
+    : file_(filename.c_str(), std::ios::out | std::ios::app) {
     if (!file_.is_open()) {
         log_open_error_ = "Could not open log file '";
         log_open_error_ += filename;

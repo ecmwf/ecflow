@@ -22,7 +22,8 @@
 #include "TimelineFileList.hpp"
 #include "ui_TimelinePreLoadDialog.h"
 
-TimelinePreLoadDialog::TimelinePreLoadDialog(QWidget* /*parent*/) : ui_(new Ui::TimelinePreLoadDialog) {
+TimelinePreLoadDialog::TimelinePreLoadDialog(QWidget* /*parent*/)
+    : ui_(new Ui::TimelinePreLoadDialog) {
     ui_->setupUi(this);
 
     // the loadable files

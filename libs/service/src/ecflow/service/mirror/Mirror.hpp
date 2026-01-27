@@ -44,7 +44,9 @@ public:
  */
 class MirrorNotification {
 public:
-    MirrorNotification(std::string_view path, MirrorData data) : path_(path), data_(std::move(data)) {}
+    MirrorNotification(std::string_view path, MirrorData data)
+        : path_(path),
+          data_(std::move(data)) {}
 
     const std::string& path() const { return path_; }
     const MirrorData data() const { return data_; }

@@ -27,7 +27,8 @@
 //
 //=================================
 
-FileFetchLocalTask::FileFetchLocalTask(FetchQueueOwner* owner) : AbstractFetchTask("FileFetchLocal", owner) {
+FileFetchLocalTask::FileFetchLocalTask(FetchQueueOwner* owner)
+    : AbstractFetchTask("FileFetchLocal", owner) {
 }
 
 // try to read the logfile from the disk (if the settings allow it)
@@ -203,7 +204,8 @@ void FileFetchTransferTask::transferFailed(QString msg) {
 //
 //=================================
 
-FileFetchCacheTask::FileFetchCacheTask(FetchQueueOwner* owner) : AbstractFetchTask("FileFetchCache", owner) {
+FileFetchCacheTask::FileFetchCacheTask(FetchQueueOwner* owner)
+    : AbstractFetchTask("FileFetchCache", owner) {
 }
 
 // Try to fetch the logfile from the local cache

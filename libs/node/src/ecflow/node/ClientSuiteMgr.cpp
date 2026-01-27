@@ -20,7 +20,8 @@ using namespace ecf;
 
 // #define DEBUG_HANDLE 1
 
-ClientSuiteMgr::ClientSuiteMgr(Defs* defs) : defs_(defs) {
+ClientSuiteMgr::ClientSuiteMgr(Defs* defs)
+    : defs_(defs) {
 }
 
 unsigned int ClientSuiteMgr::create_client_suite(bool auto_add_new_suites,

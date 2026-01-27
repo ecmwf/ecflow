@@ -20,8 +20,10 @@ namespace ecf {
 
 struct bad_conversion : public std::runtime_error
 {
-    explicit bad_conversion(const char* m) : std::runtime_error(m) {}
-    explicit bad_conversion(const std::string& m) : std::runtime_error(m) {}
+    explicit bad_conversion(const char* m)
+        : std::runtime_error(m) {}
+    explicit bad_conversion(const std::string& m)
+        : std::runtime_error(m) {}
 };
 
 namespace detail {

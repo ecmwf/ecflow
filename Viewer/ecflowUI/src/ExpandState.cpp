@@ -22,7 +22,10 @@
 
 // #define UI_EXPANDSTATE_DEBUG
 
-ExpandState::ExpandState(AbstractNodeView* view, TreeNodeModel* model) : view_(view), model_(model), root_(nullptr) {
+ExpandState::ExpandState(AbstractNodeView* view, TreeNodeModel* model)
+    : view_(view),
+      model_(model),
+      root_(nullptr) {
 }
 
 ExpandState::~ExpandState() {

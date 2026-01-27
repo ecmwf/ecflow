@@ -32,7 +32,11 @@ class LogConsumer;
 
 struct LogLoadStatItem
 {
-    LogLoadStatItem() : sumTotal_(0), maxTotal_(0), rank_(0), percentage_(0.) {}
+    LogLoadStatItem()
+        : sumTotal_(0),
+          maxTotal_(0),
+          rank_(0),
+          percentage_(0.) {}
 
     void clear() { sumTotal_ = 0, maxTotal_ = 0, rank_ = 0, percentage_ = 0.; }
     float percentage() const { return percentage_; }
@@ -52,7 +56,10 @@ class LogRequestItem {
 public:
     enum Type { ChildCmd, UserCmd, OtherCmd };
 
-    LogRequestItem() : global_(false), type_(OtherCmd), counter_(0) {}
+    LogRequestItem()
+        : global_(false),
+          type_(OtherCmd),
+          counter_(0) {}
     LogRequestItem(const std::string& name, Type type, const std::string& pattern, bool global = false)
         : global_(global),
           name_(name),
@@ -166,7 +173,8 @@ public:
     enum TimeRes { SecondResolution, MinuteResolution, HourResolution };
     enum LoadStatus { LoadNotTried, LoadFailed, LoadDone };
 
-    LogLoadData(QObject* parent = nullptr) : QObject(parent) {}
+    LogLoadData(QObject* parent = nullptr)
+        : QObject(parent) {}
 
     void
     loadLogFile(const std::string& logFile, size_t maxReadSize, const std::vector<std::string>& suites, LogConsumer*);

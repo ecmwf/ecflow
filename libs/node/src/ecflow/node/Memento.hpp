@@ -91,7 +91,8 @@ private:
  */
 class CompoundMemento {
 public:
-    explicit CompoundMemento(const std::string& absNodePath) : absNodePath_(absNodePath) {}
+    explicit CompoundMemento(const std::string& absNodePath)
+        : absNodePath_(absNodePath) {}
 
     CompoundMemento() = default; // for serialization
 
@@ -119,7 +120,8 @@ private:
  */
 class StateMemento : public Memento {
 public:
-    explicit StateMemento(NState::State state) : state_(state) {}
+    explicit StateMemento(NState::State state)
+        : state_(state) {}
     StateMemento() = default;
 
 private:
@@ -142,7 +144,8 @@ private:
  */
 class NodeStateMemento : public Memento {
 public:
-    explicit NodeStateMemento(std::pair<NState::State, boost::posix_time::time_duration> state) : state_(state) {}
+    explicit NodeStateMemento(std::pair<NState::State, boost::posix_time::time_duration> state)
+        : state_(state) {}
     NodeStateMemento() = default;
 
 private:
@@ -165,7 +168,8 @@ private:
  */
 class OrderMemento : public Memento {
 public:
-    explicit OrderMemento(const std::vector<std::string>& order) : order_(order) {}
+    explicit OrderMemento(const std::vector<std::string>& order)
+        : order_(order) {}
     OrderMemento() = default;
 
 private:
@@ -199,7 +203,8 @@ private:
  */
 class ChildrenMemento : public Memento {
 public:
-    explicit ChildrenMemento(const std::vector<node_ptr>& children) : children_(children) {}
+    explicit ChildrenMemento(const std::vector<node_ptr>& children)
+        : children_(children) {}
     ChildrenMemento() = default;
 
 private:
@@ -225,7 +230,8 @@ private:
  */
 class AliasChildrenMemento : public Memento {
 public:
-    explicit AliasChildrenMemento(const std::vector<alias_ptr>& children) : children_(children) {}
+    explicit AliasChildrenMemento(const std::vector<alias_ptr>& children)
+        : children_(children) {}
     AliasChildrenMemento() = default;
 
 private:
@@ -248,7 +254,8 @@ private:
  */
 class AliasNumberMemento : public Memento {
 public:
-    explicit AliasNumberMemento(unsigned int alias_no) : alias_no_(alias_no) {}
+    explicit AliasNumberMemento(unsigned int alias_no)
+        : alias_no_(alias_no) {}
     AliasNumberMemento() = default;
 
 private:
@@ -271,7 +278,8 @@ private:
  */
 class SuspendedMemento : public Memento {
 public:
-    explicit SuspendedMemento(bool suspended) : suspended_(suspended) {}
+    explicit SuspendedMemento(bool suspended)
+        : suspended_(suspended) {}
     SuspendedMemento() = default;
 
 private:
@@ -294,7 +302,8 @@ private:
  */
 class ServerStateMemento : public Memento {
 public:
-    explicit ServerStateMemento(SState::State s) : state_(s) {}
+    explicit ServerStateMemento(SState::State s)
+        : state_(s) {}
     ServerStateMemento() = default;
 
 private:
@@ -317,7 +326,8 @@ private:
  */
 class ServerVariableMemento : public Memento {
 public:
-    explicit ServerVariableMemento(const std::vector<Variable>& vec) : serverEnv_(vec) {}
+    explicit ServerVariableMemento(const std::vector<Variable>& vec)
+        : serverEnv_(vec) {}
     ServerVariableMemento() = default;
 
 private:
@@ -340,7 +350,8 @@ private:
  */
 class NodeDefStatusDeltaMemento : public Memento {
 public:
-    explicit NodeDefStatusDeltaMemento(DState::State state) : state_(state) {}
+    explicit NodeDefStatusDeltaMemento(DState::State state)
+        : state_(state) {}
     NodeDefStatusDeltaMemento() = default;
 
 private:
@@ -363,7 +374,8 @@ private:
  */
 class NodeEventMemento : public Memento {
 public:
-    explicit NodeEventMemento(const Event& e) : event_(e) {}
+    explicit NodeEventMemento(const Event& e)
+        : event_(e) {}
     NodeEventMemento() = default;
 
 private:
@@ -386,7 +398,8 @@ private:
  */
 class NodeMeterMemento : public Memento {
 public:
-    explicit NodeMeterMemento(const Meter& e) : meter_(e) {}
+    explicit NodeMeterMemento(const Meter& e)
+        : meter_(e) {}
     NodeMeterMemento() = default;
 
 private:
@@ -409,7 +422,8 @@ private:
  */
 class NodeLabelMemento : public Memento {
 public:
-    explicit NodeLabelMemento(const Label& e) : label_(e) {}
+    explicit NodeLabelMemento(const Label& e)
+        : label_(e) {}
     NodeLabelMemento() = default;
 
 private:
@@ -432,7 +446,8 @@ private:
  */
 class NodeQueueMemento : public Memento {
 public:
-    explicit NodeQueueMemento(const QueueAttr& e) : queue_(e) {}
+    explicit NodeQueueMemento(const QueueAttr& e)
+        : queue_(e) {}
     NodeQueueMemento() = default;
 
 private:
@@ -456,7 +471,8 @@ private:
  */
 class NodeGenericMemento : public Memento {
 public:
-    explicit NodeGenericMemento(const GenericAttr& e) : generic_(e) {}
+    explicit NodeGenericMemento(const GenericAttr& e)
+        : generic_(e) {}
     NodeGenericMemento() = default;
 
 private:
@@ -509,7 +525,8 @@ private:
  */
 class NodeTriggerMemento : public Memento {
 public:
-    explicit NodeTriggerMemento(const Expression& e) : exp_(e) {}
+    explicit NodeTriggerMemento(const Expression& e)
+        : exp_(e) {}
     NodeTriggerMemento() = default;
 
 private:
@@ -532,7 +549,8 @@ private:
  */
 class NodeCompleteMemento : public Memento {
 public:
-    explicit NodeCompleteMemento(const Expression& e) : exp_(e) {}
+    explicit NodeCompleteMemento(const Expression& e)
+        : exp_(e) {}
     NodeCompleteMemento() = default;
 
 private:
@@ -555,7 +573,8 @@ private:
  */
 class NodeRepeatMemento : public Memento {
 public:
-    explicit NodeRepeatMemento(const Repeat& e) : repeat_(e) {}
+    explicit NodeRepeatMemento(const Repeat& e)
+        : repeat_(e) {}
     NodeRepeatMemento() = default;
 
 private:
@@ -578,7 +597,8 @@ private:
  */
 class NodeRepeatIndexMemento : public Memento {
 public:
-    explicit NodeRepeatIndexMemento(const Repeat& e) : index_or_value_(e.index_or_value()) {}
+    explicit NodeRepeatIndexMemento(const Repeat& e)
+        : index_or_value_(e.index_or_value()) {}
     NodeRepeatIndexMemento() = default;
 
 private:
@@ -601,7 +621,8 @@ private:
  */
 class NodeLimitMemento : public Memento {
 public:
-    explicit NodeLimitMemento(const Limit& e) : limit_(e) {}
+    explicit NodeLimitMemento(const Limit& e)
+        : limit_(e) {}
     NodeLimitMemento() = default;
 
 private:
@@ -624,7 +645,8 @@ private:
  */
 class NodeInLimitMemento : public Memento {
 public:
-    explicit NodeInLimitMemento(const InLimit& e) : inlimit_(e) {}
+    explicit NodeInLimitMemento(const InLimit& e)
+        : inlimit_(e) {}
     NodeInLimitMemento() = default;
 
 private:
@@ -648,7 +670,8 @@ private:
  */
 class NodeVariableMemento : public Memento {
 public:
-    explicit NodeVariableMemento(const Variable& e) : var_(e) {}
+    explicit NodeVariableMemento(const Variable& e)
+        : var_(e) {}
     NodeVariableMemento() = default;
 
 private:
@@ -671,7 +694,8 @@ private:
  */
 class NodeLateMemento : public Memento {
 public:
-    explicit NodeLateMemento(const ecf::LateAttr& e) : late_(e) {}
+    explicit NodeLateMemento(const ecf::LateAttr& e)
+        : late_(e) {}
     NodeLateMemento() = default;
 
 private:
@@ -694,7 +718,8 @@ private:
  */
 class FlagMemento : public Memento {
 public:
-    explicit FlagMemento(const ecf::Flag& e) : flag_(e) {}
+    explicit FlagMemento(const ecf::Flag& e)
+        : flag_(e) {}
     FlagMemento() = default;
 
 private:
@@ -721,7 +746,8 @@ private:
  */
 class NodeTodayMemento : public Memento {
 public:
-    explicit NodeTodayMemento(const ecf::TodayAttr& attr) : attr_(attr) {}
+    explicit NodeTodayMemento(const ecf::TodayAttr& attr)
+        : attr_(attr) {}
     NodeTodayMemento() = default;
 
 private:
@@ -744,7 +770,8 @@ private:
  */
 class NodeTimeMemento : public Memento {
 public:
-    explicit NodeTimeMemento(const ecf::TimeAttr& attr) : attr_(attr) {}
+    explicit NodeTimeMemento(const ecf::TimeAttr& attr)
+        : attr_(attr) {}
     NodeTimeMemento() = default;
 
 private:
@@ -767,7 +794,8 @@ private:
  */
 class NodeDayMemento : public Memento {
 public:
-    explicit NodeDayMemento(const DayAttr& attr) : attr_(attr) {}
+    explicit NodeDayMemento(const DayAttr& attr)
+        : attr_(attr) {}
     NodeDayMemento() = default;
 
 private:
@@ -790,7 +818,8 @@ private:
  */
 class NodeCronMemento : public Memento {
 public:
-    explicit NodeCronMemento(const ecf::CronAttr& attr) : attr_(attr) {}
+    explicit NodeCronMemento(const ecf::CronAttr& attr)
+        : attr_(attr) {}
     NodeCronMemento() = default;
 
 private:
@@ -814,7 +843,8 @@ private:
 class NodeAvisoMemento : public Memento {
 public:
     NodeAvisoMemento() = default;
-    explicit NodeAvisoMemento(const ecf::AvisoAttr& a) : aviso_(a.make_detached()) {}
+    explicit NodeAvisoMemento(const ecf::AvisoAttr& a)
+        : aviso_(a.make_detached()) {}
 
 private:
     void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {
@@ -837,7 +867,8 @@ private:
 class NodeMirrorMemento : public Memento {
 public:
     NodeMirrorMemento() = default;
-    explicit NodeMirrorMemento(const ecf::MirrorAttr& a) : mirror_(a.make_detached()) {}
+    explicit NodeMirrorMemento(const ecf::MirrorAttr& a)
+        : mirror_(a.make_detached()) {}
 
 private:
     void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {
@@ -859,7 +890,8 @@ private:
  */
 class NodeDateMemento : public Memento {
 public:
-    explicit NodeDateMemento(const DateAttr& attr) : attr_(attr) {}
+    explicit NodeDateMemento(const DateAttr& attr)
+        : attr_(attr) {}
     NodeDateMemento() = default;
 
 private:
@@ -882,7 +914,8 @@ private:
  */
 class NodeZombieMemento : public Memento {
 public:
-    explicit NodeZombieMemento(const ZombieAttr& attr) : attr_(attr) {}
+    explicit NodeZombieMemento(const ZombieAttr& attr)
+        : attr_(attr) {}
     NodeZombieMemento() = default;
 
 private:
@@ -905,7 +938,8 @@ private:
  */
 class NodeVerifyMemento : public Memento {
 public:
-    explicit NodeVerifyMemento(const std::vector<VerifyAttr>& attr) : verifys_(attr) {}
+    explicit NodeVerifyMemento(const std::vector<VerifyAttr>& attr)
+        : verifys_(attr) {}
     NodeVerifyMemento() = default;
 
 private:
@@ -965,7 +999,8 @@ private:
  */
 class SuiteClockMemento : public Memento {
 public:
-    explicit SuiteClockMemento(const ClockAttr& c) : clockAttr_(c) {}
+    explicit SuiteClockMemento(const ClockAttr& c)
+        : clockAttr_(c) {}
     SuiteClockMemento() = default;
 
 private:
@@ -988,7 +1023,8 @@ private:
  */
 class SuiteBeginDeltaMemento : public Memento {
 public:
-    explicit SuiteBeginDeltaMemento(bool begun) : begun_(begun) {}
+    explicit SuiteBeginDeltaMemento(bool begun)
+        : begun_(begun) {}
     SuiteBeginDeltaMemento() = default;
 
 private:
@@ -1011,7 +1047,8 @@ private:
  */
 class SuiteCalendarMemento : public Memento {
 public:
-    explicit SuiteCalendarMemento(const ecf::Calendar& cal) : cal_(cal) {}
+    explicit SuiteCalendarMemento(const ecf::Calendar& cal)
+        : cal_(cal) {}
     SuiteCalendarMemento() = default;
 
 private:

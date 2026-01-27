@@ -27,7 +27,8 @@ using namespace ecf;
 
 struct Fixture
 {
-    Fixture() : log{"test_base_forcecmd.log"} {}
+    Fixture()
+        : log{"test_base_forcecmd.log"} {}
     ~Fixture() = default;
 
     TestLog log;

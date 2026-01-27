@@ -16,7 +16,9 @@
 #include "ModelColumn.hpp"
 #include "ui_AddModelColumnDialog.h"
 
-AddModelColumnDialog::AddModelColumnDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AddModelColumnDialog) {
+AddModelColumnDialog::AddModelColumnDialog(QWidget* parent)
+    : QDialog(parent),
+      ui(new Ui::AddModelColumnDialog) {
     ui->setupUi(this);
 }
 
@@ -63,7 +65,8 @@ void AddModelColumnDialog::accept() {
     QDialog::accept();
 }
 
-ChangeModelColumnDialog::ChangeModelColumnDialog(QWidget* parent) : AddModelColumnDialog(parent) {
+ChangeModelColumnDialog::ChangeModelColumnDialog(QWidget* parent)
+    : AddModelColumnDialog(parent) {
     setWindowTitle(tr("Change column in table view"));
 }
 

@@ -27,7 +27,8 @@
 #include "VNode.hpp"
 #include "ecflow/node/Aspect.hpp"
 
-EventEditorWidget::EventEditorWidget(QWidget* parent) : QWidget(parent) {
+EventEditorWidget::EventEditorWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     pathView_->addAction(actionLookUp_);

@@ -41,7 +41,8 @@ static std::vector<std::string> propVec;
 //
 //=======================================================
 
-TimelineInfoDailyModel::TimelineInfoDailyModel(QObject* parent) : QAbstractItemModel(parent) {
+TimelineInfoDailyModel::TimelineInfoDailyModel(QObject* parent)
+    : QAbstractItemModel(parent) {
 }
 
 TimelineInfoDailyModel::~TimelineInfoDailyModel() = default;

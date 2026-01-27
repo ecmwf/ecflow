@@ -48,7 +48,10 @@ class PrintStyleHolder {
 public:
     using holding_t = PrintStyle::Type_t;
 
-    explicit PrintStyleHolder(holding_t t) : old_style_(getStyle()) { setStyle(t); }
+    explicit PrintStyleHolder(holding_t t)
+        : old_style_(getStyle()) {
+        setStyle(t);
+    }
 
     // Disable default construction
     PrintStyleHolder() = delete;

@@ -25,7 +25,8 @@
 
 std::vector<ChangeNotifyWidget*> ChangeNotifyWidget::widgets_;
 
-ChangeNotifyButton::ChangeNotifyButton(QWidget* parent) : QToolButton(parent) {
+ChangeNotifyButton::ChangeNotifyButton(QWidget* parent)
+    : QToolButton(parent) {
     setProperty("notify", "1");
     setAutoRaise(true);
     setIconSize(QSize(20, 20));
@@ -147,7 +148,8 @@ void ChangeNotifyButton::updateIcon() {
     setIcon(pix);
 }
 
-ChangeNotifyWidget::ChangeNotifyWidget(QWidget* parent) : QWidget(parent) {
+ChangeNotifyWidget::ChangeNotifyWidget(QWidget* parent)
+    : QWidget(parent) {
     layout_ = new QHBoxLayout(this);
     layout_->setContentsMargins(0, 0, 0, 0);
     layout_->setSpacing(0);

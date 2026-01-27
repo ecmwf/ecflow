@@ -28,7 +28,9 @@
 
 using namespace ecf;
 
-PathsCmd::PathsCmd(Api api, const std::string& absNodePath, bool force) : api_(api), force_(force) {
+PathsCmd::PathsCmd(Api api, const std::string& absNodePath, bool force)
+    : api_(api),
+      force_(force) {
     if (!absNodePath.empty()) {
         paths_.push_back(absNodePath);
     }

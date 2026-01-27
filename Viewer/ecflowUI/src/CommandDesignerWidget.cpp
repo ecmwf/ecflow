@@ -20,7 +20,9 @@
 
 namespace po = boost::program_options;
 
-CommandDesignerWidget::CommandDesignerWidget(QWidget* parent) : QWidget(parent), menuItem_("") {
+CommandDesignerWidget::CommandDesignerWidget(QWidget* parent)
+    : QWidget(parent),
+      menuItem_("") {
     setupUi(this);
 
     // at least for now, all commands will start with 'ecflow_client' and end with '<full_name>'

@@ -24,7 +24,8 @@
 #include "UiLog.hpp"
 #include "VFilter.hpp"
 
-TableFilterWidget::TableFilterWidget(QWidget* parent) : QWidget(parent) {
+TableFilterWidget::TableFilterWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     connect(queryTe_, SIGNAL(clicked()), this, SLOT(slotEdit()));

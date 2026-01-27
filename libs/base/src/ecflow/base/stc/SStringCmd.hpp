@@ -25,8 +25,10 @@
 ///================================================================================
 class SStringCmd final : public ServerToClientCmd {
 public:
-    explicit SStringCmd(const std::string& s) : str_(s) {}
-    SStringCmd() : ServerToClientCmd() {}
+    explicit SStringCmd(const std::string& s)
+        : str_(s) {}
+    SStringCmd()
+        : ServerToClientCmd() {}
 
     void init(const std::string& s) { str_ = s; }
     std::string print() const override;

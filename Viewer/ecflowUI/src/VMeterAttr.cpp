@@ -18,7 +18,8 @@
 // VMeterAttrType
 //================================
 
-VMeterAttrType::VMeterAttrType() : VAttributeType("meter") {
+VMeterAttrType::VMeterAttrType()
+    : VAttributeType("meter") {
     dataCount_                      = 6;
     searchKeyToData_["meter_name"]  = NameIndex;
     searchKeyToData_["meter_value"] = ValueIndex;
@@ -56,7 +57,8 @@ void VMeterAttrType::encode(const Meter& m, QStringList& data) const {
 //
 //=====================================================
 
-VMeterAttr::VMeterAttr(VNode* parent, const Meter& /*m*/, int index) : VAttribute(parent, index) {
+VMeterAttr::VMeterAttr(VNode* parent, const Meter& /*m*/, int index)
+    : VAttribute(parent, index) {
 }
 
 VAttributeType* VMeterAttr::type() const {

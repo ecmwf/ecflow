@@ -40,7 +40,8 @@ private:
     void write_to_disk(EVP_PKEY* pkey, X509* x509);
 };
 
-inline Certificate::Certificate(const std::string& path) : path_(path) {
+inline Certificate::Certificate(const std::string& path)
+    : path_(path) {
     // Generating RSA key...
     EVP_PKEY* pkey = generate_key();
 

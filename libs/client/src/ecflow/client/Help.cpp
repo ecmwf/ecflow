@@ -219,7 +219,8 @@ class Documentation {
 public:
     using descriptions_t = boost::program_options::options_description;
 
-    explicit Documentation(const descriptions_t& descriptions) : descriptions_{descriptions} {}
+    explicit Documentation(const descriptions_t& descriptions)
+        : descriptions_{descriptions} {}
 
     void show(std::ostream& os, const std::string& topic) const;
 
@@ -421,7 +422,9 @@ struct Help::Impl
     Documentation documentation_;
     std::string topic_;
 
-    Impl(const description_t& description, std::string topic) : documentation_(description), topic_(std::move(topic)) {}
+    Impl(const description_t& description, std::string topic)
+        : documentation_(description),
+          topic_(std::move(topic)) {}
 };
 
 Help::Help(const description_t& description, const std::string& topic)

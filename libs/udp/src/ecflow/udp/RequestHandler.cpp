@@ -183,7 +183,8 @@ public:
     void execute(ClientAPI& client) const { impl_->execute(client); }
 
 private:
-    explicit Command(std::unique_ptr<BasicCommand>&& impl) : impl_{std::move(impl)} {}
+    explicit Command(std::unique_ptr<BasicCommand>&& impl)
+        : impl_{std::move(impl)} {}
 
     std::unique_ptr<BasicCommand> impl_;
 };
@@ -321,7 +322,8 @@ public:
 /// The factory of `command`; creates commands based on JSON data
 class CommandFactory {
 public:
-    CommandFactory() : builders_{} {
+    CommandFactory()
+        : builders_{} {
         builders_.push_back(std::make_unique<CommandUserAlterLabelBuilder>());
         builders_.push_back(std::make_unique<CommandUserAlterMeterBuilder>());
         builders_.push_back(std::make_unique<CommandUserAlterEventBuilder>());
@@ -348,7 +350,8 @@ public:
 
 class JSONRequestHandler {
 public:
-    JSONRequestHandler() : client_{} {}
+    JSONRequestHandler()
+        : client_{} {}
 
     void handle(const nlohmann::json& request) {
         try {

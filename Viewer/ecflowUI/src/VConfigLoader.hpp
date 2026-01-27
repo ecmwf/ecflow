@@ -34,7 +34,8 @@ class SimpleLoader : public VConfigLoader {
     void load(VProperty* prop) override { T::load(prop); }
 
 public:
-    explicit SimpleLoader(const std::string& name) : VConfigLoader(name) {}
+    explicit SimpleLoader(const std::string& name)
+        : VConfigLoader(name) {}
 };
 
 #endif /* ecflow_viewer_VConfigLoader_HPP */

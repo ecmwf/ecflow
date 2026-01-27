@@ -81,7 +81,9 @@ Expression::Expression(const PartExpression& exp) {
 
 Expression::Expression() = default;
 
-Expression::Expression(const Expression& rhs) : vec_(rhs.vec_), free_(rhs.free_) {
+Expression::Expression(const Expression& rhs)
+    : vec_(rhs.vec_),
+      free_(rhs.free_) {
 }
 
 std::unique_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,

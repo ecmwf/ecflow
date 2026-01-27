@@ -42,7 +42,9 @@ void Task::copy(const Task& rhs) {
     }
 }
 
-Task::Task(const Task& rhs) : Submittable(rhs), alias_no_(rhs.alias_no_) {
+Task::Task(const Task& rhs)
+    : Submittable(rhs),
+      alias_no_(rhs.alias_no_) {
     copy(rhs);
 }
 

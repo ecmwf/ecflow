@@ -24,7 +24,9 @@ namespace ecf {
 
 class Timer {
 public:
-    explicit Timer(boost::asio::io_context& io) : io_{io}, timer_{io_, std::chrono::seconds(0)} {}
+    explicit Timer(boost::asio::io_context& io)
+        : io_{io},
+          timer_{io_, std::chrono::seconds(0)} {}
 
     Timer(const Timer&)            = delete;
     Timer& operator=(const Timer&) = delete;

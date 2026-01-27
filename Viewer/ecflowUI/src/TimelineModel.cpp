@@ -15,7 +15,9 @@
 #include "TimelineData.hpp"
 #include "ViewerUtil.hpp"
 
-TimelineModel::TimelineModel(QObject* parent) : QAbstractItemModel(parent), data_(nullptr) {
+TimelineModel::TimelineModel(QObject* parent)
+    : QAbstractItemModel(parent),
+      data_(nullptr) {
 }
 
 TimelineModel::~TimelineModel() = default;

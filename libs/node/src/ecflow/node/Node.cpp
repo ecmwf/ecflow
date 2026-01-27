@@ -65,7 +65,8 @@ void log_repeat_value_update(const Node& node) {
 // #define DEBUG_REQUEUE 1
 // #define DEBUG_FIND_REFERENCED_NODE 1
 
-Node::Node(const std::string& n, bool check) : n_(n) {
+Node::Node(const std::string& n, bool check)
+    : n_(n) {
     if (check) {
         std::string msg;
         if (!Str::valid_name(n, msg)) {

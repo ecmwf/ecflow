@@ -32,7 +32,8 @@ void IconTabBar::paintEvent(QPaintEvent* /*e*/) {
     }
 }
 
-TabWidget::TabWidget(QWidget* parent) : QWidget(parent) {
+TabWidget::TabWidget(QWidget* parent)
+    : QWidget(parent) {
     // Main layout
     auto* layout = new QVBoxLayout(this);
     layout->setSpacing(0);

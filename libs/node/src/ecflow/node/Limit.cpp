@@ -22,7 +22,9 @@ using namespace ecf;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-Limit::Limit(const std::string& name, int limit) : n_(name), lim_(limit) {
+Limit::Limit(const std::string& name, int limit)
+    : n_(name),
+      lim_(limit) {
     if (!Str::valid_name(name)) {
         throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
     }
@@ -38,7 +40,11 @@ Limit::Limit(const std::string& name, int limit, int value, const std::set<std::
     }
 }
 
-Limit::Limit(const Limit& rhs) : n_(rhs.n_), lim_(rhs.lim_), value_(rhs.value_), paths_(rhs.paths_) {
+Limit::Limit(const Limit& rhs)
+    : n_(rhs.n_),
+      lim_(rhs.lim_),
+      value_(rhs.value_),
+      paths_(rhs.paths_) {
 }
 
 bool Limit::operator==(const Limit& rhs) const {

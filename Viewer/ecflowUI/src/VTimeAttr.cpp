@@ -17,7 +17,8 @@
 // VTimeAttrType
 //================================
 
-VTimeAttrType::VTimeAttrType() : VAttributeType("time") {
+VTimeAttrType::VTimeAttrType()
+    : VAttributeType("time") {
     dataCount_                    = 3;
     searchKeyToData_["time_name"] = NameIndex;
     searchKeyToData_["name"]      = NameIndex;

@@ -33,7 +33,8 @@ BOOST_AUTO_TEST_SUITE(T_Server)
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class TestServer : public BasicServer {
 public:
-    explicit TestServer(boost::asio::io_context& io, ServerEnvironment& s) : BasicServer(io, s) {}
+    explicit TestServer(boost::asio::io_context& io, ServerEnvironment& s)
+        : BasicServer(io, s) {}
     ~TestServer() override = default;
 
     // abort server if check pt files exist, but can't be loaded

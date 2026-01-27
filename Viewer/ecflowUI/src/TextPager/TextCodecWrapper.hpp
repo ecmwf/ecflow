@@ -17,7 +17,8 @@
 
 class TextCodecWrapper {
 public:
-    explicit TextCodecWrapper(QStringConverter::Encoding e = QStringConverter::System) : value_{e} {}
+    explicit TextCodecWrapper(QStringConverter::Encoding e = QStringConverter::System)
+        : value_{e} {}
     QStringConverter::Encoding value() const { return value_; }
     bool hasValue() const { return true; }
     static auto fromName(const QByteArray& codecName) {
@@ -33,7 +34,8 @@ protected:
 
 class TextCodecWrapper {
 public:
-    TextCodecWrapper(QTextCodec* c = nullptr) : value_{c} {}
+    TextCodecWrapper(QTextCodec* c = nullptr)
+        : value_{c} {}
     QTextCodec* value() const { return value_; }
     bool hasValue() const { return value_ != nullptr; }
     static auto fromName(const QByteArray& codecName) {

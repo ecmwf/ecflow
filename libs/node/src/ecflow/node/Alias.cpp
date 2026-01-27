@@ -23,7 +23,8 @@
 using namespace ecf;
 
 //==================================================================================
-Alias::Alias(const std::string& name, bool check) : Submittable(name, check) {
+Alias::Alias(const std::string& name, bool check)
+    : Submittable(name, check) {
     set_state_only(NState::QUEUED);
 }
 

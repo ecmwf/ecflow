@@ -49,10 +49,15 @@ using namespace ecf;
 
 Defs::Defs() = default;
 
-Defs::Defs(const std::string& port) : server_(port) {
+Defs::Defs(const std::string& port)
+    : server_(port) {
 }
 
-Defs::Defs(const Defs& rhs) : state_(rhs.state_), server_(rhs.server_), flag_(rhs.flag_), client_suite_mgr_(this) {
+Defs::Defs(const Defs& rhs)
+    : state_(rhs.state_),
+      server_(rhs.server_),
+      flag_(rhs.flag_),
+      client_suite_mgr_(this) {
     size_t theSize = rhs.suiteVec_.size();
     for (size_t s = 0; s < theSize; s++) {
         suite_ptr suite_copy = std::make_shared<Suite>(*rhs.suiteVec_[s]);

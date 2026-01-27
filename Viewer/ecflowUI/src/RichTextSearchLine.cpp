@@ -14,7 +14,8 @@
 
 #include "RichTextSearchInterface.hpp"
 
-RichTextSearchLine::RichTextSearchLine(QWidget* parent) : TextEditSearchLine(parent) {
+RichTextSearchLine::RichTextSearchLine(QWidget* parent)
+    : TextEditSearchLine(parent) {
     interface_ = new RichTextSearchInterface;
     TextEditSearchLine::setSearchInterface(interface_);
 }

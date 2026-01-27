@@ -16,7 +16,9 @@
 
 // #define UI_GENFILEPROVIDER_DEBUG
 
-GenFileProvider::GenFileProvider(GenFileReceiver* provider) : reply_(new VReply()), provider_(provider) {
+GenFileProvider::GenFileProvider(GenFileReceiver* provider)
+    : reply_(new VReply()),
+      provider_(provider) {
     fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);
 }
 

@@ -176,7 +176,8 @@ private Q_SLOTS:
     }
 
 private:
-    explicit TextLayoutCacheManager(QObject* parent) : QObject(parent) {
+    explicit TextLayoutCacheManager(QObject* parent)
+        : QObject(parent) {
         maxLayouts = qMax(1, qgetenv("TEXTCURSOR_MAX_CACHED_TEXTLAYOUTS").toInt());
     }
 
@@ -188,7 +189,8 @@ class TextPagerLayout;
 struct TextCursorSharedPrivate
 {
 public:
-    TextCursorSharedPrivate() : ref(1) {}
+    TextCursorSharedPrivate()
+        : ref(1) {}
 
     ~TextCursorSharedPrivate() {
         int refint = ref.fetchAndAddRelaxed(0); // required to get past a bug in Qt 5.2.1 (see Ubuntu 14.04)

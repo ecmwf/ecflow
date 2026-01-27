@@ -19,7 +19,8 @@
     #include "ServerHandler.hpp"
     #include "VNode.hpp"
 
-LogViewerCom::LogViewerCom() : QObject(nullptr) {
+LogViewerCom::LogViewerCom()
+    : QObject(nullptr) {
     if (char* logexe = getenv("ECFLOWUI_LOG_VIEWER")) {
         program_ = QString(logexe);
     }

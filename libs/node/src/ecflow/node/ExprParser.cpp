@@ -367,7 +367,8 @@ AstTop* createTopAst(tree_parse_info<> info,
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-ExprParser::ExprParser(const std::string& expression) : expr_(expression) {
+ExprParser::ExprParser(const std::string& expression)
+    : expr_(expression) {
 }
 
 static std::map<parser_id, std::string> rule_names;

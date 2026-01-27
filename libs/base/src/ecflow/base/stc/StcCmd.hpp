@@ -27,7 +27,8 @@ public:
         INVALID_ARGUMENT, // Created on the Client side
         END_OF_FILE
     };
-    explicit StcCmd(Api a) : api_(a) {}
+    explicit StcCmd(Api a)
+        : api_(a) {}
     StcCmd() = default;
 
     void init(Api a) { api_ = a; }

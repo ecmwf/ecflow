@@ -36,9 +36,15 @@ public:
     Result& operator=(Result&&)      = default;
 
 private:
-    explicit Result(const V& value) : success_{true}, data_{value} {}
-    explicit Result(V&& value) : success_{true}, data_{std::move(value)} {}
-    explicit Result(const Error& error) : success_{false}, data_{error} {}
+    explicit Result(const V& value)
+        : success_{true},
+          data_{value} {}
+    explicit Result(V&& value)
+        : success_{true},
+          data_{std::move(value)} {}
+    explicit Result(const Error& error)
+        : success_{false},
+          data_{error} {}
 
 public:
     ~Result() = default;

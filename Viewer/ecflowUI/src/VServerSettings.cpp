@@ -31,7 +31,10 @@ std::map<VServerSettings::Param, std::string> VServerSettings::notifyIds_;
 std::map<VServerSettings::Param, std::string> VServerSettings::parNames_;
 VProperty* VServerSettings::globalProp_ = nullptr;
 
-VServerSettings::VServerSettings(ServerHandler* server) : server_(server), prop_(nullptr), guiProp_(nullptr) {
+VServerSettings::VServerSettings(ServerHandler* server)
+    : server_(server),
+      prop_(nullptr),
+      guiProp_(nullptr) {
     if (parNames_.empty()) {
         parNames_[AutoUpdate]              = "server.update.autoUpdate";
         parNames_[UpdateRate]              = "server.update.updateRateInSec";

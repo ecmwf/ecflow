@@ -31,8 +31,14 @@ class TimeSlot {
 public:
     static std::string type() { return "TimeSlot"; }
     TimeSlot() = default;
-    TimeSlot(int hour, int min) : h_(hour), m_(min) { assert(hour >= 0 && min >= 0); }
-    explicit TimeSlot(const boost::posix_time::time_duration& td) : h_(td.hours()), m_(td.minutes()) {
+    TimeSlot(int hour, int min)
+        : h_(hour),
+          m_(min) {
+        assert(hour >= 0 && min >= 0);
+    }
+    explicit TimeSlot(const boost::posix_time::time_duration& td)
+        : h_(td.hours()),
+          m_(td.minutes()) {
         assert(h_ < 60 && m_ < 60);
     }
 

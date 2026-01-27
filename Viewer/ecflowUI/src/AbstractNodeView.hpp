@@ -28,7 +28,14 @@ class TreeNodeViewDelegate;
 // all its children will be removed from viewItems.
 struct TreeNodeViewItem
 {
-    TreeNodeViewItem() : expanded(0), hasChildren(0), hasMoreSiblings(0), level(0), width(0), height(0), x(0) {}
+    TreeNodeViewItem()
+        : expanded(0),
+          hasChildren(0),
+          hasMoreSiblings(0),
+          level(0),
+          width(0),
+          height(0),
+          x(0) {}
 
     QModelIndex index;     // the model index represented by the item.
                            // We remove items whenever the indexes are invalidated

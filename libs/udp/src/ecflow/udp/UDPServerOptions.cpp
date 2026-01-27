@@ -27,7 +27,9 @@ std::string as_string(Args... args) {
 
 } // namespace
 
-UDPServerOptions::UDPServerOptions(const std::vector<std::string>& argv) : general{create_options()}, variables{} {
+UDPServerOptions::UDPServerOptions(const std::vector<std::string>& argv)
+    : general{create_options()},
+      variables{} {
 
     namespace po = boost::program_options;
 

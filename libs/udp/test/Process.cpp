@@ -42,7 +42,8 @@ namespace ecf::test {
 #if BOOST_PROCESS_VERSION == 1
 struct Process::Impl
 {
-    Impl(std::string_view executable, std::vector<std::string_view> args) : handle_{} {
+    Impl(std::string_view executable, std::vector<std::string_view> args)
+        : handle_{} {
         // Determine the invocation command
         auto invoke_command = std::string(executable);
         for (const auto& arg : args) {
@@ -83,10 +84,12 @@ struct Process::Impl
     #error "Unsupported boost::process version"
 #endif
 
-Process::Process() : impl_{nullptr} {
+Process::Process()
+    : impl_{nullptr} {
 }
 
-Process::Process(Process&& rhs) : impl_{std::move(rhs.impl_)} {
+Process::Process(Process&& rhs)
+    : impl_{std::move(rhs.impl_)} {
     rhs.impl_ = nullptr;
 }
 

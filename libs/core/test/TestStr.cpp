@@ -657,7 +657,8 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //// ==============================================================
 class Fred {
 public:
-    explicit Fred(int i = 0) : i_(i) {
+    explicit Fred(int i = 0)
+        : i_(i) {
         // Do nothing...
     }
     Fred(const Fred& rhs)            = default;

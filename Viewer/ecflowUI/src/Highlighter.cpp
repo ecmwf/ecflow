@@ -25,7 +25,8 @@ std::string Highlighter::parFile_;
 
 #include "VProperty.hpp"
 
-Highlighter::Highlighter(QTextDocument* parent, QString id) : QSyntaxHighlighter(parent) {
+Highlighter::Highlighter(QTextDocument* parent, QString id)
+    : QSyntaxHighlighter(parent) {
     load(id);
 }
 

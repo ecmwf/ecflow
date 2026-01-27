@@ -56,7 +56,10 @@ Event::Event(int number, const std::string& eventName, bool iv, bool check_name)
     }
 }
 
-Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_(iv) {
+Event::Event(const std::string& eventName, bool iv)
+    : n_(eventName),
+      v_(iv),
+      iv_(iv) {
     if (eventName.empty()) {
         throw std::runtime_error("Event::Event: Invalid event name : name must be specified if no number supplied");
     }

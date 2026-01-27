@@ -22,7 +22,8 @@ namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ResolveExternsVisitor: Will traverse node tree hierarchy
-ResolveExternsVisitor::ResolveExternsVisitor(Defs* defs) : defs_(defs) {
+ResolveExternsVisitor::ResolveExternsVisitor(Defs* defs)
+    : defs_(defs) {
 }
 
 void ResolveExternsVisitor::visitDefs(Defs* d) {
@@ -68,7 +69,9 @@ void ResolveExternsVisitor::doSetup(Node* node, Ast* ast) {
 
 //======================================================================================
 // AstResolveExternVisitor: Will traverse ASR tree hierarchy
-AstResolveExternVisitor::AstResolveExternVisitor(Node* node, Defs* defs) : triggerNode_(node), defs_(defs) {
+AstResolveExternVisitor::AstResolveExternVisitor(Node* node, Defs* defs)
+    : triggerNode_(node),
+      defs_(defs) {
 }
 
 AstResolveExternVisitor::~AstResolveExternVisitor() = default;

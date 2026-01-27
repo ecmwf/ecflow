@@ -24,7 +24,8 @@ public:
         : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no),
           name_(name),
           label_(label) {}
-    LabelCmd() : TaskCmd() {}
+    LabelCmd()
+        : TaskCmd() {}
 
     const std::string& name() const { return name_; }
     const std::string& label() const { return label_; }

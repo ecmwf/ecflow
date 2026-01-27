@@ -24,7 +24,10 @@
 
 namespace ecf::service::aviso::etcd {
 
-Client::Client(const std::string& address) : client_(address), address_(address), auth_token_() {
+Client::Client(const std::string& address)
+    : client_(address),
+      address_(address),
+      auth_token_() {
 }
 
 Client::Client(const std::string& address, const std::string& auth_token)

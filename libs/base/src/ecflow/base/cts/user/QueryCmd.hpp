@@ -23,7 +23,8 @@ public:
           path_to_attribute_(path_to_attribute),
           attribute_(attribute),
           path_to_task_(path_to_task) {}
-    QueryCmd() : UserCmd() {}
+    QueryCmd()
+        : UserCmd() {}
     ~QueryCmd() override;
 
     const std::string& query_type() const { return query_type_; }

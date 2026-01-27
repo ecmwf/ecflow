@@ -16,7 +16,9 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Str.hpp"
 
-VDir::VDir(const std::string& path) : path_(path), fetchMode_(NoFetchMode) {
+VDir::VDir(const std::string& path)
+    : path_(path),
+      fetchMode_(NoFetchMode) {
 }
 
 VDir::VDir(const std::string& path, const std::string& pattern)

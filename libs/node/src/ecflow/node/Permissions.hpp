@@ -36,8 +36,10 @@ public:
     }
 
 private:
-    Permissions() : allowed_{} {}
-    explicit Permissions(std::vector<std::string> allowed) : allowed_{std::move(allowed)} {}
+    Permissions()
+        : allowed_{} {}
+    explicit Permissions(std::vector<std::string> allowed)
+        : allowed_{std::move(allowed)} {}
 
     std::vector<std::string> allowed_;
 };

@@ -25,7 +25,8 @@ static QColor errorColour(255, 0, 0);
 static QColor dateColour(34, 107, 138);
 // static QColor largeFileColour(Qt::red);
 
-FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent) {
+FileInfoLabel::FileInfoLabel(QWidget* parent)
+    : QLabel(parent) {
     // Define id for the css
     setProperty("fileInfo", "1");
     setWordWrap(true);

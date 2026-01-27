@@ -122,7 +122,10 @@ py::object get_file(ClientInvoker* self,
 /// Set the CLI to enable output to standard out
 class CliSetter {
 public:
-    explicit CliSetter(ClientInvoker* self) : _self(self) { self->set_cli(true); }
+    explicit CliSetter(ClientInvoker* self)
+        : _self(self) {
+        self->set_cli(true);
+    }
     ~CliSetter() { _self->set_cli(false); }
 
 private:

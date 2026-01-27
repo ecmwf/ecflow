@@ -30,7 +30,8 @@ public:
           action_(action),
           step_(step),
           path_to_node_with_queue_(path_to_node_with_queue) {}
-    QueueCmd() : TaskCmd() {}
+    QueueCmd()
+        : TaskCmd() {}
 
     const std::string& name() const { return name_; }
     const std::string& action() const { return action_; }

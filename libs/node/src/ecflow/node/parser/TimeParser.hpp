@@ -15,7 +15,8 @@
 
 class TimeParser : public Parser {
 public:
-    explicit TimeParser(DefsStructureParser* p) : Parser(p) {}
+    explicit TimeParser(DefsStructureParser* p)
+        : Parser(p) {}
     const char* keyword() const override { return "time"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };

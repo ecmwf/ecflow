@@ -63,7 +63,9 @@ private:
 
 class TestDefsStateChanged {
 public:
-    explicit TestDefsStateChanged(Defs* s) : defs_(s), initial_state_change_no_(s->defs_only_max_state_change_no()) {}
+    explicit TestDefsStateChanged(Defs* s)
+        : defs_(s),
+          initial_state_change_no_(s->defs_only_max_state_change_no()) {}
 
     ~TestDefsStateChanged() {
         Ecf::set_server(false);

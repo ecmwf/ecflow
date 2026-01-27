@@ -84,7 +84,8 @@ protected:
 
 class AbortedNotify : public ChangeNotify {
 public:
-    explicit AbortedNotify(const std::string& id) : ChangeNotify(id) {}
+    explicit AbortedNotify(const std::string& id)
+        : ChangeNotify(id) {}
     QColor fillColour() const override;
     QColor textColour() const override;
 };

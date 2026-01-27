@@ -45,7 +45,8 @@ private:
 
 class TriggerListCollector : public TriggerCollector {
 public:
-    explicit TriggerListCollector(bool extended) : extended_(extended) {}
+    explicit TriggerListCollector(bool extended)
+        : extended_(extended) {}
 
     ~TriggerListCollector() override;
     bool add(VItem*, VItem*, Mode) override;
@@ -79,7 +80,9 @@ private:
 
 class TriggerParentCollector : public TriggerCollector {
 public:
-    TriggerParentCollector(VItem* parent, TriggerCollector* collector) : parent_(parent), collector_(collector) {}
+    TriggerParentCollector(VItem* parent, TriggerCollector* collector)
+        : parent_(parent),
+          collector_(collector) {}
 
     bool add(VItem*, VItem*, Mode) override;
 
@@ -90,7 +93,9 @@ private:
 
 class TriggeredCollector : public TriggerListCollector {
 public:
-    explicit TriggeredCollector(VNode* n) : TriggerListCollector(false), node_(n) {}
+    explicit TriggeredCollector(VNode* n)
+        : TriggerListCollector(false),
+          node_(n) {}
     bool add(VItem*, VItem*, Mode) override;
 
 private:
@@ -99,7 +104,10 @@ private:
 
 class TriggerListItem {
 public:
-    TriggerListItem(VItem* t, VItem* dep, TriggerCollector::Mode mode) : t_(t), dep_(dep), mode_(mode) {}
+    TriggerListItem(VItem* t, VItem* dep, TriggerCollector::Mode mode)
+        : t_(t),
+          dep_(dep),
+          mode_(mode) {}
 
     VItem* item() const { return t_; }
     VItem* dep() const { return dep_; }
@@ -113,7 +121,9 @@ protected:
 
 class TriggerDependencyItem {
 public:
-    TriggerDependencyItem(VItem* dep, TriggerCollector::Mode mode) : dep_(dep), mode_(mode) {}
+    TriggerDependencyItem(VItem* dep, TriggerCollector::Mode mode)
+        : dep_(dep),
+          mode_(mode) {}
 
     VItem* dep() const { return dep_; }
     TriggerCollector::Mode mode() const { return mode_; }
@@ -125,7 +135,8 @@ protected:
 
 class TriggerTableItem {
 public:
-    explicit TriggerTableItem(VItem* t) : t_(t) {}
+    explicit TriggerTableItem(VItem* t)
+        : t_(t) {}
 
     void addDependency(VItem* dep, TriggerCollector::Mode mode) { deps_.emplace_back(dep, mode); }
 
@@ -141,7 +152,8 @@ protected:
 
 class TriggerTableCollector : public TriggerCollector {
 public:
-    explicit TriggerTableCollector(bool extended) : extended_(extended) {}
+    explicit TriggerTableCollector(bool extended)
+        : extended_(extended) {}
 
     ~TriggerTableCollector() override;
     bool add(VItem*, VItem*, Mode) override;

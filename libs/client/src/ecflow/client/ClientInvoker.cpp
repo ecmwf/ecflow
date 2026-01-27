@@ -109,7 +109,9 @@ void cfg(const ClientEnvironment& env, HttpClient& client) {
 
 // ==================================================================================
 // class ClientInvoker
-ClientInvoker::ClientInvoker() : clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD) {
+ClientInvoker::ClientInvoker()
+    : clientEnv_(false),
+      retry_connection_period_(RETRY_CONNECTION_PERIOD) {
     if (clientEnv_.debug()) {
         std::cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 1=================start=================\n";
     }
@@ -1940,7 +1942,8 @@ void ClientInvoker::child_complete() {
 // ==========================================================================
 // class RequestLogger:
 // ==========================================================================
-RequestLogger::RequestLogger(const ClientInvoker* ci) : ci_(ci) {
+RequestLogger::RequestLogger(const ClientInvoker* ci)
+    : ci_(ci) {
 }
 RequestLogger::~RequestLogger() {
 
@@ -1974,7 +1977,8 @@ RequestLogger::~RequestLogger() {
 // ==========================================================================
 // class RoundTripRecorder:
 // ==========================================================================
-RoundTripRecorder::RoundTripRecorder(const ClientInvoker* ci) : ci_(ci) {
+RoundTripRecorder::RoundTripRecorder(const ClientInvoker* ci)
+    : ci_(ci) {
     // get the current time from the clock -- one second resolution
     ci_->start_time_ = boost::posix_time::microsec_clock::universal_time();
     ci_->rtt_        = boost::posix_time::time_duration();

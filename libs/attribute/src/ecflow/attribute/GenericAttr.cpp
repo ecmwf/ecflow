@@ -31,7 +31,8 @@ GenericAttr::GenericAttr(const std::string& name, const std::vector<std::string>
     }
 }
 
-GenericAttr::GenericAttr(const std::string& name) : name_(name) {
+GenericAttr::GenericAttr(const std::string& name)
+    : name_(name) {
     std::string msg;
     if (!Str::valid_name(name, msg)) {
         throw std::runtime_error("GenericAttr::GenericAttr : Invalid generic name : " + msg);

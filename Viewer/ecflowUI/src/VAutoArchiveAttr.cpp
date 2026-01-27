@@ -18,7 +18,8 @@
 // VAutoArchiveAttrType
 //================================
 
-VAutoArchiveAttrType::VAutoArchiveAttrType() : VAttributeType("autoarchive") {
+VAutoArchiveAttrType::VAutoArchiveAttrType()
+    : VAttributeType("autoarchive") {
     dataCount_                            = 2;
     searchKeyToData_["autoarchive_value"] = ValueIndex;
     scanProc_                             = VAutoArchiveAttr::scan;
@@ -59,7 +60,8 @@ void VAutoArchiveAttrType::encode(ecf::AutoArchiveAttr* a, QStringList& data) co
 //
 //=====================================================
 
-VAutoArchiveAttr::VAutoArchiveAttr(VNode* parent) : VAttribute(parent, 0) {
+VAutoArchiveAttr::VAutoArchiveAttr(VNode* parent)
+    : VAttribute(parent, 0) {
 }
 
 VAttributeType* VAutoArchiveAttr::type() const {

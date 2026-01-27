@@ -18,7 +18,8 @@
 // VMirrorAttrType
 //================================
 
-VMirrorAttrType::VMirrorAttrType() : VAttributeType("mirror") {
+VMirrorAttrType::VMirrorAttrType()
+    : VAttributeType("mirror") {
     dataCount_                             = 9;
     searchKeyToData_["mirror_name"]        = NameIndex;
     searchKeyToData_["mirror_remote_path"] = RemotePathIndex;

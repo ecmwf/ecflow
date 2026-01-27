@@ -35,7 +35,8 @@
 //(e.g. suites are added/loaded/removed from the server). Then we need to make sure
 // that the changes are merged into the edited state.
 
-SuiteItemWidget::SuiteItemWidget(QWidget* parent) : QWidget(parent) {
+SuiteItemWidget::SuiteItemWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     infoProvider_ = new SuiteProvider(this);

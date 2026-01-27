@@ -21,7 +21,8 @@ ssl_connection::~ssl_connection() {
 #endif
 }
 
-ssl_connection::ssl_connection(boost::asio::io_context& io, boost::asio::ssl::context& context) : socket_(io, context) {
+ssl_connection::ssl_connection(boost::asio::io_context& io, boost::asio::ssl::context& context)
+    : socket_(io, context) {
 #ifdef DEBUG_CONNECTION
     auto location = Ecf::server() ? "SERVER" : "CLIENT";
     std::cout << location << ": ssl_connection::ssl_connection\n";

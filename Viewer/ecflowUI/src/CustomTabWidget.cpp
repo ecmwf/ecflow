@@ -12,7 +12,8 @@
 
 #include <QVariant>
 
-CustomTabWidget::CustomTabWidget(QWidget* parent) : QTabWidget(parent) {
+CustomTabWidget::CustomTabWidget(QWidget* parent)
+    : QTabWidget(parent) {
     setProperty("change", "1");
 }
 

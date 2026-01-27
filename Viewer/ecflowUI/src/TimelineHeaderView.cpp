@@ -775,7 +775,8 @@ void MainTimelineHeader::setMaxDurations(int submittedDuration, int activeDurati
 //
 //=================================================================
 
-NodeTimelineHeader::NodeTimelineHeader(QTreeView* view) : TimelineHeader(view) {
+NodeTimelineHeader::NodeTimelineHeader(QTreeView* view)
+    : TimelineHeader(view) {
     columnType_ << OtherColumn;
     columnType_ << DayColumn;
 }

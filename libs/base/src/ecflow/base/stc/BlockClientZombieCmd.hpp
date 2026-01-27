@@ -21,7 +21,8 @@
 //
 class BlockClientZombieCmd final : public ServerToClientCmd {
 public:
-    explicit BlockClientZombieCmd(ecf::Child::ZombieType zt) : zombie_type_(zt) {}
+    explicit BlockClientZombieCmd(ecf::Child::ZombieType zt)
+        : zombie_type_(zt) {}
     BlockClientZombieCmd() = default;
 
     void init(ecf::Child::ZombieType zt) { zombie_type_ = zt; } // server context

@@ -146,7 +146,8 @@ public:
 
 class LogTimer {
 public:
-    explicit LogTimer(const char* msg) : msg_(msg) {}
+    explicit LogTimer(const char* msg)
+        : msg_(msg) {}
     // Disable copy (and move) semantics
     LogTimer(const LogTimer&)                  = delete;
     const LogTimer& operator=(const LogTimer&) = delete;

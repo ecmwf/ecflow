@@ -31,7 +31,8 @@ using namespace ecf;
 
 // #define DEBUG_INVARIANTS 1
 
-ClientToServerCmd::ClientToServerCmd() : cl_host_(Host().name()) {
+ClientToServerCmd::ClientToServerCmd()
+    : cl_host_(Host().name()) {
 }
 
 ClientToServerCmd::~ClientToServerCmd() = default;

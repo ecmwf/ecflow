@@ -96,7 +96,10 @@ private:
 
 class LineNumberArea : public QWidget {
 public:
-    explicit LineNumberArea(PlainTextEdit* editor) : QWidget(editor) { textEditor = editor; }
+    explicit LineNumberArea(PlainTextEdit* editor)
+        : QWidget(editor) {
+        textEditor = editor;
+    }
     QSize sizeHint() const override { return {textEditor->lineNumberAreaWidth(), 0}; }
 
 protected:

@@ -32,25 +32,32 @@ const Repeat& Repeat::EMPTY() {
 
 Repeat::Repeat() = default;
 
-Repeat::Repeat(const RepeatDate& r) : type_(std::make_unique<RepeatDate>(r)) {
+Repeat::Repeat(const RepeatDate& r)
+    : type_(std::make_unique<RepeatDate>(r)) {
 }
 
-Repeat::Repeat(const RepeatDateTime& r) : type_(std::make_unique<RepeatDateTime>(r)) {
+Repeat::Repeat(const RepeatDateTime& r)
+    : type_(std::make_unique<RepeatDateTime>(r)) {
 }
 
-Repeat::Repeat(const RepeatDateList& r) : type_(std::make_unique<RepeatDateList>(r)) {
+Repeat::Repeat(const RepeatDateList& r)
+    : type_(std::make_unique<RepeatDateList>(r)) {
 }
 
-Repeat::Repeat(const RepeatInteger& r) : type_(std::make_unique<RepeatInteger>(r)) {
+Repeat::Repeat(const RepeatInteger& r)
+    : type_(std::make_unique<RepeatInteger>(r)) {
 }
 
-Repeat::Repeat(const RepeatEnumerated& r) : type_(std::make_unique<RepeatEnumerated>(r)) {
+Repeat::Repeat(const RepeatEnumerated& r)
+    : type_(std::make_unique<RepeatEnumerated>(r)) {
 }
 
-Repeat::Repeat(const RepeatString& r) : type_(std::make_unique<RepeatString>(r)) {
+Repeat::Repeat(const RepeatString& r)
+    : type_(std::make_unique<RepeatString>(r)) {
 }
 
-Repeat::Repeat(const RepeatDay& r) : type_(std::make_unique<RepeatDay>(r)) {
+Repeat::Repeat(const RepeatDay& r)
+    : type_(std::make_unique<RepeatDay>(r)) {
 }
 
 Repeat::~Repeat() = default;
@@ -61,7 +68,8 @@ Repeat::Repeat(const Repeat& rhs) {
     }
 }
 
-Repeat::Repeat(Repeat&& rhs) : type_(std::move(rhs.type_)) {
+Repeat::Repeat(Repeat&& rhs)
+    : type_(std::move(rhs.type_)) {
 }
 
 Repeat& Repeat::operator=(Repeat rhs) {

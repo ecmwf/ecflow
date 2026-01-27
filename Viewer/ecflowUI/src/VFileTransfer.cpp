@@ -25,7 +25,9 @@ static QMap<QProcess::ProcessError, QString> errorStr;
 
 // #define UI_FILETRANSFER_DEBUG_
 
-VFileTransferCore::VFileTransferCore(QObject* parent) : QObject(parent), scriptName_("ecflow_ui_transfer_file.sh") {
+VFileTransferCore::VFileTransferCore(QObject* parent)
+    : QObject(parent),
+      scriptName_("ecflow_ui_transfer_file.sh") {
     if (errorStr.isEmpty()) {
         errorStr[QProcess::FailedToStart] = "failed to start";
         errorStr[QProcess::Crashed]       = "crashed";

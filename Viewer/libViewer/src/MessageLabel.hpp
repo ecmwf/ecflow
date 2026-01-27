@@ -22,7 +22,9 @@ class QTimer;
 class DelayedProgressDef {
 public:
     DelayedProgressDef() = default;
-    explicit DelayedProgressDef(QString text, int max = 0) : infoText_(text), max_(max) {}
+    explicit DelayedProgressDef(QString text, int max = 0)
+        : infoText_(text),
+          max_(max) {}
     void clear() {
         infoText_.clear();
         progText_.clear();

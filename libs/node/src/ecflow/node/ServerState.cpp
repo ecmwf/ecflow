@@ -23,11 +23,13 @@ using namespace ecf;
 // When a Defs is loaded into a server:
 //       	o the jobSubmissionInterval_ is set
 //       	o the jobGeneration_ is set
-ServerState::ServerState() : server_state_(default_state()) {
+ServerState::ServerState()
+    : server_state_(default_state()) {
     setup_default_env(Str::DEFAULT_PORT_NUMBER());
 }
 
-ServerState::ServerState(const std::string& port) : server_state_(default_state()) {
+ServerState::ServerState(const std::string& port)
+    : server_state_(default_state()) {
     setup_default_env(port);
 }
 

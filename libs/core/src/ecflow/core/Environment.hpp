@@ -145,7 +145,8 @@ struct Wrapper<std::chrono::milliseconds>
 
 struct EnvVarNotFound : public std::runtime_error
 {
-    explicit EnvVarNotFound(std::basic_string<char> what) : std::runtime_error(what) {}
+    explicit EnvVarNotFound(std::basic_string<char> what)
+        : std::runtime_error(what) {}
 };
 
 /**

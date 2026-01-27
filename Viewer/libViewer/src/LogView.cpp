@@ -12,7 +12,8 @@
 
 #include "LogModel.hpp"
 
-LogView::LogView(QWidget* parent) : QTreeView(parent) {
+LogView::LogView(QWidget* parent)
+    : QTreeView(parent) {
     setProperty("log", "1");
     setRootIsDecorated(false);
     setUniformRowHeights(true);

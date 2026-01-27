@@ -38,9 +38,10 @@ public:
     using port_t     = uint16_t;
 
     template <typename... Args>
-    BaseMockServer(hostname_t host, port_t port, Args... args) : host_{std::move(host)},
-                                                                 port_{port},
-                                                                 server_{} {
+    BaseMockServer(hostname_t host, port_t port, Args... args)
+        : host_{std::move(host)},
+          port_{port},
+          server_{} {
         BOOST_REQUIRE_MESSAGE(!host_.empty(), "determiner host name");
         BOOST_REQUIRE_MESSAGE(port_ > 0, "port is be larger than 0");
 
@@ -74,7 +75,8 @@ private:
  */
 class MockServer : public BaseMockServer<MockServer> {
 public:
-    explicit MockServer(port_t port) : BaseMockServer<MockServer>(ecf::Host{}.name(), port) {}
+    explicit MockServer(port_t port)
+        : BaseMockServer<MockServer>(ecf::Host{}.name(), port) {}
 
     void load_definition(const std::string& defs) const {
         ClientInvoker client(ecf::Str::LOCALHOST(), port());
@@ -256,7 +258,8 @@ public:
  */
 struct EnableServersFixture
 {
-    EnableServersFixture() : EnableServersFixture(get_ecflow_server_port(), get_ecflow_udp_port()) {}
+    EnableServersFixture()
+        : EnableServersFixture(get_ecflow_server_port(), get_ecflow_udp_port()) {}
     ~EnableServersFixture() = default;
 
     ecf::test::MockServer ecflow_server;

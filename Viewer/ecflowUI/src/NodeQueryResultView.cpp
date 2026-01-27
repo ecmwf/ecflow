@@ -24,7 +24,8 @@
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 
-NodeQueryResultView::NodeQueryResultView(QWidget* parent) : QTreeView(parent) {
+NodeQueryResultView::NodeQueryResultView(QWidget* parent)
+    : QTreeView(parent) {
     // setProperty("style","nodeView");
     setProperty("view", "query");
 

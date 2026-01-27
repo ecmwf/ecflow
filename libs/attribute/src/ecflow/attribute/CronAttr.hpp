@@ -27,9 +27,12 @@ class CronAttr {
 public:
     CronAttr();
     explicit CronAttr(const std::string& time_series);
-    CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) : timeSeries_(s, f, i) {}
-    explicit CronAttr(const TimeSeries& ts) : timeSeries_(ts) {}
-    CronAttr(int h, int m, bool relative = false) : timeSeries_(h, m, relative) {}
+    CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i)
+        : timeSeries_(s, f, i) {}
+    explicit CronAttr(const TimeSeries& ts)
+        : timeSeries_(ts) {}
+    CronAttr(int h, int m, bool relative = false)
+        : timeSeries_(h, m, relative) {}
 
     bool operator==(const CronAttr& rhs) const;
     bool operator<(const CronAttr& rhs) const { return timeSeries_ < rhs.timeSeries_; }

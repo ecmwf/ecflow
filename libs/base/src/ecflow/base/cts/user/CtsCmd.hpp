@@ -48,7 +48,8 @@ public:
         RELOAD_CUSTOM_PASSWD_FILE
     };
 
-    explicit CtsCmd(Api a) : api_(a) {}
+    explicit CtsCmd(Api a)
+        : api_(a) {}
     CtsCmd() = default;
 
     Api api() const { return api_; }

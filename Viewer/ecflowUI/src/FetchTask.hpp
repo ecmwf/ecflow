@@ -44,7 +44,8 @@ class FetchTaskMaker : public FetchTaskFactory {
     AbstractFetchTask* make(FetchQueueOwner* owner) override { return new T(owner); }
 
 public:
-    explicit FetchTaskMaker(const std::string& name) : FetchTaskFactory(name) {}
+    explicit FetchTaskMaker(const std::string& name)
+        : FetchTaskFactory(name) {}
 };
 
 class AbstractFetchTask {
@@ -53,7 +54,9 @@ class AbstractFetchTask {
 public:
     enum Status { NoStatus, SucceededStatus, FinishedStatus, FailedStatus, RunningStatus };
     enum RunCondition { NoCondition, RunIfPrevFailed };
-    AbstractFetchTask(const std::string& name, FetchQueueOwner* owner) : name_(name), owner_(owner) {}
+    AbstractFetchTask(const std::string& name, FetchQueueOwner* owner)
+        : name_(name),
+          owner_(owner) {}
     virtual ~AbstractFetchTask() = default;
     virtual void run()           = 0;
     virtual void stop() {}
@@ -111,7 +114,9 @@ protected:
 class FetchQueue {
 public:
     enum Policy { RunUntilFirstSucceeded, RunAll };
-    FetchQueue(Policy policy, FetchQueueOwner* owner) : policy_(policy), owner_(owner) {}
+    FetchQueue(Policy policy, FetchQueueOwner* owner)
+        : policy_(policy),
+          owner_(owner) {}
     void add(AbstractFetchTask* t);
     void run();
     void clear();

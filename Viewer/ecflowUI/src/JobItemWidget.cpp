@@ -16,7 +16,8 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 
-JobItemWidget::JobItemWidget(QWidget* parent) : CodeItemWidget(parent) {
+JobItemWidget::JobItemWidget(QWidget* parent)
+    : CodeItemWidget(parent) {
     messageLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
 

@@ -26,13 +26,16 @@
 
 using namespace ecf;
 
-LogCmd::LogCmd(LogApi a, int get_last_n_lines) : api_(a), get_last_n_lines_(get_last_n_lines) {
+LogCmd::LogCmd(LogApi a, int get_last_n_lines)
+    : api_(a),
+      get_last_n_lines_(get_last_n_lines) {
     if (get_last_n_lines_ == 0) {
         get_last_n_lines_ = Log::get_last_n_lines_default();
     }
 }
 
-LogCmd::LogCmd() : get_last_n_lines_(Log::get_last_n_lines_default()) {
+LogCmd::LogCmd()
+    : get_last_n_lines_(Log::get_last_n_lines_default()) {
 }
 
 LogCmd::LogCmd(const std::string& path)

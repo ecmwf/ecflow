@@ -53,7 +53,8 @@ void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
 // i.e ignore expression build/checking and limit checking
 class TestDefsStructureParser : public DefsStructureParser {
 public:
-    TestDefsStructureParser(Defs* defsfile, const std::string& file_name) : DefsStructureParser(defsfile, file_name) {}
+    TestDefsStructureParser(Defs* defsfile, const std::string& file_name)
+        : DefsStructureParser(defsfile, file_name) {}
     bool do_parse_file(std::string& errorMsg) { return DefsStructureParser::do_parse_file(errorMsg); }
 };
 

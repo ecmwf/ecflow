@@ -51,7 +51,8 @@ public:
     static ecf::MirrorAttr parse_mirror_line(const std::string& line, const std::string& name, Node* parent);
     static ecf::MirrorAttr parse_mirror_line(const std::string& line, Node* parent);
 
-    explicit MirrorParser(DefsStructureParser* p) : Parser(p) {}
+    explicit MirrorParser(DefsStructureParser* p)
+        : Parser(p) {}
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
     const char* keyword() const override { return keyword_mirror; }
 };

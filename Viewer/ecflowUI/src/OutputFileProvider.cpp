@@ -85,7 +85,8 @@ protected:
     OutputFileProvider* provider_{nullptr};
 };
 
-OutputFileFetchQueueManager::OutputFileFetchQueueManager(OutputFileProvider* provider) : provider_(provider) {
+OutputFileFetchQueueManager::OutputFileFetchQueueManager(OutputFileProvider* provider)
+    : provider_(provider) {
     fetchQueue_ = new FetchQueue(FetchQueue::RunUntilFirstSucceeded, this);
 }
 
@@ -230,7 +231,8 @@ VDir_ptr OutputFileFetchQueueManager::dirToFile(const std::string& fileName) con
 //
 //========================================
 
-OutputFileProvider::OutputFileProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::OutputTask) {
+OutputFileProvider::OutputFileProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::OutputTask) {
     // outCache will be clean up automatically (QObject)
     outCache_ = new OutputCache(this);
 

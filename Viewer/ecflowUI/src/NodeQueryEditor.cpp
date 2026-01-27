@@ -37,7 +37,8 @@
 //
 //======================================================
 
-NodeQuerySaveDialog::NodeQuerySaveDialog(QWidget* parent) : QDialog(parent) {
+NodeQuerySaveDialog::NodeQuerySaveDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 }
 
@@ -72,7 +73,8 @@ void NodeQuerySaveDialog::accept() {
 //
 //======================================================
 
-NodeQueryEditor::NodeQueryEditor(QWidget* parent) : QWidget(parent) {
+NodeQueryEditor::NodeQueryEditor(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     query_ = new NodeQuery("tmp");

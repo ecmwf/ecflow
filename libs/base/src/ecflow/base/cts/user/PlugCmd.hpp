@@ -15,7 +15,9 @@
 
 class PlugCmd final : public UserCmd {
 public:
-    PlugCmd(const std::string& source, const std::string& dest) : source_(source), dest_(dest) {}
+    PlugCmd(const std::string& source, const std::string& dest)
+        : source_(source),
+          dest_(dest) {}
     PlugCmd() = default;
 
     // Uses by equals only

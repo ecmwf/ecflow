@@ -33,7 +33,8 @@ public:
              unsigned int client_state_change_no,
              unsigned int client_modify_change_no,
              AbstractServer* as);
-    SNewsCmd() : ServerToClientCmd() {}
+    SNewsCmd()
+        : ServerToClientCmd() {}
 
     void init(unsigned int client_handle, // a reference to a set of suites used by client
               unsigned int client_state_change_no,

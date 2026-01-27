@@ -29,7 +29,8 @@ private:
     std::string tokenfile_;
 };
 
-inline TokenFile::TokenFile(const std::string& tokenfile) : tokenfile_(tokenfile) {
+inline TokenFile::TokenFile(const std::string& tokenfile)
+    : tokenfile_(tokenfile) {
     // write api token file
     // api-keys: 3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e
     //           351db772d94310a6d57aa7144448f4c108e7ee2e2a00a74edbdf8edb11bee71b

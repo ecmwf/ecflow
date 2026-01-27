@@ -20,7 +20,8 @@ namespace ecf {
 
 class InvalidCLIOption : public std::logic_error {
 public:
-    explicit InvalidCLIOption(const std::string& error) : logic_error(error) {}
+    explicit InvalidCLIOption(const std::string& error)
+        : logic_error(error) {}
     InvalidCLIOption(const InvalidCLIOption&) = default;
     ~InvalidCLIOption() override;
 };

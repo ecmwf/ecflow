@@ -60,7 +60,8 @@ struct MirrorClient::Impl
     }
 };
 
-MirrorClient::MirrorClient() : impl_(std::make_unique<Impl>()) {
+MirrorClient::MirrorClient()
+    : impl_(std::make_unique<Impl>()) {
 }
 
 MirrorClient::~MirrorClient() = default;

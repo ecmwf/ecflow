@@ -24,7 +24,10 @@
 //
 //==========================================
 
-VTreeNode::VTreeNode(VNode* n, VTreeNode* parent) : vnode_(n), parent_(parent), attrNum_(-1) {
+VTreeNode::VTreeNode(VNode* n, VTreeNode* parent)
+    : vnode_(n),
+      parent_(parent),
+      attrNum_(-1) {
     if (parent_) {
         parent_->addChild(this);
     }
@@ -130,7 +133,9 @@ int VTreeNode::totalNumOfChildren() const {
     return num;
 }
 
-VTreeSuiteNode::VTreeSuiteNode(VNode* n, VTreeNode* parent) : VTreeNode(n, parent), num_(0) {
+VTreeSuiteNode::VTreeSuiteNode(VNode* n, VTreeNode* parent)
+    : VTreeNode(n, parent),
+      num_(0) {
 }
 
 void VTreeSuiteNode::countChildren() const {
@@ -148,7 +153,10 @@ int VTreeSuiteNode::totalNumOfChildren() const {
 //
 //========================================================
 
-VTree::VTree(VTreeServer* server) : VTreeNode(server->realServer()->vRoot(), nullptr), server_(server), totalNum_(0) {
+VTree::VTree(VTreeServer* server)
+    : VTreeNode(server->realServer()->vRoot(), nullptr),
+      server_(server),
+      totalNum_(0) {
 }
 
 VTree::~VTree() {

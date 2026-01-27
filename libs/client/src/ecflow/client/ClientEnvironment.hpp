@@ -54,7 +54,8 @@ private:
 
 struct UnavailableToken : public std::runtime_error
 {
-    explicit UnavailableToken(const std::string& what) : std::runtime_error(what) {}
+    explicit UnavailableToken(const std::string& what)
+        : std::runtime_error(what) {}
 };
 
 /**

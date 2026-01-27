@@ -26,7 +26,8 @@
 
 using namespace ecf;
 
-DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force) : force_(force) {
+DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force)
+    : force_(force) {
     if (!absNodePath.empty()) {
         paths_.push_back(absNodePath);
     }

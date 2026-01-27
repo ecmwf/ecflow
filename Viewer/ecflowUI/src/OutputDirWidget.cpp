@@ -95,7 +95,9 @@ public:
 // DirWidgetState
 //-------------------------------
 
-DirWidgetState::DirWidgetState(OutputDirWidget* owner, DirWidgetState* prev) : QObject(owner), owner_(owner) {
+DirWidgetState::DirWidgetState(OutputDirWidget* owner, DirWidgetState* prev)
+    : QObject(owner),
+      owner_(owner) {
     if (prev) {
         timerSuspended_ = prev->timerSuspended_;
     }
@@ -274,7 +276,8 @@ void DirWidgetFailedState::handleFailedInternal(VReply* reply) {
 // DirWidgetEmptyState
 //===========================================================
 
-DirWidgetEmptyState::DirWidgetEmptyState(OutputDirWidget* owner, DirWidgetState* prev) : DirWidgetState(owner, prev) {
+DirWidgetEmptyState::DirWidgetEmptyState(OutputDirWidget* owner, DirWidgetState* prev)
+    : DirWidgetState(owner, prev) {
     owner_->stopTimer();
     owner_->hide();
     owner_->joboutFile_.clear();
@@ -311,7 +314,9 @@ void DirWidgetDisabledState::handleEnable() {
 //
 //==========================================================
 
-OutputDirWidget::OutputDirWidget(QWidget* parent) : QWidget(parent), ui_(new Ui::OutputDirWidget) {
+OutputDirWidget::OutputDirWidget(QWidget* parent)
+    : QWidget(parent),
+      ui_(new Ui::OutputDirWidget) {
     ui_->setupUi(this);
 
     //--------------------------------

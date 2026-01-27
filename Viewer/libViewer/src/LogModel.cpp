@@ -16,7 +16,8 @@
 #include "IconProvider.hpp"
 #include "UiLog.hpp"
 
-LogModel::LogModel(QObject* parent) : QAbstractItemModel(parent) {
+LogModel::LogModel(QObject* parent)
+    : QAbstractItemModel(parent) {
     IconProvider::add(":/viewer/log_error.svg", "log_error");
     IconProvider::add(":/viewer/log_info.svg", "log_info");
     IconProvider::add(":/viewer/log_warning.svg", "log_warning");
@@ -407,7 +408,8 @@ QModelIndex LogModel::highlightPeriodIndex() const {
 //
 //========================================================
 
-LogDelegate::LogDelegate(QWidget* parent) : QStyledItemDelegate(parent) {
+LogDelegate::LogDelegate(QWidget* parent)
+    : QStyledItemDelegate(parent) {
 }
 
 void LogDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {

@@ -36,7 +36,10 @@ namespace {
 /// Class to manage locking: Only unlock if acquired the lock,
 class Lock {
 public:
-    Lock(const std::string& user, AbstractServer* as) : as_(as) { ok_ = as->lock(user); }
+    Lock(const std::string& user, AbstractServer* as)
+        : as_(as) {
+        ok_ = as->lock(user);
+    }
     ~Lock() {
         if (ok_) {
             as_->unlock();

@@ -18,7 +18,8 @@
 
 #include "ServerHandler.hpp"
 
-ServerItem::ServerItem(const std::string& name) : name_(name) {
+ServerItem::ServerItem(const std::string& name)
+    : name_(name) {
 }
 
 ServerItem::ServerItem(const std::string& name,

@@ -792,7 +792,9 @@ void ServerListDialog::readSettings() {
 //
 //======================================
 
-ServerListModel::ServerListModel(ServerFilter* filter, QObject* parent) : QAbstractItemModel(parent), filter_(filter) {
+ServerListModel::ServerListModel(ServerFilter* filter, QObject* parent)
+    : QAbstractItemModel(parent),
+      filter_(filter) {
     int id  = IconProvider::add(":/viewer/favourite.svg", "favourite");
     favPix_ = IconProvider::pixmap(id, 12);
 
@@ -1038,7 +1040,8 @@ ServerItem* ServerListModel::indexToServer(const QModelIndex& index) {
 //
 //======================================
 
-ServerListFilterModel::ServerListFilterModel(QObject* parent) : QSortFilterProxyModel(parent) {
+ServerListFilterModel::ServerListFilterModel(QObject* parent)
+    : QSortFilterProxyModel(parent) {
 }
 
 void ServerListFilterModel::setFilterStr(QString t) {

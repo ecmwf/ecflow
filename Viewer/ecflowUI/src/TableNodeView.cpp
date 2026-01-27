@@ -565,7 +565,8 @@ void TableNodeView::writeSettings(VSettings* vs) {
 // TableNodeHeader
 //=========================================
 
-TableNodeHeader::TableNodeHeader(QWidget* parent) : QHeaderView(Qt::Horizontal, parent) {
+TableNodeHeader::TableNodeHeader(QWidget* parent)
+    : QHeaderView(Qt::Horizontal, parent) {
     setStretchLastSection(true);
 
     connect(this, SIGNAL(sectionResized(int, int, int)), this, SLOT(slotSectionResized(int)));

@@ -36,7 +36,8 @@
 //
 class RepeatBase {
 public:
-    explicit RepeatBase(const std::string& name) : name_(name) {}
+    explicit RepeatBase(const std::string& name)
+        : name_(name) {}
     RepeatBase() = default;
     virtual ~RepeatBase();
 
@@ -557,10 +558,13 @@ private:
 /// Note: this applies to the clone as well
 class RepeatDay final : public RepeatBase {
 public:
-    RepeatDay() : RepeatBase("day") {}
+    RepeatDay()
+        : RepeatBase("day") {}
 
     // Enable implicit conversion from integer
-    RepeatDay(int step) : RepeatBase("day"), step_(step) {}
+    RepeatDay(int step)
+        : RepeatBase("day"),
+          step_(step) {}
 
     bool operator==(const RepeatDay& rhs) const;
     bool operator<(const RepeatDay& rhs) const { return step_ < rhs.step(); }
@@ -595,7 +599,10 @@ public:
     bool is_repeat_day() const override { return true; }
 
 private:
-    RepeatDay(int step, bool valid) : RepeatBase("day"), step_(step), valid_(valid) {}
+    RepeatDay(int step, bool valid)
+        : RepeatBase("day"),
+          step_(step),
+          valid_(valid) {}
 
 private:
     int step_{1};

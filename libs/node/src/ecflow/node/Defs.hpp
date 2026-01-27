@@ -516,7 +516,10 @@ private:
 // Start notification. End notification automatically signalled, Even if exception raised.
 class ChangeStartNotification {
 public:
-    explicit ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start(); }
+    explicit ChangeStartNotification(defs_ptr defs)
+        : defs_ptr_(defs) {
+        defs_ptr_->notify_start();
+    }
     // Disable copy (and move) semantics
     ChangeStartNotification(const ChangeStartNotification&)            = delete;
     ChangeStartNotification& operator=(const ChangeStartNotification&) = delete;

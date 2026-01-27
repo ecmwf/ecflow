@@ -27,7 +27,10 @@
 class GroupCTSCmd final : public UserCmd {
 public:
     GroupCTSCmd(const std::string& list_of_commands, AbstractClientEnv* clientEnv);
-    explicit GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd); }
+    explicit GroupCTSCmd(Cmd_ptr cmd)
+        : cli_(false) {
+        addChild(cmd);
+    }
     GroupCTSCmd() = default;
 
     bool isWrite() const override;

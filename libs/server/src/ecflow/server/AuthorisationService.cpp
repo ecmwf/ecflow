@@ -29,7 +29,8 @@ struct NodeRules
 ///
 struct WhiteListRules
 {
-    WhiteListRules(const WhiteListFile& file) : file_(file) {}
+    WhiteListRules(const WhiteListFile& file)
+        : file_(file) {}
     const WhiteListFile& file_;
 };
 
@@ -42,19 +43,24 @@ struct Unrestricted
 
 struct AuthorisationService::Impl
 {
-    Impl() : permissions_(Unrestricted{}) {}
-    explicit Impl(NodeRules&& rules) : permissions_(std::move(rules)) {}
-    explicit Impl(WhiteListRules&& rules) : permissions_(std::move(rules)) {}
+    Impl()
+        : permissions_(Unrestricted{}) {}
+    explicit Impl(NodeRules&& rules)
+        : permissions_(std::move(rules)) {}
+    explicit Impl(WhiteListRules&& rules)
+        : permissions_(std::move(rules)) {}
 
     std::variant<Unrestricted, NodeRules, WhiteListRules> permissions_;
 };
 
 AuthorisationService::AuthorisationService() = default;
 
-AuthorisationService::AuthorisationService(std::unique_ptr<Impl>&& impl) : impl_{std::move(impl)} {
+AuthorisationService::AuthorisationService(std::unique_ptr<Impl>&& impl)
+    : impl_{std::move(impl)} {
 }
 
-AuthorisationService::AuthorisationService(AuthorisationService&& rhs) noexcept : impl_{std::move(rhs.impl_)} {
+AuthorisationService::AuthorisationService(AuthorisationService&& rhs) noexcept
+    : impl_{std::move(rhs.impl_)} {
 }
 
 AuthorisationService::~AuthorisationService() = default;

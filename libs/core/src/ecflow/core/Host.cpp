@@ -25,7 +25,8 @@ Host::Host() {
     get_host_name();
 }
 
-Host::Host(const std::string& host) : the_host_name_(host) {
+Host::Host(const std::string& host)
+    : the_host_name_(host) {
     if (the_host_name_ == Str::LOCALHOST()) {
         get_host_name();
     }

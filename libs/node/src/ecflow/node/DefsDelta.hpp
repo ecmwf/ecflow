@@ -38,7 +38,8 @@ class DefsDelta {
 public:
     ///=========================================================================
     /// *Server side*
-    explicit DefsDelta(unsigned int client_state_change_no) : client_state_change_no_(client_state_change_no) {}
+    explicit DefsDelta(unsigned int client_state_change_no)
+        : client_state_change_no_(client_state_change_no) {}
 
     // Disable copy (and move) semantics
     DefsDelta(const DefsDelta&)            = delete;

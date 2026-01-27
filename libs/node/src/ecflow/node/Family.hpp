@@ -19,9 +19,11 @@ class Family final : public NodeContainer {
 public:
     Family() = default;
 
-    explicit Family(const std::string& name, bool check = true) : NodeContainer(name, check) {}
+    explicit Family(const std::string& name, bool check = true)
+        : NodeContainer(name, check) {}
 
-    Family(const Family& rhs) : NodeContainer(rhs) {}
+    Family(const Family& rhs)
+        : NodeContainer(rhs) {}
     Family& operator=(const Family&);
 
     ~Family() override;

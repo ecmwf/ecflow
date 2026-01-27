@@ -42,7 +42,8 @@ UiFunctionLog::UiFunctionLog(const std::string& server, const std::string& funcN
     UiLog(serverName_).dbg() << logEnter();
 }
 
-UiFunctionLog::UiFunctionLog(const std::string& funcName) : funcName_(funcName) {
+UiFunctionLog::UiFunctionLog(const std::string& funcName)
+    : funcName_(funcName) {
     init();
     UiLog(serverName_).dbg() << logEnter();
 }
@@ -84,7 +85,8 @@ std::string UiFunctionLog::formatFuncInfo(const std::string& funcName) {
 // UiLog
 //---------------------------------
 
-UiLog::UiLog(const std::string& server) : server_(server) {
+UiLog::UiLog(const std::string& server)
+    : server_(server) {
 }
 
 UiLog::~UiLog() {

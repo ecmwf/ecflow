@@ -19,14 +19,18 @@ namespace ecf {
 
 struct Exception : public std::runtime_error
 {
-    explicit Exception(const char* what) : std::runtime_error(what) {}
-    explicit Exception(const std::string& what) : std::runtime_error(what) {}
+    explicit Exception(const char* what)
+        : std::runtime_error(what) {}
+    explicit Exception(const std::string& what)
+        : std::runtime_error(what) {}
 };
 
 struct InvalidArgument : public Exception
 {
-    explicit InvalidArgument(const char* what) : Exception(what) {}
-    explicit InvalidArgument(const std::string& what) : Exception(what) {}
+    explicit InvalidArgument(const char* what)
+        : Exception(what) {}
+    explicit InvalidArgument(const std::string& what)
+        : Exception(what) {}
 };
 
 } // namespace ecf

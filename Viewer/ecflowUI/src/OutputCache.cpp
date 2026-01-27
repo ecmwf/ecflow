@@ -16,7 +16,10 @@
 
 // #define UI_OUTPUTCACHE_DEBUG
 
-OutputCacheItem::OutputCacheItem(QString id, VFile_ptr file) : id_(id), file_(file), used_(false) {
+OutputCacheItem::OutputCacheItem(QString id, VFile_ptr file)
+    : id_(id),
+      file_(file),
+      used_(false) {
 }
 
 bool OutputCacheItem::isAttached() const {

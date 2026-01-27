@@ -26,7 +26,8 @@
 
 using namespace ecf;
 
-LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force) : force_(force) {
+LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force)
+    : force_(force) {
     if (defs) {
         defs->handle_migration();
         defs->write_to_string(defs_, PrintStyle::NET);
