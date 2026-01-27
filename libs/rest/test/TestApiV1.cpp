@@ -9,6 +9,8 @@
  */
 
 #include <array>
+#include <random>
+#include <sstream>
 
 #include <boost/test/unit_test.hpp>
 
@@ -25,13 +27,8 @@ struct TestCfg
 {
     TestCfg()
         : host_{"localhost"},
-#if defined(ECF_TEST_HTTP_BACKEND)
-          port_{"8989"},
-#else
-          port_{"8988"},
-#endif
-          key_{"3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e"} {
-    }
+          port_{make_random_port()},
+          key_{"3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e"} {}
 
     const std::string& host() const { return host_; }
 
@@ -39,6 +36,17 @@ struct TestCfg
     int port_as_int() const { return std::stoi(port_); }
 
     const std::string& key() const { return key_; }
+
+    static std::string make_random_port() {
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist(49152, 65535); // Ephemeral port range
+
+        std::ostringstream port;
+        port << dist(rng);
+
+        return port.str();
+    }
 
 private:
     std::string host_;
