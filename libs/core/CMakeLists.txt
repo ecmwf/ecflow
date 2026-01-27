@@ -64,6 +64,7 @@ set(test_srcs
   test/TestVersion.cpp
   test/TestVersioning.cpp
   test/TestWhiteListFile.cpp
+  test/TestWhiteListIncludes.cpp
 )
 
 ecbuild_add_test(
