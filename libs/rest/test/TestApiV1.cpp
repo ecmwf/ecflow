@@ -26,9 +26,9 @@ struct TestCfg
     TestCfg()
         : host_{"localhost"},
 #if defined(ECF_TEST_HTTP_BACKEND)
-          port_{"8081"},
+          port_{"8989"},
 #else
-          port_{"8080"},
+          port_{"8988"},
 #endif
           key_{"3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e"} {
     }
