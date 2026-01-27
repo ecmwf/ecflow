@@ -21,6 +21,36 @@
 #include "ecflow/http/JSON.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
+struct TestCfg
+{
+    TestCfg()
+        : host_{"localhost"},
+#if defined(ECF_TEST_HTTP_BACKEND)
+          port_{"8081"},
+#else
+          port_{"8080"},
+#endif
+          key_{"3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e"} {
+    }
+
+    const std::string& host() const { return host_; }
+
+    const char* port_as_string() const { return port_.c_str(); }
+    int port_as_int() const { return std::stoi(port_); }
+
+    const std::string& key() const { return key_; }
+
+private:
+    std::string host_;
+    std::string port_;
+    std::string key_;
+};
+
+///
+/// @brief The following test configuration is used to configure the HTTP server and client for testing
+///
+inline static TestCfg cfg;
+
 BOOST_AUTO_TEST_SUITE(S_Http)
 
 BOOST_AUTO_TEST_SUITE(T_ApiV1)
@@ -28,9 +58,6 @@ BOOST_AUTO_TEST_SUITE(T_ApiV1)
 using ecf::http::HttpServer;
 using ecf::http::HttpStatusCode;
 using ecf::http::ojson;
-
-const std::string API_HOST("localhost");
-const std::string API_KEY("3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e");
 
 std::unique_ptr<Certificate> create_certificate() {
     auto cert_dir = ecf::environment::fetch("ECF_API_CERT_DIRECTORY");
@@ -72,9 +99,9 @@ void start_api_server() {
 
     api_server = std::make_unique<std::thread>([] {
 #if defined(ECF_TEST_HTTP_BACKEND)
-        std::array argv = {"ecflow_http", "-v", "--polling_interval", "1", "--port", "8081", "--http"};
+        std::array argv = {"ecflow_http", "-v", "--polling_interval", "1", "--port", cfg.port_as_string(), "--http"};
 #else
-        std::array argv = {"ecflow_http", "-v", "--polling_interval", "1", "--port", "8080"};
+        std::array argv = {"ecflow_http", "-v", "--polling_interval", "1", "--port", cfg.port_as_string()};
 #endif
 
         HttpServer server(argv.size(), const_cast<char**>(argv.data()));
@@ -108,16 +135,12 @@ httplib::Result request(const std::string& method,
                         const std::string& payload             = "",
                         const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
-#if defined(ECF_TEST_HTTP_BACKEND)
-    httplib::SSLClient c(API_HOST, 8081);
-#else
-    httplib::SSLClient c(API_HOST, 8080);
-#endif
+    httplib::SSLClient c(cfg.host(), cfg.port_as_int());
 
     c.enable_server_certificate_verification(false);
     c.set_connection_timeout(3);
 
-    BOOST_TEST_MESSAGE("Request URL: " << method << " " << API_HOST << resource);
+    BOOST_TEST_MESSAGE("Request URL: " << method << " " << cfg.host() << resource);
     BOOST_TEST_MESSAGE("Request body: " << payload);
 
     httplib::Headers h = {{"Content-type", "application/json"}};
@@ -309,15 +332,15 @@ BOOST_AUTO_TEST_CASE(test_server) {
     handle_response(request("get", "/v1/server/ping"));
 
     handle_response(
-        request("post", "/v1/server/attributes", R"({"type":"variable","name":"foo","value":"bar"})", API_KEY),
+        request("post", "/v1/server/attributes", R"({"type":"variable","name":"foo","value":"bar"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "foo", "bar"); });
 
     handle_response(
-        request("put", "/v1/server/attributes", R"({"type":"variable","name":"foo","value":"baz"})", API_KEY));
+        request("put", "/v1/server/attributes", R"({"type":"variable","name":"foo","value":"baz"})", cfg.key()));
     wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "foo", "baz"); });
 
-    handle_response(request("delete", "/v1/server/attributes", R"({"type":"variable","name":"foo"})", API_KEY),
+    handle_response(request("delete", "/v1/server/attributes", R"({"type":"variable","name":"foo"})", cfg.key()),
                     HttpStatusCode::success_no_content);
     wait_until(
         [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "foo", "bar"); });
@@ -327,13 +350,13 @@ BOOST_AUTO_TEST_CASE(test_suite) {
     ECF_NAME_THIS_TEST();
 
     // remove test-suite if it exists; disregard any problems with the call
-    request("delete", "/v1/suites/test/definition", "", API_KEY);
+    request("delete", "/v1/suites/test/definition", "", cfg.key());
     wait_until([] { return false == check_for_path("/v1/suites/test/definition"); });
 
     handle_response(request("post",
                             "/v1/suites",
                             R"({"definition" : "suite test\n  family a\n    task a\n  endfamily\nendsuite"})",
-                            API_KEY),
+                            cfg.key()),
                     HttpStatusCode::success_created);
     wait_until([] { return check_for_path("/v1/suites/test/definition"); });
 
@@ -376,7 +399,7 @@ BOOST_AUTO_TEST_CASE(test_suite) {
 
     BOOST_REQUIRE(found);
 
-    handle_response(request("put", "/v1/suites/test/status", R"({"action":"begin"})", API_KEY));
+    handle_response(request("put", "/v1/suites/test/status", R"({"action":"begin"})", cfg.key()));
 
     auto response = ojson::parse(handle_response(request("get", "/v1/suites/test/definition")).body);
 
@@ -384,7 +407,7 @@ BOOST_AUTO_TEST_CASE(test_suite) {
 
     BOOST_REQUIRE(response.at("definition").get<std::string>() == correct);
 
-    handle_response(request("put", "/v1/suites/test/status", R"({"action":"suspend"})", API_KEY));
+    handle_response(request("put", "/v1/suites/test/status", R"({"action":"suspend"})", cfg.key()));
     wait_until([] { return check_for_element("/v1/suites/test/status?filter=status", "", "", "suspended"); });
 }
 
@@ -392,14 +415,14 @@ BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
     ECF_NAME_THIS_TEST();
 
     // (0) Clean up -- in case there is any left-over from passed/failed tests
-    request("delete", "/v1/suites/basic_suite/definition", "", API_KEY);
+    request("delete", "/v1/suites/basic_suite/definition", "", cfg.key());
     wait_until([] { return false == check_for_path("/v1/suites/basic_suite/definition"); });
 
     // (1) Publish 'basic_suite' suite
 
     std::string suite_definition =
         R"({"definition" : "suite basic_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
-    handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
+    handle_response(request("post", "/v1/suites", suite_definition, cfg.key()), HttpStatusCode::success_created);
     wait_until([] { return check_for_path("/v1/suites/basic_suite/definition"); });
 
     // (2) Retrieve 'basic_suite' suite tree
@@ -432,7 +455,7 @@ BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
     }
 
     // (5) Clean up
-    request("delete", "/v1/suites/basic_suite/definition", "", API_KEY);
+    request("delete", "/v1/suites/basic_suite/definition", "", cfg.key());
     wait_until([] { return false == check_for_path("/v1/suites/basic_suite/definition"); });
 }
 
@@ -440,14 +463,14 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree) {
     ECF_NAME_THIS_TEST();
 
     // (0) Clean up -- in case there is any left-over from passed/failed tests
-    request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
+    request("delete", "/v1/suites/full_suite/definition", "", cfg.key());
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 
     // (1) Publish 'full_tree' suite
 
     std::string suite_definition =
         R"({"definition" : "suite full_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
-    handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
+    handle_response(request("post", "/v1/suites", suite_definition, cfg.key()), HttpStatusCode::success_created);
     wait_until([] { return check_for_path("/v1/suites/full_suite/definition"); });
 
     // (2) Retrieve 'full_suite' suite tree, explicitly specifying full content
@@ -505,7 +528,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree) {
     }
 
     // (4) Clean up
-    request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
+    request("delete", "/v1/suites/full_suite/definition", "", cfg.key());
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 }
 
@@ -513,14 +536,14 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
     // (0) Clean up -- in case there is any left-over from passed/failed tests
-    request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
+    request("delete", "/v1/suites/full_suite/definition", "", cfg.key());
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 
     // (1) Publish 'full_tree' suite
 
     std::string suite_definition =
         R"({"definition" : "suite full_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
-    handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
+    handle_response(request("post", "/v1/suites", suite_definition, cfg.key()), HttpStatusCode::success_created);
     wait_until([] { return check_for_path("/v1/suites/full_suite/definition"); });
 
     // (2) Retrieve 'full_suite' suite tree, explicitly requesting generated variables
@@ -570,7 +593,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
     }
 
     // (4) Clean up
-    request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
+    request("delete", "/v1/suites/full_suite/definition", "", cfg.key());
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 }
 
@@ -578,7 +601,7 @@ BOOST_AUTO_TEST_CASE(test_token_authentication) {
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", API_KEY),
+        request("post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
 
@@ -586,11 +609,11 @@ BOOST_AUTO_TEST_CASE(test_token_authentication) {
                             "/v1/server/attributes",
                             R"({"type":"variable","name":"xfoo","value":"xbaz"})",
                             "",
-                            {{"X-API-Key", API_KEY}}));
+                            {{"X-API-Key", cfg.key()}}));
     wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
 
     handle_response(
-        request("delete", "/v1/server/attributes?key=" + API_KEY, R"({"type":"variable","name":"xfoo"})", ""),
+        request("delete", "/v1/server/attributes?key=" + cfg.key(), R"({"type":"variable","name":"xfoo"})", ""),
         HttpStatusCode::success_no_content);
     wait_until(
         [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
@@ -618,7 +641,7 @@ BOOST_AUTO_TEST_CASE(test_family_add, *boost::unit_test::depends_on("S_Http/T_Ap
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("put", "/v1/suites/test/definition", R"({"definition": "family dynamic\nendfamily"})", API_KEY));
+        request("put", "/v1/suites/test/definition", R"({"definition": "family dynamic\nendfamily"})", cfg.key()));
     wait_until([] { return check_for_path("/v1/suites/test/dynamic/definition"); });
 }
 
@@ -632,21 +655,21 @@ BOOST_AUTO_TEST_CASE(test_status, *boost::unit_test::depends_on("S_Http/T_ApiV1/
 
     for (const auto& status : statuses) {
         ojson j = {{"action", status.first}};
-        handle_response(request("put", "/v1/suites/test/dynamic/status", j.dump(), API_KEY));
+        handle_response(request("put", "/v1/suites/test/dynamic/status", j.dump(), cfg.key()));
 
         wait_until(
             [&] { return check_for_element("/v1/suites/test/dynamic/status?filter=status", "", "", status.second); });
     }
 
     handle_response(request(
-        "put", "/v1/suites/test/dynamic/status", R"({"action":"defstatus","defstatus_value":"complete"})", API_KEY));
+        "put", "/v1/suites/test/dynamic/status", R"({"action":"defstatus","defstatus_value":"complete"})", cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/status?filter=default_status", "", "", "complete"); });
 
-    handle_response(request("put", "/v1/suites/test/a/status", R"({"action":"archive"})", API_KEY));
+    handle_response(request("put", "/v1/suites/test/a/status", R"({"action":"archive"})", cfg.key()));
     wait_until([] { return false == check_for_path("/v1/suites/test/a/a/definition"); });
 
-    handle_response(request("put", "/v1/suites/test/a/status", R"({"action":"restore"})", API_KEY));
+    handle_response(request("put", "/v1/suites/test/a/status", R"({"action":"restore"})", cfg.key()));
     wait_until([] { return check_for_path("/v1/suites/test/a/a/definition"); });
 }
 
@@ -655,20 +678,21 @@ BOOST_AUTO_TEST_CASE(test_status, *boost::unit_test::depends_on("S_Http/T_ApiV1/
 BOOST_AUTO_TEST_CASE(test_variable, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_family_add")) {
     ECF_NAME_THIS_TEST();
 
-    handle_response(
-        request(
-            "post", "/v1/suites/test/dynamic/attributes", R"({"type":"variable","name":"foo","value":"bar"})", API_KEY),
-        HttpStatusCode::success_created);
+    handle_response(request("post",
+                            "/v1/suites/test/dynamic/attributes",
+                            R"({"type":"variable","name":"foo","value":"bar"})",
+                            cfg.key()),
+                    HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=variables", "value", "foo", "bar"); });
 
     handle_response(request(
-        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"variable","name":"foo","value":"baz"})", API_KEY));
+        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"variable","name":"foo","value":"baz"})", cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=variables", "value", "foo", "baz"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"variable","name":"foo"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"variable","name":"foo"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=variables", "value", "foo", "baz");
@@ -683,18 +707,18 @@ BOOST_AUTO_TEST_CASE(test_meter, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
     handle_response(request("post",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"meter","name":"foo","value":"10","min":"0","max":"20"})",
-                            API_KEY),
+                            cfg.key()),
                     HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=meters", "value", "foo", "10"); });
 
-    handle_response(
-        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"meter","name":"foo","value":"15"})", API_KEY));
+    handle_response(request(
+        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"meter","name":"foo","value":"15"})", cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=meters", "value", "foo", "15"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"meter","name":"foo"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"meter","name":"foo"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=meters", "value", "foo", "15");
@@ -707,18 +731,19 @@ BOOST_AUTO_TEST_CASE(test_limit, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"limit","name":"foo","value":"0"})", API_KEY),
+        request(
+            "post", "/v1/suites/test/dynamic/attributes", R"({"type":"limit","name":"foo","value":"0"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=limits", "value", "foo", "0"); });
 
-    handle_response(
-        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"limit","name":"foo","value":"6"})", API_KEY));
+    handle_response(request(
+        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"limit","name":"foo","value":"6"})", cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=limits", "value", "foo", "6"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"limit","name":"foo"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"limit","name":"foo"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=limits", "value", "foo", "6");
@@ -732,18 +757,18 @@ BOOST_AUTO_TEST_CASE(test_event, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
 
     handle_response(
         request(
-            "post", "/v1/suites/test/dynamic/attributes", R"({"type":"event","name":"foo","value":"set"})", API_KEY),
+            "post", "/v1/suites/test/dynamic/attributes", R"({"type":"event","name":"foo","value":"set"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=events", "value", "foo", "true"); });
 
     handle_response(request(
-        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"event","name":"foo","value":false})", API_KEY));
+        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"event","name":"foo","value":false})", cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=events", "value", "foo", "false"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"event","name":"foo"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"event","name":"foo"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=events", "value", "foo", "false");
@@ -757,18 +782,18 @@ BOOST_AUTO_TEST_CASE(test_label, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
 
     handle_response(
         request(
-            "post", "/v1/suites/test/dynamic/attributes", R"({"type":"label","name":"foo","value":"bar"})", API_KEY),
+            "post", "/v1/suites/test/dynamic/attributes", R"({"type":"label","name":"foo","value":"bar"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=labels", "value", "foo", "bar"); });
 
     handle_response(request(
-        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"label","name":"foo","value":"baz"})", API_KEY));
+        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"label","name":"foo","value":"baz"})", cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=labels", "value", "foo", "baz"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"label","name":"foo"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"label","name":"foo"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=labels", "value", "foo", "baz");
@@ -781,7 +806,7 @@ BOOST_AUTO_TEST_CASE(test_time, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"time","value":"+00:20"})", API_KEY),
+        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"time","value":"+00:20"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=times", "value", "", "+00:20"); });
@@ -789,12 +814,12 @@ BOOST_AUTO_TEST_CASE(test_time, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
     handle_response(request("put",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"time","old_value":"+00:20","value":"+00:25"})",
-                            API_KEY));
+                            cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=times", "value", "", "+00:25"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"time","value":"+00:25"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"time","value":"+00:25"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=times", "value", "", "+00:25");
@@ -807,7 +832,7 @@ BOOST_AUTO_TEST_CASE(test_day, *boost::unit_test::depends_on("S_Http/T_ApiV1/tes
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"day","value":"monday"})", API_KEY),
+        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"day","value":"monday"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=days", "value", "", "monday"); });
@@ -815,12 +840,12 @@ BOOST_AUTO_TEST_CASE(test_day, *boost::unit_test::depends_on("S_Http/T_ApiV1/tes
     handle_response(request("put",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"day","old_value":"monday","value":"tuesday"})",
-                            API_KEY));
+                            cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=days", "value", "", "tuesday"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"day","value":"tuesday"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"day","value":"tuesday"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=days", "value", "", "tuesday");
@@ -833,7 +858,7 @@ BOOST_AUTO_TEST_CASE(test_date, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"date","value":"1.*.*"})", API_KEY),
+        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"date","value":"1.*.*"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=dates", "value", "", "1.*.*"); });
@@ -841,12 +866,12 @@ BOOST_AUTO_TEST_CASE(test_date, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
     handle_response(request("put",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"date","old_value":"1.*.*","value":"2.*.*"})",
-                            API_KEY));
+                            cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=dates", "value", "", "2.*.*"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"date","value":"2.*.*"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"date","value":"2.*.*"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=dates", "value", "", "2.*.*");
@@ -859,7 +884,7 @@ BOOST_AUTO_TEST_CASE(test_today, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"today","value":"03:00"})", API_KEY),
+        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"today","value":"03:00"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=todays", "value", "", "03:00"); });
@@ -867,15 +892,16 @@ BOOST_AUTO_TEST_CASE(test_today, *boost::unit_test::depends_on("S_Http/T_ApiV1/t
     handle_response(request("put",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"today","old_value":"03:00","value":"03:00 05:00 01:00"})",
-                            API_KEY));
+                            cfg.key()));
     wait_until([] {
         return check_for_element("/v1/suites/test/dynamic/attributes?filter=todays", "value", "", "03:00 05:00 01:00");
     });
 
-    handle_response(
-        request(
-            "delete", "/v1/suites/test/dynamic/attributes", R"({"type":"today","value":"03:00 05:00 01:00"})", API_KEY),
-        HttpStatusCode::success_no_content);
+    handle_response(request("delete",
+                            "/v1/suites/test/dynamic/attributes",
+                            R"({"type":"today","value":"03:00 05:00 01:00"})",
+                            cfg.key()),
+                    HttpStatusCode::success_no_content);
     wait_until([] {
         return false ==
                check_for_element("/v1/suites/test/dynamic/attributes?filter=todays", "value", "", "03:00 05:00 01:00");
@@ -888,7 +914,7 @@ BOOST_AUTO_TEST_CASE(test_cron, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"cron","value":"-w 0,1 10:00"})", API_KEY),
+        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"cron","value":"-w 0,1 10:00"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until([] {
         return check_for_element("/v1/suites/test/dynamic/attributes?filter=crons", "value", "", "-w 0,1 10:00");
@@ -897,12 +923,12 @@ BOOST_AUTO_TEST_CASE(test_cron, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
     handle_response(request("put",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"cron","old_value":"-w 0,1 10:00","value":"23:00"})",
-                            API_KEY));
+                            cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=crons", "value", "", "23:00"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"cron","value":"23:00"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"cron","value":"23:00"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=crons", "value", "", "23:00");
@@ -917,7 +943,7 @@ BOOST_AUTO_TEST_CASE(test_late, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
     handle_response(request("post",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"late","value":"-s +00:01 -a 14:30 -c +00:01"})",
-                            API_KEY),
+                            cfg.key()),
                     HttpStatusCode::success_created);
     wait_until([] {
         return check_for_element(
@@ -927,12 +953,12 @@ BOOST_AUTO_TEST_CASE(test_late, *boost::unit_test::depends_on("S_Http/T_ApiV1/te
     handle_response(request("put",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"late","old_value":"-s +00:01 -a 14:30 -c +00:01","value":"-c +00:01"})",
-                            API_KEY));
+                            cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=late", "value", "", "-c +00:01"); });
 
     handle_response(
-        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"late","value":"-c +00:01"})", API_KEY),
+        request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"late","value":"-c +00:01"})", cfg.key()),
         HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=late", "value", "", "-c +00:01");
@@ -947,7 +973,7 @@ BOOST_AUTO_TEST_CASE(test_complete, *boost::unit_test::depends_on("S_Http/T_ApiV
     handle_response(request("post",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"complete","value":"/test/a eq complete"})",
-                            API_KEY),
+                            cfg.key()),
                     HttpStatusCode::success_created);
     wait_until([] {
         return check_for_element(
@@ -955,7 +981,7 @@ BOOST_AUTO_TEST_CASE(test_complete, *boost::unit_test::depends_on("S_Http/T_ApiV
     });
 
     handle_response(request(
-        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"complete","value":"/test/a eq active"})", API_KEY));
+        "put", "/v1/suites/test/dynamic/attributes", R"({"type":"complete","value":"/test/a eq active"})", cfg.key()));
     wait_until([] {
         return check_for_element(
             "/v1/suites/test/dynamic/attributes?filter=complete", "value", "", "/test/a eq active");
@@ -964,7 +990,7 @@ BOOST_AUTO_TEST_CASE(test_complete, *boost::unit_test::depends_on("S_Http/T_ApiV
     handle_response(request("delete",
                             "/v1/suites/test/dynamic/attributes",
                             R"({"type":"complete","value":"/test/a eq active"})",
-                            API_KEY),
+                            cfg.key()),
                     HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=complete", "value", "", "");
@@ -977,18 +1003,18 @@ BOOST_AUTO_TEST_CASE(test_autocancel, *boost::unit_test::depends_on("S_Http/T_Ap
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"+01:00"})", API_KEY),
+        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"+01:00"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until([] {
         return check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "+01:00");
     });
 
     handle_response(
-        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"0"})", API_KEY));
+        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel","value":"0"})", cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "0"); });
 
-    handle_response(request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel"})", API_KEY),
+    handle_response(request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"autocancel"})", cfg.key()),
                     HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=autocancel", "value", "", "0");
@@ -1001,18 +1027,18 @@ BOOST_AUTO_TEST_CASE(test_autoarchive, *boost::unit_test::depends_on("S_Http/T_A
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autoarchive","value":"+01:00"})", API_KEY),
+        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autoarchive","value":"+01:00"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until([] {
         return check_for_element("/v1/suites/test/dynamic/attributes?filter=autoarchive", "value", "", "+01:00");
     });
 
     handle_response(
-        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autoarchive","value":"0"})", API_KEY));
+        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autoarchive","value":"0"})", cfg.key()));
     wait_until(
         [] { return check_for_element("/v1/suites/test/dynamic/attributes?filter=autoarchive", "value", "", "0"); });
 
-    handle_response(request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"autoarchive"})", API_KEY),
+    handle_response(request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"autoarchive"})", cfg.key()),
                     HttpStatusCode::success_no_content);
     wait_until([] {
         return false == check_for_element("/v1/suites/test/dynamic/attributes?filter=autoarchive", "value", "", "");
@@ -1025,19 +1051,19 @@ BOOST_AUTO_TEST_CASE(test_autorestore, *boost::unit_test::depends_on("S_Http/T_A
     ECF_NAME_THIS_TEST();
 
     handle_response(
-        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autorestore","value":"/test/a"})", API_KEY),
+        request("post", "/v1/suites/test/dynamic/attributes", R"({"type":"autorestore","value":"/test/a"})", cfg.key()),
         HttpStatusCode::success_created);
     wait_until([] {
         return check_for_element("/v1/suites/test/dynamic/attributes?filter=autorestore", "value", "", "/test/a");
     });
 
     handle_response(
-        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autorestore","value":"/test"})", API_KEY));
+        request("put", "/v1/suites/test/dynamic/attributes", R"({"type":"autorestore","value":"/test"})", cfg.key()));
     wait_until([] {
         return check_for_element("/v1/suites/test/dynamic/attributes?filter=autorestore", "value", "", "/test");
     });
 
-    handle_response(request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"autorestore"})", API_KEY),
+    handle_response(request("delete", "/v1/suites/test/dynamic/attributes", R"({"type":"autorestore"})", cfg.key()),
                     HttpStatusCode::success_no_content);
     wait_until([] {
         return false ==
@@ -1066,12 +1092,12 @@ BOOST_AUTO_TEST_CASE(test_script, *boost::unit_test::depends_on("S_Http/T_ApiV1/
 BOOST_AUTO_TEST_CASE(test_suite_family_delete, *boost::unit_test::depends_on("S_Http/T_ApiV1/test_autorestore")) {
     ECF_NAME_THIS_TEST();
 
-    handle_response(request("delete", "/v1/suites/test/dynamic/definition", "", API_KEY),
+    handle_response(request("delete", "/v1/suites/test/dynamic/definition", "", cfg.key()),
                     HttpStatusCode::success_no_content);
     wait_until([] { return false == check_for_path("/v1/suites/test/dynamic/definition"); });
     wait_until([] { return check_for_path("/v1/suites/test/definition"); });
 
-    handle_response(request("delete", "/v1/suites/test/definition", "", API_KEY), HttpStatusCode::success_no_content);
+    handle_response(request("delete", "/v1/suites/test/definition", "", cfg.key()), HttpStatusCode::success_no_content);
     wait_until([] { return false == check_for_path("/v1/suites/test/definition"); });
 }
 
