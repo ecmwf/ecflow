@@ -114,11 +114,11 @@ const char* CSyncCmd::theArg() const {
     return CtsApi::syncArg();
 }
 
-int CSyncCmd::timeout() const {
+ClientToServerCmd::time_duration_t CSyncCmd::timeout() const {
     if (api_ == CSyncCmd::SYNC || api_ == CSyncCmd::SYNC_FULL || api_ == CSyncCmd::SYNC_CLOCK) {
-        return time_out_for_load_sync_and_get();
+        return timeout_for_load_sync_and_get();
     }
-    return 20; // CSyncCmd::NEWS
+    return std::chrono::seconds{20}; // CSyncCmd::NEWS
 }
 
 void CSyncCmd::do_log(AbstractServer* as) const {

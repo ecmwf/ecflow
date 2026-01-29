@@ -164,6 +164,28 @@ std::set<const Node*> get_all_ast_nodes(const Defs& defs);
  */
 std::set<const Node*> get_all_ast_nodes(const Node& node);
 
+/**
+ * Ensure that all mirrors in the given defs or node are valid,
+ *
+ * @param defs The defs being checked
+ * @param host The host of the server
+ * @param port The port of the server
+ *
+ * @throws std::runtime_error if an invalid mirror is found
+ */
+void ensure_all_mirrors_are_valid(const Defs& defs, std::string_view host, std::string_view port);
+
+/**
+ * Ensure that all mirrors in the given defs or node are valid,
+ *
+ * @param node The node being checked
+ * @param host The host of the server
+ * @param port The port of the server
+ *
+ * @throws std::runtime_error if an invalid mirror is found
+ */
+void ensure_all_mirrors_are_valid(const Node& node, std::string_view host, std::string_view port);
+
 } // namespace ecf
 
 #endif /* ecflow_node_NodeAlgorithms_HPP */

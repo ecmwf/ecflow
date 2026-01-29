@@ -31,6 +31,11 @@ class GroupCTSCmd;
 ///////////////////////////////////////////////////////////////////////////////////
 class ClientToServerCmd {
 public:
+    ///
+    /// @brief The type used to configure a specific amount of time (e.g. for timeouts or time between retries).
+    ///
+    using time_duration_t = std::chrono::milliseconds;
+
     virtual ~ClientToServerCmd();
 
     /// The host where the client was called
@@ -105,7 +110,7 @@ public:
     /// NOTE: We also have a timeout in ClientInvoker/ClientEnvironment, *that* is different,
     ///       as that applies to CHILD/task commands, and control how long we continue
     ///       to iterate over the hosts files
-    virtual int timeout() const { return 60; }
+    virtual time_duration_t timeout() const { return std::chrono::seconds{60}; }
 
     /// A command can be read only command or write only command
     /// A read only command will not change the state of the suites in the server

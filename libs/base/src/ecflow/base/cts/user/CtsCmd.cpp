@@ -315,9 +315,9 @@ bool CtsCmd::cmd_updates_defs() const {
     return false;
 }
 
-int CtsCmd::timeout() const {
+ClientToServerCmd::time_duration_t CtsCmd::timeout() const {
     if (api_ == CtsCmd::PING) {
-        return 10;
+        return std::chrono::seconds{10};
     }
     return ClientToServerCmd::timeout();
 }

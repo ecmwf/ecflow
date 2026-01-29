@@ -67,21 +67,6 @@
     #include "ecflow/core/DebugPerf.hpp"
 #endif
 
-#ifdef DEBUG
-
-    #if defined(HPUX) || defined(_AIX)
-        #define RETRY_CONNECTION_PERIOD 2
-        #define NEXT_HOST_POLL_PERIOD 2
-    #else
-        #define RETRY_CONNECTION_PERIOD 1
-        #define NEXT_HOST_POLL_PERIOD 1
-    #endif
-
-#else
-    #define RETRY_CONNECTION_PERIOD 10
-    #define NEXT_HOST_POLL_PERIOD 30
-#endif
-
 #include "ecflow/base/HttpClient.hpp"
 
 #if defined(ADD)
@@ -238,15 +223,16 @@ void ClientInvoker::disable_logging() {
     Rtt::destroy();
 }
 
-void ClientInvoker::set_connect_timeout(int t) {
-    clientEnv_.set_connect_timeout(t);
+void ClientInvoker::set_connect_timeout(time_duration_t timeout) {
+    clientEnv_.set_connect_timeout(timeout);
+}
+
+void ClientInvoker::set_connect_timeout(int timeout) {
+    set_connect_timeout(std::chrono::seconds{timeout});
 }
 
 void ClientInvoker::set_connection_attempts(unsigned int attempts) {
-    connection_attempts_ = attempts;
-    if (connection_attempts_ < 1) {
-        connection_attempts_ = 1;
-    }
+    connection_attempts_ = std::max(1u, attempts);
 }
 
 std::optional<Cmd_ptr> ClientInvoker::get_cmd_from_args(const CommandLine& cl) const {
@@ -425,9 +411,9 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     /// Added to get round glitches in the network.
     /// However for ping() always default to 1 second. This avoids 10 second wait in release mode.
     /// We do this both for the CLI(command level interface) and python api
-    unsigned int retry_connection_period = retry_connection_period_;
+    auto retry_connection_period = retry_connection_period_;
     if (cts_cmd->ping_cmd()) {
-        retry_connection_period = 1;
+        retry_connection_period = std::chrono::seconds(1);
     }
 
     try {
@@ -462,11 +448,11 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                     if (clientEnv_.debug()) {
                         std::cout << TimeStamp::now() << "ClientInvoker: >>> " << cts_cmd->print_short();
                         std::cout << " on " << client_env_host_port() << " : retry_connection_period("
-                                  << retry_connection_period << ") no_of_tries(" << no_of_tries
-                                  << ") cmd_connect_timeout(" << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT("
-                                  << clientEnv_.connect_timeout()
+                                  << retry_connection_period.count() << "ms) no_of_tries(" << no_of_tries
+                                  << ") cmd_connect_timeout(" << cts_cmd->timeout().count()
+                                  << "ms) ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout().count() << "ms)"
 #ifdef ECF_OPENSSL
-                                  << ") SSL(" << clientEnv_.ssl()
+                                  << " SSL(" << clientEnv_.ssl()
 #endif
                                   << ")<<<" << std::endl;
                     }
@@ -664,7 +650,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
                 // Wait a bit before trying to connect again, but only if no_of_tries > 0
                 no_of_tries--;
                 if (no_of_tries > 0) {
-                    sleep(retry_connection_period);
+                    std::this_thread::sleep_for(retry_connection_period);
                 }
             }
 

@@ -32,6 +32,11 @@ class CommandLine;
 /// This is more efficient than creating a ClientInvoker for each request
 class ClientInvoker {
 public:
+    ///
+    /// @brief The type used to configure a specific amount of time (e.g. for timeouts or time between retries).
+    ///
+    using time_duration_t = std::chrono::milliseconds;
+
     /// Will create the *ClientEnvironment* once on construction
     /// By default will throw exception std::runtime_error for errors
     ClientInvoker();
@@ -100,18 +105,38 @@ public:
     void set_user_name(const std::string& user);
     void set_password(const std::string& password);
 
-    /// Whenever there is a connections failure we wait a number of seconds
-    /// before trying again. ( i.e. to get round glitches in the network.)
-    /// For the ping command this is set as 1 second
-    /// This wait between connection attempts can be configured here.
-    /// i.e. for the GUI & python interface this can be reduced to increase responsiveness.
-    /// Default: In debug this period in set to 1 second and in release mode 10 seconds
-    void set_retry_connection_period(unsigned int period) { retry_connection_period_ = period; }
+    ///
+    /// @brief Set a custom period to wait between connection attempts.
+    ///
+    /// Whenever there is a connections failure, the client invoker waits a given a amount of time before retrying to
+    /// get around temporary network failures.
+    ///
+    /// The amount of time between retries can be customised, typically by reducing the period, so that the GUI & python
+    /// interface increase responsiveness.
+    ///
+    /// @note The default amount of time of 1 second is always used for the Ping command, regardeless of the current
+    /// value of the retry connection period.
+    ///
+    /// @node In debug builds, the default value in set to 1 second, while in release build the default is 10 seconds
+    ///
+    /// @param period The period in seconds to wait between connection attempts.
+    ///
+    void set_retry_connection_period(time_duration_t period) { retry_connection_period_ = period; }
 
-    /// Set the number of times to connect to server, in case of failure
-    /// The period between connection attempts is handled by set_retry_connection_period
-    /// i.e. for the GUI & python interface this can be reduced to increase responsiveness.
-    /// Default value is set as 2. Setting a value less than 1 is ignored, will default to 1 in this case
+    ///
+    /// @see ClientInvoker::set_retry_connection_period(time_duration_t)
+    ///
+    [[deprecated("Use set_retry_connection_period(time_duration_t) instead")]]
+    void set_retry_connection_period(unsigned int period) {
+        set_retry_connection_period(std::chrono::seconds{period});
+    }
+
+    ///
+    /// @brief  Set a custom a number of times to attempt to connect to server, in case of failure.
+    ///
+    /// The value is expected to be at least 1 (if a lower value is requests it be ignored and 1 used instead).
+    ///
+    /// @node The default value is set to 2.
     void set_connection_attempts(unsigned int attempts);
 
     /// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
@@ -140,16 +165,27 @@ public:
 
     void debug(bool flag) { clientEnv_.set_debug(flag); }
 
-    /// The timeout feature allow the client to fail gracefully in the case
-    /// where the server has died/crashed. The timeout will ensure the socket is closed.
-    /// allowing the server to be restarted without getting the address is use error.
-    /// Set the timeout for each client->server communication:
-    //    connect        : timeout_ second
-    //    send request   : timeout_ second
-    //    receive reply  : timeout_ second
-    // default is 0 second, which means take the timeout from the command/request
-    // used for test only
-    void set_connect_timeout(int t);
+    ///
+    /// @brief Set amount of time to wait (i.e. timeout) while establishing the client-server communication.
+    ///
+    /// The timeout allows the client to fail gracefully in case the server has died/crashed.
+    ///
+    /// The current implementation considers the timeout for each client->server communication:
+    ///    connect        : timeout_ second
+    ///    send request   : timeout_ second
+    ///    receive reply  : timeout_ second
+    ///
+    /// @note The default timeout value is 0 second, which means take the timeout from the command/request
+    ///
+    /// @param timeout The timeout value in microseconds
+    ///
+    void set_connect_timeout(time_duration_t timeout);
+
+    ///
+    /// @see ClientInvoker::set_connect_timeout(time_duration_t)
+    ///
+    [[deprecated("Use ClientInvoker::set_connect_timeout(time_duration_t) instead")]]
+    void set_connect_timeout(int timeout);
 
     /// ServerReply Holds the reply from the server
     void reset() const; // will clear local client definition and handle
@@ -453,12 +489,32 @@ private:
     friend void export_Client();
 
 private:
+#ifdef DEBUG
+    inline static auto RETRY_CONNECTION_PERIOD = std::chrono::seconds{1};
+    inline static auto NEXT_HOST_POLL_PERIOD   = 1;
+#else
+    inline static auto RETRY_CONNECTION_PERIOD = std::chrono::seconds{10};
+    inline static auto NEXT_HOST_POLL_PERIOD   = 30;
+#endif
+    inline static auto CONNECTION_ATTEMPTS = 2u;
+
     mutable ClientEnvironment clientEnv_;
     // Important: the environment is loaded *once* upon construction. This *must* be before Client options
-    mutable ClientOptions args_;           // Used for argument parsing & creating client request
-    mutable ServerReply server_reply_;     // stores the local defs, client_handle, & all server replies
-    unsigned int connection_attempts_{2};  // No of attempts to establish connection with the server
-    unsigned int retry_connection_period_; // No of seconds to wait before trying to connect in case of failure.
+    mutable ClientOptions args_;       // Used for argument parsing & creating client request
+    mutable ServerReply server_reply_; // stores the local defs, client_handle, & all server replies
+
+    ///
+    /// @brief The number of time to attempt to establish connection with the server.
+    ///
+    /// In practice, the number of (re)connection attempts is equal to connection_attempts_ - 1,
+    /// since the first connection attempt is made immediately upon invocation.
+    ///
+    unsigned int connection_attempts_{CONNECTION_ATTEMPTS};
+
+    ///
+    /// @brief  The amount of time to wait before retrying to connect in case of failure.
+    ///
+    time_duration_t retry_connection_period_{RETRY_CONNECTION_PERIOD};
 
     mutable boost::posix_time::time_duration rtt_; // record latency for each cmd.
     mutable boost::posix_time::ptime start_time_;  // Used for time out and measuring latency

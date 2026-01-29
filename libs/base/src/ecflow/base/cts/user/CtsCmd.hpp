@@ -64,7 +64,7 @@ public:
     bool cmd_updates_defs() const override;
     bool terminate_cmd() const override { return api_ == TERMINATE_SERVER; }
     bool ping_cmd() const override { return api_ == PING; }
-    int timeout() const override;
+    time_duration_t timeout() const override;
 
     bool handleRequestIsTestable() const override;
 

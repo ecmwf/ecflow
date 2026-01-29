@@ -32,6 +32,7 @@ ecbuild_add_test(
     TestFoolproof_main.cpp # test entry point
     # Test sources
     TestFoolproof.Basic.cpp
+    TestFoolproof.Mirror.cpp
     TestFoolproof.NodeExtern.cpp
     TestFoolproof.PasswordsAndWhiteLists.cpp
     TestFoolproof.Scaffold.cpp

@@ -223,7 +223,8 @@ std::string ClientEnvironment::toString() const {
     ss << "   " << ecf::environment::ECF_HOSTFILE_POLICY << " = " << host_file_policy_ << "\n";
     ss << "   " << ecf::environment::ECF_TIMEOUT << " = " << timeout_ << "\n";
     ss << "   " << ecf::environment::ECF_ZOMBIE_TIMEOUT << " = " << zombie_timeout_ << "\n";
-    ss << "   " << ecf::environment::ECF_CONNECT_TIMEOUT << " = " << connect_timeout_ << "\n";
+    ss << "   " << ecf::environment::ECF_CONNECT_TIMEOUT << " = "
+       << std::chrono::duration_cast<std::chrono::seconds>(connect_timeout_).count() << "\n";
     ss << "   " << ecf::environment::ECF_DENIED << " = " << denied_ << "\n";
     ss << "   " << ecf::environment::NO_ECF << " = " << no_ecf_ << "\n";
     for (const auto& i : env_) {

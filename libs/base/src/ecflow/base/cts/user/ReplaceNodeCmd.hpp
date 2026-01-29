@@ -26,7 +26,7 @@ public:
     bool force() const { return force_; }
 
     bool isWrite() const override { return true; }
-    int timeout() const override { return 300; }
+    time_duration_t timeout() const override { return std::chrono::seconds{300}; }
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

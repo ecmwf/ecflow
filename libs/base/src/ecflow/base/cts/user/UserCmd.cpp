@@ -252,6 +252,6 @@ void UserCmd::split_args_to_options_and_paths(const std::vector<std::string>& ar
 #endif
 }
 
-int UserCmd::time_out_for_load_sync_and_get() {
-    return 600;
+ClientToServerCmd::time_duration_t UserCmd::timeout_for_load_sync_and_get() {
+    return std::chrono::seconds{600};
 }
