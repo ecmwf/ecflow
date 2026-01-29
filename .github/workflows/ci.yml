@@ -27,8 +27,6 @@ jobs:
     uses: ecmwf/downstream-ci/.github/workflows/downstream-ci.yml@main
     with:
       ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
-      skip_matrix_jobs: |
-        clang@macos-13-arm
       codecov_upload: true
       clang_format: true
       clang_format_ignore: |

@@ -37,8 +37,7 @@ gnu-14.2.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.12.9-01/lib64/libpython3.12.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.12.9-01/lib64
     ctest_options:
-      # disable s_http* tests
-      - -L nightly -E '(s_http)'
+      - -L nightly
 
 gnu-12.2.0:
   build:
@@ -64,8 +63,7 @@ gnu-12.2.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so 
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
     ctest_options:
-      # disable s_http* tests
-      - -L nightly -E '(s_http)'
+      - -L nightly
 
 gnu-8.5.0:
   build:
@@ -91,8 +89,7 @@ gnu-8.5.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so 
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.11.8-01/lib64
     ctest_options:
-      # disable s_http* tests
-      - -L nightly -E '(s_http)'
+      - -L nightly
 
 intel-2025.0.1:
   build:
@@ -119,8 +116,7 @@ intel-2025.0.1:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.12.9-01/lib64/libpython3.12.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.12.9-01/lib64
     ctest_options:
-      # disable s_http* tests
-      - -L nightly -E '(s_http)'
+      - -L nightly
 
 intel-2021.4.0:
   build:
