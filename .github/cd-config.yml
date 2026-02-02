@@ -77,7 +77,7 @@ builds:
             - qt/5.12.0
             - cmake/new
             - ecbuild/new
-          cmake_options: >-
+          cmake_options:
             <<: *common_cmake_options
             ENABLE_UI: OFF
             Boost_ROOT: /usr/local/apps/boost/1.75.0/GNU/8.5
