@@ -54,7 +54,6 @@ builds:
             Python3_LIBRARIES: /usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so
             Python3_LIBRARY_DIRS: /usr/local/apps/python3/3.11.8-01/lib64
             ENABLE_UI: OFF
-
           install_command: |
             chmod u+w $INSTALL_PREFIX/lib
             cmake --install . --component python
