@@ -74,16 +74,57 @@ public:
 private:
     void update_change_no();
 
+    ///
+    /// @brief Create a message describing the current contents of the Limit
+    ///
+    /// @return The description of the Limit
+    ///
+    std::string dump() const;
+
 public:
     void write(std::string&) const;
 
 private:
+    ///
+    /// @bried The name of the Limit
+    ///
     std::string n_;
-    Node* node_{nullptr};             // The parent NOT persisted
-    unsigned int state_change_no_{0}; // *not* persisted, only used on server side
+
+    ///
+    /// @brief The parent Node
+    ///
+    /// @note The parent Node is not persisted (i.e. not re/stored in the definition file)
+    ///
+    Node* node_{nullptr};
+
+    ///
+    /// @brief The state_change_no indicates the amount of changes that have occurred to this Limit
+    ///
+    /// The state_change_no is used to determine if the Limit has changed since last checked.
+    ///
+    /// @note The state_change_no is not persisted (i.e. not re/stored in the definition file)
+    /// @note The state_change_no is only used on the server-side
+    ///
+    unsigned int state_change_no_{0};
+
+    ///
+    /// @brief The _maximum_ value of the Limit (effectively the "limit" of allowed 'resources')
+    ///
     int lim_{0};
+
+    ///
+    /// @brief The _current_ value of the Limit (effectively the "value" of current allowed 'resources')
+    ///
+    /// @note This value must always be less than or equal to the _maximum_ value of the Limit
+    ///
     int value_{0};
-    std::set<std::string> paths_; // Updated via increment()/decrement()/reset(). Typically task paths
+
+    ///
+    /// @brief The paths (typically task paths) currently allowed by this Limit
+    ///
+    /// @ note This value is updated by increment()/decrement()/reset()
+    ///
+    std::set<std::string> paths_;
 
     friend class cereal::access;
     template <class Archive>
