@@ -736,6 +736,31 @@ def test_client_check(ci):
     assert len(server_check) > 0, "Expected defs to fail, since no externs in server "
 
 
+def test_client_using_partial(ci):
+    print_test(ci, "test_client_using_partial")
+    ci.delete_all()
+
+    defs = Defs()
+    defs.add_partial("/partial/f1")
+    suite = defs.add_suite("partial")
+    family_f1 = suite.add_family("f1")
+    family_f1.add_task("t1")
+    family_f1.add_task("t2")
+    family_f1.add_task("t3")
+    family_f2 = suite.add_family("f2")
+    family_f2.add_task("t1")
+    family_f2.add_task("t2")
+    family_f2.add_task("t3")
+
+    # Cannot replace outside of partial scope
+    try:
+        ci.replace("/partial", defs)
+        assert False, "Expected replace to fail, since replacing outside of partial scope"
+    except RuntimeError as e:
+        print("Expected exception: ", str(e))
+        assert False
+
+
 def test_client_suites(ci, protocol):
     print_test(ci, "test_client_suites")
     ci.delete_all()
@@ -2277,6 +2302,8 @@ def do_tests(ci, protocol):
 
     test_client_check(ci)
     test_client_check_defstatus(ci, protocol)
+
+    test_client_using_partial(ci)
 
     test_client_stats(ci)
     test_client_stats_with_stdout(ci)

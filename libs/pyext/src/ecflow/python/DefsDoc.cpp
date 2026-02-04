@@ -418,6 +418,26 @@ const char* DefsDoc::add_extern_doc() {
            "  defs.auto_add_externs(True)   # remove existing extern first.\n";
 }
 
+const char* DefsDoc::add_partial_doc() {
+    return "`partial`_ refers to a node that is partially defined, from a larger set nodes (e.g. when the user is\n"
+           "interested in updating a particular family, and defines only that family to allow replacing it on the\n"
+           "server.\n"
+           "\n"
+           "This can be used to avoid mistakenly replacing and losing unintented nodes, as (if any 'partial' \n"
+           "attribute is declared) the client will not allow replacing a node that is not included in the 'partial'\n"
+           "part of the Node tree.\n"
+           "\n"
+           "Manual Method:\n\n"
+           ".. code-block:: python\n\n"
+           "  void add_partial(string nodePath )\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "  defs = Defs('file.def')\n"
+           "  ....\n"
+           "  defs.add_partial('/suite/particular/node')\n"
+           "\n";
+}
+
 const char* DefsDoc::node_doc() {
     return "A Node class is the abstract base class for Suite, Family and Task\n\n"
            "Every Node instance has a name, and a path relative to a suite";

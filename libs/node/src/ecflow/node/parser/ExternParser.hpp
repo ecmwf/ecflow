@@ -36,4 +36,12 @@ public:
     const char* keyword() const override { return "extern"; }
 };
 
+class PartialParser : public Parser {
+public:
+    explicit PartialParser(DefsStructureParser* p)
+        : Parser(p) {}
+    bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
+    const char* keyword() const override { return "partial"; }
+};
+
 #endif /* ecflow_node_parser_ExternParser_HPP */

@@ -15,7 +15,6 @@
 #include "ecflow/node/Defs.hpp"
 
 bool ExternParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
-    // cout << "line = " << line << "\n";
     if (lineTokens.size() < 2) {
         throw std::runtime_error("ExternParser::doParse Invalid extern " + line);
     }
@@ -34,8 +33,27 @@ bool ExternParser::doParse(const std::string& line, std::vector<std::string>& li
     //
     // We will not split it up:
 
-    // cout << "add extern  = '" << lineTokens[1] << "'\n";
     defsfile()->add_extern(lineTokens[1]);
+
+    return true;
+}
+
+bool PartialParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
+    if (lineTokens.size() < 2) {
+        throw std::runtime_error("PartialParser::doParse Invalid partial " + line);
+    }
+
+    // Guard against
+    // partial   # empty partial with a comment
+    // partial   #empty partial with a comment
+    if (lineTokens[1][0] == '#') {
+        throw std::runtime_error("PartialParser::doParse Invalid partial paths." + line);
+    }
+
+    // Expecting:
+    //   partial <path>
+
+    defsfile()->add_partial(lineTokens[1]);
 
     return true;
 }

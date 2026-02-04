@@ -2178,6 +2178,16 @@ struct Writer<Defs, Stream>
             }
         }
 
+        // Write partials
+        if (ctx.style.is_not_one_of<PrintStyle::MIGRATE, PrintStyle::NET>()) {
+            // We do NOT persist the partials in these cases (+matches boost serialisation)
+            for (const auto& p : item.partials()) {
+                output << "partial ";
+                output << p;
+                output << "\n";
+            }
+        }
+
         // Write the children (i.e. suites)
         for (const auto& s : item.suiteVec()) {
             Writer<Suite, Stream>::write(output, *s, ctx);

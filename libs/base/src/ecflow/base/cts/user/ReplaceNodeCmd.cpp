@@ -23,6 +23,37 @@
 
 using namespace ecf;
 
+namespace {
+
+void validate_partial_replace(const std::string& pathToNode, const std::set<std::string>& partials) {
+
+    if (partials.empty()) {
+        // Nothing to do...
+        return;
+    }
+
+    auto start_with = [](const std::string& suffix, const std::string& value) {
+        return suffix.compare(0, value.size(), value) == 0;
+    };
+
+    bool accepted = false;
+    for (auto& partial : partials) {
+        if (start_with(pathToNode, partial)) {
+            accepted = true;
+            break;
+        }
+    }
+
+    if (!accepted) {
+        std::stringstream ss;
+        ss << "ReplaceNodeCmd::ReplaceNodeCmd: The client definition file contains 'partial' declarations,"
+              "but replace is requested outside of the partial definition.";
+        throw std::runtime_error(ss.str());
+    }
+}
+
+} // namespace
+
 ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force)
     : createNodesAsNeeded_(createNodesAsNeeded),
       force_(force),
@@ -46,6 +77,8 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
         ss << ", does not exist in the client definition ";
         throw std::runtime_error(ss.str());
     }
+
+    validate_partial_replace(pathToNode_, client_defs->partials());
 
     client_defs->write_to_string(clientDefs_, PrintStyle::NET);
 
@@ -85,6 +118,8 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
         ss << ", does not exist in the client definition " << path_to_defs;
         throw std::runtime_error(ss.str());
     }
+
+    validate_partial_replace(pathToNode_, client_defs->partials());
 
     client_defs->write_to_string(clientDefs_, PrintStyle::NET);
 

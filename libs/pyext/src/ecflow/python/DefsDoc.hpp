@@ -40,6 +40,7 @@ public:
     static const char* family_doc();
     static const char* add_suite_doc();
     static const char* add_extern_doc();
+    static const char* add_partial_doc();
     static const char* add_family_doc();
     static const char* add_task_doc();
     static const char* suite_doc();

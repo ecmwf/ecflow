@@ -321,6 +321,7 @@ void export_Defs() {
         .def("add_suite", &Defs::add_suite, GlossaryDoc::list())
         .def("add_extern", &Defs::add_extern, DefsDoc::add_extern_doc())
         .def("auto_add_externs", &Defs::auto_add_externs, DefsDoc::add_extern_doc())
+        .def("add_partial", &Defs::add_partial, DefsDoc::add_partial_doc())
         .def("add_variable", &add_variable, DefsDoc::add_variable_doc())
         .def("add_variable", &add_variable_int)
         .def("add_variable", &add_variable_var)

@@ -162,6 +162,8 @@ public:
     void add_extern(const std::string& nodePath);
     void clear_externs() { externs_.clear(); }
 
+    void add_partial(const std::string& nodePath);
+
     /// Scan the trigger and complete expressions, and automatically add extern's
     /// i.e where the node paths, and references, to event, meters, edit and repeat variables,
     /// don't exist, in this defs.
@@ -237,6 +239,7 @@ public:
     node_ptr find_closest_matching_node(const std::string& pathToNode) const;
 
     const std::set<std::string>& externs() const { return externs_; }
+    const std::set<std::string>& partials() const { return partials_; }
 
     /// Access the server state (i.e., State, Variables, etc.)
     ServerState& server_state() { return server_; }
@@ -465,6 +468,7 @@ private:
     /// Externs are *NEVER* loaded in the server, since they can be computed and
     /// save on network band with, and check point file size.
     std::set<std::string> externs_; // NOT persisted
+    std::set<std::string> partials_;
 
     friend class SaveEditHistoryWhenCheckPointing;
 

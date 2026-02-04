@@ -563,8 +563,13 @@ void Defs::add_extern(const std::string& ex) {
         throw std::runtime_error("Defs::add_extern: Cannot add empty extern");
     }
     externs_.insert(ex);
-    // auto result = externs_.insert(ex);
-    // cout << "Defs::add_extern " << ex << " result " << result.second << "\n";
+}
+
+void Defs::add_partial(const std::string& pt) {
+    if (pt.empty()) {
+        throw std::runtime_error("Defs::add_partial: Cannot add empty partial");
+    }
+    partials_.insert(pt);
 }
 
 void Defs::auto_add_externs(bool remove_existing_externs_first) {
