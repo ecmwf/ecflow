@@ -511,6 +511,15 @@ Glossary
       - it is a default directory where ecFlow server looks for include files; overridden by :term:`ECF_INCLUDE` user defined variable. See the "directives" entry for more detail.
       - it is used as a default prefix portion of the job output path (the :term:`ECF_JOBOUT` generated variable); overridden by **ECF_OUT** user defined variable. See descriptions of :term:`ECF_JOBOUT` and :term:`ECF_OUT` variables for more detail.
 
+   ECF_HOSTFILE
+      ECF_HOSTFILE is an environment variable, used by the :term:`ecflow_client`, and specifies the path to a file containing
+      alternative hosts to contact when the primary host is not responding.
+
+      .. important::
+
+         This configuration is, by default, only applicable to :term:`child commands <child command>`.
+         But the behaviour can be customised by setting the environment variable ECF_HOSTFILE_POLICY.
+
    ECF_INCLUDE
       This is a user defined variable. It is used to specify directory locations, that are used to search for include files.
 
@@ -743,6 +752,20 @@ Glossary
          ecflow_client --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat
          ecflow_client --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file" 
 
+   ECF_TIMEOUT
+      ECF_TIMEOUT is an environment variable, used by the :term:`ecflow_client`, and specifies how much time
+      (measured in seconds) a *child command* will continue to try contacting the server(s) before giving up.
+
+      .. important::
+
+         This timeout is only applicable to :term:`child commands <child command>`.
+
+      When ECF_TIMEOUT is not set, the client uses the default value of 24 hours (24 * 60 * 60 seconds).
+      The minimum value allowed is 60 seconds, while the maximum value is 24 hours.
+      If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+      When the client is unable to contact the server within the timeout period, it will exit with an error code.
+
    ECF_TRIES
       This is generated variable added at the server level with a default value of 2.  It can be overridden by the user and controls the number of times job should re-run should it abort. Provided:
 
@@ -777,7 +800,26 @@ Glossary
       It is re-set back to 1 after a re-queue.
       It is used in output and :term:`job file` numbering. 
       (i.e It avoids overwriting the :term:`job file` output during multiple re-runs)
-      
+
+   ECF_ZOMBIE_TIMEOUT
+      ECF_ZOMBIE_TIMEOUT is an environment variable used by the :term:`ecflow_client`, and that specifies how much time
+      (measured in seconds) a *zombie* child command will continue to try contacting the server(s) before giving up.
+
+      .. important::
+
+         This timeout is only applicable to :term:`child commands <child command>`.
+
+      A child command knows that the related :term:`task` has been deemed a :term:`zombie`, because the reply from
+      the server includes a *zombie* flag. When the client receives this flag, it will used ECF_ZOMBIE_TIMEOUT (instead of ECF_TIMEOUT).
+
+      The ECF_ZOMBIE_TIMEOUT, in combination with the attempt to contact all hosts in ECF_HOSTFILE, allows a :term:`zombie`
+      task from being adopted by another server. This can be particularly useful in cases where the server has been restarted,
+      and the client is trying to contact an old server.
+
+      When ECF_ZOMBIE_TIMEOUT is not set, the client uses the default value of 12 hours (12 * 60 * 60 seconds).
+      The minimum value allowed is 60 seconds, while the maximum value is 12 hours.
+      If a value outside this range is specified, it will be adjusted to the nearest limit.
+
    ecFlow
       Is the ECMWF work flow manager.
       
@@ -905,7 +947,7 @@ Glossary
 
              .. code-block:: shell
 
-               export ECF_TIMEOUT=36024*3600
+               export ECF_TIMEOUT=3600 # wait for maximum of 1 hour
 
          * - ECF_CONNECT_TIMEOUT
            - Maximum time (in seconds) for the client to establish connection
