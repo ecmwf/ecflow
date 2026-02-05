@@ -15,7 +15,6 @@
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool CalendarParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     if (lineTokens.size() < 2) {

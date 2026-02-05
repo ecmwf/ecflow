@@ -19,7 +19,8 @@
 #include "VAttributeType.hpp"
 #include "VGenVarAttr.hpp"
 
-VariableEditorWidget::VariableEditorWidget(QWidget* parent) : QWidget(parent) {
+VariableEditorWidget::VariableEditorWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     QLayoutItem* item = nullptr;

@@ -31,7 +31,7 @@ Client::Client(boost::asio::io_context& io,
                Cmd_ptr cmd_ptr,
                const std::string& host,
                const std::string& port,
-               int timeout)
+               time_duration_t timeout)
     : stopped_(false),
       host_(host),
       port_(port),
@@ -47,7 +47,7 @@ Client::Client(boost::asio::io_context& io,
     // When the timeout is not set it is obtained from the command.
     // The timeout is defined per command -- this allows, for example, loading the definition to have a longer timeout
     // than ping.
-    if (0 == timeout_) {
+    if (time_duration_t{0} == timeout_) {
         timeout_ = cmd_ptr->timeout();
     }
 
@@ -103,7 +103,7 @@ bool Client::start_connect(endpoints_iterator_t endpoints_iterator) {
         // will soon be executed. If it returns 1 then the wait handler was successfully cancelled.
 
         // Set a deadline for the connect operation.
-        deadline_.expires_after(std::chrono::seconds(timeout_));
+        deadline_.expires_after(timeout_);
 
         auto endpoint = endpoints_iterator->endpoint();
         connection_.socket_ll().async_connect(endpoint,
@@ -190,7 +190,7 @@ void Client::start_write() {
     // executed. If it returns 1 then the wait handler was successfully cancelled.
 
     // Set a deadline for the write operation.
-    deadline_.expires_after(std::chrono::seconds(timeout_));
+    deadline_.expires_after(timeout_);
 
     connection_.async_write(outbound_request_,
                             [this](const boost::system::error_code& error) { this->handle_write(error); });
@@ -235,7 +235,7 @@ void Client::start_read() {
     // executed. If it returns 1 then the wait handler was successfully cancelled.
 
     // Set a deadline for the read operation.
-    deadline_.expires_after(std::chrono::seconds(timeout_));
+    deadline_.expires_after(timeout_);
 
     connection_.async_read(inbound_response_,
                            [this](const boost::system::error_code& error) { this->handle_read(error); });
@@ -350,7 +350,7 @@ void Client::check_deadline() {
         stop();
 
         std::stringstream ss;
-        ss << "Client::check_deadline: timed out after " << timeout_ << " seconds for request( " << outbound_request_
+        ss << "Client::check_deadline: timed out after " << timeout_.count() << "ms for request( " << outbound_request_
            << " ) on " << host_ << ":" << port_;
         throw std::runtime_error(ss.str());
     }

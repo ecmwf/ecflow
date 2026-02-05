@@ -22,11 +22,11 @@
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
         fs::remove_all(ecf_home);
     }
     catch (const fs::filesystem_error& e) {
-        cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
+        std::cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
     }
 }
 
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
         fs::remove_all(ecf_home);
     }
     catch (const fs::filesystem_error& e) {
-        cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
+        std::cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
     }
 }
 

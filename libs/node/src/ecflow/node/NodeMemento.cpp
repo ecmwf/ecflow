@@ -13,7 +13,6 @@
 #include "ecflow/node/MiscAttrs.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_MEMENTO 1
 

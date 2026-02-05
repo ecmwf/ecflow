@@ -22,9 +22,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 //=======================================================================================
 
@@ -138,10 +135,11 @@ const char* FreeDepCmd::desc() {
 }
 
 void FreeDepCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(FreeDepCmd::arg(), po::value<vector<string>>()->multitoken(), FreeDepCmd::desc());
+    desc.add_options()(
+        FreeDepCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), FreeDepCmd::desc());
 }
 void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(FreeDepCmd::arg(), args);

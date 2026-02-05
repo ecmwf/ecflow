@@ -23,7 +23,8 @@
 //
 //========================================================
 
-OverviewItemWidget::OverviewItemWidget(QWidget* parent) : CodeItemWidget(parent) {
+OverviewItemWidget::OverviewItemWidget(QWidget* parent)
+    : CodeItemWidget(parent) {
     fileLabel_->hide();
     externalTb_->hide();
     copyPathTb_->hide();

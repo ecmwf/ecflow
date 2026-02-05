@@ -33,8 +33,6 @@
     #include <iostream>
 #endif
 
-using namespace std;
-
 namespace ecf {
 
 // ===========================================================================

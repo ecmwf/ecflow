@@ -12,7 +12,6 @@
 
 #include "ecflow/core/File.hpp"
 
-using namespace std;
 using namespace ecf;
 
 std::string findTestDataLocation(const std::string& defsFile) {

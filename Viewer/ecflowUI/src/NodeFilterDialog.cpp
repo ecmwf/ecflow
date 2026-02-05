@@ -17,7 +17,8 @@
 #include "SessionHandler.hpp"
 #include "VConfig.hpp"
 
-NodeFilterDialog::NodeFilterDialog(QWidget* parent) : QDialog(parent) {
+NodeFilterDialog::NodeFilterDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 
     // setAttribute(Qt::WA_DeleteOnClose);

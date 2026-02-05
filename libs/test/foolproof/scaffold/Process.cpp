@@ -163,10 +163,12 @@ struct Process::Impl
     #error "Unsupported boost::process version"
 #endif
 
-Process::Process() : impl_{nullptr} {
+Process::Process()
+    : impl_{nullptr} {
 }
 
-Process::Process(Process&& rhs) : impl_{std::move(rhs.impl_)} {
+Process::Process(Process&& rhs)
+    : impl_{std::move(rhs.impl_)} {
     rhs.impl_ = nullptr;
 }
 

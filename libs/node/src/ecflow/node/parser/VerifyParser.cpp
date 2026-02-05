@@ -19,7 +19,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool VerifyParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // expect:

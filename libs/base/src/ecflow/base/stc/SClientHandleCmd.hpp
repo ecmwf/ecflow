@@ -15,8 +15,10 @@
 
 class SClientHandleCmd final : public ServerToClientCmd {
 public:
-    explicit SClientHandleCmd(int handle) : handle_(handle) {}
-    SClientHandleCmd() : ServerToClientCmd() {}
+    explicit SClientHandleCmd(int handle)
+        : handle_(handle) {}
+    SClientHandleCmd()
+        : ServerToClientCmd() {}
 
     void init(int handle) { handle_ = handle; }
     std::string print() const override;

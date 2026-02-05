@@ -12,7 +12,8 @@
 
 #include "ui_PlainTextWidget.h"
 
-PlainTextWidget::PlainTextWidget(QWidget* /*parent*/) : ui_(new Ui::PlainTextWidget) {
+PlainTextWidget::PlainTextWidget(QWidget* /*parent*/)
+    : ui_(new Ui::PlainTextWidget) {
     ui_->setupUi(this);
 
     ui_->titleLabel->setProperty("fileInfo", "1");

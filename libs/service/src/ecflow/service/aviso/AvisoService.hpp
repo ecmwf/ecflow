@@ -56,7 +56,9 @@ public:
 
     struct Entry
     {
-        explicit Entry(const listener_t& listener) : auth_token{}, listener_{listener} {}
+        explicit Entry(const listener_t& listener)
+            : auth_token{},
+              listener_{listener} {}
 
         const listener_t& listener() const { return listener_; }
         listener_t& listener() { return listener_; }

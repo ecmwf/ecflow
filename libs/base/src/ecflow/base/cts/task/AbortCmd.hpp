@@ -20,7 +20,8 @@ public:
              const std::string& process_or_remote_id,
              int try_no                = 1,
              const std::string& reason = "");
-    AbortCmd() : TaskCmd() {}
+    AbortCmd()
+        : TaskCmd() {}
 
     const std::string& reason() const { return reason_; }
 

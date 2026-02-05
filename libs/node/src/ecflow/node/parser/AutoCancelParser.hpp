@@ -15,7 +15,8 @@
 
 class AutoCancelParser : public Parser {
 public:
-    explicit AutoCancelParser(DefsStructureParser* p) : Parser(p) {}
+    explicit AutoCancelParser(DefsStructureParser* p)
+        : Parser(p) {}
     const char* keyword() const override { return "autocancel"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };

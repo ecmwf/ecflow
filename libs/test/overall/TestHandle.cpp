@@ -28,7 +28,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 ///
@@ -192,7 +191,8 @@ BOOST_AUTO_TEST_CASE(test_handle) {
                             "Expected to have no registered suites");
     }
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_handle_sync) {
@@ -331,7 +331,8 @@ BOOST_AUTO_TEST_CASE(test_handle_sync) {
                             "Expected to have no registered suites");
     }
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
@@ -416,7 +417,8 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
                             "Expected to have no registered suites");
     }
 
-    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+    std::cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount()
+              << ")\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

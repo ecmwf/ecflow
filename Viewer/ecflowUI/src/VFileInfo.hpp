@@ -17,7 +17,8 @@
 
 class VFileInfo : public QFileInfo {
 public:
-    explicit VFileInfo(const QString& file) : QFileInfo(file) {}
+    explicit VFileInfo(const QString& file)
+        : QFileInfo(file) {}
 
     QString formatSize() const;
     QString formatModDate() const;

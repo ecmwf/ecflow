@@ -27,7 +27,11 @@ VTask::VTask(Type t, VTaskObserver* obs)
     reply_ = new VReply();
 }
 
-VTask::VTask(Type t, VNode* node, VTaskObserver* obs) : type_(t), status_(NOSTATUS), node_(node), reply_(nullptr) {
+VTask::VTask(Type t, VNode* node, VTaskObserver* obs)
+    : type_(t),
+      status_(NOSTATUS),
+      node_(node),
+      reply_(nullptr) {
     if (node_) {
         targetPath_ = node_->absNodePath();
     }

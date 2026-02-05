@@ -27,7 +27,8 @@
 #include "VProperty.hpp"
 #include "ViewerUtil.hpp"
 
-PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent) {
+PropertyEditor::PropertyEditor(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     headerWidget_->setProperty("editorHeader", "1");

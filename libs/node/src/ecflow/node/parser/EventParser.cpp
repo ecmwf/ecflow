@@ -17,7 +17,6 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-using namespace std;
 using namespace ecf;
 
 bool EventParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
@@ -37,7 +36,7 @@ bool EventParser::doParse(const std::string& line, std::vector<std::string>& lin
     // use std::numeric_limits<int>::max()
     // THIS HAS TO BE THE SAME AS THE Event() constructor
     // ================================================================
-    string name;
+    std::string name;
     bool initial_value = false;
     int number         = std::numeric_limits<int>::max();
 

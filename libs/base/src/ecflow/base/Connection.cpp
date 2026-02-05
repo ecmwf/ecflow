@@ -21,7 +21,8 @@ connection::~connection() {
 #endif
 }
 
-connection::connection(boost::asio::io_context& io) : socket_(io) {
+connection::connection(boost::asio::io_context& io)
+    : socket_(io) {
 #ifdef DEBUG_CONNECTION
     auto location = Ecf::server() ? "SERVER" : "CLIENT";
     std::cout << location << ": Connection::connection\n";

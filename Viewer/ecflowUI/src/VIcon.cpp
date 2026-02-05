@@ -45,103 +45,120 @@ std::vector<std::string> VIcon::lastNames_;
 
 class VWaitIcon : public VIcon {
 public:
-    explicit VWaitIcon(const std::string& name) : VIcon(name) {}
+    explicit VWaitIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VRerunIcon : public VIcon {
 public:
-    explicit VRerunIcon(const std::string& name) : VIcon(name) {}
+    explicit VRerunIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VNodeLogIcon : public VIcon {
 public:
-    explicit VNodeLogIcon(const std::string& name) : VIcon(name) {}
+    explicit VNodeLogIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VCompleteIcon : public VIcon {
 public:
-    explicit VCompleteIcon(const std::string& name) : VIcon(name) {}
+    explicit VCompleteIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VTimeIcon : public VIcon {
 public:
-    explicit VTimeIcon(const std::string& name) : VIcon(name) {}
+    explicit VTimeIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VTimeFreeIcon : public VIcon {
 public:
-    explicit VTimeFreeIcon(const std::string& name) : VIcon(name) {}
+    explicit VTimeFreeIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VDateIcon : public VIcon {
 public:
-    explicit VDateIcon(const std::string& name) : VIcon(name) {}
+    explicit VDateIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VZombieIcon : public VIcon {
 public:
-    explicit VZombieIcon(const std::string& name) : VIcon(name) {}
+    explicit VZombieIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VLateIcon : public VIcon {
 public:
-    explicit VLateIcon(const std::string& name) : VIcon(name) {}
+    explicit VLateIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VSlowIcon : public VIcon {
 public:
-    explicit VSlowIcon(const std::string& name) : VIcon(name) {}
+    explicit VSlowIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VKilledIcon : public VIcon {
 public:
-    explicit VKilledIcon(const std::string& name) : VIcon(name) {}
+    explicit VKilledIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VArchivedIcon : public VIcon {
 public:
-    explicit VArchivedIcon(const std::string& name) : VIcon(name) {}
+    explicit VArchivedIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VRestoredIcon : public VIcon {
 public:
-    explicit VRestoredIcon(const std::string& name) : VIcon(name) {}
+    explicit VRestoredIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VSlowJobCreationIcon : public VIcon {
 public:
-    explicit VSlowJobCreationIcon(const std::string& name) : VIcon(name) {}
+    explicit VSlowJobCreationIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VNoLogIcon : public VIcon {
 public:
-    explicit VNoLogIcon(const std::string& name) : VIcon(name) {}
+    explicit VNoLogIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VCheckpointErrorIcon : public VIcon {
 public:
-    explicit VCheckpointErrorIcon(const std::string& name) : VIcon(name) {}
+    explicit VCheckpointErrorIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
 class VRemoteErrorIcon : public VIcon {
 public:
-    explicit VRemoteErrorIcon(const std::string& name) : VIcon(name) {}
+    explicit VRemoteErrorIcon(const std::string& name)
+        : VIcon(name) {}
     bool show(VNode*) override;
 };
 
@@ -176,7 +193,9 @@ static VRemoteErrorIcon remoteErrorIcon("remote_err");
 //
 //==========================================================
 
-VIcon::VIcon(const std::string& name) : VParam(name), pixId_(-1) {
+VIcon::VIcon(const std::string& name)
+    : VParam(name),
+      pixId_(-1) {
     items_[name] = this;
     itemsVec_.push_back(this);
 }

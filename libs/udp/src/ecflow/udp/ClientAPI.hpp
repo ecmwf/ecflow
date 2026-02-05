@@ -22,8 +22,10 @@ namespace ecf {
 
 struct ClientAPIException : public std::runtime_error
 {
-    explicit ClientAPIException(const char* msg) : std::runtime_error(msg) {}
-    explicit ClientAPIException(const std::string& msg) : std::runtime_error(msg) {}
+    explicit ClientAPIException(const char* msg)
+        : std::runtime_error(msg) {}
+    explicit ClientAPIException(const std::string& msg)
+        : std::runtime_error(msg) {}
 };
 
 /**

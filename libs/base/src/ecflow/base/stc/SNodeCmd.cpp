@@ -19,9 +19,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
-using namespace std;
-using namespace boost;
-
 //=====================================================================================
 // This command returns the requested node back to the client
 // Note: In the case where defs has not been loaded, it can be NULL
@@ -111,7 +108,7 @@ bool SNodeCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd
             std::cout << ecf::as_string(*suite, style) << "\n";
             return true;
         }
-        cout << ecf::as_string(node, style) << "\n";
+        std::cout << ecf::as_string(node, style) << "\n";
     }
     else {
         server_reply.set_client_node(node);

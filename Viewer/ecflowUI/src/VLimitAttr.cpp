@@ -19,7 +19,8 @@
 // VLimitAttrType
 //================================
 
-VLimitAttrType::VLimitAttrType() : VAttributeType("limit") {
+VLimitAttrType::VLimitAttrType()
+    : VAttributeType("limit") {
     dataCount_                      = 4;
     searchKeyToData_["limit_name"]  = NameIndex;
     searchKeyToData_["limit_value"] = ValueIndex;
@@ -57,7 +58,8 @@ void VLimitAttrType::encode(limit_ptr lim, QStringList& data) const {
 //
 //=====================================================
 
-VLimitAttr::VLimitAttr(VNode* parent, limit_ptr /*lim*/, int index) : VAttribute(parent, index) {
+VLimitAttr::VLimitAttr(VNode* parent, limit_ptr /*lim*/, int index)
+    : VAttribute(parent, index) {
     // name_=lim->name();
 }
 

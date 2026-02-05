@@ -21,7 +21,8 @@
 
 class MockServerInvoker {
 public:
-    explicit MockServerInvoker(const std::string& commandline) : env_(CommandLine(commandline)) {}
+    explicit MockServerInvoker(const std::string& commandline)
+        : env_(CommandLine(commandline)) {}
 
     const ServerEnvironment& environment() const { return env_; };
 

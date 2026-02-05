@@ -57,10 +57,12 @@ std::string VSettingsPath::join(const std::string& sep) const {
 //
 //======================================================
 
-VSettings::VSettings(const std::string& file) : file_(file) {
+VSettings::VSettings(const std::string& file)
+    : file_(file) {
 }
 
-VSettings::VSettings(boost::property_tree::ptree pt) : pt_(pt) {
+VSettings::VSettings(boost::property_tree::ptree pt)
+    : pt_(pt) {
 }
 
 void VSettings::clear() {

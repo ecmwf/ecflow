@@ -252,7 +252,9 @@ void VParamFilterMenu::checkActionState() {
 //
 //===========================================
 
-ServerFilterMenu::ServerFilterMenu(QMenu* parent) : menu_(parent), filter_(nullptr) {
+ServerFilterMenu::ServerFilterMenu(QMenu* parent)
+    : menu_(parent),
+      filter_(nullptr) {
     loadFont_.setBold(true);
 
     allMenu_ = new QMenu("All servers", menu_);

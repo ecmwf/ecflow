@@ -38,7 +38,9 @@ static int idCnt = 0;
 //
 //===========================================
 
-IconItem::IconItem(QString path) : path_(path), id_(idCnt++) {
+IconItem::IconItem(QString path)
+    : path_(path),
+      id_(idCnt++) {
 }
 
 QPixmap IconItem::pixmap(int size) {
@@ -94,7 +96,8 @@ QPixmap IconItem::unknown(int size) {
     return unknownIcon.pixmap(size);
 }
 
-UnknownIconItem::UnknownIconItem(QString path) : IconItem(path) {
+UnknownIconItem::UnknownIconItem(QString path)
+    : IconItem(path) {
 }
 
 QPixmap UnknownIconItem::unknown(int /*size*/) {

@@ -26,7 +26,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
 
 void Node::replace_variables(const std::vector<Variable>& vars) {
     state_change_no_ = Ecf::incr_state_change_no();

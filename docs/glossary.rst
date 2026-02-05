@@ -511,6 +511,15 @@ Glossary
       - it is a default directory where ecFlow server looks for include files; overridden by :term:`ECF_INCLUDE` user defined variable. See the "directives" entry for more detail.
       - it is used as a default prefix portion of the job output path (the :term:`ECF_JOBOUT` generated variable); overridden by **ECF_OUT** user defined variable. See descriptions of :term:`ECF_JOBOUT` and :term:`ECF_OUT` variables for more detail.
 
+   ECF_HOSTFILE
+      ECF_HOSTFILE is an environment variable, used by the :term:`ecflow_client`, and specifies the path to a file containing
+      alternative hosts to contact when the primary host is not responding.
+
+      .. important::
+
+         This configuration is, by default, only applicable to :term:`child commands <child command>`.
+         But the behaviour can be customised by setting the environment variable ECF_HOSTFILE_POLICY.
+
    ECF_INCLUDE
       This is a user defined variable. It is used to specify directory locations, that are used to search for include files.
 
@@ -743,6 +752,20 @@ Glossary
          ecflow_client --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat
          ecflow_client --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file" 
 
+   ECF_TIMEOUT
+      ECF_TIMEOUT is an environment variable, used by the :term:`ecflow_client`, and specifies how much time
+      (measured in seconds) a *child command* will continue to try contacting the server(s) before giving up.
+
+      .. important::
+
+         This timeout is only applicable to :term:`child commands <child command>`.
+
+      When ECF_TIMEOUT is not set, the client uses the default value of 24 hours (24 * 60 * 60 seconds).
+      The minimum value allowed is 60 seconds, while the maximum value is 24 hours.
+      If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+      When the client is unable to contact the server within the timeout period, it will exit with an error code.
+
    ECF_TRIES
       This is generated variable added at the server level with a default value of 2.  It can be overridden by the user and controls the number of times job should re-run should it abort. Provided:
 
@@ -777,7 +800,26 @@ Glossary
       It is re-set back to 1 after a re-queue.
       It is used in output and :term:`job file` numbering. 
       (i.e It avoids overwriting the :term:`job file` output during multiple re-runs)
-      
+
+   ECF_ZOMBIE_TIMEOUT
+      ECF_ZOMBIE_TIMEOUT is an environment variable used by the :term:`ecflow_client`, and that specifies how much time
+      (measured in seconds) a *zombie* child command will continue to try contacting the server(s) before giving up.
+
+      .. important::
+
+         This timeout is only applicable to :term:`child commands <child command>`.
+
+      A child command knows that the related :term:`task` has been deemed a :term:`zombie`, because the reply from
+      the server includes a *zombie* flag. When the client receives this flag, it will used ECF_ZOMBIE_TIMEOUT (instead of ECF_TIMEOUT).
+
+      The ECF_ZOMBIE_TIMEOUT, in combination with the attempt to contact all hosts in ECF_HOSTFILE, allows a :term:`zombie`
+      task from being adopted by another server. This can be particularly useful in cases where the server has been restarted,
+      and the client is trying to contact an old server.
+
+      When ECF_ZOMBIE_TIMEOUT is not set, the client uses the default value of 12 hours (12 * 60 * 60 seconds).
+      The minimum value allowed is 60 seconds, while the maximum value is 12 hours.
+      If a value outside this range is specified, it will be adjusted to the nearest limit.
+
    ecFlow
       Is the ECMWF work flow manager.
       
@@ -803,150 +845,269 @@ Glossary
       Since the :term:`ecf script` can call ecflow_client(i.e :term:`child command`) then typically
       some are set in an include header.
       
-      .. list-table:: Environment variables common for User and Task commands
+      .. list-table:: Environment variables used by *ecflow_client*
          :header-rows: 1
-         :widths: 10 50 10 30
+         :widths: 20 80
 
-         * - Variable Name
-           - Explanation
-           - Compulsory
-           - Example
-         * - ECF_PORT
-           - Port number of the :term:`ecflow_server`. Must match :term:`ecflow_server`
-           - Yes/No
-           - We can use:
-            
-             .. code-block:: shell
-            
-                ecflow_client --port 3141
+         * - Variable
+           - Description
 
-             as an alternative to specifying the ECF_PORT.
          * - ECF_HOST
-           - Name of the host running the :term:`ecflow_server` 
-           - Yes/No
-           - We can use:
-            
-             .. code-block:: shell 
-            
-               ecflow --host machine1
 
-             as an alternative to specifying ECF_HOST
+             (User + Child)
+           - The name of the :term:`ecflow_server` host
+
+             |
+
+             .. code-block:: shell
+
+                # Export variable
+                export ECF_HOST=machine1
+                ecflow_client <cmd>
+
+                # Or, use the command line option
+                ecflow_client --host machine1 <cmd>
+
+         * - ECF_PORT
+
+             (User + Child)
+           - The port on the :term:`ecflow_server` host
+
+             |
+
+             .. code-block:: shell
+
+                # Export variable
+                export ECF_PORT=1234
+                ecflow_client <cmd>
+
+                # Or, use the command line option
+                ecflow_client --port 3141 <cmd>
+
          * - NO_ECF
-           - If set exits ecflow_client immediately with success. This allows the scripts to be tested independent of the server
-           - No
-           - .. code-block:: shell
-            
+
+             (User + Child)
+           - Speficies if client terminates immediately with success
+             (to allow the scripts to be tested independently from the server)
+
+             |
+
+             .. code-block:: shell
+
+               # To terminate immediately
+               # with a success code
                export NO_ECF=1
 
          * - ECF_DENIED
-           - If server denies client communication and this flag is set, exit with an error. Avoids 24hr hour connection attempt to :term:`ecflow_server`.
-           - No
-           - .. code-block:: shell
-             
+
+             (User + Child)
+           - Specifies if client terminates with error when the server denies contacts,
+             in order to avoid waiting for ECF_TIMEOUT.
+
+             |
+
+             .. code-block:: shell
+
+               # To terminate immediately
+               # with an error code
+               # when server denies contact
                export ECF_DENIED=1
 
          * - ECF_SSL
-           - For secure communication between server and client -- requires build with SSL enabled.
-           - No
-           - .. code-block:: shell
-              
-               # To share a certificate amongst multiple servers
-               export ECF_SSL=1 # or empty value
-               # To use specific server certificate
-               export ECF_SSL=<any non-empty value, except '1'>
 
-             When `ECF_SSL=1`, ecflow will search for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
+             (User + Child)
+           - Enables secure communication between server and client.
+
+             |
+
+             When `ECF_SSL=1`, ecflow searches for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
              and then fallback to the server specific certificate at `$HOME/.ecflowrc/ssl/<host>.<port>.crt`.
+
+             |
+
+             Using `ECF_SSL=<value>`, where `<value>` is any non-empty value except '1',
+             allows users to specify a custom certificate path.
+
+             |
 
              Secure communication can also be activated using the :code:`ecflow_client --ssl ...` option.
              When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
 
-      .. list-table:: Environment variables for Task commands
-         :header-rows: 1
-         :widths: 10 50 10 30
+             |
 
-         * - Variable Name
-           - Explanation
-           - Compulsory
-           - Example
+             .. code-block:: shell
+              
+               # To use a shared certificate
+               # amongst multiple servers
+               export ECF_SSL=1 # or empty value
+
+               # To use a specific certificate
+               export ECF_SSL=<value>
+
          * - :term:`ECF_NAME`
-           - Path to the task
-           - Yes
-           - /suite/family/task
-         * - :term:`ECF_PASS`
-           - Jobs password. Generated by the server, will replace %ECF_PASS% in the scripts,during job generation.Used for authenticating child commands.
-           - Yes
-           - (generated)
-         * - ECF_RID
-           - Remote id. Allow easier job kill, and disambiguate a zombie
-           - Yes
-           - (generated)
-         * - :term:`ECF_TRYNO`
-           - The number of times the job has run. This is allocated by the server and used in job/output file name generation.
-           - No 
-           - (generated)
-         * - ECF_HOSTFILE
-           - File that lists alternate hosts to try, if connection to main host fails
-           - No
-           - $HOME/.echostfile
-         * - ECF_HOSTFILE_POLICY
-           - The policy, one of "task" or "all" indicates when to perform retry based on the ECF_HOSTFILE.
-             The default policy is "task", meaning that the retry will only be performed for task (i.e. commands) commands.
-             If the policy is "all", the retry will be performed for both task and user commands (including :code:`ping`).
-           - No
-           - .. code-block:: shell
 
+             (Child only)
+           - The path to the task
+
+             |
+
+             **This variable is mandatory for child commands**
+
+             |
+
+             The value is used by the server to identify the task, and is provided by the server (%ECF_NAME%) to be used in variable substitution in the script.
+
+             .. code-block:: shell
+
+                /suite/family/task
+
+         * - :term:`ECF_PASS`
+
+             (Child only)
+           - The password of the task.
+
+             |
+
+             **This variable is mandatory for child commands**
+
+             |
+
+             The value is used by the server to identify the task, and is provided by the server (%ECF_PASS%) to be used in variable substitution in the script.
+
+         * - ECF_RID
+
+             (Child only)
+           - The remote id of the task.
+
+             |
+
+             **This variable is mandatory for child commands**
+
+             |
+
+             The value is used by the server to identify the task, and is provided by the server (%ECF_RID%) to be used in variable substitution in the script.
+
+         * - :term:`ECF_TRYNO`
+
+             (Child only)
+           - The number of times the task has run.
+
+             |
+
+             This value is provided by the server (%ECF_TRYNO%) and used in job/output file name generation.
+
+         * - ECF_HOSTFILE
+
+             (User + Child)
+           - The path to the file that lists alternate hosts to try, if connection to main host fails
+
+             |
+
+             .. code-block:: shell
+
+                $HOME/.echostfile
+
+         * - ECF_HOSTFILE_POLICY
+
+             (User + Child)
+           - The policy, either "task" or "all", indicates when to perform retry based on the ECF_HOSTFILE.
+             The default policy is "task", meaning that the retry will only be performed for task (i.e. child) commands.
+             If the policy is "all", the retry will be performed for both task and user commands (including :code:`ping`).
+
+             |
+
+             .. code-block:: shell
+
+               # To apply retry policy only to task commands
+               export ECF_HOSTFILE_POLICY=task
+
+               # To apply retry policy to all commands
                export ECF_HOSTFILE_POLICY=all
 
          * - ECF_TIMEOUT
-           - Maximum time (in seconds) for the client to deliver message
-           - No
-           - default value: 24 * 60 * 60 # i.e. 24 hours
+
+             (Child only)
+           - Maximum time (in seconds) for the client to perform operations (e.g. :code:`init`, :code:`abort`, :code:`complete`) with the server before giving up.
+
+             |
+
+             This limit applies to all child commands, and user commands that have ECF_HOSTFILE_POLICY set to "all". When the client is unable to contact the server within the timeout period, it will exit with an error code.
+
+             |
+
+             The default value is 24 hours (24 * 60 * 60 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours. If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+             |
 
              .. code-block:: shell
 
-               export ECF_TIMEOUT=36024*3600
+               # To wait a maximum of 1 hour
+               export ECF_TIMEOUT=3600
 
          * - ECF_CONNECT_TIMEOUT
-           - Maximum time (in seconds) for the client to establish connection
-           - No
-           - default value: 0
+
+             (Child only)
+           - Maximum time (in seconds) for the client to establish connection with the server before giving up.
+
+             |
+
+             The default value is 0 seconds, meaning that there is no timeout for establishing connection.
+
          * - ECF_ZOMBIE_TIMEOUT
-           - Maximum time (in seconds) for the zombie Task client (performing :code:`init`, :code:`abort`, :code:`complete`, etc) to get a reply from the server.
-           - No
-           - 12*3600 (default value):
+
+             (Child only)
+           - Maximum time (in seconds) for the client to perform operations (e.g. :code:`init`, :code:`abort`, :code:`complete`) to get a reply from the server.
+
+             |
+
+             This limit applies to child commands that have been marked as zombies by the server. When the client is unable to contact the server within the timeout period, it will exit with an error code.
+
+             |
+
+             The default value is 12 hours (12 * 60 * 60 seconds). The minimum value allowed is 60 seconds, while the maximum value is 12 hours. If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+             |
 
              .. code-block:: shell
-             
-               export ECF_ZOMBIE_TIMEOUT=36024*3600
-         
-      .. list-table:: Variables specific to user commands
-         :header-rows: 1
-         :widths: 10 50 10 30
 
-         * - Variable Name
-           - Explanation
-           - Compulsory
-           - Example
+               # To wait a maximum of 1 hour
+               export ECF_ZOMBIE_TIMEOUT=3600
+
          * - :term:`ECF_PASSWD`
-           - path to the client password file, used for password based authentication
-           - No
-           - .. code-block:: shell
-  
-               export ECF_PASSWD=mymachine.3141.ecf.passwd
+
+             (User only)
+           - The path to the user password file
+
+             |
+
+             .. code-block:: shell
+
+               # Either export variable
+               export ECF_PASSWD=ecf.passwd
+               ecflow_client <comand>
+
+               # Or, use the command line option
+               ecflow_client --password <password> <comand>
 
          * - ECF_USER
-           - When user need to pose as another user, i.e. when users id on the client machine, doesn't  match his id on the remote server. Requires password file.
-           - No
-           - .. code-block:: shell
-              
-               export ECF_USER=my_user_name
 
-             To avoid setting environment variable we can use:
+             (User only)
+           - The user name to authenticate with the server.
+
+             |
+
+             When user need to pose as another user, i.e. when users id on the client machine, doesn't  match his id on the remote server. Requires password file.
+
+             |
 
              .. code-block:: shell
-                  
-                ecflow_client --user my_user_name ......
+
+                # Either export variable
+                export ECF_USER=user_name
+                ecflow_client <comand>
+
+                # Or, use the command line option
+                ecflow_client --user user_name <comand>
 
    ecflow_server
       This executable is the server. 
@@ -962,65 +1123,137 @@ Glossary
       The following environment variables control the execution of the server and may be set before the start of the server.
       ecflow_server will start happily with out any of these variables being set, since all of them have default values.
       
-      .. list-table:: 
+      .. list-table:: Environment variables used by *ecflow_server*
          :header-rows: 1
-         
-         * - Variable Name
-           - Explanation
-           - Default value
-         * - :term:`ECF_HOME`
-           - Home for all the :term:`ecFlow` files
-           - Current working directory
-         * - ECF_PORT
-           - Server port number. Must be unique
-           - 3141
-         * - ECF_LOG
-           - History or log file
-           - <host>.<port>.ecf.log
-         * - ECF_CHECK
-           - Name of the checkpoint file
-           - <host>.<port>.ecf.check
-         * - ECF_CHECKOLD
-           - Name of the backup checkpoint file
-           - <host>.<port>.ecf.check.b
-         * - ECF_CHECKINTERVAL
-           - Interval in second to save :term:`check point` file
-           - 120
-         * - ECF_LISTS
-           - White list file. Controls read/write access to the server for each user
-           - <host>.<port>.ecf.lists
-         * - ECF_TASK_THRESHOLD
-           - Report in log file all task/job that take longer than given threshold. Used to debug/instrument, those scripts that are very large.
-           - 4000 (milliseconds). Before release 4.0.6 default was 2000 ms.
-         * - :term:`ECF_PASSWD`
-           - path to server password file, used to authenticate :term:`user command`\ s. Use when ALL should be password authenticated
-           - <host>.<port>.ecf.passwd
-         * - ECF_CUSTOM_PASSWD
-           - path to server password file, used to authenticate :term:`user command`\ s. Use when a small number of users need to be password authenticated. Typically client would use:ecflow_client --user=fred ....export ECF_USER=fred; ecflow_client ...
-           - <host>.<port>.ecf.custom_passwd
-         * - ECF_PRUNE_NODE_LOG
-           - When the checkpoint point file is loaded, node log history older than 30 days is automatically pruned. The variable allows this value to be changed.Setting the variable to zero, means there will be no pruning. All history is preserved at the cost increasing server memory, and time taken to write checkpoint file.
-           - .. code-block:: shell
-            
-               export ECF_PRUNE_NODE_LOG=40
-               
-             Prune node log history older than 40 days, upon reload of :term:`check point` file.
-         * - ECF_SSL
-           - For secure communication between server and client -- requires build with SSL enabled.
-           - .. code-block:: shell
-              
-               # To share a certificate amongst multiple servers
-               export ECF_SSL=1 # or empty value
-               # To use specific server certificate
-               export ECF_SSL=<any non-empty value, except '1'>
+         :widths: 20 80
 
-             When `ECF_SSL=1`, ecflow will search for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
+         * - Variable
+           - Description
+
+         * - :term:`ECF_HOME`
+           - The home for all the :term:`ecFlow` files.
+
+             |
+
+             By default, the server will use the current working directory.
+
+         * - ECF_PORT
+           - The server port number.
+
+             |
+
+             By default, the server will use port 3141.
+
+         * - ECF_LOG
+           - The path to the log (or history) file
+
+             |
+
+             By default, the server will use the file name ``<host>.<port>.ecf.log``, in the directory where the server is running.
+
+         * - ECF_CHECK
+           - The path to the checkpoint file
+
+             |
+
+             By default, the server will use the file name ``<host>.<port>.ecf.check``, in the directory where the server is running.
+
+         * - ECF_CHECKOLD
+           - The path to the backup checkpoint file
+
+             |
+
+             By default, the server will use the file name ``<host>.<port>.ecf.check.b``, in the directory where the server is running.
+
+         * - ECF_CHECKINTERVAL
+           - The interval (in second) to save :term:`check point` file
+
+             |
+
+             By default, the server will save the checkpoint file every 120 seconds.
+
+         * - ECF_LISTS
+           - The white list file, used for authorization purposes (i.e. control read/write access).
+
+             |
+
+             By default, the server will look for a file named ``<host>.<port>.ecf.lists``, in the directory where the server is running.
+
+         * - ECF_TASK_THRESHOLD
+           - The threshold (in milliseconds) to report all task that take longer than given threshold.
+
+             |
+
+             By default, the server will report all tasks that take longer than 4000 milliseconds.
+
+             |
+
+             *Used to debug/instrument, those scripts that are very large*.
+
+         * - :term:`ECF_PASSWD`
+           - The path to server password file, used to authenticate :term:`user commands <user command>`.
+
+             |
+
+             By default, the server will look for a file named ``<host>.<port>.ecf.passwd``, in the directory where the server is running.
+
+
+         * - ECF_CUSTOM_PASSWD
+           - The path to server password file, used to authenticate :term:`user commands <user command>`.
+
+             |
+
+             By default, the server will look for a file named ``<host>.<port>.ecf.custom_passwd``, in the directory where the server is running.
+
+         * - ECF_PRUNE_NODE_LOG
+           - When the checkpoint point file is loaded, by default the node log history older than 30 days is automatically pruned.
+
+             |
+
+             The variable allows this value to be customized. Setting the variable to 0, means all history is preserved at the cost increasing server memory and time taken to write checkpoint file.
+
+             |
+
+             .. code-block:: shell
+
+                # Preserve 40 days of history
+                export ECF_PRUNE_NODE_LOG=40
+
+                # Preserve all history
+                export ECF_PRUNE_NODE_LOG=0
+
+         * - ECF_SSL
+           - Enable secure communication between server and client.
+
+             |
+
+             When `ECF_SSL=1`, ecflow searches for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
              and then fallback to the server specific certificate at `$HOME/.ecflowrc/ssl/<host>.<port>.crt`.
+
+             |
+
+             Using `ECF_SSL=<value>`, where `<value>` is any non-empty value except '1',
+             allows users to specify a custom certificate path.
+
+             |
 
              Secure communication can also be activated using the :code:`ecflow_server --ssl ...` option.
              When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
 
+             |
+
              Consider using `ecflow_start.sh -s` to start the server with SSL support.
+
+             |
+
+             .. code-block:: shell
+              
+                # To use a shared certificate
+                # amongst multiple servers
+                export ECF_SSL=1 # or empty value
+
+                # To use a specific certificate
+                export ECF_SSL=<value>
 
 
       The server can be in several states. The default when first started is :term:`halted`, See :term:`server states`
@@ -1055,20 +1288,30 @@ Glossary
       Events can be referenced in :term:`trigger` and :term:`complete expression` s.
      
    extern
-      This allows an external :term:`node` to be used in a :term:`trigger` expression. 
+      An extern declares the presence of a :term:`node` (or node attribute) so that it can
+      be included in a :term:`trigger` expression. The extern declaration informs that this
+      *object* is guaranteed, by the user, to exist in the server even if not present in the local
+      :term:`suite definition`.
+
+      The objects declared as extern are usually in another :term:`suite`; but, if the user has
+      partially defined a suite (e.g. just a specific family, to be replaced), the extern can also
+      declare a *local* object.
       
-      All :term:`node`\ s in :term:`trigger`\ s must be known to :term:`ecflow_server` by the end of the load command. 
-      No cross-suite :term:`dependencies` are allowed unless the names of tasks outside the suite are declared as external. 
-      An external :term:`trigger` reference is considered unknown if it is not defined when the :term:`trigger` is evaluated. 
-      You are strongly advised to avoid cross-suite :term:`dependencies`. 
+      All :term:`nodes <node>` in :term:`triggers <trigger>` must be known to :term:`ecflow_server`
+      by the end of the load command. No :term:`dependencies` are allowed unless the names of the
+      objects are declared as extern.
+      An extern :term:`trigger` reference is considered *unknown* if it is not defined when the
+      :term:`trigger` is evaluated. 
+
+      See :token:`extern` in grammar.
+
+      .. important::
+         The use of cross-suite :term:`dependencies` is strongly discouraged. 
       
-      Families and suites that depend on one another should be placed in a single :term:`suite`. 
-      If you think you need cross-suite dependencies, you should consider merging the suites 
-      together and have each as a top-level family in the merged suite.
-      
-      For grammar see :token:`extern`.
-      
-          
+         Suites and families that depend on each other should be placed in a single :term:`suite`.
+         Whenever cross-suite dependencies are needed, consider merging the suites together by 
+         turn each suite into a top-level family under a merging suite.
+
    family
       A family is an organisational entity that is used to provide hierarchy and grouping. 
       It consists of a collection of :term:`task`\ s and families.
@@ -1429,6 +1672,12 @@ Glossary
         local ecFlow server.
 
         Operations to execute synchronised Tasks have been disabled from the :term:`ecflow_ui`.
+
+      .. warning::
+
+        It is highly discouraged to mirror entities within the same server
+        (e.g. a suite mirrors a task from another suite living in the same server).
+        as this may lead to undesired behaviour, including deadlocks.
 
       `Only one mirror attribute is allowed per node`, and each attribute is
       defined by the following properties:

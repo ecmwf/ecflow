@@ -11,10 +11,9 @@
 #include "ecflow/node/NodeStats.hpp"
 
 #include <sstream>
-using namespace std;
 
 std::string NodeStats::print() const {
-    stringstream ss;
+    std::ostringstream ss;
     ss << "Definition statistics\n";
     ss << "Nodes               " << nodes_ << "\n";
     ss << "Suites              " << suites_ << "\n";

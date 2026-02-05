@@ -33,7 +33,9 @@ class VNodeTriggerData;
 
 class VNodeInternalState {
 public:
-    VNodeInternalState() : tryNo_(0), flag_(0) {}
+    VNodeInternalState()
+        : tryNo_(0),
+          flag_(0) {}
 
     unsigned char tryNo_;
     unsigned char flag_;
@@ -64,7 +66,9 @@ public:
 // Describes the major changes during an update
 class VServerChange {
 public:
-    VServerChange() : suiteNum_(0), attrNum_(0) {} //, totalNum_(0) {}
+    VServerChange()
+        : suiteNum_(0),
+          attrNum_(0) {} //, totalNum_(0) {}
     int suiteNum_;
     int attrNum_;
     // int totalNum_;
@@ -236,21 +240,24 @@ protected:
 
 class VSuiteNode : public VNode {
 public:
-    VSuiteNode(VNode* parent, node_ptr node) : VNode(parent, node) {}
+    VSuiteNode(VNode* parent, node_ptr node)
+        : VNode(parent, node) {}
     VSuiteNode* isSuite() const override { return const_cast<VSuiteNode*>(this); }
     const std::string& typeName() const override;
 };
 
 class VFamilyNode : public VNode {
 public:
-    VFamilyNode(VNode* parent, node_ptr node) : VNode(parent, node) {}
+    VFamilyNode(VNode* parent, node_ptr node)
+        : VNode(parent, node) {}
     VFamilyNode* isFamily() const override { return const_cast<VFamilyNode*>(this); }
     const std::string& typeName() const override;
 };
 
 class VAliasNode : public VNode {
 public:
-    VAliasNode(VNode* parent, node_ptr node) : VNode(parent, node) {}
+    VAliasNode(VNode* parent, node_ptr node)
+        : VNode(parent, node) {}
     VAliasNode* isAlias() const override { return const_cast<VAliasNode*>(this); }
     const std::string& typeName() const override;
 };

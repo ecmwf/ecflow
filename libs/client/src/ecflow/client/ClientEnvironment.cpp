@@ -34,17 +34,20 @@
     #include "ecflow/base/Openssl.hpp"
 #endif
 
-// Provide upper and lower bounds for timeouts
-/// The timeout is used control for how long we continue to iterate over the hosts
-/// attempting to connect to the servers.
+// Define upper and lower bounds for timeouts
+//
+// The timeout is determines how long the client continues to attemp to contact the server(s).
+//
 #ifdef DEBUG
-    #define MAX_TIMEOUT 120            // Max time in seconds for client to deliver message
-    #define DEFAULT_ZOMBIE_TIMEOUT 120 // Max time in seconds for client to deliver message
-    #define MIN_TIMEOUT 5              // Some reasonable value
+static constexpr long MAX_TIMEOUT            = 120; // = 2 minutes * 60 seconds
+static constexpr long DEFAULT_TIMEOUT        = MAX_TIMEOUT;
+static constexpr long DEFAULT_ZOMBIE_TIMEOUT = 120; // = 2 minutes * 60 seconds
+static constexpr long MIN_TIMEOUT            = 5;   // = 5 seconds
 #else
-    #define MAX_TIMEOUT (24 * 3600)            // We don't try forever, only 24 hours
-    #define DEFAULT_ZOMBIE_TIMEOUT (12 * 3600) // We don't try forever, only 12 hours
-    #define MIN_TIMEOUT (10 * 60)              // Some reasonable value
+static constexpr long MAX_TIMEOUT            = 86400; // = 24 hours * 60 minutes * 60 seconds
+static constexpr long DEFAULT_TIMEOUT        = MAX_TIMEOUT;
+static constexpr long DEFAULT_ZOMBIE_TIMEOUT = 43200; // = 12 hours * 60 minutes * 60 seconds
+static constexpr long MIN_TIMEOUT            = 60;
 #endif
 
 // #define DEBUG_ENVIRONMENT 1
@@ -60,7 +63,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
 
 ClientEnvironment::ClientEnvironment(bool gui)
     : AbstractClientEnv(),
-      timeout_(MAX_TIMEOUT),
+      timeout_(DEFAULT_TIMEOUT),
       zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),
       gui_(gui) {
     init();
@@ -68,7 +71,7 @@ ClientEnvironment::ClientEnvironment(bool gui)
 
 ClientEnvironment::ClientEnvironment(bool gui, const std::string& host, const std::string& port)
     : AbstractClientEnv(),
-      timeout_(MAX_TIMEOUT),
+      timeout_(DEFAULT_TIMEOUT),
       zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),
       gui_(gui) {
     init();
@@ -77,7 +80,7 @@ ClientEnvironment::ClientEnvironment(bool gui, const std::string& host, const st
 
 ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::string& host, const std::string& port)
     : AbstractClientEnv(),
-      timeout_(MAX_TIMEOUT),
+      timeout_(DEFAULT_TIMEOUT),
       zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT) {
     init();
 
@@ -223,7 +226,8 @@ std::string ClientEnvironment::toString() const {
     ss << "   " << ecf::environment::ECF_HOSTFILE_POLICY << " = " << host_file_policy_ << "\n";
     ss << "   " << ecf::environment::ECF_TIMEOUT << " = " << timeout_ << "\n";
     ss << "   " << ecf::environment::ECF_ZOMBIE_TIMEOUT << " = " << zombie_timeout_ << "\n";
-    ss << "   " << ecf::environment::ECF_CONNECT_TIMEOUT << " = " << connect_timeout_ << "\n";
+    ss << "   " << ecf::environment::ECF_CONNECT_TIMEOUT << " = "
+       << std::chrono::duration_cast<std::chrono::seconds>(connect_timeout_).count() << "\n";
     ss << "   " << ecf::environment::ECF_DENIED << " = " << denied_ << "\n";
     ss << "   " << ecf::environment::NO_ECF << " = " << no_ecf_ << "\n";
     for (const auto& i : env_) {
@@ -283,12 +287,10 @@ void ClientEnvironment::read_environment_variables() {
     ecf::environment::get(ecf::environment::ECF_USER, user_name_);
 
     ecf::environment::get(ecf::environment::ECF_TIMEOUT, timeout_);
-    timeout_ = timeout_ > MAX_TIMEOUT ? MAX_TIMEOUT : timeout_;
-    timeout_ = timeout_ < MIN_TIMEOUT ? MIN_TIMEOUT : timeout_;
+    timeout_ = std::max(std::min(timeout_, MAX_TIMEOUT), MIN_TIMEOUT);
 
     ecf::environment::get(ecf::environment::ECF_ZOMBIE_TIMEOUT, zombie_timeout_);
-    zombie_timeout_ = (zombie_timeout_ > MAX_TIMEOUT) ? MAX_TIMEOUT : zombie_timeout_;
-    zombie_timeout_ = (zombie_timeout_ < MIN_TIMEOUT) ? MIN_TIMEOUT : zombie_timeout_;
+    zombie_timeout_ = std::max(std::min(zombie_timeout_, MAX_TIMEOUT), MIN_TIMEOUT);
 
     ecf::environment::get(ecf::environment::ECF_CONNECT_TIMEOUT, connect_timeout_);
 

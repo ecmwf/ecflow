@@ -16,7 +16,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool AutoRestoreParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // autorestore /s1/f1

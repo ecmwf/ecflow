@@ -19,7 +19,8 @@ class ServerToClientResponse {
 public:
     ServerToClientResponse() = default;
 
-    explicit ServerToClientResponse(const STC_Cmd_ptr& cmd) : stc_cmd_(cmd) {}
+    explicit ServerToClientResponse(const STC_Cmd_ptr& cmd)
+        : stc_cmd_(cmd) {}
 
     ServerToClientResponse(const ServerToClientResponse&)            = delete;
     ServerToClientResponse& operator=(const ServerToClientResponse&) = delete;

@@ -24,7 +24,8 @@
 //
 //======================================
 
-TextFilterAddDialog::TextFilterAddDialog(QWidget* parent) : QDialog(parent) {
+TextFilterAddDialog::TextFilterAddDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 
     setWindowTitle(tr("Add item"));
@@ -66,7 +67,8 @@ void TextFilterAddDialog::accept() {
 //
 //======================================
 
-TextFilterEditDialog::TextFilterEditDialog(QWidget* parent) : TextFilterAddDialog(parent) {
+TextFilterEditDialog::TextFilterEditDialog(QWidget* parent)
+    : TextFilterAddDialog(parent) {
     setWindowTitle(tr("Edit item"));
 }
 
@@ -106,7 +108,8 @@ void TextFilterEditDialog::accept() {
 //
 //======================================
 
-TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget* parent) : QDialog(parent) {
+TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 
     auto* sep1 = new QAction(this);

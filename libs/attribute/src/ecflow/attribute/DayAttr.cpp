@@ -20,7 +20,6 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG_DAYS 1

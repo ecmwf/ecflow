@@ -20,8 +20,6 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 TodayAttr::TodayAttr(const std::string& str) {

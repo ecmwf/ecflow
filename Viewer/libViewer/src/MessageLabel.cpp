@@ -34,7 +34,8 @@
 //
 //===================================================
 
-MessageLabelLoadWidget::MessageLabelLoadWidget(QWidget* parent) : QWidget(parent) {
+MessageLabelLoadWidget::MessageLabelLoadWidget(QWidget* parent)
+    : QWidget(parent) {
     auto* layout = new QHBoxLayout(this);
 
     loadTextLabel_ = new QLabel("In progress ...", this);
@@ -83,7 +84,8 @@ void MessageLabelLoadWidget::stopLoadLabel() {
 //
 //===================================================
 
-MessageLabelProgWidget::MessageLabelProgWidget(QWidget* parent) : QWidget(parent) {
+MessageLabelProgWidget::MessageLabelProgWidget(QWidget* parent)
+    : QWidget(parent) {
     auto* layout = new QHBoxLayout(this);
     layout->setContentsMargins(2, 2, 2, 2);
 
@@ -195,7 +197,8 @@ public:
 
 static std::map<MessageLabel::Type, MessageLabelDefData> typeData;
 
-MessageLabel::MessageLabel(QWidget* parent) : QWidget(parent) {
+MessageLabel::MessageLabel(QWidget* parent)
+    : QWidget(parent) {
     setProperty("base", "1");
 
     if (typeData.empty()) {

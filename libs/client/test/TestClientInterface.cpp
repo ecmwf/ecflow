@@ -26,7 +26,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -362,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
     BOOST_REQUIRE_MESSAGE(theClient.force(event_paths, "set") == 0, " should return 0\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.force(event_paths, "clear") == 0, " should return 0\n" << theClient.errorMsg());
     std::vector<std::string> validStates = NState::allStates(); // HPUX barfs, if NState::allStates() is used directly
-    for (const string& state : validStates) {
+    for (const std::string& state : validStates) {
         BOOST_REQUIRE_MESSAGE(theClient.force("/s", state, true, true) == 0,
                               "force " << state << " should return 0\n"
                                        << theClient.errorMsg());
@@ -390,7 +389,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
 
     std::vector<CFileCmd::File_t> fileTypesVec = CFileCmd::fileTypesVec();
     for (auto& i : fileTypesVec) {
-        BOOST_REQUIRE_MESSAGE(theClient.file("/s", CFileCmd::toString(i), string("100")) == 0,
+        BOOST_REQUIRE_MESSAGE(theClient.file("/s", CFileCmd::toString(i), std::string("100")) == 0,
                               " should return 0\n"
                                   << theClient.errorMsg());
     }
@@ -707,7 +706,7 @@ BOOST_AUTO_TEST_CASE(test_client_interface) {
                           "--alter should return 0\n"
                               << theClient.errorMsg());
 
-    for (const string& day : DayAttr::allDays()) {
+    for (const std::string& day : DayAttr::allDays()) {
         BOOST_REQUIRE_MESSAGE(theClient.alter("/s1", "add", "day", day) == 0,
                               "--alter should return 0\n"
                                   << theClient.errorMsg());

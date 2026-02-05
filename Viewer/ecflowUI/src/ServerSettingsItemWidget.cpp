@@ -24,7 +24,8 @@
 //
 //========================================================
 
-ServerSettingsItemWidget::ServerSettingsItemWidget(QWidget* parent) : QWidget(parent) {
+ServerSettingsItemWidget::ServerSettingsItemWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     connect(buttonBox_, SIGNAL(clicked(QAbstractButton*)), this, SLOT(slotClicked(QAbstractButton*)));

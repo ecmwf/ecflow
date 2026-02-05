@@ -29,7 +29,8 @@ std::string VRepeatDayAttr::subType_("day");
 // VRepeatAttrType
 //================================
 
-VRepeatAttrType::VRepeatAttrType() : VAttributeType("repeat") {
+VRepeatAttrType::VRepeatAttrType()
+    : VAttributeType("repeat") {
     dataCount_                       = 10;
     searchKeyToData_["repeat_name"]  = NameIndex;
     searchKeyToData_["repeat_value"] = ValueIndex;
@@ -118,7 +119,8 @@ void VRepeatAttrType::encode(const Repeat& r,
 //
 //=====================================================
 
-VRepeatAttr::VRepeatAttr(VNode* parent) : VAttribute(parent, 0) {
+VRepeatAttr::VRepeatAttr(VNode* parent)
+    : VAttribute(parent, 0) {
     // name_=e.name_or_number();
 }
 

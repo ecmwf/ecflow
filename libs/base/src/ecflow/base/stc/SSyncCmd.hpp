@@ -42,7 +42,9 @@ public:
              unsigned int client_modify_change_no,
              AbstractServer* as);
 
-    SSyncCmd() : ServerToClientCmd(), incremental_changes_(0) {}
+    SSyncCmd()
+        : ServerToClientCmd(),
+          incremental_changes_(0) {}
 
     std::string print() const override;
     bool equals(ServerToClientCmd*) const override;

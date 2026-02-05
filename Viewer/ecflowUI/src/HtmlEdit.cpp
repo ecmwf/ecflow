@@ -15,7 +15,8 @@
 
 #include "UiLog.hpp"
 
-HtmlEdit::HtmlEdit(QWidget* parent) : QTextBrowser(parent) {
+HtmlEdit::HtmlEdit(QWidget* parent)
+    : QTextBrowser(parent) {
 #if 0
     QFont f("Courier");
     //QFont f("Monospace");

@@ -52,7 +52,8 @@
 //
 //========================================================
 
-OutputItemWidget::OutputItemWidget(QWidget* parent) : QWidget(parent) {
+OutputItemWidget::OutputItemWidget(QWidget* parent)
+    : QWidget(parent) {
     // We try to keep the contents when clicking away
     // tryToKeepContents_=true;
 

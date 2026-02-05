@@ -20,12 +20,14 @@
 #include "ecflow/core/Extract.hpp"
 #include "ecflow/core/Serialization.hpp"
 
-using namespace std;
 using namespace ecf;
 
 //==========================================================================================
 
-DateAttr::DateAttr(int day, int month, int year) : day_(day), month_(month), year_(year) {
+DateAttr::DateAttr(int day, int month, int year)
+    : day_(day),
+      month_(month),
+      year_(year) {
     checkDate(day_, month_, year_, true /* allow wild cards */);
 }
 

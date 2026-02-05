@@ -19,7 +19,8 @@
 // VQueueAttrType
 //================================
 
-VQueueAttrType::VQueueAttrType() : VAttributeType("queue") {
+VQueueAttrType::VQueueAttrType()
+    : VAttributeType("queue") {
     dataCount_                      = 5;
     searchKeyToData_["queue_name"]  = NameIndex;
     searchKeyToData_["queue_value"] = ValueIndex;
@@ -75,7 +76,8 @@ void VQueueAttrType::encode(const QueueAttr& q, QStringList& data) const {
 //
 //=====================================================
 
-VQueueAttr::VQueueAttr(VNode* parent, const QueueAttr&, int index) : VAttribute(parent, index) {
+VQueueAttr::VQueueAttr(VNode* parent, const QueueAttr&, int index)
+    : VAttribute(parent, index) {
     // name_=m.name();
 }
 

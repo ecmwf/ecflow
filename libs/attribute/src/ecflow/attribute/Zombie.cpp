@@ -15,7 +15,6 @@
 #include "ecflow/core/Serialization.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // support return by reference
 const Zombie& Zombie::EMPTY() {
@@ -273,17 +272,17 @@ std::string Zombie::pretty_print(const std::vector<Zombie>& zombies, int indent)
 }
 
 void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::string>& list, int indent) {
-    string path("task-path");
-    string type("type");
-    string password("password");
-    string rid("pid");
-    string duration("age(s)");
-    string calls("calls");
-    string try_no("try_no");
-    string user_action("action");
-    string child_type("child");
-    string host("host");
-    string explanation("explanation");
+    std::string path("task-path");
+    std::string type("type");
+    std::string password("password");
+    std::string rid("pid");
+    std::string duration("age(s)");
+    std::string calls("calls");
+    std::string try_no("try_no");
+    std::string user_action("action");
+    std::string child_type("child");
+    std::string host("host");
+    std::string explanation("explanation");
 
     size_t path_width        = path.size();
     size_t type_width        = type.size();
@@ -353,11 +352,12 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
                 ss << " ";
             }
         }
-        ss << left << setw(path_width) << path << " " << setw(type_width) << type << " " << setw(duration_width)
-           << duration << " " << setw(password_width) << password << " " << setw(rid_width) << rid << " "
-           << setw(tryno_width) << try_no << " " << setw(user_action_width) << user_action << " "
-           << setw(child_type_width) << child_type << " " << setw(calls_width) << calls << " " << setw(host_width)
-           << host << " " << setw(explanation_width) << explanation;
+        ss << std::left << std::setw(path_width) << path << " " << std::setw(type_width) << type << " "
+           << std::setw(duration_width) << duration << " " << std::setw(password_width) << password << " "
+           << std::setw(rid_width) << rid << " " << std::setw(tryno_width) << try_no << " "
+           << std::setw(user_action_width) << user_action << " " << std::setw(child_type_width) << child_type << " "
+           << std::setw(calls_width) << calls << " " << std::setw(host_width) << host << " "
+           << std::setw(explanation_width) << explanation;
         list.push_back(ss.str());
     }
 
@@ -394,12 +394,12 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
                 break;
         }
 
-        ss << left << setw(path_width) << z.path_to_task() << " " << setw(type_width) << z.type_str() << " "
-           << setw(duration_width) << z.duration() << " " << setw(password_width) << z.jobs_password() << " "
-           << setw(rid_width) << z.process_or_remote_id() << " " << setw(tryno_width) << z.try_no() << " "
-           << setw(user_action_width) << z.user_action_str() << " " << setw(child_type_width)
-           << Child::to_string(z.last_child_cmd()) << " " << setw(calls_width) << z.calls() << " " << setw(host_width)
-           << z.host() << " " << setw(explanation_width) << exp;
+        ss << std::left << std::setw(path_width) << z.path_to_task() << " " << std::setw(type_width) << z.type_str()
+           << " " << std::setw(duration_width) << z.duration() << " " << std::setw(password_width) << z.jobs_password()
+           << " " << std::setw(rid_width) << z.process_or_remote_id() << " " << std::setw(tryno_width) << z.try_no()
+           << " " << std::setw(user_action_width) << z.user_action_str() << " " << std::setw(child_type_width)
+           << Child::to_string(z.last_child_cmd()) << " " << std::setw(calls_width) << z.calls() << " "
+           << std::setw(host_width) << z.host() << " " << std::setw(explanation_width) << exp;
         list.push_back(ss.str());
     }
 }

@@ -21,7 +21,8 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
-OverviewProvider::OverviewProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::NoTask) {
+OverviewProvider::OverviewProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::NoTask) {
 }
 
 //==================================================

@@ -18,7 +18,8 @@
 #include "IconProvider.hpp"
 #include "ViewerUtil.hpp"
 
-AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent) {
+AbstractSearchLine::AbstractSearchLine(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     confirmSearchLabel_->hide();

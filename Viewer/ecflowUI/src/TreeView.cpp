@@ -12,7 +12,8 @@
 
 #include <QPalette>
 
-TreeView::TreeView(QWidget* parent) : QTreeView(parent) {
+TreeView::TreeView(QWidget* parent)
+    : QTreeView(parent) {
     //!!!!We need to do it because:
     // The background colour between the views left border and the nodes cannot be
     // controlled by delegates or stylesheets. It always takes the QPalette::Highlight

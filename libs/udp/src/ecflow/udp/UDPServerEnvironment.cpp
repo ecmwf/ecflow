@@ -30,7 +30,8 @@ const std::unordered_map<std::string, std::string> options_map = {{UDPServerEnvi
 
 } // namespace
 
-UDPServerEnvironment::UDPServerEnvironment() : environment_{} {
+UDPServerEnvironment::UDPServerEnvironment()
+    : environment_{} {
     for (auto variable : variables) {
         ecf::environment::get(variable, environment_[variable]);
     }

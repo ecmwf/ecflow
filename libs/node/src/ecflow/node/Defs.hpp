@@ -211,7 +211,20 @@ public:
 
     /// Assumes input argument is of the form /suite/family/task, /suite/family/family/task
     node_ptr findAbsNode(const std::string& pathToNode) const;
+
+    ///
+    /// @brief Check if the given path + attribute is listed as an extern.
+    ///
+    /// When the attribute is empty, the function simply checks if the node itself is listed as an extern;
+    /// othersise, the function checks if the the attribute of the node (in the form of '<nodePath>:<externObj>')
+    /// is listed as an extern.
+    ///
+    /// @param pathToNode The path to the node
+    /// @param node_attr_name The attribute name, can be empty
+    /// @return true if found, false otherwise
+    ///
     bool find_extern(const std::string& pathToNode, const std::string& node_attr_name) const;
+
     suite_ptr findSuite(const std::string& name) const;
     std::string find_node_path(const std::string& type, const std::string& name) const;
     node_ptr find_node(const std::string& type, const std::string& pathToNode) const;
@@ -503,7 +516,10 @@ private:
 // Start notification. End notification automatically signalled, Even if exception raised.
 class ChangeStartNotification {
 public:
-    explicit ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start(); }
+    explicit ChangeStartNotification(defs_ptr defs)
+        : defs_ptr_(defs) {
+        defs_ptr_->notify_start();
+    }
     // Disable copy (and move) semantics
     ChangeStartNotification(const ChangeStartNotification&)            = delete;
     ChangeStartNotification& operator=(const ChangeStartNotification&) = delete;
@@ -515,77 +531,5 @@ public:
 private:
     defs_ptr defs_ptr_;
 };
-
-namespace ecf {
-
-// Select Nodes
-
-/**
- * Retrieve all 'sub-nodes' of the given defs.
- *
- * @param defs The defs being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Node*> get_all_nodes(Defs& defs);
-std::vector<const Node*> get_all_nodes(const Defs& defs);
-
-std::vector<node_ptr> get_all_nodes_ptr(Defs& defs);
-std::vector<node_ptr> get_all_nodes_ptr(node_ptr& node);
-
-// Select Tasks
-
-/**
- * Retrieve all 'sub-nodes' of the given defs, that are of type Task.
- *
- * @param defs The defs being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Task*> get_all_tasks(Defs& defs);
-std::vector<const Task*> get_all_tasks(const Defs& defs);
-
-std::vector<task_ptr> get_all_tasks_ptr(Defs& defs);
-
-// Select Alias
-
-/**
- * Retrieve all 'sub-nodes' of the given defs, that are of type Alias.
- *
- * @param defs The defs being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Alias*> get_all_aliases(Defs& defs);
-
-// Select Active Submittables
-
-/**
- * Retrieve all 'sub-nodes' of the given defs, that are both Active and of type Submittable.
- *
- * @param defs The defs being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Submittable*> get_all_active_submittables(Defs& defs);
-
-// Select Families
-
-/**
- * Retrieve all 'sub-nodes' of the given defs, that are of type Family.
- *
- * @param defs The defs being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Family*> get_all_families(const Defs& defs);
-
-// Select Nodes that have ASTs (i.e. either Trigger or Complete)
-
-/**
- * Retrieve the set of 'sub-nodes' of the given defs,
- * that are referenced in either a Trigger or a Complete.
- *
- * @param defs The defs being queried
- * @return The set of 'sub-nodes'
- */
-std::set<const Node*> get_all_ast_nodes(const Defs& defs);
-
-} // namespace ecf
 
 #endif /* ecflow_node_Defs_HPP */

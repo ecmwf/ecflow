@@ -24,7 +24,8 @@
 #include "VSettings.hpp"
 #include "ecflow/node/Node.hpp"
 
-TimelineItemWidget::TimelineItemWidget(QWidget* /*parent*/) : delayedLoad_(false) {
+TimelineItemWidget::TimelineItemWidget(QWidget* /*parent*/)
+    : delayedLoad_(false) {
     auto* vb = new QVBoxLayout(this);
     vb->setContentsMargins(0, 0, 0, 0);
 

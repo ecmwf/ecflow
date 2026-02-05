@@ -22,7 +22,8 @@ class Defs;
 /// to ensure they are the same
 class PersistHelper {
 public:
-    explicit PersistHelper(bool compare_edit_history = false) : compare_edit_history_(compare_edit_history) {}
+    explicit PersistHelper(bool compare_edit_history = false)
+        : compare_edit_history_(compare_edit_history) {}
 
     PersistHelper(const PersistHelper&)            = delete;
     PersistHelper& operator=(const PersistHelper&) = delete;

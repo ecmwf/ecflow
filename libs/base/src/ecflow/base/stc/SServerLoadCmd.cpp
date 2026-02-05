@@ -15,8 +15,6 @@
 #include "ecflow/base/Gnuplot.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
 bool SServerLoadCmd::equals(ServerToClientCmd* rhs) const {
     auto* the_rhs = dynamic_cast<SServerLoadCmd*>(rhs);
@@ -39,7 +37,7 @@ std::string SServerLoadCmd::print() const {
 
 bool SServerLoadCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
     if (debug) {
-        cout << "  SServerLoadCmd::handle_server_response log_file_path = " << log_file_path() << "\n";
+        std::cout << "  SServerLoadCmd::handle_server_response log_file_path = " << log_file_path() << "\n";
     }
     Gnuplot gnuplot(log_file_path(), server_reply.host(), server_reply.port());
     gnuplot.show_server_load();

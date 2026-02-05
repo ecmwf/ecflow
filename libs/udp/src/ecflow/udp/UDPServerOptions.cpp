@@ -27,7 +27,11 @@ std::string as_string(Args... args) {
 
 } // namespace
 
-UDPServerOptions::UDPServerOptions(const std::vector<std::string>& argv) : general{create_options()}, variables{} {
+UDPServerOptions::UDPServerOptions(const std::vector<std::string>& argv)
+    : general{create_options()},
+      variables{} {
+
+    namespace po = boost::program_options;
 
     po::options_description all_options("All");
     all_options.add(general);
@@ -60,7 +64,7 @@ UDPServerOptions::UDPServerOptions(const std::vector<std::string>& argv) : gener
     }
 }
 
-void UDPServerOptions::ensure_valid_options(const po::variables_map& variables) {
+void UDPServerOptions::ensure_valid_options(const boost::program_options::variables_map& variables) {
     if (variables.count(OPTION_HELP) > 0) {
         // Nothing to do, help will be displayed even if other options are provided
         return;
@@ -74,7 +78,10 @@ void UDPServerOptions::ensure_valid_options(const po::variables_map& variables) 
     // Add all necessary options validation here!...
 }
 
-po::options_description UDPServerOptions::create_options() {
+boost::program_options::options_description UDPServerOptions::create_options() {
+
+    namespace po = boost::program_options;
+
     po::options_description general{"General"};
     // clang-format off
     general.add_options()

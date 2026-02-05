@@ -40,10 +40,12 @@ public:
     using clock_t   = std::chrono::system_clock;
     using instant_t = std::chrono::time_point<Instant::clock_t>;
 
-    Instant() : instant_() {}
+    Instant()
+        : instant_() {}
     explicit Instant(instant_t instant)
         : instant_(std::chrono::duration_cast<std::chrono::seconds>(instant.time_since_epoch())) {}
-    explicit Instant(std::chrono::seconds seconds_since_reference) : instant_(seconds_since_reference) {}
+    explicit Instant(std::chrono::seconds seconds_since_reference)
+        : instant_(seconds_since_reference) {}
 
     static Instant parse(const std::string& value);
     static std::string format(const Instant& value);
@@ -86,9 +88,11 @@ class Duration {
 public:
     using duration_t = std::chrono::seconds;
 
-    Duration() : duration_{} {}
+    Duration()
+        : duration_{} {}
     template <typename DURATION>
-    explicit Duration(DURATION duration) : duration_{std::chrono::duration_cast<duration_t>(duration)} {}
+    explicit Duration(DURATION duration)
+        : duration_{std::chrono::duration_cast<duration_t>(duration)} {}
 
     [[nodiscard]] duration_t as_seconds() const { return duration_; }
 

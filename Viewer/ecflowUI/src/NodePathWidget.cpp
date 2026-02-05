@@ -44,7 +44,9 @@ int NodePathItem::vPadding_ = 0;
 
 // #define UI_NODEPATHWIDGET_DEBUG
 
-BcWidget::BcWidget(QWidget* parent) : QWidget(parent), font_(QFont()) {
+BcWidget::BcWidget(QWidget* parent)
+    : QWidget(parent),
+      font_(QFont()) {
     font_ = QFont();
     font_.setPointSize(font_.pointSize() - 1);
     QFontMetrics fm(font_);
@@ -723,7 +725,8 @@ NodePathEllipsisItem::NodePathEllipsisItem(BcWidget* owner)
 //
 //=============================================================
 
-NodePathWidget::NodePathWidget(QWidget* parent) : QWidget(parent) {
+NodePathWidget::NodePathWidget(QWidget* parent)
+    : QWidget(parent) {
     layout_ = new QHBoxLayout(this);
     layout_->setSpacing(0);
     layout_->setContentsMargins(2, 2, 3, 2);

@@ -68,7 +68,8 @@ public:
     using instant_t  = std::chrono::time_point<clock_t>;
     using duration_t = std::chrono::microseconds;
 
-    DurationTimer() : start_time_(clock_t::now()) {}
+    DurationTimer()
+        : start_time_(clock_t::now()) {}
 
     ~DurationTimer() = default;
 
@@ -141,7 +142,9 @@ private:
  */
 class ScopedDurationTimer : public DurationTimer {
 public:
-    explicit ScopedDurationTimer(std::string msg) : DurationTimer(), msg_(std::move(msg)) {}
+    explicit ScopedDurationTimer(std::string msg)
+        : DurationTimer(),
+          msg_(std::move(msg)) {}
 
     ~ScopedDurationTimer();
 
@@ -173,7 +176,8 @@ inline PerformanceMeasure operator-(const PerformanceMeasure& lhs, const Perform
 
 class PerformanceTimer {
 public:
-    PerformanceTimer() : times_{PerformanceMeasure::current()} {}
+    PerformanceTimer()
+        : times_{PerformanceMeasure::current()} {}
 
     void start() noexcept { times_ = PerformanceMeasure::current(); }
     PerformanceMeasure elapsed() const { return PerformanceMeasure::current() - times_; }

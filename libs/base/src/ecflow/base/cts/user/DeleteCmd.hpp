@@ -16,7 +16,9 @@
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
 class DeleteCmd final : public UserCmd {
 public:
-    explicit DeleteCmd(const std::vector<std::string>& paths, bool force = false) : paths_(paths), force_(force) {}
+    explicit DeleteCmd(const std::vector<std::string>& paths, bool force = false)
+        : paths_(paths),
+          force_(force) {}
     explicit DeleteCmd(const std::string& absNodePath, bool force = false);
     DeleteCmd() = default;
 

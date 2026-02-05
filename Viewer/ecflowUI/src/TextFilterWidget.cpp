@@ -27,7 +27,8 @@
 #include "VProperty.hpp"
 #include "ViewerUtil.hpp"
 
-TextFilterWidget::TextFilterWidget(QWidget* parent) : QWidget(parent) {
+TextFilterWidget::TextFilterWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     setProperty("textFilter", "1");

@@ -18,7 +18,8 @@
 // VEventAttrType
 //================================
 
-VEventAttrType::VEventAttrType() : VAttributeType("event") {
+VEventAttrType::VEventAttrType()
+    : VAttributeType("event") {
     dataCount_                      = 3;
     searchKeyToData_["event_name"]  = NameIndex;
     searchKeyToData_["event_value"] = ValueIndex;
@@ -54,7 +55,8 @@ void VEventAttrType::encode(const Event& e, QStringList& data) const {
 //
 //=====================================================
 
-VEventAttr::VEventAttr(VNode* parent, const Event& /*e*/, int index) : VAttribute(parent, index) {
+VEventAttr::VEventAttr(VNode* parent, const Event& /*e*/, int index)
+    : VAttribute(parent, index) {
     // name_=e.name_or_number();
 }
 

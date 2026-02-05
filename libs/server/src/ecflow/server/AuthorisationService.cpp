@@ -29,7 +29,8 @@ struct NodeRules
 ///
 struct WhiteListRules
 {
-    WhiteListRules(const WhiteListFile& file) : file_(file) {}
+    WhiteListRules(const WhiteListFile& file)
+        : file_(file) {}
     const WhiteListFile& file_;
 };
 
@@ -42,19 +43,24 @@ struct Unrestricted
 
 struct AuthorisationService::Impl
 {
-    Impl() : permissions_(Unrestricted{}) {}
-    explicit Impl(NodeRules&& rules) : permissions_(std::move(rules)) {}
-    explicit Impl(WhiteListRules&& rules) : permissions_(std::move(rules)) {}
+    Impl()
+        : permissions_(Unrestricted{}) {}
+    explicit Impl(NodeRules&& rules)
+        : permissions_(std::move(rules)) {}
+    explicit Impl(WhiteListRules&& rules)
+        : permissions_(std::move(rules)) {}
 
     std::variant<Unrestricted, NodeRules, WhiteListRules> permissions_;
 };
 
 AuthorisationService::AuthorisationService() = default;
 
-AuthorisationService::AuthorisationService(std::unique_ptr<Impl>&& impl) : impl_{std::move(impl)} {
+AuthorisationService::AuthorisationService(std::unique_ptr<Impl>&& impl)
+    : impl_{std::move(impl)} {
 }
 
-AuthorisationService::AuthorisationService(AuthorisationService&& rhs) noexcept : impl_{std::move(rhs.impl_)} {
+AuthorisationService::AuthorisationService(AuthorisationService&& rhs) noexcept
+    : impl_{std::move(rhs.impl_)} {
 }
 
 AuthorisationService::~AuthorisationService() = default;
@@ -94,65 +100,61 @@ bool AuthorisationService::allows(const Identity& identity,
     }
 
     bool allowed = false;
-    std::visit(
-        overload{[&allowed](const Unrestricted&) {
-                     // when no rules are loaded, we allow everything...
-                     // Dangerous, but backward compatible!
-                     allowed = true;
-                 },
-                 [&allowed, &identity, &paths, &permission](const WhiteListRules& rules) {
-                     // Apply white list rules
-                     if (permission == "read") {
-                         allowed = rules.file_.verify_read_access(identity.username(), paths);
-                     }
-                     else if (permission == "write") {
-                         allowed = rules.file_.verify_write_access(identity.username(), paths);
-                     }
-                     else {
-                         allowed = false;
-                     }
-                 },
-                 [&server, &identity, &paths, &allowed](const NodeRules& rules) {
-                     for (auto&& path : paths) {
+    std::visit(overload{[&allowed](const Unrestricted&) {
+                            // when no rules are loaded, we allow everything...
+                            // Dangerous, but backward compatible!
+                            allowed = true;
+                        },
+                        [&allowed, &identity, &paths, &permission](const WhiteListRules& rules) {
+                            // Apply white list rules
+                            if (permission == "read") {
+                                allowed = rules.file_.verify_read_access(identity.username(), paths);
+                            }
+                            else if (permission == "write") {
+                                allowed = rules.file_.verify_write_access(identity.username(), paths);
+                            }
+                            else {
+                                allowed = false;
+                            }
+                        },
+                        [&server, &identity, &paths, &allowed](const NodeRules& rules) {
+                            for (auto&& path : paths) {
 
-                         struct Visitor
-                         {
-                             void handle(const Defs& defs) {
-                                 auto p      = defs.server_state().permissions();
-                                 permissions = p.is_empty() ? permissions : p;
-                             }
-                             void handle(const Node& s) {
-                                 auto p      = s.permissions();
-                                 permissions = p.is_empty() ? permissions : p;
-                             }
+                                struct Visitor
+                                {
+                                    void handle(const Defs& defs) {
+                                        auto p      = defs.server_state().permissions();
+                                        permissions = p.is_empty() ? permissions : p;
+                                    }
+                                    void handle(const Node& s) {
+                                        auto p      = s.permissions();
+                                        permissions = p.is_empty() ? permissions : p;
+                                    }
 
-                             void not_found() { permissions = Permissions::make_empty(); }
+                                    void not_found() { permissions = Permissions::make_empty(); }
 
-                             Permissions permissions = Permissions::make_empty();
-                         };
+                                    Permissions permissions = Permissions::make_empty();
+                                };
 
-                         auto d = server.defs();
-                         auto p = Path::make(path).value();
-                         auto v = Visitor{};
+                                auto d = server.defs();
+                                auto p = Path::make(path).value();
+                                auto v = Visitor{};
 
-                         ecf::visit(*d, p, v);
+                                ecf::visit(*d, p, v);
 
-                         if (v.permissions.is_empty()) {
-                             std::cout << "Allowed! No custom permissions found for: " << p.to_string() << std::endl;
-                             allowed = true;
-                         }
-                         else if (v.permissions.allows(identity.username())) {
-                             std::cout << "Allowed! Specific permissions found for: " << p.to_string() << std::endl;
-                             allowed = true;
-                         }
-                         else {
-                             std::cout << "Not allowed! Specific permissions found for: " << p.to_string() << std::endl;
-                             allowed = false;
-                             break;
-                         }
-                     }
-                 }},
-        impl_->permissions_);
+                                if (v.permissions.is_empty()) {
+                                    allowed = true;
+                                }
+                                else if (v.permissions.allows(identity.username())) {
+                                    allowed = true;
+                                }
+                                else {
+                                    allowed = false;
+                                    break;
+                                }
+                            }
+                        }},
+               impl_->permissions_);
 
     return allowed;
 }

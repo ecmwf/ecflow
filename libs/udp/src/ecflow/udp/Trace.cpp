@@ -14,7 +14,9 @@
 
 namespace ecf::log {
 
-Trace::Trace() : output_{std::cout}, verbose_{false} {
+Trace::Trace()
+    : output_{std::cout},
+      verbose_{false} {
 }
 
 void Trace::store(const std::string& entry) const {

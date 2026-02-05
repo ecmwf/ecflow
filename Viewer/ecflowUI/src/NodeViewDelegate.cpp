@@ -60,7 +60,8 @@ void LabelStyle::update() {
     bgBrush_   = QBrush(bgProp_->value().value<QColor>());
 }
 
-NodeViewDelegate::NodeViewDelegate(QWidget* parent) : QStyledItemDelegate(parent) {
+NodeViewDelegate::NodeViewDelegate(QWidget* parent)
+    : QStyledItemDelegate(parent) {
     hoverPen_      = QPen(QColor(201, 201, 201));
     hoverBrush_    = QBrush(QColor(250, 250, 250, 210));
     selectPen_     = QPen(QColor(125, 162, 206));

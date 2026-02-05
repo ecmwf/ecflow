@@ -25,7 +25,10 @@
 //
 //========================================
 
-VInfo::VInfo(ServerHandler* server, VNode* node, VAttribute* attr) : server_(server), node_(node), attr_(attr) {
+VInfo::VInfo(ServerHandler* server, VNode* node, VAttribute* attr)
+    : server_(server),
+      node_(node),
+      attr_(attr) {
     if (server_) {
         server_->addServerObserver(this);
     }
@@ -257,7 +260,8 @@ VInfo_ptr VInfo::createFromItem(VItem* item) {
 //
 //=========================================
 
-VInfoServer::VInfoServer(ServerHandler* server) : VInfo(server, nullptr) {
+VInfoServer::VInfoServer(ServerHandler* server)
+    : VInfo(server, nullptr) {
     if (server_) {
         node_       = server_->vRoot();
         storedPath_ = VItemPathParser::encodeWithServer(server_->name(), "/", "server");
@@ -294,7 +298,8 @@ VItem* VInfoServer::item() const {
 //
 //=========================================
 
-VInfoNode::VInfoNode(ServerHandler* server, VNode* node) : VInfo(server, node) {
+VInfoNode::VInfoNode(ServerHandler* server, VNode* node)
+    : VInfo(server, node) {
     if (node_) {
         assert(server_);
         storedPath_ = VItemPathParser::encodeWithServer(server_->name(), node_->absNodePath(), "node");
@@ -372,7 +377,8 @@ VItem* VInfoNode::item() const {
 //
 //=========================================
 
-VInfoAttribute::VInfoAttribute(ServerHandler* server, VNode* node, VAttribute* attr) : VInfo(server, node, attr) {
+VInfoAttribute::VInfoAttribute(ServerHandler* server, VNode* node, VAttribute* attr)
+    : VInfo(server, node, attr) {
     if (attr_) {
         assert(server_);
         storedPath_ = VItemPathParser::encodeWithServer(server_->name(), attr_->fullPath(), attr_->typeName());

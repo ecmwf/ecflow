@@ -14,11 +14,11 @@
 
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)

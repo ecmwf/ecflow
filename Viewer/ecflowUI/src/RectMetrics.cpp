@@ -13,7 +13,9 @@
 #include <QImage>
 #include <QPainter>
 
-RectMetrics::RectMetrics(int penWidth) : topOffset_(0), bottomOffset_(0) {
+RectMetrics::RectMetrics(int penWidth)
+    : topOffset_(0),
+      bottomOffset_(0) {
     if (penWidth >= 0 && penWidth <= 4) {
         compute(penWidth);
     }

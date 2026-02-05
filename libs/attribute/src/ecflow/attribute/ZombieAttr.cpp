@@ -21,8 +21,6 @@
 #include "ecflow/core/ZombieCtrlAction.hpp"
 
 using namespace ecf;
-using namespace boost;
-using namespace std;
 
 const ZombieAttr& ZombieAttr::EMPTY() {
     static const ZombieAttr ZOMBIEATTR = ZombieAttr();
@@ -215,7 +213,7 @@ bool ZombieAttr::kill(ecf::Child::CmdType child_cmd) const {
 
 ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
     /// Use boost tokenizer instead of Str::split, as it allows preservation of empty tokens
-    char_separator<char> sep(":", "", boost::keep_empty_tokens);
+    boost::char_separator<char> sep(":", "", boost::keep_empty_tokens);
     using tokenizer = boost::tokenizer<boost::char_separator<char>>;
     tokenizer tokenise(string_to_parse, sep);
     std::vector<std::string> tokens;
@@ -225,10 +223,10 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
     }
 
     /// expects <zombie_type>:<user_action>:child_cmds:zombie_lifetime
-    string str_zombie_type;
-    string action_str;
-    string child_cmds;
-    string lifetime;
+    std::string str_zombie_type;
+    std::string action_str;
+    std::string child_cmds;
+    std::string lifetime;
     size_t tokens_size = tokens.size();
     for (size_t i = 0; i < tokens_size; i++) {
         // cout << "   token " << i << ": '" << tokens[i] << "'\n";
@@ -256,19 +254,19 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
     if (!Child::valid_zombie_type(str_zombie_type)) {
         throw std::runtime_error("ZombieAttr::create failed: Invalid zombie type, expected one of [ user | ecf | "
                                  "ecf_pid | ecf_pid_passed | ecf_passwd | path ] but found " +
-                                 str_zombie_type + string(":") + string_to_parse);
+                                 str_zombie_type + std::string(":") + string_to_parse);
     }
 
     if (!action_str.empty() && !ecf::Enumerate<ZombieCtrlAction>::is_valid(action_str)) {
         throw std::runtime_error("ZombieAttr::create failed: Invalid user action, expected one of [ fob | fail | "
                                  "remove | block | adopt | kill ] but found " +
-                                 action_str + string(":") + string_to_parse);
+                                 action_str + std::string(":") + string_to_parse);
     }
 
     if (!child_cmds.empty() && !Child::valid_child_cmds(child_cmds)) {
         throw std::runtime_error("ZombieAttr::create failed: Invalid child type, expected one or more of [ "
                                  "init,event,meter,label,wait,queue,abort,complete] but found " +
-                                 tokens[2] + string(":") + string_to_parse);
+                                 tokens[2] + std::string(":") + string_to_parse);
     }
 
     int zombie_lifetime = -1;
@@ -278,7 +276,7 @@ ZombieAttr ZombieAttr::create(const std::string& string_to_parse) {
         }
         catch (const ecf::bad_conversion&) {
             throw std::runtime_error("ZombieAttr::create failed: Zombie life time must be convertible to an integer " +
-                                     lifetime + string(":") + string_to_parse);
+                                     lifetime + std::string(":") + string_to_parse);
         }
     }
 

@@ -28,7 +28,8 @@
 
 class WithTestEnvironmentVariable {
 public:
-    WithTestEnvironmentVariable(std::string variable, std::string value) : variable_(variable) {
+    WithTestEnvironmentVariable(std::string variable, std::string value)
+        : variable_(variable) {
         setenv(variable_.c_str(), value.c_str(), 1);
     }
     WithTestEnvironmentVariable(const WithTestEnvironmentVariable&)                = default;
@@ -44,7 +45,8 @@ private:
 
 class NamedTestFile {
 public:
-    explicit NamedTestFile(const std::string& name) : name_{name} {}
+    explicit NamedTestFile(const std::string& name)
+        : name_{name} {}
 
     constexpr const fs::path& path() const { return name_; }
 
@@ -54,8 +56,10 @@ private:
 
 class AutomaticTestFile {
 public:
-    AutomaticTestFile() : random_name_{randomized_name_n(MAX_CHARS)} {}
-    explicit AutomaticTestFile(const std::string& name) : random_name_{suffixed_name_n(name, MAX_CHARS)} {}
+    AutomaticTestFile()
+        : random_name_{randomized_name_n(MAX_CHARS)} {}
+    explicit AutomaticTestFile(const std::string& name)
+        : random_name_{suffixed_name_n(name, MAX_CHARS)} {}
 
     constexpr const fs::path& path() const { return random_name_; }
 
@@ -109,7 +113,8 @@ public:
         location_ = fs::canonical(location_);
     }
 
-    explicit WithTestFile() : WithTestFile(AutomaticTestFile{}) {}
+    explicit WithTestFile()
+        : WithTestFile(AutomaticTestFile{}) {}
 
     WithTestFile(const WithTestFile&)                = default;
     WithTestFile& operator=(const WithTestFile&)     = default;

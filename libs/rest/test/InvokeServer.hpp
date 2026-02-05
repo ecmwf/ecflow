@@ -27,7 +27,8 @@
 
 class InvokeServer {
 public:
-    InvokeServer(bool use_http_backend = false) : use_http_backend_(use_http_backend) {
+    InvokeServer(bool use_http_backend = false)
+        : use_http_backend_(use_http_backend) {
         std::string port;
         ecf::environment::get(ecf::environment::ECF_PORT, port);
         /// Remove check pt and backup check pt file, else server will load it & remove log file

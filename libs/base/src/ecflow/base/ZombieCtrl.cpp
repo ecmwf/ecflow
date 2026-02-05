@@ -16,11 +16,11 @@
 #include "ecflow/base/cts/task/TaskCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_ZOMBIE  1
 

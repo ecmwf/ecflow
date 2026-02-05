@@ -16,8 +16,6 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
 BOOST_AUTO_TEST_SUITE(T_Variable)

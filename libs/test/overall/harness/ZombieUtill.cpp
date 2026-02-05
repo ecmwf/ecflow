@@ -18,7 +18,6 @@
 #include "ecflow/core/AssertTimer.hpp"
 #include "ecflow/core/Environment.hpp"
 
-using namespace std;
 using namespace ecf;
 
 void ZombieUtil::test_clean_up(int timeout) {
@@ -27,9 +26,9 @@ void ZombieUtil::test_clean_up(int timeout) {
     TestFixture::client().zombieGet();
     std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
     if (!zombies.empty()) {
-        cout << "\nZombieUtil::test_clean_up: Found Zombies:\n";
-        cout << "Client Environment:\n" << TestFixture::client().to_string() << "\n";
-        cout << Zombie::pretty_print(zombies, 9) << "\n, attempting to *fob* then *remove* ...\n";
+        std::cout << "\nZombieUtil::test_clean_up: Found Zombies:\n";
+        std::cout << "Client Environment:\n" << TestFixture::client().to_string() << "\n";
+        std::cout << Zombie::pretty_print(zombies, 9) << "\n, attempting to *fob* then *remove* ...\n";
 
         int no_fobed = do_zombie_user_action(
             ZombieCtrlAction::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
@@ -40,8 +39,8 @@ void ZombieUtil::test_clean_up(int timeout) {
 #if defined(HPUX) || defined(_AIX)
             wait += 5; // On these platforms wait longer,
 #endif
-            cout << "   Fobed " << no_fobed << " left over zombies. sleeping for " << wait
-                 << "s before attempting to remove\n";
+            std::cout << "   Fobed " << no_fobed << " left over zombies. sleeping for " << wait
+                      << "s before attempting to remove\n";
             sleep(wait);
         }
         (void)do_zombie_user_action(
@@ -57,8 +56,8 @@ int ZombieUtil::do_zombie_user_action(ZombieCtrlAction uc,
     bool ecf_debug_zombies = false;
     if (ecf::environment::has("ECF_DEBUG_ZOMBIES")) {
         ecf_debug_zombies = true;
-        cout << "\n   do_zombie_user_action " << ecf::to_string(uc) << " expected_action_cnt " << expected_action_cnt
-             << "\n";
+        std::cout << "\n   do_zombie_user_action " << ecf::to_string(uc) << " expected_action_cnt "
+                  << expected_action_cnt << "\n";
     }
 
     int action_set = 0;
@@ -147,8 +146,8 @@ int ZombieUtil::do_zombie_user_action(ZombieCtrlAction uc,
 
             if (expected_action_cnt > 0 && action_set > 0) {
                 if (ecf_debug_zombies) {
-                    cout << "   timeing out after action_set = " << action_set
-                         << " expected_action_cnt = " << expected_action_cnt << "\n";
+                    std::cout << "   timeing out after action_set = " << action_set
+                              << " expected_action_cnt = " << expected_action_cnt << "\n";
                 }
                 break;
             }
@@ -162,7 +161,7 @@ int ZombieUtil::do_zombie_user_action(ZombieCtrlAction uc,
                 BOOST_REQUIRE_MESSAGE(false, ss.str() << " aborting\n" << Zombie::pretty_print(zombies, 6));
             }
             else {
-                cout << ss.str() << " breaking out\n" << Zombie::pretty_print(zombies, 6) << "\n";
+                std::cout << ss.str() << " breaking out\n" << Zombie::pretty_print(zombies, 6) << "\n";
                 break;
             }
         }
@@ -170,8 +169,8 @@ int ZombieUtil::do_zombie_user_action(ZombieCtrlAction uc,
     }
 
     if (ecf_debug_zombies) {
-        cout << "   " << action_set << " zombies set to user action " << ecf::to_string(uc) << " returning\n";
-        cout << Zombie::pretty_print(action_set_zombies, 6);
+        std::cout << "   " << action_set << " zombies set to user action " << ecf::to_string(uc) << " returning\n";
+        std::cout << Zombie::pretty_print(action_set_zombies, 6);
     }
     return action_set;
 }

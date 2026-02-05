@@ -59,7 +59,8 @@
 //
 //=======================================================
 
-LogLoadWidget::LogLoadWidget(QWidget* /*parent*/) : ui_(new Ui::LogLoadWidget) {
+LogLoadWidget::LogLoadWidget(QWidget* /*parent*/)
+    : ui_(new Ui::LogLoadWidget) {
     ui_->setupUi(this);
 
     // message label

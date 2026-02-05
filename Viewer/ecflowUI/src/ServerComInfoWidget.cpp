@@ -18,7 +18,6 @@
 #include <QPainter>
 #include <QTimer>
 #include <QToolButton>
-#include <boost/current_function.hpp>
 
 #include "ConnectState.hpp"
 #include "FontMetrics.hpp"
@@ -1094,7 +1093,10 @@ void ServerRefreshInfoWidget::printStatus() const {
                   << " timeout=" << timer_->interval() / 1000. << "s";
 }
 
-ServerComActivityLine::ServerComActivityLine(QWidget* parent) : QWidget(parent), font_(QFont()), fm_(font_) {
+ServerComActivityLine::ServerComActivityLine(QWidget* parent)
+    : QWidget(parent),
+      font_(QFont()),
+      fm_(font_) {
     font_.setPointSize(font_.pointSize() - 1);
     fm_ = QFontMetrics(font_);
 

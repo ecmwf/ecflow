@@ -24,7 +24,8 @@ class Suite final : public NodeContainer {
 public:
     Suite() = default;
 
-    explicit Suite(const std::string& name, bool check = true) : NodeContainer(name, check) {}
+    explicit Suite(const std::string& name, bool check = true)
+        : NodeContainer(name, check) {}
 
     Suite(const Suite&);
     Suite& operator=(const Suite&);

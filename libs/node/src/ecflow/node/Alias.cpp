@@ -21,10 +21,10 @@
 #include "ecflow/core/Str.hpp"
 
 using namespace ecf;
-using namespace std;
 
 //==================================================================================
-Alias::Alias(const std::string& name, bool check) : Submittable(name, check) {
+Alias::Alias(const std::string& name, bool check)
+    : Submittable(name, check) {
     set_state_only(NState::QUEUED);
 }
 

@@ -18,6 +18,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 
@@ -34,9 +35,13 @@ struct DefsTreeVisitor
     using path_t  = std::string;
     using nodes_t = std::vector<const Node*>;
 
-    DefsTreeVisitor(const defs_ptr& defs, V& v) : defs_{*defs}, v_{v} {}
+    DefsTreeVisitor(const defs_ptr& defs, V& v)
+        : defs_{*defs},
+          v_{v} {}
 
-    DefsTreeVisitor(const Defs& defs, V& v) : defs_{defs}, v_{v} {}
+    DefsTreeVisitor(const Defs& defs, V& v)
+        : defs_{defs},
+          v_{v} {}
 
     void visit_at(const path_t& path) {
         nodes_t nodes = nodes_at(path);

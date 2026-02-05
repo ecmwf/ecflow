@@ -21,7 +21,8 @@
 
 class VerifyParser : public Parser {
 public:
-    explicit VerifyParser(DefsStructureParser* p) : Parser(p) {}
+    explicit VerifyParser(DefsStructureParser* p)
+        : Parser(p) {}
     const char* keyword() const override { return "verify"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };

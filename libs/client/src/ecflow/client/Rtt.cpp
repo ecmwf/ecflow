@@ -32,7 +32,8 @@ void Rtt::destroy() {
     instance_ = nullptr;
 }
 
-Rtt::Rtt(const std::string& filename) : file_(filename.c_str(), std::ios::out | std::ios::app) {
+Rtt::Rtt(const std::string& filename)
+    : file_(filename.c_str(), std::ios::out | std::ios::app) {
     if (!file_.is_open()) {
         std::cerr << "Rtt::Rtt Could not open file '" << filename << "'\n";
         throw std::runtime_error("Rtt::Rtt: Could not open file " + filename);

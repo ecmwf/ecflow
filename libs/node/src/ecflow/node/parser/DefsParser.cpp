@@ -49,19 +49,19 @@
 #include "ecflow/node/parser/ZombieAttrParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_PARSER 1
 
 template <class T>
-ostream& operator<<(ostream& os, const vector<T>& v) {
-    copy(v.begin(), v.end(), ostream_iterator<T>(cout, ","));
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+    copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, ","));
     return os;
 }
 
 class AliasParser : public Parser {
 public:
-    explicit AliasParser(DefsStructureParser* p) : Parser(p) {
+    explicit AliasParser(DefsStructureParser* p)
+        : Parser(p) {
         reserve_vec(21);
         addParser(new VariableParser(p));
         addParser(new LabelParser(p));
@@ -155,7 +155,8 @@ private:
 
 class TaskParser : public Parser {
 public:
-    explicit TaskParser(DefsStructureParser* p) : Parser(p) {
+    explicit TaskParser(DefsStructureParser* p)
+        : Parser(p) {
         reserve_vec(25);
         addParser(new VariableParser(p));
         addParser(new TriggerParser(p));
@@ -258,7 +259,8 @@ private:
 
 class FamilyParser : public Parser {
 public:
-    explicit FamilyParser(DefsStructureParser* p) : Parser(p) {
+    explicit FamilyParser(DefsStructureParser* p)
+        : Parser(p) {
         reserve_vec(25);
         addParser(new VariableParser(p));
         addParser(new TaskParser(p));
@@ -383,7 +385,8 @@ private:
 // See ECFLOW-106, and SUP-1198, why we don't allow time,today,date,day ate the suite level.
 class SuiteParser : public Parser {
 public:
-    explicit SuiteParser(DefsStructureParser* p) : Parser(p) {
+    explicit SuiteParser(DefsStructureParser* p)
+        : Parser(p) {
         reserve_vec(25);
         addParser(new VariableParser(p));
         addParser(new FamilyParser(p));
@@ -471,7 +474,8 @@ private:
 
 //================================================================================
 
-DefsParser::DefsParser(DefsStructureParser* p) : Parser(p) {
+DefsParser::DefsParser(DefsStructureParser* p)
+    : Parser(p) {
     reserve_vec(5);
     addParser(new HistoryParser(p));
     addParser(new SuiteParser(p));
@@ -482,7 +486,8 @@ DefsParser::DefsParser(DefsStructureParser* p) : Parser(p) {
     addParser(new DefsStateParser(p));
 }
 
-DefsParser::DefsParser(DefsStructureParser* p, bool /*node_parser_only*/) : Parser(p) {
+DefsParser::DefsParser(DefsStructureParser* p, bool /*node_parser_only*/)
+    : Parser(p) {
     reserve_vec(4);
     addParser(new TaskParser(p));
     addParser(new FamilyParser(p));

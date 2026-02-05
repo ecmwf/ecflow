@@ -16,7 +16,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG_MEMENTO 1

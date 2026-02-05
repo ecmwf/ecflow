@@ -21,7 +21,6 @@
 // #define DEBUG_PARSER 1
 
 using namespace ecf;
-using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////////////
 DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file_name)
@@ -108,7 +107,7 @@ bool DefsStructureParser::doParse(std::string& errorMsg, std::string& warningMsg
 bool DefsStructureParser::do_parse_file(std::string& errorMsg) {
     std::vector<std::string> lineTokens;
     lineTokens.reserve(64);
-    string line;
+    std::string line;
     line.reserve(1024);
     while (infile_.good()) {
         getNextLine(line); // will increment lineNumer_
@@ -122,7 +121,7 @@ bool DefsStructureParser::do_parse_file(std::string& errorMsg) {
 bool DefsStructureParser::do_parse_string(std::string& errorMsg) {
     std::vector<std::string> lineTokens;
     lineTokens.reserve(64);
-    string line;
+    std::string line;
     line.reserve(1024);
     while (defs_as_string_.good()) {
         getNextLine(line); // will increment lineNumer_
@@ -280,7 +279,8 @@ bool DefsStructureParser::semiColonInEditVariable() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-DefsString::DefsString(const std::string& defs_as_string) : empty_(defs_as_string.empty()) {
+DefsString::DefsString(const std::string& defs_as_string)
+    : empty_(defs_as_string.empty()) {
     if (!empty_) {
         lines_.reserve(256);
         Str::split_using_string_view(defs_as_string, lines_, "\n");

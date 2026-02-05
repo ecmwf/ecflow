@@ -31,7 +31,8 @@
 // This item will be updated (the why? regenerated) at the end of each sync, so it does not need
 // to observe the node it stores. The reason for this is that the why? can basically depend on
 // anything in the tree. So anything in a sync can potentally have an impact on it.
-WhyItemWidget::WhyItemWidget(QWidget* parent) : HtmlItemWidget(parent) {
+WhyItemWidget::WhyItemWidget(QWidget* parent)
+    : HtmlItemWidget(parent) {
     // We will not keep the contents when the item becomes unselected
     unselectedFlags_.clear();
 

@@ -164,7 +164,7 @@ std::string Flag::enum_to_string(Flag::Type flag) {
         default:
             break;
     };
-    return std::string();
+    return std::string{};
 }
 
 const char* Flag::enum_to_char_star(Flag::Type flag) {

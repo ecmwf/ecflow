@@ -28,7 +28,6 @@
 
 using boost::asio::ip::tcp;
 
-using namespace std;
 using namespace ecf;
 
 /// Constructor opens the acceptor and starts waiting for the first incoming connection.
@@ -41,7 +40,7 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
       serverState_(SState::HALTED),
       serverEnv_(serverEnv) {
     if (serverEnv_.debug()) {
-        cout << "-->Server::server starting server on port " << serverEnv.port() << endl;
+        std::cout << "-->Server::server starting server on port " << serverEnv.port() << std::endl;
     }
 
     // Must be set before checkpt file is loaded.
@@ -87,7 +86,7 @@ BaseServer::BaseServer(boost::asio::io_context& io, ServerEnvironment& serverEnv
 
 BaseServer::~BaseServer() {
     if (serverEnv_.debug()) {
-        cout << "<--BaseServer::~Baseserver exiting server on port " << serverEnv_.port() << endl;
+        std::cout << "<--BaseServer::~Baseserver exiting server on port " << serverEnv_.port() << std::endl;
     }
 
     // Defs destructor may get called after we have returned from main. See ECFLOW-1291
@@ -99,8 +98,8 @@ BaseServer::~BaseServer() {
 
 #ifdef DEBUG
     if (defs_.use_count() != 0) {
-        cout << "Server::~server() defs_.use_count() = " << defs_.use_count()
-             << " something is still hold onto the defs, asserting\n";
+        std::cout << "Server::~server() defs_.use_count() = " << defs_.use_count()
+                  << " something is still hold onto the defs, asserting\n";
     }
 #endif
     assert(defs_.use_count() == 0);
@@ -110,7 +109,8 @@ void BaseServer::handle_terminate() {
     // if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling
     // checkpt and traverser timers, and signals" << endl;
     if (serverEnv_.debug()) {
-        cout << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
+        std::cout << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals"
+                  << std::endl;
     }
 
     // Cancel signal
@@ -190,7 +190,7 @@ bool BaseServer::restore_from_checkpt(const std::string& filename, bool& failed)
             }
             return true;
         }
-        catch (exception& e) {
+        catch (std::exception& e) {
             LOG(Log::ERR, "Failed to load *DEFS* check point file " << filename << ", because: " << e.what());
         }
     }
@@ -247,7 +247,7 @@ std::pair<std::string, std::string> BaseServer::hostPort() const {
 
 void BaseServer::updateDefs(defs_ptr defs, bool force) {
     if (serverEnv_.debug()) {
-        std::cout << "   BaseServer::updateDefs: Loading new suites" << endl;
+        std::cout << "   BaseServer::updateDefs: Loading new suites" << std::endl;
     }
 
     // After the absorb, input defs will be left with NO suites.
@@ -263,7 +263,7 @@ void BaseServer::updateDefs(defs_ptr defs, bool force) {
 
 void BaseServer::clear_defs() {
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::clear_defs()" << endl;
+        std::cout << "   BaseServer::clear_defs()" << std::endl;
     }
 
     defs_->clear();
@@ -271,8 +271,8 @@ void BaseServer::clear_defs() {
 
 bool BaseServer::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm) {
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::checkPtDefs() mode(" << m << ") check_pt_interval(" << check_pt_interval
-             << ") check_pt_save_time_alarm(" << check_pt_save_time_alarm << ")" << endl;
+        std::cout << "   BaseServer::checkPtDefs() mode(" << m << ") check_pt_interval(" << check_pt_interval
+                  << ") check_pt_save_time_alarm(" << check_pt_save_time_alarm << ")" << std::endl;
     }
 
     if (m == ecf::CheckPt::UNDEFINED && check_pt_interval == 0 && check_pt_save_time_alarm == 0) {
@@ -297,7 +297,7 @@ bool BaseServer::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int ch
 
 void BaseServer::restore_defs_from_checkpt() {
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::restore_defs_from_checkpt()" << endl;
+        std::cout << "   BaseServer::restore_defs_from_checkpt()" << std::endl;
     }
 
     if (serverState_ != SState::HALTED) {
@@ -314,7 +314,7 @@ void BaseServer::restore_defs_from_checkpt() {
 
 void BaseServer::nodeTreeStateChanged() {
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::nodeTreeStateChanged()" << endl;
+        std::cout << "   BaseServer::nodeTreeStateChanged()" << std::endl;
     }
 
     // will only actually save if configuration allows it
@@ -331,7 +331,7 @@ void BaseServer::shutdown() {
     /// SHUTDOWN     yes               yes              no             yes
     /// HALTED       yes               no               no             no
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::shutdown. Stop Scheduling new jobs only" << endl;
+        std::cout << "   BaseServer::shutdown. Stop Scheduling new jobs only" << std::endl;
     }
 
     // Stop server from creating new jobs. Don't stop the checkPtSaver_ since
@@ -357,9 +357,10 @@ void BaseServer::halted() {
     /// SHUTDOWN     yes               yes              no             yes
     /// HALTED       yes               no               no             no
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::halted. Stop Scheduling new jobs *and* block task communication. Stop check pointing. "
-                "Only accept user request"
-             << endl;
+        std::cout
+            << "   BaseServer::halted. Stop Scheduling new jobs *and* block task communication. Stop check pointing. "
+               "Only accept user request"
+            << std::endl;
     }
 
     // Stop server from creating new jobs. i.e Job scheduling.
@@ -388,7 +389,7 @@ void BaseServer::restart() {
     /// SHUTDOWN     yes               yes              no             yes
     /// HALTED       yes               no               no             no
     if (serverEnv_.debug()) {
-        std::cout << "   BaseServer::restart" << endl;
+        std::cout << "   BaseServer::restart" << std::endl;
     }
 
     // The server state *MUST* be set, *before* traverser_.start(), since that can kick off job traversal.
@@ -406,14 +407,14 @@ void BaseServer::restart() {
 
 bool BaseServer::reloadPasswdFile(std::string& errorMsg) {
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::reloadPasswdFile" << endl;
+        std::cout << "   BaseServer::reloadPasswdFile" << std::endl;
     }
     return authentication().reload_passwd_file(errorMsg);
 }
 
 bool BaseServer::reloadCustomPasswdFile(std::string& errorMsg) {
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::reloadCustomPasswdFile " << endl;
+        std::cout << "   BaseServer::reloadCustomPasswdFile " << std::endl;
     }
     return authentication().reload_custom_passwd_file(errorMsg);
 }
@@ -425,14 +426,14 @@ void BaseServer::traverse_node_tree_and_job_generate(const boost::posix_time::pt
 
 bool BaseServer::reloadWhiteListFile(std::string& errorMsg) {
     if (serverEnv_.debug()) {
-        cout << "   BaseServer::reloadWhiteListFile" << endl;
+        std::cout << "   BaseServer::reloadWhiteListFile" << std::endl;
     }
     return serverEnv_.reloadWhiteListFile(errorMsg);
 }
 
 bool BaseServer::lock(const std::string& user) {
     if (serverEnv_.debug()) {
-        std::cout << "   BaseServer::lock " << user << endl;
+        std::cout << "   BaseServer::lock " << user << std::endl;
     }
 
     if (userWhoHasLock_.empty()) {
@@ -450,7 +451,7 @@ bool BaseServer::lock(const std::string& user) {
 }
 void BaseServer::unlock() {
     if (serverEnv_.debug()) {
-        std::cout << "   BaseServer::unlock " << userWhoHasLock_ << endl;
+        std::cout << "   BaseServer::unlock " << userWhoHasLock_ << std::endl;
     }
 
     userWhoHasLock_.clear();
@@ -479,7 +480,7 @@ int BaseServer::poll_interval() const {
 void BaseServer::debug_server_on() {
     serverEnv_.set_debug(true);
     std::cout << "\nEnable DEBUG, start with DUMP of server environment:\n\n";
-    std::cout << serverEnv_.dump() << endl;
+    std::cout << serverEnv_.dump() << std::endl;
 }
 
 void BaseServer::debug_server_off() {
@@ -493,13 +494,13 @@ bool BaseServer::debug() const {
 void BaseServer::sigterm_signal_handler() {
     if (io_.stopped()) {
         if (serverEnv_.debug()) {
-            cout << "-->BaseServer::sigterm_signal_handler(): io_context has stopped returning " << endl;
+            std::cout << "-->BaseServer::sigterm_signal_handler(): io_context has stopped returning " << std::endl;
         }
         return;
     }
 
     if (serverEnv_.debug()) {
-        cout << "BaseServer::sigterm_signal_handler(): Received SIGTERM : starting check pointing" << endl;
+        std::cout << "BaseServer::sigterm_signal_handler(): Received SIGTERM : starting check pointing" << std::endl;
     }
     ecf::log(Log::MSG, "BaseServer::sigterm_signal_handler(): Received SIGTERM : starting check pointing");
 
@@ -508,7 +509,7 @@ void BaseServer::sigterm_signal_handler() {
 
     ecf::log(Log::MSG, "BaseServer::sigterm_signal_handler(): finished check pointing");
     if (serverEnv_.debug()) {
-        cout << "BaseServer::sigterm_signal_handler(): finished check pointing" << endl;
+        std::cout << "BaseServer::sigterm_signal_handler(): finished check pointing" << std::endl;
     }
 
     // We need re-wait each time signal handler is called

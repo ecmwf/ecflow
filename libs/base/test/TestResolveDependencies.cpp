@@ -21,12 +21,12 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
@@ -70,12 +70,12 @@ BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
     }
 
     // Ensure initial state is unknown
-    string suite_f_t  = "/suite/f/t";
-    string suite_f_tt = "/suite/f/tt";
-    node_ptr node_t   = defs.findAbsNode(suite_f_t);
-    node_ptr node_tt  = defs.findAbsNode(suite_f_tt);
-    suite_ptr suite   = defs.findSuite(suitename);
-    family_ptr fam    = suite->findFamily(familyname);
+    std::string suite_f_t  = "/suite/f/t";
+    std::string suite_f_tt = "/suite/f/tt";
+    node_ptr node_t        = defs.findAbsNode(suite_f_t);
+    node_ptr node_tt       = defs.findAbsNode(suite_f_tt);
+    suite_ptr suite        = defs.findSuite(suitename);
+    family_ptr fam         = suite->findFamily(familyname);
     BOOST_CHECK_MESSAGE(suite->state() == NState::UNKNOWN,
                         "expected state NState::UNKNOWN, but found to be " << NState::toString(suite->state()));
     BOOST_CHECK_MESSAGE(node_t->state() == NState::UNKNOWN,

@@ -72,7 +72,8 @@ struct Path
     auto end() const { return tokens_.end(); }
 
 private:
-    explicit Path(std::vector<std::string> tokens) : tokens_(std::move(tokens)) {}
+    explicit Path(std::vector<std::string> tokens)
+        : tokens_(std::move(tokens)) {}
 
     std::vector<std::string> tokens_;
 };

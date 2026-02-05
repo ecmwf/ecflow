@@ -29,8 +29,13 @@
 class CtsNodeCmd final : public UserCmd {
 public:
     enum Api { NO_CMD, JOB_GEN, CHECK_JOB_GEN_ONLY, GET, WHY, GET_STATE, MIGRATE };
-    CtsNodeCmd(Api a, const std::string& absNodePath) : api_(a), absNodePath_(absNodePath) {}
-    explicit CtsNodeCmd(Api a) : api_(a) { assert(a != NO_CMD); }
+    CtsNodeCmd(Api a, const std::string& absNodePath)
+        : api_(a),
+          absNodePath_(absNodePath) {}
+    explicit CtsNodeCmd(Api a)
+        : api_(a) {
+        assert(a != NO_CMD);
+    }
     CtsNodeCmd() = default;
 
     Api api() const { return api_; }
@@ -46,7 +51,7 @@ public:
 
     PrintStyle::Type_t show_style() const override;
 
-    int timeout() const override;
+    time_duration_t timeout() const override;
     bool isWrite() const override;
     bool handleRequestIsTestable() const override { return !terminate_cmd(); }
     bool why_cmd(std::string& nodePath) const override;

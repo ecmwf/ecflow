@@ -50,7 +50,8 @@ class NodeQueryOptionMaker : public NodeQueryOptionFactory {
     NodeQueryOption* make(VProperty* p) override { return new T(p); }
 
 public:
-    explicit NodeQueryOptionMaker(const std::string& t) : NodeQueryOptionFactory(t) {}
+    explicit NodeQueryOptionMaker(const std::string& t)
+        : NodeQueryOptionFactory(t) {}
 };
 
 NodeQueryOptionFactory::NodeQueryOptionFactory(const std::string& type) {
@@ -337,7 +338,8 @@ void NodeQueryComboOption::load(VSettings*) {
 //
 //===============================================
 
-NodeQueryPeriodOption::NodeQueryPeriodOption(VProperty* p) : NodeQueryOption(p) {
+NodeQueryPeriodOption::NodeQueryPeriodOption(VProperty* p)
+    : NodeQueryOption(p) {
 }
 
 void NodeQueryPeriodOption::clear() {

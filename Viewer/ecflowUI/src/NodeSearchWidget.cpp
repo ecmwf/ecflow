@@ -37,7 +37,8 @@
 //
 //======================================================
 
-NodeSearchWidget::NodeSearchWidget(QWidget* parent) : QWidget(parent) {
+NodeSearchWidget::NodeSearchWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     //--------------------

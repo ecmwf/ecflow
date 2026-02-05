@@ -184,7 +184,8 @@ public:
     QRect adjustSelectionRectNonOpt(const QRect& optRect) const override { return adjustSelectionRect(optRect); }
 };
 
-TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model, QWidget* parent) : model_(model) {
+TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model, QWidget* parent)
+    : model_(model) {
     nodeBox_ = new TreeNodeDelegateBox;
     attrBox_ = new TreeAttrDelegateBox;
 

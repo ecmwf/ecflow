@@ -26,7 +26,8 @@
 
 VProperty* PropertyDialog::prop_ = nullptr;
 
-PropertyDialog::PropertyDialog(QWidget* parent) : QDialog(parent) {
+PropertyDialog::PropertyDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 
     QString wt = windowTitle();

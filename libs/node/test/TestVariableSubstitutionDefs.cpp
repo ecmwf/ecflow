@@ -18,7 +18,6 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -44,8 +43,8 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
     }
 
     // See page 31, section 5.1 variable inheritance, of SMS users guide
-    std::string cmd = "%AVI%-%BAHRA%-%LOWER%-%AVI%";
-    string expected = "avi-bahra-10-avi";
+    std::string cmd      = "%AVI%-%BAHRA%-%LOWER%-%AVI%";
+    std::string expected = "avi-bahra-10-avi";
     BOOST_CHECK_MESSAGE(defs.variableSubstitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 

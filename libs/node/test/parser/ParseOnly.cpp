@@ -14,7 +14,6 @@
 
 #include "ecflow/node/Defs.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // leap42 boost_1_64_0 gcc-5.3.0 release mode
@@ -26,7 +25,7 @@ using namespace ecf;
 int main(int argc, char* argv[]) {
 
     if (argc != 2) {
-        cout << "Expect single argument which is path to a defs file\n";
+        std::cout << "Expect single argument which is path to a defs file\n";
         return 1;
     }
 
@@ -35,8 +34,8 @@ int main(int argc, char* argv[]) {
     Defs defs;
     std::string errorMsg, warningMsg;
     if (!defs.restore(path, errorMsg, warningMsg)) {
-        cout << errorMsg << "\n";
-        cout << warningMsg << "\n";
+        std::cout << errorMsg << "\n";
+        std::cout << warningMsg << "\n";
         return 1;
     }
 

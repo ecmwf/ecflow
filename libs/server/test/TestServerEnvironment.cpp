@@ -27,7 +27,6 @@
 #include "ecflow/server/ServerEnvironment.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Server)
@@ -40,8 +39,8 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     // ecflow server interval is valid for range [1-60]
     std::string port = Str::DEFAULT_PORT_NUMBER();
     for (int i = -10; i < 70; ++i) {
-        string errorMsg;
-        string argument               = "--ecfinterval=" + ecf::convert_to<std::string>(i);
+        std::string errorMsg;
+        std::string argument          = "--ecfinterval=" + ecf::convert_to<std::string>(i);
         std::vector<std::string> args = {"ServerEnvironment", argument};
         ServerEnvironment serverEnv(args);
         bool valid = serverEnv.valid(errorMsg);
@@ -193,80 +192,80 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
                                 "for ECF_HOME expected " << fs::current_path().string() << " but found " << p.second);
             continue;
         }
-        if (string("ECF_PORT") == p.first && !ecf::environment::has("ECF_PORT")) {
+        if (std::string("ECF_PORT") == p.first && !ecf::environment::has("ECF_PORT")) {
             BOOST_CHECK_MESSAGE(p.second == Str::DEFAULT_PORT_NUMBER(),
                                 "for ECF_PORT expected " << Str::DEFAULT_PORT_NUMBER() << " but found " << p.second);
             continue;
         }
-        if (string("ECF_CHECKINTERVAL") == p.first) {
+        if (std::string("ECF_CHECKINTERVAL") == p.first) {
             std::string expected = ecf::convert_to<std::string>(CheckPt::default_interval());
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_CHECKINTERVAL expected " << CheckPt::default_interval() << " but found "
                                                                   << p.second);
             continue;
         }
-        if (string("ECF_INTERVAL") == p.first) {
+        if (std::string("ECF_INTERVAL") == p.first) {
             std::string expected = "60";
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_INTERVAL expected " << expected << " but found " << p.second);
             continue;
         }
-        if (string("ECF_JOB_CMD") == p.first) {
+        if (std::string("ECF_JOB_CMD") == p.first) {
             std::string expected = Ecf::JOB_CMD();
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_JOB_CMD expected " << expected << " but found " << p.second);
             continue;
         }
-        if (string("ECF_KILL_CMD") == p.first) {
+        if (std::string("ECF_KILL_CMD") == p.first) {
             std::string expected = Ecf::KILL_CMD();
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_KILL_CMD expected " << expected << " but found " << p.second);
             continue;
         }
-        if (string("ECF_STATUS_CMD") == p.first) {
+        if (std::string("ECF_STATUS_CMD") == p.first) {
             std::string expected = Ecf::STATUS_CMD();
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_STATUS_CMD expected " << expected << " but found " << p.second);
             continue;
         }
-        if (string("ECF_CHECK_CMD") == p.first) {
+        if (std::string("ECF_CHECK_CMD") == p.first) {
             std::string expected = Ecf::CHECK_CMD();
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_CHECK_CMD expected " << expected << " but found " << p.second);
             continue;
         }
-        if (string("ECF_URL_CMD") == p.first) {
+        if (std::string("ECF_URL_CMD") == p.first) {
             std::string expected = Ecf::URL_CMD();
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_URL_CMD expected " << expected << " but found " << p.second);
             continue;
         }
-        if (string("ECF_URL_BASE") == p.first) {
+        if (std::string("ECF_URL_BASE") == p.first) {
             std::string expected = Ecf::URL_BASE();
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_URL_BASE expected " << expected << " but found " << p.second);
             continue;
         }
-        if (string("ECF_URL") == p.first) {
+        if (std::string("ECF_URL") == p.first) {
             std::string expected = Ecf::URL();
             BOOST_CHECK_MESSAGE(p.second == expected, "for ECF_URL expected " << expected << " but found " << p.second);
             continue;
         }
-        if (string("ECF_MICRODEF") == p.first) {
+        if (std::string("ECF_MICRODEF") == p.first) {
             std::string expected = Ecf::MICRO();
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_MICRODEF expected " << expected << " but found " << p.second);
             continue;
         }
 
-        if (string("ECF_PASSWD") == p.first) {
+        if (std::string("ECF_PASSWD") == p.first) {
 
             Host host;
             std::string port = Str::DEFAULT_PORT_NUMBER();
             if (ecf::environment::has("ECF_PORT")) {
                 port = ecf::environment::get("ECF_PORT");
             }
-            std::string expected = host.prefix_host_and_port(port, ecf::environment::ECF_PASSWD);
+            std::string expected = host.prefix_host_and_port(port, AuthenticationService::default_passwd_file());
 
             BOOST_CHECK_MESSAGE(p.second == expected,
                                 "for ECF_PASSWD expected " << expected << " but found " << p.second);
@@ -339,7 +338,7 @@ BOOST_AUTO_TEST_CASE(test_server_profile_threshold_environment_variable) {
 
     // ==================================================================================
     // Note test for errors
-    vector<string> dodgy_thresholds;
+    std::vector<std::string> dodgy_thresholds;
     dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=x");
     dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=,");
     dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=:");

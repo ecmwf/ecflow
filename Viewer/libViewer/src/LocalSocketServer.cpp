@@ -20,7 +20,9 @@
 
 #include "DirectoryHandler.hpp"
 
-LocalSocketServer::LocalSocketServer(QString serverId, QObject* parent) : QObject(parent), serverId_(serverId) {
+LocalSocketServer::LocalSocketServer(QString serverId, QObject* parent)
+    : QObject(parent),
+      serverId_(serverId) {
     QString name = generateServerName();
 
     // remove existings sockets with the same name

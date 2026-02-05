@@ -13,7 +13,8 @@
 #include <QStringList>
 #include <QVariant>
 
-EditorInfoLabel::EditorInfoLabel(QWidget* parent) : QLabel(parent) {
+EditorInfoLabel::EditorInfoLabel(QWidget* parent)
+    : QLabel(parent) {
     // Define id for the css
     setProperty("editorInfo", "1");
     setWordWrap(true);

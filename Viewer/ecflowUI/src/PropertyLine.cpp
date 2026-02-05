@@ -35,7 +35,8 @@
 
 static std::map<VProperty::GuiType, PropertyLineFactory*>* makers = nullptr;
 
-FontSizeSpin::FontSizeSpin(QWidget* parent) : QSpinBox(parent) {
+FontSizeSpin::FontSizeSpin(QWidget* parent)
+    : QSpinBox(parent) {
 }
 
 void FontSizeSpin::setFamily(QString family) {
@@ -155,7 +156,9 @@ PropertyLine* PropertyLineFactory::create(VProperty* p, bool addLabel, QWidget* 
 //
 //=========================================================================
 
-PropertyLine::PropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent) : QObject(parent), guiProp_(guiProp) {
+PropertyLine::PropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
+    : QObject(parent),
+      guiProp_(guiProp) {
     prop_ = guiProp_->link();
     assert(prop_);
 

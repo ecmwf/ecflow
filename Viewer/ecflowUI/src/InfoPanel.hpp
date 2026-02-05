@@ -32,7 +32,9 @@ class InfoPanelItemHandler {
     friend class InfoPanel;
 
 public:
-    InfoPanelItemHandler(InfoPanelDef* def, InfoPanelItem* item) : def_(def), item_(item) {}
+    InfoPanelItemHandler(InfoPanelDef* def, InfoPanelItem* item)
+        : def_(def),
+          item_(item) {}
 
     bool match(const std::vector<InfoPanelDef*>& defs) const;
     InfoPanelItem* item() const { return item_; }

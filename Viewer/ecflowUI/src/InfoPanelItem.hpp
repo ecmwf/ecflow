@@ -35,7 +35,8 @@ class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObs
     friend class InfoPanel;
 
 public:
-    InfoPanelItem() : unselectedFlags_(KeepContents) {}
+    InfoPanelItem()
+        : unselectedFlags_(KeepContents) {}
     ~InfoPanelItem() override;
 
     enum ChangeFlag {
@@ -131,7 +132,8 @@ class InfoPanelItemMaker : public InfoPanelItemFactory {
     InfoPanelItem* make() override { return new T(); }
 
 public:
-    explicit InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
+    explicit InfoPanelItemMaker(const std::string& name)
+        : InfoPanelItemFactory(name) {}
 };
 
 #endif /* ecflow_viewer_InfoPanelItem_HPP */

@@ -23,7 +23,8 @@
 
 SessionHandler* SessionHandler::instance_ = nullptr;
 
-SessionItem::SessionItem(const std::string& name) : name_(name) {
+SessionItem::SessionItem(const std::string& name)
+    : name_(name) {
     checkDir();
     isTemporary_                   = false;
     askToPreserveTemporarySession_ = true;

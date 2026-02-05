@@ -19,13 +19,13 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
@@ -116,7 +116,7 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
 
     MockServer mock_server(server_defs);
     SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
-    string error_msg;
+    std::string error_msg;
     BOOST_REQUIRE_MESSAGE(mock_server.defs()->checkInvariants(error_msg), error_msg);
     BOOST_CHECK_MESSAGE(cmd.do_sync(server_reply), "Expected server to change");
     BOOST_CHECK_MESSAGE(server_reply.in_sync(), "Expected to be in sync");

@@ -24,7 +24,8 @@ public:
         : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no),
           name_(meterName),
           value_(meterValue) {}
-    MeterCmd() : TaskCmd() {}
+    MeterCmd()
+        : TaskCmd() {}
 
     const std::string& name() const { return name_; }
     int value() const { return value_; }

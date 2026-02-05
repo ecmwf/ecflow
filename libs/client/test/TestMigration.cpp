@@ -24,7 +24,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 /**
@@ -70,7 +69,7 @@ void do_test_migration(ClientInvoker& theClient,
                 continue;
             }
 
-            cout << relPath.string() << "  : file size " << fs::file_size(relPath) << "\n\n";
+            std::cout << relPath.string() << "  : file size " << fs::file_size(relPath) << "\n\n";
             if (fs::file_size(relPath) > 0) {
                 try {
                     theClient.loadDefs(relPath.string());

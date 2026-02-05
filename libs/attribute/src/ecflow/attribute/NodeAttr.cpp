@@ -18,7 +18,6 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
 using namespace ecf;
 
 const std::string& Event::SET() {
@@ -50,14 +49,17 @@ Event::Event(int number, const std::string& eventName, bool iv, bool check_name)
       v_(iv),
       iv_(iv) {
     if (!eventName.empty() && check_name) {
-        string msg;
+        std::string msg;
         if (!Str::valid_name(eventName, msg)) {
             throw std::runtime_error("Event::Event: Invalid event name : " + msg);
         }
     }
 }
 
-Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_(iv) {
+Event::Event(const std::string& eventName, bool iv)
+    : n_(eventName),
+      v_(iv),
+      iv_(iv) {
     if (eventName.empty()) {
         throw std::runtime_error("Event::Event: Invalid event name : name must be specified if no number supplied");
     }
@@ -83,7 +85,7 @@ Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_
         }
     }
 
-    string msg;
+    std::string msg;
     if (!Str::valid_name(eventName, msg)) {
         throw std::runtime_error("Event::Event: Invalid event name : " + msg);
     }

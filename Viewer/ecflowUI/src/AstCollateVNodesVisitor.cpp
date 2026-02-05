@@ -19,7 +19,8 @@
 
 static std::vector<VAttributeType*> attrTypes;
 
-AstCollateVNodesVisitor::AstCollateVNodesVisitor(std::vector<VItem*>& s) : items_(s) {
+AstCollateVNodesVisitor::AstCollateVNodesVisitor(std::vector<VItem*>& s)
+    : items_(s) {
     if (attrTypes.empty()) {
         QStringList types;
         types << "event"

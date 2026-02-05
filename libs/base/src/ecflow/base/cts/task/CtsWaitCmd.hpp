@@ -22,7 +22,8 @@ public:
                const std::string& process_or_remote_id,
                int try_no,
                const std::string& expression);
-    CtsWaitCmd() : TaskCmd() {}
+    CtsWaitCmd()
+        : TaskCmd() {}
 
     const std::string& expression() const { return expression_; }
 

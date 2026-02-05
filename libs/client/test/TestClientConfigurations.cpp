@@ -19,7 +19,8 @@
 
 struct MockClientInvoker
 {
-    explicit MockClientInvoker(const std::string& commandline) : client_() {
+    explicit MockClientInvoker(const std::string& commandline)
+        : client_() {
         client_.set_cli(true);
         // Process the command line arguments to trigger the environment initialization
         auto b = client_.get_cmd_from_args(CommandLine(commandline));

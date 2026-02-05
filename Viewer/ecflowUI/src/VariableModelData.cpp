@@ -33,7 +33,8 @@ static std::string defaultStr("");
 //
 //==========================================
 
-VariableModelData::VariableModelData(VInfo_ptr info) : info_(info) {
+VariableModelData::VariableModelData(VInfo_ptr info)
+    : info_(info) {
     reload();
 }
 

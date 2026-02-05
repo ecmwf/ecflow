@@ -27,9 +27,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 // #define DEBUG_ZOMBIE 1
 
@@ -115,15 +112,15 @@ const char* CtsWaitCmd::desc() {
 }
 
 void CtsWaitCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CtsWaitCmd::arg(), po::value<string>(), CtsWaitCmd::desc());
+    desc.add_options()(CtsWaitCmd::arg(), boost::program_options::value<std::string>(), CtsWaitCmd::desc());
 }
 void CtsWaitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     std::string expression = vm[arg()].as<std::string>();
 
     if (clientEnv->debug()) {
-        cout << "  CtsWaitCmd::create " << CtsWaitCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
-             << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
-             << clientEnv->task_try_no() << ") expression(" << expression << ")\n";
+        std::cout << "  CtsWaitCmd::create " << CtsWaitCmd::arg() << " task_path(" << clientEnv->task_path()
+                  << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
+                  << ") try_no(" << clientEnv->task_try_no() << ") expression(" << expression << ")\n";
     }
 
     std::string errorMsg;

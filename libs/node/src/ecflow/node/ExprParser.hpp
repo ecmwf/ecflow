@@ -50,7 +50,8 @@ private:
 // But the simple expression do form a very large subset
 class SimpleExprParser {
 public:
-    explicit SimpleExprParser(const std::string& expression) : expr_(expression) {}
+    explicit SimpleExprParser(const std::string& expression)
+        : expr_(expression) {}
 
     // Disable copy (and move) semantics
     SimpleExprParser(const SimpleExprParser&)            = delete;

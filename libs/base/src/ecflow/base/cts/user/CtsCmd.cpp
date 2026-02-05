@@ -25,9 +25,6 @@
 #include "ecflow/node/JobsParam.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 // *IMPORTANT*: STATS_RESET was introduced in release 4.0.5
 
@@ -318,9 +315,9 @@ bool CtsCmd::cmd_updates_defs() const {
     return false;
 }
 
-int CtsCmd::timeout() const {
+ClientToServerCmd::time_duration_t CtsCmd::timeout() const {
     if (api_ == CtsCmd::PING) {
-        return 10;
+        return std::chrono::seconds{10};
     }
     return ClientToServerCmd::timeout();
 }
@@ -560,7 +557,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::SHUTDOWN_SERVER: {
             desc.add_options()(CtsApi::shutdownServerArg(),
-                               po::value<string>()->implicit_value(string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
                                "Stop server from scheduling new jobs.\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e\n"
                                "  --shutdown=yes\n"
@@ -576,7 +573,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::HALT_SERVER: {
             desc.add_options()(CtsApi::haltServerArg(),
-                               po::value<string>()->implicit_value(string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
                                "Stop server communication with jobs, and new job scheduling.\n"
                                "Also stops automatic check pointing\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.\n"
@@ -593,62 +590,107 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         }
         case CtsCmd::TERMINATE_SERVER: {
             desc.add_options()(CtsApi::terminateServerArg(),
-                               po::value<string>()->implicit_value(string("")),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
                                "Terminate the server.\n"
                                "  arg1 = yes(optional) # use to bypass confirmation prompt.i.e\n"
                                "  --terminate=yes");
             break;
         }
         case CtsCmd::RELOAD_WHITE_LIST_FILE: {
-            desc.add_options()(CtsApi::reloadwsfileArg(),
-                               "Reload the white list file.\n"
-                               "The white list file is used to authenticate 'user' commands.\n"
-                               "File path is specified by ECF_LISTS environment, read by the server on *startup*.\n"
-                               "Hence the contents of the file can be changed but not the location\n"
-                               "If ECF_LISTS is not specified, or is specified and is 'ecf.lists' then by default\n"
-                               "it will open <host>.<port>.ecf.lists.If a path like /var/tmp/ecf.lists was specified\n"
-                               "for ECF_LISTS, then this is the path used for reloading the white list file\n"
-                               "On startup, if the file is not present or is present but is empty (i.e just contains "
-                               "the version number)\n"
-                               "then all users have read/write access\n"
-                               "However on reload it will raises an error if file does not exist, or fails to parse\n"
-                               "Expected format for this file is:\n\n"
-                               "# comment\n"
-                               "4.4.14  # version number, this must be present, even if no users specified\n\n"
-                               "# Users with read/write access\n"
-                               "user1   # comment\n"
-                               "user2   # comment\n\n"
-                               "*       # use this form if you want all users to have read/write access\n\n"
-                               "# Users with read  access, must have - before user name\n"
-                               "-user3  # comment\n"
-                               "-user4\n\n"
-                               "-*      # use this form if you want all users to have read access");
+            desc.add_options()(
+                CtsApi::reloadwsfileArg(),
+                "Reload the white list file.\n"
+                "\n"
+                "The white list file (authorisation) is used to verify if a 'user' is allowed to perform a\n"
+                "specific command.\n"
+                "\n"
+                "The file path is specified as the ECF_LISTS variable, and loaded only once by the server\n"
+                "(on *startup*). This means that the file contents can be updated, but the file location\n"
+                "cannot change during the server execution.\n"
+                "\n"
+                "The ECF_LISTS variable can be used as follows:\n"
+                "  - if ECF_LISTS is not specified, or if it is specified with value `ecf.lists`,\n"
+                "    then the server will use the value `<host>.<port>.ecf.lists`\n"
+                "  - if ECF_LISTS is specified to be a path, such as /var/tmp/ecf.lists,\n"
+                "    then the server will use this path to reload the white list file\n"
+                "\n"
+                "The server automatically loads the white list file content as part of the startup procedure,\n"
+                "considering that if the file is not present or is empty (i.e., just contains the version\n"
+                "number) then all users have read/write access.\n"
+                "\n"
+                "The reload operation will fail if file does not exist or if the content is invalid.\n"
+                "\n"
+                "Expected format for this file is:\n"
+                "\n"
+                "\n"
+                "# all characters after the first # in a line are considered comments and are discarded\n"
+                "# empty lines are also discarded\n"
+                "\n"
+                "4.4.14  # the version number is mandatory, even if no users are specified\n"
+                "# Users with read/write access\n"
+                "user1\n"
+                "user2   # comment\n"
+                "*       # use this form if you want all users to have read/write access\n"
+                "\n"
+                "# Users with read  access, must have - before user name\n"
+                "-user3  # comment\n"
+                "-user4\n"
+                "-*      # use this form if you want all users to have read access\n"
+                "\n"
+                "\n"
+                "Usage:\n"
+                " --reloadwsfile");
             break;
         }
         case CtsCmd::RELOAD_PASSWD_FILE: {
             desc.add_options()(
                 CtsApi::reloadpasswdfile_arg(),
-                "Reload the server password file. To be used when ALL users have a password\n"
-                "Although the password file can be reloaded(i.e to add/remove users), its location can't be changed\n"
-                "The password file is located by the ECF_PASSWD environment variable, both for the client and server\n"
-                "On the server the default file name is <host>.<port>.ecf.passwd\n"
-                "On the client the default file name is ecf.passwd\n"
-                "The format of the file is same for client and server:\n\n"
+                "Reload the server password file.\n"
+                "\n"
+                "The password file (authentication) is used by the server to authenticate a 'user' by\n"
+                "verifying if the password provided by the user matches the one held by the server.\n"
+                "The password file is also used on the client to automatically load the password for the\n"
+                "'user' when connecting to the server.\n"
+                "\n"
+                "When the server is configured to use a password file, then ALL users must have a password.\n"
+                "\n"
+                "The file path is specified as the ECF_PASSWD environment variable, both for the client and\n"
+                "server, and is loaded only by the server on *startup*. This means that the file contents\n"
+                "can be updated (i.e., add/remove users), but the file location cannot change during the\n"
+                "server execution.\n"
+                "\n"
+                "The server automatically loads the password file content as part of the startup procedure.\n"
+                "\n"
+                "The ECF_PASSWD environment variable is used to specify the password file location,\n"
+                "considering that\n"
+                " - On the server, the default file name is <host>.<port>.ecf.passwd\n"
+                " - On the client, the default file name is ecf.passwd\n"
+                "\n"
+                "The format of the file is same for client and server:\n"
+                "\n"
+                "\n"
                 "4.5.0\n"
                 "# comment\n"
-                "<user> <host> <port> <passwd> # comment\n\n"
-                "i.e\n"
+                "<user> <host> <port> <passwd> # comment\n"
+                "\n"
+                "The following is an example\n"
+                "\n"
                 "4.5.0 # the version\n"
                 "fred machine1 3142 xxyyyd\n"
                 "fred machine2 3133 xxyyyd # comment\n"
-                "bill machine2 3133 xxyggyyd\n\n"
-                "The same user may appear multiple times. i.e with different host/port. This allows the password file\n"
-                "to be used for multiple servers\n"
-                "For the password authentication to work. It must be:\n"
-                "  - Defined for the client and server\n"
-                "  - Creating an empty password file,(i.e with just the version) will mean, no client can reload it.\n"
-                "    Hence at least the server administrator needs to be added to the file\n"
-                "  - The password file permission's must be set for reading by the user only\n"
+                "bill machine2 3133 xxyggyyd\n"
+                "\n"
+                "\n"
+                "Notice that the same user may appear multiple times (associated with different host/port).\n"
+                "This allows the client to use the same password file to contact multiple servers.\n"
+                "\n"
+                "For the password authentication to work, ensure the following:\n"
+                " - The password is defined for the client and server\n"
+                " - On the server, add at least the server administrator to the password file\n"
+                "   Note: If an empty password file (i.e., containing just the version) is used,\n"
+                "         no user is allowed access.\n"
+                " - On the client, the password file should be readable only by the 'user' itself\n"
+                "\n"
                 "Usage:\n"
                 " --reloadpasswdfile");
             break;
@@ -656,31 +698,51 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE: {
             desc.add_options()(
                 CtsApi::reloadcustompasswdfile_arg(),
-                "Reload the server custom password file. For those user's who don't use login name\n"
-                "This should be used when most users use the machine login name, but a few users specify their own "
-                "user name,\n"
-                "in this case these user must provide a password.\n"
-                "Although the password file can be reloaded(i.e to add/remove users), its location can't be changed\n"
-                "The password file is located by the ECF_CUSTOM_PASSWD environment variable, both for the client and "
-                "server\n"
-                "On the server the default file name is <host>.<port>.ecf.custom_passwd\n"
-                "On the client the default file name is ecf.custom_passwd\n"
+                "Reload the server custom password file.\n"
+                "\n"
+                "The custom password file (authentication) is used by the server to authenticate a 'user' by\n"
+                "verifying if the password provided by the user matches the one held by the server. This\n"
+                "particular file is used for authentication of users that explicitly specify the user name\n"
+                "(either via the environment variable ECF_USER or the --user option).\n"
+                "\n"
+                "This mechanism should be used when most users use the machine login name, but a few users\n"
+                "specify their own user name, in which case the password must also be explicitly provided.\n"
+                "\n"
+                "The file path is specified as the ECF_CUSTOM_PASSWD environment variable, both for the\n"
+                "client and server, and is loaded only by the server on *startup*. This means that the file\n"
+                "contents can be updated (i.e., add/remove users), but the file location cannot change during\n"
+                "the server execution.\n"
+                "\n"
+                "The server automatically loads the password file content as part of the startup procedure.\n"
+                "\n"
+                "The ECF_CUSTOM_PASSWD environment variable is used to specify the password file location,\n"
+                "considering that\n"
+                " - On the server the default file name is <host>.<port>.ecf.custom_passwd\n"
+                " - On the client the default file name is ecf.custom_passwd\n"
+                "\n"
                 "The format of the file is same for client and server:\n\n"
+                "\n"
                 "4.5.0\n"
                 "# comment\n"
-                "<user> <host> <port> <passwd> # comment\n\n"
-                "i.e\n"
+                "<user> <host> <port> <passwd> # comment\n"
+                "\n"
+                "The following is an example\n"
+                "\n"
                 "4.5.0 # the version\n"
                 "fred machine1 3142 xxyyyd\n"
                 "fred machine2 3133 xxyyyd # comment\n"
-                "bill machine2 3133 xxyggyyd\n\n"
-                "The same user may appear multiple times. i.e with different host/port. This allows the password file\n"
-                "to be used for multiple servers\n"
-                "For the password authentication to work. It must be:\n"
-                "  - Defined for the client and server\n"
-                "  - Creating an empty password file,(i.e with just the version) will mean, no client can reload it.\n"
-                "    Hence at least the server administrator needs to be added to the file\n"
-                "  - The password file permission's must be set for reading by the user only\n"
+                "bill machine2 3133 xxyggyyd\n"
+                "\n"
+                "Notice that the same user may appear multiple times (associated with different host/port).\n"
+                "This allows the client to use the same password file to contact multiple servers.\n"
+                "\n"
+                "For the password authentication to work, ensure the following:\n"
+                " - The password is defined for the client and server\n"
+                " - On the server, add at least the server administrator to the password file\n"
+                "   Note: If an empty password file (i.e., containing just the version) is used,\n"
+                "         no user is allowed access.\n"
+                " - On the client, the password file should be readable only by the 'user' itself\n"
+                "\n"
                 "Usage:\n"
                 " --reloadcustompasswdfile");
             break;
@@ -729,8 +791,9 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const 
             break;
         }
         case CtsCmd::SERVER_LOAD: {
-            desc.add_options()(
-                CtsApi::server_load_arg(), po::value<std::string>()->implicit_value(string("")), server_load_desc());
+            desc.add_options()(CtsApi::server_load_arg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                               server_load_desc());
             break;
         }
         case CtsCmd::NO_CMD:
@@ -754,7 +817,7 @@ bool CtsCmd::handleRequestIsTestable() const {
 
 void CtsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     if (ac->debug()) {
-        cout << "  CtsCmd::create api = '" << api_ << "'.\n";
+        std::cout << "  CtsCmd::create api = '" << api_ << "'.\n";
     }
 
     assert(api_ != CtsCmd::NO_CMD);

@@ -21,13 +21,16 @@
 //
 //========================================================
 
-NodeQueryResultItem::NodeQueryResultItem(VNode* node) : node_(node) {
+NodeQueryResultItem::NodeQueryResultItem(VNode* node)
+    : node_(node) {
     if (node_) {
         server_ = node_->server();
     }
 }
 
-NodeQueryResultItem::NodeQueryResultItem(NodeQueryResultTmp_ptr d) : node_(d->node_), attr_(d->attr_) {
+NodeQueryResultItem::NodeQueryResultItem(NodeQueryResultTmp_ptr d)
+    : node_(d->node_),
+      attr_(d->attr_) {
     if (node_) {
         server_ = node_->server();
     }
@@ -144,7 +147,8 @@ bool NodeQueryResultBlock::find(const VNode* nc, int& pos, int& cnt) {
 //
 //========================================================
 
-NodeQueryResult::NodeQueryResult(QObject* parent) : QObject(parent) {
+NodeQueryResult::NodeQueryResult(QObject* parent)
+    : QObject(parent) {
 }
 
 NodeQueryResult::~NodeQueryResult() {

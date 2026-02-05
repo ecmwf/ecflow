@@ -15,8 +15,6 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-using namespace std;
-
 bool DayParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     //  day monday  # free expired
     //  day tuesday # expired

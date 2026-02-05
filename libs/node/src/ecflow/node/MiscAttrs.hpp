@@ -21,7 +21,8 @@ class MiscAttrs {
 public:
     MiscAttrs() = default;
 
-    explicit MiscAttrs(Node* node) : node_(node) {}
+    explicit MiscAttrs(Node* node)
+        : node_(node) {}
 
     MiscAttrs(const MiscAttrs& rhs)            = default;
     MiscAttrs& operator=(const MiscAttrs&)     = default;

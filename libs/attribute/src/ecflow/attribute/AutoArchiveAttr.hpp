@@ -34,7 +34,10 @@ public:
         : time_(ts),
           relative_(relative),
           idle_(idle) {}
-    explicit AutoArchiveAttr(int days, bool idle = false) : time_(TimeSlot(days * 24, 0)), days_(true), idle_(idle) {}
+    explicit AutoArchiveAttr(int days, bool idle = false)
+        : time_(TimeSlot(days * 24, 0)),
+          days_(true),
+          idle_(idle) {}
 
     bool operator==(const AutoArchiveAttr& rhs) const;
     bool operator<(const AutoArchiveAttr& rhs) const { return time_ < rhs.time(); }

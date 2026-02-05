@@ -23,8 +23,6 @@
     #include "ecflow/core/Ecf.hpp"
 #endif
 
-using namespace std;
-
 // #define DEBUG_CALENDAR 1;
 
 namespace ecf {

@@ -575,4 +575,410 @@ endsuite;
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(T_PasswordFile)
+
+BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_using_just_defaults) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case verifies the correct file name is used to load the user password, when:
+     *  - not provided with any additional configuration
+     *
+     * Requirements
+     *
+     * - ecFlow uses the default password file name to load 'regular' user credentials.
+     * - ecFlow considers `<host>.<port>.ecf.passwd` as the default 'regular' user password file name.
+     *
+     * - ecFlow uses the default password file name to load 'custom' user credentials.
+     * - ecFlow considers `<host>.<port>.ecf.custom_passwd` as the default 'custom' user password file name.
+     *
+     */
+
+    using namespace foolproof::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto user = User{"alice", "somesecret", "rw"};
+
+    std::string default_passwd        = "ecf.passwd";
+    std::string default_custom_passwd = "ecf.custom_passwd";
+    std::string actual_passwd         = host.value() + "." + std::to_string(port.value()) + "." + default_passwd;
+    std::string actual_custom_passwd  = host.value() + "." + std::to_string(port.value()) + "." + default_custom_passwd;
+
+    auto authentication_1 = MakeTestFile{}
+                                .with(SpecificFileLocation{actual_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+    auto authentication_2 = MakeTestFile{}
+                                .with(SpecificFileLocation{actual_custom_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+
+    auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    auto s          = server.get();
+    auto [out, err] = s.shutdown();
+
+    ECF_TEST_DBG("\n\n\n****\n\n" << out << "\n\n\n");
+
+    BOOST_CHECK(out.find("Password file located at '" + actual_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file located at '" + actual_custom_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_default_value) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case verifies the correct file name is used to load the user password, when:
+     *  - `ECF_PASSWD=ecf.passwd` environment variable is exported
+     *  - `ECF_CUSTOM_PASSWD=ecf.custom_passwd` environment variable is exported
+     *
+     * Requirements
+     *
+     * - ecFlow uses the default password file name to load 'regular' user credentials.
+     * - ecFlow considers `<host>.<port>.ecf.passwd` as the default 'regular' user password file name.
+     *
+     * - ecFlow uses the default password file name to load 'custom' user credentials.
+     * - ecFlow considers `<host>.<port>.ecf.custom_passwd` as the default 'custom' user password file name.
+     *
+     */
+
+    using namespace foolproof::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto user = User{"alice", "somesecret", "rw"};
+
+    std::string default_passwd        = "ecf.passwd";
+    std::string default_custom_passwd = "ecf.custom_passwd";
+    std::string actual_passwd         = host.value() + "." + std::to_string(port.value()) + "." + default_passwd;
+    std::string actual_custom_passwd  = host.value() + "." + std::to_string(port.value()) + "." + default_custom_passwd;
+
+    auto authentication_1 = MakeTestFile{}
+                                .with(SpecificFileLocation{actual_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+    auto authentication_2 = MakeTestFile{}
+                                .with(SpecificFileLocation{actual_custom_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+
+    auto passwd_envvar        = MakeEnvironmentVariable{}.with("ECF_PASSWD", default_passwd).create();
+    auto custom_passwd_envvar = MakeEnvironmentVariable{}.with("ECF_CUSTOM_PASSWD", default_custom_passwd).create();
+
+    auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    auto s          = server.get();
+    auto [out, err] = s.shutdown();
+
+    BOOST_CHECK(out.find("Password file located at '" + actual_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file located at '" + actual_custom_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_default_value) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case verifies the correct file name is used to load the user password, when:
+     *  - `ECF_PASSWD=ecf.passwd` variable is provided in server_environment.cfg
+     *  - `ECF_CUSTOM_PASSWD=ecf.custom_passwd` variable is provided in server_environment.cfg
+     *
+     * Requirements
+     *
+     * - ecFlow uses the default password file name to load 'regular' user credentials.
+     * - ecFlow considers `<host>.<port>.ecf.passwd` as the default 'regular' user password file name.
+     *
+     * - ecFlow uses the default password file name to load 'custom' user credentials.
+     * - ecFlow considers `<host>.<port>.ecf.custom_passwd` as the default 'custom' user password file name.
+     *
+     */
+
+    using namespace foolproof::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto user = User{"alice", "somesecret", "rw"};
+
+    std::string default_passwd        = "ecf.passwd";
+    std::string default_custom_passwd = "ecf.custom_passwd";
+    std::string actual_passwd         = host.value() + "." + std::to_string(port.value()) + "." + default_passwd;
+    std::string actual_custom_passwd  = host.value() + "." + std::to_string(port.value()) + "." + default_custom_passwd;
+
+    auto authentication_1 = MakeTestFile{}
+                                .with(SpecificFileLocation{actual_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+    auto authentication_2 = MakeTestFile{}
+                                .with(SpecificFileLocation{actual_custom_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+
+    auto server_environment_cfg =
+        MakeTestFile{}
+            .with(SpecificFileLocation{"server_environment.cfg", cwd})
+            .with(ServerEnvironmentFile{std::make_tuple("ECF_PASSWD", default_passwd),
+                                        std::make_tuple("ECF_CUSTOM_PASSWD", default_custom_passwd)}
+                      .data())
+            .create();
+
+    auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    auto s          = server.get();
+    auto [out, err] = s.shutdown();
+
+    BOOST_CHECK(out.find("Password file located at '" + actual_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file located at '" + actual_custom_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_specific_value) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case verifies the correct file name is used to load the user password, when:
+     *  - `ECF_PASSWD=<specific-value>` environment variable is exported
+     *  - `ECF_CUSTOM_PASSWD=<specific-value>` environment variable is exported
+     *
+     * Requirements
+     *
+     * - ecFlow uses the specific password file name to load 'regular' user credentials.
+     * - ecFlow considers `<specific-value>` as the default 'regular' user password file name.
+     *
+     * - ecFlow uses the specific password file name to load 'custom' user credentials.
+     * - ecFlow considers `<specific-value>` as the default 'custom' user password file name.
+     *
+     */
+
+    using namespace foolproof::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto user = User{"alice", "somesecret", "rw"};
+
+    std::string specific_passwd        = "specific.passwd";
+    std::string specific_custom_passwd = "specific.custom_passwd";
+
+    auto authentication_1 = MakeTestFile{}
+                                .with(SpecificFileLocation{specific_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+    auto authentication_2 = MakeTestFile{}
+                                .with(SpecificFileLocation{specific_custom_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+
+    auto passwd_envvar        = MakeEnvironmentVariable{}.with("ECF_PASSWD", specific_passwd).create();
+    auto custom_passwd_envvar = MakeEnvironmentVariable{}.with("ECF_CUSTOM_PASSWD", specific_custom_passwd).create();
+
+    auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    auto s          = server.get();
+    auto [out, err] = s.shutdown();
+
+    ECF_TEST_DBG("\n\n\n****\n\n" << out << "\n\n\n");
+
+    BOOST_CHECK(out.find("Password file located at '" + specific_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file located at '" + specific_custom_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_value) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case verifies the correct file name is used to load the user password, when:
+     *  - `ECF_PASSWD=<specific-value>` variable is provided in server_environment.cfg
+     *  - `ECF_CUSTOM_PASSWD=<specific-value>` variable is provided in server_environment.cfg
+     *
+     * Requirements
+     *
+     * - ecFlow uses the specific password file name to load 'regular' user credentials.
+     * - ecFlow considers `<specific-value>` as the default 'regular' user password file name.
+     *
+     * - ecFlow uses the specific password file name to load 'custom' user credentials.
+     * - ecFlow considers `<specific-value>` as the default 'custom' user password file name.
+     *
+     */
+
+    using namespace foolproof::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto user = User{"alice", "somesecret", "rw"};
+
+    std::string specific_passwd        = "specific.passwd";
+    std::string specific_custom_passwd = "specific.custom_passwd";
+
+    auto authentication_1 = MakeTestFile{}
+                                .with(SpecificFileLocation{specific_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+    auto authentication_2 = MakeTestFile{}
+                                .with(SpecificFileLocation{specific_custom_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+
+    auto server_environment_cfg =
+        MakeTestFile{}
+            .with(SpecificFileLocation{"server_environment.cfg", cwd})
+            .with(ServerEnvironmentFile{std::make_tuple("ECF_PASSWD", specific_passwd),
+                                        std::make_tuple("ECF_CUSTOM_PASSWD", specific_custom_passwd)}
+                      .data())
+            .create();
+
+    auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    auto s          = server.get();
+    auto [out, err] = s.shutdown();
+
+    BOOST_CHECK(out.find("Password file located at '" + specific_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file located at '" + specific_custom_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_value_and_then_overriden_by_envvar) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case verifies the correct file name is used to load the user password, when:
+     *  - `ECF_PASSWD=<original-value>` variable is provided in server_environment.cfg
+     *  - `ECF_CUSTOM_PASSWD=<original-value>` variable is provided in server_environment.cfg
+     *  - `ECF_PASSWD=<specific-value>` environment variable is exported
+     *  - `ECF_CUSTOM_PASSWD=<specific-value>` environment variable is exported (note that the original value is
+     *
+     * Requirements
+     *
+     * - ecFlow uses the specific password file name to load 'regular' user credentials.
+     * - ecFlow considers that `<specific-value>` overrides `<original-value>` as the 'regular' user password file name.
+     *
+     * - ecFlow uses the specific password file name to load 'custom' user credentials.
+     * - ecFlow considers that `<specific-value>` overrides `<original-value>` as the 'custom' user password file name.
+     *
+     */
+
+    using namespace foolproof::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto user = User{"alice", "somesecret", "rw"};
+
+    std::string specific_passwd        = "specific.passwd";
+    std::string original_passwd        = specific_passwd + "_extra";
+    std::string specific_custom_passwd = "specific.custom_passwd";
+    std::string original_custom_passwd = specific_custom_passwd + "_extra";
+
+    auto authentication_1 = MakeTestFile{}
+                                .with(SpecificFileLocation{specific_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+    auto authentication_2 = MakeTestFile{}
+                                .with(SpecificFileLocation{specific_custom_passwd, cwd})
+                                .with(PasswordsFile{host, port, user}.data())
+                                .create();
+
+    auto passwd_envvar        = MakeEnvironmentVariable{}.with("ECF_PASSWD", specific_passwd).create();
+    auto custom_passwd_envvar = MakeEnvironmentVariable{}.with("ECF_CUSTOM_PASSWD", specific_custom_passwd).create();
+
+    auto server_environment_cfg =
+        MakeTestFile{}
+            .with(SpecificFileLocation{"server_environment.cfg", cwd})
+            .with(ServerEnvironmentFile{std::make_tuple("ECF_PASSWD", original_passwd),
+                                        std::make_tuple("ECF_CUSTOM_PASSWD", original_custom_passwd)}
+                      .data())
+            .create();
+
+    auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    auto s          = server.get();
+    auto [out, err] = s.shutdown();
+
+    ECF_TEST_DBG("\n\n\n****\n\n" << out << "\n\n\n");
+
+    BOOST_CHECK(out.find("Password file located at '" + specific_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Password file successfully loaded") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file located at '" + specific_custom_passwd + "'") != std::string::npos);
+    BOOST_CHECK(out.find("Custom Password file successfully loaded") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -19,7 +19,8 @@
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 
-TriggerEditorWidget::TriggerEditorWidget(QWidget* parent) : QWidget(parent) {
+TriggerEditorWidget::TriggerEditorWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
 #if 0
@@ -34,7 +35,8 @@ TriggerEditorWidget::TriggerEditorWidget(QWidget* parent) : QWidget(parent) {
     te_->setShowLineNumbers(false);
 }
 
-TriggerEditor::TriggerEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info, "trigger", parent) {
+TriggerEditor::TriggerEditor(VInfo_ptr info, QWidget* parent)
+    : AttributeEditor(info, "trigger", parent) {
     w_ = new TriggerEditorWidget(this);
     addForm(w_);
 

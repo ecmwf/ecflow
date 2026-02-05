@@ -16,8 +16,6 @@
 #include "ecflow/server/BaseServer.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 
-using boost::asio::ip::tcp;
-using namespace std;
 using namespace ecf;
 
 SslTcpServer::SslTcpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
@@ -31,7 +29,7 @@ SslTcpServer::SslTcpServer(BaseServer* server, boost::asio::io_context& io, Serv
 
 void SslTcpServer::start_accept() {
     if (serverEnv_.debug()) {
-        cout << "   SslTcpServer::start_accept()" << endl;
+        std::cout << "   SslTcpServer::start_accept()" << std::endl;
     }
 
     ssl_connection_ptr new_conn =
@@ -43,14 +41,14 @@ void SslTcpServer::start_accept() {
 
 void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connection_ptr conn) {
     if (serverEnv_.debug()) {
-        cout << "   SslTcpServer::handle_accept" << endl;
+        std::cout << "   SslTcpServer::handle_accept" << std::endl;
     }
 
     // Check whether the server was stopped by a signal before this completion
     // handler had a chance to run.
     if (!acceptor_.is_open()) {
         if (serverEnv_.debug()) {
-            cout << "   SslTcpServer::handle_accept:  acceptor is closed, returning" << endl;
+            std::cout << "   SslTcpServer::handle_accept:  acceptor is closed, returning" << std::endl;
         }
         return;
     }
@@ -63,7 +61,7 @@ void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connect
     }
     else {
         if (serverEnv_.debug()) {
-            cout << "   SslTcpServer::handle_accept " << e.message() << endl;
+            std::cout << "   SslTcpServer::handle_accept " << e.message() << std::endl;
         }
         if (e != boost::asio::error::operation_aborted) {
             // An error occurred. Log it
@@ -84,7 +82,7 @@ void SslTcpServer::handle_accept(const boost::system::error_code& e, ssl_connect
 
 void SslTcpServer::handle_handshake(const boost::system::error_code& e, ssl_connection_ptr new_conn) {
     if (serverEnv_.debug()) {
-        cout << "   SslTcpServer::handle_handshake" << endl;
+        std::cout << "   SslTcpServer::handle_handshake" << std::endl;
     }
 
     if (!e) {
@@ -127,8 +125,8 @@ void SslTcpServer::handle_write(const boost::system::error_code& e, ssl_connecti
     // Nothing to do. The socket will be closed automatically when the last
     // reference to the connection object goes away.
     if (serverEnv_.debug()) {
-        cout << "   SslTcpServer::handle_write: client request " << inbound_request_ << " replying with  "
-             << outbound_response_ << endl;
+        std::cout << "   SslTcpServer::handle_write: client request " << inbound_request_ << " replying with  "
+                  << outbound_response_ << std::endl;
     }
 
     if (e) {

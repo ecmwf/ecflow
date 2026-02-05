@@ -55,7 +55,6 @@
 
 using boost::asio::ip::tcp;
 
-using namespace std;
 using namespace ecf;
 
 TcpBaseServer::TcpBaseServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
@@ -74,7 +73,7 @@ TcpBaseServer::TcpBaseServer(BaseServer* server, boost::asio::io_context& io, Se
 void TcpBaseServer::handle_request() {
     // See what kind of message we got from the client
     if (serverEnv_.debug()) {
-        std::cout << "   TcpBaseServer::handle_request  : client request " << inbound_request_ << endl;
+        std::cout << "   TcpBaseServer::handle_request  : client request " << inbound_request_ << std::endl;
     }
 
     // Provide Identity to the command, to enable authentication
@@ -86,7 +85,7 @@ void TcpBaseServer::handle_request() {
         // Note:: Handle request will first authenticate
         outbound_response_.set_cmd(inbound_request_.handleRequest(server_));
     }
-    catch (exception& e) {
+    catch (std::exception& e) {
         outbound_response_.set_cmd(PreAllocatedReply::error_cmd(e.what()));
     }
 
@@ -128,8 +127,8 @@ void TcpBaseServer::handle_terminate_request() {
     //           i.e a read only user should not be allowed to terminate server.
     if (inbound_request_.terminateRequest()) {
         if (serverEnv_.debug()) {
-            cout << "   <-- TcpBaseServer::handle_terminate_request  exiting server via terminate() port "
-                 << serverEnv_.port() << endl;
+            std::cout << "   <-- TcpBaseServer::handle_terminate_request  exiting server via terminate() port "
+                      << serverEnv_.port() << std::endl;
         }
         terminate();
     }
@@ -139,7 +138,7 @@ void TcpBaseServer::terminate() {
     // The server is terminated by cancelling all outstanding asynchronous
     // operations. Once all operations have finished the io_context::run() call  will exit.
     if (serverEnv_.debug()) {
-        cout << "   Server::terminate(): posting call to Server::handle_terminate" << endl;
+        std::cout << "   Server::terminate(): posting call to Server::handle_terminate" << std::endl;
     }
 
     // Post a call to the stop function so that Server::stop() is safe to call from any thread.
@@ -150,7 +149,8 @@ void TcpBaseServer::handle_terminate() {
     // if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling
     // checkpt and traverser timers, and signals" << endl;
     if (serverEnv_.debug()) {
-        cout << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
+        std::cout << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals"
+                  << std::endl;
     }
 
     server_->handle_terminate();

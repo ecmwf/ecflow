@@ -42,7 +42,9 @@ void Task::copy(const Task& rhs) {
     }
 }
 
-Task::Task(const Task& rhs) : Submittable(rhs), alias_no_(rhs.alias_no_) {
+Task::Task(const Task& rhs)
+    : Submittable(rhs),
+      alias_no_(rhs.alias_no_) {
     copy(rhs);
 }
 
@@ -293,7 +295,7 @@ std::string Task::find_node_path(const std::string& type, const std::string& nod
             return absNodePath();
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 void Task::reset() {

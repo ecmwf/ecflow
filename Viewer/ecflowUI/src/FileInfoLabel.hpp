@@ -47,7 +47,8 @@ protected:
 
 class DirInfoLabel : public FileInfoLabel {
 public:
-    explicit DirInfoLabel(QWidget* parent = nullptr) : FileInfoLabel(parent) {}
+    explicit DirInfoLabel(QWidget* parent = nullptr)
+        : FileInfoLabel(parent) {}
 
     void update(VReply*);
 };

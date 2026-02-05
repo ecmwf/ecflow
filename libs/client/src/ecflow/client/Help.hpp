@@ -17,9 +17,10 @@
 
 class Help {
 public:
-    using descriptions_t = boost::program_options::options_description;
+    using description_t  = boost::program_options::options_description;
+    using descriptions_t = std::vector<boost::shared_ptr<boost::program_options::option_description>>;
 
-    Help(const descriptions_t& descriptions, const std::string& topic);
+    Help(const description_t& description, const std::string& topic);
     ~Help();
 
     friend std::ostream& operator<<(std::ostream& os, const Help& help);

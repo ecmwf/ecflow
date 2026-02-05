@@ -18,7 +18,8 @@
 #include "SessionRenameDialog.hpp"
 #include "ui_SessionDialog.h"
 
-SessionDialog::SessionDialog(QWidget* parent) : QDialog(parent) {
+SessionDialog::SessionDialog(QWidget* parent)
+    : QDialog(parent) {
     // ui->setupUi(this);
     setupUi(this);
 

@@ -44,7 +44,9 @@ QString logFileName;
     Constructs an empty TextPagerEdit with parent \a parent.
 */
 
-TextPagerEdit::TextPagerEdit(QWidget* parent) : QAbstractScrollArea(parent), d(new TextEditPrivate(this)) {
+TextPagerEdit::TextPagerEdit(QWidget* parent)
+    : QAbstractScrollArea(parent),
+      d(new TextEditPrivate(this)) {
     viewport()->setCursor(Qt::IBeamCursor);
 
     setProperty("pager", "1");

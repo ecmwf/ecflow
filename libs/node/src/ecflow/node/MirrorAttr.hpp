@@ -98,6 +98,13 @@ public:
     [[nodiscard]] inline const std::string& auth() const { return auth_; }
     [[nodiscard]] inline const std::string& reason() const { return reason_; }
 
+    [[nodiscard]] inline std::string resolved_remote_host() const {
+        return resolve_cfg(remote_host_, default_remote_host, fallback_remote_port);
+    }
+    [[nodiscard]] inline std::string resolved_remote_port() const {
+        return resolve_cfg(remote_port_, default_remote_port, fallback_remote_port);
+    }
+
     void set_parent(Node* parent) { parent_ = parent; }
 
     unsigned int state_change_no() const { return state_change_no_; }

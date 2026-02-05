@@ -16,9 +16,9 @@
 #include "MyDefsFixture.hpp"
 #include "PersistHelper.hpp"
 #include "ecflow/core/PrintStyle.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Parser)

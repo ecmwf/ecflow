@@ -50,7 +50,9 @@ int OutputBrowser::minConfirmSearchSize_ = 20 * 1024 * 1024;
 
 class OutputBrowserState : public QObject {
 public:
-    explicit OutputBrowserState(OutputBrowser* browser) : QObject(browser), browser_(browser) {}
+    explicit OutputBrowserState(OutputBrowser* browser)
+        : QObject(browser),
+          browser_(browser) {}
     ~OutputBrowserState() override = default;
 
     virtual void handleClear();
@@ -98,7 +100,8 @@ void OutputBrowserState::handleReloadBegin() {
 }
 
 // Empty
-OutputBrowserEmptyState::OutputBrowserEmptyState(OutputBrowser* b) : OutputBrowserState(b) {
+OutputBrowserEmptyState::OutputBrowserEmptyState(OutputBrowser* b)
+    : OutputBrowserState(b) {
     browser_->clearIt();
 }
 
@@ -123,7 +126,9 @@ void OutputBrowserReloadState::handleLoad(VFile_ptr file) {
 //
 //========================================
 
-OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent), searchTb_(nullptr) {
+OutputBrowser::OutputBrowser(QWidget* parent)
+    : QWidget(parent),
+      searchTb_(nullptr) {
     auto* vb = new QVBoxLayout(this);
     vb->setContentsMargins(0, 0, 0, 0);
     vb->setSpacing(2);

@@ -91,7 +91,8 @@ QColor CommandOutput::statusColour() const {
 //
 //===============================================
 
-CommandOutputHandler::CommandOutputHandler(QObject* parent) : QObject(parent) {
+CommandOutputHandler::CommandOutputHandler(QObject* parent)
+    : QObject(parent) {
     showDialogStdOutProp_ = VConfig::instance()->find("view.shellCommand.showPopupOnStdOut");
     showDialogStdErrProp_ = VConfig::instance()->find("view.shellCommand.showPopupOnStdErr");
 }

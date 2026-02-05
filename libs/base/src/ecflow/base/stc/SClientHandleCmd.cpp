@@ -15,14 +15,13 @@
 #include "ecflow/core/Converter.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool SClientHandleCmd::equals(ServerToClientCmd* rhs) const {
     return (dynamic_cast<SClientHandleCmd*>(rhs)) ? ServerToClientCmd::equals(rhs) : false;
 }
 
 std::string SClientHandleCmd::print() const {
-    string os;
+    std::string os;
     os += "cmd:SClientHandleCmd [ ";
     os += ecf::convert_to<std::string>(handle_);
     os += " ]";
@@ -31,7 +30,7 @@ std::string SClientHandleCmd::print() const {
 
 bool SClientHandleCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
     if (debug) {
-        cout << "  SClientHandleCmd::handle_server_response handle_ = " << handle_ << "\n";
+        std::cout << "  SClientHandleCmd::handle_server_response handle_ = " << handle_ << "\n";
     }
     server_reply.set_client_handle(handle_);
     return true;

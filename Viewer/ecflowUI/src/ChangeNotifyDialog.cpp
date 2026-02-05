@@ -41,7 +41,8 @@ Q_DECLARE_METATYPE(QList<int>)
 //
 //===========================================================
 
-ChangeNotifyDialogButton::ChangeNotifyDialogButton(QWidget* parent) : QToolButton(parent) {
+ChangeNotifyDialogButton::ChangeNotifyDialogButton(QWidget* parent)
+    : QToolButton(parent) {
     setProperty("notify", "1");
     setAutoRaise(true);
     setIconSize(QSize(20, 20));
@@ -107,7 +108,8 @@ void ChangeNotifyDialogButton::updateSettings() {
 //
 //===========================================================
 
-ChangeNotifyDialogWidget::ChangeNotifyDialogWidget(QWidget* parent) : QWidget(parent) {
+ChangeNotifyDialogWidget::ChangeNotifyDialogWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 }
 
@@ -225,7 +227,8 @@ void ChangeNotifyDialogWidget::readSettings(const QSettings& settings) {
 //
 //===========================================================
 
-ChangeNotifyDialog::ChangeNotifyDialog(QWidget* parent) : QDialog(parent) {
+ChangeNotifyDialog::ChangeNotifyDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 
     buttonHb_ = new QHBoxLayout(buttonW_);

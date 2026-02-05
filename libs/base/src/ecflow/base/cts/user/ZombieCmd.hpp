@@ -24,7 +24,8 @@ public:
           process_id_(process_id),
           password_(password),
           paths_(paths) {}
-    explicit ZombieCmd(ecf::ZombieCtrlAction uc = ecf::ZombieCtrlAction::BLOCK) : user_action_(uc) {}
+    explicit ZombieCmd(ecf::ZombieCtrlAction uc = ecf::ZombieCtrlAction::BLOCK)
+        : user_action_(uc) {}
 
     const std::vector<std::string>& paths() const { return paths_; }
     const std::string& process_or_remote_id() const { return process_id_; }

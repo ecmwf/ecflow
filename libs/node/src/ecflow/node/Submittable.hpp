@@ -18,7 +18,8 @@ class SubGenVariables;
 
 class Submittable : public Node {
 protected:
-    Submittable(const std::string& name, bool check) : Node(name, check) {}
+    Submittable(const std::string& name, bool check)
+        : Node(name, check) {}
     Submittable() = default;
     Submittable(const Submittable& rhs)
         : Node(rhs),

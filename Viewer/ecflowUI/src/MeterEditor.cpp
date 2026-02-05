@@ -19,11 +19,14 @@
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 
-MeterEditorWidget::MeterEditorWidget(QWidget* parent) : QWidget(parent) {
+MeterEditorWidget::MeterEditorWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 }
 
-MeterEditor::MeterEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info, "meter", parent), oriVal_(0) {
+MeterEditor::MeterEditor(VInfo_ptr info, QWidget* parent)
+    : AttributeEditor(info, "meter", parent),
+      oriVal_(0) {
     w_ = new MeterEditorWidget(this);
     addForm(w_);
 

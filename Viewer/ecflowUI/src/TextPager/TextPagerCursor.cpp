@@ -23,7 +23,8 @@
 
 class SelectionChangedEmitter {
 public:
-    explicit SelectionChangedEmitter(TextPagerEdit* t) : textEdit(t) {
+    explicit SelectionChangedEmitter(TextPagerEdit* t)
+        : textEdit(t) {
         if (textEdit) {
             selectionStart = textEdit->textCursor().selectionStart();
             selectionEnd   = textEdit->textCursor().selectionEnd();
@@ -86,7 +87,8 @@ TextPagerCursor::TextPagerCursor(const TextPagerEdit* edit, int pos, int anc) {
     }
 }
 
-TextPagerCursor::TextPagerCursor(const TextPagerCursor& cursor) : d(cursor.d) {
+TextPagerCursor::TextPagerCursor(const TextPagerCursor& cursor)
+    : d(cursor.d) {
     ref();
 }
 

@@ -16,11 +16,13 @@ StringMatchMode::StringMatchMode() {
     init();
 }
 
-StringMatchMode::StringMatchMode(Mode mode) : mode_(mode) {
+StringMatchMode::StringMatchMode(Mode mode)
+    : mode_(mode) {
     init();
 }
 
-StringMatchMode::StringMatchMode(int idx) : mode_(static_cast<Mode>(idx)) {
+StringMatchMode::StringMatchMode(int idx)
+    : mode_(static_cast<Mode>(idx)) {
     init();
 }
 

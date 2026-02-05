@@ -18,7 +18,8 @@
 // VAutoCancelAttrType
 //================================
 
-VAutoCancelAttrType::VAutoCancelAttrType() : VAttributeType("autocancel") {
+VAutoCancelAttrType::VAutoCancelAttrType()
+    : VAttributeType("autocancel") {
     dataCount_                           = 2;
     searchKeyToData_["autocancel_value"] = ValueIndex;
     scanProc_                            = VAutoCancelAttr::scan;
@@ -59,7 +60,8 @@ void VAutoCancelAttrType::encode(ecf::AutoCancelAttr* a, QStringList& data) cons
 //
 //=====================================================
 
-VAutoCancelAttr::VAutoCancelAttr(VNode* parent) : VAttribute(parent, 0) {
+VAutoCancelAttr::VAutoCancelAttr(VNode* parent)
+    : VAttribute(parent, 0) {
 }
 
 VAttributeType* VAutoCancelAttr::type() const {

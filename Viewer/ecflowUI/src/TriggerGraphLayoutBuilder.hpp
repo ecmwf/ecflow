@@ -18,7 +18,9 @@ class TriggerGraphLayoutNode;
 
 struct GraphLayoutNode
 {
-    GraphLayoutNode(int width, int height) : width_(width), height_(height) {}
+    GraphLayoutNode(int width, int height)
+        : width_(width),
+          height_(height) {}
     explicit GraphLayoutNode(GraphLayoutNode* n)
         : width_(n->width_),
           height_(n->height_),
@@ -55,7 +57,9 @@ struct GraphLayoutNode
 
 class GraphLayoutEdge {
 public:
-    GraphLayoutEdge(int from, int to) : from_(from), to_(to) {}
+    GraphLayoutEdge(int from, int to)
+        : from_(from),
+          to_(to) {}
 
     int from_;
     int to_;
@@ -66,8 +70,10 @@ public:
 
 struct SimpleGraphLayoutNode : GraphLayoutNode
 {
-    explicit SimpleGraphLayoutNode(GraphLayoutNode* n) : GraphLayoutNode(n) {}
-    SimpleGraphLayoutNode() : GraphLayoutNode(0, 0) {}
+    explicit SimpleGraphLayoutNode(GraphLayoutNode* n)
+        : GraphLayoutNode(n) {}
+    SimpleGraphLayoutNode()
+        : GraphLayoutNode(0, 0) {}
 
     int arc_{0};
     int level_{0};

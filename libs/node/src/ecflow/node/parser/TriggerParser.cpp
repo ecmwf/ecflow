@@ -18,7 +18,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 static bool hasExtension(const std::string& line, const std::vector<std::string>& lineTokens) {
     //    cout << "hasExtension = ";

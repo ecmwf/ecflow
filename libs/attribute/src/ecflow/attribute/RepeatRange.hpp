@@ -19,7 +19,8 @@ namespace ecf {
 template <typename R>
 struct Range
 {
-    explicit Range(const R& r) : r_(r) {}
+    explicit Range(const R& r)
+        : r_(r) {}
     const R& r_;
 };
 
@@ -30,7 +31,8 @@ struct Range<RepeatDay>
     using iterator   = std::size_t;
     using value_type = int;
 
-    explicit Range(const RepeatDay& r) : r_(r) {}
+    explicit Range(const RepeatDay& r)
+        : r_(r) {}
 
     iterator begin() const { return 0; }
     iterator end() const { return 0; }
@@ -51,7 +53,8 @@ struct Range<RepeatDate>
     using iterator   = std::size_t;
     using value_type = int;
 
-    explicit Range(const RepeatDate& r) : r_(r) {}
+    explicit Range(const RepeatDate& r)
+        : r_(r) {}
 
     iterator begin() const { return 0; }
     iterator end() const {
@@ -90,7 +93,8 @@ struct Range<RepeatDateList>
     using iterator   = std::size_t;
     using value_type = date_t;
 
-    explicit Range(const RepeatDateList& r) : r_(r) {}
+    explicit Range(const RepeatDateList& r)
+        : r_(r) {}
 
     iterator begin() const { return 0; }
     iterator end() const { return r_.indexNum(); }
@@ -113,7 +117,8 @@ struct Range<RepeatDateTime>
     using iterator   = std::size_t;
     using value_type = Instant;
 
-    explicit Range(const RepeatDateTime& r) : r_(r) {}
+    explicit Range(const RepeatDateTime& r)
+        : r_(r) {}
 
     iterator begin() const { return 0; }
     iterator end() const {
@@ -158,7 +163,8 @@ struct Range<RepeatInteger>
     using iterator   = std::size_t;
     using value_type = int;
 
-    explicit Range(const RepeatInteger& r) : r_(r) {}
+    explicit Range(const RepeatInteger& r)
+        : r_(r) {}
 
     iterator begin() const { return 0; }
     iterator end() const {
@@ -194,7 +200,8 @@ struct Range<RepeatEnumerated>
     using iterator   = std::size_t;
     using value_type = std::string;
 
-    explicit Range(const RepeatEnumerated& r) : r_(r) {}
+    explicit Range(const RepeatEnumerated& r)
+        : r_(r) {}
 
     iterator begin() const { return 0; }
     iterator end() const { return r_.end() + 1; }
@@ -217,7 +224,8 @@ struct Range<RepeatString>
     using iterator   = std::size_t;
     using value_type = std::string;
 
-    explicit Range(const RepeatString& r) : r_(r) {}
+    explicit Range(const RepeatString& r)
+        : r_(r) {}
 
     iterator begin() const { return 0; }
     iterator end() const { return r_.end() + 1; }
