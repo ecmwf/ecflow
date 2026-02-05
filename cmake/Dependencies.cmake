@@ -130,7 +130,7 @@ if (ENABLE_PYTHON)
 
   ecbuild_info( "Locating pybind11" )
 
-  find_package(pybind11 REQUIRED)
+  find_package(pybind11 3.0.1 REQUIRED)
 
   ecbuild_info( "pybind11 details:" )
   ecbuild_info( " * pybind11_FOUND        : ${pybind11_FOUND}" )
