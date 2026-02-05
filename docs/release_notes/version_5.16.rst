@@ -6,6 +6,9 @@ Version 5.16 updates
 .. role:: jiraissue
    :class: hidden
 
+.. role:: githubissue
+   :class: hidden
+
 Version 5.16.0
 ==============
 
@@ -22,6 +25,7 @@ General
 - **Improvement** enable to add an inlimit with -s (submission) or -n (group) flags :jiraissue:`ECFLOW-2064`
 - **Improvement** include process/machine resources in server `--stats` :jiraissue:`ECFLOW-2066`
 - **Improvement** enforce the use of TLS v1.3 by the server #infosec :jiraissue:`ECFLOW-2001`
+- **Improvement** ensure that all date/time-related Repeat variables are 0-padded :jiraissue:`https://github.com/ecmwf/ecflow/issues/296`
 
 - **Fix** correct reload of whitelist file when created after server start :jiraissue:`ECFLOW-2057`
 - **Fix** correct removal of Mirror attribute when remote server is unavailable :jiraissue:`ECFLOW-2058`
