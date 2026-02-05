@@ -845,150 +845,269 @@ Glossary
       Since the :term:`ecf script` can call ecflow_client(i.e :term:`child command`) then typically
       some are set in an include header.
       
-      .. list-table:: Environment variables common for User and Task commands
+      .. list-table:: Environment variables used by *ecflow_client*
          :header-rows: 1
-         :widths: 10 50 10 30
+         :widths: 20 80
 
-         * - Variable Name
-           - Explanation
-           - Compulsory
-           - Example
-         * - ECF_PORT
-           - Port number of the :term:`ecflow_server`. Must match :term:`ecflow_server`
-           - Yes/No
-           - We can use:
-            
-             .. code-block:: shell
-            
-                ecflow_client --port 3141
+         * - Variable
+           - Description
 
-             as an alternative to specifying the ECF_PORT.
          * - ECF_HOST
-           - Name of the host running the :term:`ecflow_server` 
-           - Yes/No
-           - We can use:
-            
-             .. code-block:: shell 
-            
-               ecflow --host machine1
 
-             as an alternative to specifying ECF_HOST
+             (User + Child)
+           - The name of the :term:`ecflow_server` host
+
+             |
+
+             .. code-block:: shell
+
+                # Export variable
+                export ECF_HOST=machine1
+                ecflow_client <cmd>
+
+                # Or, use the command line option
+                ecflow_client --host machine1 <cmd>
+
+         * - ECF_PORT
+
+             (User + Child)
+           - The port on the :term:`ecflow_server` host
+
+             |
+
+             .. code-block:: shell
+
+                # Export variable
+                export ECF_PORT=1234
+                ecflow_client <cmd>
+
+                # Or, use the command line option
+                ecflow_client --port 3141 <cmd>
+
          * - NO_ECF
-           - If set exits ecflow_client immediately with success. This allows the scripts to be tested independent of the server
-           - No
-           - .. code-block:: shell
-            
+
+             (User + Child)
+           - Speficies if client terminates immediately with success
+             (to allow the scripts to be tested independently from the server)
+
+             |
+
+             .. code-block:: shell
+
+               # To terminate immediately
+               # with a success code
                export NO_ECF=1
 
          * - ECF_DENIED
-           - If server denies client communication and this flag is set, exit with an error. Avoids 24hr hour connection attempt to :term:`ecflow_server`.
-           - No
-           - .. code-block:: shell
-             
+
+             (User + Child)
+           - Specifies if client terminates with error when the server denies contacts,
+             in order to avoid waiting for ECF_TIMEOUT.
+
+             |
+
+             .. code-block:: shell
+
+               # To terminate immediately
+               # with an error code
+               # when server denies contact
                export ECF_DENIED=1
 
          * - ECF_SSL
-           - For secure communication between server and client -- requires build with SSL enabled.
-           - No
-           - .. code-block:: shell
-              
-               # To share a certificate amongst multiple servers
-               export ECF_SSL=1 # or empty value
-               # To use specific server certificate
-               export ECF_SSL=<any non-empty value, except '1'>
 
-             When `ECF_SSL=1`, ecflow will search for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
+             (User + Child)
+           - Enables secure communication between server and client.
+
+             |
+
+             When `ECF_SSL=1`, ecflow searches for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
              and then fallback to the server specific certificate at `$HOME/.ecflowrc/ssl/<host>.<port>.crt`.
+
+             |
+
+             Using `ECF_SSL=<value>`, where `<value>` is any non-empty value except '1',
+             allows users to specify a custom certificate path.
+
+             |
 
              Secure communication can also be activated using the :code:`ecflow_client --ssl ...` option.
              When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
 
-      .. list-table:: Environment variables for Task commands
-         :header-rows: 1
-         :widths: 10 50 10 30
+             |
 
-         * - Variable Name
-           - Explanation
-           - Compulsory
-           - Example
+             .. code-block:: shell
+              
+               # To use a shared certificate
+               # amongst multiple servers
+               export ECF_SSL=1 # or empty value
+
+               # To use a specific certificate
+               export ECF_SSL=<value>
+
          * - :term:`ECF_NAME`
-           - Path to the task
-           - Yes
-           - /suite/family/task
-         * - :term:`ECF_PASS`
-           - Jobs password. Generated by the server, will replace %ECF_PASS% in the scripts,during job generation.Used for authenticating child commands.
-           - Yes
-           - (generated)
-         * - ECF_RID
-           - Remote id. Allow easier job kill, and disambiguate a zombie
-           - Yes
-           - (generated)
-         * - :term:`ECF_TRYNO`
-           - The number of times the job has run. This is allocated by the server and used in job/output file name generation.
-           - No 
-           - (generated)
-         * - ECF_HOSTFILE
-           - File that lists alternate hosts to try, if connection to main host fails
-           - No
-           - $HOME/.echostfile
-         * - ECF_HOSTFILE_POLICY
-           - The policy, one of "task" or "all" indicates when to perform retry based on the ECF_HOSTFILE.
-             The default policy is "task", meaning that the retry will only be performed for task (i.e. commands) commands.
-             If the policy is "all", the retry will be performed for both task and user commands (including :code:`ping`).
-           - No
-           - .. code-block:: shell
 
+             (Child only)
+           - The path to the task
+
+             |
+
+             **This variable is mandatory for child commands**
+
+             |
+
+             The value is used by the server to identify the task, and is provided by the server (%ECF_NAME%) to be used in variable substitution in the script.
+
+             .. code-block:: shell
+
+                /suite/family/task
+
+         * - :term:`ECF_PASS`
+
+             (Child only)
+           - The password of the task.
+
+             |
+
+             **This variable is mandatory for child commands**
+
+             |
+
+             The value is used by the server to identify the task, and is provided by the server (%ECF_PASS%) to be used in variable substitution in the script.
+
+         * - ECF_RID
+
+             (Child only)
+           - The remote id of the task.
+
+             |
+
+             **This variable is mandatory for child commands**
+
+             |
+
+             The value is used by the server to identify the task, and is provided by the server (%ECF_RID%) to be used in variable substitution in the script.
+
+         * - :term:`ECF_TRYNO`
+
+             (Child only)
+           - The number of times the task has run.
+
+             |
+
+             This value is provided by the server (%ECF_TRYNO%) and used in job/output file name generation.
+
+         * - ECF_HOSTFILE
+
+             (User + Child)
+           - The path to the file that lists alternate hosts to try, if connection to main host fails
+
+             |
+
+             .. code-block:: shell
+
+                $HOME/.echostfile
+
+         * - ECF_HOSTFILE_POLICY
+
+             (User + Child)
+           - The policy, either "task" or "all", indicates when to perform retry based on the ECF_HOSTFILE.
+             The default policy is "task", meaning that the retry will only be performed for task (i.e. child) commands.
+             If the policy is "all", the retry will be performed for both task and user commands (including :code:`ping`).
+
+             |
+
+             .. code-block:: shell
+
+               # To apply retry policy only to task commands
+               export ECF_HOSTFILE_POLICY=task
+
+               # To apply retry policy to all commands
                export ECF_HOSTFILE_POLICY=all
 
          * - ECF_TIMEOUT
-           - Maximum time (in seconds) for the client to deliver message
-           - No
-           - default value: 24 * 60 * 60 # i.e. 24 hours
+
+             (Child only)
+           - Maximum time (in seconds) for the client to perform operations (e.g. :code:`init`, :code:`abort`, :code:`complete`) with the server before giving up.
+
+             |
+
+             This limit applies to all child commands, and user commands that have ECF_HOSTFILE_POLICY set to "all". When the client is unable to contact the server within the timeout period, it will exit with an error code.
+
+             |
+
+             The default value is 24 hours (24 * 60 * 60 seconds). The minimum value allowed is 60 seconds, while the maximum value is 24 hours. If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+             |
 
              .. code-block:: shell
 
-               export ECF_TIMEOUT=3600 # wait for maximum of 1 hour
+               # To wait a maximum of 1 hour
+               export ECF_TIMEOUT=3600
 
          * - ECF_CONNECT_TIMEOUT
-           - Maximum time (in seconds) for the client to establish connection
-           - No
-           - default value: 0
+
+             (Child only)
+           - Maximum time (in seconds) for the client to establish connection with the server before giving up.
+
+             |
+
+             The default value is 0 seconds, meaning that there is no timeout for establishing connection.
+
          * - ECF_ZOMBIE_TIMEOUT
-           - Maximum time (in seconds) for the zombie Task client (performing :code:`init`, :code:`abort`, :code:`complete`, etc) to get a reply from the server.
-           - No
-           - 12*3600 (default value):
+
+             (Child only)
+           - Maximum time (in seconds) for the client to perform operations (e.g. :code:`init`, :code:`abort`, :code:`complete`) to get a reply from the server.
+
+             |
+
+             This limit applies to child commands that have been marked as zombies by the server. When the client is unable to contact the server within the timeout period, it will exit with an error code.
+
+             |
+
+             The default value is 12 hours (12 * 60 * 60 seconds). The minimum value allowed is 60 seconds, while the maximum value is 12 hours. If a value outside this range is specified, it will be adjusted to the nearest limit.
+
+             |
 
              .. code-block:: shell
-             
-               export ECF_ZOMBIE_TIMEOUT=36024*3600
-         
-      .. list-table:: Variables specific to user commands
-         :header-rows: 1
-         :widths: 10 50 10 30
 
-         * - Variable Name
-           - Explanation
-           - Compulsory
-           - Example
+               # To wait a maximum of 1 hour
+               export ECF_ZOMBIE_TIMEOUT=3600
+
          * - :term:`ECF_PASSWD`
-           - path to the client password file, used for password based authentication
-           - No
-           - .. code-block:: shell
-  
-               export ECF_PASSWD=mymachine.3141.ecf.passwd
+
+             (User only)
+           - The path to the user password file
+
+             |
+
+             .. code-block:: shell
+
+               # Either export variable
+               export ECF_PASSWD=ecf.passwd
+               ecflow_client <comand>
+
+               # Or, use the command line option
+               ecflow_client --password <password> <comand>
 
          * - ECF_USER
-           - When user need to pose as another user, i.e. when users id on the client machine, doesn't  match his id on the remote server. Requires password file.
-           - No
-           - .. code-block:: shell
-              
-               export ECF_USER=my_user_name
 
-             To avoid setting environment variable we can use:
+             (User only)
+           - The user name to authenticate with the server.
+
+             |
+
+             When user need to pose as another user, i.e. when users id on the client machine, doesn't  match his id on the remote server. Requires password file.
+
+             |
 
              .. code-block:: shell
-                  
-                ecflow_client --user my_user_name ......
+
+                # Either export variable
+                export ECF_USER=user_name
+                ecflow_client <comand>
+
+                # Or, use the command line option
+                ecflow_client --user user_name <comand>
 
    ecflow_server
       This executable is the server. 
