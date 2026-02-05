@@ -1,5 +1,5 @@
-name: All CD
- 
+name: Dummy CD
+
 on:
   push:
     tags:
@@ -10,16 +10,14 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:
- 
+
 permissions:
   contents: write
- 
+
 jobs:
   build-and-release:
-    if: |
-      startsWith(github.ref, 'refs/tags/') ||
-      github.ref_name == github.event.repository.default_branch ||
-      (github.event.pull_request.base.ref == github.event.repository.default_branch && github.event.label.name == 'approved-for-cd')
+    name: "${{ startsWith(github.ref, 'refs/tags/') && 'Build and Release' || 'Dry Run' }}"
+    if: true
     uses: ecmwf/reusable-workflows/.github/workflows/main-cd.yml@v2
     with:
       ref_name: ${{ github.ref_name }}

@@ -15,5 +15,114 @@ builds:
     config:
       conda_build_args: "-m .cd/conda/conda_build_config_common.yaml -m .cd/conda/conda_build_config_py313.yaml --no-anaconda-upload"
 
+  - name: ecflow-hpc
+    type: hpc
+    enabled: true
+    config:
+      platform: gnu-8.5.0
+      install_type: module
+      install_lib_dir: lib
+
+      #dependencies: |
+      #  ecmwf/ecbuild@develop
+
+      parallel: 64
+      self_test: true
+
+      stages:
+        - name: python312
+          modules:
+            - boost/1.87.0
+            - python3/3.12.9-01
+            - qt/6.6.1
+            - cmake/new
+            - ecbuild/new
+          test_command: &test_cmd "ctest --output-on-failure -j 8 -L nightly"
+          install_command: |
+            #chmod -R u+w $INSTALL_PREFIX || true
+            cmake --install .
+          cmake_options: &common_cmake_options
+            CMAKE_VERBOSE_MAKEFILE: ON
+            ENABLE_ALL_TESTS: ON
+            ENABLE_STATIC_BOOST_LIBS: ON
+            ENABLE_WARNINGS: ON
+            CMAKE_BUILD_TYPE: Release
+            CMAKE_CXX_FLAGS: -Wno-deprecated-declarations
+            CMAKE_PYTHON_INSTALL_TYPE: local
+            INSTALL_LIB_DIR: lib
+            UI_SYSTEM_SERVERS_LIST: /ec/vol/ecflow_def/servers.list.all
+
+        - name: python311
+          modules:
+            - boost/1.84.0
+            - python3/3.11.8-01
+            - qt/5.12.0
+            - cmake/new
+            - ecbuild/new
+          test_command: *test_cmd
+          cmake_options:
+            <<: *common_cmake_options
+            DBoost_ROOT: /usr/local/apps/boost/1.84.0/GNU/8.5
+            DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.84.0/GNU/8.5/include
+            DBoost_PYTHON311_LIBRARY_RELEASE: /usr/local/apps/boost/1.84.0/GNU/8.5/lib/libboost_python311.so
+            Python3_ROOT_DIR: /usr/local/apps/python3/3.11.8-01
+            Python3_EXECUTABLE: /usr/local/apps/python3/3.11.8-01/bin/python3
+            Python3_INCLUDE_DIRS: /usr/local/apps/python3/3.11.8-01/include/python3.11
+            Python3_LIBRARIES: /usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so
+            Python3_LIBRARY_DIRS: /usr/local/apps/python3/3.11.8-01/lib64
+            ENABLE_UI: OFF
+          install_command: |
+            chmod u+w $INSTALL_PREFIX/lib
+            cmake --install . --component python
+
+        - name: python310
+          modules:
+            - boost/1.81.0
+            - python3/3.10.10-01
+            - qt/6.2.0
+            - cmake/new
+            - ecbuild/new
+          test_command: *test_cmd
+          cmake_options:
+            <<: *common_cmake_options
+            ENABLE_UI: OFF
+            Boost_ROOT: /usr/local/apps/boost/1.81.0/GNU/8.5
+            Boost_INCLUDE_DIR: /usr/local/apps/boost/1.81.0/GNU/12.2/include
+            Boost_PYTHON310_LIBRARY_RELEASE: /usr/local/apps/boost/1.81.0/GNU/8.5/lib/libboost_python310.so
+            Python3_ROOT_DIR: /usr/local/apps/python3/3.10.10-01
+            Python3_EXECUTABLE: /usr/local/apps/python3/3.10.10-01/bin/python3
+            Python3_INCLUDE_DIRS: /usr/local/apps/python3/3.10.10-01/include/python3.10
+            Python3_LIBRARIES: /usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
+            Python3_LIBRARY_DIRS: /usr/local/apps/python3/3.10.10-01/lib64
+          install_command: |
+            chmod u+w $INSTALL_PREFIX/lib
+            cmake --install . --component python
+
+        - name: python38
+          modules:
+            - boost/1.75.0
+            - python3/3.8.8-01
+            - qt/5.12.0
+            - cmake/new
+            - ecbuild/new
+          test_command: *test_cmd
+          cmake_options:
+            <<: *common_cmake_options
+            ENABLE_UI: OFF
+            Boost_ROOT: /usr/local/apps/boost/1.75.0/GNU/8.5
+            Boost_INCLUDE_DIR: /usr/local/apps/boost/1.75.0/GNU/8.5/include
+            Boost_PYTHON38_LIBRARY_RELEASE: /usr/local/apps/boost/1.75.0/GNU/8.5/lib/libboost_python38.so
+            Python3_ROOT_DIR: /usr/local/apps/python3/3.8.8-01
+            Python3_EXECUTABLE: /usr/local/apps/python3/3.8.8-01/bin/python3
+            Python3_INCLUDE_DIRS: /usr/local/apps/python3/3.8.8-01/include/python3.8
+            Python3_LIBRARIES: /usr/local/apps/python3/3.8.8-01/lib64/libpython3.8.so
+            Python3_LIBRARY_DIRS: /usr/local/apps/python3/3.8.8-01/lib64
+          install_command: |
+            chmod u+w $INSTALL_PREFIX/lib
+            cmake --install . --component python
+
+      finalize:
+        lock_permissions: true
+
 release:
-  enabled: true
+  enabled: false
