@@ -17,7 +17,8 @@
 #include "ServerList.hpp"
 #include "ViewerUtil.hpp"
 
-ServerListSyncWidget::ServerListSyncWidget(QWidget* parent) : QWidget(parent) {
+ServerListSyncWidget::ServerListSyncWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     title_->setShowTypeTitle(false);

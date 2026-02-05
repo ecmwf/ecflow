@@ -15,16 +15,26 @@
 #include "ecflow/node/AbstractObserver.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 class MyObserver : public AbstractObserver {
 public:
-    explicit MyObserver(Defs* defs) : update_count_(0), defs_(defs), node_(nullptr) { defs->attach(this); }
-    explicit MyObserver(Node* node) : update_count_(0), defs_(nullptr), node_(node) { node->attach(this); }
+    explicit MyObserver(Defs* defs)
+        : update_count_(0),
+          defs_(defs),
+          node_(nullptr) {
+        defs->attach(this);
+    }
+    explicit MyObserver(Node* node)
+        : update_count_(0),
+          defs_(nullptr),
+          node_(node) {
+        node->attach(this);
+    }
 
     ~MyObserver() override {
         /* std::cout << "~MyObserver()\n"; */

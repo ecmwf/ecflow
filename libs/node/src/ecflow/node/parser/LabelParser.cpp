@@ -15,7 +15,6 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-using namespace std;
 using namespace ecf;
 
 bool LabelParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {

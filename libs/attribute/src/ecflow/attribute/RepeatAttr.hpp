@@ -36,7 +36,8 @@
 //
 class RepeatBase {
 public:
-    explicit RepeatBase(const std::string& name) : name_(name) {}
+    explicit RepeatBase(const std::string& name)
+        : name_(name) {}
     RepeatBase() = default;
     virtual ~RepeatBase();
 
@@ -557,10 +558,13 @@ private:
 /// Note: this applies to the clone as well
 class RepeatDay final : public RepeatBase {
 public:
-    RepeatDay() : RepeatBase("day") {}
+    RepeatDay()
+        : RepeatBase("day") {}
 
     // Enable implicit conversion from integer
-    RepeatDay(int step) : RepeatBase("day"), step_(step) {}
+    RepeatDay(int step)
+        : RepeatBase("day"),
+          step_(step) {}
 
     bool operator==(const RepeatDay& rhs) const;
     bool operator<(const RepeatDay& rhs) const { return step_ < rhs.step(); }
@@ -576,10 +580,10 @@ public:
     RepeatBase* clone() const override { return new RepeatDay(step_, valid_); }
     bool compare(RepeatBase*) const override;
     bool valid() const override { return valid_; }
-    std::string valueAsString() const override { return std::string(); };
-    std::string value_as_string(int) const override { return std::string(); }
-    std::string next_value_as_string() const override { return std::string(); }
-    std::string prev_value_as_string() const override { return std::string(); }
+    std::string valueAsString() const override { return std::string{}; };
+    std::string value_as_string(int) const override { return std::string{}; }
+    std::string next_value_as_string() const override { return std::string{}; }
+    std::string prev_value_as_string() const override { return std::string{}; }
 
     void setToLastValue() override { /* do nothing  ?? */ }
     void reset() override { valid_ = true; }
@@ -595,7 +599,10 @@ public:
     bool is_repeat_day() const override { return true; }
 
 private:
-    RepeatDay(int step, bool valid) : RepeatBase("day"), step_(step), valid_(valid) {}
+    RepeatDay(int step, bool valid)
+        : RepeatBase("day"),
+          step_(step),
+          valid_(valid) {}
 
 private:
     int step_{1};
@@ -663,10 +670,10 @@ public:
             type_->setToLastValue();
         }
     }
-    std::string valueAsString() const { return (type_) ? type_->valueAsString() : std::string(); }
-    std::string value_as_string(int index) const { return (type_) ? type_->value_as_string(index) : std::string(); }
-    std::string next_value_as_string() const { return (type_) ? type_->next_value_as_string() : std::string(); }
-    std::string prev_value_as_string() const { return (type_) ? type_->prev_value_as_string() : std::string(); }
+    std::string valueAsString() const { return (type_) ? type_->valueAsString() : std::string{}; }
+    std::string value_as_string(int index) const { return (type_) ? type_->value_as_string(index) : std::string{}; }
+    std::string next_value_as_string() const { return (type_) ? type_->next_value_as_string() : std::string{}; }
+    std::string prev_value_as_string() const { return (type_) ? type_->prev_value_as_string() : std::string{}; }
 
     void reset() {
         if (type_) {
@@ -693,8 +700,8 @@ public:
             type_->set_value(newValue);
         }
     }
-    std::string toString() const { return (type_) ? type_->toString() : std::string(); }
-    std::string dump() const { return (type_) ? type_->dump() : std::string(); } // additional state
+    std::string toString() const { return (type_) ? type_->toString() : std::string{}; }
+    std::string dump() const { return (type_) ? type_->dump() : std::string{}; } // additional state
     unsigned int state_change_no() const { return (type_) ? type_->state_change_no() : 0; }
 
     /// simulator functions:

@@ -30,7 +30,9 @@
 #include "VConfig.hpp"
 #include "ui_OutputFetchInfo.h"
 
-OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent), ui_(new Ui::OutputFetchInfo) {
+OutputFetchInfo::OutputFetchInfo(QWidget* parent)
+    : QWidget(parent),
+      ui_(new Ui::OutputFetchInfo) {
     ui_->setupUi(this);
 
     ui_->te->setMinimumWidth(400);

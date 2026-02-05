@@ -17,7 +17,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool DefsStatusParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     if (lineTokens.size() < 2) {

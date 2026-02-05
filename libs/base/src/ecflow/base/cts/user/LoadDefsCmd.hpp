@@ -32,7 +32,7 @@ public:
     const std::string& defs_as_string() const { return defs_; }
 
     bool isWrite() const override { return true; }
-    int timeout() const override { return time_out_for_load_sync_and_get(); }
+    time_duration_t timeout() const override { return timeout_for_load_sync_and_get(); }
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;

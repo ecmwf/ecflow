@@ -447,7 +447,8 @@ void MenuHandler::setupShortcut(QObject* receiver, QWidget* w, const std::string
 // Menu class functions
 // --------------------
 
-Menu::Menu(const std::string& name) : name_(name) {
+Menu::Menu(const std::string& name)
+    : name_(name) {
 }
 
 Menu::~Menu() {

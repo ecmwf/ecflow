@@ -16,8 +16,10 @@
 ///================================================================================
 class SStringVecCmd final : public ServerToClientCmd {
 public:
-    explicit SStringVecCmd(const std::vector<std::string>& s) : vec_(s) {}
-    SStringVecCmd() : ServerToClientCmd() {}
+    explicit SStringVecCmd(const std::vector<std::string>& s)
+        : vec_(s) {}
+    SStringVecCmd()
+        : ServerToClientCmd() {}
 
     void init(const std::vector<std::string>& s) { vec_ = s; }
     const std::vector<std::string>& get_string_vec() const { return vec_; }

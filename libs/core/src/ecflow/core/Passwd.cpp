@@ -17,8 +17,8 @@
 double ecf_drand48();
 
 std::string Passwd::generate() {
-    std::string pw{9, '\0'};
-    for (size_t i = 0; i < 8; i++) { /* generate a random password */
+    std::array<char, 8> pw;
+    for (size_t i = 0; i < pw.size(); i++) { /* generate a random password */
 
         pw[i] = 64.0 * ecf_drand48() + '.'; /* Just crack this one! */
         if (pw[i] > '9') {
@@ -29,7 +29,7 @@ std::string Passwd::generate() {
         }
     }
 
-    return pw;
+    return std::string(pw.begin(), pw.end());
 }
 
 double ecf_drand48()

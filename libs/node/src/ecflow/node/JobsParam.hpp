@@ -21,7 +21,8 @@
 class JobsParam {
 public:
     // This constructor is used in test
-    explicit JobsParam(bool createJobs = false) : createJobs_(createJobs) {}
+    explicit JobsParam(bool createJobs = false)
+        : createJobs_(createJobs) {}
 
     JobsParam(int submitJobsInterval, bool createJobs, bool spawn_jobs = true)
         : createJobs_(createJobs),

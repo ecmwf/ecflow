@@ -18,7 +18,8 @@
 #include "VConfig.hpp"
 #include "WidgetNameProvider.hpp"
 
-NodeSearchWindow::NodeSearchWindow(QWidget* parent) : QMainWindow(parent) {
+NodeSearchWindow::NodeSearchWindow(QWidget* parent)
+    : QMainWindow(parent) {
     setupUi(this);
 
     setAttribute(Qt::WA_DeleteOnClose);

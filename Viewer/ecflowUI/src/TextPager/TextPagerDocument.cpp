@@ -54,7 +54,9 @@ static void findSleep(const TextPagerDocument* document) {
 }
 #endif
 
-TextPagerDocument::TextPagerDocument(QObject* parent) : QObject(parent), d(new TextDocumentPrivate(this)) {
+TextPagerDocument::TextPagerDocument(QObject* parent)
+    : QObject(parent),
+      d(new TextDocumentPrivate(this)) {
 }
 
 TextPagerDocument::~TextPagerDocument() {
@@ -381,7 +383,8 @@ QTextCodec* TextPagerDocument::textCodec() const {
 
 class FindScope {
 public:
-    explicit FindScope(TextDocumentPrivate::FindState* s) : state(s) {
+    explicit FindScope(TextDocumentPrivate::FindState* s)
+        : state(s) {
         if (state) {
             *state = TextDocumentPrivate::Finding;
         }

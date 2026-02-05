@@ -15,7 +15,8 @@
 // format:
 //  [type]server://nodepath:atttibutename
 
-VItemPathParser::VItemPathParser(const std::string& path, PathFormat format) : itemType_(NoType) {
+VItemPathParser::VItemPathParser(const std::string& path, PathFormat format)
+    : itemType_(NoType) {
     if (path.empty()) {
         return;
     }

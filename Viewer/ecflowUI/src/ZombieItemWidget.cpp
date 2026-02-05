@@ -27,7 +27,8 @@ static bool firstRun = true;
 //
 //========================================================
 
-ZombieItemWidget::ZombieItemWidget(QWidget* parent) : QWidget(parent) {
+ZombieItemWidget::ZombieItemWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     infoProvider_ = new ZombieProvider(this);

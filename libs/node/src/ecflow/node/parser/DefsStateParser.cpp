@@ -15,8 +15,6 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-using namespace std;
-
 bool DefsStateParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // cout << "line = " << line << "\n";
     if (lineTokens.size() < 2) {

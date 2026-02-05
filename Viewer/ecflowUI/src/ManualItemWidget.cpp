@@ -17,7 +17,8 @@
 #include "VConfig.hpp"
 #include "VReply.hpp"
 
-ManualItemWidget::ManualItemWidget(QWidget* parent) : CodeItemWidget(parent) {
+ManualItemWidget::ManualItemWidget(QWidget* parent)
+    : CodeItemWidget(parent) {
     fileLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();

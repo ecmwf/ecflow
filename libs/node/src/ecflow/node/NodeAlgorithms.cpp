@@ -8,12 +8,9 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/node/Alias.hpp"
-#include "ecflow/node/Defs.hpp"
-#include "ecflow/node/ExprAstVisitor.hpp"
-#include "ecflow/node/Family.hpp"
-#include "ecflow/node/Node.hpp"
-#include "ecflow/node/Task.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
+
+#include "ecflow/core/Overload.hpp"
 
 namespace ecf {
 
@@ -434,6 +431,72 @@ std::vector<node_ptr> get_all_nodes_ptr(Defs& defs) {
 
 std::vector<node_ptr> get_all_nodes_ptr(node_ptr& node) {
     return implementation::get_all_t_ptr<Node>(node, [](const node_ptr&) { return true; });
+}
+
+namespace {
+
+template <typename Criteria>
+bool search_nodes(const Node& current, Criteria& criteria) {
+    // Check if criteria applies to the current node
+    if (auto found = criteria(current); found) {
+        return true;
+    }
+
+    if (auto selected = dynamic_cast<const NodeContainer*>(&current)) {
+        for (const auto& child : selected->children()) {
+            if (auto found = search_nodes(*child, criteria); found) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
+template <typename Criteria>
+bool search_nodes(const Defs& defs, Criteria& criteria) {
+    if (auto found = criteria(defs); found) {
+        return true;
+    }
+
+    for (const auto& suite : defs.suites()) {
+        if (auto found = search_nodes(*suite.get(), criteria); found) {
+            return true;
+        }
+    }
+    return false;
+};
+
+template <typename T>
+void check_all_mirrors_are_valid(const T& root, std::string_view host, std::string_view port) {
+    std::string error;
+    auto criteria =
+        ecf::overload{[](const Defs& defs) -> bool { return false; },
+                      [&error, host, port](const Node& node) -> bool {
+                          for (const auto& mirror : node.mirrors()) {
+                              if (mirror.resolved_remote_host() == host && mirror.resolved_remote_port() == port) {
+                                  std::ostringstream oss;
+                                  oss << "Mirror '" << mirror.name() << "' on node '" + node.absNodePath()
+                                      << "' mirrors own server '" << host << ":" << port << "'";
+                                  error = oss.str();
+                                  return true;
+                              }
+                          }
+                          return false;
+                      }};
+
+    if (auto found = ecf::search_nodes(root, criteria); found) {
+        throw std::runtime_error(error);
+    }
+}
+
+} // namespace
+
+void ensure_all_mirrors_are_valid(const Defs& defs, std::string_view host, std::string_view port) {
+    return check_all_mirrors_are_valid(defs, host, port);
+}
+
+void ensure_all_mirrors_are_valid(const Node& node, std::string_view host, std::string_view port) {
+    return check_all_mirrors_are_valid(node, host, port);
 }
 
 } // namespace ecf

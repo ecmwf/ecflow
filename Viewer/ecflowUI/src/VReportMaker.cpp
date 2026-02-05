@@ -17,7 +17,8 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 
-VReportMaker::VReportMaker(QObject* parent) : QObject(parent) {
+VReportMaker::VReportMaker(QObject* parent)
+    : QObject(parent) {
     infoProvider_ = new OutputFileProvider(this);
 }
 

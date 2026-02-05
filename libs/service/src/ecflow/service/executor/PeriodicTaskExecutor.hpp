@@ -27,7 +27,10 @@ struct InvalidExecutorArgument : public std::runtime_error
 template <typename TASK>
 class PeriodicTaskExecutor {
 public:
-    explicit PeriodicTaskExecutor(TASK task) : running_{false}, worker_{}, task_{std::move(task)} {}
+    explicit PeriodicTaskExecutor(TASK task)
+        : running_{false},
+          worker_{},
+          task_{std::move(task)} {}
 
     PeriodicTaskExecutor(const PeriodicTaskExecutor&)            = delete;
     PeriodicTaskExecutor& operator=(const PeriodicTaskExecutor&) = delete;

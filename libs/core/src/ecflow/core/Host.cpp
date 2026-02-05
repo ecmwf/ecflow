@@ -19,15 +19,14 @@
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 Host::Host() {
     get_host_name();
 }
 
-Host::Host(const std::string& host) : the_host_name_(host) {
+Host::Host(const std::string& host)
+    : the_host_name_(host) {
     if (the_host_name_ == Str::LOCALHOST()) {
         get_host_name();
     }
@@ -76,12 +75,12 @@ std::string Host::ecf_custom_passwd_file(const std::string& port) const {
     return prefix_host_and_port(port, ecf::environment::ECF_CUSTOM_PASSWD);
 }
 
-std::string Host::prefix_host_and_port(const std::string& port, const std::string& file_name) const {
+std::string Host::prefix_host_and_port(const std::string& port, std::string_view file_name) const {
     // The file name may include a path.  /user/avi/fred.log
     //    fred.log             ->  <host>.<port>.fred.log
     //    /user/avi/fred.log   ->  /user/avi/fred.log
     if (!file_name.empty() && file_name.find("/") != std::string::npos) {
-        return file_name;
+        return std::string{file_name};
     }
     std::string ret = host_port_prefix(port);
     ret += ".";

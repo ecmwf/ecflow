@@ -1,11 +1,4 @@
-#!/bin/ksh
-
-## Copyright 2009- ECMWF.
-## This software is licensed under the terms of the Apache Licence version 2.0
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-## In applying this licence, ECMWF does not waive the privileges and immunities
-## granted to it by virtue of its status as an intergovernmental organisation
-## nor does it submit to any jurisdiction.
+#!/usr/bin/env bash
 
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
@@ -20,7 +13,7 @@ export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 if [[ "%ECF_SSL:%" != "" ]] ; then
-   export ECF_SSL=%ECF_SSL:%
+    export ECF_SSL=%ECF_SSL:%
 fi
 
 # Tell ECF_ we have stated
@@ -32,10 +25,10 @@ fi
 # Defined a error hanlder
 
 ERROR() {
-	set +e        # Clear -e flag, so we don't fail
-	#smsabort      # Notify ECF_ that something went wrong
-	trap 0        # Remove the trap
-	exit 0        # End the script
+    set +e        # Clear -e flag, so we don't fail
+    #smsabort      # Notify ECF_ that something went wrong
+    trap 0        # Remove the trap
+    exit 0        # End the script
 }
 
 # Trap any calls to exit and errors caught by the -e flag

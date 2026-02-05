@@ -19,15 +19,16 @@
 #include "ecflow/base/cts/user/ForceCmd.hpp"
 #include "ecflow/base/cts/user/RequeueNodeCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 struct Fixture
 {
-    Fixture() : log{"test_base_forcecmd.log"} {}
+    Fixture()
+        : log{"test_base_forcecmd.log"} {}
     ~Fixture() = default;
 
     TestLog log;

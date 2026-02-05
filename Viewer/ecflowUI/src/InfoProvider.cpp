@@ -211,7 +211,8 @@ void InfoProvider::taskChanged(VTask_ptr task) {
     }
 }
 
-JobProvider::JobProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::JobTask) {
+JobProvider::JobProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::JobTask) {
     fileVarName_ = "ECF_JOB";
 
     fileNotDefinedText_ = "Job is <b>not</b> defined";
@@ -230,7 +231,8 @@ bool JobProvider::handleFileMissing(const std::string& fileName, VReply* reply) 
     return false;
 }
 
-JobStatusFileProvider::JobStatusFileProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::JobStatusFileTask) {
+JobStatusFileProvider::JobStatusFileProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::JobStatusFileTask) {
     fileVarName_        = "ECF_JOB";
     fileSuffix_         = ".stat";
     fileNotDefinedText_ = "Job status is <b>not</b> defined";
@@ -248,19 +250,23 @@ bool JobStatusFileProvider::handleFileMissing(const std::string& fileName, VRepl
     return false;
 }
 
-JobStatusProvider::JobStatusProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::JobStatusTask) {
+JobStatusProvider::JobStatusProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::JobStatusTask) {
 }
 
-ManualProvider::ManualProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::ManualTask) {
+ManualProvider::ManualProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::ManualTask) {
     fileVarName_        = "ECF_MANUAL";
     fileNotDefinedText_ = "Manual is <b>not</b> available";
     fileMissingText_    = "Manual is <b>not</b> available";
 }
 
-MessageProvider::MessageProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::MessageTask) {
+MessageProvider::MessageProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::MessageTask) {
 }
 
-ScriptProvider::ScriptProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::ScriptTask) {
+ScriptProvider::ScriptProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::ScriptTask) {
     fileVarName_        = "ECF_SCRIPT";
     fileNotDefinedText_ = "Script is <b>not</b> defined";
     fileMissingText_    = "Script <b>not/b> found! <br> Check <b>ECF_FILES</b> or <b>ECF_HOME</b> directories,  \
@@ -345,14 +351,18 @@ void ScriptProvider::visit(VInfoNode* info) {
     info->server()->run(task_);
 }
 
-HistoryProvider::HistoryProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::HistoryTask) {
+HistoryProvider::HistoryProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::HistoryTask) {
 }
 
-SuiteProvider::SuiteProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::SuiteListTask) {
+SuiteProvider::SuiteProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::SuiteListTask) {
 }
 
-ZombieProvider::ZombieProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::ZombieListTask) {
+ZombieProvider::ZombieProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::ZombieListTask) {
 }
 
-WhyProvider::WhyProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::WhySyncTask) {
+WhyProvider::WhyProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::WhySyncTask) {
 }

@@ -34,7 +34,10 @@ std::map<std::string, VAttributeType*> VAttributeType::typesMap_;
 std::vector<VAttributeType*> VAttributeType::types_;
 std::vector<std::string> VAttributeType::lastNames_;
 
-VAttributeType::VAttributeType(const std::string& name) : VParam(name), dataCount_(0), typeId_(types_.size()) {
+VAttributeType::VAttributeType(const std::string& name)
+    : VParam(name),
+      dataCount_(0),
+      typeId_(types_.size()) {
     typesMap_[name] = this;
     types_.push_back(this);
 }

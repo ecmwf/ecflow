@@ -36,7 +36,8 @@ class AttributeEditorMaker : public AttributeEditorFactory {
     AttributeEditor* make(VInfo_ptr info, QWidget* parent) override { return new T(info, parent); }
 
 public:
-    explicit AttributeEditorMaker(const std::string& t) : AttributeEditorFactory(t) {}
+    explicit AttributeEditorMaker(const std::string& t)
+        : AttributeEditorFactory(t) {}
 };
 
 #endif /* ecflow_viewer_AttributeEditorFactory_HPP */

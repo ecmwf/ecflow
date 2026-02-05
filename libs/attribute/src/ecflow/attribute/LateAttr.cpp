@@ -19,8 +19,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeSeries.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 LateAttr::LateAttr() = default;

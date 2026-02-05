@@ -23,7 +23,7 @@ public:
     const std::string& suiteName() const { return suiteName_; }
     bool force() const { return force_; }
 
-    int timeout() const override { return 80; }
+    time_duration_t timeout() const override { return std::chrono::seconds{80}; }
 
     bool isWrite() const override { return true; }
     void print(std::string&) const override;

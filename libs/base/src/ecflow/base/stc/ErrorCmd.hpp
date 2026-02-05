@@ -16,7 +16,8 @@
 class ErrorCmd final : public ServerToClientCmd {
 public:
     explicit ErrorCmd(const std::string& errorMsg);
-    ErrorCmd() : ServerToClientCmd() {}
+    ErrorCmd()
+        : ServerToClientCmd() {}
 
     void init(const std::string& errorMsg);
     std::string print() const override;
@@ -25,7 +26,7 @@ public:
 
     std::string error() const override { return error_msg_; }   /// Used by test
     bool ok() const override { return false; }                  /// Used by group command
-    void cleanup() override { std::string().swap(error_msg_); } /// run in the server, after command send to client
+    void cleanup() override { std::string{}.swap(error_msg_); } /// run in the server, after command send to client
 
 private:
     std::string error_msg_;

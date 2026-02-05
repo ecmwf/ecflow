@@ -44,7 +44,9 @@ void VTreeChangeInfo::addStateChange(const VNode* n) {
 
 // It takes ownership of the filter
 
-VModelServer::VModelServer(ServerHandler* server) : server_(server), inScan_(false) {
+VModelServer::VModelServer(ServerHandler* server)
+    : server_(server),
+      inScan_(false) {
     // We has to observe the nodes of the server.
     server_->addNodeObserver(this);
 
@@ -809,7 +811,8 @@ void VTreeServer::refreshServerNode() {
 
 // It takes ownership of the filter
 
-VTableServer::VTableServer(ServerHandler* server, NodeFilterDef* filterDef) : VModelServer(server) {
+VTableServer::VTableServer(ServerHandler* server, NodeFilterDef* filterDef)
+    : VModelServer(server) {
     filter_ = new TableNodeFilter(filterDef, server);
 
     // We have to observe the nodes of the server.
@@ -1417,7 +1420,8 @@ void VTreeModelData::deleteExpandState() {
 //
 //==============================================================
 
-VTableModelData::VTableModelData(NodeFilterDef* filterDef, AbstractNodeModel* model) : VModelData(filterDef, model) {
+VTableModelData::VTableModelData(NodeFilterDef* filterDef, AbstractNodeModel* model)
+    : VModelData(filterDef, model) {
 }
 
 void VTableModelData::connectToModel(VModelServer* s) {

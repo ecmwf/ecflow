@@ -21,7 +21,8 @@ namespace ecf {
 
 struct HostsFileFailure : public std::runtime_error
 {
-    explicit HostsFileFailure(const std::string& message) : std::runtime_error(message) {}
+    explicit HostsFileFailure(const std::string& message)
+        : std::runtime_error(message) {}
 };
 
 class HostsFile {
@@ -63,7 +64,8 @@ public:
     static HostsFile parse(const fs::path& path, int default_port);
 
 private:
-    explicit HostsFile(hosts_t hosts) : hosts_(std::move(hosts)) {}
+    explicit HostsFile(hosts_t hosts)
+        : hosts_(std::move(hosts)) {}
     hosts_t hosts_;
 };
 

@@ -235,7 +235,7 @@ void ServerHandler::createClient(bool init) {
         }
 
         client_->set_auto_sync(true); // will call sync_local() after each command!!!
-        client_->set_retry_connection_period(1);
+        client_->set_retry_connection_period(std::chrono::seconds{1});
         client_->set_connection_attempts(1);
         client_->set_throw_on_error(true);
     }

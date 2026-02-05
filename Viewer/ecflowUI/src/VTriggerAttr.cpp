@@ -20,7 +20,8 @@
 // VTriggerAttrType
 //================================
 
-VTriggerAttrType::VTriggerAttrType() : VAttributeType("trigger") {
+VTriggerAttrType::VTriggerAttrType()
+    : VAttributeType("trigger") {
     dataCount_                             = 3;
     searchKeyToData_["trigger_type"]       = CompleteIndex;
     searchKeyToData_["trigger_expression"] = ExprIndex;
@@ -90,7 +91,8 @@ void VTriggerAttrType::encode_empty(QStringList& data) const {
 //
 //=====================================================
 
-VTriggerAttr::VTriggerAttr(VNode* parent, Expression*, int index) : VAttribute(parent, index) {
+VTriggerAttr::VTriggerAttr(VNode* parent, Expression*, int index)
+    : VAttribute(parent, index) {
 }
 
 VAttributeType* VTriggerAttr::type() const {

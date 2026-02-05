@@ -18,16 +18,19 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 class ExpectStateChange {
 public:
-    ExpectStateChange() : state_change_no_(Ecf::state_change_no()) { Ecf::set_server(true); }
+    ExpectStateChange()
+        : state_change_no_(Ecf::state_change_no()) {
+        Ecf::set_server(true);
+    }
     ~ExpectStateChange() {
         BOOST_CHECK_MESSAGE(state_change_no_ != Ecf::state_change_no(), "Expected state change");
         Ecf::set_server(false);
@@ -39,7 +42,10 @@ private:
 
 class ExpectModifyChange {
 public:
-    ExpectModifyChange() : modify_change_no_(Ecf::modify_change_no()) { Ecf::set_server(true); }
+    ExpectModifyChange()
+        : modify_change_no_(Ecf::modify_change_no()) {
+        Ecf::set_server(true);
+    }
     ~ExpectModifyChange() {
         BOOST_CHECK_MESSAGE(modify_change_no_ != Ecf::modify_change_no(), "Expected Modify change");
         Ecf::set_server(false);
@@ -51,7 +57,9 @@ private:
 
 class ExpectNoChange {
 public:
-    ExpectNoChange() : state_change_no_(Ecf::state_change_no()), modify_change_no_(Ecf::modify_change_no()) {
+    ExpectNoChange()
+        : state_change_no_(Ecf::state_change_no()),
+          modify_change_no_(Ecf::modify_change_no()) {
         Ecf::set_server(true);
     }
     ~ExpectNoChange() {

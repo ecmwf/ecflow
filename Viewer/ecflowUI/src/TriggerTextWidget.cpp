@@ -16,7 +16,8 @@
 #include "TriggerCollector.hpp"
 #include "VItemPathParser.hpp"
 
-TriggerTextWidget::TriggerTextWidget(QWidget* parent) : QTextBrowser(parent) {
+TriggerTextWidget::TriggerTextWidget(QWidget* parent)
+    : QTextBrowser(parent) {
     setOpenExternalLinks(false);
     setOpenLinks(false);
     setReadOnly(true);

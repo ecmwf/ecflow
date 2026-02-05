@@ -20,7 +20,9 @@
 #include "VIcon.hpp"
 #include "VNode.hpp"
 
-TriggerGraphModel::TriggerGraphModel(Mode mode, QObject* parent) : QAbstractItemModel(parent), mode_(mode) {
+TriggerGraphModel::TriggerGraphModel(Mode mode, QObject* parent)
+    : QAbstractItemModel(parent),
+      mode_(mode) {
 }
 
 TriggerGraphModel::~TriggerGraphModel() = default;

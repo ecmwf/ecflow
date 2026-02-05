@@ -6,6 +6,6 @@
 # QSUB -ko
 # QSUB -nr
 # QSUB -A %ACCOUNT%
-# QSUB -s /bin/ksh
+# QSUB -s /bin/bash
 # QSUB -r %TASK%-%FAMILY1%
 # QSUB -o %LOGDIR%%SMSNAME%.%SMSTRYNO%

@@ -20,11 +20,11 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Task.hpp"
 
-using namespace std;
-
 namespace ecf {
 
-TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dummy_task_(false) {
+TaskScriptGenerator::TaskScriptGenerator(const Task* task)
+    : task_(task),
+      is_dummy_task_(false) {
     /// if ECF_DUMMY_TASK specified ignore
     std::string theValue;
     is_dummy_task_ = task_->findParentUserVariableValue(ecf::environment::ECF_DUMMY_TASK, theValue);

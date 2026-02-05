@@ -26,9 +26,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 AbortCmd::AbortCmd(const std::string& pathToTask,
                    const std::string& jobsPassword,
@@ -84,7 +81,7 @@ STC_Cmd_ptr AbortCmd::doHandleRequest(AbstractServer* as) const {
         // update suite change numbers before job submission, submittable_ setup during authentication
         SuiteChanged1 changed(submittable_->suite());
 
-        string theReason = reason_;
+        std::string theReason = reason_;
         if (theReason.empty()) {
             theReason = "Trap raised in job file";
         }
@@ -114,15 +111,16 @@ const char* AbortCmd::desc() {
 }
 
 void AbortCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(AbortCmd::arg(), po::value<string>()->implicit_value(string()), AbortCmd::desc());
+    desc.add_options()(
+        AbortCmd::arg(), boost::program_options::value<std::string>()->implicit_value(std::string{}), AbortCmd::desc());
 }
 void AbortCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     std::string reason = vm[arg()].as<std::string>();
 
     if (clientEnv->debug()) {
-        cout << "  AbortCmd::create " << AbortCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
-             << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
-             << clientEnv->task_try_no() << ") reason(" << reason << ")\n";
+        std::cout << "  AbortCmd::create " << AbortCmd::arg() << " task_path(" << clientEnv->task_path()
+                  << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
+                  << ") try_no(" << clientEnv->task_try_no() << ") reason(" << reason << ")\n";
     }
 
     std::string errorMsg;

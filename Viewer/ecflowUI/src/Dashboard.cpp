@@ -37,7 +37,9 @@
 
 int Dashboard::maxWidgetNum_ = 20;
 
-Dashboard::Dashboard(QString /*rootNode*/, QWidget* parent) : QMainWindow(parent), settingsAreRead_(false) {
+Dashboard::Dashboard(QString /*rootNode*/, QWidget* parent)
+    : QMainWindow(parent),
+      settingsAreRead_(false) {
     // We use the mainwindow as a widget. Its task is
     // to dock all the component widgets!
     setWindowFlags(Qt::Widget);

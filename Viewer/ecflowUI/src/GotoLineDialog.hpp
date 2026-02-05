@@ -13,8 +13,6 @@
 
 #include "ui_GotoLineDialog.h"
 
-using namespace std;
-
 class GotoLineDialog : public QDialog, private Ui::GotoLineDialogQ {
     Q_OBJECT
 

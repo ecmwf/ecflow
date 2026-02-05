@@ -152,7 +152,9 @@ httplib::Result request(const std::string& method,
 
 struct SetupTest
 {
-    SetupTest() : tokenfile(create_token_file()), cert(create_certificate()) {
+    SetupTest()
+        : tokenfile(create_token_file()),
+          cert(create_certificate()) {
         sigset_t set;
         sigemptyset(&set);
         sigaddset(&set, SIGPIPE);

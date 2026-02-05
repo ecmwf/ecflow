@@ -13,7 +13,8 @@
 #include "ModelColumn.hpp"
 #include "ecflow/core/Chrono.hpp"
 
-ZombieModel::ZombieModel(QObject* parent) : QAbstractItemModel(parent) {
+ZombieModel::ZombieModel(QObject* parent)
+    : QAbstractItemModel(parent) {
     columns_ = ModelColumn::def("zombie_columns");
 
     assert(columns_);

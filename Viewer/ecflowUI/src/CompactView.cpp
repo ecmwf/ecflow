@@ -28,7 +28,8 @@
 
 // #define UI_COMPACTVIEW_DEBUG
 
-CompactView::CompactView(TreeNodeModel* model, QWidget* parent) : AbstractNodeView(model, parent) {
+CompactView::CompactView(TreeNodeModel* model, QWidget* parent)
+    : AbstractNodeView(model, parent) {
     // This is needed for making the context menu work
     setProperty("view", "tree");
 

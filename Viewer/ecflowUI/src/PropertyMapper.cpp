@@ -13,7 +13,8 @@
 #include "UIDebug.hpp"
 #include "VConfig.hpp"
 
-PropertyMapper::PropertyMapper(const std::vector<std::string>& names, VPropertyObserver* obs) : obs_(obs) {
+PropertyMapper::PropertyMapper(const std::vector<std::string>& names, VPropertyObserver* obs)
+    : obs_(obs) {
     for (const auto& name : names) {
         if (VProperty* p = VConfig::instance()->find(name)) {
             p->addObserver(obs);

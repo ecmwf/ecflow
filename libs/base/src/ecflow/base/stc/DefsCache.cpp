@@ -21,9 +21,6 @@
     #include <iostream>
 #endif
 
-using namespace std;
-using namespace boost;
-
 // ===========================================================================================
 // CACHE: the deserialization costs, so that if multiple clients request the full defs
 //        we can improve the performance, by only performing that once for each state change.

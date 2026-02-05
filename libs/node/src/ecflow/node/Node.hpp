@@ -176,7 +176,8 @@ public:
     {
         enum Requeue_t { REPEAT_INCREMENT = 1, TIME = 2, FULL = 3 };
         Requeue_args() = default;
-        explicit Requeue_args(Requeue_t r_t) : requeue_t(r_t) {};
+        explicit Requeue_args(Requeue_t r_t)
+            : requeue_t(r_t) {};
         Requeue_args(Requeue_t r_t,
                      bool resetRepeats,
                      int clear_suspended_in_child_nodes,
@@ -440,9 +441,9 @@ public:
     AstTop* completeAst() const; // Will create AST on demand
     AstTop* triggerAst() const;  // Will create AST on demand
     std::string completeExpression() const;
-    std::string basicCompleteExpression() const { return c_expr_ ? c_expr_->expression() : std::string(); }
+    std::string basicCompleteExpression() const { return c_expr_ ? c_expr_->expression() : std::string{}; }
     std::string triggerExpression() const;
-    std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string(); }
+    std::string basicTriggerExpression() const { return t_expr_ ? t_expr_->expression() : std::string{}; }
 
     /// returns the immediate children
     virtual void immediateChildren(std::vector<node_ptr>&) const {}
@@ -643,7 +644,7 @@ public:
     virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr(); }
     virtual node_ptr find_immediate_child(const std::string_view&) const { return node_ptr(); }
     virtual std::string find_node_path(const std::string& /*type*/, const std::string& /*name*/) const {
-        return std::string();
+        return std::string{};
     }
     const Variable& findVariable(const std::string& name) const;
     std::string find_parent_variable_sub_value(const std::string& name) const;
@@ -679,10 +680,34 @@ public:
     const ZombieAttr& findZombie(ecf::Child::ZombieType) const;
     bool findParentZombie(ecf::Child::ZombieType, ZombieAttr&) const;
 
-    /// Finds the referenced node. The node path can be relative or absolute or a extern path
-    /// however if its an extern path, and corresponding suite is loaded, but we still
-    /// can't find the path, then an error is returned
+    ///
+    /// @brief Finds the node at the given path.
+    ///
+    /// Important:
+    ///   When the node path is found to be an extern path, if the corresponding suite is available
+    ///   but the node cannot be found an error is returned.
+    ///
+    /// @param nodePath The path of the node to find -- can be relative, absolute, or an 'extern' path.
+    /// @param errorMsg A reference to a string where an error message will be stored if the node cannot be found.
+    /// @return A pointer to the found node, or nullptr if not found.
+    ///
     node_ptr findReferencedNode(const std::string& nodePath, std::string& errorMsg) const;
+
+    ///
+    /// @brief Finds the node or object (e.g. Variable, Meter, ...) at the given path.
+    ///
+    /// If '<externObj>' is empty, a simple node look up is performed; otherwise, the function will concatenate
+    /// '<nodePath>:<externObj>' to form the full path to the object to be found.
+    ///
+    /// Important:
+    ///   When the node path is found to be an extern path, if the corresponding suite is available
+    ///   but the node cannot be found an error is returned.
+    ///
+    /// @param nodePath The path of the node to find -- can be relative, absolute, or an 'extern' path.
+    /// @param externObj The name of the object to use when resolving extern paths.
+    /// @param errorMsg A reference to a string where an error message will be stored if the node cannot be found.
+    /// @return A pointer to the found node, or nullptr if not found.
+    ///
     node_ptr findReferencedNode(const std::string& nodePath, const std::string& externObj, std::string& errorMsg) const;
 
     /// return true if we can find a event, meter, user, repeat or generated variable with the given name
@@ -964,97 +989,5 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);
 };
-
-namespace ecf {
-
-/**
- * Retrieve the set of (regular) variables of the given node.
- *
- * @param node The node being queried
- * @return The set of variables
- */
-inline const std::vector<Variable>& variables(const Node& node) {
-    return node.variables();
-}
-
-/**
- * Retrieve the set of inherited variables of the given node.
- *
- * @param node The node being queried
- * @return The set of variables
- */
-std::vector<Variable> inherited_variables(const Node& node);
-
-/**
- * Retrieve the set of generated (including inherited) variables of the given node.
- *
- * @param node The node being queried
- * @return The set of variables
- */
-std::vector<Variable> generated_variables(const Node& node);
-
-// Select Nodes
-
-/**
- * Retrieve all 'sub-nodes' of the given node (including the node itself).
- *
- * @param node The node being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Node*> get_all_nodes(Node& node);
-
-// Select Tasks
-
-/**
- * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Task.
- *
- * @param node The node being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Task*> get_all_tasks(Node& node);
-std::vector<const Task*> get_all_tasks(const Node& node);
-
-// Select Alias
-
-/**
- * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Alias.
- *
- * @param node The node being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<const Alias*> get_all_aliases(const Node& node);
-
-// Select Active Submittables
-
-/**
- * Retrieve all 'sub-nodes' of the given node (including the node itself), that are both Active and of type Submittable.
- *
- * @param node The node being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Submittable*> get_all_active_submittables(Node& node);
-
-// Select Families
-
-/**
- * Retrieve all 'sub-nodes' of the given node (including the node itself), that are of type Family.
- *
- * @param node The node being queried
- * @return The set of 'sub-nodes'
- */
-std::vector<Family*> get_all_families(Node& node);
-
-// Select Nodes that have ASTs (i.e. either Trigger or Complete)
-
-/**
- * Retrieve the set of 'sub-nodes' of the given node (including the node itself),
- * that are referenced in either a Trigger or a Complete.
- *
- * @param node The node being queried
- * @return The set of 'sub-nodes'
- */
-std::set<const Node*> get_all_ast_nodes(const Node& node);
-
-} // namespace ecf
 
 #endif /* ecflow_node_Node_HPP */

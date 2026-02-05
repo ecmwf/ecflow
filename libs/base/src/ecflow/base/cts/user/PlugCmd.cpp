@@ -30,16 +30,16 @@
 #endif
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 namespace {
 
 /// Class to manage locking: Only unlock if acquired the lock,
 class Lock {
 public:
-    Lock(const std::string& user, AbstractServer* as) : as_(as) { ok_ = as->lock(user); }
+    Lock(const std::string& user, AbstractServer* as)
+        : as_(as) {
+        ok_ = as->lock(user);
+    }
     ~Lock() {
         if (ok_) {
             as_->unlock();
@@ -294,11 +294,12 @@ const char* PlugCmd::desc() {
 }
 
 void PlugCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(PlugCmd::arg(), po::value<vector<string>>()->multitoken(), PlugCmd::desc());
+    desc.add_options()(
+        PlugCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), PlugCmd::desc());
 }
 
 void PlugCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ace->debug()) {
         dumpVecArgs(PlugCmd::arg(), args);

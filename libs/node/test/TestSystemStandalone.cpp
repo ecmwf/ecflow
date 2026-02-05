@@ -17,7 +17,6 @@
 #include "ecflow/node/Signal.hpp"
 #include "ecflow/node/System.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // leap42 boost_1_64_0 gcc-5.3.0 release mode
@@ -27,17 +26,17 @@ using namespace ecf;
 //    sys     0m0.18s
 
 int main(int argc, char* argv[]) {
-    cout << "argc = " << argc << "\n";
+    std::cout << "argc = " << argc << "\n";
     for (int i = 0; i < argc; i++) {
-        cout << "arg " << i << ":" << argv[i] << "\n";
+        std::cout << "arg " << i << ":" << argv[i] << "\n";
     }
 
     if (argc != 2) {
-        cout << "Expect single argument \n";
+        std::cout << "Expect single argument \n";
         return 1;
     }
 
-    cout << "Invoke command: " << argv[1] << "\n";
+    std::cout << "Invoke command: " << argv[1] << "\n";
     std::string errorMsg;
     if (!System::instance()->spawn(System::ECF_STATUS_CMD, argv[1], "", errorMsg)) {
         throw std::runtime_error(errorMsg);

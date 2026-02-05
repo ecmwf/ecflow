@@ -24,7 +24,8 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
-AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent) {
+AboutDialog::AboutDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 
     QString title         = "EcflowUI";

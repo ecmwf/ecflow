@@ -42,7 +42,10 @@ ServerList* ServerList::instance_ = nullptr;
 //
 //==================================
 
-ServerListTmpItem::ServerListTmpItem(ServerItem* item) : name_(item->name()), host_(item->host()), port_(item->port()) {
+ServerListTmpItem::ServerListTmpItem(ServerItem* item)
+    : name_(item->name()),
+      host_(item->host()),
+      port_(item->port()) {
 }
 
 //======================================

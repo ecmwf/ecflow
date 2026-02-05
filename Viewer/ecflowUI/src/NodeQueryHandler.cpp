@@ -18,7 +18,8 @@
 
 NodeQueryHandler* NodeQueryHandler::instance_ = nullptr;
 
-NodeQueryHandler::NodeQueryHandler() : suffix_("query") {
+NodeQueryHandler::NodeQueryHandler()
+    : suffix_("query") {
 }
 
 NodeQueryHandler* NodeQueryHandler::instance() {

@@ -27,7 +27,8 @@ void ClientAPI::try_invoke(F f) const {
     }
 }
 
-ClientAPI::ClientAPI() : invoker_(std::make_unique<ClientInvoker>()) {
+ClientAPI::ClientAPI()
+    : invoker_(std::make_unique<ClientInvoker>()) {
 }
 
 ClientAPI::~ClientAPI() = default;

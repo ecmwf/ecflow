@@ -27,11 +27,10 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
-PathsCmd::PathsCmd(Api api, const std::string& absNodePath, bool force) : api_(api), force_(force) {
+PathsCmd::PathsCmd(Api api, const std::string& absNodePath, bool force)
+    : api_(api),
+      force_(force) {
     if (!absNodePath.empty()) {
         paths_.push_back(absNodePath);
     }
@@ -608,38 +607,49 @@ const char* restore_desc() {
 }
 
 void PathsCmd::addOption(boost::program_options::options_description& desc) const {
+
+    namespace po = boost::program_options;
+
     switch (api_) {
         case PathsCmd::CHECK: {
-            desc.add_options()(CtsApi::check_arg(), po::value<vector<string>>()->multitoken(), get_check_desc());
+            desc.add_options()(
+                CtsApi::check_arg(), po::value<std::vector<std::string>>()->multitoken(), get_check_desc());
             break;
         }
         case PathsCmd::SUSPEND: {
-            desc.add_options()(CtsApi::suspend_arg(), po::value<vector<string>>()->multitoken(), suspend_desc());
+            desc.add_options()(
+                CtsApi::suspend_arg(), po::value<std::vector<std::string>>()->multitoken(), suspend_desc());
             break;
         }
         case PathsCmd::RESUME: {
-            desc.add_options()(CtsApi::resume_arg(), po::value<vector<string>>()->multitoken(), resume_desc());
+            desc.add_options()(
+                CtsApi::resume_arg(), po::value<std::vector<std::string>>()->multitoken(), resume_desc());
             break;
         }
         case PathsCmd::KILL: {
-            desc.add_options()(CtsApi::kill_arg(), po::value<vector<string>>()->multitoken(), get_kill_desc());
+            desc.add_options()(
+                CtsApi::kill_arg(), po::value<std::vector<std::string>>()->multitoken(), get_kill_desc());
             break;
         }
         case PathsCmd::STATUS: {
-            desc.add_options()(CtsApi::statusArg(), po::value<vector<string>>()->multitoken(), get_status_desc());
+            desc.add_options()(
+                CtsApi::statusArg(), po::value<std::vector<std::string>>()->multitoken(), get_status_desc());
             break;
         }
         case PathsCmd::EDIT_HISTORY: {
-            desc.add_options()(
-                CtsApi::edit_history_arg(), po::value<vector<string>>()->multitoken(), get_edit_history_desc());
+            desc.add_options()(CtsApi::edit_history_arg(),
+                               po::value<std::vector<std::string>>()->multitoken(),
+                               get_edit_history_desc());
             break;
         }
         case PathsCmd::ARCHIVE: {
-            desc.add_options()(CtsApi::archive_arg(), po::value<vector<string>>()->multitoken(), archive_desc());
+            desc.add_options()(
+                CtsApi::archive_arg(), po::value<std::vector<std::string>>()->multitoken(), archive_desc());
             break;
         }
         case PathsCmd::RESTORE: {
-            desc.add_options()(CtsApi::restore_arg(), po::value<vector<string>>()->multitoken(), restore_desc());
+            desc.add_options()(
+                CtsApi::restore_arg(), po::value<std::vector<std::string>>()->multitoken(), restore_desc());
             break;
         }
         case PathsCmd::NO_CMD:
@@ -654,7 +664,8 @@ void PathsCmd::addOption(boost::program_options::options_description& desc) cons
 void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     assert(api_ != PathsCmd::NO_CMD);
 
-    vector<string> args = vm[theArg()].as<vector<string>>();
+    auto args = vm[theArg()].as<std::vector<std::string>>();
+
     if (ac->debug()) {
         dumpVecArgs(theArg(), args);
     }

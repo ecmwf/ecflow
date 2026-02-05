@@ -18,7 +18,8 @@
 // VGenVarAttrType
 //================================
 
-VGenVarAttrType::VGenVarAttrType() : VAttributeType("genvar") {
+VGenVarAttrType::VGenVarAttrType()
+    : VAttributeType("genvar") {
     dataCount_                    = 3;
     searchKeyToData_["var_name"]  = NameIndex;
     searchKeyToData_["var_value"] = ValueIndex;
@@ -50,7 +51,8 @@ void VGenVarAttrType::encode(const Variable& v, QStringList& data) const {
 //
 //=====================================================
 
-VGenVarAttr::VGenVarAttr(VNode* parent, const Variable& /*v*/, int index) : VAttribute(parent, index) {
+VGenVarAttr::VGenVarAttr(VNode* parent, const Variable& /*v*/, int index)
+    : VAttribute(parent, index) {
     // name_=v.name();
 }
 

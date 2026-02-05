@@ -26,8 +26,11 @@ class DState {
 public:
     enum State { UNKNOWN = 0, COMPLETE = 1, QUEUED = 2, ABORTED = 3, SUBMITTED = 4, ACTIVE = 5, SUSPENDED = 6 };
 
-    explicit DState(State s) : st_(s), state_change_no_(0) {}
-    DState() : st_(default_state()) {}
+    explicit DState(State s)
+        : st_(s),
+          state_change_no_(0) {}
+    DState()
+        : st_(default_state()) {}
     static DState::State default_state() { return DState::QUEUED; } // NEVER change, or will break client/server
 
     State state() const { return st_; }
@@ -65,8 +68,10 @@ private:
 // Thin wrapper over DState, to aid python. i.e Task("t").add(Defstatus(DState.complete))
 class Defstatus {
 public:
-    explicit Defstatus(DState::State state) : st_(state) {}
-    explicit Defstatus(const std::string& ds) : st_(DState::toState(ds)) {}
+    explicit Defstatus(DState::State state)
+        : st_(state) {}
+    explicit Defstatus(const std::string& ds)
+        : st_(DState::toState(ds)) {}
     DState::State state() const { return st_; }
     std::string to_string() const { return DState::to_string(st_); }
 

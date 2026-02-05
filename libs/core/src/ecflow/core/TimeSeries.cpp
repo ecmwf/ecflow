@@ -23,7 +23,6 @@
     #include "ecflow/core/Ecf.hpp"
 #endif
 
-using namespace std;
 using namespace ecf;
 
 static void testTimeSlot(const ecf::TimeSlot& ts) {
@@ -683,36 +682,36 @@ bool TimeSeries::checkInvariants(std::string& errormsg) const {
     if (!finish_.isNULL()) {
         if (incr_.isNULL()) {
             errormsg += "TimeSeries::checkInvariants increment cannot be NULL when we have a time series";
-            cout << errormsg << "  " << toString() << "\n";
+            std::cout << errormsg << "  " << toString() << "\n";
             return false;
         }
         if (incr_.hour() == 0 && incr_.minute() == 0) {
             errormsg += "TimeSeries::checkInvariants increment must greater than zero";
-            cout << errormsg << "  " << toString() << "\n";
+            std::cout << errormsg << "  " << toString() << "\n";
             return false;
         }
 
         if (start_.duration() > finish_.duration()) {
             errormsg += "TimeSeries::checkInvariants Invalid time series start() > finish()";
-            cout << errormsg << "  " << toString() << "\n";
+            std::cout << errormsg << "  " << toString() << "\n";
             return false;
         }
 
         if (lastTimeSlot_ <= start_.duration() && lastTimeSlot_ > finish_.duration()) {
             errormsg += "TimeSeries::checkInvariants Invalid last time slot";
-            cout << errormsg << "  " << toString() << "\n";
+            std::cout << errormsg << "  " << toString() << "\n";
             return false;
         }
     }
     if (relativeDuration_.is_special()) {
         errormsg += "TimeSeries::checkInvariants relativeDuration_ should not be special";
-        cout << errormsg << "  " << toString() << "\n";
+        std::cout << errormsg << "  " << toString() << "\n";
         return false;
     }
 
     if (!relativeToSuiteStart_ && relativeDuration_.total_seconds() > 0) {
         errormsg += "TimeSeries::checkInvariants Can only have RelativeDuration if relativeToSuiteStart_ flag is set";
-        cout << errormsg << "  " << toString() << "\n";
+        std::cout << errormsg << "  " << toString() << "\n";
         return false;
     }
 
@@ -721,7 +720,7 @@ bool TimeSeries::checkInvariants(std::string& errormsg) const {
 
 std::ostream& operator<<(std::ostream& os, const TimeSeries* d) {
     if (d) {
-        string s;
+        std::string s;
         d->print(s);
         os << s;
         return os;
@@ -729,7 +728,7 @@ std::ostream& operator<<(std::ostream& os, const TimeSeries* d) {
     return os << "TimeSlot == NULL";
 }
 std::ostream& operator<<(std::ostream& os, const TimeSeries& d) {
-    string s;
+    std::string s;
     d.print(s);
     os << s;
     return os;
@@ -858,8 +857,8 @@ ecf::TimeSeries TimeSeries::create(size_t& index, const std::vector<std::string>
 
     // cron 10:00 20:00 01:00
     // index is on 10:00, ie index should have value of 1 in this case
-    string startStr = lineTokens[index];
-    bool relative   = false;
+    std::string startStr = lineTokens[index];
+    bool relative        = false;
     if (startStr[0] == '+') {
         relative = true;
         startStr.erase(startStr.begin()); // remove leading +
@@ -909,7 +908,7 @@ bool TimeSeries::getTime(const std::string& time, int& hour, int& min, bool chec
     // HH:MM
     // +HH:MM  for other clients
     size_t colonPos = time.find_first_of(':');
-    if (colonPos == string::npos) {
+    if (colonPos == std::string::npos) {
         throw std::runtime_error("TimeSeries::getTime: Invalid time :'" + time + "'");
     }
 

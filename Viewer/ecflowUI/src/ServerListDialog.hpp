@@ -26,7 +26,8 @@ class ServerListFilterModel;
 
 class ServerDialogChecker {
 protected:
-    explicit ServerDialogChecker(QString txt) : errorText_(txt) {}
+    explicit ServerDialogChecker(QString txt)
+        : errorText_(txt) {}
 
     bool checkName(QString name, QString oriName = QString());
     bool checkHost(QString host);

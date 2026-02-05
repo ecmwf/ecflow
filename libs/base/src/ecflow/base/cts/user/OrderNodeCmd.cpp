@@ -21,9 +21,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool OrderNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<OrderNodeCmd*>(rhs);
@@ -105,10 +102,12 @@ const char* OrderNodeCmd::desc() {
 }
 
 void OrderNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(OrderNodeCmd::arg(), po::value<vector<string>>()->multitoken(), OrderNodeCmd::desc());
+    desc.add_options()(OrderNodeCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       OrderNodeCmd::desc());
 }
 void OrderNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[OrderNodeCmd::arg()].as<vector<string>>();
+    auto args = vm[OrderNodeCmd::arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(OrderNodeCmd::arg(), args);

@@ -17,7 +17,8 @@ class ClientHandleCmd final : public UserCmd {
 public:
     enum Api { REGISTER, DROP, DROP_USER, ADD, REMOVE, AUTO_ADD, SUITES };
 
-    explicit ClientHandleCmd(Api api = AUTO_ADD) : api_(api) {}
+    explicit ClientHandleCmd(Api api = AUTO_ADD)
+        : api_(api) {}
 
     ClientHandleCmd(int client_handle, const std::vector<std::string>& suites, bool add_add_new_suites)
         : api_(REGISTER),
@@ -25,9 +26,13 @@ public:
           suites_(suites),
           auto_add_new_suites_(add_add_new_suites) {}
 
-    explicit ClientHandleCmd(int client_handle) : api_(DROP), client_handle_(client_handle) {}
+    explicit ClientHandleCmd(int client_handle)
+        : api_(DROP),
+          client_handle_(client_handle) {}
 
-    explicit ClientHandleCmd(const std::string& drop_user) : api_(DROP_USER), drop_user_(drop_user) {}
+    explicit ClientHandleCmd(const std::string& drop_user)
+        : api_(DROP_USER),
+          drop_user_(drop_user) {}
 
     ClientHandleCmd(int client_handle, const std::vector<std::string>& suites, Api api)
         : api_(api), // Must be ADD or REMOVE

@@ -19,11 +19,11 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -71,15 +71,15 @@ void located_ecf_file_fail(task_ptr task, int line) {
 void create_ecf_file(const std::string& ecf_file_location) {
     // cout << "create file  = " << ecf_file_location << "\n";
     //  generate the ecf file;
-    string header   = "%include <simple_head.h>\n";
-    string body     = "#body\n";
-    string tail     = "%include <simple_tail.h>\n";
-    string ecf_file = header;
+    std::string header   = "%include <simple_head.h>\n";
+    std::string body     = "#body\n";
+    std::string tail     = "%include <simple_tail.h>\n";
+    std::string ecf_file = header;
     ecf_file += body;
     ecf_file += tail;
 
     BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location), "Could not create missing dir\n");
-    string errormsg;
+    std::string errormsg;
     BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
     BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
 }
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
 
     {
         // cout << "Test ECF_HOME/ECF_LISTS at leaf location this should be using ECF_SCRIPT\n";
-        string ecf_file_location = ecf_home + task->absNodePath() + File::ECF_EXTN();
+        std::string ecf_file_location = ecf_home + task->absNodePath() + File::ECF_EXTN();
         create_ecf_file(ecf_file_location);
 
         located_ecf_file(task, EcfFile::ECF_SCRIPT, EcfFile::PRUNE_ROOT, __LINE__);
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
     }
     {
         // cout << "Test ECF_HOME/ECF_LISTS at root location\n";
-        string ecf_file_location = ecf_home + "/" + task->name() + File::ECF_EXTN();
+        std::string ecf_file_location = ecf_home + "/" + task->name() + File::ECF_EXTN();
         create_ecf_file(ecf_file_location);
 
         located_ecf_file(task, EcfFile::ECF_HOME, EcfFile::PRUNE_ROOT, __LINE__);
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
         node       = node->parent();
         while (node) {
 
-            string ecf_file_location = ecf_home + node->absNodePath() + "/" + task->name() + File::ECF_EXTN();
+            std::string ecf_file_location = ecf_home + node->absNodePath() + "/" + task->name() + File::ECF_EXTN();
             create_ecf_file(ecf_file_location);
 
             // cout << "Node: " << node->absNodePath() << "\n";
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_search) {
         node       = node->parent();
         while (node) {
 
-            string ecf_file_location = ecf_lists + node->absNodePath() + "/" + task->name() + File::ECF_EXTN();
+            std::string ecf_file_location = ecf_lists + node->absNodePath() + "/" + task->name() + File::ECF_EXTN();
             create_ecf_file(ecf_file_location);
 
             // cout << "Node: " << node->absNodePath() << "\n";

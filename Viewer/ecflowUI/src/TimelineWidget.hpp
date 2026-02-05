@@ -33,7 +33,10 @@ class TimelineWidget;
 
 struct TimelinePrevState
 {
-    TimelinePrevState() : valid(false), fullStart(false), fullEnd(false) {}
+    TimelinePrevState()
+        : valid(false),
+          fullStart(false),
+          fullEnd(false) {}
     bool valid;
     QDateTime startDt;
     QDateTime endDt;

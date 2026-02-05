@@ -12,9 +12,6 @@
 
 #include <iostream>
 
-using namespace std;
-using namespace boost;
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SStringVecCmd::equals(ServerToClientCmd* rhs) const {
@@ -34,7 +31,7 @@ std::string SStringVecCmd::print() const {
 
 bool SStringVecCmd::handle_server_response(ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug) const {
     if (debug) {
-        cout << "  SStringVecCmd::handle_server_response str.size()= " << vec_.size() << "\n";
+        std::cout << "  SStringVecCmd::handle_server_response str.size()= " << vec_.size() << "\n";
     }
     if (server_reply.cli()) {
         for (const auto& i : vec_) {

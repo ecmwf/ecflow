@@ -181,7 +181,8 @@ void OutputDirFetchLogServerTask::clientError(QString msg) {
 // OutputFileFetchLocalTask
 //
 //=================================
-OutputDirFetchLocalTask::OutputDirFetchLocalTask(FetchQueueOwner* owner) : OutputDirFetchTask("DirFetchLocal", owner) {
+OutputDirFetchLocalTask::OutputDirFetchLocalTask(FetchQueueOwner* owner)
+    : OutputDirFetchTask("DirFetchLocal", owner) {
 }
 
 // try to read the logfile from the disk (if the settings allow it)
@@ -373,7 +374,8 @@ protected:
     OutputDirProvider* provider_{nullptr};
 };
 
-OutputDirFetchQueueManager::OutputDirFetchQueueManager(OutputDirProvider* provider) : provider_(provider) {
+OutputDirFetchQueueManager::OutputDirFetchQueueManager(OutputDirProvider* provider)
+    : provider_(provider) {
     fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);
 }
 
@@ -450,7 +452,8 @@ void OutputDirFetchQueueManager::fetchQueueFinished(const std::string& /*filePat
 //
 //=================================
 
-OutputDirProvider::OutputDirProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::NoTask) {
+OutputDirProvider::OutputDirProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::NoTask) {
     fetchManager_ = new OutputDirFetchQueueManager(this);
 }
 

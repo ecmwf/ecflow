@@ -23,7 +23,8 @@
 
 static bool firstRun = true;
 
-MessageItemWidget::MessageItemWidget(QWidget* parent) : QWidget(parent) {
+MessageItemWidget::MessageItemWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     searchTb_->setEnabled(false);

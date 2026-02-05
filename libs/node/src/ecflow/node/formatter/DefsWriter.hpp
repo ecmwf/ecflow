@@ -35,7 +35,8 @@ namespace ecf {
 
 struct Style
 {
-    Style(PrintStyle::Type_t s) : selected_(s) {}
+    Style(PrintStyle::Type_t s)
+        : selected_(s) {}
 
     PrintStyle::Type_t selected() { return selected_; }
 
@@ -88,12 +89,15 @@ struct Context
 
 struct Indent
 {
-    Indent(Context& ctx) : ctx_(ctx) { ctx_.format.increase_indentation(); }
+    Indent(Context& ctx)
+        : ctx_(ctx) {
+        ctx_.format.increase_indentation();
+    }
     ~Indent() { ctx_.format.decrease_indentation(); }
 
     template <typename Stream>
     void write(Stream& output) const {
-        output << (ctx_.format.is_indenting() ? std::string(ctx_.format.indentation_spaces(), ' ') : std::string(""));
+        output << (ctx_.format.is_indenting() ? std::string(ctx_.format.indentation_spaces(), ' ') : std::string{});
     }
 
     template <typename Stream>

@@ -1,11 +1,4 @@
-#!/bin/ksh
-# ================================== start of head.h ================================
-## Copyright 2009- ECMWF.
-## This software is licensed under the terms of the Apache Licence version 2.0
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
-## In applying this licence, ECMWF does not waive the privileges and immunities
-## granted to it by virtue of its status as an intergovernmental organisation
-## nor does it submit to any jurisdiction.
+#!/usr/bin/env bash
 
 %manual
 #This is the manual from the head.h file
@@ -38,7 +31,7 @@ fi
 # SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
 os_name=$(uname -s)
 if [[ $os_name = Linux ]] ; then
-   host %ECF_HOST%
+    host %ECF_HOST%
 fi
 
 # Typically we dont set this, however the zombie automated test require this.
@@ -52,12 +45,12 @@ export ECF_RID=$$
 
 # Defined a error hanlder
 ERROR() {
-	echo "ERROR() called"
-	set +e        # Clear -e flag, so we don't fail
-	wait          # wait for background process to stop
-	%ECF_CLIENT_EXE_PATH:ecflow_client% --abort # Notify ECF_ that something went wrong
-	trap 0        # Remove the trap
-	exit 0        # End the script
+    echo "ERROR() called"
+    set +e        # Clear -e flag, so we don't fail
+    wait          # wait for background process to stop
+    %ECF_CLIENT_EXE_PATH:ecflow_client% --abort # Notify ECF_ that something went wrong
+    trap 0        # Remove the trap
+    exit 0        # End the script
 }
 
 # Trap any calls to exit and errors caught by the -e flag

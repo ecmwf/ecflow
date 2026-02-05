@@ -15,9 +15,6 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Converter.hpp"
 
-using namespace std;
-using namespace boost;
-
 ZombieGetCmd::ZombieGetCmd(AbstractServer* as) {
     init(as);
 }
@@ -37,7 +34,7 @@ bool ZombieGetCmd::equals(ServerToClientCmd* rhs) const {
 }
 
 std::string ZombieGetCmd::print() const {
-    string os;
+    std::string os;
     os += "cmd:ZombieGetCmd [ ";
     os += ecf::convert_to<std::string>(zombies_.size());
     os += " ]";

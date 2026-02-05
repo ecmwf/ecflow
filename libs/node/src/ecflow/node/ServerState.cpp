@@ -19,16 +19,17 @@
 #include "ecflow/core/Version.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // When a Defs is loaded into a server:
 //       	o the jobSubmissionInterval_ is set
 //       	o the jobGeneration_ is set
-ServerState::ServerState() : server_state_(default_state()) {
+ServerState::ServerState()
+    : server_state_(default_state()) {
     setup_default_env(Str::DEFAULT_PORT_NUMBER());
 }
 
-ServerState::ServerState(const std::string& port) : server_state_(default_state()) {
+ServerState::ServerState(const std::string& port)
+    : server_state_(default_state()) {
     setup_default_env(port);
 }
 
@@ -327,12 +328,12 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
         //    b/ Allow for recursive substitution. %fred% -> %bill%--> 10
 
         size_t firstPercentPos = cmd.find(micro, pos);
-        if (firstPercentPos == string::npos) {
+        if (firstPercentPos == std::string::npos) {
             break;
         }
 
         size_t secondPercentPos = cmd.find(micro, firstPercentPos + 1);
-        if (secondPercentPos == string::npos) {
+        if (secondPercentPos == std::string::npos) {
             break;
         }
 
@@ -347,7 +348,7 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
             pos = 0;
         }
 
-        string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
+        std::string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
 
         // First search user variable (*ONLY* set when doing user edit's the script)
         // Handle case: cmd = "%fred:bill% and where we have user variable "fred:bill"
@@ -362,9 +363,9 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
         else {
 
             size_t firstColon = percentVar.find(':');
-            if (firstColon != string::npos) {
+            if (firstColon != std::string::npos) {
 
-                string var(percentVar.begin(), percentVar.begin() + firstColon);
+                std::string var(percentVar.begin(), percentVar.begin() + firstColon);
 
                 const Variable& variable2 = findVariable(var);
                 if (!variable2.empty()) {
@@ -372,7 +373,7 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
                     cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
                 }
                 else {
-                    string substitute(percentVar.begin() + firstColon + 1, percentVar.end());
+                    std::string substitute(percentVar.begin() + firstColon + 1, percentVar.end());
                     cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, substitute);
                 }
             }
@@ -398,7 +399,7 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
         doubleEcfMicro += micro;
         size_t last_pos = 0;
         while (true) {
-            string::size_type ecf_double_micro_pos = cmd.find(doubleEcfMicro, last_pos);
+            auto ecf_double_micro_pos = cmd.find(doubleEcfMicro, last_pos);
             if (ecf_double_micro_pos != std::string::npos) {
                 cmd.erase(cmd.begin() + ecf_double_micro_pos);
                 last_pos = ecf_double_micro_pos + 1;
@@ -434,33 +435,35 @@ void ServerState::setup_default_server_variables(std::vector<Variable>& server_v
     Host host;
     server_variables.emplace_back(ecf::environment::ECF_MICRO,
                                   Ecf::MICRO()); // Preprocessor character for variable substitution and including files
-    server_variables.emplace_back(ecf::environment::ECF_HOME, string("."));
-    server_variables.emplace_back(string("ECF_JOB_CMD"), Ecf::JOB_CMD());   // Command to be executed to submit a job
-    server_variables.emplace_back(string("ECF_KILL_CMD"), Ecf::KILL_CMD()); // Command to be executed to kill a job
-    server_variables.emplace_back(string("ECF_STATUS_CMD"),
+    server_variables.emplace_back(ecf::environment::ECF_HOME, std::string("."));
+    server_variables.emplace_back(std::string("ECF_JOB_CMD"), Ecf::JOB_CMD()); // Command to be executed to submit a job
+    server_variables.emplace_back(std::string("ECF_KILL_CMD"), Ecf::KILL_CMD()); // Command to be executed to kill a job
+    server_variables.emplace_back(std::string("ECF_STATUS_CMD"),
                                   Ecf::STATUS_CMD()); // Command to be executed to get status of job
-    server_variables.emplace_back(string("ECF_URL_CMD"), Ecf::URL_CMD());
-    server_variables.emplace_back(string("ECF_URL_BASE"), Ecf::URL_BASE());
-    server_variables.emplace_back(string("ECF_URL"), Ecf::URL());
-    server_variables.emplace_back(string("ECF_LOG"), host.ecf_log_file(port));
-    server_variables.emplace_back(string("ECF_INTERVAL"), string("60")); // Check time dependencies and submit any jobs
-    server_variables.emplace_back(string("ECF_LISTS"), host.ecf_lists_file(port));
-    server_variables.emplace_back(string("ECF_PASSWD"), host.ecf_passwd_file(port));
-    server_variables.emplace_back(string("ECF_CUSTOM_PASSWD"), host.ecf_custom_passwd_file(port));
-    server_variables.emplace_back(string("ECF_CHECK"), host.ecf_checkpt_file(port));
-    server_variables.emplace_back(string("ECF_CHECKOLD"), host.ecf_backup_checkpt_file(port));
-    server_variables.emplace_back(string("ECF_CHECKINTERVAL"),
-                                  string("120")); // The interval in seconds to save check point file
-    server_variables.emplace_back(string("ECF_CHECKMODE"),
-                                  string("CHECK_ON_TIME")); // The check mode, must be one of NEVER, ON_TIME, ALWAYS
+    server_variables.emplace_back(std::string("ECF_URL_CMD"), Ecf::URL_CMD());
+    server_variables.emplace_back(std::string("ECF_URL_BASE"), Ecf::URL_BASE());
+    server_variables.emplace_back(std::string("ECF_URL"), Ecf::URL());
+    server_variables.emplace_back(std::string("ECF_LOG"), host.ecf_log_file(port));
+    server_variables.emplace_back(std::string("ECF_INTERVAL"),
+                                  std::string("60")); // Check time dependencies and submit any jobs
+    server_variables.emplace_back(std::string("ECF_LISTS"), host.ecf_lists_file(port));
+    server_variables.emplace_back(std::string("ECF_PASSWD"), host.ecf_passwd_file(port));
+    server_variables.emplace_back(std::string("ECF_CUSTOM_PASSWD"), host.ecf_custom_passwd_file(port));
+    server_variables.emplace_back(std::string("ECF_CHECK"), host.ecf_checkpt_file(port));
+    server_variables.emplace_back(std::string("ECF_CHECKOLD"), host.ecf_backup_checkpt_file(port));
+    server_variables.emplace_back(std::string("ECF_CHECKINTERVAL"),
+                                  std::string("120")); // The interval in seconds to save check point file
+    server_variables.emplace_back(
+        std::string("ECF_CHECKMODE"),
+        std::string("CHECK_ON_TIME")); // The check mode, must be one of NEVER, ON_TIME, ALWAYS
 
     // Number of times a job should rerun if it aborts. If more than one and
     // job aborts, the job is automatically re-run. Useful when jobs are run in
     // an unreliable environments. For example using using commands like ftp(1)
     // in a job can fail easily, but re-running the job will often work
-    server_variables.emplace_back(ecf::environment::ECF_TRIES, string("2"));
+    server_variables.emplace_back(ecf::environment::ECF_TRIES, std::string("2"));
 
-    server_variables.emplace_back(string("ECF_VERSION"), Version::full()); // server version
+    server_variables.emplace_back(std::string("ECF_VERSION"), Version::full()); // server version
 
     // Needed to setup client environment.
     // The server sets these variable for use by the client. i.e when creating the jobs

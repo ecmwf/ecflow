@@ -51,7 +51,9 @@ public:
 
 class PropertyValueRule : public PropertyRule {
 public:
-    PropertyValueRule(PropertyLine* propLine, QString val) : propLine_(propLine), val_(val) {}
+    PropertyValueRule(PropertyLine* propLine, QString val)
+        : propLine_(propLine),
+          val_(val) {}
     bool execute() const override;
     QList<PropertyLine*> propertyLines() const override;
     static PropertyValueRule* make(VProperty* parent, QString expr, QList<PropertyLine*> lines);
@@ -64,7 +66,9 @@ protected:
 
 class PropertyOrRule : public PropertyRule {
 public:
-    PropertyOrRule(PropertyValueRule* left, PropertyValueRule* right) : left_(left), right_(right) {}
+    PropertyOrRule(PropertyValueRule* left, PropertyValueRule* right)
+        : left_(left),
+          right_(right) {}
     bool execute() const override;
     QList<PropertyLine*> propertyLines() const override;
 
@@ -75,7 +79,9 @@ protected:
 
 class PropertyAndRule : public PropertyRule {
 public:
-    PropertyAndRule(PropertyValueRule* left, PropertyValueRule* right) : left_(left), right_(right) {}
+    PropertyAndRule(PropertyValueRule* left, PropertyValueRule* right)
+        : left_(left),
+          right_(right) {}
     bool execute() const override;
     QList<PropertyLine*> propertyLines() const override;
 
@@ -106,7 +112,8 @@ class PropertyLineMaker : public PropertyLineFactory {
     PropertyLine* make(VProperty* p, bool addLabel, QWidget* w) override { return new T(p, addLabel, w); }
 
 public:
-    explicit PropertyLineMaker(VProperty::GuiType t) : PropertyLineFactory(t) {}
+    explicit PropertyLineMaker(VProperty::GuiType t)
+        : PropertyLineFactory(t) {}
 };
 
 //-------------------------------------

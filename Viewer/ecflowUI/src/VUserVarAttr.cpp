@@ -18,7 +18,8 @@
 // VUserVarAttrType
 //================================
 
-VUserVarAttrType::VUserVarAttrType() : VAttributeType("var") {
+VUserVarAttrType::VUserVarAttrType()
+    : VAttributeType("var") {
     dataCount_                    = 3;
     searchKeyToData_["var_name"]  = NameIndex;
     searchKeyToData_["var_value"] = ValueIndex;
@@ -50,7 +51,8 @@ void VUserVarAttrType::encode(const Variable& v, QStringList& data) const {
 //
 //=====================================================
 
-VUserVarAttr::VUserVarAttr(VNode* parent, const Variable& /*v*/, int index) : VAttribute(parent, index) {
+VUserVarAttr::VUserVarAttr(VNode* parent, const Variable& /*v*/, int index)
+    : VAttribute(parent, index) {
     // name_=v.name();
 }
 

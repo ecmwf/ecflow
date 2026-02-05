@@ -18,7 +18,6 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -31,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_server_load) {
     // Check if gnuplot is found on the path, on the RPM machines gnuplot not always installed
     std::string path_to_gnuplot = File::which("gnuplot");
     if (path_to_gnuplot.empty()) {
-        cout << "Ignoring test since GNUplot was not found on $PATH" << endl;
+        std::cout << "Ignoring test since GNUplot was not found on $PATH" << std::endl;
         return;
     }
 

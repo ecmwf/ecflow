@@ -47,7 +47,8 @@ static QString objectPath(QObject* obj) {
     return res;
 }
 
-InputEventLog::InputEventLog(QObject* parent) : QObject(parent) {
+InputEventLog::InputEventLog(QObject* parent)
+    : QObject(parent) {
     QString path = QString::fromStdString(DirectoryHandler::uiEventLogFileName());
     outFile_     = new QFile(path);
 

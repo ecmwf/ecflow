@@ -50,7 +50,8 @@
 //
 //=======================================================
 
-LogLoadRequestSortModel::LogLoadRequestSortModel(QObject* parent) : QSortFilterProxyModel(parent) {
+LogLoadRequestSortModel::LogLoadRequestSortModel(QObject* parent)
+    : QSortFilterProxyModel(parent) {
 }
 
 bool LogLoadRequestSortModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
@@ -387,7 +388,9 @@ void LogLoadRequestModel::setShowColour(bool b) {
 //
 //=============================================
 
-ChartCallout::ChartCallout(QChart* chart) : QGraphicsItem(chart), chart_(chart) {
+ChartCallout::ChartCallout(QChart* chart)
+    : QGraphicsItem(chart),
+      chart_(chart) {
     font_.setPointSize(font_.pointSize() - 1);
 }
 
@@ -484,7 +487,9 @@ void ChartCallout::updateGeometry() {
 //
 //=============================================
 
-ChartView::ChartView(QChart* chart, QWidget* parent) : QChartView(chart, parent), callout_(nullptr) {
+ChartView::ChartView(QChart* chart, QWidget* parent)
+    : QChartView(chart, parent),
+      callout_(nullptr) {
     setRubberBand(QChartView::HorizontalRubberBand);
 }
 
@@ -684,7 +689,9 @@ void ChartView::removeCallout() {
 //
 //=============================================
 
-LogRequestViewHandler::LogRequestViewHandler(QWidget* parent) : data_(nullptr), lastScanIndex_(0) {
+LogRequestViewHandler::LogRequestViewHandler(QWidget* parent)
+    : data_(nullptr),
+      lastScanIndex_(0) {
     // The data object - to read and store processed log data
     data_ = new LogLoadData();
 
@@ -1639,7 +1646,7 @@ void LogRequestView::writeSettings(VComboSettings* vs) {
 
 void LogRequestView::readSettings(VComboSettings* vs) {
     // sort mode
-    //    QString resMode=QString::fromStdString(vs->get<std::string>("plotResolution", std::string()));
+    //    QString resMode=QString::fromStdString(vs->get<std::string>("plotResolution", std::string{}));
     //    ViewerUtil::initComboBoxByData(resMode,ui_->resCombo);
 
     splitterSavedState_ = vs->getQs("splitter").toByteArray();
@@ -2950,7 +2957,9 @@ void LogStatSuiteCmdView::loadCore() {
 //
 //=====================================================
 
-LogStatRequestModel::LogStatRequestModel(QObject* parent) : QAbstractItemModel(parent), columnOrder_(ValueOrder) {
+LogStatRequestModel::LogStatRequestModel(QObject* parent)
+    : QAbstractItemModel(parent),
+      columnOrder_(ValueOrder) {
 }
 
 LogStatRequestModel::~LogStatRequestModel() = default;

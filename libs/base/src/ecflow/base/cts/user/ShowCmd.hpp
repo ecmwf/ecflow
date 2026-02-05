@@ -18,7 +18,8 @@
 // This class has no need for persistence, i.e client side only
 class ShowCmd final : public UserCmd {
 public:
-    explicit ShowCmd(PrintStyle::Type_t s = PrintStyle::DEFS) : style_(s) {}
+    explicit ShowCmd(PrintStyle::Type_t s = PrintStyle::DEFS)
+        : style_(s) {}
 
     // returns the showStyle
     bool show_cmd() const override { return true; }

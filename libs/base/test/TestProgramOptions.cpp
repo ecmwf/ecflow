@@ -17,9 +17,6 @@
 
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-namespace po = boost::program_options;
-
 BOOST_AUTO_TEST_SUITE(U_Base)
 
 BOOST_AUTO_TEST_SUITE(T_ProgramOptions)
@@ -27,10 +24,12 @@ BOOST_AUTO_TEST_SUITE(T_ProgramOptions)
 BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
     ECF_NAME_THIS_TEST();
 
+    namespace po = boost::program_options;
+
     // Declare the supported options.
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")(
-        "arg1", po::value<string>()->implicit_value(string("")), "optional arg1 description");
+        "arg1", po::value<std::string>()->implicit_value(std::string{}), "optional arg1 description");
 
     {
         std::array argv = {"test_program_options_implicit_value", "--help", "--arg1"};
@@ -41,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
 
         BOOST_CHECK_MESSAGE(vm.count("help"), "Expected help");
         BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
-        BOOST_CHECK_MESSAGE(vm["arg1"].as<string>() == "", "Expected arg1 to be empty");
+        BOOST_CHECK_MESSAGE(vm["arg1"].as<std::string>() == "", "Expected arg1 to be empty");
     }
     {
         std::array argv = {"test_program_options_implicit_value", "--arg1=11"};
@@ -51,18 +50,20 @@ BOOST_AUTO_TEST_CASE(test_program_options_implicit_value) {
         po::notify(vm);
 
         BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
-        BOOST_CHECK_MESSAGE(vm["arg1"].as<string>() == "11",
-                            "Expected arg1 with value of 11 but found " << vm["arg1"].as<string>());
+        BOOST_CHECK_MESSAGE(vm["arg1"].as<std::string>() == "11",
+                            "Expected arg1 with value of 11 but found " << vm["arg1"].as<std::string>());
     }
 }
 
 BOOST_AUTO_TEST_CASE(test_program_options_multitoken) {
     ECF_NAME_THIS_TEST();
 
+    namespace po = boost::program_options;
+
     // Declare the supported options.
     po::options_description desc("Allowed options");
-    desc.add_options()("help",
-                       "produce help message")("arg1", po::value<vector<string>>()->multitoken(), "arg1 description");
+    desc.add_options()("help", "produce help message")(
+        "arg1", po::value<std::vector<std::string>>()->multitoken(), "arg1 description");
 
     std::array argv = {"test_program_options_multitoken", "--help", "--arg1", "a", "b"};
 
@@ -73,19 +74,21 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken) {
     BOOST_CHECK_MESSAGE(vm.count("help"), "Expected help");
     BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
 
-    std::vector<string> expected;
+    std::vector<std::string> expected;
     expected.emplace_back("a");
     expected.emplace_back("b");
-    BOOST_CHECK_MESSAGE(vm["arg1"].as<vector<string>>() == expected, "multi-token not as expected");
+    BOOST_CHECK_MESSAGE(vm["arg1"].as<std::vector<std::string>>() == expected, "multi-token not as expected");
 }
 
 BOOST_AUTO_TEST_CASE(test_program_options_multitoken_with_negative_values) {
     ECF_NAME_THIS_TEST();
 
+    namespace po = boost::program_options;
+
     // Declare the supported options.
     po::options_description desc("Allowed options");
-    desc.add_options()("help",
-                       "produce help message")("arg1", po::value<vector<string>>()->multitoken(), "arg1 description");
+    desc.add_options()("help", "produce help message")(
+        "arg1", po::value<std::vector<std::string>>()->multitoken(), "arg1 description");
 
     std::array argv{"test_program_options_multitoken_1", "--help", "--arg1", "-1", "-w"};
 
@@ -105,10 +108,10 @@ BOOST_AUTO_TEST_CASE(test_program_options_multitoken_with_negative_values) {
     BOOST_CHECK_MESSAGE(vm.count("help"), "Expected help");
     BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
 
-    std::vector<string> expected;
+    std::vector<std::string> expected;
     expected.emplace_back("-1");
     expected.emplace_back("-w");
-    BOOST_CHECK_MESSAGE(vm["arg1"].as<vector<string>>() == expected, "multi-token not as expected");
+    BOOST_CHECK_MESSAGE(vm["arg1"].as<std::vector<std::string>>() == expected, "multi-token not as expected");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

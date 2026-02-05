@@ -30,7 +30,6 @@
 #include "ecflow/node/System.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_TASK_LOCATION 1
 
@@ -312,7 +311,7 @@ bool Submittable::operator==(const Submittable& rhs) const {
     return Node::operator==(rhs);
 }
 
-string Submittable::tryNo() const {
+std::string Submittable::tryNo() const {
     try {
         return ecf::convert_to<std::string>(tryNo_);
     }
@@ -320,7 +319,7 @@ string Submittable::tryNo() const {
     }
 
     LOG_ASSERT(false, "Submittable::tryNo() corrupt?");
-    return string();
+    return std::string{};
 }
 
 EcfFile Submittable::locatedEcfFile() const {
@@ -696,7 +695,8 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
 
 class JobCreationTimer {
 public:
-    explicit JobCreationTimer(Submittable* sub) : sub_(sub) {}
+    explicit JobCreationTimer(Submittable* sub)
+        : sub_(sub) {}
 
     // Disable copy (and move) semantics
     JobCreationTimer(const JobCreationTimer&)                  = delete;
@@ -773,7 +773,7 @@ void Submittable::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
     LOG_ASSERT(!errorMsg.empty(), "failing to submit must raise an error message");
 
     jobCtrl->error_msg() += errorMsg;
-    jobCtrl->push_back_failing_submittable(dynamic_pointer_cast<Submittable>(shared_from_this()));
+    jobCtrl->push_back_failing_submittable(std::dynamic_pointer_cast<Submittable>(shared_from_this()));
 }
 
 bool Submittable::run(JobsParam& jobsParam, bool force) {

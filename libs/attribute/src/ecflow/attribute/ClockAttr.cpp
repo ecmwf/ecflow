@@ -43,7 +43,9 @@ ClockAttr::ClockAttr(int day, int month, int year, bool hybrid)
     DateAttr::checkDate(day, month, year, false /* disable wild cards */);
 }
 
-ClockAttr::ClockAttr(bool hybrid) : state_change_no_(Ecf::incr_state_change_no()), hybrid_(hybrid) {
+ClockAttr::ClockAttr(bool hybrid)
+    : state_change_no_(Ecf::incr_state_change_no()),
+      hybrid_(hybrid) {
 }
 
 std::string ClockAttr::toString() const {

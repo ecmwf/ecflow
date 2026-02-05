@@ -18,7 +18,9 @@
 #include "SessionHandler.hpp"
 #include "ui_ShortcutHelpDialog.h"
 
-ShortcutHelpDialog::ShortcutHelpDialog(QWidget* parent) : QDialog(parent), ui_(new Ui::ShortcutHelpDialog) {
+ShortcutHelpDialog::ShortcutHelpDialog(QWidget* parent)
+    : QDialog(parent),
+      ui_(new Ui::ShortcutHelpDialog) {
     ui_->setupUi(this);
 
     // Set css for the text formatting

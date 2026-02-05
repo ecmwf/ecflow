@@ -28,9 +28,6 @@
 #include "ecflow/server/ServerOptions.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 static std::string the_check_mode(ecf::CheckPt::Mode mode) {
     switch (mode) {
@@ -47,9 +44,9 @@ static std::string the_check_mode(ecf::CheckPt::Mode mode) {
             return "UNDEFINED";
             break;
     }
-    cout << "ServerEnvironment.cpp theCheckMode: assert failed\n";
+    std::cout << "ServerEnvironment.cpp theCheckMode: assert failed\n";
     assert(false);
-    return std::string();
+    return std::string{};
 }
 
 // This can be overridden by calling "server --ecfinterval 3" for test purposes
@@ -327,20 +324,7 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
     /// read in the ecf white list file that specifies valid users and their access rights
     /// If the file can't be opened returns false and an error message and false;
     /// Automatically add server admin(user) with write access, as this will allow admin reload
-    if (auto loaded = load_whitelist_file(errorMsg); loaded) {
-        if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
-            authorisation_service_ = result.value();
-            std::cout << "Loaded server permissions based on Whitelist file\n";
-            return true;
-        }
-        else {
-            std::cout << "Unable to load server permissions, due to: " << result.reason() << '\n';
-            return false;
-        }
-    }
-    else {
-        return false;
-    }
+    return load_whitelist_file(errorMsg);
 }
 
 std::pair<std::string, std::string> ServerEnvironment::hostPort() const {
@@ -399,8 +383,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
 
 bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
     if (debug()) {
-        cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD("
-             << fs::current_path().string() << ")\n";
+        std::cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD("
+                  << fs::current_path().string() << ")\n";
     }
     if (ecf_white_list_file_.empty()) {
         errorMsg += "The ECF_LISTS file ";
@@ -420,13 +404,26 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
 
 bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     // Only override valid users if we successfully opened and parsed file
-    if (white_list_file_.load(ecf_white_list_file_, debug(), errorMsg)) {
+    if (white_list_file_.load(ecf_white_list_file_, errorMsg)) {
+        std::cout << "*** White list file loaded from '" << ecf_white_list_file_ << "'\n";
+        if (debug()) {
+            std::cout << white_list_file_.dump_valid_users() << "\n";
+        }
         // If the user accidentally removes the server/user from whitelist,
         // they will not be able to reload the whitelist, since it requires write access.
         // (Requires terminate, modify white list, restart to fix)
         // Hence always allow server user write access *IF* required for non-empty file
         white_list_file_.allow_write_access_for_server_user();
-        return true;
+
+        if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
+            authorisation_service_ = result.value();
+            std::cout << "Loaded server permissions based on Whitelist file\n";
+            return true;
+        }
+        else {
+            std::cout << "Unable to load server permissions, due to: " << result.reason() << '\n';
+            return false;
+        }
     }
     return false;
 }
@@ -497,7 +494,7 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
 
 void ServerEnvironment::read_config_file(std::string& log_file_name, const std::string& path_to_config_file) {
     if (debug()) {
-        cout << "ServerEnvironment::read_config_file() current_path = " << fs::current_path() << "\n";
+        std::cout << "ServerEnvironment::read_config_file() current_path = " << fs::current_path() << "\n";
     }
 
     try {
@@ -506,6 +503,8 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
 
         std::string passwd_file;
         std::string custom_passwd_file;
+
+        namespace po = boost::program_options;
 
         // read the environment from the config file.
         // **** Port *must* be read before log file, and check pt files
@@ -529,16 +528,16 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_URL", po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
             ("ECF_MICRODEF", po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
             ("ECF_LISTS", po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and their access rights")
-            ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(ecf::environment::ECF_PASSWD), "Path name to passwd file")
-            ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(ecf::environment::ECF_CUSTOM_PASSWD), "Path name to custom passwd file, for user who don't use login name")
+            ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(std::string{AuthenticationService::default_passwd_file()}), "Path name to passwd file")
+            ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(std::string{AuthenticationService::default_custom_passwd_file()}), "Path name to custom passwd file, for user who don't use login name")
             ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
             ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
         // clang-format on
 
-        ifstream ifs(path_to_config_file.c_str());
+        std::ifstream ifs(path_to_config_file.c_str());
         if (!ifs) {
             if (debug()) {
-                cout << "Could not load server_environment.cfg " << path_to_config_file << "\n";
+                std::cout << "Could not load server_environment.cfg " << path_to_config_file << "\n";
             }
         }
 
@@ -566,13 +565,13 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
         }
     }
     catch (std::exception& e) {
-        cerr << "ServerEnvironment::read_config_file() " << e.what() << "\n";
+        std::cerr << "ServerEnvironment::read_config_file() " << e.what() << "\n";
     }
 }
 
 void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
     if (debug()) {
-        cout << "ServerEnvironment::read_environment_variables()\n";
+        std::cout << "ServerEnvironment::read_environment_variables()\n";
     }
 
     if (auto var = ecf::environment::fetch<std::string>(ecf::environment::ECF_PORT); var) {

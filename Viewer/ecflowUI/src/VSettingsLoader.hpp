@@ -33,7 +33,8 @@ private:
 template <class T>
 class SimpleSettingsLoader : public VSettingsLoader {
 public:
-    explicit SimpleSettingsLoader() : VSettingsLoader() {}
+    explicit SimpleSettingsLoader()
+        : VSettingsLoader() {}
 
 protected:
     void loadSettings() override { T::loadSettings(); }

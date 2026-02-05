@@ -25,7 +25,8 @@ class AbstractServer;
 class SStatsCmd final : public ServerToClientCmd {
 public:
     explicit SStatsCmd(AbstractServer* as);
-    SStatsCmd() : ServerToClientCmd() {}
+    SStatsCmd()
+        : ServerToClientCmd() {}
 
     void init(AbstractServer* as);
 

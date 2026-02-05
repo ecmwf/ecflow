@@ -19,7 +19,9 @@
 
 class EditProvider : public InfoProvider {
 public:
-    explicit EditProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::OutputTask), preproc_(false) {}
+    explicit EditProvider(InfoPresenter* owner)
+        : InfoProvider(owner, VTask::OutputTask),
+          preproc_(false) {}
 
     void visit(VInfoNode*) override;
     void submit(const std::vector<std::string>& txt, bool alias);

@@ -15,7 +15,8 @@
 
 class ZombieAttrParser : public Parser {
 public:
-    explicit ZombieAttrParser(DefsStructureParser* p) : Parser(p) {}
+    explicit ZombieAttrParser(DefsStructureParser* p)
+        : Parser(p) {}
     const char* keyword() const override { return "zombie"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };

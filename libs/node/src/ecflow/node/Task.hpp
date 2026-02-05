@@ -15,7 +15,8 @@
 
 class Task final : public Submittable {
 public:
-    explicit Task(const std::string& name, bool check = true) : Submittable(name, check) {}
+    explicit Task(const std::string& name, bool check = true)
+        : Submittable(name, check) {}
     Task() = default;
     Task(const Task& rhs);
     Task& operator=(const Task&);

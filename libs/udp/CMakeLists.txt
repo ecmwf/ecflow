@@ -78,10 +78,6 @@ list(APPEND ${TEST_TARGET}_srcs
   test/TestUDPServer.cpp
 )
 
-if(${SELECTED_BOOST_VERSION} VERSION_GREATER_EQUAL 1.86.0)
-  set(ADDITIONAL_BOOST_COMPONENTS Boost::process)
-endif()
-
 ecbuild_add_test(
   TARGET
     ${TEST_TARGET}

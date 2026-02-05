@@ -16,7 +16,8 @@
 
 class RepeatParser : public Parser {
 public:
-    explicit RepeatParser(DefsStructureParser* p) : Parser(p) {}
+    explicit RepeatParser(DefsStructureParser* p)
+        : Parser(p) {}
 
     const char* keyword() const override { return "repeat"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;

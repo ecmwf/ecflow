@@ -159,7 +159,9 @@ public:
 
 class TriggerGraphExpandStateItem {
 public:
-    TriggerGraphExpandStateItem(VInfo_ptr info, TriggerGraphExpandState::Mode mode) : info_(info), mode_(mode) {}
+    TriggerGraphExpandStateItem(VInfo_ptr info, TriggerGraphExpandState::Mode mode)
+        : info_(info),
+          mode_(mode) {}
 
     VInfo_ptr info_;
     TriggerGraphExpandState::Mode mode_;

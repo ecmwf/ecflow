@@ -24,5 +24,6 @@ UiFunctionLogS::UiFunctionLogS(ServerHandler* server, const std::string& funcNam
 // UiLog
 //---------------------------------
 
-UiLogS::UiLogS(ServerHandler* server) : UiLog((server) ? server->longName() : "") {
+UiLogS::UiLogS(ServerHandler* server)
+    : UiLog((server) ? server->longName() : "") {
 }

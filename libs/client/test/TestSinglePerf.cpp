@@ -23,10 +23,10 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -50,16 +50,16 @@ static double client_cmds_threshold_s = 8.5;
 
 static void sync_and_news_local(ClientInvoker& theClient) {
     {
-        cout << "   news_local() : ";
+        std::cout << "   news_local() : ";
         DurationTimer duration_timer;
         theClient.news_local();
-        cout << duration_timer.elapsed_seconds();
+        std::cout << duration_timer.elapsed_seconds();
     }
     {
-        cout << "   sync_local() : ";
+        std::cout << "   sync_local() : ";
         DurationTimer duration_timer;
         theClient.sync_local();
-        cout << duration_timer.elapsed_seconds() << endl;
+        std::cout << duration_timer.elapsed_seconds() << std::endl;
     }
 }
 
@@ -87,13 +87,13 @@ void time_load_and_downloads(ClientInvoker& theClient,
                 continue;
             }
 
-            cout << "\n" << relPath.string() << "  : file size " << fs::file_size(relPath) << endl;
+            std::cout << "\n" << relPath.string() << "  : file size " << fs::file_size(relPath) << std::endl;
             {
                 DurationTimer duration_timer;
                 BOOST_REQUIRE_MESSAGE(theClient.loadDefs(relPath.string()) == 0,
                                       "load defs failed \n"
                                           << theClient.errorMsg());
-                cout << " Load:                " << duration_timer.elapsed_milliseconds() << "ms" << endl;
+                std::cout << " Load:                " << duration_timer.elapsed_milliseconds() << "ms" << std::endl;
                 BOOST_CHECK_MESSAGE(duration_timer.elapsed_milliseconds() < load_threshold_ms,
                                     "regression load(" << duration_timer.elapsed_milliseconds()
                                                        << "), exceeded threshold of " << load_threshold_ms);
@@ -101,15 +101,15 @@ void time_load_and_downloads(ClientInvoker& theClient,
             {
                 DurationTimer duration_timer;
                 BOOST_REQUIRE_MESSAGE(theClient.begin_all_suites() == 0, "begin failed \n" << theClient.errorMsg());
-                cout << " Begin:               " << duration_timer.elapsed_milliseconds() << "ms" << endl;
+                std::cout << " Begin:               " << duration_timer.elapsed_milliseconds() << "ms" << std::endl;
                 BOOST_CHECK_MESSAGE(duration_timer.elapsed_milliseconds() < begin_threshold_ms,
                                     "regression begin(" << duration_timer.elapsed_milliseconds()
                                                         << "), exceeded threshold of " << begin_threshold_ms);
             }
 
             {
-                cout << " Download(news_local):";
-                cout.flush();
+                std::cout << " Download(news_local):";
+                std::cout.flush();
                 ClientInvoker client_news(host, port);
                 DurationTimer duration_timer;
                 for (int i = 0; i < count; i++) {
@@ -117,13 +117,13 @@ void time_load_and_downloads(ClientInvoker& theClient,
                         client_news.news_local();
                         switch (client_news.server_reply().get_news()) {
                             case ServerReply::DO_FULL_SYNC:
-                                cout << "FULL ";
+                                std::cout << "FULL ";
                                 break;
                             case ServerReply::NEWS:
-                                cout << "NEWS ";
+                                std::cout << "NEWS ";
                                 break;
                             case ServerReply::NO_NEWS:
-                                cout << "NO_NEWS ";
+                                std::cout << "NO_NEWS ";
                                 break;
                         }
                     }
@@ -131,53 +131,55 @@ void time_load_and_downloads(ClientInvoker& theClient,
                         client_news.sync_local();
                     }
                 }
-                cout << ": 1:news_local(),2:sync_local(),n:news_local with the new Client: "
-                     << duration_timer.elapsed_milliseconds() << "(ms)" << endl;
+                std::cout << ": 1:news_local(),2:sync_local(),n:news_local with the new Client: "
+                          << duration_timer.elapsed_milliseconds() << "(ms)" << std::endl;
             }
             {
-                cout << " Download(Sync):      ";
-                cout.flush();
+                std::cout << " Download(Sync):      ";
+                std::cout.flush();
                 for (int i = 0; i < count; i++) {
                     DurationTimer duration_timer;
                     theClient.sync_local();
                     int ms = duration_timer.elapsed_milliseconds();
-                    cout << ms << " ";
+                    std::cout << ms << " ";
                 }
-                cout << ":(milli-seconds) sync_local() with the same Client. First call updates cache." << endl;
+                std::cout << ":(milli-seconds) sync_local() with the same Client. First call updates cache."
+                          << std::endl;
             }
             {
                 // On construction of Defs, hence should be slightly faster
-                cout << " Download(Sync-FULL): ";
-                cout.flush();
+                std::cout << " Download(Sync-FULL): ";
+                std::cout.flush();
                 double total = 0;
                 for (int i = 0; i < count; i++) {
                     ClientInvoker client(host, port);
                     DurationTimer duration_timer;
                     client.sync_local();
                     int ms = duration_timer.elapsed_milliseconds();
-                    cout << ms << " ";
+                    std::cout << ms << " ";
                     total += ms;
                 }
                 double average = (double)(total) / ((double)count * 1000);
-                cout << ": Avg:" << average << "(sec)  : sync_local() with *different* clients.uses cache!" << endl;
+                std::cout << ": Avg:" << average << "(sec)  : sync_local() with *different* clients.uses cache!"
+                          << std::endl;
                 BOOST_CHECK_MESSAGE(average < sync_full_threshold_s,
                                     "regression Sync-FULL(" << average << "), exceeded threshold of "
                                                             << sync_full_threshold_s);
             }
             {
-                cout << " Download(FULL):      ";
-                cout.flush();
+                std::cout << " Download(FULL):      ";
+                std::cout.flush();
                 double total = 0;
                 for (int i = 0; i < count; i++) {
                     ClientInvoker client(host, port);
                     DurationTimer duration_timer;
                     theClient.getDefs();
                     int ms = duration_timer.elapsed_milliseconds();
-                    cout << ms << " ";
+                    std::cout << ms << " ";
                     total += ms;
                 }
                 double average = (double)(total) / ((double)count * 1000);
-                cout << ": Avg:" << average << "(sec)  : get_defs() from different client" << endl;
+                std::cout << ": Avg:" << average << "(sec)  : get_defs() from different client" << std::endl;
                 BOOST_CHECK_MESSAGE(average < full_threshold_s,
                                     "regression FULL(sync)(" << average << ") exceeded threshold of "
                                                              << full_threshold_s);
@@ -194,59 +196,59 @@ void time_load_and_downloads(ClientInvoker& theClient,
                 }
 
                 {
-                    cout << " Suspend " << paths.size() << " tasks : ";
-                    cout.flush();
+                    std::cout << " Suspend " << paths.size() << " tasks : ";
+                    std::cout.flush();
                     DurationTimer duration_timer;
                     theClient.suspend(paths);
-                    cout << duration_timer.elapsed_seconds();
+                    std::cout << duration_timer.elapsed_seconds();
                     sync_and_news_local(theClient);
                 }
                 {
-                    cout << " Resume " << paths.size() << " tasks  : ";
-                    cout.flush();
+                    std::cout << " Resume " << paths.size() << " tasks  : ";
+                    std::cout.flush();
                     DurationTimer duration_timer;
                     theClient.resume(paths);
-                    cout << duration_timer.elapsed_seconds();
+                    std::cout << duration_timer.elapsed_seconds();
                     sync_and_news_local(theClient);
                 }
                 {
-                    cout << " Suspend " << paths.size() << " tasks : ";
-                    cout.flush();
+                    std::cout << " Suspend " << paths.size() << " tasks : ";
+                    std::cout.flush();
                     theClient.set_auto_sync(true);
                     DurationTimer duration_timer;
                     theClient.suspend(paths);
-                    cout << duration_timer.elapsed_seconds() << " : auto-sync" << endl;
+                    std::cout << duration_timer.elapsed_seconds() << " : auto-sync" << std::endl;
                     BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < suspend_threshold_s,
                                         "regression suspend(" << duration_timer.elapsed_seconds()
                                                               << ") exceeded threshold of " << suspend_threshold_s);
                     theClient.set_auto_sync(false);
                 }
                 {
-                    cout << " Resume " << paths.size() << " tasks  : ";
-                    cout.flush();
+                    std::cout << " Resume " << paths.size() << " tasks  : ";
+                    std::cout.flush();
                     theClient.set_auto_sync(true);
                     DurationTimer duration_timer;
                     theClient.resume(paths);
-                    cout << duration_timer.elapsed_seconds() << " : auto-sync" << endl;
+                    std::cout << duration_timer.elapsed_seconds() << " : auto-sync" << std::endl;
                     BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < resume_threshold_s,
                                         "regression resume(" << duration_timer.elapsed_seconds()
                                                              << ") exceeded threshold of " << resume_threshold_s);
                     theClient.set_auto_sync(false);
                 }
                 {
-                    cout << " check  " << paths.size() << " tasks  : ";
-                    cout.flush();
+                    std::cout << " check  " << paths.size() << " tasks  : ";
+                    std::cout.flush();
                     DurationTimer duration_timer;
                     theClient.check(paths);
-                    cout << duration_timer.elapsed_seconds();
+                    std::cout << duration_timer.elapsed_seconds();
                     sync_and_news_local(theClient);
                 }
                 {
-                    cout << " kill   " << paths.size() << " tasks  : ";
-                    cout.flush();
+                    std::cout << " kill   " << paths.size() << " tasks  : ";
+                    std::cout.flush();
                     DurationTimer duration_timer;
                     theClient.kill(paths);
-                    cout << duration_timer.elapsed_seconds();
+                    std::cout << duration_timer.elapsed_seconds();
                     sync_and_news_local(theClient);
                 }
                 {
@@ -254,21 +256,21 @@ void time_load_and_downloads(ClientInvoker& theClient,
                     // repeats to loop Hence we will call force aborted instead. Also AVOID active/submitted otherwise
                     // we spend a huge time adding zombies, for the subsequent force cmd below. Node: state change
                     // memento, will also persist duration time of state change.
-                    cout << " force  " << paths.size() << " tasks  : ";
-                    cout.flush();
+                    std::cout << " force  " << paths.size() << " tasks  : ";
+                    std::cout.flush();
                     DurationTimer duration_timer;
                     theClient.force(paths, "aborted");
-                    cout << duration_timer.elapsed_seconds() << " force(aborted)";
+                    std::cout << duration_timer.elapsed_seconds() << " force(aborted)";
                     sync_and_news_local(theClient);
                 }
                 {
-                    cout << " force  " << paths.size() << " tasks  : ";
-                    cout.flush();
+                    std::cout << " force  " << paths.size() << " tasks  : ";
+                    std::cout.flush();
                     theClient.set_auto_sync(true);
                     DurationTimer duration_timer;
                     theClient.force(
                         paths, "queued"); // can't use aborted again, as it already aborted, and hence will be ignored
-                    cout << duration_timer.elapsed_seconds() << " : auto-sync :  force(queued)" << endl;
+                    std::cout << duration_timer.elapsed_seconds() << " : auto-sync :  force(queued)" << std::endl;
                     BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < force_threshold_s,
                                         "regression force(" << duration_timer.elapsed_seconds()
                                                             << ") exceeded threshold of " << force_threshold_s);
@@ -276,25 +278,25 @@ void time_load_and_downloads(ClientInvoker& theClient,
                 }
             }
             {
-                cout << " Check pt:            ";
-                cout.flush();
+                std::cout << " Check pt:            ";
+                std::cout.flush();
                 double total = 0;
                 for (int i = 0; i < count; i++) {
                     DurationTimer duration_timer;
                     theClient.checkPtDefs();
                     int ms = duration_timer.elapsed_milliseconds();
-                    cout << ms << " ";
+                    std::cout << ms << " ";
                     total += ms;
                 }
                 double average = (double)(total) / ((double)count * 1000);
-                cout << ": Avg:" << average << "(s)" << endl;
+                std::cout << ": Avg:" << average << "(s)" << std::endl;
                 BOOST_CHECK_MESSAGE(average < check_pt_threshold_s,
                                     "regression in check_pt(" << average << ") exceeded threshold of "
                                                               << check_pt_threshold_s);
             }
             {
-                cout << " client cmds:         ";
-                cout.flush();
+                std::cout << " client cmds:         ";
+                std::cout.flush();
                 DurationTimer duration_timer;
                 size_t i;
                 for (i = 0; i < paths.size() && i < 2000; i++) {
@@ -309,14 +311,14 @@ void time_load_and_downloads(ClientInvoker& theClient,
                     theClient.requeue(paths[i]);
                     theClient.sync_local();
                 }
-                cout << i << " times " << duration_timer.elapsed_seconds()
-                     << "(s) (sync_local) with same client (suspend,resume,force,alter,requeue)" << endl;
+                std::cout << i << " times " << duration_timer.elapsed_seconds()
+                          << "(s) (sync_local) with same client (suspend,resume,force,alter,requeue)" << std::endl;
                 BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < client_cmds_threshold_s,
                                     "regression, exceeded threshold of " << client_cmds_threshold_s);
             }
             {
-                cout << " client cmds:         ";
-                cout.flush();
+                std::cout << " client cmds:         ";
+                std::cout.flush();
                 theClient.set_auto_sync(true);
                 DurationTimer duration_timer;
                 size_t i;
@@ -327,8 +329,8 @@ void time_load_and_downloads(ClientInvoker& theClient,
                     theClient.alter(paths[i], "add", "variable", "ZZZZ", "XXXX");
                     theClient.requeue(paths[i]);
                 }
-                cout << i << " times " << duration_timer.elapsed_seconds()
-                     << "(s) (auto_sync ) with same client (suspend,resume,force,alter,requeue)" << endl;
+                std::cout << i << " times " << duration_timer.elapsed_seconds()
+                          << "(s) (auto_sync ) with same client (suspend,resume,force,alter,requeue)" << std::endl;
                 BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < client_cmds_threshold_s,
                                     "regression, exceeded threshold of " << client_cmds_threshold_s);
                 theClient.set_auto_sync(false);
@@ -339,7 +341,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
                 BOOST_REQUIRE_MESSAGE(theClient.delete_all(true) == 0,
                                       "delete all defs failed \n"
                                           << theClient.errorMsg());
-                cout << " Delete:              " << duration_timer.elapsed_milliseconds() << "ms" << endl;
+                std::cout << " Delete:              " << duration_timer.elapsed_milliseconds() << "ms" << std::endl;
             }
         }
         catch (const std::exception& ex) {

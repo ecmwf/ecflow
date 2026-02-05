@@ -30,7 +30,8 @@
 
 class MeterParser : public Parser {
 public:
-    explicit MeterParser(DefsStructureParser* p) : Parser(p) {}
+    explicit MeterParser(DefsStructureParser* p)
+        : Parser(p) {}
     const char* keyword() const override { return "meter"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };

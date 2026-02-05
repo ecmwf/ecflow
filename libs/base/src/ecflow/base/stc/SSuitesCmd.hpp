@@ -21,7 +21,8 @@ class AbstractServer;
 class SSuitesCmd final : public ServerToClientCmd {
 public:
     explicit SSuitesCmd(AbstractServer* as);
-    SSuitesCmd() : ServerToClientCmd() {}
+    SSuitesCmd()
+        : ServerToClientCmd() {}
 
     void init(AbstractServer* as);
     std::string print() const override;

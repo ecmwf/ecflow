@@ -29,6 +29,8 @@ jobs:
     uses: ecmwf/downstream-ci/.github/workflows/downstream-ci.yml@main
     with:
       ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
+      skip_matrix_jobs: |
+        clang@macos-13-arm
       codecov_upload: true
       clang_format: true
       clang_format_ignore: |
@@ -39,7 +41,7 @@ jobs:
         libs/client/test/data
         libs/node/test/data
         libs/pyext/test/data
-        libs/test/data
+        libs/test/overall/data
     secrets: inherit
 
   # Build downstream packages on HPC

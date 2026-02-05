@@ -84,7 +84,9 @@ enum HttpStatusCode {
 class HttpServerException : public std::exception {
 public:
     HttpServerException() = delete;
-    HttpServerException(HttpStatusCode code, const std::string& msg) : code_(code), msg_(msg) {}
+    HttpServerException(HttpStatusCode code, const std::string& msg)
+        : code_(code),
+          msg_(msg) {}
 
     HttpServerException(const HttpServerException&)                = default;
     HttpServerException& operator=(const HttpServerException&)     = default;

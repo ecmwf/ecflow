@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/usr/bin/env bash
 
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
@@ -32,16 +32,16 @@ smsinit $$
 # Defined a error hanlder
 
 ERROR() {
-   # wait for background process to stop.
-   # If we did not have background jobs, closly called foreround jobs
-   # may arrive out of order at the server, causing unnecessary zombies
-   # The wait should prevent this.
-   echo "ERROR() called"
-	set +e        # Clear -e flag, so we don't fail
-	wait          # wait for background process to stop
-   smsabort      # Notify ECF_ that something went wrong
-	trap 0        # Remove the trap
-	exit 0        # End the script
+    # wait for background process to stop.
+    # If we did not have background jobs, closly called foreround jobs
+    # may arrive out of order at the server, causing unnecessary zombies
+    # The wait should prevent this.
+    echo "ERROR() called"
+    set +e        # Clear -e flag, so we don't fail
+    wait          # wait for background process to stop
+    smsabort      # Notify ECF_ that something went wrong
+    trap 0        # Remove the trap
+    exit 0        # End the script
 }
 
 # Trap any calls to exit and errors caught by the -e flag

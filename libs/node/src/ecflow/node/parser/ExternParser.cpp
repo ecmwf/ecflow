@@ -14,8 +14,6 @@
 
 #include "ecflow/node/Defs.hpp"
 
-using namespace std;
-
 bool ExternParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // cout << "line = " << line << "\n";
     if (lineTokens.size() < 2) {

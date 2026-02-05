@@ -21,7 +21,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -1463,7 +1462,7 @@ void AstFlag::print_flat(std::ostream& os, bool /*add_bracket*/) const {
 }
 
 std::string AstFlag::expression() const {
-    string ret = nodePath_;
+    std::string ret = nodePath_;
     ret += "<flag>";
     ret += ecf::Flag::enum_to_string(flag_);
     return ret;
@@ -1742,7 +1741,9 @@ std::string AstParentVariable::why_expression(bool html) const {
 // ===============================================================================
 // class VariableHelper:
 // ===============================================================================
-VariableHelper::VariableHelper(const AstVariable* astVariable) : astVariable_(astVariable), theReferenceNode_(nullptr) {
+VariableHelper::VariableHelper(const AstVariable* astVariable)
+    : astVariable_(astVariable),
+      theReferenceNode_(nullptr) {
     // For *this* constructor we don't care about errors'
     std::string errorMsg;
     theReferenceNode_ = astVariable_->referencedNode(errorMsg);

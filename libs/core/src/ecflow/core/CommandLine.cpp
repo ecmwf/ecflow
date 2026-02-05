@@ -199,16 +199,20 @@ std::vector<std::string> split_unix(const std::string& cmdline) {
 
 } // namespace impl_detail
 
-CommandLine::CommandLine(int argc, char** argv) : CommandLine(argc, const_cast<const char**>(argv)) {
+CommandLine::CommandLine(int argc, char** argv)
+    : CommandLine(argc, const_cast<const char**>(argv)) {
 }
 
-CommandLine::CommandLine(int argc, const char** argv) : tokens_{impl_detail::reconstruct_tokens(argc, argv)} {
+CommandLine::CommandLine(int argc, const char** argv)
+    : tokens_{impl_detail::reconstruct_tokens(argc, argv)} {
 }
 
-CommandLine::CommandLine(const std::string& cl) : tokens_{impl_detail::split_unix(cl)} {
+CommandLine::CommandLine(const std::string& cl)
+    : tokens_{impl_detail::split_unix(cl)} {
 }
 
-CommandLine::CommandLine(tokens_t tokens) : tokens_{std::move(tokens)} {
+CommandLine::CommandLine(tokens_t tokens)
+    : tokens_{std::move(tokens)} {
 }
 
 CommandLine::cl_t CommandLine::original() const {

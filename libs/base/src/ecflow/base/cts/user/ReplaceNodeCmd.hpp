@@ -26,7 +26,7 @@ public:
     bool force() const { return force_; }
 
     bool isWrite() const override { return true; }
-    int timeout() const override { return 300; }
+    time_duration_t timeout() const override { return std::chrono::seconds{300}; }
     void print(std::string&) const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
@@ -47,7 +47,7 @@ private:
 
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
-    void cleanup() override { std::string().swap(clientDefs_); } /// run in the server, after command send to client
+    void cleanup() override { std::string{}.swap(clientDefs_); } /// run in the server, after command send to client
 
     bool createNodesAsNeeded_{false};
     bool force_{false};

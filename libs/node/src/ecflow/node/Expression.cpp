@@ -20,7 +20,6 @@
 #include "ecflow/node/ExprParser.hpp"
 #include "ecflow/node/Node.hpp"
 
-using namespace std;
 using namespace ecf;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -82,13 +81,15 @@ Expression::Expression(const PartExpression& exp) {
 
 Expression::Expression() = default;
 
-Expression::Expression(const Expression& rhs) : vec_(rhs.vec_), free_(rhs.free_) {
+Expression::Expression(const Expression& rhs)
+    : vec_(rhs.vec_),
+      free_(rhs.free_) {
 }
 
 std::unique_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,
                                           const std::string& error_msg_context) {
     PartExpression exp(expression_to_parse);
-    string parseErrorMsg;
+    std::string parseErrorMsg;
     std::unique_ptr<AstTop> ast = exp.parseExpressions(parseErrorMsg);
     if (!ast.get()) {
         std::stringstream ss;
@@ -101,7 +102,7 @@ std::unique_ptr<AstTop> Expression::parse(const std::string& expression_to_parse
 std::unique_ptr<AstTop> Expression::parse_no_throw(const std::string& expression_to_parse,
                                                    std::string& error_msg_context) {
     PartExpression exp(expression_to_parse);
-    string parseErrorMsg;
+    std::string parseErrorMsg;
     std::unique_ptr<AstTop> ast = exp.parseExpressions(parseErrorMsg);
     if (!ast.get()) {
         std::stringstream ss;
@@ -112,7 +113,7 @@ std::unique_ptr<AstTop> Expression::parse_no_throw(const std::string& expression
 }
 
 std::string Expression::compose_expression(const std::vector<PartExpression>& vec) {
-    string ret;
+    std::string ret;
     auto theEnd = vec.end();
     for (auto expr = vec.begin(); expr != theEnd; ++expr) {
         if ((*expr).andExpr()) {

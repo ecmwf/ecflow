@@ -14,7 +14,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_DAY 1
 

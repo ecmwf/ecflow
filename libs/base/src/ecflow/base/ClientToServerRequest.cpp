@@ -16,8 +16,6 @@
 #include "ecflow/base/Authorisation.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
-using namespace std;
-
 STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
     if (cmd_.get()) {
         // Perform Authentication (i.e. user/task identity) control

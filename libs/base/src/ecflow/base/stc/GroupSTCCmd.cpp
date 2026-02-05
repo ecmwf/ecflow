@@ -21,8 +21,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
 std::string GroupSTCCmd::print() const {
     return "cmd:GroupSTCCmd";

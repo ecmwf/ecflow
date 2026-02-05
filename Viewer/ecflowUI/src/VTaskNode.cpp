@@ -15,7 +15,10 @@
 #include "ServerHandler.hpp"
 #include "VNState.hpp"
 
-VTaskNode::VTaskNode(VNode* parent, node_ptr node) : VNode(parent, node), prevTryNo_(0), prevFlag_(0) {
+VTaskNode::VTaskNode(VNode* parent, node_ptr node)
+    : VNode(parent, node),
+      prevTryNo_(0),
+      prevFlag_(0) {
     unsigned int tn          = tryNo();
     NState::State new_status = node_->state();
 

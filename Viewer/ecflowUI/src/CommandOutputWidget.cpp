@@ -18,7 +18,8 @@
 #include "TextFormat.hpp"
 #include "ViewerUtil.hpp"
 
-CommandOutputModel::CommandOutputModel(QObject* parent) : QAbstractItemModel(parent) {
+CommandOutputModel::CommandOutputModel(QObject* parent)
+    : QAbstractItemModel(parent) {
     columns_ = ModelColumn::def("output_columns");
 
     assert(columns_);
@@ -163,7 +164,9 @@ QModelIndex CommandOutputModel::itemToStatusIndex(CommandOutput_ptr item) const 
 //
 //==============================================
 
-CommandOutputWidget::CommandOutputWidget(QWidget* parent) : QWidget(parent), errCol_(QColor(204, 0, 0)) {
+CommandOutputWidget::CommandOutputWidget(QWidget* parent)
+    : QWidget(parent),
+      errCol_(QColor(204, 0, 0)) {
     setupUi(this);
 
     infoLabel_->setProperty("fileInfo", "1");

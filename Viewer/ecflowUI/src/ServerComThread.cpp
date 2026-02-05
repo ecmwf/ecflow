@@ -25,7 +25,9 @@
 
 #define UI_SERVERCOMTHREAD_DEBUG
 
-ServerComThread::ServerComThread(ServerHandler* server, ClientInvoker* ci) : server_(server), ci_(ci) {
+ServerComThread::ServerComThread(ServerHandler* server, ClientInvoker* ci)
+    : server_(server),
+      ci_(ci) {
     assert(server_);
 }
 

@@ -207,7 +207,8 @@ void VParamSet::readSettings(VSettings* vs) {
 //
 //==============================================
 
-NodeStateFilter::NodeStateFilter() : VParamSet() {
+NodeStateFilter::NodeStateFilter()
+    : VParamSet() {
     settingsId_            = "states";
     settingsIdV0_          = "state";
     std::vector<VParam*> v = VNState::filterItems();
@@ -220,7 +221,8 @@ NodeStateFilter::NodeStateFilter() : VParamSet() {
 //
 //==============================================
 
-AttributeFilter::AttributeFilter() : VParamSet() {
+AttributeFilter::AttributeFilter()
+    : VParamSet() {
     settingsId_            = "attributes";
     settingsIdV0_          = "attribute";
     std::vector<VParam*> v = VAttributeType::filterItems();
@@ -303,7 +305,8 @@ void AttributeFilter::readSettings(VSettings* vs) {
 //
 //==============================================
 
-IconFilter::IconFilter() : VParamSet() {
+IconFilter::IconFilter()
+    : VParamSet() {
     settingsId_            = "icons";
     settingsIdV0_          = "icon";
     std::vector<VParam*> v = VIcon::filterItems();
@@ -344,7 +347,8 @@ void IconFilter::readSettings(VSettings* vs) {
 // NodeFilterDef
 //==============================================
 
-NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter, Scope /*scope*/) : serverFilter_(serverFilter) {
+NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter, Scope /*scope*/)
+    : serverFilter_(serverFilter) {
     nodeState_ = new NodeStateFilter;
     connect(nodeState_, SIGNAL(changed()), this, SIGNAL(changed()));
     query_ = new NodeQuery("tmp", true);
@@ -396,7 +400,9 @@ void NodeFilterDef::serverRenamed(const std::string& newName, const std::string&
 //
 //==============================================
 
-NodeFilter::NodeFilter(NodeFilterDef* def, ServerHandler* server) : def_(def), server_(server) {
+NodeFilter::NodeFilter(NodeFilterDef* def, ServerHandler* server)
+    : def_(def),
+      server_(server) {
     assert(server_);
     queryEngine_ = new NodeFilterEngine(this);
 }
@@ -608,7 +614,9 @@ bool TreeNodeFilter::filterState(VNode* node, VParamSet* stateFilter) {
 //
 //===========================================================
 
-TableNodeFilter::TableNodeFilter(NodeFilterDef* def, ServerHandler* server) : NodeFilter(def, server), matchCount_(0) {
+TableNodeFilter::TableNodeFilter(NodeFilterDef* def, ServerHandler* server)
+    : NodeFilter(def, server),
+      matchCount_(0) {
 }
 
 // When nothing should be shown

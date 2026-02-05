@@ -13,10 +13,10 @@
 #include "MyDefsFixture.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_FIXTURE_TEST_SUITE(U_Node, MyDefsFixture)
@@ -44,7 +44,7 @@ static void testPersistence(const Defs& fixtureDefs) {
         BOOST_CHECK_MESSAGE(theyCompare, "restored defs file is not same as fixtureDefs defs file");
     }
 
-    cout << " check pt file_size: " << fs::file_size(check_pt_file) << "\n";
+    std::cout << " check pt file_size: " << fs::file_size(check_pt_file) << "\n";
 
     // Uncomment if you want see what this file looks like
     fs::remove(check_pt_file);

@@ -62,7 +62,10 @@ class LogLoadWidget;
 
 struct LogLoadPrevState
 {
-    LogLoadPrevState() : valid(false), fullStart(false), fullEnd(false) {}
+    LogLoadPrevState()
+        : valid(false),
+          fullStart(false),
+          fullEnd(false) {}
     bool valid;
     QDateTime startDt;
     QDateTime endDt;

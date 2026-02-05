@@ -54,7 +54,10 @@
 
 class TriggerRelationCollector : public TriggerCollector {
 public:
-    TriggerRelationCollector(VItem* node, TriggerGraphView* view, bool e) : node_(node), view_(view), e_(e) {}
+    TriggerRelationCollector(VItem* node, TriggerGraphView* view, bool e)
+        : node_(node),
+          view_(view),
+          e_(e) {}
 
     bool scanParents() override { return e_; }
     bool scanKids() override { return e_; }
@@ -74,7 +77,10 @@ private:
 
 class TriggeredRelationCollector : public TriggerCollector {
 public:
-    TriggeredRelationCollector(VItem* node, TriggerGraphView* view, bool e) : node_(node), view_(view), e_(e) {}
+    TriggeredRelationCollector(VItem* node, TriggerGraphView* view, bool e)
+        : node_(node),
+          view_(view),
+          e_(e) {}
 
     bool scanParents() override { return e_; }
     bool scanKids() override { return e_; }
@@ -402,7 +408,8 @@ void TriggerGraphEdgeItem::addTrigger(VItem* through, TriggerCollector::Mode mod
 //
 //=============================================================
 
-TriggerGraphEdgeInfoDialog::TriggerGraphEdgeInfoDialog(QWidget* parent) : QDialog(parent) {
+TriggerGraphEdgeInfoDialog::TriggerGraphEdgeInfoDialog(QWidget* parent)
+    : QDialog(parent) {
     setWindowTitle(tr("Trigger details"));
     setModal(false);
 
@@ -596,7 +603,8 @@ void TriggerGraphExpandState::clear() {
 //
 //===========================================================
 
-TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent) {
+TriggerGraphView::TriggerGraphView(QWidget* parent)
+    : QGraphicsView(parent) {
     // used by ActioHandler to identfy this view
     setProperty("view", "graph");
 

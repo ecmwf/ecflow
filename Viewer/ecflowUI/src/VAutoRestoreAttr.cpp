@@ -18,7 +18,8 @@
 // VAutoRestoreAttrType
 //================================
 
-VAutoRestoreAttrType::VAutoRestoreAttrType() : VAttributeType("autorestore") {
+VAutoRestoreAttrType::VAutoRestoreAttrType()
+    : VAttributeType("autorestore") {
     dataCount_                            = 2;
     searchKeyToData_["autorestore_value"] = ValueIndex;
     scanProc_                             = VAutoRestoreAttr::scan;
@@ -59,7 +60,8 @@ void VAutoRestoreAttrType::encode(ecf::AutoRestoreAttr* a, QStringList& data) co
 //
 //=====================================================
 
-VAutoRestoreAttr::VAutoRestoreAttr(VNode* parent) : VAttribute(parent, 0) {
+VAutoRestoreAttr::VAutoRestoreAttr(VNode* parent)
+    : VAttribute(parent, 0) {
 }
 
 VAttributeType* VAutoRestoreAttr::type() const {

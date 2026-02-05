@@ -13,7 +13,8 @@
 #include <QDebug>
 #include <QFontDatabase>
 
-HtmlItemWidget::HtmlItemWidget(QWidget* parent) : QWidget(parent) {
+HtmlItemWidget::HtmlItemWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     externalTb_->hide();

@@ -18,10 +18,14 @@
 #include "TextPagerEdit.hpp"
 #include "TextPagerLayout_p.hpp"
 
-SyntaxHighlighter::SyntaxHighlighter(QObject* parent) : QObject(parent), d(new Private) {
+SyntaxHighlighter::SyntaxHighlighter(QObject* parent)
+    : QObject(parent),
+      d(new Private) {
 }
 
-SyntaxHighlighter::SyntaxHighlighter(TextPagerEdit* parent) : QObject(parent), d(new Private) {
+SyntaxHighlighter::SyntaxHighlighter(TextPagerEdit* parent)
+    : QObject(parent),
+      d(new Private) {
     if (parent) {
         parent->addSyntaxHighlighter(this);
     }

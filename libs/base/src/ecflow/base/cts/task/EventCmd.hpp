@@ -25,7 +25,8 @@ public:
         : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no),
           name_(eventName),
           value_(value) {}
-    EventCmd() : TaskCmd() {}
+    EventCmd()
+        : TaskCmd() {}
 
     const std::string& name() const { return name_; }
     bool value() const { return value_; }

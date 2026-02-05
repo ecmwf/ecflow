@@ -28,7 +28,7 @@ public:
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
     std::string print() const override;
     bool equals(ServerToClientCmd*) const override;
-    void cleanup() override { std::string().swap(the_node_str_); } /// run in the server, after command send to client
+    void cleanup() override { std::string{}.swap(the_node_str_); } /// run in the server, after command send to client
 
 private:
     node_ptr get_node_ptr(std::string& error_msg) const;

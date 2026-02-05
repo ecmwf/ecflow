@@ -26,16 +26,16 @@
 #endif
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 namespace {
 
 /// Class to manage locking: Only unlock if acquired the lock,
 class Lock {
 public:
-    Lock(const std::string& user, AbstractServer* as) : as_(as) { ok_ = as->lock(user); }
+    Lock(const std::string& user, AbstractServer* as)
+        : as_(as) {
+        ok_ = as->lock(user);
+    }
     ~Lock() {
         if (ok_) {
             as_->unlock();
@@ -200,7 +200,8 @@ const char* MoveCmd::desc() {
 }
 
 void MoveCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(MoveCmd::arg(), po::value<vector<string>>()->multitoken(), MoveCmd::desc());
+    desc.add_options()(
+        MoveCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), MoveCmd::desc());
 }
 
 void MoveCmd::create(Cmd_ptr&, boost::program_options::variables_map&, AbstractClientEnv*) const {

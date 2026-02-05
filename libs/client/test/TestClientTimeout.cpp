@@ -21,7 +21,6 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -57,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_client_timeout, *boost::unit_test::disabled()) {
     //    send request   : 1 second
     //    receive reply  : 1 second
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
-    theClient.set_connect_timeout(0);
+    theClient.set_connect_timeout(std::chrono::seconds{0});
 
     std::string path = File::test_data("libs/node/test/parser/data/single_defs/mega.def", "parser");
     BOOST_REQUIRE_THROW(theClient.loadDefs(path),
@@ -68,9 +67,9 @@ BOOST_AUTO_TEST_CASE(test_client_timeout, *boost::unit_test::disabled()) {
     for (int i = 2; i < 30; ++i) {
         theClient.set_connect_timeout(i);
         try {
-            cout << "Trying with timeout of " << i << " seconds\n";
+            std::cout << "Trying with timeout of " << i << " seconds\n";
             theClient.loadDefs(path);
-            cout << "   loaded mega defs with a timeout of " << i << " seconds\n";
+            std::cout << "   loaded mega defs with a timeout of " << i << " seconds\n";
             loaded_defs = true;
             break;
         }

@@ -98,7 +98,8 @@ public:
 
     CalendarDate() = delete;
 
-    explicit CalendarDate(value_t value) : value_(value) {}
+    explicit CalendarDate(value_t value)
+        : value_(value) {}
 
     CalendarDate(const CalendarDate&)            = default;
     CalendarDate& operator=(const CalendarDate&) = default;
@@ -139,7 +140,8 @@ public:
     using value_t = long;
 
     JulianDay() = delete;
-    explicit JulianDay(value_t value) : value_(value) {}
+    explicit JulianDay(value_t value)
+        : value_(value) {}
 
     value_t value() const { return value_; }
 

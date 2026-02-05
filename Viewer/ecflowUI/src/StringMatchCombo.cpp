@@ -13,7 +13,8 @@
 #include <QMenu>
 #include <QVariant>
 
-StringMatchTb::StringMatchTb(QWidget* parent) : QToolButton(parent) {
+StringMatchTb::StringMatchTb(QWidget* parent)
+    : QToolButton(parent) {
     QIcon ic(QPixmap(":/viewer/edit.svg"));
     setIcon(ic);
     setAutoRaise(true);
@@ -25,7 +26,8 @@ StringMatchTb::StringMatchTb(QWidget* parent) : QToolButton(parent) {
     setPopupMode(QToolButton::InstantPopup);
 }
 
-StringMatchCombo::StringMatchCombo(QWidget* parent) : QComboBox(parent) {
+StringMatchCombo::StringMatchCombo(QWidget* parent)
+    : QComboBox(parent) {
     addItem("contains", StringMatchMode::ContainsMatch);
     addItem("matches", StringMatchMode::WildcardMatch);
     addItem("regexp", StringMatchMode::RegexpMatch);

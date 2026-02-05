@@ -25,7 +25,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // #define DEBUG_FIND_NODE 1
@@ -33,7 +32,9 @@ using namespace std;
 // Create the generated variable up-front. This allows them to be referenced
 // is abstract syntax tree during the post process call
 
-Suite::Suite(const Suite& rhs) : NodeContainer(rhs), begun_(rhs.begun_) {
+Suite::Suite(const Suite& rhs)
+    : NodeContainer(rhs),
+      begun_(rhs.begun_) {
     if (rhs.clockAttr_.get()) {
         clockAttr_ = std::make_shared<ClockAttr>(*rhs.clockAttr_);
     }

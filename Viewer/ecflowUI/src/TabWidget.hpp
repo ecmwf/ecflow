@@ -22,7 +22,8 @@ class QVBoxLayout;
 
 class IconTabBar : public QTabBar {
 public:
-    explicit IconTabBar(QWidget* parent = nullptr) : QTabBar(parent) {}
+    explicit IconTabBar(QWidget* parent = nullptr)
+        : QTabBar(parent) {}
 
 protected:
     void paintEvent(QPaintEvent* e) override;

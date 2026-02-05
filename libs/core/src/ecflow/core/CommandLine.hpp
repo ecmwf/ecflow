@@ -104,7 +104,8 @@ private:
     struct Overload : L...
     {
         using L::operator()...;
-        constexpr explicit Overload(L... lambda) : L(std::move(lambda))... {}
+        constexpr explicit Overload(L... lambda)
+            : L(std::move(lambda))... {}
     };
 };
 

@@ -16,7 +16,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_CRON 1
 

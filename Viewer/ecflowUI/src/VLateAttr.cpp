@@ -18,7 +18,8 @@
 // VLateAttrType
 //================================
 
-VLateAttrType::VLateAttrType() : VAttributeType("late") {
+VLateAttrType::VLateAttrType()
+    : VAttributeType("late") {
     dataCount_                    = 2;
     searchKeyToData_["late_name"] = NameIndex;
     searchKeyToData_["late_type"] = TypeIndex;
@@ -54,7 +55,8 @@ void VLateAttrType::encode(ecf::LateAttr* late, QStringList& data) const {
 //
 //=====================================================
 
-VLateAttr::VLateAttr(VNode* parent, const std::string& /*name*/) : VAttribute(parent, 0) {
+VLateAttr::VLateAttr(VNode* parent, const std::string& /*name*/)
+    : VAttribute(parent, 0) {
 }
 
 VAttributeType* VLateAttr::type() const {

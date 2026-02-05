@@ -34,7 +34,9 @@
 //
 //========================================================
 
-VariableDelegate::VariableDelegate(QTreeView* parent) : QStyledItemDelegate(parent), view_(parent) {
+VariableDelegate::VariableDelegate(QTreeView* parent)
+    : QStyledItemDelegate(parent),
+      view_(parent) {
     selectPen_         = QPen(QColor(8, 117, 182));
     selectBrush_       = QBrush(QColor(65, 139, 212));
     selectBrushBlock_  = QBrush(QColor(48, 102, 178));
@@ -286,7 +288,8 @@ QSize VariableDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 //
 //========================================================
 
-VariableView::VariableView(QWidget* parent) : TreeView(parent) {
+VariableView::VariableView(QWidget* parent)
+    : TreeView(parent) {
     setProperty("var", "1");
 
     delegate_ = new VariableDelegate(this);

@@ -21,8 +21,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-
 // DEBUG AID: to see the expression tree, invert the expected evaluation
 //            so that test fail's
 
@@ -39,19 +37,19 @@ BOOST_AUTO_TEST_CASE(test_single_expression) {
     // The map key = trigger expression,
     // value.first  = type of expected root abstract syntax tree
     // value.second = result of expected evaluation
-    map<string, std::pair<string, bool>> exprMap;
+    std::map<std::string, std::pair<std::string, bool>> exprMap;
 
     exprMap[":var == 0"] = std::make_pair(AstEqual::stype(), true);
     exprMap[":var != 1"] = std::make_pair(AstNotEqual::stype(), true);
 
-    for (std::pair<string, std::pair<string, bool>> p : exprMap) {
+    for (std::pair<std::string, std::pair<std::string, bool>> p : exprMap) {
 
         ExprParser theExprParser(p.first);
         std::string errorMsg;
         bool ok = theExprParser.doParse(errorMsg);
         BOOST_REQUIRE_MESSAGE(ok, errorMsg);
 
-        string expectedRootType       = p.second.first;
+        std::string expectedRootType  = p.second.first;
         bool expectedEvaluationResult = p.second.second;
 
         Ast* top = theExprParser.getAst();
@@ -68,18 +66,18 @@ BOOST_AUTO_TEST_CASE(test_single_expression) {
             std::stringstream ss;
             top->print_flat(ss);
             std::string print_flat = ss.str();
-            cout << print_flat << "\n";
+            std::cout << print_flat << "\n";
             BOOST_REQUIRE_MESSAGE(expectedEvaluationResult == top->evaluate(),
                                   "evaluation not as expected for:\n"
                                       << p.first << "\n"
                                       << print_flat << "\n"
                                       << ecf::as_string(*top, PrintStyle::DEFS));
         }
-        cout << ecf::as_string(*top, PrintStyle::DEFS) << "\n";
+        std::cout << ecf::as_string(*top, PrintStyle::DEFS) << "\n";
 
         std::string why;
         top->why(why);
-        cout << "why: " << why << "\n";
+        std::cout << "why: " << why << "\n";
     }
 }
 

@@ -24,7 +24,8 @@ public:
         : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no),
           var_to_add_(vec) {}
 
-    InitCmd() : TaskCmd() {}
+    InitCmd()
+        : TaskCmd() {}
 
     const std::vector<Variable>& variables_to_add() const { return var_to_add_; }
 

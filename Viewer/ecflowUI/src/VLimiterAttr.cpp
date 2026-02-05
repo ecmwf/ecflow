@@ -18,7 +18,8 @@
 // VLimiterAttrType
 //================================
 
-VLimiterAttrType::VLimiterAttrType() : VAttributeType("limiter") {
+VLimiterAttrType::VLimiterAttrType()
+    : VAttributeType("limiter") {
     dataCount_                       = 6;
     searchKeyToData_["limiter_name"] = NameIndex;
     searchKeyToData_["limiter_path"] = PathIndex;
@@ -70,7 +71,8 @@ void VLimiterAttrType::encode(const InLimit& lim, QStringList& data) const {
 //
 //=====================================================
 
-VLimiterAttr::VLimiterAttr(VNode* parent, const InLimit& /*lim*/, int index) : VAttribute(parent, index) {
+VLimiterAttr::VLimiterAttr(VNode* parent, const InLimit& /*lim*/, int index)
+    : VAttribute(parent, index) {
 }
 
 VAttributeType* VLimiterAttr::type() const {

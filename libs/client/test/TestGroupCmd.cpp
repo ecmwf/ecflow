@@ -20,7 +20,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -119,10 +118,10 @@ BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
     //	   			trigger ../family1/a:myMeter >= 50 || ../family1/a:myEvent
     //	    endfamily
     //	endsuite
-    string suite1_family1_a  = "suite1/family1/a";
-    string suite1_family1_b  = "suite1/family1/b";
-    string suite1_family2_aa = "suite1/family2/aa";
-    string suite1_family2_bb = "suite1/family2/bb";
+    std::string suite1_family1_a  = "suite1/family1/a";
+    std::string suite1_family1_b  = "suite1/family1/b";
+    std::string suite1_family2_aa = "suite1/family2/aa";
+    std::string suite1_family2_bb = "suite1/family2/bb";
 
     // ***********************************************************************
     // Create a request to initialise Node: suite1/family1/a

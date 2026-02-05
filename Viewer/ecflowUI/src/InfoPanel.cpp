@@ -59,7 +59,8 @@ void InfoPanelItemHandler::addToTab(QTabWidget* tab, bool showTitle) {
 //
 //==============================================
 
-InfoPanel::InfoPanel(QWidget* parent) : DashboardWidget("info", parent) {
+InfoPanel::InfoPanel(QWidget* parent)
+    : DashboardWidget("info", parent) {
     setupUi(this);
 
     bcWidget_ = new NodePathWidget(this);

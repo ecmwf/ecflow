@@ -12,7 +12,8 @@
 
 #include <QPushButton>
 
-GotoLineDialog::GotoLineDialog(QWidget* parent) : QDialog(parent) {
+GotoLineDialog::GotoLineDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this); // this sets up GUI// setupFileMenu();
 
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(doneIt()));

@@ -41,7 +41,8 @@
 // Also distinguish between server and environment errors
 class ServerEnvironmentException : public std::runtime_error {
 public:
-    explicit ServerEnvironmentException(const std::string& msg) : std::runtime_error(msg) {}
+    explicit ServerEnvironmentException(const std::string& msg)
+        : std::runtime_error(msg) {}
 };
 
 class ServerEnvironment {
@@ -49,7 +50,8 @@ public:
     explicit ServerEnvironment(const CommandLine& cl,
                                const std::string& path_to_config_file = "server_environment.cfg");
 
-    explicit ServerEnvironment(const std::vector<std::string>& args) : ServerEnvironment(CommandLine(args)) {}
+    explicit ServerEnvironment(const std::vector<std::string>& args)
+        : ServerEnvironment(CommandLine(args)) {}
     explicit ServerEnvironment(const std::vector<std::string>& args, const std::string& path_to_config_file)
         : ServerEnvironment(CommandLine(args), path_to_config_file) {}
 

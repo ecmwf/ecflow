@@ -18,7 +18,9 @@
 #include "VSettings.hpp"
 #include "ui_TriggerGraphWidget.h"
 
-TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) : QWidget(parent), ui_(new Ui::TriggerGraphWidget) {
+TriggerGraphWidget::TriggerGraphWidget(QWidget* parent)
+    : QWidget(parent),
+      ui_(new Ui::TriggerGraphWidget) {
     ui_->setupUi(this);
 
     //    ui_->zoomSlider->setMaximumWidth(200);
