@@ -1123,65 +1123,137 @@ Glossary
       The following environment variables control the execution of the server and may be set before the start of the server.
       ecflow_server will start happily with out any of these variables being set, since all of them have default values.
       
-      .. list-table:: 
+      .. list-table:: Environment variables used by *ecflow_server*
          :header-rows: 1
-         
-         * - Variable Name
-           - Explanation
-           - Default value
-         * - :term:`ECF_HOME`
-           - Home for all the :term:`ecFlow` files
-           - Current working directory
-         * - ECF_PORT
-           - Server port number. Must be unique
-           - 3141
-         * - ECF_LOG
-           - History or log file
-           - <host>.<port>.ecf.log
-         * - ECF_CHECK
-           - Name of the checkpoint file
-           - <host>.<port>.ecf.check
-         * - ECF_CHECKOLD
-           - Name of the backup checkpoint file
-           - <host>.<port>.ecf.check.b
-         * - ECF_CHECKINTERVAL
-           - Interval in second to save :term:`check point` file
-           - 120
-         * - ECF_LISTS
-           - White list file. Controls read/write access to the server for each user
-           - <host>.<port>.ecf.lists
-         * - ECF_TASK_THRESHOLD
-           - Report in log file all task/job that take longer than given threshold. Used to debug/instrument, those scripts that are very large.
-           - 4000 (milliseconds). Before release 4.0.6 default was 2000 ms.
-         * - :term:`ECF_PASSWD`
-           - path to server password file, used to authenticate :term:`user command`\ s. Use when ALL should be password authenticated
-           - <host>.<port>.ecf.passwd
-         * - ECF_CUSTOM_PASSWD
-           - path to server password file, used to authenticate :term:`user command`\ s. Use when a small number of users need to be password authenticated. Typically client would use:ecflow_client --user=fred ....export ECF_USER=fred; ecflow_client ...
-           - <host>.<port>.ecf.custom_passwd
-         * - ECF_PRUNE_NODE_LOG
-           - When the checkpoint point file is loaded, node log history older than 30 days is automatically pruned. The variable allows this value to be changed.Setting the variable to zero, means there will be no pruning. All history is preserved at the cost increasing server memory, and time taken to write checkpoint file.
-           - .. code-block:: shell
-            
-               export ECF_PRUNE_NODE_LOG=40
-               
-             Prune node log history older than 40 days, upon reload of :term:`check point` file.
-         * - ECF_SSL
-           - For secure communication between server and client -- requires build with SSL enabled.
-           - .. code-block:: shell
-              
-               # To share a certificate amongst multiple servers
-               export ECF_SSL=1 # or empty value
-               # To use specific server certificate
-               export ECF_SSL=<any non-empty value, except '1'>
+         :widths: 20 80
 
-             When `ECF_SSL=1`, ecflow will search for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
+         * - Variable
+           - Description
+
+         * - :term:`ECF_HOME`
+           - The home for all the :term:`ecFlow` files.
+
+             |
+
+             By default, the server will use the current working directory.
+
+         * - ECF_PORT
+           - The server port number.
+
+             |
+
+             By default, the server will use port 3141.
+
+         * - ECF_LOG
+           - The path to the log (or history) file
+
+             |
+
+             By default, the server will use the file name ``<host>.<port>.ecf.log``, in the directory where the server is running.
+
+         * - ECF_CHECK
+           - The path to the checkpoint file
+
+             |
+
+             By default, the server will use the file name ``<host>.<port>.ecf.check``, in the directory where the server is running.
+
+         * - ECF_CHECKOLD
+           - The path to the backup checkpoint file
+
+             |
+
+             By default, the server will use the file name ``<host>.<port>.ecf.check.b``, in the directory where the server is running.
+
+         * - ECF_CHECKINTERVAL
+           - The interval (in second) to save :term:`check point` file
+
+             |
+
+             By default, the server will save the checkpoint file every 120 seconds.
+
+         * - ECF_LISTS
+           - The white list file, used for authorization purposes (i.e. control read/write access).
+
+             |
+
+             By default, the server will look for a file named ``<host>.<port>.ecf.lists``, in the directory where the server is running.
+
+         * - ECF_TASK_THRESHOLD
+           - The threshold (in milliseconds) to report all task that take longer than given threshold.
+
+             |
+
+             By default, the server will report all tasks that take longer than 4000 milliseconds.
+
+             |
+
+             *Used to debug/instrument, those scripts that are very large*.
+
+         * - :term:`ECF_PASSWD`
+           - The path to server password file, used to authenticate :term:`user commands <user command>`.
+
+             |
+
+             By default, the server will look for a file named ``<host>.<port>.ecf.passwd``, in the directory where the server is running.
+
+
+         * - ECF_CUSTOM_PASSWD
+           - The path to server password file, used to authenticate :term:`user commands <user command>`.
+
+             |
+
+             By default, the server will look for a file named ``<host>.<port>.ecf.custom_passwd``, in the directory where the server is running.
+
+         * - ECF_PRUNE_NODE_LOG
+           - When the checkpoint point file is loaded, by default the node log history older than 30 days is automatically pruned.
+
+             |
+
+             The variable allows this value to be customized. Setting the variable to 0, means all history is preserved at the cost increasing server memory and time taken to write checkpoint file.
+
+             |
+
+             .. code-block:: shell
+
+                # Preserve 40 days of history
+                export ECF_PRUNE_NODE_LOG=40
+
+                # Preserve all history
+                export ECF_PRUNE_NODE_LOG=0
+
+         * - ECF_SSL
+           - Enable secure communication between server and client.
+
+             |
+
+             When `ECF_SSL=1`, ecflow searches for a shared certificate at `$HOME/.ecflowrc/ssl/server.crt`,
              and then fallback to the server specific certificate at `$HOME/.ecflowrc/ssl/<host>.<port>.crt`.
+
+             |
+
+             Using `ECF_SSL=<value>`, where `<value>` is any non-empty value except '1',
+             allows users to specify a custom certificate path.
+
+             |
 
              Secure communication can also be activated using the :code:`ecflow_server --ssl ...` option.
              When using the `--ssl` option, if `ECF_SSL` is not explicitly specified, it is assumed `ECF_SSL=1`.
 
+             |
+
              Consider using `ecflow_start.sh -s` to start the server with SSL support.
+
+             |
+
+             .. code-block:: shell
+              
+                # To use a shared certificate
+                # amongst multiple servers
+                export ECF_SSL=1 # or empty value
+
+                # To use a specific certificate
+                export ECF_SSL=<value>
 
 
       The server can be in several states. The default when first started is :term:`halted`, See :term:`server states`
