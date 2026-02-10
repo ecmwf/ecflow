@@ -645,7 +645,12 @@ void export_Node(py::module& m) {
 
     py::class_<Node, std::shared_ptr<Node>>(m, "Node", py::dynamic_attr(), DefsDoc::node_doc())
 
-        .def(py::self < py::self)
+        //
+        // The '__lt__' is defined, instead of py::self < py::self, to avoid problems in older
+        // compilers (e.g. gcc 10) which complain about Node being an abstract class and thus not
+        // being able to determine the correct operator< overload
+        //
+        .def("__lt__", [](const Node& self, const Node& other) { return self < other; })
 
         // *** Operators ***
 
