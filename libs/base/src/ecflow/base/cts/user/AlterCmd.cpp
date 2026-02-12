@@ -11,6 +11,7 @@
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 
 #include <stdexcept>
+#include <string>
 
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
@@ -54,7 +55,56 @@ static std::string dump_args(const std::vector<std::string>& options, const std:
     return the_args;
 }
 
-namespace ecf::detail {
+namespace ecf {
+
+InlimitOptions parse_inlimit_value(std::string value) {
+    if (value.empty()) {
+        return InlimitOptions{/* tokens = */ 1, /* limited_submission = */ false, /* limited_node = */ false};
+    }
+
+    bool limited_submission               = false;
+    constexpr const char* submission_flag = "-s";
+    if (ecf::algorithm::contains(value, submission_flag)) {
+        limited_submission = true;
+        ecf::algorithm::remove_all(value, submission_flag);
+    }
+
+    bool limited_node               = false;
+    constexpr const char* node_flag = "-n";
+    if (ecf::algorithm::contains(value, node_flag)) {
+        limited_node = true;
+        ecf::algorithm::remove_all(value, node_flag);
+    }
+
+    if (limited_submission && limited_node) {
+        throw std::runtime_error("AlterCmd: an inlimit cannot be limited for both submission and node");
+    }
+
+    ecf::algorithm::trim(value);
+
+    if (value.empty()) {
+        return InlimitOptions{/* tokens = */ 1, limited_submission, limited_node};
+    }
+
+    try {
+        int tokens = ecf::convert_to<int>(value);
+
+        if (tokens <= 0) {
+            std::stringstream ss;
+            ss << "AlterCmd: the inlimit value must be > 0, but value was: '" << tokens << "'";
+            throw std::runtime_error(ss.str());
+        }
+
+        return InlimitOptions{tokens, limited_submission, limited_node};
+    }
+    catch (const ecf::bad_conversion&) {
+        std::stringstream ss;
+        ss << "AlterCmd: the inlimit value, '" << value << "', cannot be converted to an integer";
+        throw std::runtime_error(ss.str());
+    }
+};
+
+namespace detail {
 
 template <>
 struct EnumTraits<AlterCmd::Delete_attr_type>
@@ -152,7 +202,9 @@ struct EnumTraits<AlterCmd::Change_attr_type>
     static_assert(EnumTraits<AlterCmd::Change_attr_type>::size == map.back().first);
 };
 
-} // namespace ecf::detail
+} // namespace detail
+
+} // namespace ecf
 
 static AlterCmd::Delete_attr_type deleteAttrType(const std::string& s) {
     if (auto found = ecf::Enumerate<AlterCmd::Delete_attr_type>::to_enum(s); found) {
@@ -568,22 +620,19 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 }
                 case AlterCmd::ADD_INLIMIT: {
-                    std::string path_to_limit; // This can be empty
-                    std::string limitName;
-                    if (!Extract::pathAndName(name_, path_to_limit, limitName)) {
+                    // Parse the limit path and name, which the inlimit depends on.
+                    std::string limit_path; // This can be empty
+                    std::string limit_name;
+                    if (!Extract::pathAndName(name_, limit_path, limit_name)) {
                         throw std::runtime_error("AlterCmd::ADD_INLIMIT: Invalid inlimit : " + name_);
                     }
-                    int token_value = 1;
-                    if (!value_.empty()) {
-                        try {
-                            token_value = ecf::convert_to<int>(value_);
-                        }
-                        catch (const ecf::bad_conversion&) {
-                            ss << "AlterCmd: add_inlimit expected '" << value_ << "' to be convertible to an integer";
-                            throw std::runtime_error(ss.str());
-                        }
-                    }
-                    node->addInLimit(InLimit(limitName, path_to_limit, token_value)); // will throw if not valid
+
+                    // Parse the inlimit options, including token value
+                    auto [tokens, limited_submission, limited_node] = parse_inlimit_value(value_);
+
+                    // Add the inlimit to the node
+                    // Note: the InLimit ctor performs validation of the parameters and can throw if they are not valid
+                    node->addInLimit(InLimit(limit_name, limit_path, tokens, limited_node, limited_submission));
                     break;
                 }
                 case AlterCmd::ADD_ATTR_ND:
@@ -716,6 +765,10 @@ const char* AlterCmd::desc() {
         "   ecflow_client --alter=add limit mars \"100\" /path/to/node\n"
         "\n"
         "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-s 10\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-n 10\" /path/to/node\n"
         "\n"
         "   # zombie attributes have the following structure:\n"
         "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n"

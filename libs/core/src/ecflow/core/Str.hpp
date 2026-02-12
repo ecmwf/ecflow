@@ -48,6 +48,16 @@ inline static void trim(Sequence& input) {
     ::boost::algorithm::trim(input);
 }
 
+template <typename Sequence, typename Pattern>
+inline static bool contains(const Sequence& input, const Pattern& pattern) {
+    return ::boost::algorithm::contains(input, pattern);
+}
+
+template <typename Sequence, typename Pattern>
+inline static void remove_all(Sequence& input, const Pattern& pattern) {
+    ::boost::algorithm::erase_all(input, pattern);
+}
+
 template <typename T>
 static std::vector<std::string> transform_to_name_vector(const std::vector<T>& i) {
     std::vector<std::string> o;

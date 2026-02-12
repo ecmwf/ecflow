@@ -14,6 +14,43 @@
 #include "ecflow/base/cts/user/UserCmd.hpp"
 #include "ecflow/node/Flag.hpp"
 
+namespace ecf {
+
+struct InlimitOptions
+{
+    ///
+    /// @ brief the number of tokens considered for the inlimit, the minimum/default is 1
+    ///
+    int tokens = 1;
+
+    ///
+    /// @ brief flag indicating whether the inlimit is limited for submission
+    ///
+    bool limited_submission = false;
+
+    ///
+    /// @ brief flag indicating whether the inlimit is limited for node
+    ///
+    bool limited_node = false;
+};
+
+///
+/// @brief Parses the inlimit options from a given value and returns the corresponding InlimitOptions struct.
+///
+/// @param value the value to parse, which can be in the following formats:
+///              - "" (tokens = 1, limited_submission = false, limited_node = false)
+///              - "10" (tokens = 10, limited_submission = false, limited_node = false)
+///              - "-s 10" (tokens = 10, limited_submission = true, limited_node = false)
+///              - "-n 10" (tokens = 10, limited_submission = false, limited_node = true)
+/// @return the InlimitOptions containing the tokens, limited_submission, and limited_node values
+/// @throws std::runtime_error for the following cases:
+///         - the value, after stripped of '-n' and '-s' options, and 'spacces' trimmed, is not a valid positive integer
+///         - both '-n' and '-s' options are specified at the same time
+///
+InlimitOptions parse_inlimit_value(std::string value);
+
+} // namespace ecf
+
 class AlterCmd final : public UserCmd {
 public:
     enum Delete_attr_type {
