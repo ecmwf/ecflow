@@ -17,7 +17,6 @@ jobs:
       matrix:
         os:
           - alpine-3.23
-          - arch-20260104
           - debian-11.11
           - debian-12.12
           - debian-13.2
@@ -76,13 +75,13 @@ jobs:
           cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }}
 
       - name: Test ecflow (default)
-        if: ${{ matrix.os != 'alpine-3.23' && matrix.os != 'arch-20260104'}}
+        if: ${{ matrix.os != 'alpine-3.23' }}
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -j ${{ matrix.jobs }}
 
       - name: Test ecflow (specific to some distros, due to Boost.Test crash)
-        if: ${{ matrix.os == 'alpine-3.23' || matrix.os == 'arch-20260104'}}
+        if: ${{ matrix.os == 'alpine-3.23' }}
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -E s_foolproof -j ${{ matrix.jobs }}
