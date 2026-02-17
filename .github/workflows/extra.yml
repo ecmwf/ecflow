@@ -16,16 +16,18 @@ jobs:
       fail-fast: false
       matrix:
         os:
+          - almalinux-9.7
+          - almalinux-10.1
           - alpine-3.23
           - debian-11.11
           - debian-12.12
           - debian-13.2
           - fedora-37
           - fedora-42
+          - opensuse-tumbleweed
           - ubuntu-22.04
           - ubuntu-24.04
-          - almalinux-9.7
-          - almalinux-10.1
+
         preset:
           - linux.gcc.all.release
           - linux.clang.all.release
