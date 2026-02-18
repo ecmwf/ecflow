@@ -124,6 +124,37 @@ builds:
       finalize:
         lock_permissions: true
 
+
+  - name: ecflow-hpc-ag
+    type: hpc
+    enabled: false
+    config:
+      site: ag-batch
+      platform: gnu-11.5.0
+      install_type: module
+      install_lib_dir: lib
+      parallel: 64
+      self_test: true
+
+      stages:
+        - name: python312
+          modules:
+            - boost/1.87.0
+            - python3/3.12.9-01
+            - cmake/new
+            - ecbuild/new
+          test_command: *test_cmd
+          install_command: |
+            cmake --install .
+          cmake_options:
+            <<: *common_cmake_options
+            ENABLE_UI: OFF
+          sync_module: false
+
+      finalize:
+        lock_permissions: true
+
+
   - name: "tarball"
     type: "tarball"
     enabled: true
