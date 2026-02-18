@@ -127,7 +127,7 @@ builds:
 
   - name: ecflow-hpc-ag
     type: hpc
-    enabled: false
+    enabled: true
     config:
       site: ag-batch
       platform: gnu-11.5.0
