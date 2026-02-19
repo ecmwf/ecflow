@@ -144,7 +144,7 @@ builds:
             - boost/1.87.0
             - python3/3.12.9-01
             - cmake/new
-            - ecbuild/new
+            - ecbuild
           test_command: *test_cmd
           install_command: |
             cmake --install .
