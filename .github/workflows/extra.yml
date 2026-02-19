@@ -76,17 +76,29 @@ jobs:
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }}
 
+      # The goal is to run all tests on all distros, but on Alpine and OpenSUSE, some tests fail due to Boost incompatibilities:
+      #  - On Alpine, the test fails due to a crash in Boost.test.
+      #  - On openSUSE, the test fails due to an issue in Boost.Process.
+      #    Is seems that the bp::stdio_pipe implementation does not work as expected, leading to an exception being thrown
+      #    when the test tries to read the output of thea subprocess, complaining that the file descriptor is not valid.
+
       - name: Test ecflow (default)
-        if: ${{ matrix.os != 'alpine-3.23' }}
+        if: ${{ matrix.os != 'alpine-3.23' && matrix.os != 'opensuse-tumbleweed' }} 
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -j ${{ matrix.jobs }}
 
-      - name: Test ecflow (specific to some distros, due to Boost.Test crash)
+      - name: Test ecflow (specific to Alpine)
         if: ${{ matrix.os == 'alpine-3.23' }}
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -E s_foolproof -j ${{ matrix.jobs }}
+
+      - name: Test ecflow (specific to openSUSE)
+        if: ${{ matrix.os == 'opensuse-tumbleweed' }}
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -E 's_(udp|foolproof)' -j ${{ matrix.jobs }}
 
       - name: Lint ecflow
         if: ${{ matrix.preset == 'linux.clang.all.release' && matrix.os == 'ubuntu-24.04' && !always() }} # Disable until we have a stable build
