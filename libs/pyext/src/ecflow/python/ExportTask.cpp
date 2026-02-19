@@ -23,7 +23,6 @@ namespace {
 // Task
 
 std::shared_ptr<Task> Task_init(const std::string& name, const py::args& args, const py::kwargs& kwargs) {
-    std::cout << "task_init: name: " << name << std::endl;
     auto node = std::make_shared<Task>(name);
     NodeUtil::add(*node, args);
     NodeUtil::add(*node, kwargs);
