@@ -8,6 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include "ecflow/core/Version.hpp"
 #include "ecflow/python/PythonBinding.hpp"
 
 void export_Collections(py::module& m);
@@ -27,6 +28,8 @@ PYBIND11_MODULE(ecflow, m) {
 
     m.doc() = "The ecflow module provides the python bindings/api for creating definition structure "
               "and communicating with the server.";
+
+    m.attr("__version__") = ecf::Version::base();
 
     export_Collections(m);
     export_Core(m);
