@@ -47,7 +47,9 @@ Suite::Suite(const Suite& rhs)
 }
 
 node_ptr Suite::clone() const {
-    return std::make_shared<Suite>(*this);
+    auto clone = std::make_shared<Suite>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 Suite& Suite::operator=(const Suite& rhs) {

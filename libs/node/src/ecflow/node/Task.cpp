@@ -49,7 +49,9 @@ Task::Task(const Task& rhs)
 }
 
 node_ptr Task::clone() const {
-    return std::make_shared<Task>(*this);
+    auto clone = std::make_shared<Task>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 bool Task::check_defaults() const {
