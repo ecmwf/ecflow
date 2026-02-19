@@ -131,7 +131,7 @@ builds:
     config:
       site: ag-batch
       queue: ng
-      gpus: 1
+      gpus: 0
       platform: gnu-11.5.0
       install_type: module
       install_lib_dir: lib
