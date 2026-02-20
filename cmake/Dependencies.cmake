@@ -8,7 +8,7 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(DEPENDENCIES_DIR "${CMAKE_SOURCE_DIR}/3rdparty")
+get_filename_component(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty" ABSOLUTE)
 
 # =========================================================================================
 # Threads
