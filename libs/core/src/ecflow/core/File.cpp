@@ -991,7 +991,7 @@ static std::string find_bjam_ecf_client_path() {
 
 std::string File::find_ecf_server_path() {
 #ifdef CMAKE
-    std::string path = CMAKE_ECFLOW_BUILD_DIR;
+    std::string path = CMAKE_ECFLOW_BUILD_DIR();
     path += "/bin/";
     path += Ecf::SERVER_NAME();
 
@@ -1009,7 +1009,7 @@ std::string File::find_ecf_server_path() {
 
 std::string File::find_ecf_client_path() {
 #ifdef CMAKE
-    std::string path = CMAKE_ECFLOW_BUILD_DIR;
+    std::string path = CMAKE_ECFLOW_BUILD_DIR();
     path += "/bin/";
     path += Ecf::CLIENT_NAME();
 
@@ -1073,7 +1073,7 @@ std::string File::test_data_in_current_dir(const std::string& rel_path) {
 
 std::string File::root_source_dir() {
 #ifdef CMAKE
-    return CMAKE_ECFLOW_SOURCE_DIR;
+    return CMAKE_ECFLOW_SOURCE_DIR();
 #endif
 
     // bjam
@@ -1109,7 +1109,7 @@ std::string File::root_source_dir() {
 
 std::string File::root_build_dir() {
 #ifdef CMAKE
-    return CMAKE_ECFLOW_BUILD_DIR;
+    return CMAKE_ECFLOW_BUILD_DIR();
 #endif
 
     fs::path current_path        = fs::current_path();
