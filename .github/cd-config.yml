@@ -141,6 +141,7 @@ builds:
       install_prefix: $SCRATCH/test-install-ecflow
       parallel: 64
       self_test: true
+      sync_module: false
 
       stages:
         - name: python312
@@ -155,7 +156,6 @@ builds:
           cmake_options:
             <<: *common_cmake_options
             ENABLE_UI: OFF
-          sync_module: false
 
       finalize:
         lock_permissions: true
