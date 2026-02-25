@@ -1,4 +1,20 @@
 builds:
+  - name: "conda-build Python3.11"
+    type: "conda"
+    enabled: false
+    config:
+      conda_build_args: "-m .cd/conda/conda_build_config_common.yaml -m .cd/conda/conda_build_config_py311.yaml --no-anaconda-upload"
+  - name: "conda-build Python3.12"
+    type: "conda"
+    enabled: false
+    config:
+      conda_build_args: "-m .cd/conda/conda_build_config_common.yaml -m .cd/conda/conda_build_config_py312.yaml --no-anaconda-upload"
+  - name: "conda-build Python3.13"
+    type: "conda"
+    enabled: false
+    config:
+      conda_build_args: "-m .cd/conda/conda_build_config_common.yaml -m .cd/conda/conda_build_config_py313.yaml --no-anaconda-upload"
+
   - name: ecflow-hpc
     type: hpc
     enabled: true
@@ -6,6 +22,8 @@ builds:
       platform: gnu-8.5.0
       install_type: module
       install_lib_dir: lib
+      dry_run_install: true
+      install_prefix: $SCRATCH/test-install-ecflow
 
       #dependencies: |
       #  ecmwf/ecbuild@develop
@@ -105,8 +123,16 @@ builds:
             chmod u+w $INSTALL_PREFIX/lib
             cmake --install . --component python
 
-      finalize:
-        lock_permissions: true
+      lock_permissions: true
+
+
+  - name: "tarball"
+    type: "tarball"
+    enabled: true
+    config:
+      cmake_options: -DBOOST_ROOT=${BOOST_ROOT_DIR} -DBOOST_INCLUDEDIR=${BOOST_INCLUDE_DIR} -DBOOST_LIBRARYDIR=${BOOST_LIB_DIR} -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR} -DENABLE_STATIC_BOOST_LIBS=OFF
+      confluence_space: "ECFLOW"
+      confluence_page_title: "For testing tarball uploads"
 
 release:
   enabled: false
