@@ -129,11 +129,16 @@ endif()
 
 ecbuild_info( "Locating Boost" )
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0")
-  ecbuild_info( "Using BoostConfig.cmake to find Boost (CMake >= 3.30)" )
-  cmake_policy(SET CMP0167 NEW)
+if( CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0" )
+  if ( ENABLE_CONFIG_MODE_BOOST )
+    ecbuild_info( "Detected CMake >= 3.30, so will use CMAKE_PREFIX_PATH, to locate and use boost-config.cmake or BoostConfig.cmake" )
+    cmake_policy( SET CMP0167 NEW )
+  else ()
+    ecbuild_info( "Detected CMake >= 3.30, but will use CMAKE_MODULE_PATH, to locate and use Find<PackageName>.cmake" )
+    cmake_policy( SET CMP0167 OLD )
+  endif()
 else()
-  ecbuild_info( "Using FindBoost.cmake module to find Boost (CMake < 3.30)" )
+  ecbuild_info( "Detected CMake < 3.30, so will use CMAKE_MODULE_PATH, to locate and use Find<PackageName>.cmake" )
 endif()
 
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.

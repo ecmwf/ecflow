@@ -67,6 +67,7 @@ option( ENABLE_SERVER              "Build the server (switch OFF to building UI 
 option( ENABLE_PYTHON              "Enable ecFlow Python3 support"                       ON )
 option( ENABLE_UI                  "Enable ecFlowUI"                                     ON )
 option( ENABLE_STATIC_BOOST_LIBS   "Use static Boost libs linkage"                       ON )
+option( ENABLE_CONFIG_MODE_BOOST   "Use CMake config mode to find Boost, instead of FindBoost (applicable to CMake 3.30+)" ON )
 option( ENABLE_ALL_TESTS           "Enable performance/migration/regression tests"       OFF )
 option( ENABLE_UI_BACKTRACE        "Enable printing ecFlowUI debug backtrace"            OFF )
 option( ENABLE_UI_USAGE_LOG        "Enable ecFlowUI usage logging"                       OFF )
