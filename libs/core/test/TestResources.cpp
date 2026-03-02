@@ -29,14 +29,14 @@ BOOST_AUTO_TEST_CASE(can_measure_process_resources) {
 
         auto meter = m.get_process_meter();
 
-        BOOST_CHECK(meter.pid > 0);
-        BOOST_CHECK(meter.maximum_memory > 0);
-        BOOST_CHECK(meter.virtual_memory > 0);
-        BOOST_CHECK(meter.resident_memory > 0);
-        BOOST_CHECK(meter.page_size > 0);
-        BOOST_CHECK(meter.n_cpu_online > 0);
-        BOOST_CHECK(meter.n_cpu_maximum > 0);
-        BOOST_CHECK(meter.n_threads > 0);
+        BOOST_CHECK(meter.get("pid").value() > ProcessMeter::pid_t{0});
+        BOOST_CHECK(meter.get("maximum_memory").value() > ProcessMeter::memory_t{0});
+        BOOST_CHECK(meter.get("virtual_memory").value() > ProcessMeter::memory_t{0});
+        BOOST_CHECK(meter.get("resident_memory").value() > ProcessMeter::memory_t{0});
+        BOOST_CHECK(meter.get("page_size").value() > ProcessMeter::page_size_t{0});
+        BOOST_CHECK(meter.get("n_cpu_online").value() > ProcessMeter::n_cpu_t{0});
+        BOOST_CHECK(meter.get("n_cpu_maximum").value() > ProcessMeter::n_cpu_t{0});
+        BOOST_CHECK(meter.get("n_threads").value() > ProcessMeter::n_threads_t{0});
     }
     catch (std::exception& e) {
         BOOST_FAIL("Unexpected exception:" << e.what());

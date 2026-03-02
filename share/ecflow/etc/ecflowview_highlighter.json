@@ -35,7 +35,7 @@
                 },
 
                 "server_stats" : {
-                    "pattern" : "^(Server statistics)",
+                    "pattern" : "^(Server ([Ss]tatistics|[Rr]esources)|(User|Task) Commands.*)",
                     "colour"  : "rgb(0,0,0)",
                     "bold"    : "true"
                 },
@@ -316,4 +316,3 @@
               }
         }
 }
-
