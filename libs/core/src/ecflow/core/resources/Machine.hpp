@@ -13,7 +13,12 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <stdexcept>
+#include <variant>
+#include <vector>
+
+#include "ecflow/core/Serialization.hpp"
 
 namespace ecf::resources {
 
@@ -33,100 +38,152 @@ struct UnsupportedPlatform : public std::runtime_error
     using std::runtime_error::runtime_error;
 };
 
+struct NamedValue
+{
+    using name_t  = std::string;
+    using value_t = std::variant<int32_t, uint32_t, int64_t, uint64_t, double>;
+    using unit_t  = std::string;
+
+    name_t n_;
+    value_t v_;
+    unit_t u_;
+
+    NamedValue() = default;
+
+    template <typename T>
+    NamedValue(std::string n, T v)
+        : n_{std::move(n)},
+          v_{v},
+          u_{} {}
+
+    template <typename T>
+    NamedValue(std::string n, T v, std::string u)
+        : n_{std::move(n)},
+          v_{v},
+          u_{std::move(u)} {}
+
+    const auto& name() const { return n_; }
+    const auto& unit() const { return u_; }
+
+    template <typename T>
+    bool operator==(T v) const {
+        return std::holds_alternative<T>(v_) && std::get<T>(v_) == v;
+    }
+
+    template <typename T>
+    bool operator<(T v) const {
+        return std::holds_alternative<T>(v_) && std::get<T>(v_) < v;
+    }
+
+    template <typename T>
+    bool operator!=(T v) const {
+        return !(*this != v);
+    }
+
+    template <typename T>
+    bool operator>(T v) const {
+        return !(*this < v) && !(*this == v);
+    }
+
+    template <typename T>
+    bool operator>=(T v) const {
+        return !(*this < v);
+    }
+
+    template <typename T>
+    bool operator<=(T v) const {
+        return (*this < v) || (*this == v);
+    }
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
+        ar & n_;
+        ar & v_;
+        ar & u_;
+    };
+
+    friend std::ostream& operator<<(std::ostream& o, const NamedValue& nv) {
+        std::visit([&o](auto&& arg) { o << arg; }, nv.v_);
+        return o;
+    }
+};
+
 ///
 /// @brief ProcessMeter is a snapshot of the resources available for/used by the process at a given time.
 ///
 struct ProcessMeter
 {
-    using pid_t             = int32_t;
-    using maximum_memory_t  = uint64_t;
-    using virtual_memory_t  = uint64_t;
-    using resident_memory_t = uint64_t;
-    using page_size_t       = uint64_t;
-    using n_cpu_online_t    = int32_t;
-    using n_cpu_maximum_t   = int32_t;
-    using n_threads_t       = int32_t;
+    using pid_t       = int32_t;
+    using memory_t    = uint64_t;
+    using page_size_t = uint64_t;
+    using n_cpu_t     = int32_t;
+    using n_threads_t = int32_t;
 
-    ///
-    /// @brief pid is the process ID of the current process.
-    ///
-    pid_t pid;
-
-    ///
-    /// @brief The maximum amount of memory available (in KB) on the machine
-    ///
-    maximum_memory_t maximum_memory;
-
-    ///
-    /// @brief The amount of virtual memory (in KB) currently used by the process.
-    ///
-    virtual_memory_t virtual_memory;
-
-    ///
-    /// @brief The amount of resident memory (in KB) currently used by the process.
-    ///
-    resident_memory_t resident_memory;
-
-    ///
-    /// @brief The size of a memory page (in bytes) on the machine.
-    ///
-    page_size_t page_size;
-
-    ///
-    /// @brief The number of CPUs currently available on the machine.
-    ///
-    n_cpu_online_t n_cpu_online;
-
-    ///
-    /// @brief The maximum number of CPUs that can be available on the machine.
-    ///
-    n_cpu_maximum_t n_cpu_maximum;
-
-    ///
-    /// @brief The number of threads currently used by the process.
-    ///
-    n_threads_t n_threads;
+    std::vector<NamedValue> values_;
 
     static ProcessMeter make() { return {}; }
 
+    ProcessMeter() = default;
+
+    ProcessMeter(const ProcessMeter&)            = default;
+    ProcessMeter& operator=(const ProcessMeter&) = default;
+
+    ~ProcessMeter() = default;
+
     ProcessMeter& with_pid(pid_t value) {
-        this->pid = value;
+        this->values_.emplace_back("pid", value);
         return *this;
     }
 
-    ProcessMeter& with_maximum_memory(maximum_memory_t value) {
-        this->maximum_memory = value;
+    ProcessMeter& with_maximum_memory(memory_t value) {
+        this->values_.emplace_back("maximum_memory", value, "kB");
         return *this;
     }
 
-    ProcessMeter& with_virtual_memory(virtual_memory_t value) {
-        this->virtual_memory = value;
+    ProcessMeter& with_virtual_memory(memory_t value) {
+        this->values_.emplace_back("virtual_memory", value, "kB");
         return *this;
     }
 
-    ProcessMeter& with_resident_memory(resident_memory_t value) {
-        this->resident_memory = value;
+    ProcessMeter& with_resident_memory(memory_t value) {
+        this->values_.emplace_back("resident_memory", value, "kB");
         return *this;
     }
 
     ProcessMeter& with_page_size(page_size_t value) {
-        this->page_size = value;
+        this->values_.emplace_back("page_size", value, "bytes");
         return *this;
     }
 
-    ProcessMeter& with_n_cpu_online(n_cpu_online_t value) {
-        this->n_cpu_online = value;
+    ProcessMeter& with_n_cpu_online(n_cpu_t value) {
+        this->values_.emplace_back("n_cpu_online", value);
         return *this;
     }
 
-    ProcessMeter& with_n_cpu_maximum(n_cpu_maximum_t value) {
-        this->n_cpu_maximum = value;
+    ProcessMeter& with_n_cpu_maximum(n_cpu_t value) {
+        this->values_.emplace_back("n_cpu_maximum", value);
         return *this;
     }
 
     ProcessMeter& with_n_threads(n_threads_t value) {
-        this->n_threads = value;
+        this->values_.emplace_back("n_threads", value);
         return *this;
+    }
+
+    std::optional<NamedValue> get(const std::string& name) const {
+        for (const auto& value : values_) {
+            if (value.name() == name) {
+                return value;
+            }
+        }
+        return std::nullopt;
+    }
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version) {
+        ar & values_;
     }
 };
 
