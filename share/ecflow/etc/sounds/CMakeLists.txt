@@ -13,16 +13,25 @@ set (files
   tone.ogg
 )
 
+set(DST share/ecflow/etc/sounds)
+set(DIR ${CMAKE_BINARY_DIR}/${DST})
+
+file(MAKE_DIRECTORY ${DIR})
+
 # for each file, copy it into the build directory at build time
 # and install it into the installation directory at install time (!)
 foreach( f ${files} )
-  configure_file(${f} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-    
+  configure_file(${f} ${DIR} COPYONLY)
+
+  if (NOT EXISTS ${DIR}/${f})
+    message(FATAL_ERROR "File ${DIR}/${f} does not exist after configuration")
+  endif()
+
   install(
     FILES
-      ${CMAKE_CURRENT_BINARY_DIR}/${f}
+      ${DIR}/${f}
     DESTINATION
-      share/ecflow/etc/sounds
+      ${DST}
     PERMISSIONS
       OWNER_WRITE
       OWNER_READ
