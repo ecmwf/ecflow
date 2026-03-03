@@ -138,7 +138,7 @@ builds:
       install_type: module
       install_lib_dir: lib
       dry_run_install: true
-      install_prefix: $SCRATCH/test-install-ecflow
+      install_prefix: $SCRATCH/test-install-ecflow-ag
       parallel: 64
       self_test: true
       sync_module: false
