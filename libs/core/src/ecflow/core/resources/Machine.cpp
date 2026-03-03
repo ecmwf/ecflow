@@ -319,7 +319,19 @@ ProcessMeter LinuxMachine::get_process_meter() const {
 
     // *** Tracked memory used
 
-    auto info_memory              = mallinfo2();
+    // Ensure we are on a system using glibc
+    #ifdef __GLIBC__
+        #if (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 33)
+            #define HAVE_MALLINFO2
+        #endif
+    #endif
+
+    #if defined(HAVE_MALLINFO2)
+    auto info_memory = mallinfo2();
+    #else
+    auto info_memory = mallinfo();
+    #endif
+
     const uint64_t arena          = info_memory.arena; /* The total amount of memory allocated (non-mmapped) (bytes) */
     const uint64_t tracked_memory = info_memory.uordblks / 1024; /* Total allocated space (bytes) */
     const uint64_t freed_memory   = info_memory.fordblks / 1024; /* The total number of bytes in free blocks. */
