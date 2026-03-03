@@ -176,6 +176,21 @@ struct ProcessMeter
         return *this;
     }
 
+    ProcessMeter& with_arena_memory(memory_t value) {
+        this->values_.emplace_back("arena_memory", value, "kb");
+        return *this;
+    }
+
+    ProcessMeter& with_tracked_memory(memory_t value) {
+        this->values_.emplace_back("tracked_memory", value, "kB");
+        return *this;
+    }
+
+    ProcessMeter& with_freed_memory(memory_t value) {
+        this->values_.emplace_back("freed_memory", value, "kB");
+        return *this;
+    }
+
     std::optional<NamedValue> get(const std::string& name) const {
         for (const auto& value : values_) {
             if (value.name() == name) {
