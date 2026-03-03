@@ -37,6 +37,8 @@ BOOST_AUTO_TEST_CASE(can_measure_process_resources) {
         BOOST_CHECK(meter.get("n_cpu_online").value() > ProcessMeter::n_cpu_t{0});
         BOOST_CHECK(meter.get("n_cpu_maximum").value() > ProcessMeter::n_cpu_t{0});
         BOOST_CHECK(meter.get("n_threads").value() > ProcessMeter::n_threads_t{0});
+        BOOST_CHECK(meter.get("cpu_usage").has_value());
+        BOOST_CHECK(meter.get("cpu_usage").value() >= double{0.0});
     }
     catch (std::exception& e) {
         BOOST_FAIL("Unexpected exception:" << e.what());

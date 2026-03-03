@@ -379,7 +379,7 @@ struct display_stats_helper
           width(width) {}
 
     void operator()(const ecf::resources::NamedValue& value) {
-        os << std::left << "  " << std::setw(width) << value.name() << value;
+        os << std::left << "  " << std::setw(width) << value.name() << std::fixed << value;
         if (auto& u = value.unit(); !u.empty()) {
             os << " (" << u << ")";
         }

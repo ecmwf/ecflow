@@ -171,6 +171,11 @@ struct ProcessMeter
         return *this;
     }
 
+    ProcessMeter& with_cpu_usage(double value) {
+        this->values_.emplace_back("cpu_usage", value, "%");
+        return *this;
+    }
+
     std::optional<NamedValue> get(const std::string& name) const {
         for (const auto& value : values_) {
             if (value.name() == name) {
