@@ -656,8 +656,8 @@ def test_client_stats(ci):
     out = CustomStdOut()
     with out:
         stats = ci.stats()
-        assert "statistics" in stats, "Expected 'statistics' in the response"
-    assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
+        assert "Statistics" in stats, "Expected 'Statistics' in the response"
+    assert "Statistics" in out.value(), "Expected 'Statistics' in the captured output"
 
 
 @disable_on("macOS-13.*-arm64-.*")
@@ -666,8 +666,8 @@ def test_client_stats_with_stdout(ci):
     out = CustomStdOut()
     with out:
         stats = ci.stats(True)
-        assert "statistics" in stats, "Expected 'statistics' in the response"
-    assert "statistics" in out.value(), "Expected 'statistics' in the captured output"
+        assert "Statistics" in stats, "Expected 'Statistics' in the response"
+    assert "Statistics" in out.value(), "Expected 'Statistics' in the captured output"
 
 
 @disable_on("macOS-13.*-arm64-.*")
@@ -676,7 +676,7 @@ def test_client_stats_without_stdout(ci):
     out = CustomStdOut()
     with out:
         stats = ci.stats(False)
-        assert "statistics" in stats, "Expected 'statistics' in the response"
+        assert "Statistics" in stats, "Expected 'Statistics' in the response"
     assert not out.value(), "No captured output expected, but found: " + out.value()
 
 
@@ -684,7 +684,7 @@ def test_client_stats_reset(ci):
     print_test(ci, "test_client_stats_reset")
     ci.stats_reset()
     stats = ci.stats()
-    assert "statistics" in stats, "Expected 'statistics' in the response"
+    assert "Statistics" in stats, "Expected 'Statistics' in the response"
 
 
 def test_client_debug_server_on_off(ci):
