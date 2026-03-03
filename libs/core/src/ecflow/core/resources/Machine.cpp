@@ -46,15 +46,13 @@ static auto parse = [](const std::string& line) -> uint64_t {
     return value;
 };
 
-namespace detail {
-
 struct proc_self_status
 {
     inline static const char* PROC_SELF_STATUS = "/proc/self/status";
 
-    uint64_t vm_size;
-    uint64_t vm_rss;
-    uint64_t threads;
+    uint64_t vm_size = 0;
+    uint64_t vm_rss  = 0;
+    uint64_t threads = 0;
 
     static proc_self_status process() {
         std::ifstream status(PROC_SELF_STATUS);
@@ -245,8 +243,6 @@ struct proc_stat
     }
 };
 
-} // namespace detail
-
 ProcessMeter LinuxMachine::get_process_meter() const {
 
     // Retrieve process ID
@@ -277,7 +273,7 @@ ProcessMeter LinuxMachine::get_process_meter() const {
     uint64_t resident_memory_kb = 0;
     int32_t threads             = 0;
     {
-        auto nfo           = detail::proc_self_status::process();
+        auto nfo           = proc_self_status::process();
         virtual_memory_kb  = nfo.virtual_memory_kb();
         resident_memory_kb = nfo.resident_memory_kb();
         threads            = nfo.n_threads();
@@ -290,14 +286,12 @@ ProcessMeter LinuxMachine::get_process_meter() const {
     int64_t proc_cutime = 0;
     int64_t proc_cstime = 0;
     try {
-        auto ps            = detail::proc_self_stat::process();
-        proc_utime         = ps.proc_utime;
-        proc_stime         = ps.proc_stime;
-        proc_cutime        = ps.proc_cutime;
-        proc_cstime        = ps.proc_cstime;
-        threads            = ps.threads;
-        virtual_memory_kb  = ps.virtual_memory_kb;
-        resident_memory_kb = ps.resident_memory_kb;
+        auto ps     = proc_self_stat::process();
+        proc_utime  = ps.proc_utime;
+        proc_stime  = ps.proc_stime;
+        proc_cutime = ps.proc_cutime;
+        proc_cstime = ps.proc_cstime;
+        threads     = ps.threads;
     }
     catch (const std::exception& e) {
         throw ResourceUnavailable("Failed to retrieve process statistics: " + std::string(e.what()));
@@ -310,7 +304,7 @@ ProcessMeter LinuxMachine::get_process_meter() const {
 
     uint64_t system_total_ticks = 0;
     try {
-        auto ps            = detail::proc_stat::process();
+        auto ps            = proc_stat::process();
         system_total_ticks = ps.system_total_ticks;
     }
     catch (const ecf::resources::ResourceUnavailable& e) {
@@ -320,13 +314,12 @@ ProcessMeter LinuxMachine::get_process_meter() const {
     // CPU usage as a percentage of total system CPU time (across all CPUs)
     const double cpu_usage =
         (system_total_ticks > 0)
-            ? (static_cast<double>(process_total_ticks) / static_cast<double>(system_total_ticks)) * 100.0 *
-                  n_cpus_online
+            ? (static_cast<double>(process_total_ticks) / static_cast<double>(system_total_ticks)) * 100.0
             : 0.0;
 
     // *** Tracked memory used
 
-    auto info_memory                     = mallinfo2();
+    auto info_memory              = mallinfo2();
     const uint64_t arena          = info_memory.arena; /* The total amount of memory allocated (non-mmapped) (bytes) */
     const uint64_t tracked_memory = info_memory.uordblks / 1024; /* Total allocated space (bytes) */
     const uint64_t freed_memory   = info_memory.fordblks / 1024; /* The total number of bytes in free blocks. */
