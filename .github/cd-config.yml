@@ -28,6 +28,7 @@ builds:
       dependency_branch: develop
       parallelism_factor: 8
       install_test: true
+      install_test_command: /opt/ecmwf/bin/ecflow_client --version
 
   - name: "deb-debian-12-server"
     type: system-package
@@ -54,6 +55,7 @@ builds:
       dependency_branch: develop
       parallelism_factor: 8
       install_test: true
+      install_test_command: /opt/ecmwf/bin/ecflow_client --version
 
 
 release:
