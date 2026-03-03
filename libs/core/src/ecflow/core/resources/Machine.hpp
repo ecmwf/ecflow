@@ -77,7 +77,7 @@ struct NamedValue
 
     template <typename T>
     bool operator!=(T v) const {
-        return !(*this != v);
+        return !(*this == v);
     }
 
     template <typename T>
@@ -101,7 +101,7 @@ struct NamedValue
         ar & n_;
         ar & v_;
         ar & u_;
-    };
+    }
 
     friend std::ostream& operator<<(std::ostream& o, const NamedValue& nv) {
         std::visit([&o](auto&& arg) { o << arg; }, nv.v_);

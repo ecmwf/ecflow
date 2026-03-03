@@ -229,9 +229,15 @@ void Stats::update_for_serialisation() {
     /// >>> Hence the server load is only valid for last hour <<<
 
     // Retrieve Process resources information
-    {
+    try {
         using namespace ecf::resources;
         process_meter_ = std::make_unique<ProcessMeter>(Machine::make().get_process_meter());
+    }
+    catch (const ecf::resources::UnsupportedPlatform& e) {
+        process_meter_ = nullptr;
+    }
+    catch (const ecf::resources::ResourceUnavailable& e) {
+        process_meter_ = nullptr;
     }
 
     if (!request_stats_.empty()) {
@@ -393,7 +399,7 @@ struct display_stats_helper
 
         os << std::left << "  " << std::setw(width) << label << value;
         if (!unit.empty()) {
-            os << " (" << unit << ")\n";
+            os << " (" << unit << ")";
         }
         os << "\n";
     }
@@ -405,7 +411,7 @@ struct display_stats_helper
 
         os << std::left << "  " << std::setw(width) << label << value;
         if (!unit.empty()) {
-            os << " (" << unit << ")\n";
+            os << " (" << unit << ")";
         }
         os << "\n";
     }
@@ -492,8 +498,7 @@ bool Stats::has_user_commands_file() const {
 }
 
 void Stats::show(std::ostream& os) const {
-    int width    = 32;
-    auto display = display_stats_helper(os, width);
+    auto display = display_stats_helper(os, Stats::width);
 
     os << "Server Statistics\n";
     display("Version", version_);
