@@ -250,6 +250,6 @@ private:
     }
 };
 
-CEREAL_CLASS_VERSION(Stats, 1);
+CEREAL_CLASS_VERSION(Stats, 1)
 
 #endif /* ecflow_base_Stats_HPP */
