@@ -15,6 +15,7 @@
 
 #if defined(__linux__)
     #include <fstream>
+    #include <malloc.h>
     #include <sstream>
     #include <string>
 
@@ -323,6 +324,13 @@ ProcessMeter LinuxMachine::get_process_meter() const {
                   n_cpus_online
             : 0.0;
 
+    // *** Tracked memory used
+
+    auto info_memory                     = mallinfo2();
+    const uint64_t arena          = info_memory.arena; /* The total amount of memory allocated (non-mmapped) (bytes) */
+    const uint64_t tracked_memory = info_memory.uordblks / 1024; /* Total allocated space (bytes) */
+    const uint64_t freed_memory   = info_memory.fordblks / 1024; /* The total number of bytes in free blocks. */
+
     return ProcessMeter::make()
         .with_pid(pid)
         .with_maximum_memory(maximum_memory_kb)
@@ -332,7 +340,10 @@ ProcessMeter LinuxMachine::get_process_meter() const {
         .with_n_cpu_online(n_cpus_online)
         .with_n_cpu_maximum(n_cpus_maximum)
         .with_n_threads(threads)
-        .with_cpu_usage(cpu_usage);
+        .with_cpu_usage(cpu_usage)
+        .with_arena_memory(arena)
+        .with_tracked_memory(tracked_memory)
+        .with_freed_memory(freed_memory);
 }
 
 #elif defined(__APPLE__)
