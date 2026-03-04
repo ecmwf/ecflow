@@ -435,12 +435,12 @@ ProcessMeter DarwinMachine::get_process_meter() const {
 
     return ProcessMeter::make()
         .with_pid(pid)
-        .with_maximum_memory(this->host_nfo.max_mem / 1024)
-        .with_page_size(vm_kernel_page_size)
+        .with_maximum_memory(this->host_nfo.max_mem / 1024 / 1024)
+        .with_page_size(vm_kernel_page_size / 1024)
         .with_n_cpu_online(this->host_nfo.physical_cpu)
         .with_n_cpu_maximum(this->host_nfo.physical_cpu_max)
-        .with_virtual_memory(pti.pti_virtual_size / 1024)
-        .with_resident_memory(pti.pti_resident_size / 1024)
+        .with_virtual_memory(pti.pti_virtual_size / 1024 / 1024)
+        .with_resident_memory(pti.pti_resident_size / 1024 / 1024)
         .with_n_threads(pti.pti_threadnum)
         .with_cpu_usage(cpu_usage);
 }

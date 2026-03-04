@@ -137,22 +137,22 @@ struct ProcessMeter
     }
 
     ProcessMeter& with_maximum_memory(memory_t value) {
-        this->values_.emplace_back("maximum_memory", value, "kB");
+        this->values_.emplace_back("maximum_memory_available", value, "MB");
         return *this;
     }
 
     ProcessMeter& with_virtual_memory(memory_t value) {
-        this->values_.emplace_back("virtual_memory", value, "kB");
+        this->values_.emplace_back("virtual_memory_used", value, "MB");
         return *this;
     }
 
     ProcessMeter& with_resident_memory(memory_t value) {
-        this->values_.emplace_back("resident_memory", value, "kB");
+        this->values_.emplace_back("resident_memory_used", value, "MB");
         return *this;
     }
 
     ProcessMeter& with_page_size(page_size_t value) {
-        this->values_.emplace_back("page_size", value, "bytes");
+        this->values_.emplace_back("page_size", value, "kB");
         return *this;
     }
 
@@ -177,7 +177,7 @@ struct ProcessMeter
     }
 
     ProcessMeter& with_arena_memory(memory_t value) {
-        this->values_.emplace_back("arena_memory", value, "kb");
+        this->values_.emplace_back("arena_memory", value, "kB");
         return *this;
     }
 
