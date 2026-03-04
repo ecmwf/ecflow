@@ -123,8 +123,7 @@ builds:
             chmod u+w $INSTALL_PREFIX/lib
             cmake --install . --component python
 
-      finalize:
-        lock_permissions: true
+      lock_permissions: true
 
 
   - name: ecflow-hpc-ag
@@ -157,8 +156,7 @@ builds:
             <<: *common_cmake_options
             ENABLE_UI: OFF
 
-      finalize:
-        lock_permissions: true
+      lock_permissions: true
 
 
   - name: "tarball"
