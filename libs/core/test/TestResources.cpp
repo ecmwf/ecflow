@@ -173,13 +173,7 @@ BOOST_AUTO_TEST_CASE(can_measure_process_resources) {
         BOOST_CHECK(meter.get("cpu_usage").has_value());
         BOOST_CHECK(meter.get("cpu_usage").value() >= double{0.0});
 
-#if defined(__APPLE__)
-
-        BOOST_REQUIRE(!meter.get("arena_memory").has_value());
-        BOOST_REQUIRE(!meter.get("tracked_memory").has_value());
-        BOOST_REQUIRE(!meter.get("freed_memory").has_value());
-
-#elif defined(__linux__)
+#if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
 
         BOOST_REQUIRE(meter.get("arena_memory").has_value());
         BOOST_CHECK(meter.get("arena_memory").value() > ProcessMeter::memory_t{0});
@@ -192,7 +186,9 @@ BOOST_AUTO_TEST_CASE(can_measure_process_resources) {
 
 #else
 
-    #error "Unknown platform"
+        BOOST_REQUIRE(!meter.get("arena_memory").has_value());
+        BOOST_REQUIRE(!meter.get("tracked_memory").has_value());
+        BOOST_REQUIRE(!meter.get("freed_memory").has_value());
 
 #endif
     }
