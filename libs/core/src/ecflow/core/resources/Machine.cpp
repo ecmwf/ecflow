@@ -323,18 +323,23 @@ ProcessMeter LinuxMachine::get_process_meter() const {
     #ifdef __GLIBC__
         #if (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 33)
             #define HAVE_MALLINFO2
+        #else
+            #define HAVE_MALLINFO
         #endif
     #endif
 
-    #if defined(HAVE_MALLINFO2)
+    #if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
+        #if defined(HAVE_MALLINFO2)
     auto info_memory = mallinfo2();
-    #else
+        #else
     auto info_memory = mallinfo();
-    #endif
+        #endif
 
     const uint64_t arena          = info_memory.arena; /* The total amount of memory allocated (non-mmapped) (bytes) */
     const uint64_t tracked_memory = info_memory.uordblks / 1024; /* Total allocated space (bytes) */
     const uint64_t freed_memory   = info_memory.fordblks / 1024; /* The total number of bytes in free blocks. */
+
+    #endif
 
     return ProcessMeter::make()
         .with_pid(pid)
@@ -346,9 +351,12 @@ ProcessMeter LinuxMachine::get_process_meter() const {
         .with_n_cpu_maximum(n_cpus_maximum)
         .with_n_threads(threads)
         .with_cpu_usage(cpu_usage)
+    #if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
         .with_arena_memory(arena)
         .with_tracked_memory(tracked_memory)
-        .with_freed_memory(freed_memory);
+        .with_freed_memory(freed_memory)
+    #endif
+        ;
 }
 
 #elif defined(__APPLE__)
