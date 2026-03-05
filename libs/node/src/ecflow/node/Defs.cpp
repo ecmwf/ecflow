@@ -118,13 +118,9 @@ defs_ptr Defs::create(const std::string& port) {
 } // Defs::create(port)
 
 Defs::~Defs() {
-    //    cout << "   Deleting defs "\n";
     if (!Ecf::server()) {
         notify_delete();
     }
-
-    // Duplicate AST are held in a static map. Delete them, to avoid valgrind complaining
-    ExprDuplicate reclaim_cloned_ast_memory;
 }
 
 void Defs::handle_migration() {
