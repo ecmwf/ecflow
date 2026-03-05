@@ -54,6 +54,14 @@ jobs:
           echo "Working directory: ${{ github.workspace }}"
           echo "Environment:"
           echo "$(env)"
+          echo "OS info:"
+          echo "$(cat /etc/os-release)"
+          echo "CPU info:"
+          echo "$(cat /proc/cpuinfo)"
+          echo "Memory info:"
+          echo "$(cat /proc/meminfo)"
+          echo "Disk info:"
+          echo "$(df -h)"
 
       - name: Checkout 'ecbuild'
         uses: actions/checkout@v4
