@@ -313,14 +313,14 @@ void Task::begin() {
 #endif
 }
 
-void Task::requeue(Requeue_args& args) {
+void Task::requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) {
     if (aliases_.empty()) {
         if (alias_no_ != 0) {
             reset_alias_number();
         }
     }
 
-    Submittable::requeue(args);
+    Submittable::requeue(args, authorisation);
 
 #ifdef DEBUG_STATE_CHANGE_NO
     std::cout << "Task::requeue\n";
@@ -722,7 +722,12 @@ const std::string& Task::script_extension() const {
     return ecf::File::ECF_EXTN(); // ".ecf"
 }
 
-void Task::collateChanges(DefsDelta& changes) const {
+void Task::collateChanges(DefsDelta& changes, const ecf::AuthorisationContext& ctx) const {
+
+    if (!ctx.allows(this->absNodePath(), ecf::Allowed::READ)) {
+        return;
+    }
+
     //   std::cout << "Task::collateChanges " << debugNodePath()
     //             << " changes.client_state_change_no() = " << changes.client_state_change_no()
     //             << " add_remove_state_change_no_ = " << add_remove_state_change_no_
@@ -770,7 +775,7 @@ void Task::collateChanges(DefsDelta& changes) const {
 
     // Traversal to children
     for (auto& alias : aliases_) {
-        alias->collateChanges(changes);
+        alias->collateChanges(changes, ctx);
     }
 }
 
