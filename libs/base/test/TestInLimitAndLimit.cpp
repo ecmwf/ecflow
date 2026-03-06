@@ -1873,7 +1873,8 @@ BOOST_AUTO_TEST_CASE(test_limit_value_reset_is_delivered_by_incremental_synchron
     MockServer mock_server(server_defs);
     unsigned int client_handle = 0;
     SNewsCmd news_cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
-    SSyncCmd sync_cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
+    SSyncCmd sync_cmd(
+        client_handle, client_state_change_no, client_modify_change_no, ecf::Identity::make_none(), &mock_server);
 
     BOOST_CHECK_MESSAGE(news_cmd.get_news(), "Expected the server to report a change");
     BOOST_CHECK_MESSAGE(sync_cmd.do_sync(server_reply), "Expected the server to report a change");

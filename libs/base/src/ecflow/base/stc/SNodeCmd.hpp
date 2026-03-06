@@ -12,6 +12,8 @@
 #define ecflow_base_stc_SNodeCmd_HPP
 
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
+#include "ecflow/core/Identity.hpp"
+
 class AbstractServer;
 
 //================================================================================
@@ -20,10 +22,10 @@ class AbstractServer;
 //================================================================================
 class SNodeCmd final : public ServerToClientCmd {
 public:
-    SNodeCmd(AbstractServer* as, node_ptr node);
+    SNodeCmd(const ecf::Identity& identity, AbstractServer* as, node_ptr node);
     SNodeCmd() = default;
 
-    void init(AbstractServer* as, node_ptr node);
+    void init(const ecf::Identity& identity, AbstractServer* as, node_ptr node);
 
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
     std::string print() const override;

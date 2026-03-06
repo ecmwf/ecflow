@@ -215,6 +215,7 @@ containers on ``<host>``. Run them from ``releng/imachination/`` unless noted ot
        -p 8889:8889 \
        -v /home/<user>/<host>:/home/<user>/<host> \
        -e ECFLOW_WORKSPACE_DIR=/home/<user>/<host> \
+       -w /home/<user>/<host> \
        eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
 
 * Verify deployment:

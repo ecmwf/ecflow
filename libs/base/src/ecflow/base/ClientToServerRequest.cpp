@@ -36,15 +36,36 @@ std::string make_rejection_message(const std::string& reason, const ecf::Identit
 STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
     if (cmd_.get()) {
         // Perform Authentication (i.e. user/task identity) control
+        std::cout << "*** [DBG] ClientToServerRequest::handleRequest: Command received, processing request..."
+                  << std::endl;
+
         if (auto result = ecf::is_authentic(*cmd_, *as); !result.ok()) {
+            std::cout
+                << "*** [DBG] ClientToServerRequest::handleRequest: Command failed, due to authentication failure..."
+                << std::endl;
+            std::cout << "*** [DBG] ClientToServerRequest::handleRequest: Command failed, with username ["
+                      << cmd_->identity().username().value() << "]" << std::endl;
             return PreAllocatedReply::error_cmd(make_rejection_message(result.reason(), cmd_->identity()));
         }
 
+        std::cout << "*** [DBG] ClientToServerRequest::handleRequest: Command accepted: authentication..." << std::endl;
+
         // Perform Authorisation (i.e. access rules) control
         if (auto result = ecf::is_authorised(*cmd_, *as); result.ok()) {
+            std::cout << "*** [DBG] ClientToServerRequest::handleRequest: Command accepted: authorization..."
+                      << std::endl;
+            std::cout << "*** [DBG] ClientToServerRequest::handleRequest: Command accepted, with command ["
+                      << cmd_->print_short() << "]" << std::endl;
+            std::cout << "*** [DBG] ClientToServerRequest::handleRequest: Command accepted, with username ["
+                      << cmd_->identity().username().value() << "]" << std::endl;
             return cmd_->handleRequest(as);
         }
         else {
+            std::cout
+                << "*** [DBG] ClientToServerRequest::handleRequest: Command failed, due to authorisation failure..."
+                << std::endl;
+            std::cout << "*** [DBG] ClientToServerRequest::handleRequest: Command failed, with username ["
+                      << cmd_->identity().username().value() << "]" << std::endl;
             // The command is not accepted, return an error
             return PreAllocatedReply::error_cmd(make_rejection_message(result.reason(), cmd_->identity()));
         }

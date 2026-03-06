@@ -205,6 +205,10 @@ private:
 
     void change_dir_to_ecf_home_and_check_accesibility();
 
+    bool enable_whitelist_based_permissions(std::string& error) const;
+    bool enable_node_based_permissions(std::string& error) const;
+    bool enable_unrestricted_permissions(std::string& error) const;
+
     bool load_whitelist_file(std::string& err) const;
 
 #ifdef ECF_OPENSSL
@@ -230,6 +234,7 @@ private:
     int checkpt_save_time_alarm_;
     int submitJobsInterval_;
     int ecf_prune_node_log_;
+    std::string permissions_;
     bool jobGeneration_; // used in debug/test mode only
     ecf::Protocol protocol_;
     bool debug_;

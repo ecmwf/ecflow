@@ -14,43 +14,20 @@
 #include "ecflow/core/Overload.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
 #include "ecflow/node/NodePathAlgorithms.hpp"
+#include "ecflow/node/permissions/ActivePermissions.hpp"
 
 namespace ecf {
 
-///
-/// NodeRules represent permissions derived from the nodes themselves (based on ECF_PERMISSIONS permissions)
-///
-struct NodeRules
-{
-};
-
-///
-/// WhiteListRules represent permissions define by a white list file
-///
-struct WhiteListRules
-{
-    WhiteListRules(const WhiteListFile& file)
-        : file_(file) {}
-    const WhiteListFile& file_;
-};
-
-///
-/// Unrestricted represent no restrictions at all
-///
-struct Unrestricted
-{
-};
-
 struct AuthorisationService::Impl
 {
-    Impl()
-        : permissions_(Unrestricted{}) {}
+    explicit Impl(UnrestrictedRules&& rules)
+        : rules_(std::move(rules)) {}
     explicit Impl(NodeRules&& rules)
-        : permissions_(std::move(rules)) {}
+        : rules_(std::move(rules)) {}
     explicit Impl(WhiteListRules&& rules)
-        : permissions_(std::move(rules)) {}
+        : rules_(std::move(rules)) {}
 
-    std::variant<Unrestricted, NodeRules, WhiteListRules> permissions_;
+    std::variant<UnrestrictedRules, WhiteListRules, NodeRules> rules_;
 };
 
 AuthorisationService::AuthorisationService() = default;
@@ -76,23 +53,21 @@ bool AuthorisationService::good() const {
     return impl_ != nullptr;
 }
 
-bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
-                                  const std::string& permission) const {
-    return allows(identity, server, paths_t{ROOT}, permission);
+bool AuthorisationService::allows(const Identity& identity, const Defs& defs, Allowed required) const {
+    return allows(identity, defs, paths_t{ROOT}, required);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
+                                  const Defs& defs,
                                   const path_t& path,
-                                  const std::string& permission) const {
-    return allows(identity, server, paths_t{path}, permission);
+                                  Allowed required) const {
+    return allows(identity, defs, paths_t{path}, required);
 }
 
 bool AuthorisationService::allows(const Identity& identity,
-                                  const AbstractServer& server,
+                                  const Defs& defs,
                                   const paths_t& paths,
-                                  const std::string& permission) const {
+                                  Allowed required) const {
     if (!good()) {
         // When no rules are loaded, we allow everything...
         // Dangerous, but backward compatible!
@@ -100,63 +75,47 @@ bool AuthorisationService::allows(const Identity& identity,
     }
 
     bool allowed = false;
-    std::visit(overload{[&allowed](const Unrestricted&) {
-                            // when no rules are loaded, we allow everything...
-                            // Dangerous, but backward compatible!
-                            allowed = true;
-                        },
-                        [&allowed, &identity, &paths, &permission](const WhiteListRules& rules) {
+    std::visit(overload{[&allowed](const UnrestrictedRules&) { allowed = true; },
+                        [&allowed, &identity, &paths, &required](const WhiteListRules& rules) {
                             // Apply white list rules
-                            if (permission == "read") {
+                            if (contains(required, Allowed::READ)) {
                                 allowed = rules.file_.verify_read_access(identity.username().value(), paths);
                             }
-                            else if (permission == "write") {
+                            else if (contains(required, Allowed::WRITE) || contains(required, Allowed::EXECUTE)) {
                                 allowed = rules.file_.verify_write_access(identity.username().value(), paths);
                             }
                             else {
                                 allowed = false;
                             }
                         },
-                        [&server, &identity, &paths, &allowed](const NodeRules& rules) {
+                        [&allowed, &defs, &identity, &paths, &required](const NodeRules& rules) {
                             for (auto&& path : paths) {
-
-                                struct Visitor
-                                {
-                                    void handle(const Defs& defs) {
-                                        auto p      = defs.server_state().permissions();
-                                        permissions = p.is_empty() ? permissions : p;
-                                    }
-                                    void handle(const Node& s) {
-                                        auto p      = s.permissions();
-                                        permissions = p.is_empty() ? permissions : p;
-                                    }
-
-                                    void not_found() { permissions = Permissions::make_empty(); }
-
-                                    Permissions permissions = Permissions::make_empty();
-                                };
-
-                                auto d = server.defs();
-                                auto p = Path::make(path).value();
-                                auto v = Visitor{};
-
-                                ecf::visit(*d, p, v);
-
-                                if (v.permissions.is_empty()) {
-                                    allowed = true;
-                                }
-                                else if (v.permissions.allows(identity.username().value())) {
-                                    allowed = true;
-                                }
-                                else {
-                                    allowed = false;
+                                ActivePermissions active = permissions_at(identity, defs, path);
+                                std::cout << "*** [DBG] AuthorisationService::allows: User ["
+                                          << identity.username().value() << "] checking permissions for path [" << path
+                                          << "] with required permissions [" << allowed_to_string(required) << "]"
+                                          << std::endl;
+                                std::cout << "*** [DBG] AuthorisationService::allows: User ["
+                                          << identity.username().value() << "] " << active << std::endl;
+                                allowed = active.allows(identity.username(), required);
+                                std::cout << "*** [DBG] AuthorisationService::allows: User ["
+                                          << identity.username().value()
+                                          << "] is allowed: " << (allowed ? "true" : "false") << std::endl;
+                                if (!allowed) {
                                     break;
                                 }
                             }
                         }},
-               impl_->permissions_);
+               impl_->rules_);
+
+    std::cout << "*** [DBG] AuthorisationService::allows: User [" << identity.username().value()
+              << "] is allowed: " << (allowed ? "true" : "false") << " >> (FINAL)" << std::endl;
 
     return allowed;
+}
+
+AuthorisationService::result_t AuthorisationService::load_permissions_unrestricted() {
+    return result_t::success(AuthorisationService(std::make_unique<Impl>(UnrestrictedRules{})));
 }
 
 AuthorisationService::result_t AuthorisationService::load_permissions_from_nodes() {
@@ -165,6 +124,15 @@ AuthorisationService::result_t AuthorisationService::load_permissions_from_nodes
 
 AuthorisationService::result_t AuthorisationService::load_permissions_from_whitelist(const WhiteListFile& whitelist) {
     return result_t::success(AuthorisationService(std::make_unique<Impl>(WhiteListRules{whitelist})));
+}
+
+void AuthorisationService::init(const Permissions& permissions) {
+    if (permissions.is_empty()) {
+        impl_ = std::make_unique<AuthorisationService::Impl>(WhiteListRules{WhiteListFile{}});
+    }
+    else {
+        impl_ = std::make_unique<AuthorisationService::Impl>(NodeRules{});
+    }
 }
 
 } // namespace ecf
