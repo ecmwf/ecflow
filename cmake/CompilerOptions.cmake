@@ -146,3 +146,23 @@ if( NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_
   # ARM-based Clang (available on Atos HPC) needs explicit stdc++fs linking
   link_libraries(stdc++fs)
 endif()
+
+# =========================================================================================
+# Support for mallinfo / mallinfo2
+# =========================================================================================
+
+check_symbol_exists(mallinfo2 malloc.h HAVE_MALLINFO2)
+if (HAVE_MALLINFO2)
+  message(STATUS "'mallinfo2' is available, using it for memory usage information")
+  add_definitions(-DHAVE_MALLINFO2)
+else ()
+  check_symbol_exists(mallinfo malloc.h HAVE_MALLINFO)
+  if (HAVE_MALLINFO)
+    message(STATUS "'mallinfo' is available, using it for memory usage information")
+    add_definitions(-DHAVE_MALLINFO)
+  endif()
+endif()
+
+if (NOT HAVE_MALLINFO AND NOT HAVE_MALLINFO2)
+  message(STATUS "Neither 'mallinfo' nor 'mallinfo2' are available, memory usage information will not be available")
+endif()

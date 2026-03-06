@@ -52,6 +52,7 @@ set(test_srcs
   test/TestPasswordEncryption.cpp
   test/TestPerfTimer.cpp
   test/TestRealCalendar.cpp
+  test/TestResources.cpp
   test/TestResult.cpp
   test/TestSanitizerAS.cpp
   test/TestSanitizerUB.cpp
