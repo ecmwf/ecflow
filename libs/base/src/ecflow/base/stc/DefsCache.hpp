@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <ecflow/core/Identity.hpp>
+
+#include "ecflow/node/AuthorisationContext.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 //================================================================================
@@ -38,8 +41,8 @@ public:
     DefsCache() = delete;
 
     // Server side
-    static void update_cache_if_state_changed(Defs* defs);
-    static void update_cache(Defs* defs);
+    static void update_cache_if_state_changed(Defs* defs, const ecf::AuthorisationContext& authorisation);
+    static void update_cache(Defs* defs, const ecf::AuthorisationContext& authorisation);
 
     // Client side
     static defs_ptr restore_defs_from_string(const std::string&);
@@ -49,6 +52,7 @@ private:
     friend class SSyncCmd;
     friend class DefsCmd;
 
+    static ecf::Identity identity_;
     static std::string full_server_defs_as_string_;
     static unsigned int state_change_no_;  // detect state change in defs across clients
     static unsigned int modify_change_no_; // detect state change in defs across clients

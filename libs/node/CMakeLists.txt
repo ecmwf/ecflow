@@ -40,6 +40,7 @@ set(test_srcs
   test/TestNode_main.cpp # test entry point
   test/TestOperations.cpp
   test/TestOrder.cpp
+  test/TestPermissions.cpp
   test/TestPersistence.cpp
   test/TestPreProcessing.cpp
   test/TestRepeatWithTimeDependencies.cpp
