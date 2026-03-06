@@ -170,26 +170,6 @@ public:
     /// If errors arise the exist user still stay in affect
     bool reloadWhiteListFile(std::string& errorMsg);
 
-    /// There are several kinds of authentification:
-    ///     a/ None
-    ///     b/ List mode.   ASCII file based on ECF_LISTS is defined
-    ///     c/ Secure mode. binary file based ECF_PASSWD is defined
-    /// At the moment we will only implement options a/ and b/
-    //
-    /// Returns true if the given user has access to the server, false otherwise
-    // bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) const;
-    // bool authenticateReadAccess(const std::string& user,
-    //                             bool custom_user,
-    //                             const std::string& passwd,
-    //                             const std::string& path) const;
-    // bool authenticateReadAccess(const std::string& user,
-    //                             bool custom_user,
-    //                             const std::string& passwd,
-    //                             const std::vector<std::string>& paths) const;
-    // bool authenticateWriteAccess(const std::string& user) const;
-    // bool authenticateWriteAccess(const std::string& user, const std::string& path) const;
-    // bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) const;
-
     ecf::AuthenticationService& authentication() { return authentication_service_; }
     const ecf::AuthenticationService& authentication() const { return authentication_service_; }
 
@@ -222,6 +202,10 @@ private:
 
     void change_dir_to_ecf_home_and_check_accesibility();
 
+    bool enable_whitelist_based_permissions(std::string& error) const;
+    bool enable_node_based_permissions(std::string& error) const;
+    bool enable_unrestricted_permissions(std::string& error) const;
+
     bool load_whitelist_file(std::string& err) const;
 
 private:
@@ -232,6 +216,7 @@ private:
     int checkpt_save_time_alarm_;
     int submitJobsInterval_;
     int ecf_prune_node_log_;
+    std::string permissions_;
     bool jobGeneration_; // used in debug/test mode only
     ecf::Protocol protocol_;
     bool debug_;

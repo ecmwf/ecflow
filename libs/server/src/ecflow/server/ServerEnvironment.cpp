@@ -151,7 +151,17 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
         ecf_white_list_file_ = host_name_.prefix_host_and_port(port, ecf_white_list_file_);
     }
 
-    authentication_service_.init(host_name_, port);
+    {
+        // Init the authentication service
+        authentication_service_.init(host_name_, port);
+    }
+
+    {
+        // Init the authorisation service
+        if (auto perms = Permissions::make_from_variable(permissions_); perms.ok()) {
+            authorisation_service_.init(perms.value());
+        }
+    }
 
     // Change directory to ECF_HOME and check that it is accessible
     change_dir_to_ecf_home_and_check_accesibility();
@@ -298,29 +308,41 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         return false;
     }
 
-    if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
-        authorisation_service_ = result.value();
-        std::cout << "Loaded server permissions based on Nodes\n";
-    }
+    //
+    // Authentication Setup
+    //
 
     // Check that Authentication information is valid
     if (auto status = authentication_service_.valid(serverHost_, the_port(), errorMsg); !status) {
         return false;
     }
 
-    // *WHEN* the server starts, it is possible that the white list file is empty or simply does not exist, since any
-    // user is free to access the server.
-    if (ecf_white_list_file_.empty()) {
-        return true;
-    }
-    if (!fs::exists(ecf_white_list_file_)) {
-        return true;
-    }
+    //
+    // Authorisation Setup
+    //
 
-    /// read in the ecf white list file that specifies valid users and their access rights
-    /// If the file can't be opened returns false and an error message and false;
-    /// Automatically add server admin(user) with write access, as this will allow admin reload
-    return load_whitelist_file(errorMsg);
+    //
+    // Upon server starup, the following Authorisation scenarios are possible:
+    // 1) a white list file is defined, exists and is valid
+    //    - the Authorisation is based on the white list file
+    // 2) a white list file is not defined, does not exist or is invalid, and ECF_PERMISSIONS is defined and valid
+    //    - the Authorisation is based on ECF_PERMISSIONS
+    // 3) a white list file is not defined, does not exist or is invalid, and ECF_PERMISSIONS is not defined or invalid
+    //    - the Authorisation is unrestricted
+    //
+
+    if (!ecf_white_list_file_.empty() && fs::exists(ecf_white_list_file_)) {
+        return enable_whitelist_based_permissions(errorMsg);
+    }
+    else {
+
+        if (!permissions_.empty()) {
+            return enable_node_based_permissions(errorMsg);
+        }
+        else {
+            return enable_unrestricted_permissions(errorMsg);
+        }
+    }
 }
 
 std::pair<std::string, std::string> ServerEnvironment::hostPort() const {
@@ -368,6 +390,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string, std::string
     theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_);            // server PID
     theRetVec.emplace_back(std::string("ECF_VERSION"), Version::full()); // server version
 
+    theRetVec.emplace_back(std::string(ecf::environment::ECF_PERMISSIONS), permissions_);
+
 #ifdef ECF_OPENSSL
     if (ssl_.enabled()) {
         theRetVec.emplace_back(
@@ -395,13 +419,78 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg) {
         return false;
     }
 
-    return load_whitelist_file(errorMsg);
+    return enable_whitelist_based_permissions(errorMsg);
 }
 
+bool ServerEnvironment::enable_whitelist_based_permissions(std::string& error) const {
+    if (auto loaded = load_whitelist_file(error); loaded) {
+        if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
+            std::cout << "*** Server permissions based on white list file, loaded from '" << ecf_white_list_file_
+                      << "'\n";
+            authorisation_service_ = result.value();
+            return true;
+        }
+        else {
+            std::ostringstream ss;
+            ss << "Unable setup authorisation service based on white file, due to: " << result.reason() << '\n';
+            error = ss.str();
+            return false;
+        }
+    }
+    else {
+        std::ostringstream ss;
+        ss << "Unable to load white file based server permissions, due to: " << error << '\n';
+        error = ss.str();
+        return false;
+    }
+}
+
+bool ServerEnvironment::enable_node_based_permissions(std::string& error) const {
+    if (auto permissions = Permissions::make_from_variable(permissions_); !permissions.ok()) {
+        std::ostringstream ss;
+        ss << "Found invalid ECF_PERMISSIONS value, due to: " << permissions.reason() << "\n";
+        error = ss.str();
+        return false;
+    }
+
+    if (auto result = AuthorisationService::load_permissions_from_nodes(); result.ok()) {
+        authorisation_service_ = result.value();
+        std::cout << "*** Server permissions based on ECF_PERMISSIONS\n";
+        return true;
+    }
+    else {
+        std::ostringstream ss;
+        ss << "Unable setup authorisation service based on nodes, due to: " << result.reason() << '\n';
+        error = ss.str();
+        return false;
+    }
+}
+
+bool ServerEnvironment::enable_unrestricted_permissions(std::string& error) const {
+    if (auto result = AuthorisationService::load_permissions_unrestricted(); result.ok()) {
+        authorisation_service_ = result.value();
+        std::cout << "*** Server permissions based on unrestricted permissions\n";
+        return true;
+    }
+    else {
+        std::ostringstream ss;
+        ss << "Unable setup unrestricted authorisation service, due to: " << result.reason() << '\n';
+        error = ss.str();
+        return false;
+    }
+}
+
+///
+/// @brief Read in the ecf white list file that specifies valid users and their access rights
+///
+/// Automatically ensures that the server admin(user) has write access, as this will allow admin reload.
+///
+/// @param errorMsg a buffer for the error message
+/// @return false, if the file cannot be loaded, with an error message; otherwise, true
+///
 bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     // Only override valid users if we successfully opened and parsed file
     if (white_list_file_.load(ecf_white_list_file_, errorMsg)) {
-        std::cout << "*** White list file loaded from '" << ecf_white_list_file_ << "'\n";
         if (debug()) {
             std::cout << white_list_file_.dump_valid_users() << "\n";
         }
@@ -410,79 +499,10 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
         // (Requires terminate, modify white list, restart to fix)
         // Hence always allow server user write access *IF* required for non-empty file
         white_list_file_.allow_write_access_for_server_user();
-
-        if (auto result = AuthorisationService::load_permissions_from_whitelist(this->white_list_file_); result.ok()) {
-            authorisation_service_ = result.value();
-            std::cout << "Loaded server permissions based on Whitelist file\n";
-            return true;
-        }
-        else {
-            std::cout << "Unable to load server permissions, due to: " << result.reason() << '\n';
-            return false;
-        }
+        return true;
     }
     return false;
 }
-
-// bool ServerEnvironment::authenticateReadAccess(const std::string& user,
-//                                                bool custom_user,
-//                                                const std::string& passwd) const {
-//     if (!custom_user) {
-//         if (!passwd_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//     else {
-//         if (!passwd_custom_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//
-//     // if *NO* users specified then all users are valid
-//     return white_list_file_.verify_read_access(user);
-// }
-
-// bool ServerEnvironment::authenticateReadAccess(const std::string& user,
-//                                                bool custom_user,
-//                                                const std::string& passwd,
-//                                                const std::string& path) const {
-//     if (!custom_user) {
-//         if (!passwd_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//     else {
-//         if (!passwd_custom_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//
-//     return white_list_file_.verify_read_access(user, path);
-// }
-//
-// bool ServerEnvironment::authenticateReadAccess(const std::string& user,
-//                                                bool custom_user,
-//                                                const std::string& passwd,
-//                                                const std::vector<std::string>& paths) const {
-//     if (!custom_user) {
-//         if (!passwd_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//     else {
-//         if (!passwd_custom_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//
-//     return white_list_file_.verify_read_access(user, paths);
-// }
-//
-// bool ServerEnvironment::authenticateWriteAccess(const std::string& user) const {
-//     // if *NO* users specified then all users have write access
-//     return white_list_file_.verify_write_access(user);
-// }
-// bool ServerEnvironment::authenticateWriteAccess(const std::string& user, const std::string& path) const {
-//     return white_list_file_.verify_write_access(user, path);
-// }
-// bool ServerEnvironment::authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) const
-// {
-//     return white_list_file_.verify_write_access(user, paths);
-// }
 
 // ============================================================================================
 // Privates:
@@ -527,7 +547,10 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(std::string{AuthenticationService::default_passwd_file()}), "Path name to passwd file")
             ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(std::string{AuthenticationService::default_custom_passwd_file()}), "Path name to custom passwd file, for user who don't use login name")
             ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")
-            ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded");
+            ("ECF_PRUNE_NODE_LOG", po::value<int>(&ecf_prune_node_log_)->default_value(30), "Node log, older than 180 days automatically pruned when checkpoint file loaded")
+            (ecf::environment::ECF_PERMISSIONS,po::value<std::string>(&permissions_)->default_value(""), "")
+        ;
+
         // clang-format on
 
         std::ifstream ifs(path_to_config_file.c_str());
@@ -689,6 +712,8 @@ std::string ServerEnvironment::dump() const {
     ss << "ECF_SSL = " << ssl_ << "\n";
 #endif
 
+    ss << ecf::environment::ECF_PERMISSIONS << " = " << permissions_ << "\n";
+
     ss << white_list_file_.dump_valid_users();
     return ss.str();
 }
@@ -715,6 +740,7 @@ std::vector<std::string> ServerEnvironment::expected_variables() {
     expected_variables.emplace_back("ECF_INTERVAL");
     expected_variables.emplace_back(ecf::environment::ECF_PASSWD);
     expected_variables.emplace_back(ecf::environment::ECF_CUSTOM_PASSWD);
+    expected_variables.emplace_back(ecf::environment::ECF_PERMISSIONS);
 #ifdef ECF_OPENSSL
     if (ecf::environment::has(ecf::environment::ECF_SSL)) {
         expected_variables.emplace_back(ecf::environment::ECF_SSL);
