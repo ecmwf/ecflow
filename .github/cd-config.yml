@@ -76,7 +76,7 @@ builds:
 
   - name: "conda-build Python3.11"
     type: "conda"
-    enabled: false
+    enabled: true
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -84,7 +84,7 @@ builds:
 
   - name: "conda-build Python3.12"
     type: "conda"
-    enabled: false
+    enabled: true
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -92,7 +92,7 @@ builds:
 
   - name: "conda-build Python3.13"
     type: "conda"
-    enabled: false
+    enabled: true
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -120,9 +120,6 @@ builds:
             - cmake/new
             - ecbuild/new
           test_command: &test_cmd "ctest --output-on-failure -j 8 -L nightly"
-          install_command: |
-            #chmod -R u+w $INSTALL_PREFIX || true
-            cmake --install .
           cmake_options: &common_cmake_options
             -DCMAKE_VERBOSE_MAKEFILE: ON
             -DENABLE_ALL_TESTS: ON
@@ -154,7 +151,6 @@ builds:
             -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.11.8-01/lib64
             -DENABLE_UI: OFF
           install_command: |
-            chmod u+w $INSTALL_PREFIX/lib
             cmake --install . --component python
 
         - name: python310
@@ -177,7 +173,6 @@ builds:
             -DPython3_LIBRARIES: /usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
             -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.10.10-01/lib64
           install_command: |
-            chmod u+w $INSTALL_PREFIX/lib
             cmake --install . --component python
 
         - name: python38
@@ -200,7 +195,6 @@ builds:
             -DPython3_LIBRARIES: /usr/local/apps/python3/3.8.8-01/lib64/libpython3.8.so
             -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.8.8-01/lib64
           install_command: |
-            chmod u+w $INSTALL_PREFIX/lib
             cmake --install . --component python
 
       lock_permissions: true
