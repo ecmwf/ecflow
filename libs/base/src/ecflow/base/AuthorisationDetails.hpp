@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <boost/beast/http/field.hpp>
-
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/Authorisation.hpp"
 #include "ecflow/base/cts/ClientToServerCmd.hpp"
@@ -43,6 +41,7 @@
 #include "ecflow/base/cts/user/ServerVersionCmd.hpp"
 #include "ecflow/base/cts/user/ShowCmd.hpp"
 #include "ecflow/base/cts/user/ZombieCmd.hpp"
+#include "ecflow/node/Defs.hpp"
 #include "ecflow/server/BaseServer.hpp"
 
 namespace ecf {
@@ -70,23 +69,29 @@ std::vector<std::string> get_affected_paths(const COMMAND& command) {
 
 template <typename COMMAND>
 authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractServer& server) {
-    auto base = dynamic_cast<BaseServer*>(&server);
-
     static_assert(std::is_base_of_v<TaskCmd, COMMAND> || std::is_base_of_v<UserCmd, COMMAND>,
                   "The command must be either a TaskCmd or a UserCmd");
 
     if constexpr (std::is_base_of_v<TaskCmd, COMMAND>) {
         // No actual verification is done for task commands
+        std::cout
+            << "*** [DBG] allows_as_per_read_write_rules: Task command, authorisation granted without verification."
+            << std::endl;
         return authorisation_t::success("Authorisation (task) granted");
     }
 
     std::vector<std::string> paths = get_affected_paths(command);
 
-    const std::string required_permission = command.isWrite() ? "write" : "read";
-    if (base->authorisation().allows(command.identity(), *base, paths, required_permission)) {
+    auto required = Authoriser<COMMAND>::required(command);
+    ServiceAuthorisationContext ctx{command.identity(), *server.defs(), server.authorisation()};
+    if (ctx.allows(paths, required)) {
+        std::cout << "*** [DBG] allows_as_per_read_write_rules: User command, authorisation granted." << std::endl;
+        std::string s = required == Allowed::WRITE ? "WRITE" : required == Allowed::READ ? "READ" : "?OTHER?";
+        std::cout << "*** [DBG] allows_as_per_read_write_rules: User command, required permissions: " << s << std::endl;
         return authorisation_t::success("Authorisation (user) granted");
     }
 
+    std::cout << "*** [DBG] allows_as_per_read_write_rules: User command, authorisation failed." << std::endl;
     return authorisation_t::failure("Authorisation (user) failed, due to: Insufficient permissions");
 }
 
@@ -105,6 +110,8 @@ struct Authoriser<InitCmd>
     }
 
     static void paths(const InitCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
+
+    static Allowed required(const InitCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -115,6 +122,8 @@ struct Authoriser<CompleteCmd>
     }
 
     static void paths(const CompleteCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
+
+    static Allowed required(const CompleteCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -125,6 +134,8 @@ struct Authoriser<AbortCmd>
     }
 
     static void paths(const AbortCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
+
+    static Allowed required(const AbortCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -135,6 +146,8 @@ struct Authoriser<LabelCmd>
     }
 
     static void paths(const LabelCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
+
+    static Allowed required(const LabelCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -145,6 +158,8 @@ struct Authoriser<MeterCmd>
     }
 
     static void paths(const MeterCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
+
+    static Allowed required(const MeterCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -155,6 +170,8 @@ struct Authoriser<EventCmd>
     }
 
     static void paths(const EventCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
+
+    static Allowed required(const EventCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -165,6 +182,8 @@ struct Authoriser<QueueCmd>
     }
 
     static void paths(const QueueCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
+
+    static Allowed required(const QueueCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -175,6 +194,8 @@ struct Authoriser<CtsWaitCmd>
     }
 
     static void paths(const CtsWaitCmd& command, std::vector<std::string>& paths) { /* Nothing to do... */ }
+
+    static Allowed required(const CtsWaitCmd&) { return Allowed::WRITE; }
 };
 
 // User commands
@@ -209,6 +230,8 @@ struct Authoriser<AlterCmd>
     }
 
     static void paths(const AlterCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
+
+    static Allowed required(const AlterCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -219,6 +242,8 @@ struct Authoriser<BeginCmd>
     }
 
     static void paths(const BeginCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+
+    static Allowed required(const BeginCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -229,6 +254,8 @@ struct Authoriser<CFileCmd>
     }
 
     static void paths(const CFileCmd& command, std::vector<std::string>& paths) { select_node_path(command, paths); }
+
+    static Allowed required(const CFileCmd&) { return Allowed::READ; }
 };
 
 template <>
@@ -239,6 +266,8 @@ struct Authoriser<CheckPtCmd>
     }
 
     static void paths(const CheckPtCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+
+    static Allowed required(const CheckPtCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -251,6 +280,11 @@ struct Authoriser<ClientHandleCmd>
     static void paths(const ClientHandleCmd& command, std::vector<std::string>& paths) {
         select_root_path(command, paths);
     }
+
+    static Allowed required(const ClientHandleCmd&) {
+        // Todo[MB]: Check the correct choice for Suite handle commands
+        return Allowed::READ;
+    }
 };
 
 template <>
@@ -261,6 +295,8 @@ struct Authoriser<CSyncCmd>
     }
 
     static void paths(const CSyncCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+
+    static Allowed required(const CSyncCmd&) { return Allowed::READ; }
 };
 
 template <>
@@ -271,6 +307,12 @@ struct Authoriser<CtsCmd>
     }
 
     static void paths(const CtsCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+
+    static Allowed required(const CtsCmd& cmd) {
+        // Todo[MB]: Check the correct choice for "multi-Action" commands, as it really depends on the value of the
+        // action
+        return cmd.isWrite() ? Allowed::WRITE : Allowed::READ;
+    }
 };
 
 template <>
@@ -287,6 +329,12 @@ struct Authoriser<CtsNodeCmd>
         else {
             paths.push_back(path);
         }
+    }
+
+    static Allowed required(const CtsNodeCmd& cmd) {
+        // Todo[MB]: Check the correct choice for "multi-Action" commands, as it really depends on the value of the
+        // action
+        return cmd.isWrite() ? Allowed::WRITE : Allowed::READ;
     }
 };
 
@@ -305,6 +353,8 @@ struct Authoriser<DeleteCmd>
             paths.push_back(affected[0]);
         }
     }
+
+    static Allowed required(const DeleteCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -317,6 +367,12 @@ struct Authoriser<EditScriptCmd>
     static void paths(const EditScriptCmd& command, std::vector<std::string>& paths) {
         select_node_path(command, paths);
     }
+
+    static Allowed required(const EditScriptCmd& cmd) {
+        // Todo[MB]: Check the correct choice for "multi-Action" commands, as it really depends on the value of the
+        // action
+        return cmd.isWrite() ? Allowed::WRITE : Allowed::READ;
+    }
 };
 
 template <>
@@ -327,6 +383,8 @@ struct Authoriser<ForceCmd>
     }
 
     static void paths(const ForceCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
+
+    static Allowed required(const ForceCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -337,6 +395,8 @@ struct Authoriser<FreeDepCmd>
     }
 
     static void paths(const FreeDepCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+
+    static Allowed required(const FreeDepCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -347,6 +407,8 @@ struct Authoriser<LoadDefsCmd>
     }
 
     static void paths(const LoadDefsCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+
+    static Allowed required(const LoadDefsCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -357,6 +419,12 @@ struct Authoriser<LogCmd>
     }
 
     static void paths(const LogCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+
+    static Allowed required(const LogCmd& cmd) {
+        // Todo[MB]: Check the correct choice for "multi-Action" commands, as it really depends on the value of the
+        // action
+        return cmd.isWrite() ? Allowed::WRITE : Allowed::READ;
+    }
 };
 
 template <>
@@ -369,6 +437,11 @@ struct Authoriser<LogMessageCmd>
     static void paths(const LogMessageCmd& command, std::vector<std::string>& paths) {
         select_root_path(command, paths);
     }
+
+    static Allowed required(const LogMessageCmd& cmd) {
+        // Todo[MB]: Check the correct choice for "Logging a Message" command
+        return Allowed::READ;
+    }
 };
 
 template <>
@@ -379,6 +452,8 @@ struct Authoriser<MoveCmd>
     }
 
     static void paths(const MoveCmd& command, std::vector<std::string>& paths) { paths.push_back(command.src_path()); }
+
+    static Allowed required(const MoveCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -391,6 +466,8 @@ struct Authoriser<OrderNodeCmd>
     static void paths(const OrderNodeCmd& command, std::vector<std::string>& paths) {
         select_node_path(command, paths);
     }
+
+    static Allowed required(const OrderNodeCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -401,6 +478,12 @@ struct Authoriser<PathsCmd>
     }
 
     static void paths(const PathsCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
+
+    static Allowed required(const PathsCmd& cmd) {
+        // Todo[MB]: Check the correct choice for "multi-Action" commands, as it really depends on the value of the
+        // action
+        return cmd.isWrite() ? Allowed::WRITE : Allowed::READ;
+    }
 };
 
 template <>
@@ -411,6 +494,8 @@ struct Authoriser<PlugCmd>
     }
 
     static void paths(const PlugCmd& command, std::vector<std::string>& paths) { paths.push_back(command.source()); }
+
+    static Allowed required(const PlugCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -423,6 +508,8 @@ struct Authoriser<QueryCmd>
     static void paths(const QueryCmd& command, std::vector<std::string>& paths) {
         paths.push_back(command.path_to_attribute());
     }
+
+    static Allowed required(const QueryCmd&) { return Allowed::READ; }
 };
 
 template <>
@@ -435,6 +522,8 @@ struct Authoriser<ReplaceNodeCmd>
     static void paths(const ReplaceNodeCmd& command, std::vector<std::string>& paths) {
         select_node_path(command, paths);
     }
+
+    static Allowed required(const ReplaceNodeCmd&) { return Allowed::WRITE; }
 };
 
 template <>
@@ -447,6 +536,8 @@ struct Authoriser<RequeueNodeCmd>
     static void paths(const RequeueNodeCmd& command, std::vector<std::string>& paths) {
         select_all_paths(command, paths);
     }
+
+    static Allowed required(const RequeueNodeCmd&) { return Allowed::WRITE | Allowed::EXECUTE; }
 };
 
 template <>
@@ -457,6 +548,8 @@ struct Authoriser<RunNodeCmd>
     }
 
     static void paths(const RunNodeCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
+
+    static Allowed required(const RunNodeCmd&) { return Allowed::WRITE | Allowed::EXECUTE; }
 };
 
 template <>
@@ -469,6 +562,8 @@ struct Authoriser<ServerVersionCmd>
     static void paths(const ServerVersionCmd& command, std::vector<std::string>& paths) {
         select_root_path(command, paths);
     }
+
+    static Allowed required(const ServerVersionCmd&) { return Allowed::READ; }
 };
 
 template <>
@@ -479,6 +574,8 @@ struct Authoriser<ShowCmd>
     }
 
     static void paths(const ShowCmd& command, std::vector<std::string>& paths) { select_root_path(command, paths); }
+
+    static Allowed required(const ShowCmd&) { return Allowed::READ; }
 };
 
 template <>
@@ -489,6 +586,11 @@ struct Authoriser<ZombieCmd>
     }
 
     static void paths(const ZombieCmd& command, std::vector<std::string>& paths) { select_all_paths(command, paths); }
+
+    static Allowed required(const ZombieCmd&) {
+        // Todo[MB]: Check the correct choice for Zombie related commands
+        return Allowed::READ;
+    }
 };
 
 template <typename... COMMANDS>
@@ -568,6 +670,11 @@ struct Authoriser<GroupCTSCmd>
         for (auto&& cmd : command.cmdVec()) {
             Apply_t::to(cmd, [&](auto&& c) { accumulate_paths(c, paths); });
         }
+    }
+
+    static Allowed required(const GroupCTSCmd& command) {
+        // Todo[MB]: Confirm that groups are always allowed, since each individual commands will be checked anyway
+        return Allowed::READ | Allowed::WRITE | Allowed::EXECUTE | Allowed::OWNER;
     }
 };
 
