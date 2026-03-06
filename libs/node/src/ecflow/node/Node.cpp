@@ -345,10 +345,19 @@ void Node::begin() {
 }
 
 void Node::requeue(Requeue_args& args) {
+    requeue(args, ecf::UnrestrictedAuthorisationContext{});
+}
+
+void Node::requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) {
 #ifdef DEBUG_REQUEUE
     LOG(Log::DBG, "      Node::requeue() " << absNodePath() << " resetRepeats = " << args.resetRepeats_);
 #endif
     // Note: we don't reset verify attributes as they record state stat's
+
+    if (!authorisation.allows(this->absNodePath(), Allowed::EXECUTE)) {
+        // User not authorised to requeue this node
+        return;
+    }
 
     if (!mirrors_.empty()) {
         // In case mirror attributes are available, the node state becomes UNKNOWN

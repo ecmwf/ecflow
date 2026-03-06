@@ -20,7 +20,9 @@ Identity identify(const Cmd_ptr& cmd) {
         if (user_cmd->is_custom_user()) {
             return ecf::Identity::make_custom_user(user_cmd->user(), user_cmd->passwd());
         }
-        return ecf::Identity::make_user(user_cmd->user(), user_cmd->passwd());
+        else {
+            return ecf::Identity::make_user(user_cmd->user(), user_cmd->passwd());
+        }
     }
     if (auto task_cmd = dynamic_cast<TaskCmd*>(cmd.get()); task_cmd != nullptr) {
         return ecf::Identity::make_task(

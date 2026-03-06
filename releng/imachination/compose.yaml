@@ -15,7 +15,7 @@ services:
 
   authotron:
     hostname: authotron
-    image: eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.5
+    image: eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.8
     ports:
       - "8080:8080"
     volumes:

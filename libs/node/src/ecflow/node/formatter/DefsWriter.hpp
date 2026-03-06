@@ -11,6 +11,10 @@
 #ifndef ecflow_node_formatter_DefsWriter_HPP
 #define ecflow_node_formatter_DefsWriter_HPP
 
+#include <memory>
+
+#include <ecflow/base/Authorisation.hpp>
+
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
@@ -38,7 +42,7 @@ struct Style
     Style(PrintStyle::Type_t s)
         : selected_(s) {}
 
-    PrintStyle::Type_t selected() { return selected_; }
+    PrintStyle::Type_t selected() const { return selected_; }
 
     template <PrintStyle::Type_t... Args>
     bool is_one_of() const {
@@ -66,30 +70,33 @@ struct Format
     uint32_t indentation_spaces() const { return indentation_width * indentation_level; }
 };
 
-struct Context
+struct FormatContext
 {
     Style style;
     Format format;
+    const AuthorisationContext* authorisation;
 
-    static Context make_for(PrintStyle::Type_t style) {
+    static FormatContext make_for(PrintStyle::Type_t style) { return make_for(style, nullptr); }
+
+    static FormatContext make_for(PrintStyle::Type_t style, const AuthorisationContext* authorisation) {
         switch (style) {
             case PrintStyle::DEFS:
-                return Context{Style{PrintStyle::DEFS}, Format{true, 2, 0}};
+                return FormatContext{Style{PrintStyle::DEFS}, Format{true, 2, 0}, authorisation};
             case PrintStyle::STATE:
-                return Context{Style{PrintStyle::STATE}, Format{false, 0, 0}};
+                return FormatContext{Style{PrintStyle::STATE}, Format{false, 0, 0}, authorisation};
             case PrintStyle::NET:
-                return Context{Style{PrintStyle::NET}, Format{false, 0, 0}};
+                return FormatContext{Style{PrintStyle::NET}, Format{false, 0, 0}, authorisation};
             case PrintStyle::MIGRATE:
-                return Context{Style{PrintStyle::MIGRATE}, Format{false, 0, 0}};
+                return FormatContext{Style{PrintStyle::MIGRATE}, Format{false, 0, 0}, authorisation};
             default:
-                return Context{Style{PrintStyle::NOTHING}, Format{true, 2, 0}};
+                return FormatContext{Style{PrintStyle::NOTHING}, Format{true, 2, 0}, authorisation};
         }
     }
 };
 
 struct Indent
 {
-    Indent(Context& ctx)
+    Indent(FormatContext& ctx)
         : ctx_(ctx) {
         ctx_.format.increase_indentation();
     }
@@ -107,7 +114,7 @@ struct Indent
     }
 
 private:
-    Context& ctx_;
+    FormatContext& ctx_;
 };
 
 /* ************************************************************************** */
@@ -128,7 +135,7 @@ struct Writer
 namespace detail {
 
 template <typename Stream, typename T>
-bool write_ast_derived_type(Stream& output, const Ast* root, Context& ctx) {
+bool write_ast_derived_type(Stream& output, const Ast* root, FormatContext& ctx) {
     if (auto x = dynamic_cast<const T*>(root); x) {
         Writer<T, Stream>::write(output, *x, ctx);
         return true;
@@ -137,12 +144,12 @@ bool write_ast_derived_type(Stream& output, const Ast* root, Context& ctx) {
 }
 
 template <typename Stream, typename... T>
-void write_ast_derived_types(Stream& output, const Ast* root, Context& ctx) {
+void write_ast_derived_types(Stream& output, const Ast* root, FormatContext& ctx) {
     (write_ast_derived_type<Stream, T>(output, root, ctx) || ...);
 }
 
 template <typename Stream>
-void write_ast_type(Stream& output, const Ast* root, Context& ctx) {
+void write_ast_type(Stream& output, const Ast* root, FormatContext& ctx) {
     write_ast_derived_types<Stream,
                             AstTop,
                             AstNot,
@@ -175,13 +182,15 @@ void write_ast_type(Stream& output, const Ast* root, Context& ctx) {
 template <typename Stream>
 struct Writer<Ast, Stream>
 {
-    static void write(Stream& output, const Ast& item, Context& ctx) { detail::write_ast_type(output, &item, ctx); }
+    static void write(Stream& output, const Ast& item, FormatContext& ctx) {
+        detail::write_ast_type(output, &item, ctx);
+    }
 };
 
 template <typename Stream>
 struct Writer<AstTop, Stream>
 {
-    static void write(Stream& output, const AstTop& item, Context& ctx) {
+    static void write(Stream& output, const AstTop& item, FormatContext& ctx) {
         // taken from AstTop::print(std::string& os) const
 
         Indent l1(ctx);
@@ -197,7 +206,7 @@ struct Writer<AstTop, Stream>
 template <typename Stream>
 struct Writer<AstRoot, Stream>
 {
-    static void write(Stream& output, const AstRoot& item, Context& ctx) {
+    static void write(Stream& output, const AstRoot& item, FormatContext& ctx) {
         // taken from AstRoot::print(std::string& os) const
 
         if (const auto* left = item.left(); left) {
@@ -213,7 +222,7 @@ struct Writer<AstRoot, Stream>
 template <typename Stream>
 struct Writer<AstNot, Stream>
 {
-    static void write(Stream& output, const AstNot& item, Context& ctx) {
+    static void write(Stream& output, const AstNot& item, FormatContext& ctx) {
         // taken from AstNot::print(std::string& os) const
 
         Indent l1(ctx);
@@ -240,7 +249,7 @@ struct Writer<AstNot, Stream>
 template <typename Stream>
 struct Writer<AstPlus, Stream>
 {
-    static void write(Stream& output, const AstPlus& item, Context& ctx) {
+    static void write(Stream& output, const AstPlus& item, FormatContext& ctx) {
         // taken from AstPlus::print(std::string& os) const
 
         Indent l1(ctx);
@@ -270,7 +279,7 @@ struct Writer<AstPlus, Stream>
 template <typename Stream>
 struct Writer<AstMinus, Stream>
 {
-    static void write(Stream& output, const AstMinus& item, Context& ctx) {
+    static void write(Stream& output, const AstMinus& item, FormatContext& ctx) {
         // taken from AstMinus::print(std::string& os) const
 
         Indent l1(ctx);
@@ -300,7 +309,7 @@ struct Writer<AstMinus, Stream>
 template <typename Stream>
 struct Writer<AstDivide, Stream>
 {
-    static void write(Stream& output, const AstDivide& item, Context& ctx) {
+    static void write(Stream& output, const AstDivide& item, FormatContext& ctx) {
         // taken from AstDivide::print(std::string& os) const
 
         Indent l1(ctx);
@@ -330,7 +339,7 @@ struct Writer<AstDivide, Stream>
 template <typename Stream>
 struct Writer<AstMultiply, Stream>
 {
-    static void write(Stream& output, const AstMultiply& item, Context& ctx) {
+    static void write(Stream& output, const AstMultiply& item, FormatContext& ctx) {
         // taken from AstMultiply::print(std::string& os) const
 
         Indent l1(ctx);
@@ -360,7 +369,7 @@ struct Writer<AstMultiply, Stream>
 template <typename Stream>
 struct Writer<AstModulo, Stream>
 {
-    static void write(Stream& output, const AstModulo& item, Context& ctx) {
+    static void write(Stream& output, const AstModulo& item, FormatContext& ctx) {
         // taken from AstModulo::print(std::string& os) const
 
         Indent l1(ctx);
@@ -390,7 +399,7 @@ struct Writer<AstModulo, Stream>
 template <typename Stream>
 struct Writer<AstAnd, Stream>
 {
-    static void write(Stream& output, const AstAnd& item, Context& ctx) {
+    static void write(Stream& output, const AstAnd& item, FormatContext& ctx) {
         // taken from AstAnd::print(std::string& os) const
 
         Indent l1(ctx);
@@ -420,7 +429,7 @@ struct Writer<AstAnd, Stream>
 template <typename Stream>
 struct Writer<AstOr, Stream>
 {
-    static void write(Stream& output, const AstOr& item, Context& ctx) {
+    static void write(Stream& output, const AstOr& item, FormatContext& ctx) {
         // taken from AstOr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -450,7 +459,7 @@ struct Writer<AstOr, Stream>
 template <typename Stream>
 struct Writer<AstEqual, Stream>
 {
-    static void write(Stream& output, const AstEqual& item, Context& ctx) {
+    static void write(Stream& output, const AstEqual& item, FormatContext& ctx) {
         // taken from AstEqual::print(std::string& os) const
 
         Indent l1(ctx);
@@ -480,7 +489,7 @@ struct Writer<AstEqual, Stream>
 template <typename Stream>
 struct Writer<AstNotEqual, Stream>
 {
-    static void write(Stream& output, const AstNotEqual& item, Context& ctx) {
+    static void write(Stream& output, const AstNotEqual& item, FormatContext& ctx) {
         // taken from AstNotEqual::print(std::string& os) const
 
         Indent l1(ctx);
@@ -510,7 +519,7 @@ struct Writer<AstNotEqual, Stream>
 template <typename Stream>
 struct Writer<AstLessEqual, Stream>
 {
-    static void write(Stream& output, const AstLessEqual& item, Context& ctx) {
+    static void write(Stream& output, const AstLessEqual& item, FormatContext& ctx) {
         // taken from AstLessEqual::print(std::string& os) const
 
         Indent l1(ctx);
@@ -541,7 +550,7 @@ struct Writer<AstLessEqual, Stream>
 template <typename Stream>
 struct Writer<AstGreaterEqual, Stream>
 {
-    static void write(Stream& output, const AstGreaterEqual& item, Context& ctx) {
+    static void write(Stream& output, const AstGreaterEqual& item, FormatContext& ctx) {
         // taken from AstGreaterEqual::print(std::string& os) const
 
         Indent l1(ctx);
@@ -571,7 +580,7 @@ struct Writer<AstGreaterEqual, Stream>
 template <typename Stream>
 struct Writer<AstGreaterThan, Stream>
 {
-    static void write(Stream& output, const AstGreaterThan& item, Context& ctx) {
+    static void write(Stream& output, const AstGreaterThan& item, FormatContext& ctx) {
         // taken from AstGreaterThan::print(std::string& os) const
 
         Indent l1(ctx);
@@ -601,7 +610,7 @@ struct Writer<AstGreaterThan, Stream>
 template <typename Stream>
 struct Writer<AstLessThan, Stream>
 {
-    static void write(Stream& output, const AstLessThan& item, Context& ctx) {
+    static void write(Stream& output, const AstLessThan& item, FormatContext& ctx) {
         // taken from AstLessThan::print(std::string& os) const
 
         Indent l1(ctx);
@@ -631,7 +640,7 @@ struct Writer<AstLessThan, Stream>
 template <typename Stream>
 struct Writer<AstFunction, Stream>
 {
-    static void write(Stream& output, const AstFunction& item, Context& ctx) {
+    static void write(Stream& output, const AstFunction& item, FormatContext& ctx) {
         // taken from AstFunction::print(std::string& os) const
 
         Indent l1(ctx);
@@ -662,7 +671,7 @@ struct Writer<AstFunction, Stream>
 template <typename Stream>
 struct Writer<AstInteger, Stream>
 {
-    static void write(Stream& output, const AstInteger& item, Context& ctx) {
+    static void write(Stream& output, const AstInteger& item, FormatContext& ctx) {
         // taken from AstInteger::print(std::string& os) const
 
         Indent l1(ctx);
@@ -683,7 +692,7 @@ struct Writer<AstInteger, Stream>
 template <typename Stream>
 struct Writer<AstInstant, Stream>
 {
-    static void write(Stream& output, const AstInstant& item, Context& ctx) {
+    static void write(Stream& output, const AstInstant& item, FormatContext& ctx) {
         // taken from AstInstant::print(std::string& os) const
 
         Indent l1(ctx);
@@ -704,7 +713,7 @@ struct Writer<AstInstant, Stream>
 template <typename Stream>
 struct Writer<AstNodeState, Stream>
 {
-    static void write(Stream& output, const AstNodeState& item, Context& ctx) {
+    static void write(Stream& output, const AstNodeState& item, FormatContext& ctx) {
         // taken from AstNodeState::print(std::string& os) const
 
         Indent l1(ctx);
@@ -728,7 +737,7 @@ struct Writer<AstNodeState, Stream>
 template <typename Stream>
 struct Writer<AstEventState, Stream>
 {
-    static void write(Stream& output, const AstEventState& item, Context& ctx) {
+    static void write(Stream& output, const AstEventState& item, FormatContext& ctx) {
         // taken from AstEventState::print(std::string& os) const
 
         Indent l1(ctx);
@@ -749,7 +758,7 @@ struct Writer<AstEventState, Stream>
 template <typename Stream>
 struct Writer<AstNode, Stream>
 {
-    static void write(Stream& output, const AstNode& item, Context& ctx) {
+    static void write(Stream& output, const AstNode& item, FormatContext& ctx) {
         // taken from AstNode::print(std::string& os) const
 
         Indent l1(ctx);
@@ -786,7 +795,7 @@ struct Writer<AstNode, Stream>
 template <typename Stream>
 struct Writer<AstFlag, Stream>
 {
-    static void write(Stream& output, const AstFlag& item, Context& ctx) {
+    static void write(Stream& output, const AstFlag& item, FormatContext& ctx) {
         // taken from AstFlag::print(std::string& os) const
 
         Indent l1(ctx);
@@ -821,7 +830,7 @@ struct Writer<AstFlag, Stream>
 template <typename Stream>
 struct Writer<AstVariable, Stream>
 {
-    static void write(Stream& output, const AstVariable& item, Context& ctx) {
+    static void write(Stream& output, const AstVariable& item, FormatContext& ctx) {
         // taken from AstVariable::print(std::string& os) const
 
         Indent l1(ctx);
@@ -859,7 +868,7 @@ struct Writer<AstVariable, Stream>
 template <typename Stream>
 struct Writer<AstParentVariable, Stream>
 {
-    static void write(Stream& output, const AstParentVariable& item, Context& ctx) {
+    static void write(Stream& output, const AstParentVariable& item, FormatContext& ctx) {
         // taken from AstParentVariable::print(std::string& os) const
 
         Indent l1(ctx);
@@ -893,8 +902,11 @@ struct Writer<AstParentVariable, Stream>
 template <typename Stream>
 struct Writer<PartExpression, Stream>
 {
-    static void
-    write(Stream& output, const PartExpression& item, Context& ctx, const std::string& expression_type, bool is_free) {
+    static void write(Stream& output,
+                      const PartExpression& item,
+                      FormatContext& ctx,
+                      const std::string& expression_type,
+                      bool is_free) {
         // taken from PartExpression::print(std::string& os, const std::string& exprType, bool isFree) const
 
         Indent l1(ctx);
@@ -908,7 +920,7 @@ struct Writer<PartExpression, Stream>
 
     static void writeln(Stream& output,
                         const PartExpression& item,
-                        Context& ctx,
+                        FormatContext& ctx,
                         const std::string& expression_type,
                         bool is_free) {
         output << expression_type;
@@ -941,7 +953,7 @@ struct Writer<PartExpression, Stream>
 template <typename Stream>
 struct Writer<Expression, Stream>
 {
-    static void write(Stream& output, const Expression& item, Context& ctx, const std::string& expression_type) {
+    static void write(Stream& output, const Expression& item, FormatContext& ctx, const std::string& expression_type) {
         // taken from Expression::print(std::string& os, const std::string& exprType) const
 
         for (const auto& part : item.expr()) {
@@ -957,7 +969,7 @@ struct Writer<Expression, Stream>
 template <typename Stream>
 struct Writer<AutoArchiveAttr, Stream>
 {
-    static void write(Stream& output, const AutoArchiveAttr& item, Context& ctx) {
+    static void write(Stream& output, const AutoArchiveAttr& item, FormatContext& ctx) {
         // taken from AutoArchiveAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -975,7 +987,7 @@ struct Writer<AutoArchiveAttr, Stream>
 template <typename Stream>
 struct Writer<AutoCancelAttr, Stream>
 {
-    static void write(Stream& output, const AutoCancelAttr& item, Context& ctx) {
+    static void write(Stream& output, const AutoCancelAttr& item, FormatContext& ctx) {
         // taken from AutoCancelAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -992,7 +1004,7 @@ struct Writer<AutoCancelAttr, Stream>
 template <typename Stream>
 struct Writer<AutoRestoreAttr, Stream>
 {
-    static void write(Stream& output, const AutoRestoreAttr& item, Context& ctx) {
+    static void write(Stream& output, const AutoRestoreAttr& item, FormatContext& ctx) {
         // taken from AutoRestoreAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1009,7 +1021,7 @@ struct Writer<AutoRestoreAttr, Stream>
 template <typename Stream>
 struct Writer<AvisoAttr, Stream>
 {
-    static void write(Stream& output, const AvisoAttr& item, Context& ctx) {
+    static void write(Stream& output, const AvisoAttr& item, FormatContext& ctx) {
         // taken from AvisoAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1027,7 +1039,7 @@ struct Writer<AvisoAttr, Stream>
 template <typename Stream>
 struct Writer<ClockAttr, Stream>
 {
-    static void write(Stream& output, const ClockAttr& item, Context& ctx) {
+    static void write(Stream& output, const ClockAttr& item, FormatContext& ctx) {
         // taken from ClockAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1044,7 +1056,7 @@ struct Writer<ClockAttr, Stream>
 template <typename Stream>
 struct Writer<CronAttr, Stream>
 {
-    static void write(Stream& output, const CronAttr& item, Context& ctx) {
+    static void write(Stream& output, const CronAttr& item, FormatContext& ctx) {
         // taken from CronAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1056,7 +1068,7 @@ struct Writer<CronAttr, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const CronAttr& item, Context& ctx) {
+    static void writeln(Stream& output, const CronAttr& item, FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             item.time_series().write_state(output.buf, item.isSetFree());
@@ -1067,7 +1079,7 @@ struct Writer<CronAttr, Stream>
 template <typename Stream>
 struct Writer<DateAttr, Stream>
 {
-    static void write(Stream& output, const DateAttr& item, Context& ctx) {
+    static void write(Stream& output, const DateAttr& item, FormatContext& ctx) {
         // taken from DayAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1079,7 +1091,7 @@ struct Writer<DateAttr, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const DateAttr& item, Context& ctx) {
+    static void writeln(Stream& output, const DateAttr& item, FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.isSetFree()) {
@@ -1092,7 +1104,7 @@ struct Writer<DateAttr, Stream>
 template <typename Stream>
 struct Writer<DayAttr, Stream>
 {
-    static void write(Stream& output, const DayAttr& item, Context& ctx) {
+    static void write(Stream& output, const DayAttr& item, FormatContext& ctx) {
         // taken from DayAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1104,7 +1116,7 @@ struct Writer<DayAttr, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const DayAttr& item, Context& ctx) {
+    static void writeln(Stream& output, const DayAttr& item, FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             bool added_hash = false;
@@ -1134,7 +1146,7 @@ struct Writer<DayAttr, Stream>
 template <typename Stream>
 struct Writer<DState::State, Stream>
 {
-    static void write(Stream& output, const DState::State& item, Context& ctx) {
+    static void write(Stream& output, const DState::State& item, FormatContext& ctx) {
 
         if (item != DState::default_state()) {
             Indent l1(ctx);
@@ -1156,7 +1168,7 @@ struct Writer<DState::State, Stream>
 template <typename Stream>
 struct Writer<Event, Stream>
 {
-    static void write(Stream& output, const Event& item, Context& ctx) {
+    static void write(Stream& output, const Event& item, FormatContext& ctx) {
         // taken from Event::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1168,7 +1180,7 @@ struct Writer<Event, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const Event& item, Context& ctx) {
+    static void writeln(Stream& output, const Event& item, FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.initial_value() != item.value()) { // initial value and value differ
@@ -1187,7 +1199,7 @@ struct Writer<Event, Stream>
 template <typename Stream>
 struct Writer<GenericAttr, Stream>
 {
-    static void write(Stream& output, const GenericAttr& item, Context& ctx) {
+    static void write(Stream& output, const GenericAttr& item, FormatContext& ctx) {
         // taken from GenericAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1204,7 +1216,7 @@ struct Writer<GenericAttr, Stream>
 template <typename Stream>
 struct Writer<InLimit, Stream>
 {
-    static void write(Stream& output, const InLimit& item, Context& ctx) {
+    static void write(Stream& output, const InLimit& item, FormatContext& ctx) {
         // taken from InLimit::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1216,7 +1228,7 @@ struct Writer<InLimit, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const InLimit& item, const Context& ctx) {
+    static void writeln(Stream& output, const InLimit& item, const FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
 
@@ -1242,7 +1254,7 @@ struct Writer<InLimit, Stream>
 template <typename Stream>
 struct Writer<Label, Stream>
 {
-    static void write(Stream& output, const Label& item, Context& ctx) {
+    static void write(Stream& output, const Label& item, FormatContext& ctx) {
         // taken from Meter::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1254,7 +1266,7 @@ struct Writer<Label, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const Label& item, const Context& ctx) {
+    static void writeln(Stream& output, const Label& item, const FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (!item.new_value().empty()) {
@@ -1278,7 +1290,7 @@ struct Writer<Label, Stream>
 template <typename Stream>
 struct Writer<LateAttr, Stream>
 {
-    static void write(Stream& output, const LateAttr& item, Context& ctx) {
+    static void write(Stream& output, const LateAttr& item, FormatContext& ctx) {
         // taken from LateAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1290,7 +1302,7 @@ struct Writer<LateAttr, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const LateAttr& item, const Context& ctx) {
+    static void writeln(Stream& output, const LateAttr& item, const FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.isLate()) {
@@ -1303,7 +1315,7 @@ struct Writer<LateAttr, Stream>
 template <typename Stream>
 struct Writer<Limit, Stream>
 {
-    static void write(Stream& output, const Limit& item, Context& ctx) {
+    static void write(Stream& output, const Limit& item, FormatContext& ctx) {
         // taken from Limit::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1314,7 +1326,7 @@ struct Writer<Limit, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const Limit& item, const Context& ctx) {
+    static void writeln(Stream& output, const Limit& item, const FormatContext& ctx) {
         item.write(output.buf);
 
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
@@ -1333,7 +1345,7 @@ struct Writer<Limit, Stream>
 template <typename Stream>
 struct Writer<Meter, Stream>
 {
-    static void write(Stream& output, const Meter& item, Context& ctx) {
+    static void write(Stream& output, const Meter& item, FormatContext& ctx) {
         // taken from Meter::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1345,7 +1357,7 @@ struct Writer<Meter, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const Meter& item, const Context& ctx) {
+    static void writeln(Stream& output, const Meter& item, const FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             if (item.value() != item.min()) {
@@ -1359,7 +1371,7 @@ struct Writer<Meter, Stream>
 template <typename Stream>
 struct Writer<MirrorAttr, Stream>
 {
-    static void write(Stream& output, const MirrorAttr& item, Context& ctx) {
+    static void write(Stream& output, const MirrorAttr& item, FormatContext& ctx) {
         // taken from MirrorAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1377,7 +1389,7 @@ struct Writer<MirrorAttr, Stream>
 template <typename Stream>
 struct Writer<QueueAttr, Stream>
 {
-    static void write(Stream& output, const QueueAttr& item, Context& ctx) {
+    static void write(Stream& output, const QueueAttr& item, FormatContext& ctx) {
         // taken from QueueAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1389,7 +1401,7 @@ struct Writer<QueueAttr, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const QueueAttr& item, const Context& ctx) {
+    static void writeln(Stream& output, const QueueAttr& item, const FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             output << " # ";
@@ -1405,7 +1417,7 @@ struct Writer<QueueAttr, Stream>
 template <typename Stream>
 struct Writer<RepeatInteger, Stream>
 {
-    static void write(Stream& output, const RepeatInteger& item, Context& ctx) {
+    static void write(Stream& output, const RepeatInteger& item, FormatContext& ctx) {
         // taken from RepeatInteger::write(std::string& os) const
 
         Indent l1(ctx);
@@ -1417,7 +1429,7 @@ struct Writer<RepeatInteger, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const RepeatInteger& item, const Context& ctx) {
+    static void writeln(Stream& output, const RepeatInteger& item, const FormatContext& ctx) {
         output << "repeat integer ";
         output << item.name();
         output << " ";
@@ -1439,7 +1451,7 @@ struct Writer<RepeatInteger, Stream>
 template <typename Stream>
 struct Writer<RepeatDate, Stream>
 {
-    static void write(Stream& output, const RepeatDate& item, Context& ctx) {
+    static void write(Stream& output, const RepeatDate& item, FormatContext& ctx) {
         // taken from RepeatDate::write(std::string& os) const
 
         Indent l1(ctx);
@@ -1451,7 +1463,7 @@ struct Writer<RepeatDate, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const RepeatDate& item, const Context& ctx) {
+    static void writeln(Stream& output, const RepeatDate& item, const FormatContext& ctx) {
         output << "repeat date ";
         output << item.name();
         output << " ";
@@ -1471,7 +1483,7 @@ struct Writer<RepeatDate, Stream>
 template <typename Stream>
 struct Writer<RepeatDateList, Stream>
 {
-    static void write(Stream& output, const RepeatDateList& item, Context& ctx) {
+    static void write(Stream& output, const RepeatDateList& item, FormatContext& ctx) {
         // taken from RepeatDateList::write(std::string& os) const
 
         Indent l1(ctx);
@@ -1482,7 +1494,7 @@ struct Writer<RepeatDateList, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const RepeatDateList& item, const Context& ctx) {
+    static void writeln(Stream& output, const RepeatDateList& item, const FormatContext& ctx) {
         output << "repeat datelist ";
         output << item.name();
         for (auto date : item.values()) {
@@ -1500,7 +1512,7 @@ struct Writer<RepeatDateList, Stream>
 template <typename Stream>
 struct Writer<RepeatDateTime, Stream>
 {
-    static void write(Stream& output, const RepeatDateTime& item, Context& ctx) {
+    static void write(Stream& output, const RepeatDateTime& item, FormatContext& ctx) {
         // taken from RepeatDateTime::write(std::string& os) const
 
         Indent l1(ctx);
@@ -1512,7 +1524,7 @@ struct Writer<RepeatDateTime, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const RepeatDateTime& item, Context& ctx) {
+    static void writeln(Stream& output, const RepeatDateTime& item, FormatContext& ctx) {
         output << "repeat datetime ";
         output << item.name();
         output << " ";
@@ -1534,7 +1546,7 @@ template <typename Stream>
 struct Writer<RepeatEnumerated, Stream>
 {
     /* RepeatEnumerated */
-    static void write(Stream& output, const RepeatEnumerated& item, Context& ctx) {
+    static void write(Stream& output, const RepeatEnumerated& item, FormatContext& ctx) {
         // taken from RepeatEnumerated::write(std::string& os) const
 
         Indent l1(ctx);
@@ -1546,7 +1558,7 @@ struct Writer<RepeatEnumerated, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const RepeatEnumerated& item, const Context& ctx) {
+    static void writeln(Stream& output, const RepeatEnumerated& item, const FormatContext& ctx) {
         output << "repeat enumerated ";
         output << item.name();
         for (const auto& value : item.values()) {
@@ -1565,7 +1577,7 @@ struct Writer<RepeatEnumerated, Stream>
 template <typename Stream>
 struct Writer<RepeatString, Stream>
 {
-    static void write(Stream& output, const RepeatString& item, Context& ctx) {
+    static void write(Stream& output, const RepeatString& item, FormatContext& ctx) {
         // taken from RepeatString::write(std::string& os) const
 
         Indent l1(ctx);
@@ -1577,7 +1589,7 @@ struct Writer<RepeatString, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const RepeatString& item, const Context& ctx) {
+    static void writeln(Stream& output, const RepeatString& item, const FormatContext& ctx) {
         output << "repeat string ";
         output << item.name();
         for (const std::string& s : item.values()) {
@@ -1596,7 +1608,7 @@ struct Writer<RepeatString, Stream>
 template <typename Stream>
 struct Writer<RepeatDay, Stream>
 {
-    static void write(Stream& output, const RepeatDay& item, Context& ctx) {
+    static void write(Stream& output, const RepeatDay& item, FormatContext& ctx) {
         // taken from RepeatDay::write(std::string& os) const
 
         Indent l1(ctx);
@@ -1617,7 +1629,7 @@ struct Writer<RepeatDay, Stream>
 template <typename Stream>
 struct Writer<RepeatBase, Stream>
 {
-    static void write(Stream& output, const RepeatBase& item, Context& ctx) {
+    static void write(Stream& output, const RepeatBase& item, FormatContext& ctx) {
         // taken from Repeat::print(std::string& os) const
 
         if (auto r = dynamic_cast<const RepeatInteger*>(&item)) {
@@ -1650,7 +1662,7 @@ struct Writer<RepeatBase, Stream>
 template <typename Stream>
 struct Writer<Repeat, Stream>
 {
-    static void write(Stream& output, const Repeat& item, Context& ctx) {
+    static void write(Stream& output, const Repeat& item, FormatContext& ctx) {
         // taken from Repeat::print(std::string& os) const
 
         const RepeatBase* base = item.repeatBase();
@@ -1663,7 +1675,7 @@ struct Writer<Repeat, Stream>
 template <typename Stream>
 struct Writer<TimeAttr, Stream>
 {
-    static void write(Stream& output, const TimeAttr& item, Context& ctx) {
+    static void write(Stream& output, const TimeAttr& item, FormatContext& ctx) {
         // taken from TimeAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1674,7 +1686,7 @@ struct Writer<TimeAttr, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const TimeAttr& item, const Context& ctx) {
+    static void writeln(Stream& output, const TimeAttr& item, const FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             item.time_series().write_state(output.buf, item.isSetFree());
@@ -1685,7 +1697,7 @@ struct Writer<TimeAttr, Stream>
 template <typename Stream>
 struct Writer<TodayAttr, Stream>
 {
-    static void write(Stream& output, const TodayAttr& item, Context& ctx) {
+    static void write(Stream& output, const TodayAttr& item, FormatContext& ctx) {
         // taken from TodayAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1697,7 +1709,7 @@ struct Writer<TodayAttr, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const TodayAttr& item, const Context& ctx) {
+    static void writeln(Stream& output, const TodayAttr& item, const FormatContext& ctx) {
         item.write(output.buf);
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             item.time_series().write_state(output.buf, item.isSetFree());
@@ -1719,7 +1731,7 @@ struct Writer<Variable, Stream>
 
     static void write(Stream& output,
                       const Variable& item,
-                      Context& ctx,
+                      FormatContext& ctx,
                       const std::string& prefix = empty,
                       const std::string& suffix = empty) {
         // taken from Variable::print(std::string& os) const
@@ -1747,7 +1759,7 @@ struct Writer<Variable, Stream>
 template <typename Stream>
 struct Writer<VerifyAttr, Stream>
 {
-    static void write(Stream& output, const VerifyAttr& item, Context& ctx) {
+    static void write(Stream& output, const VerifyAttr& item, FormatContext& ctx) {
         // taken from VerifyAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1759,7 +1771,7 @@ struct Writer<VerifyAttr, Stream>
         output << "\n";
     }
 
-    static void writeln(Stream& output, const VerifyAttr& item, const Context& ctx) {
+    static void writeln(Stream& output, const VerifyAttr& item, const FormatContext& ctx) {
         output << item.toString();
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>()) {
             output << " # ";
@@ -1771,7 +1783,7 @@ struct Writer<VerifyAttr, Stream>
 template <typename Stream>
 struct Writer<ZombieAttr, Stream>
 {
-    static void write(Stream& output, const ZombieAttr& item, Context& ctx) {
+    static void write(Stream& output, const ZombieAttr& item, FormatContext& ctx) {
         // taken from ZombieAttr::print(std::string& os) const
 
         Indent l1(ctx);
@@ -1793,8 +1805,22 @@ struct Writer<ZombieAttr, Stream>
 template <typename Stream>
 struct Writer<Alias, Stream>
 {
-    static void write(Stream& output, const Alias& item, Context& ctx) {
+    static void write(Stream& output, const Alias& item, FormatContext& ctx) {
         // taken from Alias::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // An Alias can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            // Check if allowed accress to this Alias
+            if (const auto* service = ctx.authorisation; service) {
+                auto allowed = service->allows(item.absNodePath(), Allowed::READ);
+                if (!allowed) {
+                    // User is not allowed to read this Alias, so we skip writing it
+                    return;
+                }
+            }
+        }
 
         Indent l1(ctx);
 
@@ -1818,8 +1844,22 @@ struct Writer<Alias, Stream>
 template <typename Stream>
 struct Writer<Family, Stream>
 {
-    static void write(Stream& output, const Family& item, Context& ctx) {
+    static void write(Stream& output, const Family& item, FormatContext& ctx) {
         // taken from Family::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Family can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            // Check if allowed accress to this Family
+            if (const auto* service = ctx.authorisation; service) {
+                auto allowed = service->allows(item.absNodePath(), Allowed::READ);
+                if (!allowed) {
+                    // User is not allowed to read this Family, so we skip writing it
+                    return;
+                }
+            }
+        }
 
         Indent l1(ctx);
 
@@ -1850,8 +1890,22 @@ struct Writer<Family, Stream>
 template <typename Stream>
 struct Writer<Task, Stream>
 {
-    static void write(Stream& output, const Task& item, Context& ctx) {
+    static void write(Stream& output, const Task& item, FormatContext& ctx) {
         // taken from Task::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Task can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            // Check if allowed accress to this Task
+            if (const auto* service = ctx.authorisation; service) {
+                auto allowed = service->allows(item.absNodePath(), Allowed::READ);
+                if (!allowed) {
+                    // User is not allowed to read this Task, so we skip writing it
+                    return;
+                }
+            }
+        }
 
         Indent l1(ctx);
 
@@ -1889,7 +1943,7 @@ struct Writer<Task, Stream>
 template <typename Stream>
 struct Writer<const Node*, Stream>
 {
-    static void write(Stream& output, const Node* item, Context& ctx) {
+    static void write(Stream& output, const Node* item, FormatContext& ctx) {
 
         // Note: here we must use dynamic_cast to determine the type of the node
         // This is because we are using a templated Writer, and we need to call the correct
@@ -1916,7 +1970,7 @@ struct Writer<const Node*, Stream>
 template <typename Stream>
 struct Writer<Node*, Stream>
 {
-    static void write(Stream& output, Node* item, Context& ctx) {
+    static void write(Stream& output, Node* item, FormatContext& ctx) {
         return Writer<const Node*, Stream>::write(output, item, ctx);
     }
 };
@@ -1924,7 +1978,7 @@ struct Writer<Node*, Stream>
 template <typename Stream>
 struct Writer<std::shared_ptr<Node>, Stream>
 {
-    static void write(Stream& output, const std::shared_ptr<Node>& item, Context& ctx) {
+    static void write(Stream& output, const std::shared_ptr<Node>& item, FormatContext& ctx) {
         return Writer<const Node*, Stream>::write(output, item.get(), ctx);
     }
 };
@@ -1932,7 +1986,7 @@ struct Writer<std::shared_ptr<Node>, Stream>
 template <typename Stream>
 struct Writer<Node, Stream>
 {
-    static void write(Stream& output, const Node& item, Context& ctx) {
+    static void write(Stream& output, const Node& item, FormatContext& ctx) {
         // taken from Node::print(std::string& os) const
 
         Writer<DState::State, Stream>::write(output, item.defStatus(), ctx);
@@ -2067,7 +2121,7 @@ struct Writer<Node, Stream>
 template <typename Stream>
 struct Writer<NodeContainer, Stream>
 {
-    static void write(Stream& output, const NodeContainer& item, Context& ctx) {
+    static void write(Stream& output, const NodeContainer& item, FormatContext& ctx) {
         // taken from NodeContainer::print(std::string& os) const
 
         for (const auto& node : item.nodeVec()) {
@@ -2098,8 +2152,22 @@ struct Writer<NodeContainer, Stream>
 template <typename Stream>
 struct Writer<Suite, Stream>
 {
-    static void write(Stream& output, const Suite& item, Context& ctx) {
+    static void write(Stream& output, const Suite& item, FormatContext& ctx) {
         // taken from Suite::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Suite can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            // Check if allowed accress to this Suite
+            if (const auto* service = ctx.authorisation; service) {
+                auto allowed = service->allows(item.absNodePath(), Allowed::READ);
+                if (!allowed) {
+                    // User is not allowed to read this Suite, so we skip writing it
+                    return;
+                }
+            }
+        }
 
         // Write the suite header
         output << "suite ";
@@ -2150,7 +2218,7 @@ struct Writer<Suite, Stream>
 template <typename Stream>
 struct Writer<Defs, Stream>
 {
-    static void write(Stream& output, const Defs& item, Context& ctx) {
+    static void write(Stream& output, const Defs& item, FormatContext& ctx) {
         // taken from Defs::print(std::string& os) const
 
         output << "#";
@@ -2189,7 +2257,7 @@ struct Writer<Defs, Stream>
     }
 
 private:
-    static void write_state(Stream& output, const Defs& item, Context& ctx) {
+    static void write_state(Stream& output, const Defs& item, FormatContext& ctx) {
         // taken from Defs::write_state(std::string& os) const
 
         // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
@@ -2287,22 +2355,48 @@ private:
 /* *** Write entry point **************************************************** */
 /* ************************************************************************** */
 
+///
+/// @brief Write an item to a buffer, using the specified context
+///
+/// @tparam T the type of item to write
+/// @param buffer the buffer to write to
+/// @param item the item to write
+/// @param ctx the context for writing
+///
 template <typename T>
-inline void write_t(std::string& buffer, const T& item, Context& ctx) {
+inline void write_t(std::string& buffer, const T& item, FormatContext& ctx) {
     buffer.reserve(1024 * 4); // Should be using a sensible default size for the buffer
     stringstreambuf output{buffer};
     implementation::Writer<T, stringstreambuf>::write(output, item, ctx);
 }
 
+///
+/// @brief Write an item to a stream, using the specified context
+///
+/// @tparam  Stream @tparam Stream the type of the output stream
+/// @tparam T the type of item to write
+/// @param buffer the buffer to write to
+/// @param item the item to write
+/// @param ctx the context for writing
+///
 template <typename Stream, typename T>
-inline void write_t(Stream& output, const T& item, Context& ctx) {
+inline void write_t(Stream& output, const T& item, FormatContext& ctx) {
     std::string buffer;
     write_t(buffer, item, ctx);
     output << buffer;
 }
 
+///
+/// @brief Convert an item to a string, using the specified context
+///
+/// @tparam T the type of item to write
+/// @param buffer the buffer to write to
+/// @param item the item to write
+/// @param ctx the context for writing
+/// @return the item as a string
+///
 template <typename T>
-inline std::string as_string(const T& item, Context& ctx) {
+inline std::string as_string(const T& item, FormatContext& ctx) {
     std::string buffer;
     write_t(buffer, item, ctx);
     return buffer;
@@ -2312,21 +2406,46 @@ inline std::string as_string(const T& item, Context& ctx) {
 /* *** Write entry point (with PrintStyle) ********************************** */
 /* ************************************************************************** */
 
+///
+/// @brief Write an expression to a buffer, using the specified PrintStyle and type of the expression
+///
+/// @param buffer the buffer to write to
+/// @param item the expression to write
+/// @param style the print style to use
+/// @param type the type of expression (either "trigger" or "complete")
+///
 inline void write_t(std::string& buffer, const Expression& item, PrintStyle::Type_t style, const std::string& type) {
     buffer.reserve(1024 * 4); // Should be using a sensible default size for the buffer
     stringstreambuf output{buffer};
-    auto ctx = Context::make_for(style);
+    auto ctx = FormatContext::make_for(style);
     implementation::Writer<Expression, stringstreambuf>::write(output, item, ctx, type);
 }
 
+///
+/// @brief Write an item to a buffer, using the specified PrintStyle
+///
+/// @tparam T the type of item to write
+/// @param buffer the buffer to write to
+/// @param item the item to write
+/// @param style the print style to use
+///
 template <typename T>
 inline void write_t(std::string& buffer, const T& item, PrintStyle::Type_t style) {
     buffer.reserve(1024 * 4); // Should be using a sensible default size for the buffer
     stringstreambuf output{buffer};
-    auto ctx = Context::make_for(style);
+    auto ctx = FormatContext::make_for(style);
     implementation::Writer<T, stringstreambuf>::write(output, item, ctx);
 }
 
+///
+/// @brief Write an item to an output stream, using the specified PrintStyle
+///
+/// @tparam Stream the type of the output stream
+/// @tparam T the type of item to write
+/// @param output the output stream
+/// @param item the item to write
+/// @param style the print style to use
+///
 template <typename Stream, typename T>
 inline void write_t(Stream& output, const T& item, PrintStyle::Type_t style) {
     std::string buffer;
@@ -2334,6 +2453,14 @@ inline void write_t(Stream& output, const T& item, PrintStyle::Type_t style) {
     output << buffer;
 }
 
+///
+/// @brief Convert an item to a string, using the specified PrintStyle
+///
+/// @tparam T the type of item to convert
+/// @param item the item to convert
+/// @param style the print style to use
+/// @return the item as a string
+///
 template <typename T>
 inline std::string as_string(const T& item, PrintStyle::Type_t style) {
     std::string buffer;
