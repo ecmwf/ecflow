@@ -22,10 +22,10 @@ class AbstractServer;
 //================================================================================
 class DefsCmd final : public ServerToClientCmd {
 public:
-    explicit DefsCmd(AbstractServer* as, bool save_edit_history = false);
+    explicit DefsCmd(const ecf::Identity& identity, AbstractServer* as, bool save_edit_history = false);
     DefsCmd() = default;
 
-    void init(AbstractServer* as, bool save_edit_history);
+    void init(const ecf::Identity& identity, AbstractServer* as, bool save_edit_history);
 
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;
     std::string print() const override;

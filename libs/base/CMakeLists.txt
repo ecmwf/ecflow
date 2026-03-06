@@ -28,7 +28,6 @@ set(test_srcs
   test/TestInLimitParsing.cpp
   test/TestLogCmd.cpp
   test/TestMeterCmd.cpp
-  test/TestPermissions.cpp
   test/TestProgramOptions.cpp
   test/TestQueryCmd.cpp
   test/TestQueueCmd.cpp

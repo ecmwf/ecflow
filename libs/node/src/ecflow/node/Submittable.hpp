@@ -58,7 +58,7 @@ public:
     /// there are multiple runs.  re-queue/begin() resets the try Number
     void reset() override;
     void begin() override;
-    void requeue(Requeue_args&) override;
+    void requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) override;
     bool run(JobsParam& jobsParam, bool force) override;
     void kill(const std::string& zombie_pid = "") override;
     void status() override;

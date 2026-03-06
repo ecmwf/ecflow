@@ -36,6 +36,12 @@ export ECF_CHECKOLD
 ECF_OUT=${ECF_HOST}.${ECF_PORT}.ecf.out
 export ECF_OUT
 
+# Change to the workspace directory.
+#
+# This is fundamental since the server_environment.cfg is expected to be in the current
+# working directory when the server starts, and it is used to configure.
+cd ${ECFLOW_WORKSPACE_DIR}
+
 nohup ${ECFLOW_INSTALL_DIR}/bin/ecflow_server \
       -d \
       --http \

@@ -13,10 +13,12 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <memory>
 
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
+#include "ecflow/base/Authorisation.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Version.hpp"
@@ -83,19 +85,22 @@ struct FormatContext
 {
     Style style;
     Format format;
+    const AuthorisationContext* authorisation;
 
-    static FormatContext make_for(PrintStyle::Type_t style) {
+    static FormatContext make_for(PrintStyle::Type_t style) { return make_for(style, nullptr); }
+
+    static FormatContext make_for(PrintStyle::Type_t style, const AuthorisationContext* authorisation) {
         switch (style) {
             case PrintStyle::DEFS:
-                return FormatContext{Style{PrintStyle::DEFS}, Format{true, 2, 0}};
+                return FormatContext{Style{PrintStyle::DEFS}, Format{true, 2, 0}, authorisation};
             case PrintStyle::STATE:
-                return FormatContext{Style{PrintStyle::STATE}, Format{false, 0, 0}};
+                return FormatContext{Style{PrintStyle::STATE}, Format{false, 0, 0}, authorisation};
             case PrintStyle::NET:
-                return FormatContext{Style{PrintStyle::NET}, Format{false, 0, 0}};
+                return FormatContext{Style{PrintStyle::NET}, Format{false, 0, 0}, authorisation};
             case PrintStyle::MIGRATE:
-                return FormatContext{Style{PrintStyle::MIGRATE}, Format{false, 0, 0}};
+                return FormatContext{Style{PrintStyle::MIGRATE}, Format{false, 0, 0}, authorisation};
             default:
-                return FormatContext{Style{PrintStyle::NOTHING}, Format{true, 2, 0}};
+                return FormatContext{Style{PrintStyle::NOTHING}, Format{true, 2, 0}, authorisation};
         }
     }
 };
@@ -1844,6 +1849,20 @@ struct Writer<Alias, Stream>
     static void write(Stream& output, const Alias& item, FormatContext& ctx) {
         // taken from Alias::print(std::string& os) const
 
+        if (auto* defs = item.defs(); defs) {
+            // An Alias can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            // Check if allowed accress to this Alias
+            if (const auto* service = ctx.authorisation; service) {
+                auto allowed = service->allows(item.absNodePath(), Allowed::READ);
+                if (!allowed) {
+                    // User is not allowed to read this Alias, so we skip writing it
+                    return;
+                }
+            }
+        }
+
         Indent l1(ctx);
 
         // Write the alias header
@@ -1868,6 +1887,20 @@ struct Writer<Family, Stream>
 {
     static void write(Stream& output, const Family& item, FormatContext& ctx) {
         // taken from Family::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Family can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            // Check if allowed accress to this Family
+            if (const auto* service = ctx.authorisation; service) {
+                auto allowed = service->allows(item.absNodePath(), Allowed::READ);
+                if (!allowed) {
+                    // User is not allowed to read this Family, so we skip writing it
+                    return;
+                }
+            }
+        }
 
         Indent l1(ctx);
 
@@ -1900,6 +1933,20 @@ struct Writer<Task, Stream>
 {
     static void write(Stream& output, const Task& item, FormatContext& ctx) {
         // taken from Task::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Task can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            // Check if allowed accress to this Task
+            if (const auto* service = ctx.authorisation; service) {
+                auto allowed = service->allows(item.absNodePath(), Allowed::READ);
+                if (!allowed) {
+                    // User is not allowed to read this Task, so we skip writing it
+                    return;
+                }
+            }
+        }
 
         Indent l1(ctx);
 
@@ -2148,6 +2195,20 @@ struct Writer<Suite, Stream>
 {
     static void write(Stream& output, const Suite& item, FormatContext& ctx) {
         // taken from Suite::print(std::string& os) const
+
+        if (auto* defs = item.defs(); defs) {
+            // A Suite can be created in isolation, e.g. by using the Python API.
+            // When a node is not included in a Defs, it does not make sense to perform Permission checks.
+
+            // Check if allowed accress to this Suite
+            if (const auto* service = ctx.authorisation; service) {
+                auto allowed = service->allows(item.absNodePath(), Allowed::READ);
+                if (!allowed) {
+                    // User is not allowed to read this Suite, so we skip writing it
+                    return;
+                }
+            }
+        }
 
         // Write the suite header
         output << "suite ";

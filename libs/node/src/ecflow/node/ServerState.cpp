@@ -137,6 +137,20 @@ bool ServerState::compare(const ServerState& rhs) const {
     return true;
 }
 
+Permissions ServerState::permissions() const {
+    // Find the permissions in the user variables first, as these override the server variables
+    if (auto permissions = Permissions::find_in(user_variables_); !permissions.is_empty()) {
+        return permissions;
+    }
+
+    // Then, find the permissions in the server variables
+    if (auto permissions = Permissions::find_in(server_variables_); !permissions.is_empty()) {
+        return permissions;
+    }
+
+    return Permissions::make_empty();
+}
+
 void ServerState::sort_variables() {
     variable_state_change_no_ = Ecf::incr_state_change_no();
 
