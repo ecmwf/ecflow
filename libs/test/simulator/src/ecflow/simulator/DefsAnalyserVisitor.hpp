@@ -40,7 +40,7 @@ private:
     std::set<Node*> analysedNodes_; // The node we  analysed
     std::string buffer_;
     ecf::stringstreambuf ss_{buffer_};
-    ecf::Context ctx_ = ecf::Context::make_for(PrintStyle::DEFS);
+    ecf::FormatContext ctx_ = ecf::FormatContext::make_for(PrintStyle::DEFS);
 };
 
 } // namespace ecf

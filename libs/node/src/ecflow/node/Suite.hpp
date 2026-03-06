@@ -13,6 +13,7 @@
 
 #include "ecflow/attribute/ClockAttr.hpp" // IWYU pragma: keep
 #include "ecflow/core/Calendar.hpp"
+#include "ecflow/node/Node.hpp"
 #include "ecflow/node/NodeContainer.hpp"
 
 class SuiteGenVariables;
@@ -53,7 +54,8 @@ public:
     void reset() override;
     void handle_migration(const ecf::Calendar&) override;
     void begin() override;
-    void requeue(Requeue_args& args) override;
+    using Node::requeue;
+    void requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) override;
     bool begun() const { return begun_; }
     void reset_begin();
     void update_generated_variables() const override;
@@ -87,7 +89,7 @@ public:
     bool checkInvariants(std::string& errorMsg) const override;
 
     // Memento functions
-    void collateChanges(DefsDelta&) const override;
+    void collateChanges(DefsDelta& changes, const ecf::AuthorisationContext& ctx) const override;
     void set_memento(const SuiteClockMemento*, std::vector<ecf::Aspect::Type>& aspects, bool);
     void set_memento(const SuiteBeginDeltaMemento*, std::vector<ecf::Aspect::Type>& aspects, bool);
     void set_memento(const SuiteCalendarMemento*, std::vector<ecf::Aspect::Type>& aspects, bool);
