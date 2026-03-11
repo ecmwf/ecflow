@@ -167,4 +167,4 @@ builds:
       confluence_space: "ECFLOW"
 
 release:
-  enabled: false
+  enabled: true
