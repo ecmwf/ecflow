@@ -165,7 +165,6 @@ builds:
     config:
       cmake_options: -DBOOST_ROOT=${BOOST_ROOT_DIR} -DBOOST_INCLUDEDIR=${BOOST_INCLUDE_DIR} -DBOOST_LIBRARYDIR=${BOOST_LIB_DIR} -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR} -DENABLE_STATIC_BOOST_LIBS=OFF
       confluence_space: "ECFLOW"
-      confluence_page_title: "For testing tarball uploads"
 
 release:
   enabled: false
