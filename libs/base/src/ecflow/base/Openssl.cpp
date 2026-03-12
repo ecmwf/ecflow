@@ -79,8 +79,8 @@ void Openssl::enable(std::string host, const std::string& port) {
 
     if (!enable_no_throw(host, port)) {
         std::stringstream ss;
-        ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) server.crt or " << host
-           << "." << port << ".crt in $HOME/.ecflowrc/ssl";
+        ss << "Error: Unable to find the self-signed certificate file(CRT) server.crt or " << host << "." << port
+           << ".crt in $HOME/.ecflowrc/ssl";
         throw std::runtime_error(ss.str());
     }
 }
@@ -96,12 +96,12 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
         if (!enable_no_throw(host, port, ecf_ssl_env)) {
             std::stringstream ss;
             if (ecf_ssl_env == "1") {
-                ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) server.crt *OR* "
-                   << host << "." << port << ".crt in $HOME/.ecflowrc/ssl when ECF_SSL=1";
+                ss << "Error: Unable to find the self-signed certificate file(CRT) server.crt *OR* " << host << "."
+                   << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=1)";
             }
             else {
-                ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) " << host << "."
-                   << port << ".crt in $HOME/.ecflowrc/ssl when ECF_SSL=" << host << "." << port;
+                ss << "Error: Unable to find the self-signed certificate file(CRT) " << host << "." << port
+                   << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=" << host << "." << port << ")";
             }
             throw std::runtime_error(ss.str());
         }
@@ -158,8 +158,7 @@ std::string Openssl::get_password() const {
         }
         else {
             std::stringstream ss;
-            ss << "Server::get_password file " << passwd_file << " exists, but can't be opened (" << strerror(errno)
-               << ")";
+            ss << "Error: Unable to open password file '" << passwd_file << "' (" << strerror(errno) << ")";
             throw std::runtime_error(ss.str());
         }
     }
@@ -269,11 +268,11 @@ const char* Openssl::ssl_info() {
            "  Or you can choose to remove password requirement. In that case we don't need server.passwd file.\n\n"
            "     > cp server.key server.key.secure\n"
            "     > openssl rsa -in server.key.secure -out server.key  # remove password requirement\n"
-           "- Sign certificate with private key (self signed certificate).Generate Certificate Signing Request(CSR).\n"
+           "- Sign certificate with private key (self-signed certificate).Generate Certificate Signing Request(CSR).\n"
            "  This will prompt with a number of questions.\n"
            "  However please ensure 'common name' matches the host where your server is going to run.\n\n"
            "     > openssl req -new -key server.key -out server.csr # Generate Certificate Signing Request(CSR)\n"
-           "- Generate a self signed certificate CRT, by using the CSR and private key.\n\n"
+           "- Generate a self-signed certificate CRT, by using the CSR and private key.\n\n"
            "     > openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt\n\n"
            "- Generate dhparam file. ecFlow expects 2048 key.\n"
            "     > openssl dhparam -out dh2048.pem 2048";
