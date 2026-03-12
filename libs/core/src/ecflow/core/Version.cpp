@@ -14,6 +14,9 @@
 
 #include <boost/version.hpp>
 #include <cereal/version.hpp>
+#if defined(ECF_OPENSSL)
+    #include <openssl/crypto.h>
+#endif
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/ecflow_version.h"
@@ -37,7 +40,7 @@ std::string Version::suffix() {
 }
 
 std::string Version::description() {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "Ecflow ";
 #ifdef DEBUG
     ss << "(debug) ";
@@ -46,9 +49,7 @@ std::string Version::description() {
     ss << "boost(" << Version::boost() << ") ";
     ss << "compiler(" << Version::compiler() << ") ";
     ss << "protocol(JSON cereal " << Version::cereal() << ") ";
-#ifdef ECF_OPENSSL
-    ss << "openssl(enabled) ";
-#endif
+    ss << "openssl(" << Version::openssl() << ") ";
     ss << "Compiled on " << __DATE__ << " " << __TIME__;
     return ss.str();
 }
@@ -67,7 +68,7 @@ std::string Version::full() {
 }
 
 std::string Version::boost() {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << BOOST_VERSION / 100000 << "."     // major version
        << BOOST_VERSION / 100 % 1000 << "." // minor version
        << BOOST_VERSION % 100;              // patch level
@@ -75,7 +76,7 @@ std::string Version::boost() {
 }
 
 std::string Version::cereal() {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << CEREAL_VERSION_MAJOR         // major version
        << "." << CEREAL_VERSION_MINOR  // minor version
        << "." << CEREAL_VERSION_PATCH; // patch level
@@ -83,7 +84,7 @@ std::string Version::cereal() {
 }
 
 std::string Version::compiler() {
-    std::stringstream ss;
+    std::ostringstream ss;
 #if defined(_AIX)
     ss << "aix " << __IBMCPP__;
 #elif defined(HPUX)
@@ -104,6 +105,36 @@ std::string Version::compiler() {
     auto version = ss.str();
 
     return version.empty() ? "unknown" : version;
+}
+
+std::string Version::openssl() {
+#if defined(ECF_OPENSSL)
+
+    std::ostringstream ss;
+    #if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    // OpenSSL 3.0+ provides these functions
+    auto major = OPENSSL_version_major();
+    auto minor = OPENSSL_version_minor();
+    auto patch = OPENSSL_version_patch();
+    ss << major << "." << minor << "." << patch;
+    #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+    // OpenSSL 1.x: extract version components from OpenSSL_version_num()
+    auto version_num = OpenSSL_version_num();
+    auto major       = (version_num >> 28) & 0xF;
+    auto minor       = (version_num >> 20) & 0xFF;
+    auto patch       = (version_num >> 12) & 0xFF;
+    ss << major << "." << minor << "." << patch;
+    #else
+    // OpenSSL 0.9.x: unable to determine the version dynamically!
+    ss << "n/a";
+    #endif
+    return ss.str();
+
+#else
+
+    return "disabled";
+
+#endif
 }
 
 } // namespace ecf
