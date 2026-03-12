@@ -114,8 +114,6 @@ boost::asio::ssl::context& Openssl::context() {
 }
 
 void Openssl::init_for_server() {
-    //   std::cout << " Openssl::init_for_server  host :" << host_ << "@" << port_ << "\n";
-    //   std::cout << " Openssl::init_for_server ssl_:'" << ssl_ << "'\n";
     if (enabled()) {
         check_server_certificates();
 
@@ -134,7 +132,6 @@ void Openssl::init_for_server() {
 }
 
 void Openssl::init_for_client() {
-    //   std::cout << " Openssl::init_for_client host :" << host_ << "@" << port_ << "\n";
     if (!init_for_client_ && enabled()) {
         init_for_client_ = true;
 
@@ -144,7 +141,6 @@ void Openssl::init_for_client() {
 }
 
 std::string Openssl::get_password() const {
-    // std::cout << "Openssl::get_password()\n";
     std::string passwd_file = passwd();
     if (fs::exists(passwd_file)) {
         std::string contents;
@@ -153,7 +149,6 @@ std::string Openssl::get_password() const {
             if (!contents.empty() && contents[contents.size() - 1] == '\n') {
                 contents.erase(contents.begin() + contents.size() - 1);
             }
-            // std::cout << "Server::get_password() passwd('" << contents << "')\n";
             return contents;
         }
         else {
@@ -162,7 +157,6 @@ std::string Openssl::get_password() const {
             throw std::runtime_error(ss.str());
         }
     }
-    // std::cout << "Server::get_password() passwd('test')\n";
     return "test";
 }
 
@@ -279,8 +273,6 @@ const char* Openssl::ssl_info() {
 }
 
 void Openssl::check_server_certificates() const {
-    //   cout << "Openssl::check_server_certificates: ssl'" << ssl_ << "'\n";
-
     {
         std::string server_key = key();
         if (!fs::exists(server_key)) {
