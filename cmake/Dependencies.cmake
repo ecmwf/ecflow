@@ -236,7 +236,7 @@ endif()
 if (ENABLE_SSL)
   ecbuild_info( "Locating OpenSSL" )
 
-  find_package(OpenSSL REQUIRED)
+  find_package(OpenSSL REQUIRED VERSION 1.1.1)
 
   add_definitions( -DECF_OPENSSL=1 )
 

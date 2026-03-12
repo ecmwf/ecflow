@@ -117,9 +117,19 @@ void Openssl::init_for_server() {
     if (enabled()) {
         check_server_certificates();
 
-        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
-        ssl_context_->set_options(boost::asio::ssl::context::default_workarounds | boost::asio::ssl::context::no_sslv2 |
-                                  boost::asio::ssl::context::single_dh_use);
+        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::tls_server);
+
+        // clang-format off
+        ssl_context_->set_options(
+            boost::asio::ssl::context::default_workarounds |
+            boost::asio::ssl::context::no_sslv2 |
+            boost::asio::ssl::context::no_sslv3 |
+            boost::asio::ssl::context::no_tlsv1 |
+            boost::asio::ssl::context::no_tlsv1_1 |
+            boost::asio::ssl::context::no_tlsv1_2 |
+            boost::asio::ssl::context::single_dh_use);
+        // clang-format on
+
         // this must be done before loading any keys. as below
         ssl_context_->set_password_callback(
             [this](std::size_t size, boost::asio::ssl::context_base::password_purpose purpose) {
@@ -135,7 +145,7 @@ void Openssl::init_for_client() {
     if (!init_for_client_ && enabled()) {
         init_for_client_ = true;
 
-        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
+        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::tls_client);
         ssl_context_->load_verify_file(crt());
     }
 }
@@ -262,7 +272,7 @@ const char* Openssl::ssl_info() {
            "  Or you can choose to remove password requirement. In that case we don't need server.passwd file.\n\n"
            "     > cp server.key server.key.secure\n"
            "     > openssl rsa -in server.key.secure -out server.key  # remove password requirement\n"
-           "- Sign certificate with private key (self-signed certificate).Generate Certificate Signing Request(CSR).\n"
+           "- Sign certificate with private key (self-signed certificate). Generate Certificate Signing Request(CSR).\n"
            "  This will prompt with a number of questions.\n"
            "  However please ensure 'common name' matches the host where your server is going to run.\n\n"
            "     > openssl req -new -key server.key -out server.csr # Generate Certificate Signing Request(CSR)\n"
