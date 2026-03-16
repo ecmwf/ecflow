@@ -61,6 +61,9 @@ private:
 
     /// Create a string containing the version of the Compiler used to build ecFlow
     static std::string compiler();
+
+    /// Create a string containing the version of the OpenSSL library
+    static std::string openssl();
 };
 
 } // namespace ecf
