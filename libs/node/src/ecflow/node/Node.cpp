@@ -1669,9 +1669,7 @@ Node::parse_and_check_expressions(const std::string& expr, bool trigger, const s
 
     std::string errorMsg;
     if (!check_expressions(ast.get(), expr, trigger, errorMsg)) {
-        std::stringstream ss;
-        ss << context << " " << errorMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(context << " " << errorMsg));
     }
     return ast;
 }
@@ -2276,7 +2274,7 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
         why_found = true; // return true if why found
     }
     else if (state() != NState::QUEUED && state() != NState::ABORTED) {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (html) {
             ss << path_href() << " (" << NState::to_html(state()) << ") is not queued or aborted";
         }

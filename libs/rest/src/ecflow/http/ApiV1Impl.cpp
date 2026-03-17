@@ -1032,7 +1032,7 @@ ojson update_script_content(const httplib::Request& request) {
 
     std::vector<std::string> lines;
     lines.reserve(20);
-    std::stringstream ss(script);
+    std::istringstream ss(script);
 
     for (std::string line; std::getline(ss, line, '\n');) {
         lines.push_back(line);

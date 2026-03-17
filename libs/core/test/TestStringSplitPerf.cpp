@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
 
             auto tokens = Str::make_split_iterator(line);
 
-            std::stringstream ss;
+            std::ostringstream ss;
             for (; !tokens.eof(); ++tokens) {
                 boost::iterator_range<std::string::const_iterator> range = *tokens;
                 ss << range << " ";
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
             boost::timer::cpu_timer timer;
             for (size_t i = 0; i < file_contents.size(); i++) {
 
-                std::stringstream ss;
+                std::ostringstream ss;
                 auto tokens = Str::make_split_iterator(file_contents[i]);
 
                 for (; !tokens.eof(); ++tokens) {

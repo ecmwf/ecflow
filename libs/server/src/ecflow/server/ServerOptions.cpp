@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Version.hpp"
 #include "ecflow/server/ServerEnvironment.hpp"
 
@@ -25,9 +26,8 @@ ServerOptions::ServerOptions(const CommandLine& cl, ServerEnvironment* env) {
 
     namespace po = boost::program_options;
 
-    std::stringstream ss;
-    ss << "\n" << Version::description() << "\nServer options";
-    po::options_description desc(ss.str(), po::options_description::m_default_line_length + 80);
+    auto description = MESSAGE("\n" << Version::description() << "\nServer options");
+    po::options_description desc(description, po::options_description::m_default_line_length + 80);
 
     desc.add_options()("help,h",
                        "The server reads the LANG for the locale. Please ensure that\n"

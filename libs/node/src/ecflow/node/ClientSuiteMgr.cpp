@@ -11,10 +11,11 @@
 #include "ecflow/node/ClientSuiteMgr.hpp"
 
 #include <algorithm> // for sort, remove_if
-#include <sstream>   // for std::stringstream
+#include <sstream>
 #include <stdexcept>
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Message.hpp"
 
 using namespace ecf;
 
@@ -70,10 +71,9 @@ void ClientSuiteMgr::remove_client_suite(unsigned int client_handle) {
         clientSuites_.end());
 
     if (before == clientSuites_.size()) {
-        std::stringstream ss;
-        ss << "ClientSuiteMgr::remove_client_suite: handle(" << client_handle
-           << ") does not exist. Handle dropped? Please refresh GUI/re-register suites";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("ClientSuiteMgr::remove_client_suite: handle("
+                                         << client_handle
+                                         << ") does not exist. Handle dropped? Please refresh GUI/re-register suites"));
     }
 #ifdef DEBUG_HANDLE
     std::cout << "ClientSuiteMgr::remove_client_suite: handle(" << client_handle << ") " << dump() << "\n";
@@ -89,10 +89,9 @@ void ClientSuiteMgr::remove_client_suites(const std::string& user_to_drop) {
         clientSuites_.end());
 
     if (before == clientSuites_.size()) {
-        std::stringstream ss;
-        ss << "ClientSuiteMgr::remove_client_suites: user(" << user_to_drop
-           << ") has no registered handles. User dropped? Please refresh GUI/re-register suites";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "ClientSuiteMgr::remove_client_suites: user("
+            << user_to_drop << ") has no registered handles. User dropped? Please refresh GUI/re-register suites"));
     }
 
 #ifdef DEBUG_HANDLE
@@ -114,10 +113,9 @@ void ClientSuiteMgr::add_suites(unsigned int client_handle, const std::vector<st
             return;
         }
     }
-    std::stringstream ss;
-    ss << "ClientSuiteMgr::add_suites: handle(" << client_handle
-       << ") does not exist. Handle dropped? Please refresh GUI/re-register suites";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("ClientSuiteMgr::add_suites: handle("
+                                     << client_handle
+                                     << ") does not exist. Handle dropped? Please refresh GUI/re-register suites"));
 }
 
 void ClientSuiteMgr::remove_suites(unsigned int client_handle, const std::vector<std::string>& suites) {
@@ -133,10 +131,9 @@ void ClientSuiteMgr::remove_suites(unsigned int client_handle, const std::vector
             return;
         }
     }
-    std::stringstream ss;
-    ss << "ClientSuiteMgr::remove_suites: handle(" << client_handle
-       << ") does not exist. Handle dropped? Please refresh GUI/re-register suites";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("ClientSuiteMgr::remove_suites: handle("
+                                     << client_handle
+                                     << ") does not exist. Handle dropped? Please refresh GUI/re-register suites"));
 }
 
 void ClientSuiteMgr::auto_add_new_suites(unsigned int client_handle, bool auto_add_new_suites) {
@@ -152,10 +149,9 @@ void ClientSuiteMgr::auto_add_new_suites(unsigned int client_handle, bool auto_a
             return;
         }
     }
-    std::stringstream ss;
-    ss << "ClientSuiteMgr::auto_add_new_suites: handle(" << client_handle
-       << ") does not exist. Handle dropped? Please refresh GUI/re-register suites";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("ClientSuiteMgr::auto_add_new_suites: handle("
+                                     << client_handle
+                                     << ") does not exist. Handle dropped? Please refresh GUI/re-register suites"));
 }
 
 bool ClientSuiteMgr::valid_handle(unsigned int client_handle) const {
@@ -220,10 +216,10 @@ void ClientSuiteMgr::max_change_no(unsigned int client_handle,
             return;
         }
     }
-    std::stringstream ss;
-    ss << "ClientSuiteMgr::max_change_no: handle(" << client_handle
-       << ") does not exist in server. Handle dropped or Server may have died? Please refresh GUI/re-register suites";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("ClientSuiteMgr::max_change_no: handle("
+                                     << client_handle
+                                     << ") does not exist in server. Handle dropped or Server may have died? Please "
+                                        "refresh GUI/re-register suites"));
 }
 
 void ClientSuiteMgr::suite_added_in_defs(suite_ptr suite) {
@@ -257,7 +253,7 @@ void ClientSuiteMgr::update_suite_order() {
 }
 
 std::string ClientSuiteMgr::dump_max_change_no() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "ClientSuiteMgr::dump_max_change_no: ECF:(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
        << ")\n";
     size_t client_suites_size = clientSuites_.size();
@@ -274,7 +270,7 @@ std::string ClientSuiteMgr::dump_max_change_no() const {
 /// For debug dumps
 std::string ClientSuiteMgr::dump() const {
     size_t client_suites_size = clientSuites_.size();
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "ECF:(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") clientSuites_.size("
        << client_suites_size << ")\n";
     for (size_t i = 0; i < client_suites_size; i++) {

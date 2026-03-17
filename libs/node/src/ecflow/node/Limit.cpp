@@ -192,27 +192,27 @@ void Limit::update_change_no() {
 }
 
 std::string Limit::dump() const {
-    std::ostringstream oss;
-    oss << "{";
+    std::ostringstream ss;
+    ss << "{";
     if (node_) {
-        oss << "\"node\": \"" << node_->absNodePath() << "\", ";
+        ss << "\"node\": \"" << node_->absNodePath() << "\", ";
     }
-    oss << "\"name\": \"" << n_ << "\", ";
-    oss << "\"value\": " << value_ << ", ";
-    oss << "\"limit\": " << lim_ << ", ";
-    oss << "\"paths\": ";
-    oss << "[";
+    ss << "\"name\": \"" << n_ << "\", ";
+    ss << "\"value\": " << value_ << ", ";
+    ss << "\"limit\": " << lim_ << ", ";
+    ss << "\"paths\": ";
+    ss << "[";
     bool first = true;
     for (const auto& path : paths_) {
         if (!first) {
-            oss << ", ";
+            ss << ", ";
         }
-        oss << path;
+        ss << path;
         first = false;
     }
-    oss << "]";
-    oss << "}";
-    return oss.str();
+    ss << "]";
+    ss << "}";
+    return ss.str();
 }
 
 template <class Archive>

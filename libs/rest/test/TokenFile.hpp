@@ -130,13 +130,13 @@ inline std::string TokenFile::generate_token(std::size_t num_bytes) {
     std::mt19937_64 gen(rd());
     std::uniform_int_distribution<int> dist(0, 255);
 
-    std::ostringstream buffer;
-    buffer << std::hex << std::setfill('0');
+    std::ostringstream ss;
+    ss << std::hex << std::setfill('0');
     for (std::size_t i = 0; i < num_bytes; ++i) {
-        buffer << std::setw(2) << dist(gen);
+        ss << std::setw(2) << dist(gen);
     }
 
-    return buffer.str();
+    return ss.str();
 }
 
 inline std::string TokenFile::generate_salt() {
@@ -155,13 +155,13 @@ inline std::string TokenFile::hmac_sha256(const std::string& salt, const std::st
          hash.data(),
          &hash_len);
 
-    std::ostringstream buffer;
-    buffer << std::hex << std::setfill('0');
+    std::ostringstream ss;
+    ss << std::hex << std::setfill('0');
     for (unsigned int i = 0; i < hash_len; ++i) {
-        buffer << std::setw(2) << static_cast<int>(hash[i]);
+        ss << std::setw(2) << static_cast<int>(hash[i]);
     }
 
-    return buffer.str();
+    return ss.str();
 }
 
 #endif /* #ifndef ecflow_http_test_TokenFile_HPP */

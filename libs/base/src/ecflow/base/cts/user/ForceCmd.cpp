@@ -102,10 +102,10 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
     bool is_event_state = Event::isValidState(stateOrEvent_);
     bool is_node_state  = NState::isValid(stateOrEvent_);
     if (!is_node_state && !is_event_state) {
-        std::stringstream ss;
-        ss << "ForceCmd: failed. Invalid node state or event " << stateOrEvent_ << " expected one of "
-           << "[ unknown | complete | queued | submitted | active | aborted | clear | set ]";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ForceCmd: failed. Invalid node state or event "
+                    << stateOrEvent_ << " expected one of "
+                    << "[ unknown | complete | queued | submitted | active | aborted | clear | set ]"));
     }
 
     use_EditHistoryMgr_ =
@@ -114,7 +114,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
     Defs* defs = as->defs().get();
     std::string the_path;
     std::string the_event;
-    std::stringstream error_ss;
+    std::ostringstream ss;
     for (const auto& path : paths_) {
 
         the_path = path;
@@ -122,15 +122,15 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
         if (is_event_state) {
             Extract::pathAndName(path, the_path, the_event);
             if (the_path.empty() || the_event.empty()) {
-                error_ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event "
-                            "i.e --force=/path/to_task:event_name set\n";
+                ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event "
+                      "i.e --force=/path/to_task:event_name set\n";
                 continue;
             }
         }
 
         node_ptr node = defs->findAbsNode(the_path);
         if (!node.get()) {
-            error_ss << "ForceCmd: Could not find node at path " << the_path << "\n";
+            ss << "ForceCmd: Could not find node at path " << the_path << "\n";
             continue;
         }
 
@@ -170,15 +170,15 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
             // The recursive option is *NOT* applicable to events, hence ignore. According to Axel !!!!
             if (stateOrEvent_ == Event::SET()) {
                 if (!node->set_event(the_event)) {
-                    error_ss << "ForceCmd: force set: failed for node(" << node->absNodePath() << ") cannot find event("
-                             << the_event << ")\n";
+                    ss << "ForceCmd: force set: failed for node(" << node->absNodePath() << ") cannot find event("
+                       << the_event << ")\n";
                     continue;
                 }
             }
             else if (stateOrEvent_ == Event::CLEAR()) {
                 if (!node->clear_event(the_event)) {
-                    error_ss << "ForceCmd: force clear: failed for node(" << node->absNodePath()
-                             << ") cannot find event(" << the_event << ")\n";
+                    ss << "ForceCmd: force clear: failed for node(" << node->absNodePath() << ") cannot find event("
+                       << the_event << ")\n";
                     continue;
                 }
             }
@@ -192,7 +192,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
         }
     }
 
-    std::string error_msg = error_ss.str();
+    std::string error_msg = ss.str();
     if (!error_msg.empty()) {
         throw std::runtime_error(error_msg);
     }
@@ -252,27 +252,23 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     }
 
     if (args.size() < 2) {
-        std::stringstream ss;
-        ss << "ForceCmd: At least two arguments expected for Force. Found " << args.size() << "\n"
-           << ForceCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("ForceCmd: At least two arguments expected for Force. Found "
+                                         << args.size() << "\n"
+                                         << ForceCmd::desc() << "\n"));
     }
 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(
         args, options, paths, true /*treat_colon_in_path_as_path*/); // relative order is still preserved
     if (paths.empty()) {
-        std::stringstream ss;
-        ss << "ForceCmd: No paths specified. Paths must begin with a leading '/' character\n"
-           << ForceCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("ForceCmd: No paths specified. Paths must begin with a leading '/' character\n"
+                                         << ForceCmd::desc() << "\n"));
     }
     if (options.empty()) {
-        std::stringstream ss;
-        ss << "ForceCmd: Invalid argument list. Expected of:\n"
-           << "[ unknown | complete | queued | submitted | active | aborted | clear | set]\n"
-           << ForceCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ForceCmd: Invalid argument list. Expected of:\n"
+                    << "[ unknown | complete | queued | submitted | active | aborted | clear | set]\n"
+                    << ForceCmd::desc() << "\n"));
     }
 
     bool is_valid_state       = false;
@@ -297,17 +293,14 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             stateOrEvent         = options[i];
         }
         else {
-            std::stringstream ss;
-            ss << "ForceCmd: Invalid argument \n" << ForceCmd::desc() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("ForceCmd: Invalid argument \n" << ForceCmd::desc() << "\n"));
         }
     }
 
     if (!is_valid_state && !is_valid_event_state) {
-        std::stringstream ss;
-        ss << "ForceCmd: Invalid node state or event expected one of:\n"
-           << "[ unknown | complete | queued | submitted | active | aborted | clear | set]\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ForceCmd: Invalid node state or event expected one of:\n"
+                    << "[ unknown | complete | queued | submitted | active | aborted | clear | set]\n"));
     }
 
     if (is_valid_event_state) {
@@ -317,10 +310,9 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             std::string the_event, the_path;
             Extract::pathAndName(paths[i], the_path, the_event);
             if (the_path.empty() || the_event.empty()) {
-                std::stringstream ss;
-                ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event i.e\n";
-                ss << " --force=/path/to_task:event_name set\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event i.e\n"
+                    << " --force=/path/to_task:event_name set\n"));
             }
         }
     }

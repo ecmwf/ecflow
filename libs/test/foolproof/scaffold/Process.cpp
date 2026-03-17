@@ -78,21 +78,21 @@ struct Process::Impl
     }
 
     std::string read_stdout() {
-        std::ostringstream buffer;
+        std::ostringstream ss;
         while (out_.good() && out_.peek() != EOF) {
             char c = out_.get();
-            buffer << c;
+            ss << c;
         }
-        return buffer.str();
+        return ss.str();
     }
 
     std::string read_stderr() {
-        std::ostringstream buffer;
+        std::ostringstream ss;
         while (err_.good() && err_.peek() != EOF) {
             char c = err_.get();
-            buffer << c;
+            ss << c;
         }
-        return buffer.str();
+        return ss.str();
     }
 
     bp::ipstream out_;

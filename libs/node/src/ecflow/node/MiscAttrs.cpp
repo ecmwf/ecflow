@@ -145,10 +145,9 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const {
 void MiscAttrs::verification(std::string& errorMsg) const {
     for (const VerifyAttr& v : verifys_) {
         if (v.expected() != v.actual()) {
-            std::stringstream ss;
-            ss << node_->debugNodePath() << " expected " << v.expected() << " " << NState::toString(v.state())
-               << " but found " << v.actual() << "\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE(node_->debugNodePath() << " expected " << v.expected() << " " << NState::toString(v.state())
+                                               << " but found " << v.actual() << "\n");
         }
     }
 }
@@ -156,10 +155,9 @@ void MiscAttrs::verification(std::string& errorMsg) const {
 void MiscAttrs::addZombie(const ZombieAttr& z) {
     const ZombieAttr& theFndOne = findZombie(z.zombie_type());
     if (!theFndOne.empty()) {
-        std::stringstream ss;
-        ss << "MiscAttrs::addZombie: Node " << node_->absNodePath() << " already has a zombie attribute of type "
-           << Child::to_string(theFndOne.zombie_type()) << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("MiscAttrs::addZombie: Node "
+                                         << node_->absNodePath() << " already has a zombie attribute of type "
+                                         << Child::to_string(theFndOne.zombie_type()) << "\n"));
     }
     zombies_.push_back(z);
     node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
@@ -207,10 +205,9 @@ const ZombieAttr& MiscAttrs::findZombie(ecf::Child::ZombieType zombie_type) cons
 void MiscAttrs::add_generic(const GenericAttr& z) {
     const GenericAttr& theFndOne = find_generic(z.name());
     if (!theFndOne.empty()) {
-        std::stringstream ss;
-        ss << "MiscAttrs::add_generic : Node " << node_->absNodePath() << " already has a generic attribute of name "
-           << z.name() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("MiscAttrs::add_generic : Node " << node_->absNodePath()
+                                                                          << " already has a generic attribute of name "
+                                                                          << z.name() << "\n"));
     }
     generics_.push_back(z);
     node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
@@ -218,10 +215,8 @@ void MiscAttrs::add_generic(const GenericAttr& z) {
 
 void MiscAttrs::addVerify(const VerifyAttr& v) {
     if (findVerify(v)) {
-        std::stringstream ss;
-        ss << "Add Verify failed: Duplicate '" << v.toString() << "' already exists for node "
-           << node_->debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Verify failed: Duplicate '"
+                                         << v.toString() << "' already exists for node " << node_->debugNodePath()));
     }
     verifys_.push_back(v);
     node_->state_change_no_ = Ecf::incr_state_change_no();
@@ -240,10 +235,9 @@ bool MiscAttrs::findVerify(const VerifyAttr& v) const {
 void MiscAttrs::add_queue(const QueueAttr& q) {
     const QueueAttr& theFndOne = find_queue(q.name());
     if (!theFndOne.empty()) {
-        std::stringstream ss;
-        ss << "MiscAttrs::add_queue: Node " << node_->absNodePath() << " already has a queue attribute of name "
-           << q.name() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("MiscAttrs::add_queue: Node " << node_->absNodePath()
+                                                                       << " already has a queue attribute of name "
+                                                                       << q.name() << "\n"));
     }
     queues_.push_back(q);
     node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd

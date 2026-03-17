@@ -250,7 +250,7 @@ void Stats::update_for_serialisation() {
         return;
     }
 
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << std::setiosflags(std::ios::fixed) << std::setprecision(2);
 
     int count      = 0;

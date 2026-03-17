@@ -208,7 +208,7 @@ bool ClientEnvironment::checkTaskPathAndPassword(std::string& errorMsg) const {
 }
 
 std::string ClientEnvironment::toString() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "ClientEnvironment:\n";
     ss << ecf::TimeStamp::now() << ecf::Version::description() << "\n";
     ss << "   ECF_HOST/ECF_PORT : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size()

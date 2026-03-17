@@ -93,9 +93,9 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
         auto ast = part.parseExpressions(error);
         BOOST_REQUIRE_MESSAGE(ast.get(), "Failed to parse\n" << expression << "  " << error);
 
-        std::stringstream s2;
-        ast->print_flat(s2);
-        std::string actual_expression = s2.str();
+        std::ostringstream ss;
+        ast->print_flat(ss);
+        std::string actual_expression = ss.str();
         BOOST_CHECK_MESSAGE(expression == actual_expression,
                             " Failed\n'" << expression << "' != '" << actual_expression << "'");
 
@@ -142,9 +142,9 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
         std::unique_ptr<AstTop> ast = part.parseExpressions(error);
         BOOST_REQUIRE_MESSAGE(ast.get(), "Failed to parse " << expression << "  " << error);
 
-        std::stringstream s2;
-        ast->print_flat(s2, true /*add_brackets*/);
-        std::string actual_expression = s2.str();
+        std::ostringstream ss;
+        ast->print_flat(ss, true /*add_brackets*/);
+        std::string actual_expression = ss.str();
         BOOST_CHECK_MESSAGE(expression == actual_expression,
                             " Failed '" << expression << "' != '" << actual_expression << "'");
 

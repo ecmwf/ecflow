@@ -127,9 +127,8 @@ public:
         std::string the_file = port_file(the_port);
         std::string errorMsg;
         if (!ecf::File::create(the_file, "", errorMsg)) {
-            std::stringstream sb;
-            sb << "EcfPortLock::create_free_port_file : could not create file " << the_file;
-            throw std::runtime_error(sb.str());
+            throw std::runtime_error(
+                MESSAGE("EcfPortLock::create_free_port_file : could not create file " << the_file));
         }
     }
 

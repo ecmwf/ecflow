@@ -1165,7 +1165,7 @@ void AstFunction::print_flat(std::ostream& os, bool add_brackets) const {
 }
 
 std::string AstFunction::expression() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     switch (ft_) {
         case AstFunction::DATE_TO_JULIAN:
             ss << "date_to_julian( arg:" << arg_->expression() << ") = " << value();
@@ -1180,7 +1180,7 @@ std::string AstFunction::expression() const {
 }
 
 std::string AstFunction::why_expression(bool html) const {
-    std::stringstream ss;
+    std::ostringstream ss;
     switch (ft_) {
         case AstFunction::DATE_TO_JULIAN:
             ss << "date_to_julian( arg:" << arg_->why_expression(html) << ") = " << value();
@@ -1215,7 +1215,7 @@ void AstInteger::print_flat(std::ostream& os, bool /*add_bracket*/) const {
 }
 
 std::string AstInteger::expression() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << value();
     return ss.str();
 }
@@ -1240,7 +1240,7 @@ void AstInstant::print_flat(std::ostream& os, bool /*add_bracket*/) const {
 }
 
 std::string AstInstant::expression() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << value_;
     return ss.str();
 }
@@ -1486,13 +1486,13 @@ std::string AstFlag::why_expression(bool html) const {
         // ecflow_ui expects: [attribute_type]attribute_path:attribute_name(value)
         // i.e                [limit]/suite/family/task:my_limit(value)
         // i.e                [flag]/suite/family/task:late(value)
-        std::stringstream display_ss;
+        std::ostringstream display_ss;
         display_ss << "[flag:" << ecf::Flag::enum_to_string(flag_) << "]" << nodePath_;
         std::string display_str = display_ss.str();
 
         std::string ref_str;
         if (ref_node) {
-            std::stringstream ref_ss;
+            std::ostringstream ref_ss;
             ref_ss << "[flag:" << ecf::Flag::enum_to_string(flag_) << "]" << ref_node->absNodePath();
             ref_str = ref_ss.str();
         }
@@ -1522,7 +1522,7 @@ std::string AstFlag::why_expression(bool html) const {
         }
         else {
             ret += "(";
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << ref_node->get_flag().is_set(flag_);
             ret += ss.str();
             ret += ")";
@@ -1575,12 +1575,12 @@ std::string AstVariable::why_expression(bool html) const {
     if (html) {
         // ecflow_ui expects: [attribute_type]attribute_path:attribute_name
         // i.e                [limit]/suite/family/task:my_limit
-        std::stringstream display_ss;
+        std::ostringstream display_ss;
         display_ss << "[" << varType << "]" << nodePath_ << ":" << name_;
         std::string display_str = display_ss.str();
         std::string ref_str;
         if (ref_node) {
-            std::stringstream ref_ss;
+            std::ostringstream ref_ss;
             ref_ss << "[" << varType << "]" << ref_node->absNodePath() << ":" << name_;
             ref_str = ref_ss.str();
         }
@@ -1604,7 +1604,7 @@ std::string AstVariable::why_expression(bool html) const {
         ret += Str::COLON();
         ret += name_;
         ret += "(";
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "type:" << varType << " value:" << theValue;
         ret += ss.str();
         ret += ")";
@@ -1701,13 +1701,13 @@ std::string AstParentVariable::why_expression(bool html) const {
     if (html) {
         // ecflow_ui expects: [attribute_type]attribute_path:attribute_name
         // i.e                [limit]/suite/family/task:my_limit
-        std::stringstream display_ss;
+        std::ostringstream display_ss;
         display_ss << "[" << varType << "]"
                    << ":" << name_;
         std::string display_str = display_ss.str();
         std::string ref_str;
         if (ref_node) {
-            std::stringstream ref_ss;
+            std::ostringstream ref_ss;
             ref_ss << "[" << varType << "]" << ref_node->absNodePath() << ":" << name_;
             ref_str = ref_ss.str();
         }
@@ -1730,7 +1730,7 @@ std::string AstParentVariable::why_expression(bool html) const {
         ret += Str::COLON();
         ret += name_;
         ret += "(";
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "type:" << varType << " value:" << theValue;
         ret += ss.str();
         ret += ")";
@@ -1789,15 +1789,11 @@ VariableHelper::VariableHelper(const AstVariable* astVariable, std::string& erro
         }
     }
 
-    std::stringstream ss;
-    ss << "From expression Variable " << astVariable_->nodePath() << Str::COLON() << astVariable_->name();
-    ss << " the referenced node is " << theReferenceNode_->debugNodePath() << "\n";
-    errorMsg += ss.str();
-    errorMsg += "Could not find event, meter, variable, repeat, generated variable, limit or queue of name('";
-    errorMsg += astVariable_->name();
-    errorMsg += "') on node ";
-    errorMsg += theReferenceNode_->debugNodePath();
-    errorMsg += "\n";
+    errorMsg += MESSAGE("From expression Variable "
+                        << astVariable_->nodePath() << Str::COLON() << astVariable_->name()
+                        << " the referenced node is " << theReferenceNode_->debugNodePath() << "\n"
+                        << "Could not find event, meter, variable, repeat, generated variable, limit or queue of name('"
+                        << astVariable_->name() << "') on node " << theReferenceNode_->debugNodePath() << "\n");
 
     // FAILED to find astVar->name(), for node theReferenceNode on event, meter,
     // user variable, repeat, generated variable

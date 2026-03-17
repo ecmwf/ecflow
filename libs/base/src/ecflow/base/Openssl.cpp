@@ -78,10 +78,8 @@ void Openssl::enable(std::string host, const std::string& port) {
     }
 
     if (!enable_no_throw(host, port)) {
-        std::stringstream ss;
-        ss << "Error: Unable to find the self-signed certificate file(CRT) server.crt or " << host << "." << port
-           << ".crt in $HOME/.ecflowrc/ssl";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt or "
+                                         << host << "." << port << ".crt in $HOME/.ecflowrc/ssl"));
     }
 }
 
@@ -94,16 +92,17 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
         }
 
         if (!enable_no_throw(host, port, ecf_ssl_env)) {
-            std::stringstream ss;
+            std::string error;
             if (ecf_ssl_env == "1") {
-                ss << "Error: Unable to find the self-signed certificate file(CRT) server.crt *OR* " << host << "."
-                   << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=1)";
+                error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt *OR* "
+                                << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=1)");
             }
             else {
-                ss << "Error: Unable to find the self-signed certificate file(CRT) " << host << "." << port
-                   << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=" << host << "." << port << ")";
+                error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) "
+                                << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=" << host << "."
+                                << port << ")");
             }
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(error);
         }
     }
 }
@@ -162,9 +161,8 @@ std::string Openssl::get_password() const {
             return contents;
         }
         else {
-            std::stringstream ss;
-            ss << "Error: Unable to open password file '" << passwd_file << "' (" << strerror(errno) << ")";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Error: Unable to open password file '" << passwd_file << "' (" << strerror(errno) << ")"));
         }
     }
     return "test";

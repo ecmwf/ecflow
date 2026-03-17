@@ -25,6 +25,7 @@
 #include "ecflow/client/Help.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
@@ -147,9 +148,8 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
             ecf::convert_to<int>(port);
         }
         catch (ecf::bad_conversion& e) {
-            std::stringstream ss;
-            ss << "ClientOptions::parse: The specified port(" << port << ") must be convertible to an integer";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("ClientOptions::parse: The specified port(" << port << ") must be convertible to an integer"));
         }
     }
     if (vm.count("host")) {
@@ -259,7 +259,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
             exit(0);
         }
 
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << print_variable_map(vm) << "\n";
         ss << "ClientOptions::parse: Arguments did not match any commands.\n";
         ss << "  argc=" << cl.size() << "\n";
@@ -290,7 +290,7 @@ static std::string print_variable_map(const boost::program_options::variables_ma
 
     namespace po = boost::program_options;
 
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "boost::program_options::variables_map:    vm.size() " << vm.size() << "\n";
     for (po::variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
         std::cout << "> " << it->first;

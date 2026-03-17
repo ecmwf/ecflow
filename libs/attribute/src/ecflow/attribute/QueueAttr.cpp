@@ -14,6 +14,7 @@
 
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -122,9 +123,7 @@ void QueueAttr::complete(const std::string& step) {
             return;
         }
     }
-    std::stringstream ss;
-    ss << "QueueAttr::complete: Could not find " << step << " in queue " << name_;
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("QueueAttr::complete: Could not find " << step << " in queue " << name_));
 }
 
 void QueueAttr::aborted(const std::string& step) {
@@ -135,9 +134,7 @@ void QueueAttr::aborted(const std::string& step) {
             return;
         }
     }
-    std::stringstream ss;
-    ss << "QueueAttr::aborted: Could not find " << step << " in queue " << name_;
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("QueueAttr::aborted: Could not find " << step << " in queue " << name_));
 }
 
 std::string QueueAttr::no_of_aborted() const {
@@ -179,7 +176,7 @@ void QueueAttr::write(std::string& ret) const {
 }
 
 std::string QueueAttr::dump() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << toString() << " # " << currentIndex_;
     for (auto i : state_vec_) {
         ss << " " << i;
@@ -197,9 +194,8 @@ void QueueAttr::parse(QueueAttr& queAttr,
                       bool parse_state) {
     size_t line_tokens_size = lineTokens.size();
     if (line_tokens_size < 3) {
-        std::stringstream ss;
-        ss << "QueueAttr::parse: expected at least 3 tokens, found " << line_tokens_size << " on line:" << line << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("QueueAttr::parse: expected at least 3 tokens, found "
+                                         << line_tokens_size << " on line:" << line << "\n"));
     }
 
     // queue name "first" "second" "last" #   current_index state state state
@@ -252,10 +248,9 @@ void QueueAttr::set_queue(const std::vector<std::string>& theQueue,
 
     if (!state_vec.empty()) {
         if (state_vec.size() != theQueue.size()) {
-            std::stringstream ss;
-            ss << "QueueAttr::set_state: for queue " << name_ << " size " << theQueue.size()
-               << " does not match state size " << state_vec.size();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("QueueAttr::set_state: for queue " << name_ << " size " << theQueue.size()
+                                                                                << " does not match state size "
+                                                                                << state_vec.size()));
         }
         state_vec_ = state_vec;
     }

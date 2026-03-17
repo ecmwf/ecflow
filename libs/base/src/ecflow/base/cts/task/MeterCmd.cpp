@@ -127,10 +127,9 @@ void MeterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     }
 
     if (args.size() != 2) {
-        std::stringstream ss;
-        ss << "MeterCmd: Two arguments expected, found " << args.size()
-           << " Please specify <meter-name> <meter-value>, ie --meter=name 100\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("MeterCmd: Two arguments expected, found "
+                                         << args.size()
+                                         << " Please specify <meter-name> <meter-value>, i.e. --meter=name 100\n"));
     }
 
     if (args[0].empty()) {

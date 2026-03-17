@@ -84,9 +84,9 @@ BOOST_AUTO_TEST_CASE(test_calendar_date_ctor_and_operations) {
     bb -= 1;
     BOOST_CHECK(bb == a);
 
-    std::ostringstream os;
-    os << a;
-    BOOST_CHECK_EQUAL(os.str(), "19991231");
+    std::ostringstream ss;
+    ss << a;
+    BOOST_CHECK_EQUAL(ss.str(), "19991231");
 }
 
 BOOST_AUTO_TEST_CASE(test_julian_date_ctor_and_operations) {
@@ -133,9 +133,9 @@ BOOST_AUTO_TEST_CASE(test_julian_date_ctor_and_operations) {
     bb -= 1;
     BOOST_CHECK(bb == a);
 
-    std::ostringstream os;
-    os << a;
-    BOOST_CHECK_EQUAL(os.str(), "2451544");
+    std::ostringstream ss;
+    ss << a;
+    BOOST_CHECK_EQUAL(ss.str(), "2451544");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

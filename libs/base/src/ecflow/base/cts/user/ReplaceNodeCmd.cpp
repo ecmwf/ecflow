@@ -41,10 +41,8 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
     // Make sure pathToNode exists in the client defs
     node_ptr nodeToReplace = client_defs->findAbsNode(node_path);
     if (!nodeToReplace.get()) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path " << node_path;
-        ss << ", does not exist in the client definition ";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path "
+                                         << node_path << ", does not exist in the client definition "));
     }
 
     client_defs->write_to_string(clientDefs_, PrintStyle::NET);
@@ -72,18 +70,15 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
         ok = client_defs->restore(path_to_defs, errMsg, warningMsg);
     }
     if (!ok) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd::ReplaceNodeCmd: Could not parse file " << path_to_defs << " : " << errMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ReplaceNodeCmd::ReplaceNodeCmd: Could not parse file " << path_to_defs << " : " << errMsg));
     }
 
     // Make sure pathToNode exists in the client defs
     node_ptr nodeToReplace = client_defs->findAbsNode(node_path);
     if (!nodeToReplace.get()) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path " << node_path;
-        ss << ", does not exist in the client definition " << path_to_defs;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path "
+                                         << node_path << ", does not exist in the client definition " << path_to_defs));
     }
 
     client_defs->write_to_string(clientDefs_, PrintStyle::NET);
@@ -134,9 +129,8 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     std::string errMsg, warningMsg;
     defs_ptr client_defs = Defs::create();
     if (!client_defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg));
     }
 
     if (force_) {
@@ -231,11 +225,10 @@ void ReplaceNodeCmd::create(Cmd_ptr& cmd,
     }
 
     if (args.size() < 2) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd: At least two arguments expected, found " << args.size()
-           << " Please specify <path-to-Node>  <defs files> parent(optional) force(optional), i.e\n"
-           << "--" << arg() << "=/suite/fa/t AdefsFile.def  parent force\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "ReplaceNodeCmd: At least two arguments expected, found "
+            << args.size() << " Please specify <path-to-Node>  <defs files> parent(optional) force(optional), i.e\n"
+            << "--" << arg() << "=/suite/fa/t AdefsFile.def  parent force\n"));
     }
 
     std::string pathToNode     = args[0];

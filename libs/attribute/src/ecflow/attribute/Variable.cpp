@@ -13,6 +13,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -82,9 +83,7 @@ void Variable::write(std::string& ret) const {
 }
 
 std::string Variable::dump() const {
-    std::stringstream ss;
-    ss << toString() << " value(" << value() << ")";
-    return ss.str();
+    return MESSAGE(toString() << " value(" << value() << ")");
 }
 
 template <class Archive>

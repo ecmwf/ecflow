@@ -50,9 +50,9 @@ public:
         if (ec) {
             ecf::LogToCout logToCout;
             ecf::LogFlusher logFlusher;
-            std::stringstream ss;
-            ss << msg << " socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;
-            ecf::log(ecf::Log::ERR, ss.str());
+            ecf::log(ecf::Log::ERR,
+                     MESSAGE(msg << " socket shutdown both failed: " << ec.message() << " : for request "
+                                 << inbound_request_));
             return false;
         }
         return true;

@@ -473,7 +473,7 @@ std::string Calendar::suite_time_str() const {
 }
 
 std::string Calendar::toString() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "hybrid(" << hybrid() << ") duration_(" << to_simple_string(duration_) << ") initTime_("
        << to_simple_string(initTime_) << ") suiteTime_(" << to_simple_string(suiteTime_) << ") dayChanged_("
        << dayChanged_ << ")";

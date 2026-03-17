@@ -140,10 +140,8 @@ BOOST_AUTO_TEST_CASE(test_single_time_trigger) {
 
         family_ptr fam = suite->add_family("family");
         task_ptr task  = fam->add_task("t");
-        std::stringstream ss;
-        ss << "/test_single_time_trigger:TIME == "
-           << "1001";
-        task->add_trigger(ss.str());
+        auto trigger   = MESSAGE("/test_single_time_trigger:TIME == " << "1001");
+        task->add_trigger(trigger);
         task->addVerify(VerifyAttr(NState::COMPLETE, 1)); // task should complete 1 times
     }
 

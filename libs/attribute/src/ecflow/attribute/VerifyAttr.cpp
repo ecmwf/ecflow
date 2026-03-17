@@ -14,6 +14,7 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
@@ -49,16 +50,11 @@ void VerifyAttr::reset() {
 }
 
 std::string VerifyAttr::toString() const {
-    std::stringstream ss;
-    ss << "verify " << NState::toString(state_) << Str::COLON() << expected_;
-    return ss.str();
+    return MESSAGE("verify " << NState::toString(state_) << Str::COLON() << expected_);
 }
 
 std::string VerifyAttr::dump() const {
-    std::stringstream ss;
-    ss << "verify " << NState::toString(state_) << Str::COLON() << expected_;
-    ss << " actual(" << actual_ << ")";
-    return ss.str();
+    return MESSAGE("verify " << NState::toString(state_) << Str::COLON() << expected_ << " actual(" << actual_ << ")");
 }
 
 template <class Archive>

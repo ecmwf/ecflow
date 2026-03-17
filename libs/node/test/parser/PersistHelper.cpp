@@ -133,29 +133,25 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
     bool match = reloaded_defs == reloaded_cereal_checkPt_defs;
 
     if (!match) {
-        std::stringstream ss;
-        ss << "\nPersistHelper::test_state_persist_and_reload_with_checkpt\n";
-        ss << "In reloaded_defs_file and reloaded_checkPt_defs don't match\n";
-        ss << "+++++++++++++ in memory defs  ++++++++++++++++++++++++++++\n";
-        ss << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE);
-        ss << "+++++++++++++ reloaded_defs  ++++++++++++++++++++++++++++\n";
-        ss << ecf::as_string(reloaded_defs, PrintStyle::MIGRATE);
-        ss << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n";
-        ss << ecf::as_string(reloaded_cereal_checkPt_defs, PrintStyle::MIGRATE);
-        errorMsg_ += ss.str();
+        errorMsg_ += MESSAGE("\nPersistHelper::test_state_persist_and_reload_with_checkpt\n"
+                             << "In reloaded_defs_file and reloaded_checkPt_defs don't match\n"
+                             << "+++++++++++++ in memory defs  ++++++++++++++++++++++++++++\n"
+                             << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE)
+                             << "+++++++++++++ reloaded_defs  ++++++++++++++++++++++++++++\n"
+                             << ecf::as_string(reloaded_defs, PrintStyle::MIGRATE)
+                             << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n"
+                             << ecf::as_string(reloaded_cereal_checkPt_defs, PrintStyle::MIGRATE));
     }
     else {
         if (compare_edit_history_ && !reloaded_defs.compare_edit_history(reloaded_cereal_checkPt_defs)) {
-            std::stringstream ss;
-            ss << "\nPersistHelper::test_state_persist_and_reload_with_checkpt  compare_edit_history_\n";
-            ss << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n";
-            ss << "+++++++++++++ in memory defs  ++++++++++++++++++++++++++++\n";
-            ss << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE);
-            ss << "+++++++++++++ reloaded_defs  ++++++++++++++++++++++++++++\n";
-            ss << ecf::as_string(reloaded_defs, PrintStyle::MIGRATE);
-            ss << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n";
-            ss << ecf::as_string(reloaded_cereal_checkPt_defs, PrintStyle::MIGRATE);
-            errorMsg_ += ss.str();
+            errorMsg_ += MESSAGE("\nPersistHelper::test_state_persist_and_reload_with_checkpt  compare_edit_history_\n"
+                                 << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n"
+                                 << "+++++++++++++ in memory defs  ++++++++++++++++++++++++++++\n"
+                                 << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE)
+                                 << "+++++++++++++ reloaded_defs  ++++++++++++++++++++++++++++\n"
+                                 << ecf::as_string(reloaded_defs, PrintStyle::MIGRATE)
+                                 << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n"
+                                 << ecf::as_string(reloaded_cereal_checkPt_defs, PrintStyle::MIGRATE));
         }
     }
     if (!reloaded_defs.compare_change_no(reloaded_cereal_checkPt_defs)) {
@@ -166,29 +162,25 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
     // Make sure reloading def's file with state is same as the checkpt file
     match = reload_strings_def == reloaded_cereal_checkPt_defs;
     if (!match) {
-        std::stringstream ss;
-        ss << "\nPersistHelper::test_state_persist_and_reload_with_checkpt\n";
-        ss << "In reloaded_defs file AS STRING and reloaded_checkPt_defs don't match\n";
-        ss << "+++++++++++++ in memory defs  ++++++++++++++++++++++++++++\n";
-        ss << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE);
-        ss << "+++++++++++++  reload_strings_def  ++++++++++++++++++++++++++++\n";
-        ss << ecf::as_string(reload_strings_def, PrintStyle::MIGRATE);
-        ss << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n";
-        ss << ecf::as_string(reloaded_cereal_checkPt_defs, PrintStyle::MIGRATE);
-        errorMsg_ += ss.str();
+        errorMsg_ += MESSAGE("\nPersistHelper::test_state_persist_and_reload_with_checkpt\n"
+                             << "In reloaded_defs file AS STRING and reloaded_checkPt_defs don't match\n"
+                             << "+++++++++++++ in memory defs  ++++++++++++++++++++++++++++\n"
+                             << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE)
+                             << "+++++++++++++  reload_strings_def  ++++++++++++++++++++++++++++\n"
+                             << ecf::as_string(reload_strings_def, PrintStyle::MIGRATE)
+                             << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n"
+                             << ecf::as_string(reloaded_cereal_checkPt_defs, PrintStyle::MIGRATE));
     }
     else {
         if (compare_edit_history_ && !reload_strings_def.compare_edit_history(reloaded_cereal_checkPt_defs)) {
-            std::stringstream ss;
-            ss << "\nPersistHelper::test_state_persist_and_reload_with_checkpt  compare_edit_history_\n";
-            ss << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n";
-            ss << "+++++++++++++ in memory defs  ++++++++++++++++++++++++++++\n";
-            ss << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE);
-            ss << "+++++++++++++ reload_strings_def ++++++++++++++++++++++++++++\n";
-            ss << ecf::as_string(reload_strings_def, PrintStyle::MIGRATE);
-            ss << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n";
-            ss << ecf::as_string(reloaded_cereal_checkPt_defs, PrintStyle::MIGRATE);
-            errorMsg_ += ss.str();
+            errorMsg_ += MESSAGE("\nPersistHelper::test_state_persist_and_reload_with_checkpt  compare_edit_history_\n"
+                                 << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n"
+                                 << "+++++++++++++ in memory defs  ++++++++++++++++++++++++++++\n"
+                                 << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE)
+                                 << "+++++++++++++ reload_strings_def ++++++++++++++++++++++++++++\n"
+                                 << ecf::as_string(reload_strings_def, PrintStyle::MIGRATE)
+                                 << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n"
+                                 << ecf::as_string(reloaded_cereal_checkPt_defs, PrintStyle::MIGRATE));
         }
     }
     if (!reload_strings_def.compare_change_no(reloaded_cereal_checkPt_defs)) {
@@ -207,9 +199,7 @@ bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs,
 
     std::string warningMsg;
     if (!reloaded_defs.restore(tmpFilename, errorMsg_, warningMsg)) {
-        std::stringstream ss;
-        ss << "RE-PARSE failed for " << tmpFilename << "\n";
-        errorMsg_ += ss.str();
+        errorMsg_ += MESSAGE("RE-PARSE failed for " << tmpFilename << "\n");
         return false;
     }
 
@@ -218,25 +208,21 @@ bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs,
         bool match = reloaded_defs == theInMemoryDefs;
 
         if (!match) {
-            std::stringstream ss;
-            ss << "\nPersistHelper::reload_from_defs_file\n";
-            ss << "In memory and reloaded def's don't match\n";
-            ss << "+++++++++++++ Saved/reloaded_defs  ++++++++++++++++++++++++++++\n";
-            ss << ecf::as_string(reloaded_defs, PrintStyle::STATE);
-            ss << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n";
-            ss << ecf::as_string(theInMemoryDefs, PrintStyle::STATE);
-            errorMsg_ += ss.str();
+            errorMsg_ += MESSAGE("\nPersistHelper::reload_from_defs_file\n"
+                                 << "In memory and reloaded def's don't match\n"
+                                 << "+++++++++++++ Saved/reloaded_defs  ++++++++++++++++++++++++++++\n"
+                                 << ecf::as_string(reloaded_defs, PrintStyle::STATE)
+                                 << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n"
+                                 << ecf::as_string(theInMemoryDefs, PrintStyle::STATE));
         }
         else {
             if (compare_edit_history_ && !reloaded_defs.compare_edit_history(theInMemoryDefs)) {
-                std::stringstream ss;
-                ss << "\nPersistHelper::reload_from_defs_file compare_edit_history_\n";
-                ss << "In memory and reloaded def's don't match\n";
-                ss << "+++++++++++++ Saved/reloaded_defs  ++++++++++++++++++++++++++++\n";
-                ss << ecf::as_string(reloaded_defs, PrintStyle::MIGRATE);
-                ss << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n";
-                ss << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE);
-                errorMsg_ += ss.str();
+                errorMsg_ += MESSAGE("\nPersistHelper::reload_from_defs_file compare_edit_history_\n"
+                                     << "In memory and reloaded def's don't match\n"
+                                     << "+++++++++++++ Saved/reloaded_defs  ++++++++++++++++++++++++++++\n"
+                                     << ecf::as_string(reloaded_defs, PrintStyle::MIGRATE)
+                                     << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n"
+                                     << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE));
             }
         }
         if (!reloaded_defs.compare_change_no(theInMemoryDefs)) {
@@ -266,25 +252,21 @@ bool PersistHelper::reload_from_cereal_checkpt_file(const Defs& theInMemoryDefs,
             // Make sure the checkpoint the file we just parsed corresponds to the one we stored
             bool match = reloaded_defs == theInMemoryDefs;
             if (!match) {
-                std::stringstream ss;
-                ss << "\nPersistHelper::reload_from_cereal_checkpt_file\n";
-                ss << "In memory and reloaded def's don't match\n";
-                ss << "+++++++++++++ Saved/reloaded check pt file ++++++++++++++++++++++++++++\n";
-                ss << ecf::as_string(reloaded_defs, PrintStyle::STATE);
-                ss << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n";
-                ss << ecf::as_string(theInMemoryDefs, PrintStyle::STATE);
-                errorMsg_ += ss.str();
+                errorMsg_ += MESSAGE("\nPersistHelper::reload_from_cereal_checkpt_file\n"
+                                     << "In memory and reloaded def's don't match\n"
+                                     << "+++++++++++++ Saved/reloaded check pt file ++++++++++++++++++++++++++++\n"
+                                     << ecf::as_string(reloaded_defs, PrintStyle::STATE)
+                                     << "++++++++++++++ In memory def ++++++++++++++++++++++++++++\n"
+                                     << ecf::as_string(theInMemoryDefs, PrintStyle::STATE));
             }
             else {
                 if (compare_edit_history_ && !reloaded_defs.compare_edit_history(theInMemoryDefs)) {
-                    std::stringstream ss;
-                    ss << "\nPersistHelper::reload_from_cereal_checkpt_file  compare_edit_history_\n";
-                    ss << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n";
-                    ss << "+++++++++++++ Saved/reloaded check pt file ++++++++++++++++++++++++++++\n";
-                    ss << ecf::as_string(reloaded_defs, PrintStyle::MIGRATE);
-                    ss << "++++++++++++++ theInMemoryDefs  ++++++++++++++++++++++++++++\n";
-                    ss << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE);
-                    errorMsg_ += ss.str();
+                    errorMsg_ += MESSAGE("\nPersistHelper::reload_from_cereal_checkpt_file  compare_edit_history_\n"
+                                         << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n"
+                                         << "+++++++++++++ Saved/reloaded check pt file ++++++++++++++++++++++++++++\n"
+                                         << ecf::as_string(reloaded_defs, PrintStyle::MIGRATE)
+                                         << "++++++++++++++ theInMemoryDefs  ++++++++++++++++++++++++++++\n"
+                                         << ecf::as_string(theInMemoryDefs, PrintStyle::MIGRATE));
                 }
             }
             if (!reloaded_defs.compare_change_no(theInMemoryDefs)) {
@@ -294,7 +276,7 @@ bool PersistHelper::reload_from_cereal_checkpt_file(const Defs& theInMemoryDefs,
         }
     }
     catch (std::exception& e) {
-        errorMsg_ = "PersistHelper::reload_from_cereal_checkpt_file: " + std::string(e.what());
+        errorMsg_ = MESSAGE("PersistHelper::reload_from_cereal_checkpt_file: " << e.what());
     }
 
     file_size_ = temporary.size();

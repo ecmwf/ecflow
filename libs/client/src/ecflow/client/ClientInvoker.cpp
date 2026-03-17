@@ -661,7 +661,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
             // See ClientEnvironment::is_not_retrying() to see when this is not done.
             //
             if (is_not_retrying(*cts_cmd)) {
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << TimeStamp::now() << "Request( " << cts_cmd->print_short() << " )";
                 if (clientEnv_.denied()) {
                     ss << " ECF_DENIED ";
@@ -685,20 +685,19 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
 
             // The ecFlow client will continue to retry connecting to the server, until it reaches the timeout limit
             if (duration.total_seconds() >= clientEnv_.max_child_cmd_timeout()) {
-                std::stringstream ss;
-                ss << TimeStamp::now() << "ClientInvoker: Timed out after ECF_TIMEOUT("
-                   << clientEnv_.max_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
-                std::string msg = ss.str();
+                std::string msg = MESSAGE(TimeStamp::now() << "ClientInvoker: Timed out after ECF_TIMEOUT("
+                                                           << clientEnv_.max_child_cmd_timeout() << ") seconds : for "
+                                                           << client_env_host_port() << "\n");
                 std::cout << msg;
                 server_reply_.set_error_msg(msg);
                 return 1;
             }
             if (server_reply_.block_client_zombie_detected() &&
                 duration.total_seconds() >= clientEnv_.max_zombie_child_cmd_timeout()) {
-                std::stringstream ss;
-                ss << TimeStamp::now() << "ClientInvoker: *ZOMBIE* Timed out after ECF_ZOMBIE_TIMEOUT("
-                   << clientEnv_.max_zombie_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
-                std::string msg = ss.str();
+                std::string msg =
+                    MESSAGE(TimeStamp::now() << "ClientInvoker: *ZOMBIE* Timed out after ECF_ZOMBIE_TIMEOUT("
+                                             << clientEnv_.max_zombie_child_cmd_timeout() << ") seconds : for "
+                                             << client_env_host_port() << "\n");
                 std::cout << msg;
                 server_reply_.set_error_msg(msg);
                 return 1;
@@ -1326,9 +1325,8 @@ int ClientInvoker::replace(const std::string& absNodePath,
         cts_cmd = std::make_shared<ReplaceNodeCmd>(absNodePath, create_parents_as_required, path_to_client_defs, force);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "ClientInvoker::replace(" << absNodePath << "," << path_to_client_defs << ", ...) failed: " << e.what();
-        server_reply_.set_error_msg(ss.str());
+        server_reply_.set_error_msg(MESSAGE("ClientInvoker::replace(" << absNodePath << "," << path_to_client_defs
+                                                                      << ", ...) failed: " << e.what()));
         if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
         }
@@ -1352,9 +1350,8 @@ int ClientInvoker::replace_1(const std::string& absNodePath,
         cts_cmd = std::make_shared<ReplaceNodeCmd>(absNodePath, create_parents_as_required, client_defs, force);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "ClientInvoker::replace_1(" << absNodePath << " ...) failed: " << e.what();
-        server_reply_.set_error_msg(ss.str());
+        server_reply_.set_error_msg(
+            MESSAGE("ClientInvoker::replace_1(" << absNodePath << " ...) failed: " << e.what()));
         if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
         }
@@ -1507,9 +1504,9 @@ int ClientInvoker::file(const std::string& absNodePath,
         cts_cmd = std::make_shared<CFileCmd>(absNodePath, fileType, max_lines);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "ClientInvoker::file(" << absNodePath << "," << fileType << "," << max_lines << ") failed:\n" << e.what();
-        server_reply_.set_error_msg(ss.str());
+        server_reply_.set_error_msg(MESSAGE("ClientInvoker::file(" << absNodePath << "," << fileType << "," << max_lines
+                                                                   << ") failed:\n"
+                                                                   << e.what()));
         if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
         }
@@ -1552,9 +1549,7 @@ int ClientInvoker::alter(const std::vector<std::string>& paths,
         cts_cmd = std::make_shared<AlterCmd>(paths, alterType, attrType, name, value);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "ClientInvoker::alter failed: " << e.what();
-        server_reply_.set_error_msg(ss.str());
+        server_reply_.set_error_msg(MESSAGE("ClientInvoker::alter failed: " << e.what()));
         if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
         }
@@ -1578,9 +1573,7 @@ int ClientInvoker::alter(const std::string& path,
         cts_cmd = std::make_shared<AlterCmd>(std::vector<std::string>(1, path), alterType, attrType, name, value);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "ClientInvoker::alter failed: " << e.what();
-        server_reply_.set_error_msg(ss.str());
+        server_reply_.set_error_msg(MESSAGE("ClientInvoker::alter failed: " << e.what()));
         if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
         }

@@ -15,6 +15,7 @@
 #include <regex>
 #include <vector>
 
+#include "Message.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
@@ -350,10 +351,8 @@ bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
         if (!foundVersionNumber) {
 
             if (!validateVersionNumber(lineTokens[0], errorMsg)) {
-                std::stringstream ss;
-                ss << " " << i + 1 << ": " << lines[i] << "\n";
-                ss << "for ECF_LISTS file " << white_list_file_ << "\n";
-                errorMsg += ss.str();
+                errorMsg += MESSAGE(" " << i + 1 << ": " << lines[i] << "\n"
+                                        << "for ECF_LISTS file " << white_list_file_ << "\n");
                 return false;
             }
             foundVersionNumber = true;
@@ -382,7 +381,7 @@ bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
 }
 
 std::string WhiteListFile::dump_valid_users() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "ECF_LISTS = '" << white_list_file_ << "'\n";
     if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         ss << " No users specified. Everyone has read/write access\n";
@@ -424,9 +423,7 @@ bool WhiteListFile::validateVersionNumber(const std::string& line, std::string& 
         std::vector<std::string> versionNumberTokens;
         Str::split(line, versionNumberTokens, ".");
         if (versionNumberTokens.size() != 3) {
-            std::stringstream ss;
-            ss << "Expected version of the form <int>.<int>.<int> i.e 4.4.14. but found invalid version number\n";
-            errorMsg += ss.str();
+            errorMsg += "Expected version of the form <int>.<int>.<int> i.e 4.4.14. but found invalid version number\n";
             return false;
         }
 

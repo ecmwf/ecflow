@@ -25,10 +25,10 @@ BOOST_AUTO_TEST_CASE(can_create_named_values) {
     using namespace ecf::resources;
 
     auto display = [](const NamedValue& v) {
-        std::ostringstream oss;
+        std::ostringstream ss;
 
-        oss << std::fixed << std::setprecision(2) << v;
-        return oss.str();
+        ss << std::fixed << std::setprecision(2) << v;
+        return ss.str();
     };
 
     {

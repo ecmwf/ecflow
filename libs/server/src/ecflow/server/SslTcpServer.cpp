@@ -132,9 +132,7 @@ void SslTcpServer::handle_write(const boost::system::error_code& e, ssl_connecti
     if (e) {
         LogFlusher logFlusher;
         ecf::LogToCout logToCout;
-        std::stringstream ss;
-        ss << "SslTcpServer::handle_write: " << e.message() << " : for request " << inbound_request_;
-        log(Log::ERR, ss.str());
+        log(Log::ERR, MESSAGE("SslTcpServer::handle_write: " << e.message() << " : for request " << inbound_request_));
         return;
     }
 

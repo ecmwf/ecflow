@@ -304,7 +304,7 @@ void InLimitMgr::decrementInLimitForSubmission(std::set<Limit*>& limitSet, const
 
 // #define DEBUG_WHY 1
 
-static void add_consumed_paths(Limit* limit, std::stringstream& ss) {
+static void add_consumed_paths(Limit* limit, std::ostream& ss) {
     ss << "(";
     const std::set<std::string>& consumed_paths = limit->paths();
     int count                                   = 0;
@@ -336,15 +336,14 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const {
         for (auto& i : vec_) {
             Limit* limit = i.limit();
             if (limit && !limit->inLimit(i.tokens())) {
-                std::stringstream ss;
+                std::ostringstream ss;
                 if (i.pathToNode().empty()) {
                     ss << "limit " << limit->name() << " is full";
                 }
                 else {
                     if (html) {
-                        std::stringstream s;
-                        s << "[limit]" << i.pathToNode() << Str::COLON() << limit->name();
-                        ss << Node::path_href_attribute(s.str()) << " is full";
+                        auto ref = MESSAGE("[limit]" << i.pathToNode() << Str::COLON() << limit->name());
+                        ss << Node::path_href_attribute(ref) << " is full";
                     }
                     else {
                         ss << "limit " << i.pathToNode() << Str::COLON() << limit->name() << " is full";
@@ -427,11 +426,8 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
                 return referencedLimit; // this is empty/NULL
             }
 
-            std::stringstream ss;
-            ss << "Warning: ";
-            ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString()
-               << ", which cannot be found on the parent nodes\n";
-            warningMsg += ss.str();
+            warningMsg += MESSAGE("Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a "
+                                              << inLimit.toString() << ", which cannot be found on the parent nodes\n");
         }
         return referencedLimit; // this is empty/NULL
     }
@@ -451,10 +447,8 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
                 return limit_ptr();
             }
 
-            std::stringstream ss;
-            ss << "Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString()
-               << ", which cannot be found\n";
-            warningMsg += ss.str();
+            warningMsg += MESSAGE("Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a "
+                                              << inLimit.toString() << ", which cannot be found\n");
         }
         return limit_ptr();
     }
@@ -470,11 +464,11 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
         }
 
         if (reportWarnings) {
-            std::stringstream ss;
-            ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString() << " :";
-            ss << "The referenced " << referenceNode->debugType() << " '" << referenceNode->absNodePath()
-               << "' does not define the limit " << inLimit.name() << "\n";
-            warning_message += ss.str();
+            warning_message +=
+                MESSAGE(node_->debugType()
+                        << " " << node_->absNodePath() << " has a " << inLimit.toString() << " :"
+                        << "The referenced " << referenceNode->debugType() << " '" << referenceNode->absNodePath()
+                        << "' does not define the limit " << inLimit.name() << "\n");
             warningMsg += "Warning: ";
             warningMsg += warning_message;
             warningMsg += "\n";
@@ -487,13 +481,10 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
     if (inLimit.tokens() > referencedLimit->theLimit()) {
         if (reportWarnings) {
             // in limit exceeds the LIMIT value
-            std::stringstream ss;
-            ss << "Warning: ";
-            ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString()
-               << " reference\n";
-            ss << " with value '" << inLimit.tokens() << "' which exceeds '" << referencedLimit->theLimit()
-               << "' defined on the Limit\n";
-            warningMsg += ss.str();
+            warningMsg += MESSAGE("Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a "
+                                              << inLimit.toString() << " reference\n"
+                                              << " with value '" << inLimit.tokens() << "' which exceeds '"
+                                              << referencedLimit->theLimit() << "' defined on the Limit\n");
         }
     }
     return referencedLimit;

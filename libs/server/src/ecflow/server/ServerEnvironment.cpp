@@ -200,7 +200,7 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
         errorMsg = "Could not determine the server host.";
         return false;
     }
-    std::stringstream ss;
+    std::ostringstream ss;
     if (serverPort_ == 0 || serverPort_ <= 1023 || serverPort_ >= 49151) {
 
         ss << "Server port " << serverPort_ << " not set correctly. \n";
@@ -580,10 +580,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
             serverPort_ = ecf::convert_to<int>(port);
         }
         catch (const ecf::bad_conversion&) {
-            std::stringstream ss;
-            ss << "ServerEnvironment::read_environment_variables(): ECF_PORT is defined(" << port
-               << ") but value is *not* convertible to an integer\n";
-            throw ServerEnvironmentException(ss.str());
+            throw ServerEnvironmentException(
+                MESSAGE("ServerEnvironment::read_environment_variables(): ECF_PORT is defined("
+                        << port << ") but value is *not* convertible to an integer\n"));
         }
     }
 
@@ -593,10 +592,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
             checkPtInterval_ = ecf::convert_to<int>(interval);
         }
         catch (const ecf::bad_conversion&) {
-            std::stringstream ss;
-            ss << "ServerEnvironment::read_environment_variables(): ECF_CHECKINTERVAL is defined(" << interval
-               << ") but value is *not* convertible to an integer\n";
-            throw ServerEnvironmentException(ss.str());
+            throw ServerEnvironmentException(
+                MESSAGE("ServerEnvironment::read_environment_variables(): ECF_CHECKINTERVAL is defined("
+                        << interval << ") but value is *not* convertible to an integer\n"));
         }
     }
 
@@ -621,11 +619,10 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
             ecf_prune_node_log_ = ecf::convert_to<int>(var.value());
         }
         catch (const ecf::bad_conversion&) {
-            std::stringstream ss;
-            ss << "ServerEnvironment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an "
-                  "integer, but found: "
-               << var.value();
-            throw ServerEnvironmentException(ss.str());
+            throw ServerEnvironmentException(
+                MESSAGE("ServerEnvironment::read_environment_variables: ECF_PRUNE_NODE_LOG must be convertible to an "
+                        "integer, but found: "
+                        << var.value()));
         }
     }
 
@@ -637,28 +634,23 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name) {
             JobProfiler::set_task_threshold(ecf::convert_to<int>(task_threshold));
         }
         catch (...) {
-            std::stringstream ss;
-            ss << "ServerEnvironment::read_environment_variables(): ECF_TASK_THRESHOLD is defined(" << var.value()
-               << ") but value is *not* convertible to an integer\n";
-            throw ServerEnvironmentException(ss.str());
+            throw ServerEnvironmentException(
+                MESSAGE("ServerEnvironment::read_environment_variables(): ECF_TASK_THRESHOLD is defined("
+                        << var.value() << ") but value is *not* convertible to an integer\n"));
         }
     }
 }
 
 void ServerEnvironment::change_dir_to_ecf_home_and_check_accesibility() {
     if (chdir(ecfHome_.c_str()) != 0) {
-        std::stringstream ss;
-        ss << "Can't chdir to ECF_HOME " << ecfHome_ << "\n";
-        throw ServerEnvironmentException(ss.str());
+        throw ServerEnvironmentException(MESSAGE("Can't chdir to ECF_HOME " << ecfHome_ << "\n"));
     }
     if (access(ecfHome_.c_str(), X_OK | R_OK | W_OK) != 0) {
         // R_OK test for read permission
         // W_OK test for write permission
         // X_OK test for execute or search permission
         // F_OK  test whether the directories leading to the file can be searched and the file exists.
-        std::stringstream ss;
-        ss << "Access restriction on ECF_HOME " << ecfHome_ << "\n";
-        throw ServerEnvironmentException(ss.str());
+        throw ServerEnvironmentException(MESSAGE("Access restriction on ECF_HOME " << ecfHome_ << "\n"));
     }
 }
 
@@ -667,7 +659,7 @@ std::string ServerEnvironment::check_mode_str() const {
 }
 
 std::string ServerEnvironment::dump() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "ECF_HOME = '" << ecfHome_ << "'\n";
     ss << "ECF_LOG = '" << Log::instance()->path() << "'\n";
     ss << "ECF_PORT = '" << serverPort_ << "'\n";

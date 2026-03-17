@@ -40,11 +40,9 @@ void CtsNodeCmd::print(std::string& os) const {
         case CtsNodeCmd::GET: {
             user_cmd(os, CtsApi::get(absNodePath_));
 #ifdef DEBUG
-            std::stringstream ss;
-            if (Ecf::server()) {
-                ss << " [server(" << Ecf::state_change_no() << " " << Ecf::modify_change_no() << ")]";
-            }
-            os += ss.str();
+            os += Ecf::server()
+                      ? MESSAGE(" [server(" << Ecf::state_change_no() << " " << Ecf::modify_change_no() << ")]")
+                      : "";
 #endif
             break;
         }

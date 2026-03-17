@@ -224,9 +224,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
             return PreAllocatedReply::ok_cmd();
         }
         catch (std::exception& e) {
-            std::stringstream ss;
-            ss << "MoveCmd Failed for " << host << ":" << port << "  " << e.what() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("MoveCmd Failed for " << host << ":" << port << "  " << e.what() << "\n"));
         }
     }
 
@@ -306,9 +304,8 @@ void PlugCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
     }
 
     if (args.size() != 2) {
-        std::stringstream ss;
-        ss << "PlugCmd: Two arguments are expected, found " << args.size() << "\n" << PlugCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("PlugCmd: Two arguments are expected, found " << args.size() << "\n"
+                                                                                       << PlugCmd::desc() << "\n"));
     }
 
     std::string sourceNode = args[0];

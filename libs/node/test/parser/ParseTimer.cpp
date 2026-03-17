@@ -141,14 +141,13 @@ int main(int argc, char* argv[]) {
         //   std::cout << "stem " << fs_path.stem()  << "\n";
         //   std::cout << "extension " << fs_path.extension()  << "\n";
 
-        std::stringstream ss;
 #ifdef DEBUG
-        ss << "/var/tmp/ma0/JSON/debug_" << fs_path.stem() << ".json";
+        std::string prefix = "debug_";
 #else
-        ss << "/var/tmp/ma0/JSON/" << fs_path.stem() << ".json";
+        std::string prefix = "";
 #endif
 
-        std::string json_filepath = ss.str();
+        std::string json_filepath = MESSAGE("/var/tmp/ma0/JSON/" << prefix << fs_path.stem() << ".json");
         Str::replaceall(json_filepath, "\"", ""); // fs_path.stem() seems to add ", so remove them
         // cout << "  json_filepath: " << json_filepath << endl;
 

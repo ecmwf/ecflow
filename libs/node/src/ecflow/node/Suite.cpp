@@ -151,9 +151,7 @@ void Suite::begin() {
 
 void Suite::requeue(Requeue_args& args) {
     if (false == begun_) {
-        std::stringstream ss;
-        ss << "Suite::requeue: The suite " << name() << " must be 'begun' first\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Suite::requeue: The suite " << name() << " must be 'begun' first\n"));
     }
 
     // This is more efficient than: since no locking is required
@@ -530,41 +528,34 @@ bool Suite::checkInvariants(std::string& errorMsg) const {
     }
     if (clockAttr_.get()) {
         if (calendar().hybrid() != clockAttr_->hybrid()) {
-            std::stringstream ss;
-            ss << "Suite:" << name() << " Calendar(hybrid(" << calendar().hybrid() << ")) and Clock attribute(hybrid("
-               << clockAttr_->hybrid() << ")) must be in sync, clock types differs";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Suite:" << name() << " Calendar(hybrid(" << calendar().hybrid()
+                                         << ")) and Clock attribute(hybrid(" << clockAttr_->hybrid()
+                                         << ")) must be in sync, clock types differs");
             return false;
         }
     }
 
     if (Ecf::server()) {
         if (state_change_no_ > Ecf::state_change_no()) {
-            std::stringstream ss;
-            ss << "Suite::checkInvariants: suite_change_no(" << state_change_no_ << ") > Ecf::state_change_no("
-               << Ecf::state_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Suite::checkInvariants: suite_change_no("
+                                << state_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n");
             return false;
         }
         if (begun_change_no_ > Ecf::state_change_no()) {
-            std::stringstream ss;
-            ss << "Suite::checkInvariants: begun_change_no_(" << begun_change_no_ << ") > Ecf::state_change_no("
-               << Ecf::state_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Suite::checkInvariants: begun_change_no_("
+                                << begun_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n");
             return false;
         }
         if (calendar_change_no_ > Ecf::state_change_no() + 1) {
-            std::stringstream ss;
-            ss << "Suite::checkInvariants: calendar_change_no_(" << calendar_change_no_ << ") > Ecf::state_change_no("
-               << Ecf::state_change_no() + 1 << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Suite::checkInvariants: calendar_change_no_("
+                        << calendar_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() + 1 << ")\n");
             return false;
         }
         if (modify_change_no_ > Ecf::modify_change_no()) {
-            std::stringstream ss;
-            ss << "Suite::checkInvariants: modify_change_no_(" << modify_change_no_ << ") > Ecf::modify_change_no("
-               << Ecf::modify_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Suite::checkInvariants: modify_change_no_("
+                        << modify_change_no_ << ") > Ecf::modify_change_no(" << Ecf::modify_change_no() << ")\n");
             return false;
         }
     }
