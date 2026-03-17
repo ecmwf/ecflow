@@ -108,14 +108,14 @@ void HttpServer::parse_args(int argc, char** argv) const {
 
 void apply_listeners(httplib::Server& http_server) {
 
-    const auto dump_headers = [](const httplib::Headers& headers, std::stringstream& ss) {
+    const auto dump_headers = [](const httplib::Headers& headers, std::ostream& ss) {
         for (const auto& [key, value] : headers) {
             ss << key << ": " << value << "\n";
         }
     };
 
     const auto format = [&dump_headers](const httplib::Request& req, const httplib::Response& res) {
-        std::stringstream ss;
+        std::ostringstream ss;
 
         ss << '\n';
 

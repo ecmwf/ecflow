@@ -474,10 +474,8 @@ void check_all_mirrors_are_valid(const T& root, std::string_view host, std::stri
                       [&error, host, port](const Node& node) -> bool {
                           for (const auto& mirror : node.mirrors()) {
                               if (mirror.resolved_remote_host() == host && mirror.resolved_remote_port() == port) {
-                                  std::ostringstream oss;
-                                  oss << "Mirror '" << mirror.name() << "' on node '" + node.absNodePath()
-                                      << "' mirrors own server '" << host << ":" << port << "'";
-                                  error = oss.str();
+                                  error = MESSAGE("Mirror '" << mirror.name() << "' on node '" + node.absNodePath()
+                                                             << "' mirrors own server '" << host << ":" << port << "'");
                                   return true;
                               }
                           }

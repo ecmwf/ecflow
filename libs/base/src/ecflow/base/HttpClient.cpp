@@ -16,6 +16,7 @@
 
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Message.hpp"
 
 static std::string make_scheme_host_port(const std::string& scheme, const std::string& host, const std::string& port) {
     return scheme + "://" + host + ":" + port;
@@ -80,7 +81,5 @@ bool HttpClient::handle_server_response(ServerReply& server_reply, bool debug) c
         return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
     }
 
-    std::stringstream ss;
-    ss << "HttpClient::handle_server_response: Error: " << status_;
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("HttpClient::handle_server_response: Error: " << status_));
 }

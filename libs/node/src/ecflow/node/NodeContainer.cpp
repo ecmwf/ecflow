@@ -12,7 +12,6 @@
 
 #include <cassert>
 #include <limits>
-#include <sstream>
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
@@ -603,9 +602,8 @@ bool NodeContainer::isAddChildOk(Node* theChild, std::string& errorMsg) const {
             return true;
         }
 
-        std::stringstream ss;
-        ss << "Task/Family of name " << theChild->name() << " already exists in container node " << name();
-        errorMsg += ss.str();
+        errorMsg +=
+            MESSAGE("Task/Family of name " << theChild->name() << " already exists in container node " << name());
         return false;
     }
 
@@ -617,9 +615,8 @@ bool NodeContainer::isAddChildOk(Node* theChild, std::string& errorMsg) const {
             return true;
         }
 
-        std::stringstream ss;
-        ss << "Family/Task of name " << theChild->name() << " already exists in container node " << name();
-        errorMsg += ss.str();
+        errorMsg +=
+            MESSAGE("Family/Task of name " << theChild->name() << " already exists in container node " << name());
         return false;
     }
 
@@ -652,9 +649,8 @@ size_t NodeContainer::child_position(const Node* child) const {
 
 task_ptr NodeContainer::add_task(const std::string& task_name) {
     if (find_by_name(task_name).get()) {
-        std::stringstream ss;
-        ss << "Add Task failed: A task/family of name '" << task_name << "' already exists on node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Task failed: A task/family of name '"
+                                         << task_name << "' already exists on node " << debugNodePath()));
     }
     task_ptr the_task = Task::create(task_name);
     add_task_only(the_task);
@@ -663,10 +659,8 @@ task_ptr NodeContainer::add_task(const std::string& task_name) {
 
 family_ptr NodeContainer::add_family(const std::string& family_name) {
     if (find_by_name(family_name).get()) {
-        std::stringstream ss;
-        ss << "Add Family failed: A Family/Task of name '" << family_name << "' already exists on node "
-           << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Family failed: A Family/Task of name '"
+                                         << family_name << "' already exists on node " << debugNodePath()));
     }
     family_ptr the_family = Family::create(family_name);
     add_family_only(the_family);
@@ -675,19 +669,16 @@ family_ptr NodeContainer::add_family(const std::string& family_name) {
 
 void NodeContainer::addTask(const task_ptr& t, size_t position) {
     if (find_by_name(t->name()).get()) {
-        std::stringstream ss;
-        ss << "Add Task failed: A Task/Family of name '" << t->name() << "' already exists on node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Task failed: A Task/Family of name '"
+                                         << t->name() << "' already exists on node " << debugNodePath()));
     }
     add_task_only(t, position);
 }
 
 void NodeContainer::add_task_only(const task_ptr& t, size_t position) {
     if (t->parent()) {
-        std::stringstream ss;
-        ss << debugNodePath() << ": Add Task failed: A task of name '" << t->name()
-           << "' is already owned by another node";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(debugNodePath() << ": Add Task failed: A task of name '" << t->name()
+                                                         << "' is already owned by another node"));
     }
 
     t->set_parent(this);
@@ -702,10 +693,8 @@ void NodeContainer::add_task_only(const task_ptr& t, size_t position) {
 
 void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
     if (f->parent()) {
-        std::stringstream ss;
-        ss << debugNodePath() << ": Add Family failed: A family of name '" << f->name()
-           << "' is already owned by another node";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(debugNodePath() << ": Add Family failed: A family of name '" << f->name()
+                                                         << "' is already owned by another node"));
     }
 
     f->set_parent(this);
@@ -720,10 +709,8 @@ void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
 
 void NodeContainer::addFamily(const family_ptr& f, size_t position) {
     if (find_by_name(f->name()).get()) {
-        std::stringstream ss;
-        ss << "Add Family failed: A Family/Task of name '" << f->name() << "' already exists on node "
-           << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Family failed: A Family/Task of name '"
+                                         << f->name() << "' already exists on node " << debugNodePath()));
     }
     add_family_only(f, position);
 }
@@ -1096,9 +1083,7 @@ void NodeContainer::update_limits() {
 std::string NodeContainer::archive_path() const {
     std::string the_archive_path;
     if (!findParentUserVariableValue(ecf::environment::ECF_HOME, the_archive_path)) {
-        std::stringstream ss;
-        ss << "NodeContainer::archive_path: cannot find ECF_HOME from " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::archive_path: cannot find ECF_HOME from " << debugNodePath()));
     }
 
     std::string the_archive_file_name = absNodePath();
@@ -1197,23 +1182,19 @@ void NodeContainer::restore_on_begin_or_requeue() {
         restore();
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore_on_begin_or_requeue(): failed : " << e.what();
-        log(Log::ERR, ss.str());
+        log(Log::ERR, MESSAGE("NodeContainer::restore_on_begin_or_requeue(): failed : " << e.what()));
     }
 }
 
 void NodeContainer::restore() {
     if (!get_flag().is_set(ecf::Flag::ARCHIVED)) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() Node " << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
+                                         << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set"));
     }
 
     if (!nodes_.empty()) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() Node " << absNodePath() << " can't restore, Container already has children ?";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
+                                         << absNodePath() << " can't restore, Container already has children ?"));
     }
 
     defs_ptr archive_defs        = Defs::create();
@@ -1222,26 +1203,22 @@ void NodeContainer::restore() {
         archive_defs->restore(the_archive_path);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() Node " << absNodePath() << " could not restore file at  " << the_archive_path
-           << "  : " << e.what();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
+                                         << absNodePath() << " could not restore file at  " << the_archive_path
+                                         << "  : " << e.what()));
     }
 
     // find the same node in the defs.
     node_ptr archived_node = archive_defs->findAbsNode(absNodePath());
     if (!archived_node) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() could not find " << absNodePath() << " in the archived file "
-           << the_archive_path;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() could not find "
+                                         << absNodePath() << " in the archived file " << the_archive_path));
     }
     NodeContainer* archived_node_container = archived_node->isNodeContainer();
     if (!archived_node_container) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() The node at " << absNodePath() << " recovered from " << the_archive_path
-           << " is not a container(suite/family)";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() The node at "
+                                         << absNodePath() << " recovered from " << the_archive_path
+                                         << " is not a container(suite/family)"));
     }
 
     swap(*archived_node_container);                            // swap the children, and set parent pointers

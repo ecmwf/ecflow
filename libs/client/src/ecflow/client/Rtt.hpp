@@ -60,9 +60,9 @@ void rtt(const std::string& message);
 // helper, see STRINGIZE() macro
 template <typename Functor>
 std::string stringize_rtt(Functor const& f) {
-    std::ostringstream out;
-    f(out);
-    return out.str();
+    std::ostringstream ss;
+    f(ss);
+    return ss.str();
 }
 
 // NOLINTBEGIN(bugprone-macro-parentheses)

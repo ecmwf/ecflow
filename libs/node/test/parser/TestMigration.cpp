@@ -490,7 +490,7 @@ BOOST_AUTO_TEST_CASE(test_state_edit_history) {
 }
 
 static std::string dump_edit_history(const std::unordered_map<std::string, std::vector<std::string>>& edit_history) {
-    std::stringstream ss;
+    std::ostringstream ss;
     for (const auto& i : edit_history) {
         ss << "node: " << i.first << "\n";
         for (const auto& h : i.second) {

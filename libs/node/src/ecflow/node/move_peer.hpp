@@ -16,25 +16,17 @@
 template <typename ct>
 void move_peer_node(std::vector<ct>& vec, Node* source, Node* dest, const std::string& error_str) {
     if (!source) {
-        std::stringstream ss;
-        ss << error_str << "::move source is NULL";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(error_str << "::move source is NULL"));
     }
     if (!dest) {
-        std::stringstream ss;
-        ss << error_str << "::move destination is NULL";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(error_str << "::move destination is NULL"));
     }
     if (source == dest) {
-        std::stringstream ss;
-        ss << error_str << "move choose a different location as sibling " << dest->absNodePath()
-           << " matches node to be moved";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(error_str << "move choose a different location as sibling "
+                                                   << dest->absNodePath() << " matches node to be moved"));
     }
     if (source->parent() != dest->parent()) {
-        std::stringstream ss;
-        ss << error_str << "move source and destination node are not siblings";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(error_str << "move source and destination node are not siblings"));
     }
 
     for (size_t t = 0; t < vec.size(); t++) {
@@ -49,16 +41,13 @@ void move_peer_node(std::vector<ct>& vec, Node* source, Node* dest, const std::s
                     return;
                 }
             }
-            std::stringstream ss;
-            ss << error_str << "::move could not find sibling node " << dest->absNodePath() << " when moving node "
-               << source->absNodePath();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE(error_str << "::move could not find sibling node " << dest->absNodePath()
+                                                       << " when moving node " << source->absNodePath()));
         }
     }
 
-    std::stringstream ss;
-    ss << error_str << "::move source node " << source->absNodePath() << " not found on parent";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(
+        MESSAGE(error_str << "::move source node " << source->absNodePath() << " not found on parent"));
 }
 
 #endif /* ecflow_node_move_peer_HPP */

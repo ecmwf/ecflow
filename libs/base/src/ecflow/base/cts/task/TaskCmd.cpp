@@ -107,10 +107,10 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
         static_cast<void>(server->zombie_ctrl().handle_path_zombie(server, this, action_taken, reply));
 
         // distinguish output by using *path*
-        std::stringstream ss;
-        ss << " zombie(*path*) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ << " : "
-           << process_or_remote_id_ << " : " << jobs_password_ << " : action(" << action_taken << ")";
-        log(Log::ERR, ss.str());
+        log(Log::ERR,
+            MESSAGE(" zombie(*path*) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_
+                                             << " : " << process_or_remote_id_ << " : " << jobs_password_
+                                             << " : action(" << action_taken << ")"));
         return false;
     }
 
@@ -175,11 +175,10 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
         case NState::SUBMITTED: {
             // The pid on the task will be empty
             if (child_type() != Child::INIT) {
-                std::stringstream ss;
-                ss << path_to_submittable_
-                   << " When a node is submitted, expected next child command to be INIT but received "
-                   << Child::to_string(child_type());
-                log(Log::ERR, ss.str());
+                log(Log::ERR,
+                    MESSAGE(path_to_submittable_
+                            << " When a node is submitted, expected next child command to be INIT but received "
+                            << Child::to_string(child_type())));
             }
             break;
         }
@@ -296,7 +295,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
             // LOG failure: Include type of zombie.
             // ** NOTE **: the zombie may have been removed by user actions. i.e if fob and child cmd is abort |
             // complete, etc
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << " zombie";
             const Zombie& theZombie =
                 server->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_);

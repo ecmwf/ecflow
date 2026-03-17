@@ -164,19 +164,17 @@ void Log::check_new_path(const std::string& new_path) {
     if (!parent_path.empty()) {
 
         if (!fs::exists(parent_path)) {
-            std::stringstream ss;
-            ss << "Log::check_new_path: Cannot create new log file, since the directory part " << parent_path
-               << " does not exist\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Log::check_new_path: Cannot create new log file, since the directory part "
+                        << parent_path << " does not exist\n"));
         }
     }
 
     // Now check that path does not correspond to a directory, can't use that as the new log file location
     if (fs::is_directory(the_new_path)) {
-        std::stringstream ss;
-        ss << "LogCmd::LogCmd: Cannot create new log file, since the path correspond to a directory " << the_new_path
-           << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("LogCmd::LogCmd: Cannot create new log file, since the path correspond to a directory "
+                    << the_new_path << "\n"));
     }
 }
 
@@ -276,9 +274,7 @@ bool log_append(const std::string& message) {
 }
 
 void log_assert(char const* expr, char const* file, long line, const std::string& message) {
-    std::stringstream ss;
-    ss << "ASSERT failure: " << expr << " at " << file << ":" << line << " " << message;
-    std::string assert_msg = ss.str();
+    auto assert_msg = MESSAGE("ASSERT failure: " << expr << " at " << file << ":" << line << " " << message);
     std::cerr << assert_msg << "\n";
     if (Log::instance()) {
         Log::instance()->log(Log::ERR, assert_msg);
@@ -327,9 +323,7 @@ TestLog::~TestLog() {
 LogTimer::~LogTimer() {
     Log* the_log = Log::instance();
     if (the_log) {
-        std::stringstream ss;
-        ss << " " << msg_ << " " << timer_.elapsed_seconds();
-        the_log->log(Log::DBG, ss.str());
+        the_log->log(Log::DBG, MESSAGE(" " << msg_ << " " << timer_.elapsed_seconds()));
     }
 }
 

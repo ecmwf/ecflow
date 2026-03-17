@@ -14,6 +14,7 @@
 #include <sstream>
 
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Message.hpp"
 
 std::string CtsApi::to_string(const std::vector<std::string>& vec) {
     std::string ret;
@@ -1081,9 +1082,7 @@ std::vector<std::string> CtsApi::getLog(int lastLine) {
     retVec.reserve(2);
     retVec.emplace_back("--log=get");
     if (lastLine != 0) {
-        std::stringstream ss;
-        ss << lastLine;
-        retVec.push_back(ss.str());
+        retVec.push_back(MESSAGE(lastLine));
     }
     return retVec;
 }

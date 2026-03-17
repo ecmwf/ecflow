@@ -18,6 +18,7 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 using namespace ecf;
@@ -203,11 +204,9 @@ bool DateAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
         return false;
     }
 
-    std::stringstream ss;
-    ss << " is date dependent ( next run on " << boost::gregorian::to_simple_string(next_matching_date(c))
-       << " the current date is ";
-    ss << c.day_of_month() << "/" << c.month() << "/" << c.year() << " )";
-    theReasonWhy += ss.str();
+    theReasonWhy += MESSAGE(" is date dependent ( next run on "
+                            << boost::gregorian::to_simple_string(next_matching_date(c)) << " the current date is "
+                            << c.day_of_month() << "/" << c.month() << "/" << c.year() << " )");
     return true;
 }
 
@@ -253,15 +252,7 @@ void DateAttr::write(std::string& ret) const {
 }
 
 std::string DateAttr::dump() const {
-    std::stringstream ss;
-    ss << toString();
-    if (free_) {
-        ss << " (free)";
-    }
-    else {
-        ss << " (holding)";
-    }
-    return ss.str();
+    return MESSAGE(toString() << (free_ ? " (free)" : " (holding)"));
 }
 
 bool DateAttr::operator==(const DateAttr& rhs) const {

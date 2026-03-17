@@ -262,9 +262,9 @@ std::string Zombie::explanation() const {
 }
 
 std::string Zombie::pretty_print(const std::vector<Zombie>& zombies, int indent) {
-    std::stringstream ss;
     std::vector<std::string> list;
     pretty_print(zombies, list, indent);
+    std::ostringstream ss;
     for (const auto& i : list) {
         ss << i << "\n";
     }
@@ -346,7 +346,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
     }
 
     {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (indent != 0) {
             for (int i = 0; i < indent; i++) {
                 ss << " ";
@@ -362,7 +362,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies, std::vector<std::s
     }
 
     for (const Zombie& z : zombies) {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (indent != 0) {
             for (int i = 0; i < indent; i++) {
                 ss << " ";

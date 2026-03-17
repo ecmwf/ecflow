@@ -166,14 +166,14 @@ public:
 };
 
 CommandLine::cl_t reconstruct_command_line(const CommandLine::tokens_t& tokens, const std::string& separator = " ") {
-    std::ostringstream cl;
+    std::ostringstream ss;
     if (!tokens.empty()) {
-        cl << tokens.front();
+        ss << tokens.front();
         for (size_t i = 1; i < tokens.size(); ++i) {
-            cl << separator << '"' << tokens[i] << '"';
+            ss << separator << '"' << tokens[i] << '"';
         }
     }
-    return cl.str();
+    return ss.str();
 }
 
 CommandLine::tokens_t reconstruct_tokens(int argc, const char** argv) {

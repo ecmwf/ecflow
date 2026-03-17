@@ -38,13 +38,13 @@ UDPServerEnvironment::UDPServerEnvironment()
 }
 
 std::string UDPServerEnvironment::as_configuration_file() const {
-    std::ostringstream os;
+    std::ostringstream ss;
     for (const auto& entry : environment_) {
         if (auto found = options_map.find(entry.first); found != std::end(options_map)) {
-            os << found->second << "=" << entry.second << std::endl;
+            ss << found->second << "=" << entry.second << std::endl;
         }
     }
-    return os.str();
+    return ss.str();
 }
 
 } // namespace ecf

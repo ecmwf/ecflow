@@ -16,6 +16,7 @@
 
 #include "ecflow/base/stc/StcCmd.hpp"
 #include "ecflow/core/Chrono.hpp"
+#include "ecflow/core/Message.hpp"
 
 #ifdef DEBUG_PERF
     #include "ecflow/core/DebugPerf.hpp"
@@ -138,16 +139,9 @@ void Client::handle_connect(const boost::system::error_code& e, endpoints_iterat
         if (!start_connect(++endpoints_iterator)) {
             // Ran out of end points, An error occurred
             stop();
-            std::stringstream ss;
-            if (e) {
-                ss << "Client::handle_connect: Ran out of end points : connection error( " << e.message()
-                   << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;
-            }
-            else {
-                ss << "Client::handle_connect: Ran out of end points : connection error for request( "
-                   << outbound_request_ << " ) on " << host_ << ":" << port_;
-            }
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Client::handle_connect: Ran out of end points : connection error ( "
+                                             << (e ? e.message() : "n/a") << " ) for request( " << outbound_request_
+                                             << " ) on " << host_ << ":" << port_));
         }
     }
     else if (e) {
@@ -165,10 +159,9 @@ void Client::handle_connect(const boost::system::error_code& e, endpoints_iterat
         if (!start_connect(++endpoints_iterator)) {
             // Ran out of end points. An error occurred.
             stop();
-            std::stringstream ss;
-            ss << "Client::handle_connect: Ran out of end points: connection error( " << e.message()
-               << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Client::handle_connect: Ran out of end points: connection error( "
+                                             << e.message() << " ) for request( " << outbound_request_ << " ) on "
+                                             << host_ << ":" << port_));
         }
     }
     else {
@@ -219,10 +212,9 @@ void Client::handle_write(const boost::system::error_code& e) {
         // An error occurred.
         stop();
 
-        std::stringstream ss;
-        ss << "Client::handle_write: error (" << e.message() << " ) for request( " << outbound_request_ << " ) on "
-           << host_ << ":" << port_;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Client::handle_write: error (" << e.message() << " ) for request( "
+                                                                         << outbound_request_ << " ) on " << host_
+                                                                         << ":" << port_));
     }
 
     // Nothing to do. The socket will be closed automatically when the last
@@ -298,10 +290,9 @@ void Client::handle_read(const boost::system::error_code& e) {
             return;
         }
 
-        std::stringstream ss;
-        ss << "Client::handle_read: connection error( " << e.message() << " ) for request( " << outbound_request_
-           << " ) on " << host_ << ":" << port_;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Client::handle_read: connection error( "
+                                         << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_
+                                         << ":" << port_));
     }
 
     // Since we are not starting a new operation the io_context will run out of
@@ -349,10 +340,9 @@ void Client::check_deadline() {
         // asynchronous operations are cancelled.
         stop();
 
-        std::stringstream ss;
-        ss << "Client::check_deadline: timed out after " << timeout_.count() << "ms for request( " << outbound_request_
-           << " ) on " << host_ << ":" << port_;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Client::check_deadline: timed out after "
+                                         << timeout_.count() << "ms for request( " << outbound_request_ << " ) on "
+                                         << host_ << ":" << port_));
     }
 
     // Put the actor back to sleep.

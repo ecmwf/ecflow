@@ -72,7 +72,7 @@ static int timeout      = 32;
 static int NUM_OF_TASKS = 5;
 
 static std::string dump_tasks(const std::vector<Task*>& tasks) {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "     task status: no of tasks(" << tasks.size() << ")\n";
     for (const Task* task : tasks) {
         ss << "      " << task->absNodePath() << " " << NState::toString(task->state())

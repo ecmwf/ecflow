@@ -20,9 +20,9 @@ namespace {
 
 template <typename... Args>
 std::string as_string(Args... args) {
-    std::ostringstream os;
-    ((os << args), ...);
-    return os.str();
+    std::ostringstream ss;
+    ((ss << args), ...);
+    return ss.str();
 }
 
 } // namespace
@@ -47,8 +47,7 @@ UDPServerOptions::UDPServerOptions(const std::vector<std::string>& argv)
         // Collect environment options
         // note: even though being processed later, environment options do not override cli options!
         UDPServerEnvironment environment;
-        std::stringstream ss;
-        ss << environment.as_configuration_file();
+        std::istringstream ss(environment.as_configuration_file());
         auto env_options = po::parse_config_file(ss, all_options, true);
         po::store(env_options, variables);
 

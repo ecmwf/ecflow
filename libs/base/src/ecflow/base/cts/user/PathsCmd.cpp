@@ -235,7 +235,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
     // LogTimer timer(" PathsCmd::doHandleRequest");
 
     Defs* defs = as->defs().get();
-    std::stringstream ss;
+    std::ostringstream ss;
     switch (api_) {
 
         case PathsCmd::SUSPEND: {
@@ -404,10 +404,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                     continue;
                 }
                 if (!theNode->suite()->begun()) {
-                    std::stringstream mss;
-                    mss << "Status failed. For " << path << " The suite " << theNode->suite()->name()
-                        << " must be 'begun' first\n";
-                    throw std::runtime_error(mss.str());
+                    throw std::runtime_error(MESSAGE("Status failed. For " << path << " The suite "
+                                                                           << theNode->suite()->name()
+                                                                           << " must be 'begun' first\n"));
                 }
                 SuiteChangedPtr changed(theNode.get());
                 theNode->status(); // this can throw std::runtime_error
@@ -684,10 +683,9 @@ void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             }
         }
         if (!all && paths.empty()) {
-            std::stringstream ss;
-            ss << "Check: Please specify one of [ _all_ | / | /<path/to/anode> ]. Paths must begin with a leading '/' "
-                  "character\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE(
+                "Check: Please specify one of [ _all_ | / | /<path/to/anode> ]. Paths must begin with a leading '/' "
+                "character\n"));
         }
         if (paths.size() == 1 && paths[0] == "/") {
             // treat as _all_
@@ -701,17 +699,15 @@ void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
                 paths.emplace_back("clear");
             }
             else {
-                std::stringstream ss;
-                ss << theArg() << ":  No paths or option specified. Paths must begin with a leading '/' character\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    theArg() << ":  No paths or option specified. Paths must begin with a leading '/' character\n"));
             }
         }
     }
     else {
         if (paths.empty()) {
-            std::stringstream ss;
-            ss << theArg() << ":  No paths specified. Paths must begin with a leading '/' character\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE(theArg() << ":  No paths specified. Paths must begin with a leading '/' character\n"));
         }
     }
 

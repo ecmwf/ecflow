@@ -93,7 +93,7 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
         return PreAllocatedReply::delete_all_cmd();
     }
     else {
-        std::stringstream ss;
+        std::ostringstream ss;
         Defs* defs = as->defs().get();
 
         for (const auto& path : paths_) {
@@ -145,7 +145,7 @@ void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* th
         }
     }
     if (!activeVec.empty() || !submittedVec.empty()) {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (theNodeToDelete) {
             ss << "Cannot delete node " << theNodeToDelete->debugNodePath() << "\n";
         }
@@ -211,9 +211,8 @@ void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, 
     }
 
     if (!all && paths.empty()) {
-        std::stringstream ss;
-        ss << "Delete: No paths specified. Paths must begin with a leading '/' character\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Delete: No paths specified. Paths must begin with a leading '/' character\n"));
     }
 
     if (do_prompt) {

@@ -477,11 +477,9 @@ bool ExprParser::doParse(std::string& errorMsg) {
         return errorMsg.empty();
     }
     else {
-        std::stringstream ss;
-        ss << "Parsing failed\n";
-        ss << "length = " << std::dec << info.length << "\n";
-        ss << "stopped at: \": " << info.stop << "\"\n";
-        errorMsg = ss.str();
+        errorMsg = MESSAGE("Parsing failed\n"
+                           << "length = " << std::dec << info.length << "\n"
+                           << "stopped at: \": " << info.stop << "\"\n");
     }
     return false;
 }
@@ -1109,9 +1107,9 @@ AstTop* createTopAst(tree_parse_info<> info,
 
 #if defined(PRINT_AST)
     if (ast.get()) {
-        std::stringstream s2;
-        ast->print_flat(s2, true /*add_brackets*/);
-        std::cout << "\nPRINT_AST  " << s2.str() << "\n";
+        std::ostringstream ss;
+        ast->print_flat(ss, true /*add_brackets*/);
+        std::cout << "\nPRINT_AST  " << ss.str() << "\n";
         std::cout << "PRINT_AST  " << expr << "\n";
         std::cout << *ast.get();
     }

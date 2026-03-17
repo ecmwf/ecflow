@@ -314,21 +314,18 @@ void ZombieCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
     if (paths.empty()) {
-        std::stringstream ss;
-        ss << "ZombieCmd: No paths specified. At least one path expected. Paths must begin with a leading '/' "
-              "character\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ZombieCmd: No paths specified. At least one path expected. Paths must begin with a leading '/' "
+                    "character\n"));
     }
     if (paths.size() > 1 && !options.empty()) {
-        std::stringstream ss;
-        ss << "ZombieCmd: process_or_remote_id and password cannot be used when multiple paths are specified. Please "
-              "specify a single path\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "ZombieCmd: process_or_remote_id and password cannot be used when multiple paths are specified. Please "
+            "specify a single path\n"));
     }
     if (options.size() >= 3) {
-        std::stringstream ss;
-        ss << "ZombieCmd: to many options expected only process_or_remote_id and password and a list of paths.\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "ZombieCmd: to many options expected only process_or_remote_id and password and a list of paths.\n"));
     }
     if (options.size() == 1) {
         process_or_remote_id = options[0];

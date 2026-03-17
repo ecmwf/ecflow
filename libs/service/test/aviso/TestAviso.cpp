@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "ecflow/core/Message.hpp"
 #include "ecflow/service/aviso/Aviso.hpp"
 
 BOOST_AUTO_TEST_SUITE(U_Aviso)
@@ -32,9 +33,9 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_subscribe) {
     using namespace ecf::service::aviso;
     AvisoSubscribe subscribe{"path", "listener_cfg", "address", "schema", 60, 1, "auth"};
 
-    std::ostringstream oss;
-    oss << subscribe;
-    BOOST_CHECK(oss.str().find("AvisoSubscribe") != std::string::npos);
+    std::ostringstream ss;
+    ss << subscribe;
+    BOOST_CHECK(ss.str().find("AvisoSubscribe") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -51,9 +52,9 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_unsubscribe) {
     using namespace ecf::service::aviso;
     AvisoUnsubscribe unsubscribe{"path"};
 
-    std::ostringstream oss;
-    oss << unsubscribe;
-    BOOST_CHECK(oss.str().find("AvisoUnsubscribe") != std::string::npos);
+    std::ostringstream ss;
+    ss << unsubscribe;
+    BOOST_CHECK(ss.str().find("AvisoUnsubscribe") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -76,9 +77,9 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_request) {
     using namespace ecf::service::aviso;
     AvisoRequest request{AvisoSubscribe{"path", "listener_cfg", "address", "schema", 60, 1, "auth"}};
 
-    std::ostringstream oss;
-    oss << request;
-    BOOST_CHECK(oss.str().find("AvisoRequest") != std::string::npos);
+    std::ostringstream ss;
+    ss << request;
+    BOOST_CHECK(ss.str().find("AvisoRequest") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -100,9 +101,9 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_notification) {
     using namespace ecf::service::aviso;
     AvisoNotification notification{"key", "value", 1};
 
-    std::ostringstream oss;
-    oss << notification;
-    BOOST_CHECK(oss.str().find("AvisoNotification") != std::string::npos);
+    std::ostringstream ss;
+    ss << notification;
+    BOOST_CHECK(ss.str().find("AvisoNotification") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -118,9 +119,7 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_no_match) {
     using namespace ecf::service::aviso;
     AvisoNoMatch no_match;
 
-    std::ostringstream oss;
-    oss << no_match;
-    BOOST_CHECK(oss.str().find("AvisoNoMatch") != std::string::npos);
+    BOOST_CHECK(MESSAGE(no_match).find("AvisoNoMatch") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(can_create_parameterised_aviso_error) {
@@ -133,9 +132,7 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_error) {
     using namespace ecf::service::aviso;
     AvisoError error{"error"};
 
-    std::ostringstream oss;
-    oss << error;
-    BOOST_CHECK(oss.str().find("AvisoError") != std::string::npos);
+    BOOST_CHECK(MESSAGE(error).find("AvisoError") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -244,9 +241,7 @@ BOOST_AUTO_TEST_CASE(can_print_configured_listener) {
     listener.with_parameter("b", "bbb");
     listener.with_parameter("c", "ccc");
 
-    std::ostringstream oss;
-    oss << listener;
-    BOOST_CHECK(oss.str().find("ConfiguredListener") != std::string::npos);
+    BOOST_CHECK(MESSAGE(listener).find("ConfiguredListener") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(can_make_configured_listener) {

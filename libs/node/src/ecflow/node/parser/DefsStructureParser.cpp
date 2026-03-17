@@ -32,10 +32,9 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file
       file_type_(PrintStyle::DEFS),
       defs_as_string_(Str::EMPTY()) {
     if (!infile_.ok()) {
-        std::stringstream ss;
-        ss << "DefsStructureParser::DefsStructureParser: Unable to open file! " << infile_.file_name() << "\n\n";
-        ss << Version::description() << "\n";
-        error_ = ss.str();
+        error_ = MESSAGE("DefsStructureParser::DefsStructureParser: Unable to open file! "
+                         << infile_.file_name() << "\n\n"
+                         << Version::description() << "\n");
     }
 }
 
@@ -48,10 +47,8 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str,
       file_type_(PrintStyle::DEFS),
       defs_as_string_(str) {
     if (defs_as_string_.empty()) {
-        std::stringstream ss;
-        ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";
-        ss << Version::description() << "\n";
-        error_ = ss.str();
+        error_ = MESSAGE("DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n"
+                         << Version::description() << "\n");
     }
 }
 
@@ -64,10 +61,8 @@ DefsStructureParser::DefsStructureParser(const std::string& defs_node_string)
       file_type_(PrintStyle::MIGRATE),
       defs_as_string_(defs_node_string) {
     if (defs_as_string_.empty()) {
-        std::stringstream ss;
-        ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";
-        ss << Version::description() << "\n";
-        error_ = ss.str();
+        error_ = MESSAGE("DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n"
+                         << Version::description() << "\n");
     }
 }
 
@@ -146,10 +141,9 @@ bool DefsStructureParser::do_parse_line(const std::string& line,
     // If the *top* of the stack is empty use the DefsParser
     Parser* theCurrentParser = (nodeStack_.empty()) ? &defsParser_ : const_cast<Parser*>(nodeStack_.top().second);
     if (theCurrentParser == nullptr) {
-        std::stringstream ss;
-        ss << "No parser found: Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
-        ss << Version::description() << "\n\n";
-        errorMsg = ss.str();
+        errorMsg =
+            MESSAGE("No parser found: Could not parse '" << line << "' around line number " << lineNumber_ << "\n"
+                                                         << Version::description() << "\n\n");
         return false;
     }
 
@@ -160,11 +154,9 @@ bool DefsStructureParser::do_parse_line(const std::string& line,
         theCurrentParser->doParse(line, lineTokens);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << e.what() << "\n";
-        ss << "Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
-        ss << Version::description() << "\n\n";
-        errorMsg = ss.str();
+        errorMsg = MESSAGE(e.what() << "\n"
+                                    << "Could not parse '" << line << "' around line number " << lineNumber_ << "\n"
+                                    << Version::description() << "\n\n");
         return false;
     }
     return true;

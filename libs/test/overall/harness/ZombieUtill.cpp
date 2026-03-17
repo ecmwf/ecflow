@@ -152,16 +152,16 @@ int ZombieUtil::do_zombie_user_action(ZombieCtrlAction uc,
                 break;
             }
 
-            std::stringstream ss;
-            ss << "do_zombie_user_action:\nExpected " << expected_action_cnt << " zombies with user action "
-               << ecf::to_string(uc) << " but found " << action_set << "\naction set zombies\n"
-               << Zombie::pretty_print(action_set_zombies, 6) << ", Test taking longer than time constraint of "
-               << assertTimer.timeConstraint();
+            auto error = MESSAGE("do_zombie_user_action:\nExpected "
+                                 << expected_action_cnt << " zombies with user action " << ecf::to_string(uc)
+                                 << " but found " << action_set << "\naction set zombies\n"
+                                 << Zombie::pretty_print(action_set_zombies, 6)
+                                 << ", Test taking longer than time constraint of " << assertTimer.timeConstraint());
             if (fail_if_to_long) {
-                BOOST_REQUIRE_MESSAGE(false, ss.str() << " aborting\n" << Zombie::pretty_print(zombies, 6));
+                BOOST_REQUIRE_MESSAGE(false, error << " aborting\n" << Zombie::pretty_print(zombies, 6));
             }
             else {
-                std::cout << ss.str() << " breaking out\n" << Zombie::pretty_print(zombies, 6) << "\n";
+                std::cout << error << " breaking out\n" << Zombie::pretty_print(zombies, 6) << "\n";
                 break;
             }
         }

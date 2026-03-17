@@ -71,7 +71,7 @@ STC_Cmd_ptr FreeDepCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().free_dep_++;
 
     Defs* defs = as->defs().get();
-    std::stringstream ss;
+    std::ostringstream ss;
     size_t vec_size = paths_.size();
     for (size_t i = 0; i < vec_size; i++) {
 
@@ -146,19 +146,17 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     }
 
     if (args.size() < 1) {
-        std::stringstream ss;
-        ss << "FreeDepCmd: At least one arguments expected for Free dependencies. Found " << args.size() << "\n"
-           << FreeDepCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("FreeDepCmd: At least one arguments expected for Free dependencies. Found "
+                                         << args.size() << "\n"
+                                         << FreeDepCmd::desc() << "\n"));
     }
 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
     if (paths.empty()) {
-        std::stringstream ss;
-        ss << "FreeDepCmd: No paths specified. Paths must begin with a leading '/' character\n"
-           << FreeDepCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("FreeDepCmd: No paths specified. Paths must begin with a leading '/' character\n"
+                    << FreeDepCmd::desc() << "\n"));
     }
 
     bool trigger    = options.empty(); // If no options default to freeing trigger dependencies
@@ -180,9 +178,8 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
             time = true;
         }
         else {
-            std::stringstream ss;
-            ss << "FreeDepCmd: Invalid argument(" << options[i] << ")\n" << FreeDepCmd::desc() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("FreeDepCmd: Invalid argument(" << options[i] << ")\n"
+                                                                             << FreeDepCmd::desc() << "\n"));
         }
     }
     assert(trigger || all || date || time); // at least one must be true

@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE(test_get_last_lines_of_a_file) {
     std::string last_100_lines;
     size_t no_of_lines = 100;
     { // create file with 100 lines 0-99
-        std::stringstream ss;
+        std::ostringstream ss;
         std::ofstream file(path.c_str());
         for (size_t i = 0; i < no_of_lines; i++) {
             file << i << ": the line\n";

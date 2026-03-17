@@ -61,10 +61,9 @@ bool DefsDelta::incremental_sync(defs_ptr client_def,
         }
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "Could not apply incremental server changes to client defs( with client handle: " << client_handle
-           << "), because: " << e.what();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Could not apply incremental server changes to client defs( with client handle: "
+                    << client_handle << "), because: " << e.what()));
     }
 
     // For each compound memento, we should have a changed node.(for use with python interface)

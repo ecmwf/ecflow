@@ -314,30 +314,6 @@ void GroupCTSCmd::cleanup() {
     }
 }
 
-// bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const {
-//     // Can only run Group cmd if all child commands authenticate
-//     size_t cmd_vec_size = cmdVec_.size();
-//     for (size_t i = 0; i < cmd_vec_size; i++) {
-//         if (!cmdVec_[i]->authenticate(as, errorMsg)) {
-//
-//             // Log authentication failure:
-//             std::string ss;
-//             ss += "GroupCTSCmd::authenticate failed: for ";
-//             cmdVec_[i]->print(ss);
-//             std::stringstream stream;
-//             stream << errorMsg;
-//             ss += stream.str();
-//             log(Log::ERR, ss); // will automatically add end of line
-//
-// #ifdef DEBUG_GROUP_CMD
-//             std::cout << "GroupCTSCmd::authenticate failed for " << ss << "\n";
-// #endif
-//             return false;
-//         }
-//     }
-//     return true;
-// }
-
 // in the server
 void GroupCTSCmd::set_client_handle(int client_handle) const {
     size_t cmd_vec_size = cmdVec_.size();

@@ -47,7 +47,7 @@ std::string hmac_sha256(const std::string& salt, const std::string& token) {
          token.size(),
          hash.data(),
          &hash_len);
-    std::stringstream ss;
+    std::ostringstream ss;
     for (unsigned int i = 0; i < hash_len; i++) {
         ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
     }
@@ -65,7 +65,7 @@ std::string hmac_pbkdf2_sha256(const std::string& salt, const std::string& token
                       EVP_sha256(),
                       SHA256_DIGEST_LENGTH,
                       hash.data());
-    std::stringstream ss;
+    std::ostringstream ss;
     for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
         ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
     }

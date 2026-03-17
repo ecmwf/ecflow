@@ -94,18 +94,16 @@ STC_Cmd_ptr QueueCmd::doHandleRequest(AbstractServer* as) const {
 
                     QueueAttr& queue_attr = node_with_queue->findQueue(name_);
                     if (queue_attr.empty()) {
-                        std::stringstream ss;
-                        ss << "QueueCmd:: Could not find queue of name " << name_ << ", on input node "
-                           << path_to_node_with_queue_;
-                        return PreAllocatedReply::error_cmd(ss.str());
+                        return PreAllocatedReply::error_cmd(MESSAGE("QueueCmd:: Could not find queue of name "
+                                                                    << name_ << ", on input node "
+                                                                    << path_to_node_with_queue_));
                     }
 
                     result = handle_queue(queue_attr);
                 }
                 else {
-                    std::stringstream ss;
-                    ss << "QueueCmd:: Could not find node at path " << path_to_node_with_queue_;
-                    return PreAllocatedReply::error_cmd(ss.str());
+                    return PreAllocatedReply::error_cmd(
+                        MESSAGE("QueueCmd:: Could not find node at path " << path_to_node_with_queue_));
                 }
             }
         }
@@ -130,9 +128,8 @@ STC_Cmd_ptr QueueCmd::doHandleRequest(AbstractServer* as) const {
             }
 
             if (!fnd_queue) {
-                std::stringstream ss;
-                ss << "QueueCmd:: Could not find queue " << name_ << " Up the node hierarchy";
-                return PreAllocatedReply::error_cmd(ss.str());
+                return PreAllocatedReply::error_cmd(
+                    MESSAGE("QueueCmd:: Could not find queue " << name_ << " Up the node hierarchy"));
             }
         }
     }
@@ -148,9 +145,7 @@ STC_Cmd_ptr QueueCmd::doHandleRequest(AbstractServer* as) const {
 
 std::string QueueCmd::handle_queue(QueueAttr& queue_attr) const {
     if (queue_attr.empty()) {
-        std::stringstream ss;
-        ss << "QueueCmd:: Could not find queue of name " << name_ << " . Program error !";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("QueueCmd:: Could not find queue of name " << name_ << " . Program error !"));
     }
 
     if (action_ == "active") {
@@ -251,33 +246,31 @@ void QueueCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     }
 
     if (args.size() == 4 && path_to_node_with_queue.empty()) {
-        std::stringstream ss;
-        ss << "QueueCmd: The fourth argument if specified must provide a path to a node where the queue resides.\n"
-           << "No path specified. " << args[3];
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "QueueCmd: The fourth argument if specified must provide a path to a node where the queue resides.\n"
+            << "No path specified. " << args[3]));
     }
 
     if (args.empty() || queue_name.empty() || action.empty()) {
-        std::stringstream ss;
-        ss << "QueueCmd: incorrect argument specified, expected at least two arguments but found " << args.size()
-           << " Please specify <queue-name> [active | aborted | complete | no_of_aborted | reset ] step <path to node "
-              "with queue>(optional) i.e\n"
-           << "--queue=name active  # active does not need a step\n"
-           << "--queue=name active /path/to/node/with/queue\n"
-           << "--queue=name aborted $step\n"
-           << "--queue=name complete $step\n"
-           << "--queue=name no_of_aborted\n"
-           << "--queue=name reset\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "QueueCmd: incorrect argument specified, expected at least two arguments but found "
+            << args.size()
+            << " Please specify <queue-name> [active | aborted | complete | no_of_aborted | reset ] step <path to node "
+               "with queue>(optional) i.e\n"
+            << "--queue=name active  # active does not need a step\n"
+            << "--queue=name active /path/to/node/with/queue\n"
+            << "--queue=name aborted $step\n"
+            << "--queue=name complete $step\n"
+            << "--queue=name no_of_aborted\n"
+            << "--queue=name reset\n"));
     }
     if ((action == "complete" || action == "aborted") && step.empty()) {
-        std::stringstream ss;
-        ss << "QueueCmd: when --queue=name complete || --queue=name aborted is used a step must be provided e.g.\n"
-           << "  ecflow_client --queue=name aborted $step\n"
-           << "  ecflow_client --queue=name complete $step\n"
-           << "where step is value returned from active, such as\n"
-           << "  step=$(ecflow_client --queue=name active)\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "QueueCmd: when --queue=name complete || --queue=name aborted is used a step must be provided e.g.\n"
+            << "  ecflow_client --queue=name aborted $step\n"
+            << "  ecflow_client --queue=name complete $step\n"
+            << "where step is value returned from active, such as\n"
+            << "  step=$(ecflow_client --queue=name active)\n"));
     }
     if ((action == "active" || action == "reset" || action == "no_of_aborted") && !step.empty()) {
         throw std::runtime_error("QueueCmd: step should not be used with active, reset or no_of_aborted.");

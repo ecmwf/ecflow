@@ -27,14 +27,10 @@ using namespace ecf;
 
 static void testTimeSlot(const ecf::TimeSlot& ts) {
     if (ts.hour() < 0 || ts.hour() > 23) {
-        std::stringstream ss;
-        ss << "TimeSeries:  time hour(" << ts.hour() << ") must be in range 0-23";
-        throw std::out_of_range(ss.str());
+        throw std::out_of_range(MESSAGE("TimeSeries:  time hour(" << ts.hour() << ") must be in range 0-23"));
     }
     if (ts.minute() < 0 || ts.minute() > 59) {
-        std::stringstream ss;
-        ss << "TimeSeries:  time minute(" << ts.minute() << ") must be in range 0-59";
-        throw std::out_of_range(ss.str());
+        throw std::out_of_range(MESSAGE("TimeSeries:  time minute(" << ts.minute() << ") must be in range 0-59"));
     }
 }
 
@@ -70,17 +66,15 @@ TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const Time
 
     if (!finish_.isNULL()) {
         if (incr_.isNULL()) {
-            std::stringstream ss;
-            ss << "TimeSeries::TimeSeries: Invalid time series: Finish specified without an increment";
-            throw std::out_of_range(ss.str());
+            throw std::out_of_range(
+                MESSAGE("TimeSeries::TimeSeries: Invalid time series: Finish specified without an increment"));
         }
     }
 
     if (start.duration() > finish.duration()) {
-        std::stringstream ss;
-        ss << "TimeSeries::TimeSeries: Invalid time series: Start time(" << start.toString()
-           << ") is greater than end time(" << finish.toString() << ")";
-        throw std::out_of_range(ss.str());
+        throw std::out_of_range(MESSAGE("TimeSeries::TimeSeries: Invalid time series: Start time("
+                                        << start.toString() << ") is greater than end time(" << finish.toString()
+                                        << ")"));
     }
     if (incr.hour() == 0 && incr.minute() == 0) {
         throw std::out_of_range(
@@ -88,11 +82,10 @@ TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const Time
     }
     auto diff = finish.duration() - start.duration();
     if (incr.duration() > diff) {
-        std::stringstream ss;
-        ss << "TimeSeries::TimeSeries: Invalid time series: Increment(" << incr.toString()
-           << ") is greater than duration " << to_simple_string(diff) << " between start(" << start.toString()
-           << ") and finish(" << finish.toString() << ")";
-        throw std::out_of_range(ss.str());
+        throw std::out_of_range(MESSAGE("TimeSeries::TimeSeries: Invalid time series: Increment("
+                                        << incr.toString() << ") is greater than duration " << to_simple_string(diff)
+                                        << " between start(" << start.toString() << ") and finish(" << finish.toString()
+                                        << ")"));
     }
 
     compute_last_time_slot();
@@ -551,7 +544,7 @@ void TimeSeries::min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const 
 }
 
 void TimeSeries::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << " ( next run time is ";
     if (relativeToSuiteStart_) {
         ss << "+";
@@ -668,14 +661,11 @@ void TimeSeries::write(std::string& ret) const {
 }
 
 std::string TimeSeries::dump() const {
-    std::stringstream ss;
-    ss << toString();
-    ss << " isValid_(" << isValid_ << ")";
-    ss << " nextTimeSlot_(" << nextTimeSlot_.toString() << ")";
-    ss << " relativeDuration_(" << to_simple_string(relativeDuration_) << ")";
-    ss << " lastTimeSlot_(" << to_simple_string(lastTimeSlot_) << ")";
-    ss << " suiteTimeAtRequeue_(" << suiteTimeAtRequeue_.toString() << ")";
-    return ss.str();
+    return MESSAGE(toString() << " isValid_(" << isValid_ << ")"
+                              << " nextTimeSlot_(" << nextTimeSlot_.toString() << ")"
+                              << " relativeDuration_(" << to_simple_string(relativeDuration_) << ")"
+                              << " lastTimeSlot_(" << to_simple_string(lastTimeSlot_) << ")"
+                              << " suiteTimeAtRequeue_(" << suiteTimeAtRequeue_.toString() << ")");
 }
 
 bool TimeSeries::checkInvariants(std::string& errormsg) const {
@@ -945,14 +935,10 @@ void TimeSeries::testTime(int hour, int minute) {
         throw std::runtime_error("TimeSeries::testTime: Failed to extract time");
     }
     if (hour < 0 || hour > 23) {
-        std::stringstream ss;
-        ss << "TimeSeries::testTime: time hour(" << hour << ") must be in range 0-23";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("TimeSeries::testTime: time hour(" << hour << ") must be in range 0-23"));
     }
     if (minute < 0 || minute > 59) {
-        std::stringstream ss;
-        ss << "TimeSeries::testTime: time minute(" << minute << ") must be in range 0-59";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("TimeSeries::testTime: time minute(" << minute << ") must be in range 0-59"));
     }
 }
 

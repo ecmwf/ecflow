@@ -66,10 +66,9 @@ void AstResolveVisitor::visitParentVariable(AstParentVariable* astvar) {
                 }
             }
 
-            std::stringstream ss;
-            ss << " Could not find variable " << astvar->name() << " on node " << triggerNode_->debugNodePath()
-               << " OR any of its parent nodes";
-            errorMsg_ += ss.str();
+            errorMsg_ +=
+                MESSAGE(" Could not find variable " << astvar->name() << " on node " << triggerNode_->debugNodePath()
+                                                    << " OR any of its parent nodes");
         }
     }
 }
