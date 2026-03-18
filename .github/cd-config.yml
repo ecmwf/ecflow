@@ -29,8 +29,39 @@ builds:
         - -E s_test|s_zombies
       dependency_branch: develop
       parallelism_factor: 8
+      install_prefix: /usr
       install_test: true
-      install_test_command: /opt/ecmwf/bin/ecflow_client --version
+      install_test_command: /usr/bin/ecflow_client --version
+
+  - name: "deb-debian-11-server"
+    type: system-package
+    enabled: true
+    config:
+      os: debian-11
+      dependencies:
+        - ecmwf/ecbuild
+      cmake_options:
+        -DPython3_EXECUTABLE: /usr/bin/python3
+        -DBOOST_ROOT: ${BOOST_ROOT_DIR}
+        -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
+        -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
+        -DBoost_DEBUG: ON
+        -DOPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}
+        -DENABLE_STATIC_BOOST_LIBS: OFF
+        -DINSTALL_PYTHON3_DIR: lib/python3/dist-packages
+        -DENABLE_ALL_TESTS: ON
+        -DENABLE_SSL: ON
+        -DENABLE_SERVER: ON
+        -DENABLE_UI: OFF
+        -DCPACK_PACKAGE_NAME: ecflow
+      ctest_options:
+        - -L nightly
+        - -E s_test|s_zombies
+      dependency_branch: develop
+      parallelism_factor: 8
+      install_prefix: /usr
+      install_test: true
+      install_test_command: /usr/bin/ecflow_client --version
 
   - name: "deb-debian-12-server"
     type: system-package
@@ -58,12 +89,13 @@ builds:
         - -E s_test|s_zombies
       dependency_branch: develop
       parallelism_factor: 8
+      install_prefix: /usr
       install_test: true
-      install_test_command: /opt/ecmwf/bin/ecflow_client --version
+      install_test_command: /usr/bin/ecflow_client --version
 
   - name: "tarball"
     type: "tarball"
-    enabled: true
+    enabled: false
     config:
       cmake_options:
         -DBOOST_ROOT: ${BOOST_ROOT_DIR}
@@ -76,7 +108,7 @@ builds:
 
   - name: "conda-build Python3.11"
     type: "conda"
-    enabled: true
+    enabled: false
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -84,7 +116,7 @@ builds:
 
   - name: "conda-build Python3.12"
     type: "conda"
-    enabled: true
+    enabled: false
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -92,7 +124,7 @@ builds:
 
   - name: "conda-build Python3.13"
     type: "conda"
-    enabled: true
+    enabled: false
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -100,7 +132,7 @@ builds:
 
   - name: ecflow-hpc
     type: hpc
-    enabled: true
+    enabled: false
     config:
       platform: gnu-8.5.0
       install_type: module
