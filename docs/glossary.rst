@@ -87,11 +87,11 @@ Glossary
       Each aviso attribute implies that a background thread is spawned whenever
       the associated :term:`node` is (re)queued. This independent background thread,
       responsible for polling the Aviso server and periodically processing the latest notifications,
-      uses the configuriguration available when the associated task is queued.
+      uses the configuration available when the associated task is queued.
 
       .. note::
 
-        If any variables provinding the configuration are updated, the Aviso configuration
+        If any variables providing the configuration are updated, the Aviso configuration
         can be reloaded (without unqueuing the Task) by issuing an Alter change command with
         the value :code:`reload` to the relevant Aviso attribute.
 
@@ -1827,116 +1827,32 @@ Glossary
        Hence the :term:`date` advances by one day at midnight. 
    
    repeat
-      Repeats provide looping functionality. There can only be a single repeat on a :term:`node`.
-
-      .. code-block:: shell
-      
-         repeat day step [ENDDATE]   # only for suites
-         repeat integer VARIABLE start end [step]
-         repeat enumerated VARIABLE first [second [third ...]]        
-         repeat string VARIABLE str1 [str2 ...]        
-         repeat file VARIABLE filename       
-         repeat date VARIABLE yyyymmdd yyyymmdd [delta]
-         repeat datetime VARIABLE yyyymmddTHHMMSS yyyymmddTHHMMSS [delta]
-         repeat datelist VARIABLE yyyymmdd(1) yyyymmdd(2) ...
-
-      
-      The repeat variable name is available as a generated variable.
-
-      The **repeat date** and **repeat datetime** define several generated variables, prefixed by variable name:
-            
-      .. code-block:: shell
-
-         # Provided for `repeat date` and `repeat datetime`
-         <variable>           # the default, the value is the current date
-         <variable>_YYYY      # the year
-         <variable>_MM        # the month
-         <variable>_DD        # the day of the month
-         <variable>_DOW       # day of the week  
-         <variable>_JULIAN    # the julian value for the date
-         # Provided for `repeat datetime`
-         <variable>_DATE      # the date formatted as yyyymmdd
-         <variable>_TIME      # the time formatted as HHMMSS
-         <variable>_HOURS     # the hours
-         <variable>_MINUTES   # the minutes
-         <variable>_SECONDS   # the seconds
-
-      For example:
-
-      .. code-block:: shell
-         :caption: Repeat generated variables, accessible for trigger expressions
-
-         repeat date YMD 20090101 20220101
-         # The following generated variables, are accessible for trigger expressions
-         # YMD
-         # YMD_YYYY, YMD_MM, YMD_DD, YMD_DOW, YMD_JULIAN
-
-         repeat datetime DT 20090101T000000 20090102T000000 06:00:00
-         # The following generated variables, are accessible for trigger expressions
-         # DT
-         # DT_DATE, DT_YYYY, DT_MM, DT_DD, DT_DOW, DT_JULIAN
-         # DT_TIME, DT_HOURS, DT_MINUTES, DT_SECONDS
-
-      The repeat VARIABLE can be used in :term:`trigger` and :term:`complete expression` expressions.
-      
-      As the repeat variable changes so do the generated variables. (See the tutorial for an example. Repeat)
-      
-      .. warning::
-
-         If a repeat is added to a family/suite, then the repeat will ONLY loop(and automatically re-queue its children) if all the children are complete. Hence additional care needs to be taken. i.e. if the parent node has a repeat and the child  has a cron attribute then the cron will always force a re-queue on the node once it has run, and hence will stop the parent from looping.
-
-      If we use relative time attribute. i.e. time +02:00, under a repeat, then the time is relative to the repeat re-queue.
-
-      The repeat VARIABLE can be used in :term:`trigger` and :term:`complete expression` expressions. Depending on the kind of repeat the value can vary:
+      A repeat attribute enables the associated task to loop over a determined sequence.
+      Several kinds of sequences are available, i.e. iterating over a list of strings, integers, dates, datetimes,
+      or days.
 
       .. code-block:: shell
 
-         RepeatDate       -> value
-         RepeatDateList   -> value
-         RepeatString     -> index  (will always return a index)
-         RepeatInteger    -> value
-         RepeatEnumerated -> value | index  ( return value at index if cast-able to integer, otherwise return index )
-         RepeatDay        -> value
+         repeat day [<delta>]    # only for suites
+         repeat integer VARIABLE <start> <end> [<delta>]
+         repeat enumerated VARIABLE <value-1> [<value-2> [<value-3> [... <value-N>]]]
+         repeat string VARIABLE <string-1> [string-2 [string-3 [... string-N]]]
+         repeat date VARIABLE <begin> <end> [<delta>]
+         repeat datelist VARIABLE <date-1> [<date-2> [<date-3> [... <date-N>]]]
+         repeat datetime VARIABLE <begin> <end> [<delta>]
 
+      There can only be a single repeat per :term:`node`, but several repeats can be used in combination by being
+      placed at distinct levels of the suite tree.
 
-      If a "repeat date" VARIABLE is used in a trigger expression then date arithmetic is used,
-      when the expression uses addition and subtraction. i.e.:
+      A repeat attribute generates a certain set of variables, depending on the repeat type. The set of variable
+      typically include a variable named after the repeat itself and the value of the variable changes as the repeat
+      loops. Other variables are available to access parts of the repeat value, e.g. year, month, day for a repeat date.
+      These variables can be used in the :term:`ecf script` during job script generation, and for evaluation of
+      :term:`trigger` and :term:`complete expression` expressions.
 
-      .. code-block:: python
-      
-         defs = ecflow.Defs()
-         s1 = defs.add_suite("s1");
-         t1 = s1.add_task("t1").add_repeat( ecflow.RepeatDate("YMD",20090101,20091231,1) );
-         t2 = s1.add_task("t2").add_trigger("t1:YMD - 1 eq 20081231");
-         assert t2.evaluate_trigger(), "Expected trigger to evaluate. 20090101 - 1  == 20081231"
-      
-      When we use relative time attributes under a Repeat. They are automatically reset when the repeat loops. Take for example:
+      For a detailed description of the generated variables for each repeat type, and for additional examples,
+      see :ref:`repeat_(for_loop)` in the User Manual.
 
-       .. code-block:: shell
-
-          suite s1
-             family hc00
-                repeat integer HYEAR 1993 2017
-                time +00:01                     # when the repeat loops delay starting task a, for 1 minute
-                task a
-                task b
-                   trigger a  == complete
-             endfamily
-          endsuite
-
-      Now when task 'a' and Task 'b' complete, the repeat is incremented, and any relative time attributes are reset. In this case effectively delaying the starting of task 'a' for 1 minute.
-
-      See also:
-
-      .. list-table::
-
-         * - :ref:`ecflow_cli`
-           - :ref:`add_cli`, :ref:`alter_cli`    
-         * - :ref:`python_api`
-           - :py:class:`ecflow.Node.add_repeat`, :py:class:`ecflow.Repeat`, :py:class:`ecflow.RepeatDate`, :py:class:`ecflow.RepeatEnumerated`, :py:class:`ecflow.RepeatInteger`, :py:class:`ecflow.RepeatDay`
-         * - :ref:`grammar`
-           - :token:`repeat`
-      
    running
       Is a :term:`ecflow_server` state. See :term:`server states`
    
@@ -2181,7 +2097,7 @@ Glossary
       
       Triggers can also reference Node attributes like :term:`event`, :term:`meter`, :term:`variable`, :term:`repeat` and generated variables.
       Trigger evaluation for node attributes uses integer arithmetic:
-      
+
       - :term:`event`: has the integer value of 0(clear) and set(1)
       - :term:`meter`: values are integers hence they are used as is
       - :term:`variable`: value is converted to an integer, otherwise 0 is used. See example below
