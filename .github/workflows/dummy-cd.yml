@@ -18,7 +18,7 @@ jobs:
   build-and-release:
     if: |
       true
-    uses: ecmwf/reusable-workflows/.github/workflows/main-cd.yml@cd-sp-docker-ref
+    uses: ecmwf/reusable-workflows/.github/workflows/main-cd.yml@main
     with:
       ref_name: ${{ github.ref_name }}
     secrets: inherit
