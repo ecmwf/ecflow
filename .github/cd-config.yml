@@ -95,7 +95,7 @@ builds:
 
   - name: "tarball"
     type: "tarball"
-    enabled: false
+    enabled: true
     config:
       cmake_options:
         -DBOOST_ROOT: ${BOOST_ROOT_DIR}
@@ -108,7 +108,7 @@ builds:
 
   - name: "conda-build Python3.11"
     type: "conda"
-    enabled: false
+    enabled: true
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -116,7 +116,7 @@ builds:
 
   - name: "conda-build Python3.12"
     type: "conda"
-    enabled: false
+    enabled: true
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -124,7 +124,7 @@ builds:
 
   - name: "conda-build Python3.13"
     type: "conda"
-    enabled: false
+    enabled: true
     config:
       conda_build_args:
         - -m .cd/conda/conda_build_config_common.yaml
@@ -132,7 +132,7 @@ builds:
 
   - name: ecflow-hpc
     type: hpc
-    enabled: false
+    enabled: true
     config:
       platform: gnu-8.5.0
       install_type: module
@@ -232,4 +232,4 @@ builds:
       lock_permissions: true
 
 release:
-  enabled: false
+  enabled: true
