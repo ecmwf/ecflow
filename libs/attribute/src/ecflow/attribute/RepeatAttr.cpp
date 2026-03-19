@@ -10,8 +10,10 @@
 
 #include "ecflow/attribute/RepeatAttr.hpp"
 
+#include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -20,6 +22,30 @@
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
+
+namespace {
+
+template <uint32_t N, typename T>
+std::string as_n_digits(T value) {
+    static_assert(N > 0, "N must be greater than zero");
+    static_assert(std::is_integral<T>::value, "T must be an integral type");
+
+    std::ostringstream ss;
+    ss << std::setfill('0') << std::setw(N) << value;
+    return ss.str();
+}
+
+template <typename T>
+std::string as_2_digits(T value) {
+    return as_n_digits<2>(value);
+}
+
+template <typename T>
+std::string as_4_digits(T value) {
+    return as_n_digits<4>(value);
+}
+
+} // namespace
 
 using namespace ecf;
 
@@ -244,19 +270,21 @@ void RepeatDate::update_repeat_genvar_value() const {
                                                                                          << " is_special"));
                 return;
             }
-            // int day_of_year  = the_date.day_of_year();
-            int day_of_week  = the_date.day_of_week().as_number();
-            int day_of_month = the_date.day();
-            int month        = the_date.month();
-            int year         = the_date.year();
 
-            yyyy_.set_value(ecf::convert_to<std::string>(year));
-            mm_.set_value(ecf::convert_to<std::string>(month));
-            dom_.set_value(ecf::convert_to<std::string>(day_of_month));
-            dow_.set_value(ecf::convert_to<std::string>(day_of_week));
+            auto year = static_cast<int>(the_date.year());
+            yyyy_.set_value(as_4_digits(year));
 
-            long last_value = last_valid_value();
-            julian_.set_value(ecf::convert_to<std::string>(ecf::CalendarDate(last_value).as_julian_day().value()));
+            auto month = the_date.month().as_number();
+            mm_.set_value(as_2_digits(month));
+
+            auto day_of_month = the_date.day().as_number();
+            dom_.set_value(as_2_digits(day_of_month));
+
+            auto day_of_week = the_date.day_of_week().as_number();
+            dow_.set_value(std::to_string(day_of_week));
+
+            auto last_value = last_valid_value();
+            julian_.set_value(std::to_string(ecf::CalendarDate(last_value).as_julian_day().value()));
         }
         catch (std::exception& e) {
             log(Log::ERR,
@@ -548,21 +576,41 @@ void RepeatDateTime::update_repeat_genvar_value() const {
             // Using boost posix_time/gregorian, since C++17 still doesn't include calendar types.
 
             auto d = dt.date();
+
             // Date
+
             generated_[name_ + "_DATE"].set_value(boost::gregorian::to_iso_string(d));
+
             // Date Components
-            generated_[name_ + "_YYYY"].set_value(std::to_string(d.year()));
-            generated_[name_ + "_MM"].set_value(std::to_string(d.month()));
-            generated_[name_ + "_DD"].set_value(std::to_string(d.day()));
-            generated_[name_ + "_JULIAN"].set_value(std::to_string(d.julian_day()));
+
+            auto year = static_cast<int>(d.year());
+            generated_[name_ + "_YYYY"].set_value(as_4_digits(year));
+
+            auto month = d.month().as_number();
+            generated_[name_ + "_MM"].set_value(as_2_digits(month));
+
+            auto day = d.day().as_number();
+            generated_[name_ + "_DD"].set_value(as_2_digits(day));
+
+            auto julian = d.julian_day();
+            generated_[name_ + "_JULIAN"].set_value(std::to_string(julian));
 
             auto t = dt.time_of_day();
+
             // Time
+
             generated_[name_ + "_TIME"].set_value(boost::posix_time::to_iso_string(t));
+
             // Time Components
-            generated_[name_ + "_HOURS"].set_value(std::to_string(t.hours()));
-            generated_[name_ + "_MINUTES"].set_value(std::to_string(t.minutes()));
-            generated_[name_ + "_SECONDS"].set_value(std::to_string(t.seconds()));
+
+            int hours = t.hours();
+            generated_[name_ + "_HOURS"].set_value(as_2_digits(hours));
+
+            int minutes = t.minutes();
+            generated_[name_ + "_MINUTES"].set_value(as_2_digits(minutes));
+
+            int seconds = t.seconds();
+            generated_[name_ + "_SECONDS"].set_value(as_2_digits(seconds));
         }
         catch (std::exception& e) {
             log(Log::ERR,
@@ -844,19 +892,20 @@ void RepeatDateList::update_repeat_genvar_value() const {
                 return;
             }
 
-            // int day_of_year  = the_date.day_of_year();
-            int day_of_week  = the_date.day_of_week().as_number();
-            int day_of_month = the_date.day();
-            int month        = the_date.month();
-            int year         = the_date.year();
+            auto year = static_cast<int>(the_date.year());
+            yyyy_.set_value(as_4_digits(year));
 
-            yyyy_.set_value(ecf::convert_to<std::string>(year));
-            mm_.set_value(ecf::convert_to<std::string>(month));
-            dom_.set_value(ecf::convert_to<std::string>(day_of_month));
-            dow_.set_value(ecf::convert_to<std::string>(day_of_week));
+            auto month = the_date.month().as_number();
+            mm_.set_value(as_2_digits(month));
 
-            long julian = CalendarDate(last_valid_value()).as_julian_day().value();
-            julian_.set_value(ecf::convert_to<std::string>(julian));
+            auto day_of_month = the_date.day().as_number();
+            dom_.set_value(as_2_digits(day_of_month));
+
+            auto day_of_week = the_date.day_of_week().as_number();
+            dow_.set_value(std::to_string(day_of_week));
+
+            auto julian_day = CalendarDate(last_valid_value()).as_julian_day().value();
+            julian_.set_value(std::to_string(julian_day));
         }
         catch (std::exception& e) {
             log(Log::ERR,

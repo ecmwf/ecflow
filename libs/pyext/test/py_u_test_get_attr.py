@@ -90,7 +90,7 @@ class Test_get_attr(unittest.TestCase):
 
         self.assertEqual(defs.s.f.t.YMD.value(), '20100111', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t.YMD_YYYY.value(), '2010', "expected generated YMD of value")
-        self.assertEqual(defs.s.f.t.YMD_MM.value(), '1', "expected generated YMD of value")
+        self.assertEqual(defs.s.f.t.YMD_MM.value(), '01', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t.YMD_DD.value(), '11', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t.YMD_DOW.value(), '1', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t.YMD_JULIAN.value(), '2455208', "expected generated YMD of value")
@@ -100,7 +100,7 @@ class Test_get_attr(unittest.TestCase):
 
         self.assertEqual(defs.s.f.t2.YMD.value(), '20100111', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t2.YMD_YYYY.value(), '2010', "expected generated YMD of value")
-        self.assertEqual(defs.s.f.t2.YMD_MM.value(), '1', "expected generated YMD of value")
+        self.assertEqual(defs.s.f.t2.YMD_MM.value(), '01', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t2.YMD_DD.value(), '11', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t2.YMD_DOW.value(), '1', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t2.YMD_JULIAN.value(), '2455208', "expected generated YMD of value")

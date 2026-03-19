@@ -1,7 +1,7 @@
 .. _edit_add_variable:
 
-Edit-add variable
-///////////////////
+variable
+////////
 
 This defines a variable for ecFlow job substitution in a node,
 equivalent to an external variable. There can be any number of
