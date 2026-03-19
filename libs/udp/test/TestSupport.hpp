@@ -203,9 +203,9 @@ private:
     template <typename V>
     static std::string
     format_request(const std::string& path, const std::string& command, const std::string& name, V value) {
-        std::ostringstream oss;
+        std::ostringstream ss;
         // clang-format off
-        oss << R"({)"
+        ss << R"({)"
                 << R"("method":"put",)"
                 << R"("payload":)"
                 << R"({)"
@@ -216,7 +216,7 @@ private:
                 << R"(})"
             << R"(})";
         // clang-format on
-        return oss.str();
+        return ss.str();
     }
 
     static void sendRequest(uint16_t port, const std::string& request) {
@@ -226,7 +226,7 @@ private:
         client.send(request);
 
         // Wait for request to flow...
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
 public:

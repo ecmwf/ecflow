@@ -130,7 +130,7 @@ public:
     void mirror();
 
     template <class Archive>
-    friend void serialize(Archive& ar, MirrorAttr& aviso, std::uint32_t version);
+    friend void serialize(Archive& ar, MirrorAttr& mirror, std::uint32_t version);
 
 private:
     std::optional<std::string> resolve_cfg(const std::string& value, std::string_view default_value) const;
@@ -150,25 +150,27 @@ private:
     auth_t auth_;
     reason_t reason_;
 
-    unsigned int state_change_no_{0}; // *not* persisted, only used on server side
+    unsigned int state_change_no_{0}; // *not* persisted, only used on the server side
 
-    // The controller is only instanciated when the Mirror is reset()
-    // This allows the MirrorAttr have a copy-ctor and assignment operator
+    // The controller is only instantiated when the Mirror is reset()
+    // This allows the MirrorAttr to have a copy-ctor and assignment operator
     controller_ptr_t controller_;
 };
 
 bool operator==(const MirrorAttr& lhs, const MirrorAttr& rhs);
 
+std::string to_python_string(const MirrorAttr& mirror);
+
 template <class Archive>
-void serialize(Archive& ar, MirrorAttr& aviso, [[maybe_unused]] std::uint32_t version) {
-    ar & aviso.name_;
-    ar & aviso.remote_path_;
-    ar & aviso.remote_host_;
-    ar & aviso.remote_port_;
-    ar & aviso.polling_;
-    ar & aviso.ssl_;
-    ar & aviso.auth_;
-    ar & aviso.reason_;
+void serialize(Archive& ar, MirrorAttr& mirror, [[maybe_unused]] std::uint32_t version) {
+    ar & mirror.name_;
+    ar & mirror.remote_path_;
+    ar & mirror.remote_host_;
+    ar & mirror.remote_port_;
+    ar & mirror.polling_;
+    ar & mirror.ssl_;
+    ar & mirror.auth_;
+    ar & mirror.reason_;
 }
 
 } // namespace ecf

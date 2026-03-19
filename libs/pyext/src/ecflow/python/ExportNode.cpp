@@ -308,9 +308,7 @@ void sort_attributes3(node_ptr self, const std::string& attribute_name, bool rec
     boost::algorithm::to_lower(attribute);
     ecf::Attr::Type attr = ecf::Attr::to_attr(attribute_name);
     if (attr == ecf::Attr::UNKNOWN) {
-        std::stringstream ss;
-        ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("sort_attributes: the attribute " << attribute_name << " is not valid"));
     }
     std::vector<std::string> no_sort;
     pyutil_list_to_str_vec(list, no_sort);
@@ -521,10 +519,9 @@ static py::object node_getattr(node_ptr self, const std::string& attr) {
         return py::object(limit);
     }
 
-    std::stringstream ss;
-    ss << "ExportNode::node_getattr: function of name '" << attr
-       << "' does not exist *OR* child node,variable,meter,event or limit on node " << self->absNodePath();
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE(
+        "ExportNode::node_getattr: function of name '"
+        << attr << "' does not exist *OR* child node,variable,meter,event or limit on node " << self->absNodePath()));
     return py::object();
 }
 

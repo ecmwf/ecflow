@@ -113,7 +113,7 @@ std::string Rtt::analysis(const std::string& filename) {
     int total_requests = 0;
 
     // Create title
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << std::left << std::setw(max_cmd_size + 1) << "Command" << std::right << std::setw(5) << "count" << std::setw(9)
        << "min" << std::setw(9) << "average" << std::setw(9) << "max" << std::setw(9) << std::right << "std\n";
     for (std::pair<std::string, std::vector<boost::posix_time::time_duration>> p : cmd_time_map) {

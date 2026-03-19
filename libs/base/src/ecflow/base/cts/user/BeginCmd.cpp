@@ -94,9 +94,8 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
 
         suite_ptr suite = defs->findSuite(suiteName_);
         if (!suite.get()) {
-            std::stringstream ss;
-            ss << "BeginCmd::doHandleRequest:  Begin failed as suite '" << suiteName_ << "' is not loaded.\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("BeginCmd::doHandleRequest:  Begin failed as suite '" << suiteName_ << "' is not loaded.\n"));
         }
 
         /// check_suite_can_begin will throw if suite can't begin
@@ -176,17 +175,15 @@ void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         else if (lineTokens.size() == 2) {
             suiteName = lineTokens[0];
             if (lineTokens[1] != "--force") {
-                std::stringstream ss;
-                ss << "BeginCmd: Expected second argument to be '--force' but found " << lineTokens[1] << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("BeginCmd: Expected second argument to be '--force' but found " << lineTokens[1] << "\n"));
             }
             force = true;
         }
         else {
-            std::stringstream ss;
-            ss << "BeginCmd: Expect zero, one or 2 arguments, but found " << lineTokens.size() << " arguments\n"
-               << BeginCmd::desc() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("BeginCmd: Expect zero, one or 2 arguments, but found "
+                                             << lineTokens.size() << " arguments\n"
+                                             << BeginCmd::desc() << "\n"));
         }
     }
 

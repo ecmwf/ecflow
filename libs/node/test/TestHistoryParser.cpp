@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_SUITE(U_Node)
 BOOST_AUTO_TEST_SUITE(T_HistoryParser)
 
 static std::string dump(const std::vector<std::string>& vec) {
-    std::stringstream ss;
+    std::ostringstream ss;
     std::copy(vec.begin(), vec.end(), std::ostream_iterator<std::string>(ss, "\n"));
     return ss.str();
 }

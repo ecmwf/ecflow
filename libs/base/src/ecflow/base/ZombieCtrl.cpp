@@ -592,11 +592,10 @@ void ZombieCtrl::adoptCli(const std::string& path_to_task, Submittable* task) {
     for (size_t i = 0; i < zombieVecSize; i++) {
         if (zombies_[i].path_to_task() == path_to_task &&
             zombies_[i].process_or_remote_id() != task->process_or_remote_id()) {
-            std::stringstream ss;
-            ss << "ZombieCtrl::adoptCli: Can *not* adopt zombies, where process id are different. Task("
-               << task->process_or_remote_id() << ") zombie(" << zombies_[i].process_or_remote_id()
-               << "). Please kill both process, and re-queue";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("ZombieCtrl::adoptCli: Can *not* adopt zombies, where process id are different. Task("
+                        << task->process_or_remote_id() << ") zombie(" << zombies_[i].process_or_remote_id()
+                        << "). Please kill both process, and re-queue"));
         }
     }
 

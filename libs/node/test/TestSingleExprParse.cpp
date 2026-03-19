@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_single_expression) {
                               "expected root type " << expectedRootType << " or 'variable' but found "
                                                     << top->left()->type() << " " << p.first);
         {
-            std::stringstream ss;
+            std::ostringstream ss;
             top->print_flat(ss);
             std::string print_flat = ss.str();
             std::cout << print_flat << "\n";

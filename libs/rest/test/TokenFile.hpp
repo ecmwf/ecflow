@@ -11,48 +11,105 @@
 #ifndef ecflow_http_test_TokenFile_HPP
 #define ecflow_http_test_TokenFile_HPP
 
+#include <array>
+#include <iomanip>
 #include <ostream>
+#include <random>
+#include <sstream>
 #include <string>
+#include <vector>
+
+#include <nlohmann/json.hpp>
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
 
 #include "ecflow/test/scaffold/Naming.hpp"
-#include "nlohmann/json.hpp"
+
+///
+/// @brief A token entry to be written into the token file.
+///
+struct BearerToken
+{
+    /// @brief The token (plaintext, 64-char hex string)
+    std::string token;
+
+    /// @brief A description of the token
+    std::string description;
+
+    /// @brief expiration time, in ISO 8601 format (if empty, means no expiry)
+    std::string expires_at;
+
+    /// @brief revocation time, in ISO 8601 format (if empty, means no revocation)
+    std::string revoked_at;
+};
 
 class TokenFile {
 public:
     TokenFile() = delete;
 
-    explicit TokenFile(const std::string& tokenfile);
+    ///
+    /// @brief Create a token file from a list of tokens.
+    ///
+    /// Each provided token is hashed (HMAC-SHA256 with a random salt)
+    /// and written to expected JSON file format.
+    ///
+    /// @param tokenfile Path to the token file to create.
+    /// @param tokens   Tokens to write.
+    ///
+    TokenFile(const std::string& tokenfile, const std::vector<BearerToken>& tokens);
 
     ~TokenFile();
 
+    ///
+    /// @brief Generate a random token as a 64-character lowercase hex string (256 bits of entropy).
+    ///
+    /// @param num_bytes The number of random bytes (default: 32, producing 64 hex chars).
+    /// @return The generated token string.
+    ///
+    static std::string generate_token(std::size_t num_bytes = 32);
+
 private:
+    ///
+    /// @brief Generate a random salt as a 16-character lowercase hex string.
+    ///
+    /// @return The generated salt string.
+    ///
+    static std::string generate_salt();
+
+    ///
+    /// @briref Computes HMAC-SHA256 of the provided token using the provided salt, returning the hex-encoded digest.
+    ///
+    /// @return The generated HMAC-SHA256
+    ///
+    static std::string hmac_sha256(const std::string& salt, const std::string& token);
+
     std::string tokenfile_;
 };
 
-inline TokenFile::TokenFile(const std::string& tokenfile)
+inline TokenFile::TokenFile(const std::string& tokenfile, const std::vector<BearerToken>& tokens)
     : tokenfile_(tokenfile) {
-    // write api token file
-    // api-keys: 3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e
-    //           351db772d94310a6d57aa7144448f4c108e7ee2e2a00a74edbdf8edb11bee71b
-    //           764073a74875ada28859454e58881229a5149ae400589fc617234d8d96c6d91a
-    //           5c6f6a003f3292c4d7671c9ad8ca10fb76e2273e584992f0d1f8fdf4abcdc81e
 
-    nlohmann::json j = {
-        {{"hash", "sha256$22660ab1789dc30e$7e24f61129294505b6ac310ebe891df9800f4854a67bac953bb86bf9fd726813"},
-         {"description", "test-app-1"},
-         {"expires_at", ""}},
-        {{"hash",
-          "pbkdf2:sha256:20000$Iqbh8Bz86hYHpkpn$ea95e8fb276c602fe4a4b56569fbcc321be5b31a3caa6bb3a9001e595349887f"},
-         {"description", "test-app-2"},
-         {"expires_at", "2100-01-01T00:00:00Z"}},
-        {{"hash",
-          "pbkdf2:sha256:20000$Iqbh8Bz86hYHpkpn$ea95e8fb276c602fe4a4b56569fbcc321be5b31a3caa6bb3a9001e595349887f"},
-         {"description", "test-app-3"},
-         {"expires_at", "2000-01-01T00:00:00Z"}},
-        {{"hash",
-          "pbkdf2:sha256:20000$Iqbh8Bz86hYHpkpn$ea95e8fb276c602fe4a4b56569fbcc321be5b31a3caa6bb3a9001e595349887f"},
-         {"description", "test-app-4"},
-         {"revoked_at", "2000-01-01T00:00:00Z"}}};
+    nlohmann::json j = nlohmann::json::array();
+
+    for (const auto& token : tokens) {
+        const std::string salt       = generate_salt();
+        const std::string hashed     = hmac_sha256(salt, token.token);
+        const std::string hash_value = "sha256$" + salt + "$" + hashed;
+
+        nlohmann::json token_obj = {
+            {"hash", hash_value},
+            {"description", token.description},
+        };
+
+        if (!token.expires_at.empty()) {
+            token_obj["expires_at"] = token.expires_at;
+        }
+        if (!token.revoked_at.empty()) {
+            token_obj["revoked_at"] = token.revoked_at;
+        }
+
+        j.push_back(token_obj);
+    }
 
     std::ofstream o(tokenfile_);
     o << std::setw(4) << j << std::endl;
@@ -66,6 +123,45 @@ inline TokenFile::~TokenFile() {
     else {
         BOOST_TEST_MESSAGE("Removed token file " << tokenfile_);
     }
+}
+
+inline std::string TokenFile::generate_token(std::size_t num_bytes) {
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<int> dist(0, 255);
+
+    std::ostringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (std::size_t i = 0; i < num_bytes; ++i) {
+        ss << std::setw(2) << dist(gen);
+    }
+
+    return ss.str();
+}
+
+inline std::string TokenFile::generate_salt() {
+    return generate_token(16);
+}
+
+inline std::string TokenFile::hmac_sha256(const std::string& salt, const std::string& token) {
+    std::array<unsigned char, EVP_MAX_MD_SIZE> hash;
+    unsigned int hash_len;
+
+    HMAC(EVP_sha256(),
+         salt.c_str(),
+         static_cast<int>(salt.size()),
+         reinterpret_cast<const unsigned char*>(token.c_str()),
+         token.size(),
+         hash.data(),
+         &hash_len);
+
+    std::ostringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (unsigned int i = 0; i < hash_len; ++i) {
+        ss << std::setw(2) << static_cast<int>(hash[i]);
+    }
+
+    return ss.str();
 }
 
 #endif /* #ifndef ecflow_http_test_TokenFile_HPP */

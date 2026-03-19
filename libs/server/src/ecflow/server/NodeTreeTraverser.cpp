@@ -169,7 +169,7 @@ void NodeTreeTraverser::do_traverse() {
 
 #ifdef DEBUG_TRAVERSER
     int real_diff = diff_from_last_time - submitJobsIntervalInSeconds;
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "   NodeTreeTraverser::traverse() diff_from_last_time:" << diff_from_last_time << " running:" << running_
        << " count:" << count_ << " real_diff:" << real_diff << "  time_now:" << to_simple_string(time_now);
     if (diff_from_last_time == 0) {
@@ -392,10 +392,10 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
                 auto duration    = time_out_time - next_poll_time_;
                 if (duration.total_seconds() >= leeway || serverEnv_.submitJobsInterval() != 60) {
 
-                    std::stringstream ss;
-                    ss << "Job generation *timed* out: start time:" << start_time << "  time_out_time:" << time_out_time
-                       << "  poll_time:" << next_poll_time_;
-                    ecf::log(Log::WAR, ss.str());
+                    ecf::log(Log::WAR,
+                             MESSAGE("Job generation *timed* out: start time:" << start_time
+                                                                               << "  time_out_time:" << time_out_time
+                                                                               << "  poll_time:" << next_poll_time_));
                 }
             }
         }

@@ -88,9 +88,7 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_notification_package) {
 
     NotificationPackage<ConfiguredListener, AvisoNotification> package{"path", listener, notification};
 
-    std::ostringstream oss;
-    oss << package;
-    BOOST_CHECK(oss.str().find("NotificationPackage") != std::string::npos);
+    BOOST_CHECK(MESSAGE(package).find("NotificationPackage") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -142,9 +140,7 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_response_with_notification_package) {
 
     AvisoResponse response = package;
 
-    std::ostringstream oss;
-    oss << response;
-    BOOST_CHECK(oss.str().find("NotificationPackage") != std::string::npos);
+    BOOST_CHECK(MESSAGE(response).find("NotificationPackage") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(can_print_aviso_response_with_no_match) {
@@ -153,9 +149,7 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_response_with_no_match) {
     AvisoNoMatch no_match;
     AvisoResponse response = no_match;
 
-    std::ostringstream oss;
-    oss << response;
-    BOOST_CHECK(oss.str().find("AvisoNoMatch") != std::string::npos);
+    BOOST_CHECK(MESSAGE(response).find("AvisoNoMatch") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(can_print_aviso_response_with_error) {
@@ -164,9 +158,7 @@ BOOST_AUTO_TEST_CASE(can_print_aviso_response_with_error) {
     AvisoError error{"error"};
     AvisoResponse response = error;
 
-    std::ostringstream oss;
-    oss << response;
-    BOOST_CHECK(oss.str().find("AvisoError") != std::string::npos);
+    BOOST_CHECK(MESSAGE(response).find("AvisoError") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

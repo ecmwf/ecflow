@@ -13,6 +13,7 @@
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/Stats.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Log.hpp"
@@ -33,9 +34,9 @@ std::string extract_report_value(const std::string& report, const std::string& l
     for (const auto& token : tokens) {
         if (token.find(label) != std::string::npos) {
             // Important!
-            //   By convention, the labels in report by `Stats` have width 35
+            //   By convention, the labels in report by `Stats` have a specific width
             //   If this convention changes, the test will fail
-            return token.substr(35);
+            return token.substr(Stats::width + 2 /* amount of spaces before label */);
         }
     }
     throw std::runtime_error("Unable to find requested label");

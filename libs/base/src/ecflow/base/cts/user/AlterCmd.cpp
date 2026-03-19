@@ -11,6 +11,7 @@
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 
 #include <stdexcept>
+#include <string>
 
 #include "ecflow/attribute/GenericAttr.hpp"
 #include "ecflow/attribute/LateAttr.hpp"
@@ -54,7 +55,54 @@ static std::string dump_args(const std::vector<std::string>& options, const std:
     return the_args;
 }
 
-namespace ecf::detail {
+namespace ecf {
+
+InlimitOptions parse_inlimit_value(std::string value) {
+    if (value.empty()) {
+        return InlimitOptions{/* tokens = */ 1, /* limited_submission = */ false, /* limited_node = */ false};
+    }
+
+    bool limited_submission               = false;
+    constexpr const char* submission_flag = "-s";
+    if (ecf::algorithm::contains(value, submission_flag)) {
+        limited_submission = true;
+        ecf::algorithm::remove_all(value, submission_flag);
+    }
+
+    bool limited_node               = false;
+    constexpr const char* node_flag = "-n";
+    if (ecf::algorithm::contains(value, node_flag)) {
+        limited_node = true;
+        ecf::algorithm::remove_all(value, node_flag);
+    }
+
+    if (limited_submission && limited_node) {
+        throw std::runtime_error("AlterCmd: an inlimit cannot be limited for both submission and node");
+    }
+
+    ecf::algorithm::trim(value);
+
+    if (value.empty()) {
+        return InlimitOptions{/* tokens = */ 1, limited_submission, limited_node};
+    }
+
+    try {
+        int tokens = ecf::convert_to<int>(value);
+
+        if (tokens <= 0) {
+            throw std::runtime_error(
+                MESSAGE("AlterCmd: the inlimit value must be > 0, but value was: '" << tokens << "'"));
+        }
+
+        return InlimitOptions{tokens, limited_submission, limited_node};
+    }
+    catch (const ecf::bad_conversion&) {
+        throw std::runtime_error(
+            MESSAGE("AlterCmd: the inlimit value, '" << value << "', cannot be converted to an integer"));
+    }
+};
+
+namespace detail {
 
 template <>
 struct EnumTraits<AlterCmd::Delete_attr_type>
@@ -152,7 +200,9 @@ struct EnumTraits<AlterCmd::Change_attr_type>
     static_assert(EnumTraits<AlterCmd::Change_attr_type>::size == map.back().first);
 };
 
-} // namespace ecf::detail
+} // namespace detail
+
+} // namespace ecf
 
 static AlterCmd::Delete_attr_type deleteAttrType(const std::string& s) {
     if (auto found = ecf::Enumerate<AlterCmd::Delete_attr_type>::to_enum(s); found) {
@@ -313,9 +363,7 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const {
         // ECFLOW-380: Some variable should be read only
         if (name_ == ecf::environment::ECF_HOST || name_ == ecf::environment::ECF_PORT || name_ == "ECF_PID" ||
             name_ == "ECF_VERSION" || name_ == "ECF_LISTS") {
-            std::stringstream ss;
-            ss << "AlterCmd:: Cannot add or change read only server variable " << name_;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("AlterCmd:: Cannot add or change read only server variable " << name_));
         }
         defs->server_state().add_or_update_user_variables(name_, value_);
     }
@@ -350,7 +398,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
     as->update_stats().alter_cmd_++;
     Defs* defs = as->defs().get();
 
-    std::stringstream ss;
+    std::ostringstream ss;
     size_t vec_size = paths_.size();
     for (size_t i = 0; i < vec_size; i++) {
 
@@ -559,31 +607,27 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                         int_value = ecf::convert_to<int>(value_);
                     }
                     catch (const ecf::bad_conversion&) {
-                        std::stringstream mss;
-                        mss << "AlterCmd: add_limit " << name_ << " " << value_ << " failed. Expected '" << value_
-                            << "' to be convertible to an integer";
-                        throw std::runtime_error(mss.str());
+                        throw std::runtime_error(MESSAGE("AlterCmd: add_limit "
+                                                         << name_ << " " << value_ << " failed. Expected '" << value_
+                                                         << "' to be convertible to an integer"));
                     }
                     node->addLimit(Limit(name_, int_value));
                     break;
                 }
                 case AlterCmd::ADD_INLIMIT: {
-                    std::string path_to_limit; // This can be empty
-                    std::string limitName;
-                    if (!Extract::pathAndName(name_, path_to_limit, limitName)) {
+                    // Parse the limit path and name, which the inlimit depends on.
+                    std::string limit_path; // This can be empty
+                    std::string limit_name;
+                    if (!Extract::pathAndName(name_, limit_path, limit_name)) {
                         throw std::runtime_error("AlterCmd::ADD_INLIMIT: Invalid inlimit : " + name_);
                     }
-                    int token_value = 1;
-                    if (!value_.empty()) {
-                        try {
-                            token_value = ecf::convert_to<int>(value_);
-                        }
-                        catch (const ecf::bad_conversion&) {
-                            ss << "AlterCmd: add_inlimit expected '" << value_ << "' to be convertible to an integer";
-                            throw std::runtime_error(ss.str());
-                        }
-                    }
-                    node->addInLimit(InLimit(limitName, path_to_limit, token_value)); // will throw if not valid
+
+                    // Parse the inlimit options, including token value
+                    auto [tokens, limited_submission, limited_node] = parse_inlimit_value(value_);
+
+                    // Add the inlimit to the node
+                    // Note: the InLimit ctor performs validation of the parameters and can throw if they are not valid
+                    node->addInLimit(InLimit(limit_name, limit_path, tokens, limited_node, limited_submission));
                     break;
                 }
                 case AlterCmd::ADD_ATTR_ND:
@@ -717,6 +761,10 @@ const char* AlterCmd::desc() {
         "\n"
         "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /path/to/node\n"
         "\n"
+        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-s 10\" /path/to/node\n"
+        "\n"
+        "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"-n 10\" /path/to/node\n"
+        "\n"
         "   # zombie attributes have the following structure:\n"
         "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n"
         "      zombie_type        = \"user\" | \"ecf\" | \"path\" | \"ecf_pid\" | \"ecf_passwd\" | \"ecf_pid_passwd\"\n"
@@ -751,21 +799,16 @@ void AlterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
     if (paths.empty()) {
-        std::stringstream ss;
-        ss << "AlterCmd: No paths specified. Paths must begin with a leading '/' character\n"
-           << dump_args(options, paths) << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("AlterCmd: No paths specified. Paths must begin with a leading '/' character\n"
+                                         << dump_args(options, paths) << "\n"));
     }
     if (options.empty()) {
-        std::stringstream ss;
-        ss << "AlterCmd: Invalid argument list:\n" << dump_args(options, paths) << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("AlterCmd: Invalid argument list:\n" << dump_args(options, paths) << "\n"));
     }
     if (options.size() < 2) {
-        std::stringstream ss;
-        ss << "Alter: At least three arguments expected. Found " << args.size() << "\n"
-           << dump_args(options, paths) << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Alter: At least three arguments expected. Found " << args.size() << "\n"
+                                                                                            << dump_args(options, paths)
+                                                                                            << "\n"));
     }
 
     // arg[0] should one of [ add | delete | change | set_flag | clear_flag | sort ]
@@ -802,18 +845,17 @@ void AlterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         return;
     }
 
-    std::stringstream ss;
-    ss << "Alter: The first argument must be one of [ change | delete | add | set_flag | clear_flag | sort ] but found "
-          "'"
-       << alterType << "'\n"
-       << dump_args(options, paths) << "\n";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE(
+        "Alter: The first argument must be one of [ change | delete | add | set_flag | clear_flag | sort ] but found "
+        "'"
+        << alterType << "'\n"
+        << dump_args(options, paths) << "\n"));
 }
 
 AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type) const {
     AlterCmd::Add_attr_type theAttrType = addAttrType(attr_type);
     if (theAttrType == AlterCmd::ADD_ATTR_ND) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "AlterCmd: add: The second argument must be one of [ ";
         std::vector<std::string> valid;
         validAddAttr(valid);
@@ -838,11 +880,10 @@ void AlterCmd::createAdd(Cmd_ptr& cmd, std::vector<std::string>& options, std::v
 
     AlterCmd::Add_attr_type theAttrType = get_add_attr_type(options[1]);
 
-    std::stringstream ss;
     if (options.size() < 3) {
-        ss << "AlterCmd: add: At least four arguments expected. Found " << (options.size() + paths.size()) << "\n"
-           << dump_args(options, paths) << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("AlterCmd: add: At least four arguments expected. Found "
+                                         << (options.size() + paths.size()) << "\n"
+                                         << dump_args(options, paths) << "\n"));
     }
 
     std::string name, value;
@@ -851,11 +892,11 @@ void AlterCmd::createAdd(Cmd_ptr& cmd, std::vector<std::string>& options, std::v
         check_for_add(theAttrType, name, value);
     }
     catch (std::exception& e) {
-        ss << "AlterCmd: add: Could not parse " << name << ". Error: " << e.what()
-           << "\n for time,today and date the new value should be a quoted string "
-           << "\n for add expected: --alter add variable <name> <value> <paths>\n"
-           << dump_args(options, paths) << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("AlterCmd: add: Could not parse "
+                                         << name << ". Error: " << e.what()
+                                         << "\n for time,today and date the new value should be a quoted string "
+                                         << "\n for add expected: --alter add variable <name> <value> <paths>\n"
+                                         << dump_args(options, paths) << "\n"));
     }
 
     cmd = std::make_shared<AlterCmd>(paths, theAttrType, name, value);
@@ -868,7 +909,6 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
                                               std::vector<std::string>& paths) const {
     // **** parse and check format, expect this argument to be single or double tick quoted ****
     // **** for time,date,day or zombie
-    std::stringstream ss;
     name = options[2];
     switch (theAttrType) {
         case AlterCmd::ADD_TIME:
@@ -890,9 +930,9 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
                 paths.erase(paths.begin());
             }
             if (options.size() < 4) {
-                ss << "AlterCmd: add: Expected 'add variable <name> <value> <paths>. Not enough arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: add: Expected 'add variable <name> <value> <paths>. Not enough arguments\n"
+                            << dump_args(options, paths) << "\n"));
             }
             value = options[3];
             break;
@@ -904,9 +944,9 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
                 paths.erase(paths.begin());
             }
             if (options.size() < 4) {
-                ss << "AlterCmd: add: Expected 'add label <name> <value> <paths>. Not enough arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: add: Expected 'add label <name> <value> <paths>. Not enough arguments\n"
+                            << dump_args(options, paths) << "\n"));
             }
             value = options[3];
             break;
@@ -918,9 +958,9 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
                 paths.erase(paths.begin());
             }
             if (options.size() < 4) {
-                ss << "AlterCmd: add: Expected 'add event <name> (set|clear) <paths>. Not enough arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: add: Expected 'add event <name> (set|clear) <paths>. Not enough arguments\n"
+                            << dump_args(options, paths) << "\n"));
             }
             value = options[3];
             break;
@@ -932,27 +972,27 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
                 paths.erase(paths.begin());
             }
             if (options.size() < 4) {
-                ss << "AlterCmd: add: Expected 'add event <name> <min,max,value> <paths>. Not enough arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: add: Expected 'add event <name> <min,max,value> <paths>. Not enough arguments\n"
+                            << dump_args(options, paths) << "\n"));
             }
             value = options[3];
             break;
         }
         case AlterCmd::ADD_AVISO: {
             if (options.size() != 4 || paths.size() < 1) {
-                ss << "AlterCmd: add: Expected 'add aviso <name> <cfg> <path> [<path> [...]]. Not enough arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: add: Expected 'add aviso <name> <cfg> <path> [<path> [...]]. Not enough arguments\n"
+                    << dump_args(options, paths) << "\n"));
             }
             value = options[3];
             break;
         }
         case AlterCmd::ADD_MIRROR: {
             if (options.size() != 4 || paths.size() < 1) {
-                ss << "AlterCmd: add: Expected 'add mirror <name> <cfg> <path> [<path> [...]]. Not enough arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: add: Expected 'add mirror <name> <cfg> <path> [<path> [...]]. Not enough arguments\n"
+                    << dump_args(options, paths) << "\n"));
             }
             value = options[3];
             break;
@@ -960,9 +1000,8 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
 
         case AlterCmd::ADD_LIMIT: {
             if (options.size() < 4) {
-                ss << "AlterCmd: add: Expected 'add limit <name> int. Not enough arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE("AlterCmd: add: Expected 'add limit <name> int. Not enough arguments\n"
+                                                 << dump_args(options, paths) << "\n"));
             }
             value = options[3];
             break;
@@ -973,10 +1012,10 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
             // options[2]  - [ path_to_limit:limit_name ]   --> name
             // options[3]  - integer (optional)             --> value
             if (options.size() < 3) {
-                ss << "AlterCmd: add: Expected 'add inlimit <path-to-limit:limit_name> <int>(optional) <paths>. Not "
-                      "enough arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: add: Expected 'add inlimit <path-to-limit:limit_name> <int>(optional) <paths>. Not "
+                    "enough arguments\n"
+                    << dump_args(options, paths) << "\n"));
             }
             if (options.size() == 4) {
                 value = options[3];
@@ -997,7 +1036,6 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
         throw std::runtime_error("Alter: check_for_add : name is empty ?");
     }
 
-    std::stringstream ss;
     switch (theAttrType) {
         case AlterCmd::ADD_TIME:
             (void)TimeSeries::create(name);
@@ -1049,8 +1087,8 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
                 int_value = ecf::convert_to<int>(value);
             }
             catch (const ecf::bad_conversion&) {
-                ss << "AlterCmd add_limit expected value(" << value << ") to be convertible to an integer\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd add_limit expected value(" << value << ") to be convertible to an integer\n"));
             }
             Limit check(name, int_value); // will throw if not valid
             break;
@@ -1071,9 +1109,8 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
                     token_value = ecf::convert_to<int>(value);
                 }
                 catch (const ecf::bad_conversion&) {
-                    ss << "AlterCmd add inlimit expected optional limit token '" << value
-                       << "' to be convertible to an integer\n";
-                    throw std::runtime_error(ss.str());
+                    throw std::runtime_error(MESSAGE("AlterCmd add inlimit expected optional limit token '"
+                                                     << value << "' to be convertible to an integer\n"));
                 }
             }
             InLimit inlimit(limitName, path_to_limit, token_value); // will throw if not valid
@@ -1087,7 +1124,7 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
 AlterCmd::Delete_attr_type AlterCmd::get_delete_attr_type(const std::string& attr_type) const {
     AlterCmd::Delete_attr_type theAttrType = deleteAttrType(attr_type);
     if (theAttrType == AlterCmd::DELETE_ATTR_ND) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "Alter: delete: The second argument must be one of [ ";
         std::vector<std::string> valid;
         validDeleteAttr(valid);
@@ -1121,11 +1158,10 @@ void AlterCmd::createDelete(Cmd_ptr& cmd,
         check_for_delete(theAttrType, name, value);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "AlterCmd: delete: Could not parse " << name << ". Error: " << e.what()
-           << "\n for time,today and date the new value should be a quoted string\n"
-           << dump_args(options, paths) << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("AlterCmd: delete: Could not parse "
+                                         << name << ". Error: " << e.what()
+                                         << "\n for time,today and date the new value should be a quoted string\n"
+                                         << dump_args(options, paths) << "\n"));
     }
     cmd = std::make_shared<AlterCmd>(paths, theAttrType, name, value);
 }
@@ -1146,11 +1182,10 @@ void AlterCmd::extract_name_and_value_for_delete(AlterCmd::Delete_attr_type theA
     // if specified make sure its parses
     if (theAttrType == AlterCmd::DEL_LIMIT_PATH) {
         if (name.empty()) {
-            std::stringstream ss;
-            ss << "Delete limit_path failed. No limit name provided. Expected 5 args: delete limit_path <limit_name> "
-                  "<path-to-limit> <path_to_node>\n";
-            ss << dump_args(options, paths) << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE(
+                "Delete limit_path failed. No limit name provided. Expected 5 args: delete limit_path <limit_name> "
+                "<path-to-limit> <path_to_node>\n"
+                << dump_args(options, paths) << "\n"));
         }
 
         std::vector<std::string> altered_path = paths;
@@ -1161,11 +1196,10 @@ void AlterCmd::extract_name_and_value_for_delete(AlterCmd::Delete_attr_type theA
         else {
             // Since we have a limit path(i.e begins with'/') it will appear in the paths, as the first path
             if (paths.size() <= 1) {
-                std::stringstream ss;
-                ss << "Delete limit_path failed: No path to limit provided. Expected 5 args: delete limit_path "
-                      "<limit_name> <path-to-limit> <path_to_node>\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("Delete limit_path failed: No path to limit provided. Expected 5 args: delete limit_path "
+                            "<limit_name> <path-to-limit> <path_to_node>\n"
+                            << dump_args(options, paths) << "\n"));
             }
             path_value = paths[0];
 
@@ -1318,7 +1352,7 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
 AlterCmd::Change_attr_type AlterCmd::get_change_attr_type(const std::string& attr_type) const {
     AlterCmd::Change_attr_type theAttrType = changeAttrType(attr_type);
     if (theAttrType == AlterCmd::CHANGE_ATTR_ND) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "AlterCmd: change: The third argument(" << attr_type << ") must be one of [ ";
         std::vector<std::string> valid;
         validChangeAttr(valid);
@@ -1353,7 +1387,7 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
                                                  std::string& value,
                                                  std::vector<std::string>& options,
                                                  std::vector<std::string>& paths) const {
-    std::stringstream ss;
+    std::ostringstream ss;
     switch (theAttrType) {
         case AlterCmd::VARIABLE: {
             if (options.size() == 3 && paths.size() > 1) {
@@ -1362,11 +1396,11 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
                 paths.erase(paths.begin()); // remove first path, since it has been added to options
             }
             if (options.size() < 3 || options.size() > 4) {
-                ss << "AlterCmd: change: expected 5 args : change variable <variable_name> <new_value> <path_to_node>";
-                ss << " but found only " << (options.size() + paths.size())
-                   << " arguments.\nThe value should be quoted if there are spaces\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change: expected 5 args : change variable <variable_name> <new_value> <path_to_node>"
+                    << " but found only " << (options.size() + paths.size())
+                    << " arguments.\nThe value should be quoted if there are spaces\n"
+                    << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             if (options.size() == 4) {
@@ -1377,11 +1411,11 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::CLOCK_TYPE: {
             if (options.size() != 3) {
-                ss << "AlterCmd: change: expected at least four args i.e. change clock_type [ hybrid | real ] "
-                      "<path_to_suite>";
-                ss << " but found only " << (options.size() + paths.size()) << " arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: change: expected at least four args i.e. change clock_type [ hybrid | real ] "
+                            "<path_to_suite>"
+                            << " but found only " << (options.size() + paths.size()) << " arguments\n"
+                            << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1389,11 +1423,10 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::CLOCK_DATE: {
             if (options.size() != 3) {
-                ss << "AlterCmd: change clock_date : expected at least four args :  change clock_date day.month.year "
-                      "<path_to_suite>";
-                ss << " but found only " << (options.size() + paths.size()) << " arguments\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change clock_date : expected at least four args :  change clock_date day.month.year "
+                    "<path_to_suite> but found only "
+                    << (options.size() + paths.size()) << " arguments\n " << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1401,11 +1434,11 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::CLOCK_GAIN: {
             if (options.size() != 3) {
-                ss << "AlterCmd: change clock_gain : expected four args i.e. change clock_gain <int> <path_to_suite> ";
-                ss << " but found " << (options.size() + paths.size())
-                   << " arguments. The actual gain must be convertible to an integer\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE("AlterCmd: change clock_gain : expected four args i.e. change "
+                                                 "clock_gain <int> <path_to_suite> but found "
+                                                 << (options.size() + paths.size())
+                                                 << " arguments. The actual gain must be convertible to an integer\n"
+                                                 << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1413,21 +1446,21 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::CLOCK_SYNC: {
             if (options.size() != 2) {
-                ss << "AlterCmd: change clock_sync : expected three args i.e. change clock_sync  <path_to_suite> ";
-                ss << " but found " << (options.size() + paths.size()) << " arguments.\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: change clock_sync : expected three args i.e. change clock_sync  <path_to_suite> "
+                            << " but found " << (options.size() + paths.size()) << " arguments.\n"
+                            << dump_args(options, paths) << "\n"));
             }
             break;
         }
 
         case AlterCmd::EVENT: {
             if (options.size() != 3 && options.size() != 4) {
-                ss << "AlterCmd: Change event : expected four/five args:  change event <name_or_number> <[set | clear "
-                      "| <nothing>]> <path_to_node>";
-                ss << " but found only " << (options.size() + paths.size()) << " arguments\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: Change event : expected four/five args:  change event <name_or_number> <[set | clear "
+                    "| <nothing>]> <path_to_node>"
+                    << " but found only " << (options.size() + paths.size()) << " arguments\n"
+                    << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             if (options.size() == 4) {
@@ -1438,11 +1471,12 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::METER: {
             if (options.size() != 4) {
-                ss << "AlterCmd: change: expected five args: change meter meter_name meter_value  <path_to_node>";
-                ss << " but found only " << (options.size() + paths.size())
-                   << " arguments. The meter value must be convertible to an integer\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change: expected five args: change meter meter_name meter_value  <path_to_node>  "
+                    "but found only "
+                    << (options.size() + paths.size())
+                    << " arguments. The meter value must be convertible to an integer\n"
+                    << dump_args(options, paths) << "\n"));
             }
             name  = options[2];
             value = options[3];
@@ -1468,12 +1502,12 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
                     paths.erase(paths.begin()); // remove first path, since it has been added to options
                 }
                 if (options.size() != 4) {
-                    ss << "AlterCmd: change label expected at least five args : change label <label_name> "
-                          "<label_value> <path_to_node> ";
-                    ss << " but found  " << (options.size() + paths.size())
-                       << " arguments. the label value should be quoted\n";
-                    ss << dump_args(options, paths) << "\n";
-                    throw std::runtime_error(ss.str());
+                    throw std::runtime_error(
+                        MESSAGE("AlterCmd: change label expected at least five args : change label <label_name> "
+                                "<label_value> <path_to_node> "
+                                << " but found  " << (options.size() + paths.size())
+                                << " arguments. the label value should be quoted\n"
+                                << dump_args(options, paths) << "\n"));
                 }
                 value = options[3];
                 if (value.find("\\n") != std::string::npos) {
@@ -1486,10 +1520,10 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::AVISO: {
             if (options.size() != 4 || paths.size() < 1) {
-                ss << "AlterCmd: change: Expected 'change aviso <name> <cfg> <path> [<path>] [...]."
-                   << "Incorrect number of arguments.\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: change: Expected 'change aviso <name> <cfg> <path> [<path>] [...]."
+                            << "Incorrect number of arguments.\n"
+                            << dump_args(options, paths) << "\n"));
             }
             name  = options[2];
             value = options[3];
@@ -1498,10 +1532,10 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::MIRROR: {
             if (options.size() != 4 || paths.size() < 1) {
-                ss << "AlterCmd: change: Expected 'change mirror <name> <cfg> <path> [<path>] [...]."
-                   << "Incorrect number of arguments.\n"
-                   << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: change: Expected 'change mirror <name> <cfg> <path> [<path>] [...]."
+                            << "Incorrect number of arguments.\n"
+                            << dump_args(options, paths) << "\n"));
             }
             name  = options[2];
             value = options[3];
@@ -1510,11 +1544,11 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::LATE: {
             if (options.size() != 3) {
-                ss << "AlterCmd: change: expected three args: change late \"late -s +00:15  -a  20:00  -c +02:00\" "
-                      "<path_to_node>";
-                ss << " but found only " << (options.size() + paths.size()) << " arguments\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change: expected three args: change late \"late -s +00:15  -a  20:00  -c +02:00\" "
+                    "<path_to_node> but found only "
+                    << (options.size() + paths.size()) << " arguments\n"
+                    << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1522,11 +1556,11 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::TRIGGER: {
             if (options.size() != 3) {
-                ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
-                ss << " but found " << (options.size() + paths.size())
-                   << " arguments. The trigger expression must be quoted\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>"
+                            << " but found " << (options.size() + paths.size())
+                            << " arguments. The trigger expression must be quoted\n"
+                            << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1534,10 +1568,10 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::COMPLETE: {
             if (options.size() != 3) {
-                ss << "AlterCmd: change complete: expected four args: change complete 'expression'  <path_to_node> ";
-                ss << " but found " << (options.size() + paths.size()) << " arguments. The expression must be quoted\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change complete: expected four args: change complete 'expression'  <path_to_node> "
+                    << " but found " << (options.size() + paths.size()) << " arguments. The expression must be quoted\n"
+                    << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1546,11 +1580,11 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
         case AlterCmd::REPEAT: {
             // *NOTE* a Node can only have *ONE* repeat, hence no need to provide name
             if (options.size() != 3) {
-                ss << "AlterCmd: change repeat: expected four arg's : change repeat [ integer | string ] "
-                      "<path_to_node>";
-                ss << " but found only " << (options.size() + paths.size()) << " arguments.\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: change repeat: expected four arg's : change repeat [ integer | string ] "
+                            "<path_to_node> but found only "
+                            << (options.size() + paths.size()) << " arguments.\n"
+                            << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1558,11 +1592,11 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::LIMIT_MAX: {
             if (options.size() != 4) {
-                ss << "AlterCmd: change: limit_max: : expected five arguments : change limit_max <limit_name> <int> "
-                      "<path_to_node>";
-                ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change: limit_max: : expected five arguments : change limit_max <limit_name> <int> "
+                    "<path_to_node> but found "
+                    << (options.size() + paths.size()) << " arguments.\n"
+                    << dump_args(options, paths) << "\n"));
             }
             name  = options[2];
             value = options[3];
@@ -1571,11 +1605,10 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::LIMIT_VAL: {
             if (options.size() != 4) {
-                ss << "AlterCmd: change: limit-value: expected five arguments : change limit_value <limit_name> <int> "
-                      "<path_to_node>";
-                ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE("AlterCmd: change: limit-value: expected five arguments : change "
+                                                 "limit_value <limit_name> <int> <path_to_node>"
+                                                 << " but found  " << (options.size() + paths.size()) << " arguments.\n"
+                                                 << dump_args(options, paths) << "\n"));
             }
             name  = options[2];
             value = options[3];
@@ -1584,10 +1617,10 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::TIME: {
             if (options.size() != 4) {
-                ss << "AlterCmd: change: time: expected five arguments : change time old_time new_time <path_to_node>";
-                ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change: time: expected five arguments : change time old_time new_time <path_to_node>"
+                    << " but found  " << (options.size() + paths.size()) << " arguments.\n"
+                    << dump_args(options, paths) << "\n"));
             }
             name  = options[2];
             value = options[3];
@@ -1596,11 +1629,10 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::TODAY: {
             if (options.size() != 4) {
-                ss << "AlterCmd: change: today: expected five arguments : change time old_today new_today "
-                      "<path_to_node>";
-                ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE("AlterCmd: change: today: expected five arguments : change time "
+                                                 "old_today new_today <path_to_node> but found  "
+                                                 << (options.size() + paths.size()) << " arguments.\n"
+                                                 << dump_args(options, paths) << "\n"));
             }
             name  = options[2];
             value = options[3];
@@ -1609,11 +1641,11 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 
         case AlterCmd::DEFSTATUS: {
             if (options.size() != 3) {
-                ss << "AlterCmd: change defstatus expected four args : change defstatus [ queued | complete | unknown "
-                      "| aborted | suspended ] <path_to_node>";
-                ss << " but found  " << (options.size() + paths.size()) << " arguments.\n";
-                ss << dump_args(options, paths) << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change defstatus expected four args : change defstatus [ queued | complete | unknown "
+                    "| aborted | suspended ] <path_to_node> but found  "
+                    << (options.size() + paths.size()) << " arguments.\n"
+                    << dump_args(options, paths) << "\n"));
             }
             name = options[2];
             break;
@@ -1629,15 +1661,14 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
 void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
                                 const std::string& name,
                                 const std::string& value) const {
-    std::stringstream ss;
     switch (theAttrType) {
         case AlterCmd::VARIABLE:
             break;
         case AlterCmd::CLOCK_TYPE: {
             if (name != "hybrid" && name != "real") {
-                ss << "AlterCmd: change clock_type: expected third argument to be one of [ hybrid | real ] but found "
-                   << name << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd: change clock_type: expected third argument to be one of [ hybrid | real ] but found "
+                    << name << "\n"));
             }
             break;
         }
@@ -1649,8 +1680,8 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
                 DateAttr::checkDate(day, month, year, false /* for clocks, we don't allow wild carding */);
             }
             catch (std::exception& e) {
-                ss << "AlterCmd:change  clock_date " << name << " is not valid. " << e.what();
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd:change  clock_date " << name << " is not valid. " << e.what()));
             }
             break;
         }
@@ -1660,8 +1691,8 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
                 ecf::convert_to<int>(name);
             }
             catch (const ecf::bad_conversion&) {
-                ss << "AlterCmd:change  clock_gain expected '" << name << "' to be convertible to an integer\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd:change  clock_gain expected '" << name << "' to be convertible to an integer\n"));
             }
             break;
         }
@@ -1671,8 +1702,8 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
 
         case AlterCmd::EVENT: {
             if (!value.empty() && value != Event::SET() && value != Event::CLEAR()) {
-                ss << "AlterCmd: Change event : expected  <[set | clear | <nothing>]> for the value";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: Change event : expected  <[set | clear | <nothing>]> for the value"));
             }
             // The name could be an integer
             try {
@@ -1691,8 +1722,8 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
                 ecf::convert_to<int>(value);
             }
             catch (const ecf::bad_conversion&) {
-                ss << "AlterCmd change meter : " << value << " to be convertible to an integer\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd change meter : " << value << " to be convertible to an integer\n"));
             }
             break;
         }
@@ -1723,8 +1754,7 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
             std::string error_msg       = "AlterCmd: change trigger:";
             std::unique_ptr<AstTop> ast = Expression::parse_no_throw(name, error_msg);
             if (!ast.get()) {
-                ss << error_msg << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(error_msg << "\n"));
             }
             break;
         }
@@ -1733,8 +1763,7 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
             std::string error_msg       = "AlterCmd: change complete:";
             std::unique_ptr<AstTop> ast = Expression::parse_no_throw(name, error_msg);
             if (!ast.get()) {
-                ss << error_msg << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(error_msg << "\n"));
             }
             break;
         }
@@ -1750,8 +1779,8 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
                 limit = ecf::convert_to<int>(value);
             }
             catch (const ecf::bad_conversion&) {
-                ss << "AlterCmd: change: limit-max: expected " << value << " to be convertible to an integer\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("AlterCmd: change: limit-max: expected " << value << " to be convertible to an integer\n"));
             }
             Limit check(name, limit); // Check name , by creating
             break;
@@ -1762,8 +1791,8 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
                 ecf::convert_to<int>(value);
             }
             catch (const ecf::bad_conversion&) {
-                ss << "AlterCmd: change: limit_value: expected " << value << " to be convertible to an integer\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE("AlterCmd: change: limit_value: expected "
+                                                 << value << " to be convertible to an integer\n"));
             }
             Limit check(name, 10); // Check name, by creating
             break;
@@ -1771,9 +1800,10 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
 
         case AlterCmd::DEFSTATUS: {
             if (!DState::isValid(name)) {
-                ss << "AlterCmd change defstatus : expected " << name
-                   << " to be a valid state,  i.e one of [ queued | complete | unknown | aborted | suspended ]\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    "AlterCmd change defstatus : expected "
+                    << name
+                    << " to be a valid state,  i.e one of [ queued | complete | unknown | aborted | suspended ]\n"));
             }
             break;
         }
@@ -1788,7 +1818,7 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
 ecf::Flag::Type AlterCmd::get_flag_type(const std::string& flag_type) const {
     Flag::Type theFlagType = Flag::string_to_flag_type(flag_type);
     if (theFlagType == Flag::NOT_SET) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "AlterCmd: set/clear_flag: The second argument(" << flag_type << ") must be one of [ ";
         std::vector<std::string> valid;
         Flag::valid_flag_type(valid);
@@ -1819,7 +1849,7 @@ void AlterCmd::create_flag(Cmd_ptr& cmd,
 void AlterCmd::check_sort_attr_type(const std::string& attr_type) const {
     ecf::Attr::Type theAttrType = Attr::to_attr(attr_type);
     if (theAttrType == Attr::UNKNOWN) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "AlterCmd: sort: The second argument must be one of [ ";
         std::vector<std::string> valid = Attr::all_attrs();
         for (size_t i = 0; i < valid.size(); ++i) {
@@ -1839,11 +1869,10 @@ void AlterCmd::create_sort_attributes(Cmd_ptr& cmd,
     // options[0] - sort
     // options[1] - [ event | meter | label | limit | variable | all ]
     // options[2] - recursive
-    std::stringstream ss;
     if (options.size() < 2) {
-        ss << "AlterCmd: add: At least three arguments expected. Found " << (options.size() + paths.size()) << "\n"
-           << dump_args(options, paths) << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("AlterCmd: add: At least three arguments expected. Found "
+                                         << (options.size() + paths.size()) << "\n"
+                                         << dump_args(options, paths) << "\n"));
     }
 
     check_sort_attr_type(options[1]);
@@ -1852,9 +1881,9 @@ void AlterCmd::create_sort_attributes(Cmd_ptr& cmd,
     std::string value;
     if (options.size() == 3) {
         if (options[2] != "recursive") {
-            ss << "AlterCmd: sort: Expected third argument to be 'recursive' but found '" << options[2] << "\n"
-               << AlterCmd::desc();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("AlterCmd: sort: Expected third argument to be 'recursive' but found '"
+                                             << options[2] << "\n"
+                                             << AlterCmd::desc()));
         }
         value = "recursive";
     }
@@ -1900,11 +1929,10 @@ AlterCmd::AlterCmd(const std::vector<std::string>& paths,
         return;
     }
 
-    std::stringstream ss;
-    ss << "AlterCmd constructor: The alterType argument must be one of [ change | delete | add | set_flag | clear_flag "
-          "| sort ] but found '"
-       << alterType << "'\n";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE(
+        "AlterCmd constructor: The alterType argument must be one of [ change | delete | add | set_flag | clear_flag "
+        "| sort ] but found '"
+        << alterType << "'\n"));
 }
 
 std::ostream& operator<<(std::ostream& os, const AlterCmd& c) {

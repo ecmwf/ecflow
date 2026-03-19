@@ -10,10 +10,33 @@
 
 #ifndef ecflow_core_ecflow_source_build_dir_H
 #define ecflow_core_ecflow_source_build_dir_H
- 
-#define CMAKE_ECFLOW_SOURCE_DIR "@PROJECT_SOURCE_DIR@"
-#define CMAKE_ECFLOW_BUILD_DIR  "@PROJECT_BINARY_DIR@"
 
-#define CMAKE_ECFLOW_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
+#include <string>
+
+///
+/// @brief The directory where the source code of ecFlow is located.
+///
+inline std::string CMAKE_ECFLOW_SOURCE_DIR() {
+    return "@PROJECT_SOURCE_DIR@";
+}
+
+///
+/// @brief The directory where the build files of ecFlow are located.
+///
+/// @note This directory is expected to store the executables files, under subdirectory bin.
+///       For example, for testing purposes, the ecFlow server and cliente are expected at:
+///        - CMAKE_ECFLOW_BUILD_DIR/bin/ecflow_server
+///        - CMAKE_ECFLOW_BUILD_DIR/bin/ecflow_client
+///
+inline std::string CMAKE_ECFLOW_BUILD_DIR() {
+    return "@CMAKE_BINARY_DIR@";
+}
+
+///
+/// @brief The build type of ecFlow, e.g., Release, RelWithDebInfo, Debug.
+///
+inline std::string CMAKE_ECFLOW_BUILD_TYPE() {
+    return "@CMAKE_BUILD_TYPE@";
+}
 
 #endif /* ecflow_core_ecflow_source_build_dir_H */

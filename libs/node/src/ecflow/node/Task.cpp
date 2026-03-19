@@ -10,7 +10,6 @@
 
 #include "ecflow/node/Task.hpp"
 
-#include <sstream>
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
@@ -49,7 +48,9 @@ Task::Task(const Task& rhs)
 }
 
 node_ptr Task::clone() const {
-    return std::make_shared<Task>(*this);
+    auto clone = std::make_shared<Task>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 bool Task::check_defaults() const {
@@ -173,9 +174,8 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
     if (create_directory) {
 
         if (user_file_contents.empty()) {
-            std::stringstream ss;
-            ss << "Task::add_alias: No .usr file contents specified. Alias creation failed for task " << absNodePath();
-            THROW_RUNTIME(ss.str());
+            THROW_RUNTIME(MESSAGE("Task::add_alias: No .usr file contents specified. Alias creation failed for task "
+                                  << absNodePath()));
         }
 
         findParentUserVariableValue(ecf::environment::ECF_HOME, dir_to_create);
@@ -195,9 +195,8 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
         std::string file_path = dir_to_create + "/" + alias_name + alias->script_extension();
         std::string error_msg;
         if (!ecf::File::create(file_path, user_file_contents, error_msg)) {
-            std::stringstream ss;
-            ss << "Task::add_alias: could not create .usr file at path(" << file_path << "): " << error_msg.c_str();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Task::add_alias: could not create .usr file at path("
+                                             << file_path << "): " << error_msg.c_str()));
         }
     }
 

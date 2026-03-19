@@ -8,6 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <array>
 #include <cstdio>
 #include <iostream>
 

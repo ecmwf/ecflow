@@ -43,8 +43,8 @@ namespace foolproof::scaffold {
 inline std::string pretty_print_path(const fs::path& path) {
     auto canonical  = fs::canonical(path);
     std::string in  = canonical.string();
-    std::string fst = std::regex_replace(in, std::regex(CMAKE_ECFLOW_BUILD_DIR), "/~~~build~~~");
-    std::string snd = std::regex_replace(fst, std::regex(CMAKE_ECFLOW_SOURCE_DIR), "/~~~source~~~");
+    std::string fst = std::regex_replace(in, std::regex(CMAKE_ECFLOW_BUILD_DIR()), "/~~~build~~~");
+    std::string snd = std::regex_replace(fst, std::regex(CMAKE_ECFLOW_SOURCE_DIR()), "/~~~source~~~");
     return snd;
 }
 
@@ -105,7 +105,7 @@ public:
         }
 
         static std::string get_build_type() {
-            auto type = std::string{CMAKE_ECFLOW_BUILD_TYPE};
+            auto type = CMAKE_ECFLOW_BUILD_TYPE();
             std::transform(type.begin(), type.end(), type.begin(), [](unsigned char c) { return std::tolower(c); });
             return type;
         }
@@ -680,7 +680,7 @@ public:
         // define location to store 'lock' files
         // 1) by default, use project build directory
         // 2) overriden by ECF_PORT_LOCK_DIR environment variable
-        fs::path lock_dir = CMAKE_ECFLOW_SOURCE_DIR;
+        fs::path lock_dir = CMAKE_ECFLOW_SOURCE_DIR();
         if (const char* env = std::getenv("ECF_PORT_LOCK_DIR")) {
             lock_dir = env;
         };
@@ -877,7 +877,7 @@ public:
     }
 
 private:
-    static fs::path find_ecflow_client_path() { return fs::path{CMAKE_ECFLOW_BUILD_DIR} / "bin" / "ecflow_client"; }
+    static fs::path find_ecflow_client_path() { return fs::path{CMAKE_ECFLOW_BUILD_DIR()} / "bin" / "ecflow_client"; }
 
     template <typename Command>
     static Outcome<Client> launch_ecflow_client(const Host* host,
@@ -1119,7 +1119,7 @@ public:
     ~MakeServer() = default;
 
 private:
-    static fs::path find_ecflow_server_path() { return fs::path{CMAKE_ECFLOW_BUILD_DIR} / "bin" / "ecflow_server"; }
+    static fs::path find_ecflow_server_path() { return fs::path{CMAKE_ECFLOW_BUILD_DIR()} / "bin" / "ecflow_server"; }
 
     static Outcome<Process> launch_ecflow_server(const Host& host, const Port& port, const Directory& cwd) {
         auto server_path = find_ecflow_server_path();

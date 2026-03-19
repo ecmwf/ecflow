@@ -122,11 +122,10 @@ void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
     /// clientEnv->under_test()
     if (!clientEnv->under_test() && !clientEnv->process_or_remote_id().empty() &&
         clientEnv->process_or_remote_id() != process_or_remote_id) {
-        std::stringstream ss;
-        ss << "remote id(" << process_or_remote_id
-           << ") passed as an argument, not the same the client environment ECF_RID("
-           << clientEnv->process_or_remote_id() << ")";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("remote id("
+                                         << process_or_remote_id
+                                         << ") passed as an argument, not the same the client environment ECF_RID("
+                                         << clientEnv->process_or_remote_id() << ")"));
     }
 
     std::vector<Variable> variable_vec;

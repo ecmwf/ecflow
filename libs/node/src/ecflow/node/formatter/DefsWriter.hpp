@@ -844,9 +844,9 @@ struct Writer<AstVariable, Stream>
             output << " node(";
             output << refNode->name();
             output << ") ";
-            std::ostringstream os;
-            refNode->findExprVariableAndPrint(item.name(), os);
-            output << os.str();
+            std::ostringstream ss;
+            refNode->findExprVariableAndPrint(item.name(), ss);
+            output << ss.str();
         }
         else {
             output << " node(?not-found?) ";
@@ -880,9 +880,9 @@ struct Writer<AstParentVariable, Stream>
             output << " node(";
             output << ref_node->name();
             output << ") ";
-            std::ostringstream os;
-            ref_node->findExprVariableAndPrint(item.name(), os);
-            output << os.str();
+            std::ostringstream ss;
+            ref_node->findExprVariableAndPrint(item.name(), ss);
+            output << ss.str();
             return;
         }
         output << " node(?not-found?) value(0)";

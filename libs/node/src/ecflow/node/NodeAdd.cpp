@@ -114,10 +114,10 @@ void Node::add_complete_expr(const Expression& expr) {
 }
 void Node::add_trigger_expression(const Expression& t) {
     if (t_expr_) {
-        std::stringstream ss;
-        ss << "Node::add_trigger_expression. A Node(" << absNodePath() << " can only have one trigger ";
-        ss << "to add large triggers use multiple calls to Node::add_part_trigger( PartExpression('t1 == complete') )";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Node::add_trigger_expression. A Node("
+                                         << absNodePath() << " can only have one trigger "
+                                         << "to add large triggers use multiple calls to Node::add_part_trigger( "
+                                            "PartExpression('t1 == complete') )"));
     }
     if (isSuite()) {
         throw std::runtime_error("Cannot add trigger on a suite");
@@ -129,11 +129,11 @@ void Node::add_trigger_expression(const Expression& t) {
 
 void Node::add_complete_expression(const Expression& t) {
     if (c_expr_) {
-        std::stringstream ss;
-        ss << "Node::add_complete_expression. A Node(" << absNodePath() << " can only have one complete expression ";
-        ss << "to add large complete expressions use multiple calls to Node::add_part_complete( PartExpression('t1 == "
-              "complete') )";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "Node::add_complete_expression. A Node("
+            << absNodePath() << " can only have one complete expression "
+            << "to add large complete expressions use multiple calls to Node::add_part_complete( PartExpression('t1 == "
+               "complete') )"));
     }
     if (isSuite()) {
         throw std::runtime_error("Cannot add complete trigger on a suite");
@@ -263,10 +263,10 @@ void Node::addCron(const CronAttr& d) {
         throw std::runtime_error("Node::addCron: The cron is in-complete, no time specified");
     }
     if (d.time().hasIncrement() && !repeat_.empty()) {
-        std::stringstream ss;
-        ss << "Node::addCron: Node " << absNodePath()
-           << " already has a repeat. Inappropriate to add two looping structures at the same level\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Node::addCron: Node "
+                    << absNodePath()
+                    << " already has a repeat. Inappropriate to add two looping structures at the same level\n"));
     }
 
     crons_.push_back(d);
@@ -275,10 +275,8 @@ void Node::addCron(const CronAttr& d) {
 
 void Node::addLabel(const Label& l) {
     if (findLabel(l.name())) {
-        std::stringstream ss;
-        ss << "Add Label failed: Duplicate label of name '" << l.name() << "' already exists for node "
-           << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Label failed: Duplicate label of name '"
+                                         << l.name() << "' already exists for node " << debugNodePath()));
     }
     labels_.push_back(l);
     state_change_no_ = Ecf::incr_state_change_no();
@@ -286,9 +284,8 @@ void Node::addLabel(const Label& l) {
 
 void Node::add_label(const std::string& name, const std::string& value, const std::string& new_value, bool check) {
     if (check && findLabel(name)) {
-        std::stringstream ss;
-        ss << "Add Label failed: Duplicate label of name '" << name << "' already exists for node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Label failed: Duplicate label of name '"
+                                         << name << "' already exists for node " << debugNodePath()));
     }
     labels_.emplace_back(name, value, new_value, check);
     state_change_no_ = Ecf::incr_state_change_no();
@@ -298,10 +295,8 @@ void Node::addMeter(const Meter& m, bool check) {
     if (check) {
         const Meter& meter = findMeter(m.name());
         if (!meter.empty()) {
-            std::stringstream ss;
-            ss << "Add Meter failed: Duplicate Meter of name '" << m.name() << "' already exists for node "
-               << debugNodePath();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Add Meter failed: Duplicate Meter of name '"
+                                             << m.name() << "' already exists for node " << debugNodePath()));
         }
     }
     meters_.push_back(m);
@@ -312,10 +307,8 @@ void Node::add_meter(const std::string& name, int min, int max, int color_change
     if (check) {
         const Meter& meter = findMeter(name);
         if (!meter.empty()) {
-            std::stringstream ss;
-            ss << "Add Meter failed: Duplicate Meter of name '" << name << "' already exists for node "
-               << debugNodePath();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Add Meter failed: Duplicate Meter of name '"
+                                             << name << "' already exists for node " << debugNodePath()));
         }
     }
     meters_.emplace_back(name, min, max, color_change, value, check);
@@ -326,10 +319,8 @@ void Node::addEvent(const Event& e, bool check) {
     if (check) {
         const Event& event = findEvent(e);
         if (!event.empty()) {
-            std::stringstream ss;
-            ss << "Add Event failed: Duplicate Event of name '" << e.name_or_number() << "' already exists for node "
-               << debugNodePath();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Add Event failed: Duplicate Event of name '"
+                                             << e.name_or_number() << "' already exists for node " << debugNodePath()));
         }
     }
     events_.push_back(e);
@@ -356,10 +347,8 @@ void Node::addMirror(const MirrorAttr& m) {
 
 void Node::addLimit(const Limit& l, bool check) {
     if (check && findLimit(l)) {
-        std::stringstream ss;
-        ss << "Add Limit failed: Duplicate Limit of name '" << l.name() << "' already exists for node "
-           << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Limit failed: Duplicate Limit of name '"
+                                         << l.name() << "' already exists for node " << debugNodePath()));
     }
     limit_ptr the_limit = std::make_shared<Limit>(l);
     the_limit->set_node(this);
@@ -374,17 +363,16 @@ void Node::addInLimit(const InLimit& l, bool check) {
 
 static void throwIfRepeatAlreadyExists(Node* node) {
     if (!node->repeat().empty()) {
-        std::stringstream ss;
-        ss << "Add Repeat failed: Repeat of name '" << node->repeat().name() << "' already exists for node "
-           << node->debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Repeat failed: Repeat of name '" << node->repeat().name()
+                                                                               << "' already exists for node "
+                                                                               << node->debugNodePath()));
     }
 
     if (!node->crons().empty()) {
-        std::stringstream ss;
-        ss << "Node::addRepeat: Node " << node->absNodePath()
-           << " already has a cron. Inappropriate to add two looping structures at the same level\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Node::addRepeat: Node "
+                    << node->absNodePath()
+                    << " already has a cron. Inappropriate to add two looping structures at the same level\n"));
     }
 }
 void Node::addRepeat(Repeat&& r) {
@@ -402,14 +390,12 @@ void Node::addRepeat(const Repeat& r) {
 
 void Node::addAutoCancel(const ecf::AutoCancelAttr& ac) {
     if (auto_archive_) {
-        std::stringstream ss;
-        ss << "Node::addAutoCancel: Cannot add autocancel and autoarchive on the same node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Node::addAutoCancel: Cannot add autocancel and autoarchive on the same node " << debugNodePath()));
     }
     if (auto_cancel_) {
-        std::stringstream ss;
-        ss << "Node::addAutoCancel: A node can only have one autocancel, see node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Node::addAutoCancel: A node can only have one autocancel, see node " << debugNodePath()));
     }
     auto_cancel_     = std::make_unique<ecf::AutoCancelAttr>(ac);
     state_change_no_ = Ecf::incr_state_change_no();
@@ -417,14 +403,12 @@ void Node::addAutoCancel(const ecf::AutoCancelAttr& ac) {
 
 void Node::add_autoarchive(const ecf::AutoArchiveAttr& aa) {
     if (auto_cancel_) {
-        std::stringstream ss;
-        ss << "Node::add_autoarchive: Cannot add autocancel and autoarchive on the same node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "Node::add_autoarchive: Cannot add autocancel and autoarchive on the same node " << debugNodePath()));
     }
     if (auto_archive_) {
-        std::stringstream ss;
-        ss << "Node::add_autoarchive: A node can only have one autoarchive, see node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Node::add_autoarchive: A node can only have one autoarchive, see node " << debugNodePath()));
     }
     auto_archive_    = std::make_unique<ecf::AutoArchiveAttr>(aa);
     state_change_no_ = Ecf::incr_state_change_no();
@@ -432,9 +416,8 @@ void Node::add_autoarchive(const ecf::AutoArchiveAttr& aa) {
 
 void Node::add_autorestore(const ecf::AutoRestoreAttr& ar) {
     if (auto_restore_) {
-        std::stringstream ss;
-        ss << "Node::add_auto_restore: Can only have one autorestore per node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Node::add_auto_restore: Can only have one autorestore per node " << debugNodePath()));
     }
     auto_restore_ = std::make_unique<ecf::AutoRestoreAttr>(ar);
     auto_restore_->set_node(this);

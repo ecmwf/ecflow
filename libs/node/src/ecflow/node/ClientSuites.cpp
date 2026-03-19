@@ -258,7 +258,7 @@ std::string ClientSuites::dump() const {
     unsigned int maxmodifychangeno = 0;
     max_change_no(maxstatechangeno, maxmodifychangeno);
 
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "  handle(" << handle() << ") user(" << user_ << ") auto_add_new_suites(" << auto_add_new_suites_
        << ") suites_.size(" << suites_.size() << ") suites(";
 

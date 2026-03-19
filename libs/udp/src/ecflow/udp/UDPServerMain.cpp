@@ -27,9 +27,9 @@ static std::string ecflow_udp_server_version() {
     const std::string TAG = " ";
 #endif
 
-    std::ostringstream oss;
-    oss << "Ecflow UDP" << TAG << "version(" << ecf::Version::full() << ")";
-    return oss.str();
+    std::ostringstream ss;
+    ss << "Ecflow UDP" << TAG << "version(" << ecf::Version::full() << ")";
+    return ss.str();
 }
 
 static void run_server(uint16_t port) {

@@ -109,7 +109,7 @@ std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool 
     //
     // Note: uch slower than SPLIT_FASTEST_METHOD (~2.5 slower)
 
-    std::stringstream ss;
+    std::ostringstream ss;
     // Read the whole file into a string
     ss << ifs.rdbuf();
     // Take a copy as ss.str() returns a temporary while tokenizer stores a reference
@@ -252,9 +252,7 @@ bool File::open(const std::string& filePath, std::string& contents) {
         return false;
     }
 
-    std::ostringstream temp;
-    temp << infile.rdbuf();
-    contents = temp.str();
+    contents = MESSAGE(infile.rdbuf());
     return true;
 }
 
@@ -263,53 +261,25 @@ bool File::create(const std::string& filename, const std::vector<std::string>& l
     // See Test: TestFile.cpp:test_file_create_perf
     FILE* theFile = fopen(filename.c_str(), "w");
     if (theFile == nullptr) {
-        std::stringstream ss;
-        ss << "Could not create file '" << filename << " (" << strerror(errno) << "'\n";
-        errorMsg += ss.str();
+        errorMsg += MESSAGE("Could not create file '" << filename << " (" << strerror(errno) << "'\n");
         return false;
     }
     size_t size = lines.size();
     for (size_t i = 0; i < size; ++i) {
         if (i != 0) {
             if (fputs("\n", theFile) == EOF) {
-                std::stringstream ss;
-                ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
-                errorMsg += ss.str();
+                errorMsg += MESSAGE("Could not write to file '" << filename << "' (" << strerror(errno) << ")\n");
                 fclose(theFile);
                 return false;
             }
         }
         if (fputs(lines[i].c_str(), theFile) == EOF) {
-            std::stringstream ss;
-            ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Could not write to file '" << filename << "' (" << strerror(errno) << ")\n");
             fclose(theFile);
             return false;
         }
     }
     fclose(theFile);
-
-    //	std::ofstream theFile( filename.c_str() );
-    //	if ( !theFile ) {
-    //		/// Could be: [ no permissions | file system full | locked by another process ]
-    // 		std::stringstream ss;
-    //		ss << "Could not create file '" << filename << "'\n";
-    //		errorMsg += ss.str();
-    //		return false;
-    //	}
-    //	size_t size = lines.size();
-    //	for (size_t i = 0; i < size; ++i) {
-    //		if (i != 0) theFile << "\n";
-    //		theFile << lines[i];
-    //	}
-    //	if (!theFile.good()) {
-    //      std::stringstream ss;
-    //      ss << "Could not write to file '" << filename << "'\n";
-    //      errorMsg += ss.str();
-    //      theFile.close();
-    //      return false;
-    //	}
-    //	theFile.close();
 
     return true;
 }
@@ -317,38 +287,18 @@ bool File::create(const std::string& filename, const std::vector<std::string>& l
 bool File::create(const std::string& filename, const std::string& contents, std::string& errorMsg) {
     std::ofstream theFile(filename.c_str());
     if (!theFile) {
-        std::stringstream ss;
-        ss << "Could not create file '" << filename << "' (" << strerror(errno) << ")\n";
-        errorMsg += ss.str();
+        errorMsg += MESSAGE("Could not create file '" << filename << "' (" << strerror(errno) << ")\n");
         return false;
     }
 
     theFile << contents;
     if (!theFile.good()) {
-        std::stringstream ss;
-        ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
-        errorMsg += ss.str();
+        errorMsg += MESSAGE("Could not write to file '" << filename << "' (" << strerror(errno) << ")\n");
         theFile.close();
         return false;
     }
     theFile.close();
 
-    // This is actually 12% slower for large file:
-    //	FILE * theFile = fopen (filename.c_str(),"w");
-    //	if (theFile==NULL) {
-    //		std::stringstream ss;
-    //		ss << "Could not create file '" << filename << "'\n";
-    //		errorMsg += ss.str();
-    //		return false;
-    //	}
-    //   if (fputs(contents.c_str(),theFile) == EOF) {
-    //      std::stringstream ss;
-    //      ss << "Could not write to file '" << filename << "'\n";
-    //      errorMsg += ss.str();
-    //      fclose (theFile);
-    //      return false;
-    //   }
-    //  	fclose (theFile);
     return true;
 }
 
@@ -374,7 +324,6 @@ bool File::find(const fs::path& dir_path,     // from this directory downwards,
                 const std::string& file_name, // search for this name,
                 fs::path& path_found          // placing path here if found
 ) {
-    //	std::cout << "Searching '" << dir_path << "' for  " << file_name  << "\n";
     if (!fs::exists(dir_path)) {
         return false;
     }
@@ -636,7 +585,7 @@ std::string File::diff(const std::string& file,
     }
 
     if (fileLines != file2Lines) {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (fileLines.size() != file2Lines.size()) {
             ss << "Expected size " << file2Lines.size() << " but found " << fileLines.size() << "\n";
         }
@@ -659,11 +608,6 @@ std::string File::diff(const std::string& file,
                     }
                     ss << "Mismatch at " << i << "(" << fileLines[i] << ")   ---->   (" << file2Lines[i] << ")\n";
                 }
-                //				else {
-                //					ss << "            " << i << " (" << fileLines[i] << ")   ---->
-                //("
-                //<< file2Lines[i] << ")\n";
-                //				}
             }
             else {
                 ss << "Mismatch at " << i;
@@ -692,10 +636,10 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
     // Do a backward search of rootPath + nodePath
     // If task path is of the form /suite/family/family2/task, then we keep
     // on consuming the first path token this should leave:
-    //   	<root-path>/suite/family/family2/task.ecf
-    //   	<root-path>/family/family2/task.ecf
-    //  	<root-path>/family2/task.ecf
-    //   	<root-path>/task.ecf
+    //   <root-path>/suite/family/family2/task.ecf
+    //   <root-path>/family/family2/task.ecf
+    //   <root-path>/family2/task.ecf
+    //   <root-path>/task.ecf
 
     std::vector<std::string> nodePathTokens;
     NodePath::split(nodePath, nodePathTokens);
@@ -991,7 +935,7 @@ static std::string find_bjam_ecf_client_path() {
 
 std::string File::find_ecf_server_path() {
 #ifdef CMAKE
-    std::string path = CMAKE_ECFLOW_BUILD_DIR;
+    std::string path = CMAKE_ECFLOW_BUILD_DIR();
     path += "/bin/";
     path += Ecf::SERVER_NAME();
 
@@ -1009,7 +953,7 @@ std::string File::find_ecf_server_path() {
 
 std::string File::find_ecf_client_path() {
 #ifdef CMAKE
-    std::string path = CMAKE_ECFLOW_BUILD_DIR;
+    std::string path = CMAKE_ECFLOW_BUILD_DIR();
     path += "/bin/";
     path += Ecf::CLIENT_NAME();
 
@@ -1073,7 +1017,7 @@ std::string File::test_data_in_current_dir(const std::string& rel_path) {
 
 std::string File::root_source_dir() {
 #ifdef CMAKE
-    return CMAKE_ECFLOW_SOURCE_DIR;
+    return CMAKE_ECFLOW_SOURCE_DIR();
 #endif
 
     // bjam
@@ -1109,7 +1053,7 @@ std::string File::root_source_dir() {
 
 std::string File::root_build_dir() {
 #ifdef CMAKE
-    return CMAKE_ECFLOW_BUILD_DIR;
+    return CMAKE_ECFLOW_BUILD_DIR();
 #endif
 
     fs::path current_path        = fs::current_path();

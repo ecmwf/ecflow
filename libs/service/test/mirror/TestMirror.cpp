@@ -34,9 +34,7 @@ BOOST_AUTO_TEST_CASE(can_print_mirror_request) {
 
     MirrorRequest request{"path", "host", "1234", 60, true, "auth"};
 
-    std::ostringstream oss;
-    oss << request;
-    BOOST_CHECK(oss.str().find("MirrorRequest") != std::string::npos);
+    BOOST_CHECK(MESSAGE(request).find("MirrorRequest") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -57,9 +55,7 @@ BOOST_AUTO_TEST_CASE(can_print_mirror_notification) {
 
     MirrorNotification notification{"path", MirrorData{1}};
 
-    std::ostringstream oss;
-    oss << notification;
-    BOOST_CHECK(oss.str().find("MirrorNotification") != std::string::npos);
+    BOOST_CHECK(MESSAGE(notification).find("MirrorNotification") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -80,9 +76,7 @@ BOOST_AUTO_TEST_CASE(can_print_mirror_error) {
 
     MirrorError error{"path", "reason"};
 
-    std::ostringstream oss;
-    oss << error;
-    BOOST_CHECK(oss.str().find("MirrorError") != std::string::npos);
+    BOOST_CHECK(MESSAGE(error).find("MirrorError") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -117,9 +111,7 @@ BOOST_AUTO_TEST_CASE(can_print_mirror_response_with_notification) {
     MirrorNotification notification{"path", MirrorData{1}};
     MirrorResponse response = notification;
 
-    std::ostringstream oss;
-    oss << response;
-    BOOST_CHECK(oss.str().find("MirrorNotification") != std::string::npos);
+    BOOST_CHECK(MESSAGE(response).find("MirrorNotification") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(can_print_mirror_response_with_error) {
@@ -128,9 +120,7 @@ BOOST_AUTO_TEST_CASE(can_print_mirror_response_with_error) {
     MirrorError error{"path", "reason"};
     MirrorResponse response = error;
 
-    std::ostringstream oss;
-    oss << response;
-    BOOST_CHECK(oss.str().find("MirrorError") != std::string::npos);
+    BOOST_CHECK(MESSAGE(response).find("MirrorError") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

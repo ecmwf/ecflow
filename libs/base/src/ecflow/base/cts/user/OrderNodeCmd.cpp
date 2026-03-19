@@ -114,16 +114,14 @@ void OrderNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& v
     }
 
     if (args.size() != 2) {
-        std::stringstream ss;
-        ss << "OrderNodeCmd: Two arguments expected. Please specify one of:\n";
-        ss << OrderNodeCmd::arg() << " pathToNode top\n";
-        ss << OrderNodeCmd::arg() << " pathToNode bottom\n";
-        ss << OrderNodeCmd::arg() << " pathToNode alpha\n";
-        ss << OrderNodeCmd::arg() << " pathToNode order\n";
-        ss << OrderNodeCmd::arg() << " pathToNode up\n";
-        ss << OrderNodeCmd::arg() << " pathToNode down\n";
-        ss << OrderNodeCmd::arg() << " pathToNode runtime\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("OrderNodeCmd: Two arguments expected. Please specify one of:\n"
+                                         << OrderNodeCmd::arg() << " pathToNode top\n"
+                                         << OrderNodeCmd::arg() << " pathToNode bottom\n"
+                                         << OrderNodeCmd::arg() << " pathToNode alpha\n"
+                                         << OrderNodeCmd::arg() << " pathToNode order\n"
+                                         << OrderNodeCmd::arg() << " pathToNode up\n"
+                                         << OrderNodeCmd::arg() << " pathToNode down\n"
+                                         << OrderNodeCmd::arg() << " pathToNode runtime\n"));
     }
 
     if (!NOrder::isValid(args[1])) {

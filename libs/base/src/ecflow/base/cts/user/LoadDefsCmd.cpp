@@ -43,9 +43,9 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
     : force_(force),
       defs_filename_(defs_filename) {
     if (defs_filename_.empty()) {
-        std::stringstream ss;
-        ss << "LoadDefsCmd::LoadDefsCmd: The pathname to the definition file must be provided\n" << LoadDefsCmd::desc();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("LoadDefsCmd::LoadDefsCmd: The pathname to the definition file must be provided\n"
+                    << LoadDefsCmd::desc()));
     }
 
     defs_ptr defs = Defs::create();
@@ -85,10 +85,9 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
         std::cout << warningMsg;
     }
     else {
-        std::stringstream ss;
-        ss << "\nLoadDefsCmd::LoadDefsCmd. Failed to parse file/definition " << defs_filename_ << "\n";
-        ss << errMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("\nLoadDefsCmd::LoadDefsCmd. Failed to parse file/definition "
+                                         << defs_filename_ << "\n"
+                                         << errMsg));
     }
 }
 
@@ -124,9 +123,8 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         std::string errMsg, warningMsg;
         defs_ptr defs = Defs::create();
         if (!defs->restore_from_string(defs_, errMsg, warningMsg)) {
-            std::stringstream ss;
-            ss << "LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg));
         }
 
         // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server

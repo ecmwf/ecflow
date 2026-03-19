@@ -78,21 +78,21 @@ struct Process::Impl
     }
 
     std::string read_stdout() {
-        std::ostringstream buffer;
+        std::ostringstream ss;
         while (out_.good() && out_.peek() != EOF) {
             char c = out_.get();
-            buffer << c;
+            ss << c;
         }
-        return buffer.str();
+        return ss.str();
     }
 
     std::string read_stderr() {
-        std::ostringstream buffer;
+        std::ostringstream ss;
         while (err_.good() && err_.peek() != EOF) {
             char c = err_.get();
-            buffer << c;
+            ss << c;
         }
-        return buffer.str();
+        return ss.str();
     }
 
     bp::ipstream out_;
@@ -107,15 +107,10 @@ struct Process::Impl
 {
     Impl(std::string_view executable, const std::vector<std::string>& args, const fs::path& cwd)
         : ctx_{},
-          stdout_buffer_{},
-          stderr_buffer_{},
           stdout_pipe_{ctx_},
           stderr_pipe_{ctx_},
-          handle_{ctx_,
-                  executable,
-                  args,
-                  bp::process_start_dir{cwd.c_str()},
-                  bp::process_stdio{{/* stdin default */}, {stdout_pipe_}, {stderr_pipe_}}} {
+          start_dir_{cwd.c_str()},
+          handle_{ctx_, executable, args, start_dir_, bp::process_stdio{nullptr, {stdout_pipe_}, {stderr_pipe_}}} {
         // The process is started in the constructor
     }
     ~Impl() = default;
@@ -151,10 +146,9 @@ struct Process::Impl
     }
 
     ba::io_context ctx_;
-    std::string stdout_buffer_;
-    std::string stderr_buffer_;
     ba::readable_pipe stdout_pipe_;
     ba::readable_pipe stderr_pipe_;
+    bp::process_start_dir start_dir_;
 
     bp::process handle_;
 };

@@ -29,8 +29,19 @@ using ecf::http::HttpServer;
 using ecf::http::HttpStatusCode;
 using ecf::http::ojson;
 
-const std::string API_HOST("localhost");
-const std::string API_KEY("3a8c3f7ac204d9c6370b5916bd8b86166c208e10776285edcbc741d56b5b4c1e");
+const std::string API_HOST        = "localhost";
+const std::string API_KEY         = TokenFile::generate_token();
+const std::string API_KEY_pbkdf2  = TokenFile::generate_token();
+const std::string API_KEY_expired = TokenFile::generate_token();
+const std::string API_KEY_revoked = TokenFile::generate_token();
+
+#if defined(ECF_TEST_HTTP_BACKEND)
+static const std::string ECF_TEST_HTTP_PORT        = "8081";
+static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_http_backend.json";
+#else
+static const std::string ECF_TEST_HTTP_PORT        = "8080";
+static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_tcpip_backend.json";
+#endif
 
 std::unique_ptr<Certificate> create_certificate() {
     auto cert_dir = ecf::environment::fetch("ECF_API_CERT_DIRECTORY");
@@ -56,9 +67,17 @@ std::unique_ptr<Certificate> create_certificate() {
 
 std::unique_ptr<TokenFile> create_token_file() {
     fs::path cwd(fs::current_path());
-    std::string tokens_file = cwd.string() + "/api-tokens.json";
+    std::string tokens_file = cwd.string() + ECF_TEST_HTTP_TOKENS_FILE;
 
-    auto tokenfile = std::make_unique<TokenFile>(tokens_file);
+    // Generate 4 random bearer tokens with different configurations
+    std::vector<BearerToken> entries = {
+        {API_KEY, "test-app-1", "", ""},                             // valid, no expiry
+        {API_KEY_pbkdf2, "test-app-2", "2100-01-01T00:00:00Z", ""},  // valid, future expiry
+        {API_KEY_expired, "test-app-3", "2000-01-01T00:00:00Z", ""}, // expired
+        {API_KEY_revoked, "test-app-4", "", "2000-01-01T00:00:00Z"}, // revoked
+    };
+
+    auto tokenfile = std::make_unique<TokenFile>(tokens_file, entries);
     BOOST_TEST_MESSAGE("Token file " << tokens_file);
     return tokenfile;
 }
@@ -71,11 +90,22 @@ void start_api_server() {
     }
 
     api_server = std::make_unique<std::thread>([] {
-#if defined(ECF_TEST_HTTP_BACKEND)
-        std::array argv = {"ecflow_http", "-v", "--polling_interval", "1", "--port", "8081", "--http"};
-#else
-        std::array argv = {"ecflow_http", "-v", "--polling_interval", "1", "--port", "8080"};
-#endif
+        std::string port = ECF_TEST_HTTP_PORT;
+        fs::path cwd(fs::current_path());
+        std::string tokens_file = cwd.string() + ECF_TEST_HTTP_TOKENS_FILE;
+
+        // clang-format off
+        std::array argv = {
+            "ecflow_http"
+            , "-v"
+            , "--polling_interval", "1"
+            , "--port", port.c_str()
+            , "--tokens_file", tokens_file.c_str()
+    #if defined(ECF_TEST_HTTP_BACKEND)
+            , "--http"
+    #endif
+        };
+        // clang-format on
 
         HttpServer server(argv.size(), const_cast<char**>(argv.data()));
         server.run();
@@ -597,22 +627,19 @@ BOOST_AUTO_TEST_CASE(test_token_authentication) {
     wait_until(
         [] { return false == check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
 
-    const std::string pbkdf2_API_KEY("351db772d94310a6d57aa7144448f4c108e7ee2e2a00a74edbdf8edb11bee71b");
     handle_response(
-        request("post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", pbkdf2_API_KEY),
+        request("post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", API_KEY_pbkdf2),
         HttpStatusCode::success_created);
     wait_until([] { return check_for_element("/v1/server/attributes?filter=variables", "value", "xfoo", "xbar"); });
 
-    const std::string expired_API_KEY("764073a74875ada28859454e58881229a5149ae400589fc617234d8d96c6d91a");
     handle_response(
         request(
-            "post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", expired_API_KEY),
+            "post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", API_KEY_expired),
         HttpStatusCode::client_error_unauthorized);
 
-    const std::string revoked_API_KEY("5c6f6a003f3292c4d7671c9ad8ca10fb76e2273e584992f0d1f8fdf4abcdc81e");
     handle_response(
         request(
-            "post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", revoked_API_KEY),
+            "post", "/v1/server/attributes", R"({"type":"variable","name":"xfoo","value":"xbar"})", API_KEY_revoked),
         HttpStatusCode::client_error_unauthorized);
 }
 

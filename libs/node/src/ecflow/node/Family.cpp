@@ -35,7 +35,9 @@ Family& Family::operator=(const Family& rhs) {
 }
 
 node_ptr Family::clone() const {
-    return std::make_shared<Family>(*this);
+    auto clone = std::make_shared<Family>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 Family::~Family() {

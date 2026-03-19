@@ -104,7 +104,7 @@ bool System::spawn(System::CmdType cmd_type,
 
     std::string msg;
     if (sys(cmd_type, cmdToSpawn, absPath, msg)) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "Child process creation failed( " << msg << ") for command " << cmdToSpawn;
         if (!absPath.empty()) {
             ss << " at path(" << absPath << ")";
@@ -175,9 +175,7 @@ int System::sys(System::CmdType cmd_type,
     }
 
     if (child_pid == -1) {
-        std::stringstream ss;
-        ss << "fork() error(" << strerror(errno) << ")";
-        errorMsg = ss.str();
+        errorMsg = MESSAGE("fork() error(" << strerror(errno) << ")");
         return 1;
     }
 
@@ -269,10 +267,11 @@ void System::processTerminatedChildren() {
                 // *Normal* termination via exit
                 if (WEXITSTATUS((*i).status_)) {
                     // exit is non zero.
-                    std::stringstream ss;
-                    ss << System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_
-                       << ") exited with status " << WEXITSTATUS((*i).status_) << " [ " << (*i).cmd_ << " ]";
-                    died((*i).absNodePath_, (*i).cmd_type_, ss.str());
+                    died((*i).absNodePath_,
+                         (*i).cmd_type_,
+                         MESSAGE(System::cmd_type((*i).cmd_type_)
+                                 << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_ << ") exited with status "
+                                 << WEXITSTATUS((*i).status_) << " [ " << (*i).cmd_ << " ]"));
                 }
                 else {
                     // exit(0) child terminated normally
@@ -289,10 +288,11 @@ void System::processTerminatedChildren() {
             else if (WIFSIGNALED((*i).status_)) {
 
                 // *abnormal* child process terminated by a signal
-                std::stringstream ss;
-                ss << System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_
-                   << ") died of signal " << WTERMSIG((*i).status_) << " [ " << (*i).cmd_ << " ]";
-                died((*i).absNodePath_, (*i).cmd_type_, ss.str());
+                died((*i).absNodePath_,
+                     (*i).cmd_type_,
+                     MESSAGE(System::cmd_type((*i).cmd_type_)
+                             << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_ << ") died of signal "
+                             << WTERMSIG((*i).status_) << " [ " << (*i).cmd_ << " ]"));
 
                 // remove the process since it has terminated
                 processVec_.erase(i--);

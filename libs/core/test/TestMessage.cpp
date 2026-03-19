@@ -48,10 +48,10 @@ BOOST_AUTO_TEST_CASE(test_message_can_stream) {
     using namespace ecf;
     using namespace std::string_literals;
 
-    std::ostringstream oss;
-    oss << Message("a", Message("b", 'c'));
+    std::ostringstream ss;
+    ss << Message("a", Message("b", 'c'));
 
-    BOOST_CHECK_EQUAL(oss.str(), "abc"s);
+    BOOST_CHECK_EQUAL(ss.str(), "abc"s);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

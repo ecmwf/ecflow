@@ -111,9 +111,8 @@ void LabelCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     }
 
     if (args.size() < 2) {
-        std::stringstream ss;
-        ss << "LabelCmd: At least 2 arguments expected. Please specify: <label-name> <label-value>\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("LabelCmd: At least 2 arguments expected. Please specify: <label-name> <label-value>\n"));
     }
 
     std::string labelName = args[0];

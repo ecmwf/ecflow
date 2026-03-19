@@ -67,10 +67,9 @@ void SimulatorVisitor::visitSuite(Suite* s) {
     // make setting NState::COMPLETE is after begin(), which will set Node into the queued state
     if (!foundTasks_) {
         s->set_state(NState::COMPLETE);
-        std::stringstream ss;
-        ss << "The defs file " << defs_filename_ << " has a suite '/" << s->suite()->name()
-           << "' which has no tasks. Ignoring \n";
-        log(Log::WAR, ss.str());
+        log(Log::WAR,
+            MESSAGE("The defs file " << defs_filename_ << " has a suite '/" << s->suite()->name()
+                                     << "' which has no tasks. Ignoring \n"));
     }
 
     // If we have cron/time with calendar increment of 1 hour, where calendar start time is in minutes
@@ -122,9 +121,7 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc) {
 
     if (!nc->crons().empty()) {
         foundCrons_ = true;
-        std::stringstream ss;
-        ss << defs_filename_ << ": Found crons on NodeContainer\n";
-        log(Log::MSG, ss.str());
+        log(Log::MSG, MESSAGE(defs_filename_ << ": Found crons on NodeContainer\n"));
     }
 
     if (!nc->timeVec().empty()) {

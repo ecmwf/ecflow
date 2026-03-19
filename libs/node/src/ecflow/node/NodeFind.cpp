@@ -791,9 +791,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
 
     if (theExtractedPath.empty()) {
-        std::stringstream ss;
-        ss << ": Could not find referenced node '" << nodePath << "' from node " << absNodePath() << "\n";
-        errorMsg = ss.str();
+        errorMsg = MESSAGE(": Could not find referenced node '" << nodePath << "' from node " << absNodePath() << "\n");
 #ifdef DEBUG_FIND_REFERENCED_NODE
         errorMsg += debug_path;
 #endif

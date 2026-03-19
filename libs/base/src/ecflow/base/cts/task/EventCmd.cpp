@@ -122,9 +122,8 @@ void EventCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             value = false;
         }
         else {
-            std::stringstream ss;
-            ss << "EventCmd: The second argument must be [ set | clear ] but found " << args[1];
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("EventCmd: The second argument must be [ set | clear ] but found " << args[1]));
         }
     }
 

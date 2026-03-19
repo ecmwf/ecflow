@@ -8,7 +8,7 @@
 # nor does it submit to any jurisdiction.
 #
 
-set(DEPENDENCIES_DIR "${CMAKE_SOURCE_DIR}/3rdparty")
+get_filename_component(DEPENDENCIES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty" ABSOLUTE)
 
 # =========================================================================================
 # Threads
@@ -129,11 +129,16 @@ endif()
 
 ecbuild_info( "Locating Boost" )
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0")
-  ecbuild_info( "Using BoostConfig.cmake to find Boost (CMake >= 3.30)" )
-  cmake_policy(SET CMP0167 NEW)
+if( CMAKE_VERSION VERSION_GREATER_EQUAL "3.30.0" )
+  if ( ENABLE_CONFIG_MODE_BOOST )
+    ecbuild_info( "Detected CMake >= 3.30, so will use CMAKE_PREFIX_PATH, to locate and use boost-config.cmake or BoostConfig.cmake" )
+    cmake_policy( SET CMP0167 NEW )
+  else ()
+    ecbuild_info( "Detected CMake >= 3.30, but will use CMAKE_MODULE_PATH, to locate and use Find<PackageName>.cmake" )
+    cmake_policy( SET CMP0167 OLD )
+  endif()
 else()
-  ecbuild_info( "Using FindBoost.cmake module to find Boost (CMake < 3.30)" )
+  ecbuild_info( "Detected CMake < 3.30, so will use CMAKE_MODULE_PATH, to locate and use Find<PackageName>.cmake" )
 endif()
 
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
@@ -231,7 +236,7 @@ endif()
 if (ENABLE_SSL)
   ecbuild_info( "Locating OpenSSL" )
 
-  find_package(OpenSSL REQUIRED)
+  find_package(OpenSSL 1.1.1 REQUIRED)
 
   add_definitions( -DECF_OPENSSL=1 )
 

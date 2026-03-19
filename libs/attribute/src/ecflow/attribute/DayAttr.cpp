@@ -17,6 +17,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 
@@ -360,16 +361,8 @@ void DayAttr::write(std::string& ret) const {
 }
 
 std::string DayAttr::dump() const {
-    std::stringstream ss;
-    ss << toString();
-    if (free_) {
-        ss << " (free)";
-    }
-    if (expired_) {
-        ss << " (expired)";
-    }
-    ss << " " << as_simple_string();
-    return ss.str();
+    return MESSAGE(toString() << (free_ ? " (free)" : "") << (expired_ ? " (expired)" : "") << " "
+                              << as_simple_string());
 }
 
 std::string DayAttr::as_simple_string() const {
@@ -481,11 +474,9 @@ DayAttr::Day_t DayAttr::getDay(const std::string& day) {
         return DayAttr::SUNDAY;
     }
 
-    std::stringstream ss;
-    ss << "Invalid day(" << day
-       << ") specification expected one of [monday,tuesday,wednesday,thursday,friday,saturday,sunday]: ";
-    throw std::runtime_error(ss.str());
-
+    throw std::runtime_error(MESSAGE(
+        "Invalid day("
+        << day << ") specification expected one of [monday,tuesday,wednesday,thursday,friday,saturday,sunday]: "));
     return DayAttr::SUNDAY;
 }
 

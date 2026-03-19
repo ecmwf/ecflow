@@ -549,7 +549,7 @@ BOOST_AUTO_TEST_CASE(test_extract_data_member_value) {
 }
 
 std::string toString(const std::vector<std::string>& c) {
-    std::stringstream ss;
+    std::ostringstream ss;
     std::copy(c.begin(), c.end(), std::ostream_iterator<std::string>(ss, ", "));
     return ss.str();
 }

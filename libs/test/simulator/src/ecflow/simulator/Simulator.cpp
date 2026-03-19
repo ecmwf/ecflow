@@ -106,7 +106,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     auto calendarIncrement     = simiVisitor.calendarIncrement();
     auto max_simulation_period = simiVisitor.maxSimulationPeriod();
 
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << " time dependency(" << simiVisitor.hasTimeDependencies() << ") max_simulation_period("
        << to_simple_string(max_simulation_period) << ") calendarIncrement(" << to_simple_string(calendarIncrement)
        << ")";
@@ -184,14 +184,14 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
         }
 
         if ((theDefs.suiteVec().size() != completeSuiteCnt)) {
-            std::stringstream mss;
-            mss << "\nDefs file " << defs_filename << "\n";
+            std::ostringstream iss; // inner stringstream, to avoid name clash with outer ostringstream ss
+            iss << "\nDefs file " << defs_filename << "\n";
             for (suite_ptr s : theDefs.suiteVec()) {
                 if (s->state() != NState::COMPLETE) {
-                    mss << "  suite '/" << s->name() << "' has not completed\n";
+                    iss << "  suite '/" << s->name() << "' has not completed\n";
                 }
             }
-            errorMsg += mss.str();
+            errorMsg += iss.str();
 
             run_analyser(theDefs, errorMsg);
             return false;

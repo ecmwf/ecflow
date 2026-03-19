@@ -83,6 +83,18 @@ public:
     /// The Parent Must set the parent pointer. For a Suite however this will be NULL
     void set_parent(Node* p) { parent_ = p; }
 
+    /**
+     * Creates a clone of the object.
+     *
+     * This allows to, polymorphically (i.e. regardless of using a pointer to a base class), to create a copy
+     * of the the node based on the actual object type.
+     *
+     * It is important to note that the cloned object will not be a sibbling of the original object.
+     * This essentially means that all parts of the clone object will be the same, except for the parent pointer which
+     * will be set to nullptr.
+     *
+     * @return the cloned Object
+     */
     virtual node_ptr clone() const = 0;
 
     ecf::Permissions permissions() const { return ecf::Permissions::find_in(vars_); }
@@ -96,6 +108,7 @@ public:
         std::vector<node_ptr> auto_cancelled_nodes_;
         std::vector<node_ptr> auto_archive_nodes_;
     };
+
     virtual bool calendarChanged(const ecf::Calendar&,
                                  Node::Calendar_args&,
                                  const ecf::LateAttr* inherited_late,

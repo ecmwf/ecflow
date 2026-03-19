@@ -18,6 +18,7 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -49,15 +50,13 @@ void CronAttr::addWeekDays(const std::vector<int>& w) {
     weekDays_ = w;
     for (int day : weekDays_) {
         if (day < 0 || day > 6) {
-            std::stringstream ss;
-            ss << "Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat";
-            throw std::out_of_range(ss.str());
+            throw std::out_of_range(
+                MESSAGE("Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat"));
         }
         auto result = std::find(std::begin(last_week_days_of_month_), std::end(last_week_days_of_month_), day);
         if (result != std::end(last_week_days_of_month_)) {
-            std::stringstream ss;
-            ss << "Duplicate day(" << day << ") of the week also found in last week day of the month";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Duplicate day(" << day << ") of the week also found in last week day of the month"));
         }
     }
 }
@@ -65,15 +64,13 @@ void CronAttr::add_last_week_days_of_month(const std::vector<int>& w) {
     last_week_days_of_month_ = w;
     for (int day : last_week_days_of_month_) {
         if (day < 0 || day > 6) {
-            std::stringstream ss;
-            ss << "Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat";
-            throw std::out_of_range(ss.str());
+            throw std::out_of_range(
+                MESSAGE("Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat"));
         }
         auto result = std::find(std::begin(weekDays_), std::end(weekDays_), day);
         if (result != std::end(weekDays_)) {
-            std::stringstream ss;
-            ss << "Duplicate last week day (" << day << ") of the month also found in week day";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Duplicate last week day (" << day << ") of the month also found in week day"));
         }
     }
 }
@@ -82,9 +79,8 @@ void CronAttr::addDaysOfMonth(const std::vector<int>& d) {
     daysOfMonth_ = d;
     for (int day_of_month : daysOfMonth_) {
         if (day_of_month < 1 || day_of_month > 31) {
-            std::stringstream ss;
-            ss << "Invalid range for day of month(" << day_of_month << ") expected range is  1-31";
-            throw std::out_of_range(ss.str());
+            throw std::out_of_range(
+                MESSAGE("Invalid range for day of month(" << day_of_month << ") expected range is  1-31"));
         }
     }
 }
@@ -93,9 +89,8 @@ void CronAttr::addMonths(const std::vector<int>& m) {
     months_ = m;
     for (int month : months_) {
         if (month < 1 || month > 12) {
-            std::stringstream ss;
-            ss << "Invalid range for month(" << month << ")  expected range is 1==Jan to 12==Dec";
-            throw std::out_of_range(ss.str());
+            throw std::out_of_range(
+                MESSAGE("Invalid range for month(" << month << ")  expected range is 1==Jan to 12==Dec"));
         }
     }
 }
@@ -180,15 +175,7 @@ void CronAttr::write(std::string& ret) const {
 }
 
 std::string CronAttr::dump() const {
-    std::stringstream ss;
-    ss << toString();
-    if (free_) {
-        ss << " (free)";
-    }
-    else {
-        ss << " (holding)";
-    }
-    return ss.str();
+    return MESSAGE(toString() << (free_ ? " (free)" : " (holding)"));
 }
 
 bool CronAttr::operator==(const CronAttr& rhs) const {
@@ -381,7 +368,7 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
     theReasonWhy += " ";
     theReasonWhy += to_simple_string(the_next_date);
 
-    std::stringstream ss;
+    std::ostringstream ss;
     TimeSlot currentTime = TimeSlot(timeSeries_.duration(c));
     ss << ", current time ";
     if (timeSeries_.relative()) {
@@ -701,9 +688,7 @@ std::vector<int> extract_month(size_t& index, const std::vector<std::string>& li
             theIntVec.push_back(theInt);
         }
         catch (const ecf::bad_conversion&) {
-            std::stringstream ss;
-            ss << "Invalid cron option: " << option;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Invalid cron option: " << option));
         }
     }
     return theIntVec;
@@ -736,9 +721,7 @@ void extract_days_of_week(size_t& index,
         try {
             if (theIntToken.size() == 2) {
                 if (theIntToken[1] != 'L') {
-                    std::stringstream ss;
-                    ss << "Invalid cron option: " << option << " " << theIntToken;
-                    throw std::runtime_error(ss.str());
+                    throw std::runtime_error(MESSAGE("Invalid cron option: " << option << " " << theIntToken));
                 }
                 auto theInt = ecf::convert_to<int>(theIntToken[0]);
                 last_week_days_of_month.push_back(theInt);
@@ -749,9 +732,7 @@ void extract_days_of_week(size_t& index,
             }
         }
         catch (const ecf::bad_conversion&) {
-            std::stringstream ss;
-            ss << "Invalid cron option: " << option;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Invalid cron option: " << option));
         }
     }
 }
@@ -791,9 +772,7 @@ void extract_days_of_month(size_t& index,
             }
         }
         catch (const ecf::bad_conversion&) {
-            std::stringstream ss;
-            ss << "Invalid cron option: " << option;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Invalid cron option: " << option));
         }
     }
 }

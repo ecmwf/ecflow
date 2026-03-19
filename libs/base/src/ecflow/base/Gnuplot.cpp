@@ -21,6 +21,7 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/File_r.hpp"
 #include "ecflow/core/Host.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -35,16 +36,12 @@ Gnuplot::Gnuplot(const std::string& log_file,
       port_(port),
       no_of_suites_to_plot_(no_of_suites_to_plot) {
     if (!fs::exists(log_file)) {
-        std::stringstream ss;
-        ss << "Gnuplot::Gnuplot: The log file " << log_file << " does not exist\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Gnuplot::Gnuplot: The log file " << log_file << " does not exist\n"));
     }
 
     std::string path_to_gnuplot = File::which("gnuplot");
     if (path_to_gnuplot.empty()) {
-        std::stringstream ss;
-        ss << "Gnuplot::Gnuplot: could not find gnuplot on $PATH.";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Gnuplot::Gnuplot: could not find gnuplot on $PATH."));
     }
 }
 
@@ -61,10 +58,8 @@ void Gnuplot::show_server_load() const {
 
     // make the gnuplot_script file executable
     if (chmod(gnuplot_script.c_str(), 0755) != 0) {
-        std::stringstream ss;
-        ss << "Gnuplot::show_server_load: Could not make gnu script file " << gnuplot_script
-           << "  executable by using chmod";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Gnuplot::show_server_load: Could not make gnu script file "
+                                         << gnuplot_script << "  executable by using chmod"));
     }
 
     std::string execute_gnuplot = "gnuplot " + gnuplot_script;

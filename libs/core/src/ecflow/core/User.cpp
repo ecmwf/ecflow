@@ -18,6 +18,8 @@
 #include <stdexcept>
 #include <unistd.h> // ofr getuid()
 
+#include "Message.hpp"
+
 namespace ecf {
 
 std::string get_login_name() {
@@ -35,9 +37,8 @@ std::string get_login_name() {
                 throw std::runtime_error("UserCmd::get_user: could not determine user name. Because: " + theError);
             }
 
-            std::stringstream ss;
-            ss << "UserCmd::get_user: could not determine user name for uid " << real_user_id_of_process;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("UserCmd::get_user: could not determine user name for uid " << real_user_id_of_process));
         }
 
         the_user_name = thePassWord->pw_name; // equivalent to the login name

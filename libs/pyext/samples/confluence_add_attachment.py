@@ -13,19 +13,18 @@
 
 import unittest
 
+username = "<some-user>"
+password = "<some-secret>"
+workspace = "/path/to/workspace"
+
 class TestConfluence(unittest.TestCase):
     def setUp(self):
-        conflunce_base_url = "https://software-test.ecmwf.int/wiki"
-#         conflunce_base_url = "https://confluence.ecmwf.int"
-        user = "deploy"  
-        password = "deploy2013"  
-#         user = "ma0"
-#         password = "chacchok1"
-        
+        confluence_base_url = "https://confluence.ecmwf.int"
+
         import sys
-        sys.path.append("/var/tmp/ma0/workspace/admin/2.0")
+        sys.path.append(f"{workspace}/admin/2.0")
         import rest
-        self.c = rest.Confluence(conflunce_base_url,user,password)
+        self.c = rest.Confluence(confluence_base_url, username, password)
 
     def test_add_attachment_id(self):
         title = "Releases"
@@ -38,7 +37,7 @@ class TestConfluence(unittest.TestCase):
                 print("space key:",space_key," page id:",page_id)
 
         comment = "production release"
-        file = "/var/tmp/ma0/workspace/ecflow/libs/pyext/samples/test.tar.gz"
+        file = f"{workspace}/ecflow/libs/pyext/samples/test.tar.gz"
         for space_key in space_key_list:
             page_id = self.c.get_page_id(space_key,title) 
             

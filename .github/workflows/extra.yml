@@ -16,24 +16,25 @@ jobs:
       fail-fast: false
       matrix:
         os:
+          - almalinux-9.7
+          - almalinux-10.1
           - alpine-3.23
-          - arch-20260104
           - debian-11.11
           - debian-12.12
           - debian-13.2
           - fedora-37
           - fedora-42
+          - opensuse-tumbleweed
           - ubuntu-22.04
           - ubuntu-24.04
-          - almalinux-9.7
-          - almalinux-10.1
+
         preset:
-          - linux.gcc.all.relwithdebinfo
-          - linux.clang.all.relwithdebinfo
+          - linux.gcc.all.release
+          - linux.clang.all.release
         jobs: [ 4 ]
         exclude:
           - os: almalinux-9.7
-            preset: linux.clang.all.relwithdebinfo
+            preset: linux.clang.all.release
             # This combination is not supported, as Clang fails to compile Chrono.hpp which does #include <boost/date_time/local_time/conversion.hpp
             # and ends up with the following error:
             #   /usr/include/boost/mpl/aux_/integral_wrapper.hpp:73:31: error: non-type template argument is not a constant expression
@@ -53,6 +54,14 @@ jobs:
           echo "Working directory: ${{ github.workspace }}"
           echo "Environment:"
           echo "$(env)"
+          echo "OS info:"
+          echo "$(cat /etc/os-release)"
+          echo "CPU info:"
+          echo "$(cat /proc/cpuinfo)"
+          echo "Memory info:"
+          echo "$(cat /proc/meminfo)"
+          echo "Disk info:"
+          echo "$(df -h)"
 
       - name: Checkout 'ecbuild'
         uses: actions/checkout@v4
@@ -75,26 +84,38 @@ jobs:
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }}
 
+      # The goal is to run all tests on all distros, but on Alpine and OpenSUSE, some tests fail due to Boost incompatibilities:
+      #  - On Alpine, the test fails due to a crash in Boost.test.
+      #  - On openSUSE, the test fails due to an issue in Boost.Process.
+      #    Is seems that the bp::stdio_pipe implementation does not work as expected, leading to an exception being thrown
+      #    when the test tries to read the output of thea subprocess, complaining that the file descriptor is not valid.
+
       - name: Test ecflow (default)
-        if: ${{ matrix.os != 'alpine-3.23' }}
+        if: ${{ matrix.os != 'alpine-3.23' && matrix.os != 'opensuse-tumbleweed' }} 
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -j ${{ matrix.jobs }}
 
-      - name: Test ecflow (specific to Alpine, due to Boost.Test crash)
+      - name: Test ecflow (specific to Alpine)
         if: ${{ matrix.os == 'alpine-3.23' }}
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -E s_foolproof -j ${{ matrix.jobs }}
 
+      - name: Test ecflow (specific to openSUSE)
+        if: ${{ matrix.os == 'opensuse-tumbleweed' }}
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -E 's_(udp|foolproof)' -j ${{ matrix.jobs }}
+
       - name: Lint ecflow
-        if: ${{ matrix.preset == 'linux.clang.all.relwithdebinfo' && matrix.os == 'ubuntu-24.04' && !always() }} # Disable until we have a stable build
+        if: ${{ matrix.preset == 'linux.clang.all.release' && matrix.os == 'ubuntu-24.04' && !always() }} # Disable until we have a stable build
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           run-clang-tidy -j ${{ matrix.jobs }} -p ${RUNNER_WORKSPACE}/ecflow/ecflow/.deploy/build/${{ matrix.preset }} | tee clang-tidy-report.txt
 
       - name: Archive lint report 
-        if: ${{ matrix.preset == 'linux.clang.all.relwithdebinfo' && matrix.os == 'ubuntu-24.04' && !always() }} # Disable until we have a stable build
+        if: ${{ matrix.preset == 'linux.clang.all.release' && matrix.os == 'ubuntu-24.04' && !always() }} # Disable until we have a stable build
         uses: actions/upload-artifact@v4
         with:
           name: cling-tidy-report

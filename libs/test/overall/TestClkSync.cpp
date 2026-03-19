@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
     // Get full defs, so that next sync_local does incremental update
     BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,
                           CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "\nStart time"
        << "\n  sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString()
        << " cal_count(" << TestFixture::client().defs()->updateCalendarCount() << ")\n";

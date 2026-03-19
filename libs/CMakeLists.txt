@@ -294,6 +294,7 @@ set(srcs
   core/src/ecflow/core/cereal_boost_time.hpp
   core/src/ecflow/core/cereal_optional_nvp.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
+  core/src/ecflow/core/resources/Machine.hpp
   # Core -- Sources
   core/src/ecflow/core/AssertTimer.cpp
   core/src/ecflow/core/Base64.cpp
@@ -327,6 +328,7 @@ set(srcs
   core/src/ecflow/core/User.cpp
   core/src/ecflow/core/Version.cpp
   core/src/ecflow/core/WhiteListFile.cpp
+  core/src/ecflow/core/resources/Machine.cpp
 
   # Node -- Headers
   node/src/ecflow/node/AbstractObserver.hpp

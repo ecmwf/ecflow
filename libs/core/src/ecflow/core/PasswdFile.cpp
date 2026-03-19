@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "Message.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
@@ -80,10 +81,8 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
         if (!foundVersionNumber) {
 
             if (!validateVersionNumber(lineTokens[0], errorMsg)) {
-                std::stringstream ss;
-                ss << " " << i + 1 << ": " << lines[i] << "\n";
-                ss << "for ECF_PASSWD/ECF_CUSTOM_PASSWD file " << passwd_file_ << "\n";
-                errorMsg += ss.str();
+                errorMsg += MESSAGE(" " << i + 1 << ": " << lines[i] << "\n"
+                                        << "for ECF_PASSWD/ECF_CUSTOM_PASSWD file " << passwd_file_ << "\n");
                 return false;
             }
             foundVersionNumber = true;
@@ -112,9 +111,7 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
             }
             if (vec_[i].user() == vec_[k].user() && vec_[i].host() == vec_[k].host() &&
                 vec_[i].port() == vec_[k].port()) {
-                std::stringstream ss;
-                ss << "user " << vec_[i].user() << " can only appear once for given host/port\n";
-                errorMsg += ss.str();
+                errorMsg += MESSAGE("user " << vec_[i].user() << " can only appear once for given host/port\n");
                 return false;
             }
         }
@@ -219,9 +216,7 @@ bool PasswdFile::validateVersionNumber(const std::string& line, std::string& err
         std::vector<std::string> versionNumberTokens;
         Str::split(line, versionNumberTokens, ".");
         if (versionNumberTokens.size() != 3) {
-            std::stringstream ss;
-            ss << "Expected version of the form <int>.<int>.<int> i.e 4.4.0. but found invalid version number\n";
-            errorMsg += ss.str();
+            errorMsg += "Expected version of the form <int>.<int>.<int> i.e 4.4.0. but found invalid version number\n";
             return false;
         }
 
@@ -280,7 +275,7 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
 }
 
 std::string PasswdFile::dump() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     int count = 1;
     for (const auto& i : vec_) {
         ss << count << ": " << i.user() << " " << i.host() << " " << i.port() << "\n";

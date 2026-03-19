@@ -103,16 +103,15 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             }
         }
         else {
-            std::stringstream ss;
-            ss << "QueryCmd: second argument must be of the form <path>:name for query\n where name is [event | meter "
-                  "| label | variable | limit | limit_max] name "
-               << query_type;
-            ss << " args size = " << args.size() << " expected 2 arguments";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE(
+                "QueryCmd: second argument must be of the form <path>:name for query\n where name is [event | meter "
+                "| label | variable | limit | limit_max] name "
+                << query_type << " args size = " << args.size() << " expected 2 arguments"));
         }
         if (attribute.empty()) {
-            throw std::runtime_error("QueryCmd: no attribute specified: query type: " + query_type +
-                                     " path+attribute: " + path_and_name + "\n" + std::string(QueryCmd::desc()));
+            throw std::runtime_error(MESSAGE("QueryCmd: no attribute specified: query type: "
+                                             << query_type << " path+attribute: " << path_and_name << "\n"
+                                             << QueryCmd::desc()));
         }
     }
     else if (query_type == "trigger") {
@@ -126,8 +125,8 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             }
         }
         if (attribute.empty()) {
-            throw std::runtime_error("QueryCmd: no attribute specified: query type: trigger\n" +
-                                     std::string(QueryCmd::desc()));
+            throw std::runtime_error(MESSAGE("QueryCmd: no attribute specified: query type: trigger\n"
+                                             << QueryCmd::desc()));
         }
     }
     else if (query_type == "state" || query_type == "dstate") {
@@ -136,7 +135,7 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             path_to_attribute = args[1];
         }
         if (args.size() > 2) {
-            throw std::runtime_error("QueryCmd: invalid (state | dstate) query : " + args[2]);
+            throw std::runtime_error(MESSAGE("QueryCmd: invalid (state | dstate) query : " << args[2]));
         }
     }
     else if (query_type == "repeat") {
@@ -147,8 +146,8 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         if (args.size() == 3) {
             attribute = args[2];
             if (attribute != "next" && attribute != "prev") {
-                throw std::runtime_error("QueryCmd: invalid (repeat) query expected 'next' or 'prev' but found " +
-                                         attribute);
+                throw std::runtime_error(
+                    MESSAGE("QueryCmd: invalid (repeat) query expected 'next' or 'prev' but found " << attribute));
             }
         }
         if (args.size() > 3) {
@@ -156,20 +155,21 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         }
     }
     else {
-        throw std::runtime_error("QueryCmd: first argument must be one of [ state | dstate | repeat | event | meter | "
-                                 "variable | trigger ] but found:" +
-                                 query_type);
+        throw std::runtime_error(
+            MESSAGE("QueryCmd: first argument must be one of [ state | dstate | repeat | event | meter | "
+                    "variable | trigger ] but found:"
+                    << query_type));
     }
 
     if (path_to_attribute.empty() || (!path_to_attribute.empty() && path_to_attribute[0] != '/')) {
-        throw std::runtime_error("QueryCmd: invalid path to attribute: " + path_to_attribute);
+        throw std::runtime_error(MESSAGE("QueryCmd: invalid path to attribute: " << path_to_attribute));
     }
 
     // path_to_task can be empty if invoked via the command line. ( used for logging, i.e identifying which task invoked
     // this command) However if invoked from the shell/python we expect the path_to_task(ECF_NAME) to have been set
     std::string path_to_task = clientEnv->task_path(); // can be empty, when cmd called from command line
     if (!path_to_task.empty() && path_to_task[0] != '/') {
-        throw std::runtime_error("QueryCmd: invalid path to task: " + path_to_task);
+        throw std::runtime_error(MESSAGE("QueryCmd: invalid path to task: " << path_to_task));
     }
 
     cmd = std::make_shared<QueryCmd>(query_type, path_to_attribute, attribute, path_to_task);
@@ -242,9 +242,8 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
         if (query_type_ == "state") {
             return PreAllocatedReply::string_cmd(NState::toString(defs->state()));
         }
-        std::stringstream ss;
-        ss << "QueryCmd: The only valid query for the server is 'state', i.e. ecflow_client --query state /";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("QueryCmd: The only valid query for the server is 'state', i.e. ecflow_client --query state /"));
     }
 
     node_ptr node = find_node(defs, path_to_attribute_);
@@ -252,9 +251,8 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
     if (query_type_ == "event") {
         const Event& event = node->findEventByNameOrNumber(attribute_);
         if (event.empty()) {
-            std::stringstream ss;
-            ss << "QueryCmd: Cannot find event " << attribute_ << " on node " << path_to_attribute_;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("QueryCmd: Cannot find event " << attribute_ << " on node " << path_to_attribute_));
         }
         if (event.value()) {
             return PreAllocatedReply::string_cmd(Event::SET());
@@ -265,9 +263,8 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
     if (query_type_ == "meter") {
         const Meter& meter = node->findMeter(attribute_);
         if (meter.empty()) {
-            std::stringstream ss;
-            ss << "QueryCmd: Cannot find meter " << attribute_ << " on node " << path_to_attribute_;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("QueryCmd: Cannot find meter " << attribute_ << " on node " << path_to_attribute_));
         }
         return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(meter.value()));
     }
@@ -290,9 +287,8 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
     if (query_type_ == "label") {
         const Label& label = node->find_label(attribute_);
         if (label.empty()) {
-            std::stringstream ss;
-            ss << "QueryCmd: Cannot find label " << attribute_ << " on node " << path_to_attribute_;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("QueryCmd: Cannot find label " << attribute_ << " on node " << path_to_attribute_));
         }
         if (label.new_value().empty()) {
             return PreAllocatedReply::string_cmd(label.value());
@@ -305,10 +301,8 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
         if (node->findParentVariableValue(attribute_, the_value)) {
             return PreAllocatedReply::string_cmd(the_value);
         }
-        std::stringstream ss;
-        ss << "QueryCmd: Cannot find variable, repeat or generated var' of name " << attribute_ << " on node "
-           << path_to_attribute_ << " or its parents";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("QueryCmd: Cannot find variable, repeat or generated var' of name "
+                                         << attribute_ << " on node " << path_to_attribute_ << " or its parents"));
     }
 
     if (query_type_ == "trigger") {
@@ -331,9 +325,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
     if (query_type_ == "repeat") {
         const Repeat& repeat = node->repeat();
         if (repeat.empty()) {
-            std::stringstream ss;
-            ss << "QueryCmd: Cannot find repeat on node " << path_to_attribute_;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("QueryCmd: Cannot find repeat on node " << path_to_attribute_));
         }
         if (attribute_.empty()) {
             return PreAllocatedReply::string_cmd(repeat.valueAsString());
@@ -344,14 +336,11 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
         if (attribute_ == "prev") {
             return PreAllocatedReply::string_cmd(repeat.prev_value_as_string());
         }
-        std::stringstream ss;
-        ss << "QueryCmd: invalid repeat attribute expected next | prev but found " << attribute_;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("QueryCmd: invalid repeat attribute expected next | prev but found " << attribute_));
     }
     else {
-        std::stringstream ss;
-        ss << "QueryCmd: unrecognised query_type " << query_type_;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("QueryCmd: unrecognised query_type " << query_type_));
     }
 
     return PreAllocatedReply::ok_cmd();

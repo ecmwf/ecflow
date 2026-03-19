@@ -118,9 +118,7 @@ void TcpServer::handle_write(const boost::system::error_code& e, connection_ptr 
     if (e) {
         LogFlusher logFlusher;
         ecf::LogToCout logToCout;
-        std::stringstream ss;
-        ss << "TcpServer::handle_write: " << e.message() << " : for request " << inbound_request_;
-        log(Log::ERR, ss.str());
+        log(Log::ERR, MESSAGE("TcpServer::handle_write: " << e.message() << " : for request " << inbound_request_));
         return;
     }
 

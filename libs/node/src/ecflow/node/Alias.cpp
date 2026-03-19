@@ -35,7 +35,9 @@ Alias::Alias() {
 }
 
 node_ptr Alias::clone() const {
-    return std::make_shared<Alias>(*this);
+    auto clone = std::make_shared<Alias>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 Alias::~Alias() {
