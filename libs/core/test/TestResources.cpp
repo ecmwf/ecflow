@@ -149,7 +149,10 @@ BOOST_AUTO_TEST_CASE(can_measure_process_resources) {
         BOOST_CHECK(meter.get("virtual_memory_used").value().unit() == "MB");
 
         BOOST_REQUIRE(meter.get("resident_memory_used").has_value());
-        BOOST_CHECK(meter.get("resident_memory_used").value() > ProcessMeter::memory_t{0});
+        // Note:
+        // The following is only checked to ensure it is non-negative. This is necessary as, unfortunately,
+        // in some scopes (e.g. AG complex), the value is 0 even though the process is of course using memory.
+        BOOST_CHECK(meter.get("resident_memory_used").value() >= ProcessMeter::memory_t{0});
         BOOST_CHECK(meter.get("resident_memory_used").value().unit() == "MB");
 
         BOOST_REQUIRE(meter.get("page_size").has_value());
