@@ -90,8 +90,7 @@ BOOST_AUTO_TEST_CASE(can_create_process_meter) {
                      .with_freed_memory(ProcessMeter::page_size_t{2050})
                      .with_n_cpu_online(ProcessMeter::n_cpu_t{1})
                      .with_n_cpu_maximum(ProcessMeter::n_cpu_t{2})
-                     .with_n_threads(ProcessMeter::n_threads_t{16})
-                     .with_cpu_usage(12.34);
+                     .with_n_threads(ProcessMeter::n_threads_t{16});
 
     BOOST_REQUIRE(meter.get("pid").has_value());
     BOOST_CHECK(meter.get("pid").value() == ProcessMeter::pid_t{12345});
@@ -125,9 +124,6 @@ BOOST_AUTO_TEST_CASE(can_create_process_meter) {
 
     BOOST_REQUIRE(meter.get("n_threads").has_value());
     BOOST_CHECK(meter.get("n_threads").value() == ProcessMeter::n_threads_t{16});
-
-    BOOST_REQUIRE(meter.get("cpu_usage").has_value());
-    BOOST_CHECK(meter.get("cpu_usage").value() == 12.34);
 }
 
 BOOST_AUTO_TEST_CASE(can_measure_process_resources) {
@@ -168,10 +164,6 @@ BOOST_AUTO_TEST_CASE(can_measure_process_resources) {
 
         BOOST_REQUIRE(meter.get("n_threads").has_value());
         BOOST_CHECK(meter.get("n_threads").value() > ProcessMeter::n_threads_t{0});
-
-        BOOST_REQUIRE(meter.get("cpu_usage").has_value());
-        BOOST_CHECK(meter.get("cpu_usage").has_value());
-        BOOST_CHECK(meter.get("cpu_usage").value() >= double{0.0});
 
 #if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
 

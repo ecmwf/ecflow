@@ -279,44 +279,6 @@ ProcessMeter LinuxMachine::get_process_meter() const {
         threads            = nfo.n_threads();
     }
 
-    // Retrieve CPU usage from /proc/self/stat
-    //   Fields (1-indexed): pid(1) comm(2) state(3) ... utime(14) stime(15) cutime(16) cstime(17) ...
-    uint64_t proc_utime = 0;
-    uint64_t proc_stime = 0;
-    int64_t proc_cutime = 0;
-    int64_t proc_cstime = 0;
-    try {
-        auto ps     = proc_self_stat::process();
-        proc_utime  = ps.proc_utime;
-        proc_stime  = ps.proc_stime;
-        proc_cutime = ps.proc_cutime;
-        proc_cstime = ps.proc_cstime;
-        threads     = ps.threads;
-    }
-    catch (const std::exception& e) {
-        throw ResourceUnavailable("Failed to retrieve process statistics: " + std::string(e.what()));
-    }
-
-    // Total process CPU time in clock ticks
-    const uint64_t process_total_ticks = proc_utime + proc_stime +
-                                         static_cast<uint64_t>(proc_cutime < 0 ? 0 : proc_cutime) +
-                                         static_cast<uint64_t>(proc_cstime < 0 ? 0 : proc_cstime);
-
-    uint64_t system_total_ticks = 0;
-    try {
-        auto ps            = proc_stat::process();
-        system_total_ticks = ps.system_total_ticks;
-    }
-    catch (const ecf::resources::ResourceUnavailable& e) {
-        throw ResourceUnavailable("Failed to retrieve system CPU statistics: " + std::string(e.what()));
-    }
-
-    // CPU usage as a percentage of total system CPU time (across all CPUs)
-    const double cpu_usage =
-        (system_total_ticks > 0)
-            ? (static_cast<double>(process_total_ticks) / static_cast<double>(system_total_ticks)) * 100.0
-            : 0.0;
-
     // *** Tracked memory used
 
     #if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
@@ -341,7 +303,6 @@ ProcessMeter LinuxMachine::get_process_meter() const {
         .with_n_cpu_online(n_cpus_online)
         .with_n_cpu_maximum(n_cpus_maximum)
         .with_n_threads(threads)
-        .with_cpu_usage(cpu_usage)
     #if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
         .with_arena_memory(arena)
         .with_tracked_memory(tracked_memory)
@@ -378,60 +339,6 @@ ProcessMeter DarwinMachine::get_process_meter() const {
         throw ResourceUnavailable("Unable to retrieve proc_pidinfo");
     }
 
-    // --- CPU usage calculation ---
-    //
-    // Process CPU time from proc_taskinfo:
-    //   pti_total_user   -- total user time (nanoseconds)
-    //   pti_total_system -- total system time (nanoseconds)
-    //
-    // These correspond conceptually to (utime + cutime) and (stime + cstime) on Linux.
-    //
-    const uint64_t proc_cpu_ns = pti.pti_total_user + pti.pti_total_system;
-
-    // System-wide CPU time via host_processor_info (per-CPU tick counts).
-    // Each CPU reports: CPU_STATE_USER, CPU_STATE_SYSTEM, CPU_STATE_IDLE, CPU_STATE_NICE ticks.
-    natural_t n_cpus                      = 0;
-    processor_info_array_t cpu_info       = nullptr;
-    mach_msg_type_number_t cpu_info_count = 0;
-
-    kern_return_t kr = host_processor_info(host_port, PROCESSOR_CPU_LOAD_INFO, &n_cpus, &cpu_info, &cpu_info_count);
-    mach_port_deallocate(mach_task_self(), host_port);
-
-    double cpu_usage = 0.0;
-    if (kr == KERN_SUCCESS && n_cpus > 0) {
-        // Sum all CPU ticks across every processor
-        uint64_t total_ticks = 0;
-        auto* cpu_load       = reinterpret_cast<processor_cpu_load_info_data_t*>(cpu_info);
-        for (natural_t i = 0; i < n_cpus; ++i) {
-            total_ticks += cpu_load[i].cpu_ticks[CPU_STATE_USER];
-            total_ticks += cpu_load[i].cpu_ticks[CPU_STATE_SYSTEM];
-            total_ticks += cpu_load[i].cpu_ticks[CPU_STATE_IDLE];
-            total_ticks += cpu_load[i].cpu_ticks[CPU_STATE_NICE];
-        }
-
-        // Convert system total ticks to nanoseconds (each tick = 10 ms = 10'000'000 ns on macOS,
-        // but we can use the ratio directly).
-        // CPU usage % = (process_cpu / system_busy) is misleading; instead compute:
-        //   usage % = process_cpu_ns / (total_ticks * tick_duration_ns) * 100
-        //
-        // On macOS the tick rate matches CLK_TCK (typically 100 Hz => 10 ms per tick).
-        const long clk_tck = sysconf(_SC_CLK_TCK);
-        if (clk_tck > 0 && total_ticks > 0) {
-            const double ns_per_tick  = 1'000'000'000.0 / static_cast<double>(clk_tck);
-            const double total_cpu_ns = static_cast<double>(total_ticks) * ns_per_tick;
-            cpu_usage = (static_cast<double>(proc_cpu_ns) / total_cpu_ns) * 100.0 * static_cast<double>(n_cpus);
-        }
-
-        // Free the memory allocated by host_processor_info
-        vm_deallocate(mach_task_self(), reinterpret_cast<vm_address_t>(cpu_info), cpu_info_count * sizeof(natural_t));
-    }
-    else {
-        if (cpu_info) {
-            vm_deallocate(
-                mach_task_self(), reinterpret_cast<vm_address_t>(cpu_info), cpu_info_count * sizeof(natural_t));
-        }
-    }
-
     return ProcessMeter::make()
         .with_pid(pid)
         .with_maximum_memory(this->host_nfo.max_mem / 1024 / 1024)
@@ -440,8 +347,7 @@ ProcessMeter DarwinMachine::get_process_meter() const {
         .with_n_cpu_maximum(this->host_nfo.physical_cpu_max)
         .with_virtual_memory(pti.pti_virtual_size / 1024 / 1024)
         .with_resident_memory(pti.pti_resident_size / 1024 / 1024)
-        .with_n_threads(pti.pti_threadnum)
-        .with_cpu_usage(cpu_usage);
+        .with_n_threads(pti.pti_threadnum);
 }
 
 #endif

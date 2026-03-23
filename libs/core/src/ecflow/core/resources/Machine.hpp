@@ -171,11 +171,6 @@ struct ProcessMeter
         return *this;
     }
 
-    ProcessMeter& with_cpu_usage(double value) {
-        this->values_.emplace_back("cpu_usage", value, "%");
-        return *this;
-    }
-
     ProcessMeter& with_arena_memory(memory_t value) {
         this->values_.emplace_back("arena_memory", value, "kB");
         return *this;
