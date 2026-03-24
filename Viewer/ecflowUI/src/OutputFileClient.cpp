@@ -305,12 +305,12 @@ bool OutputFileClient::getHeaderValue(char* buf, quint64 len, int pos1, int& pos
 #endif
     val = std::string();
     if (pos1 == 0 || buf[pos1] == ':') {
-        std::array<char, 200> d;
-        int dLen = 0;
         if (pos1 > 0) {
             pos1++;
         }
         pos2 = pos1;
+        std::array<char, 200> d;
+        std::array<char, 200>::size_type dLen = 0;
         for (quint64 i = pos1; i < len && dLen < d.size() - 1; i++) {
             if (buf[i] == ':') {
                 pos2 = i;

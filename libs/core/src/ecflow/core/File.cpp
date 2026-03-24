@@ -1017,8 +1017,10 @@ std::string File::test_data_in_current_dir(const std::string& rel_path) {
 
 std::string File::root_source_dir() {
 #ifdef CMAKE
+
     return CMAKE_ECFLOW_SOURCE_DIR();
-#endif
+
+#else
 
     // bjam
     fs::path current_path        = fs::current_path();
@@ -1049,12 +1051,16 @@ std::string File::root_source_dir() {
     }
 
     return std::string{};
+
+#endif
 }
 
 std::string File::root_build_dir() {
 #ifdef CMAKE
+
     return CMAKE_ECFLOW_BUILD_DIR();
-#endif
+
+#else
 
     fs::path current_path        = fs::current_path();
     std::string the_current_path = current_path.string();
@@ -1101,12 +1107,17 @@ std::string File::root_build_dir() {
 
     throw std::runtime_error("File::root_build_dir() failed to find root build directory");
     return std::string{};
+
+#endif
 }
 
 int File::max_open_file_allowed() {
 #ifdef OPEN_MAX
+
     return OPEN_MAX;
+
 #else
+
     static int max_open_file_allowed_ = -1;
     if (max_open_file_allowed_ != -1) {
         return max_open_file_allowed_;
@@ -1122,6 +1133,7 @@ int File::max_open_file_allowed() {
         log(Log::ERR, msg);
     }
     return max_open_file_allowed_;
+
 #endif
 }
 

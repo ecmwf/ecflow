@@ -102,7 +102,6 @@ bool Parser::doParse(const std::string& line, std::vector<std::string>& lineToke
     }
 
     throw std::runtime_error(errorMsg);
-    return false;
 }
 
 Defs* Parser::defsfile() const {

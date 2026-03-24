@@ -1027,7 +1027,6 @@ node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode)
     }
 
     throw std::runtime_error("Defs::find_node: Node of type can't be found " + type);
-    return node_ptr();
 }
 
 bool Defs::check(std::string& errorMsg, std::string& warningMsg) const {

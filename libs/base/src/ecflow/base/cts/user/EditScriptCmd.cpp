@@ -59,19 +59,14 @@ static std::string to_string(EditScriptCmd::EditType et) {
     switch (et) {
         case EditScriptCmd::EDIT:
             return "edit";
-            break;
         case EditScriptCmd::PREPROCESS:
             return "pre_process";
-            break;
         case EditScriptCmd::SUBMIT:
             return "submit";
-            break;
         case EditScriptCmd::PREPROCESS_USER_FILE:
             return "pre_process_file";
-            break;
         case EditScriptCmd::SUBMIT_USER_FILE:
             return "submit_file";
-            break;
         default:
             assert(false);
             break;
@@ -101,19 +96,14 @@ bool EditScriptCmd::isWrite() const {
     switch (edit_type_) {
         case EditScriptCmd::EDIT:
             return false;
-            break;
         case EditScriptCmd::PREPROCESS:
             return false;
-            break;
         case EditScriptCmd::PREPROCESS_USER_FILE:
             return false;
-            break;
         case EditScriptCmd::SUBMIT:
             return true;
-            break;
         case EditScriptCmd::SUBMIT_USER_FILE:
             return true;
-            break;
         default:
             assert(false);
             break;

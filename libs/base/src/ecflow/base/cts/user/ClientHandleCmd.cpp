@@ -128,25 +128,18 @@ const char* ClientHandleCmd::theArg() const {
     switch (api_) {
         case ClientHandleCmd::REGISTER:
             return CtsApi::ch_register_arg();
-            break;
         case ClientHandleCmd::DROP:
             return CtsApi::ch_drop_arg();
-            break;
         case ClientHandleCmd::DROP_USER:
             return CtsApi::ch_drop_user_arg();
-            break;
         case ClientHandleCmd::ADD:
             return CtsApi::ch_add_arg();
-            break;
         case ClientHandleCmd::REMOVE:
             return CtsApi::ch_remove_arg();
-            break;
         case ClientHandleCmd::AUTO_ADD:
             return CtsApi::ch_auto_add_arg();
-            break;
         case ClientHandleCmd::SUITES:
             return CtsApi::ch_suites_arg();
-            break;
     }
     assert(false);
     return nullptr;
@@ -156,25 +149,18 @@ bool ClientHandleCmd::cmd_updates_defs() const {
     switch (api_) {
         case ClientHandleCmd::REGISTER:
             return true;
-            break;
         case ClientHandleCmd::DROP:
             return true;
-            break; // can be expensive for large defs
         case ClientHandleCmd::DROP_USER:
             return true;
-            break; // can be expensive for large defs
         case ClientHandleCmd::ADD:
             return true;
-            break;
         case ClientHandleCmd::REMOVE:
             return true;
-            break;
         case ClientHandleCmd::AUTO_ADD:
             return false;
-            break;
         case ClientHandleCmd::SUITES:
             return false;
-            break;
     }
     assert(false);
     return false;

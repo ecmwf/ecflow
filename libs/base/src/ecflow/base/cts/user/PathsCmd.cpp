@@ -160,33 +160,25 @@ ecf::authorisation_t PathsCmd::authorise(AbstractServer& server) const {
 bool PathsCmd::isWrite() const {
     switch (api_) {
         case PathsCmd::SUSPEND:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case PathsCmd::RESUME:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case PathsCmd::KILL:
-            return true;
-            break; // requires write privilege, modifies Flag::KILLCMD_FAILED
+            return true; // requires write privilege, modifies Flag::KILLCMD_FAILED
         case PathsCmd::STATUS:
-            return true;
-            break; // requires write privilege, modifies Flag::STATUSCMD_FAILED
+            return true; // requires write privilege, modifies Flag::STATUSCMD_FAILED
         case PathsCmd::CHECK:
-            return false;
-            break; // read only
+            return false; // read only
         case PathsCmd::EDIT_HISTORY: {
             if (paths_.size() == 1 && paths_[0] == "clear") {
                 return true; // requires write privilege
             }
-            return false;
-            break; // read only
+            return false; // read only
         }
         case PathsCmd::ARCHIVE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case PathsCmd::RESTORE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case PathsCmd::NO_CMD:
             break;
         default:
@@ -200,28 +192,20 @@ const char* PathsCmd::theArg() const {
     switch (api_) {
         case PathsCmd::SUSPEND:
             return CtsApi::suspend_arg();
-            break;
         case PathsCmd::RESUME:
             return CtsApi::resume_arg();
-            break;
         case PathsCmd::KILL:
             return CtsApi::kill_arg();
-            break;
         case PathsCmd::STATUS:
             return CtsApi::statusArg();
-            break;
         case PathsCmd::CHECK:
             return CtsApi::check_arg();
-            break;
         case PathsCmd::EDIT_HISTORY:
             return CtsApi::edit_history_arg();
-            break;
         case PathsCmd::ARCHIVE:
             return CtsApi::archive_arg();
-            break;
         case PathsCmd::RESTORE:
             return CtsApi::restore_arg();
-            break;
         case PathsCmd::NO_CMD:
             break;
         default:
@@ -452,7 +436,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                 }
                 return PreAllocatedReply::string_cmd(acc_warning_msg);
             }
-            break;
         }
 
         case PathsCmd::NO_CMD:

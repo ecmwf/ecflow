@@ -191,22 +191,16 @@ const char* ZombieCmd::theArg() const {
     switch (user_action_) {
         case ZombieCtrlAction::FOB:
             return CtsApi::zombieFobArg();
-            break;
         case ZombieCtrlAction::FAIL:
             return CtsApi::zombieFailArg();
-            break;
         case ZombieCtrlAction::ADOPT:
             return CtsApi::zombieAdoptArg();
-            break;
         case ZombieCtrlAction::REMOVE:
             return CtsApi::zombieRemoveArg();
-            break;
         case ZombieCtrlAction::BLOCK:
             return CtsApi::zombieBlockArg();
-            break;
         case ZombieCtrlAction::KILL:
             return CtsApi::zombieKillArg();
-            break;
         default:
             break;
     }

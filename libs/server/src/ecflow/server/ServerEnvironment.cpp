@@ -33,16 +33,12 @@ static std::string the_check_mode(ecf::CheckPt::Mode mode) {
     switch (mode) {
         case ecf::CheckPt::NEVER:
             return "CHECK_NEVER";
-            break;
         case ecf::CheckPt::ON_TIME:
             return "CHECK_ON_TIME";
-            break;
         case ecf::CheckPt::ALWAYS:
             return "CHECK_ALWAYS";
-            break;
         case ecf::CheckPt::UNDEFINED:
             return "UNDEFINED";
-            break;
     }
     std::cout << "ServerEnvironment.cpp theCheckMode: assert failed\n";
     assert(false);

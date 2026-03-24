@@ -184,59 +184,41 @@ ecf::authorisation_t CtsCmd::authorise(AbstractServer& server) const {
 bool CtsCmd::isWrite() const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::RESTART_SERVER:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::SHUTDOWN_SERVER:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::HALT_SERVER:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::TERMINATE_SERVER:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::RELOAD_WHITE_LIST_FILE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::RELOAD_PASSWD_FILE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::FORCE_DEP_EVAL:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::PING:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::STATS:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::STATS_SERVER:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::STATS_RESET:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsCmd::SUITES:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::DEBUG_SERVER_ON:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::DEBUG_SERVER_OFF:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::SERVER_LOAD:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsCmd::NO_CMD:
             assert(false);
             break;
@@ -252,58 +234,40 @@ bool CtsCmd::cmd_updates_defs() const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES:
             return false;
-            break;
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:
             return true;
-            break;
         case CtsCmd::RESTART_SERVER:
             return true;
-            break;
         case CtsCmd::SHUTDOWN_SERVER:
             return true;
-            break;
         case CtsCmd::HALT_SERVER:
             return true;
-            break;
         case CtsCmd::TERMINATE_SERVER:
             return true;
-            break;
         case CtsCmd::RELOAD_WHITE_LIST_FILE:
             return false;
-            break;
         case CtsCmd::RELOAD_PASSWD_FILE:
             return false;
-            break;
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:
             return false;
-            break;
         case CtsCmd::FORCE_DEP_EVAL:
             return true;
-            break;
         case CtsCmd::PING:
             return false;
-            break;
         case CtsCmd::STATS:
             return false;
-            break;
         case CtsCmd::STATS_SERVER:
             return false;
-            break;
         case CtsCmd::STATS_RESET:
             return false;
-            break;
         case CtsCmd::SUITES:
             return false;
-            break;
         case CtsCmd::DEBUG_SERVER_ON:
             return false;
-            break;
         case CtsCmd::DEBUG_SERVER_OFF:
             return false;
-            break;
         case CtsCmd::SERVER_LOAD:
             return false;
-            break;
         case CtsCmd::NO_CMD:
             assert(false);
             break;
@@ -326,58 +290,40 @@ const char* CtsCmd::theArg() const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES:
             return CtsApi::zombieGetArg();
-            break;
         case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:
             return CtsApi::restoreDefsFromCheckPtArg();
-            break;
         case CtsCmd::RESTART_SERVER:
             return CtsApi::restartServerArg();
-            break;
         case CtsCmd::SHUTDOWN_SERVER:
             return CtsApi::shutdownServerArg();
-            break;
         case CtsCmd::HALT_SERVER:
             return CtsApi::haltServerArg();
-            break;
         case CtsCmd::TERMINATE_SERVER:
             return CtsApi::terminateServerArg();
-            break;
         case CtsCmd::RELOAD_WHITE_LIST_FILE:
             return CtsApi::reloadwsfileArg();
-            break;
         case CtsCmd::RELOAD_PASSWD_FILE:
             return CtsApi::reloadpasswdfile_arg();
-            break;
         case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:
             return CtsApi::reloadcustompasswdfile_arg();
-            break;
         case CtsCmd::FORCE_DEP_EVAL:
             return CtsApi::forceDependencyEvalArg();
-            break;
         case CtsCmd::PING:
             return CtsApi::pingServerArg();
-            break;
         case CtsCmd::STATS:
             return CtsApi::statsArg();
-            break;
         case CtsCmd::STATS_SERVER:
             return CtsApi::stats_server_arg();
-            break;
         case CtsCmd::STATS_RESET:
             return CtsApi::stats_reset_arg();
-            break;
         case CtsCmd::SUITES:
             return CtsApi::suitesArg();
-            break;
         case CtsCmd::DEBUG_SERVER_ON:
             return CtsApi::debug_server_on_arg();
-            break;
         case CtsCmd::DEBUG_SERVER_OFF:
             return CtsApi::debug_server_off_arg();
-            break;
         case CtsCmd::SERVER_LOAD:
             return CtsApi::server_load_arg();
-            break;
         case CtsCmd::NO_CMD:
             assert(false);
             break;
@@ -462,12 +408,10 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
             std::ostringstream ss;
             as->stats().show(ss); // ECFLOW-880, allow stats to be changed in server, by only returning string
             return PreAllocatedReply::string_cmd(ss.str());
-            break;
         }
-        case CtsCmd::STATS_SERVER: {
+        case CtsCmd::STATS_SERVER: { // Only to be used in test, as subject to change, returns Stats struct
             as->update_stats().stats_++;
             return PreAllocatedReply::stats_cmd(as);
-            break; // Only to be used in test, as subject to change, returns Stats struct
         }
         case CtsCmd::STATS_RESET:
             as->update_stats().reset();
@@ -475,7 +419,6 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
         case CtsCmd::SUITES:
             as->update_stats().suites_++;
             return PreAllocatedReply::suites_cmd(as);
-            break;
         case CtsCmd::DEBUG_SERVER_ON:
             as->update_stats().debug_server_on_++;
             as->debug_server_on();

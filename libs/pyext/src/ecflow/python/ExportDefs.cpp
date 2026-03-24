@@ -261,7 +261,6 @@ static py::object defs_getattr(defs_ptr self, const std::string& attr) {
 
     throw std::runtime_error(MESSAGE("ExportDefs::defs_getattr : function of name '"
                                      << attr << "' does not exist *OR* suite or defs variable"));
-    return py::object();
 }
 
 py::object defs_raw_constructor(py::tuple args, py::dict kw) {

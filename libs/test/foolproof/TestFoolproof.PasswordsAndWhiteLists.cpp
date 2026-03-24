@@ -37,10 +37,10 @@ BOOST_AUTO_TEST_CASE(test_e2e_update_label_with_authentication_based_on_passwd_f
 
     auto cwd = MakeDirectory{}.create();
 
-    auto user_a = User{"alice", "somesecret"};
-    auto user_b = User{"bob", "anothersecret"};
-    auto user_c = User{"charlie", "yetanothersecret"};
-    auto user_d = User{"david", "adifferentsecret"}; // Note: not included in password file!
+    auto user_a = User{"alice", "somesecret", ""};
+    auto user_b = User{"bob", "anothersecret", ""};
+    auto user_c = User{"charlie", "yetanothersecret", ""};
+    auto user_d = User{"david", "adifferentsecret", ""}; // Note: not included in password file!
 
     auto host = MakeHost{}.create();
     auto port = MakePort{}.with(AutomaticPortValue{}).create();
