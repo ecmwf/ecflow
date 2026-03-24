@@ -1,0 +1,265 @@
+builds:
+  - name: "rpm-rocky-8-ui"
+    type: system-package
+    enabled: true
+    config:
+      os: rocky-8
+      dependencies:
+        - ecmwf/ecbuild
+      cmake_options:
+        -DBOOST_ROOT: ${BOOST_ROOT_DIR}
+        -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
+        -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
+        -DBoost_DEBUG: ON
+        -DOPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}
+        -DENABLE_STATIC_BOOST_LIBS: OFF
+        -DENABLE_CONFIG_MODE_BOOST: OFF
+        -DINSTALL_PYTHON3_DIR: lib/python3/dist-packages
+        -DENABLE_ALL_TESTS: ON
+        -DENABLE_SSL: ON
+        -DENABLE_SERVER: OFF
+        -DENABLE_HTTP: OFF
+        -DENABLE_UDP: OFF
+        -DENABLE_PYTHON: OFF
+        -DENABLE_UI: ON
+        -DUI_SYSTEM_SERVERS_LIST: /ec/vol/ecflow_def/servers.list.all
+        -DCPACK_PACKAGE_NAME: ecflow-ui
+      ctest_options:
+        - -L nightly
+        - -E s_test|s_zombies
+      dependency_branch: develop
+      parallelism_factor: 8
+      install_prefix: /usr
+      install_test: true
+      install_test_command: /usr/bin/ecflow_client --version
+
+  - name: "deb-debian-11-server"
+    type: system-package
+    enabled: true
+    config:
+      os: debian-11
+      dependencies:
+        - ecmwf/ecbuild
+      cmake_options:
+        -DPython3_EXECUTABLE: /usr/bin/python3
+        -DBOOST_ROOT: ${BOOST_ROOT_DIR}
+        -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
+        -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
+        -DBoost_DEBUG: ON
+        -DOPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}
+        -DENABLE_STATIC_BOOST_LIBS: OFF
+        -DINSTALL_PYTHON3_DIR: lib/python3/dist-packages
+        -DENABLE_ALL_TESTS: ON
+        -DENABLE_SSL: ON
+        -DENABLE_SERVER: ON
+        -DENABLE_UI: OFF
+        -DCPACK_PACKAGE_NAME: ecflow
+      ctest_options:
+        - -L nightly
+        - -E s_test|s_zombies
+      dependency_branch: develop
+      parallelism_factor: 8
+      install_prefix: /usr
+      install_test: true
+      install_test_command: /usr/bin/ecflow_client --version
+
+  - name: "deb-debian-12-server"
+    type: system-package
+    enabled: true
+    config:
+      os: debian-12
+      dependencies:
+        - ecmwf/ecbuild
+      cmake_options:
+        -DPython3_EXECUTABLE: /usr/bin/python3
+        -DBOOST_ROOT: ${BOOST_ROOT_DIR}
+        -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
+        -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
+        -DBoost_DEBUG: ON
+        -DOPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}
+        -DENABLE_STATIC_BOOST_LIBS: OFF
+        -DINSTALL_PYTHON3_DIR: lib/python3/dist-packages
+        -DENABLE_ALL_TESTS: ON
+        -DENABLE_SSL: ON
+        -DENABLE_SERVER: ON
+        -DENABLE_UI: OFF
+        -DCPACK_PACKAGE_NAME: ecflow
+      ctest_options:
+        - -L nightly
+        - -E s_test|s_zombies
+      dependency_branch: develop
+      parallelism_factor: 8
+      install_prefix: /usr
+      install_test: true
+      install_test_command: /usr/bin/ecflow_client --version
+
+  - name: "tarball"
+    type: "tarball"
+    enabled: true
+    config:
+      cmake_options:
+        -DBOOST_ROOT: ${BOOST_ROOT_DIR}
+        -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
+        -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
+        -DOPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}
+        -DENABLE_STATIC_BOOST_LIBS: OFF
+      confluence_space: "ECFLOW"
+      confluence_page_title: "For testing tarball uploads"
+
+  - name: "conda-build Python3.11"
+    type: "conda"
+    enabled: true
+    config:
+      conda_build_args:
+        - -m .cd/conda/conda_build_config_common.yaml
+        - -m .cd/conda/conda_build_config_py311.yaml
+
+  - name: "conda-build Python3.12"
+    type: "conda"
+    enabled: true
+    config:
+      conda_build_args:
+        - -m .cd/conda/conda_build_config_common.yaml
+        - -m .cd/conda/conda_build_config_py312.yaml
+
+  - name: "conda-build Python3.13"
+    type: "conda"
+    enabled: true
+    config:
+      conda_build_args:
+        - -m .cd/conda/conda_build_config_common.yaml
+        - -m .cd/conda/conda_build_config_py313.yaml
+
+  - name: ecflow-hpc
+    type: hpc
+    enabled: true
+    config:
+      platform: gnu-8.5.0
+      install_type: module
+      install_lib_dir: lib
+      dry_run_install: true
+      dry_run_install_prefix: $SCRATCH/test-install-ecflow
+
+      parallel: 64
+      self_test: true
+
+      stages:
+        - name: python312
+          modules:
+            - boost/1.87.0
+            - python3/3.12.9-01
+            - qt/6.6.1
+            - cmake/new
+            - ecbuild/new
+          test_command: &test_cmd "ctest --output-on-failure -j 8 -L nightly"
+          cmake_options: &common_cmake_options
+            -DCMAKE_VERBOSE_MAKEFILE: ON
+            -DENABLE_ALL_TESTS: ON
+            -DENABLE_STATIC_BOOST_LIBS: ON
+            -DENABLE_WARNINGS: ON
+            -DCMAKE_BUILD_TYPE: Release
+            -DCMAKE_CXX_FLAGS: -Wno-deprecated-declarations
+            -DCMAKE_PYTHON_INSTALL_TYPE: local
+            -DINSTALL_LIB_DIR: lib
+            -DUI_SYSTEM_SERVERS_LIST: /ec/vol/ecflow_def/servers.list.all
+
+        - name: python311
+          modules:
+            - boost/1.84.0
+            - python3/3.11.8-01
+            - qt/5.12.0
+            - cmake/new
+            - ecbuild/new
+          test_command: *test_cmd
+          cmake_options:
+            <<: *common_cmake_options
+            -DBoost_ROOT: /usr/local/apps/boost/1.84.0/GNU/8.5
+            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.84.0/GNU/8.5/include
+            -DBoost_PYTHON311_LIBRARY_RELEASE: /usr/local/apps/boost/1.84.0/GNU/8.5/lib/libboost_python311.so
+            -DPython3_ROOT_DIR: /usr/local/apps/python3/3.11.8-01
+            -DPython3_EXECUTABLE: /usr/local/apps/python3/3.11.8-01/bin/python3
+            -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.11.8-01/include/python3.11
+            -DPython3_LIBRARIES: /usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so
+            -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.11.8-01/lib64
+            -DENABLE_UI: OFF
+          install_command: |
+            cmake --install . --component python
+
+        - name: python310
+          modules:
+            - boost/1.81.0
+            - python3/3.10.10-01
+            - qt/6.2.0
+            - cmake/new
+            - ecbuild/new
+          test_command: *test_cmd
+          cmake_options:
+            <<: *common_cmake_options
+            ENABLE_UI: OFF
+            -DBoost_ROOT: /usr/local/apps/boost/1.81.0/GNU/8.5
+            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.81.0/GNU/12.2/include
+            -DBoost_PYTHON310_LIBRARY_RELEASE: /usr/local/apps/boost/1.81.0/GNU/8.5/lib/libboost_python310.so
+            -DPython3_ROOT_DIR: /usr/local/apps/python3/3.10.10-01
+            -DPython3_EXECUTABLE: /usr/local/apps/python3/3.10.10-01/bin/python3
+            -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.10.10-01/include/python3.10
+            -DPython3_LIBRARIES: /usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
+            -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.10.10-01/lib64
+          install_command: |
+            cmake --install . --component python
+
+        - name: python38
+          modules:
+            - boost/1.75.0
+            - python3/3.8.8-01
+            - qt/5.12.0
+            - cmake/new
+            - ecbuild/new
+          test_command: *test_cmd
+          cmake_options:
+            <<: *common_cmake_options
+            -DENABLE_UI: OFF
+            -DBoost_ROOT: /usr/local/apps/boost/1.75.0/GNU/8.5
+            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.75.0/GNU/8.5/include
+            -DBoost_PYTHON38_LIBRARY_RELEASE: /usr/local/apps/boost/1.75.0/GNU/8.5/lib/libboost_python38.so
+            -DPython3_ROOT_DIR: /usr/local/apps/python3/3.8.8-01
+            -DPython3_EXECUTABLE: /usr/local/apps/python3/3.8.8-01/bin/python3
+            -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.8.8-01/include/python3.8
+            -DPython3_LIBRARIES: /usr/local/apps/python3/3.8.8-01/lib64/libpython3.8.so
+            -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.8.8-01/lib64
+          install_command: |
+            cmake --install . --component python
+
+      lock_permissions: true
+
+  - name: ecflow-hpc-ag
+    type: hpc
+    enabled: true
+    config:
+      site: ag-batch
+      queue: ng
+      gpus: 0
+      platform: gnu-11.5.0
+      install_type: module
+      install_lib_dir: lib
+      dry_run_install: true
+      dry_run_install_prefix: $SCRATCH/test-install-ecflow-ag
+      parallel: 64
+      self_test: true
+      sync_module: false
+      stages:
+        - name: python312
+          modules:
+            - boost/1.87.0
+            - python3/3.12.9-01
+            - cmake/new
+            - ecbuild
+          test_command: *test_cmd
+          install_command: |
+            cmake --install .
+          cmake_options:
+            <<: *common_cmake_options
+            ENABLE_UI: OFF
+      lock_permissions: true
+
+release:
+  enabled: true
