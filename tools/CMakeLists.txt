@@ -32,11 +32,11 @@ endif()
 
 install(
   FILES
-    ${CMAKE_SOURCE_DIR}/tools/ecflow_fuse.py
-    ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
-    ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
-    ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
-    ${CMAKE_SOURCE_DIR}/tools/ecflow_logserver.sh
+    ${CMAKE_CURRENT_SOURCE_DIR}/ecflow_fuse.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/ecflow_logsvr.pl
+    ${CMAKE_CURRENT_SOURCE_DIR}/ecflow_start.sh
+    ${CMAKE_CURRENT_SOURCE_DIR}/ecflow_stop.sh
+    ${CMAKE_CURRENT_SOURCE_DIR}/ecflow_logserver.sh
   DESTINATION bin
   PERMISSIONS
     OWNER_READ
