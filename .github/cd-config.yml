@@ -1,4 +1,6 @@
+
 builds:
+
   - name: "rpm-rocky-8-ui"
     type: system-package
     enabled: true
@@ -67,36 +69,6 @@ builds:
     enabled: true
     config:
       os: debian-12
-      dependencies:
-        - ecmwf/ecbuild
-      cmake_options:
-        -DPython3_EXECUTABLE: /usr/bin/python3
-        -DBOOST_ROOT: ${BOOST_ROOT_DIR}
-        -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
-        -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
-        -DBoost_DEBUG: ON
-        -DOPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}
-        -DENABLE_STATIC_BOOST_LIBS: OFF
-        -DINSTALL_PYTHON3_DIR: lib/python3/dist-packages
-        -DENABLE_ALL_TESTS: ON
-        -DENABLE_SSL: ON
-        -DENABLE_SERVER: ON
-        -DENABLE_UI: OFF
-        -DCPACK_PACKAGE_NAME: ecflow
-      ctest_options:
-        - -L nightly
-        - -E s_test|s_zombies
-      dependency_branch: develop
-      parallelism_factor: 8
-      install_prefix: /usr
-      install_test: true
-      install_test_command: /usr/bin/ecflow_client --version
-
-  - name: "deb-debian-13-server"
-    type: system-package
-    enabled: true
-    config:
-      os: debian-13
       dependencies:
         - ecmwf/ecbuild
       cmake_options:
