@@ -105,7 +105,7 @@ builds:
         -DOPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}
         -DENABLE_STATIC_BOOST_LIBS: OFF
       confluence_space: "ECFLOW"
-      confluence_page_title: "For testing tarball uploads"
+      confluence_page_title: "Releases"
 
   - name: "conda-build Python3.11"
     type: "conda"
