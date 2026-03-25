@@ -18,7 +18,6 @@
 #include <QPainter>
 #include <QTimer>
 #include <QToolButton>
-#include <boost/current_function.hpp>
 
 #include "ConnectState.hpp"
 #include "FontMetrics.hpp"
@@ -50,7 +49,7 @@ QPen ServerRefreshInfoWidget::driftTextPen_(QColor(120, 120, 120));
 QPen ServerRefreshInfoWidget::lastTextPen_(QColor(45, 45, 45));
 QPen ServerRefreshInfoWidget::disabledTextPen_(QColor(180, 180, 180));
 
-// #define _UI_SERVERCOMINFOWIDGET_DEBUG
+// #define UI_SERVERCOMINFOWIDGET_DEBUG
 
 #if 0
 ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget *parent) :
@@ -206,7 +205,7 @@ void ServerRefreshInfoWidget::updateSettings() {
 }
 
 void ServerRefreshInfoWidget::setServer(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -264,7 +263,7 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server) {
 //-------------------------------
 
 void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -297,7 +296,7 @@ void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server) {
 // While the server is being reloaded the refresh button is disabled. It must be followed by a
 // notifyEndServerScan() call!
 void ServerRefreshInfoWidget::notifyBeginServerClear(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
@@ -318,7 +317,7 @@ void ServerRefreshInfoWidget::notifyBeginServerClear(ServerHandler* server) {
 
 // The server has been reloaded. We must get the current state.
 void ServerRefreshInfoWidget::notifyEndServerScan(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
@@ -359,7 +358,7 @@ void ServerRefreshInfoWidget::notifyServerActivityChanged(ServerHandler* /*serve
 //-----------------------------------
 
 void ServerRefreshInfoWidget::notifyRefreshTimerStarted(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
@@ -367,7 +366,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerStarted(ServerHandler* server) {
 }
 
 void ServerRefreshInfoWidget::notifyRefreshTimerStopped(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
@@ -375,7 +374,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerStopped(ServerHandler* server) {
 }
 
 void ServerRefreshInfoWidget::notifyRefreshTimerChanged(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
     printStatus();
 #endif
@@ -390,7 +389,7 @@ void ServerRefreshInfoWidget::notifyRefreshTimerChanged(ServerHandler* server) {
 
 // While the refresh is being executed the the refresh button
 void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
@@ -399,7 +398,7 @@ void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server) {
     if (mode_ == NormalMode) {
         timer_->stop();
 
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
         printStatus();
 #endif
         // redraw
@@ -408,7 +407,7 @@ void ServerRefreshInfoWidget::notifyRefreshScheduled(ServerHandler* server) {
 }
 
 void ServerRefreshInfoWidget::notifyRefreshFinished(ServerHandler* server) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
@@ -418,7 +417,7 @@ void ServerRefreshInfoWidget::notifyRefreshFinished(ServerHandler* server) {
         Q_ASSERT(500 - elapsed > 0);
         // We keep the button in inRefresh state for 0.5 sec (the timer is stopped now!!)
         QTimer::singleShot(500 - elapsed, this, SLOT(slotTimeOutRefreshFinished()));
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
         printStatus();
 #endif
     }
@@ -444,7 +443,7 @@ void ServerRefreshInfoWidget::slotTimeOutRefreshFinished() {
 }
 
 void ServerRefreshInfoWidget::fetchInfo() {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
     printStatus();
 #endif
@@ -461,7 +460,7 @@ void ServerRefreshInfoWidget::fetchInfo() {
         bool geoUpdateNeeded = (v != hasInfo_);
         hasInfo_             = v;
 
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
         UiLog().dbg() << " period=" << period_ << " total=" << total_ << " toNext=" << toNext_;
 #endif
 
@@ -498,7 +497,7 @@ void ServerRefreshInfoWidget::fetchInfo() {
         adjustTimer(toNext_);
     }
 
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     printStatus();
 #endif
 }
@@ -598,7 +597,7 @@ void ServerRefreshInfoWidget::mousePressEvent(QMouseEvent* event) {
 
     // We are in the button
     if (isInButton(event->pos())) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
 //        UiLog().dbg() << "pressed";
 #endif
         if (currentComponent_ != ButtonComponent) {
@@ -612,7 +611,7 @@ void ServerRefreshInfoWidget::mousePressEvent(QMouseEvent* event) {
 void ServerRefreshInfoWidget::mouseMoveEvent(QMouseEvent* event) {
     // We are in the button
     if (isInButton(event->pos())) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
 //        UiLog().dbg() << "inButton";
 #endif
         // we just entered the button
@@ -626,7 +625,7 @@ void ServerRefreshInfoWidget::mouseMoveEvent(QMouseEvent* event) {
     }
     // We are in the progress part
     else if (isInText(event->pos())) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
 //        UiLog().dbg() << "inText";
 #endif
         // we came from the button
@@ -646,7 +645,7 @@ void ServerRefreshInfoWidget::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void ServerRefreshInfoWidget::leaveEvent(QEvent*) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     // UI_FUNCTION_LOG
 #endif
     currentComponent_ = NoComponent;
@@ -709,14 +708,14 @@ int ServerRefreshInfoWidget::determinePeriodTextWidthMin() const {
 // Indicate if the full period text's size will change in such a way that the
 // geometry needs to be adjusted
 bool ServerRefreshInfoWidget::periodTextWidthAboutToChange() const {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
 
     int mval = determinePeriodTextWidthMin();
 
     QString pt = fullPeriodText();
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UiLog().dbg() << " full=" << pt << " pt.size=" << pt.size() << " mval=" << mval
                   << " periodTextWidthMin=" << periodTextWidthMin_ << " periodTextSize " << periodTextWidth_;
 #endif
@@ -733,14 +732,14 @@ bool ServerRefreshInfoWidget::periodTextWidthAboutToChange() const {
     else {
         changed = true;
     }
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UiLog().dbg() << " changed=" << changed;
 #endif
     return changed;
 }
 
 void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo) {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -771,11 +770,11 @@ void ServerRefreshInfoWidget::adjustGeometry(bool doFetchInfo) {
             periodTextWidth_ = periodTextWidthMin_;
         }
         else {
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
             UiLog().dbg() << " width changed before=" << periodTextWidth_;
 #endif
             periodTextWidth_ = w;
-#ifdef _UI_SERVERCOMINFOWIDGET_DEBUG
+#ifdef UI_SERVERCOMINFOWIDGET_DEBUG
             UiLog().dbg() << " width changed after=" << periodTextWidth_;
 #endif
         }
@@ -1094,7 +1093,10 @@ void ServerRefreshInfoWidget::printStatus() const {
                   << " timeout=" << timer_->interval() / 1000. << "s";
 }
 
-ServerComActivityLine::ServerComActivityLine(QWidget* parent) : QWidget(parent), font_(QFont()), fm_(font_) {
+ServerComActivityLine::ServerComActivityLine(QWidget* parent)
+    : QWidget(parent),
+      font_(QFont()),
+      fm_(font_) {
     font_.setPointSize(font_.pointSize() - 1);
     fm_ = QFontMetrics(font_);
 

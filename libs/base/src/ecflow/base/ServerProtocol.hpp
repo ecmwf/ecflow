@@ -34,8 +34,8 @@ struct EnumTraits<Protocol>
                                                                              std::make_pair(Protocol::Https, "HTTPS")}};
 
     static constexpr std::array<std::pair<Protocol, const char*>, 4> ui_designation = {
-        {std::make_pair(Protocol::Plain, "TCT/IP"),
-         std::make_pair(Protocol::Ssl, "TCT/IP with SSL"),
+        {std::make_pair(Protocol::Plain, "TCP/IP"),
+         std::make_pair(Protocol::Ssl, "TCP/IP with SSL"),
          std::make_pair(Protocol::Http, "HTTP"),
          std::make_pair(Protocol::Https, "HTTPS")}};
 

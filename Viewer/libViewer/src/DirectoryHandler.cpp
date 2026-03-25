@@ -13,7 +13,6 @@
 #include <regex>
 
 #include <QFile>
-#include <boost/foreach.hpp>
 
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
@@ -226,11 +225,10 @@ void DirectoryHandler::findDirContents(const std::string& dirPath,
                                        FileType type,
                                        std::vector<std::string>& res) {
     fs::path path(dirPath);
-    fs::directory_iterator it(path), eod;
 
     const std::regex expr(filterStr);
 
-    BOOST_FOREACH (fs::path const& p, std::make_pair(it, eod)) {
+    for (fs::path p : fs::directory_iterator(path)) {
         std::smatch what;
         std::string fileName = p.filename().string();
 
@@ -280,7 +278,7 @@ std::string DirectoryHandler::tmpFileName() {
         try {
             fs::path model = tmp;
             model /= "%%%%-%%%%-%%%%-%%%%";
-            return fs::unique_path(model).string();
+            return ecf::fsx::unique_path(model).string();
         }
         catch (const fs::filesystem_error& err) {
             UiLog().warn() << "Could not generate tmp filename! Reason: " << err.what();
@@ -316,18 +314,14 @@ bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& des
 
     // go through all the files/dirs in the dir
     bool ok = true;
-    fs::directory_iterator it(src), eod;
-    BOOST_FOREACH (fs::path const& p, std::make_pair(it, eod)) {
-        std::string fileName = p.filename().string();
-        std::string srcFile  = p.string();
-
+    for (fs::path p : fs::directory_iterator(src)) {
         if (is_regular_file(p)) // file? then copy it into its new home
         {
             // The original boost based copy implementation did not work with newer compilers,
             // so we opted for a Qt based implementation. See ECFLOW-1207
             fs::path destPath    = dest / p.filename();
             std::string destFile = destPath.string();
-            if (!copyFile(srcFile, destFile, errorMessage)) {
+            if (!copyFile(p.string(), destFile, errorMessage)) {
                 return false;
             }
 
@@ -343,7 +337,7 @@ bool DirectoryHandler::copyDir(const std::string& srcDir, const std::string& des
             }
 #endif
         }
-        else if (is_directory(p)) // directory? then copy it recursively
+        else if (fs::is_directory(p)) // directory? then copy it recursively
         {
             fs::path destSubDir(destDir);
             destSubDir /= p.filename();

@@ -19,7 +19,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -37,17 +36,17 @@ BOOST_AUTO_TEST_CASE(test_environment_substitution) {
         suite->addVariable(Variable("AVI", "avi"));
 
         std::vector<std::pair<std::string, std::string>> env;
-        env.emplace_back(ecf::environment::ECF_HOME, string("/home/smshome"));
-        env.emplace_back(string("FRED"), string("/home/fred"));
-        env.emplace_back(string("BILL"), string("/home/bill"));
-        env.emplace_back(string("JANE"), string("/home/jane"));
-        env.emplace_back(string("REP"), string("$REP/bill"));
+        env.emplace_back(ecf::environment::ECF_HOME, std::string("/home/smshome"));
+        env.emplace_back(std::string("FRED"), std::string("/home/fred"));
+        env.emplace_back(std::string("BILL"), std::string("/home/bill"));
+        env.emplace_back(std::string("JANE"), std::string("/home/jane"));
+        env.emplace_back(std::string("REP"), std::string("$REP/bill"));
         defs.server_state().add_or_update_user_variables(env);
     }
 
     // Check for recursive, in which case we only substitute once
-    string expected = "$REP/bill";
-    std::string cmd = "$REP";
+    std::string expected = "$REP/bill";
+    std::string cmd      = "$REP";
     BOOST_REQUIRE_MESSAGE(s->variable_dollar_substitution(cmd), " substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 

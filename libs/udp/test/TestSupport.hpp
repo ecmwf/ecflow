@@ -38,17 +38,21 @@ public:
     using port_t     = uint16_t;
 
     template <typename... Args>
-    BaseMockServer(hostname_t host, port_t port, Args... args) : host_{std::move(host)},
-                                                                 port_{port},
-                                                                 server_{} {
+    BaseMockServer(hostname_t host, port_t port, Args... args)
+        : host_{std::move(host)},
+          port_{port},
+          server_{} {
         BOOST_REQUIRE_MESSAGE(!host_.empty(), "determiner host name");
         BOOST_REQUIRE_MESSAGE(port_ > 0, "port is be larger than 0");
 
         server_ = std::move(SERVER::launch(host_, port_, std::forward<Args>(args)...));
         ECF_TEST_DBG(<< "   MOCK: " << SERVER::designation << " has been started!");
     }
-    BaseMockServer(const BaseMockServer&) = delete;
-    BaseMockServer(BaseMockServer&&)      = delete;
+
+    BaseMockServer(const BaseMockServer&)            = delete;
+    BaseMockServer& operator=(const BaseMockServer&) = delete;
+    BaseMockServer(BaseMockServer&&)                 = delete;
+    BaseMockServer& operator=(BaseMockServer&&)      = delete;
 
     ~BaseMockServer() {
         server_.terminate();
@@ -71,7 +75,8 @@ private:
  */
 class MockServer : public BaseMockServer<MockServer> {
 public:
-    explicit MockServer(port_t port) : BaseMockServer<MockServer>(ecf::Host{}.name(), port) {}
+    explicit MockServer(port_t port)
+        : BaseMockServer<MockServer>(ecf::Host{}.name(), port) {}
 
     void load_definition(const std::string& defs) const {
         ClientInvoker client(ecf::Str::LOCALHOST(), port());
@@ -153,7 +158,7 @@ public:
 
     static void cleanup(const hostname_t& host, port_t port) {
         // Clean up temporary files created by the server instance
-        std::string temporaries[]{host + '.' + std::to_string(port) + ".ecf.check",
+        std::array temporaries = {host + '.' + std::to_string(port) + ".ecf.check",
                                   host + '.' + std::to_string(port) + ".ecf.check.b",
                                   host + '.' + std::to_string(port) + ".ecf.log"};
         for (const auto& t : temporaries) {
@@ -198,9 +203,9 @@ private:
     template <typename V>
     static std::string
     format_request(const std::string& path, const std::string& command, const std::string& name, V value) {
-        std::ostringstream oss;
+        std::ostringstream ss;
         // clang-format off
-        oss << R"({)"
+        ss << R"({)"
                 << R"("method":"put",)"
                 << R"("payload":)"
                 << R"({)"
@@ -211,7 +216,7 @@ private:
                 << R"(})"
             << R"(})";
         // clang-format on
-        return oss.str();
+        return ss.str();
     }
 
     static void sendRequest(uint16_t port, const std::string& request) {
@@ -221,7 +226,7 @@ private:
         client.send(request);
 
         // Wait for request to flow...
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
 public:
@@ -253,7 +258,8 @@ public:
  */
 struct EnableServersFixture
 {
-    EnableServersFixture() : EnableServersFixture(get_ecflow_server_port(), get_ecflow_udp_port()) {}
+    EnableServersFixture()
+        : EnableServersFixture(get_ecflow_server_port(), get_ecflow_udp_port()) {}
     ~EnableServersFixture() = default;
 
     ecf::test::MockServer ecflow_server;

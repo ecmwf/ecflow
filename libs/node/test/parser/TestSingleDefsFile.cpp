@@ -25,6 +25,7 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeContainer.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
@@ -33,7 +34,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Parser)
@@ -61,7 +61,8 @@ void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
 // i.e ignore expression build/checking and limit checking
 class TestDefsStructureParser : public DefsStructureParser {
 public:
-    TestDefsStructureParser(Defs* defsfile, const std::string& file_name) : DefsStructureParser(defsfile, file_name) {}
+    TestDefsStructureParser(Defs* defsfile, const std::string& file_name)
+        : DefsStructureParser(defsfile, file_name) {}
     bool do_parse_file(std::string& errorMsg) { return DefsStructureParser::do_parse_file(errorMsg); }
 };
 
@@ -132,8 +133,8 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForParse,
                             "Performance regression, expected < "
                                 << expectedTimeForParse << " seconds for parse/node tree creation but found " << timer);
-        cout << " Parsing Node tree and AST creation time                = " << timer << " < limit("
-             << expectedTimeForParse << ")" << endl;
+        std::cout << " Parsing Node tree and AST creation time                = " << timer << " < limit("
+                  << expectedTimeForParse << ")" << std::endl;
     }
     {
         Defs local_defs;
@@ -145,8 +146,8 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
                             "Performance regression, expected < " << expectedTimeForParseOnly
                                                                   << " seconds for parse/node tree creation but found "
                                                                   << timer);
-        cout << " Parsing Node tree *only* time                          = " << timer << " < limit("
-             << expectedTimeForParseOnly << ")" << endl;
+        std::cout << " Parsing Node tree *only* time                          = " << timer << " < limit("
+                  << expectedTimeForParseOnly << ")" << std::endl;
     }
     {
         timer.start();
@@ -156,8 +157,8 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForFindAllPaths,
                             "Performance regression, expected < " << expectedTimeForFindAllPaths
                                                                   << " seconds to find all paths, but found " << timer);
-        cout << " Test all paths can be found. time taken                = " << timer << " < limit("
-             << expectedTimeForFindAllPaths << ")" << endl;
+        std::cout << " Test all paths can be found. time taken                = " << timer << " < limit("
+                  << expectedTimeForFindAllPaths << ")" << std::endl;
     }
 
     {
@@ -170,8 +171,8 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForDefsPersistOnly,
                             "Performance regression, expected < " << expectedTimeForDefsPersistOnly
                                                                   << " to persist defs file, but found " << timer);
-        cout << " Persist only, time taken                               = " << timer << " < limit("
-             << expectedTimeForDefsPersistOnly << ")" << endl;
+        std::cout << " Persist only, time taken                               = " << timer << " < limit("
+                  << expectedTimeForDefsPersistOnly << ")" << std::endl;
     }
 
     {
@@ -183,16 +184,16 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
                             "Performance regression, expected < " << expectedTimeForDefsPersistAndReload
                                                                   << " seconds to persist and reload, but found "
                                                                   << timer);
-        cout << " Persist and reload(DEFS) and compare, time taken       = " << timer << " < limit("
-             << expectedTimeForDefsPersistAndReload << ")"
-             << " file_size(" << helper.file_size() << ")" << endl;
+        std::cout << " Persist and reload(DEFS) and compare, time taken       = " << timer << " < limit("
+                  << expectedTimeForDefsPersistAndReload << ")"
+                  << " file_size(" << helper.file_size() << ")" << std::endl;
     }
     {
         timer.start();
         PersistHelper helper;
         BOOST_CHECK_MESSAGE(helper.test_persist_and_reload(defs, PrintStyle::STATE), helper.errorMsg());
-        cout << " Persist and reload(STATE) and compare, time taken      = " << timer << " file_size("
-             << helper.file_size() << ")" << endl;
+        std::cout << " Persist and reload(STATE) and compare, time taken      = " << timer << " file_size("
+                  << helper.file_size() << ")" << std::endl;
     }
     {
         timer.start();
@@ -202,9 +203,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
                             "Performance regression, expected < "
                                 << expectedTimeForDefsPersistAndReload
                                 << " seconds to persist and reload *state*, but found " << timer);
-        cout << " Persist and reload(MIGRATE) and compare, time taken    = " << timer << " < limit("
-             << expectedTimeForDefsPersistAndReload << ")"
-             << " file_size(" << helper.file_size() << ")" << endl;
+        std::cout << " Persist and reload(MIGRATE) and compare, time taken    = " << timer << " < limit("
+                  << expectedTimeForDefsPersistAndReload << ")"
+                  << " file_size(" << helper.file_size() << ")" << std::endl;
 
         // each platform will have a slightly different size, since the server environment variables
         // will be different, i.e host, pid, i.e check point etc, encompasses the host name, which will be different
@@ -219,9 +220,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
                             "Performance regression, expected < "
                                 << expectedTimeForDefsPersistAndReload
                                 << " seconds to persist and reload *state*, but found " << timer);
-        cout << " Persist and reload(NET) and compare, time taken        = " << timer << " < limit("
-             << expectedTimeForDefsPersistAndReload << ")"
-             << " file_size(" << helper.file_size() << ")" << endl;
+        std::cout << " Persist and reload(NET) and compare, time taken        = " << timer << " < limit("
+                  << expectedTimeForDefsPersistAndReload << ")"
+                  << " file_size(" << helper.file_size() << ")" << std::endl;
 
         // each platform will have a slightly different size, since the server environment variables
         // will be different, i.e host, pid, i.e check point etc, encompasses the host name, which will be different
@@ -237,9 +238,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
                             "Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload
                                                                   << " seconds to persist and reload, but found "
                                                                   << timer);
-        cout << " Checkpt(CEREAL) and reload and compare, time taken     = ";
-        cout << timer << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")"
-             << " file_size(" << helper.file_size() << ")" << endl;
+        std::cout << " Checkpt(CEREAL) and reload and compare, time taken     = ";
+        std::cout << timer << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")"
+                  << " file_size(" << helper.file_size() << ")" << std::endl;
     }
 
     {
@@ -252,9 +253,9 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         for (int i = 0; i < count; i++) {
             jobs.generate(jobsParam);
         }
-        cout << " " << count << " jobSubmissions                                      = " << timer
-             << "s jobs:" << jobsParam.submitted().size() << " < limit(" << expectedTimeForResolveDependencies << ")"
-             << endl;
+        std::cout << " " << count << " jobSubmissions                                      = " << timer
+                  << "s jobs:" << jobsParam.submitted().size() << " < limit(" << expectedTimeForResolveDependencies
+                  << ")" << std::endl;
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForResolveDependencies,
                             "jobSubmission Performance regression, expected < "
                                 << expectedTimeForResolveDependencies
@@ -264,10 +265,10 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
     {
         // Time how long it takes for post process
         timer.start();
-        string errorMsg, warningMsg;
+        std::string errorMsg, warningMsg;
         BOOST_CHECK(defs.check(errorMsg, warningMsg));
-        cout << " Defs::check (inlimit resolution)                       = " << timer << " < limit("
-             << checkExprAndLimits << ")" << endl;
+        std::cout << " Defs::check (inlimit resolution)                       = " << timer << " < limit("
+                  << checkExprAndLimits << ")" << std::endl;
         BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < checkExprAndLimits,
                             "Defs::check Performance regression, expected < "
                                 << checkExprAndLimits << " seconds for resolving dependencies but found " << timer);
@@ -276,14 +277,13 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
     {
         // Time how long it takes to delete all nodes/ references. Delete all tasks and then suites/families.
         timer.start();
-        std::vector<Task*> tasks;
-        defs.getAllTasks(tasks);
+        auto tasks = ecf::get_all_tasks(defs);
         BOOST_CHECK_MESSAGE(tasks.size() > 0, "Expected > 0 tasks but found " << tasks.size());
         for (Task* t : tasks) {
             BOOST_REQUIRE_MESSAGE(defs.deleteChild(t), " Failed to delete task");
         }
-        tasks.clear();
-        defs.getAllTasks(tasks);
+
+        tasks = ecf::get_all_tasks(defs);
         BOOST_REQUIRE_MESSAGE(tasks.empty(), "Expected all tasks to be deleted but found " << tasks.size());
 
         std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         BOOST_REQUIRE_MESSAGE(defs.suiteVec().empty(),
                               "Expected all Suites to be deleted but found " << defs.suiteVec().size());
 
-        cout << " time for deleting all nodes                            = " << timer << endl;
+        std::cout << " time for deleting all nodes                            = " << timer << std::endl;
     }
 
     // Explicitly destroy, To keep valgrind happy

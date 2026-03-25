@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "Message.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
@@ -19,10 +20,9 @@
 #include "ecflow/core/User.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
-PasswdFile::PasswdFile()  = default;
+PasswdFile::PasswdFile() = default;
+
 PasswdFile::~PasswdFile() = default;
 
 // #define DEBUG_ME 1
@@ -64,8 +64,8 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
         if (lines[i][0] == '#') {
             continue;
         }
-        std::string theLine           = lines[i];
-        string::size_type comment_pos = theLine.find("#");
+        std::string theLine                = lines[i];
+        std::string::size_type comment_pos = theLine.find("#");
         if (comment_pos != std::string::npos) {
             theLine.erase(comment_pos);
         }
@@ -81,10 +81,8 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
         if (!foundVersionNumber) {
 
             if (!validateVersionNumber(lineTokens[0], errorMsg)) {
-                std::stringstream ss;
-                ss << " " << i + 1 << ": " << lines[i] << "\n";
-                ss << "for ECF_PASSWD/ECF_CUSTOM_PASSWD file " << passwd_file_ << "\n";
-                errorMsg += ss.str();
+                errorMsg += MESSAGE(" " << i + 1 << ": " << lines[i] << "\n"
+                                        << "for ECF_PASSWD/ECF_CUSTOM_PASSWD file " << passwd_file_ << "\n");
                 return false;
             }
             foundVersionNumber = true;
@@ -113,9 +111,7 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
             }
             if (vec_[i].user() == vec_[k].user() && vec_[i].host() == vec_[k].host() &&
                 vec_[i].port() == vec_[k].port()) {
-                std::stringstream ss;
-                ss << "user " << vec_[i].user() << " can only appear once for given host/port\n";
-                errorMsg += ss.str();
+                errorMsg += MESSAGE("user " << vec_[i].user() << " can only appear once for given host/port\n");
                 return false;
             }
         }
@@ -143,7 +139,7 @@ std::string PasswdFile::get_passwd(const std::string& user, const std::string& h
             return vec_[i].passwd();
         }
     }
-    return string();
+    return std::string{};
 }
 
 bool PasswdFile::authenticate(const std::string& user, const std::string& passwd) const {
@@ -214,15 +210,13 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
 bool PasswdFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const {
     // Expect 4.5.0
     // If first character is NUMERIC and we have dots
-    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != string::npos;
-    if (firstCharIsNumeric && line.find(".") != string::npos) {
+    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != std::string::npos;
+    if (firstCharIsNumeric && line.find(".") != std::string::npos) {
 
         std::vector<std::string> versionNumberTokens;
         Str::split(line, versionNumberTokens, ".");
         if (versionNumberTokens.size() != 3) {
-            std::stringstream ss;
-            ss << "Expected version of the form <int>.<int>.<int> i.e 4.4.0. but found invalid version number\n";
-            errorMsg += ss.str();
+            errorMsg += "Expected version of the form <int>.<int>.<int> i.e 4.4.0. but found invalid version number\n";
             return false;
         }
 
@@ -281,7 +275,7 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
 }
 
 std::string PasswdFile::dump() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     int count = 1;
     for (const auto& i : vec_) {
         ss << count << ": " << i.user() << " " << i.host() << " " << i.port() << "\n";
@@ -302,7 +296,7 @@ bool PasswdFile::createWithAccess(const std::string& pathToFile,
 
     auto username = get_login_name();
 
-    string line;
+    std::string line;
     line += username;
     line += " ";
     line += host;

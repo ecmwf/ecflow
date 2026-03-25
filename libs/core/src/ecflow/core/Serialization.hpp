@@ -26,6 +26,7 @@
 #include <cereal/types/memory.hpp>
 #include <cereal/types/set.hpp>
 #include <cereal/types/utility.hpp>
+#include <cereal/types/variant.hpp>
 #include <cereal/types/vector.hpp>
 
 #include "ecflow/core/cereal_optional_nvp.hpp"

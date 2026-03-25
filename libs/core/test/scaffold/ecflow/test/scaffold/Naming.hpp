@@ -35,6 +35,7 @@ inline std::string name_this_test() {
 
 } // namespace ecf::test
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define ECF_NAME_THIS_TEST(ARGS)                                             \
     do {                                                                     \
         std::cout << " * " << ecf::test::name_this_test() ARGS << std::endl; \
@@ -49,5 +50,6 @@ inline std::string name_this_test() {
     do {                                        \
         std::cerr << " +++ " ARGS << std::endl; \
     } while (0)
+// NOLINTEND(bugprone-macro-parentheses)
 
 #endif /* ecflow_test_scaffold_Naming_HPP */

@@ -12,7 +12,8 @@
 
 #include "ServerHandler.hpp"
 
-ServerDefsAccess::ServerDefsAccess(ServerHandler* server) : server_(server) {
+ServerDefsAccess::ServerDefsAccess(ServerHandler* server)
+    : server_(server) {
     server_->defsMutex_.lock(); // lock the resource on construction
 }
 

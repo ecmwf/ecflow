@@ -15,7 +15,8 @@
 
 class Task final : public Submittable {
 public:
-    explicit Task(const std::string& name, bool check = true) : Submittable(name, check) {}
+    explicit Task(const std::string& name, bool check = true)
+        : Submittable(name, check) {}
     Task() = default;
     Task(const Task& rhs);
     Task& operator=(const Task&);
@@ -78,14 +79,6 @@ public:
 
     void accept(ecf::NodeTreeVisitor&) override;
     void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
-
-    void getAllNodes(std::vector<Node*>&) const override;
-    void getAllTasks(std::vector<Task*>&) const override;
-    void getAllSubmittables(std::vector<Submittable*>&) const override;
-    void get_all_active_submittables(std::vector<Submittable*>&) const override;
-    void get_all_tasks(std::vector<task_ptr>&) const override;
-    void get_all_nodes(std::vector<node_ptr>&) const override;
-    void get_all_aliases(std::vector<alias_ptr>&) const override;
 
     const std::string& debugType() const override;
 

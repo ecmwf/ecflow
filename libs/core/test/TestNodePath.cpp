@@ -17,8 +17,6 @@
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-
 BOOST_AUTO_TEST_SUITE(U_Core)
 
 BOOST_AUTO_TEST_SUITE(T_NodePath)
@@ -28,12 +26,12 @@ static void checkPath(const std::vector<std::string>& expectedPath, const std::s
     NodePath::split(path, thePath);
     if (thePath != expectedPath) {
         BOOST_CHECK_MESSAGE(false, "Failed for " << path);
-        std::ostringstream oss;
-        oss << "Expected '";
-        std::copy(expectedPath.begin(), expectedPath.end(), std::ostream_iterator<std::string>(oss, " "));
-        oss << "'\nbut found '";
-        std::copy(thePath.begin(), thePath.end(), std::ostream_iterator<std::string>(oss, " "));
-        ECF_TEST_DBG(<< oss.str());
+        std::ostringstream ss;
+        ss << "Expected '";
+        std::copy(expectedPath.begin(), expectedPath.end(), std::ostream_iterator<std::string>(ss, " "));
+        ss << "'\nbut found '";
+        std::copy(thePath.begin(), thePath.end(), std::ostream_iterator<std::string>(ss, " "));
+        ECF_TEST_DBG(<< ss.str());
     }
 }
 

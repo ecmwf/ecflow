@@ -210,7 +210,8 @@ class DayAttr {
 public:
     enum Day_t { SUNDAY = 0, MONDAY = 1, TUESDAY = 2, WEDNESDAY = 3, THURSDAY = 4, FRIDAY = 5, SATURDAY = 6 };
     DayAttr() = default;
-    explicit DayAttr(Day_t day) : day_(day) {}
+    explicit DayAttr(Day_t day)
+        : day_(day) {}
     bool operator==(const DayAttr& rhs) const { return day_ == rhs.day() && free_ == rhs.free(); }
 
     DayAttr::Day_t day() const { return day_; }
@@ -235,7 +236,8 @@ class DayAttr {
 public:
     enum Day_t { SUNDAY = 0, MONDAY = 1, TUESDAY = 2, WEDNESDAY = 3, THURSDAY = 4, FRIDAY = 5, SATURDAY = 6 };
     DayAttr() = default;
-    explicit DayAttr(Day_t day) : day_(day) {}
+    explicit DayAttr(Day_t day)
+        : day_(day) {}
     bool operator==(const DayAttr& rhs) const {
         return day_ == rhs.day_ && expired_ == rhs.expired() && free_ == rhs.free() && date_ == rhs.date_;
     }

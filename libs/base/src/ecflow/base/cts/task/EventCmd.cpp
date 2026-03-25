@@ -24,9 +24,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool EventCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<EventCmd*>(rhs);
@@ -105,10 +102,12 @@ const char* EventCmd::desc() {
 }
 
 void EventCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(EventCmd::arg(), po::value<vector<string>>()->multitoken(), EventCmd::desc());
+    desc.add_options()(
+        EventCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), EventCmd::desc());
 }
 void EventCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
+
     std::string event;
     if (args.size() >= 1) {
         event = args[0];
@@ -123,17 +122,16 @@ void EventCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             value = false;
         }
         else {
-            std::stringstream ss;
-            ss << "EventCmd: The second argument must be [ set | clear ] but found " << args[1];
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("EventCmd: The second argument must be [ set | clear ] but found " << args[1]));
         }
     }
 
     if (clientEnv->debug()) {
-        cout << "  EventCmd::create " << EventCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
-             << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
-             << clientEnv->task_try_no() << ") event(" << event << ")"
-             << ") value(" << value << ")\n";
+        std::cout << "  EventCmd::create " << EventCmd::arg() << " task_path(" << clientEnv->task_path()
+                  << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
+                  << ") try_no(" << clientEnv->task_try_no() << ") event(" << event << ")"
+                  << ") value(" << value << ")\n";
     }
 
     std::string errorMsg;

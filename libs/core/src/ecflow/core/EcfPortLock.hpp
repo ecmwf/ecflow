@@ -58,9 +58,6 @@ class EcfPortLock {
 public:
     // Disable default construction
     EcfPortLock() = delete;
-    // Disable copy (and move) semantics
-    EcfPortLock(const EcfPortLock&)                  = delete;
-    const EcfPortLock& operator=(const EcfPortLock&) = delete;
 
     /**
      * Attempts to lock the given port
@@ -72,7 +69,6 @@ public:
     static bool try_port_lock(int port, bool debug = false) {
         std::string the_port = ecf::convert_to<std::string>(port);
         std::string the_file = port_file(the_port);
-        std::string error;
         if (debug) {
             std::cout << "  EcfPortLock::try_port_lock(" << port << "), creating file: " << the_file;
         }
@@ -131,9 +127,8 @@ public:
         std::string the_file = port_file(the_port);
         std::string errorMsg;
         if (!ecf::File::create(the_file, "", errorMsg)) {
-            std::stringstream sb;
-            sb << "EcfPortLock::create_free_port_file : could not create file " << the_file;
-            throw std::runtime_error(sb.str());
+            throw std::runtime_error(
+                MESSAGE("EcfPortLock::create_free_port_file : could not create file " << the_file));
         }
     }
 

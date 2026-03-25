@@ -41,13 +41,16 @@ static VNState suspendedSt("suspended");
 
 static unsigned char ucIdCnt = 0;
 
-VNState::VNState(const std::string& name, NState::State nstate) : VParam(name), ucId_(ucIdCnt++) {
+VNState::VNState(const std::string& name, NState::State nstate)
+    : VParam(name),
+      ucId_(ucIdCnt++) {
     items_[name]      = this;
     stateMap_[nstate] = this;
     idMap_[ucId_]     = this;
 }
 
-VNState::VNState(const std::string& name) : VParam(name) {
+VNState::VNState(const std::string& name)
+    : VParam(name) {
     items_[name] = this;
 }
 

@@ -25,7 +25,9 @@
 
 static bool metaRegistered = false;
 
-NodeQueryEngine::NodeQueryEngine(QObject* parent) : QThread(parent), query_(new NodeQuery("tmp")) {
+NodeQueryEngine::NodeQueryEngine(QObject* parent)
+    : QThread(parent),
+      query_(new NodeQuery("tmp")) {
     // We will need to pass various non-Qt types via signals and slots
     // So we need to register these types.
     if (!metaRegistered) {
@@ -285,7 +287,9 @@ void NodeQueryEngine::slotFinished() {
 void NodeQueryEngine::slotFailed() {
 }
 
-NodeFilterEngine::NodeFilterEngine(NodeFilter* owner) : query_(new NodeQuery("tmp")), owner_(owner) {
+NodeFilterEngine::NodeFilterEngine(NodeFilter* owner)
+    : query_(new NodeQuery("tmp")),
+      owner_(owner) {
 }
 
 NodeFilterEngine::~NodeFilterEngine() {

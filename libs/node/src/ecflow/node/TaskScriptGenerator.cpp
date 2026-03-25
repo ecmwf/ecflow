@@ -20,11 +20,11 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Task.hpp"
 
-using namespace std;
-
 namespace ecf {
 
-TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dummy_task_(false) {
+TaskScriptGenerator::TaskScriptGenerator(const Task* task)
+    : task_(task),
+      is_dummy_task_(false) {
     /// if ECF_DUMMY_TASK specified ignore
     std::string theValue;
     is_dummy_task_ = task_->findParentUserVariableValue(ecf::environment::ECF_DUMMY_TASK, theValue);
@@ -39,24 +39,19 @@ TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dum
             fs::create_directories(ecf_files_);
         }
         catch (std::exception& e) {
-            std::stringstream ss;
-            ss << "TaskScriptGenerator: Could not create directories for ECF_FILES " << ecf_files_ << " " << e.what();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("TaskScriptGenerator: Could not create directories for ECF_FILES "
+                                             << ecf_files_ << " " << e.what()));
         }
     }
 
     /// Find ECF_HOME and ECF_INCLUDE
     if (!task_->findParentUserVariableValue(ecf::environment::ECF_HOME, ecf_home_)) {
-        std::stringstream ss;
-        ss << "TaskScriptGenerator: Could not generate scripts for task " << task_->absNodePath()
-           << " no ECF_HOME specified\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("TaskScriptGenerator: Could not generate scripts for task "
+                                         << task_->absNodePath() << " no ECF_HOME specified\n"));
     }
     if (!task_->findParentUserVariableValue(ecf::environment::ECF_INCLUDE, ecf_include_)) {
-        std::stringstream ss;
-        ss << "TaskScriptGenerator: Could not generate scripts for task " << task_->absNodePath()
-           << " no ECF_INCLUDE specified\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("TaskScriptGenerator: Could not generate scripts for task "
+                                         << task_->absNodePath() << " no ECF_INCLUDE specified\n"));
     }
 
     // Create any missing directories,
@@ -64,18 +59,16 @@ TaskScriptGenerator::TaskScriptGenerator(const Task* task) : task_(task), is_dum
         fs::create_directories(ecf_home_);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "TaskScriptGenerator: Could not create directories for ECF_HOME " << ecf_home_ << " " << e.what();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("TaskScriptGenerator: Could not create directories for ECF_HOME " << ecf_home_ << " " << e.what()));
     }
 
     try {
         fs::create_directories(ecf_include_);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "TaskScriptGenerator: Could not create directories for ECF_INCLUDE " << ecf_include_ << " " << e.what();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("TaskScriptGenerator: Could not create directories for ECF_INCLUDE "
+                                         << ecf_include_ << " " << e.what()));
     }
 }
 
@@ -102,10 +95,8 @@ void TaskScriptGenerator::generate(const std::map<std::string, std::string>& ove
     }
 
     if (!File::createMissingDirectories(ecf_file_path)) {
-        std::stringstream ss;
-        ss << "TaskScriptGenerator::generate: Could not create missing directories '" << ecf_file_path << "' for task "
-           << task_->absNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("TaskScriptGenerator::generate: Could not create missing directories '"
+                                         << ecf_file_path << "' for task " << task_->absNodePath()));
     }
 
     // Create file head.h and tail.h in directory ECF_INCLUDE, check to see if they exist first
@@ -126,10 +117,8 @@ void TaskScriptGenerator::generate(const std::map<std::string, std::string>& ove
 
     std::string errorMsg;
     if (!File::create(ecf_file_path, contents, errorMsg)) {
-        std::stringstream ss;
-        ss << "TaskScriptGenerator::generate: Could not create '.ecf' script for task " << task_->absNodePath() << " "
-           << errorMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("TaskScriptGenerator::generate: Could not create '.ecf' script for task "
+                                         << task_->absNodePath() << " " << errorMsg));
     }
     std::cout << "Generated script file " << ecf_file_path << "\n";
 }
@@ -301,9 +290,8 @@ void TaskScriptGenerator::generate_head_file() const {
 
     std::string errorMsg;
     if (!File::create(path, contents, errorMsg)) {
-        std::stringstream ss;
-        ss << "TaskScriptGenerator::generate_tail_file: Could not create head.h " << path << " " << errorMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("TaskScriptGenerator::generate_tail_file: Could not create head.h " << path << " " << errorMsg));
     }
 
     std::cout << "Generated header file: " << path << "\n";
@@ -325,9 +313,8 @@ void TaskScriptGenerator::generate_tail_file() const {
 
     std::string errorMsg;
     if (!File::create(path, contents, errorMsg)) {
-        std::stringstream ss;
-        ss << "TaskScriptGenerator::generate_tail_file: Could not create tail.h " << path << " " << errorMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("TaskScriptGenerator::generate_tail_file: Could not create tail.h " << path << " " << errorMsg));
     }
 
     std::cout << "Generated tail file: " << path << "\n";

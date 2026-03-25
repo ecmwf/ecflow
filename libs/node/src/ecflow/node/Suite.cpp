@@ -10,6 +10,7 @@
 
 #include "ecflow/node/Suite.hpp"
 
+#include <array>
 #include <sstream>
 #include <stdexcept>
 
@@ -24,7 +25,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // #define DEBUG_FIND_NODE 1
@@ -32,7 +32,9 @@ using namespace std;
 // Create the generated variable up-front. This allows them to be referenced
 // is abstract syntax tree during the post process call
 
-Suite::Suite(const Suite& rhs) : NodeContainer(rhs), begun_(rhs.begun_) {
+Suite::Suite(const Suite& rhs)
+    : NodeContainer(rhs),
+      begun_(rhs.begun_) {
     if (rhs.clockAttr_.get()) {
         clockAttr_ = std::make_shared<ClockAttr>(*rhs.clockAttr_);
     }
@@ -45,7 +47,9 @@ Suite::Suite(const Suite& rhs) : NodeContainer(rhs), begun_(rhs.begun_) {
 }
 
 node_ptr Suite::clone() const {
-    return std::make_shared<Suite>(*this);
+    auto clone = std::make_shared<Suite>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 Suite& Suite::operator=(const Suite& rhs) {
@@ -147,9 +151,7 @@ void Suite::begin() {
 
 void Suite::requeue(Requeue_args& args) {
     if (false == begun_) {
-        std::stringstream ss;
-        ss << "Suite::requeue: The suite " << name() << " must be 'begun' first\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Suite::requeue: The suite " << name() << " must be 'begun' first\n"));
     }
 
     // This is more efficient than: since no locking is required
@@ -526,41 +528,34 @@ bool Suite::checkInvariants(std::string& errorMsg) const {
     }
     if (clockAttr_.get()) {
         if (calendar().hybrid() != clockAttr_->hybrid()) {
-            std::stringstream ss;
-            ss << "Suite:" << name() << " Calendar(hybrid(" << calendar().hybrid() << ")) and Clock attribute(hybrid("
-               << clockAttr_->hybrid() << ")) must be in sync, clock types differs";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Suite:" << name() << " Calendar(hybrid(" << calendar().hybrid()
+                                         << ")) and Clock attribute(hybrid(" << clockAttr_->hybrid()
+                                         << ")) must be in sync, clock types differs");
             return false;
         }
     }
 
     if (Ecf::server()) {
         if (state_change_no_ > Ecf::state_change_no()) {
-            std::stringstream ss;
-            ss << "Suite::checkInvariants: suite_change_no(" << state_change_no_ << ") > Ecf::state_change_no("
-               << Ecf::state_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Suite::checkInvariants: suite_change_no("
+                                << state_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n");
             return false;
         }
         if (begun_change_no_ > Ecf::state_change_no()) {
-            std::stringstream ss;
-            ss << "Suite::checkInvariants: begun_change_no_(" << begun_change_no_ << ") > Ecf::state_change_no("
-               << Ecf::state_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Suite::checkInvariants: begun_change_no_("
+                                << begun_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n");
             return false;
         }
         if (calendar_change_no_ > Ecf::state_change_no() + 1) {
-            std::stringstream ss;
-            ss << "Suite::checkInvariants: calendar_change_no_(" << calendar_change_no_ << ") > Ecf::state_change_no("
-               << Ecf::state_change_no() + 1 << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Suite::checkInvariants: calendar_change_no_("
+                        << calendar_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() + 1 << ")\n");
             return false;
         }
         if (modify_change_no_ > Ecf::modify_change_no()) {
-            std::stringstream ss;
-            ss << "Suite::checkInvariants: modify_change_no_(" << modify_change_no_ << ") > Ecf::modify_change_no("
-               << Ecf::modify_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Suite::checkInvariants: modify_change_no_("
+                        << modify_change_no_ << ") > Ecf::modify_change_no(" << Ecf::modify_change_no() << ")\n");
             return false;
         }
     }
@@ -621,12 +616,14 @@ void Suite::collateChanges(DefsDelta& changes) const {
         size_t before = changes.size();
 
         compound_memento_ptr suite_compound_mememto;
+        // Create a SuiteClockMemento to signal a change in the suite clock
         if (clockAttr_.get() && clockAttr_->state_change_no() > changes.client_state_change_no()) {
             if (!suite_compound_mememto.get()) {
                 suite_compound_mememto = std::make_shared<CompoundMemento>(absNodePath());
             }
             suite_compound_mememto->add(std::make_shared<SuiteClockMemento>(*clockAttr_));
         }
+        // Create a SuiteBeginDeltaMemento to signal a change in the suite begin state
         if (begun_change_no_ > changes.client_state_change_no()) {
             if (!suite_compound_mememto.get()) {
                 suite_compound_mememto = std::make_shared<CompoundMemento>(absNodePath());
@@ -650,6 +647,7 @@ void Suite::collateChanges(DefsDelta& changes) const {
         /// Hence as side affect why command with reference to time will only be accurate
         /// after some kind of state change. Fixed with ECFLOW-631 (Client must do sync_clock, before calling why)
         size_t after = changes.size();
+        // Create SuiteCalendarMemento to signal a change in suite calendar
         if ((before != after || changes.sync_suite_clock()) && calendar_change_no_ > changes.client_state_change_no()) {
             compound_memento_ptr compound_ptr = std::make_shared<CompoundMemento>(absNodePath());
             compound_ptr->add(std::make_shared<SuiteCalendarMemento>(cal_));
@@ -815,13 +813,12 @@ void SuiteGenVariables::update_generated_variables() const {
     int hours   = time_of_day.hours();
     int minutes = time_of_day.minutes();
 
-    constexpr int buff_size = 255;
-    char buffer[buff_size];
-    snprintf(buffer, buff_size, "%02d%02d", hours, minutes);
-    genvar_time_.set_value(buffer);
+    std::array<char, 255> buffer;
+    snprintf(buffer.data(), buffer.size(), "%02d%02d", hours, minutes);
+    genvar_time_.set_value(buffer.data());
 
-    snprintf(buffer, buff_size, "%02d:%02d", hours, minutes);
-    genvar_ecf_time_.set_value(buffer);
+    snprintf(buffer.data(), buffer.size(), "%02d:%02d", hours, minutes);
+    genvar_ecf_time_.set_value(buffer.data());
 
     // cout << "genvar_time_ = " << genvar_time_.theValue() << "\n";
     // cout << "genvar_ecf_time_ = " << genvar_ecf_time_.theValue() << "\n";
@@ -840,63 +837,61 @@ void SuiteGenVariables::update_generated_variables() const {
         // cout << "genvar_dow_ = " << genvar_dow_.theValue() << "\n";
         // cout << "genvar_doy_ = " << genvar_doy_.theValue() << "\n";
 
-        snprintf(buffer,
-                 buff_size,
+        snprintf(buffer.data(),
+                 buffer.size(),
                  "%02d.%02d.%04d",
                  suite_->cal_.day_of_month(),
                  suite_->cal_.month(),
                  suite_->cal_.year());
-        genvar_date_.set_value(buffer);
+        genvar_date_.set_value(buffer.data());
         // cout << "genvar_date_ = " << genvar_date_.theValue() << "\n";
 
-        char* day_name[] = {const_cast<char*>("sunday"),
-                            const_cast<char*>("monday"),
-                            const_cast<char*>("tuesday"),
-                            const_cast<char*>("wednesday"),
-                            const_cast<char*>("thursday"),
-                            const_cast<char*>("friday"),
-                            const_cast<char*>("saturday"),
-                            nullptr};
+        std::array day_name = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
         genvar_day_.set_value(day_name[suite_->cal_.day_of_week()]);
         // cout << "genvar_day_ = " << genvar_day_.theValue() << "\n";
 
-        snprintf(buffer, buff_size, "%02d", suite_->cal_.day_of_month());
-        genvar_dd_.set_value(buffer);
+        snprintf(buffer.data(), buffer.size(), "%02d", suite_->cal_.day_of_month());
+        genvar_dd_.set_value(buffer.data());
         // cout << "genvar_dd_ = " << genvar_dd_.theValue() << "\n";
 
-        snprintf(buffer, buff_size, "%02d", suite_->cal_.month());
-        genvar_mm_.set_value(buffer);
+        snprintf(buffer.data(), buffer.size(), "%02d", suite_->cal_.month());
+        genvar_mm_.set_value(buffer.data());
         // cout << "genvar_mm_ = " << genvar_mm_.theValue() << "\n";
 
-        char* month_name[] = {const_cast<char*>("january"),
-                              const_cast<char*>("february"),
-                              const_cast<char*>("march"),
-                              const_cast<char*>("april"),
-                              const_cast<char*>("may"),
-                              const_cast<char*>("june"),
-                              const_cast<char*>("july"),
-                              const_cast<char*>("august"),
-                              const_cast<char*>("september"),
-                              const_cast<char*>("october"),
-                              const_cast<char*>("november"),
-                              const_cast<char*>("december"),
-                              nullptr};
-        genvar_month_.set_value(month_name[suite_->cal_.month() - 1]);
+        std::array month_name = {"january",
+                                 "february",
+                                 "march",
+                                 "april",
+                                 "may",
+                                 "june",
+                                 "july",
+                                 "august",
+                                 "september",
+                                 "october",
+                                 "november",
+                                 "december"};
+
+        auto month_idx = suite_->cal_.month() - 1;
+        genvar_month_.set_value(month_name[month_idx]);
         // cout << "genvar_month_ = " << genvar_month_.theValue() << "\n";
 
-        snprintf(
-            buffer, buff_size, "%04d%02d%02d", suite_->cal_.year(), suite_->cal_.month(), suite_->cal_.day_of_month());
-        genvar_ecf_date_.set_value(buffer);
+        snprintf(buffer.data(),
+                 buffer.size(),
+                 "%04d%02d%02d",
+                 suite_->cal_.year(),
+                 suite_->cal_.month(),
+                 suite_->cal_.day_of_month());
+        genvar_ecf_date_.set_value(buffer.data());
         // cout << "genvar_ecf_date_ = " << genvar_ecf_date_.theValue() << "\n";
 
-        snprintf(buffer,
-                 buff_size,
+        snprintf(buffer.data(),
+                 buffer.size(),
                  "%s:%s:%d:%d",
                  day_name[suite_->cal_.day_of_week()],
-                 month_name[suite_->cal_.month() - 1],
+                 month_name[month_idx],
                  suite_->cal_.day_of_week(),
                  suite_->cal_.day_of_year());
-        genvar_ecf_clock_.set_value(buffer);
+        genvar_ecf_clock_.set_value(buffer.data());
         // cout << "genvar_ecf_clock_ = " << genvar_ecf_clock_.theValue() << "\n";
 
         genvar_ecf_julian_.set_value(ecf::convert_to<std::string>(suite_->cal_.suiteTime().date().julian_day()));

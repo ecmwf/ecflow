@@ -28,7 +28,9 @@
 class Certificate {
 public:
     Certificate() = delete;
+
     explicit Certificate(const std::string& path);
+
     ~Certificate();
 
 private:
@@ -38,7 +40,8 @@ private:
     void write_to_disk(EVP_PKEY* pkey, X509* x509);
 };
 
-inline Certificate::Certificate(const std::string& path) : path_(path) {
+inline Certificate::Certificate(const std::string& path)
+    : path_(path) {
     // Generating RSA key...
     EVP_PKEY* pkey = generate_key();
 
@@ -136,7 +139,7 @@ inline X509* Certificate::generate_x509(EVP_PKEY* pkey) {
     X509_set_issuer_name(x509, name);
 
     /* Actually sign the certificate with our key. */
-    if (!X509_sign(x509, pkey, EVP_sha1())) {
+    if (!X509_sign(x509, pkey, EVP_sha256())) {
         X509_free(x509);
         EVP_PKEY_free(pkey);
         throw std::runtime_error("Error signing certificate");

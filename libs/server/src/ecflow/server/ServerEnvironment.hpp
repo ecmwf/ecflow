@@ -41,19 +41,25 @@
 // Also distinguish between server and environment errors
 class ServerEnvironmentException : public std::runtime_error {
 public:
-    explicit ServerEnvironmentException(const std::string& msg) : std::runtime_error(msg) {}
+    explicit ServerEnvironmentException(const std::string& msg)
+        : std::runtime_error(msg) {}
 };
 
 class ServerEnvironment {
 public:
-    ServerEnvironment(const CommandLine& cl, const std::string& path_to_config_file = "server_environment.cfg");
+    explicit ServerEnvironment(const CommandLine& cl,
+                               const std::string& path_to_config_file = "server_environment.cfg");
 
-    ServerEnvironment(int argc, char* argv[]);
-    ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file);
+    explicit ServerEnvironment(const std::vector<std::string>& args)
+        : ServerEnvironment(CommandLine(args)) {}
+    explicit ServerEnvironment(const std::vector<std::string>& args, const std::string& path_to_config_file)
+        : ServerEnvironment(CommandLine(args), path_to_config_file) {}
 
     // Disable copy (and move) semantics
     ServerEnvironment(const ServerEnvironment&)                  = delete;
     const ServerEnvironment& operator=(const ServerEnvironment&) = delete;
+    ServerEnvironment(ServerEnvironment&&)                       = delete;
+    ServerEnvironment& operator=(ServerEnvironment&&)            = delete;
 
     ~ServerEnvironment();
 

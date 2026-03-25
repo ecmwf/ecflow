@@ -33,8 +33,6 @@
     #include <iostream>
 #endif
 
-using namespace std;
-
 namespace ecf {
 
 // ===========================================================================
@@ -47,17 +45,15 @@ public:
         : absNodePath_(absPath),
           cmd_(cmdToSpawn),
           cmd_type_(cmd_type),
-          have_status_(0),
-          pid_(pid),
-          status_(0) {}
+          pid_(pid) {}
 
-    std::string absNodePath_;  // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
-    std::string cmd_;          // the command that was spawned
-    System::CmdType cmd_type_; // Type of command
-    sig_atomic_t have_status_; // Nonzero if this process has stopped or terminated.  */
-    pid_t pid_;                // The process ID of this child.
-    int status_;               // The status of this child; 0 if running,
-                               // otherwise a status value from waitpid
+    std::string absNodePath_;     // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
+    std::string cmd_;             // the command that was spawned
+    System::CmdType cmd_type_;    // Type of command
+    sig_atomic_t have_status_{0}; // Nonzero if this process has stopped or terminated.  */
+    pid_t pid_;                   // The process ID of this child.
+    int status_{0};               // The status of this child; 0 if running,
+                                  // otherwise a status value from waitpid
 };
 std::vector<Process> processVec_;
 
@@ -108,7 +104,7 @@ bool System::spawn(System::CmdType cmd_type,
 
     std::string msg;
     if (sys(cmd_type, cmdToSpawn, absPath, msg)) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "Child process creation failed( " << msg << ") for command " << cmdToSpawn;
         if (!absPath.empty()) {
             ss << " at path(" << absPath << ")";
@@ -136,22 +132,22 @@ int System::sys(System::CmdType cmd_type,
      |  The stdin, stdout and stderr are closed (or redirected to /dev/null)
      =  PID in case of success or 0 in case of errors.
      ************************************o*************************************/
-    pid_t child_pid;
-    if ((child_pid = fork()) == 0) { /* The child */
+    pid_t child_pid = fork();
 
-        int f;
+    if (child_pid == 0) { /* The child */
+
         close(2);
-        if ((f = open("/dev/null", O_WRONLY)) != 2) {
+        if (auto f = open("/dev/null", O_WRONLY); f != 2) {
             close(f);
         }
 
         close(1);
-        if ((f = open("/dev/null", O_WRONLY)) != 1) {
+        if (auto f = open("/dev/null", O_WRONLY); f != 1) {
             close(f);
         }
 
         close(0);
-        if ((f = open("/dev/null", O_RDONLY)) != 0) {
+        if (auto f = open("/dev/null", O_RDONLY); f != 0) {
             close(f);
         }
 
@@ -179,9 +175,7 @@ int System::sys(System::CmdType cmd_type,
     }
 
     if (child_pid == -1) {
-        std::stringstream ss;
-        ss << "fork() error(" << strerror(errno) << ")";
-        errorMsg = ss.str();
+        errorMsg = MESSAGE("fork() error(" << strerror(errno) << ")");
         return 1;
     }
 
@@ -273,10 +267,11 @@ void System::processTerminatedChildren() {
                 // *Normal* termination via exit
                 if (WEXITSTATUS((*i).status_)) {
                     // exit is non zero.
-                    std::stringstream ss;
-                    ss << System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_
-                       << ") exited with status " << WEXITSTATUS((*i).status_) << " [ " << (*i).cmd_ << " ]";
-                    died((*i).absNodePath_, (*i).cmd_type_, ss.str());
+                    died((*i).absNodePath_,
+                         (*i).cmd_type_,
+                         MESSAGE(System::cmd_type((*i).cmd_type_)
+                                 << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_ << ") exited with status "
+                                 << WEXITSTATUS((*i).status_) << " [ " << (*i).cmd_ << " ]"));
                 }
                 else {
                     // exit(0) child terminated normally
@@ -293,10 +288,11 @@ void System::processTerminatedChildren() {
             else if (WIFSIGNALED((*i).status_)) {
 
                 // *abnormal* child process terminated by a signal
-                std::stringstream ss;
-                ss << System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_
-                   << ") died of signal " << WTERMSIG((*i).status_) << " [ " << (*i).cmd_ << " ]";
-                died((*i).absNodePath_, (*i).cmd_type_, ss.str());
+                died((*i).absNodePath_,
+                     (*i).cmd_type_,
+                     MESSAGE(System::cmd_type((*i).cmd_type_)
+                             << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_ << ") died of signal "
+                             << WTERMSIG((*i).status_) << " [ " << (*i).cmd_ << " ]"));
 
                 // remove the process since it has terminated
                 processVec_.erase(i--);
@@ -339,8 +335,8 @@ int System::process() const {
 //       this is different to the signal(..) which on some system needs
 //       to be reinstalled at start/end of SignalFunction.
 // ============================================================================
-typedef void SignalFunction(int);
-SignalFunction* signal_(int signo, SignalFunction* func) {
+using SignalFunction = void (*)(int);
+SignalFunction signal_(int signo, SignalFunction func) {
     struct sigaction act, oact;
     act.sa_handler = func;
     sigemptyset(&act.sa_mask);

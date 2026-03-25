@@ -23,7 +23,8 @@
 #include "ecflow/core/NodePath.hpp"
 #include "ecflow/core/Str.hpp"
 
-LogDataItem::LogDataItem(const std::string& line, qint64& refTimeInMs) : type_(NoType) {
+LogDataItem::LogDataItem(const std::string& line, qint64& refTimeInMs)
+    : type_(NoType) {
     // Format is as follows:
     // MSG:[06:46:44 23.4.2018] chd:complete .....
 

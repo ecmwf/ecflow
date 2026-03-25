@@ -15,7 +15,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // Connection and client timeout issues can be replicated  by adding
 //   - sleep(1) in EcfFile , i.e when creating the job output
@@ -54,10 +53,9 @@ JobProfiler::~JobProfiler() {
         }
 
         if (time_taken > threshold_) {
-            std::stringstream ss;
-            ss << "Job generation for task " << node_->absNodePath() << " took " << time_taken
-               << "ms, Exceeds ECF_TASK_THRESHOLD(" << threshold_ << "ms)";
-            log(Log::WAR, ss.str());
+            log(Log::WAR,
+                MESSAGE("Job generation for task " << node_->absNodePath() << " took " << time_taken
+                                                   << "ms, Exceeds ECF_TASK_THRESHOLD(" << threshold_ << "ms)"));
             node_->get_flag().set(ecf::Flag::THRESHOLD);
         }
     }

@@ -16,7 +16,7 @@
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
 
-// #define UI_FETCHTASK_DEBUG__
+// #define UI_FETCHTASK_DEBUG
 
 static std::map<std::string, FetchTaskFactory*>* makers = nullptr;
 
@@ -148,7 +148,7 @@ void FetchQueue::run() {
 }
 
 void FetchQueue::next() {
-#ifdef UI_FETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG
     UiLog().dbg() << "OutputFetchQueue::next";
 #endif
     if (status_ == RunningState) {
@@ -159,13 +159,13 @@ void FetchQueue::next() {
             if (!queue_.empty()) {
                 auto current = queue_.front();
                 if (!current->checRunCondition(prev)) {
-#ifdef UI_FETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG
                     UiLog().dbg() << " skip current";
 #endif
                     next();
                 }
                 else {
-#ifdef UI_FETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG
                     UiLog().dbg() << " run current";
 #endif
                     current->run();
@@ -182,7 +182,7 @@ void FetchQueue::next() {
 }
 
 void FetchQueue::finish(AbstractFetchTask* lastTask) {
-#ifdef UI_FETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG
     UI_FN_DBG
 #endif
     clear();
@@ -216,7 +216,7 @@ void FetchQueue::taskFinished(AbstractFetchTask*) {
 }
 
 void FetchQueue::taskFailed(AbstractFetchTask*) {
-#ifdef UI_FETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG
     UI_FN_DBG
 #endif
     if (status_ == RunningState) {
@@ -275,7 +275,7 @@ void FetchQueueOwner::clear() {
 }
 
 AbstractFetchTask* FetchQueueOwner::makeFetchTask(const std::string& name) {
-#ifdef UI_FETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "unusedtasks";
     for (auto t : unusedTasks_) {
         UiLog().dbg() << " " << t.first << " len=" << t.second.size();
@@ -293,7 +293,7 @@ AbstractFetchTask* FetchQueueOwner::makeFetchTask(const std::string& name) {
             return t;
         }
     }
-#ifdef UI_FETCHTASK_DEBUG__
+#ifdef UI_FETCHTASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "create object for name=" << name;
 #endif
     AbstractFetchTask* t = FetchTaskFactory::create(name, this);

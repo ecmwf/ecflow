@@ -23,7 +23,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
@@ -45,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test_queue_cmd) {
     //    endfamily
     // endsuite
     Defs defs;
-    string suite_f_t = "/suite/f/t";
+    std::string suite_f_t = "/suite/f/t";
 
     suite_ptr s = defs.add_suite("suite");
     QueueAttr q1("q1", {"s1", "s2", "s3"});

@@ -43,8 +43,6 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Suite.hpp"
 
-#define _UI_VNODE_DEBUG
-
 // For a given node this class stores all the nodes that this node itself triggers.
 // For memory efficiency we only store the AttributeFilterindex of the nodes not the pointers themselves.
 class VNodeTriggerData {
@@ -839,7 +837,7 @@ bool VNode::isAlias() const
 #endif
 
 std::string VNode::flagsAsStr() const {
-    return (node_) ? node_->get_flag().to_string() : std::string();
+    return (node_) ? node_->get_flag().to_string() : std::string{};
 }
 
 bool VNode::isFlagSet(ecf::Flag::Type f) const {

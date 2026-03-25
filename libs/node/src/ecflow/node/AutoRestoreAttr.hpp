@@ -26,7 +26,9 @@ namespace ecf {
 // Use compiler, destructor
 class AutoRestoreAttr {
 public:
-    AutoRestoreAttr(const AutoRestoreAttr& rhs) : node_(nullptr), nodes_to_restore_(rhs.nodes_to_restore_) {}
+    AutoRestoreAttr(const AutoRestoreAttr& rhs)
+        : node_(nullptr),
+          nodes_to_restore_(rhs.nodes_to_restore_) {}
     explicit AutoRestoreAttr(const std::vector<std::string>& nodes_to_restore)
         : node_(nullptr),
           nodes_to_restore_(nodes_to_restore) {}

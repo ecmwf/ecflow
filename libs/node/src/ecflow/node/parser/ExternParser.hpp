@@ -30,7 +30,8 @@
 
 class ExternParser : public Parser {
 public:
-    explicit ExternParser(DefsStructureParser* p) : Parser(p) {}
+    explicit ExternParser(DefsStructureParser* p)
+        : Parser(p) {}
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
     const char* keyword() const override { return "extern"; }
 };

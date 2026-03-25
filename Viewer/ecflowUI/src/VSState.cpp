@@ -35,12 +35,14 @@ static VSState runningSt("running", SState::RUNNING);
 static VSState shutSt("shutdown", SState::SHUTDOWN);
 static VSState disconnectedSt("disconnected");
 
-VSState::VSState(const std::string& name, SState::State Sstate) : VParam(name) {
+VSState::VSState(const std::string& name, SState::State Sstate)
+    : VParam(name) {
     items_[name]      = this;
     stateMap_[Sstate] = this;
 }
 
-VSState::VSState(const std::string& name) : VParam(name) {
+VSState::VSState(const std::string& name)
+    : VParam(name) {
     items_[name] = this;
 }
 

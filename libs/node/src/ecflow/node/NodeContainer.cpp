@@ -12,10 +12,7 @@
 
 #include <cassert>
 #include <limits>
-#include <sstream>
 #include <stdexcept>
-
-#include <boost/filesystem/operations.hpp>
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
@@ -37,14 +34,14 @@
 #include "ecflow/node/move_peer.hpp"
 
 using namespace ecf;
-using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // #define DEBUG_FIND_NODE 1
 // #define DEBUG_DEPENDENCIES 1
 
 /////////////////////////////////////////////////////////////////////////////////////////
-NodeContainer::NodeContainer(const std::string& name, bool check) : Node(name, check) {
+NodeContainer::NodeContainer(const std::string& name, bool check)
+    : Node(name, check) {
 }
 
 NodeContainer::NodeContainer() = default;
@@ -67,7 +64,8 @@ void NodeContainer::copy(const NodeContainer& rhs) {
     }
 }
 
-NodeContainer::NodeContainer(const NodeContainer& rhs) : Node(rhs) {
+NodeContainer::NodeContainer(const NodeContainer& rhs)
+    : Node(rhs) {
     copy(rhs);
 }
 
@@ -226,20 +224,26 @@ bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy, bool ht
 }
 
 void NodeContainer::incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) const {
-    /// There no point doing a OrderMemento if children have been added/delete
+
+    // Create ChildrenMemento to signal removal/addition of children
+    //
+    // n.b. When signalling the removal/addition of children,
+    //      any order change is irrelevant as the complete updated list of
+    //      children is made part of the synchronisation
     if (add_remove_state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
         comp->add(std::make_shared<ChildrenMemento>(nodes_));
     }
+    // Create OrderMemento to signal reordering of children
     else if (order_state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
+
         std::vector<std::string> order_vec;
         order_vec.reserve(nodes_.size());
-
         for (const auto& n : nodes_) {
             order_vec.push_back(n->name());
         }
@@ -598,9 +602,8 @@ bool NodeContainer::isAddChildOk(Node* theChild, std::string& errorMsg) const {
             return true;
         }
 
-        std::stringstream ss;
-        ss << "Task/Family of name " << theChild->name() << " already exists in container node " << name();
-        errorMsg += ss.str();
+        errorMsg +=
+            MESSAGE("Task/Family of name " << theChild->name() << " already exists in container node " << name());
         return false;
     }
 
@@ -612,9 +615,8 @@ bool NodeContainer::isAddChildOk(Node* theChild, std::string& errorMsg) const {
             return true;
         }
 
-        std::stringstream ss;
-        ss << "Family/Task of name " << theChild->name() << " already exists in container node " << name();
-        errorMsg += ss.str();
+        errorMsg +=
+            MESSAGE("Family/Task of name " << theChild->name() << " already exists in container node " << name());
         return false;
     }
 
@@ -647,9 +649,8 @@ size_t NodeContainer::child_position(const Node* child) const {
 
 task_ptr NodeContainer::add_task(const std::string& task_name) {
     if (find_by_name(task_name).get()) {
-        std::stringstream ss;
-        ss << "Add Task failed: A task/family of name '" << task_name << "' already exists on node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Task failed: A task/family of name '"
+                                         << task_name << "' already exists on node " << debugNodePath()));
     }
     task_ptr the_task = Task::create(task_name);
     add_task_only(the_task);
@@ -658,10 +659,8 @@ task_ptr NodeContainer::add_task(const std::string& task_name) {
 
 family_ptr NodeContainer::add_family(const std::string& family_name) {
     if (find_by_name(family_name).get()) {
-        std::stringstream ss;
-        ss << "Add Family failed: A Family/Task of name '" << family_name << "' already exists on node "
-           << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Family failed: A Family/Task of name '"
+                                         << family_name << "' already exists on node " << debugNodePath()));
     }
     family_ptr the_family = Family::create(family_name);
     add_family_only(the_family);
@@ -670,19 +669,16 @@ family_ptr NodeContainer::add_family(const std::string& family_name) {
 
 void NodeContainer::addTask(const task_ptr& t, size_t position) {
     if (find_by_name(t->name()).get()) {
-        std::stringstream ss;
-        ss << "Add Task failed: A Task/Family of name '" << t->name() << "' already exists on node " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Task failed: A Task/Family of name '"
+                                         << t->name() << "' already exists on node " << debugNodePath()));
     }
     add_task_only(t, position);
 }
 
 void NodeContainer::add_task_only(const task_ptr& t, size_t position) {
     if (t->parent()) {
-        std::stringstream ss;
-        ss << debugNodePath() << ": Add Task failed: A task of name '" << t->name()
-           << "' is already owned by another node";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(debugNodePath() << ": Add Task failed: A task of name '" << t->name()
+                                                         << "' is already owned by another node"));
     }
 
     t->set_parent(this);
@@ -697,10 +693,8 @@ void NodeContainer::add_task_only(const task_ptr& t, size_t position) {
 
 void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
     if (f->parent()) {
-        std::stringstream ss;
-        ss << debugNodePath() << ": Add Family failed: A family of name '" << f->name()
-           << "' is already owned by another node";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(debugNodePath() << ": Add Family failed: A family of name '" << f->name()
+                                                         << "' is already owned by another node"));
     }
 
     f->set_parent(this);
@@ -715,10 +709,8 @@ void NodeContainer::add_family_only(const family_ptr& f, size_t position) {
 
 void NodeContainer::addFamily(const family_ptr& f, size_t position) {
     if (find_by_name(f->name()).get()) {
-        std::stringstream ss;
-        ss << "Add Family failed: A Family/Task of name '" << f->name() << "' already exists on node "
-           << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Family failed: A Family/Task of name '"
+                                         << f->name() << "' already exists on node " << debugNodePath()));
     }
     add_family_only(f, position);
 }
@@ -911,7 +903,7 @@ std::string NodeContainer::find_node_path(const std::string& type, const std::st
             return res;
         }
     }
-    return string();
+    return std::string{};
 }
 
 bool NodeContainer::hasTimeDependencies() const {
@@ -934,67 +926,6 @@ void NodeContainer::allChildren(std::vector<node_ptr>& vec) const {
     for (const auto& n : nodes_) {
         vec.push_back(n);
         n->allChildren(vec); // for task does nothing
-    }
-}
-
-void NodeContainer::getAllFamilies(std::vector<Family*>& vec) const {
-    for (const auto& n : nodes_) {
-        Family* family = n->isFamily();
-        if (family) {
-            vec.push_back(family);
-            family->getAllFamilies(vec);
-        }
-    }
-}
-
-void NodeContainer::getAllNodes(std::vector<Node*>& vec) const {
-    for (const auto& n : nodes_) {
-        vec.push_back(n.get());
-        n->getAllNodes(vec);
-    }
-}
-
-void NodeContainer::getAllTasks(std::vector<Task*>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->getAllTasks(tasks);
-    }
-}
-
-void NodeContainer::getAllSubmittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->getAllSubmittables(tasks);
-    }
-}
-
-void NodeContainer::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->get_all_active_submittables(tasks);
-    }
-}
-
-void NodeContainer::get_all_tasks(std::vector<task_ptr>& tasks) const {
-    for (const auto& n : nodes_) {
-        n->get_all_tasks(tasks);
-    }
-}
-
-void NodeContainer::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    nodes.push_back(non_const_this());
-    for (const auto& n : nodes_) {
-        n->get_all_nodes(nodes);
-    }
-}
-
-void NodeContainer::get_all_aliases(std::vector<alias_ptr>& aliases) const {
-    for (const auto& n : nodes_) {
-        n->get_all_aliases(aliases);
-    }
-}
-
-void NodeContainer::getAllAstNodes(std::set<Node*>& vec) const {
-    Node::getAllAstNodes(vec);
-    for (const auto& n : nodes_) {
-        n->getAllAstNodes(vec);
     }
 }
 
@@ -1152,9 +1083,7 @@ void NodeContainer::update_limits() {
 std::string NodeContainer::archive_path() const {
     std::string the_archive_path;
     if (!findParentUserVariableValue(ecf::environment::ECF_HOME, the_archive_path)) {
-        std::stringstream ss;
-        ss << "NodeContainer::archive_path: cannot find ECF_HOME from " << debugNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::archive_path: cannot find ECF_HOME from " << debugNodePath()));
     }
 
     std::string the_archive_file_name = absNodePath();
@@ -1225,7 +1154,7 @@ void NodeContainer::archive() {
 
     std::vector<node_ptr>().swap(nodes_);                      // reclaim vector memory
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
-    string msg                  = " autoarchive ";
+    std::string msg             = " autoarchive ";
     msg += debugNodePath(); // inform user via log
     ecf::log(Log::LOG, msg);
 }
@@ -1253,23 +1182,19 @@ void NodeContainer::restore_on_begin_or_requeue() {
         restore();
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore_on_begin_or_requeue(): failed : " << e.what();
-        log(Log::ERR, ss.str());
+        log(Log::ERR, MESSAGE("NodeContainer::restore_on_begin_or_requeue(): failed : " << e.what()));
     }
 }
 
 void NodeContainer::restore() {
     if (!get_flag().is_set(ecf::Flag::ARCHIVED)) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() Node " << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
+                                         << absNodePath() << " can't restore, ecf::Flag::ARCHIVED not set"));
     }
 
     if (!nodes_.empty()) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() Node " << absNodePath() << " can't restore, Container already has children ?";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
+                                         << absNodePath() << " can't restore, Container already has children ?"));
     }
 
     defs_ptr archive_defs        = Defs::create();
@@ -1278,26 +1203,22 @@ void NodeContainer::restore() {
         archive_defs->restore(the_archive_path);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() Node " << absNodePath() << " could not restore file at  " << the_archive_path
-           << "  : " << e.what();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() Node "
+                                         << absNodePath() << " could not restore file at  " << the_archive_path
+                                         << "  : " << e.what()));
     }
 
     // find the same node in the defs.
     node_ptr archived_node = archive_defs->findAbsNode(absNodePath());
     if (!archived_node) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() could not find " << absNodePath() << " in the archived file "
-           << the_archive_path;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() could not find "
+                                         << absNodePath() << " in the archived file " << the_archive_path));
     }
     NodeContainer* archived_node_container = archived_node->isNodeContainer();
     if (!archived_node_container) {
-        std::stringstream ss;
-        ss << "NodeContainer::restore() The node at " << absNodePath() << " recovered from " << the_archive_path
-           << " is not a container(suite/family)";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("NodeContainer::restore() The node at "
+                                         << absNodePath() << " recovered from " << the_archive_path
+                                         << " is not a container(suite/family)"));
     }
 
     swap(*archived_node_container);                            // swap the children, and set parent pointers
@@ -1305,7 +1226,7 @@ void NodeContainer::restore() {
     get_flag().set(ecf::Flag::RESTORED);                       // set restored flag, to stop automatic autoarchive
     add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
 
-    string msg = " autorestore ";
+    std::string msg = " autorestore ";
     msg += debugNodePath(); // inform user via log
     ecf::log(Log::LOG, msg);
 

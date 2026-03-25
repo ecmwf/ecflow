@@ -17,7 +17,7 @@ class ClientToServerCmd;
 class ServerToClientCmd;
 class ServerReply;
 
-typedef std::shared_ptr<ClientToServerCmd> Cmd_ptr;
-typedef std::shared_ptr<ServerToClientCmd> STC_Cmd_ptr;
+using Cmd_ptr     = std::shared_ptr<ClientToServerCmd>;
+using STC_Cmd_ptr = std::shared_ptr<ServerToClientCmd>;
 
 #endif /* ecflow_base_Cmd_HPP */

@@ -27,7 +27,10 @@
 class GroupCTSCmd final : public UserCmd {
 public:
     GroupCTSCmd(const std::string& list_of_commands, AbstractClientEnv* clientEnv);
-    explicit GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd); }
+    explicit GroupCTSCmd(Cmd_ptr cmd)
+        : cli_(false) {
+        addChild(cmd);
+    }
     GroupCTSCmd() = default;
 
     bool isWrite() const override;
@@ -68,7 +71,6 @@ private:
     bool setup_user_authentification(AbstractClientEnv&) override;
     void setup_user_authentification() override;
 
-    // bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
     void cleanup() override; // cleanup all children
 

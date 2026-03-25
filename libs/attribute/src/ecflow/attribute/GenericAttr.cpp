@@ -16,8 +16,6 @@
 #include "ecflow/core/Str.hpp"
 
 using namespace ecf;
-using namespace boost;
-using namespace std;
 
 const GenericAttr& GenericAttr::EMPTY() {
     static const GenericAttr GENERICATTR = GenericAttr();
@@ -27,14 +25,15 @@ const GenericAttr& GenericAttr::EMPTY() {
 GenericAttr::GenericAttr(const std::string& name, const std::vector<std::string>& values)
     : name_(name),
       values_(values) {
-    string msg;
+    std::string msg;
     if (!Str::valid_name(name, msg)) {
         throw std::runtime_error("GenericAttr::GenericAttr : Invalid generic name : " + msg);
     }
 }
 
-GenericAttr::GenericAttr(const std::string& name) : name_(name) {
-    string msg;
+GenericAttr::GenericAttr(const std::string& name)
+    : name_(name) {
+    std::string msg;
     if (!Str::valid_name(name, msg)) {
         throw std::runtime_error("GenericAttr::GenericAttr : Invalid generic name : " + msg);
     }

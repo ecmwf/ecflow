@@ -15,10 +15,10 @@
 
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
 using namespace ecf;
 
 const std::string& Event::SET() {
@@ -50,14 +50,17 @@ Event::Event(int number, const std::string& eventName, bool iv, bool check_name)
       v_(iv),
       iv_(iv) {
     if (!eventName.empty() && check_name) {
-        string msg;
+        std::string msg;
         if (!Str::valid_name(eventName, msg)) {
             throw std::runtime_error("Event::Event: Invalid event name : " + msg);
         }
     }
 }
 
-Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_(iv) {
+Event::Event(const std::string& eventName, bool iv)
+    : n_(eventName),
+      v_(iv),
+      iv_(iv) {
     if (eventName.empty()) {
         throw std::runtime_error("Event::Event: Invalid event name : name must be specified if no number supplied");
     }
@@ -83,7 +86,7 @@ Event::Event(const std::string& eventName, bool iv) : n_(eventName), v_(iv), iv_
         }
     }
 
-    string msg;
+    std::string msg;
     if (!Str::valid_name(eventName, msg)) {
         throw std::runtime_error("Event::Event: Invalid event name : " + msg);
     }
@@ -110,9 +113,7 @@ void Event::set_value(bool b) {
 
 std::string Event::name_or_number() const {
     if (n_.empty()) {
-        std::stringstream ss;
-        ss << number_;
-        return ss.str();
+        return MESSAGE(number_);
     }
     return n_;
 }
@@ -197,9 +198,7 @@ void Event::write(std::string& ret) const {
 }
 
 std::string Event::dump() const {
-    std::stringstream ss;
-    ss << toString() << " value(" << v_ << ")  used(" << used_ << ")";
-    return ss.str();
+    return MESSAGE(toString() << " value(" << v_ << ")  used(" << used_ << ")");
 }
 
 bool Event::isValidState(const std::string& state) {
@@ -233,10 +232,8 @@ Meter::Meter(const std::string& name, int min, int max, int colorChange, int val
     }
 
     if (cc_ < min || cc_ > max) {
-        std::stringstream ss;
-        ss << "Meter::Meter: Invalid Meter(name,min,max,color_change) color_change(" << cc_ << ") must be between min("
-           << min_ << ") and max(" << max_ << ")";
-        throw std::out_of_range(ss.str());
+        throw std::out_of_range(MESSAGE("Meter::Meter: Invalid Meter(name,min,max,color_change) color_change("
+                                        << cc_ << ") must be between min(" << min_ << ") and max(" << max_ << ")"));
     }
 }
 
@@ -247,8 +244,8 @@ Meter Meter::make_from_value(const std::string& name, const std::string& value) 
     std::vector<std::string> tokens;
     ecf::algorithm::split(tokens, value, ",");
     if (tokens.size() != 3) {
-        throw std::runtime_error("Meter::make_from_value: Expect three comma-separated values, but found: '" + value +
-                                 "'");
+        throw std::runtime_error(
+            MESSAGE("Meter::make_from_value: Expect three comma-separated values, but found: '" << value << "'"));
     }
 
     try {
@@ -258,20 +255,17 @@ Meter Meter::make_from_value(const std::string& name, const std::string& value) 
         return Meter(name, min, max, max, value, false);
     }
     catch (const ecf::bad_conversion&) {
-        std::stringstream ss;
-        ss << "Meter::make_from_value: Expect three comma-separated values, but found: (" << tokens[0] << ", "
-           << tokens[1] << ", " << tokens[2] << ")";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Meter::make_from_value: Expect three comma-separated values, but found: ("
+                                         << tokens[0] << ", " << tokens[1] << ", " << tokens[2] << ")"));
     }
 }
 
 void Meter::set_value(int v) {
 
     if (!isValidValue(v)) {
-        std::stringstream ss;
-        ss << "Meter::set_value(int): The meter(" << n_ << ") value must be in the range[" << min() << "->" << max()
-           << "] but found '" << v << "'";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Meter::set_value(int): The meter(" << n_ << ") value must be in the range["
+                                                                             << min() << "->" << max()
+                                                                             << "] but found '" << v << "'"));
     }
 
     v_               = v;
@@ -319,10 +313,8 @@ void Meter::write(std::string& ret) const {
 }
 
 std::string Meter::dump() const {
-    std::stringstream ss;
-    ss << "meter " << n_ << " min(" << min_ << ") max (" << max_ << ") colorChange(" << cc_ << ") value(" << v_
-       << ") used(" << used_ << ")";
-    return ss.str();
+    return MESSAGE("meter " << n_ << " min(" << min_ << ") max (" << max_ << ") colorChange(" << cc_ << ") value(" << v_
+                            << ") used(" << used_ << ")");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -330,10 +322,9 @@ std::string Meter::dump() const {
 Label::Label(const std::string& name, const std::string& value, const std::string& new_value, bool check_name)
     : n_(name),
       v_(value),
-      new_v_(new_value),
-      state_change_no_(0) {
+      new_v_(new_value) {
     if (check_name && !Str::valid_name(n_)) {
-        throw std::runtime_error("Label::Label: Invalid Label name :" + n_);
+        throw std::runtime_error(MESSAGE("Label::Label: Invalid Label name :" << n_));
     }
 }
 
@@ -363,9 +354,7 @@ void Label::write(std::string& ret) const {
 }
 
 std::string Label::dump() const {
-    std::stringstream ss;
-    ss << toString() << " : \"" << new_v_ << "\"";
-    return ss.str();
+    return MESSAGE(toString() << " : \"" << new_v_ << "\"");
 }
 
 void Label::set_new_value(const std::string& l) {

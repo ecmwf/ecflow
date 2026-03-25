@@ -11,6 +11,7 @@
 #include "SessionHandler.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <fstream>
 #include <unistd.h>
@@ -22,7 +23,8 @@
 
 SessionHandler* SessionHandler::instance_ = nullptr;
 
-SessionItem::SessionItem(const std::string& name) : name_(name) {
+SessionItem::SessionItem(const std::string& name)
+    : name_(name) {
     checkDir();
     isTemporary_                   = false;
     askToPreserveTemporarySession_ = true;
@@ -266,9 +268,9 @@ void SessionHandler::setTemporarySessionIfReqested() {
             // create a session name, likely to be unique - if it already exists in the list, then use that
             constexpr int buff_size = 1024;
 
-            char sessName[buff_size];
-            snprintf(sessName, buff_size, "temporary_%s_%s_%d", sh, sp, getpid());
-            std::string sname(sessName);
+            std::array<char, buff_size> sessName;
+            snprintf(sessName.data(), sessName.size(), "temporary_%s_%s_%d", sh, sp, getpid());
+            std::string sname{sessName.data()};
             SessionItem* si = instance()->add(sname);
             if (!si) {
                 si = instance()->find(sname);
@@ -286,9 +288,9 @@ void SessionHandler::setTemporarySessionIfReqested() {
             instance()->createSessionDirWithTemplate(sname, templateName);
 
             // construct an alias for this server
-            char calias[buff_size];
-            snprintf(calias, buff_size, "%s:%s", sh, sp);
-            std::string alias(calias);
+            std::array<char, buff_size> calias;
+            snprintf(calias.data(), calias.size(), "%s:%s", sh, sp);
+            std::string alias{calias.data()};
             si->temporaryServerAlias(alias);
 
             // does this exact server already exist in the user's list?

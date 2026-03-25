@@ -47,7 +47,9 @@ struct HSuite
           weak_suite_ptr_(p),
           index_(index) {}
 
-    explicit HSuite(const std::string& name) : name_(name), index_(std::numeric_limits<int>::max()) {}
+    explicit HSuite(const std::string& name)
+        : name_(name),
+          index_(std::numeric_limits<int>::max()) {}
 
     std::string name_;              // suite name
     weak_suite_ptr weak_suite_ptr_; // does suite exist in defs, need to lock, to find out

@@ -53,14 +53,13 @@
 
 ////////////////////////////////////////////////////////////////////////////
 using namespace ecf;
-using namespace std;
 using namespace boost::spirit;
 using namespace phoenix;
 using namespace BOOST_SPIRIT_CLASSIC_NS;
 
 /////////////////////////////////////////////////////////////////////////////
-typedef tree_match<const char*> treematch_t;
-typedef treematch_t::tree_iterator tree_iter_t;
+using treematch_t = tree_match<const char*>;
+using tree_iter_t = treematch_t::tree_iterator;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -368,7 +367,8 @@ AstTop* createTopAst(tree_parse_info<> info,
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-ExprParser::ExprParser(const std::string& expression) : expr_(expression) {
+ExprParser::ExprParser(const std::string& expression)
+    : expr_(expression) {
 }
 
 static std::map<parser_id, std::string> rule_names;
@@ -477,11 +477,9 @@ bool ExprParser::doParse(std::string& errorMsg) {
         return errorMsg.empty();
     }
     else {
-        std::stringstream ss;
-        ss << "Parsing failed\n";
-        ss << "length = " << std::dec << info.length << "\n";
-        ss << "stopped at: \": " << info.stop << "\"\n";
-        errorMsg = ss.str();
+        errorMsg = MESSAGE("Parsing failed\n"
+                           << "length = " << std::dec << info.length << "\n"
+                           << "stopped at: \": " << info.stop << "\"\n");
     }
     return false;
 }
@@ -492,12 +490,12 @@ void do_print(const tree_iter_t& i, const std::map<parser_id, std::string>& rule
     auto iter = rule_names.find(i->value.id());
     if (iter != rule_names.end()) {
         std::cout << l1 << "Rule " << (*iter).second << "(size:" << i->children.size() << ")"
-                  << "  " << string(i->value.begin(), i->value.end()) << endl;
+                  << "  " << std::string(i->value.begin(), i->value.end()) << std::endl;
     }
     else {
         std::cout << l1 << "Unknown rule(id:" << i->value.id().to_long() << ")"
                   << "(size:" << i->children.size() << ")"
-                  << "  " << string(i->value.begin(), i->value.end()) << endl;
+                  << "  " << std::string(i->value.begin(), i->value.end()) << std::endl;
     }
 
     ecf::Indent l2(ctx);
@@ -764,7 +762,7 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
 
     if (i->value.id() == ExpressionGrammer::node_name_ID) {
 
-        string thevalue(i->value.begin(), i->value.end());
+        std::string thevalue(i->value.begin(), i->value.end());
         ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
         LOG_ASSERT(!thevalue.empty(), "");
         return new AstNode(thevalue);
@@ -778,8 +776,8 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
         auto theNodePathIter = i->children.begin();
         auto theNameIter     = i->children.begin() + 1;
 
-        string nodePath(theNodePathIter->value.begin(), theNodePathIter->value.end());
-        string name(theNameIter->value.begin(), theNameIter->value.end());
+        std::string nodePath(theNodePathIter->value.begin(), theNodePathIter->value.end());
+        std::string name(theNameIter->value.begin(), theNameIter->value.end());
         ecf::algorithm::trim(nodePath); // don't know why we get leading/trailing spaces
         ecf::algorithm::trim(name);     // don't know why we get leading/trailing spaces
         return new AstVariable(nodePath, name);
@@ -789,35 +787,35 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
         // tree_iter_t the_colon = i->children.begin(); ignore
         auto the_variable_t = i->children.begin() + 1;
 
-        string the_variable(the_variable_t->value.begin(), the_variable_t->value.end());
+        std::string the_variable(the_variable_t->value.begin(), the_variable_t->value.end());
         ecf::algorithm::trim(the_variable); // don't know why we get leading/trailing spaces
         LOG_ASSERT(!the_variable.empty(), "");
         return new AstParentVariable(the_variable);
     }
     else if (i->value.id() == ExpressionGrammer::dot_dot_path_ID) {
 
-        string thevalue(i->value.begin(), i->value.end());
+        std::string thevalue(i->value.begin(), i->value.end());
         ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
         LOG_ASSERT(!thevalue.empty(), "");
         return new AstNode(thevalue);
     }
     if (i->value.id() == ExpressionGrammer::absolute_path_ID) {
 
-        string thevalue(i->value.begin(), i->value.end());
+        std::string thevalue(i->value.begin(), i->value.end());
         ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
         LOG_ASSERT(!thevalue.empty(), "");
         return new AstNode(thevalue);
     }
     else if (i->value.id() == ExpressionGrammer::dot_path_ID) {
 
-        string thevalue(i->value.begin(), i->value.end());
+        std::string thevalue(i->value.begin(), i->value.end());
         ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
         LOG_ASSERT(!thevalue.empty(), "");
         return new AstNode(thevalue);
     }
     else if (i->value.id() == ExpressionGrammer::event_state_ID) {
 
-        string thevalue(i->value.begin(), i->value.end());
+        std::string thevalue(i->value.begin(), i->value.end());
         ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
         if (thevalue == Event::SET()) {
             return new AstEventState(true);
@@ -827,13 +825,13 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
     }
     else if (i->value.id() == ExpressionGrammer::datetime_ID) {
 
-        string thevalue(std::begin(i->value), std::end(i->value));
+        std::string thevalue(std::begin(i->value), std::end(i->value));
         ecf::Instant instant = Instant::parse(thevalue);
         return new AstInstant(instant);
     }
     else if (i->value.id() == ExpressionGrammer::integer_ID) {
 
-        string thevalue(i->value.begin(), i->value.end());
+        std::string thevalue(i->value.begin(), i->value.end());
         ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
         auto theInt = ecf::convert_to<int>(thevalue);
         return new AstInteger(theInt);
@@ -876,8 +874,8 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
         auto theNodePathIter = i->children.begin();
         auto theFlagIter     = i->children.begin() + 1;
 
-        string nodePath(theNodePathIter->value.begin(), theNodePathIter->value.end());
-        string flag(theFlagIter->value.begin(), theFlagIter->value.end());
+        std::string nodePath(theNodePathIter->value.begin(), theNodePathIter->value.end());
+        std::string flag(theFlagIter->value.begin(), theFlagIter->value.end());
         ecf::algorithm::trim(nodePath); // don't know why we get leading/trailing spaces
         ecf::algorithm::trim(flag);     // don't know why we get leading/trailing spaces
 
@@ -1025,8 +1023,8 @@ Ast* doCreateAst(const tree_iter_t& i, const std::map<parser_id, std::string>& r
         //      a and !b
         // We always treat the not as *child*
 
-        stack<Ast*> childs;
-        stack<Ast*> parents;
+        std::stack<Ast*> childs;
+        std::stack<Ast*> parents;
         Ast* not_ast = nullptr;
         for (auto t = i->children.begin(); t != i->children.end(); ++t) {
             if (is_root_node(t) && !is_not(t)) {
@@ -1109,9 +1107,9 @@ AstTop* createTopAst(tree_parse_info<> info,
 
 #if defined(PRINT_AST)
     if (ast.get()) {
-        std::stringstream s2;
-        ast->print_flat(s2, true /*add_brackets*/);
-        std::cout << "\nPRINT_AST  " << s2.str() << "\n";
+        std::ostringstream ss;
+        ast->print_flat(ss, true /*add_brackets*/);
+        std::cout << "\nPRINT_AST  " << ss.str() << "\n";
         std::cout << "PRINT_AST  " << expr << "\n";
         std::cout << *ast.get();
     }
@@ -1125,73 +1123,73 @@ AstTop* createTopAst(tree_parse_info<> info,
 
 bool has_complex_expressions(const std::string& expr) {
     // we allow . and /
-    if (expr.find('(') != string::npos) {
+    if (expr.find('(') != std::string::npos) {
         return true;
     }
-    if (expr.find(':') != string::npos) {
+    if (expr.find(':') != std::string::npos) {
         return true;
     }
-    if (expr.find('.') != string::npos) {
+    if (expr.find('.') != std::string::npos) {
         return true;
     }
-    if (expr.find('/') != string::npos) {
+    if (expr.find('/') != std::string::npos) {
         return true;
     }
-    if (expr.find(" not ") != string::npos) {
+    if (expr.find(" not ") != std::string::npos) {
         return true;
     }
-    if (expr.find(" and ") != string::npos) {
+    if (expr.find(" and ") != std::string::npos) {
         return true;
     }
-    if (expr.find(" or ") != string::npos) {
+    if (expr.find(" or ") != std::string::npos) {
         return true;
     }
-    if (expr.find('!') != string::npos) {
+    if (expr.find('!') != std::string::npos) {
         return true;
     }
-    if (expr.find("&&") != string::npos) {
+    if (expr.find("&&") != std::string::npos) {
         return true;
     }
-    if (expr.find("||") != string::npos) {
+    if (expr.find("||") != std::string::npos) {
         return true;
     }
-    if (expr.find('<') != string::npos) {
+    if (expr.find('<') != std::string::npos) {
         return true;
     }
-    if (expr.find('>') != string::npos) {
+    if (expr.find('>') != std::string::npos) {
         return true;
     }
-    if (expr.find('+') != string::npos) {
+    if (expr.find('+') != std::string::npos) {
         return true;
     }
-    if (expr.find('-') != string::npos) {
+    if (expr.find('-') != std::string::npos) {
         return true;
     }
-    if (expr.find('*') != string::npos) {
+    if (expr.find('*') != std::string::npos) {
         return true;
     }
-    if (expr.find('~') != string::npos) {
+    if (expr.find('~') != std::string::npos) {
         return true;
     }
-    if (expr.find(" ne ") != string::npos) {
+    if (expr.find(" ne ") != std::string::npos) {
         return true;
     }
-    if (expr.find(" ge ") != string::npos) {
+    if (expr.find(" ge ") != std::string::npos) {
         return true;
     }
-    if (expr.find("<=") != string::npos) {
+    if (expr.find("<=") != std::string::npos) {
         return true;
     }
-    if (expr.find(">=") != string::npos) {
+    if (expr.find(">=") != std::string::npos) {
         return true;
     }
-    if (expr.find(" le ") != string::npos) {
+    if (expr.find(" le ") != std::string::npos) {
         return true;
     }
-    if (expr.find(" gt ") != string::npos) {
+    if (expr.find(" gt ") != std::string::npos) {
         return true;
     }
-    if (expr.find(" lt ") != string::npos) {
+    if (expr.find(" lt ") != std::string::npos) {
         return true;
     }
     return false;
@@ -1210,10 +1208,10 @@ bool SimpleExprParser::doParse() {
     //   "a = complete" will be split
     // since will split on *ANY* of character, and hence this would not be reported as an error
     std::vector<std::string> tokens;
-    if (expr_.find("==") != string::npos) {
+    if (expr_.find("==") != std::string::npos) {
         Str::split(expr_, tokens, "==");
     }
-    else if (expr_.find(" eq ") != string::npos) {
+    else if (expr_.find(" eq ") != std::string::npos) {
         Str::split(expr_, tokens, " eq ");
     }
     else {
@@ -1225,7 +1223,7 @@ bool SimpleExprParser::doParse() {
         ecf::algorithm::trim(tokens[0]);
         ecf::algorithm::trim(tokens[1]);
 
-        if (tokens[0].find(' ') != string::npos) {
+        if (tokens[0].find(' ') != std::string::npos) {
             //         cout << "Found space " << expr_ << "\n";
             return false;
         }

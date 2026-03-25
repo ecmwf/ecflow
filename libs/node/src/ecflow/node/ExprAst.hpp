@@ -141,7 +141,8 @@ protected:
 
 class AstNot : public AstRoot {
 public:
-    AstNot() : name_("! ") {}
+    AstNot()
+        : name_("! ") {}
     void accept(ecf::ExprAstVisitor&) override;
     AstNot* clone() const override;
     bool is_not() const override { return true; }
@@ -374,7 +375,11 @@ public:
 class AstFunction : public AstLeaf {
 public:
     enum FuncType { DATE_TO_JULIAN, JULIAN_TO_DATE };
-    AstFunction(FuncType ft, Ast* arg) : arg_(arg), ft_(ft) { assert(arg_); }
+    AstFunction(FuncType ft, Ast* arg)
+        : arg_(arg),
+          ft_(ft) {
+        assert(arg_);
+    }
     ~AstFunction() override { delete arg_; }
 
     bool is_evaluateable() const override { return true; }
@@ -400,7 +405,8 @@ private:
 
 class AstInteger : public AstLeaf {
 public:
-    explicit AstInteger(int value) : value_(value) {}
+    explicit AstInteger(int value)
+        : value_(value) {}
 
     bool is_evaluateable() const override { return true; }
     bool evaluate() const override { return value_; } // -1 -2 1 2 3 evaluates to true, 0 returns false
@@ -420,8 +426,10 @@ private:
 
 class AstInstant : public AstLeaf {
 public:
-    explicit AstInstant(int value) : value_(ecf::coerce_from_seconds_into_instant(value)) {}
-    explicit AstInstant(ecf::Instant value) : value_(std::move(value)) {}
+    explicit AstInstant(int value)
+        : value_(ecf::coerce_from_seconds_into_instant(value)) {}
+    explicit AstInstant(ecf::Instant value)
+        : value_(std::move(value)) {}
 
     bool is_evaluateable() const override { return true; }
     bool evaluate() const override { return value(); } // -1 -2 1 2 3 evaluates to true, 0 returns false
@@ -441,7 +449,8 @@ private:
 
 class AstNodeState : public AstLeaf {
 public:
-    explicit AstNodeState(DState::State s) : state_(s) {}
+    explicit AstNodeState(DState::State s)
+        : state_(s) {}
 
     void accept(ecf::ExprAstVisitor&) override;
     AstNodeState* clone() const override;
@@ -459,7 +468,8 @@ private:
 
 class AstEventState : public AstLeaf {
 public:
-    explicit AstEventState(bool b) : state_(b) {}
+    explicit AstEventState(bool b)
+        : state_(b) {}
 
     void accept(ecf::ExprAstVisitor&) override;
     AstEventState* clone() const override;
@@ -485,7 +495,9 @@ private:
 
 class AstNode : public AstLeaf {
 public:
-    explicit AstNode(const std::string& n) : parentNode_(nullptr), nodePath_(n) {}
+    explicit AstNode(const std::string& n)
+        : parentNode_(nullptr),
+          nodePath_(n) {}
 
     void accept(ecf::ExprAstVisitor&) override;
     AstNode* clone() const override;
@@ -513,7 +525,9 @@ private:
 
 class AstFlag : public AstLeaf {
 public:
-    AstFlag(const std::string& n, ecf::Flag::Type ft) : nodePath_(n), flag_(ft) {}
+    AstFlag(const std::string& n, ecf::Flag::Type ft)
+        : nodePath_(n),
+          flag_(ft) {}
 
     std::string name() const override;
 
@@ -613,7 +627,9 @@ private:
 //  ** i.e  "2 == (((:YMD / 100 ) % 100) % 3"
 class AstParentVariable : public AstLeaf {
 public:
-    explicit AstParentVariable(const std::string& variablename) : parentNode_(nullptr), name_(variablename) {}
+    explicit AstParentVariable(const std::string& variablename)
+        : parentNode_(nullptr),
+          name_(variablename) {}
 
     std::string name() const override { return name_; }
     bool is_attribute() const override { return true; }
@@ -654,9 +670,14 @@ class VariableHelper {
 public:
     explicit VariableHelper(const AstVariable* astVariable);
     VariableHelper(const AstVariable* astVariable, std::string& errorMsg);
+
     // Disable copy (and move) semantics
     VariableHelper(const VariableHelper&)                  = delete;
     const VariableHelper& operator=(const VariableHelper&) = delete;
+    VariableHelper(VariableHelper&&)                       = delete;
+    VariableHelper& operator=(VariableHelper&&)            = delete;
+
+    ~VariableHelper() = default;
 
     int value() const;
     int plus(int) const;

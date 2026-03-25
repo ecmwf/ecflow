@@ -22,11 +22,11 @@ using namespace ecf;
 
 template <typename... T>
 bool contains(std::string_view value, T&&... pattern) {
-    return ((value.find(pattern) != std::string::npos) && ...);
+    return ((value.find(std::forward<T>(pattern)) != std::string::npos) && ...);
 }
 
 std::string find_cmake_version(const std::vector<std::string>& cmake_content) {
-    // Assume a lines like the following:
+    // Assume a line like the following:
     //   project( ecflow LANGUAGES CXX VERSION X.Y.Z )
     //
     // Find token `VERSION` and return the next token
@@ -40,7 +40,6 @@ std::string find_cmake_version(const std::vector<std::string>& cmake_content) {
             auto version_val = version_arg + 1;
             if (version_val != tokens.end()) {
                 return *version_val;
-                break;
             }
         }
     }

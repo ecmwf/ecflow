@@ -21,14 +21,13 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
-DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force) : group_cmd_(nullptr), force_(force) {
+DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force)
+    : force_(force) {
     if (!absNodePath.empty()) {
         paths_.push_back(absNodePath);
     }
@@ -94,7 +93,7 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
         return PreAllocatedReply::delete_all_cmd();
     }
     else {
-        std::stringstream ss;
+        std::ostringstream ss;
         Defs* defs = as->defs().get();
 
         for (const auto& path : paths_) {
@@ -134,25 +133,19 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const {
 // }
 
 void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as, Node* theNodeToDelete) {
-    vector<Task*> taskVec;
-    if (theNodeToDelete) {
-        theNodeToDelete->getAllTasks(taskVec);
-    }
-    else {
-        as->defs()->getAllTasks(taskVec);
-    }
+    auto tasks = theNodeToDelete ? ecf::get_all_tasks(*theNodeToDelete) : ecf::get_all_tasks(*as->defs());
 
-    vector<Task*> activeVec, submittedVec;
-    for (Task* t : taskVec) {
-        if (t->state() == NState::ACTIVE) {
-            activeVec.push_back(t);
+    std::vector<Task*> activeVec, submittedVec;
+    for (auto task : tasks) {
+        if (task->state() == NState::ACTIVE) {
+            activeVec.push_back(task);
         }
-        if (t->state() == NState::SUBMITTED) {
-            submittedVec.push_back(t);
+        if (task->state() == NState::SUBMITTED) {
+            submittedVec.push_back(task);
         }
     }
     if (!activeVec.empty() || !submittedVec.empty()) {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (theNodeToDelete) {
             ss << "Cannot delete node " << theNodeToDelete->debugNodePath() << "\n";
         }
@@ -187,11 +180,13 @@ static const char* delete_node_desc() {
 }
 
 void DeleteCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CtsApi::delete_node_arg(), po::value<vector<string>>()->multitoken(), delete_node_desc());
+    desc.add_options()(CtsApi::delete_node_arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       delete_node_desc());
 }
 
 void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[theArg()].as<vector<string>>();
+    std::vector<std::string> args = vm[theArg()].as<std::vector<std::string>>();
     if (ac->debug()) {
         dumpVecArgs(theArg(), args);
     }
@@ -216,9 +211,8 @@ void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, 
     }
 
     if (!all && paths.empty()) {
-        std::stringstream ss;
-        ss << "Delete: No paths specified. Paths must begin with a leading '/' character\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Delete: No paths specified. Paths must begin with a leading '/' character\n"));
     }
 
     if (do_prompt) {

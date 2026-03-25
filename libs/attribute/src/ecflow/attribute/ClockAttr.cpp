@@ -21,8 +21,7 @@ using namespace ecf;
 //==========================================================================================
 
 ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid, bool positiveGain)
-    : gain_(0),
-      state_change_no_(Ecf::incr_state_change_no()),
+    : state_change_no_(Ecf::incr_state_change_no()),
       hybrid_(hybrid),
       positiveGain_(positiveGain) {
     auto theDate = time.date();
@@ -35,8 +34,7 @@ ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid, bool pos
 }
 
 ClockAttr::ClockAttr(int day, int month, int year, bool hybrid)
-    : gain_(0),
-      day_(day),
+    : day_(day),
       month_(month),
       year_(year),
       state_change_no_(Ecf::incr_state_change_no()),
@@ -45,7 +43,9 @@ ClockAttr::ClockAttr(int day, int month, int year, bool hybrid)
     DateAttr::checkDate(day, month, year, false /* disable wild cards */);
 }
 
-ClockAttr::ClockAttr(bool hybrid) : state_change_no_(Ecf::incr_state_change_no()), hybrid_(hybrid) {
+ClockAttr::ClockAttr(bool hybrid)
+    : state_change_no_(Ecf::incr_state_change_no()),
+      hybrid_(hybrid) {
 }
 
 std::string ClockAttr::toString() const {

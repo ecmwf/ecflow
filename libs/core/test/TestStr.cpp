@@ -162,7 +162,7 @@ static void check(const std::string& line,
                   boost::split_iterator<std::string::const_iterator> res,
                   const std::vector<std::string>& expected) {
     std::vector<std::string> result;
-    typedef boost::split_iterator<std::string::const_iterator> split_iter_t;
+    using split_iter_t = boost::split_iterator<std::string::const_iterator>;
     for (; res != split_iter_t(); res++) {
         result.push_back(boost::copy_range<std::string>(*res));
     }
@@ -549,7 +549,7 @@ BOOST_AUTO_TEST_CASE(test_extract_data_member_value) {
 }
 
 std::string toString(const std::vector<std::string>& c) {
-    std::stringstream ss;
+    std::ostringstream ss;
     std::copy(c.begin(), c.end(), std::ostream_iterator<std::string>(ss, ", "));
     return ss.str();
 }
@@ -657,19 +657,13 @@ BOOST_AUTO_TEST_CASE(test_str_less_greater) {
 //// ==============================================================
 class Fred {
 public:
-    explicit Fred(int i = 0) : i_(i) {
+    explicit Fred(int i = 0)
+        : i_(i) {
         // Do nothing...
     }
-    Fred(const Fred& rhs) : i_(rhs.i_) {
-        // Do nothing...
-    }
-    Fred& operator=(const Fred& rhs) {
-        i_ = rhs.i_;
-        return *this;
-    }
-    ~Fred() {
-        // Do nothing...
-    }
+    Fred(const Fred& rhs)            = default;
+    Fred& operator=(const Fred& rhs) = default;
+    ~Fred()                          = default;
 
     void inc() { i_++; }
 
@@ -877,7 +871,7 @@ BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
         for (size_t i = 0; i < the_size; i++) {
             std::ostringstream st;
             st << i;
-            std::string s = st.str();
+            [[maybe_unused]] std::string s = st.str();
         }
         ECF_TEST_DBG("Time for int to string using ostringstream  elapsed time = " << timer);
     }
@@ -885,7 +879,7 @@ BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
     {
         PerformanceTimer timer;
         for (size_t i = 0; i < the_size; i++) {
-            std::string s = ecf::convert_to<std::string>(i);
+            [[maybe_unused]] std::string s = ecf::convert_to<std::string>(i);
         }
         ECF_TEST_DBG("Time for int to string using ecf::convert_to elapsed time = " << timer);
     }

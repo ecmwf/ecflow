@@ -20,7 +20,6 @@
 #include "ecflow/node/NodeTreeVisitor.hpp"
 
 using namespace ecf;
-using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // The false below is used as a dummy argument to call the Variable constructor that does not
@@ -36,7 +35,9 @@ Family& Family::operator=(const Family& rhs) {
 }
 
 node_ptr Family::clone() const {
-    return std::make_shared<Family>(*this);
+    auto clone = std::make_shared<Family>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 Family::~Family() {
@@ -177,8 +178,8 @@ void FamGenVariables::update_generated_variables() const {
     genvar_family1_.set_value(family_->name());
 
     // FAMILY is the full path excluding the suite, there is *NO* leading slash
-    std::string path              = family_->absNodePath();
-    string::size_type secondSlash = path.find('/', 1);
+    std::string path = family_->absNodePath();
+    auto secondSlash = path.find('/', 1);
     path.erase(0, secondSlash + 1);
     genvar_family_.set_value(path);
 }

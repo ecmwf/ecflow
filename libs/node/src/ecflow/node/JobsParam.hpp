@@ -21,7 +21,8 @@
 class JobsParam {
 public:
     // This constructor is used in test
-    explicit JobsParam(bool createJobs = false) : createJobs_(createJobs) {}
+    explicit JobsParam(bool createJobs = false)
+        : createJobs_(createJobs) {}
 
     JobsParam(int submitJobsInterval, bool createJobs, bool spawn_jobs = true)
         : createJobs_(createJobs),
@@ -33,8 +34,12 @@ public:
     }
 
     // Disable copy (and move) semantics
-    JobsParam(const JobsParam&)                  = delete;
-    const JobsParam& operator=(const JobsParam&) = delete;
+    JobsParam(const JobsParam&)            = delete;
+    JobsParam& operator=(const JobsParam&) = delete;
+    JobsParam(JobsParam&&)                 = delete;
+    JobsParam& operator=(JobsParam&&)      = delete;
+
+    ~JobsParam() = default;
 
     // Allow JobsParam to be re-used. Preserve cache in EcfFile. ECFLOW-1210
     void clear();

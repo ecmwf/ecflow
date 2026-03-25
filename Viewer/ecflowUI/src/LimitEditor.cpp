@@ -26,7 +26,8 @@
 #include "VNode.hpp"
 #include "ecflow/node/Aspect.hpp"
 
-LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent) {
+LimitEditorWidget::LimitEditorWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
     removeTb_->setDefaultAction(actionRemove_);
     removeAllTb_->setDefaultAction(actionRemoveAll_);
@@ -48,7 +49,9 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent) {
     pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
-LimitEditor::LimitEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info, "limit", parent), model_(nullptr) {
+LimitEditor::LimitEditor(VInfo_ptr info, QWidget* parent)
+    : AttributeEditor(info, "limit", parent),
+      model_(nullptr) {
     w_ = new LimitEditorWidget(this);
     addForm(w_);
 

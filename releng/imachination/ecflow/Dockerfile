@@ -3,6 +3,8 @@ FROM debian:12.11-slim AS base
 
 RUN apt-get update \
     && apt-get install -y \
+        python3 \
+        python3-venv \
         libssl-dev \
         libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -32,12 +34,21 @@ ENTRYPOINT ["/workspace/build.workflow.sh"]
 
 FROM base AS deploy
 
+# Provision ecFlow dependencies
+RUN python3 -m venv /opt/local/python \
+    && /opt/local/python/bin/pip install "troika>=0.2.6"
+
 # Provision ecFlow package
-## This Dockerfile assumes that the ecFlow package is available in the build context.
+## This Dockerfile assumes that the ecFlow package is available in the build context i.e. .../imachination/ecflow.
 # If you are using a different version, change the ECFLOW_PACKAGE variable accordingly.
-ARG ECFLOW_PACKAGE="ecflow-5.14.0-Linux.deb"
+ARG ECFLOW_VERSION="latest"
+ARG ECFLOW_PACKAGE="ecflow-${ECFLOW_VERSION}-Linux.deb"
 COPY ${ECFLOW_PACKAGE} /tmp/${ECFLOW_PACKAGE}
 RUN dpkg -i /tmp/${ECFLOW_PACKAGE} \
     && rm /tmp/${ECFLOW_PACKAGE}
 
-ENTRYPOINT ["/opt/ecflow/bin/ecflow_server", "-d", "--http", "--port", "8888"]
+ARG ECFLOW_LAUNCH="launch.sh"
+COPY ${ECFLOW_LAUNCH} /opt/local/bin/${ECFLOW_LAUNCH}
+RUN chmod +x /opt/local/bin/${ECFLOW_LAUNCH}
+
+ENTRYPOINT ["/opt/local/bin/launch.sh"]

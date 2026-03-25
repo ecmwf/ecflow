@@ -44,7 +44,10 @@ public:
     explicit Complete(const std::string& expression) { add(PartExpression(expression)); }
     Complete(const std::string& expression, bool and_type) { add(PartExpression(expression, and_type)); }
     explicit Complete(const PartExpression& pe) { add(pe); }
-    Complete(const Complete& rhs) = default;
+
+    Complete(const Complete& rhs)          = default;
+    Complete& operator=(Complete const& f) = delete; // prevent assignment
+
     explicit Complete(const py::list& list);
 
     bool operator==(const Complete& rhs) const { return vec_ == rhs.vec_; }
@@ -56,7 +59,6 @@ public:
 private:
     void add(const PartExpression& t) { vec_.push_back(t); }
     std::vector<PartExpression> vec_;
-    Complete& operator=(Complete const& f) = delete; // prevent assignment
 };
 
 #endif /* ecflow_python_Trigger_HPP */

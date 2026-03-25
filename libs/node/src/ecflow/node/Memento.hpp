@@ -56,11 +56,14 @@
 
 class Memento {
 public:
-    Memento()               = default;
-    Memento(const Memento&) = delete;
-    virtual ~Memento();
+    Memento() = default;
 
+    Memento(const Memento&)            = delete;
     Memento& operator=(const Memento&) = delete;
+    Memento(Memento&&)                 = delete;
+    Memento& operator=(Memento&&)      = delete;
+
+    virtual ~Memento();
 
 private:
     /// Applies the mementos to the client side defs. Can raise std::runtime_error
@@ -81,9 +84,15 @@ private:
 // Used for storing all the memento's associated with a single node
 // This allows to make only *ONE* call to find the node.
 // The mementos are then applied to this single node.
+/**
+ * Represents a set of changes to apply on specific node.
+ *
+ * The memento captures multiple other mementos, and the path of the node where to apply them on the recipient defs.
+ */
 class CompoundMemento {
 public:
-    explicit CompoundMemento(const std::string& absNodePath) : absNodePath_(absNodePath) {}
+    explicit CompoundMemento(const std::string& absNodePath)
+        : absNodePath_(absNodePath) {}
 
     CompoundMemento() = default; // for serialization
 
@@ -104,9 +113,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a change in the state of the defs.
+ *
+ * The memento captures the new state, in order to apply on the recipient defs.
+ */
 class StateMemento : public Memento {
 public:
-    explicit StateMemento(NState::State state) : state_(state) {}
+    explicit StateMemento(NState::State state)
+        : state_(state) {}
     StateMemento() = default;
 
 private:
@@ -122,9 +137,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a change in the state of the node.
+ *
+ * The memento captures the new state and the time it was updated, in order to apply on the recipient node.
+ */
 class NodeStateMemento : public Memento {
 public:
-    explicit NodeStateMemento(std::pair<NState::State, boost::posix_time::time_duration> state) : state_(state) {}
+    explicit NodeStateMemento(std::pair<NState::State, boost::posix_time::time_duration> state)
+        : state_(state) {}
     NodeStateMemento() = default;
 
 private:
@@ -140,9 +161,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a change in the order of the immediate children of the node.
+ *
+ * The memento captures the ordered list of node names, used to reorder the children on the recipient node.
+ */
 class OrderMemento : public Memento {
 public:
-    explicit OrderMemento(const std::vector<std::string>& order) : order_(order) {}
+    explicit OrderMemento(const std::vector<std::string>& order)
+        : order_(order) {}
     OrderMemento() = default;
 
 private:
@@ -169,9 +196,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a removal/addition in the immediate children of the node.
+ *
+ * The memento captures the updated collection of children nodes that must be 'grafted' onto the recipient node.
+ */
 class ChildrenMemento : public Memento {
 public:
-    explicit ChildrenMemento(const std::vector<node_ptr>& children) : children_(children) {}
+    explicit ChildrenMemento(const std::vector<node_ptr>& children)
+        : children_(children) {}
     ChildrenMemento() = default;
 
 private:
@@ -190,9 +223,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a removal/addition of an alias of a task.
+ *
+ * The memento captures the updated collection of aliases nodes that must be 'grafted' onto the recipient task.
+ */
 class AliasChildrenMemento : public Memento {
 public:
-    explicit AliasChildrenMemento(const std::vector<alias_ptr>& children) : children_(children) {}
+    explicit AliasChildrenMemento(const std::vector<alias_ptr>& children)
+        : children_(children) {}
     AliasChildrenMemento() = default;
 
 private:
@@ -208,9 +247,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a change in the alias_no_ of a task.
+ *
+ * The memento captures the updated alias_no_ to update the recipient task.
+ */
 class AliasNumberMemento : public Memento {
 public:
-    explicit AliasNumberMemento(unsigned int alias_no) : alias_no_(alias_no) {}
+    explicit AliasNumberMemento(unsigned int alias_no)
+        : alias_no_(alias_no) {}
     AliasNumberMemento() = default;
 
 private:
@@ -226,9 +271,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a change in the suspend state of a node.
+ *
+ * The memento captures the updated suspend state to update the recipient task.
+ */
 class SuspendedMemento : public Memento {
 public:
-    explicit SuspendedMemento(bool suspended) : suspended_(suspended) {}
+    explicit SuspendedMemento(bool suspended)
+        : suspended_(suspended) {}
     SuspendedMemento() = default;
 
 private:
@@ -244,9 +295,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a change in the server state.
+ *
+ * The memento captures the updated server state to update the recipient defs.
+ */
 class ServerStateMemento : public Memento {
 public:
-    explicit ServerStateMemento(SState::State s) : state_(s) {}
+    explicit ServerStateMemento(SState::State s)
+        : state_(s) {}
     ServerStateMemento() = default;
 
 private:
@@ -262,9 +319,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents a removal/addition of a variable on the server.
+ *
+ * The memento captures the updated list of variables to update the recipient defs.
+ */
 class ServerVariableMemento : public Memento {
 public:
-    explicit ServerVariableMemento(const std::vector<Variable>& vec) : serverEnv_(vec) {}
+    explicit ServerVariableMemento(const std::vector<Variable>& vec)
+        : serverEnv_(vec) {}
     ServerVariableMemento() = default;
 
 private:
@@ -280,9 +343,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to the default state of a node.
+ *
+ * The memento captures the updated default state to update the recipient node.
+ */
 class NodeDefStatusDeltaMemento : public Memento {
 public:
-    explicit NodeDefStatusDeltaMemento(DState::State state) : state_(state) {}
+    explicit NodeDefStatusDeltaMemento(DState::State state)
+        : state_(state) {}
     NodeDefStatusDeltaMemento() = default;
 
 private:
@@ -298,9 +367,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node event.
+ *
+ * The memento captures the updated event to update the recipient node.
+ */
 class NodeEventMemento : public Memento {
 public:
-    explicit NodeEventMemento(const Event& e) : event_(e) {}
+    explicit NodeEventMemento(const Event& e)
+        : event_(e) {}
     NodeEventMemento() = default;
 
 private:
@@ -316,9 +391,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node meter.
+ *
+ * The memento captures the updated meter to update the recipient node.
+ */
 class NodeMeterMemento : public Memento {
 public:
-    explicit NodeMeterMemento(const Meter& e) : meter_(e) {}
+    explicit NodeMeterMemento(const Meter& e)
+        : meter_(e) {}
     NodeMeterMemento() = default;
 
 private:
@@ -334,9 +415,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node label.
+ *
+ * The memento captures the updated label to update the recipient node.
+ */
 class NodeLabelMemento : public Memento {
 public:
-    explicit NodeLabelMemento(const Label& e) : label_(e) {}
+    explicit NodeLabelMemento(const Label& e)
+        : label_(e) {}
     NodeLabelMemento() = default;
 
 private:
@@ -352,9 +439,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node queue.
+ *
+ * The memento captures the updated queue to update the recipient node.
+ */
 class NodeQueueMemento : public Memento {
 public:
-    explicit NodeQueueMemento(const QueueAttr& e) : queue_(e) {}
+    explicit NodeQueueMemento(const QueueAttr& e)
+        : queue_(e) {}
     NodeQueueMemento() = default;
 
 private:
@@ -371,9 +464,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node generic.
+ *
+ * The memento captures the updated generic to update the recipient node.
+ */
 class NodeGenericMemento : public Memento {
 public:
-    explicit NodeGenericMemento(const GenericAttr& e) : generic_(e) {}
+    explicit NodeGenericMemento(const GenericAttr& e)
+        : generic_(e) {}
     NodeGenericMemento() = default;
 
 private:
@@ -390,6 +489,11 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node queue state.
+ *
+ * The memento captures the updated queue state (name, state vector, current index) to update the recipient node.
+ */
 class NodeQueueIndexMemento : public Memento {
 public:
     NodeQueueIndexMemento(const std::string& name, int index, const std::vector<NState::State>& state_vec)
@@ -414,9 +518,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node trigger expression.
+ *
+ * The memento captures the updated trigger expression to update the recipient node.
+ */
 class NodeTriggerMemento : public Memento {
 public:
-    explicit NodeTriggerMemento(const Expression& e) : exp_(e) {}
+    explicit NodeTriggerMemento(const Expression& e)
+        : exp_(e) {}
     NodeTriggerMemento() = default;
 
 private:
@@ -432,9 +542,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node complete expression.
+ *
+ * The memento captures the updated complete expression to update the recipient node.
+ */
 class NodeCompleteMemento : public Memento {
 public:
-    explicit NodeCompleteMemento(const Expression& e) : exp_(e) {}
+    explicit NodeCompleteMemento(const Expression& e)
+        : exp_(e) {}
     NodeCompleteMemento() = default;
 
 private:
@@ -450,9 +566,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node repeat.
+ *
+ * The memento captures the updated repeat to update the recipient node.
+ */
 class NodeRepeatMemento : public Memento {
 public:
-    explicit NodeRepeatMemento(const Repeat& e) : repeat_(e) {}
+    explicit NodeRepeatMemento(const Repeat& e)
+        : repeat_(e) {}
     NodeRepeatMemento() = default;
 
 private:
@@ -468,9 +590,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to the current index of a node repeat.
+ *
+ * The memento captures the updated repeat index to update the recipient node.
+ */
 class NodeRepeatIndexMemento : public Memento {
 public:
-    explicit NodeRepeatIndexMemento(const Repeat& e) : index_or_value_(e.index_or_value()) {}
+    explicit NodeRepeatIndexMemento(const Repeat& e)
+        : index_or_value_(e.index_or_value()) {}
     NodeRepeatIndexMemento() = default;
 
 private:
@@ -486,9 +614,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node limit.
+ *
+ * The memento captures the updated limit to update the recipient node.
+ */
 class NodeLimitMemento : public Memento {
 public:
-    explicit NodeLimitMemento(const Limit& e) : limit_(e) {}
+    explicit NodeLimitMemento(const Limit& e)
+        : limit_(e) {}
     NodeLimitMemento() = default;
 
 private:
@@ -504,9 +638,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node inlimit.
+ *
+ * The memento captures the updated inlimit to update the recipient node.
+ */
 class NodeInLimitMemento : public Memento {
 public:
-    explicit NodeInLimitMemento(const InLimit& e) : inlimit_(e) {}
+    explicit NodeInLimitMemento(const InLimit& e)
+        : inlimit_(e) {}
     NodeInLimitMemento() = default;
 
 private:
@@ -523,9 +663,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node variable.
+ *
+ * The memento captures the updated variable to update the recipient node.
+ */
 class NodeVariableMemento : public Memento {
 public:
-    explicit NodeVariableMemento(const Variable& e) : var_(e) {}
+    explicit NodeVariableMemento(const Variable& e)
+        : var_(e) {}
     NodeVariableMemento() = default;
 
 private:
@@ -541,9 +687,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node late.
+ *
+ * The memento captures the updated late to update the recipient node.
+ */
 class NodeLateMemento : public Memento {
 public:
-    explicit NodeLateMemento(const ecf::LateAttr& e) : late_(e) {}
+    explicit NodeLateMemento(const ecf::LateAttr& e)
+        : late_(e) {}
     NodeLateMemento() = default;
 
 private:
@@ -559,9 +711,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node or server flag.
+ *
+ * The memento captures the flag limit to update the recipient node.
+ */
 class FlagMemento : public Memento {
 public:
-    explicit FlagMemento(const ecf::Flag& e) : flag_(e) {}
+    explicit FlagMemento(const ecf::Flag& e)
+        : flag_(e) {}
     FlagMemento() = default;
 
 private:
@@ -581,9 +739,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node today.
+ *
+ * The memento captures the updated today to update the recipient node.
+ */
 class NodeTodayMemento : public Memento {
 public:
-    explicit NodeTodayMemento(const ecf::TodayAttr& attr) : attr_(attr) {}
+    explicit NodeTodayMemento(const ecf::TodayAttr& attr)
+        : attr_(attr) {}
     NodeTodayMemento() = default;
 
 private:
@@ -599,9 +763,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node time.
+ *
+ * The memento captures the updated time to update the recipient node.
+ */
 class NodeTimeMemento : public Memento {
 public:
-    explicit NodeTimeMemento(const ecf::TimeAttr& attr) : attr_(attr) {}
+    explicit NodeTimeMemento(const ecf::TimeAttr& attr)
+        : attr_(attr) {}
     NodeTimeMemento() = default;
 
 private:
@@ -617,9 +787,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node day.
+ *
+ * The memento captures the updated day to update the recipient node.
+ */
 class NodeDayMemento : public Memento {
 public:
-    explicit NodeDayMemento(const DayAttr& attr) : attr_(attr) {}
+    explicit NodeDayMemento(const DayAttr& attr)
+        : attr_(attr) {}
     NodeDayMemento() = default;
 
 private:
@@ -635,9 +811,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node cron.
+ *
+ * The memento captures the updated cron to update the recipient node.
+ */
 class NodeCronMemento : public Memento {
 public:
-    explicit NodeCronMemento(const ecf::CronAttr& attr) : attr_(attr) {}
+    explicit NodeCronMemento(const ecf::CronAttr& attr)
+        : attr_(attr) {}
     NodeCronMemento() = default;
 
 private:
@@ -653,10 +835,16 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node aviso.
+ *
+ * The memento captures the updated aviso to update the recipient node.
+ */
 class NodeAvisoMemento : public Memento {
 public:
     NodeAvisoMemento() = default;
-    explicit NodeAvisoMemento(const ecf::AvisoAttr& a) : aviso_(a.make_detached()) {}
+    explicit NodeAvisoMemento(const ecf::AvisoAttr& a)
+        : aviso_(a.make_detached()) {}
 
 private:
     void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {
@@ -671,10 +859,16 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node mirror.
+ *
+ * The memento captures the updated mirror to update the recipient node.
+ */
 class NodeMirrorMemento : public Memento {
 public:
     NodeMirrorMemento() = default;
-    explicit NodeMirrorMemento(const ecf::MirrorAttr& a) : mirror_(a.make_detached()) {}
+    explicit NodeMirrorMemento(const ecf::MirrorAttr& a)
+        : mirror_(a.make_detached()) {}
 
 private:
     void do_incremental_node_sync(Node* n, std::vector<ecf::Aspect::Type>& aspects, bool f) const override {
@@ -689,9 +883,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node date.
+ *
+ * The memento captures the updated date to update the recipient node.
+ */
 class NodeDateMemento : public Memento {
 public:
-    explicit NodeDateMemento(const DateAttr& attr) : attr_(attr) {}
+    explicit NodeDateMemento(const DateAttr& attr)
+        : attr_(attr) {}
     NodeDateMemento() = default;
 
 private:
@@ -707,9 +907,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node zombie.
+ *
+ * The memento captures the updated zombie to update the recipient node.
+ */
 class NodeZombieMemento : public Memento {
 public:
-    explicit NodeZombieMemento(const ZombieAttr& attr) : attr_(attr) {}
+    explicit NodeZombieMemento(const ZombieAttr& attr)
+        : attr_(attr) {}
     NodeZombieMemento() = default;
 
 private:
@@ -725,9 +931,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a node verify - n.b. VerifyAttr is used for internal debugging purposes only.
+ *
+ * The memento captures the updated verify to update the recipient node.
+ */
 class NodeVerifyMemento : public Memento {
 public:
-    explicit NodeVerifyMemento(const std::vector<VerifyAttr>& attr) : verifys_(attr) {}
+    explicit NodeVerifyMemento(const std::vector<VerifyAttr>& attr)
+        : verifys_(attr) {}
     NodeVerifyMemento() = default;
 
 private:
@@ -744,6 +956,11 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to a submittable node (i.e. Task or Alias).
+ *
+ * The memento captures the job password, rid, try no, and reason for early termination to update the recipient node.
+ */
 class SubmittableMemento : public Memento {
 public:
     SubmittableMemento(const std::string& jobsPassword,
@@ -775,9 +992,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to the suite's clock.
+ *
+ * The memento captures the updated clock to update the recipient suite.
+ */
 class SuiteClockMemento : public Memento {
 public:
-    explicit SuiteClockMemento(const ClockAttr& c) : clockAttr_(c) {}
+    explicit SuiteClockMemento(const ClockAttr& c)
+        : clockAttr_(c) {}
     SuiteClockMemento() = default;
 
 private:
@@ -793,9 +1016,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to the suite's begin status.
+ *
+ * The memento captures the begin status to update the recipient suite.
+ */
 class SuiteBeginDeltaMemento : public Memento {
 public:
-    explicit SuiteBeginDeltaMemento(bool begun) : begun_(begun) {}
+    explicit SuiteBeginDeltaMemento(bool begun)
+        : begun_(begun) {}
     SuiteBeginDeltaMemento() = default;
 
 private:
@@ -811,9 +1040,15 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+/**
+ * Represents an update to the suite's calendar.
+ *
+ * The memento captures the updated calendar to update the recipient suite.
+ */
 class SuiteCalendarMemento : public Memento {
 public:
-    explicit SuiteCalendarMemento(const ecf::Calendar& cal) : cal_(cal) {}
+    explicit SuiteCalendarMemento(const ecf::Calendar& cal)
+        : cal_(cal) {}
     SuiteCalendarMemento() = default;
 
 private:

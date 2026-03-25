@@ -17,8 +17,6 @@
 #include "ecflow/node/Defs.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
 // =====================================================================================================
 // #define DEBUG_SERVER_SYNC 1  # Also update DefsCache::DEBUG_SERVER_SYNC
@@ -250,8 +248,8 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
 void SSyncCmd::cleanup() {
     /// run in the server, after command sent to client
     incremental_changes_.cleanup();
-    std::string().swap(server_defs_);
-    std::string().swap(full_server_defs_as_string_); // will typically be empty in server
+    std::string{}.swap(server_defs_);
+    std::string{}.swap(full_server_defs_as_string_); // will typically be empty in server
 }
 
 bool SSyncCmd::equals(ServerToClientCmd* rhs) const {
@@ -288,8 +286,8 @@ bool SSyncCmd::do_sync(ServerReply& server_reply, bool debug) const {
         server_reply.set_sync(true);
         server_reply.set_full_sync(true);
         if (debug) {
-            cout << "  SSyncCmd::do_sync::*FULL sync*, client side state/modify numbers("
-                 << server_defs->state_change_no() << "," << server_defs->modify_change_no() << ")\n";
+            std::cout << "  SSyncCmd::do_sync::*FULL sync*, client side state/modify numbers("
+                      << server_defs->state_change_no() << "," << server_defs->modify_change_no() << ")\n";
         }
 #ifdef DEBUG_CLIENT_SYNC
         cout << "SSyncCmd::do_sync: defs *FULL sync*, client side state/modify numbers("
@@ -316,9 +314,9 @@ bool SSyncCmd::do_sync(ServerReply& server_reply, bool debug) const {
         server_reply.set_sync(true);
         server_reply.set_full_sync(true);
         if (debug) {
-            cout << "  SSyncCmd::do_sync::*FULL CACHE sync*, client side state/modify numbers("
-                 << server_reply.client_defs_->state_change_no() << "," << server_reply.client_defs_->modify_change_no()
-                 << ")\n";
+            std::cout << "  SSyncCmd::do_sync::*FULL CACHE sync*, client side state/modify numbers("
+                      << server_reply.client_defs_->state_change_no() << ","
+                      << server_reply.client_defs_->modify_change_no() << ")\n";
         }
 #ifdef DEBUG_CLIENT_SYNC
         cout << ": client side state/modify numbers(" << server_reply.client_defs_->state_change_no() << ","
@@ -350,10 +348,10 @@ bool SSyncCmd::do_sync(ServerReply& server_reply, bool debug) const {
         server_reply.set_sync(changes_made_to_client);
 
         if (debug) {
-            cout << "  SSyncCmd::do_sync::*INCREMENTAL sync*, client side state/modify numbers("
-                 << incremental_changes_.get_server_state_change_no() << ","
-                 << incremental_changes_.get_server_modify_change_no() << ") changes_made_to_client("
-                 << changes_made_to_client << ")\n";
+            std::cout << "  SSyncCmd::do_sync::*INCREMENTAL sync*, client side state/modify numbers("
+                      << incremental_changes_.get_server_state_change_no() << ","
+                      << incremental_changes_.get_server_modify_change_no() << ") changes_made_to_client("
+                      << changes_made_to_client << ")\n";
         }
 
 #ifdef DEBUG_CLIENT_SYNC

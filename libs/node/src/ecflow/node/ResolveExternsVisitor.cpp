@@ -18,13 +18,12 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ResolveExternsVisitor: Will traverse node tree hierarchy
-ResolveExternsVisitor::ResolveExternsVisitor(Defs* defs) : defs_(defs) {
+ResolveExternsVisitor::ResolveExternsVisitor(Defs* defs)
+    : defs_(defs) {
 }
 
 void ResolveExternsVisitor::visitDefs(Defs* d) {
@@ -70,7 +69,9 @@ void ResolveExternsVisitor::doSetup(Node* node, Ast* ast) {
 
 //======================================================================================
 // AstResolveExternVisitor: Will traverse ASR tree hierarchy
-AstResolveExternVisitor::AstResolveExternVisitor(Node* node, Defs* defs) : triggerNode_(node), defs_(defs) {
+AstResolveExternVisitor::AstResolveExternVisitor(Node* node, Defs* defs)
+    : triggerNode_(node),
+      defs_(defs) {
 }
 
 AstResolveExternVisitor::~AstResolveExternVisitor() = default;
@@ -139,7 +140,7 @@ void AstResolveExternVisitor::visitFlag(AstFlag* astVar) {
 }
 
 void AstResolveExternVisitor::addExtern(const std::string& absNodePath, const std::string& var) {
-    string ext = absNodePath;
+    std::string ext = absNodePath;
     if (!var.empty()) {
         ext += Str::COLON();
         ext += var;

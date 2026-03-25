@@ -18,7 +18,8 @@
 // VLabelAttrType
 //================================
 
-VLabelAttrType::VLabelAttrType() : VAttributeType("label") {
+VLabelAttrType::VLabelAttrType()
+    : VAttributeType("label") {
     dataCount_                      = 3;
     searchKeyToData_["label_name"]  = NameIndex;
     searchKeyToData_["label_value"] = ValueIndex;
@@ -70,7 +71,8 @@ void VLabelAttrType::encode_empty(QStringList& data) const {
 //
 //=====================================================
 
-VLabelAttr::VLabelAttr(VNode* parent, const Label& /*label*/, int index) : VAttribute(parent, index) {
+VLabelAttr::VLabelAttr(VNode* parent, const Label& /*label*/, int index)
+    : VAttribute(parent, index) {
 }
 
 int VLabelAttr::lineNum() const {

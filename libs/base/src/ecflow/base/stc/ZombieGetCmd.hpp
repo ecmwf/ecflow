@@ -22,7 +22,8 @@ class AbstractServer;
 class ZombieGetCmd final : public ServerToClientCmd {
 public:
     explicit ZombieGetCmd(AbstractServer*);
-    ZombieGetCmd() : ServerToClientCmd() {}
+    ZombieGetCmd()
+        : ServerToClientCmd() {}
 
     void init(AbstractServer*);
     bool handle_server_response(ServerReply&, Cmd_ptr cts_cmd, bool debug) const override;

@@ -211,25 +211,31 @@ public:
 
     /// Assumes input argument is of the form /suite/family/task, /suite/family/family/task
     node_ptr findAbsNode(const std::string& pathToNode) const;
+
+    ///
+    /// @brief Check if the given path + attribute is listed as an extern.
+    ///
+    /// When the attribute is empty, the function simply checks if the node itself is listed as an extern;
+    /// othersise, the function checks if the the attribute of the node (in the form of '<nodePath>:<externObj>')
+    /// is listed as an extern.
+    ///
+    /// @param pathToNode The path to the node
+    /// @param node_attr_name The attribute name, can be empty
+    /// @return true if found, false otherwise
+    ///
     bool find_extern(const std::string& pathToNode, const std::string& node_attr_name) const;
+
     suite_ptr findSuite(const std::string& name) const;
     std::string find_node_path(const std::string& type, const std::string& name) const;
     node_ptr find_node(const std::string& type, const std::string& pathToNode) const;
 
-    const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }
+    [[deprecated]] const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }
+    auto& suites() { return suiteVec_; }
+    const auto& suites() const { return suiteVec_; }
 
     /// Given a path, /suite/family/task, find node which is the closest
     node_ptr find_closest_matching_node(const std::string& pathToNode) const;
 
-    void getAllFamilies(std::vector<Family*>&) const;
-    void getAllNodes(std::vector<Node*>&) const;
-    void getAllTasks(std::vector<Task*>&) const;
-    void getAllSubmittables(std::vector<Submittable*>&) const;
-    void get_all_active_submittables(std::vector<Submittable*>&) const;
-    void get_all_nodes(std::vector<node_ptr>&) const;
-    void get_all_tasks(std::vector<task_ptr>&) const;
-    void get_all_aliases(std::vector<alias_ptr>&) const;
-    void getAllAstNodes(std::set<Node*>&) const;
     const std::set<std::string>& externs() const { return externs_; }
 
     /// Access the server state (i.e., State, Variables, etc.)
@@ -492,9 +498,12 @@ private:
 class DefsHistoryParser {
 public:
     DefsHistoryParser();
+
     // Disable copy (and move) semantics
-    DefsHistoryParser(const DefsHistoryParser&)                  = delete;
-    const DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
+    DefsHistoryParser(const DefsHistoryParser&)            = delete;
+    DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
+    DefsHistoryParser(DefsHistoryParser&&)                 = default;
+    DefsHistoryParser& operator=(DefsHistoryParser&&)      = default;
 
     void parse(const std::string& line);
     const std::vector<std::string>& parsed_messages() const { return parsed_messages_; }
@@ -507,10 +516,15 @@ private:
 // Start notification. End notification automatically signalled, Even if exception raised.
 class ChangeStartNotification {
 public:
-    explicit ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start(); }
+    explicit ChangeStartNotification(defs_ptr defs)
+        : defs_ptr_(defs) {
+        defs_ptr_->notify_start();
+    }
     // Disable copy (and move) semantics
-    ChangeStartNotification(const ChangeStartNotification&)                  = delete;
-    const ChangeStartNotification& operator=(const ChangeStartNotification&) = delete;
+    ChangeStartNotification(const ChangeStartNotification&)            = delete;
+    ChangeStartNotification& operator=(const ChangeStartNotification&) = delete;
+    ChangeStartNotification(ChangeStartNotification&&)                 = delete;
+    ChangeStartNotification& operator=(ChangeStartNotification&&)      = delete;
 
     ~ChangeStartNotification() { defs_ptr_->notify_end(); }
 

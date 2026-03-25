@@ -263,7 +263,7 @@
      <normaloff>:/viewer/images/add_table.svg</normaloff>:/viewer/images/add_table.svg</iconset>
    </property>
    <property name="text">
-    <string>Add ta&amp;ble view panel</string>
+    <string>Add ta&amp;ble view panel...</string>
    </property>
    <property name="toolTip">
     <string>Add table widget</string>

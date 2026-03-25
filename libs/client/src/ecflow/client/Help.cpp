@@ -19,15 +19,12 @@
 
 namespace /* __anonymous__ */ {
 
-using description_t = boost::program_options::option_description;
-using options_t     = std::vector<boost::shared_ptr<boost::program_options::option_description>>;
-
 struct CommandFilter
 {
     template <typename PREDICATE>
-    static void select_by(options_t& options, PREDICATE select) {
+    static void select_by(Help::descriptions_t& options, PREDICATE select) {
         // filter non-command options
-        options_t filtered;
+        Help::descriptions_t filtered;
         std::copy_if(std::begin(options),
                      std::end(options),
                      std::back_inserter(filtered),
@@ -203,7 +200,7 @@ std::string client_env_description = make_client_env_description();
 
 std::string client_task_env_description = make_task_env_description();
 
-int get_options_max_width(const options_t& options) {
+int get_options_max_width(const Help::descriptions_t& options) {
     size_t vec_size  = options.size();
     size_t max_width = 0;
     for (size_t i = 0; i < vec_size; i++) {
@@ -213,7 +210,7 @@ int get_options_max_width(const options_t& options) {
     return static_cast<int>(max_width);
 }
 
-void sort_options_by_long_name(options_t& options) {
+void sort_options_by_long_name(Help::descriptions_t& options) {
     std::sort(
         options.begin(), options.end(), [](const auto& a, const auto& b) { return a->long_name() < b->long_name(); });
 }
@@ -222,7 +219,8 @@ class Documentation {
 public:
     using descriptions_t = boost::program_options::options_description;
 
-    explicit Documentation(const descriptions_t& descriptions) : descriptions_{descriptions} {}
+    explicit Documentation(const descriptions_t& descriptions)
+        : descriptions_{descriptions} {}
 
     void show(std::ostream& os, const std::string& topic) const;
 
@@ -314,7 +312,7 @@ void Documentation::show_list_options(std::ostream& os) const {
 template <typename PREDICATE>
 void Documentation::show_table(std::ostream& os, PREDICATE select, size_t columns) const {
     // take a copy, since we need to sort
-    options_t options = descriptions_.options();
+    auto options = descriptions_.options();
 
     // filter for real commands
     CommandFilter::select_by(options, select);
@@ -336,7 +334,7 @@ template <typename PREDICATE>
 void Documentation::show_summary(std::ostream& os, PREDICATE select) const {
 
     // take a copy, since we need to sort
-    options_t options = descriptions_.options();
+    auto options = descriptions_.options();
 
     // filter for real commands
     CommandFilter::select_by(options, select);
@@ -424,13 +422,13 @@ struct Help::Impl
     Documentation documentation_;
     std::string topic_;
 
-    Impl(const descriptions_t& descriptions, std::string topic)
-        : documentation_(descriptions),
+    Impl(const description_t& description, std::string topic)
+        : documentation_(description),
           topic_(std::move(topic)) {}
 };
 
-Help::Help(const descriptions_t& descriptions, const std::string& topic)
-    : impl_(std::make_unique<Help::Impl>(descriptions, topic)) {
+Help::Help(const description_t& description, const std::string& topic)
+    : impl_(std::make_unique<Help::Impl>(description, topic)) {
 }
 
 Help::~Help() = default;

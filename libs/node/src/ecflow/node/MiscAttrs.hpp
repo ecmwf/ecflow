@@ -20,11 +20,16 @@
 class MiscAttrs {
 public:
     MiscAttrs() = default;
-    MiscAttrs(const MiscAttrs& rhs);
-    explicit MiscAttrs(Node* node) : node_(node) {}
-    ~MiscAttrs();
 
-    MiscAttrs& operator=(const MiscAttrs&) = delete;
+    explicit MiscAttrs(Node* node)
+        : node_(node) {}
+
+    MiscAttrs(const MiscAttrs& rhs)            = default;
+    MiscAttrs& operator=(const MiscAttrs&)     = default;
+    MiscAttrs(MiscAttrs&&) noexcept            = default;
+    MiscAttrs& operator=(MiscAttrs&&) noexcept = default;
+
+    ~MiscAttrs() = default;
 
     // needed by node serialisation
     void set_node(Node* n);

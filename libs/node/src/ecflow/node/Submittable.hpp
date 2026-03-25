@@ -18,7 +18,8 @@ class SubGenVariables;
 
 class Submittable : public Node {
 protected:
-    Submittable(const std::string& name, bool check) : Node(name, check) {}
+    Submittable(const std::string& name, bool check)
+        : Node(name, check) {}
     Submittable() = default;
     Submittable(const Submittable& rhs)
         : Node(rhs),
@@ -171,9 +172,14 @@ private:
 class SubGenVariables {
 public:
     explicit SubGenVariables(const Submittable*);
+
     // Disable copy (and move) semantics
-    SubGenVariables(const SubGenVariables&)                  = delete;
-    const SubGenVariables& operator=(const SubGenVariables&) = delete;
+    SubGenVariables(const SubGenVariables&)            = delete;
+    SubGenVariables& operator=(const SubGenVariables&) = delete;
+    SubGenVariables(SubGenVariables&&)                 = delete;
+    SubGenVariables& operator=(SubGenVariables&&)      = delete;
+
+    ~SubGenVariables() = default;
 
     void update_generated_variables() const;
 

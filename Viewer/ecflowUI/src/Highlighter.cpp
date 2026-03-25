@@ -25,7 +25,8 @@ std::string Highlighter::parFile_;
 
 #include "VProperty.hpp"
 
-Highlighter::Highlighter(QTextDocument* parent, QString id) : QSyntaxHighlighter(parent) {
+Highlighter::Highlighter(QTextDocument* parent, QString id)
+    : QSyntaxHighlighter(parent) {
     load(id);
 }
 
@@ -96,21 +97,20 @@ void Highlighter::load(QString id) {
         QString pattern;
         QTextCharFormat format;
 
-        ptree::const_assoc_iterator itPar;
         ptree ptPar = itRule->second;
 
-        if ((itPar = ptPar.find("pattern")) != ptPar.not_found()) {
+        if (auto itPar = ptPar.find("pattern"); itPar != ptPar.not_found()) {
             pattern = QString::fromStdString(itPar->second.get_value<std::string>());
         }
-        if ((itPar = ptPar.find("colour")) != ptPar.not_found()) {
+        if (auto itPar = ptPar.find("colour"); itPar != ptPar.not_found()) {
             format.setForeground(VProperty::toColour(itPar->second.get_value<std::string>()));
         }
-        if ((itPar = ptPar.find("bold")) != ptPar.not_found()) {
+        if (auto itPar = ptPar.find("bold"); itPar != ptPar.not_found()) {
             if (itPar->second.get_value<std::string>() == "true") {
                 format.setFontWeight(QFont::Bold);
             }
         }
-        if ((itPar = ptPar.find("italic")) != ptPar.not_found()) {
+        if (auto itPar = ptPar.find("italic"); itPar != ptPar.not_found()) {
             if (itPar->second.get_value<std::string>() == "true") {
                 format.setFontItalic(true);
             }

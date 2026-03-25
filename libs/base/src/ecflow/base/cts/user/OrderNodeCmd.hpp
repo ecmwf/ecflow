@@ -16,7 +16,9 @@
 
 class OrderNodeCmd final : public UserCmd {
 public:
-    OrderNodeCmd(const std::string& absNodepath, NOrder::Order op) : absNodepath_(absNodepath), option_(op) {}
+    OrderNodeCmd(const std::string& absNodepath, NOrder::Order op)
+        : absNodepath_(absNodepath),
+          option_(op) {}
     OrderNodeCmd() = default;
 
     [[deprecated]] const std::string& absNodePath() const { return absNodepath_; }

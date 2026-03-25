@@ -17,7 +17,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool TodayParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     size_t line_tokens_size = lineTokens.size();

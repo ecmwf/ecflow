@@ -26,8 +26,9 @@ class access;
 // Use compiler , generated destructor, assignment,  copy constructor
 class Label : public boost::equality_comparable<Label> {
 public:
-    Label(const std::string& name, const std::string& value, const std::string& new_value = "", bool check_name = true);
     Label() = default;
+
+    Label(const std::string& name, const std::string& value, const std::string& new_value = "", bool check_name = true);
 
     const std::string& name() const { return n_; }
     const std::string& value() const { return v_; }

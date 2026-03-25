@@ -15,6 +15,7 @@
     #include <sys/select.h> // hp-ux uses pselect
 #endif
 
+#include <array>
 #include <iomanip>
 #include <memory>
 #include <sstream>
@@ -35,7 +36,7 @@
 /// \note If you change this file then Connection.hpp may also need changing
 ///
 
-typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
+using ssl_socket = boost::asio::ssl::stream<boost::asio::ip::tcp::socket>;
 
 /// The connection class provides serialisation primitives on top of a socket.
 /**
@@ -150,13 +151,13 @@ private:
         }
         else {
             // Determine the length of the serialized data.
-            std::istringstream is(std::string(inbound_header_, header_length));
+            std::istringstream is(std::string(inbound_header_.data(), inbound_header_.size()));
             std::size_t inbound_data_size = 0;
             if (!(is >> std::hex >> inbound_data_size)) {
 
                 // Header doesn't seem to be valid. Inform the caller.
                 std::string err = "ssl_connection::handle_read_header: invalid header : " +
-                                  std::string(inbound_header_, header_length);
+                                  std::string(inbound_header_.data(), inbound_header_.size());
                 log_error(err.c_str());
                 handler(boost::asio::error::invalid_argument);
                 return;
@@ -211,14 +212,14 @@ private:
     static void log_archive_error(const char* msg, const std::exception& ae, const std::string& data);
 
 private:
-    ssl_socket socket_;                  /// The underlying socket.
-    std::string outbound_header_;        /// Holds an out-bound header.
-    std::string outbound_data_;          /// Holds the out-bound data.
-    enum { header_length = 8 };          /// The size of a fixed length header.
-    char inbound_header_[header_length]; /// Holds an in-bound header.
-    std::vector<char> inbound_data_;     /// Holds the in-bound data.
+    ssl_socket socket_;                              /// The underlying socket.
+    std::string outbound_header_;                    /// Holds an out-bound header.
+    std::string outbound_data_;                      /// Holds the out-bound data.
+    enum { header_length = 8 };                      /// The size of a fixed length header.
+    std::array<char, header_length> inbound_header_; /// Holds an in-bound header.
+    std::vector<char> inbound_data_;                 /// Holds the in-bound data.
 };
 
-typedef std::shared_ptr<ssl_connection> ssl_connection_ptr;
+using ssl_connection_ptr = std::shared_ptr<ssl_connection>;
 
 #endif /* ecflow_base_ssl_connection_HPP */

@@ -30,6 +30,7 @@
 #include "ecflow/node/ExprDuplicate.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
 #include "ecflow/node/Memento.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeState.hpp"
 #include "ecflow/node/NodeStats.hpp"
 #include "ecflow/node/NodeTreeVisitor.hpp"
@@ -42,17 +43,21 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_JOB_SUBMISSION 1
 // #define DEBUG_MEMENTO 1
 
 Defs::Defs() = default;
 
-Defs::Defs(const std::string& port) : server_(port) {
+Defs::Defs(const std::string& port)
+    : server_(port) {
 }
 
-Defs::Defs(const Defs& rhs) : state_(rhs.state_), server_(rhs.server_), flag_(rhs.flag_), client_suite_mgr_(this) {
+Defs::Defs(const Defs& rhs)
+    : state_(rhs.state_),
+      server_(rhs.server_),
+      flag_(rhs.flag_),
+      client_suite_mgr_(this) {
     size_t theSize = rhs.suiteVec_.size();
     for (size_t s = 0; s < theSize; s++) {
         suite_ptr suite_copy = std::make_shared<Suite>(*rhs.suiteVec_[s]);
@@ -113,13 +118,9 @@ defs_ptr Defs::create(const std::string& port) {
 } // Defs::create(port)
 
 Defs::~Defs() {
-    //    cout << "   Deleting defs "\n";
     if (!Ecf::server()) {
         notify_delete();
     }
-
-    // Duplicate AST are held in a static map. Delete them, to avoid valgrind complaining
-    ExprDuplicate reclaim_cloned_ast_memory;
 }
 
 void Defs::handle_migration() {
@@ -190,7 +191,7 @@ void Defs::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
     }
 
     if (jobCtrl->verbose()) {
-        cout << "Defs::check_job_creation(verbose):\n";
+        std::cout << "Defs::check_job_creation(verbose):\n";
     }
 
     // This function should NOT really change the data model
@@ -227,9 +228,8 @@ void Defs::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
             node->setStateOnlyHierarchically(NState::UNKNOWN);
         }
         else {
-            std::stringstream ss;
-            ss << "Defs::check_job_creation: failed as node path '" << jobCtrl->node_path() << "' does not exist.\n";
-            jobCtrl->error_msg() = ss.str();
+            jobCtrl->error_msg() = MESSAGE("Defs::check_job_creation: failed as node path '" << jobCtrl->node_path()
+                                                                                             << "' does not exist.\n");
         }
     }
 }
@@ -249,7 +249,7 @@ static void remove_autocancelled(const std::vector<node_ptr>& auto_cancelled_nod
     // Permanently remove any auto-cancelled nodes.
     if (!auto_cancelled_nodes.empty()) {
         auto theNodeEnd = auto_cancelled_nodes.end();
-        string msg;
+        std::string msg;
         for (auto n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
             // If we have two autocancel in the hierarchy, with same attributes. Then
             // (*n)->remove() on the second will fail( with a crash, SuiteChanged0 destructor,  no suite pointer)
@@ -379,7 +379,7 @@ void Defs::absorb(Defs* input_defs, bool force) {
     server_state().add_or_update_user_variables(input_defs->server_state().user_variables());
 
     // This only works on the client side. since server does not store externs
-    const set<string>& ex = input_defs->externs();
+    const std::set<std::string>& ex = input_defs->externs();
     for (const auto& i : ex) {
         add_extern(i);
     }
@@ -408,16 +408,13 @@ bool Defs::verification(std::string& errorMsg) const {
 
 suite_ptr Defs::add_suite(const std::string& name) {
     if (findSuite(name).get()) {
-        std::stringstream ss;
-        ss << "Add Suite failed: A Suite of name '" << name << "' already exists";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Suite failed: A Suite of name '" << name << "' already exists"));
     }
     suite_ptr s = Suite::create(name);
 
     if (s->defs()) {
-        std::stringstream ss;
-        ss << "Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs "));
     }
 
     insert_suite(s, std::numeric_limits<std::size_t>::max());
@@ -430,15 +427,12 @@ suite_ptr Defs::add_suite(const std::string& name) {
 
 void Defs::addSuite(const suite_ptr& s, size_t position) {
     if (findSuite(s->name()).get()) {
-        std::stringstream ss;
-        ss << "Add Suite failed: A Suite of name '" << s->name() << "' already exists";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Add Suite failed: A Suite of name '" << s->name() << "' already exists"));
     }
 
     if (s->defs()) {
-        std::stringstream ss;
-        ss << "Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs "));
     }
 
     insert_suite(s, position);
@@ -449,15 +443,12 @@ void Defs::addSuite(const suite_ptr& s, size_t position) {
 
 void Defs::placeSuite(const suite_ptr& s, size_t position) {
     if (findSuite(s->name()).get()) {
-        std::stringstream ss;
-        ss << "Place Suite failed: A Suite of name '" << s->name() << "' already exists";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Place Suite failed: A Suite of name '" << s->name() << "' already exists"));
     }
 
     if (s->defs()) {
-        std::stringstream ss;
-        ss << "Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Place Suite failed: The suite of name '" << s->name() << "' already owned by another Defs "));
     }
 
     insert_suite(s, position);
@@ -489,10 +480,10 @@ suite_ptr Defs::removeSuite(suite_ptr s) {
     }
 
     // Something serious has gone wrong. Cannot find the suite
-    cout << "Defs::removeSuite: assert failure:  suite '" << s->name() << "' suiteVec_.size() = " << suiteVec_.size()
-         << "\n";
+    std::cout << "Defs::removeSuite: assert failure:  suite '" << s->name()
+              << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
     for (unsigned si = 0; si < suiteVec_.size(); ++si) {
-        cout << si << " " << suiteVec_[si]->name() << "\n";
+        std::cout << si << " " << suiteVec_[si]->name() << "\n";
     }
     LOG_ASSERT(false, "Defs::removeSuite the suite not found");
     return suite_ptr();
@@ -522,10 +513,10 @@ node_ptr Defs::removeChild(Node* child) {
     }
 
     // Something has gone wrong.
-    cout << "Defs::removeChild: assert failed:  suite '" << child->name() << "' suiteVec_.size() = " << suiteVec_.size()
-         << "\n";
+    std::cout << "Defs::removeChild: assert failed:  suite '" << child->name()
+              << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
     for (unsigned i = 0; i < suiteVec_.size(); ++i) {
-        cout << i << " " << suiteVec_[i]->name() << "\n";
+        std::cout << i << " " << suiteVec_[i]->name() << "\n";
     }
     LOG_ASSERT(false, "Defs::removeChild,the suite not found");
     return node_ptr();
@@ -652,25 +643,24 @@ void Defs::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
 void Defs::check_suite_can_begin(const suite_ptr& suite) const {
     NState::State suiteState = suite->state();
     if (!suite->begun() && suiteState != NState::UNKNOWN && suiteState != NState::COMPLETE) {
-        int count = 0;
-        std::vector<Task*> tasks;
-        getAllTasks(tasks);
-        std::stringstream ts;
+        int count  = 0;
+        auto tasks = ecf::get_all_tasks(*this);
+        std::ostringstream ss;
         for (auto& task : tasks) {
             if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
-                ts << "   " << task->absNodePath() << "\n";
+                ss << "   " << task->absNodePath() << "\n";
                 count++;
             }
         }
         /// allow suite to begin even its aborted provide no tasks in active or submitted states
         if (count > 0) {
-            std::stringstream ss;
-            ss << "Begin failed as suite " << suite->name() << "(computed state=" << NState::toString(suiteState)
-               << ") can only begin if its in UNKNOWN or COMPLETE state\n";
-            ss << "Found " << count << " tasks with state 'active' or 'submitted'\n";
-            ss << ts.str();
-            ss << "Use the force argument to bypass this check, at the risk of creating zombies\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Begin failed as suite "
+                        << suite->name() << "(computed state=" << NState::toString(suiteState)
+                        << ") can only begin if its in UNKNOWN or COMPLETE state\n"
+                        << "Found " << count << " tasks with state 'active' or 'submitted'\n"
+                        << ss.str()
+                        << "Use the force argument to bypass this check, at the risk of creating zombies\n"));
         }
     }
 }
@@ -686,30 +676,30 @@ bool Defs::hasTimeDependencies() const {
 }
 
 std::string Defs::dump_edit_history() const {
-    std::stringstream os;
+    std::ostringstream ss;
     for (const auto& i : edit_history_) {
-        os << "history ";
-        os << i.first;
-        os << "  ";                                     // node path
+        ss << "history ";
+        ss << i.first;
+        ss << "  ";                                     // node path
         const std::vector<std::string>& vec = i.second; // list of requests
         for (const auto& c : vec) {
 
             // We expect to output a single newline, hence if there are additional new lines
             // It can mess  up, re-parse. i.e during alter change label/value, user could have added newlines
             if (c.find("\n") == std::string::npos) {
-                os << " ";
-                os << c;
+                ss << " ";
+                ss << c;
             }
             else {
                 std::string h = c;
                 Str::replaceall(h, "\n", "\\n");
-                os << " ";
-                os << h;
+                ss << " ";
+                ss << h;
             }
         }
-        os << "\n";
+        ss << "\n";
     }
-    return os.str();
+    return ss.str();
 }
 
 void Defs::read_state(const std::string& line, const std::vector<std::string>& lineTokens) {
@@ -1006,7 +996,7 @@ std::string Defs::find_node_path(const std::string& type, const std::string& nam
             return res;
         }
     }
-    return string();
+    return std::string{};
 }
 
 node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode) const {
@@ -1037,7 +1027,6 @@ node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode)
     }
 
     throw std::runtime_error("Defs::find_node: Node of type can't be found " + type);
-    return node_ptr();
 }
 
 bool Defs::check(std::string& errorMsg, std::string& warningMsg) const {
@@ -1045,62 +1034,6 @@ bool Defs::check(std::string& errorMsg, std::string& warningMsg) const {
         s->check(errorMsg, warningMsg);
     }
     return errorMsg.empty();
-}
-
-void Defs::getAllTasks(std::vector<Task*>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllTasks(tasks);
-    }
-}
-
-void Defs::getAllSubmittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllSubmittables(tasks);
-    }
-}
-
-void Defs::get_all_active_submittables(std::vector<Submittable*>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_active_submittables(tasks);
-    }
-}
-
-void Defs::get_all_tasks(std::vector<task_ptr>& tasks) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_tasks(tasks);
-    }
-}
-
-void Defs::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_nodes(nodes);
-    }
-}
-
-void Defs::get_all_aliases(std::vector<alias_ptr>& aliases) const {
-    for (const auto& s : suiteVec_) {
-        s->get_all_aliases(aliases);
-    }
-}
-
-void Defs::getAllFamilies(std::vector<Family*>& vec) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllFamilies(vec);
-    }
-}
-
-void Defs::getAllNodes(std::vector<Node*>& vec) const {
-    vec.reserve(vec.size() + suiteVec_.size());
-    for (const auto& s : suiteVec_) {
-        vec.push_back(s.get());
-        s->getAllNodes(vec);
-    }
-}
-
-void Defs::getAllAstNodes(std::set<Node*>& theSet) const {
-    for (const auto& s : suiteVec_) {
-        s->getAllAstNodes(theSet);
-    }
 }
 
 bool Defs::deleteChild(Node* nodeToBeDeleted) {
@@ -1165,20 +1098,19 @@ node_ptr Defs::replaceChild(const std::string& path,
     node_ptr serverNode = findAbsNode(path);
     if (!force && serverNode.get()) {
         // Check if serverNode has child tasks in submitted or active states
-        vector<Task*> taskVec;
-        serverNode->getAllTasks(taskVec); // taskVec will be empty if serverNode is a task
-        int count = 0;
+        auto taskVec = ecf::get_all_tasks(*serverNode); // taskVec will be empty if serverNode is a task
+        int count    = 0;
         for (Task* t : taskVec) {
             if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
                 count++;
             }
         }
         if (count != 0) {
-            std::stringstream ss;
-            ss << "Cannot replace node " << serverNode->debugNodePath() << " because it has " << count
-               << " tasks which are active or submitted\n";
-            ss << "Please use the 'force' option to bypass this check, at the expense of creating zombies\n";
-            errorMsg = ss.str();
+            errorMsg =
+                MESSAGE("Cannot replace node "
+                        << serverNode->debugNodePath() << " because it has " << count
+                        << " tasks which are active or submitted\n"
+                        << "Please use the 'force' option to bypass this check, at the expense of creating zombies\n");
             return node_ptr();
         }
     }
@@ -1187,9 +1119,8 @@ node_ptr Defs::replaceChild(const std::string& path,
     if (!createNodesAsNeeded || serverNode.get()) {
         // Then the child must exist in the server defs (i.e. this)
         if (!serverNode.get()) {
-            errorMsg = "Cannot replace child since path ";
-            errorMsg += path;
-            errorMsg += " does not exist on the server definition. Please use <parent> option";
+            errorMsg = MESSAGE("Cannot replace child since path "
+                               << path << " does not exist on the server definition. Please use <parent> option");
             return node_ptr();
         }
 
@@ -1405,9 +1336,7 @@ void Defs::restore(const std::string& the_fileName) {
     /// *************************************************************************
     std::string errorMsg, warningMsg;
     if (!restore(the_fileName, errorMsg, warningMsg)) {
-        std::stringstream e;
-        e << "Defs::defs_restore_from_checkpt: " << errorMsg;
-        throw std::runtime_error(e.str());
+        throw std::runtime_error(MESSAGE("Defs::defs_restore_from_checkpt: " << errorMsg));
     }
 }
 
@@ -1431,9 +1360,7 @@ void Defs::restore_from_string(const std::string& str) {
     /// *************************************************************************
     std::string errorMsg, warningMsg;
     if (!restore_from_string(str, errorMsg, warningMsg)) {
-        std::stringstream e;
-        e << "Defs::restore_from_string: " << errorMsg;
-        throw std::runtime_error(e.str());
+        throw std::runtime_error(MESSAGE("Defs::restore_from_string: " << errorMsg));
     }
 }
 
@@ -1470,23 +1397,19 @@ void Defs::clear() {
 bool Defs::checkInvariants(std::string& errorMsg) const {
     for (const auto& s : suiteVec_) {
         if (s->defs() != this) {
-            std::stringstream ss;
-            ss << "Defs::checkInvariants suite->defs() function not correct. Child suite parent ptr not correct\n";
-            ss << "For suite " << s->name();
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Defs::checkInvariants suite->defs() function not correct. Child suite parent ptr not correct\n"
+                        << "For suite " << s->name());
             return false;
         }
         if (!s->isSuite()) {
-            std::stringstream ss;
-            ss << "Defs::checkInvariants suite isSuite() return NULL ? for suite " << s->name();
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Defs::checkInvariants suite isSuite() return NULL ? for suite " << s->name());
             return false;
         }
         if (s->isSuite() != s->suite()) {
-            std::stringstream ss;
-            ss << "Defs::checkInvariants  s->isSuite(" << s->isSuite() << ") != s->suite(" << s->suite() << ") ";
-            ss << "for suite " << s->name();
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Defs::checkInvariants  s->isSuite(" << s->isSuite() << ") != s->suite(" << s->suite() << ") "
+                                                             << "for suite " << s->name());
             return false;
         }
         if (!s->checkInvariants(errorMsg)) {
@@ -1498,41 +1421,36 @@ bool Defs::checkInvariants(std::string& errorMsg) const {
         /// The change no should NOT be greater than Ecf::state_change_no()
 
         if (state_change_no_ > Ecf::state_change_no()) {
-            std::stringstream ss;
-            ss << "Defs::checkInvariants: state_change_no(" << state_.state_change_no() << ") > Ecf::state_change_no("
-               << Ecf::state_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Defs::checkInvariants: state_change_no("
+                        << state_.state_change_no() << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n");
             return false;
         }
         if (modify_change_no_ > Ecf::modify_change_no()) {
-            std::stringstream ss;
-            ss << "Defs::checkInvariants: modify_change_no_(" << modify_change_no_ << ") > Ecf::modify_change_no("
-               << Ecf::modify_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Defs::checkInvariants: modify_change_no_(" << modify_change_no_ << ") > Ecf::modify_change_no("
+                                                                    << Ecf::modify_change_no() << ")\n");
             return false;
         }
 
         if (flag_.state_change_no() > Ecf::state_change_no()) {
-            std::stringstream ss;
-            ss << "Defs::checkInvariants: flag.state_change_no()(" << flag_.state_change_no()
-               << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Defs::checkInvariants: flag.state_change_no()("
+                        << flag_.state_change_no() << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n");
             return false;
         }
 
         if (state_.state_change_no() > Ecf::state_change_no()) {
-            std::stringstream ss;
-            ss << "Defs::checkInvariants: state_.state_change_no()(" << state_.state_change_no()
-               << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Defs::checkInvariants: state_.state_change_no()("
+                        << state_.state_change_no() << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n");
             return false;
         }
 
         if (server_.state_change_no() > Ecf::state_change_no()) {
-            std::stringstream ss;
-            ss << "Defs::checkInvariants: server_.state_change_no()(" << server_.state_change_no()
-               << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n";
-            errorMsg += ss.str();
+            errorMsg +=
+                MESSAGE("Defs::checkInvariants: server_.state_change_no()("
+                        << server_.state_change_no() << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n");
             return false;
         }
     }
@@ -1664,7 +1582,7 @@ bool Defs::why(std::vector<std::string>& theReasonWhy, bool html) const {
         return true;
     }
     else if (state() != NState::QUEUED && state() != NState::ABORTED) {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (html) {
             ss << "The definition state(" << NState::to_html(state()) << ") is not queued or aborted.";
         }
@@ -1678,7 +1596,7 @@ bool Defs::why(std::vector<std::string>& theReasonWhy, bool html) const {
 
 std::string Defs::toString() const {
     // Let the Client control the print style
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << this;
     return ss.str();
 }
@@ -1716,13 +1634,18 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // ************************************************************************************************
     // determine if defs state changed. make sure this is in sync with defs_only_max_state_change_no()
     // ************************************************************************************************
+
     compound_memento_ptr comp;
+
+    // Create StateMemento to signal a change in state change of the Defs
     if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
         }
         comp->add(std::make_shared<StateMemento>(state_.state()));
     }
+
+    // Create OrderMemento to signal a change in Suite order
     if (order_state_change_no_ > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
@@ -1735,7 +1658,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
         comp->add(std::make_shared<OrderMemento>(order));
     }
 
-    // Determine if the flag changed
+    // Create FlagMemento to signal a change in the flag value
     if (flag_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
@@ -1743,13 +1666,16 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
         comp->add(std::make_shared<FlagMemento>(flag_));
     }
 
-    // determine if defs server state, currently only watch server state. i.e HALTED, SHUTDOWN, RUNNING
+    // Create a ServerStateMemento to signal a change in the server state
+    // Currently only watching server state i.e., HALTED, SHUTDOWN, RUNNING.
     if (server_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
         }
         comp->add(std::make_shared<ServerStateMemento>(server_.get_state()));
     }
+
+    // Create a ServerVariableMemento to signal a change in the list of server variables
     if (server_.variable_state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
@@ -1782,10 +1708,10 @@ void Defs::set_memento(const StateMemento* memento, std::vector<ecf::Aspect::Typ
 
     if (aspect_only) {
         aspects.push_back(ecf::Aspect::STATE);
+        return;
     }
-    else {
-        set_state(memento->state_);
-    }
+
+    set_state(memento->state_);
 }
 
 void Defs::set_memento(const ServerStateMemento* memento, std::vector<ecf::Aspect::Type>& aspects, bool aspect_only) {
@@ -1795,10 +1721,10 @@ void Defs::set_memento(const ServerStateMemento* memento, std::vector<ecf::Aspec
 
     if (aspect_only) {
         aspects.push_back(ecf::Aspect::SERVER_STATE);
+        return;
     }
-    else {
-        server_.set_state(memento->state_);
-    }
+
+    server_.set_state(memento->state_);
 }
 
 void Defs::set_memento(const ServerVariableMemento* memento,
@@ -1839,19 +1765,20 @@ void Defs::set_memento(const OrderMemento* memento, std::vector<ecf::Aspect::Typ
 
     std::vector<suite_ptr> vec;
     vec.reserve(suiteVec_.size());
-    size_t node_vec_size = suiteVec_.size();
     for (const auto& i : order) {
-        for (size_t t = 0; t < node_vec_size; t++) {
-            if (i == suiteVec_[t]->name()) {
-                vec.push_back(suiteVec_[t]);
+        for (auto& suite : suiteVec_) {
+            if (i == suite->name()) {
+                vec.push_back(suite);
                 break;
             }
         }
     }
+
     if (vec.size() != suiteVec_.size()) {
         std::cout << "Defs::set_memento could not find all the names\n";
         return;
     }
+
     suiteVec_ = vec;
 }
 
@@ -1863,10 +1790,10 @@ void Defs::set_memento(const FlagMemento* memento, std::vector<ecf::Aspect::Type
 
     if (aspect_only) {
         aspects.push_back(ecf::Aspect::FLAG);
+        return;
     }
-    else {
-        flag_.set_flag(memento->flag_.flag());
-    }
+
+    flag_.set_flag(memento->flag_.flag());
 }
 
 // =====================================================================
@@ -1890,12 +1817,9 @@ void Defs::remove_edit_history(Node* node) {
     }
 
     // When removing a node *it* and all its children also need to be removed.
-    std::vector<node_ptr> node_children;
-    node->get_all_nodes(node_children);
-    for (const auto& c : node_children) {
-
-        auto it = edit_history_.find(c->absNodePath());
-        if (it != edit_history_.end()) {
+    auto children = ecf::get_all_nodes(*node);
+    for (auto node : children) {
+        if (auto it = edit_history_.find(node->absNodePath()); it != edit_history_.end()) {
             edit_history_.erase(it);
         }
     }
@@ -1982,12 +1906,12 @@ void DefsHistoryParser::parse(const std::string& line) {
     }
 
     // fallback, split line based on looking for logType like 'MSG:[' | 'LOG:['
-    string::size_type first = find_log(line, 0);
+    std::string::size_type first = find_log(line, 0);
     if (first == std::string::npos) {
         return;
     }
 
-    string::size_type next = find_log(line, first + 4);
+    std::string::size_type next = find_log(line, first + 4);
     if (next == std::string::npos) {
         parsed_messages_.push_back(line.substr(first));
         return;
@@ -2005,13 +1929,13 @@ void DefsHistoryParser::parse(const std::string& line) {
     }
 }
 
-string::size_type DefsHistoryParser::find_log(const std::string& line, string::size_type pos) const {
+std::string::size_type DefsHistoryParser::find_log(const std::string& line, std::string::size_type pos) const {
     std::vector<std::string> log_types;
     Log::get_log_types(log_types);
 
     for (auto log_type : log_types) {
         log_type += ":[";
-        string::size_type log_type_pos = line.find(log_type, pos);
+        std::string::size_type log_type_pos = line.find(log_type, pos);
         if (log_type_pos != std::string::npos) {
             return log_type_pos;
         }
@@ -2020,14 +1944,10 @@ string::size_type DefsHistoryParser::find_log(const std::string& line, string::s
 }
 
 std::string Defs::stats() const {
-    std::vector<node_ptr> node_vec;
-    get_all_nodes(node_vec);
+    auto node_vec = ecf::get_all_nodes(*this);
 
-    std::vector<Family*> family_vec;
-    getAllFamilies(family_vec);
-
-    std::vector<task_ptr> task_vec;
-    get_all_tasks(task_vec);
+    auto family_vec = ecf::get_all_families(*this);
+    auto task_vec   = ecf::get_all_tasks(*this);
 
     size_t alias = 0;
     for (auto task : task_vec) {

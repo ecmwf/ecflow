@@ -30,7 +30,8 @@ public:
     using notifications_t = std::vector<notification_t>;
 
     template <typename... Args>
-    explicit Controller(Args&&... args) : running_{std::forward<Args>(args)...} {}
+    explicit Controller(Args&&... args)
+        : running_{std::forward<Args>(args)...} {}
 
     // Attribute-facing API
 

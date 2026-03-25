@@ -48,8 +48,10 @@ public:
           forTest_(forTest) {}
 
     // Disable copy (and move) semantics
-    CalendarUpdateParams(const CalendarUpdateParams&)                  = delete;
-    const CalendarUpdateParams& operator=(const CalendarUpdateParams&) = delete;
+    CalendarUpdateParams(const CalendarUpdateParams&)            = delete;
+    CalendarUpdateParams& operator=(const CalendarUpdateParams&) = delete;
+    CalendarUpdateParams(CalendarUpdateParams&&)                 = delete;
+    CalendarUpdateParams& operator=(CalendarUpdateParams&&)      = delete;
 
     const boost::posix_time::ptime& timeNow() const { return timeNow_; }
     const boost::posix_time::time_duration& serverPollPeriod() const { return serverPollPeriod_; }

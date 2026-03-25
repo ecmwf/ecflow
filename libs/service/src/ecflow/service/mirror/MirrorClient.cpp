@@ -17,6 +17,7 @@
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/service/Log.hpp"
 
 namespace ecf::service::mirror {
@@ -36,11 +37,31 @@ struct MirrorClient::Impl
 
     ~Impl() {
         // Release Suite filter handle
-        invoker_.ch1_drop();
+        try {
+            // 1. Customise the client to wait a very short time before declare a connection failure.
+            //    This avoid a potential long delay in case of network issues.
+            invoker_.set_connection_attempts(2);
+            invoker_.set_retry_connection_period(std::chrono::milliseconds{100});
+            invoker_.set_connect_timeout(std::chrono::milliseconds{100});
+
+            // 2. Unregister the suite handle
+            invoker_.ch1_drop();
+        }
+        catch (const std::runtime_error& e) {
+            SLOG(E,
+                 "MirrorClient: Unable to release handle for " << invoker_.host() << ":" << invoker_.port()
+                                                               << ", due to: " << e.what());
+        }
+        catch (...) {
+            SLOG(E,
+                 "MirrorClient: Unable to release handle for " << invoker_.host() << ":" << invoker_.port()
+                                                               << ", due to: unknown problem");
+        }
     }
 };
 
-MirrorClient::MirrorClient() : impl_(std::make_unique<Impl>()) {
+MirrorClient::MirrorClient()
+    : impl_(std::make_unique<Impl>()) {
 }
 
 MirrorClient::~MirrorClient() = default;

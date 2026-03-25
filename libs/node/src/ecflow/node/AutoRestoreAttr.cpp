@@ -22,8 +22,6 @@
     #include "ecflow/core/Ecf.hpp"
 #endif
 
-using namespace std;
-
 namespace ecf {
 
 std::string AutoRestoreAttr::toString() const {
@@ -55,17 +53,16 @@ bool AutoRestoreAttr::operator==(const AutoRestoreAttr& rhs) const {
 }
 
 void AutoRestoreAttr::do_autorestore() {
-    string warning_message;
+    std::string warning_message;
     for (const auto& i : nodes_to_restore_) {
 
         warning_message.clear();
         node_ptr referenceNode = node_->findReferencedNode(i, warning_message);
         if (!referenceNode.get()) {
             /// Could not find the references node
-            std::stringstream ss;
-            ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a path '" << i
-               << "' which cannot be found\n";
-            log(Log::ERR, ss.str());
+            log(Log::ERR,
+                MESSAGE("AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a path '" << i
+                                                             << "' which cannot be found\n"));
             continue;
         }
 
@@ -75,23 +72,22 @@ void AutoRestoreAttr::do_autorestore() {
                 nc->restore();
             }
             catch (std::exception& e) {
-                std::stringstream ss;
-                ss << "AutoRestoreAttr::do_auto_restore: could not autorestore : because : " << e.what();
-                log(Log::ERR, ss.str());
+                log(Log::ERR,
+                    MESSAGE("AutoRestoreAttr::do_auto_restore: could not autorestore : because : " << e.what()));
             }
         }
         else {
-            std::stringstream ss;
-            ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a node '" << i
-               << "' which cannot be restored. Only family and suite nodes can be restored";
-            log(Log::ERR, ss.str());
+            log(Log::ERR,
+                MESSAGE("AutoRestoreAttr::do_auto_restore: "
+                        << node_->debugType() << " references a node '" << i
+                        << "' which cannot be restored. Only family and suite nodes can be restored"));
         }
     }
 }
 
 void AutoRestoreAttr::check(std::string& errorMsg) const {
     std::vector<NodeContainer*> vec;
-    string warning_message;
+    std::string warning_message;
     for (const auto& i : nodes_to_restore_) {
 
         warning_message.clear();
@@ -106,20 +102,17 @@ void AutoRestoreAttr::check(std::string& errorMsg) const {
                 continue;
             }
 
-            std::stringstream ss;
-            ss << "Error: autorestore on node " << node_->debugType() << " references a path '" << i
-               << "' which cannot be found\n";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Error: autorestore on node " << node_->debugType() << " references a path '" << i
+                                                              << "' which cannot be found\n");
             continue;
         }
 
         // reference node found, make sure it not a task
         NodeContainer* nc = referenceNode->isNodeContainer();
         if (!nc) {
-            std::stringstream ss;
-            ss << "Error: autorestore on node " << node_->debugType() << " references a node '" << i
-               << "' which is a task. restore only works with suites or family nodes";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Error: autorestore on node "
+                                << node_->debugType() << " references a node '" << i
+                                << "' which is a task. restore only works with suites or family nodes");
         }
 
         // Check for duplicate references
@@ -127,9 +120,8 @@ void AutoRestoreAttr::check(std::string& errorMsg) const {
             vec.push_back(nc);
         }
         else {
-            std::stringstream ss;
-            ss << "Error: autorestore on node " << node_->debugType() << ", duplicate references to node '" << i << "'";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Error: autorestore on node " << node_->debugType()
+                                                              << ", duplicate references to node '" << i << "'");
         }
     }
 }

@@ -13,7 +13,8 @@
 #include <QListWidgetItem>
 #include <QPainter>
 
-CustomListWidget::CustomListWidget(QWidget* parent) : QListWidget(parent) {
+CustomListWidget::CustomListWidget(QWidget* parent)
+    : QListWidget(parent) {
     setAlternatingRowColors(true);
 
     connect(this, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(slotItemChanged(QListWidgetItem*)));

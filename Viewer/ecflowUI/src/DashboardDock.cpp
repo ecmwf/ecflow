@@ -16,7 +16,8 @@
 #include "DashboardWidget.hpp"
 #include "IconProvider.hpp"
 
-DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget* parent) : QWidget(parent) {
+DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     setProperty("dockTitle", "1");
@@ -182,7 +183,8 @@ void DashboardDockTitleWidget::slotUpdateTitle(QString txt, QString type) {
 //
 //============================================================
 
-DashboardDock::DashboardDock(DashboardWidget* dw, QWidget* parent) : QDockWidget(parent) {
+DashboardDock::DashboardDock(DashboardWidget* dw, QWidget* parent)
+    : QDockWidget(parent) {
     setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
 
     auto* dt = new DashboardDockTitleWidget(this);

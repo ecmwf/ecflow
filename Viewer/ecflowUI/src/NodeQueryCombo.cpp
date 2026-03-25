@@ -15,7 +15,8 @@
 #include "NodeQuery.hpp"
 #include "NodeQueryHandler.hpp"
 
-NodeQueryCombo::NodeQueryCombo(QWidget* parent) : QComboBox(parent) {
+NodeQueryCombo::NodeQueryCombo(QWidget* parent)
+    : QComboBox(parent) {
     for (auto it : NodeQueryHandler::instance()->items()) {
         addItem(QString::fromStdString(it->name()));
     }

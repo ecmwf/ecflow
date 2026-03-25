@@ -21,7 +21,6 @@
 #include "ecflow/core/Version.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -294,9 +293,10 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
             BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
         }
-        cout << " Server handled " << load * 16 << " requests in CPU timer(" << timer << ")" << " Duration timer("
-             << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono timer("
-             << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)" << endl;
+        std::cout << " Server handled " << load * 16 << " requests in CPU timer(" << timer << ")" << " Duration timer("
+                  << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono timer("
+                  << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)"
+                  << std::endl;
     }
     {
         theClient.set_auto_sync(true);
@@ -327,10 +327,10 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
             BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
         }
-        cout << " Server handled " << load * 8 << " requests in boost_timer(" << timer << ")" << " DurationTimer("
-             << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
-             << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)"
-             << " *with* AUTO SYNC" << endl;
+        std::cout << " Server handled " << load * 8 << " requests in boost_timer(" << timer << ")" << " DurationTimer("
+                  << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
+                  << std::chrono::duration<double, std::milli>(chrono_timer.elapsed()).count() << " milli)"
+                  << " *with* AUTO SYNC" << std::endl;
     }
 }
 
@@ -381,8 +381,9 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
         BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
         BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
     }
-    cout << " Server handled " << load * 8 << " commands using " << load << " group requests in boost_timer(" << timer
-         << ") DurationTimer(" << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << endl;
+    std::cout << " Server handled " << load * 8 << " commands using " << load << " group requests in boost_timer("
+              << timer << ") DurationTimer(" << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")"
+              << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
@@ -609,8 +610,8 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
 
     int no_of_client_calls = 74;
 
-    cout << " Server handled " << load * no_of_client_calls << " requests in boost_timer(" << timer
-         << ") DurationTimer(" << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << endl;
+    std::cout << " Server handled " << load * no_of_client_calls << " requests in boost_timer(" << timer
+              << ") DurationTimer(" << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << std::endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

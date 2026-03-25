@@ -23,9 +23,6 @@
 #include "ecflow/node/Defs.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 /// *****************************************************************************
 /// Note: The Client Handle commands, change the server,
@@ -131,25 +128,18 @@ const char* ClientHandleCmd::theArg() const {
     switch (api_) {
         case ClientHandleCmd::REGISTER:
             return CtsApi::ch_register_arg();
-            break;
         case ClientHandleCmd::DROP:
             return CtsApi::ch_drop_arg();
-            break;
         case ClientHandleCmd::DROP_USER:
             return CtsApi::ch_drop_user_arg();
-            break;
         case ClientHandleCmd::ADD:
             return CtsApi::ch_add_arg();
-            break;
         case ClientHandleCmd::REMOVE:
             return CtsApi::ch_remove_arg();
-            break;
         case ClientHandleCmd::AUTO_ADD:
             return CtsApi::ch_auto_add_arg();
-            break;
         case ClientHandleCmd::SUITES:
             return CtsApi::ch_suites_arg();
-            break;
     }
     assert(false);
     return nullptr;
@@ -159,25 +149,18 @@ bool ClientHandleCmd::cmd_updates_defs() const {
     switch (api_) {
         case ClientHandleCmd::REGISTER:
             return true;
-            break;
         case ClientHandleCmd::DROP:
             return true;
-            break; // can be expensive for large defs
         case ClientHandleCmd::DROP_USER:
             return true;
-            break; // can be expensive for large defs
         case ClientHandleCmd::ADD:
             return true;
-            break;
         case ClientHandleCmd::REMOVE:
             return true;
-            break;
         case ClientHandleCmd::AUTO_ADD:
             return false;
-            break;
         case ClientHandleCmd::SUITES:
             return false;
-            break;
     }
     assert(false);
     return false;
@@ -276,11 +259,12 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const {
 }
 
 void ClientHandleCmd::addOption(boost::program_options::options_description& desc) const {
+
     switch (api_) {
         case ClientHandleCmd::REGISTER: {
             desc.add_options()(
                 CtsApi::ch_register_arg(),
-                po::value<vector<string>>()->multitoken(),
+                boost::program_options::value<std::vector<std::string>>()->multitoken(),
                 "Register interest in a set of suites.\n"
                 "If a definition has lots of suites, but the client. is only interested in a small subset,\n"
                 "Then using this command can reduce network bandwidth and synchronisation will be quicker.\n"
@@ -307,7 +291,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 
         case ClientHandleCmd::DROP: {
             desc.add_options()(CtsApi::ch_drop_arg(),
-                               po::value<int>(),
+                               boost::program_options::value<int>(),
                                "Drop/de-register the client handle.\n"
                                "Un-used handle should be dropped otherwise they will stay, in the server.\n"
                                "   arg1 = handle(integer)  # The handle must be an integer that is > 0\n"
@@ -322,7 +306,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
         case ClientHandleCmd::DROP_USER: {
             desc.add_options()(
                 CtsApi::ch_drop_user_arg(),
-                po::value<std::string>()->implicit_value(string("")),
+                boost::program_options::value<std::string>()->implicit_value(std::string{}),
                 "Drop/de-register all handles associated with the given user.\n"
                 "If no user provided will drop for current user. Client must ensure un-used handle are dropped\n"
                 "otherwise they will stay, in the server.\n"
@@ -337,7 +321,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 
         case ClientHandleCmd::ADD: {
             desc.add_options()(CtsApi::ch_add_arg(),
-                               po::value<vector<string>>()->multitoken(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
                                "Add a set of suites, to an existing handle.\n"
                                "   arg1 = handle(integer)  # The handle must be an integer that is > 0\n"
                                "   arg2 = names            # should be a list of suite names, names not in the "
@@ -352,7 +336,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 
         case ClientHandleCmd::REMOVE: {
             desc.add_options()(CtsApi::ch_remove_arg(),
-                               po::value<vector<string>>()->multitoken(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
                                "Remove a set of suites, from an existing handle.\n"
                                "   arg1 = handle(integer)   # The handle must be an integer that is > 0\n"
                                "   arg2 = names             # should be a list of suite names, names not in the "
@@ -367,7 +351,7 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
         case ClientHandleCmd::AUTO_ADD: {
             desc.add_options()(
                 CtsApi::ch_auto_add_arg(),
-                po::value<vector<string>>()->multitoken(),
+                boost::program_options::value<std::vector<std::string>>()->multitoken(),
                 "Change an existing handle so that new suites can be added automatically.\n"
                 "   arg1 = handle(integer)  # The handle must be an integer that is > 0\n"
                 "   arg2 = true | false     # true means add new suites to my list, when they are created\n"
@@ -391,13 +375,14 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 
 void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     if (ac->debug()) {
-        cout << "  ClientHandleCmd::create api = '" << api_ << "'.\n";
+        std::cout << "  ClientHandleCmd::create api = '" << api_ << "'.\n";
     }
 
     switch (api_) {
 
         case ClientHandleCmd::REGISTER: {
-            vector<string> args = vm[theArg()].as<vector<string>>();
+            auto args = vm[theArg()].as<std::vector<std::string>>();
+
             // args can be empty, otherwise first arg must be integer or bool true or false, subsequent args represent
             // suite names
             int client_handle        = 0;
@@ -454,7 +439,8 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
         }
 
         case ClientHandleCmd::ADD: {
-            vector<string> args = vm[theArg()].as<vector<string>>();
+            auto args = vm[theArg()].as<std::vector<std::string>>();
+
             if (args.size() < 2) {
                 throw std::runtime_error(
                     "To few arguments. First arg should be a integer handle, then a list of suite names. See help");
@@ -479,7 +465,8 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
         }
 
         case ClientHandleCmd::REMOVE: {
-            vector<string> args = vm[theArg()].as<vector<string>>();
+            auto args = vm[theArg()].as<std::vector<std::string>>();
+
             if (args.size() < 2) {
                 throw std::runtime_error(
                     "To few arguments. First arg should be a integer handle, then a list of suite names. See help");
@@ -504,7 +491,8 @@ void ClientHandleCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map
         }
 
         case ClientHandleCmd::AUTO_ADD: {
-            vector<string> args = vm[theArg()].as<vector<string>>();
+            auto args = vm[theArg()].as<std::vector<std::string>>();
+
             if (args.size() != 2) {
                 throw std::runtime_error("Two argument expected. First arg should be a integer handle, second should "
                                          "be true or false. See help");

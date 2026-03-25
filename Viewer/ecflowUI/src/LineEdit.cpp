@@ -15,7 +15,8 @@
 #include <QStyle>
 #include <QToolButton>
 
-LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
+LineEdit::LineEdit(QWidget* parent)
+    : QLineEdit(parent) {
     clearTb_ = new QToolButton(this);
     QPixmap pix(":/viewer/clear_left.svg");
     clearTb_->setIcon(pix);

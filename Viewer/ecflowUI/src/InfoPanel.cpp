@@ -27,7 +27,7 @@
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
-// #define _UI_INFOPANEL_DEBUG
+// #define UI_INFOPANEL_DEBUG
 
 //==============================================
 //
@@ -59,7 +59,8 @@ void InfoPanelItemHandler::addToTab(QTabWidget* tab, bool showTitle) {
 //
 //==============================================
 
-InfoPanel::InfoPanel(QWidget* parent) : DashboardWidget("info", parent) {
+InfoPanel::InfoPanel(QWidget* parent)
+    : DashboardWidget("info", parent) {
     setupUi(this);
 
     bcWidget_ = new NodePathWidget(this);
@@ -330,7 +331,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info) {
     std::vector<InfoPanelDef*> ids;
     InfoPanelHandler::instance()->visible(info, ids);
 
-#ifdef _UI_INFOPANEL_DEBUG
+#ifdef UI_INFOPANEL_DEBUG
     for (int i = 0; i < ids.size(); i++) {
         UiLog().dbg() << "InfoPanel --> tab: " << ids[i]->name();
     }

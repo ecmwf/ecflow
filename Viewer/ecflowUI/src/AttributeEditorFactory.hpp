@@ -21,7 +21,7 @@ class QWidget;
 class AttributeEditorFactory {
 public:
     explicit AttributeEditorFactory(const std::string& type);
-    virtual ~AttributeEditorFactory();
+    virtual ~AttributeEditorFactory() = default;
 
     virtual AttributeEditor* make(VInfo_ptr, QWidget*) = 0;
     static AttributeEditor* create(const std::string&, VInfo_ptr, QWidget*);
@@ -36,7 +36,8 @@ class AttributeEditorMaker : public AttributeEditorFactory {
     AttributeEditor* make(VInfo_ptr info, QWidget* parent) override { return new T(info, parent); }
 
 public:
-    explicit AttributeEditorMaker(const std::string& t) : AttributeEditorFactory(t) {}
+    explicit AttributeEditorMaker(const std::string& t)
+        : AttributeEditorFactory(t) {}
 };
 
 #endif /* ecflow_viewer_AttributeEditorFactory_HPP */

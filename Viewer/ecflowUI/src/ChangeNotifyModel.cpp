@@ -15,7 +15,8 @@
 #include "VNode.hpp"
 #include "VNodeList.hpp"
 
-ChangeNotifyModel::ChangeNotifyModel(QObject* parent) : QAbstractItemModel(parent) {
+ChangeNotifyModel::ChangeNotifyModel(QObject* parent)
+    : QAbstractItemModel(parent) {
 }
 
 ChangeNotifyModel::~ChangeNotifyModel() = default;

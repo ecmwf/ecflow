@@ -21,9 +21,6 @@
 #include "ecflow/core/Converter.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 void CheckPtCmd::print(std::string& os) const {
     user_cmd(os, CtsApi::checkPtDefs(mode_, check_pt_interval_, check_pt_save_time_alarm_));
@@ -133,7 +130,9 @@ static const char* arg_desc() {
 }
 
 void CheckPtCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CtsApi::checkPtDefsArg(), po::value<string>()->implicit_value(string("")), arg_desc());
+    desc.add_options()(CtsApi::checkPtDefsArg(),
+                       boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                       arg_desc());
 }
 
 static int parse_check_pt_interval(const std::string& the_arg) {
@@ -142,16 +141,14 @@ static int parse_check_pt_interval(const std::string& the_arg) {
         check_pt_interval = ecf::convert_to<int>(the_arg);
     }
     catch (...) {
-        std::stringstream ss;
-        ss << "check_pt: Illegal argument(" << the_arg
-           << "), expected [ never | on_time | on_time:<integer> | always | <integer>]\n"
-           << arg_desc();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("check_pt: Illegal argument("
+                                         << the_arg
+                                         << "), expected [ never | on_time | on_time:<integer> | always | <integer>]\n"
+                                         << arg_desc()));
     }
     if (check_pt_interval <= 0) {
-        std::stringstream ss;
-        ss << "check_pt: interval(" << check_pt_interval << ") must be greater than zero :\n" << arg_desc();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("check_pt: interval(" << check_pt_interval << ") must be greater than zero :\n"
+                                                               << arg_desc()));
     }
     return check_pt_interval;
 }
@@ -164,29 +161,28 @@ static int parse_check_pt_alarm_time(const std::string& the_arg, int colon_pos) 
         check_pt_alarm_time = ecf::convert_to<int>(alarm_time);
     }
     catch (...) {
-        std::stringstream ss;
-        ss << "check_pt: Illegal argument(" << the_arg
-           << "), expected [ never | on_time | on_time:<integer> | alarm::integer> | always | <integer>]\n"
-           << arg_desc();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "check_pt: Illegal argument("
+            << the_arg << "), expected [ never | on_time | on_time:<integer> | alarm::integer> | always | <integer>]\n"
+            << arg_desc()));
     }
     if (check_pt_alarm_time <= 0) {
-        std::stringstream ss;
-        ss << "check_pt: alarm time(" << check_pt_alarm_time << ") must be greater than zero :\n" << arg_desc();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("check_pt: alarm time(" << check_pt_alarm_time
+                                                                 << ") must be greater than zero :\n"
+                                                                 << arg_desc()));
     }
     return check_pt_alarm_time;
 }
 
 void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     if (ace->debug()) {
-        cout << "CheckPtCmd::create\n";
+        std::cout << "CheckPtCmd::create\n";
     }
 
     std::string the_arg = vm[theArg()].as<std::string>();
 
     if (ace->debug()) {
-        cout << "  CheckPtCmd::create arg = " << the_arg << "\n";
+        std::cout << "  CheckPtCmd::create arg = " << the_arg << "\n";
     }
 
     ecf::CheckPt::Mode m         = ecf::CheckPt::UNDEFINED;
@@ -214,11 +210,11 @@ void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
                     m = ecf::CheckPt::ALWAYS;
                 }
                 else {
-                    std::stringstream ss;
-                    ss << "check_pt: Illegal argument(" << the_arg
-                       << "), expected [ never | on_time | on_time:<integer> | alarm:<integer> | always | <integer>]\n"
-                       << arg_desc();
-                    throw std::runtime_error(ss.str());
+                    throw std::runtime_error(MESSAGE(
+                        "check_pt: Illegal argument("
+                        << the_arg
+                        << "), expected [ never | on_time | on_time:<integer> | alarm:<integer> | always | <integer>]\n"
+                        << arg_desc()));
                 }
                 check_pt_interval = parse_check_pt_interval(interval);
             }
@@ -245,7 +241,7 @@ void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     }
 
     if (ace->debug()) {
-        cout << "  CheckPtCmd::create mode = " << m << " check_pt_interval = " << check_pt_interval << "\n";
+        std::cout << "  CheckPtCmd::create mode = " << m << " check_pt_interval = " << check_pt_interval << "\n";
     }
 
     cmd = std::make_shared<CheckPtCmd>(m, check_pt_interval, check_pt_save_time_alarm);

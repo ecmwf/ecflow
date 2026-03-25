@@ -15,13 +15,12 @@
 
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
-
 // #define DEBUG_ME 1
 
 class MyType {
 public:
-    explicit MyType(std::string str) : mName(std::move(str)) {
+    explicit MyType(std::string str)
+        : mName(std::move(str)) {
 #ifdef DEBUG_ME
         ECF_TEST_DBG("MyType::MyType " << mName << " my_int:" << my_int_);
 #endif
@@ -33,7 +32,8 @@ public:
 #endif
     }
 
-    MyType(const MyType& other) : mName(other.mName) {
+    MyType(const MyType& other)
+        : mName(other.mName) {
 #ifdef DEBUG_ME
         ECF_TEST_DBG(<< "MyType::MyType(const MyType&) " << mName << " my_int:" << my_int_);
 #endif

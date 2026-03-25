@@ -34,8 +34,11 @@ BOOST_AUTO_TEST_CASE(can_retrieve_existing_key) {
     credentials.add("key", "value");
 
     auto found = credentials.value("key");
-    BOOST_CHECK(found.has_value());
-    BOOST_CHECK_EQUAL(found.value(), "value");
+    BOOST_REQUIRE(found.has_value());
+    if (found.has_value()) {
+        auto value = found.value();
+        BOOST_CHECK_EQUAL(value, "value");
+    }
 }
 
 BOOST_AUTO_TEST_CASE(throw_exceptions_when_unable_to_parse_credentials) {

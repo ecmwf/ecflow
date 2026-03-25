@@ -44,20 +44,6 @@ public:
           first_not_of_(0),
           finished_(false) {}
 
-    // this rules out temp strings, it also rules out char * because of two available overloads
-    StringSplitter(const std::string&& src, std::string_view sep) = delete;
-
-    // this re-enables support for string literals (which are never temp)
-    // it even handles correctly char arrays that contain a null terminated string
-    // because string_view does not have a char array constructor!
-    template <std::size_t N>
-    explicit StringSplitter(const char (&sz)[N], std::string_view sep = " \t")
-        : src_(sz),
-          rem_(sz),
-          sep_(sep),
-          first_not_of_(0),
-          finished_(false) {}
-
     std::string_view next() const;
     bool finished() const;
     bool last() const { return finished_; }

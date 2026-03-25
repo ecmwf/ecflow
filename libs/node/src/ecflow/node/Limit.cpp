@@ -18,13 +18,10 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Suite.hpp"
 
-using namespace std;
-using namespace ecf;
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-Limit::Limit(const std::string& name, int limit) : n_(name), lim_(limit) {
-    if (!Str::valid_name(name)) {
+Limit::Limit(const std::string& name, int limit)
+    : n_(name),
+      lim_(limit) {
+    if (!ecf::Str::valid_name(name)) {
         throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
     }
 }
@@ -34,12 +31,16 @@ Limit::Limit(const std::string& name, int limit, int value, const std::set<std::
       lim_(limit),
       value_(value),
       paths_(paths) {
-    if (check && !Str::valid_name(name)) {
+    if (check && !ecf::Str::valid_name(name)) {
         throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
     }
 }
 
-Limit::Limit(const Limit& rhs) : n_(rhs.n_), lim_(rhs.lim_), value_(rhs.value_), paths_(rhs.paths_) {
+Limit::Limit(const Limit& rhs)
+    : n_(rhs.n_),
+      lim_(rhs.lim_),
+      value_(rhs.value_),
+      paths_(rhs.paths_) {
 }
 
 bool Limit::operator==(const Limit& rhs) const {
@@ -95,12 +96,8 @@ void Limit::write(std::string& ret) const {
 
 void Limit::decrement(int tokens, const std::string& abs_node_path) {
 
-    // cout << "Limit::decrement name = " << n_ << " current value_ = " << value_ << " limit = " <<  lim_ << " consume
-    // tokens = " << tokens << " path = " << abs_node_path << "\n"; Note: we previously had 'if (value_ > 0) {
-    //       However if the user had manually changed the value_, then we could be left with paths_,  that would never
-    //       have been cleared
     if (delete_path(abs_node_path)) {
-        // delete_path() will increment state_change_no
+        // Note: delete_path() will increment state_change_no
         value_ -= tokens;
         if (value_ < 0) {
             value_ = 0;
@@ -108,19 +105,15 @@ void Limit::decrement(int tokens, const std::string& abs_node_path) {
         }
     }
 
+    LOG(ecf::Log::MSG, "Limit event: decrement (" << tokens << ", " << abs_node_path << ") -> " << dump());
+
 #ifdef DEBUG_STATE_CHANGE_NO
     std::cout << "Limit::decrement\n";
 #endif
-    // cout << "Limit::decrement name = " << n_ << " current value_ = " << value_ << "\n";
 }
 
 void Limit::increment(int tokens, const std::string& abs_node_path) {
-    // cout << "Limit::increment name = " << n_ << " current value_ = " << value_ << " limit = " <<  lim_ << " consume
-    // tokens = " << tokens << " path = " << abs_node_path << "\n";
-
-    // increment should keep increasing limit value, *EVEN* if over the limit. See ECFLOW-324
-    // Note: previously we had:
-    //     if ( value_ < lim_ ) {
+    // Note: this keeps increasing limit value, *EVEN* if over the limit -- see ECFLOW-324
 
     auto result = paths_.insert(abs_node_path);
     if (result.second) {
@@ -128,10 +121,11 @@ void Limit::increment(int tokens, const std::string& abs_node_path) {
         update_change_no();
     }
 
+    LOG(ecf::Log::MSG, "Limit event: increment (" << tokens << ", " << abs_node_path << ") -> " << dump());
+
 #ifdef DEBUG_STATE_CHANGE_NO
     std::cout << "Limit::increment\n";
 #endif
-    // cout << "Limit::increment name = " << n_ << " current value_ = " << value_ << "\n";
 }
 
 void Limit::setValue(int v) {
@@ -183,6 +177,8 @@ bool Limit::delete_path(const std::string& abs_node_path) {
 void Limit::reset() {
     paths_.clear();
     setValue(0); // will increment state_change_no_
+
+    LOG(ecf::Log::MSG, "Limit event: reset -> " << dump());
 }
 
 void Limit::update_change_no() {
@@ -193,6 +189,30 @@ void Limit::update_change_no() {
             suite->set_state_change_no(state_change_no_);
         }
     }
+}
+
+std::string Limit::dump() const {
+    std::ostringstream ss;
+    ss << "{";
+    if (node_) {
+        ss << "\"node\": \"" << node_->absNodePath() << "\", ";
+    }
+    ss << "\"name\": \"" << n_ << "\", ";
+    ss << "\"value\": " << value_ << ", ";
+    ss << "\"limit\": " << lim_ << ", ";
+    ss << "\"paths\": ";
+    ss << "[";
+    bool first = true;
+    for (const auto& path : paths_) {
+        if (!first) {
+            ss << ", ";
+        }
+        ss << path;
+        first = false;
+    }
+    ss << "]";
+    ss << "}";
+    return ss.str();
 }
 
 template <class Archive>

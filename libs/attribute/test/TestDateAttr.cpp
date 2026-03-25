@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_date) {
                 if (month == 0) {
                     year = 0;
                 }
-                std::stringstream ss;
+                std::ostringstream ss;
                 if (day == 0) {
                     ss << "*";
                 }

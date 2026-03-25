@@ -23,7 +23,8 @@ public:
     struct Error
     {
         std::string message;
-        explicit Error(std::string message) : message(std::move(message)) {}
+        explicit Error(std::string message)
+            : message(std::move(message)) {}
     };
 
     struct UserCredentials

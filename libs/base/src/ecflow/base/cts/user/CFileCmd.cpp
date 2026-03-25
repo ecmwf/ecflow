@@ -27,9 +27,6 @@
 #include "ecflow/node/Submittable.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, const std::string& input_max_lines)
     : pathToNode_(pathToNode),
@@ -55,10 +52,9 @@ CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, 
         file_ = CFileCmd::STAT;
     }
     else {
-        std::stringstream ss;
-        ss << "CFileCmd::CFileCmd: Unrecognised file type " << file_type
-           << " expected one of [script | job | jobout | manual | kill | stat] \n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("CFileCmd::CFileCmd: Unrecognised file type "
+                                         << file_type
+                                         << " expected one of [script | job | jobout | manual | kill | stat] \n"));
     }
 
     if (!input_max_lines.empty()) {
@@ -71,10 +67,8 @@ CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, 
             max_lines_ = the_max_lines;
         }
         catch (const ecf::bad_conversion&) {
-            std::stringstream ss;
-            ss << "CFileCmd::CFileCmd: The third argument(" << input_max_lines
-               << ") must be convertible to an integer\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("CFileCmd::CFileCmd: The third argument("
+                                             << input_max_lines << ") must be convertible to an integer\n"));
         }
     }
 }
@@ -95,22 +89,16 @@ std::string CFileCmd::toString(CFileCmd::File_t ft) {
     switch (ft) {
         case CFileCmd::ECF:
             return "script";
-            break;
         case CFileCmd::MANUAL:
             return "manual";
-            break;
         case CFileCmd::JOB:
             return "job";
-            break;
         case CFileCmd::JOBOUT:
             return "jobout";
-            break;
         case CFileCmd::KILL:
             return "kill";
-            break;
         case CFileCmd::STAT:
             return "stat";
-            break;
         default:
             break;
     }
@@ -196,10 +184,9 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 std::string ecf_job_file;
                 submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 if (!File::open(ecf_job_file, fileContents)) {
-                    std::stringstream ss;
-                    ss << "CFileCmd::doHandleRequest: Failed to open the job file('" << ecf_job_file << "') for task "
-                       << pathToNode_ << " (" << strerror(errno) << ")";
-                    throw std::runtime_error(ss.str());
+                    throw std::runtime_error(MESSAGE("CFileCmd::doHandleRequest: Failed to open the job file('"
+                                                     << ecf_job_file << "') for task " << pathToNode_ << " ("
+                                                     << strerror(errno) << ")"));
                 }
                 break;
             }
@@ -216,7 +203,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 // however SMS also looked at the alternate location (and RD relied on this ECFLOW-177 )
 
                 // First try user variable, if defined this has priority ECFLOW-999
-                std::stringstream ss;
+                std::ostringstream ss;
                 std::string user_jobout;
                 if (submittable->findParentUserVariableValue(ecf::environment::ECF_JOBOUT, user_jobout)) {
                     if (File::open(user_jobout, fileContents)) {
@@ -263,10 +250,9 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 std::string file = ecf_job_file + ".kill";
                 if (!File::open(file, fileContents)) {
-                    std::stringstream ss;
-                    ss << "CFileCmd::doHandleRequest: Failed to open the kill output file('" << file << "') for task "
-                       << pathToNode_ << " (" << strerror(errno) << ")";
-                    throw std::runtime_error(ss.str());
+                    throw std::runtime_error(MESSAGE("CFileCmd::doHandleRequest: Failed to open the kill output file('"
+                                                     << file << "') for task " << pathToNode_ << " (" << strerror(errno)
+                                                     << ")"));
                 }
                 break;
             }
@@ -276,10 +262,9 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 submittable->findParentVariableValue(ecf::environment::ECF_JOB, ecf_job_file);
                 std::string file = ecf_job_file + ".stat";
                 if (!File::open(file, fileContents)) {
-                    std::stringstream ss;
-                    ss << "CFileCmd::doHandleRequest: Failed to open the status output file('" << file << "') for task "
-                       << pathToNode_ << " (" << strerror(errno) << ")";
-                    throw std::runtime_error(ss.str());
+                    throw std::runtime_error(
+                        MESSAGE("CFileCmd::doHandleRequest: Failed to open the status output file('"
+                                << file << "') for task " << pathToNode_ << " (" << strerror(errno) << ")"));
                 }
                 break;
             }
@@ -328,18 +313,14 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
             }
         }
         else {
-            std::stringstream ss;
-            ss << "Option " << CFileCmd::toString(file_) << " is only valid for tasks";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Option " << CFileCmd::toString(file_) << " is only valid for tasks"));
         }
     }
 
     /// The file could get very large, hence truncate at the start
     if (Str::truncate_at_start(fileContents, max_lines_)) {
-        std::stringstream ss;
-        ss << "\n# >>>>>>>> File truncated down to " << max_lines_
-           << ". Truncated from the end of the file <<<<<<<<<\n";
-        fileContents += ss.str();
+        fileContents += MESSAGE("\n# >>>>>>>> File truncated down to "
+                                << max_lines_ << ". Truncated from the end of the file <<<<<<<<<\n");
     }
 
     return PreAllocatedReply::string_cmd(fileContents);
@@ -364,20 +345,20 @@ const char* CFileCmd::desc() {
 }
 
 void CFileCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CFileCmd::arg(), po::value<vector<string>>()->multitoken(), CFileCmd::desc());
+    desc.add_options()(
+        CFileCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), CFileCmd::desc());
 }
 void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(CFileCmd::arg(), args);
     }
 
     if (args.size() < 1) {
-        std::stringstream ss;
-        ss << "CFileCmd: At least one arguments expected for File. Found " << args.size() << "\n"
-           << CFileCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("CFileCmd: At least one arguments expected for File. Found "
+                                         << args.size() << "\n"
+                                         << CFileCmd::desc() << "\n"));
     }
 
     std::string pathToNode = args[0];

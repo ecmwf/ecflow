@@ -35,7 +35,8 @@ class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObs
     friend class InfoPanel;
 
 public:
-    InfoPanelItem() : unselectedFlags_(KeepContents) {}
+    InfoPanelItem()
+        : unselectedFlags_(KeepContents) {}
     ~InfoPanelItem() override;
 
     enum ChangeFlag {
@@ -45,11 +46,11 @@ public:
         FrozenChanged    = 8,
         DetachedChanged  = 16
     };
-    typedef FlagSet<ChangeFlag> ChangeFlags;
+    using ChangeFlags = FlagSet<ChangeFlag>;
 
     // What to do when the item is unselected
     enum UnselectedFlag { KeepContents = 1, KeepActivity = 2 };
-    typedef FlagSet<UnselectedFlag> UnselectedFlags;
+    using UnselectedFlags = FlagSet<UnselectedFlag>;
 
     virtual void reload(VInfo_ptr info) = 0;
     virtual QWidget* realWidget()       = 0;
@@ -131,7 +132,8 @@ class InfoPanelItemMaker : public InfoPanelItemFactory {
     InfoPanelItem* make() override { return new T(); }
 
 public:
-    explicit InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
+    explicit InfoPanelItemMaker(const std::string& name)
+        : InfoPanelItemFactory(name) {}
 };
 
 #endif /* ecflow_viewer_InfoPanelItem_HPP */

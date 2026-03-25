@@ -10,14 +10,15 @@
 
 #include "ecflow/core/Passwd.hpp"
 
+#include <array>
 #include <ctime>
 #include <unistd.h>
 
 double ecf_drand48();
 
 std::string Passwd::generate() {
-    char pw[9];
-    for (int i = 0; i < 8; i++) { /* generate a random password */
+    std::array<char, 8> pw;
+    for (size_t i = 0; i < pw.size(); i++) { /* generate a random password */
 
         pw[i] = 64.0 * ecf_drand48() + '.'; /* Just crack this one! */
         if (pw[i] > '9') {
@@ -27,8 +28,8 @@ std::string Passwd::generate() {
             pw[i] += 6;
         }
     }
-    pw[8] = '\0';
-    return std::string(pw);
+
+    return std::string(pw.begin(), pw.end());
 }
 
 double ecf_drand48()

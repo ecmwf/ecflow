@@ -15,7 +15,8 @@
 #include "DirectoryHandler.hpp"
 #include "ui_SaveSessionAsDialog.h"
 
-SaveSessionAsDialog::SaveSessionAsDialog(QWidget* parent) : QDialog(parent) {
+SaveSessionAsDialog::SaveSessionAsDialog(QWidget* parent)
+    : QDialog(parent) {
     // ui->setupUi(this);
     setupUi(this);
 
@@ -23,10 +24,6 @@ SaveSessionAsDialog::SaveSessionAsDialog(QWidget* parent) : QDialog(parent) {
 
     // ensure the correct state of the Save button
     on_sessionNameEdit__textChanged();
-}
-
-SaveSessionAsDialog::~SaveSessionAsDialog() {
-    // delete ui;
 }
 
 void SaveSessionAsDialog::refreshListOfSavedSessions() {

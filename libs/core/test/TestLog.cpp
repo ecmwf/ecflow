@@ -240,11 +240,9 @@ BOOST_AUTO_TEST_CASE(test_get_last_n_lines_from_log) {
         // Check we get back *ALL* lines requested
         std::string lines = Log::instance()->contents(NO_OF_LINES_IN_LOG_FILE);
         for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; i++) {
-            std::stringstream ss;
-            ss << msg << i;
-            std::string str_to_find = ss.str();
-            BOOST_CHECK_MESSAGE(lines.find(str_to_find) != std::string::npos,
-                                "expected to find " << str_to_find << " in the log file");
+            std::string expected = MESSAGE(msg << i);
+            BOOST_CHECK_MESSAGE(lines.find(expected) != std::string::npos,
+                                "expected to find " << expected << " in the log file");
         }
     }
 
@@ -313,9 +311,7 @@ BOOST_AUTO_TEST_CASE(test_get_first_n_lines_from_log) {
     {
         std::string lines = Log::instance()->contents(-NO_OF_LINES_IN_LOG_FILE);
         for (int i = 0; i < NO_OF_LINES_IN_LOG_FILE; i++) {
-            std::stringstream ss;
-            ss << msg << i;
-            std::string expected = ss.str();
+            std::string expected = MESSAGE(msg << i);
             BOOST_CHECK_MESSAGE(lines.find(expected) != std::string::npos,
                                 "Expected '" << expected << "' but found for i " << i);
         }

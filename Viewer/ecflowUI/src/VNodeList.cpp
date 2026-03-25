@@ -21,7 +21,8 @@
 //
 //========================================================
 
-VNodeListItem::VNodeListItem(VNode* n) : node_(n) {
+VNodeListItem::VNodeListItem(VNode* n)
+    : node_(n) {
     if (n) {
         server_ = n->server();
         path_   = n->absNodePath();
@@ -71,7 +72,8 @@ bool VNodeListItem::updateNode(ServerHandler* s) {
 //
 //========================================================
 
-VNodeList::VNodeList(QObject* parent) : QObject(parent) {
+VNodeList::VNodeList(QObject* parent)
+    : QObject(parent) {
 }
 
 VNodeList::~VNodeList() {

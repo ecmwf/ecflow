@@ -39,9 +39,14 @@ class Defs;
 class ClientSuiteMgr {
 public:
     explicit ClientSuiteMgr(Defs*);
+
     // Disable copy (and move) semantics
     ClientSuiteMgr(const ClientSuiteMgr&)                  = delete;
     const ClientSuiteMgr& operator=(const ClientSuiteMgr&) = delete;
+    ClientSuiteMgr(ClientSuiteMgr&&)                       = delete;
+    ClientSuiteMgr& operator=(ClientSuiteMgr&&)            = delete;
+
+    ~ClientSuiteMgr() = default;
 
     /// Create a client suite, and return the handle associated with the created object
     unsigned int

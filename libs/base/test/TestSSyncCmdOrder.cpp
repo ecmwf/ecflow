@@ -19,13 +19,13 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // The client handle commands do not change state & modify change number, hence need to bypass these checks
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 BOOST_AUTO_TEST_SUITE(T_SSyncCmdOrder)
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
-typedef boost::function<void(defs_ptr)> defs_change_cmd;
+using defs_change_cmd = boost::function<void(defs_ptr)>;
 
 static std::vector<std::string> vector_abcd() {
     std::vector<std::string> names;
@@ -116,7 +116,7 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
 
     MockServer mock_server(server_defs);
     SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
-    string error_msg;
+    std::string error_msg;
     BOOST_REQUIRE_MESSAGE(mock_server.defs()->checkInvariants(error_msg), error_msg);
     BOOST_CHECK_MESSAGE(cmd.do_sync(server_reply), "Expected server to change");
     BOOST_CHECK_MESSAGE(server_reply.in_sync(), "Expected to be in sync");
@@ -147,8 +147,7 @@ static void reorder_family(defs_ptr theDefs) {
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d", NOrder::ALPHA)));
 
-    std::vector<Family*> families;
-    theDefs->findSuite("d")->getAllFamilies(families);
+    auto families = ecf::get_all_families(*theDefs->findAbsNode("/d"));
     BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
                           "NOrder::ALPHA  expected "
                               << ecf::algorithm::join(vector_abcd()) << " but found: "
@@ -160,8 +159,7 @@ static void reorder_task(defs_ptr theDefs) {
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d/d", NOrder::ALPHA)));
 
-    std::vector<Task*> tasks;
-    theDefs->findAbsNode("/d/d")->getAllTasks(tasks);
+    auto tasks = ecf::get_all_tasks(*theDefs->findAbsNode("/d/d"));
     BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(tasks) == vector_abcd(),
                           "NOrder::ALPHA  expected "
                               << ecf::algorithm::join(vector_abcd()) << " but found: "
@@ -225,8 +223,7 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
                     << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
 
     suite_ptr suite_a = theDefs->findSuite("d");
-    std::vector<Family*> families;
-    suite_a->getAllFamilies(families);
+    auto families     = ecf::get_all_families(*suite_a);
     BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
                           "NOrder::ALPHA  expected "
                               << ecf::algorithm::join(vector_abcd()) << " but found: "

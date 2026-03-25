@@ -21,7 +21,8 @@ ssl_connection::~ssl_connection() {
 #endif
 }
 
-ssl_connection::ssl_connection(boost::asio::io_context& io, boost::asio::ssl::context& context) : socket_(io, context) {
+ssl_connection::ssl_connection(boost::asio::io_context& io, boost::asio::ssl::context& context)
+    : socket_(io, context) {
 #ifdef DEBUG_CONNECTION
     auto location = Ecf::server() ? "SERVER" : "CLIENT";
     std::cout << location << ": ssl_connection::ssl_connection\n";
@@ -47,9 +48,9 @@ bool ssl_connection::verify_certificate(bool preverified, boost::asio::ssl::veri
     // certificate authority.
 
     // In this example we will simply print the certificate's subject name.
-    char subject_name[256];
+    std::array<char, 256> subject_name;
     X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
-    X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
+    X509_NAME_oneline(X509_get_subject_name(cert), subject_name.data(), subject_name.size());
     // std::cout << "Verifying " << subject_name << "\n";
 
     return preverified;

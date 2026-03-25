@@ -11,13 +11,14 @@
 #include "VDir.hpp"
 
 #include <QtGlobal>
-#include <boost/foreach.hpp>
 
 #include "DirectoryHandler.hpp"
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Str.hpp"
 
-VDir::VDir(const std::string& path) : path_(path), fetchMode_(NoFetchMode) {
+VDir::VDir(const std::string& path)
+    : path_(path),
+      fetchMode_(NoFetchMode) {
 }
 
 VDir::VDir(const std::string& path, const std::string& pattern)
@@ -68,19 +69,21 @@ void VDir::reload() {
 
     fs::path path(path_);
 
-    fs::directory_iterator it(path), eod;
-
-    BOOST_FOREACH (fs::path const& p, std::make_pair(it, eod)) {
-        if (is_regular_file(p) && ecf::algorithm::starts_with(p.filename().string(), pattern_)) {
+    for (fs::path p : fs::directory_iterator(path)) {
+        if (fs::is_regular_file(p) && ecf::algorithm::starts_with(p.filename().string(), pattern_)) {
             auto* item = new VDirItem;
 
             item->name_ = p.filename().string();
             item->size_ = fs::file_size(p);
             item->size_ = fs::file_size(p);
+
+            auto lw_time = ecf::fsx::last_write_time(p);
+            auto seconds = std::chrono::duration_cast<std::chrono::seconds>(lw_time.time_since_epoch()).count();
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
-            item->mtime_ = QDateTime::fromSecsSinceEpoch(fs::last_write_time(p));
+            item->mtime_ = QDateTime::fromSecsSinceEpoch(seconds);
 #else
-            item->mtime_ = QDateTime::fromTime_t(fs::last_write_time(p));
+            item->mtime_ = QDateTime::fromTime_t(seconds);
 #endif
             items_.push_back(item);
         }

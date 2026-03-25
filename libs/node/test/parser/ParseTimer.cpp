@@ -15,7 +15,6 @@
 #include "PersistHelper.hpp"
 #include "TemporaryFile.hpp"
 #include "ecflow/core/File.hpp"
-#include "ecflow/core/Log.hpp"
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Timer.hpp"
@@ -23,13 +22,12 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeContainer.hpp"
 #include "ecflow/node/Suite.hpp"
-#include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // This test is used to find a task given a path of the form:
@@ -37,12 +35,12 @@ using namespace ecf;
 //    suite/family/family/task
 void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
     if (f != defs.findAbsNode(f->absNodePath()).get()) {
-        cout << "Could not find path " << f->absNodePath() << "\n";
+        std::cout << "Could not find path " << f->absNodePath() << "\n";
     }
 
     for (node_ptr t : f->nodeVec()) {
         if (t.get() != defs.findAbsNode(t->absNodePath()).get()) {
-            cout << "Could not find path " << t->absNodePath() << "\n";
+            std::cout << "Could not find path " << t->absNodePath() << "\n";
         }
         Family* family = t->isFamily();
         if (family) {
@@ -55,7 +53,8 @@ void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
 // i.e ignore expression build/checking and limit checking
 class TestDefsStructureParser : public DefsStructureParser {
 public:
-    TestDefsStructureParser(Defs* defsfile, const std::string& file_name) : DefsStructureParser(defsfile, file_name) {}
+    TestDefsStructureParser(Defs* defsfile, const std::string& file_name)
+        : DefsStructureParser(defsfile, file_name) {}
     bool do_parse_file(std::string& errorMsg) { return DefsStructureParser::do_parse_file(errorMsg); }
 };
 
@@ -66,7 +65,7 @@ int main(int argc, char* argv[]) {
     //   }
 
     if (argc != 2) {
-        cout << "Expect single argument which is path to a defs file\n";
+        std::cout << "Expect single argument which is path to a defs file\n";
         return 1;
     }
 
@@ -81,7 +80,7 @@ int main(int argc, char* argv[]) {
         timer.start();
         std::string errorMsg, warningMsg;
         bool result = defs.restore(path, errorMsg, warningMsg);
-        cout << " Parsing Node tree & AST creation time parse(" << result << ") = " << timer << endl;
+        std::cout << " Parsing Node tree & AST creation time parse(" << result << ") = " << timer << std::endl;
     }
     {
         Defs local_defs;
@@ -89,7 +88,7 @@ int main(int argc, char* argv[]) {
         TestDefsStructureParser checkPtParser(&local_defs, path);
         std::string errorMsg;
         bool result = checkPtParser.do_parse_file(errorMsg);
-        cout << " Parsing Node tree *only* time         parse(" << result << ") = " << timer << endl;
+        std::cout << " Parsing Node tree *only* time         parse(" << result << ") = " << timer << std::endl;
     }
     {
         timer.start();
@@ -98,8 +97,8 @@ int main(int argc, char* argv[]) {
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
-        cout << " Save and restore as string(DEFS)               = " << timer << " -> string size("
-             << defs_as_string.size() << ")" << endl;
+        std::cout << " Save and restore as string(DEFS)               = " << timer << " -> string size("
+                  << defs_as_string.size() << ")" << std::endl;
     }
     {
         timer.start();
@@ -108,8 +107,8 @@ int main(int argc, char* argv[]) {
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
-        cout << " Save and restore as string(NET)                = " << timer << " -> string size("
-             << defs_as_string.size() << ") checks relaxed" << endl;
+        std::cout << " Save and restore as string(NET)                = " << timer << " -> string size("
+                  << defs_as_string.size() << ") checks relaxed" << std::endl;
     }
     {
         timer.start();
@@ -118,8 +117,8 @@ int main(int argc, char* argv[]) {
         Defs newDefs;
         std::string error_msg, warning_msg; // ignore error since some input defs have invalid triggers
         newDefs.restore_from_string(defs_as_string, error_msg, warning_msg);
-        cout << " Save and restore as string(MIGRATE)            = " << timer << " -> string size("
-             << defs_as_string.size() << ")" << endl;
+        std::cout << " Save and restore as string(MIGRATE)            = " << timer << " -> string size("
+                  << defs_as_string.size() << ")" << std::endl;
     }
     {
         // Test time for persisting to defs file only
@@ -127,7 +126,7 @@ int main(int argc, char* argv[]) {
 
         timer.start();
         defs.write_to_checkpt_file(temporary.path());
-        cout << " Save as DEFS checkpoint, time taken            = " << timer << endl;
+        std::cout << " Save as DEFS checkpoint, time taken            = " << timer << std::endl;
     }
 
     {
@@ -142,21 +141,20 @@ int main(int argc, char* argv[]) {
         //   std::cout << "stem " << fs_path.stem()  << "\n";
         //   std::cout << "extension " << fs_path.extension()  << "\n";
 
-        std::stringstream ss;
 #ifdef DEBUG
-        ss << "/var/tmp/ma0/JSON/debug_" << fs_path.stem() << ".json";
+        std::string prefix = "debug_";
 #else
-        ss << "/var/tmp/ma0/JSON/" << fs_path.stem() << ".json";
+        std::string prefix = "";
 #endif
 
-        std::string json_filepath = ss.str();
+        std::string json_filepath = MESSAGE("/var/tmp/ma0/JSON/" << prefix << fs_path.stem() << ".json");
         Str::replaceall(json_filepath, "\"", ""); // fs_path.stem() seems to add ", so remove them
         // cout << "  json_filepath: " << json_filepath << endl;
 
         std::remove(json_filepath.c_str());
         timer.start();
         defs.cereal_save_as_checkpt(json_filepath);
-        cout << " Save as CEREAL checkpoint, time taken          = " << timer << endl;
+        std::cout << " Save as CEREAL checkpoint, time taken          = " << timer << std::endl;
     }
 
     {
@@ -165,8 +163,8 @@ int main(int argc, char* argv[]) {
         timer.start();
         PersistHelper helper;
         bool result = helper.test_defs_checkpt_and_reload(defs, do_compare);
-        cout << " Checkpt(DEFS) and reload, time taken           = " << timer << " file_size(" << helper.file_size()
-             << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
+        std::cout << " Checkpt(DEFS) and reload, time taken           = " << timer << " file_size("
+                  << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << std::endl;
     }
 
     {
@@ -174,9 +172,9 @@ int main(int argc, char* argv[]) {
         timer.start();
         PersistHelper helper;
         bool result = helper.test_cereal_checkpt_and_reload(defs, do_compare);
-        cout << " Checkpt(CEREAL) and reload , time taken        = ";
-        cout << timer << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg()
-             << ")" << endl;
+        std::cout << " Checkpt(CEREAL) and reload , time taken        = ";
+        std::cout << timer << " file_size(" << helper.file_size() << ")  result(" << result << ") msg("
+                  << helper.errorMsg() << ")" << std::endl;
     }
 
     {
@@ -184,7 +182,7 @@ int main(int argc, char* argv[]) {
         for (suite_ptr s : defs.suiteVec()) {
             test_find_task_using_path(s.get(), defs);
         }
-        cout << " Test all paths can be found. time taken        = " << timer << endl;
+        std::cout << " Test all paths can be found. time taken        = " << timer << std::endl;
     }
     {
         // Time how long it takes for job submission. Must call begin on all suites first.
@@ -196,30 +194,29 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < count; i++) {
             jobs.generate(jobsParam);
         }
-        cout << " time for 10 jobSubmissions                     = " << timer
-             << " jobs:" << jobsParam.submitted().size() << endl;
+        std::cout << " time for 10 jobSubmissions                     = " << timer
+                  << " jobs:" << jobsParam.submitted().size() << std::endl;
     }
     {
         // Time how long it takes for post process
         timer.start();
-        string errorMsg, warningMsg;
+        std::string errorMsg, warningMsg;
         bool result = defs.check(errorMsg, warningMsg);
-        cout << " Time for Defs::check(inlimit resolution)       = " << timer << " result(" << result << ")" << endl;
+        std::cout << " Time for Defs::check(inlimit resolution)       = " << timer << " result(" << result << ")"
+                  << std::endl;
     }
     {
         // Time how long it takes to delete all nodes/ references. Delete all tasks and then suites/families.
         timer.start();
-        std::vector<Task*> tasks;
-        defs.getAllTasks(tasks);
+        auto tasks = ecf::get_all_tasks(defs);
         for (Task* ta : tasks) {
             if (!defs.deleteChild(ta)) {
-                cout << "Failed to delete task\n";
+                std::cout << "Failed to delete task\n";
             }
         }
-        tasks.clear();
-        defs.getAllTasks(tasks);
+        tasks = ecf::get_all_tasks(defs);
         if (!tasks.empty()) {
-            cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";
+            std::cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";
         }
 
         std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators
@@ -227,20 +224,20 @@ int main(int argc, char* argv[]) {
             std::vector<node_ptr> familyVec = s->nodeVec(); // make a copy, to avoid invalidating iterators
             for (node_ptr f : familyVec) {
                 if (!defs.deleteChild(f.get())) {
-                    cout << "Failed to delete family\n";
+                    std::cout << "Failed to delete family\n";
                 }
             }
             if (!s->nodeVec().empty()) {
-                cout << "Expected all Families to be deleted but found " << s->nodeVec().size() << "\n";
+                std::cout << "Expected all Families to be deleted but found " << s->nodeVec().size() << "\n";
             }
             if (!defs.deleteChild(s.get())) {
-                cout << "Failed to delete suite\n";
+                std::cout << "Failed to delete suite\n";
             }
         }
         if (!defs.suiteVec().empty()) {
-            cout << "Expected all Suites to be deleted but found " << defs.suiteVec().size() << "\n";
+            std::cout << "Expected all Suites to be deleted but found " << defs.suiteVec().size() << "\n";
         }
 
-        cout << " time for deleting all nodes                    = " << timer << endl;
+        std::cout << " time for deleting all nodes                    = " << timer << std::endl;
     }
 }

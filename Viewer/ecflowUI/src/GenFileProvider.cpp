@@ -14,9 +14,11 @@
 #include "VConfig.hpp"
 #include "VReply.hpp"
 
-#define UI_FILEPROVIDER_TASK_DEBUG__
+// #define UI_GENFILEPROVIDER_DEBUG
 
-GenFileProvider::GenFileProvider(GenFileReceiver* provider) : reply_(new VReply()), provider_(provider) {
+GenFileProvider::GenFileProvider(GenFileReceiver* provider)
+    : reply_(new VReply()),
+      provider_(provider) {
     fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);
 }
 
@@ -59,9 +61,7 @@ void GenFileProvider::fetchFiles(const std::vector<std::string>& fPaths) {
 
     Q_ASSERT(fetchQueue_->size() == filesToFetch_.size());
 
-    // #ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
-    // #endif
     fetchQueue_->run();
 }
 
@@ -88,7 +88,7 @@ void GenFileProvider::fetchFile(const std::string& fPath) {
     t->setUseMetaData(false);
     fetchQueue_->add(t);
 
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+#ifdef UI_GENFILEPROVIDER_DEBUG
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
 #endif
     fetchQueue_->run();

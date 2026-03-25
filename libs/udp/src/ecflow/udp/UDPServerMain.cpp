@@ -27,9 +27,9 @@ static std::string ecflow_udp_server_version() {
     const std::string TAG = " ";
 #endif
 
-    std::ostringstream oss;
-    oss << "Ecflow UDP" << TAG << "version(" << ecf::Version::full() << ")";
-    return oss.str();
+    std::ostringstream ss;
+    ss << "Ecflow UDP" << TAG << "version(" << ecf::Version::full() << ")";
+    return ss.str();
 }
 
 static void run_server(uint16_t port) {
@@ -62,7 +62,8 @@ static int launch_server(const ecf::UDPServerOptions& options) {
 
 int main(int argc, char* argv[]) try {
 
-    ecf::UDPServerOptions options(argc, const_cast<const char**>(argv));
+    std::vector<std::string> args(argv + 1, argv + argc);
+    ecf::UDPServerOptions options(args);
 
     if (options.has_help()) {
         std::cout << std::endl << "  ecFlow UDP" << std::endl << std::endl;
@@ -86,7 +87,7 @@ int main(int argc, char* argv[]) try {
         }
         auto ecflow_http = options.has_http();
         if (ecflow_http) {
-            const std::string selected{ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Http).value()};
+            const auto selected = std::string{ecf::Enumerate<ecf::Protocol>::as_string(ecf::Protocol::Http)};
             setenv(ecf::environment::ECF_HOST_PROTOCOL, selected.c_str(), 1);
         }
         // Avoid that the Client automatically uses environment passwords

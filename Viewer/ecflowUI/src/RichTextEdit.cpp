@@ -21,7 +21,8 @@
 #include "VConfig.hpp"
 #include "ViewerUtil.hpp"
 
-RichTextEdit::RichTextEdit(QWidget* parent) : QTextBrowser(parent) {
+RichTextEdit::RichTextEdit(QWidget* parent)
+    : QTextBrowser(parent) {
     setFont(ViewerUtil::findMonospaceFont());
 }
 

@@ -51,9 +51,13 @@ public:
     DefsStructureParser(Defs* defsfile, const std::string& file_name);
     DefsStructureParser(Defs* defsfile, const std::string& def_str, bool);
     explicit DefsStructureParser(const std::string& defs_node_string);
+
     // Disable copy (and move) semantics
-    DefsStructureParser(const DefsStructureParser&)                  = delete;
-    const DefsStructureParser& operator=(const DefsStructureParser&) = delete;
+    DefsStructureParser(const DefsStructureParser&)            = delete;
+    DefsStructureParser& operator=(const DefsStructureParser&) = delete;
+    DefsStructureParser(DefsStructureParser&&)                 = delete;
+    DefsStructureParser& operator=(DefsStructureParser&&)      = delete;
+
     ~DefsStructureParser();
 
     /// Parse the definition file, *AND* check expressions and limits

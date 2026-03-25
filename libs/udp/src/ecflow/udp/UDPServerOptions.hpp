@@ -16,15 +16,14 @@
 
 #include <boost/program_options.hpp>
 
-namespace po = boost::program_options;
-
 namespace ecf {
 
 class InvalidCLIOption : public std::logic_error {
 public:
-    explicit InvalidCLIOption(const std::string& error) : logic_error(error) {}
+    explicit InvalidCLIOption(const std::string& error)
+        : logic_error(error) {}
     InvalidCLIOption(const InvalidCLIOption&) = default;
-    virtual ~InvalidCLIOption();
+    ~InvalidCLIOption() override;
 };
 
 /**
@@ -32,7 +31,7 @@ public:
  */
 class UDPServerOptions {
 public:
-    UDPServerOptions(int argc, const char* argv[]);
+    UDPServerOptions(const std::vector<std::string>& argv);
 
     ~UDPServerOptions() = default;
 
@@ -57,9 +56,9 @@ public:
 
     bool has_http() const { return get_option(OPTION_ECFLOW_HTTP); }
 
-    const po::options_description& get_description() const { return general; }
+    const boost::program_options::options_description& get_description() const { return general; }
 
-    static po::options_description create_options();
+    static boost::program_options::options_description create_options();
 
 public:
     static inline const char* OPTION_HELP        = "help";
@@ -71,10 +70,10 @@ public:
     static inline const char* OPTION_ECFLOW_HTTP = "http";
 
 private:
-    static void ensure_valid_options(const po::variables_map& variables);
+    static void ensure_valid_options(const boost::program_options::variables_map& variables);
 
-    po::options_description general;
-    po::variables_map variables;
+    boost::program_options::options_description general;
+    boost::program_options::variables_map variables;
 };
 
 } // namespace ecf

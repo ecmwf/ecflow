@@ -17,10 +17,10 @@
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/cereal_boost_time.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // #define DEBUG_DAYS 1
@@ -31,28 +31,20 @@ static const char* theDay(DayAttr::Day_t day) {
     switch (day) {
         case DayAttr::SUNDAY:
             return "sunday";
-            break;
         case DayAttr::MONDAY:
             return "monday";
-            break;
         case DayAttr::TUESDAY:
             return "tuesday";
-            break;
         case DayAttr::WEDNESDAY:
             return "wednesday";
-            break;
         case DayAttr::THURSDAY:
             return "thursday";
-            break;
         case DayAttr::FRIDAY:
             return "friday";
-            break;
         case DayAttr::SATURDAY:
             return "saturday";
-            break;
         default:
             assert(false);
-            break;
     }
     return nullptr;
 }
@@ -361,16 +353,8 @@ void DayAttr::write(std::string& ret) const {
 }
 
 std::string DayAttr::dump() const {
-    std::stringstream ss;
-    ss << toString();
-    if (free_) {
-        ss << " (free)";
-    }
-    if (expired_) {
-        ss << " (expired)";
-    }
-    ss << " " << as_simple_string();
-    return ss.str();
+    return MESSAGE(toString() << (free_ ? " (free)" : "") << (expired_ ? " (expired)" : "") << " "
+                              << as_simple_string());
 }
 
 std::string DayAttr::as_simple_string() const {
@@ -482,12 +466,9 @@ DayAttr::Day_t DayAttr::getDay(const std::string& day) {
         return DayAttr::SUNDAY;
     }
 
-    std::stringstream ss;
-    ss << "Invalid day(" << day
-       << ") specification expected one of [monday,tuesday,wednesday,thursday,friday,saturday,sunday]: ";
-    throw std::runtime_error(ss.str());
-
-    return DayAttr::SUNDAY;
+    throw std::runtime_error(MESSAGE(
+        "Invalid day("
+        << day << ") specification expected one of [monday,tuesday,wednesday,thursday,friday,saturday,sunday]: "));
 }
 
 std::vector<std::string> DayAttr::allDays() {

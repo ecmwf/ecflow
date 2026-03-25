@@ -24,7 +24,8 @@ class ColumnDefinitions {
 public:
     using storage_t = std::map<std::string, ModelColumn*>;
 
-    ColumnDefinitions() : storage_{} {}
+    ColumnDefinitions()
+        : storage_{} {}
     ~ColumnDefinitions() {
         for (auto item : storage_) {
             delete item.second;
@@ -38,7 +39,7 @@ public:
     auto end() { return storage_.end(); }
 
     template <typename F>
-    void for_each(F&& f) {
+    void for_each(F f) {
         for (auto item : storage_) {
             f(item.first, item.second);
         }
@@ -50,7 +51,10 @@ private:
 
 static ColumnDefinitions defs;
 
-ModelColumn::ModelColumn(const std::string& id) : id_(id), diagStart_(-1), diagEnd_(-1) {
+ModelColumn::ModelColumn(const std::string& id)
+    : id_(id),
+      diagStart_(-1),
+      diagEnd_(-1) {
     defs.insert(id_, this);
 }
 

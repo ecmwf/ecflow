@@ -19,12 +19,13 @@ ecbuild_dont_pack(
     # ignore local notes
     .scratch
     .sandbox
-    .deploy
+    .scratch
     SCRATCH
     CUSTOMER
     # ignore source control directories
     .git
     # ignore build directories
+    .deploy
     bamboo
     ecbuild
     build_scripts/nightly
@@ -38,7 +39,7 @@ ecbuild_dont_pack(
     libs/attributes/doc
     libs/node/doc
     libs/client/doc
-    libs/simulator/doc
+    libs/test/simulator/doc
     libs/pyext/doc
     libs/server/doc
     # ignore IDE configuration directories

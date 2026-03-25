@@ -23,7 +23,8 @@
 //
 //========================================================
 
-ScriptItemWidget::ScriptItemWidget(QWidget* parent) : CodeItemWidget(parent) {
+ScriptItemWidget::ScriptItemWidget(QWidget* parent)
+    : CodeItemWidget(parent) {
     messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
 

@@ -54,7 +54,6 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    Boost::filesystem
 )
 target_clangformat(u_service_auth
   CONDITION ENABLE_TESTS
@@ -83,7 +82,6 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    Boost::filesystem
     $<$<BOOL:${ZLIB_FOUND}>:ZLIB::ZLIB>
   DEFINITIONS
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>

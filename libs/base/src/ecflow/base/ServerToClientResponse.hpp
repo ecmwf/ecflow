@@ -17,12 +17,17 @@
 // server and client
 class ServerToClientResponse {
 public:
-    ServerToClientResponse()                              = default;
-    ServerToClientResponse(const ServerToClientResponse&) = delete;
-    explicit ServerToClientResponse(const STC_Cmd_ptr& cmd) : stc_cmd_(cmd) {}
-    ~ServerToClientResponse() = default;
+    ServerToClientResponse() = default;
 
+    explicit ServerToClientResponse(const STC_Cmd_ptr& cmd)
+        : stc_cmd_(cmd) {}
+
+    ServerToClientResponse(const ServerToClientResponse&)            = delete;
     ServerToClientResponse& operator=(const ServerToClientResponse&) = delete;
+    ServerToClientResponse(ServerToClientResponse&&)                 = delete;
+    ServerToClientResponse& operator=(ServerToClientResponse&&)      = delete;
+
+    ~ServerToClientResponse() = default;
 
     STC_Cmd_ptr get_cmd() const { return stc_cmd_; }
     void set_cmd(const STC_Cmd_ptr& cmd) { stc_cmd_ = cmd; }

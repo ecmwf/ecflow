@@ -31,6 +31,10 @@ void set_host_port(ClientInvoker* self, const std::string& host, int port) {
     self->set_host_port(host, ecf::convert_to<std::string>(port));
 }
 
+void set_retry_connection_period(ClientInvoker* self, int seconds) {
+    self->set_retry_connection_period(std::chrono::seconds(seconds));
+}
+
 std::string version(ClientInvoker* self) {
     return ecf::Version::full();
 }
@@ -118,7 +122,10 @@ py::object get_file(ClientInvoker* self,
 /// Set the CLI to enable output to standard out
 class CliSetter {
 public:
-    explicit CliSetter(ClientInvoker* self) : _self(self) { self->set_cli(true); }
+    explicit CliSetter(ClientInvoker* self)
+        : _self(self) {
+        self->set_cli(true);
+    }
     ~CliSetter() { _self->set_cli(false); }
 
 private:
@@ -530,9 +537,7 @@ void export_Client() {
              &ClientInvoker::port,
              py::return_value_policy<py::copy_const_reference>(),
              "Return the port, assume set_host_port() has been set. otherwise returns 3141")
-        .def("set_retry_connection_period",
-             &ClientInvoker::set_retry_connection_period,
-             ClientDoc::set_retry_connection_period())
+        .def("set_retry_connection_period", set_retry_connection_period, ClientDoc::set_retry_connection_period())
         .def("set_connection_attempts", &ClientInvoker::set_connection_attempts, ClientDoc::set_connection_attempts())
         .def("set_auto_sync",
              &ClientInvoker::set_auto_sync,

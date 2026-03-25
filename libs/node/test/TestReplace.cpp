@@ -18,16 +18,19 @@
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/Jobs.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 class ExpectStateChange {
 public:
-    ExpectStateChange() : state_change_no_(Ecf::state_change_no()) { Ecf::set_server(true); }
+    ExpectStateChange()
+        : state_change_no_(Ecf::state_change_no()) {
+        Ecf::set_server(true);
+    }
     ~ExpectStateChange() {
         BOOST_CHECK_MESSAGE(state_change_no_ != Ecf::state_change_no(), "Expected state change");
         Ecf::set_server(false);
@@ -39,7 +42,10 @@ private:
 
 class ExpectModifyChange {
 public:
-    ExpectModifyChange() : modify_change_no_(Ecf::modify_change_no()) { Ecf::set_server(true); }
+    ExpectModifyChange()
+        : modify_change_no_(Ecf::modify_change_no()) {
+        Ecf::set_server(true);
+    }
     ~ExpectModifyChange() {
         BOOST_CHECK_MESSAGE(modify_change_no_ != Ecf::modify_change_no(), "Expected Modify change");
         Ecf::set_server(false);
@@ -51,7 +57,9 @@ private:
 
 class ExpectNoChange {
 public:
-    ExpectNoChange() : state_change_no_(Ecf::state_change_no()), modify_change_no_(Ecf::modify_change_no()) {
+    ExpectNoChange()
+        : state_change_no_(Ecf::state_change_no()),
+          modify_change_no_(Ecf::modify_change_no()) {
         Ecf::set_server(true);
     }
     ~ExpectNoChange() {
@@ -1038,18 +1046,15 @@ BOOST_AUTO_TEST_CASE(test_trigger_references_during_replace) {
         BOOST_REQUIRE_MESSAGE(errorMsg.empty(), "Expected no message " << errorMsg);
     }
     {
-        std::vector<Node*> all_server_nodes;
-        serverDefs.getAllNodes(all_server_nodes);
+        auto all_server_nodes = ecf::get_all_nodes(serverDefs);
 
         // Now check the Trigger reference. The old reference to nodes in the trigger expressions should have been
         // removed
-        std::vector<Task*> theTasks;
-        server_suite->getAllTasks(theTasks);
-        BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
-        for (auto& theTask : theTasks) {
+        auto tasks = ecf::get_all_tasks(*server_suite);
+        BOOST_REQUIRE_MESSAGE(tasks.size() == 3, "Expected 3 tasks but found, " << tasks.size());
+        for (auto& task : tasks) {
 
-            std::set<Node*> referenced_nodes;
-            theTask->getAllAstNodes(referenced_nodes);
+            auto referenced_nodes = ecf::get_all_ast_nodes(*task);
             BOOST_REQUIRE_MESSAGE(referenced_nodes.size() == 1, " expected 1 referenced node");
 
             // The reference nodes must exist in the server. Otherwise replace has still kept references to old nodes in

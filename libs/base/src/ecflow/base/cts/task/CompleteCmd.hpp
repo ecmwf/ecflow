@@ -23,7 +23,8 @@ public:
                 const std::vector<std::string>& vec     = std::vector<std::string>())
         : TaskCmd(pathToTask, jobsPassword, process_or_remote_id, try_no),
           var_to_del_(vec) {}
-    CompleteCmd() : TaskCmd() {}
+    CompleteCmd()
+        : TaskCmd() {}
 
     const std::vector<std::string>& variables_to_delete() const { return var_to_del_; }
 

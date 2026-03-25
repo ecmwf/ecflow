@@ -35,6 +35,14 @@ template <typename COMMAND>
 class DefaultCommand : public BasicCommand {
 public:
     void execute(ClientAPI& client) final { static_cast<COMMAND*>(this)->actually_execute(client); }
+
+private:
+    /* The private default ctor prevents incorrect instantiation of the DefaultCommand,
+     * while the friendship allows access the default ctor,  enforcing the CRTP pattern
+     * (i.e. COMMAND must be the derived class)
+     */
+    DefaultCommand() = default;
+    friend COMMAND;
 };
 
 /// The `command` to update an ecFlow meter (issued by an ecFlow user)
@@ -175,7 +183,8 @@ public:
     void execute(ClientAPI& client) const { impl_->execute(client); }
 
 private:
-    explicit Command(std::unique_ptr<BasicCommand>&& impl) : impl_{std::move(impl)} {}
+    explicit Command(std::unique_ptr<BasicCommand>&& impl)
+        : impl_{std::move(impl)} {}
 
     std::unique_ptr<BasicCommand> impl_;
 };
@@ -294,10 +303,10 @@ public:
         std::string value = obj.at("value");
 
         bool event_value;
-        if (value == "1") {
+        if (value == "1" or value == "true" or value == "set") {
             event_value = true;
         }
-        else if (value == "0") {
+        else if (value == "0" or value == "false" or value == "clear") {
             event_value = false;
         }
         else {
@@ -313,7 +322,8 @@ public:
 /// The factory of `command`; creates commands based on JSON data
 class CommandFactory {
 public:
-    CommandFactory() : builders_{} {
+    CommandFactory()
+        : builders_{} {
         builders_.push_back(std::make_unique<CommandUserAlterLabelBuilder>());
         builders_.push_back(std::make_unique<CommandUserAlterMeterBuilder>());
         builders_.push_back(std::make_unique<CommandUserAlterEventBuilder>());
@@ -340,7 +350,8 @@ public:
 
 class JSONRequestHandler {
 public:
-    JSONRequestHandler() : client_{} {}
+    JSONRequestHandler()
+        : client_{} {}
 
     void handle(const nlohmann::json& request) {
         try {

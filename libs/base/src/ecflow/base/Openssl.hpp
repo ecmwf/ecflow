@@ -21,9 +21,6 @@ namespace ecf {
 
 class Openssl {
 public:
-    Openssl(const Openssl&)                  = delete;
-    const Openssl& operator=(const Openssl&) = delete;
-
     /// There is no SSL protocol version named SSLv23.
     /// The SSLv23_method() API and its variants choose SSLv2, SSLv3, or TLSv1 for compatibility with the peer
     /// Consider the incompatibility among the SSL/TLS versions when you develop
@@ -35,6 +32,13 @@ public:
     /// However, the SSL client using the SSLv23 method cannot establish connection with the SSL server
     ///  with the SSLv3/TLSv1 method because SSLv2 hello message is sent by the client
     Openssl() = default;
+
+    Openssl(const Openssl&)            = delete;
+    Openssl& operator=(const Openssl&) = delete;
+    Openssl(Openssl&&)                 = delete;
+    Openssl& operator=(Openssl&&)      = delete;
+
+    ~Openssl() = default;
 
     const std::string& ssl() const { return ssl_; }
     bool enabled() const { return !ssl_.empty(); }

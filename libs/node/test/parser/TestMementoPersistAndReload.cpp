@@ -18,7 +18,6 @@
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 // ********************************************************************

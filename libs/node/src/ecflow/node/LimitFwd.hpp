@@ -14,6 +14,6 @@
 #include <memory>
 
 class Limit;
-typedef std::shared_ptr<Limit> limit_ptr;
+using limit_ptr = std::shared_ptr<Limit>;
 
 #endif /* ecflow_node_LimitFwd_HPP */

@@ -23,8 +23,8 @@
 #include "VReply.hpp"
 #include "ecflow/core/Filesystem.hpp"
 
-// #define UI_OUTPUTDIRPROVIDER_DEBUG__
-// #define UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+// #define UI_OUTPUTDIRPROVIDER_DEBUG
+// #define UI_OUTPUTDIRPROVIDER_TASK_DEBUG
 
 OutputDirFetchTask::OutputDirFetchTask(const std::string& name, FetchQueueOwner* owner)
     : AbstractFetchTask(name, owner) {
@@ -53,7 +53,7 @@ OutputDirFetchLogServerTask::~OutputDirFetchLogServerTask() {
 
 void OutputDirFetchLogServerTask::deleteClient() {
     if (client_) {
-#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG
         UI_FN_DBG
 #endif
         client_->disconnect(this);
@@ -82,7 +82,7 @@ void OutputDirFetchLogServerTask::clear() {
 // dir asynchronously. The output client will call clientFinished or
 // clientError eventually!!
 void OutputDirFetchLogServerTask::run() {
-#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     std::string host, port;
@@ -96,7 +96,7 @@ void OutputDirFetchLogServerTask::run() {
     }
     Q_ASSERT(!userLogServerUsed || !sysLogServerUsed);
 
-#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "host=" << host << " port=" << port;
 #endif
 
@@ -181,12 +181,13 @@ void OutputDirFetchLogServerTask::clientError(QString msg) {
 // OutputFileFetchLocalTask
 //
 //=================================
-OutputDirFetchLocalTask::OutputDirFetchLocalTask(FetchQueueOwner* owner) : OutputDirFetchTask("DirFetchLocal", owner) {
+OutputDirFetchLocalTask::OutputDirFetchLocalTask(FetchQueueOwner* owner)
+    : OutputDirFetchTask("DirFetchLocal", owner) {
 }
 
 // try to read the logfile from the disk (if the settings allow it)
 void OutputDirFetchLocalTask::run() {
-#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
     VDir_ptr res;
@@ -194,7 +195,7 @@ void OutputDirFetchLocalTask::run() {
     fs::path p(filePath_);
 
     // Is it a directory?
-    boost::system::error_code errorCode;
+    std::error_code errorCode;
     if (fs::is_directory(p, errorCode)) {
         fail();
         return;
@@ -265,7 +266,7 @@ void OutputDirFetchTransferTask::clear() {
 // file asynchronously. The output client will call clientFinished() or
 // clientError eventually!!
 void OutputDirFetchTransferTask::run() {
-#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG__
+#ifdef UI_OUTPUTDIRPROVIDER_TASK_DEBUG
     UiLog().dbg() << UI_FN_INFO << "filePath=" << filePath_;
 #endif
 
@@ -373,7 +374,8 @@ protected:
     OutputDirProvider* provider_{nullptr};
 };
 
-OutputDirFetchQueueManager::OutputDirFetchQueueManager(OutputDirProvider* provider) : provider_(provider) {
+OutputDirFetchQueueManager::OutputDirFetchQueueManager(OutputDirProvider* provider)
+    : provider_(provider) {
     fetchQueue_ = new FetchQueue(FetchQueue::RunAll, this);
 }
 
@@ -425,7 +427,7 @@ void OutputDirFetchQueueManager::run(ServerHandler* server, VNode* node, const s
         fetchQueue_->add(t);
     }
 
-#ifdef UI_OUTPUTFILEPROVIDER_DEBUG__
+#ifdef UI_OUTPUTDIRPROVIDER_DEBUG
     UiLog().dbg() << UI_FN_INFO << "queue=" << fetchQueue_;
 #endif
     fetchQueue_->run();
@@ -437,7 +439,7 @@ void OutputDirFetchQueueManager::fetchQueueFinished(const std::string& /*filePat
         provider_->owner_->infoFailed(theReply());
     }
     else {
-#ifdef UI_OUTPUTDIRPROVIDER_DEBUG__
+#ifdef UI_OUTPUTDIRPROVIDER_DEBUG
         UiLog().dbg() << UI_FN_INFO << "dirs=" << reply_->directories().size();
 #endif
         provider_->owner_->infoReady(theReply());
@@ -450,7 +452,8 @@ void OutputDirFetchQueueManager::fetchQueueFinished(const std::string& /*filePat
 //
 //=================================
 
-OutputDirProvider::OutputDirProvider(InfoPresenter* owner) : InfoProvider(owner, VTask::NoTask) {
+OutputDirProvider::OutputDirProvider(InfoPresenter* owner)
+    : InfoProvider(owner, VTask::NoTask) {
     fetchManager_ = new OutputDirFetchQueueManager(this);
 }
 

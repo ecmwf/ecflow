@@ -17,7 +17,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool MeterParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // meter 0 100 100 # value

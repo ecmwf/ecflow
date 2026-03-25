@@ -20,7 +20,8 @@
 
 CommandOutputDialog* CommandOutputDialog::dialog_ = nullptr;
 
-CommandOutputDialog::CommandOutputDialog(QWidget* parent) : QDialog(parent) {
+CommandOutputDialog::CommandOutputDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 
     setAttribute(Qt::WA_DeleteOnClose);

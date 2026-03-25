@@ -91,11 +91,7 @@ std::string Child::to_string(const std::vector<Child::CmdType>& vec) {
 }
 
 std::string Child::to_string(Child::CmdType ct) {
-    if (auto found = Enumerate<Child::CmdType>::to_string(ct); found) {
-        return std::string{found.value()};
-    }
-    assert(false);
-    return std::string{Enumerate<Child::CmdType>::to_string(Child::INIT).value()};
+    return std::string{Enumerate<Child::CmdType>::as_string(ct)};
 }
 
 std::vector<Child::CmdType> Child::child_cmds(const std::string& s) {

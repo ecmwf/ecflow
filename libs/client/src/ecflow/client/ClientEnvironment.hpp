@@ -54,7 +54,8 @@ private:
 
 struct UnavailableToken : public std::runtime_error
 {
-    explicit UnavailableToken(const std::string& what) : std::runtime_error(what) {}
+    explicit UnavailableToken(const std::string& what)
+        : std::runtime_error(what) {}
 };
 
 /**
@@ -73,6 +74,11 @@ struct UnavailableToken : public std::runtime_error
  */
 class ClientEnvironment final : public AbstractClientEnv {
 public:
+    /**
+     * @brief The type used to configure a specific amount of time (e.g. for timeouts or time between retries).
+     */
+    using time_duration_t = std::chrono::milliseconds;
+
     /**
      * @brief Create a new ClientEnvironment, effectively loading all environment configurations
      *
@@ -154,7 +160,7 @@ public:
     // massive slow down and disconnection from the client, when the server is still
     // running.
     // used for **test only**
-    int connect_timeout() const { return connect_timeout_; }
+    time_duration_t connect_timeout() const { return connect_timeout_; }
 
     /// When called will demand load the ecf host file, and read the hosts.
     /// Will then iterate over the host, when the end is reached will start over
@@ -300,7 +306,7 @@ private:
      *
      * This value default is 0.
      */
-    int connect_timeout_{0}; // default 0, ECF_CONNECT_TIMEOUT, connection timeout
+    time_duration_t connect_timeout_{0}; // default 0, ECF_CONNECT_TIMEOUT, connection timeout
 
     /**
      * @brief The index of the current selected host, used to select an entry into the host_vec_ vector.
@@ -330,7 +336,9 @@ private:
 
     void taskPath(const std::string& s) { task_path_ = s; }
     void set_jobs_password(const std::string& s) { jobs_password_ = s; }
-    void set_connect_timeout(int t) { connect_timeout_ = t; }
+
+    void set_connect_timeout(time_duration_t timeout) { connect_timeout_ = timeout; }
+    void set_connect_timeout(int t) { set_connect_timeout(std::chrono::seconds(t)); }
 
     // Allow testing to add or update the environment in the Defs file
     // Each pair is ( variable name, variable value )

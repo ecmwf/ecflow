@@ -18,14 +18,17 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 
-using namespace std;
 using namespace ecf;
 
 //==========================================================================================
 
-DateAttr::DateAttr(int day, int month, int year) : day_(day), month_(month), year_(year) {
+DateAttr::DateAttr(int day, int month, int year)
+    : day_(day),
+      month_(month),
+      year_(year) {
     checkDate(day_, month_, year_, true /* allow wild cards */);
 }
 
@@ -77,8 +80,9 @@ void DateAttr::checkDate(int day, int month, int year, bool allow_wild_cards) {
 
     if (day != 0 && month != 0 && year != 0) {
 
-        // let boost validate the date
-        auto theDate = boost::gregorian::date(year, month, day);
+        // The following validates the given date
+        //  -- i.e. an bad_year/_month/_day_of_month exception is thrown in case the date is invalid
+        boost::gregorian::date(year, month, day);
     }
 }
 
@@ -161,15 +165,7 @@ bool DateAttr::checkForRequeue(const ecf::Calendar& calendar) const {
     // checkForRequeue is called when we are deciding whether to re-queue the node.
     // If this date is in the future, we should re-queue
     if (day_ != 0 && month_ != 0 && year_ != 0) {
-        auto theDate = boost::gregorian::date(year_, month_, day_);
-        if (theDate > calendar.date()) {
-            // #ifdef DEBUG
-            //			cout << toString() << "   > " << " calendar date " << to_simple_string( calendar.date())
-            //<<
-            //"\n"; #endif
-            return true;
-        }
-        return false;
+        return boost::gregorian::date(year_, month_, day_) > calendar.date();
     }
 
     bool futureDayMatches   = true;
@@ -184,18 +180,6 @@ bool DateAttr::checkForRequeue(const ecf::Calendar& calendar) const {
     if (year_ != 0) {
         futureYearMatches = year_ > calendar.year();
     }
-
-    // #ifdef DEBUG
-    //   	if ( futureDayMatches ) {
-    //  		cout << "futureDayMatches " << toString() << " > " << calendar.day_of_month() << "\n";
-    //  	}
-    //	if ( futureMonthMatches ) {
-    //  		cout << "futureMonthMatches " << toString() << " > " << calendar.month() << "\n";
-    //  	}
-    //	if ( futureYearMatches ) {
-    //  		cout << "futureYearMatches " << toString() << " > " << calendar.year() << "\n";
-    //  	}
-    // #endif
 
     return (futureDayMatches || futureMonthMatches || futureYearMatches);
 }
@@ -220,11 +204,9 @@ bool DateAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const {
         return false;
     }
 
-    std::stringstream ss;
-    ss << " is date dependent ( next run on " << boost::gregorian::to_simple_string(next_matching_date(c))
-       << " the current date is ";
-    ss << c.day_of_month() << "/" << c.month() << "/" << c.year() << " )";
-    theReasonWhy += ss.str();
+    theReasonWhy += MESSAGE(" is date dependent ( next run on "
+                            << boost::gregorian::to_simple_string(next_matching_date(c)) << " the current date is "
+                            << c.day_of_month() << "/" << c.month() << "/" << c.year() << " )");
     return true;
 }
 
@@ -270,15 +252,7 @@ void DateAttr::write(std::string& ret) const {
 }
 
 std::string DateAttr::dump() const {
-    std::stringstream ss;
-    ss << toString();
-    if (free_) {
-        ss << " (free)";
-    }
-    else {
-        ss << " (holding)";
-    }
-    return ss.str();
+    return MESSAGE(toString() << (free_ ? " (free)" : " (holding)"));
 }
 
 bool DateAttr::operator==(const DateAttr& rhs) const {
@@ -374,9 +348,11 @@ void DateAttr::getDate(const std::string& date, int& day, int& month, int& year)
         throw std::runtime_error("DateAttr::getDate: Invalid clock date:" + date);
     }
 
-    // let boost validate the date
     if (day != 0 && month != 0 && year != 0) {
-        auto theDate = boost::gregorian::date(year, month, day);
+
+        // The following validates the given date
+        //  -- i.e. an bad_year/_month/_day_of_month exception is thrown in case the date is invalid
+        boost::gregorian::date(year, month, day);
     }
 }
 

@@ -23,11 +23,13 @@ inline void log_error(char const* where, boost::beast::error_code ec) {
     LOG(Log::ERR, where << ": " << ec.message());
 }
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define LOG_LEVEL(LEVEL, WHERE, MESSAGE)                                      \
     {                                                                         \
         using namespace ecf;                                                  \
         std::cout << LEVEL << " (" << WHERE << "): " << MESSAGE << std::endl; \
     }
+// NOLINTEND(bugprone-macro-parentheses)
 
 #define LOG_ERROR(WHERE, MESSAGE) LOG_LEVEL("ERR", WHERE, MESSAGE)
 #define LOG_DEBUG(WHERE, MESSAGE) LOG_LEVEL("DBG", WHERE, MESSAGE)
@@ -173,7 +175,9 @@ class HttpSession : public std::enable_shared_from_this<HttpSession> {
 
 public:
     // Take ownership of the stream
-    HttpSession(boost::asio::ip::tcp::socket&& socket, HttpServer* owner) : socket_(std::move(socket)), owner_{owner} {}
+    HttpSession(boost::asio::ip::tcp::socket&& socket, HttpServer* owner)
+        : socket_(std::move(socket)),
+          owner_{owner} {}
 
     void run() {
         // Clear the incoming and outgoing data buffers used buy the session

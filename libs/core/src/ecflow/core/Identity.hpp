@@ -31,7 +31,8 @@ public:
 template <class T>
 class WrappingIdentity : public AbstractIdentity {
 public:
-    explicit WrappingIdentity(T&& id) : id_(std::move(id)) {}
+    explicit WrappingIdentity(T&& id)
+        : id_(std::move(id)) {}
 
     [[nodiscard]] std::unique_ptr<AbstractIdentity> clone() const override {
         T clone = id_;
@@ -89,7 +90,9 @@ private:
 
 class SecureUserX {
 public:
-    explicit SecureUserX(std::string username) : username_(std::move(username)), password_{} {}
+    explicit SecureUserX(std::string username)
+        : username_(std::move(username)),
+          password_{} {}
 
     [[nodiscard]] std::string username() const { return username_; }
     [[nodiscard]] std::string password() const { return password_; }
@@ -130,6 +133,25 @@ bool is_a(const U& object) {
     return IsA<D>()(object);
 }
 
+namespace detail {
+
+template <typename X, typename Y, typename... Ys>
+struct is_one_of
+{
+    constexpr static bool value = std::is_same_v<X, Y> || is_one_of<X, Ys...>::value;
+};
+
+template <typename X, typename Y>
+struct is_one_of<X, Y>
+{
+    constexpr static bool value = std::is_same_v<X, Y>;
+};
+
+template <typename X, typename... Xs>
+constexpr bool is_one_of_v = is_one_of<X, Xs...>::value;
+
+} // namespace detail
+
 class Identity {
 public:
     [[nodiscard]] static Identity make_none() { return Identity{None{}}; }
@@ -147,17 +169,15 @@ public:
         return Identity{TaskX{pid, pass, tryno}};
     }
 
-    Identity(const Identity& other) : handle_{other.handle_->clone()} {}
-    Identity(Identity&& other) noexcept : handle_{std::move(other.handle_)} {}
+    Identity(const Identity& other)
+        : handle_{other.handle_->clone()} {}
+    Identity(Identity&& other) noexcept
+        : handle_{std::move(other.handle_)} {}
     ~Identity() = default;
 
-    Identity& operator=(const Identity& other) {
-        handle_ = other.handle_->clone();
-        return *this;
-    }
-
-    Identity& operator=(Identity&& other) noexcept {
-        handle_ = std::move(other.handle_);
+    Identity& operator=(Identity other) {
+        using std::swap;
+        std::swap(handle_, other.handle_);
         return *this;
     }
 
@@ -175,8 +195,10 @@ public:
     [[nodiscard]] std::string as_string() const { return handle_->as_string(); }
 
 private:
-    template <class T>
-    explicit Identity(T&& t) : handle_{std::make_unique<WrappingIdentity<T>>(std::move(t))} {}
+    template <class T,
+              typename = std::enable_if_t<detail::is_one_of_v<T, None, UserX, CustomUserX, SecureUserX, TaskX>>>
+    explicit Identity(T&& t)
+        : handle_{std::make_unique<WrappingIdentity<T>>(std::forward<T>(t))} {}
 
     std::unique_ptr<AbstractIdentity> handle_;
 };

@@ -14,6 +14,7 @@
 
 #include "ecflow/base/stc/ErrorCmd.hpp"
 #include "ecflow/base/stc/StcCmd.hpp"
+#include "ecflow/core/Message.hpp"
 
 // #define DEBUG_CLIENT 1;
 
@@ -30,7 +31,7 @@ SslClient::SslClient(boost::asio::io_context& io,
                      Cmd_ptr cmd_ptr,
                      const std::string& host,
                      const std::string& port,
-                     int timeout)
+                     time_duration_t timeout)
     : stopped_(false),
       host_(host),
       port_(port),
@@ -46,7 +47,7 @@ SslClient::SslClient(boost::asio::io_context& io,
     // When the timeout is not set it is obtained from the command.
     // The timeout is defined per command -- this allows, for example, loading the definition to have a longer timeout
     // than ping.
-    if (0 == timeout_) {
+    if (time_duration_t{0} == timeout_) {
         timeout_ = cmd_ptr->timeout();
     }
 
@@ -104,7 +105,7 @@ bool SslClient::start_connect(endpoints_iterator_t endpoints_iterator) {
         // will soon be executed. If it returns 1 then the wait handler was successfully cancelled.
 
         // Set a deadline for the connect operation.
-        deadline_.expires_after(std::chrono::seconds(timeout_));
+        deadline_.expires_after(timeout_);
 
         boost::asio::ip::tcp::endpoint endpoint = *endpoints_iterator;
         connection_.socket_ll().async_connect(endpoint,
@@ -139,16 +140,10 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
         if (!start_connect(++endpoints_iterator)) {
             // Ran out of end points, An error occurred
             stop();
-            std::stringstream ss;
-            if (e) {
-                ss << "SslClient::handle_connect: Ran out of end points : connection error( " << e.message()
-                   << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;
-            }
-            else {
-                ss << "SslClient::handle_connect: Ran out of end points : connection error for request( "
-                   << outbound_request_ << " ) on " << host_ << ":" << port_;
-            }
-            throw std::runtime_error(ss.str());
+
+            throw std::runtime_error(MESSAGE("SslClient::handle_connect: Ran out of end points : connection error ( "
+                                             << (e ? e.message() : "n/a") << " ) for request( " << outbound_request_
+                                             << " ) on " << host_ << ":" << port_));
         }
     }
     else if (e) {
@@ -166,10 +161,10 @@ void SslClient::handle_connect(const boost::system::error_code& e, endpoints_ite
         if (!start_connect(++endpoints_iterator)) {
             // Ran out of end points. An error occurred.
             stop();
-            std::stringstream ss;
-            ss << "SslClient::handle_connect: Ran out of end points: connection error( " << e.message()
-               << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;
-            throw std::runtime_error(ss.str());
+
+            throw std::runtime_error(MESSAGE("SslClient::handle_connect: Ran out of end points: connection error( "
+                                             << e.message() << " ) for request( " << outbound_request_ << " ) on "
+                                             << host_ << ":" << port_));
         }
     }
     else {
@@ -192,7 +187,7 @@ void SslClient::start_handshake() {
     // cancelled. If it returns 0 then you were too late and the wait handler has already been executed, or will soon be
     // executed. If it returns 1 then the wait handler was successfully cancelled. Set a deadline for the write
     // operation.
-    deadline_.expires_after(std::chrono::seconds(timeout_));
+    deadline_.expires_after(timeout_);
 
     connection_.socket().async_handshake(boost::asio::ssl::stream_base::client,
                                          [this](const boost::system::error_code& e) { handle_handshake(e); });
@@ -209,10 +204,9 @@ void SslClient::handle_handshake(const boost::system::error_code& e) {
         // An error occurred.
         stop();
 
-        std::stringstream ss;
-        ss << "SslClient::handle_handshake: error(" << e.message() << ") on " << host_ << ":" << port_
-           << " possibly non-ssl server";
-        inbound_response_.set_cmd(std::make_shared<ErrorCmd>(ss.str()));
+        inbound_response_.set_cmd(std::make_shared<ErrorCmd>(MESSAGE("SslClient::handle_handshake: error("
+                                                                     << e.message() << ") on " << host_ << ":" << port_
+                                                                     << " possibly non-ssl server")));
     }
 }
 
@@ -222,7 +216,7 @@ void SslClient::start_write() {
     // executed. If it returns 1 then the wait handler was successfully cancelled.
 
     // Set a deadline for the write operation.
-    deadline_.expires_after(std::chrono::seconds(timeout_));
+    deadline_.expires_after(timeout_);
 
     connection_.async_write(outbound_request_,
                             [this](const boost::system::error_code& error) { this->handle_write(error); });
@@ -251,10 +245,9 @@ void SslClient::handle_write(const boost::system::error_code& e) {
         // An error occurred.
         stop();
 
-        std::stringstream ss;
-        ss << "SslClient::handle_write: error (" << e.message() << " ) for request( " << outbound_request_ << " ) on "
-           << host_ << ":" << port_;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("SslClient::handle_write: error (" << e.message() << " ) for request( "
+                                                                            << outbound_request_ << " ) on " << host_
+                                                                            << ":" << port_));
     }
 
     // Nothing to do. The socket will be closed automatically when the last
@@ -267,7 +260,7 @@ void SslClient::start_read() {
     // executed. If it returns 1 then the wait handler was successfully cancelled.
 
     // Set a deadline for the read operation.
-    deadline_.expires_after(std::chrono::seconds(timeout_));
+    deadline_.expires_after(timeout_);
 
     connection_.async_read(inbound_response_,
                            [this](const boost::system::error_code& error) { this->handle_read(error); });
@@ -330,10 +323,9 @@ void SslClient::handle_read(const boost::system::error_code& e) {
             return;
         }
 
-        std::stringstream ss;
-        ss << "Client::handle_read: connection error( " << e.message() << " ) for request( " << outbound_request_
-           << " ) on " << host_ << ":" << port_;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Client::handle_read: connection error( "
+                                         << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_
+                                         << ":" << port_));
     }
 
     // Since we are not starting a new operation the io_context will run out of
@@ -378,10 +370,9 @@ void SslClient::check_deadline() {
         // asynchronous operations are cancelled.
         stop();
 
-        std::stringstream ss;
-        ss << "SslClient::check_deadline: timed out after " << timeout_ << " seconds for request( " << outbound_request_
-           << " ) on " << host_ << ":" << port_;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("SslClient::check_deadline: timed out after "
+                                         << timeout_.count() << "ms for request( " << outbound_request_ << " ) on "
+                                         << host_ << ":" << port_));
     }
 
     // Put the actor back to sleep.

@@ -22,6 +22,7 @@
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeContainer.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/NodeAttrDoc.hpp"
@@ -307,9 +308,7 @@ void sort_attributes3(node_ptr self, const std::string& attribute_name, bool rec
     boost::algorithm::to_lower(attribute);
     ecf::Attr::Type attr = ecf::Attr::to_attr(attribute_name);
     if (attr == ecf::Attr::UNKNOWN) {
-        std::stringstream ss;
-        ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("sort_attributes: the attribute " << attribute_name << " is not valid"));
     }
     std::vector<std::string> no_sort;
     pyutil_list_to_str_vec(list, no_sort);
@@ -317,9 +316,7 @@ void sort_attributes3(node_ptr self, const std::string& attribute_name, bool rec
 }
 
 std::vector<node_ptr> get_all_nodes(node_ptr self) {
-    std::vector<node_ptr> nodes;
-    self->get_all_nodes(nodes);
-    return nodes;
+    return ecf::get_all_nodes_ptr(self);
 }
 
 node_ptr add_trigger(node_ptr self, const std::string& expr) {
@@ -522,10 +519,9 @@ static py::object node_getattr(node_ptr self, const std::string& attr) {
         return py::object(limit);
     }
 
-    std::stringstream ss;
-    ss << "ExportNode::node_getattr: function of name '" << attr
-       << "' does not exist *OR* child node,variable,meter,event or limit on node " << self->absNodePath();
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE(
+        "ExportNode::node_getattr: function of name '"
+        << attr << "' does not exist *OR* child node,variable,meter,event or limit on node " << self->absNodePath()));
     return py::object();
 }
 

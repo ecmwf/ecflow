@@ -18,7 +18,6 @@
 
 using boost::asio::ip::tcp;
 
-using namespace std;
 using namespace ecf;
 
 TcpServer::TcpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvironment& serverEnv)
@@ -30,7 +29,7 @@ TcpServer::TcpServer(BaseServer* server, boost::asio::io_context& io, ServerEnvi
 
 void TcpServer::start_accept() {
     if (serverEnv_.debug()) {
-        cout << "   TcpServer::start_accept()" << endl;
+        std::cout << "   TcpServer::start_accept()" << std::endl;
     }
     connection_ptr new_conn = std::make_shared<connection>(boost::ref(io_));
     acceptor_.async_accept(new_conn->socket_ll(),
@@ -39,14 +38,14 @@ void TcpServer::start_accept() {
 
 void TcpServer::handle_accept(const boost::system::error_code& e, connection_ptr conn) {
     if (serverEnv_.debug()) {
-        cout << "   TcpServer::handle_accept" << endl;
+        std::cout << "   TcpServer::handle_accept" << std::endl;
     }
 
     // Check whether the server was stopped by a signal before this completion
     // handler had a chance to run.
     if (!acceptor_.is_open()) {
         if (serverEnv_.debug()) {
-            cout << "   TcpServer::handle_accept:  acceptor is closed, returning" << endl;
+            std::cout << "   TcpServer::handle_accept:  acceptor is closed, returning" << std::endl;
         }
         return;
     }
@@ -61,7 +60,7 @@ void TcpServer::handle_accept(const boost::system::error_code& e, connection_ptr
     }
     else {
         if (serverEnv_.debug()) {
-            cout << "   TcpServer::handle_accept " << e.message() << endl;
+            std::cout << "   TcpServer::handle_accept " << e.message() << std::endl;
         }
         if (e != boost::asio::error::operation_aborted) {
             // An error occurred. Log it
@@ -112,16 +111,14 @@ void TcpServer::handle_write(const boost::system::error_code& e, connection_ptr 
     // Nothing to do. The socket will be closed automatically when the last
     // reference to the connection object goes away.
     if (serverEnv_.debug()) {
-        cout << "   TcpServer::handle_write: client request " << inbound_request_ << " replying with  "
-             << outbound_response_ << endl;
+        std::cout << "   TcpServer::handle_write: client request " << inbound_request_ << " replying with  "
+                  << outbound_response_ << std::endl;
     }
 
     if (e) {
         LogFlusher logFlusher;
         ecf::LogToCout logToCout;
-        std::stringstream ss;
-        ss << "TcpServer::handle_write: " << e.message() << " : for request " << inbound_request_;
-        log(Log::ERR, ss.str());
+        log(Log::ERR, MESSAGE("TcpServer::handle_write: " << e.message() << " : for request " << inbound_request_));
         return;
     }
 

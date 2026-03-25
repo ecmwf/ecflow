@@ -111,20 +111,17 @@ bool CheckPtSaver::explicitSave(bool from_server) const {
             Log::instance()->cache_time_stamp();
             std::string msg = Str::SVR_CMD();
             msg += CtsApi::checkPtDefsArg();
-            std::stringstream ss;
-            ss << msg << " in " << timer.duration() << " seconds";
-            log(Log::MSG, ss.str());
+            log(Log::MSG, MESSAGE(msg << " in " << timer.duration() << " seconds"));
         }
 
         /// If Save take longer than checkpt_save_time_alarm, then set a flag on server
         /// So that user can be aware of it.
         if (static_cast<size_t>(timer.duration()) > server_->serverEnv_.checkpt_save_time_alarm()) {
             server_->defs_->flag().set(ecf::Flag::LATE);
-            std::stringstream ss;
-            ss << "Check pt save time(" << timer.duration() << ") is greater than alarm time("
-               << server_->serverEnv_.checkpt_save_time_alarm()
-               << "). Excessive save times can interfere with scheduling!";
-            log(Log::WAR, ss.str());
+            log(Log::WAR,
+                MESSAGE("Check pt save time(" << timer.duration() << ") is greater than alarm time("
+                                              << server_->serverEnv_.checkpt_save_time_alarm()
+                                              << "). Excessive save times can interfere with scheduling!"));
         }
 #ifdef DEBUG_CHECKPT
         std::cout << " backup and save took " << durationTimer.duration() << " seconds\n";

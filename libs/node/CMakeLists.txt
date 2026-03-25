@@ -24,6 +24,7 @@ set(test_srcs
   test/TestEcfFile.cpp
   test/TestEcfFileLocator.cpp
   test/TestEnviromentSubstitution.cpp
+  test/TestExprASTRendering.cpp
   test/TestExprParser.cpp
   test/TestExprRepeatDateArithmetic.cpp
   test/TestExprRepeatDateListArithmetic.cpp
@@ -37,6 +38,7 @@ set(test_srcs
   test/TestMigration.cpp
   test/TestMissNextTimeSlot.cpp
   test/TestMovePeer.cpp
+  test/TestNodeAlgorithms.cpp
   test/TestNodeBeginRequeue.cpp
   test/TestNodeState.cpp
   test/TestNode_main.cpp # test entry point

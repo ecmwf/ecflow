@@ -31,7 +31,7 @@ class VTaskObserver;
 // a shared pointer of VTask. So VTask can only exist as a shared pointer.
 
 class VTask;
-typedef std::shared_ptr<VTask> VTask_ptr;
+using VTask_ptr = std::shared_ptr<VTask>;
 
 class VTask : public std::enable_shared_from_this<VTask> {
 public:

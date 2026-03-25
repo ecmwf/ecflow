@@ -23,11 +23,16 @@
 
 class WhyCmd {
 public:
-    WhyCmd()              = delete;
-    WhyCmd(const WhyCmd&) = delete;
-    WhyCmd(WhyCmd&&)      = delete;
+    WhyCmd() = delete;
 
     WhyCmd(defs_ptr defs, const std::string& absNodePath);
+
+    WhyCmd(const WhyCmd&)            = delete;
+    WhyCmd& operator=(const WhyCmd&) = delete;
+    WhyCmd(WhyCmd&&)                 = delete;
+    WhyCmd& operator=(WhyCmd&&)      = delete;
+
+    ~WhyCmd() = default;
 
     /// Why the node is not running
     /// Return a '/n' separated string which lists the reasons why

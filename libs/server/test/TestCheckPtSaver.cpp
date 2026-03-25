@@ -24,7 +24,8 @@ public:
     /**
      * Create a handle for a 'non-existent' data file
      */
-    explicit TestFile(const std::string& basename) : absolute_path_(TestFile::unique_absolute_path(basename)) {}
+    explicit TestFile(const std::string& basename)
+        : absolute_path_(TestFile::unique_absolute_path(basename)) {}
 
     /**
      * Create a handle for a data file, with the given content
@@ -39,7 +40,7 @@ public:
     [[nodiscard]] std::string load() const { return f_load(absolute_path_); }
 
     static fs::path unique_absolute_path(const std::string& basename) {
-        return fs::absolute(fs::unique_path(basename));
+        return fs::absolute(ecf::fsx::unique_path(basename));
     }
 
 private:

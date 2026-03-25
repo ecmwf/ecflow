@@ -18,7 +18,7 @@ class VProperty;
 class VConfigLoader {
 public:
     explicit VConfigLoader(const std::string& name);
-    virtual ~VConfigLoader();
+    virtual ~VConfigLoader() = default;
 
     virtual void load(VProperty* group) = 0;
     static bool process(const std::string& name, VProperty*);
@@ -34,7 +34,8 @@ class SimpleLoader : public VConfigLoader {
     void load(VProperty* prop) override { T::load(prop); }
 
 public:
-    explicit SimpleLoader(const std::string& name) : VConfigLoader(name) {}
+    explicit SimpleLoader(const std::string& name)
+        : VConfigLoader(name) {}
 };
 
 #endif /* ecflow_viewer_VConfigLoader_HPP */

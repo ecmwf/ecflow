@@ -127,12 +127,12 @@ void set_last_request_time() {
     last_request_time = static_cast<unsigned int>(curtime.tv_sec);
 }
 
-template <typename T>
-void trycatch(const httplib::Request& request, httplib::Response& response, T&& func) {
+template <typename F>
+void trycatch(const httplib::Request& request, httplib::Response& response, F f) {
     set_last_request_time();
     try {
         num_requests++;
-        func();
+        f();
     }
     catch (const HttpServerException& e) {
         num_errors++;

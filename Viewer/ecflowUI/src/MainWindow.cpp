@@ -64,7 +64,9 @@ int MainWindow::maxWindowNum_ = 25;
 LogViewerCom* MainWindow::logCom_ = nullptr;
 #endif
 
-MainWindow::MainWindow(QStringList /*idLst*/, QWidget* parent) : QMainWindow(parent), serverSyncNotifyTb_(nullptr) {
+MainWindow::MainWindow(QStringList /*idLst*/, QWidget* parent)
+    : QMainWindow(parent),
+      serverSyncNotifyTb_(nullptr) {
     setupUi(this);
 
     // Assigns name to each object
@@ -763,7 +765,7 @@ MainWindow* MainWindow::findWindow(QWidget* childW) {
 }
 
 MainWindow* MainWindow::firstWindow() {
-    return (!windows_.isEmpty()) ? (windows_[0]) : NULL;
+    return (!windows_.isEmpty()) ? (windows_[0]) : nullptr;
 }
 
 void MainWindow::startPreferences(QString option) {
@@ -802,7 +804,8 @@ void MainWindow::updateMenuMode(ServerHandler* sh) {
 //
 //--------------------------------------------------------
 
-MainWindowTitleHandler::MainWindowTitleHandler(MainWindow* win) : win_(win) {
+MainWindowTitleHandler::MainWindowTitleHandler(MainWindow* win)
+    : win_(win) {
     Q_ASSERT(win_);
     std::vector<std::string> propVec;
 }

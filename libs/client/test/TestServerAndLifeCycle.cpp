@@ -8,6 +8,8 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <vector>
+
 #include <boost/test/unit_test.hpp>
 
 #include "InvokeServer.hpp"
@@ -20,7 +22,6 @@
 #include "ecflow/node/System.hpp" // kill singleton for valgrind
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -45,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
     std::string host = ClientEnvironment::hostSpecified();
     if (!host.empty()) {
         // Server allready started, since we cant disable job generation ignore this test
-        std::cout << "Ignoring test when ECF_HOST specified..." << endl;
+        std::cout << "Ignoring test when ECF_HOST specified..." << std::endl;
         return;
     }
 
@@ -97,10 +98,10 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
     //	    endfamily
     //	endsuite
 
-    string suite1_family1_a  = "suite1/family1/a";
-    string suite1_family1_b  = "suite1/family1/b";
-    string suite1_family2_aa = "suite1/family2/aa";
-    string suite1_family2_bb = "suite1/family2/bb";
+    std::string suite1_family1_a  = "suite1/family1/a";
+    std::string suite1_family1_b  = "suite1/family1/b";
+    std::string suite1_family2_aa = "suite1/family2/aa";
+    std::string suite1_family2_bb = "suite1/family2/bb";
 
     {
         // Begin will set all states to queued and then start job submission placing
@@ -159,9 +160,8 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
     {
         theClient.taskPath(suite1_family1_a);
         {
-            char* argv[] = {
-                const_cast<char*>("ClientInvoker"), const_cast<char*>("--meter=myMeter"), const_cast<char*>("100")};
-            BOOST_REQUIRE_MESSAGE(theClient.invoke(3, argv) == 0, " should return 0\n" << theClient.errorMsg());
+            std::vector<std::string> args = {"ClientInvoker", "--meter=myMeter", "100"};
+            BOOST_REQUIRE_MESSAGE(theClient.invoke(args) == 0, " should return 0\n" << theClient.errorMsg());
             BOOST_REQUIRE_MESSAGE(theClient.forceDependencyEval() == 0,
                                   CtsApi::forceDependencyEval() << " failed should return 0\n"
                                                                 << theClient.errorMsg());

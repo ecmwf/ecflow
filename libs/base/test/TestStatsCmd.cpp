@@ -13,6 +13,7 @@
 #include "MockServer.hpp"
 #include "MyDefsFixture.hpp"
 #include "ecflow/base/ClientToServerRequest.hpp"
+#include "ecflow/base/Stats.hpp"
 #include "ecflow/base/cts/user/CtsCmd.hpp"
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/core/Log.hpp"
@@ -33,9 +34,9 @@ std::string extract_report_value(const std::string& report, const std::string& l
     for (const auto& token : tokens) {
         if (token.find(label) != std::string::npos) {
             // Important!
-            //   By convention, the labels in report by `Stats` have width 35
+            //   By convention, the labels in report by `Stats` have a specific width
             //   If this convention changes, the test will fail
-            return token.substr(35);
+            return token.substr(Stats::width + 2 /* amount of spaces before label */);
         }
     }
     throw std::runtime_error("Unable to find requested label");
@@ -57,7 +58,7 @@ BOOST_AUTO_TEST_SUITE(U_Base)
 
 BOOST_AUTO_TEST_SUITE(T_StatsCmd)
 
-BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_number_of_suites) {
+BOOST_AUTO_TEST_CASE(is_able_to_report_number_of_suites) {
 
     ecf::TestLog test_log("test_stats_cmd__reports_number_of_suites.log");
 
@@ -91,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_number_of_suites) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_stats_cmd__reports_requests_per_second) {
+BOOST_AUTO_TEST_CASE(is_able_to_report_requests_per_second) {
 
     ecf::TestLog test_log("test_stats_cmd__reports_requests_per_second.log");
 

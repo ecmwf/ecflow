@@ -48,6 +48,16 @@ inline static void trim(Sequence& input) {
     ::boost::algorithm::trim(input);
 }
 
+template <typename Sequence, typename Pattern>
+inline static bool contains(const Sequence& input, const Pattern& pattern) {
+    return ::boost::algorithm::contains(input, pattern);
+}
+
+template <typename Sequence, typename Pattern>
+inline static void remove_all(Sequence& input, const Pattern& pattern) {
+    ::boost::algorithm::erase_all(input, pattern);
+}
+
 template <typename T>
 static std::vector<std::string> transform_to_name_vector(const std::vector<T>& i) {
     std::vector<std::string> o;
@@ -67,9 +77,6 @@ class Str {
 public:
     // Disable default construction
     Str() = delete;
-    // Disable copy (and move) semantics
-    Str(const Str&)                  = delete;
-    const Str& operator=(const Str&) = delete;
 
     static int reserve_4() { return 4; }
     static int reserve_8() { return 8; }
@@ -141,7 +148,7 @@ public:
     //    }
     //
     //    std::vector<std::string> vec;
-    //    typedef boost::split_iterator<std::string::const_iterator> split_iter_t;
+    //    using split_iter_t = boost::split_iterator<std::string::const_iterator>;
     //    for(split_iter_t i = Str::split(s,delim); i != split_iter_t(); i++) {
     //       vec.push_back(boost::copy_range<std::string>(*i));
     //    }

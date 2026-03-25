@@ -33,8 +33,10 @@ protected:
     AbstractClientEnv() = default;
 
 public:
-    AbstractClientEnv(const AbstractClientEnv&)                  = delete;
-    const AbstractClientEnv& operator=(const AbstractClientEnv&) = delete;
+    AbstractClientEnv(const AbstractClientEnv&)            = delete;
+    AbstractClientEnv& operator=(const AbstractClientEnv&) = delete;
+    AbstractClientEnv(AbstractClientEnv&&)                 = delete;
+    AbstractClientEnv& operator=(AbstractClientEnv&&)      = delete;
 
     virtual ~AbstractClientEnv() = default;
 

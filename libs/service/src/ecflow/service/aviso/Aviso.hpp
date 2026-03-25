@@ -75,7 +75,8 @@ private:
  */
 class AvisoUnsubscribe {
 public:
-    explicit AvisoUnsubscribe(std::string_view path) : path_{path} {}
+    explicit AvisoUnsubscribe(std::string_view path)
+        : path_{path} {}
 
     const std::string& path() const { return path_; }
 
@@ -143,7 +144,8 @@ class AvisoNoMatch {
  */
 class AvisoError {
 public:
-    explicit AvisoError(std::string_view reason) : reason_{reason} {}
+    explicit AvisoError(std::string_view reason)
+        : reason_{reason} {}
 
     [[nodiscard]] std::string_view reason() const { return reason_; }
 

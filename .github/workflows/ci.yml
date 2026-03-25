@@ -8,6 +8,8 @@ on:
       - 'develop'
     tags-ignore:
       - '**'
+    paths-ignore:
+      - ".cd/**"
 
   # Trigger the workflow on pull request
   pull_request: ~
@@ -27,7 +29,19 @@ jobs:
     uses: ecmwf/downstream-ci/.github/workflows/downstream-ci.yml@main
     with:
       ecflow: ecmwf/ecflow@${{ github.event.pull_request.head.sha || github.sha }}
+      skip_matrix_jobs: |
+        clang@macos-13-arm
       codecov_upload: true
+      clang_format: true
+      clang_format_ignore: |
+        3rdparty
+        docs
+        tools
+        releng
+        libs/client/test/data
+        libs/node/test/data
+        libs/pyext/test/data
+        libs/test/overall/data
     secrets: inherit
 
   # Build downstream packages on HPC
@@ -40,4 +54,5 @@ jobs:
       skip_matrix_jobs: |
         intel-2021.4.0
         nvidia-22.11
+        aocc-4.0.0
     secrets: inherit

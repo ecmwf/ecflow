@@ -22,7 +22,8 @@ class VReply {
 public:
     enum Status { NoStatus, TaskDone, TaskFailed, TaskCancelled };
     enum FileReadMode { NoReadMode, LocalReadMode, ServerReadMode, LogServerReadMode, TransferReadMode };
-    explicit VReply(void* sender = nullptr) : sender_(sender) {}
+    explicit VReply(void* sender = nullptr)
+        : sender_(sender) {}
     ~VReply() = default;
 
     void reset();

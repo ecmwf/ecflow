@@ -17,7 +17,6 @@
 #include "ecflow/test/scaffold/Naming.hpp"
 #include "ecflow/test/scaffold/Provisioning.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)

@@ -69,7 +69,8 @@ public:
 
 class VRepeatDateAttr : public VRepeatAttr {
 public:
-    explicit VRepeatDateAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDateAttr(VNode* n)
+        : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -84,7 +85,8 @@ protected:
 
 class VRepeatDateTimeAttr : public VRepeatAttr {
 public:
-    VRepeatDateTimeAttr(VNode* n) : VRepeatAttr(n) {}
+    VRepeatDateTimeAttr(VNode* n)
+        : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -99,7 +101,8 @@ protected:
 
 class VRepeatDateListAttr : public VRepeatAttr {
 public:
-    explicit VRepeatDateListAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDateListAttr(VNode* n)
+        : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -115,7 +118,8 @@ protected:
 
 class VRepeatDayAttr : public VRepeatAttr {
 public:
-    explicit VRepeatDayAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatDayAttr(VNode* n)
+        : VRepeatAttr(n) {}
     int endIndex() const override { return 0; }
     int currentIndex() const override { return 0; }
     QString startValue() const override;
@@ -130,7 +134,8 @@ protected:
 
 class VRepeatIntAttr : public VRepeatAttr {
 public:
-    explicit VRepeatIntAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatIntAttr(VNode* n)
+        : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -145,7 +150,8 @@ protected:
 
 class VRepeatEnumAttr : public VRepeatAttr {
 public:
-    explicit VRepeatEnumAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatEnumAttr(VNode* n)
+        : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;
@@ -161,7 +167,8 @@ protected:
 
 class VRepeatStringAttr : public VRepeatAttr {
 public:
-    explicit VRepeatStringAttr(VNode* n) : VRepeatAttr(n) {}
+    explicit VRepeatStringAttr(VNode* n)
+        : VRepeatAttr(n) {}
     int endIndex() const override;
     int currentIndex() const override;
     QString startValue() const override;

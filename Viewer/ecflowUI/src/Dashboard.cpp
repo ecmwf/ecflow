@@ -37,7 +37,9 @@
 
 int Dashboard::maxWidgetNum_ = 20;
 
-Dashboard::Dashboard(QString /*rootNode*/, QWidget* parent) : QMainWindow(parent), settingsAreRead_(false) {
+Dashboard::Dashboard(QString /*rootNode*/, QWidget* parent)
+    : QMainWindow(parent),
+      settingsAreRead_(false) {
     // We use the mainwindow as a widget. Its task is
     // to dock all the component widgets!
     setWindowFlags(Qt::Widget);
@@ -86,7 +88,13 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type, bool userAdde
         w = ctl;
     }
     else if (type == "table") {
-        NodeWidget* ctl = new TableNodeWidget(serverFilter_, userAddedView, this);
+        NodeWidget* ctl;
+        try {
+            ctl = new TableNodeWidget(serverFilter_, userAddedView, this);
+        }
+        catch (const UserCancelledOperation&) {
+            return nullptr;
+        }
 
         connect(ctl, SIGNAL(popInfoPanel(VInfo_ptr, QString)), this, SLOT(slotPopInfoPanel(VInfo_ptr, QString)));
 
@@ -144,6 +152,12 @@ DashboardWidget* Dashboard::addWidget(const std::string& type) {
     }
 
     DashboardWidget* w = addWidget(type, dockId.toStdString(), popupTableFilter);
+
+    if (!w) {
+        // This means that the Widget was not created, typically because the user cancelled the operation.
+        // In this case we do not want to proceed further.
+        return nullptr;
+    }
 
     // At this point the widgets can be inactive. Reload will make them active!!!
     w->reload();

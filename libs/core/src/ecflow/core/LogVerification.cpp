@@ -16,8 +16,6 @@
 #include "ecflow/core/NState.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 bool LogVerification::extractNodePathAndState(const std::string& logfile,
@@ -85,7 +83,7 @@ bool LogVerification::compareNodeStates(const std::string& logfile,
     }
 
     if (lines != goldenLines) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "Log file " << logfile << " does not match golden reference file " << goldenRefLogFile << "\n";
         if (lines.size() != goldenLines.size()) {
             ss << "Expected log file size " << goldenLines.size() << " but found " << lines.size() << "\n";

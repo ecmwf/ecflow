@@ -38,9 +38,6 @@ public:
 
     // Disable default construction
     PrintStyle() = delete;
-    // Disable copy (and move) semantics
-    PrintStyle(const PrintStyle&)            = delete;
-    PrintStyle& operator=(const PrintStyle&) = delete;
 
     static bool is_persist_style(Type_t);
 
@@ -51,7 +48,10 @@ class PrintStyleHolder {
 public:
     using holding_t = PrintStyle::Type_t;
 
-    explicit PrintStyleHolder(holding_t t) : old_style_(getStyle()) { setStyle(t); }
+    explicit PrintStyleHolder(holding_t t)
+        : old_style_(getStyle()) {
+        setStyle(t);
+    }
 
     // Disable default construction
     PrintStyleHolder() = delete;

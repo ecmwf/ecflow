@@ -18,7 +18,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // The -i is the last token before the comments start.
 static bool has_idle_flag(std::vector<std::string>& lineTokens) {
@@ -44,7 +43,7 @@ bool AutoArchiveParser::doParse(const std::string& line, std::vector<std::string
             "AutoArchiveParser::doParse: Could not add autoarchive as node stack is empty at line: " + line);
     }
 
-    if (lineTokens[1].find_first_of(':') == string::npos) {
+    if (lineTokens[1].find_first_of(':') == std::string::npos) {
         // Must be of the form:
         // autoarchive 10        # archive 10 days after complete
         // autoarchive 0         # archive immediately after complete

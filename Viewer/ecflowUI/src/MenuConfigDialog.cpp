@@ -12,7 +12,8 @@
 
 #include "MenuHandler.hpp"
 
-MenuConfigDialog::MenuConfigDialog(QWidget* parent) : QDialog(parent) {
+MenuConfigDialog::MenuConfigDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
     // connect (insertPushButton_, SIGNAL(clicked()), this, SLOT(insertCurrentText()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));

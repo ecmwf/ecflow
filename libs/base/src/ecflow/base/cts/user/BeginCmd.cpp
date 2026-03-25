@@ -18,15 +18,15 @@
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
-BeginCmd::BeginCmd(const std::string& suiteName, bool force) : suiteName_(suiteName), force_(force) {
+BeginCmd::BeginCmd(const std::string& suiteName, bool force)
+    : suiteName_(suiteName),
+      force_(force) {
     // The begin command actually requires the suite name without the lead '/'
     // i.e if we provide /suite --> change to suite
     if (!suiteName_.empty() && suiteName_[0] == '/') {
@@ -82,7 +82,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
             }
         }
         else {
-            defs->get_all_active_submittables(tasks);
+            tasks = ecf::get_all_active_submittables(*defs);
             as->zombie_ctrl().add_user_zombies(tasks, CtsApi::beginArg());
 
             defs->reset_begin(); // Force should *only* be used for test
@@ -94,9 +94,8 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
 
         suite_ptr suite = defs->findSuite(suiteName_);
         if (!suite.get()) {
-            std::stringstream ss;
-            ss << "BeginCmd::doHandleRequest:  Begin failed as suite '" << suiteName_ << "' is not loaded.\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("BeginCmd::doHandleRequest:  Begin failed as suite '" << suiteName_ << "' is not loaded.\n"));
         }
 
         /// check_suite_can_begin will throw if suite can't begin
@@ -105,7 +104,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
         }
         else {
 
-            suite->get_all_active_submittables(tasks);
+            tasks = ecf::get_all_active_submittables(*suite);
             as->zombie_ctrl().add_user_zombies(tasks, CtsApi::beginArg());
 
             suite->reset_begin(); // Force should *only* be used for test
@@ -148,14 +147,15 @@ void BeginCmd::addOption(boost::program_options::options_description& desc) cons
     // allow options like
     // client --begin=suitename       // begin <suitename>
     // client --begin                 // means begin all suites
-    desc.add_options()(BeginCmd::arg(), po::value<string>()->implicit_value(string("")), BeginCmd::desc());
+    desc.add_options()(
+        BeginCmd::arg(), boost::program_options::value<std::string>()->implicit_value(std::string{}), BeginCmd::desc());
 }
 void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     std::string beginArg = vm[arg()].as<std::string>();
     Str::removeQuotes(beginArg);
 
     if (ace->debug()) {
-        cout << "  BeginCmd::create arg = " << beginArg << "\n";
+        std::cout << "  BeginCmd::create arg = " << beginArg << "\n";
     }
 
     std::string suiteName;
@@ -175,17 +175,15 @@ void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         else if (lineTokens.size() == 2) {
             suiteName = lineTokens[0];
             if (lineTokens[1] != "--force") {
-                std::stringstream ss;
-                ss << "BeginCmd: Expected second argument to be '--force' but found " << lineTokens[1] << "\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(
+                    MESSAGE("BeginCmd: Expected second argument to be '--force' but found " << lineTokens[1] << "\n"));
             }
             force = true;
         }
         else {
-            std::stringstream ss;
-            ss << "BeginCmd: Expect zero, one or 2 arguments, but found " << lineTokens.size() << " arguments\n"
-               << BeginCmd::desc() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("BeginCmd: Expect zero, one or 2 arguments, but found "
+                                             << lineTokens.size() << " arguments\n"
+                                             << BeginCmd::desc() << "\n"));
         }
     }
 

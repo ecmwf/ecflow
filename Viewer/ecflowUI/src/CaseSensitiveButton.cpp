@@ -10,7 +10,8 @@
 
 #include "CaseSensitiveButton.hpp"
 
-CaseSensitiveButton::CaseSensitiveButton(QWidget* parent) : QToolButton(parent) {
+CaseSensitiveButton::CaseSensitiveButton(QWidget* parent)
+    : QToolButton(parent) {
     connect(this, SIGNAL(clicked(bool)), this, SLOT(slotClicked(bool)));
 
     setCheckable(true);

@@ -26,9 +26,12 @@
 class WhiteListFile {
 public:
     WhiteListFile();
+
     // Disable copy (and move) semantics
     WhiteListFile(const WhiteListFile&)                  = delete;
     const WhiteListFile& operator=(const WhiteListFile&) = delete;
+    WhiteListFile(WhiteListFile&&)                       = delete;
+    WhiteListFile& operator=(WhiteListFile&&)            = delete;
 
     ~WhiteListFile();
 
@@ -63,7 +66,7 @@ public:
 
     // Parse the file if any errors found return false and errorMsg
     // The parser expects version number  4.4.5
-    bool load(const std::string& file, bool debug, std::string& errorMsg);
+    bool load(const std::string& file, std::string& errorMsg);
 
     // Function used in test:
     // Will overwrite the existing file
@@ -82,7 +85,7 @@ private:
     bool validateVersionNumber(const std::string& line, std::string& errorMsg) const;
     bool add_user(std::vector<std::string>& tokens, std::string& error_msg);
 
-    typedef std::unordered_map<std::string, std::vector<std::string>> mymap;
+    using mymap = std::unordered_map<std::string, std::vector<std::string>>;
     bool verify_path_access(const std::string& user, const std::vector<std::string>& paths, const mymap&) const;
     bool verify_path_access(const std::string& user, const std::string& path, const mymap&) const;
 

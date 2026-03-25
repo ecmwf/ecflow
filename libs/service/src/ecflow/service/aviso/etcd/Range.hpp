@@ -33,7 +33,8 @@ public:
     friend Content make_content_from(Content::content_view_t content);
 
 private:
-    explicit Content(content_view_t raw) : raw_{raw} {}
+    explicit Content(content_view_t raw)
+        : raw_{raw} {}
 
     content_t raw_;
 };

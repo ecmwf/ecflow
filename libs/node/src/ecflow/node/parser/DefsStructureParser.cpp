@@ -21,7 +21,6 @@
 // #define DEBUG_PARSER 1
 
 using namespace ecf;
-using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////////////
 DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file_name)
@@ -33,10 +32,9 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file
       file_type_(PrintStyle::DEFS),
       defs_as_string_(Str::EMPTY()) {
     if (!infile_.ok()) {
-        std::stringstream ss;
-        ss << "DefsStructureParser::DefsStructureParser: Unable to open file! " << infile_.file_name() << "\n\n";
-        ss << Version::description() << "\n";
-        error_ = ss.str();
+        error_ = MESSAGE("DefsStructureParser::DefsStructureParser: Unable to open file! "
+                         << infile_.file_name() << "\n\n"
+                         << Version::description() << "\n");
     }
 }
 
@@ -49,10 +47,8 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str,
       file_type_(PrintStyle::DEFS),
       defs_as_string_(str) {
     if (defs_as_string_.empty()) {
-        std::stringstream ss;
-        ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";
-        ss << Version::description() << "\n";
-        error_ = ss.str();
+        error_ = MESSAGE("DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n"
+                         << Version::description() << "\n");
     }
 }
 
@@ -65,10 +61,8 @@ DefsStructureParser::DefsStructureParser(const std::string& defs_node_string)
       file_type_(PrintStyle::MIGRATE),
       defs_as_string_(defs_node_string) {
     if (defs_as_string_.empty()) {
-        std::stringstream ss;
-        ss << "DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n";
-        ss << Version::description() << "\n";
-        error_ = ss.str();
+        error_ = MESSAGE("DefsStructureParser::DefsStructureParser :  Unable to parse empty string\n\n"
+                         << Version::description() << "\n");
     }
 }
 
@@ -108,7 +102,7 @@ bool DefsStructureParser::doParse(std::string& errorMsg, std::string& warningMsg
 bool DefsStructureParser::do_parse_file(std::string& errorMsg) {
     std::vector<std::string> lineTokens;
     lineTokens.reserve(64);
-    string line;
+    std::string line;
     line.reserve(1024);
     while (infile_.good()) {
         getNextLine(line); // will increment lineNumer_
@@ -122,7 +116,7 @@ bool DefsStructureParser::do_parse_file(std::string& errorMsg) {
 bool DefsStructureParser::do_parse_string(std::string& errorMsg) {
     std::vector<std::string> lineTokens;
     lineTokens.reserve(64);
-    string line;
+    std::string line;
     line.reserve(1024);
     while (defs_as_string_.good()) {
         getNextLine(line); // will increment lineNumer_
@@ -147,10 +141,9 @@ bool DefsStructureParser::do_parse_line(const std::string& line,
     // If the *top* of the stack is empty use the DefsParser
     Parser* theCurrentParser = (nodeStack_.empty()) ? &defsParser_ : const_cast<Parser*>(nodeStack_.top().second);
     if (theCurrentParser == nullptr) {
-        std::stringstream ss;
-        ss << "No parser found: Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
-        ss << Version::description() << "\n\n";
-        errorMsg = ss.str();
+        errorMsg =
+            MESSAGE("No parser found: Could not parse '" << line << "' around line number " << lineNumber_ << "\n"
+                                                         << Version::description() << "\n\n");
         return false;
     }
 
@@ -161,11 +154,9 @@ bool DefsStructureParser::do_parse_line(const std::string& line,
         theCurrentParser->doParse(line, lineTokens);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << e.what() << "\n";
-        ss << "Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
-        ss << Version::description() << "\n\n";
-        errorMsg = ss.str();
+        errorMsg = MESSAGE(e.what() << "\n"
+                                    << "Could not parse '" << line << "' around line number " << lineNumber_ << "\n"
+                                    << Version::description() << "\n\n");
         return false;
     }
     return true;
@@ -218,7 +209,7 @@ void DefsStructureParser::getNextLine(std::string& line) {
                 }
 
                 boost::char_separator<char> sep(";");
-                typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+                using tokenizer = boost::tokenizer<boost::char_separator<char>>;
                 tokenizer tokens(line, sep);
                 std::copy(tokens.begin(), tokens.end(), back_inserter(multi_statements_per_line_vec_));
                 assert(!multi_statements_per_line_vec_.empty());
@@ -280,7 +271,8 @@ bool DefsStructureParser::semiColonInEditVariable() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-DefsString::DefsString(const std::string& defs_as_string) : empty_(defs_as_string.empty()) {
+DefsString::DefsString(const std::string& defs_as_string)
+    : empty_(defs_as_string.empty()) {
     if (!empty_) {
         lines_.reserve(256);
         Str::split_using_string_view(defs_as_string, lines_, "\n");

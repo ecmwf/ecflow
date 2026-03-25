@@ -15,7 +15,8 @@
 
 class GenericParser : public Parser {
 public:
-    explicit GenericParser(DefsStructureParser* p) : Parser(p) {}
+    explicit GenericParser(DefsStructureParser* p)
+        : Parser(p) {}
     const char* keyword() const override { return "generic"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };

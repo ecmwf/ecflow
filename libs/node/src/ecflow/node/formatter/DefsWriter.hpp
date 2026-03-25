@@ -35,7 +35,8 @@ namespace ecf {
 
 struct Style
 {
-    Style(PrintStyle::Type_t s) : selected_(s) {}
+    Style(PrintStyle::Type_t s)
+        : selected_(s) {}
 
     PrintStyle::Type_t selected() { return selected_; }
 
@@ -88,12 +89,15 @@ struct Context
 
 struct Indent
 {
-    Indent(Context& ctx) : ctx_(ctx) { ctx_.format.increase_indentation(); }
+    Indent(Context& ctx)
+        : ctx_(ctx) {
+        ctx_.format.increase_indentation();
+    }
     ~Indent() { ctx_.format.decrease_indentation(); }
 
     template <typename Stream>
     void write(Stream& output) const {
-        output << (ctx_.format.is_indenting() ? std::string(ctx_.format.indentation_spaces(), ' ') : std::string(""));
+        output << (ctx_.format.is_indenting() ? std::string(ctx_.format.indentation_spaces(), ' ') : std::string{});
     }
 
     template <typename Stream>
@@ -140,6 +144,7 @@ void write_ast_derived_types(Stream& output, const Ast* root, Context& ctx) {
 template <typename Stream>
 void write_ast_type(Stream& output, const Ast* root, Context& ctx) {
     write_ast_derived_types<Stream,
+                            AstTop,
                             AstNot,
                             AstPlus,
                             AstMinus,
@@ -180,11 +185,9 @@ struct Writer<AstTop, Stream>
         // taken from AstTop::print(std::string& os) const
 
         Indent l1(ctx);
-        Indent l2(ctx);
-
-        output << l2;
-
+        output << l1;
         output << "# Trigger Evaluation Tree\n";
+
         if (const auto* root = item.left(); root) {
             detail::write_ast_type<Stream>(output, root, ctx);
         }
@@ -841,9 +844,9 @@ struct Writer<AstVariable, Stream>
             output << " node(";
             output << refNode->name();
             output << ") ";
-            std::ostringstream os;
-            refNode->findExprVariableAndPrint(item.name(), os);
-            output << os.str();
+            std::ostringstream ss;
+            refNode->findExprVariableAndPrint(item.name(), ss);
+            output << ss.str();
         }
         else {
             output << " node(?not-found?) ";
@@ -877,10 +880,9 @@ struct Writer<AstParentVariable, Stream>
             output << " node(";
             output << ref_node->name();
             output << ") ";
-            std::ostringstream os;
-            ref_node->findExprVariableAndPrint(item.name(), os);
-            output << os.str();
-            output << "\n";
+            std::ostringstream ss;
+            ref_node->findExprVariableAndPrint(item.name(), ss);
+            output << ss.str();
             return;
         }
         output << " node(?not-found?) value(0)";

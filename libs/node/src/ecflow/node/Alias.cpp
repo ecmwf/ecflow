@@ -21,10 +21,10 @@
 #include "ecflow/core/Str.hpp"
 
 using namespace ecf;
-using namespace std;
 
 //==================================================================================
-Alias::Alias(const std::string& name, bool check) : Submittable(name, check) {
+Alias::Alias(const std::string& name, bool check)
+    : Submittable(name, check) {
     set_state_only(NState::QUEUED);
 }
 
@@ -35,7 +35,9 @@ Alias::Alias() {
 }
 
 node_ptr Alias::clone() const {
-    return std::make_shared<Alias>(*this);
+    auto clone = std::make_shared<Alias>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 Alias::~Alias() {
@@ -108,10 +110,6 @@ void Alias::collateChanges(DefsDelta& changes) const {
     /// All changes to Alias should be on ONE compound_memento_ptr
     compound_memento_ptr comp;
     Submittable::incremental_changes(changes, comp);
-}
-
-void Alias::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    nodes.push_back(non_const_this());
 }
 
 // Functions unique to aliases

@@ -20,7 +20,8 @@
 #include "VProperty.hpp"
 #include "ViewerUtil.hpp"
 
-ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent) {
+ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     model_ = new ChangeNotifyEditorModel(this);
@@ -121,7 +122,8 @@ void ChangeNotifyEditor::slotRowSelected(const QModelIndex& idx) {
     }*/
 }
 
-ChangeNotifyEditorModel::ChangeNotifyEditorModel(QObject* parent) : QAbstractItemModel(parent) {
+ChangeNotifyEditorModel::ChangeNotifyEditorModel(QObject* parent)
+    : QAbstractItemModel(parent) {
 }
 
 ChangeNotifyEditorModel::~ChangeNotifyEditorModel() = default;

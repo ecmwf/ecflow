@@ -18,8 +18,6 @@
 #include "ecflow/core/Host.hpp"
 #include "ecflow/core/Str.hpp"
 
-using namespace std;
-
 namespace ecf {
 
 std::string Openssl::info() const {
@@ -80,10 +78,8 @@ void Openssl::enable(std::string host, const std::string& port) {
     }
 
     if (!enable_no_throw(host, port)) {
-        std::stringstream ss;
-        ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) server.crt or " << host
-           << "." << port << ".crt in $HOME/.ecflowrc/ssl";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt or "
+                                         << host << "." << port << ".crt in $HOME/.ecflowrc/ssl"));
     }
 }
 
@@ -96,16 +92,17 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
         }
 
         if (!enable_no_throw(host, port, ecf_ssl_env)) {
-            std::stringstream ss;
+            std::string error;
             if (ecf_ssl_env == "1") {
-                ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) server.crt *OR* "
-                   << host << "." << port << ".crt in $HOME/.ecflowrc/ssl when ECF_SSL=1";
+                error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) server.crt *OR* "
+                                << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=1)");
             }
             else {
-                ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) " << host << "."
-                   << port << ".crt in $HOME/.ecflowrc/ssl when ECF_SSL=" << host << "." << port;
+                error = MESSAGE("Error: Unable to find the self-signed certificate file(CRT) "
+                                << host << "." << port << ".crt in $HOME/.ecflowrc/ssl (with ECF_SSL=" << host << "."
+                                << port << ")");
             }
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(error);
         }
     }
 }
@@ -116,14 +113,22 @@ boost::asio::ssl::context& Openssl::context() {
 }
 
 void Openssl::init_for_server() {
-    //   std::cout << " Openssl::init_for_server  host :" << host_ << "@" << port_ << "\n";
-    //   std::cout << " Openssl::init_for_server ssl_:'" << ssl_ << "'\n";
     if (enabled()) {
         check_server_certificates();
 
-        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
-        ssl_context_->set_options(boost::asio::ssl::context::default_workarounds | boost::asio::ssl::context::no_sslv2 |
-                                  boost::asio::ssl::context::single_dh_use);
+        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::tls_server);
+
+        // clang-format off
+        ssl_context_->set_options(
+            boost::asio::ssl::context::default_workarounds |
+            boost::asio::ssl::context::no_sslv2 |
+            boost::asio::ssl::context::no_sslv3 |
+            boost::asio::ssl::context::no_tlsv1 |
+            boost::asio::ssl::context::no_tlsv1_1 |
+            boost::asio::ssl::context::no_tlsv1_2 |
+            boost::asio::ssl::context::single_dh_use);
+        // clang-format on
+
         // this must be done before loading any keys. as below
         ssl_context_->set_password_callback(
             [this](std::size_t size, boost::asio::ssl::context_base::password_purpose purpose) {
@@ -136,17 +141,15 @@ void Openssl::init_for_server() {
 }
 
 void Openssl::init_for_client() {
-    //   std::cout << " Openssl::init_for_client host :" << host_ << "@" << port_ << "\n";
     if (!init_for_client_ && enabled()) {
         init_for_client_ = true;
 
-        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
+        ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::tls_client);
         ssl_context_->load_verify_file(crt());
     }
 }
 
 std::string Openssl::get_password() const {
-    // std::cout << "Openssl::get_password()\n";
     std::string passwd_file = passwd();
     if (fs::exists(passwd_file)) {
         std::string contents;
@@ -155,17 +158,13 @@ std::string Openssl::get_password() const {
             if (!contents.empty() && contents[contents.size() - 1] == '\n') {
                 contents.erase(contents.begin() + contents.size() - 1);
             }
-            // std::cout << "Server::get_password() passwd('" << contents << "')\n";
             return contents;
         }
         else {
-            std::stringstream ss;
-            ss << "Server::get_password file " << passwd_file << " exists, but can't be opened (" << strerror(errno)
-               << ")";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Error: Unable to open password file '" << passwd_file << "' (" << strerror(errno) << ")"));
         }
     }
-    // std::cout << "Server::get_password() passwd('test')\n";
     return "test";
 }
 
@@ -271,28 +270,26 @@ const char* Openssl::ssl_info() {
            "  Or you can choose to remove password requirement. In that case we don't need server.passwd file.\n\n"
            "     > cp server.key server.key.secure\n"
            "     > openssl rsa -in server.key.secure -out server.key  # remove password requirement\n"
-           "- Sign certificate with private key (self signed certificate).Generate Certificate Signing Request(CSR).\n"
+           "- Sign certificate with private key (self-signed certificate). Generate Certificate Signing Request(CSR).\n"
            "  This will prompt with a number of questions.\n"
            "  However please ensure 'common name' matches the host where your server is going to run.\n\n"
            "     > openssl req -new -key server.key -out server.csr # Generate Certificate Signing Request(CSR)\n"
-           "- Generate a self signed certificate CRT, by using the CSR and private key.\n\n"
+           "- Generate a self-signed certificate CRT, by using the CSR and private key.\n\n"
            "     > openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt\n\n"
            "- Generate dhparam file. ecFlow expects 2048 key.\n"
            "     > openssl dhparam -out dh2048.pem 2048";
 }
 
 void Openssl::check_server_certificates() const {
-    //   cout << "Openssl::check_server_certificates: ssl'" << ssl_ << "'\n";
-
     {
-        string server_key = key();
+        std::string server_key = key();
         if (!fs::exists(server_key)) {
             throw std::runtime_error("Error: The password protected private server key file '" + server_key +
                                      "' does not exist\n\n" + ssl_info());
         }
     }
     {
-        string server_pem = pem();
+        std::string server_pem = pem();
         if (!fs::exists(server_pem)) {
             throw std::runtime_error("Error: The dhparam file(pem) '" + server_pem + "' does not exist\n\n" +
                                      ssl_info());

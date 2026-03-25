@@ -19,9 +19,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 // #define DEBUG_ZOMBIE 1
 
@@ -110,10 +107,10 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
         static_cast<void>(server->zombie_ctrl().handle_path_zombie(server, this, action_taken, reply));
 
         // distinguish output by using *path*
-        std::stringstream ss;
-        ss << " zombie(*path*) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_ << " : "
-           << process_or_remote_id_ << " : " << jobs_password_ << " : action(" << action_taken << ")";
-        log(Log::ERR, ss.str());
+        log(Log::ERR,
+            MESSAGE(" zombie(*path*) : chd:" << ecf::Child::to_string(child_type()) << " : " << path_to_submittable_
+                                             << " : " << process_or_remote_id_ << " : " << jobs_password_
+                                             << " : action(" << action_taken << ")"));
         return false;
     }
 
@@ -178,11 +175,10 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
         case NState::SUBMITTED: {
             // The pid on the task will be empty
             if (child_type() != Child::INIT) {
-                std::stringstream ss;
-                ss << path_to_submittable_
-                   << " When a node is submitted, expected next child command to be INIT but received "
-                   << Child::to_string(child_type());
-                log(Log::ERR, ss.str());
+                log(Log::ERR,
+                    MESSAGE(path_to_submittable_
+                            << " When a node is submitted, expected next child command to be INIT but received "
+                            << Child::to_string(child_type())));
             }
             break;
         }
@@ -197,7 +193,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
                 // Client then sends init again. In this case rather than treating it as a zombie, we will let it
                 // through providing the password and pid matches.
                 if (!password_missmatch_ && !pid_missmatch_) {
-                    string ret = " [ overloaded || --init*2 ](pid and passwd match) : chd:";
+                    std::string ret = " [ overloaded || --init*2 ](pid and passwd match) : chd:";
                     ret += ecf::Child::to_string(child_type());
                     ret += " : ";
                     ret += path_to_submittable_;
@@ -235,7 +231,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
                 submittable_->get_flag().clear(ecf::Flag::ZOMBIE);
                 server->zombie_ctrl().remove_by_path(path_to_submittable_);
 
-                string ret = " [ overloaded || zombie || --complete*2 ] : chd:";
+                std::string ret = " [ overloaded || zombie || --complete*2 ] : chd:";
                 ret += ecf::Child::to_string(child_type());
                 ret += " : ";
                 ret += path_to_submittable_;
@@ -263,7 +259,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
 
                     server->zombie_ctrl().remove(submittable_);
 
-                    string ret = " [ overloaded || --abort*2 ] (pid and passwd match) : chd:";
+                    std::string ret = " [ overloaded || --abort*2 ] (pid and passwd match) : chd:";
                     ret += ecf::Child::to_string(child_type());
                     ret += " : ";
                     ret += path_to_submittable_;
@@ -299,7 +295,7 @@ bool TaskCmd::check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) co
             // LOG failure: Include type of zombie.
             // ** NOTE **: the zombie may have been removed by user actions. i.e if fob and child cmd is abort |
             // complete, etc
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << " zombie";
             const Zombie& theZombie =
                 server->zombie_ctrl().find(path_to_submittable_, process_or_remote_id_, jobs_password_);

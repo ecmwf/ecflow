@@ -29,7 +29,9 @@ public:
     // Suites, Families, and Tasks. This is also used during serialisation, to avoid checking generated names that are
     // guaranteed to be valid.
     // Notice that the bool argument is used as a "tag" argument and not actually used.
-    Variable(const std::string& name, const std::string& value, [[maybe_unused]] bool check) : n_(name), v_(value) {}
+    Variable(const std::string& name, const std::string& value, [[maybe_unused]] bool check)
+        : n_(name),
+          v_(value) {}
     Variable(const std::string& name, const std::string& value);
     Variable() = default;
 
@@ -68,7 +70,8 @@ public:
     using index_t   = std::unordered_map<std::string, size_t>;
 
     template <typename... VARIABLES>
-    explicit VariableMap(const VARIABLES... variables) : variables_{variables...} {
+    explicit VariableMap(const VARIABLES... variables)
+        : variables_{variables...} {
         // Fill index
         for (size_t i = 0; i < variables_.size(); ++i) {
             index_.insert(std::make_pair(variables_[i].name(), i));

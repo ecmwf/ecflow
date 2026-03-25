@@ -33,9 +33,12 @@ private:
 public:
     // Note: 1000 milliseconds = 1 second
     JobProfiler(Task*, JobsParam&, size_t threshold /* expected to be milliseconds */);
+
     // Disable copy (and move) semantics
     JobProfiler(const JobProfiler&)                  = delete;
     const JobProfiler& operator=(const JobProfiler&) = delete;
+    JobProfiler(JobProfiler&&)                       = delete;
+    JobProfiler& operator=(JobProfiler&&)            = delete;
 
     ~JobProfiler();
 

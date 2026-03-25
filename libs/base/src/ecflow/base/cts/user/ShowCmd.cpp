@@ -19,9 +19,6 @@
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -89,13 +86,14 @@ const char* ShowCmd::desc() {
 }
 
 void ShowCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(ShowCmd::arg(), po::value<string>()->implicit_value(string()), ShowCmd::desc());
+    desc.add_options()(
+        ShowCmd::arg(), boost::program_options::value<std::string>()->implicit_value(std::string{}), ShowCmd::desc());
 }
 void ShowCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     std::string show_state = vm[ShowCmd::arg()].as<std::string>();
 
     if (ac->debug()) {
-        cout << "  ShowCmd::create api = '" << show_state << "'.\n";
+        std::cout << "  ShowCmd::create api = '" << show_state << "'.\n";
     }
 
     PrintStyle::Type_t style = PrintStyle::DEFS;

@@ -30,7 +30,7 @@
 // By choosing RUNNING, it allows the Defs related test, to run without explicitly setting the state
 class ServerState {
 public:
-    using state_change_no_t         = uint64_t;
+    using state_change_no_t          = uint64_t;
     using variable_state_change_no_t = uint64_t;
 
     ServerState();

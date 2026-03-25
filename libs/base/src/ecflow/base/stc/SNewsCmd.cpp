@@ -17,7 +17,6 @@
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
 
-using namespace std;
 using namespace ecf;
 
 /// Custom handling of command logging so that we can add additional debug.
@@ -58,10 +57,8 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
             news_ = ServerReply::DO_FULL_SYNC;
 
 #if DEBUG_NEWS
-            std::stringstream ss;
-            ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
-               << ") : client no > server no ! :DO_FULL_SYNC]";
-            log_append(ss.str());
+            log_append(MESSAGE(" [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
+                                           << ") : client no > server no ! :DO_FULL_SYNC]"));
 #else
             log_append("");
 #endif
@@ -73,10 +70,9 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
             news_ = ServerReply::NEWS;
 
 #if DEBUG_NEWS
-            std::stringstream ss;
-            ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
-               << ") : *Large* scale changes(" << (Ecf::modify_change_no() - client_modify_change_no) << ") :NEWS]";
-            log_append(ss.str());
+            log_append(MESSAGE(" [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
+                                           << ") : *Large* scale changes("
+                                           << (Ecf::modify_change_no() - client_modify_change_no) << ") :NEWS]"));
 #else
             log_append("");
 #endif
@@ -88,10 +84,9 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
             news_ = ServerReply::NEWS;
 
 #if DEBUG_NEWS
-            std::stringstream ss;
-            ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
-               << ") : *Small* scale changes(" << (Ecf::state_change_no() - client_state_change_no) << ") :NEWS]";
-            log_append(ss.str());
+            log_append(MESSAGE(" [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
+                                           << ") : *Small* scale changes("
+                                           << (Ecf::state_change_no() - client_state_change_no) << ") :NEWS]"));
 #else
             log_append("");
 #endif
@@ -118,10 +113,8 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
         news_ = ServerReply::DO_FULL_SYNC;
 
 #if DEBUG_NEWS
-        std::stringstream ss;
-        ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") : Cannot find handle("
-           << client_handle << ") :DO_FULL_SYNC]";
-        log_append(ss.str());
+        log_append(MESSAGE(" [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
+                                       << ") : Cannot find handle(" << client_handle << ") :DO_FULL_SYNC]"));
 #else
         log_append("");
 #endif
@@ -148,11 +141,10 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
         news_ = ServerReply::DO_FULL_SYNC;
 
 #if DEBUG_NEWS
-        std::stringstream ss;
-        ss << " [server handle(" << max_client_handle_state_change_no << "," << max_client_handle_modify_change_no
-           << ")  server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
-           << ") : client no > server no ! :DO_FULL_SYNC]";
-        log_append(ss.str());
+        log_append(MESSAGE(" [server handle(" << max_client_handle_state_change_no << ","
+                                              << max_client_handle_modify_change_no << ")  server("
+                                              << Ecf::state_change_no() << "," << Ecf::modify_change_no()
+                                              << ") : client no > server no ! :DO_FULL_SYNC]"));
 #else
         log_append("");
 #endif
@@ -166,11 +158,10 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
         news_ = ServerReply::NEWS;
 
 #if DEBUG_NEWS
-        std::stringstream ss;
-        ss << " [server handle(" << max_client_handle_state_change_no << "," << max_client_handle_modify_change_no
-           << ") server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
-           << ") : *Large* scale changes (new handle or suites added or removed) :NEWS]";
-        log_append(ss.str());
+        log_append(MESSAGE(" [server handle("
+                           << max_client_handle_state_change_no << "," << max_client_handle_modify_change_no
+                           << ") server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
+                           << ") : *Large* scale changes (new handle or suites added or removed) :NEWS]"));
 #else
         log_append("");
 #endif
@@ -184,11 +175,10 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
         news_ = ServerReply::NEWS;
 
 #if DEBUG_NEWS
-        std::stringstream ss;
-        ss << " [server handle(" << max_client_handle_state_change_no << "," << max_client_handle_modify_change_no
-           << ") server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
-           << ") : *Large* scale changes :NEWS]";
-        log_append(ss.str());
+        log_append(MESSAGE(" [server handle(" << max_client_handle_state_change_no << ","
+                                              << max_client_handle_modify_change_no << ") server("
+                                              << Ecf::state_change_no() << "," << Ecf::modify_change_no()
+                                              << ") : *Large* scale changes :NEWS]"));
 #else
         log_append("");
 #endif
@@ -202,11 +192,10 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
         news_ = ServerReply::NEWS;
 
 #if DEBUG_NEWS
-        std::stringstream ss;
-        ss << " [server handle(" << max_client_handle_state_change_no << "," << max_client_handle_modify_change_no
-           << ") server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
-           << ") : *Small* scale changes :NEWS]";
-        log_append(ss.str());
+        log_append(MESSAGE(" [server handle(" << max_client_handle_state_change_no << ","
+                                              << max_client_handle_modify_change_no << ") server("
+                                              << Ecf::state_change_no() << "," << Ecf::modify_change_no()
+                                              << ") : *Small* scale changes :NEWS]"));
 #else
         log_append("");
 #endif
@@ -242,9 +231,7 @@ bool SNewsCmd::equals(ServerToClientCmd* rhs) const {
 }
 
 std::string SNewsCmd::print() const {
-    std::stringstream ss;
-    ss << "cmd:SNewsCmd [ " << news_ << " ] ";
-    return ss.str();
+    return MESSAGE("cmd:SNewsCmd [ " << news_ << " ] ");
 }
 
 std::ostream& operator<<(std::ostream& os, const SNewsCmd& c) {

@@ -21,7 +21,8 @@ class ConfigTreeWidget : public QTreeWidget {
 public:
     ConfigTreeWidget() = default;
 
-    explicit ConfigTreeWidget(QSplitter* s) : QTreeWidget(s) {
+    explicit ConfigTreeWidget(QSplitter* s)
+        : QTreeWidget(s) {
         resize(200, 300);
 
         setSelectionMode(QAbstractItemView::SingleSelection);

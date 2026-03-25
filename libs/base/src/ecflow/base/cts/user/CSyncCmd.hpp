@@ -29,7 +29,9 @@ public:
           client_handle_(client_handle),
           client_state_change_no_(client_state_change_no),
           client_modify_change_no_(client_modify_change_no) {}
-    explicit CSyncCmd(unsigned int client_handle) : api_(SYNC_FULL), client_handle_(client_handle) {}
+    explicit CSyncCmd(unsigned int client_handle)
+        : api_(SYNC_FULL),
+          client_handle_(client_handle) {}
     CSyncCmd() = default;
 
     Api api() const { return api_; }
@@ -42,7 +44,7 @@ public:
     std::string print_short() const override;
     void print_only(std::string&) const override;
     bool equals(ClientToServerCmd*) const override;
-    int timeout() const override;
+    time_duration_t timeout() const override;
 
     [[nodiscard]] ecf::authentication_t authenticate(AbstractServer& server) const override;
     [[nodiscard]] ecf::authorisation_t authorise(AbstractServer& server) const override;

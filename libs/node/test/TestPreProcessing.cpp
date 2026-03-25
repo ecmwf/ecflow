@@ -20,12 +20,12 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/JobsParam.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/System.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 void findVariable(std::string& line, std::set<std::string>& variables) {
@@ -39,27 +39,27 @@ void findVariable(std::string& line, std::set<std::string>& variables) {
     //  %VAR:fred --f%  will either be "BILL" or if VAR is not defined "fred --f"
     while (true) {
         size_t firstPercentPos = line.find(Ecf::MICRO());
-        if (firstPercentPos == string::npos) {
+        if (firstPercentPos == std::string::npos) {
             break;
         }
         size_t secondPercentPos = line.find(Ecf::MICRO(), firstPercentPos + 1);
-        if (secondPercentPos == string::npos) {
+        if (secondPercentPos == std::string::npos) {
             break;
         }
         if (secondPercentPos - firstPercentPos <= 1) {
             break; // handle %% with no characters in between
         }
 
-        string percentVar(line.begin() + firstPercentPos + 1, line.begin() + secondPercentPos);
+        std::string percentVar(line.begin() + firstPercentPos + 1, line.begin() + secondPercentPos);
 
         size_t firstColon = percentVar.find(':');
-        if (firstColon != string::npos) {
-            string var(percentVar.begin(), percentVar.begin() + firstColon);
+        if (firstColon != std::string::npos) {
+            std::string var(percentVar.begin(), percentVar.begin() + firstColon);
             percentVar = var;
         }
 
         // Ignore auto-generated variables
-        if (percentVar.find("ECF_") == string::npos && percentVar != "DATE" && percentVar != "DAY" &&
+        if (percentVar.find("ECF_") == std::string::npos && percentVar != "DATE" && percentVar != "DAY" &&
             percentVar != "DD" && percentVar != "DOW" && percentVar != "DOY" && percentVar != "MM" &&
             percentVar != "MONTH" && percentVar != "YYYY" && percentVar != "TASK" && percentVar != "FAMILY" &&
             percentVar != "FAMILY1" && percentVar != "SUITE") {
@@ -136,7 +136,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
         // a bug in autoDiscoverVariables
         std::set<std::string> discoveredVariables;
         autoDiscoverVariables(ecf_home + "/includes", discoveredVariables);
-        for (const string& var : discoveredVariables) {
+        for (const std::string& var : discoveredVariables) {
             // 			cerr << "autoDiscoverVariables = " << var << "\n";
             suite->addVariable(Variable(var, "gobblygook"));
         }
@@ -167,8 +167,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     }
 
     // get all the task
-    std::vector<Task*> theTasks;
-    theDefs.getAllTasks(theTasks);
+    auto tasks = ecf::get_all_tasks(theDefs);
 
     // Override ECF_HOME.   ECF_HOME is need to locate the ecf files
     theDefs.server_state().add_or_update_user_variables(ecf::environment::ECF_HOME, ecf_home);
@@ -178,18 +177,18 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     theDefs.beginAll();
 
     // Test Job creator, this will pre-process and perform variable substitution on ecf files
-    for (Task* t : theTasks) {
+    for (auto task : tasks) {
 
         // cout << "  task " << t->absNodePath() << "\n";
         JobsParam jobsParam; // create jobs =  false, spawn_jobs = false
-        bool ok = t->submitJob(jobsParam);
+        bool ok = task->submitJob(jobsParam);
 
         if (pass) { // Test expected to pass
             BOOST_CHECK_MESSAGE(ok, "Failed to create jobs. " << jobsParam.getErrorMsg());
         }
         else { // test expected to fail
             BOOST_CHECK_MESSAGE(!ok, "Expected failure " << jobsParam.getErrorMsg());
-            BOOST_CHECK_MESSAGE(!ok, "expected no passes but found " << t->absNodePath() << " passes");
+            BOOST_CHECK_MESSAGE(!ok, "expected no passes but found " << task->absNodePath() << " passes");
             // cerr << "\n" << jobsParam.getErrorMsg() << " \n"; // un-comment to ensure correct error message
         }
     }

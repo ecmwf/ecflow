@@ -25,16 +25,17 @@
 #include "ecflow/node/Defs.hpp"
 
 using namespace ecf;
-using namespace std;
-namespace po = boost::program_options;
 
-LogCmd::LogCmd(LogApi a, int get_last_n_lines) : api_(a), get_last_n_lines_(get_last_n_lines) {
+LogCmd::LogCmd(LogApi a, int get_last_n_lines)
+    : api_(a),
+      get_last_n_lines_(get_last_n_lines) {
     if (get_last_n_lines_ == 0) {
         get_last_n_lines_ = Log::get_last_n_lines_default();
     }
 }
 
-LogCmd::LogCmd() : get_last_n_lines_(Log::get_last_n_lines_default()) {
+LogCmd::LogCmd()
+    : get_last_n_lines_(Log::get_last_n_lines_default()) {
 }
 
 LogCmd::LogCmd(const std::string& path)
@@ -122,19 +123,14 @@ bool LogCmd::isWrite() const {
     switch (api_) {
         case LogCmd::GET:
             return false;
-            break;
         case LogCmd::CLEAR:
             return false;
-            break;
         case LogCmd::FLUSH:
             return false;
-            break;
         case LogCmd::NEW:
             return true;
-            break;
         case LogCmd::PATH:
             return false;
-            break;
         default:
             throw std::runtime_error("LogCmd::isWrite: Unrecognised log api command,");
     }
@@ -223,11 +219,12 @@ const char* LogCmd::desc() {
 }
 
 void LogCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LogCmd::arg(), po::value<vector<string>>()->multitoken(), LogCmd::desc());
+    desc.add_options()(
+        LogCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), LogCmd::desc());
 }
 
 void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(LogCmd::arg(), args);
@@ -236,10 +233,9 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
     if (!args.empty() && args[0] == "get") {
 
         if (args.size() != 1 && args.size() != 2) {
-            std::stringstream ss;
-            ss << "LogCmd: Please use '--log==get 100' to get the log file contents from the server\n";
-            ss << "optionally an integer can be provide to specify the last number of lines\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("LogCmd: Please use '--log==get 100' to get the log file contents from the server\n"
+                        << "optionally an integer can be provide to specify the last number of lines\n"));
         }
 
         if (args.size() == 1) {
@@ -265,9 +261,8 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
     if (!args.empty() && args[0] == "clear") {
 
         if (args.size() != 1) {
-            std::stringstream ss;
-            ss << "LogCmd: Too many arguments. Please use " << CtsApi::clearLog() << " to clear the log file\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("LogCmd: Too many arguments. Please use " << CtsApi::clearLog() << " to clear the log file\n"));
         }
         cmd = std::make_shared<LogCmd>(LogCmd::CLEAR);
         return;
@@ -275,9 +270,8 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
     if (!args.empty() && args[0] == "flush") {
 
         if (args.size() != 1) {
-            std::stringstream ss;
-            ss << "LogCmd: Too many arguments. Please use " << CtsApi::flushLog() << " to flush the log file\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("LogCmd: Too many arguments. Please use " << CtsApi::flushLog() << " to flush the log file\n"));
         }
         cmd = std::make_shared<LogCmd>(LogCmd::FLUSH);
         return;
@@ -285,9 +279,8 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
     if (!args.empty() && args[0] == "path") {
 
         if (args.size() != 1) {
-            std::stringstream ss;
-            ss << "LogCmd: Too many arguments. Please use " << CtsApi::get_log_path() << " to get the log file path\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("LogCmd: Too many arguments. Please use "
+                                             << CtsApi::get_log_path() << " to get the log file path\n"));
         }
         cmd = std::make_shared<LogCmd>(LogCmd::PATH);
         return;
@@ -295,9 +288,8 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
     if (!args.empty() && args[0] == "new") {
 
         if (args.size() > 2) {
-            std::stringstream ss;
-            ss << "LogCmd: Too many arguments.  Expected --log=new   OR   --log=new /path/to/newlog/file\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("LogCmd: Too many arguments.  Expected --log=new   OR   --log=new /path/to/newlog/file\n"));
         }
         std::string path;
         if (args.size() == 2) {
@@ -307,9 +299,7 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
         return;
     }
 
-    std::stringstream ss;
-    ss << "LogCmd: The arguments have not been specified correctly\n" << LogCmd::desc();
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("LogCmd: The arguments have not been specified correctly\n" << LogCmd::desc()));
 }
 
 std::ostream& operator<<(std::ostream& os, const LogCmd& c) {

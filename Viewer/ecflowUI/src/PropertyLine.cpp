@@ -35,7 +35,8 @@
 
 static std::map<VProperty::GuiType, PropertyLineFactory*>* makers = nullptr;
 
-FontSizeSpin::FontSizeSpin(QWidget* parent) : QSpinBox(parent) {
+FontSizeSpin::FontSizeSpin(QWidget* parent)
+    : QSpinBox(parent) {
 }
 
 void FontSizeSpin::setFamily(QString family) {
@@ -135,10 +136,6 @@ PropertyLineFactory::PropertyLineFactory(VProperty::GuiType type) {
     (*makers)[type] = this;
 }
 
-PropertyLineFactory::~PropertyLineFactory() {
-    // Not called
-}
-
 PropertyLine* PropertyLineFactory::create(VProperty* p, bool addLabel, QWidget* parent) {
     if (!p || !p->link()) {
         return nullptr;
@@ -159,7 +156,9 @@ PropertyLine* PropertyLineFactory::create(VProperty* p, bool addLabel, QWidget* 
 //
 //=========================================================================
 
-PropertyLine::PropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent) : QObject(parent), guiProp_(guiProp) {
+PropertyLine::PropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
+    : QObject(parent),
+      guiProp_(guiProp) {
     prop_ = guiProp_->link();
     assert(prop_);
 
@@ -939,8 +938,7 @@ void ComboMultiPropertyLine::setEnabledEditable(bool b) {
 //=========================================================================
 
 SoundComboPropertyLine::SoundComboPropertyLine(VProperty* guiProp, bool addLabel, QWidget* parent)
-    : ComboPropertyLine(guiProp, addLabel, parent),
-      playTb_(nullptr) {
+    : ComboPropertyLine(guiProp, addLabel, parent) {
     playTb_ = new QToolButton(parent);
     playTb_->setObjectName(prop_->name());
 
@@ -965,7 +963,7 @@ void SoundComboPropertyLine::setEnabledEditable(bool b) {
 
 void SoundComboPropertyLine::slotPlay(bool) {
     int loopCount = 1;
-    if (PropertyLine* line = helpers_.value("sound_loop", NULL)) {
+    if (PropertyLine* line = helpers_.value("sound_loop", nullptr)) {
         loopCount = line->currentValue().toInt();
     }
 

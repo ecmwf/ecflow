@@ -40,6 +40,8 @@ ecbuild_add_library(
 
 target_clangformat(ecflow3)
 
+set(ECFLOW_PYTHONPATH ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "Path to find ecflow python module for testing" FORCE)
+
 #
 # Override default behaviour that add RPATHS during install
 # The only thing that seem to work is set INSTALL_RPATH to ""
@@ -70,7 +72,7 @@ foreach( test ${u_tests} )
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py
     ENVIRONMENT
-      "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH};PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}"
+      "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH};PYTHONPATH=${ECFLOW_PYTHONPATH}"
     TEST_DEPENDS
       u_base
   )
@@ -89,7 +91,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ARGS
         ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py
       ENVIRONMENT
-        "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH};PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR};ECF_SSL_DIR=${CMAKE_CURRENT_BINARY_DIR}/"
+        "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH};PYTHONPATH=${ECFLOW_PYTHONPATH};ECF_SSL_DIR=${CMAKE_CURRENT_BINARY_DIR}/"
       TEST_DEPENDS
         u_base
     )

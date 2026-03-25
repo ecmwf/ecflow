@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <mutex>
 #include <stdexcept>
 #include <vector>
 
@@ -19,8 +20,6 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/TimeStamp.hpp"
-
-using namespace std;
 
 namespace ecf {
 
@@ -42,7 +41,9 @@ void Log::destroy() {
     instance_ = nullptr;
 }
 
-Log::Log(const std::string& fileName) : logImpl_(std::make_unique<LogImpl>(fileName)), fileName_(fileName) {
+Log::Log(const std::string& fileName)
+    : logImpl_(std::make_unique<LogImpl>(fileName)),
+      fileName_(fileName) {
 }
 
 void Log::create_logimpl() {
@@ -52,7 +53,7 @@ void Log::create_logimpl() {
 }
 
 bool Log::log(Log::LogType lt, const std::string& message) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     create_logimpl();
 
@@ -68,7 +69,7 @@ bool Log::log(Log::LogType lt, const std::string& message) {
 }
 
 bool Log::log_no_newline(Log::LogType lt, const std::string& message) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     create_logimpl();
 
@@ -84,7 +85,7 @@ bool Log::log_no_newline(Log::LogType lt, const std::string& message) {
 }
 
 bool Log::append(const std::string& message) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     create_logimpl();
 
@@ -100,20 +101,20 @@ bool Log::append(const std::string& message) {
 }
 
 void Log::cache_time_stamp() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     create_logimpl();
     logImpl_->create_time_stamp();
 }
 
 const std::string& Log::get_cached_time_stamp() const {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     return (logImpl_) ? logImpl_->get_cached_time_stamp() : Str::EMPTY();
 }
 
 void Log::flush() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     // will close ofstream and force data to be written to disk.
     // Forcing writing to physical medium can't be guaranteed though!
@@ -121,7 +122,7 @@ void Log::flush() {
 }
 
 void Log::flush_only() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     if (logImpl_) {
         logImpl_->flush();
@@ -129,18 +130,18 @@ void Log::flush_only() {
 }
 
 void Log::clear() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
     flush();
 
     // Open and truncate the file.
-    std::ofstream logfile(fileName_.c_str(), ios::out | ios::trunc);
+    std::ofstream logfile(fileName_.c_str(), std::ios::out | std::ios::trunc);
     if (logfile.is_open()) {
         logfile.close(); // force buffers to flush
     }
 }
 
 void Log::new_path(const std::string& the_new_path) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     check_new_path(the_new_path);
 
@@ -163,24 +164,22 @@ void Log::check_new_path(const std::string& new_path) {
     if (!parent_path.empty()) {
 
         if (!fs::exists(parent_path)) {
-            std::stringstream ss;
-            ss << "Log::check_new_path: Cannot create new log file, since the directory part " << parent_path
-               << " does not exist\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Log::check_new_path: Cannot create new log file, since the directory part "
+                        << parent_path << " does not exist\n"));
         }
     }
 
     // Now check that path does not correspond to a directory, can't use that as the new log file location
     if (fs::is_directory(the_new_path)) {
-        std::stringstream ss;
-        ss << "LogCmd::LogCmd: Cannot create new log file, since the path correspond to a directory " << the_new_path
-           << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("LogCmd::LogCmd: Cannot create new log file, since the path correspond to a directory "
+                    << the_new_path << "\n"));
     }
 }
 
 std::string Log::path() const {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     if (!fileName_.empty() && fileName_[0] == '/') {
         // Path is absolute return as is
@@ -193,10 +192,10 @@ std::string Log::path() const {
 }
 
 std::string Log::contents(int get_last_n_lines) {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     if (get_last_n_lines == 0) {
-        return string();
+        return std::string{};
     }
 
     // Close the file. Log file may be buffered, hence flush first
@@ -210,7 +209,7 @@ std::string Log::contents(int get_last_n_lines) {
 }
 
 std::string Log::handle_write_failure() {
-    std::lock_guard lock(mx_);
+    std::scoped_lock lock(mx_);
 
     std::string msg = logImpl_->log_open_error();
     if (msg.empty()) {
@@ -275,10 +274,8 @@ bool log_append(const std::string& message) {
 }
 
 void log_assert(char const* expr, char const* file, long line, const std::string& message) {
-    std::stringstream ss;
-    ss << "ASSERT failure: " << expr << " at " << file << ":" << line << " " << message;
-    std::string assert_msg = ss.str();
-    cerr << assert_msg << "\n";
+    auto assert_msg = MESSAGE("ASSERT failure: " << expr << " at " << file << ":" << line << " " << message);
+    std::cerr << assert_msg << "\n";
     if (Log::instance()) {
         Log::instance()->log(Log::ERR, assert_msg);
         exit(1);
@@ -307,7 +304,8 @@ LogFlusher::~LogFlusher() {
 
 //======================================================================================================
 
-TestLog::TestLog(const std::string& log_path) : log_path_(log_path) {
+TestLog::TestLog(const std::string& log_path)
+    : log_path_(log_path) {
     Log::create(log_path);
 }
 
@@ -325,14 +323,13 @@ TestLog::~TestLog() {
 LogTimer::~LogTimer() {
     Log* the_log = Log::instance();
     if (the_log) {
-        std::stringstream ss;
-        ss << " " << msg_ << " " << timer_.elapsed_seconds();
-        the_log->log(Log::DBG, ss.str());
+        the_log->log(Log::DBG, MESSAGE(" " << msg_ << " " << timer_.elapsed_seconds()));
     }
 }
 
 //======================================================================================================
-LogImpl::LogImpl(const std::string& filename) : file_(filename.c_str(), ios::out | ios::app) {
+LogImpl::LogImpl(const std::string& filename)
+    : file_(filename.c_str(), std::ios::out | std::ios::app) {
     if (!file_.is_open()) {
         log_open_error_ = "Could not open log file '";
         log_open_error_ += filename;

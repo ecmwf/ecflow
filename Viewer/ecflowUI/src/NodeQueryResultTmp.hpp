@@ -19,13 +19,16 @@
 class VNode;
 
 struct NodeQueryResultTmp;
-typedef std::shared_ptr<NodeQueryResultTmp> NodeQueryResultTmp_ptr;
+using NodeQueryResultTmp_ptr = std::shared_ptr<NodeQueryResultTmp>;
 
 struct NodeQueryResultTmp
 {
     NodeQueryResultTmp() = default;
-    explicit NodeQueryResultTmp(VNode* node) : node_(node) {}
-    NodeQueryResultTmp(VNode* node, QStringList attr) : node_(node), attr_(attr) {}
+    explicit NodeQueryResultTmp(VNode* node)
+        : node_(node) {}
+    NodeQueryResultTmp(VNode* node, QStringList attr)
+        : node_(node),
+          attr_(attr) {}
 
     VNode* node_{nullptr};
     QStringList attr_;

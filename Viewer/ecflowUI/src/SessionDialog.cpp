@@ -18,7 +18,8 @@
 #include "SessionRenameDialog.hpp"
 #include "ui_SessionDialog.h"
 
-SessionDialog::SessionDialog(QWidget* parent) : QDialog(parent) {
+SessionDialog::SessionDialog(QWidget* parent)
+    : QDialog(parent) {
     // ui->setupUi(this);
     setupUi(this);
 
@@ -45,10 +46,6 @@ SessionDialog::SessionDialog(QWidget* parent) : QDialog(parent) {
 
     // ensure the correct state of the Save button
     setButtonsEnabledStatus();
-}
-
-SessionDialog::~SessionDialog() {
-    // delete ui;
 }
 
 void SessionDialog::refreshListOfSavedSessions() {

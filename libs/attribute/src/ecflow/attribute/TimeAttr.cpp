@@ -23,7 +23,7 @@
 
 namespace ecf {
 
-TimeAttr::TimeAttr(const std::string& str) : state_change_no_(0) {
+TimeAttr::TimeAttr(const std::string& str) {
     if (str.empty()) {
         throw std::runtime_error("Time::Time: empty string passed");
     }
@@ -80,19 +80,7 @@ void TimeAttr::write(std::string& ret) const {
 }
 
 std::string TimeAttr::dump() const {
-    std::stringstream ss;
-    ss << "time ";
-
-    if (free_) {
-        ss << "(free) ";
-    }
-    else {
-        ss << "(holding) ";
-    }
-
-    ss << ts_.dump();
-
-    return ss.str();
+    return MESSAGE("time " << (free_ ? "(free) " : "(holding) ") << ts_.dump());
 }
 
 bool TimeAttr::operator==(const TimeAttr& rhs) const {

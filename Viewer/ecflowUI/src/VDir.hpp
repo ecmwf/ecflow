@@ -71,6 +71,6 @@ protected:
 };
 
 class VDir;
-typedef std::shared_ptr<VDir> VDir_ptr;
+using VDir_ptr = std::shared_ptr<VDir>;
 
 #endif /* ecflow_viewer_VDir_HPP */

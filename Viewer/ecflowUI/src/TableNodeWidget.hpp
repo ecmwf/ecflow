@@ -19,10 +19,23 @@ class TableNodeSortModel;
 class VParamFilterMenu;
 class VSettings;
 
+class UserCancelledOperation : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
 class TableNodeWidget : public NodeWidget, protected Ui::TableNodeWidget {
     Q_OBJECT
 
 public:
+    /**
+     * Create a TableNodeWidget.
+     *
+     * @param servers the filter of serves
+     * @param interactive if the user should be interactively defining the filter for the table.
+     * @param parent the parent widget
+     *
+     * @throws UserCancelledOperation if, when in interactive meeting, the user cancels the filter definition dialog.
+     */
     TableNodeWidget(ServerFilter* servers, bool interactive, QWidget* parent = nullptr);
     ~TableNodeWidget() override;
 

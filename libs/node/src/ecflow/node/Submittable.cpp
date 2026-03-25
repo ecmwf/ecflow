@@ -30,7 +30,6 @@
 #include "ecflow/node/System.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_TASK_LOCATION 1
 
@@ -312,7 +311,7 @@ bool Submittable::operator==(const Submittable& rhs) const {
     return Node::operator==(rhs);
 }
 
-string Submittable::tryNo() const {
+std::string Submittable::tryNo() const {
     try {
         return ecf::convert_to<std::string>(tryNo_);
     }
@@ -320,7 +319,7 @@ string Submittable::tryNo() const {
     }
 
     LOG_ASSERT(false, "Submittable::tryNo() corrupt?");
-    return string();
+    return std::string{};
 }
 
 EcfFile Submittable::locatedEcfFile() const {
@@ -473,17 +472,15 @@ EcfFile Submittable::locatedEcfFile() const {
                     searchResult = File::forwardSearch(ecf_filesDirectory, theAbsNodePath, script_extension());
                 }
                 if (searchResult.empty()) {
-                    std::stringstream ss;
-                    ss << "   Search of directory ECF_FILES(variable substituted)(" << ecf_filesDirectory
-                       << ") failed:\n";
-                    reasonEcfFileNotFound += ss.str();
+                    reasonEcfFileNotFound += MESSAGE("   Search of directory ECF_FILES(variable substituted)("
+                                                     << ecf_filesDirectory << ") failed:\n");
                 }
                 else {
                     return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_FILES, file_search_algo);
                 }
             }
             else {
-                std::stringstream ss;
+                std::ostringstream ss;
                 ss << "   Directory ECF_FILES(" << original_ecf_filesDirectory << ") does not exist:\n";
                 if (original_ecf_filesDirectory != ecf_filesDirectory) {
                     ss << "   Directory ECF_FILES(" << ecf_filesDirectory
@@ -584,10 +581,8 @@ bool Submittable::submit_job_only(JobsParam& jobsParam) {
 #endif
 
     if (state() == NState::ACTIVE || state() == NState::SUBMITTED) {
-        std::stringstream ss;
-        ss << "Submittable::submit_job_only: failed: Submittable " << absNodePath() << " is already "
-           << NState::toString(state()) << " : ";
-        jobsParam.errorMsg() += ss.str();
+        jobsParam.errorMsg() += MESSAGE("Submittable::submit_job_only: failed: Submittable "
+                                        << absNodePath() << " is already " << NState::toString(state()) << " : ");
         get_flag().set(ecf::Flag::EDIT_FAILED);
         return false;
     }
@@ -654,10 +649,9 @@ bool Submittable::script_based_job_submission(JobsParam& jobsParam) {
     }
     catch (std::exception& e) {
         get_flag().set(ecf::Flag::NO_SCRIPT);
-        std::stringstream ss;
-        ss << "Submittable::submit_job_only: Script location failed for task " << absNodePath() << " :\n"
-           << e.what() << "\n";
-        jobsParam.errorMsg() += ss.str();
+        jobsParam.errorMsg() +=
+            MESSAGE("Submittable::submit_job_only: Script location failed for task " << absNodePath() << " :\n"
+                                                                                     << e.what() << "\n");
         set_aborted_only(e.what()); // remember jobsParam.errorMsg() is accumulated
         return false;
     }
@@ -696,10 +690,14 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
 
 class JobCreationTimer {
 public:
-    explicit JobCreationTimer(Submittable* sub) : enabled_(false), failed_(false), sub_(sub) {}
+    explicit JobCreationTimer(Submittable* sub)
+        : sub_(sub) {}
+
     // Disable copy (and move) semantics
     JobCreationTimer(const JobCreationTimer&)                  = delete;
     const JobCreationTimer& operator=(const JobCreationTimer&) = delete;
+    JobCreationTimer(JobCreationTimer&&)                       = delete;
+    const JobCreationTimer& operator=(JobCreationTimer&&)      = delete;
 
     ~JobCreationTimer() {
         if (enabled_) {
@@ -722,10 +720,10 @@ public:
     void set_failed() { failed_ = true; }
 
 private:
-    bool enabled_;
-    bool failed_;
-    Submittable* sub_;
-    boost::posix_time::ptime start_;
+    bool enabled_{false};
+    bool failed_{false};
+    Submittable* sub_{nullptr};
+    boost::posix_time::ptime start_{};
 };
 
 void Submittable::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
@@ -770,7 +768,7 @@ void Submittable::check_job_creation(job_creation_ctrl_ptr jobCtrl) {
     LOG_ASSERT(!errorMsg.empty(), "failing to submit must raise an error message");
 
     jobCtrl->error_msg() += errorMsg;
-    jobCtrl->push_back_failing_submittable(dynamic_pointer_cast<Submittable>(shared_from_this()));
+    jobCtrl->push_back_failing_submittable(std::dynamic_pointer_cast<Submittable>(shared_from_this()));
 }
 
 bool Submittable::run(JobsParam& jobsParam, bool force) {
@@ -785,10 +783,9 @@ bool Submittable::run(JobsParam& jobsParam, bool force) {
             return true;
         }
     }
-    std::stringstream ss;
-    ss << "Submittable::run: Aborted for task " << absNodePath() << " because state is " << NState::toString(state())
-       << " and force not set\n";
-    jobsParam.errorMsg() += ss.str();
+    jobsParam.errorMsg() +=
+        MESSAGE("Submittable::run: Aborted for task " << absNodePath() << " because state is "
+                                                      << NState::toString(state()) << " and force not set\n");
     return false;
 }
 
@@ -816,25 +813,22 @@ void Submittable::kill(const std::string& zombie_pid) {
         /// This is typically used in the KILL CMD, make sure its there
         if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty()) {
             get_flag().set(ecf::Flag::KILLCMD_FAILED);
-            std::stringstream ss;
-            ss << "Submittable::kill: Generated variable ECF_RID is empty for task " << absNodePath();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Submittable::kill: Generated variable ECF_RID is empty for task " << absNodePath()));
         }
 
         if (!findParentUserVariableValue(ecf::environment::ECF_KILL_CMD, ecf_kill_cmd) || ecf_kill_cmd.empty()) {
             get_flag().set(ecf::Flag::KILLCMD_FAILED);
-            std::stringstream ss;
-            ss << "Submittable::kill: ECF_KILL_CMD not defined, for task " << absNodePath() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Submittable::kill: ECF_KILL_CMD not defined, for task " << absNodePath() << "\n"));
         }
     }
     else {
         // Use input
         if (!findParentUserVariableValue(ecf::environment::ECF_KILL_CMD, ecf_kill_cmd) || ecf_kill_cmd.empty()) {
             get_flag().set(ecf::Flag::KILLCMD_FAILED);
-            std::stringstream ss;
-            ss << "Submittable::kill: ECF_KILL_CMD not defined, for task " << absNodePath() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Submittable::kill: ECF_KILL_CMD not defined, for task " << absNodePath() << "\n"));
         }
 
         // replace %ECF_RID% with the input args
@@ -843,10 +837,8 @@ void Submittable::kill(const std::string& zombie_pid) {
 
     if (!variableSubstitution(ecf_kill_cmd)) {
         get_flag().set(ecf::Flag::KILLCMD_FAILED);
-        std::stringstream ss;
-        ss << "Submittable::kill: Variable substitution failed for ECF_KILL_CMD(" << ecf_kill_cmd << ") on task "
-           << absNodePath() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Submittable::kill: Variable substitution failed for ECF_KILL_CMD("
+                                         << ecf_kill_cmd << ") on task " << absNodePath() << "\n"));
     }
 
     // Please note: this is *non-blocking* the output of the command(ECF_KILL_CMD) should be written to %ECF_JOB%.kill
@@ -871,10 +863,8 @@ void Submittable::status() {
     // Note: Only is active state do we have a ECF_RID
     if (state() != NState::ACTIVE && state() != NState::SUBMITTED) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
-        std::stringstream ss;
-        ss << "Submittable::status: To use status command on a *single* node(" << absNodePath()
-           << ") it must be active or submitted";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Submittable::status: To use status command on a *single* node("
+                                         << absNodePath() << ") it must be active or submitted"));
     }
 
     // *** Generated variables are *NOT* persisted.                                     ***
@@ -890,25 +880,21 @@ void Submittable::status() {
     /// If we are in active state, then ECF_RID must have been setup
     if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty()) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
-        std::stringstream ss;
-        ss << "Submittable::status: Generated variable ECF_RID is empty for ACTIVE task " << absNodePath();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Submittable::status: Generated variable ECF_RID is empty for ACTIVE task " << absNodePath()));
     }
 
     std::string ecf_status_cmd;
     if (!findParentUserVariableValue(ecf::environment::ECF_STATUS_CMD, ecf_status_cmd) || ecf_status_cmd.empty()) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
-        std::stringstream ss;
-        ss << "Submittable::status: ECF_STATUS_CMD not defined, for task " << absNodePath() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("Submittable::status: ECF_STATUS_CMD not defined, for task " << absNodePath() << "\n"));
     }
 
     if (!variableSubstitution(ecf_status_cmd)) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
-        std::stringstream ss;
-        ss << "Submittable::status: Variable substitution failed for ECF_STATUS_CMD(" << ecf_status_cmd << ") on task "
-           << absNodePath() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("Submittable::status: Variable substitution failed for ECF_STATUS_CMD("
+                                         << ecf_status_cmd << ") on task " << absNodePath() << "\n"));
     }
 
     // Please note: this is *non-blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
@@ -1001,6 +987,7 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
     std::cout << "Submittable::incremental_changes() " << debugNodePath() << "\n";
 #endif
 
+    // Create SubmittableMemento, in case the node state changes, to signal the updated submission parameters
     if (state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());

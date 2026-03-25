@@ -22,7 +22,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -100,8 +99,8 @@ BOOST_AUTO_TEST_CASE(test_generated_variables) {
     findParentVariableValue(t, "AEnum", "AA");
     findParentVariableValue(t, "YMD", "20090101");
     findParentVariableValue(t, "YMD_YYYY", "2009");
-    findParentVariableValue(t, "YMD_MM", "1");
-    findParentVariableValue(t, "YMD_DD", "1");
+    findParentVariableValue(t, "YMD_MM", "01");
+    findParentVariableValue(t, "YMD_DD", "01");
     findParentVariableValue(t, "YMD_DOW", "4");
     findParentVariableValue(
         t, "YMD_JULIAN", ecf::convert_to<std::string>(ecf::CalendarDate(20090101).as_julian_day().value()));

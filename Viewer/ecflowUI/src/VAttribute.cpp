@@ -16,9 +16,9 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
-// #define  _UI_VATTRIBUTE_DEBUG
-
-VAttribute::VAttribute(VNode* parent, int index) : VItem(parent), index_(index) {
+VAttribute::VAttribute(VNode* parent, int index)
+    : VItem(parent),
+      index_(index) {
 }
 
 VAttribute::~VAttribute() = default;

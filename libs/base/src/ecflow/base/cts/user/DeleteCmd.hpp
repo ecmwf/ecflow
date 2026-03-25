@@ -17,8 +17,7 @@
 class DeleteCmd final : public UserCmd {
 public:
     explicit DeleteCmd(const std::vector<std::string>& paths, bool force = false)
-        : group_cmd_(nullptr),
-          paths_(paths),
+        : paths_(paths),
           force_(force) {}
     explicit DeleteCmd(const std::string& absNodePath, bool force = false);
     DeleteCmd() = default;
@@ -52,7 +51,7 @@ private:
 
 private:
     const GroupCTSCmd* group_cmd_{nullptr}; // not persisted only used in server
-    std::vector<std::string> paths_;
+    std::vector<std::string> paths_{};
     bool force_{false};
 
     friend class cereal::access;

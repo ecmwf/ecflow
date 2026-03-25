@@ -28,7 +28,8 @@
 //
 //========================================================
 
-TriggerItemWidget::TriggerItemWidget(QWidget* parent) : QWidget(parent) {
+TriggerItemWidget::TriggerItemWidget(QWidget* parent)
+    : QWidget(parent) {
     // This item will listen to any changes in nodes
     handleAnyChange_ = true;
 

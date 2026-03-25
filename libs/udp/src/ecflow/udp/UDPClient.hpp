@@ -76,7 +76,9 @@ public:
     using endpoints_set_t      = resolver_t::results_type;
     using endpoints_iterator_t = endpoints_set_t::iterator;
 
-    BaseUDPClient(hostname_t host, port_t port) : host_{std::move(host)}, port_{std::move(port)} {}
+    BaseUDPClient(hostname_t host, port_t port)
+        : host_{std::move(host)},
+          port_{std::move(port)} {}
 
     void send(const data_t& data) {
         boost::asio::io_context io;

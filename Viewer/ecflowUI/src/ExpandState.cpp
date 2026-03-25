@@ -20,9 +20,12 @@
 #include "VTree.hpp"
 #include "ecflow/core/Str.hpp"
 
-// #define _UI_EXPANDSTATE_DEBUG
+// #define UI_EXPANDSTATE_DEBUG
 
-ExpandState::ExpandState(AbstractNodeView* view, TreeNodeModel* model) : view_(view), model_(model), root_(nullptr) {
+ExpandState::ExpandState(AbstractNodeView* view, TreeNodeModel* model)
+    : view_(view),
+      model_(model),
+      root_(nullptr) {
 }
 
 ExpandState::~ExpandState() {
@@ -176,7 +179,7 @@ void ExpandState::save(const VNode* node, ExpandStateNode* expandNode, const QMo
 // expand tree might not match. In this case the expand tree has to be adjusted to the
 // VNode tree.
 void ExpandState::collectExpanded(const VNode* node, QSet<QPersistentModelIndex>& theSet) {
-#ifdef _UI_EXPANDSTATE_DEBUG
+#ifdef UI_EXPANDSTATE_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(node);
@@ -186,7 +189,7 @@ void ExpandState::collectExpanded(const VNode* node, QSet<QPersistentModelIndex>
     }
 
     QModelIndex nodeIdx = model_->nodeToIndex(node);
-#ifdef _UI_EXPANDSTATE_DEBUG
+#ifdef UI_EXPANDSTATE_DEBUG
     UiLog().dbg() << " root=" << root_->name_;
 #endif
     ExpandStateNode* expand = find(node->absNodePath());
@@ -194,7 +197,7 @@ void ExpandState::collectExpanded(const VNode* node, QSet<QPersistentModelIndex>
         collectExpanded(expand, node, nodeIdx, theSet);
     }
     else {
-#ifdef _UI_EXPANDSTATE_DEBUG
+#ifdef UI_EXPANDSTATE_DEBUG
         UiLog().dbg() << " Node not found in expand tree";
 #endif
     }
@@ -204,7 +207,7 @@ void ExpandState::collectExpanded(ExpandStateNode* expand,
                                   const VNode* node,
                                   const QModelIndex& nodeIdx,
                                   QSet<QPersistentModelIndex>& theSet) {
-#ifdef _UI_EXPANDSTATE_DEBUG
+#ifdef UI_EXPANDSTATE_DEBUG
     UI_FUNCTION_LOG
 #endif
     // The contents of expand node and the vnode might differ. We try to
@@ -221,7 +224,7 @@ void ExpandState::collectExpanded(ExpandStateNode* expand,
     if (expand->expanded_ && nodeIdx.isValid()) {
         theSet.insert(nodeIdx);
 
-#ifdef _UI_EXPANDSTATE_DEBUG
+#ifdef UI_EXPANDSTATE_DEBUG
         UiLog().dbg() << "  " << expand->name_;
 #endif
     }

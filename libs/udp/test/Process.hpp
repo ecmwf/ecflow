@@ -20,12 +20,12 @@ namespace ecf::test {
 class Process {
 public:
     Process();
-    Process(const Process& rhs) = delete;
-    Process(Process&& rhs);
 
     Process(std::string_view executable, std::vector<std::string_view> args);
 
+    Process(const Process& rhs)            = delete;
     Process& operator=(const Process& rhs) = delete;
+    Process(Process&& rhs);
     Process& operator=(Process&& rhs);
 
     void terminate();

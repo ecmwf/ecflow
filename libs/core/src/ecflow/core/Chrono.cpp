@@ -17,6 +17,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 namespace ecf {
@@ -49,7 +50,7 @@ bool is_valid_days_of_month(int day /* [1-31] */, int month /* [0-11] */, int ye
 
 Instant Instant::parse(const std::string& value) {
     std::tm tm = {};
-    std::stringstream ss(value);
+    std::istringstream ss(value);
     ss >> std::get_time(&tm, "%Y%m%dT%H%M%S");
     // Validate if parsing was successful
     if (ss.fail()) {
@@ -86,9 +87,7 @@ std::string Instant::format(const Instant& value) {
     auto tt    = std::chrono::system_clock::to_time_t(value.instant_);
     std::tm tm = *std::gmtime(&tt);
 
-    std::ostringstream o;
-    o << std::put_time(&tm, "%Y%m%dT%H%M%S");
-    return o.str();
+    return MESSAGE(std::put_time(&tm, "%Y%m%dT%H%M%S"));
 }
 
 std::ostream& operator<<(std::ostream& o, const Instant& v) {
@@ -149,9 +148,9 @@ template <class DurationIn, class FirstDuration, class... RestDurations>
 std::string format_duration(DurationIn d) {
     auto value = std::chrono::duration_cast<FirstDuration>(d);
 
-    std::ostringstream oss;
-    oss << std::setw(2) << std::setfill('0') << value.count(); // Ensure left 0-padded value with 2 digits
-    std::string out = oss.str();
+    std::ostringstream ss;
+    ss << std::setw(2) << std::setfill('0') << value.count(); // Ensure left 0-padded value with 2 digits
+    std::string out = ss.str();
 
     if constexpr (sizeof...(RestDurations) > 0) {
         // Important!

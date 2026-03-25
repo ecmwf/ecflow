@@ -21,14 +21,13 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
-LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force) : force_(force) {
+LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force)
+    : force_(force) {
     if (defs) {
         defs->handle_migration();
         defs->write_to_string(defs_, PrintStyle::NET);
@@ -44,9 +43,9 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
     : force_(force),
       defs_filename_(defs_filename) {
     if (defs_filename_.empty()) {
-        std::stringstream ss;
-        ss << "LoadDefsCmd::LoadDefsCmd: The pathname to the definition file must be provided\n" << LoadDefsCmd::desc();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("LoadDefsCmd::LoadDefsCmd: The pathname to the definition file must be provided\n"
+                    << LoadDefsCmd::desc()));
     }
 
     defs_ptr defs = Defs::create();
@@ -72,10 +71,10 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
         defs->server_state().add_or_update_user_variables(client_env); // use in test environment
 
         if (print) {
-            cout << ecf::as_string(*defs, PrintStyle::NET); // should be same as MIGRATE, only differ on reload
+            std::cout << ecf::as_string(*defs, PrintStyle::NET); // should be same as MIGRATE, only differ on reload
         }
         if (stats) {
-            cout << defs->stats();
+            std::cout << defs->stats();
         }
 
         if (!check_only && !stats && !print) {
@@ -83,13 +82,12 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
         }
 
         // Output any warning to standard output
-        cout << warningMsg;
+        std::cout << warningMsg;
     }
     else {
-        std::stringstream ss;
-        ss << "\nLoadDefsCmd::LoadDefsCmd. Failed to parse file/definition " << defs_filename_ << "\n";
-        ss << errMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("\nLoadDefsCmd::LoadDefsCmd. Failed to parse file/definition "
+                                         << defs_filename_ << "\n"
+                                         << errMsg));
     }
 }
 
@@ -125,10 +123,12 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         std::string errMsg, warningMsg;
         defs_ptr defs = Defs::create();
         if (!defs->restore_from_string(defs_, errMsg, warningMsg)) {
-            std::stringstream ss;
-            ss << "LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("LoadDefsCmd::doHandleRequest : Could not parse file " << defs_filename_ << " : " << errMsg));
         }
+
+        // Check if node to be loaded is "valid" i.e. no mirrors self-targets the server
+        ensure_all_mirrors_are_valid(*defs.get(), as->hostPort().first, as->hostPort().second);
 
         // After the updateDefs, defs will be left with NO suites.
         // Can't really used defs after this point
@@ -183,11 +183,13 @@ const char* LoadDefsCmd::desc() {
 }
 
 void LoadDefsCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LoadDefsCmd::arg(), po::value<vector<string>>()->multitoken(), LoadDefsCmd::desc());
+    desc.add_options()(LoadDefsCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       LoadDefsCmd::desc());
 }
 
 void LoadDefsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
     if (clientEnv->debug()) {
         dumpVecArgs(LoadDefsCmd::arg(), args);
     }
@@ -215,7 +217,7 @@ void LoadDefsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm
         }
     }
     if (clientEnv->debug()) {
-        cout << "  LoadDefsCmd::create: Defs file '" << defs_filename << "'.\n";
+        std::cout << "  LoadDefsCmd::create: Defs file '" << defs_filename << "'.\n";
     }
 
     cmd = LoadDefsCmd::create(defs_filename, force, check_only, print, stats, clientEnv);

@@ -27,8 +27,7 @@
 // ***************************************************************************************
 class CtsApi {
 public:
-    CtsApi(const CtsApi&)                  = delete;
-    const CtsApi& operator=(const CtsApi&) = delete;
+    CtsApi() = delete;
 
     static std::string to_string(const std::vector<std::string>&);
 

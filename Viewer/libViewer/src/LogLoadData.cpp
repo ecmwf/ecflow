@@ -34,7 +34,10 @@
 //=======================================================
 
 // Helper structure for data collection
-LogReqCounter::LogReqCounter(const std::string& name) : name_(name), childReq_(0), userReq_(0) {
+LogReqCounter::LogReqCounter(const std::string& name)
+    : name_(name),
+      childReq_(0),
+      userReq_(0) {
     LogLoadDataItem::buildSubReq(subReq_);
 }
 
@@ -122,7 +125,8 @@ bool sortVecFunction(const std::pair<size_t, size_t>& a, const std::pair<size_t,
     return a.second < b.second;
 }
 
-LogLoadDataItem::LogLoadDataItem(const std::string& name) : name_(name) {
+LogLoadDataItem::LogLoadDataItem(const std::string& name)
+    : name_(name) {
     buildSubReq(subReq_);
 }
 

@@ -19,7 +19,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     size_t line_token_size = lineTokens.size();
@@ -30,7 +29,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         throw std::runtime_error("RepeatParser::doParse: Could not add repeat as node stack is empty at line: " + line);
     }
 
-    string errorMsg = "Invalid repeat : ";
+    std::string errorMsg = "Invalid repeat : ";
     errorMsg += line;
 
     if (lineTokens[1] == "date") {
@@ -39,10 +38,10 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
             throw std::runtime_error(errorMsg);
         }
 
-        string name  = lineTokens[2];
-        int startYMD = Extract::ymd(lineTokens[3], errorMsg);
-        int endYMD   = Extract::ymd(lineTokens[4], errorMsg);
-        int delta    = Extract::optional_value<int>(lineTokens, 5, 1, errorMsg);
+        std::string name = lineTokens[2];
+        int startYMD     = Extract::ymd(lineTokens[3], errorMsg);
+        int endYMD       = Extract::ymd(lineTokens[4], errorMsg);
+        int delta        = Extract::optional_value<int>(lineTokens, 5, 1, errorMsg);
         RepeatDate rep(name, startYMD, endYMD, delta);
         int value = 0;
         if (get_value(lineTokens, value)) {
@@ -57,7 +56,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
             throw std::runtime_error(errorMsg);
         }
 
-        string name      = lineTokens[2];
+        std::string name = lineTokens[2];
         Instant startYMD = Instant::parse(lineTokens[3]);
         Instant endYMD   = Instant::parse(lineTokens[4]);
         Duration delta   = Duration{std::chrono::seconds{86400}}; // by default, consider delta = 24 hours
@@ -79,7 +78,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         }
 
         // repeat datelist VARIABLE "YYYYMMDD" "YYYYMMDD" "YYYYMMDD" # comment
-        string name = lineTokens[2];
+        std::string name = lineTokens[2];
         std::vector<int> theEnums;
         theEnums.reserve(line_token_size);
         for (size_t i = 3; i < line_token_size; i++) {
@@ -119,7 +118,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
         }
 
         // repeat enumerated VARIABLE "first" "second" "last" # comment
-        string name = lineTokens[2];
+        std::string name = lineTokens[2];
         std::vector<std::string> theEnums;
         theEnums.reserve(line_token_size);
         for (size_t i = 3; i < line_token_size; i++) {
@@ -149,10 +148,10 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
             throw std::runtime_error(errorMsg);
         }
 
-        string name = lineTokens[2];
-        auto start  = Extract::value<int>(lineTokens[3], errorMsg);
-        auto end    = Extract::value<int>(lineTokens[4], errorMsg);
-        auto step   = Extract::optional_value<int>(lineTokens, 5, 1, errorMsg);
+        std::string name = lineTokens[2];
+        auto start       = Extract::value<int>(lineTokens[3], errorMsg);
+        auto end         = Extract::value<int>(lineTokens[4], errorMsg);
+        auto step        = Extract::optional_value<int>(lineTokens, 5, 1, errorMsg);
         RepeatInteger rep(name, start, end, step);
         int value = 0;
         if (get_value(lineTokens, value)) {
@@ -180,7 +179,7 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
             throw std::runtime_error(errorMsg);
         }
 
-        string name = lineTokens[2];
+        std::string name = lineTokens[2];
         std::vector<std::string> theEnums;
         theEnums.reserve(line_token_size);
         for (size_t i = 3; i < line_token_size; i++) {

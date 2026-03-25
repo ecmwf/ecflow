@@ -18,9 +18,6 @@ class NodePath {
 public:
     // Disable default construction
     NodePath() = delete;
-    // Disable copy (and move) semantics
-    NodePath(const NodePath&)                  = delete;
-    const NodePath& operator=(const NodePath&) = delete;
 
     /// returns the path as a vector of strings, preserving the order
     /// Note: multiple path separator '/' are treated as one separator.
@@ -39,6 +36,13 @@ public:
     /// Given a path like:   //localhost:3141/suite/family/task
     /// returns              /suite/family/task
     static std::string removeHostPortFromPath(const std::string& path);
+
+    ///
+    /// @brief Check if the given path is an absolute path.
+    ///
+    /// @return true if absolute path, false otherwise.
+    ///
+    static bool isAbsolutePath(const std::string& path);
 };
 
 #endif /* ecflow_core_NodePath_HPP */

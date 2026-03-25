@@ -27,11 +27,10 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
-PathsCmd::PathsCmd(Api api, const std::string& absNodePath, bool force) : api_(api), force_(force) {
+PathsCmd::PathsCmd(Api api, const std::string& absNodePath, bool force)
+    : api_(api),
+      force_(force) {
     if (!absNodePath.empty()) {
         paths_.push_back(absNodePath);
     }
@@ -161,33 +160,25 @@ ecf::authorisation_t PathsCmd::authorise(AbstractServer& server) const {
 bool PathsCmd::isWrite() const {
     switch (api_) {
         case PathsCmd::SUSPEND:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case PathsCmd::RESUME:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case PathsCmd::KILL:
-            return true;
-            break; // requires write privilege, modifies Flag::KILLCMD_FAILED
+            return true; // requires write privilege, modifies Flag::KILLCMD_FAILED
         case PathsCmd::STATUS:
-            return true;
-            break; // requires write privilege, modifies Flag::STATUSCMD_FAILED
+            return true; // requires write privilege, modifies Flag::STATUSCMD_FAILED
         case PathsCmd::CHECK:
-            return false;
-            break; // read only
+            return false; // read only
         case PathsCmd::EDIT_HISTORY: {
             if (paths_.size() == 1 && paths_[0] == "clear") {
                 return true; // requires write privilege
             }
-            return false;
-            break; // read only
+            return false; // read only
         }
         case PathsCmd::ARCHIVE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case PathsCmd::RESTORE:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case PathsCmd::NO_CMD:
             break;
         default:
@@ -201,28 +192,20 @@ const char* PathsCmd::theArg() const {
     switch (api_) {
         case PathsCmd::SUSPEND:
             return CtsApi::suspend_arg();
-            break;
         case PathsCmd::RESUME:
             return CtsApi::resume_arg();
-            break;
         case PathsCmd::KILL:
             return CtsApi::kill_arg();
-            break;
         case PathsCmd::STATUS:
             return CtsApi::statusArg();
-            break;
         case PathsCmd::CHECK:
             return CtsApi::check_arg();
-            break;
         case PathsCmd::EDIT_HISTORY:
             return CtsApi::edit_history_arg();
-            break;
         case PathsCmd::ARCHIVE:
             return CtsApi::archive_arg();
-            break;
         case PathsCmd::RESTORE:
             return CtsApi::restore_arg();
-            break;
         case PathsCmd::NO_CMD:
             break;
         default:
@@ -236,7 +219,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
     // LogTimer timer(" PathsCmd::doHandleRequest");
 
     Defs* defs = as->defs().get();
-    std::stringstream ss;
+    std::ostringstream ss;
     switch (api_) {
 
         case PathsCmd::SUSPEND: {
@@ -405,10 +388,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                     continue;
                 }
                 if (!theNode->suite()->begun()) {
-                    std::stringstream mss;
-                    mss << "Status failed. For " << path << " The suite " << theNode->suite()->name()
-                        << " must be 'begun' first\n";
-                    throw std::runtime_error(mss.str());
+                    throw std::runtime_error(MESSAGE("Status failed. For " << path << " The suite "
+                                                                           << theNode->suite()->name()
+                                                                           << " must be 'begun' first\n"));
                 }
                 SuiteChangedPtr changed(theNode.get());
                 theNode->status(); // this can throw std::runtime_error
@@ -454,7 +436,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                 }
                 return PreAllocatedReply::string_cmd(acc_warning_msg);
             }
-            break;
         }
 
         case PathsCmd::NO_CMD:
@@ -608,38 +589,49 @@ const char* restore_desc() {
 }
 
 void PathsCmd::addOption(boost::program_options::options_description& desc) const {
+
+    namespace po = boost::program_options;
+
     switch (api_) {
         case PathsCmd::CHECK: {
-            desc.add_options()(CtsApi::check_arg(), po::value<vector<string>>()->multitoken(), get_check_desc());
+            desc.add_options()(
+                CtsApi::check_arg(), po::value<std::vector<std::string>>()->multitoken(), get_check_desc());
             break;
         }
         case PathsCmd::SUSPEND: {
-            desc.add_options()(CtsApi::suspend_arg(), po::value<vector<string>>()->multitoken(), suspend_desc());
+            desc.add_options()(
+                CtsApi::suspend_arg(), po::value<std::vector<std::string>>()->multitoken(), suspend_desc());
             break;
         }
         case PathsCmd::RESUME: {
-            desc.add_options()(CtsApi::resume_arg(), po::value<vector<string>>()->multitoken(), resume_desc());
+            desc.add_options()(
+                CtsApi::resume_arg(), po::value<std::vector<std::string>>()->multitoken(), resume_desc());
             break;
         }
         case PathsCmd::KILL: {
-            desc.add_options()(CtsApi::kill_arg(), po::value<vector<string>>()->multitoken(), get_kill_desc());
+            desc.add_options()(
+                CtsApi::kill_arg(), po::value<std::vector<std::string>>()->multitoken(), get_kill_desc());
             break;
         }
         case PathsCmd::STATUS: {
-            desc.add_options()(CtsApi::statusArg(), po::value<vector<string>>()->multitoken(), get_status_desc());
+            desc.add_options()(
+                CtsApi::statusArg(), po::value<std::vector<std::string>>()->multitoken(), get_status_desc());
             break;
         }
         case PathsCmd::EDIT_HISTORY: {
-            desc.add_options()(
-                CtsApi::edit_history_arg(), po::value<vector<string>>()->multitoken(), get_edit_history_desc());
+            desc.add_options()(CtsApi::edit_history_arg(),
+                               po::value<std::vector<std::string>>()->multitoken(),
+                               get_edit_history_desc());
             break;
         }
         case PathsCmd::ARCHIVE: {
-            desc.add_options()(CtsApi::archive_arg(), po::value<vector<string>>()->multitoken(), archive_desc());
+            desc.add_options()(
+                CtsApi::archive_arg(), po::value<std::vector<std::string>>()->multitoken(), archive_desc());
             break;
         }
         case PathsCmd::RESTORE: {
-            desc.add_options()(CtsApi::restore_arg(), po::value<vector<string>>()->multitoken(), restore_desc());
+            desc.add_options()(
+                CtsApi::restore_arg(), po::value<std::vector<std::string>>()->multitoken(), restore_desc());
             break;
         }
         case PathsCmd::NO_CMD:
@@ -654,7 +646,8 @@ void PathsCmd::addOption(boost::program_options::options_description& desc) cons
 void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     assert(api_ != PathsCmd::NO_CMD);
 
-    vector<string> args = vm[theArg()].as<vector<string>>();
+    auto args = vm[theArg()].as<std::vector<std::string>>();
+
     if (ac->debug()) {
         dumpVecArgs(theArg(), args);
     }
@@ -673,10 +666,9 @@ void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             }
         }
         if (!all && paths.empty()) {
-            std::stringstream ss;
-            ss << "Check: Please specify one of [ _all_ | / | /<path/to/anode> ]. Paths must begin with a leading '/' "
-                  "character\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE(
+                "Check: Please specify one of [ _all_ | / | /<path/to/anode> ]. Paths must begin with a leading '/' "
+                "character\n"));
         }
         if (paths.size() == 1 && paths[0] == "/") {
             // treat as _all_
@@ -690,17 +682,15 @@ void PathsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
                 paths.emplace_back("clear");
             }
             else {
-                std::stringstream ss;
-                ss << theArg() << ":  No paths or option specified. Paths must begin with a leading '/' character\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE(
+                    theArg() << ":  No paths or option specified. Paths must begin with a leading '/' character\n"));
             }
         }
     }
     else {
         if (paths.empty()) {
-            std::stringstream ss;
-            ss << theArg() << ":  No paths specified. Paths must begin with a leading '/' character\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE(theArg() << ":  No paths specified. Paths must begin with a leading '/' character\n"));
         }
     }
 

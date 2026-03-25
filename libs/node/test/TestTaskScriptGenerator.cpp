@@ -22,11 +22,11 @@
 #include "ecflow/node/EcfFile.hpp"
 #include "ecflow/node/Family.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -129,17 +129,16 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
     BOOST_REQUIRE_MESSAGE(fs::exists(tail), "Tail file " << tail << " not created");
 
     // get all the task, assume non hierarchical families
-    std::vector<Task*> theTasks;
-    theDefs.getAllTasks(theTasks);
+    auto tasks = ecf::get_all_tasks(theDefs);
 
     /// begin , will cause creation of generated variables. The generated variables
     /// are use in client scripts and used to locate the sms files
     theDefs.beginAll();
 
     // Test for ECF_ file location
-    for (Task* t : theTasks) {
+    for (auto task : tasks) {
         try {
-            EcfFile ecf_file = t->locatedEcfFile();
+            EcfFile ecf_file = task->locatedEcfFile();
             BOOST_REQUIRE_MESSAGE(ecf_file.valid(), "Could not locate ecf file for task ");
         }
         catch (std::exception& e) {
@@ -152,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator) {
         fs::remove_all(ecf_home);
     }
     catch (const fs::filesystem_error& e) {
-        cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
+        std::cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
     }
 }
 
@@ -241,7 +240,7 @@ BOOST_AUTO_TEST_CASE(test_task_script_generator_with_dummy_tasks) {
         fs::remove_all(ecf_home);
     }
     catch (const fs::filesystem_error& e) {
-        cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
+        std::cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
     }
 }
 

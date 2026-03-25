@@ -19,9 +19,6 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
-using namespace std;
-using namespace boost;
-
 //=====================================================================================
 // The defs command returns the full definition back to the client
 

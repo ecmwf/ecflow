@@ -28,7 +28,14 @@ class TreeNodeViewDelegate;
 // all its children will be removed from viewItems.
 struct TreeNodeViewItem
 {
-    TreeNodeViewItem() : expanded(0), hasChildren(0), hasMoreSiblings(0), level(0), width(0), height(0), x(0) {}
+    TreeNodeViewItem()
+        : expanded(0),
+          hasChildren(0),
+          hasMoreSiblings(0),
+          level(0),
+          width(0),
+          height(0),
+          x(0) {}
 
     QModelIndex index;     // the model index represented by the item.
                            // We remove items whenever the indexes are invalidated
@@ -173,7 +180,7 @@ protected:
     TreeNodeViewDelegate* delegate_;
     QSet<QPersistentModelIndex> expandedIndexes; // used when expanding and collapsing items
 
-    typedef std::vector<TreeNodeViewItem>::iterator ViewItemIterator;
+    using ViewItemIterator = std::vector<TreeNodeViewItem>::iterator;
     ScrollMode verticalScrollMode_;
     mutable std::vector<TreeNodeViewItem> viewItems_;
     int rowCount_;

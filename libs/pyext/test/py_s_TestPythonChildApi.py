@@ -36,18 +36,16 @@ def create_defs(name, port, protocol):
     protocol_option = "True" if protocol == Test.Protocol.HTTP else "False"
     suite.add_variable("ECF_USING_HTTP_BACKEND", protocol_option);
 
-    prefix_job_cmd = ""
+    # Setup the job command, based on the current environment
+    job_cmd = ""
     if 'PYTHONPATH' in os.environ:
-        prefix_job_cmd = "export PYTHONPATH=" + os.environ['PYTHONPATH'] + ";"
+        job_cmd = "export PYTHONPATH=" + os.environ['PYTHONPATH'] + ";"
     if 'LD_LIBRARY_PATH' in os.environ:
-        prefix_job_cmd += "export LD_LIBRARY_PATH=" + os.environ['LD_LIBRARY_PATH'] + ";"
+        job_cmd += "export LD_LIBRARY_PATH=" + os.environ['LD_LIBRARY_PATH'] + ";"
+    # Use the current python interpreter to run the job
+    job_cmd += f"{sys.executable} %ECF_JOB% 1> %ECF_JOBOUT% 2>&1"
 
-    # sys.version_info is a tuple containing (major,minor,micro,releaselevel,serial)
-    # releaselevel = alpha beta candidate final
-    if (sys.version_info > (3, 0)):
-        suite.add_variable("ECF_JOB_CMD", prefix_job_cmd + "python3 %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
-    else:
-        suite.add_variable("ECF_JOB_CMD", prefix_job_cmd + "python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
+    suite.add_variable("ECF_JOB_CMD", job_cmd)
 
     family = suite.add_family("f1")
     t1 = family.add_task("t1")

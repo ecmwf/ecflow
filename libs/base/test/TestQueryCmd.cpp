@@ -24,7 +24,6 @@
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
@@ -54,11 +53,9 @@ BOOST_AUTO_TEST_CASE(test_query_cmd) {
     //    task task
     // endsuite
     Defs defs;
-    string suite_f_t1 = "suite/f/t1";
-    task_ptr t1       = Task::create("t1");
+    task_ptr t1 = Task::create("t1");
     task_ptr t2;
     task_ptr task          = Task::create("task");
-    string suite_task      = "suite/task";
     std::string meter_name = "m";
     std::string event_name = "event";
     std::string label_name = "name";

@@ -29,9 +29,12 @@ class ExprDuplicate {
 private:
 public:
     ExprDuplicate() = default;
+
     // Disable copy (and move) semantics
     ExprDuplicate(const ExprDuplicate&)                  = delete;
     const ExprDuplicate& operator=(const ExprDuplicate&) = delete;
+    ExprDuplicate(ExprDuplicate&&)                       = delete;
+    ExprDuplicate& operator=(ExprDuplicate&&)            = delete;
 
     ~ExprDuplicate();
 

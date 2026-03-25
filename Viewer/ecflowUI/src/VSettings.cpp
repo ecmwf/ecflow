@@ -20,7 +20,7 @@
 #include "ecflow/core/Filesystem.hpp"
 #include "ecflow/core/Str.hpp"
 
-// #define _UI_SETTINGS_DEBUG
+// #define UI_SETTINGS_DEBUG
 
 //======================================================
 //
@@ -57,10 +57,12 @@ std::string VSettingsPath::join(const std::string& sep) const {
 //
 //======================================================
 
-VSettings::VSettings(const std::string& file) : file_(file) {
+VSettings::VSettings(const std::string& file)
+    : file_(file) {
 }
 
-VSettings::VSettings(boost::property_tree::ptree pt) : pt_(pt) {
+VSettings::VSettings(boost::property_tree::ptree pt)
+    : pt_(pt) {
 }
 
 void VSettings::clear() {
@@ -215,7 +217,7 @@ void VSettings::endGroup() {
 VComboSettings::VComboSettings(const std::string& file, const std::string& qsFile)
     : VSettings(file),
       qs_(QString::fromStdString(qsFile), QSettings::NativeFormat) {
-#ifdef _UI_SETTINGS_DEBUG
+#ifdef UI_SETTINGS_DEBUG
     UiLog().dbg() << "VComboSettings --> fileName=" << qs_.fileName();
 #endif
 }
@@ -241,7 +243,7 @@ void VComboSettings::putQs(const std::string& key, QVariant val) {
 }
 
 QVariant VComboSettings::getQs(const std::string& key) {
-#ifdef _UI_SETTINGS_DEBUG
+#ifdef UI_SETTINGS_DEBUG
     UiLog().dbg() << "qt group " << qs_.group();
 #endif
     return qs_.value(QString::fromStdString(key));
@@ -250,7 +252,7 @@ QVariant VComboSettings::getQs(const std::string& key) {
 void VComboSettings::beginGroup(const std::string& id) {
     VSettings::beginGroup(id);
     qs_.beginGroup(QString::fromStdString(id));
-#ifdef _UI_SETTINGS_DEBUG
+#ifdef UI_SETTINGS_DEBUG
     UiLog().dbg() << "qt group " << qs_.group();
 #endif
 }

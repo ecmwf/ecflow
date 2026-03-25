@@ -278,4 +278,27 @@ bool operator==(const MirrorAttr& lhs, const MirrorAttr& rhs) {
            lhs.reason() == rhs.reason();
 }
 
+std::string to_python_string(const MirrorAttr& mirror) {
+    std::string s;
+    s += "MirrorAttr(";
+    s += "name=";
+    s += mirror.name();
+    s += ", remote_path=";
+    s += mirror.remote_path();
+    s += ", remote_host=";
+    s += mirror.remote_host();
+    s += ", remote_port=";
+    s += mirror.remote_port();
+    s += ", polling=";
+    s += mirror.polling();
+    s += ", ssl=";
+    s += mirror.ssl();
+    s += ", auth=";
+    s += mirror.auth();
+    s += ", reason=";
+    s += mirror.reason();
+    s += ")";
+    return s;
+}
+
 } // namespace ecf

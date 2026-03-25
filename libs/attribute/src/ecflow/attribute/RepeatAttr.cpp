@@ -10,8 +10,10 @@
 
 #include "ecflow/attribute/RepeatAttr.hpp"
 
+#include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 
 #include "ecflow/core/Calendar.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -21,7 +23,30 @@
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 
-using namespace std;
+namespace {
+
+template <uint32_t N, typename T>
+std::string as_n_digits(T value) {
+    static_assert(N > 0, "N must be greater than zero");
+    static_assert(std::is_integral<T>::value, "T must be an integral type");
+
+    std::ostringstream ss;
+    ss << std::setfill('0') << std::setw(N) << value;
+    return ss.str();
+}
+
+template <typename T>
+std::string as_2_digits(T value) {
+    return as_n_digits<2>(value);
+}
+
+template <typename T>
+std::string as_4_digits(T value) {
+    return as_n_digits<4>(value);
+}
+
+} // namespace
+
 using namespace ecf;
 
 const Repeat& Repeat::EMPTY() {
@@ -33,25 +58,32 @@ const Repeat& Repeat::EMPTY() {
 
 Repeat::Repeat() = default;
 
-Repeat::Repeat(const RepeatDate& r) : type_(std::make_unique<RepeatDate>(r)) {
+Repeat::Repeat(const RepeatDate& r)
+    : type_(std::make_unique<RepeatDate>(r)) {
 }
 
-Repeat::Repeat(const RepeatDateTime& r) : type_(std::make_unique<RepeatDateTime>(r)) {
+Repeat::Repeat(const RepeatDateTime& r)
+    : type_(std::make_unique<RepeatDateTime>(r)) {
 }
 
-Repeat::Repeat(const RepeatDateList& r) : type_(std::make_unique<RepeatDateList>(r)) {
+Repeat::Repeat(const RepeatDateList& r)
+    : type_(std::make_unique<RepeatDateList>(r)) {
 }
 
-Repeat::Repeat(const RepeatInteger& r) : type_(std::make_unique<RepeatInteger>(r)) {
+Repeat::Repeat(const RepeatInteger& r)
+    : type_(std::make_unique<RepeatInteger>(r)) {
 }
 
-Repeat::Repeat(const RepeatEnumerated& r) : type_(std::make_unique<RepeatEnumerated>(r)) {
+Repeat::Repeat(const RepeatEnumerated& r)
+    : type_(std::make_unique<RepeatEnumerated>(r)) {
 }
 
-Repeat::Repeat(const RepeatString& r) : type_(std::make_unique<RepeatString>(r)) {
+Repeat::Repeat(const RepeatString& r)
+    : type_(std::make_unique<RepeatString>(r)) {
 }
 
-Repeat::Repeat(const RepeatDay& r) : type_(std::make_unique<RepeatDay>(r)) {
+Repeat::Repeat(const RepeatDay& r)
+    : type_(std::make_unique<RepeatDay>(r)) {
 }
 
 Repeat::~Repeat() = default;
@@ -62,16 +94,14 @@ Repeat::Repeat(const Repeat& rhs) {
     }
 }
 
-Repeat& Repeat::operator=(const Repeat& rhs) {
-    type_.reset(nullptr);
-    if (rhs.type_) {
-        type_.reset(rhs.type_->clone());
-    }
-    return *this;
+Repeat::Repeat(Repeat&& rhs)
+    : type_(std::move(rhs.type_)) {
 }
 
-Repeat& Repeat::operator=(Repeat&& rhs) {
-    type_ = std::move(rhs.type_); // since rhs.type_ is a unique_ptr no need to set rhs.type_ to NULL
+Repeat& Repeat::operator=(Repeat rhs) {
+    using std::swap;
+    swap(this->type_, rhs.type_);
+
     return *this;
 }
 
@@ -131,42 +161,36 @@ RepeatDate::RepeatDate(const std::string& variable, int start, int end, int delt
     }
 
     if (delta == 0) {
-        std::stringstream ss;
-        ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-        throw std::runtime_error("Invalid Repeat date: the delta cannot be zero" + ss.str());
+        throw std::runtime_error(MESSAGE("Invalid Repeat date: the delta cannot be zero"
+                                         << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
     std::string theStart = ecf::convert_to<std::string>(start);
     if (theStart.size() != 8) {
-        std::stringstream ss;
-        ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-        throw std::runtime_error("Invalid Repeat date: The start is not a valid date. Please use yyyymmdd format." +
-                                 ss.str());
+        throw std::runtime_error(
+            MESSAGE("Invalid Repeat date: The start is not a valid date. Please use yyyymmdd format."
+                    << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
     std::string theEnd = ecf::convert_to<std::string>(end);
     if (theEnd.size() != 8) {
-        std::stringstream ss;
-        ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-        throw std::runtime_error("Invalid Repeat date: The end is not a valid date. Please use yyyymmdd format." +
-                                 ss.str());
+        throw std::runtime_error(MESSAGE("Invalid Repeat date: The end is not a valid date. Please use yyyymmdd format."
+                                         << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
     if (delta_ > 0) {
         // assert end => start
         if (!(end >= start)) {
-            std::stringstream ss;
-            ss << "repeat " << variable << " " << start << " " << end << " " << delta;
             throw std::runtime_error(
-                "Invalid Repeat date: The end must be greater than the start date, when delta is positive " + ss.str());
+                MESSAGE("Invalid Repeat date: The end must be greater than the start date, when delta is positive "
+                        << "repeat " << variable << " " << start << " " << end << " " << delta));
         }
     }
     else {
         // assert start >= end
         if (!(start >= end)) {
-            std::stringstream ss;
-            ss << "repeat " << variable << " " << start << " " << end << " " << delta;
             throw std::runtime_error(
-                "Invalid Repeat date: The start must be greater than the end date, when delta is negative " + ss.str());
+                MESSAGE("Invalid Repeat date: The start must be greater than the end date, when delta is negative "
+                        << "repeat " << variable << " " << start << " " << end << " " << delta));
         }
     }
 
@@ -176,9 +200,8 @@ RepeatDate::RepeatDate(const std::string& variable, int start, int end, int delt
         (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(theEnd));
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-        throw std::runtime_error("Invalid Repeat date: The start/end is not a valid date." + ss.str());
+        throw std::runtime_error(MESSAGE("Invalid Repeat date: The start/end is not a valid date."
+                                         << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 }
 
@@ -242,30 +265,31 @@ void RepeatDate::update_repeat_genvar_value() const {
         try {
             auto the_date = boost::gregorian::from_undelimited_string(date_as_string);
             if (the_date.is_special()) {
-                std::stringstream ss;
-                ss << "RepeatDate::update_repeat_genvar(): invalid current date: " << date_as_string << " is_special";
-                log(Log::ERR, ss.str());
+                log(Log::ERR,
+                    MESSAGE("RepeatDate::update_repeat_genvar(): invalid current date: " << date_as_string
+                                                                                         << " is_special"));
                 return;
             }
-            // int day_of_year  = the_date.day_of_year();
-            int day_of_week  = the_date.day_of_week().as_number();
-            int day_of_month = the_date.day();
-            int month        = the_date.month();
-            int year         = the_date.year();
 
-            yyyy_.set_value(ecf::convert_to<std::string>(year));
-            mm_.set_value(ecf::convert_to<std::string>(month));
-            dom_.set_value(ecf::convert_to<std::string>(day_of_month));
-            dow_.set_value(ecf::convert_to<std::string>(day_of_week));
+            auto year = static_cast<int>(the_date.year());
+            yyyy_.set_value(as_4_digits(year));
 
-            long last_value = last_valid_value();
-            julian_.set_value(ecf::convert_to<std::string>(ecf::CalendarDate(last_value).as_julian_day().value()));
+            auto month = the_date.month().as_number();
+            mm_.set_value(as_2_digits(month));
+
+            auto day_of_month = the_date.day().as_number();
+            dom_.set_value(as_2_digits(day_of_month));
+
+            auto day_of_week = the_date.day_of_week().as_number();
+            dow_.set_value(std::to_string(day_of_week));
+
+            auto last_value = last_valid_value();
+            julian_.set_value(std::to_string(ecf::CalendarDate(last_value).as_julian_day().value()));
         }
         catch (std::exception& e) {
-            std::stringstream ss;
-            ss << "RepeatDate::update_repeat_genvar_value : " << toString() << "\n The current date(" << date_as_string
-               << ") is not valid";
-            log(Log::ERR, ss.str());
+            log(Log::ERR,
+                MESSAGE("RepeatDate::update_repeat_genvar_value : " << toString() << "\n The current date("
+                                                                    << date_as_string << ") is not valid"));
             return;
         }
     }
@@ -321,9 +345,7 @@ void RepeatDate::reset() {
 }
 
 std::string RepeatDate::dump() const {
-    std::stringstream ss;
-    ss << toString() << " value(" << value_ << ")";
-    return ss.str();
+    return MESSAGE(toString() << " value(" << value_ << ")");
 }
 
 bool RepeatDate::operator==(const RepeatDate& rhs) const {
@@ -353,7 +375,7 @@ std::string RepeatDate::valueAsString() const {
     catch (const ecf::bad_conversion&) {
         LOG_ASSERT(false, "RepeatDate::valueAsString(): could not convert value " << value_ << " to a string");
     }
-    return string();
+    return std::string{};
 }
 
 std::string RepeatDate::value_as_string(int index) const {
@@ -363,7 +385,7 @@ std::string RepeatDate::value_as_string(int index) const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string{};
 }
 
 std::string RepeatDate::next_value_as_string() const {
@@ -375,7 +397,7 @@ std::string RepeatDate::next_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string{};
 }
 
 std::string RepeatDate::prev_value_as_string() const {
@@ -387,7 +409,7 @@ std::string RepeatDate::prev_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string{};
 }
 
 void RepeatDate::increment() {
@@ -397,10 +419,10 @@ void RepeatDate::increment() {
 
 void RepeatDate::change(const std::string& newdate) {
     if (newdate.size() != 8) {
-        std::stringstream ss;
-        ss << "RepeatDate::change: " << toString()
-           << " The new date is not valid, expected 8 characters in yyyymmdd format but found " << newdate;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "RepeatDate::change: " << toString()
+                                   << " The new date is not valid, expected 8 characters in yyyymmdd format but found "
+                                   << newdate));
     }
 
     long the_new_date = 0;
@@ -408,9 +430,8 @@ void RepeatDate::change(const std::string& newdate) {
         the_new_date = ecf::convert_to<long>(newdate);
     }
     catch (const ecf::bad_conversion&) {
-        std::stringstream ss;
-        ss << "RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not convertible to an long";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("RepeatDate::change: " << toString() << " The new date(" << newdate
+                                                                << ") is not convertible to an long"));
     }
 
     // Use date lib to check YMD
@@ -418,9 +439,8 @@ void RepeatDate::change(const std::string& newdate) {
         (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(newdate));
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not valid";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("RepeatDate::change: " << toString() << " The new date(" << newdate << ") is not valid"));
     }
 
     changeValue(the_new_date);
@@ -429,18 +449,16 @@ void RepeatDate::change(const std::string& newdate) {
 void RepeatDate::changeValue(long the_new_date) {
     if (delta_ > 0) {
         if (the_new_date < start_ || the_new_date > end_) {
-            std::stringstream ss;
-            ss << "RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
-               << " : " << end_ << "] but found " << the_new_date;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
+                                                    << " : " << end_ << "] but found " << the_new_date));
         }
     }
     else {
         if (the_new_date > start_ || the_new_date < end_) {
-            std::stringstream ss;
-            ss << "RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
-               << " : " << end_ << "] but found " << the_new_date;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
+                                                    << " : " << end_ << "] but found " << the_new_date));
         }
     }
 
@@ -449,10 +467,8 @@ void RepeatDate::changeValue(long the_new_date) {
     long julian_start    = ecf::CalendarDate(start_).as_julian_day().value();
     long diff            = julian_new_date - julian_start;
     if (diff % delta_ != 0) {
-        std::stringstream ss;
-        ss << "RepeatDate::changeValue: " << toString() << "\nThe new date " << the_new_date
-           << " is not in line with the delta/step";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("RepeatDate::changeValue: " << toString() << "\nThe new date " << the_new_date
+                                                                     << " is not in line with the delta/step"));
     }
 
     set_value(the_new_date);
@@ -489,45 +505,37 @@ RepeatDateTime::RepeatDateTime(const std::string& variable, Instant start, Insta
     }
 
     if (delta == Duration{std::chrono::seconds{0}}) {
-        std::stringstream ss;
-        ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-        throw std::runtime_error("Invalid Repeat datetime: the delta cannot be zero" + ss.str());
+        throw std::runtime_error(MESSAGE("Invalid Repeat datetime: the delta cannot be zero"
+                                         << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
     auto theStart = boost::lexical_cast<std::string>(start);
     if (theStart.size() != 15) {
-        std::stringstream ss;
-        ss << "repeat " << variable << " " << start << " " << end << " " << delta;
         throw std::runtime_error(
-            "Invalid Repeat datetime: The start is not a valid date+time. Please use yyyymmddTMMHHSS format." +
-            ss.str());
+            MESSAGE("Invalid Repeat datetime: The start is not a valid date+time. Please use yyyymmddTMMHHSS format."
+                    << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
     auto theEnd = boost::lexical_cast<std::string>(end);
     if (theEnd.size() != 15) {
-        std::stringstream ss;
-        ss << "repeat " << variable << " " << start << " " << end << " " << delta;
         throw std::runtime_error(
-            "Invalid Repeat datetime: The end is not a valid date+time. Please use yyyymmddTHHMMSS format." + ss.str());
+            MESSAGE("Invalid Repeat datetime: The end is not a valid date+time. Please use yyyymmddTHHMMSS format."
+                    << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
     if (delta_ > Duration{std::chrono::seconds{0}}) {
         // assert end => start
         if (!(end >= start)) {
-            std::stringstream ss;
-            ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-            throw std::runtime_error(
-                "Invalid Repeat datetime: The end must be greater than the start date+time, when delta is positive " +
-                ss.str());
+            throw std::runtime_error(MESSAGE(
+                "Invalid Repeat datetime: The end must be greater than the start date+time, when delta is positive "
+                << "repeat " << variable << " " << start << " " << end << " " << delta));
         }
     }
     else {
         // assert start >= end
         if (!(start >= end)) {
-            std::stringstream ss;
-            ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-            throw std::runtime_error(
-                "Invalid Repeat datetime: The start must be greater than the end date+time, when delta is negative " +
-                ss.str());
+            throw std::runtime_error(MESSAGE(
+                "Invalid Repeat datetime: The start must be greater than the end date+time, when delta is negative "
+                << "repeat " << variable << " " << start << " " << end << " " << delta));
         }
     }
 }
@@ -568,27 +576,46 @@ void RepeatDateTime::update_repeat_genvar_value() const {
             // Using boost posix_time/gregorian, since C++17 still doesn't include calendar types.
 
             auto d = dt.date();
+
             // Date
+
             generated_[name_ + "_DATE"].set_value(boost::gregorian::to_iso_string(d));
+
             // Date Components
-            generated_[name_ + "_YYYY"].set_value(std::to_string(d.year()));
-            generated_[name_ + "_MM"].set_value(std::to_string(d.month()));
-            generated_[name_ + "_DD"].set_value(std::to_string(d.day()));
-            generated_[name_ + "_JULIAN"].set_value(std::to_string(d.julian_day()));
+
+            auto year = static_cast<int>(d.year());
+            generated_[name_ + "_YYYY"].set_value(as_4_digits(year));
+
+            auto month = d.month().as_number();
+            generated_[name_ + "_MM"].set_value(as_2_digits(month));
+
+            auto day = d.day().as_number();
+            generated_[name_ + "_DD"].set_value(as_2_digits(day));
+
+            auto julian = d.julian_day();
+            generated_[name_ + "_JULIAN"].set_value(std::to_string(julian));
 
             auto t = dt.time_of_day();
+
             // Time
+
             generated_[name_ + "_TIME"].set_value(boost::posix_time::to_iso_string(t));
+
             // Time Components
-            generated_[name_ + "_HOURS"].set_value(std::to_string(t.hours()));
-            generated_[name_ + "_MINUTES"].set_value(std::to_string(t.minutes()));
-            generated_[name_ + "_SECONDS"].set_value(std::to_string(t.seconds()));
+
+            int hours = t.hours();
+            generated_[name_ + "_HOURS"].set_value(as_2_digits(hours));
+
+            int minutes = t.minutes();
+            generated_[name_ + "_MINUTES"].set_value(as_2_digits(minutes));
+
+            int seconds = t.seconds();
+            generated_[name_ + "_SECONDS"].set_value(as_2_digits(seconds));
         }
         catch (std::exception& e) {
-            std::stringstream ss;
-            ss << "RepeatDateTime::update_repeat_genvar_value : " << toString() << "\n The current date("
-               << date_as_string << ") is not valid";
-            log(Log::ERR, ss.str());
+            log(Log::ERR,
+                MESSAGE("RepeatDateTime::update_repeat_genvar_value : " << toString() << "\n The current date("
+                                                                        << date_as_string << ") is not valid"));
             return;
         }
     }
@@ -647,9 +674,7 @@ void RepeatDateTime::reset() {
 }
 
 std::string RepeatDateTime::dump() const {
-    std::stringstream ss;
-    ss << toString() << " value(" << value_ << ")";
-    return ss.str();
+    return MESSAGE(toString() << " value(" << value_ << ")");
 }
 
 bool RepeatDateTime::operator==(const RepeatDateTime& rhs) const {
@@ -729,9 +754,8 @@ void RepeatDateTime::change(const std::string& newdate) {
         the_new_date = ecf::coerce_from_instant_into_seconds(instant);
     }
     catch (std::exception& e) {
-        std::stringstream ss;
-        ss << "RepeatDateTime::change: " << toString() << " The new date(" << newdate << ") is not valid";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("RepeatDateTime::change: " << toString() << " The new date(" << newdate << ") is not valid"));
     }
 
     changeValue(the_new_date);
@@ -742,28 +766,25 @@ void RepeatDateTime::changeValue(long the_new_date) {
     auto new_date = ecf::coerce_from_seconds_into_instant(the_new_date);
     if (delta_ > Duration{std::chrono::seconds{0}}) {
         if (new_date < start_ || new_date > end_) {
-            std::stringstream ss;
-            ss << "RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
-               << " : " << end_ << "] but found " << new_date;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range["
+                                                        << start_ << " : " << end_ << "] but found " << new_date));
         }
     }
     else {
         if (new_date > start_ || new_date < end_) {
-            std::stringstream ss;
-            ss << "RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range[" << start_
-               << " : " << end_ << "] but found " << the_new_date;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date should be in the range["
+                                                        << start_ << " : " << end_ << "] but found " << the_new_date));
         }
     }
 
     // Ensure that new value is in step
     auto diff = new_date - start_;
     if (diff.as_seconds().count() % delta_.as_seconds().count() != 0) {
-        std::stringstream ss;
-        ss << "RepeatDateTime::changeValue: " << toString() << "\nThe new date " << the_new_date
-           << " is not in line with the delta/step";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("RepeatDateTime::changeValue: " << toString() << "\nThe new date "
+                                                                         << the_new_date
+                                                                         << " is not in line with the delta/step"));
     }
 
     set_value(the_new_date);
@@ -795,20 +816,18 @@ RepeatDateList::RepeatDateList(const std::string& variable, const std::vector<in
     for (int i : list_) {
         std::string date_i = ecf::convert_to<std::string>(i);
         if (date_i.size() != 8) {
-            std::stringstream ss;
-            ss << "Invalid Repeat datelist : " << variable << " the date " << i
-               << " is not valid. Please use yyyymmdd format.";
-            throw std::runtime_error("Invalid Repeat datelist " + ss.str());
+            throw std::runtime_error(
+                MESSAGE("Invalid Repeat datelist : " << variable << " the date " << i
+                                                     << " is not valid. Please use yyyymmdd format."));
         }
 
         try {
             (void)boost::gregorian::date(boost::gregorian::from_undelimited_string(date_i));
         }
         catch (std::exception& e) {
-            std::stringstream ss;
-            ss << "Invalid Repeat datelist : " << variable << " the date " << i
-               << " is not valid. Please use yyyymmdd format.";
-            throw std::runtime_error("Invalid Repeat datelist " + ss.str());
+            throw std::runtime_error(
+                MESSAGE("Invalid Repeat datelist : " << variable << " the date " << i
+                                                     << " is not valid. Please use yyyymmdd format."));
         }
     }
 }
@@ -867,32 +886,31 @@ void RepeatDateList::update_repeat_genvar_value() const {
         try {
             auto the_date = boost::gregorian::from_undelimited_string(date_as_string);
             if (the_date.is_special()) {
-                std::stringstream ss;
-                ss << "RepeatDateList::update_repeat_genvar_value(): " << toString()
-                   << "\n invalid current date: " << date_as_string << " is special ";
-                log(Log::ERR, ss.str());
+                log(Log::ERR,
+                    MESSAGE("RepeatDateList::update_repeat_genvar_value(): "
+                            << toString() << "\n invalid current date: " << date_as_string << " is special "));
                 return;
             }
 
-            // int day_of_year  = the_date.day_of_year();
-            int day_of_week  = the_date.day_of_week().as_number();
-            int day_of_month = the_date.day();
-            int month        = the_date.month();
-            int year         = the_date.year();
+            auto year = static_cast<int>(the_date.year());
+            yyyy_.set_value(as_4_digits(year));
 
-            yyyy_.set_value(ecf::convert_to<std::string>(year));
-            mm_.set_value(ecf::convert_to<std::string>(month));
-            dom_.set_value(ecf::convert_to<std::string>(day_of_month));
-            dow_.set_value(ecf::convert_to<std::string>(day_of_week));
+            auto month = the_date.month().as_number();
+            mm_.set_value(as_2_digits(month));
 
-            long julian = CalendarDate(last_valid_value()).as_julian_day().value();
-            julian_.set_value(ecf::convert_to<std::string>(julian));
+            auto day_of_month = the_date.day().as_number();
+            dom_.set_value(as_2_digits(day_of_month));
+
+            auto day_of_week = the_date.day_of_week().as_number();
+            dow_.set_value(std::to_string(day_of_week));
+
+            auto julian_day = CalendarDate(last_valid_value()).as_julian_day().value();
+            julian_.set_value(std::to_string(julian_day));
         }
         catch (std::exception& e) {
-            std::stringstream ss;
-            ss << "RepeatDateList::update_repeat_genvar_value(): " << toString()
-               << "\n invalid current date: " << date_as_string;
-            log(Log::ERR, ss.str());
+            log(Log::ERR,
+                MESSAGE("RepeatDateList::update_repeat_genvar_value(): " << toString() << "\n invalid current date: "
+                                                                         << date_as_string));
         }
     }
 }
@@ -919,9 +937,7 @@ bool RepeatDateList::compare(RepeatBase* rb) const {
 }
 
 std::string RepeatDateList::dump() const {
-    std::stringstream ss;
-    ss << toString() << " ordinal-value(" << value() << ") value-as-string(" << valueAsString() << ")";
-    return ss.str();
+    return MESSAGE(toString() << " ordinal-value(" << value() << ") value-as-string(" << valueAsString() << ")");
 }
 
 void RepeatDateList::reset() {
@@ -991,7 +1007,7 @@ std::string RepeatDateList::valueAsString() const {
 
 std::string RepeatDateList::value_as_string(int index) const {
     if (list_.empty()) {
-        return string("0");
+        return std::string("0");
     }
     if (index >= 0 && index < static_cast<int>(list_.size())) {
         return ecf::convert_to<std::string>(list_[index]);
@@ -1002,12 +1018,12 @@ std::string RepeatDateList::value_as_string(int index) const {
     if (index >= static_cast<int>(list_.size())) {
         return ecf::convert_to<std::string>(list_[list_.size() - 1]);
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatDateList::next_value_as_string() const {
     if (list_.empty()) {
-        return string("0");
+        return std::string("0");
     }
 
     int index = currentIndex_;
@@ -1017,7 +1033,7 @@ std::string RepeatDateList::next_value_as_string() const {
 
 std::string RepeatDateList::prev_value_as_string() const {
     if (list_.empty()) {
-        return string("0");
+        return std::string("0");
     }
 
     int index = currentIndex_;
@@ -1032,10 +1048,9 @@ void RepeatDateList::change(const std::string& newValue) {
         new_val = ecf::convert_to<int>(newValue);
     }
     catch (...) {
-        std::stringstream ss;
-        ss << "RepeatDateList::change: " << toString() << "\nThe new value " << newValue
-           << " is must be convertible to integer, and correspond to an existing value\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "RepeatDateList::change: " << toString() << "\nThe new value " << newValue
+                                       << " is must be convertible to integer, and correspond to an existing value\n"));
     }
 
     for (size_t i = 0; i < list_.size(); i++) {
@@ -1045,10 +1060,8 @@ void RepeatDateList::change(const std::string& newValue) {
         }
     }
 
-    std::stringstream ss;
-    ss << "RepeatDateList::change: " << toString() << "\nThe new value " << newValue
-       << " is not a valid member of the date list\n";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("RepeatDateList::change: " << toString() << "\nThe new value " << newValue
+                                                                << " is not a valid member of the date list\n"));
 }
 
 void RepeatDateList::changeValue(long the_new_index) {
@@ -1057,11 +1070,10 @@ void RepeatDateList::changeValue(long the_new_index) {
     }
 
     if (the_new_index < 0 || the_new_index >= static_cast<int>(list_.size())) {
-        std::stringstream ss;
-        ss << "RepeatDateList::changeValue:" << toString() << "\nThe new value '" << the_new_index
-           << "' is not a valid index ";
-        ss << "expected range[0-" << list_.size() - 1 << "] but found '" << the_new_index << "'";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("RepeatDateList::changeValue:" << toString() << "\nThe new value '"
+                                                                        << the_new_index << "' is not a valid index "
+                                                                        << "expected range[0-" << list_.size() - 1
+                                                                        << "] but found '" << the_new_index << "'"));
     }
     set_value(the_new_index);
 }
@@ -1172,10 +1184,8 @@ void RepeatInteger::change(const std::string& newValue) {
         the_new_value = ecf::convert_to<long>(newValue);
     }
     catch (const ecf::bad_conversion&) {
-        std::stringstream ss;
-        ss << "RepeatInteger::change:" << toString() << " The new value(" << newValue
-           << ") is not convertible to an long";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("RepeatInteger::change:" << toString() << " The new value(" << newValue
+                                                                  << ") is not convertible to an long"));
     }
     changeValue(the_new_value);
 }
@@ -1183,18 +1193,16 @@ void RepeatInteger::change(const std::string& newValue) {
 void RepeatInteger::changeValue(long the_new_value) {
     if (delta_ > 0) {
         if (the_new_value < start_ || the_new_value > end_) {
-            std::stringstream ss;
-            ss << "RepeatInteger::changeValue:" << toString() << ". The new value should be in the range[" << start_
-               << "-" << end_ << "] but found " << the_new_value;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range["
+                                                      << start_ << "-" << end_ << "] but found " << the_new_value));
         }
     }
     else {
         if (the_new_value > start_ || the_new_value < end_) {
-            std::stringstream ss;
-            ss << "RepeatInteger::changeValue:" << toString() << ". The new value should be in the range[" << start_
-               << "-" << end_ << "] but found " << the_new_value;
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("RepeatInteger::changeValue:" << toString() << ". The new value should be in the range["
+                                                      << start_ << "-" << end_ << "] but found " << the_new_value));
         }
     }
     set_value(the_new_value);
@@ -1217,9 +1225,7 @@ void RepeatInteger::setToLastValue() {
 }
 
 std::string RepeatInteger::dump() const {
-    std::stringstream ss;
-    ss << toString() << " value(" << value_ << ")";
-    return ss.str();
+    return MESSAGE(toString() << " value(" << value_ << ")");
 }
 
 bool RepeatInteger::operator==(const RepeatInteger& rhs) const {
@@ -1279,7 +1285,7 @@ std::string RepeatInteger::valueAsString() const {
     catch (const ecf::bad_conversion&) {
         LOG_ASSERT(false, "");
     }
-    return string();
+    return std::string{};
 }
 
 std::string RepeatInteger::value_as_string(int index) const {
@@ -1289,7 +1295,7 @@ std::string RepeatInteger::value_as_string(int index) const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string{};
 }
 
 std::string RepeatInteger::next_value_as_string() const {
@@ -1300,7 +1306,7 @@ std::string RepeatInteger::next_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string{};
 }
 
 std::string RepeatInteger::prev_value_as_string() const {
@@ -1311,7 +1317,7 @@ std::string RepeatInteger::prev_value_as_string() const {
     }
     catch (const ecf::bad_conversion&) {
     }
-    return string();
+    return std::string{};
 }
 
 //======================================================================================
@@ -1343,9 +1349,7 @@ bool RepeatEnumerated::compare(RepeatBase* rb) const {
 }
 
 std::string RepeatEnumerated::dump() const {
-    std::stringstream ss;
-    ss << toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")";
-    return ss.str();
+    return MESSAGE(toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")");
 }
 
 void RepeatEnumerated::reset() {
@@ -1419,19 +1423,19 @@ std::string RepeatEnumerated::valueAsString() const {
 
         return theEnums_[currentIndex_];
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatEnumerated::value_as_string(int index) const {
     if (index >= 0 && index < static_cast<int>(theEnums_.size())) {
         return theEnums_[index];
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatEnumerated::next_value_as_string() const {
     if (theEnums_.empty()) {
-        return string();
+        return std::string{};
     }
 
     int index = currentIndex_;
@@ -1447,7 +1451,7 @@ std::string RepeatEnumerated::next_value_as_string() const {
 
 std::string RepeatEnumerated::prev_value_as_string() const {
     if (theEnums_.empty()) {
-        return string();
+        return std::string{};
     }
 
     int index = currentIndex_;
@@ -1480,19 +1484,17 @@ void RepeatEnumerated::change(const std::string& newValue) {
     catch (const ecf::bad_conversion&) {
     }
 
-    std::stringstream ss;
-    ss << "RepeatEnumerated::change:" << toString() << "\nThe new value " << newValue
-       << " is not a valid index or a member of the enumerated list\n";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(
+        MESSAGE("RepeatEnumerated::change:" << toString() << "\nThe new value " << newValue
+                                            << " is not a valid index or a member of the enumerated list\n"));
 }
 
 void RepeatEnumerated::changeValue(long the_new_value) {
     if (the_new_value < 0 || the_new_value >= static_cast<int>(theEnums_.size())) {
-        std::stringstream ss;
-        ss << "RepeatEnumerated::changeValue:" << toString() << "\nThe new value '" << the_new_value
-           << "' is not a valid index ";
-        ss << "expected range[0-" << theEnums_.size() - 1 << "] but found '" << the_new_value << "'";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("RepeatEnumerated::changeValue:" << toString() << "\nThe new value '"
+                                                                          << the_new_value << "' is not a valid index "
+                                                                          << "expected range[0-" << theEnums_.size() - 1
+                                                                          << "] but found '" << the_new_value << "'"));
     }
     set_value(the_new_value);
 }
@@ -1565,9 +1567,7 @@ bool RepeatString::compare(RepeatBase* rb) const {
 }
 
 std::string RepeatString::dump() const {
-    std::stringstream ss;
-    ss << toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")";
-    return ss.str();
+    return MESSAGE(toString() << " ordinal-value(" << value() << ")   value-as-string(" << valueAsString() << ")");
 }
 
 void RepeatString::reset() {
@@ -1600,7 +1600,7 @@ std::string RepeatString::next_value_as_string() const {
         }
         return theStrings_[index];
     }
-    return string();
+    return std::string{};
 }
 
 std::string RepeatString::prev_value_as_string() const {
@@ -1615,7 +1615,7 @@ std::string RepeatString::prev_value_as_string() const {
         }
         return theStrings_[index];
     }
-    return string();
+    return std::string{};
 }
 
 void RepeatString::increment() {
@@ -1635,14 +1635,14 @@ std::string RepeatString::valueAsString() const {
     if (!theStrings_.empty()) {
         return theStrings_[last_valid_value()];
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string RepeatString::value_as_string(int index) const {
     if (index >= 0 && index < static_cast<int>(theStrings_.size())) {
         return theStrings_[index];
     }
-    return std::string();
+    return std::string{};
 }
 
 void RepeatString::change(const std::string& newValue) {
@@ -1664,19 +1664,16 @@ void RepeatString::change(const std::string& newValue) {
     catch (const ecf::bad_conversion&) {
     }
 
-    std::stringstream ss;
-    ss << "RepeatString::change: " << toString() << "\nThe new value " << newValue
-       << " is not a valid index or member of the string list";
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("RepeatString::change: " << toString() << "\nThe new value " << newValue
+                                                              << " is not a valid index or member of the string list"));
 }
 
 void RepeatString::changeValue(long the_new_value) {
     if (the_new_value < 0 || the_new_value >= static_cast<int>(theStrings_.size())) {
-        std::stringstream ss;
-        ss << "RepeatString::change: " << toString() << " The new the integer " << the_new_value
-           << " is not a valid index ";
-        ss << "expected range[0-" << theStrings_.size() - 1 << "]'";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("RepeatString::change: " << toString() << " The new the integer "
+                                                                  << the_new_value << " is not a valid index "
+                                                                  << "expected range[0-" << theStrings_.size() - 1
+                                                                  << "]'"));
     }
     set_value(the_new_value);
 }

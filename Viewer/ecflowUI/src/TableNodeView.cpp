@@ -37,7 +37,7 @@
 #include "VSettings.hpp"
 #include "ViewerUtil.hpp"
 
-#define _UI_TABLENODEVIEW_DEBUG
+#define UI_TABLENODEVIEW_DEBUG
 
 TableNodeView::TableNodeView(TableNodeSortModel* model, NodeFilterDef* filterDef, QWidget* parent)
     : QTreeView(parent),
@@ -172,7 +172,7 @@ void TableNodeView::selectionChanged(const QItemSelection& selected, const QItem
     if (lst.count() > 0 && !setCurrentAfterUpdateIsRunning_) {
         VInfo_ptr info = model_->nodeInfo(lst.front());
         if (info && !info->isEmpty()) {
-#ifdef _UI_TABLENODEVIEW_DEBUG
+#ifdef UI_TABLENODEVIEW_DEBUG
             UiLog().dbg() << "TableNodeView::selectionChanged --> emit=" << info->path();
 #endif
             Q_EMIT selectionChanged(info);
@@ -207,7 +207,7 @@ void TableNodeView::setCurrentSelection(VInfo_ptr info) {
     setCurrentIsRunning_ = true;
     QModelIndex idx      = model_->infoToIndex(info);
     if (idx.isValid()) {
-#ifdef _UI_TABLENODEVIEW_DEBUG
+#ifdef UI_TABLENODEVIEW_DEBUG
         if (info) {
             UiLog().dbg() << "TableNodeView::setCurrentSelection --> " << info->path();
         }
@@ -565,7 +565,8 @@ void TableNodeView::writeSettings(VSettings* vs) {
 // TableNodeHeader
 //=========================================
 
-TableNodeHeader::TableNodeHeader(QWidget* parent) : QHeaderView(Qt::Horizontal, parent) {
+TableNodeHeader::TableNodeHeader(QWidget* parent)
+    : QHeaderView(Qt::Horizontal, parent) {
     setStretchLastSection(true);
 
     connect(this, SIGNAL(sectionResized(int, int, int)), this, SLOT(slotSectionResized(int)));

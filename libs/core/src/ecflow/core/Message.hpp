@@ -56,12 +56,14 @@ inline std::ostream& operator<<(std::ostream& o, const Message& m) {
  */
 template <typename Functor>
 std::string stringize_f(Functor const& f) {
-    std::ostringstream out;
-    f(out);
-    return out.str();
+    std::ostringstream ss;
+    f(ss);
+    return ss.str();
 }
 
-#define MESSAGE(EXPRESSION) (ecf::stringize_f([&](std::ostringstream& os) { os << EXPRESSION; }))
+// NOLINTBEGIN(bugprone-macro-parentheses)
+#define MESSAGE(EXPRESSION) (ecf::stringize_f([&](std::ostream& os) { os << EXPRESSION; }))
+// NOLINTEND(bugprone-macro-parentheses)
 
 } // namespace ecf
 

@@ -745,16 +745,15 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
 
     // if an absolute path cut in early
-    if (!nodePath.empty() && nodePath[0] == '/') {
+    if (NodePath::isAbsolutePath(nodePath)) {
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
         debug_path += "(!nodePath.empty() && nodePath[0] == '/') \n";
 #endif
 
         // Must be an absolute path. i.e. /suite/family/path
-        node_ptr constNode = theDefs->findAbsNode(nodePath);
-        if (constNode.get()) {
-            return constNode;
+        if (node_ptr found = theDefs->findAbsNode(nodePath); found.get()) {
+            return found;
         }
 
         // *NOTE*: The server does *NOT* store externs, hence the check below, will always return false, for the server:
@@ -766,33 +765,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
             // =================================================================
             // **Client side* specific: Only client side defs, stores extrens
             // =================================================================
-#ifdef DEBUG_FIND_REFERENCED_NODE
-            debug_path += "theDefs->find_extern(nodePath) \n";
-#endif
-
-            // return NULL *without* setting an error message as node path is defined as an extern
-
-            // OK: the node path appears in the extern list. This may be because that suite  has not been loaded.
-            // *** If the suite is loaded, then it's an error that we did not
-            // *** locate the node. i.e. in the previous call to defs->findAbsNode(nodePath);
-            std::vector<std::string> theExtractedPath;
-            NodePath::split(nodePath, theExtractedPath);
-
-            std::string referenceSuite = theExtractedPath[0];
-            if (theDefs->findSuite(referenceSuite)) {
-                // The suite referenced in the extern is LOADED, but path did not resolve,
-                // in previous call to defs->findAbsNode(nodePath);
-                errorMsg = "Extern path ";
-                errorMsg += nodePath;
-                errorMsg += " does not exist on suite ";
-                errorMsg += referenceSuite;
-                errorMsg += "\n";
-#ifdef DEBUG_FIND_REFERENCED_NODE
-                errorMsg += debug_path;
-#endif
-            }
-
-            // It's an extern path that references a suite that's NOT loaded yet
+            // The node was found declared as an extern path.
             return node_ptr();
         }
 
@@ -818,9 +791,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
 
     if (theExtractedPath.empty()) {
-        std::stringstream ss;
-        ss << ": Could not find referenced node '" << nodePath << "' from node " << absNodePath() << "\n";
-        errorMsg = ss.str();
+        errorMsg = MESSAGE(": Could not find referenced node '" << nodePath << "' from node " << absNodePath() << "\n");
 #ifdef DEBUG_FIND_REFERENCED_NODE
         errorMsg += debug_path;
 #endif

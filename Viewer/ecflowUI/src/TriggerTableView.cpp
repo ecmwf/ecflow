@@ -27,7 +27,8 @@
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 
-TriggerTableView::TriggerTableView(QWidget* parent) : QTreeView(parent) {
+TriggerTableView::TriggerTableView(QWidget* parent)
+    : QTreeView(parent) {
     setProperty("view", "trigger");
 
     actionHandler_ = new ActionHandler(this, this);

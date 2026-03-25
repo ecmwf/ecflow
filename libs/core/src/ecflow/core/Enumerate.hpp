@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -50,8 +51,26 @@ public:
     /**
      * Convert the given enum value to its designation
      *
+     * This is an "unsafe" operation, as it assumes that the given enum value exists in the mapping.
+     * If the enum value does not exist, an assertion failure is raised.
+     *
      * @param e the enum value
-     * @return the designation, in case it exists; an empty optional, otherwise
+     * @return the associated designation
+     */
+    static constexpr string_t as_string(enum_t e) noexcept {
+        auto found = std::find_if(
+            std::begin(TRAITS::map), std::end(TRAITS::map), [&](const auto& item) { return item.first == e; });
+
+        assert(found != std::end(TRAITS::map));
+
+        return found->second;
+    }
+
+    /**
+     * Convert the given enum value to its designation
+     *
+     * @param e the enum value
+     * @return the associated designation, in case it exists; an empty optional, otherwise
      */
     static constexpr std::optional<string_t> to_string(enum_t e) noexcept {
         if (auto found = std::find_if(

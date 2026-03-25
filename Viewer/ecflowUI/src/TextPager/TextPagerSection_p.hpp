@@ -30,7 +30,8 @@ Q_SIGNALS:
     void sectionCursorChanged(TextPagerSection* section);
 
 private:
-    TextSectionManager() : QObject(QCoreApplication::instance()) {}
+    TextSectionManager()
+        : QObject(QCoreApplication::instance()) {}
     friend class TextPagerSection;
 };
 

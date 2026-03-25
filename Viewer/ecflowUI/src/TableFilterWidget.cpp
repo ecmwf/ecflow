@@ -24,7 +24,8 @@
 #include "UiLog.hpp"
 #include "VFilter.hpp"
 
-TableFilterWidget::TableFilterWidget(QWidget* parent) : QWidget(parent) {
+TableFilterWidget::TableFilterWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     connect(queryTe_, SIGNAL(clicked()), this, SLOT(slotEdit()));
@@ -36,7 +37,7 @@ TableFilterWidget::TableFilterWidget(QWidget* parent) : QWidget(parent) {
     // queryTe_->setFixedHeight(18);
 }
 
-void TableFilterWidget::slotEdit() {
+bool TableFilterWidget::setupFilterInteractive() {
     assert(filterDef_);
     assert(serverFilter_);
 
@@ -47,7 +48,14 @@ void TableFilterWidget::slotEdit() {
     if (d.exec() == QDialog::Accepted) {
         filterDef_->setQuery(d.query());
         UiLog().dbg() << "new table query: " << filterDef_->query()->query();
+        return true;
     }
+
+    return false;
+}
+
+void TableFilterWidget::slotEdit() {
+    setupFilterInteractive();
 }
 
 void TableFilterWidget::build(NodeFilterDef* def, ServerFilter* sf) {

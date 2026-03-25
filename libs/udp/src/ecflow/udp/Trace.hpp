@@ -26,10 +26,10 @@ public:
     template <typename... ARGS>
     void add(const std::string& qualifier, const std::string& location, ARGS... args) const {
         if (verbose_) {
-            std::ostringstream os;
-            os << "   " << location << " (" << qualifier << "): ";
-            ((os << args), ...);
-            store(os.str());
+            std::ostringstream ss;
+            ss << "   " << location << " (" << qualifier << "): ";
+            ((ss << args), ...);
+            store(ss.str());
         }
     }
 

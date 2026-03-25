@@ -24,9 +24,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool RunNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<RunNodeCmd*>(rhs);
@@ -65,7 +62,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const {
     assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 
     Defs* defs = as->defs().get();
-    std::stringstream ss;
+    std::ostringstream ss;
     size_t vec_size = paths_.size();
     for (size_t i = 0; i < vec_size; i++) {
         node_ptr node = find_node_for_edit_no_throw(defs, paths_[i]);
@@ -76,10 +73,9 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         if (!node->suite()->begun()) {
-            std::stringstream mss;
-            mss << "RunNodeCmd failed: For " << paths_[i] << ". The suite " << node->suite()->name()
-                << " must be 'begun' first\n";
-            throw std::runtime_error(mss.str());
+            throw std::runtime_error(MESSAGE("RunNodeCmd failed: For " << paths_[i] << ". The suite "
+                                                                       << node->suite()->name()
+                                                                       << " must be 'begun' first\n"));
         }
 
         SuiteChangedPtr changed(node.get());
@@ -156,10 +152,11 @@ const char* RunNodeCmd::desc() {
 }
 
 void RunNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(RunNodeCmd::arg(), po::value<vector<string>>()->multitoken(), RunNodeCmd::desc());
+    desc.add_options()(
+        RunNodeCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), RunNodeCmd::desc());
 }
 void RunNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
-    vector<string> args = vm[RunNodeCmd::arg()].as<vector<string>>();
+    auto args = vm[RunNodeCmd::arg()].as<std::vector<std::string>>();
 
     if (ace->debug()) {
         dumpVecArgs(RunNodeCmd::arg(), args);
@@ -168,26 +165,22 @@ void RunNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
     if (paths.empty()) {
-        std::stringstream ss;
-        ss << "RunNodeCmd: No paths specified. Paths must begin with a leading '/' character\n"
-           << RunNodeCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("RunNodeCmd: No paths specified. Paths must begin with a leading '/' character\n"
+                    << RunNodeCmd::desc() << "\n"));
     }
 
     bool force = false;
     if (!options.empty()) {
         if (options.size() != 1) {
-            std::stringstream ss;
-            ss << "RunNodeCmd: Invalid arguments. Expected a single optional 'force'\n" << RunNodeCmd::desc() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("RunNodeCmd: Invalid arguments. Expected a single optional 'force'\n"
+                                             << RunNodeCmd::desc() << "\n"));
         }
         if (options[0].find("force") != std::string::npos) {
             force = true;
         }
         else {
-            std::stringstream ss;
-            ss << "RunNodeCmd: Expected force <path(s)>\n" << RunNodeCmd::desc() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("RunNodeCmd: Expected force <path(s)>\n" << RunNodeCmd::desc() << "\n"));
         }
     }
     cmd = std::make_shared<RunNodeCmd>(paths, force);

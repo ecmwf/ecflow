@@ -26,9 +26,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool EditScriptCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<EditScriptCmd*>(rhs);
@@ -62,19 +59,14 @@ static std::string to_string(EditScriptCmd::EditType et) {
     switch (et) {
         case EditScriptCmd::EDIT:
             return "edit";
-            break;
         case EditScriptCmd::PREPROCESS:
             return "pre_process";
-            break;
         case EditScriptCmd::SUBMIT:
             return "submit";
-            break;
         case EditScriptCmd::PREPROCESS_USER_FILE:
             return "pre_process_file";
-            break;
         case EditScriptCmd::SUBMIT_USER_FILE:
             return "submit_file";
-            break;
         default:
             assert(false);
             break;
@@ -104,19 +96,14 @@ bool EditScriptCmd::isWrite() const {
     switch (edit_type_) {
         case EditScriptCmd::EDIT:
             return false;
-            break;
         case EditScriptCmd::PREPROCESS:
             return false;
-            break;
         case EditScriptCmd::PREPROCESS_USER_FILE:
             return false;
-            break;
         case EditScriptCmd::SUBMIT:
             return true;
-            break;
         case EditScriptCmd::SUBMIT_USER_FILE:
             return true;
-            break;
         default:
             assert(false);
             break;
@@ -192,16 +179,16 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
             ///   - ignore %noop
             std::string ret_file_contents;
             ecf_file.pre_process_user_file(user_file_contents_, ret_file_contents);
-            vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
+            std::vector<std::string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
             return PreAllocatedReply::string_cmd(ret_file_contents);
         }
 
         case EditScriptCmd::SUBMIT: {
 
             if (submittable->state() == NState::ACTIVE || submittable->state() == NState::SUBMITTED) {
-                std::stringstream ss;
-                ss << "Node " << path_to_node_ << " is already " << NState::toString(submittable->state()) << " : ";
-                throw std::runtime_error("EditScriptCmd:: failed for submit: " + ss.str());
+                throw std::runtime_error(MESSAGE("EditScriptCmd:: failed for submit: Node "
+                                                 << path_to_node_ << " is already "
+                                                 << NState::toString(submittable->state()) << " : "));
             }
 
             /// Using the User edited variables, generate the job using the ECF/USR file accessible from the server
@@ -234,9 +221,9 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
             /// If the selected node is an Alias, Just submit it. Since aliases can *NOT* have other aliases as children
             if (!alias_ || submittable->isAlias()) {
                 if (submittable->state() == NState::ACTIVE || submittable->state() == NState::SUBMITTED) {
-                    std::stringstream ss;
-                    ss << "Node " << path_to_node_ << " is already " << NState::toString(submittable->state()) << " : ";
-                    throw std::runtime_error("EditScriptCmd:: failed for submit: " + ss.str());
+                    throw std::runtime_error(MESSAGE("EditScriptCmd:: failed for submit: Node "
+                                                     << path_to_node_ << " is already "
+                                                     << NState::toString(submittable->state()) << " : "));
                 }
 
                 /// Convert from vector to map
@@ -252,8 +239,10 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
                 jobsParam.set_user_edit_file(user_file_contents_);
 
                 if (!submittable->submitJob(jobsParam)) {
-                    vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
-                    throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: failed : " + jobsParam.getErrorMsg());
+                    std::vector<std::string>().swap(
+                        user_file_contents_); // clear user_file_contents_ and minimise its capacity
+                    throw std::runtime_error(
+                        MESSAGE("EditScriptCmd::SUBMIT_USER_FILE: failed : " << jobsParam.getErrorMsg()));
                 }
                 submittable->get_flag().set(ecf::Flag::USER_EDIT);
             }
@@ -261,7 +250,8 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
                 // CREATE a Child Alias. The create alias and parent it to the Task., and choose to run or not.
                 Task* task = submittable->isTask();
                 if (!task) {
-                    vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
+                    std::vector<std::string>().swap(
+                        user_file_contents_); // clear user_file_contents_ and minimise its capacity
                     throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: Aliases can only be created for a task. "
                                              "Selected path is a Alias. Please select a Task path");
                 }
@@ -271,7 +261,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
                     /// This will *NOT* timeout, unlike server Job generation
                     JobsParam jobsParam(as->poll_interval(), true /* create jobs */); // spawn jobs = true
                     if (!alias->submitJob(jobsParam)) {
-                        vector<string>().swap(
+                        std::vector<std::string>().swap(
                             user_file_contents_); // clear user_file_contents_ and minimise its capacity
                         throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: failed for Alias : " +
                                                  jobsParam.getErrorMsg());
@@ -289,7 +279,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
 
     // Clear up memory allocated *ASAP*
     // When dealing with several thousands strings, this makes a *HUGE* difference
-    vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
+    std::vector<std::string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
 
     return PreAllocatedReply::ok_cmd();
 }
@@ -350,24 +340,24 @@ const char* EditScriptCmd::desc() {
 }
 
 void EditScriptCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(EditScriptCmd::arg(), po::value<vector<string>>()->multitoken(), EditScriptCmd::desc());
+    desc.add_options()(EditScriptCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       EditScriptCmd::desc());
 }
 
 void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(EditScriptCmd::arg(), args);
     }
 
-    std::stringstream ss;
     if (args.size() < 2) {
-        ss << "EditScriptCmd:At least 2 arguments required:\n" << EditScriptCmd::desc();
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("EditScriptCmd:At least 2 arguments required:\n" << EditScriptCmd::desc()));
     }
 
-    string path_to_task               = args[0];
-    string edit_type_str              = args[1];
+    std::string path_to_task          = args[0];
+    std::string edit_type_str         = args[1];
     EditScriptCmd::EditType edit_type = EditScriptCmd::EDIT;
 
     /// Check edit_type is valid
@@ -399,6 +389,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     }
 
     if (!ok) {
+        std::ostringstream ss;
         ss << "The second argument(" << args[1] << ") to edit_script must be one of [ ";
         for (size_t i = 0; i < edit_types.size(); ++i) {
             if (i != 0) {
@@ -416,9 +407,9 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
             return;
         }
         else {
-            ss << "When two arguments specified, the second argument must be one of [ edit | pre_process ]\n"
-               << EditScriptCmd::desc();
-            throw ss.str();
+            throw std::runtime_error(
+                MESSAGE("When two arguments specified, the second argument must be one of [ edit | pre_process ]\n"
+                        << EditScriptCmd::desc()));
         }
     }
 
@@ -433,22 +424,21 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
         }
     }
     if ((create_alias || !run_alias) && edit_type != EditScriptCmd::SUBMIT_USER_FILE) {
-        ss << "The create_alias option is only valid when the second argument is 'submit_file' \n"
-           << EditScriptCmd::desc();
-        throw ss.str();
+        throw std::runtime_error(
+            MESSAGE("The create_alias option is only valid when the second argument is 'submit_file' \n"
+                    << EditScriptCmd::desc()));
     }
 
     if (args.size() >= 3 && args.size() <= 5) {
-        string path_to_script = args[2];
+        std::string path_to_script = args[2];
         std::vector<std::string> script_lines;
 
         if (!fs::exists(path_to_script)) {
-            ss << "The script file specified '" << path_to_script << "' does not exist\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("The script file specified '" << path_to_script << "' does not exist\n"));
         }
         if (!File::splitFileIntoLines(path_to_script, script_lines)) {
-            ss << "Could not open script file " << path_to_script << " (" << strerror(errno) << ")";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("Could not open script file " << path_to_script << " (" << strerror(errno) << ")"));
         }
 
         if (edit_type == EditScriptCmd::SUBMIT || edit_type == EditScriptCmd::SUBMIT_USER_FILE) {
@@ -478,8 +468,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
         }
     }
 
-    ss << "Wrong number of arguments specified\n" << EditScriptCmd::desc();
-    throw std::runtime_error(ss.str());
+    throw std::runtime_error(MESSAGE("Wrong number of arguments specified\n" << EditScriptCmd::desc()));
 }
 
 std::ostream& operator<<(std::ostream& os, const EditScriptCmd& c) {

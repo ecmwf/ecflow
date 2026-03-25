@@ -37,7 +37,7 @@ public:
     virtual QString definition(QStringList) const { return QString(); }
 
     static void scan(VNode* vnode, std::vector<VAttribute*>& v);
-    typedef void (*ScanProc)(VNode* vnode, std::vector<VAttribute*>& vec);
+    using ScanProc = void (*)(VNode* vnode, std::vector<VAttribute*>& vec);
     ScanProc scanProc() { return scanProc_; }
 
     static const std::vector<std::string>& lastNames() { return lastNames_; }
@@ -50,7 +50,7 @@ public:
 protected:
     explicit VAttributeType(const std::string& name);
 
-    typedef std::vector<VAttributeType*>::const_iterator TypeIterator;
+    using TypeIterator = std::vector<VAttributeType*>::const_iterator;
     std::map<std::string, int> keyToData_;
     std::map<std::string, int> searchKeyToData_;
     int dataCount_;

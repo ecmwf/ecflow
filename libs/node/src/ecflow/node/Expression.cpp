@@ -20,13 +20,12 @@
 #include "ecflow/node/ExprParser.hpp"
 #include "ecflow/node/Node.hpp"
 
-using namespace std;
 using namespace ecf;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 std::string PartExpression::toString(const std::string& exprType) const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << exprType; // trigger or complete
     switch (type_) {
         case PartExpression::FIRST:
@@ -47,9 +46,6 @@ std::string PartExpression::toString(const std::string& exprType) const {
 }
 
 std::unique_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) const {
-    // #ifdef DEBUG
-    //	cout << "PartExpression::parseExpressions '" << exp_ << "'\n";
-    // #endif
     if (!exp_.empty()) {
         ExprParser expressionParser(exp_);
         if (expressionParser.doParse(errorMsg)) {
@@ -82,18 +78,19 @@ Expression::Expression(const PartExpression& exp) {
 
 Expression::Expression() = default;
 
-Expression::Expression(const Expression& rhs) : vec_(rhs.vec_), free_(rhs.free_) {
+Expression::Expression(const Expression& rhs)
+    : vec_(rhs.vec_),
+      free_(rhs.free_) {
 }
 
 std::unique_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,
                                           const std::string& error_msg_context) {
     PartExpression exp(expression_to_parse);
-    string parseErrorMsg;
+    std::string parseErrorMsg;
     std::unique_ptr<AstTop> ast = exp.parseExpressions(parseErrorMsg);
     if (!ast.get()) {
-        std::stringstream ss;
-        ss << error_msg_context << " Failed to parse expression '" << expression_to_parse << "'.  " << parseErrorMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(error_msg_context << " Failed to parse expression '" << expression_to_parse
+                                                           << "'.  " << parseErrorMsg));
     }
     return ast;
 }
@@ -101,18 +98,17 @@ std::unique_ptr<AstTop> Expression::parse(const std::string& expression_to_parse
 std::unique_ptr<AstTop> Expression::parse_no_throw(const std::string& expression_to_parse,
                                                    std::string& error_msg_context) {
     PartExpression exp(expression_to_parse);
-    string parseErrorMsg;
+    std::string parseErrorMsg;
     std::unique_ptr<AstTop> ast = exp.parseExpressions(parseErrorMsg);
     if (!ast.get()) {
-        std::stringstream ss;
-        ss << error_msg_context << " Failed to parse expression '" << expression_to_parse << "'.  " << parseErrorMsg;
-        error_msg_context = ss.str();
+        error_msg_context = MESSAGE(error_msg_context << " Failed to parse expression '" << expression_to_parse
+                                                      << "'.  " << parseErrorMsg);
     }
     return ast;
 }
 
 std::string Expression::compose_expression(const std::vector<PartExpression>& vec) {
-    string ret;
+    std::string ret;
     auto theEnd = vec.end();
     for (auto expr = vec.begin(); expr != theEnd; ++expr) {
         if ((*expr).andExpr()) {
@@ -130,19 +126,17 @@ void Expression::add(const PartExpression& t) {
     if (vec_.empty()) {
         // The first expression should not have AND or OR
         if (t.andExpr() || t.orExpr()) {
-            std::stringstream ss;
-            ss << "Expression::add: expression " << t.expression()
-               << " failed: The first expression should not have AND or OR set";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Expression::add: expression "
+                                             << t.expression()
+                                             << " failed: The first expression should not have AND or OR set"));
         }
     }
     else {
         // Subsequent expression must be AND or OR expressions
         if (!t.andExpr() && !t.orExpr()) {
-            std::stringstream ss;
-            ss << "Expression::add: expression " << t.expression()
-               << " failed: Subsequent expression must have AND or OR set";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Expression::add: expression "
+                                             << t.expression()
+                                             << " failed: Subsequent expression must have AND or OR set"));
         }
     }
     vec_.push_back(t);
@@ -212,10 +206,8 @@ void Expression::createAST(Node* node, const std::string& exprType, std::string&
             //			cout << *theCombinedAst << "\n";
         }
         else {
-            std::stringstream ss;
-            ss << "Failed to parse " << vec_[i].toString(exprType) << " at " << node->debugNodePath() << " because "
-               << localErrorMsg << "\n\n";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Failed to parse " << vec_[i].toString(exprType) << " at " << node->debugNodePath()
+                                                   << " because " << localErrorMsg << "\n\n");
             break;
         }
     }

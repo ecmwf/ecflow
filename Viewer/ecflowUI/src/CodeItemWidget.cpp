@@ -21,7 +21,8 @@
 #include <QDebug>
 #include <QFontDatabase>
 
-CodeItemWidget::CodeItemWidget(QWidget* parent) : QWidget(parent) {
+CodeItemWidget::CodeItemWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     externalTb_->hide();

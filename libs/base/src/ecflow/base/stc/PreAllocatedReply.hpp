@@ -26,9 +26,7 @@ class AbstractServer;
 // should be cleared first
 class PreAllocatedReply {
 public:
-    PreAllocatedReply()                                    = delete;
-    PreAllocatedReply(const PreAllocatedReply&)            = delete;
-    PreAllocatedReply& operator=(const PreAllocatedReply&) = delete;
+    PreAllocatedReply() = delete;
 
     static STC_Cmd_ptr ok_cmd();
     static STC_Cmd_ptr block_client_server_halted_cmd();

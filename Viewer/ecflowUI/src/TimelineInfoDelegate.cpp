@@ -41,7 +41,8 @@ struct TimelineInfoNodeDelegateBox : public NodeDelegateBox
     }
 };
 
-TimelineInfoDelegate::TimelineInfoDelegate(QWidget* /*parent*/) : borderPen_(QColor(230, 230, 230)) {
+TimelineInfoDelegate::TimelineInfoDelegate(QWidget* /*parent*/)
+    : borderPen_(QColor(230, 230, 230)) {
     nodeBox_ = new TimelineInfoNodeDelegateBox;
     attrBox_ = nullptr;
 

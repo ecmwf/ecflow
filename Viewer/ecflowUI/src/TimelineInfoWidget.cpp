@@ -39,7 +39,8 @@
 //
 //=======================================================
 
-TimelineInfoModel::TimelineInfoModel(QObject* parent) : QAbstractItemModel(parent) {
+TimelineInfoModel::TimelineInfoModel(QObject* parent)
+    : QAbstractItemModel(parent) {
 }
 
 TimelineInfoModel::~TimelineInfoModel() = default;
@@ -443,7 +444,8 @@ void TimelineInfoWidget::writeSettings(QSettings& settings) {
 //
 //=======================================================
 
-TimelineInfoDialog::TimelineInfoDialog(QWidget* parent) : QDialog(parent) {
+TimelineInfoDialog::TimelineInfoDialog(QWidget* parent)
+    : QDialog(parent) {
     setWindowTitle(tr("ecFlowUI - Timeline details"));
 
     auto* vb = new QVBoxLayout(this);

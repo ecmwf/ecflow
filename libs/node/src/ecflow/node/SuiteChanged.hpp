@@ -29,9 +29,12 @@ namespace ecf {
 class SuiteChanged {
 public:
     explicit SuiteChanged(suite_ptr s);
+
     // Disable copy (and move) semantics
-    SuiteChanged(const SuiteChanged&)                  = delete;
-    const SuiteChanged& operator=(const SuiteChanged&) = delete;
+    SuiteChanged(const SuiteChanged&)            = delete;
+    SuiteChanged& operator=(const SuiteChanged&) = delete;
+    SuiteChanged(SuiteChanged&&)                 = delete;
+    SuiteChanged& operator=(SuiteChanged&&)      = delete;
 
     ~SuiteChanged();
 
@@ -44,9 +47,12 @@ private:
 class SuiteChanged0 {
 public:
     explicit SuiteChanged0(node_ptr s);
+
     // Disable copy (and move) semantics
-    SuiteChanged0(const SuiteChanged0&)                  = delete;
-    const SuiteChanged0& operator=(const SuiteChanged0&) = delete;
+    SuiteChanged0(const SuiteChanged0&)            = delete;
+    SuiteChanged0& operator=(const SuiteChanged0&) = delete;
+    SuiteChanged0(SuiteChanged0&&)                 = delete;
+    SuiteChanged0& operator=(SuiteChanged0&&)      = delete;
 
     ~SuiteChanged0();
 
@@ -61,9 +67,12 @@ private:
 class SuiteChangedPtr {
 public:
     explicit SuiteChangedPtr(Node* s);
+
     // Disable copy (and move) semantics
-    SuiteChangedPtr(const SuiteChangedPtr&)                  = delete;
-    const SuiteChangedPtr& operator=(const SuiteChangedPtr&) = delete;
+    SuiteChangedPtr(const SuiteChangedPtr&)            = delete;
+    SuiteChangedPtr& operator=(const SuiteChangedPtr&) = delete;
+    SuiteChangedPtr(SuiteChangedPtr&&)                 = delete;
+    SuiteChangedPtr& operator=(SuiteChangedPtr&&)      = delete;
 
     ~SuiteChangedPtr();
 
@@ -76,9 +85,12 @@ private:
 class SuiteChanged1 {
 public:
     explicit SuiteChanged1(Suite* s);
+
     // Disable copy (and move) semantics
-    SuiteChanged1(const SuiteChanged1&)                  = delete;
-    const SuiteChanged1& operator=(const SuiteChanged1&) = delete;
+    SuiteChanged1(const SuiteChanged1&)            = delete;
+    SuiteChanged1& operator=(const SuiteChanged1&) = delete;
+    SuiteChanged1(SuiteChanged1&&)                 = delete;
+    SuiteChanged1& operator=(SuiteChanged1&&)      = delete;
 
     ~SuiteChanged1();
 

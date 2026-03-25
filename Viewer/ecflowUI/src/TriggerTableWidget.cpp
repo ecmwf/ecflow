@@ -17,7 +17,8 @@
 #include "TriggeredScanner.hpp"
 #include "VSettings.hpp"
 
-TriggerTableWidget::TriggerTableWidget(QWidget* parent) : QWidget(parent) {
+TriggerTableWidget::TriggerTableWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     nodeCollector_      = new TriggerTableCollector(false);

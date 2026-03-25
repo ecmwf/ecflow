@@ -25,18 +25,19 @@
 #include "ecflow/client/Help.hpp"
 #include "ecflow/core/CommandLine.hpp"
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 
-using namespace std;
 using namespace ecf;
-using namespace boost;
-namespace po = boost::program_options;
 
 static std::string print_variable_map(const boost::program_options::variables_map& vm);
 
 ClientOptions::ClientOptions() {
+
+    namespace po = boost::program_options;
+
     // This could have been moved to parse(). However, since the same ClientInvoker can be
     // used for multiple commands, we have separated out the parts.
     // As this needs to be done only once, this approach improves the performance.
@@ -54,23 +55,23 @@ ClientOptions::ClientOptions() {
     // clang-format off
     desc_->add_options()(
         "rid",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "When specified overrides the environment variable ECF_RID. Can only be used for child commands.");
     desc_->add_options()(
         "port",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "When specified overrides the environment variable ECF_PORT and default port: '3141'");
     desc_->add_options()(
         "host",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "When specified overrides the environment variable ECF_HOST and default host: 'localhost'");
     desc_->add_options()(
         "user",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "Specifies the user name used to contact the server. Must be used in combination with option --password.");
     desc_->add_options()(
         "password",
-        po::value<string>()->implicit_value(string("")),
+        po::value<std::string>()->implicit_value(std::string{}),
         "Specifies the password used to contact the server. Must be used in combination with option --user.");
 #ifdef ECF_OPENSSL
     desc_->add_options()(
@@ -92,6 +93,9 @@ ClientOptions::~ClientOptions() {
 }
 
 Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) const {
+
+    namespace po = boost::program_options;
+
     // We expect two hyphen/minus, However sometimes we get a weird/rogue kind of hyphen
     // This rogue hyphen can mess up the parsing.
     // # ecflow_client ––group="halt=yes; check_pt; terminate=yes"  // *BAD* hyphens 2 of them
@@ -105,7 +109,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     // The correct hyphen has:
     //   dec:45 hex:2D oct:55 -
     if (env->debug()) {
-        cout << "  ClientOptions::parse " << cl << "\n";
+        std::cout << "  ClientOptions::parse " << cl << "\n";
         std::cout << "  help column width = " << po::options_description::m_default_line_length + 80 << "\n";
     }
 
@@ -144,9 +148,8 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
             ecf::convert_to<int>(port);
         }
         catch (ecf::bad_conversion& e) {
-            std::stringstream ss;
-            ss << "ClientOptions::parse: The specified port(" << port << ") must be convertible to an integer";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("ClientOptions::parse: The specified port(" << port << ") must be convertible to an integer"));
         }
     }
     if (vm.count("host")) {
@@ -246,17 +249,17 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         //         --server_load         // this is sent to server
         //         --server_load=<path>  // no command returned, command executed by client
         if (vm.count("help")) {
-            string topic = vm["help"].as<std::string>();
+            std::string topic = vm["help"].as<std::string>();
             std::cout << Help{*desc_, topic};
             return client_request;
         }
 
         if (vm.count("version")) {
-            cout << Version::description() << "\n";
+            std::cout << Version::description() << "\n";
             exit(0);
         }
 
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << print_variable_map(vm) << "\n";
         ss << "ClientOptions::parse: Arguments did not match any commands.\n";
         ss << "  argc=" << cl.size() << "\n";
@@ -284,7 +287,10 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
 }
 
 static std::string print_variable_map(const boost::program_options::variables_map& vm) {
-    std::stringstream ss;
+
+    namespace po = boost::program_options;
+
+    std::ostringstream ss;
     ss << "boost::program_options::variables_map:    vm.size() " << vm.size() << "\n";
     for (po::variables_map::const_iterator it = vm.begin(); it != vm.end(); it++) {
         std::cout << "> " << it->first;

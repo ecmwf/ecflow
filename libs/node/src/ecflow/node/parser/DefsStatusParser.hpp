@@ -15,7 +15,8 @@
 
 class DefsStatusParser : public Parser {
 public:
-    explicit DefsStatusParser(DefsStructureParser* p) : Parser(p) {}
+    explicit DefsStatusParser(DefsStructureParser* p)
+        : Parser(p) {}
     const char* keyword() const override { return "defstatus"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };

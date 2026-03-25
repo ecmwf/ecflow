@@ -13,7 +13,7 @@
 #include <fstream>
 #include <stdexcept>
 
-#include <boost/filesystem.hpp>
+#include <ecflow/core/Filesystem.hpp>
 
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Environment.hpp"
@@ -24,9 +24,6 @@
 #ifdef CMAKE
     #include "ecflow/core/ecflow_source_build_dir.h"
 #endif
-
-using namespace std;
-using namespace boost;
 
 // #define DEBUG_SERVER_PATH 1
 // #define DEBUG_CLIENT_PATH 1
@@ -76,7 +73,7 @@ std::string File::which(const std::string& file) {
             }
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string File::getExt(const std::string& file) {
@@ -84,12 +81,12 @@ std::string File::getExt(const std::string& file) {
     if (i != std::string::npos) {
         return file.substr(i + 1);
     }
-    return string();
+    return std::string{};
 }
 
 void File::replaceExt(std::string& file, const std::string& newExt) {
-    string::size_type i = file.rfind('.', file.length());
-    if (i != string::npos) {
+    auto i = file.rfind('.', file.length());
+    if (i != std::string::npos) {
         file.replace(i + 1, newExt.length(), newExt);
     }
 }
@@ -112,7 +109,7 @@ std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool 
     //
     // Note: uch slower than SPLIT_FASTEST_METHOD (~2.5 slower)
 
-    std::stringstream ss;
+    std::ostringstream ss;
     // Read the whole file into a string
     ss << ifs.rdbuf();
     // Take a copy as ss.str() returns a temporary while tokenizer stores a reference
@@ -120,13 +117,13 @@ std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool 
 
     if (ignoreEmptyLine) {
         char_separator<char> sep("\n", 0, boost::drop_empty_tokens);
-        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        using tokenizer = boost::tokenizer<boost::char_separator<char>>;
         tokenizer tokens(theFileAsString, sep);
         std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
     }
     else {
         char_separator<char> sep("\n", 0, boost::keep_empty_tokens);
-        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        using tokenizer = boost::tokenizer<boost::char_separator<char>>;
         tokenizer tokens(theFileAsString, sep);
         std::copy(tokens.begin(), tokens.end(), back_inserter(lines));
     }
@@ -138,7 +135,7 @@ std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool 
     std::istreambuf_iterator<char> file_iter(ifs);
     std::istreambuf_iterator<char> end_of_stream;
 
-    typedef boost::tokenizer<boost::char_separator<char>, std::istreambuf_iterator<char>> tokenizer;
+    using tokenizer = boost::tokenizer<boost::char_separator<char>, std::istreambuf_iterator<char>>;
 
     boost::char_separator<char> sep("\n");
     tokenizer tokens(file_iter, end_of_stream, sep);
@@ -150,6 +147,7 @@ std::vector<std::string> File::splitStreamIntoLines(std::istream& content, bool 
 
     return lines;
 }
+
 bool File::splitFileIntoLines(const std::string& filename, std::vector<std::string>& lines, bool ignoreEmptyLine) {
     std::ifstream the_file(filename.c_str(), std::ios_base::in);
     if (!the_file) {
@@ -162,8 +160,7 @@ bool File::splitFileIntoLines(const std::string& filename, std::vector<std::stri
 
     // Note if we use: while( getline( theEcfFile, line)), then we will miss the *last* *empty* line
 
-    //	int i = 0;
-    string line;
+    std::string line;
     while (std::getline(the_file, line)) {
         //		i++;
         //		cout << i << ": " << line << "\n";
@@ -180,7 +177,7 @@ std::string
 File::get_last_n_lines(const std::string& filename, int last_n_lines, size_t& file_size, std::string& error_msg) {
     file_size = 0;
     if (last_n_lines <= 0) {
-        return string();
+        return std::string{};
     }
 
     std::ifstream source(filename.c_str(), std::ios_base::in);
@@ -189,7 +186,7 @@ File::get_last_n_lines(const std::string& filename, int last_n_lines, size_t& fi
         error_msg += " (";
         error_msg += strerror(errno);
         error_msg += ")";
-        return string();
+        return std::string{};
     }
 
     size_t const granularity = 100 * last_n_lines;
@@ -221,7 +218,7 @@ std::string File::get_last_n_lines(const std::string& filename, int last_n_lines
 
 std::string File::get_first_n_lines(const std::string& filename, int n_lines, std::string& error_msg) {
     if (n_lines <= 0) {
-        return string();
+        return std::string{};
     }
 
     std::ifstream source(filename.c_str(), std::ios_base::in);
@@ -230,7 +227,7 @@ std::string File::get_first_n_lines(const std::string& filename, int n_lines, st
         error_msg += " (";
         error_msg += strerror(errno);
         error_msg += ")";
-        return string();
+        return std::string{};
     }
 
     std::string ret;
@@ -255,9 +252,7 @@ bool File::open(const std::string& filePath, std::string& contents) {
         return false;
     }
 
-    std::ostringstream temp;
-    temp << infile.rdbuf();
-    contents = temp.str();
+    contents = MESSAGE(infile.rdbuf());
     return true;
 }
 
@@ -266,53 +261,25 @@ bool File::create(const std::string& filename, const std::vector<std::string>& l
     // See Test: TestFile.cpp:test_file_create_perf
     FILE* theFile = fopen(filename.c_str(), "w");
     if (theFile == nullptr) {
-        std::stringstream ss;
-        ss << "Could not create file '" << filename << " (" << strerror(errno) << "'\n";
-        errorMsg += ss.str();
+        errorMsg += MESSAGE("Could not create file '" << filename << " (" << strerror(errno) << "'\n");
         return false;
     }
     size_t size = lines.size();
     for (size_t i = 0; i < size; ++i) {
         if (i != 0) {
             if (fputs("\n", theFile) == EOF) {
-                std::stringstream ss;
-                ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
-                errorMsg += ss.str();
+                errorMsg += MESSAGE("Could not write to file '" << filename << "' (" << strerror(errno) << ")\n");
                 fclose(theFile);
                 return false;
             }
         }
         if (fputs(lines[i].c_str(), theFile) == EOF) {
-            std::stringstream ss;
-            ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
-            errorMsg += ss.str();
+            errorMsg += MESSAGE("Could not write to file '" << filename << "' (" << strerror(errno) << ")\n");
             fclose(theFile);
             return false;
         }
     }
     fclose(theFile);
-
-    //	std::ofstream theFile( filename.c_str() );
-    //	if ( !theFile ) {
-    //		/// Could be: [ no permissions | file system full | locked by another process ]
-    // 		std::stringstream ss;
-    //		ss << "Could not create file '" << filename << "'\n";
-    //		errorMsg += ss.str();
-    //		return false;
-    //	}
-    //	size_t size = lines.size();
-    //	for (size_t i = 0; i < size; ++i) {
-    //		if (i != 0) theFile << "\n";
-    //		theFile << lines[i];
-    //	}
-    //	if (!theFile.good()) {
-    //      std::stringstream ss;
-    //      ss << "Could not write to file '" << filename << "'\n";
-    //      errorMsg += ss.str();
-    //      theFile.close();
-    //      return false;
-    //	}
-    //	theFile.close();
 
     return true;
 }
@@ -320,38 +287,18 @@ bool File::create(const std::string& filename, const std::vector<std::string>& l
 bool File::create(const std::string& filename, const std::string& contents, std::string& errorMsg) {
     std::ofstream theFile(filename.c_str());
     if (!theFile) {
-        std::stringstream ss;
-        ss << "Could not create file '" << filename << "' (" << strerror(errno) << ")\n";
-        errorMsg += ss.str();
+        errorMsg += MESSAGE("Could not create file '" << filename << "' (" << strerror(errno) << ")\n");
         return false;
     }
 
     theFile << contents;
     if (!theFile.good()) {
-        std::stringstream ss;
-        ss << "Could not write to file '" << filename << "' (" << strerror(errno) << ")\n";
-        errorMsg += ss.str();
+        errorMsg += MESSAGE("Could not write to file '" << filename << "' (" << strerror(errno) << ")\n");
         theFile.close();
         return false;
     }
     theFile.close();
 
-    // This is actually 12% slower for large file:
-    //	FILE * theFile = fopen (filename.c_str(),"w");
-    //	if (theFile==NULL) {
-    //		std::stringstream ss;
-    //		ss << "Could not create file '" << filename << "'\n";
-    //		errorMsg += ss.str();
-    //		return false;
-    //	}
-    //   if (fputs(contents.c_str(),theFile) == EOF) {
-    //      std::stringstream ss;
-    //      ss << "Could not write to file '" << filename << "'\n";
-    //      errorMsg += ss.str();
-    //      fclose (theFile);
-    //      return false;
-    //   }
-    //  	fclose (theFile);
     return true;
 }
 
@@ -377,7 +324,6 @@ bool File::find(const fs::path& dir_path,     // from this directory downwards,
                 const std::string& file_name, // search for this name,
                 fs::path& path_found          // placing path here if found
 ) {
-    //	std::cout << "Searching '" << dir_path << "' for  " << file_name  << "\n";
     if (!fs::exists(dir_path)) {
         return false;
     }
@@ -457,7 +403,7 @@ std::string File::findPath(const fs::path& dir_path,     // from this directory 
             }
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string File::findPath(const fs::path& dir_path,              // from this directory downwards
@@ -482,7 +428,7 @@ std::string File::findPath(const fs::path& dir_path,              // from this d
             }
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 // #define INTEL_DEBUG_ME 1
@@ -619,11 +565,11 @@ std::string File::diff(const std::string& file,
                        bool ignoreBlanksLine) {
     if (!fs::exists(file)) {
         errorMsg += "First argument File " + file + " does not exist";
-        return std::string();
+        return std::string{};
     }
     if (!fs::exists(file2)) {
         errorMsg += "Second argument File " + file2 + " does not exist";
-        return std::string();
+        return std::string{};
     }
 
     std::vector<std::string> fileLines;
@@ -631,15 +577,15 @@ std::string File::diff(const std::string& file,
 
     if (!splitFileIntoLines(file, fileLines, ignoreBlanksLine)) {
         errorMsg += "First argument File " + file + " could not be opened : " + strerror(errno);
-        return std::string();
+        return std::string{};
     }
     if (!splitFileIntoLines(file2, file2Lines, ignoreBlanksLine)) {
         errorMsg += "Second argument File " + file2 + " could not be opened : " + strerror(errno);
-        return std::string();
+        return std::string{};
     }
 
     if (fileLines != file2Lines) {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (fileLines.size() != file2Lines.size()) {
             ss << "Expected size " << file2Lines.size() << " but found " << fileLines.size() << "\n";
         }
@@ -662,11 +608,6 @@ std::string File::diff(const std::string& file,
                     }
                     ss << "Mismatch at " << i << "(" << fileLines[i] << ")   ---->   (" << file2Lines[i] << ")\n";
                 }
-                //				else {
-                //					ss << "            " << i << " (" << fileLines[i] << ")   ---->
-                //("
-                //<< file2Lines[i] << ")\n";
-                //				}
             }
             else {
                 ss << "Mismatch at " << i;
@@ -687,7 +628,7 @@ std::string File::diff(const std::string& file,
         }
         return ss.str();
     }
-    return std::string();
+    return std::string{};
 }
 
 std::string
@@ -695,12 +636,12 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
     // Do a backward search of rootPath + nodePath
     // If task path is of the form /suite/family/family2/task, then we keep
     // on consuming the first path token this should leave:
-    //   	<root-path>/suite/family/family2/task.ecf
-    //   	<root-path>/family/family2/task.ecf
-    //  	<root-path>/family2/task.ecf
-    //   	<root-path>/task.ecf
+    //   <root-path>/suite/family/family2/task.ecf
+    //   <root-path>/family/family2/task.ecf
+    //   <root-path>/family2/task.ecf
+    //   <root-path>/task.ecf
 
-    vector<std::string> nodePathTokens;
+    std::vector<std::string> nodePathTokens;
     NodePath::split(nodePath, nodePathTokens);
     LOG_ASSERT(!nodePathTokens.empty(), "");
 
@@ -758,7 +699,7 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
     }
 
     // failed to find file via backward search
-    return string();
+    return std::string{};
 }
 
 std::string File::forwardSearch(const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn) {
@@ -770,7 +711,7 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
     ///   <root-path>/suite/task.ecf
     ///   <root-path>/task.ecf
 
-    vector<std::string> nodePathTokens;
+    std::vector<std::string> nodePathTokens;
     NodePath::split(nodePath, nodePathTokens);
     LOG_ASSERT(!nodePathTokens.empty(), "");
 
@@ -843,7 +784,7 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
     }
 
     // failed to find file via forward search
-    return string();
+    return std::string{};
 }
 
 // Remove a directory recursively ****
@@ -994,7 +935,7 @@ static std::string find_bjam_ecf_client_path() {
 
 std::string File::find_ecf_server_path() {
 #ifdef CMAKE
-    std::string path = CMAKE_ECFLOW_BUILD_DIR;
+    std::string path = CMAKE_ECFLOW_BUILD_DIR();
     path += "/bin/";
     path += Ecf::SERVER_NAME();
 
@@ -1012,7 +953,7 @@ std::string File::find_ecf_server_path() {
 
 std::string File::find_ecf_client_path() {
 #ifdef CMAKE
-    std::string path = CMAKE_ECFLOW_BUILD_DIR;
+    std::string path = CMAKE_ECFLOW_BUILD_DIR();
     path += "/bin/";
     path += Ecf::CLIENT_NAME();
 
@@ -1076,8 +1017,10 @@ std::string File::test_data_in_current_dir(const std::string& rel_path) {
 
 std::string File::root_source_dir() {
 #ifdef CMAKE
-    return CMAKE_ECFLOW_SOURCE_DIR;
-#endif
+
+    return CMAKE_ECFLOW_SOURCE_DIR();
+
+#else
 
     // bjam
     fs::path current_path        = fs::current_path();
@@ -1107,13 +1050,17 @@ std::string File::root_source_dir() {
         }
     }
 
-    return string();
+    return std::string{};
+
+#endif
 }
 
 std::string File::root_build_dir() {
 #ifdef CMAKE
-    return CMAKE_ECFLOW_BUILD_DIR;
-#endif
+
+    return CMAKE_ECFLOW_BUILD_DIR();
+
+#else
 
     fs::path current_path        = fs::current_path();
     std::string the_current_path = current_path.string();
@@ -1159,13 +1106,18 @@ std::string File::root_build_dir() {
     }
 
     throw std::runtime_error("File::root_build_dir() failed to find root build directory");
-    return std::string();
+    return std::string{};
+
+#endif
 }
 
 int File::max_open_file_allowed() {
 #ifdef OPEN_MAX
+
     return OPEN_MAX;
+
 #else
+
     static int max_open_file_allowed_ = -1;
     if (max_open_file_allowed_ != -1) {
         return max_open_file_allowed_;
@@ -1181,6 +1133,7 @@ int File::max_open_file_allowed() {
         log(Log::ERR, msg);
     }
     return max_open_file_allowed_;
+
 #endif
 }
 

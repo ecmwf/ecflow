@@ -29,9 +29,6 @@
 #include "ecflow/core/Str.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 // #define DEBUG_GROUP_CMD 1
 
@@ -45,12 +42,12 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
     }
     if (clientEnv->debug()) {
         for (const auto& i : individualCmdVec) {
-            cout << "  CHILD COMMAND = " << i << "\n";
+            std::cout << "  CHILD COMMAND = " << i << "\n";
         }
     }
 
     // Create a list of allowable commands for a group. i.e excludes help, group
-    po::options_description desc("Allowed group options");
+    boost::program_options::options_description desc("Allowed group options");
     CtsCmdRegistry cmdRegistry(false /* don't add group option */);
     cmdRegistry.addCmdOptions(desc);
 
@@ -123,13 +120,14 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         CommandLine cl(theArgs);
 
         if (clientEnv->debug()) {
-            cout << "  PROCESSING COMMAND = '" << subCmd << "' " << cl << "\n";
+            std::cout << "  PROCESSING COMMAND = '" << subCmd << "' " << cl << "\n";
         }
 
         // Treat each sub command  separately
         boost::program_options::variables_map group_vm;
 
         // 1) Parse the CLI options
+        namespace po = boost::program_options;
         po::parsed_options parsed_options =
             po::command_line_parser(cl.tokens())
                 .options(desc)
@@ -316,30 +314,6 @@ void GroupCTSCmd::cleanup() {
     }
 }
 
-// bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const {
-//     // Can only run Group cmd if all child commands authenticate
-//     size_t cmd_vec_size = cmdVec_.size();
-//     for (size_t i = 0; i < cmd_vec_size; i++) {
-//         if (!cmdVec_[i]->authenticate(as, errorMsg)) {
-//
-//             // Log authentication failure:
-//             std::string ss;
-//             ss += "GroupCTSCmd::authenticate failed: for ";
-//             cmdVec_[i]->print(ss);
-//             std::stringstream stream;
-//             stream << errorMsg;
-//             ss += stream.str();
-//             log(Log::ERR, ss); // will automatically add end of line
-//
-// #ifdef DEBUG_GROUP_CMD
-//             std::cout << "GroupCTSCmd::authenticate failed for " << ss << "\n";
-// #endif
-//             return false;
-//         }
-//     }
-//     return true;
-// }
-
 // in the server
 void GroupCTSCmd::set_client_handle(int client_handle) const {
     size_t cmd_vec_size = cmdVec_.size();
@@ -426,12 +400,12 @@ const char* GroupCTSCmd::desc() {
 }
 
 void GroupCTSCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(GroupCTSCmd::arg(), po::value<string>(), GroupCTSCmd::desc());
+    desc.add_options()(GroupCTSCmd::arg(), boost::program_options::value<std::string>(), GroupCTSCmd::desc());
 }
 
 void GroupCTSCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     if (clientEnv->debug()) {
-        cout << "  " << arg() << ": Group Cmd '" << vm[arg()].as<std::string>() << "'\n";
+        std::cout << "  " << arg() << ": Group Cmd '" << vm[arg()].as<std::string>() << "'\n";
     }
 
     // Parse and split commands and then parse individually. Assumes commands are separated by ';'

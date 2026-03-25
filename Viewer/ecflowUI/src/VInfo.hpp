@@ -28,7 +28,7 @@ class VInfoObserver;
 class VInfoVisitor;
 
 class VInfo;
-typedef std::shared_ptr<VInfo> VInfo_ptr;
+using VInfo_ptr = std::shared_ptr<VInfo>;
 
 //==============================================================================
 // For each selected item in any of the views a new VInfo object is created.
@@ -158,9 +158,9 @@ protected:
     VInfoAttribute(ServerHandler*, VNode*, VAttribute*);
 };
 
-typedef std::shared_ptr<VInfoServer> VInfoServer_ptr;
-typedef std::shared_ptr<VInfoNode> VInfoNode_ptr;
-typedef std::shared_ptr<VInfoAttribute> VInfoAttribute_ptr;
+using VInfoServer_ptr    = std::shared_ptr<VInfoServer>;
+using VInfoNode_ptr      = std::shared_ptr<VInfoNode>;
+using VInfoAttribute_ptr = std::shared_ptr<VInfoAttribute>;
 
 class VInfoVisitor {
 public:

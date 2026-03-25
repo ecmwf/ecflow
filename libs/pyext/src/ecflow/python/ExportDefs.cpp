@@ -15,6 +15,7 @@
 #include "ecflow/core/PrintStyle.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/JobCreationCtrl.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/python/DefsDoc.hpp"
@@ -27,11 +28,8 @@
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 
 void save_as_defs(const Defs& theDefs, const std::string& filename, PrintStyle::Type_t the_style_enum) {
-    std::stringstream ss;
-    ss << ecf::as_string(theDefs, the_style_enum);
-
     std::string file_creation_error_msg;
-    if (!ecf::File::create(filename, ss.str(), file_creation_error_msg)) {
+    if (!ecf::File::create(filename, ecf::as_string(theDefs, the_style_enum), file_creation_error_msg)) {
         std::string error = "save_as_defs failed: ";
         error += file_creation_error_msg;
         throw std::runtime_error(error);
@@ -104,14 +102,11 @@ suite_ptr add_suite(defs_ptr self, suite_ptr s) {
 }
 
 std::vector<task_ptr> get_all_tasks(defs_ptr self) {
-    std::vector<task_ptr> tasks;
-    self->get_all_tasks(tasks);
-    return tasks;
+    return ecf::get_all_tasks_ptr(*self);
 }
+
 std::vector<node_ptr> get_all_nodes(defs_ptr self) {
-    std::vector<node_ptr> nodes;
-    self->get_all_nodes(nodes);
-    return nodes;
+    return ecf::get_all_nodes_ptr(*self);
 }
 
 // Context management, Only used to provide indentation
@@ -178,9 +173,7 @@ void sort_attributes3(defs_ptr self, const std::string& attribute_name, bool rec
     boost::algorithm::to_lower(attribute);
     ecf::Attr::Type attr = ecf::Attr::to_attr(attribute_name);
     if (attr == ecf::Attr::UNKNOWN) {
-        std::stringstream ss;
-        ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("sort_attributes: the attribute " << attribute_name << " is not valid"));
     }
     std::vector<std::string> no_sort;
     pyutil_list_to_str_vec(list, no_sort);
@@ -266,10 +259,8 @@ static py::object defs_getattr(defs_ptr self, const std::string& attr) {
         return py::object(var);
     }
 
-    std::stringstream ss;
-    ss << "ExportDefs::defs_getattr : function of name '" << attr << "' does not exist *OR* suite or defs variable";
-    throw std::runtime_error(ss.str());
-    return py::object();
+    throw std::runtime_error(MESSAGE("ExportDefs::defs_getattr : function of name '"
+                                     << attr << "' does not exist *OR* suite or defs variable"));
 }
 
 py::object defs_raw_constructor(py::tuple args, py::dict kw) {

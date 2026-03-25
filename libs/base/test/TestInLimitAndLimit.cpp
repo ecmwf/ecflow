@@ -30,7 +30,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
@@ -308,7 +307,7 @@ BOOST_AUTO_TEST_CASE(test_limit1) {
                             "Expected 0 task to submit but found " << jobsParam.submitted().size());
         if (jobsParam.submitted().size() != 0) {
             for (Submittable* t : jobsParam.submitted()) {
-                cerr << "Submittable " << t->absNodePath() << "\n";
+                std::cerr << "Submittable " << t->absNodePath() << "\n";
             }
         }
     }

@@ -16,11 +16,11 @@
 #include "ecflow/base/cts/task/TaskCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Submittable.hpp"
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-using namespace std;
 
 // #define DEBUG_ZOMBIE  1
 
@@ -445,18 +445,16 @@ void ZombieCtrl::add_user_zombies(Node* node, const std::string& user_cmd) {
     if (!node) {
         return;
     }
-    std::vector<Submittable*> tasks;
-    node->get_all_active_submittables(tasks);
-    add_user_zombies(tasks, user_cmd);
+    auto submittables = ecf::get_all_active_submittables(*node);
+    add_user_zombies(submittables, user_cmd);
 }
 
 void ZombieCtrl::add_user_zombies(defs_ptr defs, const std::string& user_cmd) {
     if (!defs.get()) {
         return;
     }
-    std::vector<Submittable*> tasks;
-    defs->get_all_active_submittables(tasks);
-    add_user_zombies(tasks, user_cmd);
+    auto submittables = ecf::get_all_active_submittables(*defs);
+    add_user_zombies(submittables, user_cmd);
 }
 
 /// Returns the list of zombies, **updated** with seconds since creation
@@ -594,11 +592,10 @@ void ZombieCtrl::adoptCli(const std::string& path_to_task, Submittable* task) {
     for (size_t i = 0; i < zombieVecSize; i++) {
         if (zombies_[i].path_to_task() == path_to_task &&
             zombies_[i].process_or_remote_id() != task->process_or_remote_id()) {
-            std::stringstream ss;
-            ss << "ZombieCtrl::adoptCli: Can *not* adopt zombies, where process id are different. Task("
-               << task->process_or_remote_id() << ") zombie(" << zombies_[i].process_or_remote_id()
-               << "). Please kill both process, and re-queue";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(
+                MESSAGE("ZombieCtrl::adoptCli: Can *not* adopt zombies, where process id are different. Task("
+                        << task->process_or_remote_id() << ") zombie(" << zombies_[i].process_or_remote_id()
+                        << "). Please kill both process, and re-queue"));
         }
     }
 

@@ -22,9 +22,18 @@
 namespace ecf {
 
 class Rtt {
+private:
+    explicit Rtt(const std::string& filename);
+
 public:
+    Rtt() = delete;
+
     Rtt(const Rtt&)                  = delete;
     const Rtt& operator=(const Rtt&) = delete;
+    Rtt(Rtt&&)                       = delete;
+    Rtt& operator=(Rtt&&)            = delete;
+
+    ~Rtt();
 
     static void create(const std::string& filename);
     static void destroy();
@@ -39,8 +48,6 @@ public:
     static const char* tag() { return "rtt:"; }
 
 private:
-    ~Rtt();
-    explicit Rtt(const std::string& filename);
     static Rtt* instance_;
     mutable std::ofstream file_;
 };
@@ -53,12 +60,14 @@ void rtt(const std::string& message);
 // helper, see STRINGIZE() macro
 template <typename Functor>
 std::string stringize_rtt(Functor const& f) {
-    std::ostringstream out;
-    f(out);
-    return out.str();
+    std::ostringstream ss;
+    f(ss);
+    return ss.str();
 }
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define STRINGIZE_RTT(EXPRESSION) (ecf::stringize_rtt([](std::ostringstream& os) { os << EXPRESSION };))
+// NOLINTEND(bugprone-macro-parentheses)
 #define RTT(EXPRESSION) ecf::rtt(STRINGIZE_RTT(EXPRESSION))
 
 } // namespace ecf

@@ -12,7 +12,7 @@
 #define ecflow_http_ApiV1Impl_HPP
 
 #include "ecflow/client/ClientInvoker.hpp"
-#include "ecflow/http/HttpLibrary.hpp"
+#include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/JSON.hpp"
 
 namespace ecf::http {

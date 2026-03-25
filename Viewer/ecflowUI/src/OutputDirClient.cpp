@@ -10,12 +10,13 @@
 
 #include "OutputDirClient.hpp"
 
+#include <array>
 #include <memory>
 
 #include "UiLog.hpp"
 #include "ecflow/core/Filesystem.hpp"
 
-#define _UI_OUTPUTDIRCLIENT_DEBUG
+#define UI_OUTPUTDIRCLIENT_DEBUG
 
 OutputDirClient::OutputDirClient(const std::string& host, const std::string& portStr, QObject* parent)
     : OutputClient(host, portStr, parent) {
@@ -37,7 +38,7 @@ void OutputDirClient::slotCheckTimeout() {
 }
 
 void OutputDirClient::slotConnected() {
-#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+#ifdef UI_OUTPUTDIRCLIENT_DEBUG
     UiLog().dbg() << "OutputDirClient::slotConnected() connected to " << soc_->peerName();
 #endif
     soc_->write("list ", 5);
@@ -46,26 +47,26 @@ void OutputDirClient::slotConnected() {
 }
 
 void OutputDirClient::slotError(QAbstractSocket::SocketError err) {
-#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+#ifdef UI_OUTPUTDIRCLIENT_DEBUG
     UiLog().dbg() << "OutputDirClient::slotError --> " << soc_->errorString();
 #endif
     switch (err) {
         // The logserver does not notify us if the file trasfer finish. We simply get this error.
         case QAbstractSocket::RemoteHostClosedError:
 
-#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+#ifdef UI_OUTPUTDIRCLIENT_DEBUG
             UiLog().dbg() << "   RemoteHostClosedError ";
 #endif
             // If no data was transferred we think it is a real error.
             if (data_.isEmpty()) {
-#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+#ifdef UI_OUTPUTDIRCLIENT_DEBUG
                 UiLog().dbg() << "   --> data is empty: file transfer failed";
 #endif
                 break;
             }
             // If there is some data we think the transfer succeeded.
             else {
-#ifdef _UI_OUTPUTDIRCLIENT_DEBUG
+#ifdef UI_OUTPUTDIRCLIENT_DEBUG
                 UiLog().dbg() << "   --> has data: file transfer succeeded";
 #endif
                 if (dir_) {
@@ -114,12 +115,11 @@ void OutputDirClient::getDir(const std::string& name) {
 }
 
 void OutputDirClient::slotRead() {
-    const qint64 size = 64 * 1024;
-    char buf[size + 1];
+    std::array<char, 64 * 1024 + 1> buffer;
     quint64 len = 0;
 
-    while ((len = soc_->read(buf, size)) > 0) {
-        data_.append(buf, len);
+    while ((len = soc_->read(buffer.data(), buffer.size() - 1)) > 0) {
+        data_.append(buffer.data(), len);
     }
 }
 

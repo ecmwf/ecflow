@@ -188,7 +188,8 @@ protected:
 
 class StringMatchExact : public StringMatchBase {
 public:
-    explicit StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    explicit StringMatchExact(bool caseSensitive)
+        : StringMatchBase(caseSensitive) {}
     ~StringMatchExact() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
@@ -196,7 +197,8 @@ public:
 
 class StringMatchContains : public StringMatchBase {
 public:
-    explicit StringMatchContains(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    explicit StringMatchContains(bool caseSensitive)
+        : StringMatchBase(caseSensitive) {}
     ~StringMatchContains() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
@@ -204,7 +206,8 @@ public:
 
 class StringMatchWildcard : public StringMatchBase {
 public:
-    explicit StringMatchWildcard(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    explicit StringMatchWildcard(bool caseSensitive)
+        : StringMatchBase(caseSensitive) {}
     ~StringMatchWildcard() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
@@ -212,7 +215,8 @@ public:
 
 class StringMatchRegexp : public StringMatchBase {
 public:
-    explicit StringMatchRegexp(bool caseSensitive) : StringMatchBase(caseSensitive) {}
+    explicit StringMatchRegexp(bool caseSensitive)
+        : StringMatchBase(caseSensitive) {}
     ~StringMatchRegexp() override = default;
 
     bool match(std::string searchFor, std::string searchIn) override;
@@ -294,7 +298,8 @@ private:
 
 class StateNodeCondition : public BaseNodeCondition {
 public:
-    explicit StateNodeCondition(QString stateName) : stateName_(stateName) {}
+    explicit StateNodeCondition(QString stateName)
+        : stateName_(stateName) {}
     ~StateNodeCondition() override = default;
 
     bool execute(VItem* node) override;
@@ -312,7 +317,8 @@ private:
 
 class NodeMenuModeCondition : public BaseNodeCondition {
 public:
-    explicit NodeMenuModeCondition(QString menuModeName) : menuModeName_(menuModeName) {}
+    explicit NodeMenuModeCondition(QString menuModeName)
+        : menuModeName_(menuModeName) {}
     ~NodeMenuModeCondition() override = default;
 
     bool execute(VItem*) override;
@@ -330,7 +336,9 @@ private:
 
 class EnvVarCondition : public BaseNodeCondition {
 public:
-    explicit EnvVarCondition(QString envVarName) : envVarName_(envVarName), defined_(-1) {}
+    explicit EnvVarCondition(QString envVarName)
+        : envVarName_(envVarName),
+          defined_(-1) {}
     ~EnvVarCondition() override = default;
 
     bool execute(VItem*) override;
@@ -349,7 +357,8 @@ private:
 
 class UIStateCondition : public BaseNodeCondition {
 public:
-    explicit UIStateCondition(const std::string& uiStateName) : uiStateName_(uiStateName) {}
+    explicit UIStateCondition(const std::string& uiStateName)
+        : uiStateName_(uiStateName) {}
     ~UIStateCondition() override = default;
 
     bool execute(VItem*) override;
@@ -367,7 +376,8 @@ private:
 
 class NodeAttributeCondition : public BaseNodeCondition {
 public:
-    explicit NodeAttributeCondition(QString nodeAttrName) : nodeAttrName_(nodeAttrName) {}
+    explicit NodeAttributeCondition(QString nodeAttrName)
+        : nodeAttrName_(nodeAttrName) {}
     ~NodeAttributeCondition() override = default;
 
     bool execute(VItem*) override;
@@ -385,7 +395,8 @@ private:
 
 class NodeFlagCondition : public BaseNodeCondition {
 public:
-    explicit NodeFlagCondition(QString nodeFlagName) : nodeFlagName_(nodeFlagName) {}
+    explicit NodeFlagCondition(QString nodeFlagName)
+        : nodeFlagName_(nodeFlagName) {}
     ~NodeFlagCondition() override = default;
 
     bool execute(VItem*) override;
@@ -498,7 +509,8 @@ private:
 
 class WhatToSearchForOperand : public BaseNodeCondition {
 public:
-    explicit WhatToSearchForOperand(const std::string& what) : what_(what) {}
+    explicit WhatToSearchForOperand(const std::string& what)
+        : what_(what) {}
     ~WhatToSearchForOperand() override;
 
     std::string name() { return what_; }
@@ -517,7 +529,8 @@ private:
 class AttributeCondition : public BaseNodeCondition {
 public:
     // explicit AttributeCondition(NodeExpressionParser::AttributeType type) {type_ = type;}
-    explicit AttributeCondition(VAttributeType* type) : type_(type) {}
+    explicit AttributeCondition(VAttributeType* type)
+        : type_(type) {}
     ~AttributeCondition() override = default;
 
     bool execute(VItem*) override;
@@ -535,7 +548,8 @@ private:
 
 class AttributeStateCondition : public BaseNodeCondition {
 public:
-    explicit AttributeStateCondition(QString attrState) : attrState_(attrState) {}
+    explicit AttributeStateCondition(QString attrState)
+        : attrState_(attrState) {}
     ~AttributeStateCondition() override = default;
 
     bool execute(VItem*) override;

@@ -23,7 +23,10 @@ public:
           paths_(paths),
           force_(force) {}
     PathsCmd(Api api, const std::string& absNodePath, bool force = false);
-    explicit PathsCmd(Api api) : api_(api) { assert(api != NO_CMD); }
+    explicit PathsCmd(Api api)
+        : api_(api) {
+        assert(api != NO_CMD);
+    }
     PathsCmd() = default;
 
     Api api() const { return api_; }

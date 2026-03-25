@@ -19,7 +19,8 @@
 #include "SessionHandler.hpp"
 #include "WidgetNameProvider.hpp"
 
-DashboardDialog::DashboardDialog(QWidget* parent) : QDialog(parent) {
+DashboardDialog::DashboardDialog(QWidget* parent)
+    : QDialog(parent) {
     setupUi(this);
 
     setAttribute(Qt::WA_DeleteOnClose);

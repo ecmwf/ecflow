@@ -21,9 +21,14 @@
 class ExprParser {
 public:
     explicit ExprParser(const std::string& expression);
+
     // Disable copy (and move) semantics
     ExprParser(const ExprParser&)                  = delete;
     const ExprParser& operator=(const ExprParser&) = delete;
+    ExprParser(ExprParser&&)                       = delete;
+    ExprParser& operator=(ExprParser&&)            = delete;
+
+    ~ExprParser() = default;
 
     /// Parse the expression, return true if parse OK false otherwise
     /// if false is returned, and error message is returned
@@ -45,10 +50,14 @@ private:
 // But the simple expression do form a very large subset
 class SimpleExprParser {
 public:
-    explicit SimpleExprParser(const std::string& expression) : expr_(expression) {}
+    explicit SimpleExprParser(const std::string& expression)
+        : expr_(expression) {}
+
     // Disable copy (and move) semantics
-    SimpleExprParser(const SimpleExprParser&)                  = delete;
-    const SimpleExprParser& operator=(const SimpleExprParser&) = delete;
+    SimpleExprParser(const SimpleExprParser&)            = delete;
+    SimpleExprParser& operator=(const SimpleExprParser&) = delete;
+    SimpleExprParser(SimpleExprParser&&)                 = delete;
+    SimpleExprParser& operator=(SimpleExprParser&&)      = delete;
 
     /// Parse the expression, return true if parse OK false otherwise
     bool doParse();

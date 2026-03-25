@@ -62,7 +62,7 @@
 #endif
 
 #ifdef QT_DEBUG
-    #define _UI_TEXTPAGER_ITERATOR_DEBUG
+    #define UI_TEXTPAGER_ITERATOR_DEBUG
 #endif
 
 static inline bool matchSection(const TextPagerSection* section, const TextPagerEdit* textEdit) {
@@ -432,7 +432,7 @@ public:
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
         Q_ASSERT(doc);
 
-    #ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+    #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
                 // qDebug() << "prevLine --->" << pos << offset;  //<< chunkData;
     #endif
 
@@ -477,7 +477,7 @@ public:
         // We will go backwards until we find a newline
         while (*data != newline) {
                 // Q_ASSERT(*data  == chunkData.at(offset));
-    #ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+    #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
                     // qDebug() << pos << offset << chunkData.at(offset) << to;
     #endif
             if (pos <= min) {
@@ -514,7 +514,7 @@ public:
                 data += offset;
                 to = offset;
 
-    #ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+    #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
                         // qDebug() << "change" << pos << offset << *data << chunkData.at(offset);
     #endif
             }
@@ -523,7 +523,7 @@ public:
             }
         }
 
-    #ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+    #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
                 // qDebug() << pos << offset << to;
     #endif
 
@@ -539,7 +539,7 @@ public:
         }
 #endif
 
-#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+#ifdef UI_TEXTPAGER_ITERATOR_DEBUG
             // qDebug() << "line:" << str;
 #endif
 
@@ -554,7 +554,7 @@ public:
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
         Q_ASSERT(doc);
 
-    #ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+    #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
                 // qDebug() << "nextLine --->" << pos << offset << chunkData.size() << chunkData.at(offset);
     #endif
         int posEnd = end();
@@ -602,7 +602,7 @@ public:
 
         // We will go forward until we find a newline
         while (*data != newline) {
-    #ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+    #ifdef UI_TEXTPAGER_ITERATOR_DEBUG
                     // qDebug() << pos << offset << chunkData.at(offset);
     #endif
             if (pos >= posEnd) {
@@ -657,7 +657,7 @@ public:
 
 #endif
 
-#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+#ifdef UI_TEXTPAGER_ITERATOR_DEBUG
             // qDebug() << "line:" << str;
 #endif
 

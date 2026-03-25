@@ -24,9 +24,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool LabelCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<LabelCmd*>(rhs);
@@ -100,22 +97,22 @@ const char* LabelCmd::desc() {
 }
 
 void LabelCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LabelCmd::arg(), po::value<vector<string>>()->multitoken(), LabelCmd::desc());
+    desc.add_options()(
+        LabelCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), LabelCmd::desc());
 }
 void LabelCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (clientEnv->debug()) {
         dumpVecArgs(LabelCmd::arg(), args);
-        cout << "  LabelCmd::create " << LabelCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
-             << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
-             << clientEnv->task_try_no() << ")\n";
+        std::cout << "  LabelCmd::create " << LabelCmd::arg() << " task_path(" << clientEnv->task_path()
+                  << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
+                  << ") try_no(" << clientEnv->task_try_no() << ")\n";
     }
 
     if (args.size() < 2) {
-        std::stringstream ss;
-        ss << "LabelCmd: At least 2 arguments expected. Please specify: <label-name> <label-value>\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("LabelCmd: At least 2 arguments expected. Please specify: <label-name> <label-value>\n"));
     }
 
     std::string labelName = args[0];

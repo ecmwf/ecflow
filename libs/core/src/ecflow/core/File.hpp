@@ -27,9 +27,6 @@ class File {
 public:
     // Disable default construction
     File() = delete;
-    // Disable copy (and move) semantics
-    File(const File&)            = delete;
-    File& operator=(const File&) = delete;
 
     static size_t MAX_LINES();            //  max number of lines, default to 10000
     static const std::string& JOB_EXTN(); // ".job"

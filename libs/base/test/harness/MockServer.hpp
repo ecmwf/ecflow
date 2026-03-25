@@ -33,8 +33,14 @@ public:
     std::string ssl() const override { return ""; }
 
     // Only in server side do we increment state/modify numbers, controlled by: Ecf::set_server(true)
-    explicit MockServer(Defs* defs) : defs_(defs_ptr(defs, MockServer::null_deleter())) { Ecf::set_server(true); }
-    explicit MockServer(defs_ptr defs) : defs_(defs) { Ecf::set_server(true); }
+    explicit MockServer(Defs* defs)
+        : defs_(defs_ptr(defs, MockServer::null_deleter())) {
+        Ecf::set_server(true);
+    }
+    explicit MockServer(defs_ptr defs)
+        : defs_(defs) {
+        Ecf::set_server(true);
+    }
     ~MockServer() override { Ecf::set_server(false); }
 
     void set_server_state(SState::State ss);
@@ -141,12 +147,19 @@ private:
 ///   o Update Suite state/modify change number
 class MockSuiteChangedServer {
 public:
-    MockSuiteChangedServer()                              = delete;
-    MockSuiteChangedServer(const MockSuiteChangedServer&) = delete;
-    explicit MockSuiteChangedServer(suite_ptr suite) : suiteChanged_(suite) { Ecf::set_server(true); }
-    ~MockSuiteChangedServer() { Ecf::set_server(false); }
+    MockSuiteChangedServer() = delete;
 
+    explicit MockSuiteChangedServer(suite_ptr suite)
+        : suiteChanged_(suite) {
+        Ecf::set_server(true);
+    }
+
+    MockSuiteChangedServer(const MockSuiteChangedServer&)            = delete;
     MockSuiteChangedServer& operator=(const MockSuiteChangedServer&) = delete;
+    MockSuiteChangedServer(MockSuiteChangedServer&&)                 = delete;
+    MockSuiteChangedServer& operator=(MockSuiteChangedServer&&)      = delete;
+
+    ~MockSuiteChangedServer() { Ecf::set_server(false); }
 
 private:
     ecf::SuiteChanged suiteChanged_;

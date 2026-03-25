@@ -30,9 +30,12 @@ class BaseServer;
 class CheckPtSaver {
 public:
     CheckPtSaver(BaseServer* s, boost::asio::io_context& io, const ServerEnvironment*);
+
     // Disable copy (and move) semantics
-    CheckPtSaver(const CheckPtSaver&)                  = delete;
-    const CheckPtSaver& operator=(const CheckPtSaver&) = delete;
+    CheckPtSaver(const CheckPtSaver&)            = delete;
+    CheckPtSaver& operator=(const CheckPtSaver&) = delete;
+    CheckPtSaver(CheckPtSaver&&)                 = delete;
+    CheckPtSaver& operator=(CheckPtSaver&&)      = delete;
 
     ~CheckPtSaver();
 
@@ -78,7 +81,7 @@ public:
         // exception, or server crash), the procedure is always interrupted without
         // changes to the current+old CheckPoint files in order to facilitate recovery.
         //
-        fs::path temporary = fs::unique_path(current.string() + "%%%%-%%%%-%%%%-%%%%");
+        fs::path temporary = ecf::fsx::unique_path(current.string() + "%%%%-%%%%-%%%%-%%%%");
         store(temporary.string());
 
         // 2. Backup the current CheckPoint files

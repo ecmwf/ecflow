@@ -22,7 +22,6 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -241,7 +240,7 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
     // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
     // the test will will invalid. hence ignore.
     if (!ClientEnvironment::hostSpecified().empty()) {
-        cout << "Ignoring test when ECF_HOST specified\n";
+        std::cout << "Ignoring test when ECF_HOST specified\n";
         return;
     }
 
@@ -310,7 +309,7 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
     // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
     // the test will will invalid. hence ignore.
     if (!ClientEnvironment::hostSpecified().empty()) {
-        cout << "Ignoring test when ECF_HOST specified\n";
+        std::cout << "Ignoring test when ECF_HOST specified\n";
         return;
     }
 

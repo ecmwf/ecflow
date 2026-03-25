@@ -231,11 +231,11 @@ The list of commands, amongst other details, can be displayed by using the optio
 
     * - :ref:`reloadcustompasswdfile_cli` 
       - :term:`user command`
-      - Reload the server custom password file. For those user's who don't use login name
+      - Reload the server custom password file.
 
     * - :ref:`reloadpasswdfile_cli` 
       - :term:`user command`
-      - Reload the server password file. To be used when ALL users have a password
+      - Reload the server password file.
 
     * - :ref:`reloadwsfile_cli` 
       - :term:`user command`

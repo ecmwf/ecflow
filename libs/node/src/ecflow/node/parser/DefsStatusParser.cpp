@@ -17,7 +17,6 @@
 #include "ecflow/node/Node.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool DefsStatusParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     if (lineTokens.size() < 2) {
@@ -35,10 +34,9 @@ bool DefsStatusParser::doParse(const std::string& line, std::vector<std::string>
         auto it = defStatusMap().find(node);
         if (it != defStatusMap().end()) {
             if ((*it).second) {
-                std::stringstream ss;
-                ss << "DefsStatusParser::doParse: " << node->debugType() << " " << node->name()
-                   << " already has a default status\n";
-                throw std::runtime_error(ss.str());
+                throw std::runtime_error(MESSAGE("DefsStatusParser::doParse: " << node->debugType() << " "
+                                                                               << node->name()
+                                                                               << " already has a default status\n"));
             }
         }
         defStatusMap()[node] = true;

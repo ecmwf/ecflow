@@ -20,31 +20,34 @@ namespace {
 
 template <typename... Args>
 std::string as_string(Args... args) {
-    std::ostringstream os;
-    ((os << args), ...);
-    return os.str();
+    std::ostringstream ss;
+    ((ss << args), ...);
+    return ss.str();
 }
 
 } // namespace
 
-UDPServerOptions::UDPServerOptions(int argc, const char* argv[]) : general{create_options()}, variables{} {
+UDPServerOptions::UDPServerOptions(const std::vector<std::string>& argv)
+    : general{create_options()},
+      variables{} {
+
+    namespace po = boost::program_options;
 
     po::options_description all_options("All");
     all_options.add(general);
 
     try {
         // Collect command line options
-        po::command_line_parser parser{argc, argv};
+        po::command_line_parser parser{argv};
         parser.options(all_options)
             .style(po::command_line_style::default_style | po::command_line_style::allow_slash_for_short);
         auto cli_options = parser.run();
         po::store(cli_options, variables);
 
         // Collect environment options
-        // note: by being processed later, environment options don't override cli options)
+        // note: even though being processed later, environment options do not override cli options!
         UDPServerEnvironment environment;
-        std::stringstream ss;
-        ss << environment.as_configuration_file();
+        std::istringstream ss(environment.as_configuration_file());
         auto env_options = po::parse_config_file(ss, all_options, true);
         po::store(env_options, variables);
 
@@ -60,7 +63,7 @@ UDPServerOptions::UDPServerOptions(int argc, const char* argv[]) : general{creat
     }
 }
 
-void UDPServerOptions::ensure_valid_options(const po::variables_map& variables) {
+void UDPServerOptions::ensure_valid_options(const boost::program_options::variables_map& variables) {
     if (variables.count(OPTION_HELP) > 0) {
         // Nothing to do, help will be displayed even if other options are provided
         return;
@@ -74,7 +77,10 @@ void UDPServerOptions::ensure_valid_options(const po::variables_map& variables) 
     // Add all necessary options validation here!...
 }
 
-po::options_description UDPServerOptions::create_options() {
+boost::program_options::options_description UDPServerOptions::create_options() {
+
+    namespace po = boost::program_options;
+
     po::options_description general{"General"};
     // clang-format off
     general.add_options()

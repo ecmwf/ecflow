@@ -50,11 +50,15 @@ public:
           notify_{notify},
           subscribe_{subscribe},
           mirror_{} {};
-    MirrorService()                     = delete;
-    MirrorService(const MirrorService&) = delete;
-    ~MirrorService() { stop(); }
 
+    MirrorService() = delete;
+
+    MirrorService(const MirrorService&)            = delete;
     MirrorService& operator=(const MirrorService&) = delete;
+    MirrorService(MirrorService&&)                 = delete;
+    MirrorService& operator=(MirrorService&&)      = delete;
+
+    ~MirrorService() { stop(); }
 
     void start();
     void stop() { executor_.stop(); }

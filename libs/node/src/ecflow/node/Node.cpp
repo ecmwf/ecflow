@@ -33,6 +33,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/MirrorAttr.hpp"
 #include "ecflow/node/MiscAttrs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/NodeStats.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
@@ -41,7 +42,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 namespace {
 
@@ -65,9 +65,10 @@ void log_repeat_value_update(const Node& node) {
 // #define DEBUG_REQUEUE 1
 // #define DEBUG_FIND_REFERENCED_NODE 1
 
-Node::Node(const std::string& n, bool check) : n_(n) {
+Node::Node(const std::string& n, bool check)
+    : n_(n) {
     if (check) {
-        string msg;
+        std::string msg;
         if (!Str::valid_name(n, msg)) {
             throw std::runtime_error("Invalid node name : " + msg);
         }
@@ -78,7 +79,7 @@ Node::Node() = default;
 
 Node::Node(const Node& rhs)
     : enable_shared_from_this(rhs),
-      parent_(nullptr),
+      parent_{rhs.parent_}, // Important: this means the copy retains the same parent, thus is a sibling of rhs!
       n_(rhs.n_),
       st_(rhs.st_),
       d_st_(rhs.d_st_),
@@ -1168,22 +1169,16 @@ DState::State Node::dstate() const {
     switch (state()) {
         case NState::COMPLETE:
             return DState::COMPLETE;
-            break;
         case NState::ABORTED:
             return DState::ABORTED;
-            break;
         case NState::ACTIVE:
             return DState::ACTIVE;
-            break;
         case NState::SUBMITTED:
             return DState::SUBMITTED;
-            break;
         case NState::QUEUED:
             return DState::QUEUED;
-            break;
         case NState::UNKNOWN:
             return DState::UNKNOWN;
-            break;
     }
     return DState::UNKNOWN;
 }
@@ -1329,12 +1324,12 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         //   b/ Allow for recursive substitution. %fred% -> %bill% -> 10
 
         size_t firstPercentPos = cmd.find(micro, pos);
-        if (firstPercentPos == string::npos) {
+        if (firstPercentPos == std::string::npos) {
             break;
         }
 
         size_t secondPercentPos = cmd.find(micro, firstPercentPos + 1);
-        if (secondPercentPos == string::npos) {
+        if (secondPercentPos == std::string::npos) {
             break;
         }
 
@@ -1347,7 +1342,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
             continue;
         }
 
-        string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
+        std::string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
         // cout << percentVar << "\n";
 #ifdef DEBUG_S
         cout << "   Found percentVar " << percentVar << "\n";
@@ -1390,12 +1385,12 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         if (!user_edit_variables.empty() && search_user_edit_variables(percentVar, varValue, user_edit_variables)) {
             cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
         }
-        else if (generated_variable && firstColon == string::npos &&
+        else if (generated_variable && firstColon == std::string::npos &&
                  find_parent_gen_variable_value(percentVar, varValue)) {
             cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
         }
         else {
-            if (firstColon != string::npos) {
+            if (firstColon != std::string::npos) {
 
                 if (is_a_alias && findParentVariableValue(percentVar, varValue)) {
                     // For alias, we could have added variables with %A:0%, %A:1%.
@@ -1404,7 +1399,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
                 }
                 else {
                     // ':' is not a valid in variables, hence split, and search, if search fails use replacement
-                    string var(percentVar.begin(), percentVar.begin() + firstColon);
+                    std::string var(percentVar.begin(), percentVar.begin() + firstColon);
 #ifdef DEBUG_S
                     cout << "   var " << var << "\n";
 #endif
@@ -1430,7 +1425,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
                         cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
                     }
                     else {
-                        string substitute(percentVar.begin() + firstColon + 1, percentVar.end());
+                        std::string substitute(percentVar.begin() + firstColon + 1, percentVar.end());
 #ifdef DEBUG_S
                         cout << "  substitute value = " << substitute << "\n";
 #endif
@@ -1467,7 +1462,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
         doubleEcfMicro += micro;
         size_t last_pos = 0;
         while (true) {
-            string::size_type ecf_double_micro_pos = cmd.find(doubleEcfMicro, last_pos);
+            auto ecf_double_micro_pos = cmd.find(doubleEcfMicro, last_pos);
             if (ecf_double_micro_pos != std::string::npos) {
                 cmd.erase(cmd.begin() + ecf_double_micro_pos);
                 last_pos = ecf_double_micro_pos + 1;
@@ -1492,26 +1487,26 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
         //   b/ Allow for recursive substitution. %fred% -> %bill% -> 10
 
         size_t firstPercentPos = cmd.find(micro);
-        if (firstPercentPos == string::npos) {
+        if (firstPercentPos == std::string::npos) {
             break;
         }
         size_t secondPercentPos = cmd.find(micro, firstPercentPos + 1);
-        if (secondPercentPos == string::npos) {
+        if (secondPercentPos == std::string::npos) {
             break;
         }
         if (secondPercentPos - firstPercentPos <= 1) {
             break; // handle %% with no characters in between
         }
 
-        string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
+        std::string percentVar(cmd.begin() + firstPercentPos + 1, cmd.begin() + secondPercentPos);
 #ifdef DEBUG_S
         cout << "   Found percentVar " << percentVar << "\n";
 #endif
 
         size_t firstColon = percentVar.find(':');
-        if (firstColon != string::npos) {
+        if (firstColon != std::string::npos) {
 
-            string var(percentVar.begin(), percentVar.begin() + firstColon);
+            std::string var(percentVar.begin(), percentVar.begin() + firstColon);
 #ifdef DEBUG_S
             cout << "   var " << var << "\n";
 #endif
@@ -1529,7 +1524,7 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
                 cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
             }
             else {
-                string substitute(percentVar.begin() + firstColon + 1, percentVar.end());
+                std::string substitute(percentVar.begin() + firstColon + 1, percentVar.end());
 #ifdef DEBUG_S
                 cout << "  substitute value = " << substitute << "\n";
 #endif
@@ -1572,19 +1567,19 @@ bool Node::variable_dollar_substitution(std::string& cmd) const {
 
     while (true) {
         size_t firstPos = cmd.find('$');
-        if (firstPos == string::npos) {
+        if (firstPos == std::string::npos) {
             break;
         }
 
         size_t secondPos = cmd.find_first_not_of(Str::ALPHANUMERIC_UNDERSCORE(), firstPos + 1);
-        if (secondPos == string::npos) {
+        if (secondPos == std::string::npos) {
             secondPos = cmd.size();
         }
         if (secondPos - firstPos <= 1) {
             break; // handle $/ with no characters in between
         }
 
-        string env(cmd.begin() + firstPos + 1, cmd.begin() + secondPos);
+        std::string env(cmd.begin() + firstPos + 1, cmd.begin() + secondPos);
         // cout << "find env " << env << "\n";
 
         std::string envValue;
@@ -1605,20 +1600,20 @@ bool Node::variable_dollar_substitution(std::string& cmd) const {
 
 std::string Node::completeExpression() const {
     if (c_expr_) {
-        string ret = "complete ";
+        std::string ret = "complete ";
         ret += c_expr_->expression();
         return ret;
     }
-    return string();
+    return std::string{};
 }
 
 std::string Node::triggerExpression() const {
     if (t_expr_) {
-        string ret = "trigger ";
+        std::string ret = "trigger ";
         ret += t_expr_->expression();
         return ret;
     }
-    return string();
+    return std::string{};
 }
 
 bool Node::check_expressions(Ast* ast, const std::string& expr, bool trigger, std::string& errorMsg) const {
@@ -1668,9 +1663,7 @@ Node::parse_and_check_expressions(const std::string& expr, bool trigger, const s
 
     std::string errorMsg;
     if (!check_expressions(ast.get(), expr, trigger, errorMsg)) {
-        std::stringstream ss;
-        ss << context << " " << errorMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(context << " " << errorMsg));
     }
     return ast;
 }
@@ -2275,7 +2268,7 @@ bool Node::why(std::vector<std::string>& vec, bool html) const {
         why_found = true; // return true if why found
     }
     else if (state() != NState::QUEUED && state() != NState::ABORTED) {
-        std::stringstream ss;
+        std::ostringstream ss;
         if (html) {
             ss << path_href() << " (" << NState::to_html(state()) << ") is not queued or aborted";
         }
@@ -2507,17 +2500,6 @@ std::string Node::path_href() const {
 void Node::verification(std::string& errorMsg) const {
     if (misc_attrs_) {
         misc_attrs_->verification(errorMsg);
-    }
-}
-
-void Node::getAllAstNodes(std::set<Node*>& theSet) const {
-    if (completeAst()) {
-        AstCollateNodesVisitor astVisitor(theSet);
-        completeAst()->accept(astVisitor);
-    }
-    if (triggerAst()) {
-        AstCollateNodesVisitor astVisitor(theSet);
-        triggerAst()->accept(astVisitor);
     }
 }
 
@@ -2769,10 +2751,9 @@ bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const {
 
             /// *Only* delete this node if we don't create zombies
             /// anywhere for our children
-            vector<Task*> taskVec;
-            getAllTasks(taskVec);
-            for (Task* t : taskVec) {
-                if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+            auto tasks = ecf::get_all_tasks(*this);
+            for (auto task : tasks) {
+                if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                     return false;
                 }
             }
@@ -2788,10 +2769,9 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const {
 
             /// *Only* archive this node if we don't create zombies anywhere for our children
             /// The most significant state could be ABORTED in family, but we could still have active tasks.
-            vector<Task*> taskVec;
-            getAllTasks(taskVec);
-            for (Task* t : taskVec) {
-                if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+            auto tasks = ecf::get_all_tasks(*this);
+            for (auto task : tasks) {
+                if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                     return false;
                 }
             }
@@ -2801,7 +2781,7 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const {
     return false;
 }
 
-void Node::stats(NodeStats& stats) {
+void Node::stats(NodeStats& stats) const {
     stats.vars_ += vars_.size();
     if (c_expr_) {
         stats.c_trigger_++;

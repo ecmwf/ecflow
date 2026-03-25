@@ -16,7 +16,6 @@
 #include "ecflow/core/File.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -34,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
 
     /// generated a file with results
     std::string errorMsg;
-    string generated_file = root_path + "rtt_analysis.dat";
+    std::string generated_file = root_path + "rtt_analysis.dat";
     BOOST_CHECK_MESSAGE(File::create(generated_file, result, errorMsg), errorMsg);
 
     /// Compare with a reference file
@@ -43,8 +42,9 @@ BOOST_AUTO_TEST_CASE(test_client_invoker_round_trip_times) {
     std::string diffs = File::diff(generated_file, root_path + "ref_analysis.dat", ignoreVec, errorMsg);
     BOOST_CHECK_MESSAGE(diffs.empty(), diffs << "\n" << errorMsg);
 
-    if (diffs.empty())
+    if (diffs.empty()) {
         fs::remove(generated_file);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

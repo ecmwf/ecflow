@@ -29,10 +29,14 @@ class AbstractClientEnv;
 
 class CtsCmdRegistry {
 public:
-    CtsCmdRegistry(const CtsCmdRegistry&)                  = delete;
-    const CtsCmdRegistry& operator=(const CtsCmdRegistry&) = delete;
-
     explicit CtsCmdRegistry(bool addGroupCmd = true);
+
+    CtsCmdRegistry(const CtsCmdRegistry&)            = delete;
+    CtsCmdRegistry& operator=(const CtsCmdRegistry&) = delete;
+    CtsCmdRegistry(CtsCmdRegistry&&)                 = delete;
+    CtsCmdRegistry& operator=(CtsCmdRegistry&&)      = delete;
+
+    ~CtsCmdRegistry() = default;
 
     /// These option describe the arguments for each of the commands
     /// They also can be presented to the user via --help option.

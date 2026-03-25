@@ -19,7 +19,8 @@
 #include "PropertyMapper.hpp"
 #include "VConfig.hpp"
 
-ClockWidget::ClockWidget(QWidget* parent) : QLabel(parent) {
+ClockWidget::ClockWidget(QWidget* parent)
+    : QLabel(parent) {
     timer_ = new QTimer(this);
     connect(timer_, SIGNAL(timeout()), this, SLOT(slotTimeOut()));
 

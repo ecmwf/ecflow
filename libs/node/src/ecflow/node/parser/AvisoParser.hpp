@@ -53,7 +53,8 @@ public:
     static ecf::AvisoAttr parse_aviso_line(const std::string& line, const std::string& name, Node* parent);
     static ecf::AvisoAttr parse_aviso_line(const std::string& line, Node* parent);
 
-    explicit AvisoParser(DefsStructureParser* p) : Parser(p) {}
+    explicit AvisoParser(DefsStructureParser* p)
+        : Parser(p) {}
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
     const char* keyword() const override { return "aviso"; }
 };

@@ -17,7 +17,8 @@
 #include "Highlighter.hpp"
 // #include <QStyleOptionFrameV3>
 
-OneLineTextEdit::OneLineTextEdit(QWidget* parent) : QTextEdit(parent) {
+OneLineTextEdit::OneLineTextEdit(QWidget* parent)
+    : QTextEdit(parent) {
     setReadOnly(true);
     setWordWrapMode(QTextOption::NoWrap);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

@@ -44,17 +44,26 @@ void MirrorService::start() {
 
     // Start polling...
 
-    std::uint32_t expiry = 40;
+    const std::chrono::seconds minimum_expiry{60};
+    std::chrono::seconds expiry = minimum_expiry;
 
     if (!listeners_.empty()) {
         std::vector<std::uint32_t> polling_intervals;
         auto found = std::max_element(std::begin(listeners_), std::end(listeners_), [](const auto& a, const auto& b) {
             return a.mirror_request_.polling < b.mirror_request_.polling;
         });
-        expiry     = found->mirror_request_.polling;
+        expiry     = std::chrono::seconds{found->mirror_request_.polling};
+    }
+    SLOG(D, "MirrorService: start polling, requested polling interval: " << expiry.count() << " s");
+
+    if (expiry < minimum_expiry) {
+        SLOG(W,
+             "MirrorService: polling interval too low detected: " << expiry.count() << " s, resetting to minimum: "
+                                                                  << minimum_expiry.count() << " s");
+        expiry = minimum_expiry;
     }
 
-    SLOG(D, "MirrorService: start polling, with polling interval: " << expiry << " s");
+    SLOG(D, "MirrorService: start polling, with polling interval: " << expiry.count() << " s");
     executor_.start(std::chrono::seconds{expiry});
 }
 

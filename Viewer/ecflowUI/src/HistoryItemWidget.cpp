@@ -22,7 +22,8 @@
 
 static bool firstRun = true;
 
-HistoryItemWidget::HistoryItemWidget(QWidget* parent) : QWidget(parent) {
+HistoryItemWidget::HistoryItemWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     searchTb_->setEnabled(false);

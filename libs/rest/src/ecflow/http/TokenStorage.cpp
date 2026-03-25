@@ -13,6 +13,7 @@
 #include <atomic> // shared mutex only with c++14
 #include <fstream>
 #include <iomanip>
+#include <mutex>
 #include <shared_mutex>
 #include <sstream>
 #include <thread>
@@ -36,7 +37,7 @@ std::atomic initialized = false;
 namespace {
 
 std::string hmac_sha256(const std::string& salt, const std::string& token) {
-    unsigned char hash[EVP_MAX_MD_SIZE];
+    std::array<unsigned char, EVP_MAX_MD_SIZE> hash;
     unsigned int hash_len;
 
     HMAC(EVP_sha256(),
@@ -44,9 +45,9 @@ std::string hmac_sha256(const std::string& salt, const std::string& token) {
          static_cast<int>(salt.size()),
          reinterpret_cast<const unsigned char*>(token.c_str()),
          token.size(),
-         hash,
+         hash.data(),
          &hash_len);
-    std::stringstream ss;
+    std::ostringstream ss;
     for (unsigned int i = 0; i < hash_len; i++) {
         ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
     }
@@ -54,7 +55,7 @@ std::string hmac_sha256(const std::string& salt, const std::string& token) {
 }
 
 std::string hmac_pbkdf2_sha256(const std::string& salt, const std::string& token, int num_iterations) {
-    unsigned char hash[SHA256_DIGEST_LENGTH];
+    std::array<unsigned char, SHA256_DIGEST_LENGTH> hash;
 
     PKCS5_PBKDF2_HMAC(token.c_str(),
                       static_cast<int>(token.size()),
@@ -63,8 +64,8 @@ std::string hmac_pbkdf2_sha256(const std::string& salt, const std::string& token
                       num_iterations,
                       EVP_sha256(),
                       SHA256_DIGEST_LENGTH,
-                      hash);
-    std::stringstream ss;
+                      hash.data());
+    std::ostringstream ss;
     for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
         ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
     }
@@ -213,12 +214,11 @@ void TokenStorage::ReadStorage() {
 
     while (true) {
         try {
-            auto current_modified =
-                std::chrono::system_clock::from_time_t(fs::last_write_time(fs::path(opts.tokens_file)));
+            auto current_modified = ecf::fsx::last_write_time(fs::path(opts.tokens_file));
             if (current_modified > last_modified) {
                 auto new_tokens = ReadTokens(opts.tokens_file);
                 {
-                    std::lock_guard lock(m);
+                    std::scoped_lock lock(m);
                     tokens_ = new_tokens;
                 }
                 last_modified = current_modified;

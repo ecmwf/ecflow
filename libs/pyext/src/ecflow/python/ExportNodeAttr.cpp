@@ -370,6 +370,14 @@ static std::shared_ptr<ecf::MirrorAttr> mirror_init_defaults_4(const std::string
     return mirror_init(name, path, host, port, polling, ssl);
 }
 
+static std::string to_python_string_aviso(const ecf::AvisoAttr& aviso) {
+    return ecf::to_python_string(aviso);
+}
+
+static std::string to_python_string_mirror(const ecf::MirrorAttr& mirror) {
+    return ecf::to_python_string(mirror);
+}
+
 void export_NodeAttr() {
     // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
     py::class_<Trigger, std::shared_ptr<Trigger>>("Trigger", DefsDoc::trigger(), py::init<std::string>())
@@ -1118,7 +1126,7 @@ void export_NodeAttr() {
         .def("__init__", py::make_constructor(&aviso_init_defaults_2))
         .def("__init__", py::make_constructor(&aviso_init_defaults_3))
         .def(py::self == py::self)                           // __eq__
-        .def("__str__", &ecf::to_python_string)              // __str__
+        .def("__str__", &to_python_string_aviso)             // __str__
         .def("__copy__", pyutil_copy_object<ecf::AvisoAttr>) // __copy__ uses copy constructor
         .def("name",
              &ecf::AvisoAttr::name,
@@ -1150,7 +1158,7 @@ void export_NodeAttr() {
         .def("__init__", py::make_constructor(&mirror_init_defaults_3))
         .def("__init__", py::make_constructor(&mirror_init_defaults_4))
         .def(py::self == py::self)                            // __eq__
-        .def("__str__", &ecf::to_python_string)               // __str__
+        .def("__str__", &to_python_string_mirror)             // __str__
         .def("__copy__", pyutil_copy_object<ecf::MirrorAttr>) // __copy__ uses copy constructor
         .def("name",
              &ecf::MirrorAttr::name,

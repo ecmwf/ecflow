@@ -19,7 +19,8 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
-NodeQueryResultModel::NodeQueryResultModel(QObject* parent) : QAbstractItemModel(parent) {
+NodeQueryResultModel::NodeQueryResultModel(QObject* parent)
+    : QAbstractItemModel(parent) {
     columns_ = ModelColumn::def("query_columns");
     Q_ASSERT(columns_);
 

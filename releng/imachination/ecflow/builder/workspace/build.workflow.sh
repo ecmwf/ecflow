@@ -23,7 +23,8 @@ function configure() {
     pushd "${ECFLOW_DIR}"
 
     # Configure the project
-    cmake --preset linux.gcc.serveronly.relwithdebinfo
+    ARCH=$(uname -m)
+    cmake --preset linux.gcc.serveronly.relwithdebinfo -DBoost_LIBRARY_DIR="/usr/lib/${ARCH}-linux-gnu"
 
     popd
 }
@@ -42,6 +43,9 @@ function package() {
 
     # Create the package
     cmake --build --preset linux.gcc.serveronly.relwithdebinfo --target package
+
+    # Copy the generated .deb package to the root ecflow directory
+    cmake -E copy ${ECFLOW_DIR}/.deploy/build/linux.gcc.serveronly.relwithdebinfo/*.deb ${ECFLOW_DIR}/
 
     popd
 }

@@ -15,7 +15,8 @@
 
 class LabelParser : public Parser {
 public:
-    explicit LabelParser(DefsStructureParser* p) : Parser(p) {}
+    explicit LabelParser(DefsStructureParser* p)
+        : Parser(p) {}
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
     const char* keyword() const override { return "label"; }
 };

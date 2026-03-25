@@ -28,9 +28,6 @@ public:
 
     // Disable default construction
     CheckPt() = delete;
-    // Disable copy (and move) semantics
-    CheckPt(const CheckPt&)                  = delete;
-    const CheckPt& operator=(const CheckPt&) = delete;
 
     /// The interval between automatic saves of check point by server
     static int default_interval() { return 120; }

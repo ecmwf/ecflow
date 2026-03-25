@@ -35,16 +35,6 @@ ecbuild_info( "CMAKE_C_COMPILER_VERSION   : ${CMAKE_C_COMPILER_VERSION}")
 ecbuild_info( "CMAKE_CXX_COMPILER_ID      : ${CMAKE_CXX_COMPILER_ID}")
 ecbuild_info( "CMAKE_CXX_COMPILER_VERSION : ${CMAKE_CXX_COMPILER_VERSION}")
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  #
-  # In case of using Clang 18.1+ in Linux, we disable the following error (present in Boost headers):
-  #
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 18.1 AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    ecbuild_add_cxx_flags("-Wno-enum-constexpr-conversion")
-  endif ()
-
-endif()
-
 ecbuild_info( "Selected built type: ${CMAKE_BUILD_TYPE}" )
 
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
@@ -61,11 +51,12 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   ecbuild_add_cxx_flags("-ftemplate-depth=1024")
 
   #
-  # In case of using Clang 18.1+ in Linux, we disable the following error (present in Boost headers):
+  # In case of using Clang [18.1, 20[ in Linux, we disable the following error (present in Boost headers):
   #
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 18.1 AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 18.1 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 20 AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     ecbuild_add_cxx_flags("-Wno-enum-constexpr-conversion")
   endif ()
+
 endif()
 
 if (HAVE_WARNINGS)
@@ -99,12 +90,16 @@ if (HAVE_WARNINGS)
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>>:-Wno-missing-field-initializers> # silence warning in Boost.Python related headers
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>>:-Wno-overloaded-virtual>
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>>:-Wno-unused-parameter>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,14.0.0>>:-Wno-c++20-attribute-extensions> # silence warning in Qt6 related headers
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,21.0.0>>:-Wno-character-conversion> # silence warning in Qt6 related headers
     ## Clang (MacOS AppleClang)
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-deprecated-copy-with-user-provided-copy> # silence warnings in Qt5 related headers
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-deprecated-declarations>
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-missing-field-initializers> # silence warning in Boost.Python related headers
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-overloaded-virtual>
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-unused-parameter>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,14.0.0>>:-Wno-c++20-attribute-extensions> # silence warning in Qt6 related headers
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,21.0.0>>:-Wno-character-conversion> # silence warning in Qt6 related headers
     ## Clang (Intel Clang-based)
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:IntelLLVM>>:-Wno-deprecated-copy-with-user-provided-copy> # silence warnings in Qt5 related headers
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:IntelLLVM>>:-Wno-deprecated-declarations>
@@ -130,3 +125,44 @@ endif ()
 if (HAVE_EXPORT_COMPILE_COMMANDS)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif ()
+
+# =========================================================================================
+# Support for std::filesystem
+# =========================================================================================
+
+if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0" )
+  # GCC 8.x needs explicit stdc++fs linking
+  link_libraries(stdc++fs)
+endif()
+if( CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "2026.0")
+  # Intel compilers (available on Atos HPC) need explicit stdc++fs linking
+  link_libraries(stdc++fs)
+endif()
+if( CMAKE_CXX_COMPILER_ID STREQUAL "NVHPC" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL "25.0")
+  # NVidia compilers (available on Atos HPC) need explicit stdc++fs linking
+  link_libraries(stdc++fs)
+endif()
+if( NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "15.0")
+  # ARM-based Clang (available on Atos HPC) needs explicit stdc++fs linking
+  link_libraries(stdc++fs)
+endif()
+
+# =========================================================================================
+# Support for mallinfo / mallinfo2
+# =========================================================================================
+
+check_symbol_exists(mallinfo2 malloc.h HAVE_MALLINFO2)
+if (HAVE_MALLINFO2)
+  message(STATUS "'mallinfo2' is available, using it for memory usage information")
+  add_definitions(-DHAVE_MALLINFO2)
+else ()
+  check_symbol_exists(mallinfo malloc.h HAVE_MALLINFO)
+  if (HAVE_MALLINFO)
+    message(STATUS "'mallinfo' is available, using it for memory usage information")
+    add_definitions(-DHAVE_MALLINFO)
+  endif()
+endif()
+
+if (NOT HAVE_MALLINFO AND NOT HAVE_MALLINFO2)
+  message(STATUS "Neither 'mallinfo' nor 'mallinfo2' are available, memory usage information will not be available")
+endif()

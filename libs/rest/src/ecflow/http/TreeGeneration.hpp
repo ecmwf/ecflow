@@ -24,7 +24,9 @@ namespace ecf::http {
 
 struct BasicTree
 {
-    BasicTree() : root_(ojson::object({})), stack_{&root_} {}
+    BasicTree()
+        : root_(ojson::object({})),
+          stack_{&root_} {}
 
     void begin_visit(const Suite& suite) {
         ojson& parent_ = *stack_.back();

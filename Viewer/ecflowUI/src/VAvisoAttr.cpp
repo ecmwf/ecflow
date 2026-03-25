@@ -18,7 +18,8 @@
 // VAvisoAttrType
 //================================
 
-VAvisoAttrType::VAvisoAttrType() : VAttributeType("aviso") {
+VAvisoAttrType::VAvisoAttrType()
+    : VAttributeType("aviso") {
     dataCount_                         = 10;
     searchKeyToData_["aviso_name"]     = NameIndex;
     searchKeyToData_["aviso_listener"] = ListenerIndex;

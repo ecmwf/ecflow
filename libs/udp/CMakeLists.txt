@@ -55,7 +55,7 @@ ecbuild_add_executable(
   LIBS
     pthread
     Boost::boost
-    Boost::filesystem
+    $<$<VERSION_LESS:${SELECTED_BOOST_VERSION},1.69.0>:Boost::system>
 )
 set_target_properties(${CLIENT_TARGET} PROPERTIES
   INSTALL_RPATH ""
@@ -77,10 +77,6 @@ list(APPEND ${TEST_TARGET}_srcs
   test/TestUDP_main.cpp
   test/TestUDPServer.cpp
 )
-
-if(${SELECTED_BOOST_VERSION} VERSION_GREATER_EQUAL 1.86.0)
-  set(ADDITIONAL_BOOST_COMPONENTS Boost::process)
-endif()
 
 ecbuild_add_test(
   TARGET

@@ -26,9 +26,6 @@
 #endif
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool CtsNodeCmd::why_cmd(std::string& nodePath) const {
     if (api_ == CtsNodeCmd::WHY) {
@@ -43,11 +40,9 @@ void CtsNodeCmd::print(std::string& os) const {
         case CtsNodeCmd::GET: {
             user_cmd(os, CtsApi::get(absNodePath_));
 #ifdef DEBUG
-            std::stringstream ss;
-            if (Ecf::server()) {
-                ss << " [server(" << Ecf::state_change_no() << " " << Ecf::modify_change_no() << ")]";
-            }
-            os += ss.str();
+            os += Ecf::server()
+                      ? MESSAGE(" [server(" << Ecf::state_change_no() << " " << Ecf::modify_change_no() << ")]")
+                      : "";
 #endif
             break;
         }
@@ -70,7 +65,6 @@ void CtsNodeCmd::print(std::string& os) const {
             break;
         default:
             throw std::runtime_error("CtsNodeCmd::print: Unrecognised command");
-            break;
     }
 }
 void CtsNodeCmd::print_only(std::string& os) const {
@@ -97,7 +91,6 @@ void CtsNodeCmd::print_only(std::string& os) const {
             break;
         default:
             throw std::runtime_error("CtsNodeCmd::print_only : Unrecognised command");
-            break;
     }
 }
 
@@ -126,28 +119,21 @@ bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const {
 bool CtsNodeCmd::isWrite() const {
     switch (api_) {
         case CtsNodeCmd::GET:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::GET_STATE:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::MIGRATE:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::JOB_GEN:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::WHY:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::NO_CMD:
             break;
         default:
             throw std::runtime_error("CtsNodeCmd::isWrite: Unrecognised command");
-            break;
     }
     assert(false);
     return false;
@@ -157,27 +143,20 @@ const char* CtsNodeCmd::theArg() const {
     switch (api_) {
         case CtsNodeCmd::GET:
             return CtsApi::getArg();
-            break;
         case CtsNodeCmd::GET_STATE:
             return CtsApi::get_state_arg();
-            break;
         case CtsNodeCmd::MIGRATE:
             return CtsApi::migrate_arg();
-            break;
         case CtsNodeCmd::JOB_GEN:
             return CtsApi::job_genArg();
-            break;
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY:
             return CtsApi::checkJobGenOnlyArg();
-            break;
         case CtsNodeCmd::WHY:
             return CtsApi::whyArg();
-            break;
         case CtsNodeCmd::NO_CMD:
             break;
         default:
             throw std::runtime_error("CtsNodeCmd::theArg: Unrecognised command");
-            break;
     }
     assert(false);
     return nullptr;
@@ -196,12 +175,12 @@ PrintStyle::Type_t CtsNodeCmd::show_style() const {
     return ClientToServerCmd::show_style();
 }
 
-int CtsNodeCmd::timeout() const {
+ClientToServerCmd::time_duration_t CtsNodeCmd::timeout() const {
     if (api_ == CtsNodeCmd::GET) {
-        return time_out_for_load_sync_and_get();
+        return timeout_for_load_sync_and_get();
     }
     if (api_ == CtsNodeCmd::MIGRATE) {
-        return 120;
+        return std::chrono::seconds{120};
     }
     return ClientToServerCmd::timeout();
 }
@@ -265,7 +244,6 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const {
         case CtsNodeCmd::NO_CMD:
         default:
             throw std::runtime_error("CtsNodeCmd::doHandleRequest: Unrecognised command");
-            break;
     }
 
     return PreAllocatedReply::ok_cmd();
@@ -348,29 +326,39 @@ const char* migrate_desc() {
 void CtsNodeCmd::addOption(boost::program_options::options_description& desc) const {
     switch (api_) {
         case CtsNodeCmd::GET: {
-            desc.add_options()(CtsApi::getArg(), po::value<string>()->implicit_value(string()), get_desc());
+            desc.add_options()(CtsApi::getArg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                               get_desc());
             break;
         }
         case CtsNodeCmd::GET_STATE: {
-            desc.add_options()(
-                CtsApi::get_state_arg(), po::value<string>()->implicit_value(string()), get_state_desc());
+            desc.add_options()(CtsApi::get_state_arg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                               get_state_desc());
             break;
         }
         case CtsNodeCmd::MIGRATE: {
-            desc.add_options()(CtsApi::migrate_arg(), po::value<string>()->implicit_value(string()), migrate_desc());
+            desc.add_options()(CtsApi::migrate_arg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                               migrate_desc());
             break;
         }
         case CtsNodeCmd::JOB_GEN: {
-            desc.add_options()(CtsApi::job_genArg(), po::value<string>()->implicit_value(string()), job_gen_desc());
+            desc.add_options()(CtsApi::job_genArg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                               job_gen_desc());
             break;
         }
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY: {
-            desc.add_options()(
-                CtsApi::checkJobGenOnlyArg(), po::value<string>()->implicit_value(string()), job_gen_only_desc());
+            desc.add_options()(CtsApi::checkJobGenOnlyArg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                               job_gen_only_desc());
             break;
         }
         case CtsNodeCmd::WHY: {
-            desc.add_options()(CtsApi::whyArg(), po::value<string>()->implicit_value(string()), why_desc());
+            desc.add_options()(CtsApi::whyArg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}),
+                               why_desc());
             break;
         }
         case CtsNodeCmd::NO_CMD:
@@ -386,7 +374,7 @@ void CtsNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     assert(api_ != CtsNodeCmd::NO_CMD);
 
     if (ac->debug()) {
-        cout << "  CtsNodeCmd::create = '" << theArg() << "'.\n";
+        std::cout << "  CtsNodeCmd::create = '" << theArg() << "'.\n";
     }
 
     std::string absNodePath = vm[theArg()].as<std::string>();

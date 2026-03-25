@@ -18,6 +18,7 @@
 #include "ecflow/node/Limit.hpp"
 #include "ecflow/node/Memento.hpp"
 #include "ecflow/node/Node.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 
 #ifdef DEBUG
     #include <ostream>
@@ -26,7 +27,6 @@
 #endif
 
 using namespace ecf;
-using namespace std;
 
 void InLimitMgr::reset() {
     for (auto& i : vec_) {
@@ -80,8 +80,8 @@ bool InLimitMgr::deleteInlimit(const std::string& name) {
         return true;
     }
 
-    string path_to_limit; // This can be empty
-    string limit_name;
+    std::string path_to_limit; // This can be empty
+    std::string limit_name;
     (void)Extract::pathAndName(name, path_to_limit, limit_name); // already checked for empty name
     // cout << "   path_to_limit:" << path_to_limit << "\n";
     // cout << "   limit_name:" <<  limit_name << "\n";
@@ -245,7 +245,7 @@ void InLimitMgr::decrementInLimit(std::set<Limit*>& limitSet, const std::string&
 
     resolveInLimitReferences();
 
-    std::vector<task_ptr> task_vec;
+    std::vector<Task*> tasks;
     for (InLimit& inlimit : vec_) {
         Limit* limit = inlimit.limit();
         if (limit && limitSet.find(limit) == limitSet.end()) {
@@ -258,10 +258,10 @@ void InLimitMgr::decrementInLimit(std::set<Limit*>& limitSet, const std::string&
                     // Can only decrement this once, i.e when all child tasks are completed or aborted or queued or
                     // unknown
                     bool at_least_one_active = false;
-                    if (task_vec.empty()) {
-                        node_->get_all_tasks(task_vec); // Get tasks once, inside for loop
+                    if (tasks.empty()) {
+                        tasks = ecf::get_all_tasks(*node_); // Get tasks once, inside for loop
                     }
-                    for (task_ptr task : task_vec) {
+                    for (auto task : tasks) {
                         if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
                             at_least_one_active = true;
                             break;
@@ -304,7 +304,7 @@ void InLimitMgr::decrementInLimitForSubmission(std::set<Limit*>& limitSet, const
 
 // #define DEBUG_WHY 1
 
-static void add_consumed_paths(Limit* limit, std::stringstream& ss) {
+static void add_consumed_paths(Limit* limit, std::ostream& ss) {
     ss << "(";
     const std::set<std::string>& consumed_paths = limit->paths();
     int count                                   = 0;
@@ -336,15 +336,14 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const {
         for (auto& i : vec_) {
             Limit* limit = i.limit();
             if (limit && !limit->inLimit(i.tokens())) {
-                std::stringstream ss;
+                std::ostringstream ss;
                 if (i.pathToNode().empty()) {
                     ss << "limit " << limit->name() << " is full";
                 }
                 else {
                     if (html) {
-                        std::stringstream s;
-                        s << "[limit]" << i.pathToNode() << Str::COLON() << limit->name();
-                        ss << Node::path_href_attribute(s.str()) << " is full";
+                        auto ref = MESSAGE("[limit]" << i.pathToNode() << Str::COLON() << limit->name());
+                        ss << Node::path_href_attribute(ref) << " is full";
                     }
                     else {
                         ss << "limit " << i.pathToNode() << Str::COLON() << limit->name() << " is full";
@@ -427,18 +426,15 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
                 return referencedLimit; // this is empty/NULL
             }
 
-            std::stringstream ss;
-            ss << "Warning: ";
-            ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString()
-               << ", which cannot be found on the parent nodes\n";
-            warningMsg += ss.str();
+            warningMsg += MESSAGE("Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a "
+                                              << inLimit.toString() << ", which cannot be found on the parent nodes\n");
         }
         return referencedLimit; // this is empty/NULL
     }
 
     // *FIND* the node referenced by the In-Limit, this should hold the Limit.
     // cout << "Inlimit path not empty \n";
-    string warning_message;
+    std::string warning_message;
     node_ptr referenceNode = node_->findReferencedNode(inLimit.pathToNode(), inLimit.name(), warning_message);
     if (!referenceNode.get()) {
         /// Could not find the node which *HOLDS* the limit
@@ -451,10 +447,8 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
                 return limit_ptr();
             }
 
-            std::stringstream ss;
-            ss << "Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString()
-               << ", which cannot be found\n";
-            warningMsg += ss.str();
+            warningMsg += MESSAGE("Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a "
+                                              << inLimit.toString() << ", which cannot be found\n");
         }
         return limit_ptr();
     }
@@ -470,11 +464,11 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
         }
 
         if (reportWarnings) {
-            std::stringstream ss;
-            ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString() << " :";
-            ss << "The referenced " << referenceNode->debugType() << " '" << referenceNode->absNodePath()
-               << "' does not define the limit " << inLimit.name() << "\n";
-            warning_message += ss.str();
+            warning_message +=
+                MESSAGE(node_->debugType()
+                        << " " << node_->absNodePath() << " has a " << inLimit.toString() << " :"
+                        << "The referenced " << referenceNode->debugType() << " '" << referenceNode->absNodePath()
+                        << "' does not define the limit " << inLimit.name() << "\n");
             warningMsg += "Warning: ";
             warningMsg += warning_message;
             warningMsg += "\n";
@@ -487,13 +481,10 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
     if (inLimit.tokens() > referencedLimit->theLimit()) {
         if (reportWarnings) {
             // in limit exceeds the LIMIT value
-            std::stringstream ss;
-            ss << "Warning: ";
-            ss << node_->debugType() << " " << node_->absNodePath() << " has a " << inLimit.toString()
-               << " reference\n";
-            ss << " with value '" << inLimit.tokens() << "' which exceeds '" << referencedLimit->theLimit()
-               << "' defined on the Limit\n";
-            warningMsg += ss.str();
+            warningMsg += MESSAGE("Warning: " << node_->debugType() << " " << node_->absNodePath() << " has a "
+                                              << inLimit.toString() << " reference\n"
+                                              << " with value '" << inLimit.tokens() << "' which exceeds '"
+                                              << referencedLimit->theLimit() << "' defined on the Limit\n");
         }
     }
     return referencedLimit;

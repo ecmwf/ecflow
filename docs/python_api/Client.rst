@@ -73,96 +73,203 @@ Alter command is used to change the attributes of a node
     ::
     
        void alter(
-          (list | string ) paths(s) : A single or list of paths. Path name to the node whose attributes are to be changed
-          string alter_type         : This must be one of [ 'add' | 'change' | 'delete' | 'set_flag' | 'clear_flag' ]
-          string attr_type          : This varies according to the 'alter_type'. valid strings are:
-             add    : [ variable,time,today,date,day,label,zombie,late]
-             delete : [ variable,time,today,date,day,label,cron,event,meter,trigger,complete,repeat,limit,inlimit,limit_path,zombie,late]
-             change : [ variable,clock-type,clock-gain,event,meter,label,trigger,complete,repeat,limit-max,limit-value,late,time,today]
-             set_flag and clear_flag:
-                      [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | statuscmd_failed | killcmd_failed |
-                        no_script | killed | status | late | message | complete | queue_limit | task_waiting | locked | zombie ]
-          string name               : used to locate the attribute, when multiple attributes of the same type,
-                                      optional for some.i.e. when changing, attributes like variable,meter,event,label,limits
-          string value              : Only used when 'changing' a attribute. provides a new value
+           (list | string ) paths(s) :
+               One or more paths to the node with the attribute(s) to be altered.
+           string alter_type :
+               The type of alteration to perform.
+               Must be one of [ add, change, delete, set_flag, clear_flag, sort ]
+           string attr_type :
+               The type of attribute affected by the alteration.
+               Depending on the type of alteration, provide one of the following.
+                   for add : [
+                     variable,  time, today, date, day, zombie, event, meter,
+                     late, limit, inlimit, label, aviso, mirror
+                   ]
+                   for delete : [
+                     variable, time, today, date, day, cron, event, meter, late, generic,
+                     queue, label, trigger, complete, repeat, limit, inlimit, limit_path,
+                     zombie, aviso, mirror
+                   ]
+                   for change : [
+                     variable, clock_type, clock_gain, clock_date, clock_sync , event, meter
+                     label, trigger , complete, repeat, limit_max, limit_value, defstatus
+                     late, time, today, aviso, mirror
+                   ]
+                   for set_flag or clear_flag: [
+                     force_aborted, user_edit, task_aborted, edit_failed, ecfcmd_failed,
+                     statuscmd_failed, killcmd_failed, no_script, killed, status, late,
+                     message complete, queue_limit, task_waiting, locked, zombie, archived,
+                     restored, threshold, log_error, checkpt_error
+                   ]
+                   for sort: [
+                     event, meter, label, variable,  limit, all               ]
+          string name :
+              The name of the attribute(s) to be altered.
+              Used when multiple attributes of the same type exist e.g. a variable,
+              a meter, an event or a labet; but optional when changing unnamed attributes,
+              such as trigger or complete.
+          string value :
+              The new/updated value for the attribute.
        )
     
-    Exceptions can be raised because:
+    This function will raise exceptions because:
     
-    - absolute_node_path does not exist.
-    - parsing fails
+    - A provided path does not exist.
+    - A provided value cannot be parsed
+    - A provided value is invalid or out of range
     
     The following describes the parameters in more detail:
     
     .. code-block:: shell
     
      add variable variable_name variable_value
-     add time   format    # when format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
-     add today  format    # when format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
-     add date   format    # when format dd.mm.yyyy, can use '*' to indicate any day,month, or year
-     add day    format    # when format is one of [ sunday,monday,tuesday,wednesday,friday,saturday ]
-     add zombie format    # when format is one of <zombie-type>:<child>:<server-action>|<client-action>:<zombie-lifetime>
-                          #  <zombie-type> := [ user | ecf | path ]
-                          #  <child> := [ init, event, meter, label, wait, abort, complete ]
-                          #  <server-action> := [ adopt | delete ]
-                          #  <client-action> := [ fob | fail | block(default) ]
-                          #  <zombie-lifetime>:= lifetime of zombie in the server
-                          # example
-                          # add zombie :label:fob:0   # fob all child label request, & remove zombie as soon as possible
     
-     delete variable name # if name is empty will delete -all- variables on the node
-     delete time name     # To delete a specific time, enter the time in same format as show above,
-                          # or as specified in the defs file
-                          # an empty name will delete all time attributes on the node
-     delete today name    # To delete a specific today attribute, enter in same format as show above,
-                          # or as specified in the defs file.
-                          # an empty name will delete all today attributes on the node
-     delete date name     # To delete a specific date attribute, enter in same format as show above,
-                          # or as specified in the defs file
-                          # an empty name will delete all date attributes on the node
-     delete day name      # To delete a specific day attribute, enter in same format as show above,
-                          # or as specified in the defs file
-                          # an empty name will delete all day attributes on the node
-     delete cron name     # To delete a specific cron attribute, enter in same as specified in the defs file
-                          # an empty name will delete all cron attributes on the node
-     delete event name    # To delete a specific event, enter name or number
-                          # an empty name will delete all events on the node
-     delete meter name    # To delete a specific meter , enter the meter name
-                          # an empty name will delete all meter on the node 
-     delete label name    # To delete a specific label , enter the label name
-                          # an empty name will delete all labels on the node
-     delete limit name    # To delete a specific limit , enter the limit name
-                          # an empty name will delete all limits on the node
-     delete inlimit name  # To delete a specific inlimit , enter the inlimit name
-                          # an empty name will delete all inlimits on the node
-     delete limit_path limit_name limit_path # To delete a specific limit path
-     delete trigger       # A node can only have one trigger expression, hence the name is not required
-     delete complete      # A node can only have one complete expression, hence the name is not required
-     delete repeat        # A node can only have one repeat, hence the name is not required
+     add time format
+       # where format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
     
-     change variable name value    # Find the specified variable, and set the new value.
-     change clock_type name        # The name must be one of 'hybrid' or 'real'.
-     change clock_gain name        # The gain must be convertible to an integer.
-     change clock_sync name        # Sync suite calendar with the computer.
-     change event name(optional )  # if no name specified the event is set, otherwise name must be 'set' or 'clear'
-     change meter name value       # The meter value must be convertible to an integer, and between meter min-max range.
-     change label name value       # sets the label
-     change trigger name           # The name must be expression. returns an error if the expression does not parse
-     change complete name          # The name must be expression. returns an error if the expression does not parse
-     change limit_max name value   # Sets the max value of the limit. The value must be convertible to an integer
-     change limit_value name value # Sets the consumed tokens to value.The value must be convertible to an integer
-     change repeat value           # If the repeat is a date, then the value must be a valid YMD ( ie. yyyymmdd)
-                                   # and be convertible to an integer, additionally the value must be in range
-                                   # of the repeat start and end dates. Like wise for repeat integer. For repeat
-                                   # string and enum,  the name must either be an integer, that is a valid index or
-                                   # if it is a string, it must correspond to one of enum's or strings list
+     add today format
+       # where format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
+    
+     add date format
+       # where format is dd.mm.yyyy, and '*' can be used to indicate any day, month or year
+    
+     add day format
+       # where format is one of [ sunday,monday,tuesday,wednesday,friday,saturday ]
+    
+     add zombie format
+       # where format is based on the following grammar
+       #       <zombie-type>:<child>:<server-action> | <client-action>:<zombie-lifetime>
+       #       <zombie-type> := [ user | ecf | path ]
+       #       <child> := [ init, event, meter, label, wait, abort, complete ]
+       #       <server-action> := [ adopt | delete ]
+       #       <client-action> := [ fob | fail | block(default) ]
+       #       <zombie-lifetime>:= lifetime of zombie in the server
+       # For example, to fob all child label requests, and remove zombie as soon as possible:
+       #    'add zombie :label:fob:0'
+    
+     add inlimit '/path/to/node:limit' '12'
+       # To add an inlimit, depending on '/path/to/node:limit' and value '12'
+       # Important:
+       #  * an empty inlimit value will add an inlimit with default value of 1
+       #  * if a 0 or negative value is provided, an exception will be raised
+       #  * if the limit node/name is not found, an exception will be raised
+       #  * if both '-s' and '-n' are provided, an exception will be raised
+    
+     add inlimit '/path/to/node:limit' '-s 13'
+       # To add an inlimit, depending on '/path/to/node:limit' and value '13'.
+       # By including '-s' the inlimit will affect submissions only.
+    
+     add inlimit '/path/to/node:limit' '-n 14'
+       # To add an inlimit, depending on '/path/to/node:limit' and value '14'.
+       # By including '-n' the inlimit will affect node only.
+    
+     delete variable name
+       # Important: if name is empty, *all* variables on the node are deleted
+    
+     delete time name
+       # To delete a specific time, enter the time in same format as show above,
+       # or as specified in the defs file
+       # an empty name will delete all time attributes on the node
+    
+     delete today name
+       # To delete a specific today attribute, enter in same format as show above,
+       # or as specified in the defs file.
+       # an empty name will delete all today attributes on the node
+    
+     delete date name
+       # To delete a specific date attribute, enter in same format as show above,
+       # or as specified in the defs file
+       # an empty name will delete all date attributes on the node
+    
+     delete day name
+       # To delete a specific day attribute, enter in same format as show above,
+       # or as specified in the defs file
+       # an empty name will delete all day attributes on the node
+    
+     delete cron name
+       # To delete a specific cron attribute, enter in same as specified in the defs file
+       # an empty name will delete all cron attributes on the node
+    
+     delete event name
+       # To delete a specific event, enter name or number
+       # an empty name will delete all events on the node
+    
+     delete meter name
+       # To delete a specific meter , enter the meter name
+       # an empty name will delete all meter on the node 
+    
+     delete label name
+       # To delete a specific label , enter the label name
+       # an empty name will delete all labels on the node
+    
+     delete limit name
+       # To delete a specific limit , enter the limit name
+       # an empty name will delete all limits on the node
+    
+     delete inlimit name
+       # To delete a specific inlimit , enter the inlimit name
+       # an empty name will delete all inlimits on the node
+    
+     delete limit_path limit_name limit_path
+       # To delete a specific limit path
+    
+     delete trigger
+       # A node can only have one trigger expression, hence the name is not required
+    
+     delete complete
+       # A node can only have one complete expression, hence the name is not required
+    
+     delete repeat
+       # A node can only have one repeat, hence the name is not required
+    
+     change variable name value
+       # Find the specified variable, and set the new value.
+    
+     change clock_type name
+       # The name must be one of 'hybrid' or 'real'.
+    
+     change clock_gain name
+       # The gain must be convertible to an integer.
+    
+     change clock_sync name
+       # Sync suite calendar with the computer.
+    
+     change event name(optional )
+       # if no name specified the event is set, otherwise name must be 'set' or 'clear'
+    
+     change meter name value
+       # The meter value must be convertible to an integer, and between meter min-max range.
+    
+     change label name value
+       # sets the label
+    
+     change trigger name
+       # The name must be expression. returns an error if the expression does not parse
+    
+     change complete name
+       # The name must be expression. returns an error if the expression does not parse
+    
+     change limit_max name value
+       # Sets the max value of the limit. The value must be convertible to an integer
+    
+     change limit_value name value
+       # Sets the consumed tokens to value. The value must be convertible to an integer
+    
+     change repeat value
+       # For date repeats, the value must be an yyyymmdd formtted integer, defined in
+       # the [begin, end] dates range.
+       # For integer repeats, the value must be an integer, defined in the [begin, end]
+       # values range.
+       # For string or enum repeats, the value must either be a valid integer (to be used
+       # as index) or a string matching a valid enum or strings list value.
+    
     
     Usage:
     
     .. code-block:: python
     
       try:
-         ci = Client()     # use default host(ECF_HOST) & port(ECF_PORT)
+         ci = Client()     # uses default host(ECF_HOST) & port(ECF_PORT)
          ci.alter('/suite/task','change','trigger','b2 == complete')
       except RuntimeError, e:
          print(str(e))

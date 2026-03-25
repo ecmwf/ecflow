@@ -17,14 +17,15 @@ namespace ecf::test {
 
 class TestContentProvider {
 public:
-    TestContentProvider()                                       = delete;
-    TestContentProvider(const TestContentProvider&)             = delete;
-    TestContentProvider(TestContentProvider&&)                  = delete;
-    TestContentProvider& operator=(const TestContentProvider&)  = delete;
-    TestContentProvider& operator=(const TestContentProvider&&) = delete;
+    TestContentProvider() = delete;
 
     explicit TestContentProvider(const std::string& file_name_prefix);
     explicit TestContentProvider(const std::string& file_name_prefix, const std::string& content);
+
+    TestContentProvider(const TestContentProvider&)             = delete;
+    TestContentProvider& operator=(const TestContentProvider&)  = delete;
+    TestContentProvider(TestContentProvider&&)                  = delete;
+    TestContentProvider& operator=(const TestContentProvider&&) = delete;
 
     ~TestContentProvider();
 

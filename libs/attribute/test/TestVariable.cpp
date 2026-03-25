@@ -8,6 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <array>
 #include <cstdio>
 #include <iostream>
 
@@ -15,8 +16,6 @@
 
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
-
-using namespace std;
 
 BOOST_AUTO_TEST_SUITE(U_Attributes)
 
@@ -85,15 +84,14 @@ BOOST_AUTO_TEST_CASE(test_variable_value) {
     }
 
     // make sure time is convertible to an integer
-    constexpr int buff_size = 255;
-    char smstime[buff_size];
+    std::array<char, 255> smstime;
     for (int h = 0; h < 24; h++) {
         for (int m = 1; m < 60; m++) {
-            int output_written = snprintf(smstime, buff_size, "%02d%02d", h, m);
+            int output_written = snprintf(smstime.data(), smstime.size(), "%02d%02d", h, m);
             BOOST_CHECK_MESSAGE(output_written == 4, " expected size 4 but found " << output_written);
             Variable var("name", "");
-            var.set_value(smstime);
-            int value = stoi(string(smstime));
+            var.set_value(smstime.data());
+            int value = stoi(std::string(smstime.data(), smstime.size()));
             BOOST_CHECK_MESSAGE(var.value() == value, "expected " << value << " but found " << var.value());
         }
     }

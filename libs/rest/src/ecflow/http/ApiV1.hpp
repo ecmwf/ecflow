@@ -11,8 +11,8 @@
 #ifndef ecflow_http_ApiV1_HPP
 #define ecflow_http_ApiV1_HPP
 
+#include "ecflow/core/HttpLibrary.hpp"
 #include "ecflow/http/DefsStorage.hpp"
-#include "ecflow/http/HttpLibrary.hpp"
 
 namespace ecf::http {
 

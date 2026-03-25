@@ -27,7 +27,8 @@
 #include "VProperty.hpp"
 #include "ViewerUtil.hpp"
 
-PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent) {
+PropertyEditor::PropertyEditor(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     headerWidget_->setProperty("editorHeader", "1");
@@ -121,7 +122,7 @@ void PropertyEditor::addHelpers() {
         QString h = line->guiProperty()->param("helpers");
         if (!h.isEmpty()) {
             Q_FOREACH (QString s, h.split("/")) {
-                if (PropertyLine* hl = lineMap.value(s.toStdString(), NULL)) {
+                if (PropertyLine* hl = lineMap.value(s.toStdString(), nullptr)) {
                     line->addHelper(hl);
                 }
             }

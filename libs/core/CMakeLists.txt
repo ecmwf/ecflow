@@ -42,6 +42,7 @@ set(test_srcs
   test/TestCore_main.cpp # contains main() function for test driver
   test/TestExtract.cpp
   test/TestFile.cpp
+  test/TestFilesystem.cpp
   test/TestGetUserDetails.cpp
   test/TestLog.cpp
   test/TestMessage.cpp
@@ -51,6 +52,7 @@ set(test_srcs
   test/TestPasswordEncryption.cpp
   test/TestPerfTimer.cpp
   test/TestRealCalendar.cpp
+  test/TestResources.cpp
   test/TestResult.cpp
   test/TestSanitizerAS.cpp
   test/TestSanitizerUB.cpp
@@ -63,6 +65,7 @@ set(test_srcs
   test/TestVersion.cpp
   test/TestVersioning.cpp
   test/TestWhiteListFile.cpp
+  test/TestWhiteListIncludes.cpp
 )
 
 ecbuild_add_test(

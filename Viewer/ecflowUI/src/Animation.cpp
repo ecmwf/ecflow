@@ -21,7 +21,9 @@
 //
 //=====================================================
 
-Animation::Animation(QWidget* view, Type type) : view_(view), type_(type) {
+Animation::Animation(QWidget* view, Type type)
+    : view_(view),
+      type_(type) {
     if (type_ == ServerLoadType) {
         setFileName(":/viewer/spinning_wheel.gif");
     }
@@ -78,7 +80,8 @@ void Animation::notifyBeginServerClear(ServerHandler* /*server*/) {
 //
 //=====================================================
 
-AnimationHandler::AnimationHandler(QWidget* view) : view_(view) {
+AnimationHandler::AnimationHandler(QWidget* view)
+    : view_(view) {
 }
 
 AnimationHandler::~AnimationHandler() {

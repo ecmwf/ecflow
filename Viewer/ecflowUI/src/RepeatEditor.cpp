@@ -27,7 +27,8 @@
 #include "VRepeatAttr.hpp"
 #include "ecflow/node/Node.hpp"
 
-RepeatEditorWidget::RepeatEditorWidget(QWidget* parent) : QWidget(parent) {
+RepeatEditorWidget::RepeatEditorWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 }
 
@@ -44,7 +45,9 @@ void RepeatEditorWidget::hideRow(QWidget* w) {
 //
 //================================================================
 
-RepeatEditor::RepeatEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info, "repeat", parent), model_(nullptr) {
+RepeatEditor::RepeatEditor(VInfo_ptr info, QWidget* parent)
+    : AttributeEditor(info, "repeat", parent),
+      model_(nullptr) {
     w_ = new RepeatEditorWidget(this);
     addForm(w_);
 
@@ -178,7 +181,8 @@ void RepeatEditor::readSettings() {
 //
 //================================================================
 
-RepeatIntEditor::RepeatIntEditor(VInfo_ptr info, QWidget* parent) : RepeatEditor(info, parent) {
+RepeatIntEditor::RepeatIntEditor(VInfo_ptr info, QWidget* parent)
+    : RepeatEditor(info, parent) {
     // if(!repeat_)
     //     return;
 
@@ -265,7 +269,8 @@ void RepeatIntEditor::apply() {
 //
 //================================================================
 
-RepeatStringEditor::RepeatStringEditor(VInfo_ptr info, QWidget* parent) : RepeatEditor(info, parent) {
+RepeatStringEditor::RepeatStringEditor(VInfo_ptr info, QWidget* parent)
+    : RepeatEditor(info, parent) {
     // if(!repeat_)
     //     return;
 
@@ -321,7 +326,8 @@ void RepeatStringEditor::apply() {
 //
 //================================================================
 
-RepeatDateEditor::RepeatDateEditor(VInfo_ptr info, QWidget* parent) : RepeatEditor(info, parent) {
+RepeatDateEditor::RepeatDateEditor(VInfo_ptr info, QWidget* parent)
+    : RepeatEditor(info, parent) {
     // if(!repeat_)
     //     return;
 
@@ -376,7 +382,8 @@ void RepeatDateEditor::apply() {
 //
 //================================================================
 
-RepeatDateTimeEditor::RepeatDateTimeEditor(VInfo_ptr info, QWidget* parent) : RepeatEditor(info, parent) {
+RepeatDateTimeEditor::RepeatDateTimeEditor(VInfo_ptr info, QWidget* parent)
+    : RepeatEditor(info, parent) {
     // if(!repeat_)
     //     return;
 

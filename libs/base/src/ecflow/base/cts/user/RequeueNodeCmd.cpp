@@ -19,14 +19,12 @@
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/SuiteChanged.hpp"
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool RequeueNodeCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<RequeueNodeCmd*>(rhs);
@@ -53,7 +51,7 @@ ecf::authorisation_t RequeueNodeCmd::authorise(AbstractServer& server) const {
 static std::string to_string(RequeueNodeCmd::Option option) {
     switch (option) {
         case RequeueNodeCmd::NO_OPTION:
-            return string();
+            return std::string{};
         case RequeueNodeCmd::FORCE:
             return "force";
         case RequeueNodeCmd::ABORT:
@@ -62,7 +60,7 @@ static std::string to_string(RequeueNodeCmd::Option option) {
             assert(false);
             break;
     }
-    return string();
+    return std::string{};
 }
 
 void RequeueNodeCmd::print(std::string& os) const {
@@ -89,7 +87,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
                             true /* reset relative duration */);
 
     Defs* defs = as->defs().get();
-    std::stringstream ss;
+    std::ostringstream ss;
     size_t vec_size = paths_.size();
     for (size_t i = 0; i < vec_size; i++) {
 
@@ -101,19 +99,17 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         if (!theNodeToRequeue->suite()->begun()) {
-            std::stringstream mss;
-            mss << "RequeueNodeCmd::doHandleRequest: For node " << paths_[i] << ". The suite "
-                << theNodeToRequeue->suite()->name() << " must be 'begun' first\n";
-            throw std::runtime_error(mss.str());
+            throw std::runtime_error(MESSAGE("RequeueNodeCmd::doHandleRequest: For node "
+                                             << paths_[i] << ". The suite " << theNodeToRequeue->suite()->name()
+                                             << " must be 'begun' first\n"));
         }
 
         SuiteChangedPtr changed(theNodeToRequeue.get());
 
         if (option_ == RequeueNodeCmd::ABORT) {
             // ONLY Re-queue the aborted tasks
-            std::vector<Task*> taskVec;
-            theNodeToRequeue->getAllTasks(taskVec);
-            for (auto& task : taskVec) {
+            auto tasks = ecf::get_all_tasks(*theNodeToRequeue);
+            for (auto& task : tasks) {
                 if (task->state() == NState::ABORTED) {
                     task->requeue(args);
                     task->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
@@ -128,9 +124,8 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const {
         }
         else if (option_ == RequeueNodeCmd::NO_OPTION) {
             // ONLY Re-queue if there no tasks in submitted or active states
-            std::vector<Task*> taskVec;
-            theNodeToRequeue->getAllTasks(taskVec);
-            for (auto& task : taskVec) {
+            auto tasks = ecf::get_all_tasks(*theNodeToRequeue);
+            for (auto& task : tasks) {
                 if (task->state() == NState::SUBMITTED || task->state() == NState::ACTIVE) {
                     return PreAllocatedReply::ok_cmd();
                 }
@@ -208,32 +203,32 @@ const char* RequeueNodeCmd::desc() {
 }
 
 void RequeueNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(RequeueNodeCmd::arg(), po::value<vector<string>>()->multitoken(), RequeueNodeCmd::desc());
+    desc.add_options()(RequeueNodeCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       RequeueNodeCmd::desc());
 }
 void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
-    vector<string> args = vm[RequeueNodeCmd::arg()].as<vector<string>>();
+    auto args = vm[RequeueNodeCmd::arg()].as<std::vector<std::string>>();
 
     if (ac->debug()) {
         dumpVecArgs(RequeueNodeCmd::arg(), args);
     }
 
     if (args.size() < 1) {
-        std::stringstream ss;
-        ss << "RequeueNodeCmd: At least 1 argument(path to node) expected. Please specify one of:\n";
-        ss << RequeueNodeCmd::arg() << " pathToNode\n";
-        ss << RequeueNodeCmd::arg() << " abort pathToNode\n";
-        ss << RequeueNodeCmd::arg() << " force pathToNode\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("RequeueNodeCmd: At least 1 argument(path to node) expected. Please specify one of:\n"
+                    << RequeueNodeCmd::arg() << " pathToNode\n"
+                    << RequeueNodeCmd::arg() << " abort pathToNode\n"
+                    << RequeueNodeCmd::arg() << " force pathToNode\n"));
     }
 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
     if (paths.empty()) {
-        std::stringstream ss;
-        ss << "RequeueNodeCmd: No paths specified. At least one path expected. Paths must begin with a leading '/' "
-              "character\n"
-           << RequeueNodeCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "RequeueNodeCmd: No paths specified. At least one path expected. Paths must begin with a leading '/' "
+            "character\n"
+            << RequeueNodeCmd::desc() << "\n"));
     }
 
     RequeueNodeCmd::Option option = RequeueNodeCmd::NO_OPTION;
@@ -242,26 +237,23 @@ void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map&
         if (options[i] == "abort") {
             option = RequeueNodeCmd::ABORT;
             if (ac->debug()) {
-                cout << "  ABORT selected\n";
+                std::cout << "  ABORT selected\n";
             }
         }
         else if (options[i] == "force") {
             option = RequeueNodeCmd::FORCE;
             if (ac->debug()) {
-                cout << "  FORCE selected\n";
+                std::cout << "  FORCE selected\n";
             }
         }
         else {
-            std::stringstream ss;
-            ss << "RequeueNodeCmd: RequeueNodeCmd: Expected : [force | abort ] paths.\n"
-               << RequeueNodeCmd::desc() << "\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("RequeueNodeCmd: RequeueNodeCmd: Expected : [force | abort ] paths.\n"
+                                             << RequeueNodeCmd::desc() << "\n"));
         }
     }
     if (options.size() > 1) {
-        std::stringstream ss;
-        ss << "RequeueNodeCmd: Expected only a single option i.e [ force | abort ]\n" << RequeueNodeCmd::desc() << "\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("RequeueNodeCmd: Expected only a single option i.e [ force | abort ]\n"
+                                         << RequeueNodeCmd::desc() << "\n"));
     }
 
     cmd = std::make_shared<RequeueNodeCmd>(paths, option);

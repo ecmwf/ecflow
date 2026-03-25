@@ -22,9 +22,6 @@
 #include "ecflow/node/Task.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 void ZombieCmd::print(std::string& os) const {
     switch (user_action_) {
@@ -194,22 +191,16 @@ const char* ZombieCmd::theArg() const {
     switch (user_action_) {
         case ZombieCtrlAction::FOB:
             return CtsApi::zombieFobArg();
-            break;
         case ZombieCtrlAction::FAIL:
             return CtsApi::zombieFailArg();
-            break;
         case ZombieCtrlAction::ADOPT:
             return CtsApi::zombieAdoptArg();
-            break;
         case ZombieCtrlAction::REMOVE:
             return CtsApi::zombieRemoveArg();
-            break;
         case ZombieCtrlAction::BLOCK:
             return CtsApi::zombieBlockArg();
-            break;
         case ZombieCtrlAction::KILL:
             return CtsApi::zombieKillArg();
-            break;
         default:
             break;
     }
@@ -223,7 +214,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
         case ZombieCtrlAction::FOB: {
             desc.add_options()(
                 CtsApi::zombieFobArg(),
-                po::value<vector<string>>()->multitoken(),
+                boost::program_options::value<std::vector<std::string>>()->multitoken(),
                 "Locates the task in the servers list of zombies, and sets to fob.\n"
                 "This default behaviour of the child commands(label,event,meter) is to fob\n"
                 "Next time the child commands (init,event,meter,label,abort,complete,wait,queue) communicate\n"
@@ -236,7 +227,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
         }
         case ZombieCtrlAction::FAIL: {
             desc.add_options()(CtsApi::zombieFailArg(),
-                               po::value<vector<string>>()->multitoken(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets to fail.\n"
                                "Next time a child command (init,event,meter,label,abort,complete) which "
                                "matches zombie, communicates with the server, will be set to fail.\n"
@@ -250,7 +241,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
         }
         case ZombieCtrlAction::ADOPT: {
             desc.add_options()(CtsApi::zombieAdoptArg(),
-                               po::value<vector<string>>()->multitoken(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets to adopt.\n"
                                "Next time a child command (init,event,meter,label,abort,complete,wait queue) "
                                "communicates with the server, the password on the zombie is adopted by the task.\n"
@@ -263,7 +254,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
         case ZombieCtrlAction::REMOVE: {
             desc.add_options()(
                 CtsApi::zombieRemoveArg(),
-                po::value<vector<string>>()->multitoken(),
+                boost::program_options::value<std::vector<std::string>>()->multitoken(),
                 "Locates the task in the servers list of zombies, and removes it.\n"
                 "Since a job typically has many child commands (i.e init, complete, event, meter, label, wait, queue)\n"
                 "the zombie may reappear\n"
@@ -273,7 +264,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
         }
         case ZombieCtrlAction::BLOCK: {
             desc.add_options()(CtsApi::zombieBlockArg(),
-                               po::value<vector<string>>()->multitoken(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets flags to block it.\n"
                                "This is default behaviour of the child commands(init,abort,complete,wait,queue)\n"
                                "when the server cannot match the passwords. Each child commands will continue\n"
@@ -285,7 +276,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
         }
         case ZombieCtrlAction::KILL: {
             desc.add_options()(CtsApi::zombieKillArg(),
-                               po::value<vector<string>>()->multitoken(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
                                "Locates the task in the servers list of zombies, and sets flags to kill\n"
                                "The kill is done using ECF_KILL_CMD, but using the process_id from the zombie\n"
                                "The job is allowed to continue until the kill is received\n"
@@ -302,7 +293,7 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
 }
 
 void ZombieCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
-    vector<string> args = vm[theArg()].as<vector<string>>();
+    auto args = vm[theArg()].as<std::vector<std::string>>();
     if (ace->debug()) {
         dumpVecArgs(theArg(), args);
     }
@@ -317,21 +308,18 @@ void ZombieCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
     if (paths.empty()) {
-        std::stringstream ss;
-        ss << "ZombieCmd: No paths specified. At least one path expected. Paths must begin with a leading '/' "
-              "character\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ZombieCmd: No paths specified. At least one path expected. Paths must begin with a leading '/' "
+                    "character\n"));
     }
     if (paths.size() > 1 && !options.empty()) {
-        std::stringstream ss;
-        ss << "ZombieCmd: process_or_remote_id and password cannot be used when multiple paths are specified. Please "
-              "specify a single path\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "ZombieCmd: process_or_remote_id and password cannot be used when multiple paths are specified. Please "
+            "specify a single path\n"));
     }
     if (options.size() >= 3) {
-        std::stringstream ss;
-        ss << "ZombieCmd: to many options expected only process_or_remote_id and password and a list of paths.\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "ZombieCmd: to many options expected only process_or_remote_id and password and a list of paths.\n"));
     }
     if (options.size() == 1) {
         process_or_remote_id = options[0];

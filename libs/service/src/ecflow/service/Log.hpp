@@ -17,12 +17,14 @@
 
 #include "ecflow/core/Log.hpp"
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define SLOG(LEVEL, MESSAGE)                                                      \
     [&]() {                                                                       \
         using namespace ecf::service::log;                                        \
         LOG(LevelTraits<Level::LEVEL>::mapping_type,                              \
             MESSAGE << " {" << LevelTraits<Level::LEVEL>::name << "}" << Meta{}); \
     }()
+// NOLINTEND(bugprone-macro-parentheses)
 
 namespace ecf::service {
 

@@ -18,7 +18,6 @@
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
 using namespace ecf;
-using namespace std;
 
 bool VariableParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // Note: For migrate the defs can have variables
@@ -35,7 +34,7 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
 
     size_t line_tokens_size = lineTokens.size();
     if (line_tokens_size < 3) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "VariableParser::doParse: expected at least 3 tokens, found " << line_tokens_size << " on line:" << line
            << "\n";
         if (node) {
@@ -53,7 +52,7 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
     if (lineTokens[2][0] == '#') {
         // edit fred #comment
         // edit fred #
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "VariableParser::doParse: Expected value but found comment at line:" << line << "\n";
         if (node) {
             ss << "At node: " << node->debugNodePath() << "\n";

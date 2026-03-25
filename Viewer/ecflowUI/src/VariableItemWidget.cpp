@@ -32,8 +32,7 @@
 #include "VariableSearchLine.hpp"
 #include "WidgetNameProvider.hpp"
 
-#define _UI_VARIABLEITEMWIDGET_DEBUG
-#define _UI_VARIABLESORTMODELTEST_DEBUG
+#define UI_VARIABLEITEMWIDGET_DEBUG
 
 //======================================
 //
@@ -126,7 +125,7 @@ VariablePropDialog::VariablePropDialog(VariableModelDataHandler* data,
 }
 
 VariablePropDialog::~VariablePropDialog() {
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+#ifdef UI_VARIABLEITEMWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(data_);
@@ -732,7 +731,7 @@ void VariableItemWidget::clearContents() {
 }
 
 void VariableItemWidget::slotItemSelected(const QModelIndex& idx, const QModelIndex& /*prevIdx*/) {
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+#ifdef UI_VARIABLEITEMWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
 
@@ -844,7 +843,7 @@ void VariableItemWidget::checkActionState() {
 }
 
 void VariableItemWidget::editItem(const QModelIndex& index) {
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+#ifdef UI_VARIABLEITEMWIDGET_DEBUG
     UI_FUNCTION_LOG
     UiLog().dbg() << " index=" << index;
 #endif
@@ -854,7 +853,7 @@ void VariableItemWidget::editItem(const QModelIndex& index) {
     bool genVar = false;
 
     QModelIndex vIndex = sortModel_->mapToSource(index);
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+#ifdef UI_VARIABLEITEMWIDGET_DEBUG
     UiLog().dbg() << "vIndex=" << vIndex;
 #endif
 
@@ -863,7 +862,7 @@ void VariableItemWidget::editItem(const QModelIndex& index) {
         Q_ASSERT(data_->count() > 0);
         Q_ASSERT(block >= 0);
 
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+#ifdef UI_VARIABLEITEMWIDGET_DEBUG
         UiLog().dbg() << " block=" << block;
 #endif
 
@@ -1089,7 +1088,7 @@ void VariableItemWidget::toClipboard(QString txt) const {
 }
 
 void VariableItemWidget::slotFilterTextChanged(QString text) {
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+#ifdef UI_VARIABLEITEMWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     sortModel_->setMatchText(text);
@@ -1097,7 +1096,7 @@ void VariableItemWidget::slotFilterTextChanged(QString text) {
 }
 
 void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect) {
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+#ifdef UI_VARIABLEITEMWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     canSaveLastSelection_ = false;
@@ -1109,7 +1108,7 @@ void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 }
 
 void VariableItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect) {
-#ifdef _UI_VARIABLEITEMWIDGET_DEBUG
+#ifdef UI_VARIABLEITEMWIDGET_DEBUG
     UI_FUNCTION_LOG
 #endif
     canSaveLastSelection_ = false;

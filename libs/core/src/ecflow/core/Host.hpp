@@ -19,11 +19,16 @@ class Host {
 public:
     /// can throw std::runtime_error if the gethostname fails
     Host();
+
     explicit Host(const std::string& host);
 
     // Disable copy (and move) semantics
-    Host(const Host&)                  = delete;
-    const Host& operator=(const Host&) = delete;
+    Host(const Host&)            = delete;
+    Host& operator=(const Host&) = delete;
+    Host(Host&&)                 = delete;
+    Host& operator=(Host&&)      = delete;
+
+    ~Host() = default;
 
     /// return the host name
     std::string name() const;
@@ -47,7 +52,7 @@ public:
     std::string ecf_custom_passwd_file(const std::string& port) const;
 
     /// Given a port and file name, will return <host>.<port>.file_name
-    std::string prefix_host_and_port(const std::string& port, const std::string& file_name) const;
+    std::string prefix_host_and_port(const std::string& port, std::string_view file_name) const;
 
 private:
     std::string host_port_prefix(const std::string& port) const;

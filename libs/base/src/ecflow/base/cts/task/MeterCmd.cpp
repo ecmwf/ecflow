@@ -25,9 +25,6 @@
 #include "ecflow/node/SuiteChanged.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 bool MeterCmd::equals(ClientToServerCmd* rhs) const {
     auto* the_rhs = dynamic_cast<MeterCmd*>(rhs);
@@ -116,23 +113,23 @@ const char* MeterCmd::desc() {
 }
 
 void MeterCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(MeterCmd::arg(), po::value<vector<string>>()->multitoken(), MeterCmd::desc());
+    desc.add_options()(
+        MeterCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), MeterCmd::desc());
 }
 void MeterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (clientEnv->debug()) {
         dumpVecArgs(MeterCmd::arg(), args);
-        cout << "  MeterCmd::create " << MeterCmd::arg() << " task_path(" << clientEnv->task_path() << ") password("
-             << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id() << ") try_no("
-             << clientEnv->task_try_no() << ")\n";
+        std::cout << "  MeterCmd::create " << MeterCmd::arg() << " task_path(" << clientEnv->task_path()
+                  << ") password(" << clientEnv->jobs_password() << ") remote_id(" << clientEnv->process_or_remote_id()
+                  << ") try_no(" << clientEnv->task_try_no() << ")\n";
     }
 
     if (args.size() != 2) {
-        std::stringstream ss;
-        ss << "MeterCmd: Two arguments expected, found " << args.size()
-           << " Please specify <meter-name> <meter-value>, ie --meter=name 100\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("MeterCmd: Two arguments expected, found "
+                                         << args.size()
+                                         << " Please specify <meter-name> <meter-value>, i.e. --meter=name 100\n"));
     }
 
     if (args[0].empty()) {

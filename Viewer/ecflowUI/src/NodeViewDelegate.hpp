@@ -30,7 +30,9 @@ class PropertyMapper;
 // Base class for the node/attr renderer properties
 struct BaseNodeDelegateBox
 {
-    BaseNodeDelegateBox() : sizeHintCache(QSize(10, 10)), selectRm(2) {}
+    BaseNodeDelegateBox()
+        : sizeHintCache(QSize(10, 10)),
+          selectRm(2) {}
 
     virtual ~BaseNodeDelegateBox() = default;
 
@@ -105,7 +107,10 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
 // Attr renderer properties
 struct AttrDelegateBox : public BaseNodeDelegateBox
 {
-    AttrDelegateBox() : iconSize(16), iconPreGap(2), iconGap(2) {}
+    AttrDelegateBox()
+        : iconSize(16),
+          iconPreGap(2),
+          iconGap(2) {}
 
     int iconSize;
     int iconPreGap;
@@ -169,11 +174,11 @@ protected:
 
     virtual void renderStatus(QPainter* painter, const QModelIndex& index, const QStyleOptionViewItem& option) const;
 
-    typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter* painter,
-                                                            QStringList data,
-                                                            const QStyleOptionViewItem& option,
-                                                            QSize&,
-                                                            const QColor& foregroundColour) const;
+    using AttributeRendererProc = void (NodeViewDelegate::*)(QPainter* painter,
+                                                             QStringList data,
+                                                             const QStyleOptionViewItem& option,
+                                                             QSize&,
+                                                             const QColor& foregroundColour) const;
 
     virtual void renderMeter(QPainter* painter,
                              QStringList data,

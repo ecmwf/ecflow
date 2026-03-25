@@ -56,7 +56,9 @@ public:
 
     struct Entry
     {
-        explicit Entry(const listener_t& listener) : auth_token{}, listener_{listener} {}
+        explicit Entry(const listener_t& listener)
+            : auth_token{},
+              listener_{listener} {}
 
         const listener_t& listener() const { return listener_; }
         listener_t& listener() { return listener_; }
@@ -76,11 +78,15 @@ public:
           listeners_{},
           notify_{notify},
           subscribe_{subscribe} {};
-    AvisoService()                    = delete;
-    AvisoService(const AvisoService&) = delete;
-    ~AvisoService() { stop(); }
 
+    AvisoService() = delete;
+
+    AvisoService(const AvisoService&)            = delete;
     AvisoService& operator=(const AvisoService&) = delete;
+    AvisoService(AvisoService&&)                 = delete;
+    AvisoService& operator=(AvisoService&&)      = delete;
+
+    ~AvisoService() { stop(); }
 
     void start();
     void stop() { executor_.stop(); }

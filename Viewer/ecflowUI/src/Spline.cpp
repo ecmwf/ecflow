@@ -14,7 +14,9 @@
 #include <cmath>
 #include <cstddef>
 
-Spline::Spline(const std::vector<double>& x, const std::vector<double>& y) : xp_(x), yp_(y) {
+Spline::Spline(const std::vector<double>& x, const std::vector<double>& y)
+    : xp_(x),
+      yp_(y) {
     assert(xp_.size() == yp_.size());
     assert(xp_.size() >= 2); // we need at least 3 points for a cubic spline
     size_t n = x.size();

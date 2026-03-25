@@ -20,7 +20,6 @@
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 namespace {
@@ -161,7 +160,7 @@ auto suites = std::vector<std::string>{"aa", "bb"};
 std::string errormsg;
 
 BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_with_auto_add) {
-    cout << "ANode:: ...test_suite_filter_replace_filtered_suite_with_auto_add\n";
+    ECF_NAME_THIS_TEST();
 
     auto defs = load_defs(path);
     BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
@@ -185,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_with_auto_add) {
 }
 
 BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_with_auto_add) {
-    cout << "ANode:: ...test_suite_filter_replace_selected_suite_with_auto_add\n";
+    ECF_NAME_THIS_TEST();
 
     auto defs = load_defs(path);
     BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
@@ -210,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_with_auto_add) {
 }
 
 BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_without_auto_add) {
-    cout << "ANode:: ...test_suite_filter_replace_filtered_suite_without_auto_add\n";
+    ECF_NAME_THIS_TEST();
 
     auto defs = load_defs(path);
     BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
@@ -234,7 +233,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_filtered_suite_without_auto_add) 
 }
 
 BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_without_auto_add) {
-    cout << "ANode:: ...test_suite_filter_replace_selected_suite_without_auto_add\n";
+    ECF_NAME_THIS_TEST();
 
     auto defs = load_defs(path);
     BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});
@@ -259,7 +258,7 @@ BOOST_AUTO_TEST_CASE(test_suite_filter_replace_selected_suite_without_auto_add) 
 }
 
 BOOST_AUTO_TEST_CASE(test_suite_filter_delete_and_add_filtered_suite_with_auto_add) {
-    cout << "ANode:: ...test_suite_filter_delete_and_add_filtered_suite_with_auto_add\n";
+    ECF_NAME_THIS_TEST();
 
     auto defs = load_defs(path);
     BOOST_CHECK_EQUAL(defs->suiteVec().size(), std::size_t{3});

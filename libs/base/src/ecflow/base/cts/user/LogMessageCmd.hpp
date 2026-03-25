@@ -16,7 +16,8 @@
 /// Simply writes the message to the log file
 class LogMessageCmd final : public UserCmd {
 public:
-    explicit LogMessageCmd(const std::string& msg) : msg_(msg) {}
+    explicit LogMessageCmd(const std::string& msg)
+        : msg_(msg) {}
     LogMessageCmd() = default;
 
     const std::string& msg() const { return msg_; }

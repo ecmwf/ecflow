@@ -15,11 +15,11 @@
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Family.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 #include "ecflow/node/Task.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(U_Node)
@@ -56,16 +56,14 @@ BOOST_AUTO_TEST_CASE(test_find_abs_node_path) {
         }
     }
 
-    // Test Defs::getAllNodes()
-    std::vector<Node*> all_nodes;
-    theDefs.getAllNodes(all_nodes);
+    // Test ecf::get_all_nodes()
+    auto all_nodes = ecf::get_all_nodes(theDefs);
     BOOST_CHECK_MESSAGE(all_nodes.size() == no_of_nodes,
                         "Expected theDefs.getAllNodes() to return " << no_of_nodes << " node, but found "
                                                                     << all_nodes.size());
 
     // Test Defs::get_all_aliases()
-    std::vector<alias_ptr> alias_vec;
-    theDefs.get_all_aliases(alias_vec);
+    auto alias_vec = ecf::get_all_aliases(theDefs);
     BOOST_CHECK_MESSAGE(alias_vec.size() == no_of_alias,
                         "Expected theDefs.get_all_aliases() to return " << no_of_alias << " node, but found "
                                                                         << alias_vec.size());

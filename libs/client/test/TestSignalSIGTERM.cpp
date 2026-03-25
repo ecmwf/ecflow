@@ -19,7 +19,6 @@
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace std;
 using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Client)
@@ -28,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(T_SignalSIGTERM)
 
 static void wait_for_sigterm_in_server(ClientInvoker& theClient) {
     int count = 0;
-    while (1) {
+    while (true) {
         count++;
         sleep(1);
         BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "Sync local failed\n" << theClient.errorMsg());

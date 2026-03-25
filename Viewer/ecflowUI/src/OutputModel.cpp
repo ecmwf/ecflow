@@ -25,7 +25,8 @@ QColor OutputModel::joboutCol_ = QColor(0, 115, 48);
 //
 //=======================================================================
 
-OutputModel::OutputModel(QObject* parent) : QAbstractItemModel(parent) {
+OutputModel::OutputModel(QObject* parent)
+    : QAbstractItemModel(parent) {
 }
 
 void OutputModel::resetData(const std::vector<VDir_ptr>& dirs, const std::string& jobout) {
@@ -365,7 +366,8 @@ qint64 OutputModel::secsToNow(QDateTime dt) const {
 //
 //=======================================================================
 
-OutputSortModel::OutputSortModel(QObject* parent) : QSortFilterProxyModel(parent) {
+OutputSortModel::OutputSortModel(QObject* parent)
+    : QSortFilterProxyModel(parent) {
 }
 
 QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName) {
@@ -386,7 +388,8 @@ QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName) {
 //
 //========================================================
 
-OutputDirListDelegate::OutputDirListDelegate(QWidget* parent) : QStyledItemDelegate(parent) {
+OutputDirListDelegate::OutputDirListDelegate(QWidget* parent)
+    : QStyledItemDelegate(parent) {
 }
 
 void OutputDirListDelegate::paint(QPainter* painter,

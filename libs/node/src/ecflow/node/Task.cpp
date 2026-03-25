@@ -10,7 +10,6 @@
 
 #include "ecflow/node/Task.hpp"
 
-#include <sstream>
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
@@ -42,12 +41,16 @@ void Task::copy(const Task& rhs) {
     }
 }
 
-Task::Task(const Task& rhs) : Submittable(rhs), alias_no_(rhs.alias_no_) {
+Task::Task(const Task& rhs)
+    : Submittable(rhs),
+      alias_no_(rhs.alias_no_) {
     copy(rhs);
 }
 
 node_ptr Task::clone() const {
-    return std::make_shared<Task>(*this);
+    auto clone = std::make_shared<Task>(*this);
+    clone->set_parent(nullptr);
+    return clone;
 }
 
 bool Task::check_defaults() const {
@@ -171,9 +174,8 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
     if (create_directory) {
 
         if (user_file_contents.empty()) {
-            std::stringstream ss;
-            ss << "Task::add_alias: No .usr file contents specified. Alias creation failed for task " << absNodePath();
-            THROW_RUNTIME(ss.str());
+            THROW_RUNTIME(MESSAGE("Task::add_alias: No .usr file contents specified. Alias creation failed for task "
+                                  << absNodePath()));
         }
 
         findParentUserVariableValue(ecf::environment::ECF_HOME, dir_to_create);
@@ -193,9 +195,8 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
         std::string file_path = dir_to_create + "/" + alias_name + alias->script_extension();
         std::string error_msg;
         if (!ecf::File::create(file_path, user_file_contents, error_msg)) {
-            std::stringstream ss;
-            ss << "Task::add_alias: could not create .usr file at path(" << file_path << "): " << error_msg.c_str();
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error(MESSAGE("Task::add_alias: could not create .usr file at path("
+                                             << file_path << "): " << error_msg.c_str()));
         }
     }
 
@@ -293,7 +294,7 @@ std::string Task::find_node_path(const std::string& type, const std::string& nod
             return absNodePath();
         }
     }
-    return std::string();
+    return std::string{};
 }
 
 void Task::reset() {
@@ -345,36 +346,11 @@ const std::string& Task::debugType() const {
     return ecf::Str::TASK();
 }
 
-void Task::getAllNodes(std::vector<Node*>& vec) const {
-    // See notes: getAllSubmittables, about reserve
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        vec.push_back(aliases_[i].get());
-    }
-}
-
 void Task::immediateChildren(std::vector<node_ptr>& vec) const {
     size_t vec_size = aliases_.size();
     vec.reserve(vec.size() + vec_size);
     for (size_t i = 0; i < vec_size; i++) {
         vec.push_back(std::dynamic_pointer_cast<Node>(aliases_[i]));
-    }
-}
-
-void Task::getAllTasks(std::vector<Task*>& vec) const {
-    vec.push_back(const_cast<Task*>(this));
-}
-
-void Task::getAllSubmittables(std::vector<Submittable*>& vec) const {
-    // *DO NOT reserve here, as it dominate time , for very large defs */
-    // * Previously we had::
-    //    vec.reserve(vec.size() + vec_size + 1);
-    // * This took 47 seconds when delete the full defs, i.e when check for active tasks
-
-    vec.push_back(const_cast<Task*>(this));
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        vec.push_back(aliases_[i].get());
     }
 }
 
@@ -390,36 +366,6 @@ node_ptr Task::find_node_up_the_tree(const std::string& name) const {
         return the_parent->find_node_up_the_tree(name);
     }
     return node_ptr();
-}
-
-void Task::get_all_active_submittables(std::vector<Submittable*>& vec) const {
-    // See notes: getAllSubmittables, about reserve
-    if (state() == NState::ACTIVE || state() == NState::SUBMITTED) {
-        vec.push_back(const_cast<Task*>(this));
-    }
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        if (aliases_[i]->state() == NState::ACTIVE || aliases_[i]->state() == NState::SUBMITTED) {
-            vec.push_back(aliases_[i].get());
-        }
-    }
-}
-
-void Task::get_all_tasks(std::vector<task_ptr>& vec) const {
-    vec.push_back(std::dynamic_pointer_cast<Task>(non_const_this()));
-}
-
-void Task::get_all_nodes(std::vector<node_ptr>& nodes) const {
-    nodes.push_back(non_const_this());
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        aliases_[i]->get_all_nodes(nodes);
-    }
-}
-
-void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const {
-    destinationVec.reserve(destinationVec.size() + aliases_.size());
-    std::copy(aliases_.begin(), aliases_.end(), std::back_inserter(destinationVec));
 }
 
 bool Task::resolveDependencies(JobsParam& jobsParam) {
@@ -794,26 +740,31 @@ void Task::collateChanges(DefsDelta& changes) const {
     /// All changes to Task should be on ONE compound_memento_ptr
     compound_memento_ptr comp;
 
-    /// There no point doing a OrderMemento if children have been added/delete
+    // Create AliasChildrenMemento to signal removal/addition of children
+    //
+    // n.b. When signalling the removal/addition of children,
+    //      any order change is irrelevant as the complete updated list of
+    //      children is made part of the synchronisation
     if (add_remove_state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
         comp->add(std::make_shared<AliasChildrenMemento>(aliases_));
     }
+    // Create OrderMemento to signal reordering of aliases
     else if (order_state_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
         }
         std::vector<std::string> order_vec;
         order_vec.reserve(aliases_.size());
-        size_t node_vec_size = aliases_.size();
-        for (size_t i = 0; i < node_vec_size; i++) {
-            order_vec.push_back(aliases_[i]->name());
+        for (auto& alias : aliases_) {
+            order_vec.push_back(alias->name());
         }
         comp->add(std::make_shared<OrderMemento>(order_vec));
     }
 
+    // Create AliasNumberMemento to signal changes to aliases
     if (alias_change_no_ > changes.client_state_change_no()) {
         if (!comp.get()) {
             comp = std::make_shared<CompoundMemento>(absNodePath());
@@ -825,9 +776,8 @@ void Task::collateChanges(DefsDelta& changes) const {
     Submittable::incremental_changes(changes, comp);
 
     // Traversal to children
-    size_t vec_size = aliases_.size();
-    for (size_t t = 0; t < vec_size; t++) {
-        aliases_[t]->collateChanges(changes);
+    for (auto& alias : aliases_) {
+        alias->collateChanges(changes);
     }
 }
 
@@ -841,7 +791,7 @@ void Task::set_memento(const OrderMemento* memento, std::vector<ecf::Aspect::Typ
     }
 
     // Order aliases_ according to memento ordering
-    const std::vector<std::string>& order = memento->order_;
+    const auto& order = memento->order_;
     if (order.size() != aliases_.size()) {
         // something gone wrong.
         std::cout << "Task::set_memento OrderMemento, memento.size() " << order.size()
@@ -851,11 +801,10 @@ void Task::set_memento(const OrderMemento* memento, std::vector<ecf::Aspect::Typ
 
     std::vector<alias_ptr> vec;
     vec.reserve(aliases_.size());
-    size_t node_vec_size = aliases_.size();
     for (const auto& i : order) {
-        for (size_t t = 0; t < node_vec_size; t++) {
-            if (i == aliases_[t]->name()) {
-                vec.push_back(aliases_[t]);
+        for (auto& alias : aliases_) {
+            if (i == alias->name()) {
+                vec.push_back(alias);
                 break;
             }
         }
@@ -879,10 +828,9 @@ void Task::set_memento(const AliasChildrenMemento* memento, std::vector<ecf::Asp
     }
 
     // set up alias parent pointers. since they are *NOT* serialised.
-    aliases_        = memento->children_;
-    size_t vec_size = aliases_.size();
-    for (size_t i = 0; i < vec_size; i++) {
-        aliases_[i]->set_parent(this);
+    aliases_ = memento->children_;
+    for (auto& alias : aliases_) {
+        alias->set_parent(this);
     }
 }
 

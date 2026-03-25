@@ -260,7 +260,10 @@ protected:
 
 class LogRequestViewControlItem {
 public:
-    LogRequestViewControlItem() : model_(0), sortModel_(0), tree_(0) {}
+    LogRequestViewControlItem()
+        : model_(0),
+          sortModel_(0),
+          tree_(0) {}
 
     void adjustColumnWidth();
     bool isAnySet() const { return plotState_.contains(true); }

@@ -30,7 +30,8 @@
 
 class CronParser : public Parser {
 public:
-    explicit CronParser(DefsStructureParser* p) : Parser(p) {}
+    explicit CronParser(DefsStructureParser* p)
+        : Parser(p) {}
     const char* keyword() const override { return "cron"; }
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };

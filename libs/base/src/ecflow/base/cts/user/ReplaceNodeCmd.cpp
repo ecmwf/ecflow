@@ -18,12 +18,10 @@
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/node/Defs.hpp"
+#include "ecflow/node/NodeAlgorithms.hpp"
 #include "ecflow/node/Suite.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
-namespace po = boost::program_options;
 
 ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force)
     : createNodesAsNeeded_(createNodesAsNeeded),
@@ -43,16 +41,14 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
     // Make sure pathToNode exists in the client defs
     node_ptr nodeToReplace = client_defs->findAbsNode(node_path);
     if (!nodeToReplace.get()) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path " << node_path;
-        ss << ", does not exist in the client definition ";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path "
+                                         << node_path << ", does not exist in the client definition "));
     }
 
     client_defs->write_to_string(clientDefs_, PrintStyle::NET);
 
     // Out put any warning's to standard output
-    cout << warningMsg;
+    std::cout << warningMsg;
 }
 
 ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
@@ -74,24 +70,21 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path,
         ok = client_defs->restore(path_to_defs, errMsg, warningMsg);
     }
     if (!ok) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd::ReplaceNodeCmd: Could not parse file " << path_to_defs << " : " << errMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ReplaceNodeCmd::ReplaceNodeCmd: Could not parse file " << path_to_defs << " : " << errMsg));
     }
 
     // Make sure pathToNode exists in the client defs
     node_ptr nodeToReplace = client_defs->findAbsNode(node_path);
     if (!nodeToReplace.get()) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path " << node_path;
-        ss << ", does not exist in the client definition " << path_to_defs;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE("ReplaceNodeCmd::ReplaceNodeCmd: Cannot replace child since path "
+                                         << node_path << ", does not exist in the client definition " << path_to_defs));
     }
 
     client_defs->write_to_string(clientDefs_, PrintStyle::NET);
 
     // Out put any warning's to standard output
-    cout << warningMsg;
+    std::cout << warningMsg;
 }
 
 bool ReplaceNodeCmd::equals(ClientToServerCmd* rhs) const {
@@ -136,9 +129,8 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const {
     std::string errMsg, warningMsg;
     defs_ptr client_defs = Defs::create();
     if (!client_defs->restore_from_string(clientDefs_, errMsg, warningMsg)) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg;
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+            MESSAGE("ReplaceNodeCmd::doHandleRequest : Could not create client defs : " << errMsg));
     }
 
     if (force_) {
@@ -219,23 +211,24 @@ const char* ReplaceNodeCmd::desc() {
 }
 
 void ReplaceNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(ReplaceNodeCmd::arg(), po::value<vector<string>>()->multitoken(), ReplaceNodeCmd::desc());
+    desc.add_options()(ReplaceNodeCmd::arg(),
+                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
+                       ReplaceNodeCmd::desc());
 }
 void ReplaceNodeCmd::create(Cmd_ptr& cmd,
                             boost::program_options::variables_map& vm,
                             AbstractClientEnv* clientEnv) const {
-    vector<string> args = vm[arg()].as<vector<string>>();
+    auto args = vm[arg()].as<std::vector<std::string>>();
 
     if (clientEnv->debug()) {
         dumpVecArgs(ReplaceNodeCmd::arg(), args);
     }
 
     if (args.size() < 2) {
-        std::stringstream ss;
-        ss << "ReplaceNodeCmd: At least two arguments expected, found " << args.size()
-           << " Please specify <path-to-Node>  <defs files> parent(optional) force(optional), i.e\n"
-           << "--" << arg() << "=/suite/fa/t AdefsFile.def  parent force\n";
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(MESSAGE(
+            "ReplaceNodeCmd: At least two arguments expected, found "
+            << args.size() << " Please specify <path-to-Node>  <defs files> parent(optional) force(optional), i.e\n"
+            << "--" << arg() << "=/suite/fa/t AdefsFile.def  parent force\n"));
     }
 
     std::string pathToNode     = args[0];

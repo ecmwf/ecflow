@@ -251,6 +251,7 @@ set(srcs
   core/src/ecflow/core/Child.hpp
   core/src/ecflow/core/Chrono.hpp
   core/src/ecflow/core/CommandLine.hpp
+  core/src/ecflow/core/Converter.hpp
   core/src/ecflow/core/DState.hpp
   core/src/ecflow/core/DebugPerf.hpp
   core/src/ecflow/core/Ecf.hpp
@@ -262,6 +263,8 @@ set(srcs
   core/src/ecflow/core/File_r.hpp
   core/src/ecflow/core/Filesystem.hpp
   core/src/ecflow/core/Host.hpp
+  core/src/ecflow/core/HttpLibrary.hpp
+  core/src/ecflow/core/Identity.hpp
   core/src/ecflow/core/Log.hpp
   core/src/ecflow/core/LogVerification.hpp
   core/src/ecflow/core/Message.hpp
@@ -291,6 +294,7 @@ set(srcs
   core/src/ecflow/core/cereal_boost_time.hpp
   core/src/ecflow/core/cereal_optional_nvp.hpp
   core/src/ecflow/core/exceptions/Exceptions.hpp
+  core/src/ecflow/core/resources/Machine.hpp
   # Core -- Sources
   core/src/ecflow/core/AssertTimer.cpp
   core/src/ecflow/core/Base64.cpp
@@ -324,6 +328,7 @@ set(srcs
   core/src/ecflow/core/User.cpp
   core/src/ecflow/core/Version.cpp
   core/src/ecflow/core/WhiteListFile.cpp
+  core/src/ecflow/core/resources/Machine.cpp
 
   # Node -- Headers
   node/src/ecflow/node/AbstractObserver.hpp
@@ -358,6 +363,7 @@ set(srcs
   node/src/ecflow/node/MirrorAttr.hpp
   node/src/ecflow/node/MiscAttrs.hpp
   node/src/ecflow/node/Node.hpp
+  node/src/ecflow/node/NodeAlgorithms.hpp
   node/src/ecflow/node/NodeContainer.hpp
   node/src/ecflow/node/NodeFwd.hpp
   node/src/ecflow/node/NodeState.hpp
@@ -401,7 +407,7 @@ set(srcs
   node/src/ecflow/node/parser/LateParser.hpp
   node/src/ecflow/node/parser/LimitParser.hpp
   node/src/ecflow/node/parser/MeterParser.hpp
-  node/src/ecflow/node/parser/MirrorParser.cpp
+  node/src/ecflow/node/parser/MirrorParser.hpp
   node/src/ecflow/node/parser/Parser.hpp
   node/src/ecflow/node/parser/QueueParser.hpp
   node/src/ecflow/node/parser/RepeatParser.hpp
@@ -441,6 +447,7 @@ set(srcs
   node/src/ecflow/node/MiscAttrs.cpp
   node/src/ecflow/node/Node.cpp
   node/src/ecflow/node/NodeAdd.cpp
+  node/src/ecflow/node/NodeAlgorithms.cpp
   node/src/ecflow/node/NodeChange.cpp
   node/src/ecflow/node/NodeContainer.cpp
   node/src/ecflow/node/NodeDelete.cpp
@@ -584,8 +591,7 @@ ecbuild_add_library(
     nlohmann::json
     cereal::cereal # this needs to be public as it appears in public header files used downstream
     httplib::httplib
-    $<$<VERSION_LESS:${Boost_VERSION},1.69.0>:Boost::system>
-    Boost::filesystem
+    $<$<VERSION_LESS:${SELECTED_BOOST_VERSION},1.69.0>:Boost::system>
     Boost::date_time
     Boost::program_options
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
@@ -595,6 +601,7 @@ ecbuild_add_library(
   PUBLIC_DEFINITIONS
     CMAKE
     $<$<BOOL:${ZLIB_FOUND}>:ECF_HTTP_COMPRESSION>
+    $<$<VERSION_GREATER_EQUAL:${SELECTED_BOOST_VERSION},1.69.0>:BOOST_ASIO_NO_DEPRECATED>
 )
 target_clangformat(ecflow_all)
 
@@ -604,12 +611,10 @@ add_subdirectory(service)
 add_subdirectory(attribute)
 add_subdirectory(node)
 add_subdirectory(base)
-add_subdirectory(simulator)
 add_subdirectory(client)
 
 if (ENABLE_SERVER)
   add_subdirectory(server)
-  add_subdirectory(test)
 endif ()
 
 if (ENABLE_PYTHON)
@@ -626,3 +631,5 @@ endif ()
 if (ENABLE_UDP)
   add_subdirectory(udp)
 endif ()
+
+add_subdirectory(test)

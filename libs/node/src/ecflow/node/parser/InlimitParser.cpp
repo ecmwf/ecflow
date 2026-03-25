@@ -16,8 +16,6 @@
 #include "ecflow/node/Node.hpp"
 #include "ecflow/node/parser/DefsStructureParser.hpp"
 
-using namespace std;
-
 bool InlimitParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
     // inlimit /suite:queue1
     // inlimit disk 50
@@ -49,8 +47,8 @@ bool InlimitParser::doParse(const std::string& line, std::vector<std::string>& l
             "InlimitParser::doParse: can't limit family only(-n) and limit submission(-s) at the same time");
     }
 
-    string path_to_node_holding_the_limit;
-    string limitName;
+    std::string path_to_node_holding_the_limit;
+    std::string limitName;
     if (!Extract::pathAndName(lineTokens[token_pos], path_to_node_holding_the_limit, limitName)) {
         throw std::runtime_error("InlimitParser::doParse: Invalid inlimit : " + line);
     }

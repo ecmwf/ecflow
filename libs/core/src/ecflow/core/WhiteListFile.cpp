@@ -10,17 +10,18 @@
 
 #include "ecflow/core/WhiteListFile.hpp"
 
+#include <fstream>
 #include <iostream>
+#include <regex>
 #include <vector>
 
+#include "Message.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/File.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/User.hpp"
 
 using namespace ecf;
-using namespace std;
-using namespace boost;
 
 WhiteListFile::WhiteListFile() = default;
 
@@ -255,10 +256,55 @@ bool WhiteListFile::verify_path_access(const std::string& user,
     return false;
 }
 
-bool WhiteListFile::load(const std::string& file, bool debug, std::string& errorMsg) {
-    if (debug) {
-        std::cout << "  White list file " << file << " opening...\n";
+namespace {
+
+template <typename F>
+void iterate_lines_of(const std::string& file, F f) {
+    std::ifstream infile(file, std::ios::in);
+
+    if (!infile) {
+        std::cout << "Could not open file" << std::endl;
+        using namespace std::string_literals;
+        throw std::runtime_error("Could not open file: "s + file);
     }
+
+    std::string line;
+    while (std::getline(infile, line)) {
+
+        // 1. Process #included file
+        std::regex re(" *#include *<([^>]*)> *(#.*)?");
+        std::smatch m;
+        if (std::regex_match(line, m, re)) {
+            auto included = m[1];
+            iterate_lines_of(included, f);
+            continue;
+        }
+
+        // 2. Process line
+        f(line);
+    }
+}
+
+bool load_whitelist_file(const std::string& file, std::vector<std::string>& lines, bool ignore_empty_lines) {
+    try {
+        iterate_lines_of(file, [&lines, ignore_empty_lines](const std::string& line) {
+            if (ignore_empty_lines && line.empty()) {
+                // ignore empty lines
+            }
+            else {
+                lines.push_back(line);
+            };
+        });
+    }
+    catch (const std::runtime_error& e) {
+        return false;
+    }
+    return true;
+}
+
+} // namespace
+
+bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
 
     white_list_file_             = file;
     all_users_have_read_access_  = false;
@@ -267,86 +313,75 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
     users_with_write_access_.clear();
 
     std::vector<std::string> lines;
-    if (File::splitFileIntoLines(white_list_file_, lines, true /* ignore empty lines */)) {
-
-        bool foundVersionNumber = false; // can read from version 4.4.5 onwards
-        size_t lines_size       = lines.size();
-        for (size_t i = 0; i < lines_size; ++i) {
-
-            if (lines[i].empty()) {
-                continue;
-            }
-
-            // ignore/remove all comments
-            if (lines[i][0] == '#') {
-                continue;
-            }
-            std::string theLine           = lines[i];
-            string::size_type comment_pos = theLine.find("#");
-            if (comment_pos != std::string::npos) {
-                theLine.erase(comment_pos);
-            }
-
-            ecf::algorithm::trim(theLine); // remove leading and trailing spaces
-            std::vector<std::string> lineTokens;
-            Str::split(theLine, lineTokens);
-            if (lineTokens.empty()) {
-                continue;
-            }
-
-            // version should be at the start
-            if (!foundVersionNumber) {
-
-                if (!validateVersionNumber(lineTokens[0], errorMsg)) {
-                    std::stringstream ss;
-                    ss << " " << i + 1 << ": " << lines[i] << "\n";
-                    ss << "for ECF_LISTS file " << white_list_file_ << "\n";
-                    errorMsg += ss.str();
-                    return false;
-                }
-                foundVersionNumber = true;
-                continue;
-            }
-            else {
-                if (!add_user(lineTokens, errorMsg)) {
-                    return false;
-                }
-            }
-        }
-
-        // remove duplicates
-        mymap::iterator i;
-        for (i = users_with_read_access_.begin(); i != users_with_read_access_.end(); ++i) {
-            std::vector<std::string>& paths = (*i).second;
-            std::sort(paths.begin(), paths.end());
-            paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
-        }
-        for (i = users_with_write_access_.begin(); i != users_with_write_access_.end(); ++i) {
-            std::vector<std::string>& paths = (*i).second;
-            std::sort(paths.begin(), paths.end());
-            paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
-        }
-
-        if (debug) {
-            std::cout << dump_valid_users() << "\n";
-        }
-
-        return true;
+    if (!load_whitelist_file(white_list_file_, lines, true /* ignore empty lines */)) {
+        errorMsg += "Could not open invalid file specified by ECF_LISTS ";
+        errorMsg += white_list_file_;
+        errorMsg += " (";
+        errorMsg += strerror(errno);
+        errorMsg += ") -- check also if #included files exist\n";
+        return false;
     }
 
-    errorMsg += "Could not open file specified by ECF_LISTS ";
-    errorMsg += white_list_file_;
-    errorMsg += " (";
-    errorMsg += strerror(errno);
-    errorMsg += ")";
-    if (debug) {
-        std::cout << dump_valid_users() << "\n";
+    bool foundVersionNumber = false; // can read from version 4.4.5 onwards
+    size_t lines_size       = lines.size();
+    for (size_t i = 0; i < lines_size; ++i) {
+
+        if (lines[i].empty()) {
+            continue;
+        }
+
+        // ignore/remove all comments
+        if (lines[i][0] == '#') {
+            continue;
+        }
+        std::string theLine                = lines[i];
+        std::string::size_type comment_pos = theLine.find("#");
+        if (comment_pos != std::string::npos) {
+            theLine.erase(comment_pos);
+        }
+
+        ecf::algorithm::trim(theLine); // remove leading and trailing spaces
+        std::vector<std::string> lineTokens;
+        Str::split(theLine, lineTokens);
+        if (lineTokens.empty()) {
+            continue;
+        }
+
+        // version should be at the start
+        if (!foundVersionNumber) {
+
+            if (!validateVersionNumber(lineTokens[0], errorMsg)) {
+                errorMsg += MESSAGE(" " << i + 1 << ": " << lines[i] << "\n"
+                                        << "for ECF_LISTS file " << white_list_file_ << "\n");
+                return false;
+            }
+            foundVersionNumber = true;
+            continue;
+        }
+        else {
+            if (!add_user(lineTokens, errorMsg)) {
+                return false;
+            }
+        }
     }
-    return false;
+
+    // remove duplicates
+    mymap::iterator i;
+    for (i = users_with_read_access_.begin(); i != users_with_read_access_.end(); ++i) {
+        std::vector<std::string>& paths = (*i).second;
+        std::sort(paths.begin(), paths.end());
+        paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
+    }
+    for (i = users_with_write_access_.begin(); i != users_with_write_access_.end(); ++i) {
+        std::vector<std::string>& paths = (*i).second;
+        std::sort(paths.begin(), paths.end());
+        paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
+    }
+    return true;
 }
 
 std::string WhiteListFile::dump_valid_users() const {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "ECF_LISTS = '" << white_list_file_ << "'\n";
     if (users_with_read_access_.empty() && users_with_write_access_.empty()) {
         ss << " No users specified. Everyone has read/write access\n";
@@ -382,15 +417,13 @@ std::string WhiteListFile::dump_valid_users() const {
 bool WhiteListFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const {
     // Expect 4.4.14, Current syntax in force after 4.4.5
     // If first character is NUMERIC and we have dots
-    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != string::npos;
-    if (firstCharIsNumeric && line.find(".") != string::npos) {
+    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != std::string::npos;
+    if (firstCharIsNumeric && line.find(".") != std::string::npos) {
 
         std::vector<std::string> versionNumberTokens;
         Str::split(line, versionNumberTokens, ".");
         if (versionNumberTokens.size() != 3) {
-            std::stringstream ss;
-            ss << "Expected version of the form <int>.<int>.<int> i.e 4.4.14. but found invalid version number\n";
-            errorMsg += ss.str();
+            errorMsg += "Expected version of the form <int>.<int>.<int> i.e 4.4.14. but found invalid version number\n";
             return false;
         }
 

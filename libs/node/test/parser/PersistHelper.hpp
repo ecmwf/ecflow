@@ -22,7 +22,15 @@ class Defs;
 /// to ensure they are the same
 class PersistHelper {
 public:
-    explicit PersistHelper(bool compare_edit_history = false) : compare_edit_history_(compare_edit_history) {}
+    explicit PersistHelper(bool compare_edit_history = false)
+        : compare_edit_history_(compare_edit_history) {}
+
+    PersistHelper(const PersistHelper&)            = delete;
+    PersistHelper& operator=(const PersistHelper&) = delete;
+    PersistHelper(PersistHelper&&)                 = delete;
+    PersistHelper& operator=(PersistHelper&&)      = delete;
+
+    ~PersistHelper() = default;
 
     bool
     test_persist_and_reload(const Defs& theInMemoryDefs, PrintStyle::Type_t file_type_on_disk, bool do_compare = true);
@@ -42,11 +50,6 @@ private:
                                bool do_compare = true);
     bool reload_from_cereal_checkpt_file(const Defs& theInMemoryDefs, Defs& reloaded_defs, bool do_compare = true);
 
-private:
-    PersistHelper(const PersistHelper&)                  = delete;
-    const PersistHelper& operator=(const PersistHelper&) = delete;
-
-private:
     std::string errorMsg_;
     size_t file_size_{0};
     bool compare_edit_history_;

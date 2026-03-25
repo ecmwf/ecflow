@@ -18,7 +18,8 @@
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 
-LabelEditorWidget::LabelEditorWidget(QWidget* parent) : QWidget(parent) {
+LabelEditorWidget::LabelEditorWidget(QWidget* parent)
+    : QWidget(parent) {
     setupUi(this);
 
     QLayoutItem* item = nullptr;
@@ -27,7 +28,8 @@ LabelEditorWidget::LabelEditorWidget(QWidget* parent) : QWidget(parent) {
     item->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 }
 
-LabelEditor::LabelEditor(VInfo_ptr info, QWidget* parent) : AttributeEditor(info, "label", parent) {
+LabelEditor::LabelEditor(VInfo_ptr info, QWidget* parent)
+    : AttributeEditor(info, "label", parent) {
     w_ = new LabelEditorWidget(this);
     addForm(w_);
 

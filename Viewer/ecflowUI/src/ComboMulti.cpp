@@ -24,7 +24,9 @@
 //
 //==========================================================
 
-ComboMulti::ComboMulti(QWidget* widget) : QComboBox(widget), dpyText_("") {
+ComboMulti::ComboMulti(QWidget* widget)
+    : QComboBox(widget),
+      dpyText_("") {
     setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
     auto* del = new ComboMultiDelegate(this);
@@ -179,7 +181,8 @@ void ComboMulti::setMode(Mode mode) {
 //
 //==========================================================
 
-ComboMultiDelegate::ComboMultiDelegate(QObject* parent) : QItemDelegate(parent) {
+ComboMultiDelegate::ComboMultiDelegate(QObject* parent)
+    : QItemDelegate(parent) {
 }
 
 void ComboMultiDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {

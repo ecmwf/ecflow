@@ -19,7 +19,8 @@ class AbstractServer;
 class SClientHandleSuitesCmd final : public ServerToClientCmd {
 public:
     explicit SClientHandleSuitesCmd(AbstractServer* as);
-    SClientHandleSuitesCmd() : ServerToClientCmd() {}
+    SClientHandleSuitesCmd()
+        : ServerToClientCmd() {}
 
     void init(AbstractServer* as);
     std::string print() const override;

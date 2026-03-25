@@ -24,12 +24,16 @@ class AbstractServer;
 
 class EditHistoryMgr {
 public:
-    EditHistoryMgr()                      = delete;
-    EditHistoryMgr(const EditHistoryMgr&) = delete;
-    EditHistoryMgr(const ClientToServerCmd*, AbstractServer*);
-    ~EditHistoryMgr();
+    EditHistoryMgr() = delete;
 
+    EditHistoryMgr(const EditHistoryMgr&)            = delete;
     EditHistoryMgr& operator=(const EditHistoryMgr&) = delete;
+    EditHistoryMgr(EditHistoryMgr&&)                 = delete;
+    EditHistoryMgr& operator=(EditHistoryMgr&&)      = delete;
+
+    EditHistoryMgr(const ClientToServerCmd*, AbstractServer*);
+
+    ~EditHistoryMgr();
 
 private:
     const ClientToServerCmd* cts_cmd_;
