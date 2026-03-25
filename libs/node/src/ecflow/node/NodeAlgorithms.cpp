@@ -450,7 +450,7 @@ bool search_nodes(const Node& current, Criteria& criteria) {
         }
     }
     return false;
-};
+}
 
 template <typename Criteria>
 bool search_nodes(const Defs& defs, Criteria& criteria) {
@@ -464,7 +464,7 @@ bool search_nodes(const Defs& defs, Criteria& criteria) {
         }
     }
     return false;
-};
+}
 
 template <typename T>
 void check_all_mirrors_are_valid(const T& root, std::string_view host, std::string_view port) {

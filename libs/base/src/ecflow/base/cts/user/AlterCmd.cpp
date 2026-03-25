@@ -100,7 +100,7 @@ InlimitOptions parse_inlimit_value(std::string value) {
         throw std::runtime_error(
             MESSAGE("AlterCmd: the inlimit value, '" << value << "', cannot be converted to an integer"));
     }
-};
+}
 
 namespace detail {
 

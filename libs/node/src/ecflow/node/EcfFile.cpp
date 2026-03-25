@@ -551,7 +551,6 @@ bool EcfFile::open_script_file(const std::string& file_or_cmd,
                 }
                 case EcfFile::INCLUDE:
                     return open_include_file(file_or_cmd, lines, errormsg);
-                    break;
                 case EcfFile::MANUAL:
                 case EcfFile::COMMENT:
                     if (!File::splitFileIntoLines(file_or_cmd, lines)) {
@@ -699,16 +698,12 @@ std::string EcfFile::fileType(EcfFile::Type t) {
     switch (t) {
         case EcfFile::SCRIPT:
             return "script";
-            break;
         case EcfFile::INCLUDE:
             return "include";
-            break;
         case EcfFile::MANUAL:
             return "manual";
-            break;
         case EcfFile::COMMENT:
             return "comment";
-            break;
     }
     assert(false);
     return std::string{};
@@ -1426,7 +1421,6 @@ const std::string& EcfFile::get_extn() const {
         throw std::runtime_error(MESSAGE("EcfFile::get_extn(): Can only return extension for task/alias but found "
                                          << node_->debugNodePath()));
     }
-    return Str::EMPTY();
 }
 
 // =======================================================================================

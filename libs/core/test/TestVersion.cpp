@@ -40,7 +40,6 @@ std::string find_cmake_version(const std::vector<std::string>& cmake_content) {
             auto version_val = version_arg + 1;
             if (version_val != tokens.end()) {
                 return *version_val;
-                break;
             }
         }
     }

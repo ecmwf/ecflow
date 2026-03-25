@@ -89,22 +89,16 @@ std::string CFileCmd::toString(CFileCmd::File_t ft) {
     switch (ft) {
         case CFileCmd::ECF:
             return "script";
-            break;
         case CFileCmd::MANUAL:
             return "manual";
-            break;
         case CFileCmd::JOB:
             return "job";
-            break;
         case CFileCmd::JOBOUT:
             return "jobout";
-            break;
         case CFileCmd::KILL:
             return "kill";
-            break;
         case CFileCmd::STAT:
             return "stat";
-            break;
         default:
             break;
     }

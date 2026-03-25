@@ -93,7 +93,6 @@ NState::State QueueAttr::state(const std::string& step) const {
         }
     }
     throw std::runtime_error("QueueAttr::state: could not find step " + step);
-    return NState::UNKNOWN;
 }
 
 void QueueAttr::requeue() {

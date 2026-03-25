@@ -1017,12 +1017,12 @@ public:
 private:
     streams_t shutdown_ecflow_server() {
         if (auto o = process_.terminate(); o == 0) {
-            return dump_server_execution_report(cwd_, process_);
             ECF_TEST_DBG("Shutdown server: [OK]");
+            return dump_server_execution_report(cwd_, process_);
         }
         else {
-            return dump_server_execution_report(cwd_, process_);
             ECF_TEST_DBG("Shutdown server: [FAIL]");
+            return dump_server_execution_report(cwd_, process_);
         }
 
         if (auto o = ensure_ecflow_server_is_shutdown(host_, port_, cwd_); !o.ok()) {

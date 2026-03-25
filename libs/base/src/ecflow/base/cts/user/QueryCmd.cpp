@@ -343,7 +343,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
         throw std::runtime_error(MESSAGE("QueryCmd: unrecognised query_type " << query_type_));
     }
 
-    return PreAllocatedReply::ok_cmd();
+    // This function must return on one of the above conditions!
 }
 
 std::ostream& operator<<(std::ostream& os, const QueryCmd& c) {

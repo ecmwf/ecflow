@@ -1169,22 +1169,16 @@ DState::State Node::dstate() const {
     switch (state()) {
         case NState::COMPLETE:
             return DState::COMPLETE;
-            break;
         case NState::ABORTED:
             return DState::ABORTED;
-            break;
         case NState::ACTIVE:
             return DState::ACTIVE;
-            break;
         case NState::SUBMITTED:
             return DState::SUBMITTED;
-            break;
         case NState::QUEUED:
             return DState::QUEUED;
-            break;
         case NState::UNKNOWN:
             return DState::UNKNOWN;
-            break;
     }
     return DState::UNKNOWN;
 }

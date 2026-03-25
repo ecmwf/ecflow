@@ -31,28 +31,20 @@ static const char* theDay(DayAttr::Day_t day) {
     switch (day) {
         case DayAttr::SUNDAY:
             return "sunday";
-            break;
         case DayAttr::MONDAY:
             return "monday";
-            break;
         case DayAttr::TUESDAY:
             return "tuesday";
-            break;
         case DayAttr::WEDNESDAY:
             return "wednesday";
-            break;
         case DayAttr::THURSDAY:
             return "thursday";
-            break;
         case DayAttr::FRIDAY:
             return "friday";
-            break;
         case DayAttr::SATURDAY:
             return "saturday";
-            break;
         default:
             assert(false);
-            break;
     }
     return nullptr;
 }
@@ -477,7 +469,6 @@ DayAttr::Day_t DayAttr::getDay(const std::string& day) {
     throw std::runtime_error(MESSAGE(
         "Invalid day("
         << day << ") specification expected one of [monday,tuesday,wednesday,thursday,friday,saturday,sunday]: "));
-    return DayAttr::SUNDAY;
 }
 
 std::vector<std::string> DayAttr::allDays() {

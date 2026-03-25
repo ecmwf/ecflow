@@ -363,21 +363,18 @@ static std::string show_checkpt_mode(ecf::CheckPt::Mode m) {
     switch (m) {
         case ecf::CheckPt::NEVER:
             return "CHECK_NEVER";
-            break;
         case ecf::CheckPt::ON_TIME:
             return "CHECK_ON_TIME";
-            break;
         case ecf::CheckPt::ALWAYS:
             return "CHECK_ON_ALWAYS";
-            break;
         case ecf::CheckPt::UNDEFINED:
             return "UNDEFINED";
-            break;
     }
     return std::string{};
 }
 
 namespace {
+
 struct display_stats_helper
 {
     display_stats_helper(std::ostream& os, uint32_t width)
@@ -423,7 +420,7 @@ struct display_stats_helper
 template <typename... Args>
 bool found_any(Args... args) {
     return (false || ... || args);
-};
+}
 
 } // namespace
 

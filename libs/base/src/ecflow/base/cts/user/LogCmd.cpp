@@ -123,19 +123,14 @@ bool LogCmd::isWrite() const {
     switch (api_) {
         case LogCmd::GET:
             return false;
-            break;
         case LogCmd::CLEAR:
             return false;
-            break;
         case LogCmd::FLUSH:
             return false;
-            break;
         case LogCmd::NEW:
             return true;
-            break;
         case LogCmd::PATH:
             return false;
-            break;
         default:
             throw std::runtime_error("LogCmd::isWrite: Unrecognised log api command,");
     }

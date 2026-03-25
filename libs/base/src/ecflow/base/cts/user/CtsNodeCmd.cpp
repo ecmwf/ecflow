@@ -65,7 +65,6 @@ void CtsNodeCmd::print(std::string& os) const {
             break;
         default:
             throw std::runtime_error("CtsNodeCmd::print: Unrecognised command");
-            break;
     }
 }
 void CtsNodeCmd::print_only(std::string& os) const {
@@ -92,7 +91,6 @@ void CtsNodeCmd::print_only(std::string& os) const {
             break;
         default:
             throw std::runtime_error("CtsNodeCmd::print_only : Unrecognised command");
-            break;
     }
 }
 
@@ -121,28 +119,21 @@ bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const {
 bool CtsNodeCmd::isWrite() const {
     switch (api_) {
         case CtsNodeCmd::GET:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::GET_STATE:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::MIGRATE:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::JOB_GEN:
-            return true;
-            break; // requires write privilege
+            return true; // requires write privilege
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::WHY:
-            return false;
-            break; // read only
+            return false; // read only
         case CtsNodeCmd::NO_CMD:
             break;
         default:
             throw std::runtime_error("CtsNodeCmd::isWrite: Unrecognised command");
-            break;
     }
     assert(false);
     return false;
@@ -152,27 +143,20 @@ const char* CtsNodeCmd::theArg() const {
     switch (api_) {
         case CtsNodeCmd::GET:
             return CtsApi::getArg();
-            break;
         case CtsNodeCmd::GET_STATE:
             return CtsApi::get_state_arg();
-            break;
         case CtsNodeCmd::MIGRATE:
             return CtsApi::migrate_arg();
-            break;
         case CtsNodeCmd::JOB_GEN:
             return CtsApi::job_genArg();
-            break;
         case CtsNodeCmd::CHECK_JOB_GEN_ONLY:
             return CtsApi::checkJobGenOnlyArg();
-            break;
         case CtsNodeCmd::WHY:
             return CtsApi::whyArg();
-            break;
         case CtsNodeCmd::NO_CMD:
             break;
         default:
             throw std::runtime_error("CtsNodeCmd::theArg: Unrecognised command");
-            break;
     }
     assert(false);
     return nullptr;
@@ -260,7 +244,6 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const {
         case CtsNodeCmd::NO_CMD:
         default:
             throw std::runtime_error("CtsNodeCmd::doHandleRequest: Unrecognised command");
-            break;
     }
 
     return PreAllocatedReply::ok_cmd();

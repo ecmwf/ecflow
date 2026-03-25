@@ -1751,7 +1751,8 @@ bool ClientInvoker::wait_for_server_reply(int time_out) const {
             return false;
         }
     }
-    return false;
+
+    // This function must return on one of the above conditions!
 }
 
 bool ClientInvoker::wait_for_server_death(int time_out) const {
@@ -1779,7 +1780,8 @@ bool ClientInvoker::wait_for_server_death(int time_out) const {
         // Ping ok, server lives, continue pinging, until timeout
         sleep(2);
     }
-    return false;
+
+    // This function must return on one of the above conditions!
 }
 
 int ClientInvoker::load_in_memory_defs(const defs_ptr& clientDefs, bool force) const {
