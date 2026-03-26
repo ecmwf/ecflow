@@ -14,6 +14,7 @@
 #include "ecflow/base/Cmd.hpp"
 #include "ecflow/base/ServerReply.hpp"
 #include "ecflow/core/Serialization.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/NodeFwd.hpp"
 
 //================================================================================
@@ -28,10 +29,9 @@ public:
     virtual std::string print() const = 0;
     virtual bool equals(ServerToClientCmd*) const { return true; }
 
-    virtual const std::string&
-    get_string() const;                      /// Used by group command, can return any string, including file contents
-    virtual bool ok() const { return true; } /// Used by group command
-    virtual bool is_returnable_in_group_cmd() const { return true; } /// used by group command
+    virtual const std::string& get_string() const { return ecf::string_constants::empty; };
+    virtual bool ok() const { return true; }
+    virtual bool is_returnable_in_group_cmd() const { return true; }
 
     virtual std::string error() const { return std::string{}; } /// Used by test
 

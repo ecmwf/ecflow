@@ -110,7 +110,7 @@ void Log::cache_time_stamp() {
 const std::string& Log::get_cached_time_stamp() const {
     std::scoped_lock lock(mx_);
 
-    return (logImpl_) ? logImpl_->get_cached_time_stamp() : Str::EMPTY();
+    return (logImpl_) ? logImpl_->get_cached_time_stamp() : ecf::string_constants::empty;
 }
 
 void Log::flush() {

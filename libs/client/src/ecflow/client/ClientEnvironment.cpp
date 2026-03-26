@@ -388,7 +388,7 @@ const std::string& ClientEnvironment::get_password(const char* env, const std::s
         }
     }
 
-    return ecf::Str::EMPTY();
+    return ecf::string_constants::empty;
 }
 
 struct TokenFile

@@ -422,7 +422,7 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
 
             // See if the name is defined, as an extern, in which case *DONT* warn:
             // This is client side specific, since server does not have externs.
-            if (node_->defs()->find_extern(inLimit.name(), Str::EMPTY())) {
+            if (node_->defs()->find_extern(inLimit.name(), ecf::string_constants::empty)) {
                 return referencedLimit; // this is empty/NULL
             }
 

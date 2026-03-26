@@ -173,7 +173,7 @@ bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv) {
 
 void UserCmd::setup_user_authentification() {
     if (user_.empty()) {
-        setup_user_authentification(get_login_name(), Str::EMPTY());
+        setup_user_authentification(get_login_name(), ecf::string_constants::empty);
     }
 }
 

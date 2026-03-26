@@ -203,7 +203,6 @@ public:
     static const char* SVR_CMD(); // Only for automatic check_pt
 
     // Allows string to be returned by reference
-    static const std::string& EMPTY();
     static const std::string& ROOT_PATH();      // "/"
     static const std::string& PATH_SEPARATOR(); // "/"
     static const std::string& COLON();          // ":"
@@ -220,6 +219,12 @@ public:
 
     static const std::string& WHITE_LIST_FILE();
 };
+
+namespace string_constants {
+
+inline const std::string empty = "";
+
+} // namespace string_constants
 
 } // namespace ecf
 

@@ -29,10 +29,6 @@ const char* Str::SVR_CMD() {
     return SVR_CMD;
 } // Only for automatic check_pt
 
-const std::string& Str::EMPTY() {
-    static std::string empty = std::string{};
-    return empty;
-}
 const std::string& Str::ROOT_PATH() {
     static std::string root_path = "/";
     return root_path;

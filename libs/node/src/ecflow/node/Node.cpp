@@ -279,7 +279,7 @@ void Node::begin() {
 
     if (!mirrors_.empty()) {
         // In case mirror attributes are available, the node state becomes UNKNOWN
-        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+        setStateOnly(NState::State::UNKNOWN, true, ecf::string_constants::empty, false);
     }
 
     clearTrigger();
@@ -352,7 +352,7 @@ void Node::requeue(Requeue_args& args) {
 
     if (!mirrors_.empty()) {
         // In case mirror attributes are available, the node state becomes UNKNOWN
-        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+        setStateOnly(NState::State::UNKNOWN, true, ecf::string_constants::empty, false);
     }
 
     // Set the state without causing any side effects
@@ -458,7 +458,7 @@ void Node::reset() {
 
     if (!mirrors_.empty()) {
         // In case of mirror attributes, the node state becomes UNKNOWN
-        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+        setStateOnly(NState::State::UNKNOWN, true, ecf::string_constants::empty, false);
     }
 
     clearTrigger();
@@ -614,7 +614,7 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes)
         /// Note: DState::SUSPENDED is not a real state, its really a user interaction
         /// Replace with suspend, and set underlying state as queued
         suspend();
-        setStateOnly(NState::QUEUED, false /*force*/, Str::EMPTY() /* additional info to log */, log_state_changes);
+        setStateOnly(NState::QUEUED, false, ecf::string_constants::empty, log_state_changes);
     }
     else {
 
@@ -624,10 +624,7 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes)
 
         // convert DState --> NState.
         // NOTE::  NState does *NOT* have SUSPENDED
-        setStateOnly(DState::convert(d_st_.state()),
-                     false /*force*/,
-                     Str::EMPTY() /* additional info to log */,
-                     log_state_changes);
+        setStateOnly(DState::convert(d_st_.state()), false, ecf::string_constants::empty, log_state_changes);
     }
 }
 
@@ -985,7 +982,7 @@ bool Node::evaluateTrigger() const {
 }
 
 const std::string& Node::abortedReason() const {
-    return Str::EMPTY();
+    return ecf::string_constants::empty;
 }
 
 void Node::set_state(NState::State newState, bool force, const std::string& additional_info_to_log) {

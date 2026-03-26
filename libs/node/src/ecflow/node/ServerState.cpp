@@ -251,8 +251,7 @@ const std::string& ServerState::find_variable(const std::string& theVarName) con
         }
     }
 
-    //	cerr << "FAILED to FIND '" << theVarName << "'\n";
-    return Str::EMPTY();
+    return ecf::string_constants::empty;
 }
 
 const Variable& ServerState::findVariable(const std::string& name) const {

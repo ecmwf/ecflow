@@ -26,6 +26,7 @@ class Parser;
 // This class is used get a line of defs format from a defs string
 class DefsString {
 public:
+    DefsString();
     explicit DefsString(const std::string& defs_as_string);
     // Disable copy (and move) semantics
     DefsString(const DefsString&)                  = delete;

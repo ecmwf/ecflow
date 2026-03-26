@@ -62,10 +62,10 @@ bool WhiteListFile::verify_write_access(const std::string& user) const {
         return true;
     }
 
-    if (verify_path_access(user, Str::EMPTY(), users_with_write_access_)) {
+    if (verify_path_access(user, ecf::string_constants::empty, users_with_write_access_)) {
         return true;
     }
-    if (verify_path_access("*", Str::EMPTY(), users_with_write_access_)) {
+    if (verify_path_access("*", ecf::string_constants::empty, users_with_write_access_)) {
         return true;
     }
     return false;

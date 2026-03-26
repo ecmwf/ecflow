@@ -148,7 +148,7 @@ const std::string& Node::find_parent_user_variable_value(const std::string& name
         // The node can be detached from the defs.
         return the_defs->server_state().find_variable(name);
     }
-    return Str::EMPTY();
+    return ecf::string_constants::empty;
 }
 
 bool Node::user_variable_exists(const std::string& name) const {
@@ -712,7 +712,7 @@ node_ptr Node::non_const_this() const {
 }
 
 node_ptr Node::findReferencedNode(const std::string& nodePath, std::string& errorMsg) const {
-    return findReferencedNode(nodePath, Str::EMPTY(), errorMsg);
+    return findReferencedNode(nodePath, ecf::string_constants::empty, errorMsg);
 }
 
 // #define DEBUG_FIND_REFERENCED_NODE 1
