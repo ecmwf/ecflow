@@ -20,7 +20,7 @@
 using namespace ecf;
 
 static void extractTheGain(const std::string& theGainToken, ClockAttr& clockAttr) {
-    if (theGainToken.find(Str::COLON()) != std::string::npos) {
+    if (theGainToken.find(ecf::string_constants::colon) != std::string::npos) {
         // clock real +01:00
         // clock real  01:36
         int hour, min;

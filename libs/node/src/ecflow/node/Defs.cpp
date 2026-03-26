@@ -971,7 +971,7 @@ bool Defs::find_extern(const std::string& pathToNode, const std::string& node_at
     }
 
     std::string extern_path = pathToNode;
-    extern_path += Str::COLON();
+    extern_path += ecf::string_constants::colon;
     extern_path += node_attr_name;
 
     if (externs_.find(extern_path) != externs_.end()) {

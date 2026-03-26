@@ -1557,11 +1557,11 @@ int AstVariable::plus(Ast* right) const {
 }
 
 void AstVariable::print_flat(std::ostream& os, bool /*add_bracket*/) const {
-    os << nodePath_ << Str::COLON() << name_;
+    os << nodePath_ << ecf::string_constants::colon << name_;
 }
 
 std::string AstVariable::expression() const {
-    return nodePath_ + Str::COLON() + name_;
+    return nodePath_ + ecf::string_constants::colon + name_;
 }
 
 std::string AstVariable::why_expression(bool html) const {
@@ -1601,7 +1601,7 @@ std::string AstVariable::why_expression(bool html) const {
         if (!ref_node) {
             ret += "(?)";
         }
-        ret += Str::COLON();
+        ret += ecf::string_constants::colon;
         ret += name_;
         ret += "(";
         std::ostringstream ss;
@@ -1683,11 +1683,11 @@ int AstParentVariable::plus(Ast* right) const {
 }
 
 void AstParentVariable::print_flat(std::ostream& os, bool /*add_bracket*/) const {
-    os << Str::COLON() << name_;
+    os << ecf::string_constants::colon << name_;
 }
 
 std::string AstParentVariable::expression() const {
-    return Str::COLON() + name_;
+    return ecf::string_constants::colon + name_;
 }
 
 std::string AstParentVariable::why_expression(bool html) const {
@@ -1727,7 +1727,7 @@ std::string AstParentVariable::why_expression(bool html) const {
         if (!ref_node) {
             ret += "(?)";
         }
-        ret += Str::COLON();
+        ret += ecf::string_constants::colon;
         ret += name_;
         ret += "(";
         std::ostringstream ss;
@@ -1790,7 +1790,7 @@ VariableHelper::VariableHelper(const AstVariable* astVariable, std::string& erro
     }
 
     errorMsg += MESSAGE("From expression Variable "
-                        << astVariable_->nodePath() << Str::COLON() << astVariable_->name()
+                        << astVariable_->nodePath() << ecf::string_constants::colon << astVariable_->name()
                         << " the referenced node is " << theReferenceNode_->debugNodePath() << "\n"
                         << "Could not find event, meter, variable, repeat, generated variable, limit or queue of name('"
                         << astVariable_->name() << "') on node " << theReferenceNode_->debugNodePath() << "\n");

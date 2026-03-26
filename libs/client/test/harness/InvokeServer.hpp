@@ -58,7 +58,7 @@ public:
             std::string test_name = msg;
             test_name += " on ";
             test_name += host_;
-            test_name += ecf::Str::COLON();
+            test_name += ecf::string_constants::colon;
             test_name += port_;
 
             std::cout << test_name << std::endl;
@@ -162,8 +162,6 @@ private:
                       const std::string& port,
                       bool remove_checkpt_file_after_server_exit,
                       bool remove_log_file_after_server_exit) {
-        //    std::cout << "*****InvokeServer::doEnd    Closing server on  " << host << ecf::Str::COLON() << port <<
-        //    "\n";
         {
             ClientInvoker theClient(host, port);
             BOOST_REQUIRE_NO_THROW(theClient.terminateServer());

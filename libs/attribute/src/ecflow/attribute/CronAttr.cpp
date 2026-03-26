@@ -602,7 +602,7 @@ static bool isComment(const std::string& token) {
 }
 
 static bool isTimeSpec(const std::string& token) {
-    if (token.find(Str::COLON()) == std::string::npos) {
+    if (token.find(ecf::string_constants::colon) == std::string::npos) {
         return false;
     }
     return true;

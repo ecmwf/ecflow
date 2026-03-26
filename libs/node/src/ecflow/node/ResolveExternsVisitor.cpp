@@ -142,7 +142,7 @@ void AstResolveExternVisitor::visitFlag(AstFlag* astVar) {
 void AstResolveExternVisitor::addExtern(const std::string& absNodePath, const std::string& var) {
     std::string ext = absNodePath;
     if (!var.empty()) {
-        ext += Str::COLON();
+        ext += ecf::string_constants::colon;
         ext += var;
     }
     // cout << " AstResolveExternVisitor::addExtern " << ext << "\n";

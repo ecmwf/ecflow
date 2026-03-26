@@ -71,7 +71,7 @@ void TimeSlot::write(std::string& ret) const {
     }
     ret += ecf::convert_to<std::string>(h_);
 
-    ret += Str::COLON();
+    ret += ecf::string_constants::colon;
     if (m_ < 10) {
         ret += "0";
     }

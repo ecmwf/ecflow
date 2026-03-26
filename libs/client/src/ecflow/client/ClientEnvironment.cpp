@@ -215,7 +215,7 @@ std::string ClientEnvironment::toString() const {
        << "\n";
     if (!host_vec_.empty()) {
         for (std::pair<std::string, std::string> i : host_vec_) {
-            ss << "   " << i.first << ecf::Str::COLON() << i.second << "\n";
+            ss << "   " << i.first << ecf::string_constants::colon << i.second << "\n";
         }
     }
     ss << "   " << ecf::environment::ECF_NAME << " = " << task_path_ << "\n";

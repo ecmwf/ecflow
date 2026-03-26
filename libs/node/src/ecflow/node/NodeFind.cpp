@@ -741,7 +741,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
     std::string debug_path =
-        "Searching for path " + nodePath + " from " + debugType() + Str::COLON() + absNodePath() + "\n";
+        "Searching for path " + nodePath + " from " + debugType() + ecf::string_constants::colon + absNodePath() + "\n";
 #endif
 
     // if an absolute path cut in early

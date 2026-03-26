@@ -2456,7 +2456,7 @@ std::string Node::absNodePath() const {
 
 std::string Node::debugNodePath() const {
     std::string ret = debugType();
-    ret += Str::COLON();
+    ret += ecf::string_constants::colon;
     ret += absNodePath();
     return ret;
 }

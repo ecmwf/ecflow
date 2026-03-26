@@ -836,7 +836,7 @@ struct Writer<AstVariable, Stream>
     static void writeln(Stream& output, const AstVariable& item) {
         output << "# ";
         output << item.nodePath();
-        output << Str::COLON();
+        output << ecf::string_constants::colon;
         output << item.name();
 
         std::string error;
@@ -873,7 +873,7 @@ struct Writer<AstParentVariable, Stream>
 
     static void writeln(Stream& output, const AstParentVariable& item) {
         output << "# ";
-        output << Str::COLON();
+        output << ecf::string_constants::colon;
         output << item.name();
 
         if (const auto* ref_node = item.find_node_which_references_variable(); ref_node) {

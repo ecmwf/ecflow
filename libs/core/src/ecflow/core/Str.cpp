@@ -37,10 +37,6 @@ const std::string& Str::PATH_SEPARATOR() {
     static std::string path_sep = "/";
     return path_sep;
 }
-const std::string& Str::COLON() {
-    static std::string colon = ":";
-    return colon;
-}
 
 const std::string& Str::STATE_CHANGE() {
     static std::string state_change = "   state change ";

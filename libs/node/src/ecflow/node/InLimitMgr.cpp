@@ -342,11 +342,12 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const {
                 }
                 else {
                     if (html) {
-                        auto ref = MESSAGE("[limit]" << i.pathToNode() << Str::COLON() << limit->name());
+                        auto ref =
+                            MESSAGE("[limit]" << i.pathToNode() << ecf::string_constants::colon << limit->name());
                         ss << Node::path_href_attribute(ref) << " is full";
                     }
                     else {
-                        ss << "limit " << i.pathToNode() << Str::COLON() << limit->name() << " is full";
+                        ss << "limit " << i.pathToNode() << ecf::string_constants::colon << limit->name() << " is full";
                     }
                 }
 
