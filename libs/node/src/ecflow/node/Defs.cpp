@@ -907,7 +907,7 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const {
     // This is 14% quicker than the previous algorithm, that split 'pathToNode' into a vector of strings first.
     node_ptr ret;
     bool first = false;
-    StringSplitter string_splitter(pathToNode, Str::PATH_SEPARATOR());
+    StringSplitter string_splitter(pathToNode, ecf::string_constants::path_separator);
     while (!string_splitter.finished()) {
         std::string_view path_token = string_splitter.next();
         if (!first) {

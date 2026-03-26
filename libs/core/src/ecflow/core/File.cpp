@@ -495,7 +495,7 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
 
             // if original path had leading slash then add it here, to preserve path
             if (pathToFileOrDir[0] == '/') {
-                pathToCreate += Str::PATH_SEPARATOR();
+                pathToCreate += ecf::string_constants::path_separator;
             }
 
             for (const auto& i : thePath) {
@@ -506,7 +506,7 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
 #endif
                     fs::create_directory(pathToCreate);
                 }
-                pathToCreate += Str::PATH_SEPARATOR();
+                pathToCreate += ecf::string_constants::path_separator;
             }
         }
         else {

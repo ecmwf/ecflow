@@ -131,7 +131,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     if (ecf_checkpt_file_[0] != '/') {
         // Prepend with ECF_HOME
         std::string check_pt = ecf_home();
-        check_pt += Str::PATH_SEPARATOR();
+        check_pt += ecf::string_constants::path_separator;
         check_pt += ecf_checkpt_file_;
         ecf_checkpt_file_ = check_pt;
     }
@@ -142,7 +142,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
     if (ecf_backup_checkpt_file_[0] != '/') {
         std::string check_pt = ecf_home();
-        check_pt += Str::PATH_SEPARATOR();
+        check_pt += ecf::string_constants::path_separator;
         check_pt += ecf_backup_checkpt_file_;
         ecf_backup_checkpt_file_ = check_pt;
     }

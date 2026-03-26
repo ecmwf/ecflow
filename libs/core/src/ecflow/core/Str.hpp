@@ -204,7 +204,6 @@ public:
 
     // Allows string to be returned by reference
     static const std::string& ROOT_PATH();      // "/"
-    static const std::string& PATH_SEPARATOR(); // "/"
 
     static const std::string& STATE_CHANGE();
 
@@ -223,6 +222,7 @@ namespace string_constants {
 
 inline const std::string empty = "";
 
+inline const std::string path_separator = "/";
 inline const std::string colon          = ":";
 
 } // namespace string_constants
