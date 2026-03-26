@@ -43,7 +43,7 @@ AbortCmd::AbortCmd(const std::string& pathToTask,
 }
 
 void AbortCmd::print(std::string& os) const {
-    os += Str::CHILD_CMD();
+    os += ecf::string_constants::child_cmd;
     os += "abort ";
     os += path_to_node();
     os += "  ";

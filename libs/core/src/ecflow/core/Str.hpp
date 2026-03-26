@@ -198,15 +198,15 @@ public:
     // returns a static string of numerics chars
     static const std::string& NUMERIC();
 
-    static const char* CHILD_CMD();
-    static const char* USER_CMD();
-    static const char* SVR_CMD(); // Only for automatic check_pt
-
     // Allows string to be returned by reference
     static const std::string& ROOT_PATH(); // "/"
 };
 
 namespace string_constants {
+
+inline const std::string child_cmd  = "chd:";
+inline const std::string user_cmd   = "--";
+inline const std::string server_cmd = "svr:"; // Only for automatic check_pt
 
 inline const std::string empty = "";
 

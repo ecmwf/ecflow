@@ -27,7 +27,7 @@
 using namespace ecf;
 
 void InitCmd::print(std::string& os) const {
-    os += Str::CHILD_CMD();
+    os += ecf::string_constants::child_cmd;
     os += "init ";
     os += path_to_node();
     if (!var_to_add_.empty()) {

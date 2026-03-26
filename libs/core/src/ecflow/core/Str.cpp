@@ -16,19 +16,6 @@ namespace ecf {
 
 const char* VALID_NODE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.";
 
-const char* Str::CHILD_CMD() {
-    static const char* CHILD_CMD = "chd:";
-    return CHILD_CMD;
-}
-const char* Str::USER_CMD() {
-    static const char* USER_CMD = "--";
-    return USER_CMD;
-}
-const char* Str::SVR_CMD() {
-    static const char* SVR_CMD = "svr:";
-    return SVR_CMD;
-} // Only for automatic check_pt
-
 const std::string& Str::ROOT_PATH() {
     static std::string root_path = "/";
     return root_path;
