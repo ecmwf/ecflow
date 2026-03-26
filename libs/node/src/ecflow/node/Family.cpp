@@ -102,7 +102,7 @@ void Family::read_state(const std::string& line, const std::vector<std::string>&
 }
 
 const std::string& Family::debugType() const {
-    return ecf::Str::FAMILY();
+    return ecf::string_constants::family;
 }
 
 void Family::collateChanges(DefsDelta& changes) const {

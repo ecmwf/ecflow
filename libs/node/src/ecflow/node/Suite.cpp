@@ -338,7 +338,7 @@ void Suite::read_state(const std::string& line, const std::vector<std::string>& 
 }
 
 const std::string& Suite::debugType() const {
-    return ecf::Str::SUITE();
+    return ecf::string_constants::suite;
 }
 
 void Suite::addClock(const ClockAttr& c, bool initialize_calendar) {

@@ -203,14 +203,9 @@ public:
     static const char* SVR_CMD(); // Only for automatic check_pt
 
     // Allows string to be returned by reference
-    static const std::string& ROOT_PATH();      // "/"
+    static const std::string& ROOT_PATH(); // "/"
 
     static const std::string& STATE_CHANGE();
-
-    static const std::string& TASK();
-    static const std::string& FAMILY();
-    static const std::string& SUITE();
-    static const std::string& ALIAS();
 
     static const std::string& DEFAULT_PORT_NUMBER(); // "3141"
     static const std::string& LOCALHOST();
@@ -224,6 +219,12 @@ inline const std::string empty = "";
 
 inline const std::string path_separator = "/";
 inline const std::string colon          = ":";
+
+inline const std::string task    = "TASK";
+inline const std::string family  = "FAMILY";
+inline const std::string family1 = "FAMILY1";
+inline const std::string suite   = "SUITE";
+inline const std::string alias   = "ALIAS";
 
 } // namespace string_constants
 

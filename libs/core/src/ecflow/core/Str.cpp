@@ -39,23 +39,6 @@ const std::string& Str::STATE_CHANGE() {
     return state_change;
 }
 
-const std::string& Str::TASK() {
-    static std::string task = "TASK";
-    return task;
-}
-const std::string& Str::FAMILY() {
-    static std::string family = "FAMILY";
-    return family;
-}
-const std::string& Str::SUITE() {
-    static std::string suite = "SUITE";
-    return suite;
-}
-const std::string& Str::ALIAS() {
-    static std::string alias = "ALIAS";
-    return alias;
-}
-
 const std::string& Str::DEFAULT_PORT_NUMBER() {
     static std::string port_number = "3141";
     return port_number;
