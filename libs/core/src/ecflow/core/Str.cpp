@@ -48,11 +48,6 @@ const std::string& Str::LOCALHOST() {
     return localhost;
 }
 
-const std::string& Str::WHITE_LIST_FILE() {
-    static std::string WHITE_LIST_FILE = "ecf.lists";
-    return WHITE_LIST_FILE;
-}
-
 const std::string& Str::ALPHANUMERIC_UNDERSCORE() {
     static std::string ALPHANUMERIC_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
     return ALPHANUMERIC_UNDERSCORE;
