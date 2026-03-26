@@ -2435,8 +2435,11 @@ bool Node::checkInvariants(std::string& errorMsg) const {
 }
 
 std::string Node::absNodePath() const {
+    const auto NR_OF_PATH_ELEMENTS = 16;
+    const auto BASE_PATH_LENGTH    = 64;
+
     std::vector<std::string> vec;
-    vec.reserve(Str::reserve_16());
+    vec.reserve(NR_OF_PATH_ELEMENTS);
     vec.push_back(name());
     Node* theParent = parent();
     while (theParent) {
@@ -2444,23 +2447,12 @@ std::string Node::absNodePath() const {
         theParent = theParent->parent();
     }
     std::string ret;
-    ret.reserve(Str::reserve_64());
+    ret.reserve(BASE_PATH_LENGTH);
     auto r_end = vec.rend();
     for (auto r = vec.rbegin(); r != r_end; ++r) {
         ret += '/';
         ret += *r;
     }
-
-    //	// Another algorithm broadly similar results
-    //	std::string ret; ret.reserve(Str::reserve_64());
-    // 	ret += '/';
-    //	ret += name();
-    // 	Node* theParent = parent();
-    //	while (theParent) {
-    //		ret.insert(0,"/");
-    //		ret.insert(1,theParent->name());
-    // 		theParent = theParent->parent();
-    //	}
 
     return ret;
 }

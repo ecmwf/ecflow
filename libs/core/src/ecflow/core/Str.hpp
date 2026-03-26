@@ -78,12 +78,6 @@ public:
     // Disable default construction
     Str() = delete;
 
-    static int reserve_4() { return 4; }
-    static int reserve_8() { return 8; }
-    static int reserve_16() { return 17; }
-    static int reserve_32() { return 32; }
-    static int reserve_64() { return 64; }
-
     // remove any quotes on the string, else does nothing
     // "fred" -> fred
     //  fred  -> fred
