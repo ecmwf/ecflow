@@ -140,7 +140,7 @@ if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INST
   )
   install(
     FILES
-      ../ecflow/__init__.py
+      "${CMAKE_CURRENT_BINARY_DIR}/../ecflow/__init__.py"
       ../samples/api/ecf.py
       ../samples/api/sms2ecf.py
     DESTINATION
@@ -162,18 +162,17 @@ else()
   message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
   message(STATUS "CMAKE_PYTHON_INSTALL_PREFIX : ${CMAKE_PYTHON_INSTALL_PREFIX}" )
 
-  set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/../setup.py.in")
-  set(SETUP_PY    "${CMAKE_CURRENT_SOURCE_DIR}/../setup.py")
-  set(DEPS        "${CMAKE_CURRENT_SOURCE_DIR}/../ecflow/__init__.py")
   set(OUTPUT      "${CMAKE_CURRENT_SOURCE_DIR}/timestamp")
 
-  configure_file(${SETUP_PY_IN} ${SETUP_PY} )
+  # Notice:
+  #  (1) SETUP_PY and INIT_PY files are generated from .in files in the binary directory
+  #  (2) these files are configured by the .../pyext/CMakeLists.txt
 
   add_custom_command(
     OUTPUT ${OUTPUT}
     COMMAND ${PYTHON} ${SETUP_PY} build
     COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
-    DEPENDS ${DEPS}
+    DEPENDS ${INIT_PY}
   )
   add_custom_target(target ALL DEPENDS ${OUTPUT})
 

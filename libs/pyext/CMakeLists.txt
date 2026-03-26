@@ -33,19 +33,21 @@
 #
 
 # =============================================================================
-# Configure __init__.py to add __version__
+# Configure __init__.py
+#   - effectively defines the __version__ used for bindings
 # =============================================================================
-set(INIT_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
-set(INIT_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
-configure_file(${INIT_PY_IN} ${INIT_PY_OUT} )
+set(INIT_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
+set(INIT_PY    "${CMAKE_CURRENT_BINARY_DIR}/ecflow/__init__.py")
+configure_file(${INIT_PY_IN} ${INIT_PY} )
 
 
 # =============================================================================
-# Configure setup.py. Note used locally. Uses existing libraries
+# Configure setup.py
+#   - used locally for tests
 # =============================================================================
-set(SETUP_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
-set(SETUP_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
-configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT} )
+set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
+set(SETUP_PY    "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
+configure_file(${SETUP_PY_IN} ${SETUP_PY} )
 
 # ==============================================================================
 # source files (paths relative to dirs .../python3)
