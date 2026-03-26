@@ -320,9 +320,10 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
-    BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                          CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                    << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                          CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                              << " should return 0\n"
+                              << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 0,
                           "Expected edit history of size 0 after server start, but found "
                               << theClient.server_reply().get_string_vec().size());
@@ -344,9 +345,10 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
                                                   << theClient.errorMsg());
 
     // make sure edit history updated
-    BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                          CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                    << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                          CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                              << " should return 0\n"
+                              << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 5,
                           "Expected edit history of size 5, but found "
                               << theClient.server_reply().get_string_vec().size());
@@ -355,9 +357,9 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
     BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                           CtsApi::get() << " failed should return 0\n"
                                         << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() == 0,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(ecf::string_constants::root_path).size() == 0,
                           "Expected edit history of size 0, but found "
-                              << theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
+                              << theClient.defs()->get_edit_history(ecf::string_constants::root_path).size());
 
     // This should write the edit history
     BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs() == 0,
@@ -374,9 +376,9 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
     {
         Defs defs;
         defs.restore(invokeServer.ecf_checkpt_file()); // restore defs from checkpoint
-        BOOST_REQUIRE_MESSAGE(defs.get_edit_history(Str::ROOT_PATH()).size() == 5,
+        BOOST_REQUIRE_MESSAGE(defs.get_edit_history(ecf::string_constants::root_path).size() == 5,
                               "Expected edit history of size 5, but found "
-                                  << defs.get_edit_history(Str::ROOT_PATH()).size());
+                                  << defs.get_edit_history(ecf::string_constants::root_path).size());
     }
 
     {

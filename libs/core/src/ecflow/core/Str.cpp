@@ -16,11 +16,6 @@ namespace ecf {
 
 const char* VALID_NODE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.";
 
-const std::string& Str::ROOT_PATH() {
-    static std::string root_path = "/";
-    return root_path;
-}
-
 void Str::removeQuotes(std::string& s) {
     if (!s.empty()) {
         if (s[0] == '"' && s[s.size() - 1] == '"') {

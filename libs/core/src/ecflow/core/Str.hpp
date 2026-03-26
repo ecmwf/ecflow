@@ -191,9 +191,6 @@ public:
 
     /// Only use strcmp if the first characters are the same
     static int local_strcmp(const char* s, const char* t) { return (*s != *t ? *s - *t : strcmp(s, t)); }
-
-    // Allows string to be returned by reference
-    static const std::string& ROOT_PATH(); // "/"
 };
 
 namespace string_constants {
@@ -204,6 +201,7 @@ inline const std::string server_cmd = "svr:"; // Only for automatic check_pt
 
 inline const std::string empty = "";
 
+inline const std::string root_path      = "/";
 inline const std::string path_separator = "/";
 inline const std::string colon          = ":";
 
