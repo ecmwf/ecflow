@@ -1568,7 +1568,7 @@ bool Node::variable_dollar_substitution(std::string& cmd) const {
             break;
         }
 
-        size_t secondPos = cmd.find_first_not_of(Str::ALPHANUMERIC_UNDERSCORE(), firstPos + 1);
+        size_t secondPos = cmd.find_first_not_of(ecf::string_constants::alphanumeric_underscore_chars, firstPos + 1);
         if (secondPos == std::string::npos) {
             secondPos = cmd.size();
         }

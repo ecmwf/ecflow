@@ -308,7 +308,7 @@ const Event& Node::findEventByNameOrNumber(const std::string& theName) const {
     }
 
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-    if (theName.find_first_of(Str::NUMERIC(), 0) == 0) {
+    if (theName.find_first_of(ecf::string_constants::numeric_chars, 0) == 0) {
         try {
             auto eventNumber = ecf::convert_to<int>(theName);
             return findEventByNumber(eventNumber);

@@ -75,7 +75,7 @@ Event::Event(const std::string& eventName, bool iv)
     // which then did *not* load.
     //
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-    if (eventName.find_first_of(Str::NUMERIC()) == 0) {
+    if (eventName.find_first_of(ecf::string_constants::numeric_chars) == 0) {
         try {
             number_ = ecf::convert_to<int>(eventName);
             n_.clear();

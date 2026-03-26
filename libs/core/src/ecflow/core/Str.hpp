@@ -192,12 +192,6 @@ public:
     /// Only use strcmp if the first characters are the same
     static int local_strcmp(const char* s, const char* t) { return (*s != *t ? *s - *t : strcmp(s, t)); }
 
-    // returns a static string of alphanumerics and underscore
-    static const std::string& ALPHANUMERIC_UNDERSCORE();
-
-    // returns a static string of numerics chars
-    static const std::string& NUMERIC();
-
     // Allows string to be returned by reference
     static const std::string& ROOT_PATH(); // "/"
 };
@@ -223,6 +217,11 @@ inline const std::string default_port_number = "3141";
 inline const std::string localhost           = "localhost";
 
 inline const std::string white_list_file = "ecf.lists";
+
+inline const std::string alphanumeric_underscore_chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+
+inline const std::string numeric_chars = "0123456789";
 
 } // namespace string_constants
 

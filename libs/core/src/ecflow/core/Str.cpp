@@ -21,16 +21,6 @@ const std::string& Str::ROOT_PATH() {
     return root_path;
 }
 
-const std::string& Str::ALPHANUMERIC_UNDERSCORE() {
-    static std::string ALPHANUMERIC_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
-    return ALPHANUMERIC_UNDERSCORE;
-}
-
-const std::string& Str::NUMERIC() {
-    static std::string NUMERIC = "0123456789";
-    return NUMERIC;
-}
-
 void Str::removeQuotes(std::string& s) {
     if (!s.empty()) {
         if (s[0] == '"' && s[s.size() - 1] == '"') {
@@ -349,7 +339,7 @@ bool Str::valid_name(const std::string& name, std::string& msg) {
     }
 
     // verify that the first character is alphanumeric or is an underscore
-    bool result = Str::ALPHANUMERIC_UNDERSCORE().find(name[0], 0) != std::string::npos;
+    bool result = ecf::string_constants::alphanumeric_underscore_chars.find(name[0], 0) != std::string::npos;
     if (!result) {
         msg = "Valid names can only consist of alphanumeric characters, "
               "underscores and dots (The first character cannot be a dot). "
@@ -386,7 +376,7 @@ bool Str::valid_name(const std::string& name) {
     }
 
     // verify that the first character is alphabetic or has underscore
-    bool result = Str::ALPHANUMERIC_UNDERSCORE().find(name[0], 0) != std::string::npos;
+    bool result = ecf::string_constants::alphanumeric_underscore_chars.find(name[0], 0) != std::string::npos;
     if (!result) {
         return false;
     }
@@ -400,7 +390,7 @@ bool Str::valid_name(const std::string& name) {
 }
 
 int Str::to_int(const std::string& the_str, int error_return) {
-    if (the_str.find_first_of(Str::NUMERIC(), 0) != std::string::npos) {
+    if (the_str.find_first_of(ecf::string_constants::numeric_chars, 0) != std::string::npos) {
         try {
             return ecf::convert_to<int>(the_str);
         }

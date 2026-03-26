@@ -417,7 +417,7 @@ std::string WhiteListFile::dump_valid_users() const {
 bool WhiteListFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const {
     // Expect 4.4.14, Current syntax in force after 4.4.5
     // If first character is NUMERIC and we have dots
-    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != std::string::npos;
+    bool firstCharIsNumeric = ecf::string_constants::numeric_chars.find(line[0], 0) != std::string::npos;
     if (firstCharIsNumeric && line.find(".") != std::string::npos) {
 
         std::vector<std::string> versionNumberTokens;

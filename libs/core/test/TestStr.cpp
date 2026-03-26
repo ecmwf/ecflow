@@ -724,7 +724,7 @@ BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
 static void methodX(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
     // 0.81
     // for bad conversion istringstream seems to return 0, hence add guard
-    if (str.find_first_of(Str::NUMERIC(), 0) == 0) {
+    if (str.find_first_of(ecf::string_constants::numeric_chars, 0) == 0) {
         int number = 0;
         std::istringstream(str) >> number;
         numberRes.push_back(number);
@@ -747,7 +747,7 @@ static void method1(const std::string& str, std::vector<std::string>& stringRes,
 
 static void method2(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
     // 0.6
-    if (str.find_first_of(Str::NUMERIC(), 0) == 0) {
+    if (str.find_first_of(ecf::string_constants::numeric_chars, 0) == 0) {
         try {
             int number = ecf::convert_to<int>(str);
             numberRes.push_back(number);

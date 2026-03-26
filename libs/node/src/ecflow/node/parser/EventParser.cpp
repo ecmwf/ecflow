@@ -41,7 +41,7 @@ bool EventParser::doParse(const std::string& line, std::vector<std::string>& lin
     int number         = std::numeric_limits<int>::max();
 
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-    if (lineTokens[1].find_first_of(Str::NUMERIC()) == 0) {
+    if (lineTokens[1].find_first_of(ecf::string_constants::numeric_chars) == 0) {
         //   event 0
         //   event 1 eventName
         //   event 2 eventNamea
