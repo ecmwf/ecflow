@@ -79,7 +79,7 @@ public:
         : BaseMockServer<MockServer>(ecf::Host{}.name(), port) {}
 
     void load_definition(const std::string& defs) const {
-        ClientInvoker client(ecf::Str::LOCALHOST(), port());
+        ClientInvoker client(ecf::string_constants::localhost, port());
         try {
             BOOST_REQUIRE_MESSAGE(fs::exists(defs), "definitions file doesn't exist at: " + defs);
             auto error = client.loadDefs(defs);
@@ -111,7 +111,7 @@ public:
 private:
     node_ptr get_node_at(const std::string& path) const {
         ECF_TEST_DBG(<< "   Creating ecflow_client connected to " << host() << ":" << port());
-        ClientInvoker client(ecf::Str::LOCALHOST(), port());
+        ClientInvoker client(ecf::string_constants::localhost, port());
 
         // load all definitions
         std::shared_ptr<Defs> defs = nullptr;
@@ -148,7 +148,7 @@ public:
 
         auto server = Process(invoke_command, {"--port", std::to_string(port), "-d"});
 
-        ClientInvoker client(ecf::Str::LOCALHOST(), port);
+        ClientInvoker client(ecf::string_constants::localhost, port);
         if (!client.wait_for_server_reply(5)) {
             BOOST_REQUIRE_MESSAGE(false, "could not launch ecflow server");
         }

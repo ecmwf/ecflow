@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_ecfinterval) {
     ECF_NAME_THIS_TEST();
 
     // ecflow server interval is valid for range [1-60]
-    std::string port = Str::DEFAULT_PORT_NUMBER();
+    std::string port = ecf::string_constants::default_port_number;
     for (int i = -10; i < 70; ++i) {
         std::string errorMsg;
         std::string argument          = "--ecfinterval=" + ecf::convert_to<std::string>(i);
@@ -193,8 +193,9 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
             continue;
         }
         if (std::string("ECF_PORT") == p.first && !ecf::environment::has("ECF_PORT")) {
-            BOOST_CHECK_MESSAGE(p.second == Str::DEFAULT_PORT_NUMBER(),
-                                "for ECF_PORT expected " << Str::DEFAULT_PORT_NUMBER() << " but found " << p.second);
+            BOOST_CHECK_MESSAGE(p.second == ecf::string_constants::default_port_number,
+                                "for ECF_PORT expected " << ecf::string_constants::default_port_number << " but found "
+                                                         << p.second);
             continue;
         }
         if (std::string("ECF_CHECKINTERVAL") == p.first) {
@@ -261,7 +262,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
         if (std::string("ECF_PASSWD") == p.first) {
 
             Host host;
-            std::string port = Str::DEFAULT_PORT_NUMBER();
+            std::string port = ecf::string_constants::default_port_number;
             if (ecf::environment::has("ECF_PORT")) {
                 port = ecf::environment::get("ECF_PORT");
             }

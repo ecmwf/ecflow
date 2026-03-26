@@ -27,7 +27,7 @@ Host::Host() {
 
 Host::Host(const std::string& host)
     : the_host_name_(host) {
-    if (the_host_name_ == Str::LOCALHOST()) {
+    if (the_host_name_ == ecf::string_constants::localhost) {
         get_host_name();
     }
 }

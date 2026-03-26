@@ -32,7 +32,7 @@ public:
     InvokeServer& operator=(InvokeServer&&)      = delete;
 
     explicit InvokeServer(const std::string& msg,
-                          const std::string& port                      = ecf::Str::DEFAULT_PORT_NUMBER(),
+                          const std::string& port                      = ecf::string_constants::default_port_number,
                           bool disable_job_generation                  = false,
                           bool remove_checkpt_file_before_server_start = true,
                           bool remove_checkpt_file_after_server_exit   = true)
@@ -88,7 +88,7 @@ public:
         // This will also remove the generated files.
         // Will only terminate local server, host_ is *EMPTY* for local server, using two constructors above
         if (host_.empty()) {
-            doEnd(ecf::Str::LOCALHOST(),
+            doEnd(ecf::string_constants::localhost,
                   port_,
                   remove_checkpt_file_after_server_exit_,
                   remove_log_file_after_server_exit_);
@@ -98,7 +98,7 @@ public:
     const std::string& port() const { return port_; }
     const std::string& host() const {
         if (host_.empty()) {
-            return ecf::Str::LOCALHOST();
+            return ecf::string_constants::localhost;
         }
         return host_;
     }
@@ -146,7 +146,7 @@ private:
         (void)system(theServerInvokePath.c_str());
 
         // Allow time for server process to kick in.
-        ClientInvoker theClient(ecf::Str::LOCALHOST(), port);
+        ClientInvoker theClient(ecf::string_constants::localhost, port);
         if (theClient.wait_for_server_reply()) {
             server_started = true;
             if (!msg.empty()) {

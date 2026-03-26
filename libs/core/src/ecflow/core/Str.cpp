@@ -39,15 +39,6 @@ const std::string& Str::STATE_CHANGE() {
     return state_change;
 }
 
-const std::string& Str::DEFAULT_PORT_NUMBER() {
-    static std::string port_number = "3141";
-    return port_number;
-}
-const std::string& Str::LOCALHOST() {
-    static std::string localhost = "localhost";
-    return localhost;
-}
-
 const std::string& Str::ALPHANUMERIC_UNDERSCORE() {
     static std::string ALPHANUMERIC_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
     return ALPHANUMERIC_UNDERSCORE;

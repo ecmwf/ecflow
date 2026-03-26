@@ -226,6 +226,9 @@ inline const std::string family1 = "FAMILY1";
 inline const std::string suite   = "SUITE";
 inline const std::string alias   = "ALIAS";
 
+inline const std::string default_port_number = "3141";
+inline const std::string localhost           = "localhost";
+
 inline const std::string white_list_file = "ecf.lists";
 
 } // namespace string_constants

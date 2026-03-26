@@ -309,7 +309,7 @@ bool PasswdFile::createWithAccess(const std::string& pathToFile,
     line.clear();
     line += username;
     line += " ";
-    line += Str::LOCALHOST();
+    line += ecf::string_constants::localhost;
     line += " ";
     line += port;
     line += " ";

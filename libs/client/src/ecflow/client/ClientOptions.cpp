@@ -166,10 +166,10 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
             port = env->portSpecified(); // get the environment variable ECF_PORT || Str::DEFAULT_PORT_NUMBER()
         }
         if (host.empty()) {
-            host = Str::LOCALHOST(); // if ECF_HOST not specified default to localhost
+            host = ecf::string_constants::localhost; // if ECF_HOST not specified default to localhost
         }
         if (port.empty()) {
-            port = Str::DEFAULT_PORT_NUMBER(); // if ECF_PORT not specified use default
+            port = ecf::string_constants::default_port_number; // if ECF_PORT not specified use default
         }
         env->set_host_port(host, port);
     }

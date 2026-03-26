@@ -44,15 +44,15 @@ using namespace ecf;
 namespace /* anonymous */ {
 
 bool is_external_server_running_remotelly(std::string_view host) {
-    return !host.empty() && host != Str::LOCALHOST();
+    return !host.empty() && host != ecf::string_constants::localhost;
 }
 
 bool is_external_server_running_locally(std::string_view host) {
-    return !host.empty() && host == Str::LOCALHOST();
+    return !host.empty() && host == ecf::string_constants::localhost;
 }
 
 bool is_local_server(std::string_view host) {
-    return host.empty() || host == Str::LOCALHOST();
+    return host.empty() || host == ecf::string_constants::localhost;
 }
 
 } // namespace
@@ -207,7 +207,7 @@ void TestFixture::init(const std::string& project_test_dir) {
         // Going to perform the tests using a server launched as part of the test setup.
 
         // Update ClientInvoker with local host and port
-        host_ = Str::LOCALHOST();
+        host_ = ecf::string_constants::localhost;
         port_ = ecf::SCPort::find_available_port(port_);
         client().set_host_port(host_, port_);
 

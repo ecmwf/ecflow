@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_parsing) {
     // local host should be implicitly added to internal host list
     std::string the_host = ClientEnvironment::hostSpecified();
     if (the_host.empty()) {
-        the_host = Str::LOCALHOST();
+        the_host = ecf::string_constants::localhost;
     }
 
     std::vector<std::string> expectedHost;
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_defaults) {
 
     // local host should be implicitly added to internal host list
     std::vector<std::pair<std::string, std::string>> expectedHost;
-    expectedHost.emplace_back(Str::LOCALHOST(), std::string("5111")); // here 5111 is job supplied port
+    expectedHost.emplace_back(ecf::string_constants::localhost, std::string("5111")); // here 5111 is job supplied port
     expectedHost.emplace_back(std::string("host1"), std::string("3142"));
     expectedHost.emplace_back(std::string("host2"), std::string("3141"));
     expectedHost.emplace_back(std::string("host3"),
@@ -96,10 +96,11 @@ BOOST_AUTO_TEST_CASE(test_client_environment_host_file_defaults) {
     expectedHost.emplace_back(std::string("host6"), std::string("4081"));
 
     // Create the ClientEnvironment overriding the config & environment. To specify host and port
-    ClientEnvironment client_env(good_host_file, Str::LOCALHOST(), "5111");
+    ClientEnvironment client_env(good_host_file, ecf::string_constants::localhost, "5111");
     std::string home_host = client_env.host();
     std::string home_port = client_env.port();
-    BOOST_CHECK_MESSAGE(Str::LOCALHOST() == home_host && "5111" == home_port, "host host & port not as expected");
+    BOOST_CHECK_MESSAGE(ecf::string_constants::localhost == home_host && "5111" == home_port,
+                        "host host & port not as expected");
 
     std::string host;
     size_t count       = 0;
