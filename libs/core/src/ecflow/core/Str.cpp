@@ -34,11 +34,6 @@ const std::string& Str::ROOT_PATH() {
     return root_path;
 }
 
-const std::string& Str::STATE_CHANGE() {
-    static std::string state_change = "   state change ";
-    return state_change;
-}
-
 const std::string& Str::ALPHANUMERIC_UNDERSCORE() {
     static std::string ALPHANUMERIC_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
     return ALPHANUMERIC_UNDERSCORE;

@@ -204,13 +204,6 @@ public:
 
     // Allows string to be returned by reference
     static const std::string& ROOT_PATH(); // "/"
-
-    static const std::string& STATE_CHANGE();
-
-    static const std::string& DEFAULT_PORT_NUMBER(); // "3141"
-    static const std::string& LOCALHOST();
-
-    static const std::string& WHITE_LIST_FILE();
 };
 
 namespace string_constants {
