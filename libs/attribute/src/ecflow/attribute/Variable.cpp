@@ -45,8 +45,8 @@ void Variable::set_name(const std::string& v) {
 }
 
 int Variable::value() const {
-    // see if the value is convertible to an integer
-    return Str::to_int(v_, 0 /* value to return if conversion fails*/);
+    // check if the value is convertible to an integer
+    return ecf::algorithm::to_int(v_, 0 /* value to return if conversion fails*/);
 }
 
 bool Variable::operator==(const Variable& rhs) const {
@@ -76,7 +76,7 @@ void Variable::write(std::string& ret) const {
     else {
         // replace \n, otherwise re-parse will fail
         std::string value = v_;
-        Str::replace_all(value, "\n", "\\n");
+        ecf::algorithm::replace_all(value, "\n", "\\n");
         ret += value;
     }
     ret += "'";

@@ -2693,13 +2693,15 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
             }
         }
     }
-    auto caseInsen = [](const auto& a, const auto& b) { return Str::caseInsLess(a.name(), b.name()); };
+    auto caseInsen = [](const auto& a, const auto& b) {
+        return ecf::algorithm::case_insensitive_less(a.name(), b.name());
+    };
 
     state_change_no_ = Ecf::incr_state_change_no();
     switch (attr) {
         case Attr::EVENT:
             sort(events_.begin(), events_.end(), [](const Event& a, const Event& b) {
-                return Str::caseInsLess(a.name_or_number(), b.name_or_number());
+                return ecf::algorithm::case_insensitive_less(a.name_or_number(), b.name_or_number());
             });
             break;
         case Attr::METER:
@@ -2710,7 +2712,7 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
             break;
         case Attr::LIMIT:
             sort(limits_.begin(), limits_.end(), [](const limit_ptr& a, const limit_ptr& b) {
-                return Str::caseInsLess(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_less(a->name(), b->name());
             });
             break;
         case Attr::VARIABLE:
@@ -2719,12 +2721,12 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
         case Attr::ALL:
             sort(vars_.begin(), vars_.end(), caseInsen);
             sort(events_.begin(), events_.end(), [](const Event& a, const Event& b) {
-                return Str::caseInsLess(a.name_or_number(), b.name_or_number());
+                return ecf::algorithm::case_insensitive_less(a.name_or_number(), b.name_or_number());
             });
             sort(meters_.begin(), meters_.end(), caseInsen);
             sort(labels_.begin(), labels_.end(), caseInsen);
             sort(limits_.begin(), limits_.end(), [](const limit_ptr& a, const limit_ptr& b) {
-                return Str::caseInsLess(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_less(a->name(), b->name());
             });
             break;
         case Attr::UNKNOWN:

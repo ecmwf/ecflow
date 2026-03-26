@@ -40,7 +40,7 @@ HostsFile HostsFile::parse(std::istream& is, const int default_port) {
     for (const auto& line : lines) {
 
         std::vector<std::string> tokens;
-        ecf::Str::split(line, tokens);
+        ecf::algorithm::split_at(tokens, line);
         if (tokens.empty() || tokens[0].empty() || tokens[0][0] == '#') {
             continue; // skip empty lines and comments
         }
@@ -58,7 +58,7 @@ HostsFile HostsFile::parse(std::istream& is, const int default_port) {
                 // The port can be empty, in which case we use the default port
                 port = std::to_string(default_port);
             }
-            else if (!ecf::Str::is_int(port)) {
+            else if (!ecf::algorithm::is_int(port)) {
                 // If the port must be an integer, otherwise throw an exception
                 THROW_EXCEPTION(HostsFileFailure, "Non-integer port number in hosts file: " << port);
             }

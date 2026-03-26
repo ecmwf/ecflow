@@ -465,7 +465,7 @@ std::vector<std::string> EcfFile::get_ecf_include_paths(const EcfFile& ecf) {
 
         // if ECF_INCLUDE is a set a paths, search in order. i.e., like $PATH
         if (ecf_include.find(':') != std::string::npos) {
-            Str::split(ecf_include, paths, ":");
+            ecf::algorithm::split_at(paths, ecf_include, ":");
         }
         else {
             paths = {ecf_include};
@@ -719,12 +719,12 @@ static void replace(std::string::size_type commentPos,
         if (commentPos == std::string::npos) {
             std::string replace1 = clientPath;
             replace1 += ecfEquiv;
-            Str::replace(jobLine, smsChildCmd, replace1);
+            ecf::algorithm::replace(jobLine, smsChildCmd, replace1);
         }
         else if (childPos < commentPos) {
             std::string replace2 = clientPath;
             replace2 += ecfEquiv;
-            Str::replace(jobLine, smsChildCmd, replace2);
+            ecf::algorithm::replace(jobLine, smsChildCmd, replace2);
         }
     }
 }
@@ -754,7 +754,7 @@ bool EcfFile::replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::str
 }
 
 bool EcfFile::extract_ecfmicro(const std::string& line, std::string& ecfmicro, std::string& error_msg) const {
-    if (!Str::get_token(line, 1, ecfmicro)) {
+    if (!ecf::algorithm::get_token(line, 1, ecfmicro)) {
         error_msg += MESSAGE("ecfmicro does not have a replacement character, in " << script_path_or_cmd_);
         return false;
     }
@@ -1582,7 +1582,7 @@ void PreProcessor::preProcess_line() {
     // allow   : %FRED:val%
     // disallow: %FRED
     std::string the_include_token;
-    if (!Str::get_token(script_line, 1, the_include_token)) {
+    if (!ecf::algorithm::get_token(script_line, 1, the_include_token)) {
         int ecfMicroCount = EcfFile::countEcfMicro(script_line, ecf_micro_);
         if (ecfMicroCount % 2 != 0) {
             throw std::runtime_error(
@@ -1624,7 +1624,7 @@ void PreProcessor::preProcess_includes() {
         }
 
         std::string the_include_token;
-        if (!Str::get_token(script_line, 1, the_include_token)) {
+        if (!ecf::algorithm::get_token(script_line, 1, the_include_token)) {
             throw std::runtime_error(
                 MESSAGE(error_context() << "Could not extract include token at : " << script_line));
         }
@@ -1768,7 +1768,8 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1, 
         if (includedFile.find("./") == 1 || includedFile.find("../") == 1) {
             // remove the leading and trailing '"'
             std::string the_included_file = includedFile;
-            Str::removeQuotes(the_included_file);
+
+            ecf::algorithm::remove_double_quotes(the_included_file);
 
             // Get the root path, i.e. script_or_job_path() is of the form:
             //    "/user/home/ma/mao/course/t1.ecf || /user/home/ma/mao/course/t1.job"

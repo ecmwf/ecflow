@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
 
     // read the state, into a different calendar & compare
     std::vector<std::string> lineTokens;
-    Str::split(calendar_state, lineTokens);
+    ecf::algorithm::split_at(lineTokens, calendar_state);
     Calendar calendar2;
     calendar2.read_state(calendar_state, lineTokens);
     BOOST_CHECK_MESSAGE(calendar == calendar2,
@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
     calendar_state.clear();
     calendar.write_state(calendar_state);
 
-    Str::split(calendar_state, lineTokens);
+    ecf::algorithm::split_at(lineTokens, calendar_state);
     calendar2.read_state(calendar_state, lineTokens);
 
     BOOST_CHECK_MESSAGE(calendar == calendar2, "Calendar should be the same");

@@ -54,7 +54,7 @@ bool authenticate(const httplib::Request& request, ClientInvoker* ci) {
 
     if (auth != header.end()) {
         std::vector<std::string> elems;
-        ecf::Str::split(auth->second, elems, " ");
+        ecf::algorithm::split_at(elems, auth->second, " ");
 
         if (elems[0] == "Basic") {
             auto [username, password] = BasicAuth::get_credentials(elems[1]);

@@ -205,8 +205,8 @@ void Submittable::write_state(std::string& ret, bool& added_comment_char) const 
     if (!abr_.empty()) {
         add_comment_char(ret, added_comment_char);
         std::string the_abort_reason = abr_;
-        Str::replace_all(the_abort_reason, "\n", "\\n");
-        Str::replace_all(the_abort_reason, ";", " ");
+        ecf::algorithm::replace_all(the_abort_reason, "\n", "\\n");
+        ecf::algorithm::replace_all(the_abort_reason, ";", " ");
         ret += " abort<:";
         ret += the_abort_reason;
         ret += ">abort";
@@ -832,7 +832,7 @@ void Submittable::kill(const std::string& zombie_pid) {
         }
 
         // replace %ECF_RID% with the input args
-        Str::replace(ecf_kill_cmd, "%ECF_RID%", zombie_pid);
+        ecf::algorithm::replace(ecf_kill_cmd, "%ECF_RID%", zombie_pid);
     }
 
     if (!variableSubstitution(ecf_kill_cmd)) {
@@ -948,8 +948,8 @@ void Submittable::set_aborted_only(const std::string& reason) {
 
     // Do not use "\n" | ';' in abr_, as this can mess up, --migrate output
     // Which would then affect --load.
-    Str::replace(abr_, "\n", "");
-    Str::replace(abr_, ";", " ");
+    ecf::algorithm::replace(abr_, "\n", "");
+    ecf::algorithm::replace(abr_, ";", " ");
 
     // This will set the state and bubble up the most significant state
     set_state(NState::ABORTED);

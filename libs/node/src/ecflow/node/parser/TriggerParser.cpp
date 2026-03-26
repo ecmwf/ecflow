@@ -71,7 +71,7 @@ void TriggerCompleteParser::getExpression(const std::string& line,
             rootParser()->getNextLine(line2);
 
             std::vector<std::string> lineTokens2;
-            Str::split(line2, lineTokens2);
+            ecf::algorithm::split_at(lineTokens2, line2);
 
             std::copy(lineTokens2.begin(), lineTokens2.end(), std::back_inserter(accumalatedTokens));
 

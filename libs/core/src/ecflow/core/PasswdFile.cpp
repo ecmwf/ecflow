@@ -72,7 +72,7 @@ bool PasswdFile::load(const std::string& file, bool debug, std::string& errorMsg
 
         ecf::algorithm::trim(theLine); // remove leading and trailing spaces
         std::vector<std::string> lineTokens;
-        Str::split(theLine, lineTokens);
+        ecf::algorithm::split_at(lineTokens, theLine);
         if (lineTokens.empty()) {
             continue;
         }
@@ -214,7 +214,7 @@ bool PasswdFile::validateVersionNumber(const std::string& line, std::string& err
     if (firstCharIsNumeric && line.find(".") != std::string::npos) {
 
         std::vector<std::string> versionNumberTokens;
-        Str::split(line, versionNumberTokens, ".");
+        ecf::algorithm::split_at(versionNumberTokens, line, ".");
         if (versionNumberTokens.size() != 3) {
             errorMsg += "Expected version of the form <int>.<int>.<int> i.e 4.4.0. but found invalid version number\n";
             return false;

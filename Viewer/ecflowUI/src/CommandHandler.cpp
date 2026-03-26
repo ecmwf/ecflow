@@ -106,13 +106,13 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd) {
 
         // replace placeholders with real node names
         std::string placeholder("<full_name>");
-        ecf::Str::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
+        ecf::algorithm::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
 
         placeholder = "<node_name>";
-        ecf::Str::replace_all(realCommand, placeholder, targetNodeNames[serverHandler]);
+        ecf::algorithm::replace_all(realCommand, placeholder, targetNodeNames[serverHandler]);
 
         placeholder = "<parent_name>";
-        ecf::Str::replace_all(realCommand, placeholder, targetParentFullNames[serverHandler]);
+        ecf::algorithm::replace_all(realCommand, placeholder, targetParentFullNames[serverHandler]);
 
         // Shell command
         if (realCommand.find("sh ") == 0) {

@@ -342,7 +342,7 @@ bool WhiteListFile::load(const std::string& file, std::string& errorMsg) {
 
         ecf::algorithm::trim(theLine); // remove leading and trailing spaces
         std::vector<std::string> lineTokens;
-        Str::split(theLine, lineTokens);
+        ecf::algorithm::split_at(lineTokens, theLine);
         if (lineTokens.empty()) {
             continue;
         }
@@ -421,7 +421,7 @@ bool WhiteListFile::validateVersionNumber(const std::string& line, std::string& 
     if (firstCharIsNumeric && line.find(".") != std::string::npos) {
 
         std::vector<std::string> versionNumberTokens;
-        Str::split(line, versionNumberTokens, ".");
+        ecf::algorithm::split_at(versionNumberTokens, line, ".");
         if (versionNumberTokens.size() != 3) {
             errorMsg += "Expected version of the form <int>.<int>.<int> i.e 4.4.14. but found invalid version number\n";
             return false;
@@ -561,7 +561,7 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
         else if (tok[0] == '/') {
             // path or set of paths
             std::vector<std::string> local_paths;
-            Str::split(tok, local_paths, ",");
+            ecf::algorithm::split_at(local_paths, tok, ",");
             std::copy(local_paths.begin(), local_paths.end(), std::back_inserter(paths));
 
             // root path '/' means apply to all suites, in which case the paths may as well be empty.

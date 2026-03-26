@@ -726,7 +726,7 @@ std::ostream& operator<<(std::ostream& os, const TimeSeries& d) {
 
 ecf::TimeSeries TimeSeries::create(const std::string& str) {
     std::vector<std::string> lineTokens;
-    Str::split(str, lineTokens);
+    ecf::algorithm::split_at(lineTokens, str);
     size_t index = 0;
     return TimeSeries::create(index, lineTokens);
 }

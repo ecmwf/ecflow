@@ -37,8 +37,8 @@ AbortCmd::AbortCmd(const std::string& pathToTask,
     if (!reason_.empty()) {
         // Do not use "\n" | ';' in Submittable::abr_, as this can mess up, --migrate output
         // Which would then affect --load.
-        Str::replace(reason_, "\n", "");
-        Str::replace(reason_, ";", " ");
+        ecf::algorithm::replace(reason_, "\n", "");
+        ecf::algorithm::replace(reason_, ";", " ");
     }
 }
 

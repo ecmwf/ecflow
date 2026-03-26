@@ -34,7 +34,7 @@ std::string find_cmake_version(const std::vector<std::string>& cmake_content) {
     for (auto& line : cmake_content) {
         if (contains(line, "project", "ecflow", "LANGUAGES", "CXX", "VERSION")) {
             std::vector<std::string> tokens;
-            Str::split(line, tokens);
+            ecf::algorithm::split_at(tokens, line);
 
             auto version_arg = std::find(tokens.begin(), tokens.end(), "VERSION");
             auto version_val = version_arg + 1;

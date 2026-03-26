@@ -1121,7 +1121,7 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
             }
             std::string time_stamp = line.substr(0, first_closed_bracket);
 
-            ecf::Str::split(time_stamp, parseHelper_.new_time_stamp);
+            ecf::algorithm::split_at(parseHelper_.new_time_stamp, time_stamp);
             if (parseHelper_.new_time_stamp.size() != 2) {
                 continue;
             }
@@ -1141,7 +1141,7 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
         numOfRows_++;
 
         std::vector<std::string> items;
-        ecf::Str::split(line, items, delimiter);
+        ecf::algorithm::split_at(items, line, delimiter);
         for (size_t i = 0; i < items.size(); ++i) {
             // Should be just left with " chd:<child command> " or " --<user command>, since we have removed the time
             // stamp
@@ -1386,7 +1386,7 @@ bool LogLoadData::extract_suite_path(const std::string& line,
             if (!path.empty()) {
                 if (path.find(":") != std::string::npos) {
                     std::vector<std::string> pathParts;
-                    ecf::Str::split(path, pathParts, ":");
+                    ecf::algorithm::split_at(pathParts, path, ":");
                     if (pathParts.size() > 1) {
                         path = pathParts[0];
                     }

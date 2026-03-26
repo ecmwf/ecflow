@@ -217,7 +217,7 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem* item, bool showFull
     // get the command name
     QString qCommand(item->text());
     std::string command = qCommand.toStdString();
-    ecf::Str::replace_all(command, "--", ""); // remove the "--" from the start
+    ecf::algorithm::replace_all(command, "--", ""); // remove the "--" from the start
 
     // try to find it in our list of commands
     const po::option_description* od =
@@ -230,7 +230,7 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem* item, bool showFull
     if (od) {
         // get the description, but only take the first line
         std::vector<std::string> lines;
-        ecf::Str::split(od->description(), lines, "\n");
+        ecf::algorithm::split_at(lines, od->description(), "\n");
         if (!lines.empty()) {
             QString text = qCommand + QString(": ");
             commandHelpLabel_->setText(text + QString::fromStdString(lines[0]));

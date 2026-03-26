@@ -10,8 +10,6 @@
 
 #include "ecflow/service/mirror/MirrorClient.hpp"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/PasswordEncryption.hpp"
@@ -121,15 +119,15 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
         data.generated_variables = ecf::generated_variables(*node);
 
         // Filter out the Definitions structural variables (SUITE, to avoid conflicts with "local" side definitions
-        data.generated_variables.erase(
-            std::remove_if(std::begin(data.generated_variables),
-                           std::end(data.generated_variables),
-                           [](const auto& variable) {
-                               return boost::algorithm::starts_with(variable.name(), "TASK") ||
-                                      boost::algorithm::starts_with(variable.name(), "FAMILY") ||
-                                      boost::algorithm::starts_with(variable.name(), "SUITE");
-                           }),
-            std::end(data.generated_variables));
+        data.generated_variables.erase(std::remove_if(std::begin(data.generated_variables),
+                                                      std::end(data.generated_variables),
+                                                      [](const auto& variable) {
+                                                          using ecf::algorithm::starts_with;
+                                                          return starts_with(variable.name(), "TASK") ||
+                                                                 starts_with(variable.name(), "FAMILY") ||
+                                                                 starts_with(variable.name(), "SUITE");
+                                                      }),
+                                       std::end(data.generated_variables));
 
         // ** Node Labels
         data.labels = node->labels();

@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(test_cron_state_parsing) {
     {
         std::string line = "cron 04:30 # isValid:false";
         std::vector<std::string> lineTokens;
-        Str::split(line, lineTokens);
+        ecf::algorithm::split_at(lineTokens, line);
         bool parse_state = true;
         CronAttr parsed_cronAttr;
         CronAttr::parse(parsed_cronAttr, lineTokens, index, parse_state);
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(test_cron_state_parsing) {
     {
         std::string line = "cron 04:30 # free isValid:false";
         std::vector<std::string> lineTokens;
-        Str::split(line, lineTokens);
+        ecf::algorithm::split_at(lineTokens, line);
         bool parse_state = true;
         CronAttr parsed_cronAttr;
         CronAttr::parse(parsed_cronAttr, lineTokens, index, parse_state);
@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(test_cron_state_parsing) {
     {
         std::string line = "cron 00:01 23:59 01:00 # nextTimeSlot/12:01";
         std::vector<std::string> lineTokens;
-        Str::split(line, lineTokens);
+        ecf::algorithm::split_at(lineTokens, line);
         bool parse_state = true;
         CronAttr parsed_cronAttr;
         CronAttr::parse(parsed_cronAttr, lineTokens, index, parse_state);
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_cron_state_parsing) {
     {
         std::string line = "cron 00:01 23:59 01:00 # free nextTimeSlot/12:01";
         std::vector<std::string> lineTokens;
-        Str::split(line, lineTokens);
+        ecf::algorithm::split_at(lineTokens, line);
         bool parse_state = true;
         CronAttr parsed_cronAttr;
         CronAttr::parse(parsed_cronAttr, lineTokens, index, parse_state);
@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(test_cron_state_parsing) {
     {
         std::string line = "cron 00:00 18:00 06:00 # isValid:false nextTimeSlot/24:00";
         std::vector<std::string> lineTokens;
-        Str::split(line, lineTokens);
+        ecf::algorithm::split_at(lineTokens, line);
         bool parse_state = true;
         CronAttr parsed_cronAttr;
         CronAttr::parse(parsed_cronAttr, lineTokens, index, parse_state);
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(test_cron_state_parsing) {
         // Could not parse 'cron +00:00 23:59 00:01 # isValid:false nextTimeSlot/523:40' around line number 654
         std::string line = "cron +00:00 23:59 00:01 # isValid:false nextTimeSlot/523:40";
         std::vector<std::string> lineTokens;
-        Str::split(line, lineTokens);
+        ecf::algorithm::split_at(lineTokens, line);
         bool parse_state = true;
         CronAttr parsed_cronAttr;
         CronAttr::parse(parsed_cronAttr, lineTokens, index, parse_state);

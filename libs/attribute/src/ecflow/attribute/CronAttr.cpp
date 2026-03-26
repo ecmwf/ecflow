@@ -37,7 +37,7 @@ CronAttr::CronAttr(const std::string& str) {
         throw std::runtime_error("CronAttr::CronAttr : empty string passed");
     }
     std::vector<std::string> tokens;
-    Str::split(str, tokens);
+    ecf::algorithm::split_at(tokens, str);
     if (tokens.empty()) {
         throw std::runtime_error("CronAttr::CronAttr : incorrect time string ?");
     }
@@ -873,7 +873,7 @@ void CronAttr::parse(CronAttr& cronAttr, const std::vector<std::string>& lineTok
 
 CronAttr CronAttr::create(const std::string& cronString) {
     std::vector<std::string> lineTokens;
-    Str::split(cronString, lineTokens);
+    ecf::algorithm::split_at(lineTokens, cronString);
 
     CronAttr theCronAttr;
     if (lineTokens.empty()) {

@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_str_split_StringSplitter) {
 
 static void test_get_token(const std::string& line, const char* delims = " \t") {
     std::vector<std::string> tokens;
-    Str::split_orig(line, tokens, delims);
+    ecf::algorithm::split_at(tokens, line, delims);
     for (size_t i = 0; i < tokens.size(); i++) {
         std::string token;
         BOOST_CHECK_MESSAGE(StringSplitter::get_token(line, i, token, delims) && token == tokens[i],

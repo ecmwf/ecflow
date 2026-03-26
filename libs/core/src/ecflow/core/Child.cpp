@@ -97,7 +97,7 @@ std::string Child::to_string(Child::CmdType ct) {
 std::vector<Child::CmdType> Child::child_cmds(const std::string& s) {
     // expect single or , separated tokens
     std::vector<std::string> tokens;
-    Str::split(s, tokens, ",");
+    ecf::algorithm::split_at(tokens, s, ",");
     std::vector<Child::CmdType> ret;
     ret.reserve(tokens.size());
     for (const auto& token : tokens) {
@@ -122,7 +122,7 @@ bool Child::valid_child_cmds(const std::string& s) {
 
     // expect single or , separated tokens
     std::vector<std::string> tokens;
-    Str::split(s, tokens, ",");
+    ecf::algorithm::split_at(tokens, s, ",");
     for (const auto& token : tokens) {
         if (!valid_child_cmd(token)) {
             return false;

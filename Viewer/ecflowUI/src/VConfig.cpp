@@ -403,7 +403,7 @@ bool VConfig::readRcFile(const std::string& rcFile, boost::property_tree::ptree&
 
         if (vec.size() >= 1) {
             std::vector<std::string> par;
-            ecf::algorithm::split(par, vec[0], ":");
+            ecf::algorithm::split_at(par, vec[0], ":");
 
             if (par.size() == 2) {
                 // Update

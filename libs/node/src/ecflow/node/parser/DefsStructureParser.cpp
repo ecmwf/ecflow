@@ -132,7 +132,7 @@ bool DefsStructureParser::do_parse_line(const std::string& line,
                                         std::vector<std::string>& lineTokens,
                                         std::string& errorMsg) {
     lineTokens.clear(); // This is re-used, hence clear up front
-    Str::split(line, lineTokens);
+    ecf::algorithm::split_at(lineTokens, line);
     if (lineTokens.empty()) {
         return true; // ignore empty lines
     }
@@ -186,7 +186,7 @@ void DefsStructureParser::getNextLine(std::string& line) {
                 //     # task a, task b
                 /// calling trim can be very expensive, hence avoid if possible
                 std::vector<std::string> lineTokens;
-                Str::split(line, lineTokens);
+                ecf::algorithm::split_at(lineTokens, line);
                 if (!lineTokens.empty()) {
                     if (lineTokens[0][0] == '#') {
                         // found leading_comment can ignore this line
@@ -275,7 +275,7 @@ DefsString::DefsString(const std::string& defs_as_string)
     : empty_(defs_as_string.empty()) {
     if (!empty_) {
         lines_.reserve(256);
-        Str::split_using_string_view(defs_as_string, lines_, "\n");
+        ecf::algorithm::split_at(lines_, defs_as_string, "\n");
     }
 }
 

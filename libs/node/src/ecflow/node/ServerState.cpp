@@ -140,7 +140,9 @@ bool ServerState::compare(const ServerState& rhs) const {
 void ServerState::sort_variables() {
     variable_state_change_no_ = Ecf::incr_state_change_no();
 
-    auto caseless = [](const Variable& a, const Variable& b) { return Str::caseInsLess(a.name(), b.name()); };
+    auto caseless = [](const Variable& a, const Variable& b) {
+        return ecf::algorithm::case_insensitive_less(a.name(), b.name());
+    };
     sort(user_variables_.begin(), user_variables_.end(), caseless);
     sort(server_variables_.begin(), server_variables_.end(), caseless);
 }

@@ -56,7 +56,7 @@ std::string File::which(const std::string& file) {
     if (!env_paths.empty()) {
         std::string path;
         std::vector<std::string> paths;
-        Str::split(env_paths, paths, ":");
+        ecf::algorithm::split_at(paths, env_paths, ":");
         size_t path_size = paths.size();
         for (size_t i = 0; i < path_size; ++i) {
             path.clear();

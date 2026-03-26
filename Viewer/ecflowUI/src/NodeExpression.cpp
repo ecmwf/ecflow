@@ -201,8 +201,8 @@ BaseNodeCondition* NodeExpressionParser::parseWholeExpression(const std::string&
 
     UiLog().dbg() << "parseWholeExpression:    " << expr;
 
-    ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
-    ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
+    ecf::algorithm::replace_all(expr, std::string("("), std::string(" ( "));
+    ecf::algorithm::replace_all(expr, std::string(")"), std::string(" ) "));
 
     int index         = 0;
     int length        = expr.length();

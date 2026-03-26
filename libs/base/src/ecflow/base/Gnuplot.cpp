@@ -155,7 +155,7 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
             }
             std::string time_stamp = line.substr(0, first_closed_bracket);
 
-            Str::split(time_stamp, new_time_stamp);
+            ecf::algorithm::split_at(new_time_stamp, time_stamp);
             if (new_time_stamp.size() != 2) {
                 continue;
             }

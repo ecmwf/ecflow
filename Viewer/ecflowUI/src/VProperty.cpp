@@ -343,7 +343,7 @@ VProperty* VProperty::find(const std::string& fullPath) {
     }
 
     std::vector<std::string> pathVec;
-    ecf::algorithm::split(pathVec, fullPath, ".");
+    ecf::algorithm::split_at(pathVec, fullPath, ".");
 
     if (pathVec.size() > 0) {
         if (pathVec.at(0) != strName_) {

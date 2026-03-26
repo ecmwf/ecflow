@@ -42,7 +42,7 @@ bool LogVerification::extractNodePathAndState(const std::string& logfile,
         }
 
         std::vector<std::string> lineTokens;
-        Str::split(line, lineTokens);
+        ecf::algorithm::split_at(lineTokens, line);
         if (lineTokens.size() < 3) {
             continue;
         }

@@ -1291,7 +1291,7 @@ VNode* VServer::find(const std::string& fullPath) {
     }
 
     std::vector<std::string> pathVec;
-    ecf::algorithm::split(pathVec, fullPath, "/");
+    ecf::algorithm::split_at(pathVec, fullPath, "/");
 
     if (pathVec.size() > 0 && pathVec.at(0).empty()) {
         pathVec.erase(pathVec.begin());

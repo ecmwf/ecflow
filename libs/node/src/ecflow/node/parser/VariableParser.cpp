@@ -77,8 +77,9 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
     // edit OWNER "'fred'"             => value = fred     * tick are not preserved *
     if (line_tokens_size == 3) {
         // The order of removing double quotes and then single quotes is significant here
-        Str::removeQuotes(lineTokens[2]);       // if first *and* last character is "
-        Str::removeSingleQuotes(lineTokens[2]); // if first *and* last character is '
+        ecf::algorithm::remove_double_quotes(lineTokens[2]);
+        ecf::algorithm::remove_single_quotes(lineTokens[2]);
+
         if (node) {
             if (net || node->isAlias()) {
                 node->add_variable_bypass_name_check(lineTokens[1], lineTokens[2]); // bypass name checking
@@ -111,8 +112,8 @@ bool VariableParser::doParse(const std::string& line, std::vector<std::string>& 
         value += lineTokens[i];
     }
 
-    Str::removeQuotes(value);
-    Str::removeSingleQuotes(value);
+    ecf::algorithm::remove_double_quotes(value);
+    ecf::algorithm::remove_single_quotes(value);
     if (node) {
         if (net || node->isAlias()) {
             node->add_variable_bypass_name_check(lineTokens[1], value); // bypass name checking

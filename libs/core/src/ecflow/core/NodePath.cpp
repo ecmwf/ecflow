@@ -16,7 +16,7 @@ using namespace ecf;
 
 void NodePath::split(const std::string& path, std::vector<std::string>& thePath) {
     /// The path is of the form "/suite/family/task"
-    Str::split(path, thePath, ecf::string_constants::path_separator);
+    ecf::algorithm::split_at(thePath, path, ecf::string_constants::path_separator);
 }
 
 bool NodePath::extractHostPort(const std::string& path, std::string& host, std::string& port) {

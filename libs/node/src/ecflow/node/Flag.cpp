@@ -10,6 +10,7 @@
 
 #include "ecflow/node/Flag.hpp"
 
+#include <cassert>
 #include <stdexcept>
 
 #include "ecflow/core/Ecf.hpp"
@@ -332,7 +333,7 @@ void Flag::write(std::string& ret) const {
 
 void Flag::set_flag(const std::string& flags) {
     std::vector<std::string> the_flags_vec;
-    Str::split(flags, the_flags_vec, ",");
+    ecf::algorithm::split_at(the_flags_vec, flags, ",");
 
     for (const auto& i : the_flags_vec) {
         if (i == "migrated") {

@@ -692,7 +692,7 @@ std::string Defs::dump_edit_history() const {
             }
             else {
                 std::string h = c;
-                Str::replace_all(h, "\n", "\\n");
+                ecf::algorithm::replace_all(h, "\n", "\\n");
                 ss << " ";
                 ss << h;
             }
@@ -791,7 +791,7 @@ void Defs::read_history(const std::string& line, const std::vector<std::string>&
                 size_t close_p   = parsed_message.find("]");
                 std::string date = parsed_message.substr(space_pos + 1, close_p - space_pos - 1);
                 vec.clear();
-                Str::split(date, vec, ".");
+                ecf::algorithm::split_at(vec, date, ".");
                 if (vec.size() == 3) {
                     try {
                         int day   = ecf::convert_to<int>(vec[0]);
@@ -1007,19 +1007,19 @@ node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode)
         return node_p;
     }
 
-    if (Str::caseInsCompare(type, "task")) {
+    if (ecf::algorithm::case_insensitive_compare(type, "task")) {
         if (node_p->isTask()) {
             return node_p;
         }
         return node_ptr();
     }
-    if (Str::caseInsCompare(type, "family")) {
+    if (ecf::algorithm::case_insensitive_compare(type, "family")) {
         if (node_p->isFamily()) {
             return node_p;
         }
         return node_ptr();
     }
-    if (Str::caseInsCompare(type, "suite")) {
+    if (ecf::algorithm::case_insensitive_compare(type, "suite")) {
         if (node_p->suite()) {
             return node_p;
         }
@@ -1495,7 +1495,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord) {
                 catch (const ecf::bad_conversion&) {
                 }
 
-                return Str::caseInsLess(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_less(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             client_suite_mgr_.update_suite_order();
@@ -1503,7 +1503,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord) {
         }
         case NOrder::ORDER: {
             std::sort(suiteVec_.begin(), suiteVec_.end(), [](const suite_ptr& a, const suite_ptr& b) {
-                return Str::caseInsGreater(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_greater(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             client_suite_mgr_.update_suite_order();
@@ -1901,7 +1901,7 @@ void DefsHistoryParser::parse(const std::string& line) {
     if (pos != std::string::npos) {
         // keep compatibility with the current way of writing history
         std::string requests = line.substr(pos);
-        Str::split(requests, parsed_messages_, "\b");
+        ecf::algorithm::split_at(parsed_messages_, requests, "\b");
         return;
     }
 

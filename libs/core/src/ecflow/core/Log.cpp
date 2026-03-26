@@ -392,7 +392,7 @@ bool LogImpl::do_log(Log::LogType lt, const std::string& message, bool newline) 
     else {
         // If message has \n then split into multiple lines
         std::vector<std::string> lines;
-        Str::split(message, lines, "\n");
+        ecf::algorithm::split_at(lines, message, "\n");
         size_t theSize = lines.size();
         for (size_t i = 0; i < theSize; ++i) {
             file_ << log_type_and_time_stamp_ << lines[i] << '\n';

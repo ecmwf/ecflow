@@ -278,10 +278,10 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     std::string stateOrEvent;
     size_t options_size = options.size();
     for (size_t i = 0; i < options_size; i++) {
-        if (Str::caseInsCompare(options[i], "recursive")) {
+        if (ecf::algorithm::case_insensitive_compare(options[i], "recursive")) {
             recursive = true;
         }
-        else if (Str::caseInsCompare(options[i], "full")) {
+        else if (ecf::algorithm::case_insensitive_compare(options[i], "full")) {
             setRepeatToLastValue = true;
         }
         else if (NState::isValid(options[i])) {

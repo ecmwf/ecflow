@@ -745,7 +745,7 @@ void Suite::gen_variables(std::vector<Variable>& vec) const {
 }
 
 std::string Suite::find_node_path(const std::string& type, const std::string& node_name) const {
-    if (Str::caseInsCompare(type, "suite") && node_name == name()) {
+    if (ecf::algorithm::case_insensitive_compare(type, "suite") && node_name == name()) {
         return absNodePath();
     }
     return NodeContainer::find_node_path(type, node_name);

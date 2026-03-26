@@ -240,7 +240,7 @@ void LateAttr::parse(LateAttr& lateAttr,
 
 LateAttr LateAttr::create(const std::string& lateString) {
     std::vector<std::string> lineTokens;
-    Str::split(lateString, lineTokens);
+    ecf::algorithm::split_at(lineTokens, lateString);
 
     if (lineTokens.empty()) {
         throw std::runtime_error("LateParser::create: empty string no late specified ?" + lateString);

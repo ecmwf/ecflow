@@ -33,28 +33,18 @@ static bool bypass_state_modify_change_check = false;
 
 BOOST_AUTO_TEST_SUITE(U_Base)
 
+auto to_name = [](const auto& node) { return node->name(); };
+
 BOOST_AUTO_TEST_SUITE(T_SSyncCmdOrder)
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
 using defs_change_cmd = boost::function<void(defs_ptr)>;
 
 static std::vector<std::string> vector_abcd() {
-    std::vector<std::string> names;
-    names.reserve(4);
-    names.emplace_back("a");
-    names.emplace_back("b");
-    names.emplace_back("c");
-    names.emplace_back("d");
-    return names;
+    return std::vector<std::string>{"a", "b", "c", "d"};
 }
 static std::vector<std::string> vector_dcba() {
-    std::vector<std::string> names;
-    names.reserve(4);
-    names.emplace_back("d");
-    names.emplace_back("c");
-    names.emplace_back("b");
-    names.emplace_back("a");
-    return names;
+    return std::vector<std::string>{"d", "c", "b", "a"};
 }
 
 static defs_ptr create_defs() {
@@ -67,9 +57,6 @@ static defs_ptr create_defs() {
                 family_ptr f = s->add_family(names[k]);
                 for (const auto& name : names) {
                     task_ptr t = f->add_task(name);
-                    //               t->add_alias_only(); // alias0
-                    //               t->add_alias_only(); // alias1
-                    //               t->add_alias_only(); // alias2
                 }
             }
         }
@@ -111,9 +98,6 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
         Ecf::set_server(false);
     }
 
-    //   cout << "test_sync_scaffold AFTER Command before SYNC: Server:\n" << *server_defs << "\n";
-    //   cout << "test_sync_scaffold AFTER Command before SYNC: Client:\n" << *server_reply.client_defs() << "\n";
-
     MockServer mock_server(server_defs);
     SSyncCmd cmd(client_handle, client_state_change_no, client_modify_change_no, &mock_server);
     std::string error_msg;
@@ -136,22 +120,21 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
 static void reorder_suites(defs_ptr theDefs) {
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/a", NOrder::ALPHA)));
-    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec()) == vector_abcd(),
-                          "NOrder::ALPHA expected "
-                              << ecf::algorithm::join(vector_abcd()) << " but found: "
-                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
+    auto names = ecf::algorithm::transform_to_vector(theDefs->suiteVec(), to_name);
+    BOOST_REQUIRE_MESSAGE(names == vector_abcd(),
+                          "NOrder::ALPHA expected " << ecf::algorithm::join(vector_abcd())
+                                                    << " but found: " << ecf::algorithm::join(names));
 }
 
 static void reorder_family(defs_ptr theDefs) {
-    //   std::cout << "reorder_family\n" << *theDefs << "\n";
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d", NOrder::ALPHA)));
 
     auto families = ecf::get_all_families(*theDefs->findAbsNode("/d"));
-    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
-                          "NOrder::ALPHA  expected "
-                              << ecf::algorithm::join(vector_abcd()) << " but found: "
-                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(families)));
+    auto names    = ecf::algorithm::transform_to_vector(families, to_name);
+    BOOST_REQUIRE_MESSAGE(names == vector_abcd(),
+                          "NOrder::ALPHA  expected " << ecf::algorithm::join(vector_abcd())
+                                                     << " but found: " << ecf::algorithm::join(names));
 }
 
 static void reorder_task(defs_ptr theDefs) {
@@ -160,23 +143,11 @@ static void reorder_task(defs_ptr theDefs) {
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d/d", NOrder::ALPHA)));
 
     auto tasks = ecf::get_all_tasks(*theDefs->findAbsNode("/d/d"));
-    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(tasks) == vector_abcd(),
-                          "NOrder::ALPHA  expected "
-                              << ecf::algorithm::join(vector_abcd()) << " but found: "
-                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(tasks)));
+    auto names = ecf::algorithm::transform_to_vector(tasks, to_name);
+    BOOST_REQUIRE_MESSAGE(names == vector_abcd(),
+                          "NOrder::ALPHA  expected " << ecf::algorithm::join(vector_abcd())
+                                                     << " but found: " << ecf::algorithm::join(names));
 }
-
-// static void reorder_alias(defs_ptr theDefs) {
-//    //std::cout << "reorder_task\n" << *theDefs << "\n";
-//
-//    TestHelper::invokeRequest(theDefs.get(),Cmd_ptr( new OrderNodeCmd("/d/d/d/alias0",NOrder::ALPHA)));
-//
-//    std::vector<alias_ptr> aliases;
-//    theDefs->findAbsNode("/d/d/d")->get_all_aliases(aliases);
-//    BOOST_REQUIRE_MESSAGE( ecf::algorithm::transform_to_name_vector(aliases) == vector_abcd(),"NOrder::ALPHA  expected
-//    " << ecf::algorithm::join(vector_abcd())<< " but found: " <<
-//    ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(tasks)));
-// }
 
 static void reorder_suites_using_handles(defs_ptr theDefs) {
 
@@ -193,41 +164,45 @@ static void reorder_suites_using_handles(defs_ptr theDefs) {
                         "Expected 1 Client suites but found " << theDefs->client_suite_mgr().clientSuites().size());
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/a", NOrder::ALPHA)));
-    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec()) == vector_abcd(),
-                          "NOrder::ALPHA  expected "
-                              << ecf::algorithm::join(vector_abcd()) << " but found: "
-                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
+    auto names = ecf::algorithm::transform_to_vector(theDefs->suiteVec(), to_name);
+    BOOST_REQUIRE_MESSAGE(names == vector_abcd(),
+                          "NOrder::ALPHA  expected " << ecf::algorithm::join(vector_abcd())
+                                                     << " but found: " << ecf::algorithm::join(names));
 }
 
 static void reorder_family_using_handles(defs_ptr theDefs) {
 
     // *** NOTE ****: Whenever we register a handle, we get a *FULL* sync
+    {
+        // create client handle which references all the suites
+        // It should be noted that invokeRequest, uses a MockServer, which set/unsets
+        // Hence after this call Ecf::server_ is false. Hence we need to ensure that following
+        // commands/ DM function set Ecf::server_ to true.
+        std::vector<std::string> suite_names{"d"}; // client handle for suite 'd' ONLY
+        TestHelper::invokeRequest(
+            theDefs.get(), Cmd_ptr(new ClientHandleCmd(0, suite_names, false)), bypass_state_modify_change_check);
+        BOOST_CHECK_MESSAGE(theDefs->client_suite_mgr().clientSuites().size() == 1,
+                            "Expected 1 Client suites but found " << theDefs->client_suite_mgr().clientSuites().size());
+    }
 
-    // create client handle which references all the suites
-    // It should be noted that invokeRequest, uses a MockServer, which set/unsets
-    // Hence after this call Ecf::server_ is false. Hence we need to ensure that following
-    // commands/ DM function set Ecf::server_ to true.
-    std::vector<std::string> suite_names;
-    suite_names.emplace_back("d"); // clinet handle for suite 'd' ONLY
-    TestHelper::invokeRequest(
-        theDefs.get(), Cmd_ptr(new ClientHandleCmd(0, suite_names, false)), bypass_state_modify_change_check);
-    BOOST_CHECK_MESSAGE(theDefs->client_suite_mgr().clientSuites().size() == 1,
-                        "Expected 1 Client suites but found " << theDefs->client_suite_mgr().clientSuites().size());
+    {
+        /// Don't call, data model function directly, since Ecf::server_ is false. *here*
+        /// The suite should stay the same, only suite d's family should change
+        TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d", NOrder::ALPHA)));
+        auto names = ecf::algorithm::transform_to_vector(theDefs->suiteVec(), to_name);
+        BOOST_REQUIRE_MESSAGE(names == vector_dcba(),
+                              "expected " << ecf::algorithm::join(vector_dcba())
+                                          << " but found: " << ecf::algorithm::join(names));
+    }
 
-    /// Don't call, data model function directly, since Ecf::server_ is false. *here*
-    /// The suite should stay the same, only suite d's family should change
-    TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d", NOrder::ALPHA)));
-    BOOST_REQUIRE_MESSAGE(
-        ecf::algorithm::transform_to_name_vector(theDefs->suiteVec()) == vector_dcba(),
-        "expected " << ecf::algorithm::join(vector_dcba()) << " but found: "
-                    << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(theDefs->suiteVec())));
-
-    suite_ptr suite_a = theDefs->findSuite("d");
-    auto families     = ecf::get_all_families(*suite_a);
-    BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(families) == vector_abcd(),
-                          "NOrder::ALPHA  expected "
-                              << ecf::algorithm::join(vector_abcd()) << " but found: "
-                              << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(families)));
+    {
+        suite_ptr suite_a = theDefs->findSuite("d");
+        auto families     = ecf::get_all_families(*suite_a);
+        auto names        = ecf::algorithm::transform_to_vector(families, to_name);
+        BOOST_REQUIRE_MESSAGE(names == vector_abcd(),
+                              "NOrder::ALPHA  expected " << ecf::algorithm::join(vector_abcd())
+                                                         << " but found: " << ecf::algorithm::join(names));
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_ssync_cmd_test_order) {

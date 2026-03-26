@@ -208,8 +208,11 @@ void QueueAttr::parse(QueueAttr& queAttr,
         if (theEnum[0] == '#') {
             break;
         }
-        Str::removeSingleQuotes(theEnum); // remove quotes, they get added back when we persist
-        Str::removeQuotes(theEnum);       // remove quotes, they get added back when we persist
+
+        // remove quotes, as they get added back when we persist
+        ecf::algorithm::remove_single_quotes(theEnum);
+        ecf::algorithm::remove_double_quotes(theEnum);
+
         theEnums.push_back(theEnum);
     }
     if (theEnums.empty()) {

@@ -49,7 +49,7 @@ ecf::AvisoAttr AvisoParser::parse_aviso_line(const std::string& line, Node* pare
     std::vector<std::string> tokens;
     {
         // Since po::command_line_parser requires a vector of strings, we need convert from string_view to string
-        std::vector<std::string_view> extracted = ecf::Str::tokenize_quotation(line, "'");
+        std::vector<std::string_view> extracted = ecf::algorithm::split_within_quotes(line, "'");
         std::transform(std::begin(extracted),
                        std::end(extracted),
                        std::back_inserter(tokens),

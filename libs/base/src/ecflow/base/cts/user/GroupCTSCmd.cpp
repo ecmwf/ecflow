@@ -36,7 +36,7 @@ using namespace ecf;
 
 GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* clientEnv) {
     std::vector<std::string> individualCmdVec;
-    Str::split(cmdSeries, individualCmdVec, ";");
+    ecf::algorithm::split_at(individualCmdVec, cmdSeries, ";");
     if (individualCmdVec.empty()) {
         throw std::runtime_error("GroupCTSCmd::GroupCTSCmd: Please provide a list of ';' separated commands\n");
     }
@@ -88,7 +88,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
 
         // Each sub command can have, many args
         std::vector<std::string> subCmdArgs;
-        Str::split(subCmd, subCmdArgs);
+        ecf::algorithm::split_at(subCmdArgs, subCmd);
 
         if (replaced_spaces) {
             for (auto& str : subCmdArgs) {

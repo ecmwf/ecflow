@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
                                       Defs::max_edit_history_size_per_node(),
                               "Expected edit history of size 8, but found "
                                   << theClient.server_reply().get_string_vec().size() << "\n"
-                                  << Str::dump_string_vec(theClient.server_reply().get_string_vec()));
+                                  << ecf::algorithm::as_string(theClient.server_reply().get_string_vec()));
 
         // make sure edit history was *NOT* serialized, It is only serialized when check pointing
         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,

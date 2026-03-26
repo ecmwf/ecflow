@@ -152,7 +152,8 @@ void BeginCmd::addOption(boost::program_options::options_description& desc) cons
 }
 void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {
     std::string beginArg = vm[arg()].as<std::string>();
-    Str::removeQuotes(beginArg);
+
+    ecf::algorithm::remove_double_quotes(beginArg);
 
     if (ace->debug()) {
         std::cout << "  BeginCmd::create arg = " << beginArg << "\n";
@@ -163,7 +164,7 @@ void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
 
     if (!beginArg.empty()) {
         std::vector<std::string> lineTokens;
-        Str::split(beginArg, lineTokens);
+        ecf::algorithm::split_at(lineTokens, beginArg);
         if (lineTokens.size() == 1) {
             if (lineTokens[0] == "--force") {
                 force = true;

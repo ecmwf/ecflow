@@ -289,7 +289,7 @@ node_ptr Task::find_immediate_child(const std::string_view& name) const {
 }
 
 std::string Task::find_node_path(const std::string& type, const std::string& node_name) const {
-    if (ecf::Str::caseInsCompare(type, "task")) {
+    if (ecf::algorithm::case_insensitive_compare(type, "task")) {
         if (node_name == name()) {
             return absNodePath();
         }
@@ -623,14 +623,14 @@ void Task::order(Node* immediateChild, NOrder::Order ord) {
         }
         case NOrder::ALPHA: {
             std::sort(aliases_.begin(), aliases_.end(), [](const alias_ptr& a, const alias_ptr& b) {
-                return ecf::Str::caseInsLess(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_less(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             break;
         }
         case NOrder::ORDER: {
             std::sort(aliases_.begin(), aliases_.end(), [](const alias_ptr& a, const alias_ptr& b) {
-                return ecf::Str::caseInsGreater(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_greater(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             break;

@@ -41,6 +41,8 @@ using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE(S_Test)
 
+auto to_name = [](const auto& node) { return node->name(); };
+
 BOOST_AUTO_TEST_SUITE(T_Alias)
 
 void wait_for_alias_to_complete(const std::string& alias_path) {
@@ -103,7 +105,7 @@ BOOST_AUTO_TEST_CASE(test_alias) {
     // TEST Alias CREATION and running =============================================================================
     // Split the file into line
     std::vector<std::string> script_lines;
-    Str::split(script, script_lines, "\n");
+    ecf::algorithm::split_at(script_lines, script, "\n");
 
     NameValueVec used_variables;
     int result = TestFixture::client().edit_script_submit(
@@ -147,13 +149,12 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         Task* task    = defs->findAbsNode(task_a->absNodePath())->isTask();
         BOOST_REQUIRE_MESSAGE(task, "expected to find Task");
 
-        std::vector<std::string> expected;
-        expected.push_back("alias1");
-        expected.push_back("alias0");
-        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
-                              "NOrder::DOWN expected "
-                                  << ecf::algorithm::join(expected) << " but found "
-                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
+        std::vector<std::string> expected = {"alias1", "alias0"};
+
+        auto names = ecf::algorithm::transform_to_vector(task->aliases(), to_name);
+        BOOST_REQUIRE_MESSAGE(names == expected,
+                              "NOrder::DOWN expected " << ecf::algorithm::join(expected) << " but found "
+                                                       << ecf::algorithm::join(names));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::UP)) == 0,
@@ -167,13 +168,12 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         Task* task    = defs->findAbsNode(task_a->absNodePath())->isTask();
         BOOST_REQUIRE_MESSAGE(task, "expected to find Task");
 
-        std::vector<std::string> expected;
-        expected.push_back("alias0");
-        expected.push_back("alias1");
-        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
-                              "NOrder::UP expected "
-                                  << ecf::algorithm::join(expected) << " but found "
-                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
+        std::vector<std::string> expected = {"alias0", "alias1"};
+
+        auto names = ecf::algorithm::transform_to_vector(task->aliases(), to_name);
+        BOOST_REQUIRE_MESSAGE(names == expected,
+                              "NOrder::UP expected " << ecf::algorithm::join(expected) << " but found "
+                                                     << ecf::algorithm::join(names));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::ORDER)) == 0,
@@ -187,13 +187,12 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         Task* task    = defs->findAbsNode(task_a->absNodePath())->isTask();
         BOOST_REQUIRE_MESSAGE(task, "expected to find Task");
 
-        std::vector<std::string> expected;
-        expected.push_back("alias1");
-        expected.push_back("alias0");
-        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
-                              "NOrder::ORDER expected "
-                                  << ecf::algorithm::join(expected) << " but found "
-                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
+        std::vector<std::string> expected = {"alias1", "alias0"};
+
+        auto names = ecf::algorithm::transform_to_vector(task->aliases(), to_name);
+        BOOST_REQUIRE_MESSAGE(names == expected,
+                              "NOrder::ORDER expected " << ecf::algorithm::join(expected) << " but found "
+                                                        << ecf::algorithm::join(names));
     }
 
     BOOST_REQUIRE_MESSAGE(TestFixture::client().order(alias0_path, NOrder::toString(NOrder::ALPHA)) == 0,
@@ -207,13 +206,12 @@ BOOST_AUTO_TEST_CASE(test_alias) {
         Task* task    = defs->findAbsNode(task_a->absNodePath())->isTask();
         BOOST_REQUIRE_MESSAGE(task, "expected to find Task");
 
-        std::vector<std::string> expected;
-        expected.push_back("alias0");
-        expected.push_back("alias1");
-        BOOST_REQUIRE_MESSAGE(ecf::algorithm::transform_to_name_vector(task->aliases()) == expected,
-                              "NOrder::ALPHA expected "
-                                  << ecf::algorithm::join(expected) << " but found "
-                                  << ecf::algorithm::join(ecf::algorithm::transform_to_name_vector(task->aliases())));
+        std::vector<std::string> expected = {"alias0", "alias1"};
+
+        auto names = ecf::algorithm::transform_to_vector(task->aliases(), to_name);
+        BOOST_REQUIRE_MESSAGE(names == expected,
+                              "NOrder::ALPHA expected " << ecf::algorithm::join(expected) << " but found "
+                                                        << ecf::algorithm::join(names));
     }
 
     // TEST Alias DELETION =============================================================================

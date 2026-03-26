@@ -17,7 +17,7 @@ namespace ecf {
 
 Permissions Permissions::make_from_variable(const std::string& value) {
     std::vector<std::string> allowed;
-    ecf::Str::split(value, allowed, ",");
+    ecf::algorithm::split_at(allowed, value, ",");
     return Permissions(std::move(allowed));
 }
 

@@ -300,7 +300,7 @@ ExpandStateNode* ExpandState::find(const std::string& fullPath) {
     }
 
     std::vector<std::string> pathVec;
-    ecf::algorithm::split(pathVec, fullPath, "/");
+    ecf::algorithm::split_at(pathVec, fullPath, "/");
 
     if (pathVec.size() > 0 && pathVec[0].empty()) {
         pathVec.erase(pathVec.begin());
@@ -347,7 +347,7 @@ void ExpandState::collectParents(const std::string& fullPath, std::vector<Expand
     //   str=""   -> ""
 
     std::vector<std::string> pathVec;
-    boost::split(pathVec, fullPath, boost::is_any_of("/"));
+    ecf::algorithm::split_at(pathVec, fullPath, "/");
     if (pathVec.size() > 0 && pathVec[0].empty()) {
         pathVec.erase(pathVec.begin());
     }

@@ -352,12 +352,12 @@ bool ActionHandler::confirmCommand(const std::vector<VInfo_ptr>& filteredNodes,
     std::string question = questionIn;
 
     std::string placeholder("<full_name>");
-    ecf::Str::replace_all(question, placeholder, fullNames);
+    ecf::algorithm::replace_all(question, placeholder, fullNames);
     placeholder = "<node_name>";
-    ecf::Str::replace_all(question, placeholder, nodeNames);
+    ecf::algorithm::replace_all(question, placeholder, nodeNames);
     if (taskNum > 0) {
         placeholder = "<task_num>";
-        ecf::Str::replace_all(question, placeholder, "<b>" + QString::number(taskNum).toStdString() + "</b>");
+        ecf::algorithm::replace_all(question, placeholder, "<b>" + QString::number(taskNum).toStdString() + "</b>");
     }
 
     QString msg = QString::fromStdString(question);

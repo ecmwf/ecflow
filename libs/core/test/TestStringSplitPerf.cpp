@@ -184,16 +184,15 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf) {
         BOOST_CHECK_MESSAGE(line == reconstructed, " error");
     }
 
-    { // boost::make_split_iterator
+    { // make_split_iterator (std::vector based)
         boost::timer::cpu_timer timer;
         for (size_t i = 0; i < times; i++) {
 
             auto tokens = Str::make_split_iterator(line);
 
             std::ostringstream ss;
-            for (; !tokens.eof(); ++tokens) {
-                boost::iterator_range<std::string::const_iterator> range = *tokens;
-                ss << range << " ";
+            for (const auto& token : tokens) {
+                ss << token << " ";
             }
             reconstructed = ss.str();
         }
@@ -361,13 +360,12 @@ BOOST_AUTO_TEST_CASE(test_str_split_perf_with_file) {
                 std::ostringstream ss;
                 auto tokens = Str::make_split_iterator(file_contents[i]);
 
-                for (; !tokens.eof(); ++tokens) {
-                    auto range = *tokens;
-                    ss << range << " ";
+                for (const auto& token : tokens) {
+                    ss << token << " ";
                 }
                 std::string reconstructed = ss.str();
             }
-            ECF_TEST_DBG(<< " Time for boost::make_split_iterator " << file_contents.size()
+            ECF_TEST_DBG(<< " Time for make_split_iterator " << file_contents.size()
                          << " times = " << timer.format(3, Str::cpu_timer_format()));
         }
 

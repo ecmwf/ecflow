@@ -1511,7 +1511,7 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
                 }
                 value = options[3];
                 if (value.find("\\n") != std::string::npos) {
-                    Str::replace_all(value, "\\n", "\n");
+                    ecf::algorithm::replace_all(value, "\\n", "\n");
                 }
             }
             name = options[2];

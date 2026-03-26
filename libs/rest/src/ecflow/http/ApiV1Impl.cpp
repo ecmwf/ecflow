@@ -592,7 +592,7 @@ ecf::AutoCancelAttr create_from_text(const std::string& line) {
 template <>
 ecf::AutoRestoreAttr create_from_text(const std::string& line) {
     std::vector<std::string> tasks;
-    ecf::Str::split(line, tasks, " ");
+    ecf::algorithm::split_at(tasks, line, " ");
 
     return ecf::AutoRestoreAttr(tasks);
 }

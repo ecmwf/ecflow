@@ -242,7 +242,7 @@ Meter Meter::make_from_value(const std::string& name, const std::string& value) 
     // value is expected to be of the form "min,max,value", where min, max and value are integers
 
     std::vector<std::string> tokens;
-    ecf::algorithm::split(tokens, value, ",");
+    ecf::algorithm::split_at(tokens, value, ",");
     if (tokens.size() != 3) {
         throw std::runtime_error(
             MESSAGE("Meter::make_from_value: Expect three comma-separated values, but found: '" << value << "'"));
@@ -347,7 +347,7 @@ void Label::write(std::string& ret) const {
     else {
         // replace \n, otherwise re-parse will fail
         std::string value = v_;
-        Str::replace_all(value, "\n", "\\n");
+        ecf::algorithm::replace_all(value, "\n", "\\n");
         ret += value;
     }
     ret += "\"";
@@ -395,11 +395,11 @@ void Label::parse(const std::string& line,
     // parsing will always STRIP single or double quotes, print will add double quotes
     // label simple_label 'ecgems'
     if (line_token_size == 3) {
-        Str::removeQuotes(lineTokens[2]);
-        Str::removeSingleQuotes(lineTokens[2]);
+        ecf::algorithm::remove_double_quotes(lineTokens[2]);
+        ecf::algorithm::remove_single_quotes(lineTokens[2]);
         the_value = lineTokens[2];
         if (the_value.find("\\n") != std::string::npos) {
-            Str::replace_all(the_value, "\\n", "\n");
+            ecf::algorithm::replace_all(the_value, "\\n", "\n");
         }
     }
     else {
@@ -418,11 +418,11 @@ void Label::parse(const std::string& line,
             value += lineTokens[i];
         }
 
-        Str::removeQuotes(value);
-        Str::removeSingleQuotes(value);
+        ecf::algorithm::remove_double_quotes(value);
+        ecf::algorithm::remove_single_quotes(value);
         the_value = value;
         if (the_value.find("\\n") != std::string::npos) {
-            Str::replace_all(the_value, "\\n", "\n");
+            ecf::algorithm::replace_all(the_value, "\\n", "\n");
         }
 
         // state
@@ -450,7 +450,7 @@ void Label::parse(const std::string& line,
                 the_new_value = new_value;
 
                 if (the_new_value.find("\\n") != std::string::npos) {
-                    Str::replace_all(the_new_value, "\\n", "\n");
+                    ecf::algorithm::replace_all(the_new_value, "\\n", "\n");
                 }
             }
         }

@@ -345,7 +345,7 @@ void Documentation::show_summary(std::ostream& os, PREDICATE select) const {
     int max_width = get_options_max_width(options);
     for (const auto& option : options) {
         std::vector<std::string> lines;
-        ecf::Str::split(option->description(), lines, "\n");
+        ecf::algorithm::split_at(lines, option->description(), "\n");
         if (!lines.empty()) {
             std::string name = option->long_name();
             os << "  " << std::left << std::setw(max_width) << name << " ";
