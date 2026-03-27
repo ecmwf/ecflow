@@ -25,7 +25,7 @@ using namespace ecf;
 //       	o the jobGeneration_ is set
 ServerState::ServerState()
     : server_state_(default_state()) {
-    setup_default_env(Str::DEFAULT_PORT_NUMBER());
+    setup_default_env(ecf::string_constants::default_port_number);
 }
 
 ServerState::ServerState(const std::string& port)
@@ -251,8 +251,7 @@ const std::string& ServerState::find_variable(const std::string& theVarName) con
         }
     }
 
-    //	cerr << "FAILED to FIND '" << theVarName << "'\n";
-    return Str::EMPTY();
+    return ecf::string_constants::empty;
 }
 
 const Variable& ServerState::findVariable(const std::string& name) const {
@@ -426,7 +425,7 @@ void ServerState::set_state(SState::State s) {
 void ServerState::setup_default_env(const std::string& port) {
     // This environment is required for testing in the absence of the server.
     // When the defs file is begun in the server this environment get *overridden*
-    hostPort_ = std::make_pair(Str::LOCALHOST(), port);
+    hostPort_ = std::make_pair(ecf::string_constants::localhost, port);
 
     setup_default_server_variables(server_variables_, port);
 }
@@ -469,7 +468,7 @@ void ServerState::setup_default_server_variables(std::vector<Variable>& server_v
     // The server sets these variable for use by the client. i.e when creating the jobs
     // The clients then uses them to communicate with the server.
     server_variables.emplace_back(ecf::environment::ECF_PORT, port);
-    server_variables.emplace_back(ecf::environment::ECF_HOST, Str::LOCALHOST());
+    server_variables.emplace_back(ecf::environment::ECF_HOST, ecf::string_constants::localhost);
 }
 
 /// determines why the node is not running.

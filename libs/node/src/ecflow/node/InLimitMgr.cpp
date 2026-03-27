@@ -342,11 +342,12 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const {
                 }
                 else {
                     if (html) {
-                        auto ref = MESSAGE("[limit]" << i.pathToNode() << Str::COLON() << limit->name());
+                        auto ref =
+                            MESSAGE("[limit]" << i.pathToNode() << ecf::string_constants::colon << limit->name());
                         ss << Node::path_href_attribute(ref) << " is full";
                     }
                     else {
-                        ss << "limit " << i.pathToNode() << Str::COLON() << limit->name() << " is full";
+                        ss << "limit " << i.pathToNode() << ecf::string_constants::colon << limit->name() << " is full";
                     }
                 }
 
@@ -422,7 +423,7 @@ limit_ptr InLimitMgr::find_limit(const InLimit& inLimit,
 
             // See if the name is defined, as an extern, in which case *DONT* warn:
             // This is client side specific, since server does not have externs.
-            if (node_->defs()->find_extern(inLimit.name(), Str::EMPTY())) {
+            if (node_->defs()->find_extern(inLimit.name(), ecf::string_constants::empty)) {
                 return referencedLimit; // this is empty/NULL
             }
 

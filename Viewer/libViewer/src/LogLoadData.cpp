@@ -1083,10 +1083,10 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
 
         bool child_cmd = false;
         bool user_cmd  = false;
-        if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos) {
+        if (line.find(ecf::string_constants::child_cmd) != std::string::npos) {
             child_cmd = true;
         }
-        else if (line.find(ecf::Str::USER_CMD()) != std::string::npos) {
+        else if (line.find(ecf::string_constants::user_cmd) != std::string::npos) {
             user_cmd = true;
         }
 
@@ -1151,10 +1151,10 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
             line      = items[i];
             child_cmd = false;
             user_cmd  = false;
-            if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos) {
+            if (line.find(ecf::string_constants::child_cmd) != std::string::npos) {
                 child_cmd = true;
             }
-            else if (line.find(ecf::Str::USER_CMD()) != std::string::npos) {
+            else if (line.find(ecf::string_constants::user_cmd) != std::string::npos) {
                 user_cmd = true;
                 if (i > 0 && line.find("--sync") != std::string::npos) {
                     continue;
@@ -1243,10 +1243,10 @@ std::streamoff LogLoadData::getStartPos(const std::string& logFile, int numOfRow
 
             bool child_cmd = false;
             bool user_cmd  = false;
-            if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos) {
+            if (line.find(ecf::string_constants::child_cmd) != std::string::npos) {
                 child_cmd = true;
             }
-            else if (line.find(ecf::Str::USER_CMD()) != std::string::npos) {
+            else if (line.find(ecf::string_constants::user_cmd) != std::string::npos) {
                 user_cmd = true;
             }
 

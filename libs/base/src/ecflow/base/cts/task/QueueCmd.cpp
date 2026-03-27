@@ -56,7 +56,7 @@ ecf::authorisation_t QueueCmd::authorise(AbstractServer& server) const {
 }
 
 void QueueCmd::print(std::string& os) const {
-    os += Str::CHILD_CMD();
+    os += ecf::string_constants::child_cmd;
     os += TaskApi::queue_arg();
     os += " ";
     os += name_;

@@ -16,82 +16,6 @@ namespace ecf {
 
 const char* VALID_NODE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.";
 
-const char* Str::CHILD_CMD() {
-    static const char* CHILD_CMD = "chd:";
-    return CHILD_CMD;
-}
-const char* Str::USER_CMD() {
-    static const char* USER_CMD = "--";
-    return USER_CMD;
-}
-const char* Str::SVR_CMD() {
-    static const char* SVR_CMD = "svr:";
-    return SVR_CMD;
-} // Only for automatic check_pt
-
-const std::string& Str::EMPTY() {
-    static std::string empty = std::string{};
-    return empty;
-}
-const std::string& Str::ROOT_PATH() {
-    static std::string root_path = "/";
-    return root_path;
-}
-const std::string& Str::PATH_SEPARATOR() {
-    static std::string path_sep = "/";
-    return path_sep;
-}
-const std::string& Str::COLON() {
-    static std::string colon = ":";
-    return colon;
-}
-
-const std::string& Str::STATE_CHANGE() {
-    static std::string state_change = "   state change ";
-    return state_change;
-}
-
-const std::string& Str::TASK() {
-    static std::string task = "TASK";
-    return task;
-}
-const std::string& Str::FAMILY() {
-    static std::string family = "FAMILY";
-    return family;
-}
-const std::string& Str::SUITE() {
-    static std::string suite = "SUITE";
-    return suite;
-}
-const std::string& Str::ALIAS() {
-    static std::string alias = "ALIAS";
-    return alias;
-}
-
-const std::string& Str::DEFAULT_PORT_NUMBER() {
-    static std::string port_number = "3141";
-    return port_number;
-}
-const std::string& Str::LOCALHOST() {
-    static std::string localhost = "localhost";
-    return localhost;
-}
-
-const std::string& Str::WHITE_LIST_FILE() {
-    static std::string WHITE_LIST_FILE = "ecf.lists";
-    return WHITE_LIST_FILE;
-}
-
-const std::string& Str::ALPHANUMERIC_UNDERSCORE() {
-    static std::string ALPHANUMERIC_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
-    return ALPHANUMERIC_UNDERSCORE;
-}
-
-const std::string& Str::NUMERIC() {
-    static std::string NUMERIC = "0123456789";
-    return NUMERIC;
-}
-
 void Str::removeQuotes(std::string& s) {
     if (!s.empty()) {
         if (s[0] == '"' && s[s.size() - 1] == '"') {
@@ -410,7 +334,7 @@ bool Str::valid_name(const std::string& name, std::string& msg) {
     }
 
     // verify that the first character is alphanumeric or is an underscore
-    bool result = Str::ALPHANUMERIC_UNDERSCORE().find(name[0], 0) != std::string::npos;
+    bool result = ecf::string_constants::alphanumeric_underscore_chars.find(name[0], 0) != std::string::npos;
     if (!result) {
         msg = "Valid names can only consist of alphanumeric characters, "
               "underscores and dots (The first character cannot be a dot). "
@@ -447,7 +371,7 @@ bool Str::valid_name(const std::string& name) {
     }
 
     // verify that the first character is alphabetic or has underscore
-    bool result = Str::ALPHANUMERIC_UNDERSCORE().find(name[0], 0) != std::string::npos;
+    bool result = ecf::string_constants::alphanumeric_underscore_chars.find(name[0], 0) != std::string::npos;
     if (!result) {
         return false;
     }
@@ -461,7 +385,7 @@ bool Str::valid_name(const std::string& name) {
 }
 
 int Str::to_int(const std::string& the_str, int error_return) {
-    if (the_str.find_first_of(Str::NUMERIC(), 0) != std::string::npos) {
+    if (the_str.find_first_of(ecf::string_constants::numeric_chars, 0) != std::string::npos) {
         try {
             return ecf::convert_to<int>(the_str);
         }

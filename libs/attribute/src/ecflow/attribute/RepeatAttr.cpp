@@ -119,7 +119,7 @@ bool Repeat::operator==(const Repeat& rhs) const {
 }
 
 const std::string& Repeat::name() const {
-    return (type_.get()) ? type_->name() : Str::EMPTY();
+    return (type_.get()) ? type_->name() : ecf::string_constants::empty;
 }
 
 // =========================================================================

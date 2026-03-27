@@ -133,7 +133,7 @@ void Defs::handle_migration() {
     auto it = edit_history_.begin();
     while (it != edit_history_.end()) {
 
-        if ((*it).first == Str::ROOT_PATH()) {
+        if ((*it).first == ecf::string_constants::root_path) {
             it++;
             continue; // root path is defs, which is not a node, hence ignore
         }
@@ -907,7 +907,7 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const {
     // This is 14% quicker than the previous algorithm, that split 'pathToNode' into a vector of strings first.
     node_ptr ret;
     bool first = false;
-    StringSplitter string_splitter(pathToNode, Str::PATH_SEPARATOR());
+    StringSplitter string_splitter(pathToNode, ecf::string_constants::path_separator);
     while (!string_splitter.finished()) {
         std::string_view path_token = string_splitter.next();
         if (!first) {
@@ -971,7 +971,7 @@ bool Defs::find_extern(const std::string& pathToNode, const std::string& node_at
     }
 
     std::string extern_path = pathToNode;
-    extern_path += Str::COLON();
+    extern_path += ecf::string_constants::colon;
     extern_path += node_attr_name;
 
     if (externs_.find(extern_path) != externs_.end()) {
@@ -1640,7 +1640,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Create StateMemento to signal a change in state change of the Defs
     if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         comp->add(std::make_shared<StateMemento>(state_.state()));
     }
@@ -1648,7 +1648,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Create OrderMemento to signal a change in Suite order
     if (order_state_change_no_ > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         std::vector<std::string> order;
         order.reserve(suiteVec_.size());
@@ -1661,7 +1661,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Create FlagMemento to signal a change in the flag value
     if (flag_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         comp->add(std::make_shared<FlagMemento>(flag_));
     }
@@ -1670,7 +1670,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Currently only watching server state i.e., HALTED, SHUTDOWN, RUNNING.
     if (server_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         comp->add(std::make_shared<ServerStateMemento>(server_.get_state()));
     }
@@ -1678,7 +1678,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Create a ServerVariableMemento to signal a change in the list of server variables
     if (server_.variable_state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         comp->add(std::make_shared<ServerVariableMemento>(server_.user_variables()));
     }

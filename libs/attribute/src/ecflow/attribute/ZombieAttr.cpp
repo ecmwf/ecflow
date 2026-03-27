@@ -95,11 +95,11 @@ void ZombieAttr::write(std::string& ret) const {
     /// format is  zombie_type : child_cmds(optional) : action : zombie_lifetime_(optional)
     ret += "zombie ";
     ret += Child::to_string(zombie_type_);
-    ret += Str::COLON();
+    ret += ecf::string_constants::colon;
     ret += ecf::to_string(action_);
-    ret += Str::COLON();
+    ret += ecf::string_constants::colon;
     ret += Child::to_string(child_cmds_);
-    ret += Str::COLON();
+    ret += ecf::string_constants::colon;
     ret += ecf::convert_to<std::string>(zombie_lifetime_);
 }
 

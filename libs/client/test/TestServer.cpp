@@ -146,9 +146,10 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
         // This check only valid if server was invoked locally. Ignore for remote servers
 
         // make sure edit history updated
-        BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                              CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                        << theClient.errorMsg());
+        BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                              CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                                  << " should return 0\n"
+                                  << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 7,
                               "Expected edit history of size 7, but found "
                                   << theClient.server_reply().get_string_vec().size());
@@ -157,17 +158,18 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                               CtsApi::get() << " failed should return 0\n"
                                             << theClient.errorMsg());
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() == 0,
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(ecf::string_constants::root_path).size() == 0,
                               "Expected edit history of size 0, but found "
-                                  << theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
+                                  << theClient.defs()->get_edit_history(ecf::string_constants::root_path).size());
 
         // clear edit history
         BOOST_REQUIRE_MESSAGE(theClient.edit_history("clear") == 0,
                               CtsApi::to_string(CtsApi::edit_history("clear")) << " should return 0\n"
                                                                                << theClient.errorMsg());
-        BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                              CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                        << theClient.errorMsg());
+        BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                              CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                                  << " should return 0\n"
+                                  << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 0,
                               "Expected no edit history " << theClient.server_reply().get_string_vec().size());
     }
@@ -219,9 +221,10 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
         // This check only valid if server was invoked locally. Ignore for remote servers
 
         // make sure edit history updated
-        BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                              CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                        << theClient.errorMsg());
+        BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                              CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                                  << " should return 0\n"
+                                  << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 8 &&
                                   theClient.server_reply().get_string_vec().size() <=
                                       Defs::max_edit_history_size_per_node(),
@@ -233,9 +236,9 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                               CtsApi::get() << " failed should return 0\n"
                                             << theClient.errorMsg());
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() == 0,
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(ecf::string_constants::root_path).size() == 0,
                               "Expected edit history of size 0, but found "
-                                  << theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
+                                  << theClient.defs()->get_edit_history(ecf::string_constants::root_path).size());
     }
 }
 

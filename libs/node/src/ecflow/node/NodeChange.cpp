@@ -56,7 +56,7 @@ bool Node::set_event(const std::string& event_name_or_number, bool value) {
     }
 
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-    if (event_name_or_number.find_first_of(Str::NUMERIC()) == 0) {
+    if (event_name_or_number.find_first_of(ecf::string_constants::numeric_chars) == 0) {
         try {
             auto number = ecf::convert_to<int>(event_name_or_number);
             auto found  = ecf::algorithm::find_by_number(events_, number);
@@ -86,7 +86,7 @@ bool Node::set_event_used_in_trigger(const std::string& event_name_or_number) {
     }
 
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-    if (event_name_or_number.find_first_of(Str::NUMERIC()) == 0) {
+    if (event_name_or_number.find_first_of(ecf::string_constants::numeric_chars) == 0) {
         try {
             auto number = ecf::convert_to<int>(event_name_or_number);
             auto found  = ecf::algorithm::find_by_number(events_, number);

@@ -288,7 +288,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const {
                 }
 
                 msg.clear();
-                msg += Str::CHILD_CMD();
+                msg += ecf::string_constants::child_cmd;
                 msg += "event ";
                 msg += event.name_or_number();
                 msg += " ";
@@ -314,7 +314,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const {
                     meter.set_value(meter.value() + 1);
 
                     msg.clear();
-                    msg += Str::CHILD_CMD();
+                    msg += ecf::string_constants::child_cmd;
                     msg += "meter ";
                     msg += meter.name();
                     msg += " ";
@@ -366,7 +366,7 @@ bool Simulator::update_for_queues(Submittable* t,
             }
             if (queue.used_in_trigger()) {
                 msg.clear();
-                msg += Str::CHILD_CMD();
+                msg += ecf::string_constants::child_cmd;
                 msg += "queue ";
                 msg += queue.name();
                 msg += " complete";

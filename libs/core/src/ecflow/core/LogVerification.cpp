@@ -52,7 +52,6 @@ bool LogVerification::extractNodePathAndState(const std::string& logfile,
         if (!NState::isValid(theState)) {
             continue;
         }
-        // cout << line_number << Str::COLON() << *i << "\n";
 
         pathStateVec.emplace_back(lineTokens[3], theState);
     }
@@ -94,10 +93,10 @@ bool LogVerification::compareNodeStates(const std::string& logfile,
 
             std::string theLine, theGoldenLine;
             if (i < lines.size()) {
-                theLine = lines[i].second + Str::COLON() + lines[i].first;
+                theLine = lines[i].second + ecf::string_constants::colon + lines[i].first;
             }
             if (i < goldenLines.size()) {
-                theGoldenLine = goldenLines[i].second + Str::COLON() + goldenLines[i].first;
+                theGoldenLine = goldenLines[i].second + ecf::string_constants::colon + goldenLines[i].first;
             }
 
             if (i < lines.size() && i < goldenLines.size()) {

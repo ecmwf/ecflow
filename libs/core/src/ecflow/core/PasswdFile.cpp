@@ -210,7 +210,7 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
 bool PasswdFile::validateVersionNumber(const std::string& line, std::string& errorMsg) const {
     // Expect 4.5.0
     // If first character is NUMERIC and we have dots
-    bool firstCharIsNumeric = Str::NUMERIC().find(line[0], 0) != std::string::npos;
+    bool firstCharIsNumeric = ecf::string_constants::numeric_chars.find(line[0], 0) != std::string::npos;
     if (firstCharIsNumeric && line.find(".") != std::string::npos) {
 
         std::vector<std::string> versionNumberTokens;
@@ -309,7 +309,7 @@ bool PasswdFile::createWithAccess(const std::string& pathToFile,
     line.clear();
     line += username;
     line += " ";
-    line += Str::LOCALHOST();
+    line += ecf::string_constants::localhost;
     line += " ";
     line += port;
     line += " ";

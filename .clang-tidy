@@ -12,6 +12,7 @@ Checks: >
   -bugprone-misplaced-widening-cast,
   -bugprone-narrowing-conversions,
   -bugprone-parent-virtual-call,
+  -bugprone-throwing-static-initialization,
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -cppcoreguidelines-avoid-do-while,

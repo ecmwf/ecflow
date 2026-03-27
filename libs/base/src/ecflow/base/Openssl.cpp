@@ -36,7 +36,7 @@ std::string Openssl::selected_crt() const {
 }
 
 bool Openssl::enable_no_throw(std::string host, const std::string& port, const std::string& ecf_ssl_env) {
-    if (host == Str::LOCALHOST()) {
+    if (host == ecf::string_constants::localhost) {
         host = Host().name();
     }
 
@@ -73,7 +73,7 @@ bool Openssl::enable_no_throw(std::string host, const std::string& port, const s
 }
 
 void Openssl::enable(std::string host, const std::string& port) {
-    if (host == Str::LOCALHOST()) {
+    if (host == ecf::string_constants::localhost) {
         host = Host().name();
     }
 
@@ -87,7 +87,7 @@ void Openssl::enable_if_defined(std::string host, const std::string& port) {
     if (auto ecf_ssl = ecf::environment::fetch<std::string>(ecf::environment::ECF_SSL); ecf_ssl) {
         std::string ecf_ssl_env = ecf_ssl.value();
 
-        if (host == Str::LOCALHOST()) {
+        if (host == ecf::string_constants::localhost) {
             host = Host().name();
         }
 

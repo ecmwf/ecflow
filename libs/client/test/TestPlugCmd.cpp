@@ -382,8 +382,10 @@ BOOST_AUTO_TEST_CASE(test_server_plug_cmd) {
         BOOST_REQUIRE_MESSAGE(invokeServer2.server_started(),
                               "Server failed to start on " << invokeServer2.host() << ":" << invokeServer2.port());
 
-        test_plug_on_multiple_server(
-            ClientEnvironment::hostSpecified(), ClientEnvironment::portSpecified(), Str::LOCALHOST(), port2);
+        test_plug_on_multiple_server(ClientEnvironment::hostSpecified(),
+                                     ClientEnvironment::portSpecified(),
+                                     ecf::string_constants::localhost,
+                                     port2);
     }
 }
 

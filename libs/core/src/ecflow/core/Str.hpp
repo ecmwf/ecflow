@@ -21,6 +21,36 @@
 
 namespace ecf {
 
+namespace string_constants {
+
+inline const std::string child_cmd  = "chd:";
+inline const std::string user_cmd   = "--";
+inline const std::string server_cmd = "svr:"; // Only for automatic check_pt
+
+inline const std::string empty = "";
+
+inline const std::string root_path      = "/";
+inline const std::string path_separator = "/";
+inline const std::string colon          = ":";
+
+inline const std::string task    = "TASK";
+inline const std::string family  = "FAMILY";
+inline const std::string family1 = "FAMILY1";
+inline const std::string suite   = "SUITE";
+inline const std::string alias   = "ALIAS";
+
+inline const std::string default_port_number = "3141";
+inline const std::string localhost           = "localhost";
+
+inline const std::string white_list_file = "ecf.lists";
+
+inline const std::string alphanumeric_underscore_chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+
+inline const std::string numeric_chars = "0123456789";
+
+} // namespace string_constants
+
 namespace algorithm {
 
 template <typename Sequence1, typename Sequence2 = std::string>
@@ -77,12 +107,6 @@ class Str {
 public:
     // Disable default construction
     Str() = delete;
-
-    static int reserve_4() { return 4; }
-    static int reserve_8() { return 8; }
-    static int reserve_16() { return 17; }
-    static int reserve_32() { return 32; }
-    static int reserve_64() { return 64; }
 
     // remove any quotes on the string, else does nothing
     // "fred" -> fred
@@ -194,37 +218,6 @@ public:
     static bool truncate_at_end(std::string& fileContents, size_t max_lines);
 
     static std::string dump_string_vec(const std::vector<std::string>& vec);
-
-    /// Only use strcmp if the first characters are the same
-    static int local_strcmp(const char* s, const char* t) { return (*s != *t ? *s - *t : strcmp(s, t)); }
-
-    // returns a static string of alphanumerics and underscore
-    static const std::string& ALPHANUMERIC_UNDERSCORE();
-
-    // returns a static string of numerics chars
-    static const std::string& NUMERIC();
-
-    static const char* CHILD_CMD();
-    static const char* USER_CMD();
-    static const char* SVR_CMD(); // Only for automatic check_pt
-
-    // Allows string to be returned by reference
-    static const std::string& EMPTY();
-    static const std::string& ROOT_PATH();      // "/"
-    static const std::string& PATH_SEPARATOR(); // "/"
-    static const std::string& COLON();          // ":"
-
-    static const std::string& STATE_CHANGE();
-
-    static const std::string& TASK();
-    static const std::string& FAMILY();
-    static const std::string& SUITE();
-    static const std::string& ALIAS();
-
-    static const std::string& DEFAULT_PORT_NUMBER(); // "3141"
-    static const std::string& LOCALHOST();
-
-    static const std::string& WHITE_LIST_FILE();
 };
 
 } // namespace ecf

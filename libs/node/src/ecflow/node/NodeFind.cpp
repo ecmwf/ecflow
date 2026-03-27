@@ -148,7 +148,7 @@ const std::string& Node::find_parent_user_variable_value(const std::string& name
         // The node can be detached from the defs.
         return the_defs->server_state().find_variable(name);
     }
-    return Str::EMPTY();
+    return ecf::string_constants::empty;
 }
 
 bool Node::user_variable_exists(const std::string& name) const {
@@ -308,7 +308,7 @@ const Event& Node::findEventByNameOrNumber(const std::string& theName) const {
     }
 
     // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-    if (theName.find_first_of(Str::NUMERIC(), 0) == 0) {
+    if (theName.find_first_of(ecf::string_constants::numeric_chars, 0) == 0) {
         try {
             auto eventNumber = ecf::convert_to<int>(theName);
             return findEventByNumber(eventNumber);
@@ -693,7 +693,7 @@ findRelativeNode(const std::vector<std::string>& theExtractedPath, node_ptr trig
     else {
         for (const std::string& s : theExtractedPath) {
             errorMsg += s;
-            errorMsg += Str::PATH_SEPARATOR();
+            errorMsg += ecf::string_constants::path_separator;
         }
     }
     errorMsg += "' from node ";
@@ -712,7 +712,7 @@ node_ptr Node::non_const_this() const {
 }
 
 node_ptr Node::findReferencedNode(const std::string& nodePath, std::string& errorMsg) const {
-    return findReferencedNode(nodePath, Str::EMPTY(), errorMsg);
+    return findReferencedNode(nodePath, ecf::string_constants::empty, errorMsg);
 }
 
 // #define DEBUG_FIND_REFERENCED_NODE 1
@@ -741,7 +741,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
     std::string debug_path =
-        "Searching for path " + nodePath + " from " + debugType() + Str::COLON() + absNodePath() + "\n";
+        "Searching for path " + nodePath + " from " + debugType() + ecf::string_constants::colon + absNodePath() + "\n";
 #endif
 
     // if an absolute path cut in early
@@ -910,7 +910,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
             // search suites, with the remaining path in theExtractedPath
             std::string path;
             for (const auto& i : theExtractedPath) {
-                path += Str::PATH_SEPARATOR();
+                path += ecf::string_constants::path_separator;
                 path += i;
             }
             node_ptr fndNode = theDefs->findAbsNode(path);

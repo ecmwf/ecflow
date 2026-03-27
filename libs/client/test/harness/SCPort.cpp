@@ -59,7 +59,7 @@ std::string SCPort::next() {
         std::cout << " ECF_HOST('" << host << "')";
     }
 
-    if (host == Str::LOCALHOST()) {
+    if (host == ecf::string_constants::localhost) {
         if (auto port = ecf::environment::fetch(ecf::environment::ECF_PORT); port) {
             if (!port.value().empty()) {
                 if (debug) {
@@ -117,9 +117,10 @@ bool SCPort::is_free_port(int port, bool debug) {
     const auto the_port = ecf::convert_to<std::string>(port);
     try {
         if (debug) {
-            std::cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << the_port << "'\n";
+            std::cout << "   Trying to connect to server on '" << ecf::string_constants::localhost << ":" << the_port
+                      << "'\n";
         }
-        client.set_host_port(Str::LOCALHOST(), the_port);
+        client.set_host_port(ecf::string_constants::localhost, the_port);
         client.pingServer();
         if (debug) {
             std::cout << "   Connected to server on port " << the_port << ". Returning FALSE\n";
@@ -172,9 +173,10 @@ std::string SCPort::find_free_port(int seed_port_number, bool debug) {
         free_port = ecf::convert_to<std::string>(the_port);
         try {
             if (debug) {
-                std::cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << free_port << "'\n";
+                std::cout << "   Trying to connect to server on '" << ecf::string_constants::localhost << ":"
+                          << free_port << "'\n";
             }
-            client.set_host_port(Str::LOCALHOST(), free_port);
+            client.set_host_port(ecf::string_constants::localhost, free_port);
             client.pingServer();
             if (debug) {
                 std::cout << "   Connected to server on port " << free_port << " trying next port\n";

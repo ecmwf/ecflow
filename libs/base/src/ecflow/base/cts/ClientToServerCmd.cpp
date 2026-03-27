@@ -173,7 +173,7 @@ void ClientToServerCmd::add_edit_history(Defs* defs) const {
     if (edit_history_nodes_.empty() && edit_history_node_paths_.empty()) {
 
         defs->flag().set(ecf::Flag::MESSAGE);
-        add_edit_history(defs, Str::ROOT_PATH());
+        add_edit_history(defs, ecf::string_constants::root_path);
     }
     else {
         // edit_history_node_paths_ is only populated by the delete command
@@ -220,10 +220,10 @@ void ClientToServerCmd::add_edit_history(Defs* defs, const std::string& path) co
 }
 
 void ClientToServerCmd::add_delete_edit_history(Defs* defs, const std::string& path) const {
-    // History is added to Str::ROOT_PATH(), but the path must show deleted node path
+    // History is added to ecf::string_constants::root_path, but the path must show deleted node path
     std::string ss("MSG:");
     ss += Log::instance()->get_cached_time_stamp();
 
     print(ss, path); // custom print
-    defs->add_edit_history(Str::ROOT_PATH(), ss);
+    defs->add_edit_history(ecf::string_constants::root_path, ss);
 }

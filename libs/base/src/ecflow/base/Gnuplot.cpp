@@ -125,10 +125,10 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
 
         bool child_cmd = false;
         bool user_cmd  = false;
-        if (line.find(Str::CHILD_CMD()) != std::string::npos) {
+        if (line.find(ecf::string_constants::child_cmd) != std::string::npos) {
             child_cmd = true;
         }
-        else if (line.find(Str::USER_CMD()) != std::string::npos) {
+        else if (line.find(ecf::string_constants::user_cmd) != std::string::npos) {
             user_cmd = true;
         }
         if (!child_cmd && !user_cmd) {

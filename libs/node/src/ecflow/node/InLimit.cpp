@@ -121,7 +121,7 @@ void InLimit::write(std::string& ret) const {
     }
     else {
         ret += path_;
-        ret += Str::COLON();
+        ret += ecf::string_constants::colon;
         ret += n_;
     }
     if (tokens_ != 1) {

@@ -343,7 +343,7 @@ void Task::acceptVisitTraversor(ecf::NodeTreeVisitor& v) {
 }
 
 const std::string& Task::debugType() const {
-    return ecf::Str::TASK();
+    return ecf::string_constants::task;
 }
 
 void Task::immediateChildren(std::vector<node_ptr>& vec) const {

@@ -65,7 +65,7 @@ bool FlatAnalyserVisitor::analyse(Node* node) {
 
     ss_ << l1;
     ss_ << node->debugType();
-    ss_ << Str::COLON();
+    ss_ << ecf::string_constants::colon;
     ss_ << node->name();
     ss_ << " state(";
     ss_ << NState::toString(node->state());

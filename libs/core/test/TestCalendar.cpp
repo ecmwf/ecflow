@@ -499,7 +499,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
             if (intersects && boundaryOk) {
                 BOOST_CHECK_MESSAGE(matches,
                                     "Calendar should match relative time series at "
-                                        << suiteTm.tm_hour << Str::COLON() << suiteTm.tm_min
+                                        << suiteTm.tm_hour << ecf::string_constants::colon << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
                 if (!matches) {
                     ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
             else {
                 BOOST_CHECK_MESSAGE(!matches,
                                     "Calendar should NOT match relative time series at "
-                                        << suiteTm.tm_hour << Str::COLON() << suiteTm.tm_min
+                                        << suiteTm.tm_hour << ecf::string_constants::colon << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
 
                 if (matches) {

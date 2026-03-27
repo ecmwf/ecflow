@@ -70,7 +70,7 @@ void Alias::requeue(Requeue_args& args) {
 }
 
 const std::string& Alias::debugType() const {
-    return ecf::Str::ALIAS();
+    return ecf::string_constants::alias;
 }
 
 node_ptr Alias::removeChild(Node*) {

@@ -911,16 +911,16 @@ void EcfFile::get_used_variables(std::string& used_variables) const {
             }
 
             // We must use exact match, to avoid user variables like ESUITE,EFAMILY,ETASK
-            if (item.first == Str::TASK()) {
+            if (item.first == ecf::string_constants::task) {
                 continue;
             }
-            if (item.first == Str::FAMILY()) {
+            if (item.first == ecf::string_constants::family) {
                 continue;
             }
-            if (item.first == "FAMILY1") {
+            if (item.first == ecf::string_constants::family1) {
                 continue;
             }
-            if (item.first == Str::SUITE()) {
+            if (item.first == ecf::string_constants::suite) {
                 continue;
             }
             used_variables += item.first;

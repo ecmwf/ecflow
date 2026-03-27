@@ -32,7 +32,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const {
 
     node_ptr node = client_def->findAbsNode(absNodePath_);
     if (!node.get()) {
-        if (absNodePath_ != Str::ROOT_PATH()) {
+        if (absNodePath_ != ecf::string_constants::root_path) {
 
             // add more context, about what's suites are in the client defs.
             std::string error_msg = "CompoundMemento::incremental_sync: could not find path ";

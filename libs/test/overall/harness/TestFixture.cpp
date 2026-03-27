@@ -44,15 +44,15 @@ using namespace ecf;
 namespace /* anonymous */ {
 
 bool is_external_server_running_remotelly(std::string_view host) {
-    return !host.empty() && host != Str::LOCALHOST();
+    return !host.empty() && host != ecf::string_constants::localhost;
 }
 
 bool is_external_server_running_locally(std::string_view host) {
-    return !host.empty() && host == Str::LOCALHOST();
+    return !host.empty() && host == ecf::string_constants::localhost;
 }
 
 bool is_local_server(std::string_view host) {
-    return host.empty() || host == Str::LOCALHOST();
+    return host.empty() || host == ecf::string_constants::localhost;
 }
 
 } // namespace
@@ -207,7 +207,7 @@ void TestFixture::init(const std::string& project_test_dir) {
         // Going to perform the tests using a server launched as part of the test setup.
 
         // Update ClientInvoker with local host and port
-        host_ = Str::LOCALHOST();
+        host_ = ecf::string_constants::localhost;
         port_ = ecf::SCPort::find_available_port(port_);
         client().set_host_port(host_, port_);
 
@@ -235,11 +235,12 @@ void TestFixture::init(const std::string& project_test_dir) {
     /// Either way, we wait for 60 seconds for server, for it to respond to pings
     /// This is important when server is started locally. We must wait for it to come alive.
     if (!client().wait_for_server_reply()) {
-        std::cout << "   Ping server on " << client().host() << Str::COLON() << client().port()
+        std::cout << "   Ping server on " << client().host() << ecf::string_constants::colon << client().port()
                   << " failed. Is the server running ? " << client().errorMsg() << "\n";
         assert(false);
     }
-    std::cout << "   Ping OK: server running on:  " << client().host() << Str::COLON() << client().port() << "\n";
+    std::cout << "   Ping OK: server running on:  " << client().host() << ecf::string_constants::colon
+              << client().port() << "\n";
 
     // Log file must exist, otherwise test will not work. Log file required for comparison
     if (!fs::exists(TestFixture::pathToLogFile())) {

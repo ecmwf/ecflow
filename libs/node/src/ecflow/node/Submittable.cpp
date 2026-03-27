@@ -674,7 +674,7 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam) {
     //  ecflow_client --hcomplete
 
     if (createChildProcess(jobsParam)) {
-        set_state(NState::SUBMITTED, false, Str::EMPTY() /*job size*/);
+        set_state(NState::SUBMITTED, false, ecf::string_constants::empty);
         return true;
     }
 

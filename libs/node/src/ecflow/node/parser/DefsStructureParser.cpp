@@ -30,7 +30,7 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& file
       defsParser_(this),
       lineNumber_(0),
       file_type_(PrintStyle::DEFS),
-      defs_as_string_(Str::EMPTY()) {
+      defs_as_string_() {
     if (!infile_.ok()) {
         error_ = MESSAGE("DefsStructureParser::DefsStructureParser: Unable to open file! "
                          << infile_.file_name() << "\n\n"
