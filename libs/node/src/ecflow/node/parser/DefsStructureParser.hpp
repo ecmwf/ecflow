@@ -26,7 +26,7 @@ class Parser;
 // This class is used get a line of defs format from a defs string
 class DefsString {
 public:
-    DefsString();
+    DefsString() = default;
     explicit DefsString(const std::string& defs_as_string);
     // Disable copy (and move) semantics
     DefsString(const DefsString&)                  = delete;
@@ -37,9 +37,9 @@ public:
     bool empty() const { return empty_; }
 
 private:
-    std::vector<std::string> lines_;
+    std::vector<std::string> lines_{};
     size_t line_pos_{0};
-    bool empty_;
+    bool empty_{true};
 };
 
 // This class is used to parse the DEFS file.
