@@ -77,14 +77,10 @@ public:
     const TimeSeries& time() const { return timeSeries_; }
     const TimeSeries& time_series() const { return timeSeries_; }
     bool last_day_of_month() const { return last_day_of_month_; }
-    std::vector<int>::const_iterator week_days_begin() const { return weekDays_.begin(); }
-    std::vector<int>::const_iterator week_days_end() const { return weekDays_.end(); }
-    std::vector<int>::const_iterator last_week_days_of_month_begin() const { return last_week_days_of_month_.begin(); }
-    std::vector<int>::const_iterator last_week_days_end_of_month_end() const { return last_week_days_of_month_.end(); }
-    std::vector<int>::const_iterator days_of_month_begin() const { return daysOfMonth_.begin(); }
-    std::vector<int>::const_iterator days_of_month_end() const { return daysOfMonth_.end(); }
-    std::vector<int>::const_iterator months_begin() const { return months_.begin(); }
-    std::vector<int>::const_iterator months_end() const { return months_.end(); }
+    const std::vector<int>& week_days() const { return weekDays_; }
+    const std::vector<int>& last_week_days_of_month() const { return last_week_days_of_month_; }
+    const std::vector<int>& days_of_month() const { return daysOfMonth_; }
+    const std::vector<int>& months() const { return months_; }
 
     std::string name() const; // for display/gui
     std::string toString() const;

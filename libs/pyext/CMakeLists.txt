@@ -55,6 +55,7 @@ set(srcs
   ../src/ecflow/python/ClientDoc.hpp
   ../src/ecflow/python/DefsDoc.hpp
   ../src/ecflow/python/Edit.hpp
+  ../src/ecflow/python/ExportCollections.hpp
   ../src/ecflow/python/GlossaryDoc.hpp
   ../src/ecflow/python/NodeAttrDoc.hpp
   ../src/ecflow/python/NodeUtil.hpp
@@ -67,6 +68,7 @@ set(srcs
   ../src/ecflow/python/EcfExt.cpp
   ../src/ecflow/python/Edit.cpp
   ../src/ecflow/python/ExportClient.cpp
+  ../src/ecflow/python/ExportCollections.cpp
   ../src/ecflow/python/ExportCore.cpp
   ../src/ecflow/python/ExportDefs.cpp
   ../src/ecflow/python/ExportNode.cpp
@@ -127,6 +129,6 @@ set(s_tests
   s_TestSslSetup
 )
 
-if (Python3_FOUND AND (Boost_PYTHON3_FOUND OR Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_FOUND))
+if (Python3_FOUND AND pybind11_FOUND)
   add_subdirectory( python3 )
 endif()

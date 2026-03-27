@@ -18,68 +18,85 @@
 void pyutil_list_to_int_vec(const py::list& list, std::vector<int>& int_vec) {
     auto the_list_size = len(list);
     int_vec.reserve(the_list_size);
-    for (ssize_t i = 0; i < the_list_size; ++i) {
-        int_vec.push_back(py::extract<int>(list[i]));
+    for (size_t i = 0; i < the_list_size; ++i) {
+        int_vec.push_back(list[i].cast<int>());
     }
 }
 
 void pyutil_list_to_str_vec(const py::list& list, std::vector<std::string>& vec) {
     auto the_list_size = len(list);
     vec.reserve(the_list_size);
-    for (ssize_t i = 0; i < the_list_size; ++i) {
-        vec.push_back(py::extract<std::string>(list[i]));
+    for (size_t i = 0; i < the_list_size; ++i) {
+        vec.push_back(list[i].cast<std::string>());
     }
 }
 
 void pyutil_list_to_str_vec(const py::list& list, std::vector<Variable>& vec) {
     auto the_list_size = len(list);
     vec.reserve(the_list_size);
-    for (ssize_t i = 0; i < the_list_size; ++i) {
-        vec.push_back(py::extract<Variable>(list[i]));
+    for (size_t i = 0; i < the_list_size; ++i) {
+        vec.push_back(list[i].cast<Variable>());
     }
 }
 
-void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<std::pair<std::string, std::string>>& str_pair_vec) {
-    py::list keys         = dict.keys();
-    const auto no_of_keys = len(keys);
-    str_pair_vec.reserve(no_of_keys);
+void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<std::pair<std::string, std::string>>& vec) {
 
-    for (ssize_t i = 0; i < no_of_keys; ++i) {
+    for (auto entry : dict) {
+        std::string first;
+        if (auto found = py_extract<py::str>(entry.first); found) {
+            first = found.value();
+        }
+        else if (auto found = py_extract<std::string>(entry.first); found) {
+            first = found.value();
+        }
+        else {
+            throw std::runtime_error("PythonUtil::dict_to_str_vec: key not convertible to py::str or std::string");
+        }
 
         std::string second;
-        std::string first = py::extract<std::string>(keys[i]);
-        if (py::extract<std::string>(dict[keys[i]]).check()) {
-            second = py::extract<std::string>(dict[keys[i]]);
+        if (auto found = py_extract<std::string>(entry.second); found) {
+            second = found.value();
         }
-        else if (py::extract<int>(dict[keys[i]]).check()) {
-            int the_int = py::extract<int>(dict[keys[i]]);
-            second      = ecf::convert_to<std::string>(the_int);
+        else if (auto found = py_extract<py::str>(entry.second); found) {
+            second = found.value();
+        }
+        else if (auto found = py_extract<int>(entry.second); found) {
+            int value = found.value();
+            second    = ecf::convert_to<std::string>(value);
+        }
+        else if (auto found = py_extract<py::int_>(entry.second); found) {
+            int value = found.value();
+            second    = ecf::convert_to<std::string>(value);
         }
         else {
             throw std::runtime_error("PythonUtil::dict_to_str_vec: type not convertible to string or integer");
         }
-        str_pair_vec.emplace_back(first, second);
+
+        vec.emplace_back(first, second);
     }
 }
 
 void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<Variable>& vec) {
-    py::list keys         = dict.keys();
-    const auto no_of_keys = len(keys);
-    vec.reserve(no_of_keys);
 
-    for (ssize_t i = 0; i < no_of_keys; ++i) {
-
-        std::string second;
-        std::string first = py::extract<std::string>(keys[i]);
-        if (py::extract<std::string>(dict[keys[i]]).check()) {
-            second = py::extract<std::string>(dict[keys[i]]);
-        }
-        else if (py::extract<int>(dict[keys[i]]).check()) {
-            int the_int = py::extract<int>(dict[keys[i]]);
-            second      = ecf::convert_to<std::string>(the_int);
+    for (auto entry : dict) {
+        std::string first;
+        if (auto found = py_extract<py::str>(entry.first); found) {
+            first = found.value();
         }
         else {
-            throw std::runtime_error("PythonUtil::dict_to_str_vec: type not convertible to string or integer");
+            throw std::runtime_error("PythonUtil::dict_to_str_vec: key not convertible to string");
+        }
+
+        std::string second;
+        if (auto found = py_extract<py::str>(entry.second); found) {
+            second = found.value();
+        }
+        else if (auto found = py_extract<py::int_>(entry.second); found) {
+            int value = found.value();
+            second    = ecf::convert_to<std::string>(value);
+        }
+        else {
+            throw std::runtime_error("PythonUtil::dict_to_str_vec: value not convertible to string or integer");
         }
 
         vec.emplace_back(first, second);

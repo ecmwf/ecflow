@@ -458,6 +458,8 @@ public:
      */
     bool is_not_retrying(const ClientToServerCmd& cmd) const;
 
+    auto& changed_node_paths() { return server_reply_.changed_nodes(); }
+
 private:
     /**
      * @return 1 when command is selected; 0 if no command is selected (e.g. --help)
