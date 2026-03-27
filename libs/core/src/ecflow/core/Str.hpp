@@ -21,6 +21,36 @@
 
 namespace ecf {
 
+namespace string_constants {
+
+inline const std::string child_cmd  = "chd:";
+inline const std::string user_cmd   = "--";
+inline const std::string server_cmd = "svr:"; // Only for automatic check_pt
+
+inline const std::string empty = "";
+
+inline const std::string root_path      = "/";
+inline const std::string path_separator = "/";
+inline const std::string colon          = ":";
+
+inline const std::string task    = "TASK";
+inline const std::string family  = "FAMILY";
+inline const std::string family1 = "FAMILY1";
+inline const std::string suite   = "SUITE";
+inline const std::string alias   = "ALIAS";
+
+inline const std::string default_port_number = "3141";
+inline const std::string localhost           = "localhost";
+
+inline const std::string white_list_file = "ecf.lists";
+
+inline const std::string alphanumeric_underscore_chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+
+inline const std::string numeric_chars = "0123456789";
+
+} // namespace string_constants
+
 namespace algorithm {
 
 template <typename Sequence1, typename Sequence2 = std::string>
@@ -192,36 +222,6 @@ public:
     /// Only use strcmp if the first characters are the same
     static int local_strcmp(const char* s, const char* t) { return (*s != *t ? *s - *t : strcmp(s, t)); }
 };
-
-namespace string_constants {
-
-inline const std::string child_cmd  = "chd:";
-inline const std::string user_cmd   = "--";
-inline const std::string server_cmd = "svr:"; // Only for automatic check_pt
-
-inline const std::string empty = "";
-
-inline const std::string root_path      = "/";
-inline const std::string path_separator = "/";
-inline const std::string colon          = ":";
-
-inline const std::string task    = "TASK";
-inline const std::string family  = "FAMILY";
-inline const std::string family1 = "FAMILY1";
-inline const std::string suite   = "SUITE";
-inline const std::string alias   = "ALIAS";
-
-inline const std::string default_port_number = "3141";
-inline const std::string localhost           = "localhost";
-
-inline const std::string white_list_file = "ecf.lists";
-
-inline const std::string alphanumeric_underscore_chars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
-
-inline const std::string numeric_chars = "0123456789";
-
-} // namespace string_constants
 
 } // namespace ecf
 
