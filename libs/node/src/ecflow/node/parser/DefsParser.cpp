@@ -90,8 +90,8 @@ public:
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 
-        const char* first_token = lineTokens[0].c_str();
-        if (Str::local_strcmp(first_token, keyword()) == 0) {
+        const auto& first_token = lineTokens.front();
+        if (first_token == keyword()) {
 
             if (lineTokens.size() < 2) {
                 throw std::runtime_error("Alias name missing.");
@@ -101,7 +101,7 @@ public:
 
             return true;
         }
-        else if (Str::local_strcmp(first_token, "endalias") == 0) { // required at the end
+        else if (first_token == "endalias") { // required at the end
             popNode();
             return true;
         }
@@ -187,20 +187,20 @@ public:
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 
-        const char* first_token = lineTokens[0].c_str();
-        if (Str::local_strcmp(first_token, keyword()) == 0) {
+        const auto& first_token = lineTokens.front();
+        if (first_token == keyword()) {
             if (lineTokens.size() < 2) {
                 throw std::runtime_error("Task name missing.");
             }
             addTask(line, lineTokens);
             return true;
         }
-        else if (Str::local_strcmp(first_token, "endfamily") == 0) {
+        else if (first_token == "endfamily") {
             if (parent()) {
                 return parent()->doParse(line, lineTokens);
             }
         }
-        else if (Str::local_strcmp(first_token, "endtask") == 0) { // optional
+        else if (first_token == "endtask") { // optional
             popToContainerNode();
             return true;
         }
@@ -292,8 +292,8 @@ public:
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 
-        const char* first_token = lineTokens[0].c_str();
-        if (Str::local_strcmp(first_token, keyword()) == 0) {
+        const auto& first_token = lineTokens.front();
+        if (first_token == keyword()) {
 
             if (lineTokens.size() < 2) {
                 throw std::runtime_error("Family name missing.");
@@ -303,12 +303,12 @@ public:
 
             return true;
         }
-        else if (Str::local_strcmp(first_token, "endfamily") == 0) {
+        else if (first_token == "endfamily") {
 
             popFamily();
             return true;
         }
-        else if (Str::local_strcmp(first_token, "endtask") == 0) { // optional
+        else if (first_token == "endtask") { // optional
             popNode();
             return true;
         }
@@ -416,8 +416,8 @@ public:
 
     bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 
-        const char* first_token = lineTokens[0].c_str();
-        if (Str::local_strcmp(first_token, keyword()) == 0) {
+        const auto& first_token = lineTokens.front();
+        if (first_token == keyword()) {
 
             if (started_) {
                 throw std::runtime_error("Can't have hierarchical suites.");
@@ -431,7 +431,7 @@ public:
 
             return true;
         }
-        else if (Str::local_strcmp(first_token, "endsuite") == 0) {
+        else if (first_token == "endsuite") {
 
             if (!started_) {
                 throw std::runtime_error("Misplaced endsuite..");

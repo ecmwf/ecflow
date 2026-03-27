@@ -44,12 +44,12 @@ Parser::~Parser() {
 }
 
 bool Parser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {
-    const char* first_token = lineTokens[0].c_str();
+    const auto& first_token = lineTokens.front();
     size_t theSize          = expectedParsers_.size();
     for (size_t i = 0; i < theSize; ++i) {
         Parser* p = expectedParsers_[i];
 
-        if (Str::local_strcmp(first_token, p->keyword()) == 0) {
+        if (first_token == p->keyword()) {
 
 #ifdef SHOW_PARSER_STATS
             p->incrementParserCount(); // used for stats
@@ -72,15 +72,13 @@ bool Parser::doParse(const std::string& line, std::vector<std::string>& lineToke
 #endif
 
     // Parent should handle "endfamily", "family" and "endsuite" for hierarchical families
-    if (parent() &&
-        ((Str::local_strcmp(first_token, "endfamily") == 0) || (Str::local_strcmp(first_token, "family") == 0) ||
-         (Str::local_strcmp(first_token, "endsuite") == 0))) {
+    if (parent() && ((first_token == "endfamily") || (first_token == "family") || (first_token == "endsuite"))) {
         return parent()->doParse(line, lineTokens);
     }
 
     // Check if first token is '#' comment character
     // very first non space character is # comment, hence ignore this line
-    if (*first_token == '#') {
+    if (first_token.front() == '#') {
         // std::cout << "Ignoring line with leading comment : " << line << "\n";
         return true;
     }
