@@ -23,14 +23,17 @@
 // This command returns the requested node back to the client
 // Note: In the case where defs has not been loaded, it can be NULL
 
-SNodeCmd::SNodeCmd(AbstractServer* as, node_ptr node) {
-    init(as, node);
+SNodeCmd::SNodeCmd(const ecf::Identity& identity, AbstractServer* as, node_ptr node) {
+    init(identity, as, node);
 }
 
-void SNodeCmd::init(AbstractServer* as, node_ptr node) {
+void SNodeCmd::init(const ecf::Identity& identity, AbstractServer* as, node_ptr node) {
     the_node_str_.clear();
     if (node.get()) {
-        the_node_str_ = ecf::as_string(node, PrintStyle::NET);
+        ecf::ServiceAuthorisationContext authorisation{identity, *as->defs(), as->authorisation()};
+
+        auto format_ctx = ecf::FormatContext::make_for(PrintStyle::NET, &authorisation);
+        the_node_str_   = ecf::as_string(node, format_ctx);
     }
 }
 

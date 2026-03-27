@@ -611,6 +611,10 @@ void Defs::reset_begin() {
 }
 
 void Defs::requeue() {
+    requeue(ecf::UnrestrictedAuthorisationContext{});
+}
+
+void Defs::requeue(const ecf::AuthorisationContext& authorization) {
     bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
     flag_.reset();
     if (edit_history_set) {
@@ -620,7 +624,7 @@ void Defs::requeue() {
     Node::Requeue_args args;
     size_t theSuiteVecSize = suiteVec_.size();
     for (size_t s = 0; s < theSuiteVecSize; s++) {
-        suiteVec_[s]->requeue(args);
+        suiteVec_[s]->requeue(args, authorization);
     }
 
     set_most_significant_state();
@@ -1281,6 +1285,11 @@ void Defs::cereal_restore_from_checkpt(const std::string& the_fileName) {
 }
 
 void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
+    auto ctx = ecf::FormatContext::make_for(p_style);
+    write_to_string(os, ctx);
+}
+
+void Defs::write_to_string(std::string& os, ecf::FormatContext ctx) const {
     // Set up the output, pre-allocating space based on previous runs (if available)
     os.clear();
     if (print_cache_ > 0) {
@@ -1290,7 +1299,6 @@ void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
         os.reserve(4096);
     }
 
-    auto ctx = ecf::Context::make_for(p_style);
     ecf::write_t(os, *this, ctx);
 
     // Store the size of the output, for future use
@@ -1602,9 +1610,9 @@ std::string Defs::toString() const {
 }
 
 // Memento functions
-void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_changes) const {
+void Defs::collateChanges(unsigned int client_handle, DefsDelta& changes, const ecf::AuthorisationContext& ctx) const {
     // Collate any small scale changes to the defs
-    collate_defs_changes_only(incremental_changes);
+    collate_defs_changes_only(changes);
 
     if (0 == client_handle) {
         // small scale changes. Collate changes over all suites.
@@ -1616,7 +1624,7 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
             //   *IF* node/attribute change no > client_state_change_no
             //   *THEN*
             //       Create a memento, and store in incremental_changes_
-            s->collateChanges(incremental_changes);
+            s->collateChanges(changes, ctx);
         }
     }
     else {
@@ -1626,7 +1634,7 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
         //   *IF* node/attribute change no > client_state_change_no
         //   *THEN*
         //       Create a memento, and store in incremental_changes_
-        client_suite_mgr_.collateChanges(client_handle, incremental_changes);
+        client_suite_mgr_.collateChanges(client_handle, changes, ctx);
     }
 }
 

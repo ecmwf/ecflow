@@ -8,16 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#define BOOST_TEST_MODULE Test_Base
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
-#include "MockServer.hpp"
-#include "ecflow/base/Algorithms.hpp"
 #include "ecflow/node/Family.hpp"
-#include "ecflow/server/BaseServer.hpp"
+#include "ecflow/node/NodePathAlgorithms.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-BOOST_AUTO_TEST_SUITE(U_Base)
+BOOST_AUTO_TEST_SUITE(U_Node)
 
 BOOST_AUTO_TEST_SUITE(T_Path)
 
