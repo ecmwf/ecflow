@@ -14,7 +14,54 @@
 
 namespace ecf {
 
-const char* VALID_NODE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.";
+namespace algorithm {
+
+inline bool is_valid_node_name_first_character(char c) {
+    return std::isalnum(c) || c == '_';
+}
+
+inline bool is_valid_node_name_following_character(char c) {
+    return std::isalnum(c) || c == '_' || c == '.';
+}
+
+bool is_valid_name(const std::string& name, std::string& error) {
+
+    if (name.empty()) {
+        error = "Invalid name. Empty string.";
+        return false;
+    }
+
+    if (!is_valid_node_name_first_character(name.front())) {
+        error = "Valid names can only consist of alphanumeric characters, "
+                "underscores and dots (The first character cannot be a dot). "
+                "The first character is not valid (only alphanumeric or an underscore is allowed): ";
+        error += "'";
+        error += name;
+        error += "'";
+        return false;
+    }
+
+    if (!std::all_of(name.begin() + 1, name.end(), is_valid_node_name_following_character)) {
+        error = "Valid names can only consist of alphanumeric characters, "
+                "underscores and dots (The first character cannot be a dot). ";
+        if (name.find('\r') != std::string::npos) {
+            error += "Windows line ending ? ";
+        }
+        error += "'";
+        error += name;
+        error += "'";
+        return false;
+    }
+
+    return true;
+}
+
+bool is_valid_name(const std::string& name) {
+    return !name.empty() && is_valid_node_name_first_character(name.front()) &&
+           std::all_of(name.begin() + 1, name.end(), is_valid_node_name_following_character);
+}
+
+} // namespace algorithm
 
 void Str::removeQuotes(std::string& s) {
     if (!s.empty()) {
@@ -321,67 +368,6 @@ bool Str::caseInsGreater(const std::string& a, const std::string& b) {
         }
         return toupper(static_cast<unsigned char>(x)) > toupper(static_cast<unsigned char>(y));
     });
-}
-
-bool Str::valid_name(const std::string& name, std::string& msg) {
-    // valid names are alphabetic (alphanumeric | underscore | .)
-    // however we can't have a leading '.' as that can interfere with trigger expressions
-
-    // verify that the string is not empty
-    if (name.empty()) {
-        msg = "Invalid name. Empty string.";
-        return false;
-    }
-
-    // verify that the first character is alphanumeric or is an underscore
-    bool result = ecf::string_constants::alphanumeric_underscore_chars.find(name[0], 0) != std::string::npos;
-    if (!result) {
-        msg = "Valid names can only consist of alphanumeric characters, "
-              "underscores and dots (The first character cannot be a dot). "
-              "The first character is not valid (only alphanumeric or an underscore is allowed): ";
-        msg += name;
-        return false;
-    }
-
-    // verify that any other characters are alphanumeric or underscore
-    if (name.size() > 1) {
-        result = name.find_first_not_of(VALID_NODE_CHARS, 1) == std::string::npos;
-        if (!result) {
-            msg = "Valid names can only consist of alphanumeric characters, "
-                  "underscores and dots (The first character cannot be a dot). ";
-            if (name.find('\r') != std::string::npos) {
-                msg += "Windows line ending ? ";
-            }
-            msg += "'";
-            msg += name;
-            msg += "'"; // use '<name>' to show if PC format, i.e. carriage return
-        }
-    }
-
-    return result;
-}
-
-bool Str::valid_name(const std::string& name) {
-    // valid names are alphabetic (alphanumeric | underscore | .)
-    // however we can't have a leading '.' as that can interfere with trigger expressions
-
-    // verify that the string is not empty
-    if (name.empty()) {
-        return false;
-    }
-
-    // verify that the first character is alphabetic or has underscore
-    bool result = ecf::string_constants::alphanumeric_underscore_chars.find(name[0], 0) != std::string::npos;
-    if (!result) {
-        return false;
-    }
-
-    // verify that any other characters are alphanumeric or underscore
-    if (name.size() > 1) {
-        result = name.find_first_not_of(VALID_NODE_CHARS, 1) == std::string::npos;
-    }
-
-    return result;
 }
 
 int Str::to_int(const std::string& the_str, int error_return) {

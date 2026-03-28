@@ -21,7 +21,7 @@
 Limit::Limit(const std::string& name, int limit)
     : n_(name),
       lim_(limit) {
-    if (!ecf::Str::valid_name(name)) {
+    if (!ecf::algorithm::is_valid_name(name)) {
         throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
     }
 }
@@ -31,7 +31,7 @@ Limit::Limit(const std::string& name, int limit, int value, const std::set<std::
       lim_(limit),
       value_(value),
       paths_(paths) {
-    if (check && !ecf::Str::valid_name(name)) {
+    if (check && !ecf::algorithm::is_valid_name(name)) {
         throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
     }
 }

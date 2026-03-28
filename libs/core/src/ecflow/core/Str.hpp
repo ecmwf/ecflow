@@ -101,6 +101,30 @@ inline std::string tolower(std::string s) {
     return s;
 }
 
+///
+/// @brief Check if the \param name is valid according to the rules for node/attributes names in ecFlow.
+///
+/// This is used to verify the validity of nodes and attributes (Variable, Label, Event, ...) names in ecFlow.
+///
+/// If the name is valid, the error buffer will not be updated (e.g. cleared), otherwise the error buffer will contain a
+/// description of the validation failure.
+///
+/// @param name The name to be validated.
+/// @param error A buffer to hold the error description, if validation fails (i.e. when function returns false).
+/// @return true if the name is valid, false otherwise.
+///
+bool is_valid_name(const std::string& name, std::string& error);
+
+///
+/// @brief Check if the \param name is valid according to the rules for node names in ecFlow.
+///
+/// This is used to verify the validity of nodes and attributes (Variable, Label, Event, ...) names in ecFlow.
+///
+/// @param name The name to be validated.
+/// @return true if the name is valid, false otherwise.
+///
+bool is_valid_name(const std::string& name);
+
 } // namespace algorithm
 
 class Str {
@@ -187,10 +211,6 @@ public:
 
     /// case-insensitive Greater
     static bool caseInsGreater(const std::string&, const std::string&);
-
-    /// Used for checking node names
-    static bool valid_name(const std::string& name, std::string& msg);
-    static bool valid_name(const std::string& name);
 
     /**
      * Convert a given string to an integer.

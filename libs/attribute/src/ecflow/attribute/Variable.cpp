@@ -31,14 +31,14 @@ Variable::Variable(const std::string& name, const std::string& value)
     : n_(name),
       v_(value) {
     std::string msg;
-    if (!Str::valid_name(name, msg)) {
+    if (!ecf::algorithm::is_valid_name(name, msg)) {
         throw std::runtime_error("Variable::Variable: Invalid Variable name: " + msg);
     }
 }
 
 void Variable::set_name(const std::string& v) {
     std::string msg;
-    if (!Str::valid_name(v, msg)) {
+    if (!ecf::algorithm::is_valid_name(v, msg)) {
         throw std::runtime_error("Variable::set_name: Invalid Variable name: " + msg);
     }
     n_ = v;

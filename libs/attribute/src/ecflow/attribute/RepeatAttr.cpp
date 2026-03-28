@@ -156,7 +156,7 @@ RepeatDate::RepeatDate(const std::string& variable, int start, int end, int delt
       end_(end),
       delta_(delta),
       value_(start) {
-    if (!Str::valid_name(variable)) {
+    if (!ecf::algorithm::is_valid_name(variable)) {
         throw std::runtime_error("RepeatDate::RepeatDate: Invalid name: " + variable);
     }
 
@@ -500,7 +500,7 @@ RepeatDateTime::RepeatDateTime(const std::string& variable, Instant start, Insta
       end_(end),
       delta_(delta),
       value_(start) {
-    if (!Str::valid_name(variable)) {
+    if (!ecf::algorithm::is_valid_name(variable)) {
         throw std::runtime_error("RepeatDateTime::RepeatDateTime: Invalid name: " + variable);
     }
 
@@ -806,7 +806,7 @@ void RepeatDateTime::set_value(long the_new_date) {
 RepeatDateList::RepeatDateList(const std::string& variable, const std::vector<int>& l)
     : RepeatBase(variable),
       list_(l) {
-    if (!Str::valid_name(variable)) {
+    if (!ecf::algorithm::is_valid_name(variable)) {
         throw std::runtime_error("RepeatDateList: Invalid name: " + variable);
     }
     if (list_.empty()) {
@@ -1131,7 +1131,7 @@ RepeatInteger::RepeatInteger(const std::string& variable, int start, int end, in
       delta_(delta),
       value_(start) {
     // cout << toString() << "\n";
-    if (!Str::valid_name(variable)) {
+    if (!ecf::algorithm::is_valid_name(variable)) {
         throw std::runtime_error("RepeatInteger: Invalid name: " + variable);
     }
 }
@@ -1325,7 +1325,7 @@ std::string RepeatInteger::prev_value_as_string() const {
 RepeatEnumerated::RepeatEnumerated(const std::string& variable, const std::vector<std::string>& theEnums)
     : RepeatBase(variable),
       theEnums_(theEnums) {
-    if (!Str::valid_name(variable)) {
+    if (!ecf::algorithm::is_valid_name(variable)) {
         throw std::runtime_error("RepeatEnumerated: Invalid name: " + variable);
     }
     if (theEnums.empty()) {
@@ -1543,7 +1543,7 @@ bool RepeatEnumerated::operator==(const RepeatEnumerated& rhs) const {
 RepeatString::RepeatString(const std::string& variable, const std::vector<std::string>& theEnums)
     : RepeatBase(variable),
       theStrings_(theEnums) {
-    if (!Str::valid_name(variable)) {
+    if (!ecf::algorithm::is_valid_name(variable)) {
         throw std::runtime_error("RepeatString:: Invalid name: " + variable);
     }
     if (theEnums.empty()) {

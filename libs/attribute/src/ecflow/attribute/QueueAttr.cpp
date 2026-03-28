@@ -35,7 +35,7 @@ QueueAttr::QueueAttr(const std::string& name, const std::vector<std::string>& th
     : theQueue_(theQueue),
       name_(name) {
     std::string msg;
-    if (!Str::valid_name(name, msg)) {
+    if (!ecf::algorithm::is_valid_name(name, msg)) {
         throw std::runtime_error("QueueAttr::QueueAttr: Invalid queue name : " + msg);
     }
     if (theQueue.empty()) {
@@ -273,7 +273,7 @@ void QueueAttr::set_state_vec(const std::vector<NState::State>& state_vec) {
 
 void QueueAttr::set_name(const std::string& name) {
     std::string msg;
-    if (!Str::valid_name(name, msg)) {
+    if (!ecf::algorithm::is_valid_name(name, msg)) {
         throw std::runtime_error("QueueAttr::set_name: Invalid queue name : " + msg);
     }
     name_ = name;

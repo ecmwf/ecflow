@@ -51,7 +51,7 @@ Event::Event(int number, const std::string& eventName, bool iv, bool check_name)
       iv_(iv) {
     if (!eventName.empty() && check_name) {
         std::string msg;
-        if (!Str::valid_name(eventName, msg)) {
+        if (!ecf::algorithm::is_valid_name(eventName, msg)) {
             throw std::runtime_error("Event::Event: Invalid event name : " + msg);
         }
     }
@@ -87,7 +87,7 @@ Event::Event(const std::string& eventName, bool iv)
     }
 
     std::string msg;
-    if (!Str::valid_name(eventName, msg)) {
+    if (!ecf::algorithm::is_valid_name(eventName, msg)) {
         throw std::runtime_error("Event::Event: Invalid event name : " + msg);
     }
 }
@@ -214,7 +214,7 @@ Meter::Meter(const std::string& name, int min, int max, int colorChange, int val
       cc_(colorChange),
       n_(name) {
     if (check) {
-        if (!Str::valid_name(name)) {
+        if (!ecf::algorithm::is_valid_name(name)) {
             throw std::runtime_error("Meter::Meter: Invalid Meter name: " + name);
         }
     }
@@ -323,7 +323,7 @@ Label::Label(const std::string& name, const std::string& value, const std::strin
     : n_(name),
       v_(value),
       new_v_(new_value) {
-    if (check_name && !Str::valid_name(n_)) {
+    if (check_name && !ecf::algorithm::is_valid_name(n_)) {
         throw std::runtime_error(MESSAGE("Label::Label: Invalid Label name :" << n_));
     }
 }
