@@ -277,7 +277,7 @@ void QueueCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     }
 
     std::string msg;
-    if (!Str::valid_name(queue_name, msg)) {
+    if (!ecf::algorithm::is_valid_name(queue_name, msg)) {
         throw std::runtime_error("QueueCmd: Invalid queue name : " + msg);
     }
 

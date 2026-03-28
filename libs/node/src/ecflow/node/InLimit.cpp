@@ -35,7 +35,7 @@ InLimit::InLimit(const std::string& name,
       tokens_(tokens),
       limit_this_node_only_(limit_this_node_only),
       limit_submission_(limit_submission) {
-    if (check && !Str::valid_name(name)) {
+    if (check && !ecf::algorithm::is_valid_name(name)) {
         throw std::runtime_error("InLimit::InLimit: Invalid InLimit name: " + name);
     }
     if (limit_this_node_only_ && limit_submission_) {

@@ -69,7 +69,7 @@ Node::Node(const std::string& n, bool check)
     : n_(n) {
     if (check) {
         std::string msg;
-        if (!Str::valid_name(n, msg)) {
+        if (!ecf::algorithm::is_valid_name(n, msg)) {
             throw std::runtime_error("Invalid node name : " + msg);
         }
     }

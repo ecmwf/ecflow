@@ -21,7 +21,7 @@ static void construct_expr(std::vector<PartExpression>& vec, const py::list& lis
         std::string part_expr;
         if (py::extract<std::string>(list[i]).check()) {
             part_expr = py::extract<std::string>(list[i]);
-            if (ecf::Str::valid_name(part_expr)) {
+            if (ecf::algorithm::is_valid_name(part_expr)) {
                 part_expr += " == complete";
             }
         }

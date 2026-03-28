@@ -47,6 +47,7 @@ set(test_srcs
   test/TestLog.cpp
   test/TestMessage.cpp
   test/TestMigration.cpp
+  test/TestNodeNameValidity.cpp
   test/TestNodePath.cpp
   test/TestPasswdFile.cpp
   test/TestPasswordEncryption.cpp

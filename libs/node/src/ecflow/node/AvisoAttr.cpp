@@ -36,7 +36,7 @@ std::string ensure_single_quotes(const AvisoAttr::listener_t listener) {
 } // namespace implementation
 
 bool AvisoAttr::is_valid_name(const std::string& name) {
-    return ecf::Str::valid_name(name);
+    return ecf::algorithm::is_valid_name(name);
 }
 
 AvisoAttr::AvisoAttr(Node* parent,
@@ -59,7 +59,7 @@ AvisoAttr::AvisoAttr(Node* parent,
       reason_{implementation::ensure_single_quotes(reason)},
       revision_{revision},
       controller_{nullptr} {
-    if (!ecf::Str::valid_name(name_)) {
+    if (!ecf::algorithm::is_valid_name(name_)) {
         THROW_EXCEPTION(ecf::InvalidArgument, "Invalid AvisoAttr name :" << name_);
     }
 }
