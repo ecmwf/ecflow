@@ -27,29 +27,21 @@ inline bool is_valid_node_name_following_character(char c) {
 bool is_valid_name(const std::string& name, std::string& error) {
 
     if (name.empty()) {
-        error = "Invalid name. Empty string.";
+        error = "Invalid name '': empty string";
         return false;
     }
 
     if (!is_valid_node_name_first_character(name.front())) {
-        error = "Valid names can only consist of alphanumeric characters, "
-                "underscores and dots (The first character cannot be a dot). "
-                "The first character is not valid (only alphanumeric or an underscore is allowed): ";
-        error += "'";
+        error = "Invalid name '";
         error += name;
-        error += "'";
+        error += "': only alphanumeric characters or underscore are accepted as first character";
         return false;
     }
 
     if (!std::all_of(name.begin() + 1, name.end(), is_valid_node_name_following_character)) {
-        error = "Valid names can only consist of alphanumeric characters, "
-                "underscores and dots (The first character cannot be a dot). ";
-        if (name.find('\r') != std::string::npos) {
-            error += "Windows line ending ? ";
-        }
-        error += "'";
+        error = "Invalid name '";
         error += name;
-        error += "'";
+        error += "': only alphanumeric characters, underscore or dot are accepted";
         return false;
     }
 

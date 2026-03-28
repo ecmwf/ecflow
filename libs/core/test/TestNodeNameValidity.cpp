@@ -222,6 +222,15 @@ BOOST_AUTO_TEST_CASE(test_node_name_validity) {
                                 "For name '" << tc.name << "' expected " << tc.expected << ", found " << actual);
             BOOST_CHECK_MESSAGE(actual == original,
                                 "For name '" << tc.name << "' both original and new algorithms provide same result");
+
+            if (!tc.expected) {
+                auto expected_prefix = "Invalid name '" + tc.name + "': ";
+                auto actual_prefix   = actual_error.substr(0, expected_prefix.size());
+
+                BOOST_CHECK_MESSAGE(actual_prefix == expected_prefix,
+                                    "The error message for '" << tc.name << "' expected prefix <" << expected_prefix
+                                                              << ">, found <" << actual_prefix << ">");
+            }
         }
     }
 }
