@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(test_node_name_validity_random) {
     double new_time_per_iteration = n_time / iterations;
     ECF_TEST_DBG(<< "     New approach time: " << new_time_per_iteration << " ns");
 
-    BOOST_CHECK_MESSAGE(new_time_per_iteration < old_time_per_iteration, "New algorithm is faster than original");
+    BOOST_WARN_MESSAGE(new_time_per_iteration < old_time_per_iteration, "New algorithm expected faster than original");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

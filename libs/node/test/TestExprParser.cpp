@@ -110,6 +110,43 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_expression_simple_parser) {
+    ECF_NAME_THIS_TEST();
+
+    struct TestCase
+    {
+        std::string expression;
+        bool parseable;
+    };
+
+    std::vector<TestCase> test_cases = {{"1 eq 2", true},
+                                        {"1eq2 eq ", false},
+                                        {" eq 1eq2", false},
+                                        {"1eq2 eq complete", true},
+                                        {"xeqz eq complete ", true},
+                                        {"xeqz eq complete a", false},
+                                        {"xeqz eq complete a ", false},
+                                        {"a eq complete", true},
+                                        {"a eq complete ", true},
+                                        {" a eq complete", true},
+                                        {" a == complete ", true},
+                                        {"a eq complete a", false},
+                                        {"a eq complete a ", false},
+                                        {"1 == 2", true},
+                                        {"1==2", true},
+                                        {"1==2 == ", false},
+                                        {"1==2==", false},
+                                        {" == 3==4", false},
+                                        {"==3==4", false}};
+
+    for (const auto& tc : test_cases) {
+        SimpleExprParser parser(tc.expression);
+        auto parsed = parser.doParse();
+        BOOST_REQUIRE_MESSAGE(parsed == tc.parseable,
+                              "Parsing '" << tc.expression << "', expected " << tc.parseable << " found " << parsed);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
     ECF_NAME_THIS_TEST();
 

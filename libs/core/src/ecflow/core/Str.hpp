@@ -58,6 +58,32 @@ inline static auto join(const Sequence1& strings, const Sequence2& separator = s
     return ::boost::algorithm::join(strings, separator);
 }
 
+template <typename ResultSequence, typename Sequence1, typename Sequence2 = std::string>
+ResultSequence split_by(ResultSequence& buffer, const Sequence1& input, const Sequence2& pattern) {
+    std::string::size_type start = 0;
+    std::string::size_type pos   = 0;
+    while ((pos = input.find(pattern, start)) != std::string::npos) {
+        auto token = input.substr(start, pos - start);
+        if (!token.empty()) {
+            buffer.push_back(token);
+        }
+        if constexpr (std::is_same_v<Sequence2, std::string>) {
+            start = pos + std::size(pattern);
+        }
+        else if constexpr (std::is_same_v<Sequence2, std::string_view>) {
+            start = pos + std::size(pattern);
+        }
+        else {
+            start = pos + std::size(pattern) - 1;
+        }
+    }
+    auto token = input.substr(start);
+    if (!token.empty()) {
+        buffer.push_back(token);
+    }
+    return buffer;
+}
+
 template <typename Sequence, typename SearchSequence, typename ReplaceSequence>
 inline static auto replace_first(Sequence& input, const SearchSequence& search, const ReplaceSequence& replace) {
     return ::boost::algorithm::replace_first(input, search, replace);
@@ -71,6 +97,11 @@ inline static ResultSequence& split(ResultSequence& result, const Sequence1& inp
 template <typename Sequence1, typename Sequence2>
 inline static bool starts_with(const Sequence1& input, const Sequence2& pattern) {
     return ::boost::algorithm::starts_with(input, pattern);
+}
+
+template <typename Sequence1, typename Sequence2>
+inline static bool ends_with(const Sequence1& input, const Sequence2& pattern) {
+    return ::boost::algorithm::ends_with(input, pattern);
 }
 
 template <typename Sequence>

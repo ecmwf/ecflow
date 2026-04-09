@@ -885,6 +885,40 @@ BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_str_split_by) {
+
+    struct TestCase
+    {
+        std::string input;
+        std::string pattern;
+        std::vector<std::string> expected;
+    };
+
+    std::vector<TestCase> testCases = {
+        {"This is a string", "...", {"This is a string"}},
+        {"This...is...a...string", "...", {"This", "is", "a", "string"}},
+        {"This...is...a...string...", "...", {"This", "is", "a", "string"}},
+        {"...This...is...a...string", "...", {"This", "is", "a", "string"}},
+        {"...This...is...a...string...", "...", {"This", "is", "a", "string"}},
+        {"......This......is......a......string......", "...", {"This", "is", "a", "string"}},
+        {"..This.....is.....a.....string.....", "...", {"..This", "..is", "..a", "..string", ".."}},
+        {"expression 1==expression 2", "==", {"expression 1", "expression 2"}},
+        {"expression 1==expression 2==expression 3", "==", {"expression 1", "expression 2", "expression 3"}},
+        {"expression 1 == expression 2", " == ", {"expression 1", "expression 2"}},
+        {"expression 1 == expression 2 == expression 3", " == ", {"expression 1", "expression 2", "expression 3"}},
+        {"expression 1 eq expression 2", " eq ", {"expression 1", "expression 2"}},
+        {"expression 1eqexpression 2", " eq ", {"expression 1eqexpression 2"}}};
+
+    for (const auto& testCase : testCases) {
+        std::vector<std::string> result;
+        ecf::algorithm::split_by(result, testCase.input, testCase.pattern);
+        BOOST_CHECK_MESSAGE(result == testCase.expected,
+                            "Failed for input: '" << testCase.input << "' pattern: '" << testCase.pattern
+                                                  << "'. Expected: " << toString(testCase.expected)
+                                                  << " but found: " << toString(result));
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

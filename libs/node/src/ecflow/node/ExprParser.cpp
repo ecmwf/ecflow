@@ -1196,66 +1196,95 @@ bool has_complex_expressions(const std::string& expr) {
 }
 
 bool SimpleExprParser::doParse() {
-    // 3199.def 57Mg
-    // a == b, || a eq b i.e simple  76940
-    // complex                       39240
+
+    // If expression has complex operators, return false
     if (has_complex_expressions(expr_)) {
         return false;
     }
 
-    // look for path == <state> || path eq state
-    // This gets round issue with Str::split:
-    //   "a = complete" will be split
-    // since will split on *ANY* of character, and hence this would not be reported as an error
-    std::vector<std::string> tokens;
-    if (expr_.find("==") != std::string::npos) {
-        Str::split(expr_, tokens, "==");
-    }
-    else if (expr_.find(" eq ") != std::string::npos) {
-        Str::split(expr_, tokens, " eq ");
-    }
-    else {
+    // Start by trimming the original expression
+    auto expression = expr_;
+    ecf::algorithm::trim(expression);
+
+    // If expression is empty, return false
+    if (expression.empty()) {
         return false;
     }
 
-    if (tokens.size() == 2) {
-
-        ecf::algorithm::trim(tokens[0]);
-        ecf::algorithm::trim(tokens[1]);
-
-        if (tokens[0].find(' ') != std::string::npos) {
-            //         cout << "Found space " << expr_ << "\n";
-            return false;
-        }
-
-        if (DState::isValid(tokens[1])) {
-
-            ast_          = std::make_unique<AstTop>();
-            Ast* someRoot = new AstEqual();
-            someRoot->addChild(new AstNode(tokens[0]));
-            someRoot->addChild(new AstNodeState(DState::toState(tokens[1])));
-            ast_->addChild(someRoot);
-            //       cout << "simple expr : " << expr_ << " `" << tokens[0] << "' = '" << tokens[1] << "'\n";
-            return true;
-        }
-        else {
-            try {
-                auto left     = ecf::convert_to<int>(tokens[0]);
-                auto right    = ecf::convert_to<int>(tokens[1]);
-                ast_          = std::make_unique<AstTop>();
-                Ast* someRoot = new AstEqual();
-                someRoot->addChild(new AstInteger(left));
-                someRoot->addChild(new AstInteger(right));
-                ast_->addChild(someRoot);
-                //               cout << "simple INT expr : " << expr_ << " `" << tokens[0] << "' = '" << tokens[1] <<
-                //               "'\n";
-                return true;
-            }
-            catch (const ecf::bad_conversion&) {
-                //            cout << "simple INT FAILED expr : " << expr_ << " `" << tokens[0] << "' = '"
-                //                     << tokens[1] << "'\n";
-            }
-        }
+    // If expression begins/ends with '==' or 'eq', return false
+    //   n.b. for 'eq' the comparison is done considering the necessary whitespace after/before the operator
+    if (ecf::algorithm::starts_with(expression, "==") || ecf::algorithm::starts_with(expression, "eq ") ||
+        ecf::algorithm::ends_with(expression, "==") || ecf::algorithm::ends_with(expression, " eq")) {
+        return false;
     }
-    return false;
+
+    // Split the expression into tokens, considering '==' or 'eq' operators.
+    //   n.b. for 'eq' the comparison is done considering the necessary whitespace before and after the operator
+    std::vector<std::string> operands;
+    if (expression.find("==") != std::string::npos) {
+        // Expecting expressions such as:
+        //   `/path/to/node==<state>`
+        //   `/path/to/node == <state>`
+        //   `<number>==<number>`
+        //   `<number> == <number>`
+        ecf::algorithm::split_by(operands, expression, "==");
+    }
+    else if (expression.find(" eq ") != std::string::npos) {
+        // Or, expecting expressions such as:
+        //   `/path/to/node eq <state>`
+        //   `<number> eq <number>`
+        ecf::algorithm::split_by(operands, expression, " eq ");
+    }
+    else {
+        // If the expression does not contain simple operators ('==' or 'eq'), return false
+        return false;
+    }
+
+    // If the expression does not have exactly two operands, return false
+    if (operands.size() != 2) {
+        return false;
+    }
+
+    // Trim the operands
+    ecf::algorithm::trim(operands.front());
+    ecf::algorithm::trim(operands.back());
+
+    const auto& left_operand  = operands.front();
+    const auto& right_operand = operands.back();
+
+    // If the left operand (i.e. either a `/path/to/node` or `<number>`) contain spaces, return false
+    if (left_operand.find(' ') != std::string::npos) {
+        return false;
+    }
+
+    // If the right operand (i.e. either a `<state>` or `<number>`) contain spaces, return false
+    if (right_operand.find(' ') != std::string::npos) {
+        return false;
+    }
+
+    // If the right operand is a valid `<state>`), parse the expression and return true
+    if (DState::isValid(right_operand)) {
+        ast_          = std::make_unique<AstTop>();
+        Ast* someRoot = new AstEqual();
+        someRoot->addChild(new AstNode(left_operand));
+        someRoot->addChild(new AstNodeState(DState::toState(right_operand)));
+        ast_->addChild(someRoot);
+        return true;
+    }
+
+    // Otherwise, the expression must be a comparison of two numerical values.
+    // Parse the operands as integers, and return accordingly.
+    try {
+        auto left     = ecf::convert_to<int>(left_operand);
+        auto right    = ecf::convert_to<int>(right_operand);
+        ast_          = std::make_unique<AstTop>();
+        Ast* someRoot = new AstEqual();
+        someRoot->addChild(new AstInteger(left));
+        someRoot->addChild(new AstInteger(right));
+        ast_->addChild(someRoot);
+        return true;
+    }
+    catch (const ecf::bad_conversion&) {
+        return false;
+    }
 }
