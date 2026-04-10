@@ -224,10 +224,17 @@ public:
                                          std::vector<std::string>& tokens,
                                          std::string_view delimiters = " \t");
 
-    // Get token at a given pos. Two different implementations
-    static bool get_token(std::string_view line, size_t pos, std::string& token, std::string_view sep = " \t");
-    static bool get_token2(std::string_view line, size_t pos, std::string& token, std::string_view sep = " \t");
-    static bool get_token3(std::string_view line, size_t pos, std::string& token, std::string_view sep = " \t");
+    ///
+    /// @brief Extract the token at the specified index from the input string, using the given delimiters.
+    ///
+    /// @param input The input string to tokenise.
+    /// @param index The (0-based) index of the token to extract.
+    /// @param token The extracted token.
+    /// @param delimiters The set of characters to use as token separators.
+    /// @return true if a token was found at the specified index, false otherwise.
+    ///
+    static bool
+    get_token(std::string_view input, size_t index, std::string& token, std::string_view delimiters = " \t");
 
     // Uses boost::make_split_iterator will remove
     // consecutive delimiters in the middle of the string

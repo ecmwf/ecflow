@@ -253,26 +253,21 @@ std::vector<std::string_view> Str::tokenize_quotation(const std::string& s, std:
     return tokens;
 }
 
-bool Str::get_token(std::string_view str, size_t pos, std::string& token, std::string_view delims) {
-    //   Time for StringSplitter::get_token 250000 times = 1.457s wall, (1.460s user + 0.000s system = 1.460s) CPU
-    //   (100.2%) Time for Str::get_token            250000 times = 0.566s wall, (0.560s user + 0.000s system = 0.560s)
-    //   CPU (99.0%) Time for Str::get_token2           250000 times = 0.668s wall, (0.670s user + 0.000s system =
-    //   0.670s) CPU (100.3%) Time for Str::get_token3           250000 times = 0.620s wall, (0.620s user + 0.000s
-    //   system = 0.620s) CPU (100.0%)
+bool Str::get_token(std::string_view input, size_t index, std::string& token, std::string_view delimiters) {
 
-    size_t current_pos = 0;
-    auto first         = std::cbegin(str);
-    auto end           = std::cend(str);
+    size_t current_index = 0;
+    auto first           = std::cbegin(input);
+    auto end             = std::cend(input);
 
     while (first != end) {
-        const auto second = std::find_first_of(first, end, std::cbegin(delims), std::cend(delims));
+        const auto second = std::find_first_of(first, end, std::cbegin(delimiters), std::cend(delimiters));
 
         if (first != second) {
-            if (current_pos == pos) {
+            if (current_index == index) {
                 token = std::string(first, second);
                 return true;
             }
-            current_pos++;
+            current_index++;
         }
 
         if (second == end) {
@@ -280,47 +275,6 @@ bool Str::get_token(std::string_view str, size_t pos, std::string& token, std::s
         }
 
         first = std::next(second);
-    }
-    return false;
-}
-
-bool Str::get_token2(std::string_view strv, size_t pos, std::string& token, std::string_view delims) {
-    size_t current_pos = 0;
-    size_t first       = 0;
-    while (first < strv.size()) {
-        const auto second = strv.find_first_of(delims, first);
-
-        if (first != second) {
-            if (current_pos == pos) {
-                std::string_view ref = strv.substr(first, second - first);
-                token                = std::string(ref.begin(), ref.end());
-                return true;
-            }
-            current_pos++;
-        }
-
-        if (second == std::string_view::npos) {
-            break;
-        }
-
-        first = second + 1;
-    }
-    return false;
-}
-
-bool Str::get_token3(std::string_view str, size_t pos, std::string& token, std::string_view delims) {
-    size_t current_pos = 0;
-    for (auto first = str.data(), second = str.data(), last = first + str.size(); second != last && first != last;
-         first = second + 1) {
-
-        second = std::find_first_of(first, last, std::cbegin(delims), std::cend(delims));
-        if (first != second) {
-            if (current_pos == pos) {
-                token = std::string(first, second - first);
-                return true;
-            }
-            current_pos++;
-        }
     }
     return false;
 }

@@ -186,26 +186,20 @@ static void check_splitters(const std::string& line, const std::vector<std::stri
 
     // While were at it also check get_token
     for (size_t i = 0; i < result1.size(); i++) {
-        std::string token;
-        BOOST_CHECK_MESSAGE(Str::get_token(line, i, token) && token == result1[i],
-                            "Str::get_token failed for pos " << i << " line:'" << line << "' expected '" << result1[i]
-                                                             << "' but found '" << token << "'");
+        {
+            std::string token;
+            BOOST_CHECK_MESSAGE(Str::get_token(line, i, token) && token == result1[i],
+                                "Str::get_token failed for pos " << i << " line:'" << line << "' expected '"
+                                                                 << result1[i] << "' but found '" << token << "'");
+        }
 
-        token.clear();
-        BOOST_CHECK_MESSAGE(Str::get_token2(line, i, token) && token == result1[i],
-                            "Str::get_token2 failed for pos " << i << " line:'" << line << "' expected '" << result1[i]
-                                                              << "' but found '" << token << "'");
-
-        token.clear();
-        BOOST_CHECK_MESSAGE(Str::get_token3(line, i, token) && token == result1[i],
-                            "Str::get_token3 failed for pos " << i << " line:'" << line << "' expected '" << result1[i]
-                                                              << "' but found '" << token << "'");
-
-        token.clear();
-        BOOST_CHECK_MESSAGE(StringSplitter::get_token(line, i, token) && token == result1[i],
-                            "StringSplitter::get_token failed for pos " << i << " line:'" << line << "' expected '"
-                                                                        << result1[i] << "' but found '" << token
-                                                                        << "'");
+        {
+            std::string token;
+            BOOST_CHECK_MESSAGE(StringSplitter::get_token(line, i, token) && token == result1[i],
+                                "StringSplitter::get_token failed for pos " << i << " line:'" << line << "' expected '"
+                                                                            << result1[i] << "' but found '" << token
+                                                                            << "'");
+        }
     }
 }
 
@@ -916,6 +910,67 @@ BOOST_AUTO_TEST_CASE(test_str_split_by) {
                             "Failed for input: '" << testCase.input << "' pattern: '" << testCase.pattern
                                                   << "'. Expected: " << toString(testCase.expected)
                                                   << " but found: " << toString(result));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_str_get_token) {
+
+    struct TestCase
+    {
+        std::string input;
+        size_t index;
+        std::string delimiters;
+        bool expected_outcome;
+        std::string expected_token;
+    };
+
+    std::vector<TestCase> testCases = {
+        // all tokens can be accessed
+        {"0,1,2,3,4,5,6,7,8,9,10", 0, ",", true, "0"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 1, ",", true, "1"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 2, ",", true, "2"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 3, ",", true, "3"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 4, ",", true, "4"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 5, ",", true, "5"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 6, ",", true, "6"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 7, ",", true, "7"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 8, ",", true, "8"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 9, ",", true, "9"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 10, ",", true, "10"},
+
+        // out-of-range tokens are correctly handled
+        {"0,1,2,3,4,5,6,7,8,9,10", 11, ",", false, ""},
+        {"0,1,2,3,4,5,6,7,8,9,10", 12, ",", false, ""},
+
+        // now using another delimiter
+        {"0 1 2 3 4 5 6 7 8 9 10", 0, " ", true, "0"},
+        {"0 1 2 3 4 5 6 7 8 9 10", 5, " ", true, "5"},
+        {"0 1 2 3 4 5 6 7 8 9 10", 10, " ", true, "10"},
+        {"0 1 2 3 4 5 6 7 8 9 10", 42, " ", false, ""},
+
+        // now using multiple delimiters
+        {"0 1\t2 3\t4 5\t6 7\t8 9\t10", 0, " \t", true, "0"},
+        {"0 1\t2 3\t4 5\t6 7\t8 9\t10", 5, " \t", true, "5"},
+        {"0 1\t2 3\t4 5\t6 7\t8 9\t10", 10, " \t", true, "10"},
+        {"0 1\t2 3\t4 5\t6 7\t8 9\t10", 42, " \t", false, ""},
+    };
+
+    for (const auto& testCase : testCases) {
+        std::string actual_token;
+        auto actual_outcome = ecf::Str::get_token(testCase.input, testCase.index, actual_token, testCase.delimiters);
+
+        BOOST_REQUIRE_MESSAGE(actual_outcome == testCase.expected_outcome,
+                              "Correct output getting token from '" << testCase.input << "' at index " << testCase.index
+                                                                    << " with delimiters '" << testCase.delimiters
+                                                                    << "'");
+
+        if (testCase.expected_outcome) {
+            BOOST_CHECK_MESSAGE(actual_token == testCase.expected_token,
+                                "Found correct token with input: '"
+                                    << testCase.input << "' at index " << testCase.index << " with delimiters '"
+                                    << testCase.delimiters << "'. Expected '" << testCase.expected_token << "' found '"
+                                    << actual_token << "'");
+        }
     }
 }
 
