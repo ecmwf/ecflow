@@ -81,10 +81,66 @@ BOOST_AUTO_TEST_CASE(test_base64_is_able_to_decode_and_encode_long_string_with_n
 BOOST_AUTO_TEST_CASE(test_base64_is_able_to_validate) {
     ECF_NAME_THIS_TEST();
 
+    BOOST_CHECK(ecf::validate_base64(""));
+    BOOST_CHECK(ecf::validate_base64("Zm9v"));
+    BOOST_CHECK(ecf::validate_base64("Zm8="));
     BOOST_CHECK(ecf::validate_base64("SGVsbG8sIFdvcmxkIQ=="));
     BOOST_CHECK(ecf::validate_base64("U29tZSB0ZXh0IHdpdGggcGFkZGluZw=="));
-    BOOST_CHECK(!ecf::validate_base64("Invalid base64 string!"));
-    BOOST_CHECK(!ecf::validate_base64("SGVsbG8sIFdvcmxkIQ")); // missing padding
+    BOOST_CHECK(!ecf::validate_base64("Invalid base64 string!")); // invalid size
+    BOOST_CHECK(!ecf::validate_base64("Invalid base64 !"));       // invalid characters
+    BOOST_CHECK(!ecf::validate_base64("SGVsbG8sIFdvcmxkIQ"));     // missing padding
+    BOOST_CHECK(!ecf::validate_base64("Zm8====="));               // padding too long
+    BOOST_CHECK(!ecf::validate_base64("Zm9vYg=x"));               // invalid padding characters
+}
+
+BOOST_AUTO_TEST_CASE(test_base64_rfc_test_cases) {
+    ECF_NAME_THIS_TEST();
+
+    // The following test cases are based on RFC 4648, Section 10.
+    // The original tests can be found at https://datatracker.ietf.org/doc/html/rfc4648#section-10.
+
+    // Encoding
+    {
+        BOOST_CHECK_EQUAL(ecf::encode_base64(""), "");
+        BOOST_CHECK_EQUAL(ecf::encode_base64("f"), "Zg==");
+        BOOST_CHECK_EQUAL(ecf::encode_base64("fo"), "Zm8=");
+        BOOST_CHECK_EQUAL(ecf::encode_base64("foo"), "Zm9v");
+        BOOST_CHECK_EQUAL(ecf::encode_base64("foob"), "Zm9vYg==");
+        BOOST_CHECK_EQUAL(ecf::encode_base64("fooba"), "Zm9vYmE=");
+        BOOST_CHECK_EQUAL(ecf::encode_base64("foobar"), "Zm9vYmFy");
+    }
+
+    // Decoding
+    {
+        BOOST_CHECK_EQUAL(ecf::decode_base64(""), "");
+        BOOST_CHECK_EQUAL(ecf::decode_base64("Zg=="), "f");
+        BOOST_CHECK_EQUAL(ecf::decode_base64("Zm8="), "fo");
+        BOOST_CHECK_EQUAL(ecf::decode_base64("Zm9v"), "foo");
+        BOOST_CHECK_EQUAL(ecf::decode_base64("Zm9vYg=="), "foob");
+        BOOST_CHECK_EQUAL(ecf::decode_base64("Zm9vYmE="), "fooba");
+        BOOST_CHECK_EQUAL(ecf::decode_base64("Zm9vYmFy"), "foobar");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_base64_error_cases) {
+    ECF_NAME_THIS_TEST();
+
+    {
+        // invalid characters (' ' and '!')
+        BOOST_CHECK_THROW(ecf::decode_base64("Invalid base64 !"), std::invalid_argument);
+
+        // invalid size (-2), missing padding
+        BOOST_CHECK_THROW(ecf::decode_base64("SGVsbG8sIFdvcmxkIQ"), std::invalid_argument);
+
+        // invalid size (+1), newline after padding
+        BOOST_CHECK_THROW(ecf::decode_base64("SGVsbG8sIFdvcmxkIQ==\n"), std::invalid_argument);
+
+        // invalid format, newline after padding
+        BOOST_CHECK_THROW(ecf::decode_base64("SGVsbG8sIFdvcmxkIQ=\n"), std::invalid_argument);
+
+        // invalid format, valid base64 character but after padding
+        BOOST_CHECK_THROW(ecf::decode_base64("SGVsbG8sIFdvcmxkIQ=a"), std::invalid_argument);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
