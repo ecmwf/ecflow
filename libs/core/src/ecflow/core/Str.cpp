@@ -73,21 +73,20 @@ void Str::removeSingleQuotes(std::string& s) {
     }
 }
 
-bool Str::replace(std::string& jobLine, const std::string& stringToFind, const std::string& stringToReplace) {
-    size_t pos = jobLine.find(stringToFind);
-    if (pos != std::string::npos) {
-        jobLine.replace(pos, stringToFind.length(), stringToReplace);
+bool Str::replace(std::string& input, const std::string& find, const std::string& replace) {
+    if (size_t pos = input.find(find); pos != std::string::npos) {
+        input.replace(pos, find.length(), replace);
         return true;
     }
     return false;
 }
 
-bool Str::replace_all(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace) {
+bool Str::replace_all(std::string& input, const std::string& find, const std::string& replace) {
     bool replaced = false;
     size_t pos    = 0;
-    while ((pos = subject.find(stringToFind, pos)) != std::string::npos) {
-        subject.replace(pos, stringToFind.length(), stringToReplace);
-        pos += stringToReplace.length();
+    while ((pos = input.find(find, pos)) != std::string::npos) {
+        input.replace(pos, find.length(), replace);
+        pos += replace.length();
         replaced = true;
     }
     return replaced;
@@ -113,10 +112,6 @@ bool Str::extract_data_member_value(const std::string& str,
         return true;
     }
     return false;
-}
-
-void Str::replaceall(std::string& subject, const std::string& search, const std::string& replace) {
-    boost::replace_all(subject, search, replace);
 }
 
 #define USE_STRINGSPLITTER 1

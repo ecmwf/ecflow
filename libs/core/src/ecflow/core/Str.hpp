@@ -173,11 +173,25 @@ public:
     //  fred  -> fred
     static void removeSingleQuotes(std::string&);
 
-    /// Find 'stringToFind' in 'jobLine' and replace with string 'stringToReplace'
-    /// return true if replace ok else returns false;
-    static bool replace(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace);
-    static bool replace_all(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace);
-    static void replaceall(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace);
+    ///
+    /// @brief Replace the first occurrence of 'find' with 'replace' in 'input'.
+    ///
+    /// @param input The input string in which to perform the replacement.
+    /// @param find The string to search for within the input.
+    /// @param replace The string to replace occurrences of 'find' with.
+    /// @return true if a replacement was made, false otherwise.
+    ///
+    static bool replace(std::string& input, const std::string& find, const std::string& replace);
+
+    ///
+    /// @brief Replace all occurrences of 'find' with 'replace' in 'input'.
+    ///
+    /// @param input The input string in which to perform the replacement.
+    /// @param find The string to search for within the input.
+    /// @param replace The string to replace occurrences of 'find' with.
+    /// @return true if at least one replacement was made, false otherwise.
+    ///
+    static bool replace_all(std::string& input, const std::string& find, const std::string& replace);
 
     // extract data member value, ie given a string of the form:
     //   str=cmd a b fred:value

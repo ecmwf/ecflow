@@ -205,8 +205,8 @@ void Submittable::write_state(std::string& ret, bool& added_comment_char) const 
     if (!abr_.empty()) {
         add_comment_char(ret, added_comment_char);
         std::string the_abort_reason = abr_;
-        Str::replaceall(the_abort_reason, "\n", "\\n");
-        Str::replaceall(the_abort_reason, ";", " ");
+        Str::replace_all(the_abort_reason, "\n", "\\n");
+        Str::replace_all(the_abort_reason, ";", " ");
         ret += " abort<:";
         ret += the_abort_reason;
         ret += ">abort";

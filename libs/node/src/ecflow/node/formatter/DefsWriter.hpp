@@ -1265,7 +1265,7 @@ struct Writer<Label, Stream>
                 }
                 else {
                     std::string value = item.new_value();
-                    Str::replaceall(value, "\n", "\\n");
+                    Str::replace_all(value, "\n", "\\n");
                     output << " # \"";
                     output << value;
                     output << "\"";
@@ -2269,7 +2269,7 @@ private:
                     }
                     else {
                         std::string h = c;
-                        Str::replaceall(h, "\n", "\\n");
+                        Str::replace_all(h, "\n", "\\n");
                         output << "\b";
                         output << h;
                     }

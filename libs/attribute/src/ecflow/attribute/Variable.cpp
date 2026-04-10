@@ -76,7 +76,7 @@ void Variable::write(std::string& ret) const {
     else {
         // replace \n, otherwise re-parse will fail
         std::string value = v_;
-        Str::replaceall(value, "\n", "\\n");
+        Str::replace_all(value, "\n", "\\n");
         ret += value;
     }
     ret += "'";

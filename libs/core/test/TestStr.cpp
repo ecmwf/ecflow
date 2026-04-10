@@ -415,44 +415,55 @@ BOOST_AUTO_TEST_CASE(test_str_split_make_split_iterator) {
     check(line, Str::make_split_iterator(line), expected);
 }
 
-static void
-test_replace(std::string& testStr, const std::string& find, const std::string& replace, const std::string& expected) {
-    BOOST_CHECK_MESSAGE(Str::replace(testStr, find, replace),
-                        "Replace failed for " << testStr << " find(" << find << ") replace(" << replace << ")");
-    BOOST_CHECK_MESSAGE(testStr == expected, "Expected '" << expected << "' but found '" << testStr << "'");
+static void test_replace(const std::string& input,
+                         const std::string& find,
+                         const std::string& replace,
+                         const std::string& expected) {
+
+    auto actual = input;
+
+    { // Check that replacement happens as expected
+        auto result = Str::replace(actual, find, replace);
+
+        BOOST_CHECK_MESSAGE(result,
+                            "Replace failed for " << actual << " find(" << find << ") replace(" << replace << ")");
+        BOOST_CHECK_MESSAGE(actual == expected, "Expected '" << expected << "' but found '" << actual << "'");
+    }
 }
 
-static void test_replace_all(std::string& testStr,
+static void test_replace_all(const std::string& input,
                              const std::string& find,
                              const std::string& replace,
                              const std::string& expected) {
-    std::string testStrCopy = testStr;
+    auto actual = input;
 
-    BOOST_CHECK_MESSAGE(Str::replace_all(testStr, find, replace),
-                        "Replace failed for " << testStr << " find(" << find << ") replace(" << replace << ")");
-    BOOST_CHECK_MESSAGE(testStr == expected, "Expected '" << expected << "' but found '" << testStr << "'");
+    { // Check that replacement happens as expected
+        bool result = Str::replace_all(actual, find, replace);
 
-    Str::replaceall(testStrCopy, find, replace);
-    BOOST_CHECK_MESSAGE(testStr == testStrCopy, "Expected '" << testStrCopy << "' but found '" << testStr << "'");
+        BOOST_CHECK_MESSAGE(result,
+                            "Replace successful for " << actual << " find(" << find << ") replace(" << replace << ")");
+        BOOST_CHECK_MESSAGE(actual == expected, "Expected '" << expected << "' but found '" << actual << "'");
+    }
+
+    auto copy = actual;
+
+    { // Ensure that attempting replacement again returns false and does not change the input string
+        bool result = Str::replace_all(copy, find, replace);
+
+        BOOST_CHECK_MESSAGE(!result,
+                            "Replace unsuccessful for " << copy << " find(" << find << ") replace(" << replace
+                                                        << "), since no occurrences were left");
+        BOOST_CHECK_MESSAGE(actual == copy, "Expected '" << actual << "' but found '" << copy << "'");
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_str_replace) {
     ECF_NAME_THIS_TEST();
 
-    std::string testStr = "This is a string";
-    test_replace(testStr, "This", "That", "That is a string");
-
-    testStr = "This is a string";
-    test_replace(testStr, "This is a string", "", "");
-
-    testStr = "This is a string";
-    test_replace(testStr, "is a", "was a", "This was a string");
-
-    testStr = "This\n is a string";
-    test_replace(testStr, "\n", "\\n", "This\\n is a string");
-
-    testStr = "This\n is\n a\n string\n";
-    test_replace_all(testStr, "\n", "\\n", R"(This\n is\n a\n string\n)");
+    test_replace("This is a string", "This", "That", "That is a string");
+    test_replace("This is a string", "This is a string", "", "");
+    test_replace("This is a string", "is a", "was a", "This was a string");
+    test_replace("This\n is a string", "\n", "\\n", "This\\n is a string");
 
     // Test case insenstive string comparison
     BOOST_CHECK_MESSAGE(Str::caseInsCompare("", ""), " bug1");
@@ -465,23 +476,12 @@ BOOST_AUTO_TEST_CASE(test_str_replace) {
 BOOST_AUTO_TEST_CASE(test_str_replace_all) {
     ECF_NAME_THIS_TEST();
 
-    std::string testStr = "This is a string";
-    test_replace_all(testStr, "This", "That", "That is a string");
-
-    testStr = "This is a string";
-    test_replace_all(testStr, "This is a string", "", "");
-
-    testStr = "This is a string";
-    test_replace_all(testStr, "is a", "was a", "This was a string");
-
-    testStr = "This\n is a string";
-    test_replace_all(testStr, "\n", "\\n", "This\\n is a string");
-
-    testStr = "This\n is\n a\n string\n";
-    test_replace_all(testStr, "\n", "\\n", R"(This\n is\n a\n string\n)");
-
-    testStr = "This\n is\n a\n string\n";
-    test_replace_all(testStr, "\n", "", "This is a string");
+    test_replace_all("This is a string", "This", "That", "That is a string");
+    test_replace_all("This is a string", "This is a string", "", "");
+    test_replace_all("This is a string", "is a", "was a", "This was a string");
+    test_replace_all("This\n is a string", "\n", "\\n", "This\\n is a string");
+    test_replace_all("This\n is\n a\n string\n", "\n", "\\n", R"(This\n is\n a\n string\n)");
+    test_replace_all("This\n is\n a\n string\n", "\n", "", "This is a string");
 }
 
 BOOST_AUTO_TEST_CASE(test_str_to_int) {

@@ -692,7 +692,7 @@ std::string Defs::dump_edit_history() const {
             }
             else {
                 std::string h = c;
-                Str::replaceall(h, "\n", "\\n");
+                Str::replace_all(h, "\n", "\\n");
                 ss << " ";
                 ss << h;
             }

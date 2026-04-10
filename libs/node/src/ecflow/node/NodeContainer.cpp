@@ -1087,7 +1087,7 @@ std::string NodeContainer::archive_path() const {
     }
 
     std::string the_archive_file_name = absNodePath();
-    Str::replaceall(the_archive_file_name, "/", ":"); // we use ':' since it is not allowed in the node names
+    Str::replace_all(the_archive_file_name, "/", ":"); // we use ':' since it is not allowed in the node names
     the_archive_file_name += ".check";
 
     std::string port = ecf::string_constants::default_port_number;

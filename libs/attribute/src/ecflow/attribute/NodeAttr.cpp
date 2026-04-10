@@ -347,7 +347,7 @@ void Label::write(std::string& ret) const {
     else {
         // replace \n, otherwise re-parse will fail
         std::string value = v_;
-        Str::replaceall(value, "\n", "\\n");
+        Str::replace_all(value, "\n", "\\n");
         ret += value;
     }
     ret += "\"";
@@ -399,7 +399,7 @@ void Label::parse(const std::string& line,
         Str::removeSingleQuotes(lineTokens[2]);
         the_value = lineTokens[2];
         if (the_value.find("\\n") != std::string::npos) {
-            Str::replaceall(the_value, "\\n", "\n");
+            Str::replace_all(the_value, "\\n", "\n");
         }
     }
     else {
@@ -422,7 +422,7 @@ void Label::parse(const std::string& line,
         Str::removeSingleQuotes(value);
         the_value = value;
         if (the_value.find("\\n") != std::string::npos) {
-            Str::replaceall(the_value, "\\n", "\n");
+            Str::replace_all(the_value, "\\n", "\n");
         }
 
         // state
@@ -450,7 +450,7 @@ void Label::parse(const std::string& line,
                 the_new_value = new_value;
 
                 if (the_new_value.find("\\n") != std::string::npos) {
-                    Str::replaceall(the_new_value, "\\n", "\n");
+                    Str::replace_all(the_new_value, "\\n", "\n");
                 }
             }
         }

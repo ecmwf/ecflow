@@ -148,7 +148,7 @@ int main(int argc, char* argv[]) {
 #endif
 
         std::string json_filepath = MESSAGE("/var/tmp/ma0/JSON/" << prefix << fs_path.stem() << ".json");
-        Str::replaceall(json_filepath, "\"", ""); // fs_path.stem() seems to add ", so remove them
+        Str::replace_all(json_filepath, "\"", ""); // fs_path.stem() seems to add ", so remove them
         // cout << "  json_filepath: " << json_filepath << endl;
 
         std::remove(json_filepath.c_str());
