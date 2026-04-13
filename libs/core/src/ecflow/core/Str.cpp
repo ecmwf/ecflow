@@ -279,12 +279,6 @@ bool Str::get_token(std::string_view input, size_t index, std::string& token, st
     return false;
 }
 
-boost::split_iterator<std::string::const_iterator> Str::make_split_iterator(const std::string& line,
-                                                                            const std::string& delimiters) {
-    return boost::make_split_iterator(
-        line, boost::algorithm::token_finder(boost::is_any_of(delimiters), boost::algorithm::token_compress_on));
-}
-
 static bool caseInsCharCompare(char a, char b) {
     return (toupper(a) == toupper(b));
 }

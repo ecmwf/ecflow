@@ -236,25 +236,6 @@ public:
     static bool
     get_token(std::string_view input, size_t index, std::string& token, std::string_view delimiters = " \t");
 
-    // Uses boost::make_split_iterator will remove
-    // consecutive delimiters in the middle of the string
-    // ** However preserves leading and trailing empty tokens *IF* delimiters at start/end
-    //
-    // Usage:
-    //    boost::split_iterator<std::string::const_iterator> tokens = Str::make_split_iterator(str);
-    //    for(; !tokens.eof(); ++tokens ) {
-    //       boost::iterator_range<string::const_iterator> range = *tokens;
-    //       std::string the_string(range.begin(), range.end()) ;
-    //    }
-    //
-    //    std::vector<std::string> vec;
-    //    using split_iter_t = boost::split_iterator<std::string::const_iterator>;
-    //    for(split_iter_t i = Str::split(s,delim); i != split_iter_t(); i++) {
-    //       vec.push_back(boost::copy_range<std::string>(*i));
-    //    }
-    static boost::split_iterator<std::string::const_iterator>
-    make_split_iterator(const std::string& str, const std::string& delimiters = " \t");
-
     /// case-insensitive string comparison
     static bool caseInsCompare(const std::string&, const std::string&);
 
