@@ -1394,7 +1394,7 @@ bool LogLoadData::extract_suite_path(const std::string& line,
 
                 std::vector<std::string> theNodeNames;
                 theNodeNames.reserve(4);
-                NodePath::split(path, theNodeNames);
+                ecf::node::split_path(path, theNodeNames);
                 if (!theNodeNames.empty()) {
                     suite_name = theNodeNames[0];
                 }

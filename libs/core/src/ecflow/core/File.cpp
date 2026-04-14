@@ -473,7 +473,7 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
     }
 
     std::vector<std::string> thePath;
-    NodePath::split(pathToFileOrDir, thePath);
+    ecf::node::split_path(pathToFileOrDir, thePath);
     try {
         if (!thePath.empty()) {
 
@@ -642,7 +642,7 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
     //   <root-path>/task.ecf
 
     std::vector<std::string> nodePathTokens;
-    NodePath::split(nodePath, nodePathTokens);
+    ecf::node::split_path(nodePath, nodePathTokens);
     LOG_ASSERT(!nodePathTokens.empty(), "");
 
     std::string leafName; // i.e. task in the example above
@@ -657,7 +657,7 @@ File::backwardSearch(const std::string& rootPath, const std::string& nodePath, c
     while (nodePathTokens.size() > 0) {
 
         // Reconstitute the path
-        std::string path = NodePath::createPath(nodePathTokens);
+        std::string path = ecf::node::create_node_path(nodePathTokens);
         path += fileExtn; // .ecf, .man , etc
 
         std::string combinedPath = rootPath;
@@ -712,7 +712,7 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
     ///   <root-path>/task.ecf
 
     std::vector<std::string> nodePathTokens;
-    NodePath::split(nodePath, nodePathTokens);
+    ecf::node::split_path(nodePath, nodePathTokens);
     LOG_ASSERT(!nodePathTokens.empty(), "");
 
     std::string leafName;
@@ -727,7 +727,7 @@ std::string File::forwardSearch(const std::string& rootPath, const std::string& 
     while (nodePathTokens.size() > 0) {
 
         // Reconstitute the path
-        std::string path = NodePath::createPath(nodePathTokens);
+        std::string path = ecf::node::create_node_path(nodePathTokens);
         path += fileExtn; // .ecf, .man , etc
 
         std::string combinedPath = rootPath;

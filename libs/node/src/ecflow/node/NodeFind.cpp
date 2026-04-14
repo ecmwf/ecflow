@@ -745,7 +745,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
 
     // if an absolute path cut in early
-    if (NodePath::isAbsolutePath(nodePath)) {
+    if (ecf::node::is_absolute_path(nodePath)) {
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
         debug_path += "(!nodePath.empty() && nodePath[0] == '/') \n";
@@ -779,7 +779,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
     /// Path is something other than ABSOLUTE path
     /// =============================================================================
     std::vector<std::string> theExtractedPath;
-    NodePath::split(nodePath, theExtractedPath);
+    ecf::node::split_path(nodePath, theExtractedPath);
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
     debug_path += "extracted path = ";

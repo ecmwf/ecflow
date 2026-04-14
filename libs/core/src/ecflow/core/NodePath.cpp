@@ -12,20 +12,22 @@
 
 #include "ecflow/core/Str.hpp"
 
-using namespace ecf;
+namespace ecf {
 
-void NodePath::split(const std::string& path, std::vector<std::string>& thePath) {
+namespace node {
+
+void split_path(const std::string& path, std::vector<std::string>& thePath) {
     /// The path is of the form "/suite/family/task"
     ecf::algorithm::split_at(thePath, path, ecf::string_constants::path_separator);
 }
 
-bool NodePath::extractHostPort(const std::string& path, std::string& host, std::string& port) {
+bool extract_host_and_port_from_path(const std::string& path, std::string& host, std::string& port) {
     if (path.empty()) {
         return false;
     }
 
     std::vector<std::string> thePath;
-    NodePath::split(path, thePath);
+    split_path(path, thePath);
 
     if (thePath.empty()) {
         return false;
@@ -53,7 +55,7 @@ bool NodePath::extractHostPort(const std::string& path, std::string& host, std::
     return true;
 }
 
-std::string NodePath::createPath(const std::vector<std::string>& vec) {
+std::string create_node_path(const std::vector<std::string>& vec) {
     if (vec.empty()) {
         return std::string{};
     }
@@ -67,13 +69,18 @@ std::string NodePath::createPath(const std::vector<std::string>& vec) {
     return ret;
 }
 
-std::string NodePath::removeHostPortFromPath(const std::string& path) {
+std::string remove_host_and_port_from_path(const std::string& path) {
     std::vector<std::string> pathVec;
-    NodePath::split(path, pathVec);
+    split_path(path, pathVec);
+
     pathVec.erase(pathVec.begin());
-    return NodePath::createPath(pathVec);
+    return create_node_path(pathVec);
 }
 
-bool NodePath::isAbsolutePath(const std::string& path) {
+bool is_absolute_path(const std::string& path) {
     return !path.empty() && path[0] == '/';
 }
+
+} // namespace node
+
+} // namespace ecf

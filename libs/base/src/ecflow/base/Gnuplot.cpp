@@ -384,7 +384,7 @@ bool Gnuplot::extract_suite_path(const std::string& line,
 
             std::vector<std::string> theNodeNames;
             theNodeNames.reserve(4);
-            NodePath::split(path, theNodeNames);
+            ecf::node::split_path(path, theNodeNames);
             if (!theNodeNames.empty()) {
                 for (size_t n = 0; n < suite_vec.size(); n++) {
                     if (suite_vec[n].suite_name_ == theNodeNames[0]) {

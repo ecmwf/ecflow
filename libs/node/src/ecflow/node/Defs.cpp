@@ -941,7 +941,7 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const {
 
 node_ptr Defs::find_closest_matching_node(const std::string& pathToNode) const {
     std::vector<std::string> theNodeNames;
-    NodePath::split(pathToNode, theNodeNames);
+    ecf::node::split_path(pathToNode, theNodeNames);
     if (theNodeNames.empty()) {
         return node_ptr();
     }

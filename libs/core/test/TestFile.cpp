@@ -189,11 +189,11 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
     std::vector<std::string> fileContents;
     fileContents.emplace_back("something");
     std::vector<std::string> nodePathTokens;
-    NodePath::split(nodePath, nodePathTokens);
+    ecf::node::split_path(nodePath, nodePathTokens);
     while (nodePathTokens.size() > 0) {
 
         // Reconstitute the path
-        std::string path         = NodePath::createPath(nodePathTokens);
+        std::string path         = ecf::node::create_node_path(nodePathTokens);
         std::string combinedPath = rootPath + path;
 
         BOOST_REQUIRE_MESSAGE(File::createDirectories(combinedPath), "Failed to create dirs " << combinedPath);
@@ -263,10 +263,10 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
     std::vector<std::string> fileContents;
     fileContents.emplace_back("something");
     std::vector<std::string> nodePathTokens;
-    NodePath::split(nodePath, nodePathTokens);
+    ecf::node::split_path(nodePath, nodePathTokens);
     while (nodePathTokens.size() > 0) {
 
-        std::string path = NodePath::createPath(nodePathTokens);
+        std::string path = ecf::node::create_node_path(nodePathTokens);
 
         std::string combinedPath = rootPath + path + File::ECF_EXTN(); // .ecf, .man , etc
 
