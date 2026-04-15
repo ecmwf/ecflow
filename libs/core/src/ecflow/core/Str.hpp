@@ -116,7 +116,7 @@ inline void replace_first(Sequence& input, const SearchSequence& search, const R
 ///  2) consecutive separators are collapsed into one, so no empty substrings are produced.
 ///  3) leading and trailing separators are ignored.
 ///
-/// If the input string is empty, or contains only separator characters, the result be ane empty sequence (i.e. `[ ]`).
+/// If the input string is empty, or contains only separator characters, the result be one empty sequence (i.e. `[ ]`).
 ///
 /// @tparam ResultSequence A container type to hold the resulting substrings.
 /// @tparam Sequence1 A string-like type representing the input string.
@@ -124,8 +124,7 @@ inline void replace_first(Sequence& input, const SearchSequence& search, const R
 ///
 /// @param buffer A reference to the container where the substrings will be stored.
 /// @param input The input string to be split.
-/// @param separators The string containing characters to use as separators (n.b. duplicates they will be treated as
-/// a single separator)
+/// @param separators The string containing characters to use as separators
 /// @return A reference to the container holding the resulting substrings.
 ///
 template <typename ResultSequence, typename Sequence1, typename Sequence2 = std::string_view>
@@ -148,6 +147,52 @@ split_at(ResultSequence& buffer, const Sequence1& input, const Sequence2& separa
 }
 
 ///
+/// @brief Splits an input string into a sequence of substrings based on a set of separators.
+///
+/// The resulting buffer is cleared of any contents, before being populated with the substrings.
+///
+/// A field separator is defined as any single character contained in the `separators` string.
+/// Consecutive separators are used to split the input string into empty field.
+/// An empty field is included in result, when a separator is found at the beginning and or at end of
+/// the input.
+///
+/// Splitting the input `",,a,,b,c;d; ;e,;f;"` with the separators `",;"` would result
+/// in a buffer containing `["", "", "a", "", "b", "c", "d", " ", "e", " ", "f", " "]`.
+///
+/// If the input string is empty, the result be one empty sequence (i.e. `[ ]`).
+///
+/// @tparam ResultSequence A container type to hold the resulting substrings.
+/// @tparam Sequence1 A string-like type representing the input string.
+/// @tparam Sequence2 A string-like type representing single character separators.
+///
+/// @param buffer A reference to the container where the substrings will be stored.
+/// @param input The input string to be split.
+/// @param separators The string containing characters to use as separators
+/// @return A reference to the container holding the resulting substrings.
+///
+template <typename ResultSequence, typename Sequence1, typename Sequence2 = std::string>
+static ResultSequence& split_fields_at(ResultSequence& buffer, const Sequence1& input, const Sequence2& pattern) {
+    buffer.clear();
+
+    if (input.empty()) {
+        return buffer;
+    }
+
+    std::string::size_type start = 0;
+    std::string::size_type pos   = std::string::npos;
+    while ((pos = input.find_first_of(pattern, start)) != std::string::npos) {
+        auto token = input.substr(start, pos - start);
+        buffer.push_back(token);
+        start = pos + 1;
+    }
+
+    auto token = input.substr(start);
+    buffer.push_back(token);
+
+    return buffer;
+}
+
+///
 /// @brief Splits an input string into a sequence of substrings based on a given pattern.
 ///
 /// The resulting buffer is cleared of any contents, before being populated with the substrings.
@@ -156,13 +201,13 @@ split_at(ResultSequence& buffer, const Sequence1& input, const Sequence2& separa
 /// Splitting the input `"a==b==c!=d==e == f"` with the pattern `"=="` would result
 /// in a buffer containing `["a", "b", "c!=d", "e ", " f"]`.
 ///
-/// iIf the input string is empty, or contains only repetirion of the separator pattern, the result be ane empty
+/// If the input string is empty, or contains only repetited separator patterns, the result will be one empty
 /// sequence (i.e. `[ ]`).
 ///
 /// @tparam ResultSequence A container type to hold the resulting substrings.
 /// @tparam Sequence1 A string-like type representing the input string.
-/// @tparam Sequence2 A string-like type representing the pattern to split by (n.b. if the pattern contains duplicated
-/// characters, they will be treated as a single separator).
+/// @tparam Sequence2 A string-like type representing the pattern to split by (n.b. if the pattern contains
+/// duplicated characters, they will be treated as a single separator).
 ///
 /// @param buffer A reference to the container where the resulting substrings will be stored.
 /// @param input The input string to be split.

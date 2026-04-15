@@ -116,12 +116,17 @@ BOOST_AUTO_TEST_CASE(test_algorithm_split_at) {
           "completions"}}};
 
     for (const auto& tc : test_cases) {
-        std::vector<std::string> result;
-        ecf::algorithm::split_at(result, tc.input);
-        BOOST_CHECK_MESSAGE(result == tc.expected,
+        std::vector<std::string> splits;
+
+        auto& actual = ecf::algorithm::split_at(splits, tc.input);
+
+        BOOST_CHECK_MESSAGE(&actual == &splits,
+                            "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to have same content");
+        BOOST_CHECK_MESSAGE(splits == tc.expected,
                             "Expected:\n"
                                 << ecf::algorithm::as_string(tc.expected) << "\nbut found:\n"
-                                << ecf::algorithm::as_string(result));
+                                << ecf::algorithm::as_string(splits));
     }
 }
 
@@ -150,7 +155,9 @@ BOOST_AUTO_TEST_CASE(test_algorithm_split_at_with_separators) {
 
         const auto& actual = ecf::algorithm::split_at(splits, tc.input, tc.separator);
 
-        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(&actual == &splits,
+                            "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to have same content");
         BOOST_CHECK_MESSAGE(actual == tc.expected,
                             "Splitting >>>" << tc.input << "<<<, Expected " << ecf::algorithm::as_string(tc.expected)
                                             << ", found " << ecf::algorithm::as_string(actual));
@@ -182,12 +189,56 @@ BOOST_AUTO_TEST_CASE(test_algorithm_split_by_with_separators) {
         {"expression 1eqexpression 2", " eq ", {"expression 1eqexpression 2"}}};
 
     for (const auto& testCase : testCases) {
-        std::vector<std::string> result;
-        ecf::algorithm::split_by(result, testCase.input, testCase.pattern);
-        BOOST_CHECK_MESSAGE(result == testCase.expected,
+        std::vector<std::string> splits;
+        auto& actual = ecf::algorithm::split_by(splits, testCase.input, testCase.pattern);
+
+        BOOST_CHECK_MESSAGE(&actual == &splits,
+                            "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to have same content");
+        BOOST_CHECK_MESSAGE(splits == testCase.expected,
                             "Failed for input: '" << testCase.input << "' pattern: '" << testCase.pattern
                                                   << "'. Expected: " << ecf::algorithm::as_string(testCase.expected)
-                                                  << " but found: " << ecf::algorithm::as_string(result));
+                                                  << " but found: " << ecf::algorithm::as_string(splits));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_split_fields_at_with_separators) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string separator;
+        std::vector<std::string> expected;
+    };
+
+    std::vector<tc> test_cases = {
+        {"", ",", {}},
+        {"abc,def,ghi", ",", {"abc", "def", "ghi"}},
+        {"abc,def,ghi,", ",", {"abc", "def", "ghi", ""}},
+        {",abc,def,ghi", ",", {"", "abc", "def", "ghi"}},
+        {",abc,def,ghi,", ",", {"", "abc", "def", "ghi", ""}},
+        {",abc,,def,,ghi,", ",", {"", "abc", "", "def", "", "ghi", ""}},
+        {"abc,,def,ghi", ",", {"abc", "", "def", "ghi"}},
+        {"abc,def,,ghi", ",", {"abc", "def", "", "ghi"}},
+        {"abc,,def,,ghi,", ",", {"abc", "", "def", "", "ghi", ""}},
+        {"xxx;,;yyy;,;zzz", ";,", {"xxx", "", "", "yyy", "", "", "zzz"}},
+        {"xxx;a,b;yyy;c,d;zzz", ";,", {"xxx", "a", "b", "yyy", "c", "d", "zzz"}},
+        {"aeiou,12345 12345,aeiou", " ", {"aeiou,12345", "12345,aeiou"}},
+        {"a;,b,c;d; ;e;,; f;", ",,;", {"a", "", "b", "c", "d", " ", "e", "", "", " f", ""}},
+        {",,a,,b,c;d; ;e,;f;", ",,;", {"", "", "a", "", "b", "c", "d", " ", "e", "", "f", ""}}};
+
+    for (const auto& tc : test_cases) {
+        std::vector<std::string> splits{"this", "is", "garbage"};
+
+        const auto& actual = ecf::algorithm::split_fields_at(splits, tc.input, tc.separator);
+
+        BOOST_CHECK_MESSAGE(&actual == &splits,
+                            "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to have same content");
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Splitting >>>" << tc.input << "<<<, Expected " << ecf::algorithm::as_string(tc.expected)
+                                            << ", found " << ecf::algorithm::as_string(actual));
     }
 }
 
