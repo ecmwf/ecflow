@@ -380,7 +380,8 @@ void export_Defs(py::module& m) {
 
         .def_property_readonly(
             "suites",
-            py::cpp_function([](const Defs& s) { return py::make_iterator(s.suiteVec().begin(), s.suiteVec().end()); }),
+            py::cpp_function([](const Defs& s) { return py::make_iterator(s.suiteVec().begin(), s.suiteVec().end()); },
+                             py::keep_alive<0, 1>()),
             "Returns a list of `suite`_\\ s")
 
         .def_property_readonly("externs", &Defs::externs, "Returns a list of `extern`_\\ s")
