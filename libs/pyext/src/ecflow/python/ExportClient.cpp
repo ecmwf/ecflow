@@ -103,7 +103,7 @@ int ClientInvoker_edit_script_submit(ClientInvoker* self,
     char sep = '=';
     for (size_t i = 0; i < namv.size(); ++i) {
         std::string::size_type pos = namv[i].find(sep);
-        used_variables.push_back(std::make_pair(namv[i].substr(0, pos - 1), namv[i].substr(pos + 1, namv[i].length())));
+        used_variables.push_back(std::make_pair(namv[i].substr(0, pos), namv[i].substr(pos + 1, namv[i].length())));
     }
     return self->edit_script_submit(absNodePath, used_variables, file_contents, alias, run);
 }
