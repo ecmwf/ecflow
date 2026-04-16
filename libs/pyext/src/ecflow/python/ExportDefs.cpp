@@ -28,6 +28,14 @@
 
 namespace {
 
+///
+/// @brief Save the definitions to a file using the given print style.
+///
+/// @param theDefs The definitions to save.
+/// @param filename The path to the output file.
+/// @param the_style_enum The print style to use for serialisation.
+/// @throws std::runtime_error if the file cannot be created.
+///
 void Defs_save_as_defs_with_given_style(const Defs& theDefs,
                                         const std::string& filename,
                                         PrintStyle::Type_t the_style_enum) {
@@ -39,16 +47,35 @@ void Defs_save_as_defs_with_given_style(const Defs& theDefs,
     }
 }
 
+///
+/// @brief Save the definitions to a file using the default DEFS print style.
+///
+/// @param theDefs The definitions to save.
+/// @param filename The path to the output file.
+///
 void Defs_save_as_defs_with_default_style(const Defs& theDefs, const std::string& filename) {
     Defs_save_as_defs_with_given_style(theDefs, filename, PrintStyle::DEFS);
 }
 
+///
+/// @brief Return a string representation of the definitions.
+///
+/// @param theDefs The definitions to serialise.
+/// @return The definitions serialised using the current print style.
+///
 std::string Defs_str(const Defs& theDefs) {
     std::string buffer;
     ecf::write_t(buffer, theDefs, PrintStyleHolder::getStyle());
     return buffer;
 }
 
+///
+/// @brief Check the definitions for errors and warnings.
+///
+/// @param defs The definitions to check.
+/// @return An empty string if no errors are found, otherwise a string containing
+///         error and warning messages.
+///
 std::string Defs_check(defs_ptr defs) {
     std::string error_msg;
     std::string warning_msg;
@@ -60,10 +87,25 @@ std::string Defs_check(defs_ptr defs) {
     return warning_msg;
 }
 
+///
+/// @brief Restore the definitions from a checkpoint file.
+///
+/// @param defs The definitions object to restore into.
+/// @param file_name The path to the checkpoint file.
+///
 void Defs_restore(defs_ptr defs, const std::string& file_name) {
     defs->restore(file_name);
 }
 
+///
+/// @brief Run a simulation of the definitions and return any error message.
+///
+/// The output `.def` file is named after the first suite, or `"pyext.def"` if
+/// no suites are present.
+///
+/// @param defs The definitions to simulate.
+/// @return An empty string on success, otherwise an error message from the simulator.
+///
 std::string Defs_simulate(defs_ptr defs) {
     if (defs.get()) {
         // name output file after name of the first suite
@@ -81,31 +123,78 @@ std::string Defs_simulate(defs_ptr defs) {
     return std::string();
 }
 
+///
+/// @brief Return the server state of the definitions.
+///
+/// @param self The definitions.
+/// @return The current server state.
+///
 SState::State Defs_get_server_state(defs_ptr self) {
     return self->server_state().get_state();
 }
 
+///
+/// @brief Add a suite to the definitions and return it.
+///
+/// The suite is appended to the end of the suite list.
+///
+/// @param self The definitions.
+/// @param s The suite to add.
+/// @return The added suite.
+///
 suite_ptr Defs_add_suite(defs_ptr self, suite_ptr s) {
     // Since we don't pass in a child pos, the nodes are added to the end
     self->addSuite(s);
     return s;
 }
 
+///
+/// @brief Return all task nodes in the definitions.
+///
+/// @param self The definitions.
+/// @return A vector of shared pointers to all task nodes.
+///
 std::vector<task_ptr> Defs_get_all_tasks(defs_ptr self) {
     return ecf::get_all_tasks_ptr(*self);
 }
+
+///
+/// @brief Return all nodes in the definitions.
+///
+/// @param self The definitions.
+/// @return A vector of shared pointers to all nodes.
+///
 std::vector<node_ptr> Defs_get_all_nodes(defs_ptr self) {
     return ecf::get_all_nodes_ptr(*self);
 }
 
+///
+/// @brief Implement the Python context manager entry protocol.
+///
+/// @param self The definitions.
+/// @return \p self, enabling use in a `with` statement.
+///
 defs_ptr Defs_enter(defs_ptr self) {
     return self;
 }
 
+///
+/// @brief Implement the Python context manager exit protocol.
+///
+/// @return false (exceptions are not suppressed).
+///
 bool Defs_exit(defs_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
     return false;
 }
 
+///
+/// @brief Check job creation for all tasks in the definitions.
+///
+/// @param defs The definitions to check.
+/// @param throw_on_error If true, raise a std::runtime_error when job creation fails.
+/// @param verbose If true, enable verbose output during the check.
+/// @return An empty string on success, otherwise an error message.
+///
 std::string Defs_check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose) {
     job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
     if (verbose) {
@@ -118,21 +207,51 @@ std::string Defs_check_job_creation(defs_ptr defs, bool throw_on_error, bool ver
     return jobCtrl->get_error_msg();
 }
 
+///
+/// @brief Add or update a user variable on the definitions server state using a name/value string pair.
+///
+/// @param self The definitions.
+/// @param name The variable name.
+/// @param value The variable value.
+/// @return The definitions (for method chaining).
+///
 defs_ptr Defs_add_variable_string(defs_ptr self, const std::string& name, const std::string& value) {
     self->server_state().add_or_update_user_variables(name, value);
     return self;
 }
 
+///
+/// @brief Add or update a user variable on the definitions server state using a name/integer pair.
+///
+/// @param self The definitions.
+/// @param name The variable name.
+/// @param value The integer value, converted to a string before storage.
+/// @return The definitions (for method chaining).
+///
 defs_ptr Defs_add_variable_int(defs_ptr self, const std::string& name, int value) {
     self->server_state().add_or_update_user_variables(name, ecf::convert_to<std::string>(value));
     return self;
 }
 
+///
+/// @brief Add or update a user variable on the definitions server state from a Variable object.
+///
+/// @param self The definitions.
+/// @param var The variable to add or update.
+/// @return The definitions (for method chaining).
+///
 defs_ptr Defs_add_variable_variable(defs_ptr self, const Variable& var) {
     self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     return self;
 }
 
+///
+/// @brief Add or update user variables on the definitions server state from a Python dictionary.
+///
+/// @param self The definitions.
+/// @param dict A Python dictionary mapping variable names (str) to values (str).
+/// @return The definitions (for method chaining).
+///
 defs_ptr Defs_add_variable_dict(defs_ptr self, const py::dict& dict) {
     std::vector<std::pair<std::string, std::string>> vec;
     pyutil_dict_to_str_vec(dict, vec);
@@ -144,10 +263,27 @@ defs_ptr Defs_add_variable_dict(defs_ptr self, const py::dict& dict) {
     return self;
 }
 
+///
+/// @brief Delete a user variable from the definitions server state.
+///
+/// Passing an empty string deletes all user variables.
+///
+/// @param self The definitions.
+/// @param name The name of the variable to delete, or an empty string to delete all user variables.
+///
 void Defs_delete_variable(defs_ptr self, const std::string& name) {
     self->server_state().delete_user_variable(name);
 }
 
+///
+/// @brief Sort attributes of the given type across the definitions.
+///
+/// @param self The definitions.
+/// @param attribute_name The attribute type name (case-insensitive).
+/// @param recursive If true, sort recursively through all child nodes.
+/// @param list A list of node names to exclude from sorting.
+/// @throws std::runtime_error if \p attribute_name is not a recognised attribute type.
+///
 void Defs_sort_attributes(defs_ptr self, const std::string& attribute_name, bool recursive, const py::list& list) {
     std::string attribute = attribute_name;
     boost::algorithm::to_lower(attribute);
@@ -160,14 +296,43 @@ void Defs_sort_attributes(defs_ptr self, const std::string& attribute_name, bool
     self->sort_attributes(attr, recursive, no_sort);
 }
 
+///
+/// @brief Return the number of suites in the definitions.
+///
+/// @param self The definitions.
+/// @return The number of suites.
+///
 size_t Defs_len(defs_ptr self) {
     return self->suiteVec().size();
 }
 
+///
+/// @brief Return true if the definitions contain a suite with the given name.
+///
+/// @param self The definitions.
+/// @param name The suite name to look for.
+/// @return true if a matching suite exists, false otherwise.
+///
 bool Defs_container(defs_ptr self, const std::string& name) {
     return (self->findSuite(name)) ? true : false;
 }
 
+///
+/// @brief Add a single attribute or suite to the definitions.
+///
+/// Dispatches on the runtime type of \p arg:
+/// - `suite_ptr` / `Suite`: appended as a new suite.
+/// - `py::dict`: keys/values added as user variables.
+/// - `Edit`: variables extracted and added as user variables.
+/// - `py::list`: each element is added recursively.
+/// - `Variable`: added as a user variable.
+/// - `py::none()`: no-op.
+///
+/// @param self The definitions.
+/// @param arg The object to add.
+/// @return The definitions cast to a Python object (for method chaining).
+/// @throws std::runtime_error if \p arg is not a recognised type.
+///
 py::object Defs_add(defs_ptr self, const py::handle& arg) {
     // When arg is None, there is nothing to do...
     if (arg == py::none()) {
@@ -210,6 +375,17 @@ py::object Defs_add(defs_ptr self, const py::handle& arg) {
     return py::cast(self);
 }
 
+///
+/// @brief Add multiple positional arguments and keyword arguments to the definitions.
+///
+/// Each positional argument is forwarded to `Defs_add`. Keyword arguments are
+/// added as user variables.
+///
+/// @param self The definitions.
+/// @param args Positional arguments (suites, variables, dicts, lists, etc.).
+/// @param kwargs Keyword arguments added as user variables.
+/// @return The definitions cast to a Python object (for method chaining).
+///
 py::object Defs_add_args_kwargs(defs_ptr self, const py::args& args, const py::kwargs& kwargs) {
     for (auto arg : args) {
         Defs_add(self, arg);
@@ -219,6 +395,15 @@ py::object Defs_add_args_kwargs(defs_ptr self, const py::args& args, const py::k
     return py::cast(self); // return defs as python object, relies class_<Defs>... for type registration
 }
 
+///
+/// @brief Add a list of attributes or suites to the definitions (in-place addition).
+///
+/// Each element of \p list is forwarded to `Defs_add`.
+///
+/// @param self The definitions.
+/// @param list A Python list of objects to add.
+/// @return The definitions cast to a Python object (for method chaining).
+///
 py::object Defs_iadd(defs_ptr self, const py::list& list) {
     for (const auto& item : list) {
         (void)Defs_add(self, item);
@@ -226,6 +411,16 @@ py::object Defs_iadd(defs_ptr self, const py::list& list) {
     return py::cast(self); // return defs_ptr as python object, relies class_<Defs>... for type registration
 }
 
+///
+/// @brief Implement dynamic attribute lookup on the definitions.
+///
+/// Looks up \p attr first as a suite name, then as a server-state user variable.
+///
+/// @param self The definitions.
+/// @param attr The attribute name to look up.
+/// @return The matching suite or variable as a Python object.
+/// @throws std::runtime_error if no suite or variable with the given name is found.
+///
 py::object Defs_getattr(defs_ptr self, const std::string& attr) {
     suite_ptr child = self->findSuite(attr);
     if (child) {
@@ -241,6 +436,13 @@ py::object Defs_getattr(defs_ptr self, const std::string& attr) {
                                      << attr << "' does not exist *OR* suite or defs variable"));
 }
 
+///
+/// @brief Create a Defs object by loading a definition or checkpoint file.
+///
+/// @param filename The path to the file to load.
+/// @return The loaded definitions.
+/// @throws std::runtime_error if the file cannot be restored.
+///
 defs_ptr Defs_make(const std::string& filename) {
     defs_ptr defs = Defs::create();
 
@@ -254,6 +456,13 @@ defs_ptr Defs_make(const std::string& filename) {
     return defs;
 }
 
+///
+/// @brief Construct a Defs object with optional initial suites and variables.
+///
+/// @param args Positional arguments forwarded to `Defs_add_args_kwargs`.
+/// @param kw Keyword arguments added as user variables.
+/// @return The newly created Defs.
+///
 defs_ptr Defs_init(const py::args& args, const py::kwargs& kw) {
     defs_ptr defs = Defs::create();
     Defs_add_args_kwargs(defs, args, kw);

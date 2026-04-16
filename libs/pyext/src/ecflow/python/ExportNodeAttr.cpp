@@ -47,12 +47,25 @@ namespace {
 
 // JobCreationCtrl
 
+///
+/// @brief Construct a default JobCreationCtrl instance.
+///
+/// @return The newly created JobCreationCtrl.
+///
 job_creation_ctrl_ptr JobCreationCtrl_make() {
     return std::make_shared<JobCreationCtrl>();
 }
 
 // ZombieAttr
 
+///
+/// @brief Construct a ZombieAttr from a zombie type, a list of child command types, and a control action.
+///
+/// @param zt The zombie type (e.g. user, path, ecf).
+/// @param list A Python list of `Child::CmdType` values specifying which child commands the attribute applies to.
+/// @param uc The control action to take on matching zombies.
+/// @return The newly created ZombieAttr.
+///
 ZombieAttr ZombieAttr_make(ecf::Child::ZombieType zt, const py::list& list, ecf::ZombieCtrlAction uc) {
 
     int the_list_size = len(list);
@@ -66,6 +79,15 @@ ZombieAttr ZombieAttr_make(ecf::Child::ZombieType zt, const py::list& list, ecf:
     return ZombieAttr(zt, vec, uc);
 }
 
+///
+/// @brief Construct a ZombieAttr with an explicit server lifetime.
+///
+/// @param zt The zombie type (e.g. user, path, ecf).
+/// @param list A Python list of `Child::CmdType` values specifying which child commands the attribute applies to.
+/// @param uc The control action to take on matching zombies.
+/// @param life_time_in_server The lifetime of the zombie in the server, in seconds.
+/// @return The newly created ZombieAttr.
+///
 ZombieAttr ZombieAttr_make_lifetime(ecf::Child::ZombieType zt,
                                     const py::list& list,
                                     ecf::ZombieCtrlAction uc,
@@ -84,6 +106,12 @@ ZombieAttr ZombieAttr_make_lifetime(ecf::Child::ZombieType zt,
 
 // Limit
 
+///
+/// @brief Return the set of node paths currently consuming tokens from the limit.
+///
+/// @param limit The limit to query.
+/// @return A Python list of node path strings.
+///
 py::list Limit_node_paths(Limit* limit) {
     py::list list;
     const std::set<std::string>& paths = limit->paths();
@@ -95,6 +123,13 @@ py::list Limit_node_paths(Limit* limit) {
 
 // Queue
 
+///
+/// @brief Construct a QueueAttr from a name and a list of step values.
+///
+/// @param name The queue attribute name.
+/// @param list A Python list of string step values for the queue.
+/// @return The newly created QueueAttr.
+///
 QueueAttr QueueAttr_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
@@ -103,6 +138,13 @@ QueueAttr QueueAttr_make(const std::string& name, const py::list& list) {
 
 // Generic
 
+///
+/// @brief Construct a GenericAttr from a name and a list of string values.
+///
+/// @param name The generic attribute name.
+/// @param list A Python list of string values.
+/// @return The newly created GenericAttr.
+///
 GenericAttr GenericAttr_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
@@ -111,6 +153,15 @@ GenericAttr GenericAttr_make(const std::string& name, const py::list& list) {
 
 // Late
 
+///
+/// @brief Populate a LateAttr from keyword arguments.
+///
+/// Recognised keywords are `submitted`, `active`, and `complete`; each takes a
+/// time-string value of the form `"HH:MM"` or `"+HH:MM"` (relative).
+///
+/// @param late The LateAttr to populate.
+/// @param kwargs Keyword arguments mapping time-slot names to time strings.
+///
 void LateAttr_extract_from_kwargs(std::shared_ptr<ecf::LateAttr> late, const py::kwargs& kwargs) {
 
     for (const auto& entry : kwargs) {
@@ -162,10 +213,25 @@ void LateAttr_extract_from_kwargs(std::shared_ptr<ecf::LateAttr> late, const py:
     }
 }
 
+///
+/// @brief Construct a default, empty LateAttr.
+///
+/// @return The newly created LateAttr.
+///
 std::shared_ptr<ecf::LateAttr> LateAttr_make_default() {
     return std::make_shared<ecf::LateAttr>();
 }
 
+///
+/// @brief Construct a LateAttr from keyword arguments.
+///
+/// Only keyword arguments are accepted; positional arguments are rejected.
+/// Recognised keywords: `submitted`, `active`, `complete` (time strings, e.g. `"00:20"`, `"+30:00"`).
+///
+/// @param args Must be empty; positional arguments are not supported.
+/// @param kwargs Time-slot keyword arguments (submitted, active, complete).
+/// @return The newly created LateAttr.
+///
 std::shared_ptr<ecf::LateAttr> LateAttr_make(const py::args& args, const py::kwargs& kwargs) {
     int arg_count = len(args);
     if (arg_count > 0) {
@@ -179,6 +245,12 @@ std::shared_ptr<ecf::LateAttr> LateAttr_make(const py::args& args, const py::kwa
 
 // AutoRestoreAttr
 
+///
+/// @brief Construct an AutoRestoreAttr from a list of node paths to restore.
+///
+/// @param list A Python list of absolute node path strings.
+/// @return The newly created AutoRestoreAttr.
+///
 ecf::AutoRestoreAttr AutoRestoreAttr_make(const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
@@ -187,6 +259,13 @@ ecf::AutoRestoreAttr AutoRestoreAttr_make(const py::list& list) {
 
 // RepeatDateList
 
+///
+/// @brief Construct a RepeatDateList from a name and a list of date integers.
+///
+/// @param name The repeat variable name.
+/// @param list A Python list of integer dates (in `YYYYMMDD` format).
+/// @return The newly created RepeatDateList.
+///
 RepeatDateList RepeatDateList_make(const std::string& name, const py::list& list) {
     std::vector<int> vec;
     pyutil_list_to_int_vec(list, vec);
@@ -195,6 +274,13 @@ RepeatDateList RepeatDateList_make(const std::string& name, const py::list& list
 
 // RepeatEnumerated
 
+///
+/// @brief Construct a RepeatEnumerated from a name and a list of enumeration values.
+///
+/// @param name The repeat variable name.
+/// @param list A Python list of string enumeration values.
+/// @return The newly created RepeatEnumerated.
+///
 RepeatEnumerated RepeatEnumerated_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
@@ -203,6 +289,13 @@ RepeatEnumerated RepeatEnumerated_make(const std::string& name, const py::list& 
 
 // RepeatString
 
+///
+/// @brief Construct a RepeatString from a name and a list of string values.
+///
+/// @param name The repeat variable name.
+/// @param list A Python list of string values to iterate over.
+/// @return The newly created RepeatString.
+///
 RepeatString RepeatString_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
@@ -211,6 +304,16 @@ RepeatString RepeatString_make(const std::string& name, const py::list& list) {
 
 // Cron
 
+///
+/// @brief Populate a CronAttr from a dictionary of keyword arguments.
+///
+/// Recognised keys: `days_of_week`, `days_of_month`, `months`,
+/// `last_week_days_of_the_month` (each a list of integers), and
+/// `last_day_of_the_month` (a boolean).
+///
+/// @param cron The CronAttr to populate.
+/// @param dict A Python dict mapping keyword names to their values.
+///
 void CronAttr_extract_kwargs(std::shared_ptr<ecf::CronAttr> cron, py::dict& dict) {
     for (auto entry : dict) {
         if (auto found_key = py_extract<py::str>(entry.first); found_key) {
@@ -255,60 +358,131 @@ void CronAttr_extract_kwargs(std::shared_ptr<ecf::CronAttr> cron, py::dict& dict
     }
 }
 
+///
+/// @brief Construct a default, empty CronAttr.
+///
+/// @return The newly created CronAttr.
+///
 std::shared_ptr<ecf::CronAttr> CronAttr_make() {
     return std::make_shared<ecf::CronAttr>();
 }
 
+///
+/// @brief Construct a CronAttr from a time-series string and optional keyword arguments.
+///
+/// @param ts A time-series string (e.g. `"10:00"`, `"00:30 23:30 00:30"`).
+/// @param kwargs Optional keyword arguments for days/months (see `CronAttr_extract_kwargs`).
+/// @return The newly created CronAttr.
+///
 std::shared_ptr<ecf::CronAttr> CronAttr_make_string_kwargs(const std::string& ts, py::kwargs& kwargs) {
     std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
     CronAttr_extract_kwargs(cron, kwargs);
     return cron;
 }
 
+///
+/// @brief Construct a CronAttr from a TimeSeries object and optional keyword arguments.
+///
+/// @param ts The time series defining when the cron fires.
+/// @param kwargs Optional keyword arguments for days/months (see `CronAttr_extract_kwargs`).
+/// @return The newly created CronAttr.
+///
 std::shared_ptr<ecf::CronAttr> CronAttr_make_timeseries_kwargs(const ecf::TimeSeries& ts, py::kwargs& kwargs) {
     std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
     CronAttr_extract_kwargs(cron, kwargs);
     return cron;
 }
 
+///
+/// @brief Construct a CronAttr from a TimeSeries object.
+///
+/// @param ts The time series defining when the cron fires.
+/// @return The newly created CronAttr.
+///
 std::shared_ptr<ecf::CronAttr> CronAttr_make_timeseries(const ecf::TimeSeries& ts) {
     return std::make_shared<ecf::CronAttr>(ts);
 }
 
+///
+/// @brief Set the days-of-week on the cron attribute.
+///
+/// @param cron The CronAttr to modify.
+/// @param list A Python list of integers (0 = Sunday … 6 = Saturday).
+///
 void CronAttr_set_week_days(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addWeekDays(int_vec);
 }
 
+///
+/// @brief Set the last week-days-of-month on the cron attribute.
+///
+/// @param cron The CronAttr to modify.
+/// @param list A Python list of integers (0 = Sunday … 6 = Saturday).
+///
 void CronAttr_set_last_week_days_of_month(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->add_last_week_days_of_month(int_vec);
 }
 
+///
+/// @brief Set the days-of-month on the cron attribute.
+///
+/// @param cron The CronAttr to modify.
+/// @param list A Python list of integers (1–31).
+///
 void CronAttr_set_days_of_month(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addDaysOfMonth(int_vec);
 }
 
+///
+/// @brief Set the cron to fire on the last day of the month.
+///
+/// @param cron The CronAttr to modify.
+///
 void CronAttr_set_last_day_of_the_month(ecf::CronAttr* cron) {
     cron->add_last_day_of_month();
 }
 
+///
+/// @brief Set the months on the cron attribute.
+///
+/// @param cron The CronAttr to modify.
+/// @param list A Python list of integers (1 = January … 12 = December).
+///
 void CronAttr_set_months(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addMonths(int_vec);
 }
 
+///
+/// @brief Set the time series on the cron attribute from a time-series string.
+///
+/// @param self The CronAttr to modify.
+/// @param ts A time-series string (e.g. `"10:00"`, `"00:30 23:30 00:30"`).
+///
 void CronAttr_set_time_series(ecf::CronAttr* self, const std::string& ts) {
     self->addTimeSeries(ecf::TimeSeries::create(ts));
 }
 
 // Aviso
 
+///
+/// @brief Construct an AvisoAttr with the given name, listener, and optional connection parameters.
+///
+/// @param name The attribute name.
+/// @param listener The Aviso listener configuration string.
+/// @param url The Aviso server URL (defaults to `AvisoAttr::default_url`).
+/// @param schema The schema path (defaults to `AvisoAttr::default_schema`).
+/// @param polling The polling interval (defaults to `AvisoAttr::default_polling`).
+/// @param auth The authentication configuration (defaults to `AvisoAttr::default_auth`).
+/// @return The newly created AvisoAttr.
+///
 ecf::AvisoAttr AvisoAttr_make(const std::string& name,
                               const std::string& listener,
                               const std::string& url     = ecf::AvisoAttr::default_url,
@@ -318,12 +492,30 @@ ecf::AvisoAttr AvisoAttr_make(const std::string& name,
     return ecf::AvisoAttr(nullptr, name, listener, url, schema, polling, 0, auth, "");
 }
 
+///
+/// @brief Return a string representation of the AvisoAttr.
+///
+/// @param aviso The attribute to serialise.
+/// @return A Python-friendly string representation.
+///
 std::string AvisoAttr_str(const ecf::AvisoAttr& aviso) {
     return ecf::to_python_string(aviso);
 }
 
 // Mirror
 
+///
+/// @brief Construct a MirrorAttr with the given name, path, and optional connection parameters.
+///
+/// @param name The attribute name.
+/// @param path The absolute path of the mirrored node on the remote server.
+/// @param host The remote server hostname (defaults to `MirrorAttr::default_remote_host`).
+/// @param port The remote server port (defaults to `MirrorAttr::default_remote_port`).
+/// @param polling The polling interval (defaults to `MirrorAttr::default_polling`).
+/// @param ssl Whether to use SSL for the remote connection.
+/// @param auth The authentication configuration (defaults to `MirrorAttr::default_remote_auth`).
+/// @return The newly created MirrorAttr.
+///
 ecf::MirrorAttr MirrorAttr_make(const std::string& name,
                                 const std::string& path,
                                 const std::string& host    = ecf::MirrorAttr::default_remote_host,
@@ -334,6 +526,12 @@ ecf::MirrorAttr MirrorAttr_make(const std::string& name,
     return ecf::MirrorAttr(nullptr, name, path, host, port, polling, ssl, auth, "");
 }
 
+///
+/// @brief Return a string representation of the MirrorAttr.
+///
+/// @param mirror The attribute to serialise.
+/// @return A Python-friendly string representation.
+///
 std::string MirrorAttr_str(const ecf::MirrorAttr& mirror) {
     return ecf::to_python_string(mirror);
 }

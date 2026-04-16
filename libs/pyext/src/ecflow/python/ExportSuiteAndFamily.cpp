@@ -22,26 +22,62 @@ namespace {
 
 // NodeContainer
 
+///
+/// @brief Add a family to the node container and return it.
+///
+/// @param self The node container (Suite or Family) to add the family to.
+/// @param f The family to add.
+/// @return The added family.
+///
 node_ptr NodeContainer_add_family(NodeContainer* self, family_ptr f) {
     self->addFamily(f);
     return f;
 }
 
+///
+/// @brief Create and add a new family with the given name to the node container.
+///
+/// @param self The node container (Suite or Family).
+/// @param name The name of the new family.
+/// @return The newly created family node.
+///
 node_ptr NodeContainer_add_family_by_name(NodeContainer* self, const std::string& name) {
     return self->add_family(name);
 }
 
+///
+/// @brief Add a task to the node container and return it.
+///
+/// @param self The node container (Suite or Family) to add the task to.
+/// @param t The task to add.
+/// @return The added task.
+///
 node_ptr NodeContainer_add_task(NodeContainer* self, task_ptr t) {
     self->addTask(t);
     return t;
 }
 
+///
+/// @brief Create and add a new task with the given name to the node container.
+///
+/// @param self The node container (Suite or Family).
+/// @param name The name of the new task.
+/// @return The newly created task node.
+///
 node_ptr NodeContainer_add_task_by_name(NodeContainer* self, const std::string& name) {
     return self->add_task(name);
 }
 
 // Suite
 
+///
+/// @brief Construct a Suite with the given name and optional attributes.
+///
+/// @param name The suite name.
+/// @param args Positional attributes to add to the suite (forwarded to `NodeUtil::add`).
+/// @param kwargs Keyword arguments added as variables on the suite.
+/// @return The newly created Suite.
+///
 suite_ptr Suite_init(const std::string& name, const py::args& args, const py::kwargs& kwargs) {
     auto node = Suite::create(name);
     NodeUtil::add(*node, args);
@@ -49,32 +85,78 @@ suite_ptr Suite_init(const std::string& name, const py::args& args, const py::kw
     return node;
 }
 
+///
+/// @brief Return a string representation of the suite.
+///
+/// @param self The suite.
+/// @return The suite serialised using the current print style.
+///
 std::string Suite_str(suite_ptr self) {
     return ecf::as_string(*self, PrintStyleHolder::getStyle());
 }
 
+///
+/// @brief Implement the Python context manager entry protocol.
+///
+/// @param self The suite.
+/// @return \p self, enabling use in a `with` statement.
+///
 suite_ptr Suite_enter(suite_ptr self) {
     return self;
 }
 
+///
+/// @brief Implement the Python context manager exit protocol.
+///
+/// @return false (exceptions are not suppressed).
+///
 bool Suite_exit(suite_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
     return false;
 }
 
+///
+/// @brief Return the number of immediate child nodes in the suite.
+///
+/// @param self The suite.
+/// @return The number of child nodes.
+///
 size_t Suite_len(suite_ptr self) {
     return self->nodeVec().size();
 }
 
+///
+/// @brief Return true if the suite has an immediate child node with the given name.
+///
+/// @param self The suite.
+/// @param name The name of the child node to search for.
+/// @return true if a matching child exists, false otherwise.
+///
 bool Suite_contains(suite_ptr self, const std::string& name) {
     size_t pos;
     return (self->findImmediateChild(name, pos)) ? true : false;
 }
 
+///
+/// @brief Add a clock attribute to the suite.
+///
+/// @param self The suite.
+/// @param clk The clock attribute to add.
+/// @return The suite (for method chaining).
+///
 suite_ptr Suite_add_clock(suite_ptr self, const ClockAttr& clk) {
     self->addClock(clk);
     return self;
 }
 
+///
+/// @brief Add an end-clock attribute to the suite.
+///
+/// The end-clock marks the end of a simulation period.
+///
+/// @param self The suite.
+/// @param clk The end-clock attribute to add.
+/// @return The suite (for method chaining).
+///
 suite_ptr Suite_add_end_clock(suite_ptr self, const ClockAttr& clk) {
     self->add_end_clock(clk);
     return self;
@@ -82,6 +164,14 @@ suite_ptr Suite_add_end_clock(suite_ptr self, const ClockAttr& clk) {
 
 // Family
 
+///
+/// @brief Construct a Family with the given name and optional attributes.
+///
+/// @param name The family name.
+/// @param args Positional attributes to add to the family (forwarded to `NodeUtil::add`).
+/// @param kwargs Keyword arguments added as variables on the family.
+/// @return The newly created Family.
+///
 family_ptr Family_init(const std::string& name, const py::args& args, const py::kwargs& kwargs) {
     auto node = Family::create(name);
     NodeUtil::add(*node, args);
@@ -89,22 +179,52 @@ family_ptr Family_init(const std::string& name, const py::args& args, const py::
     return node;
 }
 
+///
+/// @brief Return a string representation of the family.
+///
+/// @param self The family.
+/// @return The family serialised using the current print style.
+///
 std::string Family_str(family_ptr self) {
     return ecf::as_string(*self, PrintStyleHolder::getStyle());
 }
 
+///
+/// @brief Implement the Python context manager entry protocol.
+///
+/// @param self The family.
+/// @return \p self, enabling use in a `with` statement.
+///
 family_ptr Family_enter(family_ptr self) {
     return self;
 }
 
+///
+/// @brief Implement the Python context manager exit protocol.
+///
+/// @return false (exceptions are not suppressed).
+///
 bool Family_exit(family_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
     return false;
 }
 
+///
+/// @brief Return the number of immediate child nodes in the family.
+///
+/// @param self The family.
+/// @return The number of child nodes.
+///
 size_t Family_len(family_ptr self) {
     return self->nodeVec().size();
 }
 
+///
+/// @brief Return true if the family has an immediate child node with the given name.
+///
+/// @param self The family.
+/// @param name The name of the child node to search for.
+/// @return true if a matching child exists, false otherwise.
+///
 bool Family_contains(family_ptr self, const std::string& name) {
     size_t pos;
     return (self->findImmediateChild(name, pos)) ? true : false;

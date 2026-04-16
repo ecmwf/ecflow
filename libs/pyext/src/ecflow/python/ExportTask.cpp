@@ -22,6 +22,14 @@ namespace {
 
 // Task
 
+///
+/// @brief Construct a Task with the given name and optional attributes.
+///
+/// @param name The task name.
+/// @param args Positional attributes to add to the task (forwarded to `NodeUtil::add`).
+/// @param kwargs Keyword arguments added as variables on the task.
+/// @return The newly created Task.
+///
 std::shared_ptr<Task> Task_init(const std::string& name, const py::args& args, const py::kwargs& kwargs) {
     auto node = std::make_shared<Task>(name);
     NodeUtil::add(*node, args);
@@ -29,24 +37,53 @@ std::shared_ptr<Task> Task_init(const std::string& name, const py::args& args, c
     return node;
 }
 
+///
+/// @brief Implement the Python context manager entry protocol.
+///
+/// @param self The task.
+/// @return \p self, enabling use in a `with` statement.
+///
 task_ptr Task_enter(task_ptr self) {
     return self;
 }
 
+///
+/// @brief Implement the Python context manager exit protocol.
+///
+/// @return false (exceptions are not suppressed).
+///
 bool Task_exit(task_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
     return false;
 }
 
+///
+/// @brief Return a string representation of the task.
+///
+/// @param self The task.
+/// @return The task serialised using the current print style.
+///
 std::string Task_str(task_ptr self) {
     return ecf::as_string(*self, PrintStyleHolder::getStyle());
 }
 
+///
+/// @brief Return the number of aliases owned by the task.
+///
+/// @param self The task.
+/// @return The number of aliases.
+///
 auto Task_len(task_ptr self) {
     return self->aliases().size();
 }
 
 // Alias
 
+///
+/// @brief Return a string representation of the alias.
+///
+/// @param self The alias.
+/// @return The alias serialised using the current print style.
+///
 std::string Alias_str(alias_ptr self) {
     return ecf::as_string(*self, PrintStyleHolder::getStyle());
 }
