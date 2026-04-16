@@ -18,21 +18,23 @@ namespace fs = std::filesystem;
 namespace ecf {
 namespace fsx {
 
-/**
- * Generate a unique path from the given model.
- * The one or more '%' characters in the model which will be replaced by random hexadecimal characters (0-9, A-F).
- *
- * @param model the model for the unique path
- * @return the unique path
- */
+///
+/// @brief Generate a unique path from the given model.
+///
+/// Each '%' character in @p model is replaced by a random hexadecimal digit (0-9, A-F).
+///
+/// @param model the path model, with '%' characters as placeholders for random hex digits
+/// @return the generated path with all '%' characters replaced by random hex digits
+///
 std::filesystem::path unique_path(std::string model);
 
-/**
- * Get the last write time of the given path, as a std::chrono::system_clock::time_point.
- *
- * @param path the path
- * @return the last write time
- */
+///
+/// @brief Get the last write time of the given path as a std::chrono::system_clock::time_point.
+///
+/// @param path the path to query
+/// @return the last write time of @p path
+/// @throws std::filesystem::filesystem_error if @p path does not exist or cannot be accessed
+///
 std::chrono::system_clock::time_point last_write_time(const std::filesystem::path& path);
 
 } // namespace fsx

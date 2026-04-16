@@ -15,12 +15,12 @@
 #include <string>
 #include <vector>
 
-/**
- * CommandLine is a thin wrapper/container for the contents of an ecFlow client command line.
- *
- * Note: This class is related to class ArgvCreator, which takes the vector of the command
- * line tokens and converts them into argc+argv.
- */
+///
+/// @brief CommandLine is a thin wrapper/container for the contents of an ecFlow client command line.
+///
+/// Note: This class is related to class ArgvCreator, which takes the vector of the command
+/// line tokens and converts them into argc+argv.
+///
 class CommandLine {
 public:
     using cl_t     = std::string;
@@ -28,37 +28,40 @@ public:
     using size_t   = tokens_t::size_type;
 
 public:
-    /**
-     * Create a Command Line instance based on argc + argv
-     *
-     * @param argc the number of tokens in the command line
-     * @param argv the tokens in the command line
-     */
+    ///
+    /// @brief Create a Command Line instance based on argc + argv
+    ///
+    /// @param argc the number of tokens in the command line
+    /// @param argv the tokens in the command line
+    ///
     CommandLine(int argc, char** argv);
     CommandLine(int argc, const char** argv);
 
-    /**
-     * Create a Command Line instance based on a sequence of characters,
-     * considering that it might include single/double quotes.
-     *
-     * @param cl the command line as a sequence of characters
-     */
+    ///
+    /// @brief Create a Command Line instance based on a sequence of characters,
+    ///        considering that it might include single/double quotes.
+    ///
+    /// @param cl the command line as a sequence of characters
+    /// @throws std::runtime_error if the command line contains an invalid escape sequence
+    ///         or unmatched quotation marks
+    ///
     explicit CommandLine(const cl_t& cl);
 
-    /**
-     * Create a Command Line instance based on a sequence of tokens.
-     *
-     * @param tokens the command line as a sequence of tokens
-     */
+    ///
+    /// @brief Create a Command Line instance based on a sequence of tokens.
+    ///
+    /// @param tokens the command line as a sequence of tokens
+    ///
     explicit CommandLine(tokens_t tokens);
 
-    /**
-     * Create a Command Line instance based on multiple tokens.
-     * Tokens can be either strings or collections of strings. In the latter case, the collection of strings are
-     * added to the command line element-by-element.
-     *
-     * @param tokens the command line as multiple tokens
-     */
+    ///
+    /// @brief Create a Command Line instance based on multiple tokens.
+    ///        Tokens can be either strings or collections of strings. In the latter case, the collection of strings are
+    ///        added to the command line element-by-element.
+    ///
+    /// @param tokens the command line as multiple tokens
+    /// @return a CommandLine instance composed of the provided tokens
+    ///
     template <typename... TOKENS>
     static CommandLine make_command_line(TOKENS... tokens) {
         auto push = Overload{
@@ -72,28 +75,34 @@ public:
         return CommandLine(ts);
     }
 
-    /**
-     * Access the original content of the command line.
-     */
+    ///
+    /// @brief Access the original content of the command line.
+    ///
+    /// @return the command line as a single string, with tokens separated by spaces
+    ///
     [[nodiscard]] cl_t original() const;
 
-    /**
-     * Access the number of tokens composing the command line.
-     *
-     * @return the number of tokens
-     */
+    ///
+    /// @brief Access the number of tokens composing the command line.
+    ///
+    /// @return the number of tokens
+    ///
     [[nodiscard]] size_t size() const;
 
-    /**
-     * Access the sequence of tokens composing the command line.
-     *
-     * @return the command line tokens
-     */
+    ///
+    /// @brief Access the sequence of tokens composing the command line.
+    ///
+    /// @return the command line tokens
+    ///
     [[nodiscard]] const tokens_t& tokens() const;
 
-    /**
-     * Pretty print the command line
-     */
+    ///
+    /// @brief Pretty print the command line
+    ///
+    /// @param os the output stream to write to
+    /// @param cl the command line to print
+    /// @return the output stream @p os
+    ///
     friend std::ostream& operator<<(std::ostream& os, const CommandLine& cl);
 
 private:

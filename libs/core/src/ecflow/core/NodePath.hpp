@@ -21,51 +21,55 @@ namespace node {
 ///
 /// @brief Split the given node path into its components, using '/' as separator.
 ///
-/// The containers storing the path components will be cleared before storing any results.
+/// The container storing the path components will be cleared before storing any results.
 ///
-/// Multiple path separator '/' are treated as one separator, mimicing unix path conventions:
-///  The path '/suite//family///task' will be split into [ 'suite', 'family', 'task' ]
+/// Multiple consecutive '/' separators are treated as one, mimicking unix path conventions:
+///  the path '/suite//family///task' will be split into [ 'suite', 'family', 'task' ]
 ///
-/// @param path The input node path to split.
-/// @param components The vector to store the extracted components of the path.
+/// @param path       the input node path to split
+/// @param components the vector to store the extracted path components
 ///
 void split_path(const std::string& path, std::vector<std::string>& components);
 
 ///
-/// @brief Retrieve host and port values from the given path.
+/// @brief Extract host and port values from the given path.
 ///
-/// Considers the path has the following form, and extracts the <host> and <port> values:
-///     <host>:<port>/suite/family/task
+/// Expects the path to have the following form and extracts the @c <host> and @c <port> values:
+///     @c <host>:<port>/suite/family/task
 ///
-/// @param path The input node path to extract host and port from.
-/// @param host The buffer to store the extracted host value.
-/// @param port The buffer to store the extracted port value.
-/// @return true if host and port were successfully extracted, false otherwise.
+/// @param path the input node path to extract host and port from
+/// @param host the buffer to store the extracted host value
+/// @param port the buffer to store the extracted port value
+/// @return true if host and port were successfully extracted; false otherwise
 ///
 bool extract_host_and_port_from_path(const std::string& path, std::string& host, std::string& port);
 
-/// @brief Creates a node path based on the given a vector of strings
 ///
-/// For the components [ "suite", "family", "task" ], returns the string "/suite/family/task".
+/// @brief Create a node path string from the given vector of path components.
 ///
-/// @param components The vector with the node path components to use to create the node path string.
-/// @return The node path string created from the components.
+/// For the components @c [ "suite", "family", "task" ], returns @c "/suite/family/task".
+/// Returns an empty string if @p components is empty.
+///
+/// @param components the path components to join
+/// @return the node path string created from the components
 ///
 std::string create_node_path(const std::vector<std::string>& components);
 
 ///
-/// @brief Remove host and port information from the given path.
+/// @brief Remove the host and port prefix from the given path.
 ///
-/// @param path The input node path to remove host and port from.
-/// @return The node path with host and port removed.
+/// For the node path @c "<host>:<port>/suite/family/task", returns @c "/suite/family/task".
 ///
-/// For the node path "/localhost:3141/suite/family/task", return the path "/suite/family/task"
+/// @param path the input node path to remove the host and port prefix from
+/// @return the node path with the host and port prefix removed
+///
 std::string remove_host_and_port_from_path(const std::string& path);
 
 ///
 /// @brief Check if the given path is an absolute path.
 ///
-/// @return true if absolute path, false otherwise.
+/// @param path the path to check
+/// @return true if @p path is an absolute path; false otherwise
 ///
 bool is_absolute_path(const std::string& path);
 

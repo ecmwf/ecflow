@@ -15,6 +15,11 @@
 
 namespace ecf {
 
+///
+/// @brief Return the login name of the current user.
+///
+/// @return The login name of the current user as a string.
+///
 std::string get_login_name();
 
 } // namespace ecf

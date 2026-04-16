@@ -25,29 +25,42 @@
 
 namespace ecf {
 
+///
+/// @brief Common string constants used throughout ecFlow.
+///
+/// This namespace provides a centralised set of well-known literal strings to avoid
+/// ad-hoc string construction and to make intent explicit at call sites.
+///
 namespace string_constants {
 
+/// Command prefixes used to identify the origin of a client request.
 inline const std::string child_cmd  = "chd:";
 inline const std::string user_cmd   = "--";
 inline const std::string server_cmd = "svr:"; // Only for automatic check_pt
 
+/// An empty string, provided as a named constant for use as a default reference return.
 inline const std::string empty = "";
 
+/// Node path strings.
 inline const std::string root_path      = "/";
 inline const std::string path_separator = "/";
 inline const std::string colon          = ":";
 
+/// Node type name strings, as used in definition files and wire protocol messages.
 inline const std::string task    = "TASK";
 inline const std::string family  = "FAMILY";
 inline const std::string family1 = "FAMILY1";
 inline const std::string suite   = "SUITE";
 inline const std::string alias   = "ALIAS";
 
+/// Server connection defaults.
 inline const std::string default_port_number = "3141";
 inline const std::string localhost           = "localhost";
 
+/// Name of the ecFlow access-control white-list file.
 inline const std::string white_list_file = "ecf.lists";
 
+/// Character sets used for name validation.
 inline const std::string alphanumeric_underscore_chars =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
 
@@ -116,7 +129,8 @@ inline void replace_first(Sequence& input, const SearchSequence& search, const R
 ///  2) consecutive separators are collapsed into one, so no empty substrings are produced.
 ///  3) leading and trailing separators are ignored.
 ///
-/// If the input string is empty, or contains only separator characters, the result be one empty sequence (i.e. `[ ]`).
+/// If the input string is empty, or contains only separator characters, the result will be an empty sequence (i.e.
+/// `[ ]`).
 ///
 /// @tparam ResultSequence A container type to hold the resulting substrings.
 /// @tparam Sequence1 A string-like type representing the input string.
@@ -153,11 +167,10 @@ split_at(ResultSequence& buffer, const Sequence1& input, const Sequence2& separa
 ///
 /// A field separator is defined as any single character contained in the `separators` string.
 /// Consecutive separators are used to split the input string into empty field.
-/// An empty field is included in result, when a separator is found at the beginning and or at end of
-/// the input.
+/// An empty field is included in result, when a separator is found at the beginning and or at end of the input.
 ///
-/// Splitting the input `",,a,,b,c;d; ;e,;f;"` with the separators `",;"` would result
-/// in a buffer containing `["", "", "a", "", "b", "c", "d", " ", "e", " ", "f", " "]`.
+/// Splitting the input `",,a,,b,c;d; ;e,;f;"` with the separators `",;"` would result in a buffer containing `["", "",
+/// "a", "", "b", "c", "d", " ", "e", "", "f", ""]`.
 ///
 /// If the input string is empty, the result be one empty sequence (i.e. `[ ]`).
 ///
@@ -206,8 +219,7 @@ static ResultSequence& split_fields_at(ResultSequence& buffer, const Sequence1& 
 ///
 /// @tparam ResultSequence A container type to hold the resulting substrings.
 /// @tparam Sequence1 A string-like type representing the input string.
-/// @tparam Sequence2 A string-like type representing the pattern to split by (n.b. if the pattern contains
-/// duplicated characters, they will be treated as a single separator).
+/// @tparam Sequence2 A string-like type representing the pattern to split by.
 ///
 /// @param buffer A reference to the container where the resulting substrings will be stored.
 /// @param input The input string to be split.
@@ -250,7 +262,7 @@ inline ResultSequence& split_by(ResultSequence& buffer, const Sequence1& input, 
 ///  - split_within_quotes("'a'  x  'b' y 'c'  zz  ", "'") will return tokens ['a', x, 'b', y, 'c', zz].
 ///    Notice that any non-whitespace characters _outside_ the quotation marks are also collected (without quotes).
 ///
-///  - split_within_quotes("'a \"b\" c' \"d 'e' f\" , "\"'") will return ['a \"b\" c', 'd \'e\' f']
+///  - split_within_quotes("'a \"b\" c' \"d 'e' f\"", "\"'") will return ['a \"b\" c', 'd \'e\' f']
 ///    Every quotation mark provided is considered, but only one level/quoted region is considered.
 ///    This means that regions are detected by matching the first quote found.
 ///
@@ -287,8 +299,7 @@ inline static bool starts_with(const Sequence1& input, const Sequence2& pattern)
 ///
 /// @param input The input string to check.
 /// @param pattern The pattern to check for at the end of the input.
-/// @return true if the input ends with the pattern, false otherwise
-/// .
+/// @return true if the input ends with the pattern, false otherwise.
 template <typename Sequence1, typename Sequence2>
 inline static bool ends_with(const Sequence1& input, const Sequence2& pattern) {
     std::string_view in(input);
@@ -477,7 +488,8 @@ bool is_valid_name(const std::string& name, std::string& error);
 ///
 /// @brief Check if the \param name is valid according to the rules for node names in ecFlow.
 ///
-/// This is used to verify the validity of nodes and attributes (Variable, Label, Event, ...) names in ecFlow.
+/// This overload returns only a boolean. Use the two-argument overload to also
+/// retrieve a description of any validation failure.
 ///
 /// @param name The name to be validated.
 /// @return true if the name is valid, false otherwise.
@@ -633,10 +645,10 @@ inline int to_int(const std::string& input, int error_return = std::numeric_limi
 }
 
 ///
-/// @brief Trim the string \param fileContents, so that \param max_lines at the tail of the file are kept.
+/// @brief Trim `fileContents` so that `max_lines` at the tail of the file are kept.
 ///
 /// Lines are counted by the number of '\n' characters found when scanning from the end of the string towards the
-/// beginning. Once \param max_lines newlines have been encountered, all content before (and including) the newline
+/// beginning. Once `max_lines` newlines have been encountered, all content before (and including) the newline
 /// at the split point is erased.
 ///
 /// @param fileContents  The string to truncate in-place.
@@ -646,14 +658,14 @@ inline int to_int(const std::string& input, int error_return = std::numeric_limi
 bool tail(std::string& fileContents, size_t max_lines);
 
 ///
-/// @brief Trim the string \param fileContents, so that \param max_lines at the head of the file are kept.
+/// @brief Trim `fileContents` so that `max_lines` at the head of the file are kept.
 ///
-/// Lines are counted by the number of '\n' characters found when scanning from the begining of the string towards
-/// the end. Once \param max_lines newlines have been encountered, all content after (and including) the
+/// Lines are counted by the number of '\n' characters found when scanning from the beginning of the string towards
+/// the end. Once `max_lines` newlines have been encountered, all content after (and including) the
 /// newline at the split point is erased.
 ///
 /// @param fileContents  The string to truncate in-place.
-/// @param max_lines     The maximum number of lines to retain (counted from the beginninf).
+/// @param max_lines     The maximum number of lines to retain (counted from the beginning).
 /// @return true if the string was truncated, false if it was empty or already within the limit.
 ///
 bool head(std::string& fileContents, size_t max_lines);

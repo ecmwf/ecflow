@@ -16,37 +16,37 @@
 
 namespace ecf {
 
-/**
- * @brief Decode a base64 encoded string.
- *
- * @param value the base64 encoded string
- * @return the decoded string
- *
- * @throws std::invalid_argument if the input string has size not multiple of 4
- * @throws std::invalid_argument if any character in the input string is invalid (not in A-Za-z0-9+/ or '=' for padding)
- * @throws std::invalid_argument if padding is invalid (more than 2 '=', or non-padding characters after first '=')
- */
+///
+/// @brief Decode a base64 encoded string.
+///
+/// @param value the base64 encoded string
+/// @return the decoded string
+///
+/// @throws std::invalid_argument if the input has size not multiple of 4
+/// @throws std::invalid_argument if any character in the input is invalid (not in A-Za-z0-9+/ or '=' for padding)
+/// @throws std::invalid_argument if padding is invalid (more than 2 '=', or non-padding characters after first '=')
+///
 std::string decode_base64(std::string_view value);
 
-/**
- * @brief Encode a string to base64.
- *
- * @param value the string to encode
- * @return the base64 encoded string
- */
+///
+/// @brief Encode a string to base64.
+///
+/// @param value the string to encode
+/// @return the base64 encoded string
+///
 std::string encode_base64(std::string_view value);
 
-/**
- * @brief Simple validation of base64 encoded string.
- *
- * Checks the following conditions:
- * - length has to be multiple of 4 (n.b. 0 if a valid lenght)
- * - valid characters are A-Za-z0-9+/
- * - '=' can be used for padding (0, 1, or 2 characters) at the end of string
- *
- * @param value the base64 encoded string
- * @return true if valid, false otherwise
- */
+///
+/// @brief Simple validation of base64 encoded string.
+///
+/// Checks the following conditions:
+/// - length has to be multiple of 4 (n.b. 0 if a valid lenght)
+/// - valid characters are A-Za-z0-9+/
+/// - '=' can be used for padding (0, 1, or 2 characters) at the end of string
+///
+/// @param value the base64 encoded string
+/// @return true if valid, false otherwise
+///
 bool validate_base64(std::string_view value);
 
 } // namespace ecf
