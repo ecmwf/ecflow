@@ -95,7 +95,7 @@ py::list Limit_node_paths(Limit* limit) {
 
 // Queue
 
-QueueAttr Queue_make(const std::string& name, const py::list& list) {
+QueueAttr QueueAttr_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
     return QueueAttr(name, vec);
@@ -103,7 +103,7 @@ QueueAttr Queue_make(const std::string& name, const py::list& list) {
 
 // Generic
 
-GenericAttr Generic_make(const std::string& name, const py::list& list) {
+GenericAttr GenericAttr_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
     return GenericAttr(name, vec);
@@ -111,7 +111,7 @@ GenericAttr Generic_make(const std::string& name, const py::list& list) {
 
 // Late
 
-void Late_extract_from_kwargs(std::shared_ptr<ecf::LateAttr> late, const py::kwargs& kwargs) {
+void LateAttr_extract_from_kwargs(std::shared_ptr<ecf::LateAttr> late, const py::kwargs& kwargs) {
 
     for (const auto& entry : kwargs) {
         // 1. Extract the keywork argument name
@@ -162,24 +162,24 @@ void Late_extract_from_kwargs(std::shared_ptr<ecf::LateAttr> late, const py::kwa
     }
 }
 
-std::shared_ptr<ecf::LateAttr> Late_make_default() {
+std::shared_ptr<ecf::LateAttr> LateAttr_make_default() {
     return std::make_shared<ecf::LateAttr>();
 }
 
-std::shared_ptr<ecf::LateAttr> Late_make(const py::args& args, const py::kwargs& kwargs) {
+std::shared_ptr<ecf::LateAttr> LateAttr_make(const py::args& args, const py::kwargs& kwargs) {
     int arg_count = len(args);
     if (arg_count > 0) {
         throw std::runtime_error("late_init: Late only expects keyword arguments, i.e. "
                                  "Late(submitted='00:20',active='15:00',complete='+30:00')");
     }
     auto late = std::make_shared<ecf::LateAttr>();
-    Late_extract_from_kwargs(late, kwargs);
+    LateAttr_extract_from_kwargs(late, kwargs);
     return late;
 }
 
 // AutoRestoreAttr
 
-ecf::AutoRestoreAttr AutoRestore_make(const py::list& list) {
+ecf::AutoRestoreAttr AutoRestoreAttr_make(const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
     return ecf::AutoRestoreAttr(vec);
@@ -211,7 +211,7 @@ RepeatString RepeatString_make(const std::string& name, const py::list& list) {
 
 // Cron
 
-void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, py::dict& dict) {
+void CronAttr_extract_kwargs(std::shared_ptr<ecf::CronAttr> cron, py::dict& dict) {
     for (auto entry : dict) {
         if (auto found_key = py_extract<py::str>(entry.first); found_key) {
             std::string key = found_key.value();
@@ -234,7 +234,7 @@ void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, py::dic
                 }
                 else {
                     throw std::runtime_error(
-                        "extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | "
+                        "CronAttr_extract_kwargs: keyword arguments, expected [days_of_week | "
                         "last_week_days_of_the_month | days_of_month | months | last_day_of_the_month");
                 }
             }
@@ -244,97 +244,97 @@ void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, py::dic
                 }
                 else {
                     throw std::runtime_error(
-                        "extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | "
+                        "CronAttr_extract_kwargs: keyword arguments, expected [days_of_week | "
                         "last_week_days_of_the_month | days_of_month | months | last_day_of_the_month]");
                 }
             }
             else {
-                throw std::runtime_error("extract_cron_keyword_arguments: keyword arguments to be a list");
+                throw std::runtime_error("CronAttr_extract_kwargs: keyword arguments to be a list");
             }
         }
     }
 }
 
-std::shared_ptr<ecf::CronAttr> Cron_make() {
+std::shared_ptr<ecf::CronAttr> CronAttr_make() {
     return std::make_shared<ecf::CronAttr>();
 }
 
-std::shared_ptr<ecf::CronAttr> cron_make_string_kwargs(const std::string& ts, py::kwargs& kwargs) {
+std::shared_ptr<ecf::CronAttr> CronAttr_make_string_kwargs(const std::string& ts, py::kwargs& kwargs) {
     std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
-    extract_cron_keyword_arguments(cron, kwargs);
+    CronAttr_extract_kwargs(cron, kwargs);
     return cron;
 }
 
-std::shared_ptr<ecf::CronAttr> cron_make_timeseries_kwargs(const ecf::TimeSeries& ts, py::kwargs& kwargs) {
+std::shared_ptr<ecf::CronAttr> CronAttr_make_timeseries_kwargs(const ecf::TimeSeries& ts, py::kwargs& kwargs) {
     std::shared_ptr<ecf::CronAttr> cron = std::make_shared<ecf::CronAttr>(ts);
-    extract_cron_keyword_arguments(cron, kwargs);
+    CronAttr_extract_kwargs(cron, kwargs);
     return cron;
 }
 
-std::shared_ptr<ecf::CronAttr> cron_make_timeseries(const ecf::TimeSeries& ts) {
+std::shared_ptr<ecf::CronAttr> CronAttr_make_timeseries(const ecf::TimeSeries& ts) {
     return std::make_shared<ecf::CronAttr>(ts);
 }
 
-void Cron_set_week_days(ecf::CronAttr* cron, const py::list& list) {
+void CronAttr_set_week_days(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addWeekDays(int_vec);
 }
 
-void Cron_set_last_week_days_of_month(ecf::CronAttr* cron, const py::list& list) {
+void CronAttr_set_last_week_days_of_month(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->add_last_week_days_of_month(int_vec);
 }
 
-void Cron_set_days_of_month(ecf::CronAttr* cron, const py::list& list) {
+void CronAttr_set_days_of_month(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addDaysOfMonth(int_vec);
 }
 
-void Cron_set_last_day_of_the_month(ecf::CronAttr* cron) {
+void CronAttr_set_last_day_of_the_month(ecf::CronAttr* cron) {
     cron->add_last_day_of_month();
 }
 
-void Cron_set_months(ecf::CronAttr* cron, const py::list& list) {
+void CronAttr_set_months(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
     pyutil_list_to_int_vec(list, int_vec);
     cron->addMonths(int_vec);
 }
 
-void Cron_set_time_series(ecf::CronAttr* self, const std::string& ts) {
+void CronAttr_set_time_series(ecf::CronAttr* self, const std::string& ts) {
     self->addTimeSeries(ecf::TimeSeries::create(ts));
 }
 
 // Aviso
 
-ecf::AvisoAttr Aviso_make(const std::string& name,
-                          const std::string& listener,
-                          const std::string& url     = ecf::AvisoAttr::default_url,
-                          const std::string& schema  = ecf::AvisoAttr::default_schema,
-                          const std::string& polling = ecf::AvisoAttr::default_polling,
-                          const std::string& auth    = ecf::AvisoAttr::default_auth) {
+ecf::AvisoAttr AvisoAttr_make(const std::string& name,
+                              const std::string& listener,
+                              const std::string& url     = ecf::AvisoAttr::default_url,
+                              const std::string& schema  = ecf::AvisoAttr::default_schema,
+                              const std::string& polling = ecf::AvisoAttr::default_polling,
+                              const std::string& auth    = ecf::AvisoAttr::default_auth) {
     return ecf::AvisoAttr(nullptr, name, listener, url, schema, polling, 0, auth, "");
 }
 
-std::string Aviso_str(const ecf::AvisoAttr& aviso) {
+std::string AvisoAttr_str(const ecf::AvisoAttr& aviso) {
     return ecf::to_python_string(aviso);
 }
 
 // Mirror
 
-ecf::MirrorAttr Mirror_make(const std::string& name,
-                            const std::string& path,
-                            const std::string& host    = ecf::MirrorAttr::default_remote_host,
-                            const std::string& port    = ecf::MirrorAttr::default_remote_port,
-                            const std::string& polling = ecf::MirrorAttr::default_polling,
-                            bool ssl                   = false,
-                            const std::string& auth    = ecf::MirrorAttr::default_remote_auth) {
+ecf::MirrorAttr MirrorAttr_make(const std::string& name,
+                                const std::string& path,
+                                const std::string& host    = ecf::MirrorAttr::default_remote_host,
+                                const std::string& port    = ecf::MirrorAttr::default_remote_port,
+                                const std::string& polling = ecf::MirrorAttr::default_polling,
+                                bool ssl                   = false,
+                                const std::string& auth    = ecf::MirrorAttr::default_remote_auth) {
     return ecf::MirrorAttr(nullptr, name, path, host, port, polling, ssl, auth, "");
 }
 
-std::string Mirror_str(const ecf::MirrorAttr& mirror) {
+std::string MirrorAttr_str(const ecf::MirrorAttr& mirror) {
     return ecf::to_python_string(mirror);
 }
 
@@ -653,7 +653,7 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<QueueAttr>(m, "Queue", NodeAttrDoc::queue_doc())
 
-        .def(py::init(&Queue_make))
+        .def(py::init(&QueueAttr_make))
         .def(py::self == py::self)
         .def(py::self < py::self)
         .def("__str__", &QueueAttr::toString)
@@ -667,7 +667,7 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<GenericAttr>(m, "Generic", NodeAttrDoc::generic_doc())
 
-        .def(py::init(&Generic_make))
+        .def(py::init(&GenericAttr_make))
         .def(py::self == py::self)
         .def(py::self < py::self)
         .def("__str__", &GenericAttr::to_string)
@@ -762,8 +762,8 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<ecf::LateAttr, std::shared_ptr<ecf::LateAttr>>(m, "Late", NodeAttrDoc::late_doc())
 
-        .def(py::init(&Late_make_default))
-        .def(py::init(&Late_make))
+        .def(py::init(&LateAttr_make_default))
+        .def(py::init(&LateAttr_make))
         .def("submitted",
              &ecf::LateAttr::addSubmitted,
              "submitted(TimeSlot):The time node can stay `submitted`_. Submitted is always relative. If the node "
@@ -855,7 +855,7 @@ void export_NodeAttr(py::module& m) {
     py::class_<ecf::AutoRestoreAttr, std::shared_ptr<ecf::AutoRestoreAttr>>(
         m, "Autorestore", NodeAttrDoc::autorestore_doc())
 
-        .def(py::init(&AutoRestore_make))
+        .def(py::init(&AutoRestoreAttr_make))
         .def(py::self == py::self)
         .def("__str__", &ecf::AutoRestoreAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::AutoRestoreAttr>)
@@ -983,42 +983,43 @@ void export_NodeAttr(py::module& m) {
         .def("step", &Repeat::step, "The increment for the repeat, as an integer")
         .def("value", &Repeat::last_valid_value, "The current value of the repeat as an integer");
 
-    void (ecf::CronAttr::*Cron_set_time_series_timeseries)(const ecf::TimeSeries&) = &ecf::CronAttr::addTimeSeries;
-    void (ecf::CronAttr::*Cron_set_time_series_timeslot_timeslot_timeslot)(
+    void (ecf::CronAttr::*CronAttr_set_time_series_timeseries)(const ecf::TimeSeries&) = &ecf::CronAttr::addTimeSeries;
+    void (ecf::CronAttr::*CronAttr_set_time_series_timeslot_timeslot_timeslot)(
         const ecf::TimeSlot& s, const ecf::TimeSlot& f, const ecf::TimeSlot& i) = &ecf::CronAttr::addTimeSeries;
 
     py::class_<ecf::CronAttr, std::shared_ptr<ecf::CronAttr>>(m, "Cron", NodeAttrDoc::cron_doc())
 
-        .def(py::init(&Cron_make))
-        .def(py::init(&cron_make_string_kwargs))
-        .def(py::init(&cron_make_timeseries_kwargs))
-        .def(py::init(&cron_make_timeseries))
+        .def(py::init(&CronAttr_make))
+        .def(py::init(&CronAttr_make_string_kwargs))
+        .def(py::init(&CronAttr_make_timeseries_kwargs))
+        .def(py::init(&CronAttr_make_timeseries))
         .def(py::self == py::self)
         .def("__str__", &ecf::CronAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::CronAttr>)
         .def("set_week_days",
-             &Cron_set_week_days,
+             &CronAttr_set_week_days,
              "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
         .def("set_last_week_days_of_the_month",
-             &Cron_set_last_week_days_of_month,
+             &CronAttr_set_last_week_days_of_month,
              "Specifies last week days of the month. Expects a list of integers, with integer range 0==Sun to "
              "6==Sat")
         .def("set_days_of_month",
-             &Cron_set_days_of_month,
+             &CronAttr_set_days_of_month,
              "Specifies days of the month. Expects a list of integers with integer range 1-31")
-        .def("set_last_day_of_the_month", &Cron_set_last_day_of_the_month, "Set cron for the last day of the month")
-        .def("set_months", &Cron_set_months, "Specifies months. Expects a list of integers, with integer range 1-12")
+        .def("set_last_day_of_the_month", &CronAttr_set_last_day_of_the_month, "Set cron for the last day of the month")
+        .def(
+            "set_months", &CronAttr_set_months, "Specifies months. Expects a list of integers, with integer range 1-12")
         .def("set_time_series",
              &ecf::CronAttr::add_time_series,
              py::arg("hour"),
              py::arg("minute"),
              py::arg("relative") = false,
              "time_series(hour(int),minute(int),relative to suite start(bool=false)), Add a time slot")
-        .def("set_time_series", Cron_set_time_series_timeseries, "Add a time series. This will never complete")
+        .def("set_time_series", CronAttr_set_time_series_timeseries, "Add a time series. This will never complete")
         .def("set_time_series",
-             Cron_set_time_series_timeslot_timeslot_timeslot,
+             CronAttr_set_time_series_timeslot_timeslot_timeslot,
              "Add a time series. This will never complete")
-        .def("set_time_series", &Cron_set_time_series, "Add a time series. This will never complete")
+        .def("set_time_series", &CronAttr_set_time_series, "Add a time series. This will never complete")
         .def("time", &ecf::CronAttr::time, py::return_value_policy::reference, "return cron time as a TimeSeries")
         .def("last_day_of_the_month",
              &ecf::CronAttr::last_day_of_the_month,
@@ -1060,7 +1061,7 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<ecf::AvisoAttr>(m, "AvisoAttr", NodeAttrDoc::aviso_doc())
 
-        .def(py::init(&Aviso_make),
+        .def(py::init(&AvisoAttr_make),
              py::arg("name"),
              py::arg("listener"),
              py::arg("url")     = "%ECF_AVISO_URL%",
@@ -1068,7 +1069,7 @@ void export_NodeAttr(py::module& m) {
              py::arg("polling") = "%ECF_AVISO_POLLING%",
              py::arg("auth")    = "%ECF_AVISO_AUTH%")
         .def(py::self == py::self)
-        .def("__str__", &Aviso_str)
+        .def("__str__", &AvisoAttr_str)
         .def("__copy__", pyutil_copy_object<ecf::AvisoAttr>)
         .def("name",
              &ecf::AvisoAttr::name,
@@ -1094,7 +1095,7 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<ecf::MirrorAttr>(m, "MirrorAttr", NodeAttrDoc::mirror_doc())
 
-        .def(py::init(&Mirror_make),
+        .def(py::init(&MirrorAttr_make),
              py::arg("name"),
              py::arg("remote_path") = "%ECF_MIRROR_REMOTE_PATH%",
              py::arg("remote_host") = "%ECF_MIRROR_REMOTE_HOST%",
@@ -1103,7 +1104,7 @@ void export_NodeAttr(py::module& m) {
              py::arg("ssl")         = false,
              py::arg("auth")        = "%ECF_MIRROR_REMOTE_AUTH%")
         .def(py::self == py::self)
-        .def("__str__", &Mirror_str)
+        .def("__str__", &MirrorAttr_str)
         .def("__copy__", pyutil_copy_object<ecf::MirrorAttr>)
         .def("name",
              &ecf::MirrorAttr::name,
