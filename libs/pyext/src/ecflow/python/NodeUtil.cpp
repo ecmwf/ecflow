@@ -58,7 +58,7 @@ void NodeUtil::add1(Node& self, const py::object& o) {
 
 void NodeUtil::add(Node& self, const py::handle& arg) {
     // When arg is None, there is nothing to do...
-    if (arg == py::none()) {
+    if (arg.is(py::none())) {
         return;
     }
 
@@ -211,13 +211,7 @@ void NodeUtil::add(Node& self, const py::args& args) {
 
 void NodeUtil::add(Node& self, const py::kwargs& kwargs) {
     for (const auto& entry : kwargs) {
-        std::string key;
-        if (auto found = py_extract<py::str>(entry.first); found) {
-            key = found.value();
-        }
-        else {
-            throw std::runtime_error("NodeUtil::add: key must be a string or str");
-        }
+        std::string key = entry.first.cast<std::string>();
 
         std::string value;
         if (auto found = py_extract<py::str>(entry.second); found) {

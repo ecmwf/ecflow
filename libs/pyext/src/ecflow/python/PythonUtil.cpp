@@ -42,16 +42,7 @@ void pyutil_list_to_str_vec(const py::list& list, std::vector<Variable>& vec) {
 void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<std::pair<std::string, std::string>>& vec) {
 
     for (auto entry : dict) {
-        std::string first;
-        if (auto found = py_extract<py::str>(entry.first); found) {
-            first = found.value();
-        }
-        else if (auto found = py_extract<std::string>(entry.first); found) {
-            first = found.value();
-        }
-        else {
-            throw std::runtime_error("PythonUtil::dict_to_str_vec: key not convertible to py::str or std::string");
-        }
+        std::string first = entry.first.cast<std::string>();
 
         std::string second;
         if (auto found = py_extract<std::string>(entry.second); found) {
