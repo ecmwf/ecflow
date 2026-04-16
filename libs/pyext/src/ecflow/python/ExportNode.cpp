@@ -356,15 +356,15 @@ void Node_sort_attributes2(node_ptr self, ecf::Attr::Type attr, bool recursive, 
 }
 
 void Node_sort_attributes3(node_ptr self, const std::string& attribute_name, bool recursive, const py::list& list) {
-    std::string attribute = attribute_name;
-    boost::algorithm::to_lower(attribute);
-    ecf::Attr::Type attr = ecf::Attr::to_attr(attribute_name);
-    if (attr == ecf::Attr::UNKNOWN) {
-        throw std::runtime_error(MESSAGE("sort_attributes: the attribute " << attribute_name << " is not valid"));
+    std::string attribute_name_lowered = boost::algorithm::to_lower_copy(attribute_name);
+    ecf::Attr::Type attribute          = ecf::Attr::to_attr(attribute_name_lowered);
+    if (attribute == ecf::Attr::UNKNOWN) {
+        throw std::runtime_error(
+            MESSAGE("sort_attributes: the attribute " << attribute_name_lowered << " is not valid"));
     }
     std::vector<std::string> no_sort;
     pyutil_list_to_str_vec(list, no_sort);
-    self->sort_attributes(attr, recursive, no_sort);
+    self->sort_attributes(attribute, recursive, no_sort);
 }
 
 std::vector<node_ptr> Node_get_all_nodes(node_ptr self) {
