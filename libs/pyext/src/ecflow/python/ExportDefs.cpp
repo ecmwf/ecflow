@@ -220,9 +220,8 @@ py::object Defs_add_args_kwargs(defs_ptr self, const py::args& args, const py::k
 }
 
 py::object Defs_iadd(defs_ptr self, const py::list& list) {
-    int the_list_size = len(list);
-    for (int i = 0; i < the_list_size; ++i) {
-        (void)Defs_add(self, list[i]);
+    for (const auto& item : list) {
+        (void)Defs_add(self, item);
     }
     return py::cast(self); // return defs_ptr as python object, relies class_<Defs>... for type registration
 }

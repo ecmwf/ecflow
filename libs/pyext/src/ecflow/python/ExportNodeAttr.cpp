@@ -87,7 +87,7 @@ ZombieAttr ZombieAttr_make_lifetime(ecf::Child::ZombieType zt,
 py::list Limit_node_paths(Limit* limit) {
     py::list list;
     const std::set<std::string>& paths = limit->paths();
-    for (std::string path : paths) {
+    for (const auto& path : paths) {
         list.append(path);
     }
     return list;
