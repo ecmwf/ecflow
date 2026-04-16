@@ -41,7 +41,7 @@ std::string Task_str(task_ptr self) {
     return ecf::as_string(*self, PrintStyleHolder::getStyle());
 }
 
-bool Task_len(task_ptr self) {
+auto Task_len(task_ptr self) {
     return self->aliases().size();
 }
 
