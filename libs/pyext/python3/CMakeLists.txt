@@ -32,7 +32,7 @@ ecbuild_add_library(
     ecflow_all
     libsimulator
     Python3::Module
-    Boost::${ECFLOW_BOOST_PYTHON_COMPONENT}
+    pybind11::headers
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   CXXFLAGS
     $<$<CXX_COMPILER_ID:Clang>:-Wno-macro-redefined>

@@ -124,6 +124,25 @@ endif()
 
 
 # =========================================================================================
+# pybind11
+# =========================================================================================
+if (ENABLE_PYTHON)
+
+  ecbuild_info( "Locating pybind11" )
+
+  find_package(pybind11 2.10.3 REQUIRED)
+
+  ecbuild_info( "pybind11 details:" )
+  ecbuild_info( " * pybind11_FOUND        : ${pybind11_FOUND}" )
+  ecbuild_info( " * pybind11_INCLUDE_DIRS : ${pybind11_INCLUDE_DIRS}" )
+  ecbuild_info( " * pybind11_VERSION      : ${pybind11_VERSION}" )
+  ecbuild_info( " * pybind11_VERSION_MAJOR: ${pybind11_VERSION_MAJOR}" )
+  ecbuild_info( " * pybind11_VERSION_MINOR: ${pybind11_VERSION_MINOR}" )
+  ecbuild_info( " * pybind11_VERSION_PATCH: ${pybind11_VERSION_PATCH}" )
+
+endif()
+
+# =========================================================================================
 # Boost
 # =========================================================================================
 
@@ -172,21 +191,6 @@ list(APPEND _boost_needed_libs program_options date_time )
 if ( Boost_MINOR_VERSION GREATER_EQUAL 86 )
   message(STATUS "Using Boost::process, since using ${Boost_VERSION}" )
   list(APPEND _boost_needed_libs process)
-endif()
-
-if (ENABLE_PYTHON)
-  # The following is used to find Boost.python library, as the library name changes with python version
-  if ( Boost_MINOR_VERSION GREATER 66 )
-    # cmake 3.15
-    # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
-    # INTERFACE_LIBRARY targets may only have whitelisted properties.
-    set(_python_base_version "${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-  else()
-    set(_python_base_version "${Python3_VERSION_MAJOR}")
-  endif()
-  set(ECFLOW_BOOST_PYTHON_COMPONENT "python${_python_base_version}")
-
-  list(APPEND _boost_needed_libs ${ECFLOW_BOOST_PYTHON_COMPONENT})
 endif()
 
 if(HAVE_TESTS) # HAVE_TESTS is defined if ecbuild ENABLE_TESTS is set, (by default this is set)

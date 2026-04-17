@@ -10,6 +10,43 @@
 
 #include "ecflow/python/NodeAttrDoc.hpp"
 
+const char* NodeAttrDoc::flag_type_doc() {
+    return "Flags store state associated with a node\n\n"
+           "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
+           "- USER_EDIT     - task\n"
+           "- TASK_ABORTED  - task*\n"
+           "- EDIT_FAILED   - task*\n"
+           "- JOBCMD_FAILED - task*\n"
+           "- KILLCMD_FAILED   - task*\n"
+           "- STATUSCMD_FAILED - task*\n"
+           "- NO_SCRIPT     - task*\n"
+           "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+           "- STATUS        - task* indicates that the status command has been run\n"
+           "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
+           "- MESSAGE       - Node\n"
+           "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
+           "- QUEUELIMIT    - Node\n"
+           "- WAIT          - task* \n"
+           "- LOCKED        - Server\n"
+           "- ZOMBIE        - task*\n"
+           "- NO_REQUE      - task\n"
+           "- ARCHIVED      - Suite/Family\n"
+           "- RESTORED      - Family/Family\n"
+           "- THRESHOLD     - task\n"
+           "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
+           "- LOG_ERROR     - Error in opening or writing to log file\n"
+           "- CHECKPT_ERROR - Error in opening or writing to checkpt file \n"
+           "- NOT_SET\n";
+}
+
+const char* NodeAttrDoc::sortable_attribute_type_doc() {
+    return "Sortable attribute type, currently [event | meter | label | limit | variable | all ]";
+}
+
+const char* NodeAttrDoc::plain_zombie_doc() {
+    return "Represent a zombie process stored by the server";
+}
+
 const char* NodeAttrDoc::variable_doc() {
     return "Defines a `variable`_ on a `node`_ for use in `ecf script`_.\n\n"
            "A Node can have a number of variables.\n"
@@ -47,6 +84,10 @@ const char* NodeAttrDoc::variable_doc() {
            "  defs.s1.a += [ Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b'),\n"
            "                 Edit({ 'var':10, 'aa':'bb'}),\n"
            "                 Edit(d='d') ]\n";
+}
+
+const char* NodeAttrDoc::variable_list_doc() {
+    return "Hold a list of Variables";
 }
 
 const char* NodeAttrDoc::zombie_doc() {
@@ -269,6 +310,10 @@ const char* NodeAttrDoc::queue_doc() {
     return "Queue allows specification of queue on Task, Family and Suite nodes\n\n";
 }
 
+const char* NodeAttrDoc::generic_doc() {
+    return "A generic attribute, used to add new attributes for the future, without requiring a API change";
+}
+
 const char* NodeAttrDoc::date_doc() {
     return "Used to define a `date`_ dependency.\n\n"
            "There can be multiple Date dependencies for a `node`_.\n"
@@ -480,10 +525,10 @@ const char* NodeAttrDoc::autorestore_doc() {
            "This reduces the time to checkpoint the definition and network band width.\n"
            "The archived node is written to disk, as ECF_HOME/<host>.<port>.ECF_NAME.check,\n"
            "where '/' is replaced with ':' in ECF_NAME.\n"
-           "The node can be recovered using 'autorestore', begin,re-queue and manually via ecflow_client --restore.\n"
-           "The archiving is never immediate. The nodes are checked one a minute, and expired autoarchive nodes are "
+           "The node can be recovered using 'autorestore', begin, re-queue and manually via ecflow_client --restore.\n"
+           "The archiving is never immediate. The nodes are checked once a minute, and expired autoarchive nodes are "
            "archived.\n"
-           "If the node is suspended or any of its parent are suspended then then the archive does not happen.\n"
+           "If the node is suspended or any of its parents are suspended then the archive does not happen.\n"
            "\nConstructor::\n\n"
            "   Autorestore( list of paths )\n"
            "\nUsage:\n\n"
@@ -649,8 +694,7 @@ const char* NodeAttrDoc::cron_doc() {
            "    cron = Cron('+00:00 20:00 00:30', days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])\n\n"
            "    # Run relative to suite start time or task requeue time\n"
            "    cron = Cron('+01:30',days_of_week=[0,1,2,3,4,5,6])\n\n"
-
-           "    # Run relative to suite start time or task requeue time\n"
+           "    # Run relative to suite start time or task requeue time with multiple parameters\n"
            "    cron = Cron('+00:15 23:00 00:30', days_of_week=[0,1,2],days_of_month=[4,5,6], months=[1,2,3])\n\n"
 
            "    # Define Cron based on start/end/increment\n"

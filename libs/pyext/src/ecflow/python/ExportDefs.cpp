@@ -20,14 +20,25 @@
 #include "ecflow/node/formatter/DefsWriter.hpp"
 #include "ecflow/python/DefsDoc.hpp"
 #include "ecflow/python/Edit.hpp"
+#include "ecflow/python/ExportCollections.hpp"
 #include "ecflow/python/GlossaryDoc.hpp"
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 #include "ecflow/simulator/Simulator.hpp"
 
-// See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
+namespace {
 
-void save_as_defs(const Defs& theDefs, const std::string& filename, PrintStyle::Type_t the_style_enum) {
+///
+/// @brief Save the definitions to a file using the given print style.
+///
+/// @param theDefs The definitions to save.
+/// @param filename The path to the output file.
+/// @param the_style_enum The print style to use for serialisation.
+/// @throws std::runtime_error if the file cannot be created.
+///
+void Defs_save_as_defs_with_given_style(const Defs& theDefs,
+                                        const std::string& filename,
+                                        PrintStyle::Type_t the_style_enum) {
     std::string file_creation_error_msg;
     if (!ecf::File::create(filename, ecf::as_string(theDefs, the_style_enum), file_creation_error_msg)) {
         std::string error = "save_as_defs failed: ";
@@ -36,30 +47,36 @@ void save_as_defs(const Defs& theDefs, const std::string& filename, PrintStyle::
     }
 }
 
-void save_as_defs_1(const Defs& theDefs, const std::string& filename) {
-    save_as_defs(theDefs, filename, PrintStyle::DEFS);
+///
+/// @brief Save the definitions to a file using the default DEFS print style.
+///
+/// @param theDefs The definitions to save.
+/// @param filename The path to the output file.
+///
+void Defs_save_as_defs_with_default_style(const Defs& theDefs, const std::string& filename) {
+    Defs_save_as_defs_with_given_style(theDefs, filename, PrintStyle::DEFS);
 }
 
-std::string convert_to_string(const Defs& theDefs) {
+///
+/// @brief Return a string representation of the definitions.
+///
+/// @param theDefs The definitions to serialise.
+/// @return The definitions serialised using the current print style.
+///
+std::string Defs_str(const Defs& theDefs) {
     std::string buffer;
     ecf::write_t(buffer, theDefs, PrintStyleHolder::getStyle());
     return buffer;
 }
 
-static defs_ptr create_defs(const std::string& file_name) {
-    defs_ptr defs = Defs::create();
-
-    std::string errorMsg, warningMsg;
-    if (!defs->restore(file_name, errorMsg, warningMsg)) {
-        throw std::runtime_error(errorMsg);
-    }
-    if (!warningMsg.empty()) {
-        std::cerr << warningMsg;
-    }
-    return defs;
-}
-
-std::string check_defs(defs_ptr defs) {
+///
+/// @brief Check the definitions for errors and warnings.
+///
+/// @param defs The definitions to check.
+/// @return An empty string if no errors are found, otherwise a string containing
+///         error and warning messages.
+///
+std::string Defs_check(defs_ptr defs) {
     std::string error_msg;
     std::string warning_msg;
     if (defs.get() && !defs->check(error_msg, warning_msg)) {
@@ -70,11 +87,26 @@ std::string check_defs(defs_ptr defs) {
     return warning_msg;
 }
 
-void restore_from_checkpt(defs_ptr defs, const std::string& file_name) {
+///
+/// @brief Restore the definitions from a checkpoint file.
+///
+/// @param defs The definitions object to restore into.
+/// @param file_name The path to the checkpoint file.
+///
+void Defs_restore(defs_ptr defs, const std::string& file_name) {
     defs->restore(file_name);
 }
 
-std::string simulate(defs_ptr defs) {
+///
+/// @brief Run a simulation of the definitions and return any error message.
+///
+/// The output `.def` file is named after the first suite, or `"pyext.def"` if
+/// no suites are present.
+///
+/// @param defs The definitions to simulate.
+/// @return An empty string on success, otherwise an error message from the simulator.
+///
+std::string Defs_simulate(defs_ptr defs) {
     if (defs.get()) {
         // name output file after name of the first suite
         std::string defs_filename = "pyext.def";
@@ -91,33 +123,79 @@ std::string simulate(defs_ptr defs) {
     return std::string();
 }
 
-SState::State get_server_state(defs_ptr self) {
+///
+/// @brief Return the server state of the definitions.
+///
+/// @param self The definitions.
+/// @return The current server state.
+///
+SState::State Defs_get_server_state(defs_ptr self) {
     return self->server_state().get_state();
 }
 
-/// Since we don't pass in a child pos, the nodes are added to the end
-suite_ptr add_suite(defs_ptr self, suite_ptr s) {
+///
+/// @brief Add a suite to the definitions and return it.
+///
+/// The suite is appended to the end of the suite list.
+///
+/// @param self The definitions.
+/// @param s The suite to add.
+/// @return The added suite.
+///
+suite_ptr Defs_add_suite(defs_ptr self, suite_ptr s) {
+    // Since we don't pass in a child pos, the nodes are added to the end
     self->addSuite(s);
     return s;
 }
 
-std::vector<task_ptr> get_all_tasks(defs_ptr self) {
+///
+/// @brief Return all task nodes in the definitions.
+///
+/// @param self The definitions.
+/// @return A vector of shared pointers to all task nodes.
+///
+std::vector<task_ptr> Defs_get_all_tasks(defs_ptr self) {
     return ecf::get_all_tasks_ptr(*self);
 }
 
-std::vector<node_ptr> get_all_nodes(defs_ptr self) {
+///
+/// @brief Return all nodes in the definitions.
+///
+/// @param self The definitions.
+/// @return A vector of shared pointers to all nodes.
+///
+std::vector<node_ptr> Defs_get_all_nodes(defs_ptr self) {
     return ecf::get_all_nodes_ptr(*self);
 }
 
-// Context management, Only used to provide indentation
-defs_ptr defs_enter(defs_ptr self) {
+///
+/// @brief Implement the Python context manager entry protocol.
+///
+/// @param self The definitions.
+/// @return \p self, enabling use in a `with` statement.
+///
+defs_ptr Defs_enter(defs_ptr self) {
     return self;
 }
-bool defs_exit(defs_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
+
+///
+/// @brief Implement the Python context manager exit protocol.
+///
+/// @return false (exceptions are not suppressed).
+///
+bool Defs_exit(defs_ptr self, const py::object& type, const py::object& value, const py::object& traceback) {
     return false;
 }
 
-std::string check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose) {
+///
+/// @brief Check job creation for all tasks in the definitions.
+///
+/// @param defs The definitions to check.
+/// @param throw_on_error If true, raise a std::runtime_error when job creation fails.
+/// @param verbose If true, enable verbose output during the check.
+/// @return An empty string on success, otherwise an error message.
+///
+std::string Defs_check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose) {
     job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
     if (verbose) {
         jobCtrl->set_verbose(verbose);
@@ -129,20 +207,52 @@ std::string check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose)
     return jobCtrl->get_error_msg();
 }
 
-// Add  server user variables
-defs_ptr add_variable(defs_ptr self, const std::string& name, const std::string& value) {
+///
+/// @brief Add or update a user variable on the definitions server state using a name/value string pair.
+///
+/// @param self The definitions.
+/// @param name The variable name.
+/// @param value The variable value.
+/// @return The definitions (for method chaining).
+///
+defs_ptr Defs_add_variable_string(defs_ptr self, const std::string& name, const std::string& value) {
     self->server_state().add_or_update_user_variables(name, value);
     return self;
 }
-defs_ptr add_variable_int(defs_ptr self, const std::string& name, int value) {
+
+///
+/// @brief Add or update a user variable on the definitions server state using a name/integer pair.
+///
+/// @param self The definitions.
+/// @param name The variable name.
+/// @param value The integer value, converted to a string before storage.
+/// @return The definitions (for method chaining).
+///
+defs_ptr Defs_add_variable_int(defs_ptr self, const std::string& name, int value) {
     self->server_state().add_or_update_user_variables(name, ecf::convert_to<std::string>(value));
     return self;
 }
-defs_ptr add_variable_var(defs_ptr self, const Variable& var) {
+
+///
+/// @brief Add or update a user variable on the definitions server state from a Variable object.
+///
+/// @param self The definitions.
+/// @param var The variable to add or update.
+/// @return The definitions (for method chaining).
+///
+defs_ptr Defs_add_variable_variable(defs_ptr self, const Variable& var) {
     self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     return self;
 }
-defs_ptr add_variable_dict(defs_ptr self, const py::dict& dict) {
+
+///
+/// @brief Add or update user variables on the definitions server state from a Python dictionary.
+///
+/// @param self The definitions.
+/// @param dict A Python dictionary mapping variable names (str) to values (str).
+/// @return The definitions (for method chaining).
+///
+defs_ptr Defs_add_variable_dict(defs_ptr self, const py::dict& dict) {
     std::vector<std::pair<std::string, std::string>> vec;
     pyutil_dict_to_str_vec(dict, vec);
     std::vector<std::pair<std::string, std::string>>::iterator i;
@@ -152,23 +262,29 @@ defs_ptr add_variable_dict(defs_ptr self, const py::dict& dict) {
     }
     return self;
 }
-void delete_variable(defs_ptr self, const std::string& name) {
+
+///
+/// @brief Delete a user variable from the definitions server state.
+///
+/// Passing an empty string deletes all user variables.
+///
+/// @param self The definitions.
+/// @param name The name of the variable to delete, or an empty string to delete all user variables.
+///
+void Defs_delete_variable(defs_ptr self, const std::string& name) {
     self->server_state().delete_user_variable(name);
 }
 
-void sort_attributes(defs_ptr self, ecf::Attr::Type attr) {
-    self->sort_attributes(attr);
-}
-void sort_attributes1(defs_ptr self, ecf::Attr::Type attr, bool recurse) {
-    self->sort_attributes(attr, recurse);
-}
-void sort_attributes2(defs_ptr self, ecf::Attr::Type attr, bool recurse, const py::list& list) {
-    std::vector<std::string> no_sort;
-    pyutil_list_to_str_vec(list, no_sort);
-    self->sort_attributes(attr, recurse, no_sort);
-}
-
-void sort_attributes3(defs_ptr self, const std::string& attribute_name, bool recursive, const py::list& list) {
+///
+/// @brief Sort attributes of the given type across the definitions.
+///
+/// @param self The definitions.
+/// @param attribute_name The attribute type name (case-insensitive).
+/// @param recursive If true, sort recursively through all child nodes.
+/// @param list A list of node names to exclude from sorting.
+/// @throws std::runtime_error if \p attribute_name is not a recognised attribute type.
+///
+void Defs_sort_attributes(defs_ptr self, const std::string& attribute_name, bool recursive, const py::list& list) {
     std::string attribute = attribute_name;
     boost::algorithm::to_lower(attribute);
     ecf::Attr::Type attr = ecf::Attr::to_attr(attribute_name);
@@ -180,196 +296,307 @@ void sort_attributes3(defs_ptr self, const std::string& attribute_name, bool rec
     self->sort_attributes(attr, recursive, no_sort);
 }
 
-// Support sized and Container protocol
-size_t defs_len(defs_ptr self) {
+///
+/// @brief Return the number of suites in the definitions.
+///
+/// @param self The definitions.
+/// @return The number of suites.
+///
+size_t Defs_len(defs_ptr self) {
     return self->suiteVec().size();
 }
-bool defs_container(defs_ptr self, const std::string& name) {
+
+///
+/// @brief Return true if the definitions contain a suite with the given name.
+///
+/// @param self The definitions.
+/// @param name The suite name to look for.
+/// @return true if a matching suite exists, false otherwise.
+///
+bool Defs_container(defs_ptr self, const std::string& name) {
     return (self->findSuite(name)) ? true : false;
 }
 
-static py::object do_add(defs_ptr self, const py::object& arg) {
-    // std::cout << "defs::do_add \n";
-    if (arg.ptr() == py::object().ptr()) {
-        return py::object(self); // *IGNORE* None
+///
+/// @brief Add a single attribute or suite to the definitions.
+///
+/// Dispatches on the runtime type of \p arg:
+/// - `suite_ptr` / `Suite`: appended as a new suite.
+/// - `py::dict`: keys/values added as user variables.
+/// - `Edit`: variables extracted and added as user variables.
+/// - `py::list`: each element is added recursively.
+/// - `Variable`: added as a user variable.
+/// - `py::none()`: no-op.
+///
+/// @param self The definitions.
+/// @param arg The object to add.
+/// @return The definitions cast to a Python object (for method chaining).
+/// @throws std::runtime_error if \p arg is not a recognised type.
+///
+py::object Defs_add(defs_ptr self, const py::handle& arg) {
+    // When arg is None, there is nothing to do...
+    if (arg == py::none()) {
+        return py::cast(self);
     }
-    else if (py::extract<suite_ptr>(arg).check()) {
-        self->addSuite(py::extract<suite_ptr>(arg));
+
+    if (auto found = py_extract<suite_ptr>(arg); found) {
+        self->addSuite(found.value());
     }
-    else if (py::extract<py::dict>(arg).check()) {
-        add_variable_dict(self, py::extract<py::dict>(arg));
+    else if (auto found = py_extract<Suite>(arg); found) {
+        auto suite = std::make_shared<Suite>(found.value());
+        self->addSuite(suite);
     }
-    else if (py::extract<Edit>(arg).check()) {
-        Edit edit                        = py::extract<Edit>(arg);
+    else if (auto found = py_extract<py::dict>(arg); found) {
+        Defs_add_variable_dict(self, found.value());
+    }
+    else if (auto found = py_extract<Edit>(arg); found) {
+        Edit edit = found.value();
+
         const std::vector<Variable>& vec = edit.variables();
         for (const auto& i : vec) {
             self->server_state().add_or_update_user_variables(i.name(), i.theValue());
         }
     }
-    else if (py::extract<py::list>(arg).check()) {
-        py::list the_list = py::extract<py::list>(arg);
+    else if (auto found = py_extract<py::list>(arg); found) {
+        py::list the_list = found.value();
+
         int the_list_size = len(the_list);
         for (int i = 0; i < the_list_size; ++i) {
-            (void)do_add(self, the_list[i]); // recursive
+            (void)Defs_add(self, the_list[i]); // recursive
         }
     }
-    else if (py::extract<Variable>(arg).check()) {
-        Variable var = py::extract<Variable>(arg);
+    else if (auto found = py_extract<Variable>(arg); found) {
+        Variable var = found.value();
         self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     }
     else {
         throw std::runtime_error("ExportDefs::add : Unknown type");
     }
-    return py::object(self);
+    return py::cast(self);
 }
 
-static py::object add(py::tuple args, py::dict kwargs) {
-    int the_list_size = len(args);
-    defs_ptr self     = py::extract<defs_ptr>(args[0]); // self
-    if (!self) {
-        throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
+///
+/// @brief Add multiple positional arguments and keyword arguments to the definitions.
+///
+/// Each positional argument is forwarded to `Defs_add`. Keyword arguments are
+/// added as user variables.
+///
+/// @param self The definitions.
+/// @param args Positional arguments (suites, variables, dicts, lists, etc.).
+/// @param kwargs Keyword arguments added as user variables.
+/// @return The definitions cast to a Python object (for method chaining).
+///
+py::object Defs_add_args_kwargs(defs_ptr self, const py::args& args, const py::kwargs& kwargs) {
+    for (auto arg : args) {
+        Defs_add(self, arg);
     }
+    Defs_add_variable_dict(self, kwargs);
 
-    for (int i = 1; i < the_list_size; ++i) {
-        (void)do_add(self, args[i]);
-    }
-    (void)add_variable_dict(self, kwargs);
-
-    return py::object(self); // return defs as python object, relies class_<Defs>... for type registration
+    return py::cast(self); // return defs as python object, relies class_<Defs>... for type registration
 }
 
-static py::object defs_iadd(defs_ptr self, const py::list& list) {
-    // std::cout << "defs_iadd  list " << self->name() << "\n";
-    int the_list_size = len(list);
-    for (int i = 0; i < the_list_size; ++i) {
-        (void)do_add(self, list[i]);
+///
+/// @brief Add a list of attributes or suites to the definitions (in-place addition).
+///
+/// Each element of \p list is forwarded to `Defs_add`.
+///
+/// @param self The definitions.
+/// @param list A Python list of objects to add.
+/// @return The definitions cast to a Python object (for method chaining).
+///
+py::object Defs_iadd(defs_ptr self, const py::list& list) {
+    for (const auto& item : list) {
+        (void)Defs_add(self, item);
     }
-    return py::object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+    return py::cast(self); // return defs_ptr as python object, relies class_<Defs>... for type registration
 }
 
-static py::object defs_getattr(defs_ptr self, const std::string& attr) {
-    // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
+///
+/// @brief Implement dynamic attribute lookup on the definitions.
+///
+/// Looks up \p attr first as a suite name, then as a server-state user variable.
+///
+/// @param self The definitions.
+/// @param attr The attribute name to look up.
+/// @return The matching suite or variable as a Python object.
+/// @throws std::runtime_error if no suite or variable with the given name is found.
+///
+py::object Defs_getattr(defs_ptr self, const std::string& attr) {
     suite_ptr child = self->findSuite(attr);
     if (child) {
-        return py::object(child);
+        return py::cast(child);
     }
 
     Variable var = self->server_state().findVariable(attr);
     if (!var.empty()) {
-        return py::object(var);
+        return py::cast(var);
     }
 
     throw std::runtime_error(MESSAGE("ExportDefs::defs_getattr : function of name '"
                                      << attr << "' does not exist *OR* suite or defs variable"));
 }
 
-py::object defs_raw_constructor(py::tuple args, py::dict kw) {
-    // cout << "defs_raw_constructor  len(args):" << len(args) << endl;
-    // args[0] is Defs(i.e self)
-    py::list the_list;
-    std::string name;
-    for (int i = 1; i < len(args); ++i) {
-        if (py::extract<std::string>(args[i]).check()) {
-            name = py::extract<std::string>(args[i]);
-        }
-        else {
-            the_list.append(args[i]);
-        }
-    }
-    if (!name.empty() && len(the_list) > 0) {
-        throw std::runtime_error("defs_raw_constructor: Can't mix string with other arguments. String argument "
-                                 "specifies a path(loads a definition from disk)");
-    }
-    return args[0].attr("__init__")(the_list, kw); // calls -> init(list attr, dict kw)
-}
-
-defs_ptr defs_init(py::list the_list, py::dict kw) {
-    // cout << " defs_init: the_list: " << len(the_list) << " dict: " << len(kw) << endl;
+///
+/// @brief Create a Defs object by loading a definition or checkpoint file.
+///
+/// @param filename The path to the file to load.
+/// @return The loaded definitions.
+/// @throws std::runtime_error if the file cannot be restored.
+///
+defs_ptr Defs_make(const std::string& filename) {
     defs_ptr defs = Defs::create();
-    (void)add_variable_dict(defs, kw);
-    (void)defs_iadd(defs, the_list);
+
+    std::string errorMsg, warningMsg;
+    if (!defs->restore(filename, errorMsg, warningMsg)) {
+        throw std::runtime_error(errorMsg);
+    }
+    if (!warningMsg.empty()) {
+        std::cerr << warningMsg;
+    }
     return defs;
 }
 
-void export_Defs() {
-    py::class_<Defs, defs_ptr>("Defs", DefsDoc::add_definition_doc(), py::init<>("Create a empty Defs"))
-        .def("__init__", py::raw_function(&defs_raw_constructor, 0)) // will call -> task_init
-        .def("__init__", py::make_constructor(&defs_init))
-        .def("__init__", py::make_constructor(&create_defs), DefsDoc::add_definition_doc())
-        .def(py::self == py::self)                 // __eq__
-        .def("__copy__", pyutil_copy_object<Defs>) // __copy__ uses copy constructor
-        .def("__str__", convert_to_string)         // __str__
-        .def("__enter__", &defs_enter)             // allow with statement, hence indentation support
-        .def("__exit__", &defs_exit)               // allow with statement, hence indentation support
-        .def("__len__", &defs_len)                 // Sized protocol
-        .def("__contains__", &defs_container)      // Container protocol
-        .def("__iter__", py::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
-        .def("__getattr__", &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't
-                                              actually exist on the object itself will be passed to __getattr__*/
-        .def("__iadd__", &defs_iadd) // defs += [ Suite('s1'), Edit(var='value'), Variable('a','b') [ Suite('t2') ] ]
-        .def("__iadd__", &do_add)    // defs += Suite("s1")
-        .def("__add__", &do_add)
-        .def("add", raw_function(add, 1), DefsDoc::add())
-        .def("add_suite", &add_suite, DefsDoc::add_suite_doc())
+///
+/// @brief Construct a Defs object with optional initial suites and variables.
+///
+/// @param args Positional arguments forwarded to `Defs_add_args_kwargs`.
+/// @param kw Keyword arguments added as user variables.
+/// @return The newly created Defs.
+///
+defs_ptr Defs_init(const py::args& args, const py::kwargs& kw) {
+    defs_ptr defs = Defs::create();
+    Defs_add_args_kwargs(defs, args, kw);
+    return defs;
+}
+
+} // namespace
+
+void export_Defs(py::module& m) {
+
+    py::class_<Defs, defs_ptr>(m, "Defs", py::dynamic_attr(), DefsDoc::add_definition_doc())
+
+        .def(py::init<>(), "Create an empty Defs")
+        .def(py::init(&Defs_make), DefsDoc::add_definition_doc())
+        .def(py::init(&Defs_init))
+
+        .def(py::self == py::self)
+        .def("__copy__", pyutil_copy_object<Defs>)
+        .def("__str__", Defs_str)
+
+        // *** Iteration ***
+
+        .def(
+            "__iter__",
+            [](const Defs& s) { return py::make_iterator(s.suiteVec().begin(), s.suiteVec().end()); },
+            py::keep_alive<0, 1>())
+        .def("__len__", &Defs_len)
+        .def("__contains__", &Defs_container)
+
+        // *** Operators ***
+
+        .def("__add__", &Defs_add)
+        .def("__iadd__", &Defs_iadd) // defs += [ Suite('s1'), Edit(var='value'), Variable('a','b') [ Suite('t2') ] ]
+        .def("__iadd__", &Defs_add)  // defs += Suite("s1")
+
+        // *** Context Manager ***
+
+        .def("__enter__", &Defs_enter) // allow with statement, hence indentation support
+        .def("__exit__", &Defs_exit)   // allow with statement, hence indentation support
+
+        // *** Dynamic Attributes ***
+
+        .def("__getattr__", &Defs_getattr)
+
+        .def("add", &Defs_add_args_kwargs, DefsDoc::add())
+
+        .def("add_suite", &Defs_add_suite, DefsDoc::add_suite_doc())
         .def("add_suite", &Defs::add_suite, GlossaryDoc::list())
+
         .def("add_extern", &Defs::add_extern, DefsDoc::add_extern_doc())
+
         .def("auto_add_externs", &Defs::auto_add_externs, DefsDoc::add_extern_doc())
-        .def("add_variable", &add_variable, DefsDoc::add_variable_doc())
-        .def("add_variable", &add_variable_int)
-        .def("add_variable", &add_variable_var)
-        .def("add_variable", &add_variable_dict)
-        .def("sort_attributes", &sort_attributes)
-        .def("sort_attributes", &sort_attributes1)
-        .def("sort_attributes", &sort_attributes2)
+
+        .def("add_variable", &Defs_add_variable_string, DefsDoc::add_variable_doc())
+        .def("add_variable", &Defs_add_variable_int)
+        .def("add_variable", &Defs_add_variable_variable)
+        .def("add_variable", &Defs_add_variable_dict)
+
         .def("sort_attributes",
-             &sort_attributes3,
-             (py::arg("attribute_type"), py::arg("recursive") = true, py::arg("no_sort") = py::list()))
-        .def("sort_attributes", &Defs::sort_attributes, (py::arg("attribute_type"), py::arg("recursive") = true))
-        .def("delete_variable", &delete_variable, "An empty string will delete all user variables")
+             &Defs_sort_attributes,
+             py::arg("attribute_type"),
+             py::arg("recursive") = true,
+             py::arg("no_sort")   = py::list())
+        .def("sort_attributes",
+             &Defs::sort_attributes,
+             py::arg("attribute_type"),
+             py::arg("recursive") = true,
+             py::arg("no_sort")   = py::list())
+
+        .def("delete_variable", &Defs_delete_variable, "An empty string will delete all user variables")
+
         .def("find_suite", &Defs::findSuite, "Given a name, find the corresponding `suite`_")
+
         .def("find_abs_node", &Defs::findAbsNode, "Given a path, find the the `node`_")
+
         .def("find_node_path",
              &Defs::find_node_path,
              "Given a type(suite,family,task) and a name, return path of the first match, otherwise return an empty "
              "string")
+
         .def("find_node", &Defs::find_node, "Given a type(suite,family,task) and a path to a node, return the node.")
-        .def("get_all_nodes", &get_all_nodes, "Returns all the `node`_\\ s in the definition")
-        .def("get_all_tasks", &get_all_tasks, "Returns all the `task`_ nodes")
+
+        .def("get_all_nodes", &Defs_get_all_nodes, "Returns all the `node`_\\ s in the definition")
+
+        .def("get_all_tasks", &Defs_get_all_tasks, "Returns all the `task`_ nodes")
+
         .def("has_time_dependencies",
              &Defs::hasTimeDependencies,
              "returns True if the `suite definition`_ has any time `dependencies`_")
+
         .def("save_as_checkpt",
              &Defs::write_to_checkpt_file,
              "Save the in memory `suite definition`_ as a `check point`_ file. This includes all node state.")
-        .def("restore_from_checkpt",
-             &restore_from_checkpt,
-             "Restore the `suite definition`_ from a `check point`_ file stored on disk")
-        .def("save_as_defs",
-             &save_as_defs,
-             "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
-        .def("save_as_defs",
-             &save_as_defs_1,
-             "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
-        .def("check", &check_defs, DefsDoc::check())
-        .def("simulate", &simulate, DefsDoc::simulate())
-        .def("check_job_creation",
-             &check_job_creation,
-             (py::arg("throw_on_error") = false, py::arg("verbose") = false),
-             DefsDoc::check_job_creation_doc())
-        .def("check_job_creation", &Defs::check_job_creation)
-        .def("generate_scripts", &Defs::generate_scripts, DefsDoc::generate_scripts_doc())
-        .def("get_state", &Defs::state)
-        .def("get_server_state", &get_server_state, DefsDoc::get_server_state())
-        .add_property("suites", py::range(&Defs::suite_begin, &Defs::suite_end), "Returns a list of `suite`_\\ s")
-        .add_property("externs", py::range(&Defs::extern_begin, &Defs::extern_end), "Returns a list of `extern`_\\ s")
-        .add_property("user_variables",
-                      py::range(&Defs::user_variables_begin, &Defs::user_variables_end),
-                      "Returns a list of user defined `variable`_\\ s")
-        .add_property("server_variables",
-                      py::range(&Defs::server_variables_begin, &Defs::server_variables_end),
-                      "Returns a list of server `variable`_\\ s");
 
-#if ECF_ENABLE_PYTHON_PTR_REGISTER
-    py::register_ptr_to_python<defs_ptr>(); // needed for mac and boost 1.6
-#endif
+        .def("restore_from_checkpt",
+             &Defs_restore,
+             "Restore the `suite definition`_ from a `check point`_ file stored on disk")
+
+        .def("save_as_defs",
+             &Defs_save_as_defs_with_given_style,
+             "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
+
+        .def("save_as_defs",
+             &Defs_save_as_defs_with_default_style,
+             "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
+
+        .def("check", &Defs_check, DefsDoc::check())
+
+        .def("simulate", &Defs_simulate, DefsDoc::simulate())
+
+        .def("check_job_creation",
+             &Defs_check_job_creation,
+             py::arg("throw_on_error") = false,
+             py::arg("verbose")        = false,
+             DefsDoc::check_job_creation_doc())
+
+        .def("check_job_creation", &Defs::check_job_creation)
+
+        .def("generate_scripts", &Defs::generate_scripts, DefsDoc::generate_scripts_doc())
+
+        .def("get_state", &Defs::state)
+
+        .def("get_server_state", &Defs_get_server_state, DefsDoc::get_server_state())
+
+        .def_property_readonly(
+            "suites",
+            py::cpp_function([](const Defs& s) { return py::make_iterator(s.suiteVec().begin(), s.suiteVec().end()); },
+                             py::keep_alive<0, 1>()),
+            "Returns a list of `suite`_\\ s")
+
+        .def_property_readonly("externs", &Defs::externs, "Returns a list of `extern`_\\ s")
+
+        .def_property_readonly(
+            "user_variables", &Defs::user_variables, "Returns a list of user defined `variable`_\\ s")
+
+        .def_property_readonly("server_variables", &Defs::server_variables, "Returns a list of server `variable`_\\ s");
 }

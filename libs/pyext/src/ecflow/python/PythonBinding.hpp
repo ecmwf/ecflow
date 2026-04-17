@@ -11,11 +11,45 @@
 #ifndef ecflow_python_PythonBinding_HPP
 #define ecflow_python_PythonBinding_HPP
 
-#include <boost/python.hpp>
-#include <boost/python/docstring_options.hpp>
-#include <boost/python/raw_function.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <pybind11/iostream.h>
+#include <pybind11/operators.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 
-namespace py = boost::python;
+#include "ecflow/node/NodeFwd.hpp"
+
+namespace py = pybind11;
+
+template <typename T>
+std::optional<T> py_extract(py::object obj) {
+    if (obj.is_none()) {
+        return std::nullopt;
+    }
+
+    if constexpr (std::is_same_v<T, node_ptr>) {
+        // special handling of node_ptr, as py::isinstance<node_ptr> doesn't work due to node_ptr being a shared_ptr
+        return py::cast<T>(obj);
+    }
+    else if (py::isinstance<T>(obj)) {
+        return py::cast<T>(obj);
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+template <typename T>
+std::optional<T> py_extract(py::handle obj) {
+    if (obj.is_none()) {
+        return std::nullopt;
+    }
+    if (py::isinstance<T>(obj)) {
+        return py::cast<T>(obj);
+    }
+    else {
+        return std::nullopt;
+    }
+}
 
 #endif /* ecflow_python_PythonBinding_HPP */
