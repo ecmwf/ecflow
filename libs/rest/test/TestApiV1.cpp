@@ -35,11 +35,20 @@ const std::string API_KEY_pbkdf2  = TokenFile::generate_token();
 const std::string API_KEY_expired = TokenFile::generate_token();
 const std::string API_KEY_revoked = TokenFile::generate_token();
 
+int get_random_port(int min, int max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_int_distribution<> distrib(min, max);
+    return distrib(gen);
+}
+
 #if defined(ECF_TEST_HTTP_BACKEND)
-static const std::string ECF_TEST_HTTP_PORT        = "8081";
+static const int ECF_TEST_HTTP_PORT_NR             = get_random_port(8000, 8999);
+static const std::string ECF_TEST_HTTP_PORT        = std::to_string(ECF_TEST_HTTP_PORT_NR);
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_http_backend.json";
 #else
-static const std::string ECF_TEST_HTTP_PORT        = "8080";
+static const int ECF_TEST_HTTP_PORT_NR             = get_random_port(9000, 9999);
+static const std::string ECF_TEST_HTTP_PORT        = std::to_string(ECF_TEST_HTTP_PORT_NR);
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_tcpip_backend.json";
 #endif
 
@@ -138,11 +147,7 @@ httplib::Result request(const std::string& method,
                         const std::string& payload             = "",
                         const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
-#if defined(ECF_TEST_HTTP_BACKEND)
-    httplib::SSLClient c(API_HOST, 8081);
-#else
-    httplib::SSLClient c(API_HOST, 8080);
-#endif
+    httplib::SSLClient c(API_HOST, ECF_TEST_HTTP_PORT_NR);
 
     c.enable_server_certificate_verification(false);
     c.set_connection_timeout(3);
