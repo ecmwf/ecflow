@@ -85,8 +85,8 @@ bool Family::resolveDependencies(JobsParam& jobsParam) {
     return NodeContainer::resolveDependencies(jobsParam);
 }
 
-void Family::requeue(Requeue_args& args) {
-    NodeContainer::requeue(args);
+void Family::requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) {
+    NodeContainer::requeue(args, authorisation);
     update_generated_variables();
 }
 
@@ -105,13 +105,18 @@ const std::string& Family::debugType() const {
     return ecf::string_constants::family;
 }
 
-void Family::collateChanges(DefsDelta& changes) const {
+void Family::collateChanges(DefsDelta& changes, const ecf::AuthorisationContext& ctx) const {
+
+    if (!ctx.allows(this->absNodePath(), ecf::Allowed::READ)) {
+        return;
+    }
+
     /// All changes to family should be on ONE compound_memento_ptr
     compound_memento_ptr compound;
     NodeContainer::incremental_changes(changes, compound);
 
     // Traversal
-    NodeContainer::collateChanges(changes);
+    NodeContainer::collateChanges(changes, ctx);
 }
 
 // generated variables --------------------------------------------------------------------------

@@ -18,8 +18,10 @@
 #include "ecflow/core/Identity.hpp"
 #include "ecflow/core/Result.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
+#include "ecflow/node/permissions/ActivePermissions.hpp"
 
 class AbstractServer;
+class Defs;
 
 namespace ecf {
 
@@ -33,9 +35,8 @@ public:
 
     AuthorisationService();
 
-    AuthorisationService(const AuthorisationService& rhs)            = delete;
-    AuthorisationService& operator=(const AuthorisationService& rhs) = delete;
-
+    AuthorisationService(const AuthorisationService& rhs)                     = delete;
+    AuthorisationService& operator=(const AuthorisationService& rhs) noexcept = delete;
     AuthorisationService(AuthorisationService&& rhs) noexcept;
     AuthorisationService& operator=(AuthorisationService&& rhs) noexcept;
 
@@ -43,11 +44,6 @@ public:
 
     [[nodiscard]]
     bool good() const;
-
-    [[nodiscard]]
-    bool authenticate(const Identity& identity) const {
-        return true;
-    }
 
     /**
      * Verify if the identity is allowed to perform the action on the give paths.
@@ -58,23 +54,30 @@ public:
      * @return true if the identity is allowed to perform the action, false otherwise
      */
     [[nodiscard]]
-    bool allows(const Identity& identity, const AbstractServer& server, const std::string& permission) const;
+    bool allows(const Identity& identity, const Defs& defs, Allowed required) const;
 
     [[nodiscard]]
-    bool allows(const Identity& identity,
-                const AbstractServer& server,
-                const path_t& path,
-                const std::string& permission) const;
+    bool allows(const Identity& identity, const Defs& defs, const path_t& path, Allowed required) const;
 
     [[nodiscard]]
-    bool allows(const Identity& identity,
-                const AbstractServer& server,
-                const paths_t& paths,
-                const std::string& permission) const;
+    bool allows(const Identity& identity, const Defs& defs, const paths_t& paths, Allowed required) const;
+
+    [[nodiscard]]
+    static result_t load_permissions_unrestricted();
 
     [[nodiscard]]
     static result_t load_permissions_from_nodes();
+
+    [[nodiscard]]
     static result_t load_permissions_from_whitelist(const WhiteListFile& whitelist);
+
+    static AuthorisationService make_unrestricted();
+
+    static AuthorisationService make_from_nodes();
+
+    static AuthorisationService make_from_whitelist(const WhiteListFile& whitelist);
+
+    void init(const Permissions& permissions);
 
 private:
     struct Impl;

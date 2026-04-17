@@ -485,7 +485,7 @@ bool ExprParser::doParse(std::string& errorMsg) {
 }
 
 // The evaluation function for the AST
-void do_print(const tree_iter_t& i, const std::map<parser_id, std::string>& rule_names, ecf::Context& ctx) {
+void do_print(const tree_iter_t& i, const std::map<parser_id, std::string>& rule_names, ecf::FormatContext& ctx) {
     ecf::Indent l1(ctx);
     auto iter = rule_names.find(i->value.id());
     if (iter != rule_names.end()) {
@@ -505,7 +505,7 @@ void do_print(const tree_iter_t& i, const std::map<parser_id, std::string>& rule
 }
 
 void do_print(const tree_iter_t& i, const std::map<parser_id, std::string>& rule_names) {
-    ecf::Context ctx = ecf::Context::make_for(PrintStyle::DEFS);
+    auto ctx = ecf::FormatContext::make_for(PrintStyle::DEFS);
     do_print(i, rule_names, ctx);
 }
 
