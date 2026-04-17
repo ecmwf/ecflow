@@ -525,10 +525,10 @@ const char* NodeAttrDoc::autorestore_doc() {
            "This reduces the time to checkpoint the definition and network band width.\n"
            "The archived node is written to disk, as ECF_HOME/<host>.<port>.ECF_NAME.check,\n"
            "where '/' is replaced with ':' in ECF_NAME.\n"
-           "The node can be recovered using 'autorestore', begin,re-queue and manually via ecflow_client --restore.\n"
-           "The archiving is never immediate. The nodes are checked one a minute, and expired autoarchive nodes are "
+           "The node can be recovered using 'autorestore', begin, re-queue and manually via ecflow_client --restore.\n"
+           "The archiving is never immediate. The nodes are checked once a minute, and expired autoarchive nodes are "
            "archived.\n"
-           "If the node is suspended or any of its parent are suspended then then the archive does not happen.\n"
+           "If the node is suspended or any of its parents are suspended then the archive does not happen.\n"
            "\nConstructor::\n\n"
            "   Autorestore( list of paths )\n"
            "\nUsage:\n\n"
@@ -694,8 +694,7 @@ const char* NodeAttrDoc::cron_doc() {
            "    cron = Cron('+00:00 20:00 00:30', days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])\n\n"
            "    # Run relative to suite start time or task requeue time\n"
            "    cron = Cron('+01:30',days_of_week=[0,1,2,3,4,5,6])\n\n"
-
-           "    # Run relative to suite start time or task requeue time\n"
+           "    # Run relative to suite start time or task requeue time with multiple parameters\n"
            "    cron = Cron('+00:15 23:00 00:30', days_of_week=[0,1,2],days_of_month=[4,5,6], months=[1,2,3])\n\n"
 
            "    # Define Cron based on start/end/increment\n"
