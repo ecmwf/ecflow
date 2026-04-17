@@ -243,7 +243,7 @@ public:
                     {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"});
 
         // Wait for server to start...
-        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
         return server;
     }
