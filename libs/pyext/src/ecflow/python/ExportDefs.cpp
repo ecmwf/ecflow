@@ -193,28 +193,28 @@ static py::object do_add(defs_ptr self, const py::object& arg) {
     if (arg.ptr() == py::object().ptr()) {
         return py::object(self); // *IGNORE* None
     }
-    else if (py::extract<suite_ptr>(arg).check()) {
-        self->addSuite(py::extract<suite_ptr>(arg));
+    else if (auto extracted = py::extract<suite_ptr>(arg); extracted.check()) {
+        self->addSuite(extracted());
     }
-    else if (py::extract<py::dict>(arg).check()) {
-        add_variable_dict(self, py::extract<py::dict>(arg));
+    else if (auto extracted = py::extract<py::dict>(arg); extracted.check()) {
+        add_variable_dict(self, extracted());
     }
-    else if (py::extract<Edit>(arg).check()) {
-        Edit edit                        = py::extract<Edit>(arg);
+    else if (auto extracted = py::extract<Edit>(arg); extracted.check()) {
+        Edit edit                        = extracted();
         const std::vector<Variable>& vec = edit.variables();
         for (const auto& i : vec) {
             self->server_state().add_or_update_user_variables(i.name(), i.theValue());
         }
     }
-    else if (py::extract<py::list>(arg).check()) {
-        py::list the_list = py::extract<py::list>(arg);
+    else if (auto extracted = py::extract<py::list>(arg); extracted.check()) {
+        py::list the_list = extracted();
         int the_list_size = len(the_list);
         for (int i = 0; i < the_list_size; ++i) {
             (void)do_add(self, the_list[i]); // recursive
         }
     }
-    else if (py::extract<Variable>(arg).check()) {
-        Variable var = py::extract<Variable>(arg);
+    else if (auto extracted = py::extract<Variable>(arg); extracted.check()) {
+        Variable var = extracted();
         self->server_state().add_or_update_user_variables(var.name(), var.theValue());
     }
     else {
@@ -269,8 +269,8 @@ py::object defs_raw_constructor(py::tuple args, py::dict kw) {
     py::list the_list;
     std::string name;
     for (int i = 1; i < len(args); ++i) {
-        if (py::extract<std::string>(args[i]).check()) {
-            name = py::extract<std::string>(args[i]);
+        if (auto extracted = py::extract<std::string>(args[i]); extracted.check()) {
+            name = extracted();
         }
         else {
             the_list.append(args[i]);

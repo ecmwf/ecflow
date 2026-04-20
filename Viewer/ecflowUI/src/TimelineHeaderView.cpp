@@ -642,21 +642,16 @@ void MainTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
         if (actSec % majorTick == 0) {
             painter->drawLine(xp, majorTickTop, xp, majorTickBottom);
 
+            const char* format = majorTick < 60 ? "H:mm:ss" : "H:mm";
+
             QString s;
-            if (majorTick < 60) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-                s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, Qt::UTC).toString("H:mm:ss");
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+            s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, QTimeZone::utc()).toString(format);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+            s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, Qt::UTC).toString(format);
 #else
-                s = QDateTime::fromMSecsSinceEpoch(actSec * 1000).toUTC().toString("H:mm:ss");
+            s = QDateTime::fromMSecsSinceEpoch(actSec * 1000).toUTC().toString(format);
 #endif
-            }
-            else {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-                s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, Qt::UTC).toString("H:mm");
-#else
-                s = QDateTime::fromMSecsSinceEpoch(actSec * 1000).toUTC().toString("H:mm");
-#endif
-            }
 
             int textW = ViewerUtil::textWidth(fm_, s);
             painter->setFont(font_);
@@ -933,21 +928,16 @@ void NodeTimelineHeader::renderTimeline(const QRect& rect, QPainter* painter, in
         if (actSec % majorTick == 0) {
             painter->drawLine(xp, majorTickTop, xp, majorTickBottom);
 
+            const char* format = majorTick < 60 ? "H:mm:ss" : "H:mm";
+
             QString s;
-            if (majorTick < 60) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-                s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, Qt::UTC).toString("H:mm:ss");
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+            s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, QTimeZone::utc()).toString(format);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+            s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, Qt::UTC).toString(format);
 #else
-                s = QDateTime::fromMSecsSinceEpoch(actSec * 1000).toUTC().toString("H:mm:ss");
+            s = QDateTime::fromMSecsSinceEpoch(actSec * 1000).toUTC().toString(format);
 #endif
-            }
-            else {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-                s = QDateTime::fromMSecsSinceEpoch(actSec * 1000, Qt::UTC).toString("H:mm");
-#else
-                s = QDateTime::fromMSecsSinceEpoch(actSec * 1000).toUTC().toString("H:mm");
-#endif
-            }
 
             int textW = ViewerUtil::textWidth(fm_, s);
             painter->setFont(font_);

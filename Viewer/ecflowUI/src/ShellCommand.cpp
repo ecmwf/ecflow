@@ -97,7 +97,7 @@ ShellCommand::ShellCommand(const std::string& cmdStr, const std::string& cmdDefS
 
     startTime_ = QDateTime::currentDateTime();
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     proc_->start("/bin/sh", QStringList() << "-c" << command_);
 #else
     proc_->start("/bin/sh -c \"" + command_ + "\"");

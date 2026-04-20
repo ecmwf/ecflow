@@ -32,7 +32,7 @@ bool EditScriptCmd::equals(ClientToServerCmd* rhs) const {
     if (!the_rhs) {
         return false;
     }
-    if (path_to_node_ != the_rhs->path_to_node()) {
+    if (path_to_node_ != the_rhs->pathToNode()) {
         return false;
     }
     if (edit_type_ != the_rhs->edit_type()) {

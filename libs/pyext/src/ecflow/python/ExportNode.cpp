@@ -403,12 +403,12 @@ static py::object do_rshift(node_ptr self, const py::object& arg) {
     // std::cout << "do_rshift\n";
     (void)NodeUtil::do_add(self, arg);
 
-    if (py::extract<node_ptr>(arg).check()) {
+    if (auto extracted = py::extract<node_ptr>(arg); extracted.check()) {
         NodeContainer* nc = self->isNodeContainer();
         if (!nc) {
             throw std::runtime_error("ExportNode::do_rshift() : Can only add a child to Suite or Family");
         }
-        node_ptr child = py::extract<node_ptr>(arg);
+        node_ptr child = extracted();
 
         std::vector<node_ptr> children;
         nc->immediateChildren(children);
@@ -435,13 +435,13 @@ static py::object do_lshift(node_ptr self, const py::object& arg) {
     // std::cout << "do_lshift : " << self->name() << "\n"; cout << flush;
     (void)NodeUtil::do_add(self, arg);
 
-    if (py::extract<node_ptr>(arg).check()) {
+    if (auto extracted = py::extract<node_ptr>(arg); extracted.check()) {
 
         NodeContainer* nc = self->isNodeContainer();
         if (!nc) {
             throw std::runtime_error("ExportNode::do_lshift() : Can only add a child to Suite or Family");
         }
-        node_ptr child = py::extract<node_ptr>(arg);
+        node_ptr child = extracted();
 
         std::vector<node_ptr> children;
         nc->immediateChildren(children);

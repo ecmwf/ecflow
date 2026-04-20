@@ -96,7 +96,7 @@ std::string SCPort::next_only(bool debug) {
     if (debug) {
         std::cout << " SCPort::next_only() seed_port(" << thePort_ << ")\n";
     }
-    return SCPort::find_free_port(thePort_, debug);
+    return SCPort::find_available_port(std::to_string(thePort_));
 }
 
 bool SCPort::is_free_port(int port, bool debug) {
@@ -111,8 +111,8 @@ bool SCPort::is_free_port(int port, bool debug) {
     }
 
     ClientInvoker client;
-    client.set_retry_connection_period(1); // avoid long wait
-    client.set_connection_attempts(1);     // avoid long wait
+    client.set_retry_connection_period(std::chrono::seconds{1}); // avoid long wait
+    client.set_connection_attempts(1);                           // avoid long wait
 
     const auto the_port = ecf::convert_to<std::string>(port);
     try {
@@ -167,8 +167,8 @@ std::string SCPort::find_free_port(int seed_port_number, bool debug) {
     int the_port = seed_port_number;
     std::string free_port;
     ClientInvoker client;
-    client.set_retry_connection_period(1); // avoid long wait
-    client.set_connection_attempts(1);     // avoid long wait
+    client.set_retry_connection_period(std::chrono::seconds{1}); // avoid long wait
+    client.set_connection_attempts(1);                           // avoid long wait
     while (true) {
         free_port = ecf::convert_to<std::string>(the_port);
         try {

@@ -46,8 +46,8 @@ py::object NodeUtil::node_raw_constructor(py::tuple args, py::dict kw) {
     py::list the_list;
     std::string name;
     for (int i = 1; i < len(args); ++i) {
-        if (py::extract<std::string>(args[i]).check()) {
-            name = py::extract<std::string>(args[i]);
+        if (auto extracted = py::extract<std::string>(args[i]); extracted.check()) {
+            name = extracted();
         }
         else {
             the_list.append(args[i]);
@@ -83,119 +83,118 @@ py::object NodeUtil::do_add(node_ptr self, const py::object& arg) {
         return py::object(self); // *IGNORE* None
     }
 
-    if (py::extract<Edit>(arg).check()) {
-        Edit edit                        = py::extract<Edit>(arg);
+    if (auto extracted = py::extract<Edit>(arg); extracted.check()) {
+        Edit edit                        = extracted();
         const std::vector<Variable>& vec = edit.variables();
         for (const auto& i : vec) {
             self->addVariable(i);
         }
     }
-    else if (py::extract<node_ptr>(arg).check()) {
+    else if (auto extracted = py::extract<node_ptr>(arg); extracted.check()) {
         // std::cout << "  do_add node_ptr\n";
         NodeContainer* nc = self->isNodeContainer();
         if (!nc) {
             throw std::runtime_error("ExportNode::add() : Can only add a child to Suite or Family");
         }
-        node_ptr child = py::extract<node_ptr>(arg);
-        nc->addChild(child);
+        nc->addChild(extracted());
     }
-    else if (py::extract<Event>(arg).check()) {
-        self->addEvent(py::extract<Event>(arg));
+    else if (auto extracted = py::extract<Event>(arg); extracted.check()) {
+        self->addEvent(extracted());
     }
-    else if (py::extract<Meter>(arg).check()) {
-        self->addMeter(py::extract<Meter>(arg));
+    else if (auto extracted = py::extract<Meter>(arg); extracted.check()) {
+        self->addMeter(extracted());
     }
-    else if (py::extract<Label>(arg).check()) {
-        self->addLabel(py::extract<Label>(arg));
+    else if (auto extracted = py::extract<Label>(arg); extracted.check()) {
+        self->addLabel(extracted());
     }
-    else if (py::extract<Trigger>(arg).check()) {
-        Trigger t = py::extract<Trigger>(arg);
+    else if (auto extracted = py::extract<Trigger>(arg); extracted.check()) {
+        Trigger t = extracted();
         self->py_add_trigger_expr(t.expr());
     }
-    else if (py::extract<Complete>(arg).check()) {
-        Complete t = py::extract<Complete>(arg);
+    else if (auto extracted = py::extract<Complete>(arg); extracted.check()) {
+        Complete t = extracted();
         self->py_add_complete_expr(t.expr());
     }
-    else if (py::extract<Limit>(arg).check()) {
-        self->addLimit(py::extract<Limit>(arg));
+    else if (auto extracted = py::extract<Limit>(arg); extracted.check()) {
+        self->addLimit(extracted());
     }
-    else if (py::extract<InLimit>(arg).check()) {
-        self->addInLimit(py::extract<InLimit>(arg));
+    else if (auto extracted = py::extract<InLimit>(arg); extracted.check()) {
+        self->addInLimit(extracted());
     }
-    else if (py::extract<DayAttr>(arg).check()) {
-        self->addDay(py::extract<DayAttr>(arg));
+    else if (auto extracted = py::extract<DayAttr>(arg); extracted.check()) {
+        self->addDay(extracted());
     }
-    else if (py::extract<DateAttr>(arg).check()) {
-        self->addDate(py::extract<DateAttr>(arg));
+    else if (auto extracted = py::extract<DateAttr>(arg); extracted.check()) {
+        self->addDate(extracted());
     }
-    else if (py::extract<ecf::TodayAttr>(arg).check()) {
-        self->addToday(py::extract<ecf::TodayAttr>(arg));
+    else if (auto extracted = py::extract<ecf::TodayAttr>(arg); extracted.check()) {
+        self->addToday(extracted());
     }
-    else if (py::extract<ecf::TimeAttr>(arg).check()) {
-        self->addTime(py::extract<ecf::TimeAttr>(arg));
+    else if (auto extracted = py::extract<ecf::TimeAttr>(arg); extracted.check()) {
+        self->addTime(extracted());
     }
-    else if (py::extract<ecf::CronAttr>(arg).check()) {
-        self->addCron(py::extract<ecf::CronAttr>(arg));
+    else if (auto extracted = py::extract<ecf::CronAttr>(arg); extracted.check()) {
+        self->addCron(extracted());
     }
-    else if (py::extract<ecf::LateAttr>(arg).check()) {
-        self->addLate(py::extract<ecf::LateAttr>(arg));
+    else if (auto extracted = py::extract<ecf::LateAttr>(arg); extracted.check()) {
+        self->addLate(extracted());
     }
-    else if (py::extract<ZombieAttr>(arg).check()) {
-        self->addZombie(py::extract<ZombieAttr>(arg));
+    else if (auto extracted = py::extract<ZombieAttr>(arg); extracted.check()) {
+        self->addZombie(extracted());
     }
-    else if (py::extract<RepeatDate>(arg).check()) {
-        self->addRepeat(Repeat(py::extract<RepeatDate>(arg)));
+    else if (auto extracted = py::extract<RepeatDate>(arg); extracted.check()) {
+        self->addRepeat(Repeat(extracted()));
     }
-    else if (py::extract<RepeatDateTime>(arg).check()) {
-        self->addRepeat(Repeat(py::extract<RepeatDateTime>(arg)));
+    else if (auto extracted = py::extract<RepeatDateTime>(arg); extracted.check()) {
+        self->addRepeat(Repeat(extracted()));
     }
-    else if (py::extract<RepeatDateList>(arg).check()) {
-        self->addRepeat(Repeat(py::extract<RepeatDateList>(arg)));
+    else if (auto extracted = py::extract<RepeatDateList>(arg); extracted.check()) {
+        self->addRepeat(Repeat(extracted()));
     }
-    else if (py::extract<RepeatInteger>(arg).check()) {
-        self->addRepeat(Repeat(py::extract<RepeatInteger>(arg)));
+    else if (auto extracted = py::extract<RepeatInteger>(arg); extracted.check()) {
+        self->addRepeat(Repeat(extracted()));
     }
-    else if (py::extract<RepeatEnumerated>(arg).check()) {
-        self->addRepeat(Repeat(py::extract<RepeatEnumerated>(arg)));
+    else if (auto extracted = py::extract<RepeatEnumerated>(arg); extracted.check()) {
+        self->addRepeat(Repeat(extracted()));
     }
-    else if (py::extract<RepeatString>(arg).check()) {
-        self->addRepeat(Repeat(py::extract<RepeatString>(arg)));
+    else if (auto extracted = py::extract<RepeatString>(arg); extracted.check()) {
+        self->addRepeat(Repeat(extracted()));
     }
-    else if (py::extract<RepeatDay>(arg).check()) {
-        self->addRepeat(Repeat(py::extract<RepeatDay>(arg)));
+    else if (auto extracted = py::extract<RepeatDay>(arg); extracted.check()) {
+        self->addRepeat(Repeat(extracted()));
     }
-    else if (py::extract<ecf::AutoCancelAttr>(arg).check()) {
-        self->addAutoCancel(py::extract<ecf::AutoCancelAttr>(arg));
+    else if (auto extracted = py::extract<ecf::AutoCancelAttr>(arg); extracted.check()) {
+        self->addAutoCancel(extracted());
     }
-    else if (py::extract<Defstatus>(arg).check()) {
-        Defstatus t = py::extract<Defstatus>(arg);
+    else if (auto extracted = py::extract<Defstatus>(arg); extracted.check()) {
+        Defstatus t = extracted();
         self->addDefStatus(t.state());
     }
-    else if (py::extract<ecf::AutoArchiveAttr>(arg).check()) {
-        self->add_autoarchive(py::extract<ecf::AutoArchiveAttr>(arg));
+    else if (auto extracted = py::extract<ecf::AutoArchiveAttr>(arg); extracted.check()) {
+        self->add_autoarchive(extracted());
     }
-    else if (py::extract<ecf::AutoRestoreAttr>(arg).check()) {
-        self->add_autorestore(py::extract<ecf::AutoRestoreAttr>(arg));
+    else if (auto extracted = py::extract<ecf::AutoRestoreAttr>(arg); extracted.check()) {
+        self->add_autorestore(extracted());
     }
-    else if (py::extract<VerifyAttr>(arg).check()) {
-        self->addVerify(py::extract<VerifyAttr>(arg));
+    else if (auto extracted = py::extract<VerifyAttr>(arg); extracted.check()) {
+        self->addVerify(extracted());
     }
-    else if (py::extract<py::list>(arg).check()) {
+    else if (auto extracted = py::extract<py::list>(arg); extracted.check()) {
         // std::cout << "  do_add list\n";
-        py::list the_list = py::extract<py::list>(arg);
+        py::list the_list = extracted();
         int the_list_size = len(the_list);
         for (int i = 0; i < the_list_size; ++i) {
             (void)do_add(self, the_list[i]); // recursive
         }
     }
-    else if (py::extract<ClockAttr>(arg).check()) {
+    else if (auto extracted = py::extract<ClockAttr>(arg); extracted.check()) {
         if (!self->isSuite()) {
             throw std::runtime_error("ExportNode::add() : Can only add a clock to a suite");
         }
-        self->isSuite()->addClock(py::extract<ClockAttr>(arg));
+        self->isSuite()->addClock(extracted());
     }
-    else if (py::extract<Variable>(arg).check()) {
-        self->addVariable(py::extract<Variable>(arg));
+    else if (auto extracted = py::extract<Variable>(arg); extracted.check()) {
+        self->addVariable(extracted());
     }
     else if (auto attr = py::extract<ecf::AvisoAttr>(arg); attr.check()) {
         self->addAviso(attr);

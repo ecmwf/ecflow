@@ -1007,7 +1007,11 @@ bool AttributeStateCondition::execute(VItem* item) {
 
 IsoDateCondition::IsoDateCondition(QString dateStr) {
     QDateTime d = QDateTime::fromString(dateStr, Qt::ISODate);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    d.setTimeZone(QTimeZone::utc());
+#else
     d.setTimeSpec(Qt::UTC);
+#endif
     if (d.isValid()) {
         secsSinceEpoch_ = d.toMSecsSinceEpoch() / 1000;
     }
@@ -1015,7 +1019,11 @@ IsoDateCondition::IsoDateCondition(QString dateStr) {
 
 std::string IsoDateCondition::print() {
     if (secsSinceEpoch_ > 0)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+        return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_ * 1000, QTimeZone::utc())
+            .toString(Qt::ISODate)
+            .toStdString();
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_ * 1000, Qt::UTC).toString(Qt::ISODate).toStdString();
 #else
         return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_ * 1000).toUTC().toString(Qt::ISODate).toStdString();
