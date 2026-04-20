@@ -90,8 +90,8 @@ BOOST_AUTO_TEST_CASE(test_autocancel_ast_node_reset) {
                         errorMsg);
 
     // Auto cancel should delete suite s2 and s3, leaving one suite i.e s1
-    BOOST_CHECK_MESSAGE(theDefs.suiteVec().size() == 1,
-                        "Expected to have 1 suites but found " << theDefs.suiteVec().size());
+    BOOST_CHECK_MESSAGE(theDefs.suites().size() == 1,
+                        "Expected to have 1 suites but found " << theDefs.suites().size());
 
     // The references to nodes in suites s2, s3 should have been cleared in suite s1
     {
@@ -144,8 +144,8 @@ BOOST_AUTO_TEST_CASE(test_autocancel_suite) {
     BOOST_CHECK_MESSAGE(simulator.run(theDefs, findTestDataLocation("test_autocancel_suite.def"), errorMsg), errorMsg);
 
     // make sure autocancel deletes the suite.
-    BOOST_CHECK_MESSAGE(theDefs.suiteVec().size() == 0,
-                        "Expected to have 0 suites but found " << theDefs.suiteVec().size());
+    BOOST_CHECK_MESSAGE(theDefs.suites().size() == 0,
+                        "Expected to have 0 suites but found " << theDefs.suites().size());
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_autocancel_suite.def") + ".log";

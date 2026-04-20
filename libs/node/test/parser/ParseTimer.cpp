@@ -179,8 +179,8 @@ int main(int argc, char* argv[]) {
 
     {
         timer.start();
-        for (suite_ptr s : defs.suiteVec()) {
-            test_find_task_using_path(s.get(), defs);
+        for (suite_ptr suite : defs.suites()) {
+            test_find_task_using_path(suite.get(), defs);
         }
         std::cout << " Test all paths can be found. time taken        = " << timer << std::endl;
     }
@@ -219,23 +219,23 @@ int main(int argc, char* argv[]) {
             std::cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";
         }
 
-        std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators
-        for (suite_ptr s : vec) {
-            std::vector<node_ptr> familyVec = s->nodeVec(); // make a copy, to avoid invalidating iterators
+        auto suites = defs.suites(); // make a copy, to avoid invalidating iterators
+        for (suite_ptr suite : suites) {
+            std::vector<node_ptr> familyVec = suite->nodeVec(); // make a copy, to avoid invalidating iterators
             for (node_ptr f : familyVec) {
                 if (!defs.deleteChild(f.get())) {
                     std::cout << "Failed to delete family\n";
                 }
             }
-            if (!s->nodeVec().empty()) {
-                std::cout << "Expected all Families to be deleted but found " << s->nodeVec().size() << "\n";
+            if (!suite->nodeVec().empty()) {
+                std::cout << "Expected all Families to be deleted but found " << suite->nodeVec().size() << "\n";
             }
-            if (!defs.deleteChild(s.get())) {
+            if (!defs.deleteChild(suite.get())) {
                 std::cout << "Failed to delete suite\n";
             }
         }
-        if (!defs.suiteVec().empty()) {
-            std::cout << "Expected all Suites to be deleted but found " << defs.suiteVec().size() << "\n";
+        if (!defs.suites().empty()) {
+            std::cout << "Expected all Suites to be deleted but found " << defs.suites().size() << "\n";
         }
 
         std::cout << " time for deleting all nodes                    = " << timer << std::endl;

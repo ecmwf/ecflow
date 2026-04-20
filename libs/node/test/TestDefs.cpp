@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_defs_absorb) {
     }
 
     theDefs.absorb(&otherDefs, true);
-    BOOST_CHECK_MESSAGE(otherDefs.suiteVec().empty(), "absorb failed");
+    BOOST_CHECK_MESSAGE(otherDefs.suites().empty(), "absorb failed");
 }
 
 BOOST_AUTO_TEST_CASE(test_defs_absorb_server_user_variables) {
@@ -74,8 +74,8 @@ BOOST_AUTO_TEST_CASE(test_defs_absorb_server_user_variables) {
 
     theDefs.absorb(&otherDefs, true);
 
-    BOOST_CHECK_MESSAGE(otherDefs.suiteVec().empty(), "absorb failed");
-    BOOST_CHECK_MESSAGE(theDefs.suiteVec().size() == 1, "absorb failed");
+    BOOST_CHECK_MESSAGE(otherDefs.suites().empty(), "absorb failed");
+    BOOST_CHECK_MESSAGE(theDefs.suites().size() == 1, "absorb failed");
     BOOST_CHECK_MESSAGE(theDefs.server_state().user_variables().size() == 3, "Expected 3 server user variables");
 }
 

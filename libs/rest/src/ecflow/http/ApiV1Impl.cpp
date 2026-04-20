@@ -140,8 +140,7 @@ ojson get_sparser_node_tree(const std::string& path) {
     ojson j;
 
     if (path == "/") {
-        const std::vector<suite_ptr> suites = get_defs()->suiteVec();
-        for (const auto& suite : suites) {
+        for (const auto& suite : get_defs()->suites()) {
             j[suite->name()] = ojson::object({});
 
             print_sparser_node(j[suite->name()], suite->nodeVec());
@@ -171,8 +170,8 @@ ojson get_node_tree(const std::string& path, bool add_id = false) {
     ojson j;
 
     if (path == "/") {
-        const std::vector<suite_ptr> suites = get_defs()->suiteVec();
-        j["suites"]                         = ojson::array();
+        const auto& suites = get_defs()->suites();
+        j["suites"]        = ojson::array();
         j["suites"].get_ptr<ojson::array_t*>()->reserve(suites.size());
 
         for (const auto& suite : suites) {
@@ -206,10 +205,8 @@ ojson get_node_tree(const std::string& path, bool add_id = false) {
 }
 
 ojson get_suites() {
-    auto suites = get_defs()->suiteVec();
-
     ojson j = ojson::array();
-    for (const auto& s : suites) {
+    for (const auto& s : get_defs()->suites()) {
         j.push_back(s->name());
     }
     return j;

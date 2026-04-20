@@ -125,7 +125,7 @@ void test_sync_scaffold(defs_change_cmd the_defs_change_command, const std::stri
 
         /// called create Defs should clear the flag. make sure server state, is synced
         defs_ptr the_client_defs = server_defs->client_suite_mgr().create_defs(client_handle, server_defs);
-        BOOST_CHECK_MESSAGE(the_client_defs->suiteVec().size() == 2, test_name << ": Expected 2 suites");
+        BOOST_CHECK_MESSAGE(the_client_defs->suites().size() == 2, test_name << ": Expected 2 suites");
         BOOST_CHECK_MESSAGE(server_defs->client_suite_mgr().handle_changed(client_handle) == false,
                             test_name << ": Expected handle_changed to be cleared after create_defs()");
         BOOST_CHECK_MESSAGE(server_defs->server_state().compare(the_client_defs->server_state()),
@@ -582,11 +582,11 @@ BOOST_AUTO_TEST_CASE(test_ssync_using_handle) {
 // =============================================================================================
 
 static defs_ptr create_the_server_defs() {
-    defs_ptr defs                    = create_server_defs();
-    std::vector<suite_ptr> suite_vec = defs->suiteVec();
-    for (size_t j = 0; j < suite_vec.size(); j++) {
-        suite_vec[j]->set_state_change_no(j);
-        suite_vec[j]->set_modify_change_no(j);
+    defs_ptr defs = create_server_defs();
+    auto suites   = defs->suites();
+    for (size_t j = 0; j < suites.size(); j++) {
+        suites[j]->set_state_change_no(j);
+        suites[j]->set_modify_change_no(j);
     }
     return defs;
 }

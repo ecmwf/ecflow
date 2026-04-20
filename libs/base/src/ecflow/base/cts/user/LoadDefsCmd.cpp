@@ -136,7 +136,7 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         // all errors, references are not resolved.
         as->updateDefs(defs, force_);
 
-        LOG_ASSERT(defs->suiteVec().size() == 0, "Expected suites to be transferred to server defs");
+        LOG_ASSERT(defs->suites().size() == 0, "Expected suites to be transferred to server defs");
     }
     LOG_ASSERT(as->defs()->externs().size() == 0, "Expected server to have no externs");
 

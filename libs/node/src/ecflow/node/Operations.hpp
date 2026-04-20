@@ -153,7 +153,7 @@ struct VisitorAll<Defs>
     void operator()(V&& v) {
         v(*this);
 
-        visit_all(defs_.suiteVec(), std::forward<V>(v));
+        visit_all(defs_.suites(), std::forward<V>(v));
     }
 
     Defs& defs_;

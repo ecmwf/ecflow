@@ -2179,7 +2179,7 @@ struct Writer<Defs, Stream>
         }
 
         // Write the children (i.e. suites)
-        for (const auto& s : item.suiteVec()) {
+        for (const auto& s : item.suites()) {
             Writer<Suite, Stream>::write(output, *s, ctx);
         }
 

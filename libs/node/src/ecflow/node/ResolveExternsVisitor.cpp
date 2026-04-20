@@ -27,7 +27,7 @@ ResolveExternsVisitor::ResolveExternsVisitor(Defs* defs)
 }
 
 void ResolveExternsVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
+    for (auto s : d->suites()) {
         s->acceptVisitTraversor(*this);
     }
 }

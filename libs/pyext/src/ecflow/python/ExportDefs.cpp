@@ -78,8 +78,8 @@ std::string simulate(defs_ptr defs) {
     if (defs.get()) {
         // name output file after name of the first suite
         std::string defs_filename = "pyext.def";
-        if (!defs->suiteVec().empty()) {
-            defs_filename = (*defs->suiteVec().begin())->name() + ".def";
+        if (!defs->suites().empty()) {
+            defs_filename = (*defs->suites().begin())->name() + ".def";
         }
 
         ecf::Simulator simulator;
@@ -182,7 +182,7 @@ void sort_attributes3(defs_ptr self, const std::string& attribute_name, bool rec
 
 // Support sized and Container protocol
 size_t defs_len(defs_ptr self) {
-    return self->suiteVec().size();
+    return self->suites().size();
 }
 bool defs_container(defs_ptr self, const std::string& name) {
     return (self->findSuite(name)) ? true : false;

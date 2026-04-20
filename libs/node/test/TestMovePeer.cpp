@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_move_peer) {
     s3->move_peer(s3_f1.get(), s3_f3.get()); // order is f1,f3,f2
     s3->move_peer(s3_f2.get(), s3_f3.get()); // order is f1,f3,f2
 
-    for (auto suite : defs.suiteVec()) {
+    for (auto suite : defs.suites()) {
         for (auto family : suite->familyVec()) {
 
             node_ptr t1 = defs.findAbsNode(family->absNodePath() + "/t1");

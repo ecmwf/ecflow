@@ -24,8 +24,8 @@ namespace ecf {
 DefsAnalyserVisitor::DefsAnalyserVisitor() = default;
 
 void DefsAnalyserVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
-        s->acceptVisitTraversor(*this);
+    for (auto suite : d->suites()) {
+        suite->acceptVisitTraversor(*this);
     }
 }
 

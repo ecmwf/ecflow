@@ -1386,9 +1386,7 @@ void VServer::endScan() {
         bool hasNotifications = server_->conf()->notificationsEnabled();
 
         // Scan the suits.This will recursively scan all nodes in the tree.
-        const std::vector<suite_ptr>& suites = defs->suiteVec();
-
-        for (const auto& suite : suites) {
+        for (const auto& suite : defs->suites()) {
             VNode* vn = new VSuiteNode(this, suite);
             totalNum_++;
             scan(vn, hasNotifications);

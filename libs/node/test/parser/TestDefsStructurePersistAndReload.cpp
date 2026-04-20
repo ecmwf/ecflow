@@ -80,9 +80,9 @@ BOOST_AUTO_TEST_CASE(test_find_task_using_paths) {
 
     MyDefsFixture theDefsFixture;
 
-    const std::vector<suite_ptr>& suiteVec = theDefsFixture.defsfile_.suiteVec();
-    for (suite_ptr s : suiteVec) {
-        test_find_task_using_path(s.get(), theDefsFixture.defsfile_);
+    const auto& suites = theDefsFixture.defsfile_.suites();
+    for (suite_ptr suite : suites) {
+        test_find_task_using_path(suite.get(), theDefsFixture.defsfile_);
     }
 }
 

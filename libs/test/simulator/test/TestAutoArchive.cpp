@@ -173,8 +173,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_ast_node_reset) {
                         errorMsg);
 
     // Auto archive should archive suite s2 and s3, leaving one suite i.e s1
-    const std::vector<suite_ptr>& suites = theDefs.suiteVec();
-    for (const auto& suite : suites) {
+    for (const auto& suite : theDefs.suites()) {
         if (suite->name() == "s2" || suite->name() == "s3") {
             BOOST_CHECK_MESSAGE(suite->get_flag().is_set(ecf::Flag::ARCHIVED),
                                 "Expected suite " << suite->absNodePath() << " to be archived");

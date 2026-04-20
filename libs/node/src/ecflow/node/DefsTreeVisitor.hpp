@@ -58,7 +58,7 @@ private:
     nodes_t nodes_at(const path_t& path) const {
         nodes_t nodes;
         if (path == "/") {
-            std::vector<suite_ptr> suites = defs_.suiteVec();
+            auto suites = defs_.suites();
             std::transform(std::begin(suites), std::end(suites), std::back_inserter(nodes), [](const suite_ptr& ptr) {
                 return static_cast<Node*>(ptr.get());
             });

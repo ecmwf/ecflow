@@ -111,16 +111,16 @@ static void test_sync_scaffold(defs_change_cmd the_defs_change_command,
         BOOST_CHECK_MESSAGE(*server_defs == *server_reply.client_defs(), "Server and client should be same after sync");
     }
     else {
-        BOOST_CHECK_MESSAGE(server_reply.client_defs()->suiteVec().size() == test_equality,
+        BOOST_CHECK_MESSAGE(server_reply.client_defs()->suites().size() == test_equality,
                             "Expected suite of size " << test_equality << " but found "
-                                                      << server_reply.client_defs()->suiteVec().size());
+                                                      << server_reply.client_defs()->suites().size());
     }
 }
 
 static void reorder_suites(defs_ptr theDefs) {
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/a", NOrder::ALPHA)));
-    auto names = ecf::algorithm::transform_to_vector(theDefs->suiteVec(), to_name);
+    auto names = ecf::algorithm::transform_to_vector(theDefs->suites(), to_name);
     BOOST_REQUIRE_MESSAGE(names == vector_abcd(),
                           "NOrder::ALPHA expected " << ecf::algorithm::join(vector_abcd())
                                                     << " but found: " << ecf::algorithm::join(names));
@@ -164,7 +164,7 @@ static void reorder_suites_using_handles(defs_ptr theDefs) {
                         "Expected 1 Client suites but found " << theDefs->client_suite_mgr().clientSuites().size());
 
     TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/a", NOrder::ALPHA)));
-    auto names = ecf::algorithm::transform_to_vector(theDefs->suiteVec(), to_name);
+    auto names = ecf::algorithm::transform_to_vector(theDefs->suites(), to_name);
     BOOST_REQUIRE_MESSAGE(names == vector_abcd(),
                           "NOrder::ALPHA  expected " << ecf::algorithm::join(vector_abcd())
                                                      << " but found: " << ecf::algorithm::join(names));
@@ -189,7 +189,7 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
         /// Don't call, data model function directly, since Ecf::server_ is false. *here*
         /// The suite should stay the same, only suite d's family should change
         TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d", NOrder::ALPHA)));
-        auto names = ecf::algorithm::transform_to_vector(theDefs->suiteVec(), to_name);
+        auto names = ecf::algorithm::transform_to_vector(theDefs->suites(), to_name);
         BOOST_REQUIRE_MESSAGE(names == vector_dcba(),
                               "expected " << ecf::algorithm::join(vector_dcba())
                                           << " but found: " << ecf::algorithm::join(names));

@@ -40,8 +40,8 @@ SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename)
 }
 
 void SimulatorVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
-        s->acceptVisitTraversor(*this);
+    for (suite_ptr suite : d->suites()) {
+        suite->acceptVisitTraversor(*this);
     }
 }
 

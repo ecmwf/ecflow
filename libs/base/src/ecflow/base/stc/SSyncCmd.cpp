@@ -237,7 +237,7 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
 
 #ifdef DEBUG_SERVER_SYNC
     if (the_server_defs) {
-        cout << ": no of suites(" << the_server_defs->suiteVec().size() << ")" << endl;
+        cout << ": no of suites(" << the_server_defs->suites().size() << ")" << endl;
     }
     else {
         cout << ": NULL defs!" << endl;

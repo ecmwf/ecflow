@@ -73,12 +73,12 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
     // If no suite name begin all suites, else begin the the specific suite
     if (suiteName_.empty()) {
 
-        const std::vector<suite_ptr>& suiteVec = defs->suiteVec();
-        size_t theSuiteVecSize                 = suiteVec.size();
+        const auto& suites = defs->suites();
         if (!force_) {
-            for (size_t s = 0; s < theSuiteVecSize; s++) {
+            size_t size = suites.size();
+            for (size_t s = 0; s < size; s++) {
                 /// check_suite_can_begin will throw if suite can't begin
-                defs->check_suite_can_begin(suiteVec[s]);
+                defs->check_suite_can_begin(suites[s]);
             }
         }
         else {

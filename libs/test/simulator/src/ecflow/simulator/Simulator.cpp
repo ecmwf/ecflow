@@ -52,7 +52,7 @@ bool Simulator::run(const std::string& theDefsFile, std::string& errorMsg) const
 
 bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string& errorMsg, bool do_checks) const {
 #ifdef DEBUG_LONG_RUNNING_SUITES
-    std::cout << "Simulator::run " << defs_filename << " no of suites " << theDefs.suiteVec().size() << endl;
+    std::cout << "Simulator::run " << defs_filename << " no of suites " << theDefs.suites().size() << endl;
 #endif
     // ****:NOTE:******
     // ** This simulator relies on the defs checking to set event and meter usedInTrigger()
@@ -119,8 +119,8 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
 
     // Do we have autocancel, must be done before.
     int hasAutoCancel = 0;
-    for (suite_ptr s : theDefs.suiteVec()) {
-        if (s->hasAutoCancel()) {
+    for (auto suite : theDefs.suites()) {
+        if (suite->hasAutoCancel()) {
             hasAutoCancel++;
         }
     }
@@ -134,8 +134,8 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     while (duration <= max_simulation_period) {
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
-        for (suite_ptr my_suite : theDefs.suiteVec()) {
-            cout << "duration: " << to_simple_string(duration) << " " << my_suite->calendar().toString()
+        for (auto suite : theDefs.suites()) {
+            cout << "duration: " << to_simple_string(duration) << " " << suite->calendar().toString()
                  << " +++++++++++++++++++++++++++++++++++ " << endl;
 
             // use following to snapshot definition state at a given point in time
@@ -155,8 +155,8 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
         }
 
         // Increment calendar per suite. *MUST* use *COPY* as update_calendar() can remove suites (auto-cancel)
-        std::vector<suite_ptr> suiteVec = theDefs.suiteVec();
-        for (suite_ptr suite : suiteVec) {
+        auto suites = theDefs.suites();
+        for (suite_ptr suite : suites) {
             boost::posix_time::time_duration max_duration_for_suite = simiVisitor.max_simulation_period(suite.get());
             if (duration < max_duration_for_suite) {
                 theDefs.update_calendar(suite.get(), calUpdateParams);
@@ -177,18 +177,18 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename, std::string
     // Ignore suites with autocancel, as suite may get deleted
     if (!simiVisitor.foundCrons() && (hasAutoCancel == 0)) {
         size_t completeSuiteCnt = 0;
-        for (suite_ptr s : theDefs.suiteVec()) {
-            if (s->state() == NState::COMPLETE) {
+        for (auto suite : theDefs.suites()) {
+            if (suite->state() == NState::COMPLETE) {
                 completeSuiteCnt++;
             }
         }
 
-        if ((theDefs.suiteVec().size() != completeSuiteCnt)) {
+        if ((theDefs.suites().size() != completeSuiteCnt)) {
             std::ostringstream iss; // inner stringstream, to avoid name clash with outer ostringstream ss
             iss << "\nDefs file " << defs_filename << "\n";
-            for (suite_ptr s : theDefs.suiteVec()) {
-                if (s->state() != NState::COMPLETE) {
-                    iss << "  suite '/" << s->name() << "' has not completed\n";
+            for (auto suite : theDefs.suites()) {
+                if (suite->state() != NState::COMPLETE) {
+                    iss << "  suite '/" << suite->name() << "' has not completed\n";
                 }
             }
             errorMsg += iss.str();

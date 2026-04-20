@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_add_remove) {
 
         defs_ptr created_defs = defs->client_suite_mgr().create_defs(1, defs); // clear the handle change
         BOOST_CHECK_MESSAGE(created_defs, "Expected defs to be created");
-        BOOST_CHECK_MESSAGE(created_defs->suiteVec().empty(), "Expected no suites");
+        BOOST_CHECK_MESSAGE(created_defs->suites().empty(), "Expected no suites");
         BOOST_CHECK_MESSAGE(!defs->client_suite_mgr().handle_changed(1),
                             "Expected handle changed to be cleared after create_defs()");
     }
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_add_remove) {
         BOOST_CHECK_MESSAGE(created_defs, "Expected defs to be created");
         BOOST_CHECK_MESSAGE(created_defs.get() == defs.get(),
                             "When *ALL* suites registered, the returned defs should be the same");
-        BOOST_CHECK_MESSAGE(created_defs->suiteVec().size() == suite_names.size(), "Not all suites created");
+        BOOST_CHECK_MESSAGE(created_defs->suites().size() == suite_names.size(), "Not all suites created");
     }
 
     // Now remove the suites from the handle
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_add_remove) {
 
         defs_ptr created_defs = defs->client_suite_mgr().create_defs(1, defs); // clear the handle change
         BOOST_CHECK_MESSAGE(created_defs, "Expected defs to be created");
-        BOOST_CHECK_MESSAGE(created_defs->suiteVec().empty(), "Expected no suites");
+        BOOST_CHECK_MESSAGE(created_defs->suites().empty(), "Expected no suites");
         BOOST_CHECK_MESSAGE(!defs->client_suite_mgr().handle_changed(1),
                             "Expected handle changed to be cleared after create_defs()");
     }
@@ -307,9 +307,9 @@ BOOST_AUTO_TEST_CASE(is_able_to_handle_cmd_add_remove) {
 
 static bool check_ordering(Defs& defs) {
     // make sure order of suites in handles is the same as server order
-    const std::vector<suite_ptr>& suite_vec = defs.suiteVec();
+    const auto& suites = defs.suites();
     std::vector<std::string> suite_names;
-    for (const auto& i : suite_vec) {
+    for (const auto& i : suites) {
         suite_names.push_back(i->name());
     }
 

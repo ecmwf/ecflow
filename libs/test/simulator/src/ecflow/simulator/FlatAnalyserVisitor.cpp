@@ -25,8 +25,8 @@ namespace ecf {
 FlatAnalyserVisitor::FlatAnalyserVisitor() = default;
 
 void FlatAnalyserVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
-        s->acceptVisitTraversor(*this);
+    for (auto suite : d->suites()) {
+        suite->acceptVisitTraversor(*this);
     }
 }
 

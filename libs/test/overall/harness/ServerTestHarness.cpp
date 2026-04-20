@@ -66,7 +66,7 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
     cout << "ServerTestHarness::doRun " << defs_filename_ << " timeout=" << timeout
          << "  waitForTestCompletion = " << waitForTestCompletion << "\n";
 #endif
-    BOOST_REQUIRE_MESSAGE(!theClientDefs.suiteVec().empty(), "No suite defined");
+    BOOST_REQUIRE_MESSAGE(!theClientDefs.suites().empty(), "No suite defined");
 
 #ifdef DEBUG_TEST_HARNESS
     cout << "   ServerTestHarness::doRun: Get the client exe. This can be client exe on another platform hence cant "
@@ -90,7 +90,7 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
     // Allow user to add SLEEPTIME, otherwise add a default
     int customSmsCnt    = 0;
     auto taskSmsMapSize = static_cast<int>(customTaskSmsMap.size());
-    for (suite_ptr s : theClientDefs.suiteVec()) {
+    for (auto s : theClientDefs.suites()) {
 
         // Always override these to correctly locate files.
         s->addVariable(Variable(ecf::environment::ECF_HOME, ecf_home));
@@ -117,10 +117,10 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
                               << " createDirAndEcfFiles did not create all sms file corresponding to tasks");
 
     // If the defs has more than one suite, then start them all.
-    if (theClientDefs.suiteVec().size() != 1) {
+    if (theClientDefs.suites().size() != 1) {
         suiteName.clear();
 #ifdef DEBUG_TEST_HARNESS
-        cout << "   ServerTestHarness::doRun: defs has " << theClientDefs.suiteVec().size()
+        cout << "   ServerTestHarness::doRun: defs has " << theClientDefs.suites().size()
              << " suites hence will begin all of them\n";
 #endif
     }
@@ -236,7 +236,7 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
     defs_ptr incremental_defs;
     defs_ptr full_defs;
 
-    int sleepTime         = (theClientDefs.suiteVec().size() == 1) ? TestFixture::job_submission_interval() : 10;
+    int sleepTime         = (theClientDefs.suites().size() == 1) ? TestFixture::job_submission_interval() : 10;
     int sleep_fudgeFactor = TestFixture::job_submission_interval();
 
     // How do we terminate this test?
@@ -263,9 +263,9 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
             BOOST_REQUIRE_MESSAGE(incremental_defs.get(), "get command failed to get node tree from server");
 
             // Ensure that when suite was loaded in server, that others suites were discarded
-            BOOST_CHECK_MESSAGE(theClientDefs.suiteVec().size() == full_defs->suiteVec().size(),
-                                "mismatch in client suite count " << theClientDefs.suiteVec().size() << " and server "
-                                                                  << full_defs->suiteVec().size());
+            BOOST_CHECK_MESSAGE(theClientDefs.suites().size() == full_defs->suites().size(),
+                                "mismatch in client suite count " << theClientDefs.suites().size() << " and server "
+                                                                  << full_defs->suites().size());
             test_invariants(full_defs, "First time for getting full defs");
         }
         else {
@@ -374,7 +374,7 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
             // record the number of times that the server updated the calendar. Allow debug of time dependencies
             serverUpdateCalendarCount_ = full_defs->updateCalendarCount();
 
-            for (suite_ptr s : full_defs->suiteVec()) {
+            for (auto s : full_defs->suites()) {
                 if (s->state() == NState::COMPLETE) {
                     completeSuiteCnt++;
                 }
@@ -388,10 +388,10 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
                     "==================================================================================\n";
             std::cout << *full_defs.get();
             cout << "completeSuiteCnt = " << completeSuiteCnt
-                 << " full_defs->suiteVec().size() = " << full_defs->suiteVec().size()
+                 << " full_defs->suites().size() = " << full_defs->suites().size()
                  << " hasAutoCancel = " << hasAutoCancel << "\n";
 #endif
-            if ((full_defs->suiteVec().size() == completeSuiteCnt) && (hasAutoCancel == 0)) {
+            if ((full_defs->suites().size() == completeSuiteCnt) && (hasAutoCancel == 0)) {
 
                 if (verifyAttr && verify_attribute_verification()) {
                     // Do verification of expected state changes
@@ -410,7 +410,7 @@ defs_ptr ServerTestHarness::testWaiter(const Defs& theClientDefs, int timeout, b
             std::cout << "Test time " << assertTimer.duration() << " taking longer than time constraint of "
                       << assertTimer.timeConstraint() << " aborting\n";
             std::cout << "   completeSuiteCnt = " << completeSuiteCnt << "\n";
-            std::cout << "   full_defs->suiteVec().size() = " << full_defs->suiteVec().size() << "\n";
+            std::cout << "   full_defs->suites().size() = " << full_defs->suites().size() << "\n";
             std::cout << "   hasAutoCancel = " << hasAutoCancel << "\n";
             std::cout << "update-calendar-count(" << serverUpdateCalendarCount_ << ")\n";
             std::cout << "WHY:\n";

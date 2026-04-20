@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(can_parse_mirror_attribute_on_task_with_default_parameters)
     bool parsedOK = parser.doParse(errorMsg, warningMsg);
     BOOST_CHECK_MESSAGE(parsedOK, "Failed to parse definition: " << errorMsg);
 
-    const auto& suites = defs.suiteVec();
+    const auto& suites = defs.suites();
     BOOST_CHECK_EQUAL(suites.size(), static_cast<size_t>(1));
 
     const auto& families = suites[0]->familyVec();
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(can_parse_mirror_attribute_on_task_with_all_attributes) {
     bool parsedOK = parser.doParse(errorMsg, warningMsg);
     BOOST_CHECK_MESSAGE(parsedOK, "Failed to parse definition: " << errorMsg);
 
-    const auto& suites = defs.suiteVec();
+    const auto& suites = defs.suites();
     BOOST_CHECK_EQUAL(suites.size(), static_cast<size_t>(1));
 
     const auto& families = suites[0]->familyVec();

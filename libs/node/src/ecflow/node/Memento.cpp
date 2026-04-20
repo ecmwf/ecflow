@@ -38,7 +38,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const {
             std::string error_msg = "CompoundMemento::incremental_sync: could not find path ";
             error_msg += absNodePath_;
             error_msg += "\nClient has the following suites: ";
-            for (const auto& suite : client_def->suiteVec()) {
+            for (const auto& suite : client_def->suites()) {
                 error_msg += suite->name();
                 error_msg += ",";
             }
