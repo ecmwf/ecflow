@@ -45,7 +45,7 @@ public:
     bool why_cmd(std::string&) const override;
     bool group_cmd() const override { return true; }
 
-    void set_client_handle(int client_handle) const; // used in group sync with client register
+    void set_client_handle(int client_handle) const override; // used in group sync with client register
 
     void print(std::string&) const override;
     std::string print_short() const override;
