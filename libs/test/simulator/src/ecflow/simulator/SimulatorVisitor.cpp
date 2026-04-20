@@ -128,8 +128,8 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc) {
         foundTime_ = true;
     }
 
-    for (node_ptr t : nc->nodeVec()) {
-        t->acceptVisitTraversor(*this);
+    for (auto node : nc->children()) {
+        node->acceptVisitTraversor(*this);
     }
 }
 

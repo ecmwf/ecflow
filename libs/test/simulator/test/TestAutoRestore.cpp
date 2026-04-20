@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_suite) {
     BOOST_CHECK_MESSAGE(!s1->get_flag().is_set(ecf::Flag::ARCHIVED),
                         "Expected suite " << s1->absNodePath() << " to be restored");
     BOOST_CHECK_MESSAGE(!fs::exists(s1->archive_path()), "Expected file " << s1->archive_path() << " to be removed");
-    BOOST_CHECK_MESSAGE(!s1->nodeVec().empty(), "Expected suite " << s1->absNodePath() << " to be restored");
+    BOOST_CHECK_MESSAGE(!s1->children().empty(), "Expected suite " << s1->absNodePath() << " to be restored");
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_autorestore_suite.def") + ".log";
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_autorestore_family) {
                             "Expected family " << family->absNodePath() << " to be restored");
         BOOST_CHECK_MESSAGE(!fs::exists(family->archive_path()),
                             "Expected file " << family->absNodePath() << " to be removed");
-        BOOST_CHECK_MESSAGE(!family->nodeVec().empty(),
+        BOOST_CHECK_MESSAGE(!family->children().empty(),
                             "Expected family " << family->absNodePath() << " to be restored");
     }
 

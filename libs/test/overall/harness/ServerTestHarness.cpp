@@ -453,9 +453,9 @@ void ServerTestHarness::createDirAndEcfFiles(NodeContainer* nc,
         theManFile << "%end\n";
     }
 
-    for (node_ptr n : nc->nodeVec()) {
+    for (auto node : nc->children()) {
 
-        Task* t = n->isTask();
+        Task* t = node->isTask();
         if (t) {
             std::string ecf_file = smshome + t->absNodePath() + File::ECF_EXTN();
 #ifdef DEBUG_TEST_HARNESS
@@ -473,7 +473,7 @@ void ServerTestHarness::createDirAndEcfFiles(NodeContainer* nc,
             }
         }
         else {
-            Family* f = n->isFamily();
+            Family* f = node->isFamily();
             assert(f);
             createDirAndEcfFiles(f, smshome, customTaskSmsMap, customSmsCnt);
         }

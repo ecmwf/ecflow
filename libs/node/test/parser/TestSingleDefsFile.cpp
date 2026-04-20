@@ -47,10 +47,10 @@ void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
     BOOST_CHECK_MESSAGE(f == defs.findAbsNode(f->absNodePath()).get(),
                         "Could not find path " << f->absNodePath() << "\n");
 
-    for (node_ptr t : f->nodeVec()) {
-        BOOST_CHECK_MESSAGE(t.get() == defs.findAbsNode(t->absNodePath()).get(),
-                            "Could not find path " << t->absNodePath() << "\n");
-        Family* family = t->isFamily();
+    for (node_ptr node : f->children()) {
+        BOOST_CHECK_MESSAGE(node.get() == defs.findAbsNode(node->absNodePath()).get(),
+                            "Could not find path " << node->absNodePath() << "\n");
+        Family* family = node->isFamily();
         if (family) {
             test_find_task_using_path(family, defs);
         }
@@ -289,12 +289,12 @@ BOOST_AUTO_TEST_CASE(test_single_defs) {
         auto suites = defs.suites(); // make a copy, to avoid invalidating iterators
         BOOST_CHECK_MESSAGE(suites.size() > 0, "Expected > 0 Suites but found " << suites.size());
         for (suite_ptr s : suites) {
-            std::vector<node_ptr> familyVec = s->nodeVec(); // make a copy, to avoid invalidating iterators
-            for (node_ptr f : familyVec) {
+            auto nodes = s->children(); // make a copy, to avoid invalidating iterators
+            for (node_ptr f : nodes) {
                 BOOST_REQUIRE_MESSAGE(defs.deleteChild(f.get()), " Failed to delete family");
             }
-            BOOST_REQUIRE_MESSAGE(s->nodeVec().empty(),
-                                  "Expected all Families to be deleted but found " << s->nodeVec().size());
+            BOOST_REQUIRE_MESSAGE(s->children().empty(),
+                                  "Expected all Families to be deleted but found " << s->children().size());
             BOOST_REQUIRE_MESSAGE(defs.deleteChild(s.get()), " Failed to delete suite");
         }
         BOOST_REQUIRE_MESSAGE(defs.suites().empty(),

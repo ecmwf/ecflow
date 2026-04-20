@@ -65,7 +65,7 @@ void print_sparser_node(ojson& j, const std::vector<node_ptr>& nodes) {
 
         j[node->name()] = ojson::object({});
         if (type == "family") {
-            print_sparser_node(j[node->name()], std::dynamic_pointer_cast<Family>(node)->nodeVec());
+            print_sparser_node(j[node->name()], std::dynamic_pointer_cast<Family>(node)->children());
         }
     }
 }
@@ -78,7 +78,7 @@ void print_node(ojson& j, const std::vector<node_ptr>& nodes, bool add_id = fals
 
         j["children"].push_back(jnode);
         if (type == "family") {
-            print_node(j["children"].back(), std::dynamic_pointer_cast<Family>(node)->nodeVec(), add_id);
+            print_node(j["children"].back(), std::dynamic_pointer_cast<Family>(node)->children(), add_id);
         }
     }
 }
@@ -143,7 +143,7 @@ ojson get_sparser_node_tree(const std::string& path) {
         for (const auto& suite : get_defs()->suites()) {
             j[suite->name()] = ojson::object({});
 
-            print_sparser_node(j[suite->name()], suite->nodeVec());
+            print_sparser_node(j[suite->name()], suite->children());
         }
     }
     else {
@@ -156,10 +156,10 @@ ojson get_sparser_node_tree(const std::string& path) {
         const std::string type = ecf::algorithm::tolower(node->debugType());
 
         if (type == "family") {
-            print_sparser_node(j, std::dynamic_pointer_cast<Family>(node)->nodeVec());
+            print_sparser_node(j, std::dynamic_pointer_cast<Family>(node)->children());
         }
         else if (type == "suite") {
-            print_sparser_node(j, std::dynamic_pointer_cast<Suite>(node)->nodeVec());
+            print_sparser_node(j, std::dynamic_pointer_cast<Suite>(node)->children());
         }
     }
 
@@ -177,7 +177,7 @@ ojson get_node_tree(const std::string& path, bool add_id = false) {
         for (const auto& suite : suites) {
             ojson js = make_node_json(suite);
 
-            print_node(js, suite->nodeVec(), add_id);
+            print_node(js, suite->children(), add_id);
 
             j["suites"].push_back(js);
         }
@@ -194,10 +194,10 @@ ojson get_node_tree(const std::string& path, bool add_id = false) {
         const std::string type = ecf::algorithm::tolower(node->debugType());
 
         if (type == "family") {
-            print_node(j, std::dynamic_pointer_cast<Family>(node)->nodeVec(), add_id);
+            print_node(j, std::dynamic_pointer_cast<Family>(node)->children(), add_id);
         }
         else if (type == "suite") {
-            print_node(j, std::dynamic_pointer_cast<Suite>(node)->nodeVec(), add_id);
+            print_node(j, std::dynamic_pointer_cast<Suite>(node)->children(), add_id);
         }
     }
 

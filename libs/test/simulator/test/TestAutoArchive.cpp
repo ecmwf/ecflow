@@ -84,9 +84,9 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
     BOOST_CHECK_MESSAGE(fs::exists(s2->archive_path()), "Expected suite " << s2->absNodePath() << " to be archived");
     BOOST_CHECK_MESSAGE(fs::exists(s3->archive_path()), "Expected suite " << s3->absNodePath() << " to be archived");
 
-    BOOST_CHECK_MESSAGE(s1->nodeVec().empty(), "Expected suite " << s1->absNodePath() << " to be empty");
-    BOOST_CHECK_MESSAGE(s1->nodeVec().empty(), "Expected suite " << s2->absNodePath() << " to be empty");
-    BOOST_CHECK_MESSAGE(s1->nodeVec().empty(), "Expected suite " << s3->absNodePath() << " to be empty");
+    BOOST_CHECK_MESSAGE(s1->children().empty(), "Expected suite " << s1->absNodePath() << " to be empty");
+    BOOST_CHECK_MESSAGE(s1->children().empty(), "Expected suite " << s2->absNodePath() << " to be empty");
+    BOOST_CHECK_MESSAGE(s1->children().empty(), "Expected suite " << s3->absNodePath() << " to be empty");
 
     s1->restore();
     s2->restore();
@@ -109,9 +109,9 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_suite) {
     BOOST_CHECK_MESSAGE(!fs::exists(s2->archive_path()), "Expected file " << s2->archive_path() << " to be removed");
     BOOST_CHECK_MESSAGE(!fs::exists(s3->archive_path()), "Expected file " << s3->archive_path() << " to be removed");
 
-    BOOST_CHECK_MESSAGE(!s1->nodeVec().empty(), "Expected suite " << s1->absNodePath() << " to be restored");
-    BOOST_CHECK_MESSAGE(!s1->nodeVec().empty(), "Expected suite " << s2->absNodePath() << " to be restored");
-    BOOST_CHECK_MESSAGE(!s1->nodeVec().empty(), "Expected suite " << s3->absNodePath() << " to be restored");
+    BOOST_CHECK_MESSAGE(!s1->children().empty(), "Expected suite " << s1->absNodePath() << " to be restored");
+    BOOST_CHECK_MESSAGE(!s1->children().empty(), "Expected suite " << s2->absNodePath() << " to be restored");
+    BOOST_CHECK_MESSAGE(!s1->children().empty(), "Expected suite " << s3->absNodePath() << " to be restored");
 
     // remove generated log file. Comment out to debug
     std::string logFileName = findTestDataLocation("test_autoarchive_suite.def") + ".log";
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
                             "Expected family " << family->absNodePath() << " to be archived");
         BOOST_CHECK_MESSAGE(fs::exists(family->archive_path()),
                             "Expected family " << family->absNodePath() << " to be archived");
-        BOOST_CHECK_MESSAGE(family->nodeVec().empty(), "Expected family " << family->absNodePath() << " to be empty");
+        BOOST_CHECK_MESSAGE(family->children().empty(), "Expected family " << family->absNodePath() << " to be empty");
 
         family->restore();
         BOOST_CHECK_MESSAGE(family->get_flag().is_set(ecf::Flag::RESTORED),
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(test_autoarchive_family) {
                             "Expected family " << family->absNodePath() << " to be restored");
         BOOST_CHECK_MESSAGE(!fs::exists(family->archive_path()),
                             "Expected file " << family->absNodePath() << " to be removed");
-        BOOST_CHECK_MESSAGE(!family->nodeVec().empty(),
+        BOOST_CHECK_MESSAGE(!family->children().empty(),
                             "Expected family " << family->absNodePath() << " to be restored");
     }
 
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(test_two_autoarchive_in_hierarchy) {
                         "Expected suite " << suite->absNodePath() << " to be archived");
     BOOST_CHECK_MESSAGE(fs::exists(suite->archive_path()),
                         "Expected family " << suite->absNodePath() << " to be archived");
-    BOOST_CHECK_MESSAGE(suite->nodeVec().empty(), "Expected family " << suite->absNodePath() << " to be empty");
+    BOOST_CHECK_MESSAGE(suite->children().empty(), "Expected family " << suite->absNodePath() << " to be empty");
 
     // The family should have been deleted
     node_ptr fam = theDefs.findAbsNode("/test_two_autoarchive_in_hierarchy/family");

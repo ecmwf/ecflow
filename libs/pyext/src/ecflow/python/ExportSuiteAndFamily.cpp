@@ -41,10 +41,10 @@ suite_ptr add_end_clock(suite_ptr self, const ClockAttr& clk) {
 
 // Sized and Container protocol
 size_t family_len(family_ptr self) {
-    return self->nodeVec().size();
+    return self->children().size();
 }
 size_t suite_len(suite_ptr self) {
-    return self->nodeVec().size();
+    return self->children().size();
 }
 bool family_container(family_ptr self, const std::string& name) {
     size_t pos;

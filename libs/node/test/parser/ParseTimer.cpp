@@ -38,11 +38,11 @@ void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
         std::cout << "Could not find path " << f->absNodePath() << "\n";
     }
 
-    for (node_ptr t : f->nodeVec()) {
-        if (t.get() != defs.findAbsNode(t->absNodePath()).get()) {
-            std::cout << "Could not find path " << t->absNodePath() << "\n";
+    for (auto node : f->children()) {
+        if (node.get() != defs.findAbsNode(node->absNodePath()).get()) {
+            std::cout << "Could not find path " << node->absNodePath() << "\n";
         }
-        Family* family = t->isFamily();
+        Family* family = node->isFamily();
         if (family) {
             test_find_task_using_path(family, defs);
         }
@@ -221,14 +221,14 @@ int main(int argc, char* argv[]) {
 
         auto suites = defs.suites(); // make a copy, to avoid invalidating iterators
         for (suite_ptr suite : suites) {
-            std::vector<node_ptr> familyVec = suite->nodeVec(); // make a copy, to avoid invalidating iterators
-            for (node_ptr f : familyVec) {
-                if (!defs.deleteChild(f.get())) {
+            auto nodes = suite->children(); // make a copy, to avoid invalidating iterators
+            for (auto node : nodes) {
+                if (!defs.deleteChild(node.get())) {
                     std::cout << "Failed to delete family\n";
                 }
             }
-            if (!suite->nodeVec().empty()) {
-                std::cout << "Expected all Families to be deleted but found " << suite->nodeVec().size() << "\n";
+            if (!suite->children().empty()) {
+                std::cout << "Expected all Families to be deleted but found " << suite->children().size() << "\n";
             }
             if (!defs.deleteChild(suite.get())) {
                 std::cout << "Failed to delete suite\n";

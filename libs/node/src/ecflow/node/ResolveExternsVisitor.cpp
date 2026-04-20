@@ -43,8 +43,8 @@ void ResolveExternsVisitor::visitNodeContainer(NodeContainer* nc) {
 
     setup(nc);
 
-    for (node_ptr t : nc->nodeVec()) {
-        t->acceptVisitTraversor(*this);
+    for (auto node : nc->children()) {
+        node->acceptVisitTraversor(*this);
     }
 }
 

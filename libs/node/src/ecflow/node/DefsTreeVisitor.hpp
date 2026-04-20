@@ -83,8 +83,8 @@ private:
             // Visit suite itself
             v_.begin_visit(*found);
             // Visit suite children
-            for (auto&& entry : found->nodeVec()) {
-                visit(*entry.get());
+            for (auto&& child : found->children()) {
+                visit(*child.get());
             }
             v_.end_visit(*found);
             return;
@@ -94,8 +94,8 @@ private:
             // Visit family itself
             v_.begin_visit(*found);
             // Visit family children
-            for (auto&& entry : found->nodeVec()) {
-                visit(*entry.get());
+            for (auto&& child : found->children()) {
+                visit(*child.get());
             }
             v_.end_visit(*found);
             return;
