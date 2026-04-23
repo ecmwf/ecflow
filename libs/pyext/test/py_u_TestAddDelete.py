@@ -461,6 +461,13 @@ if __name__ == "__main__":
     repeat = task.get_repeat();
     assert repeat.empty(), "Expected no repeat"
 
+    task.add_repeat(ecflow.RepeatDateTimeList("datetime", ["20100111T000000", "20100115T000000"]))
+    repeat = task.get_repeat();
+    assert not repeat.empty(), "Expected repeat"
+    task.delete_repeat()
+    repeat = task.get_repeat();
+    assert repeat.empty(), "Expected no repeat"
+
     task.add_repeat(ecflow.RepeatString("string", ["a", "b", "c"]))
     repeat = task.get_repeat();
     assert not repeat.empty(), "Expected repeat"

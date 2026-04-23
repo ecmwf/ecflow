@@ -116,6 +116,7 @@ set(u_tests
   u_TestPrint
   u_TestRemove
   u_TestRepeatArithmetic
+  u_TestRepeatDateTimeList
   u_TestSimulator
   u_TestTraversal
   u_TestUserManual

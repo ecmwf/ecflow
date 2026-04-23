@@ -85,5 +85,7 @@ if __name__ == "__main__":
 
     test_repeat_datetime_arithmetic(ecflow.RepeatDateTime("DT", "20090101T000000", "20091231T000000", "24:00:00"),
                                     ecflow.RepeatDateTime("DT", "20090131T000000", "20101231T000000", "24:00:00"))
+    test_repeat_datetime_arithmetic(ecflow.RepeatDateTimeList("DT", ["20090101T000000", "20091231T000000"]),
+                                    ecflow.RepeatDateTimeList("DT", ["20090131T000000", "20101231T000000"]))
 
     print("All Tests pass")
