@@ -16,6 +16,7 @@
 #endif
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QTimeZone>
 
 #include "MenuHandler.hpp"
 #include "NodeExpression.hpp"

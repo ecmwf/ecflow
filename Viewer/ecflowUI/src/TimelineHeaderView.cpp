@@ -16,6 +16,7 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <QStyle>
+#include <QTimeZone>
 #include <QTreeView>
 #include <QtGlobal>
 
