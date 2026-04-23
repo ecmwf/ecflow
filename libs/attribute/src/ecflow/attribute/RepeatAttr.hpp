@@ -108,6 +108,7 @@ public:
     virtual bool isDate() const { return false; }
     virtual bool isDateTime() const { return false; }
     virtual bool isDateList() const { return false; }
+    virtual bool isDateTimeList() const { return false; }
     virtual bool isInteger() const { return false; }
     virtual bool isEnumerated() const { return false; }
     virtual bool isString() const { return false; }
@@ -372,6 +373,82 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+class RepeatDateTimeList final : public RepeatBase {
+public:
+    RepeatDateTimeList(const std::string& variable, const std::vector<ecf::Instant>&); // will throw for empty list
+    RepeatDateTimeList() = default;
+
+    void gen_variables(std::vector<Variable>& vec) const override;
+    const Variable& find_gen_variable(const std::string& name) const override;
+    void update_repeat_genvar() const override;
+
+    bool operator==(const RepeatDateTimeList& rhs) const;
+    bool operator<(const RepeatDateTimeList& rhs) const { return name() < rhs.name(); }
+
+    int start() const override;
+    int end() const override;
+    int step() const override { return 1; }
+    long value() const override;
+    long index_or_value() const override { return currentIndex_; }
+    long last_valid_value() const override;
+    long last_valid_value_minus(int value) const override;
+    long last_valid_value_plus(int value) const override;
+
+    RepeatBase* clone() const override { return new RepeatDateTimeList(name_, list_, currentIndex_); }
+    bool compare(RepeatBase*) const override;
+    bool valid() const override { return (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())); }
+    std::string valueAsString() const override;
+    std::string value_as_string(int index) const override;
+    std::string next_value_as_string() const override;
+    std::string prev_value_as_string() const override;
+
+    const std::vector<ecf::Instant>& values() const { return list_; }
+
+    void setToLastValue() override;
+    void reset() override;
+    void increment() override;
+    void change(const std::string& newValue) override; // can throw std::runtime_error
+    void changeValue(long newValue) override;          // can throw std::runtime_error
+    void set_value(long newValue) override;            // will NOT throw, allows any value
+    std::string dump() const override;
+    bool isDateTimeList() const override { return true; }
+    int indexNum() const { return static_cast<int>(list_.size()); }
+
+    /// Simulator functions:
+    bool isInfinite() const override { return false; }
+
+private:
+    RepeatDateTimeList(const std::string& variable, const std::vector<ecf::Instant>& l, int index)
+        : RepeatBase(variable),
+          currentIndex_(index),
+          list_(l) {}
+
+    void update_repeat_genvar_value() const;
+
+private:
+    int currentIndex_{0};
+    std::vector<ecf::Instant> list_;
+
+    // *not* persisted
+    mutable VariableMap generated_{
+        // clang-format off
+        Variable(name_ + "_DATE", "<invalid>"),
+        Variable(name_ + "_YYYY", "<invalid>"),
+        Variable(name_ + "_MM", "<invalid>"),
+        Variable(name_ + "_DD", "<invalid>"),
+        Variable(name_ + "_JULIAN", "<invalid>"),
+        Variable(name_ + "_TIME", "<invalid>"),
+        Variable(name_ + "_HOURS", "<invalid>"),
+        Variable(name_ + "_MINUTES", "<invalid>"),
+        Variable(name_ + "_SECONDS", "<invalid>")
+        // clang-format on
+    };
+
+    friend class cereal::access;
+    template <class Archive>
+    void serialize(Archive& ar, std::uint32_t const version);
+};
+
 class RepeatInteger final : public RepeatBase {
 public:
     RepeatInteger(const std::string& variable, int start, int end, int delta = 1);
@@ -621,6 +698,7 @@ public:
     Repeat(const RepeatDate&);
     Repeat(const RepeatDateTime&);
     Repeat(const RepeatDateList&);
+    Repeat(const RepeatDateTimeList&);
     Repeat(const RepeatInteger&);
     Repeat(const RepeatEnumerated&);
     Repeat(const RepeatString&);

@@ -791,6 +791,20 @@ const char* DefsDoc::add_repeat_date_list_doc() {
            "            RepeatDateList('YMD',[20100111,20100115]))\n";
 }
 
+const char* DefsDoc::add_repeat_datetimelist_doc() {
+    return "Add a RepeatDateTimeList attribute. See :py:class:`ecflow.RepeatDateTimeList`\n\n"
+           "A node can only have one repeat\n"
+           "\nException:\n\n"
+           "- Throws a RuntimeError if more than one repeat is added\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "  t1 = Task('t1')\n"
+           "  t1.add_repeat( RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']) )\n\n"
+           "  # we can also create a repeat in Task constructor like any other attribute\n"
+           "  t2 = Task('t2',\n"
+           "            RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']))\n";
+}
+
 const char* DefsDoc::add_repeat_integer_doc() {
     return "Add a RepeatInteger attribute. See :py:class:`ecflow.RepeatInteger`\n\n"
            "A node can only have one `repeat`_\n"

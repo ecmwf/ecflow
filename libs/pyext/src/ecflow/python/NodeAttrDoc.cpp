@@ -568,6 +568,24 @@ const char* NodeAttrDoc::repeat_date_list_doc() {
            "            RepeatDateList('YMD',[20050130, 20050203] ))\n";
 }
 
+const char* NodeAttrDoc::repeat_datetimelist_doc() {
+    return "Allows a `node`_ to be repeated using an arbitrary list of datetime instants (yyyymmddTHHMMSS format).\n\n"
+           "A node can only have one `repeat`_.\n"
+           "The repeat name can be referenced in `trigger`_ expressions.\n"
+           "\nConstructor::\n\n"
+           "   RepeatDateTimeList(variable, list)\n"
+           "      string variable:          The name of the repeat. The current datetime can be referenced in\n"
+           "                                trigger expressions using the variable name\n"
+           "      list list_of_str:         Arbitrary list of datetime strings in yyyymmddTHHMMSS format\n"
+           "\nException:\n\n"
+           "- Throws a RuntimeError if any string is not a valid datetime\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   rep = RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000', '20240103T060000'])\n"
+           "   t = Task('t1',\n"
+           "            RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']))\n";
+}
+
 const char* NodeAttrDoc::repeat_integer_doc() {
     return "Allows a `node`_ to be repeated using a integer range.\n\n"
            "A node can only have one `repeat`_.\n"

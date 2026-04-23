@@ -70,6 +70,10 @@ Repeat::Repeat(const RepeatDateList& r)
     : type_(std::make_unique<RepeatDateList>(r)) {
 }
 
+Repeat::Repeat(const RepeatDateTimeList& r)
+    : type_(std::make_unique<RepeatDateTimeList>(r)) {
+}
+
 Repeat::Repeat(const RepeatInteger& r)
     : type_(std::make_unique<RepeatInteger>(r)) {
 }
@@ -1124,6 +1128,311 @@ bool RepeatDateList::operator==(const RepeatDateList& rhs) const {
 
 //======================================================================================
 
+RepeatDateTimeList::RepeatDateTimeList(const std::string& variable, const std::vector<Instant>& l)
+    : RepeatBase(variable),
+      list_(l) {
+    if (!ecf::algorithm::is_valid_name(variable)) {
+        throw std::runtime_error("RepeatDateTimeList: Invalid name: " + variable);
+    }
+    if (list_.empty()) {
+        throw std::runtime_error("RepeatDateTimeList: " + variable + " is empty");
+    }
+
+    for (const Instant& i : list_) {
+        auto ts = boost::lexical_cast<std::string>(i);
+        if (ts.size() != 15) {
+            throw std::runtime_error(
+                MESSAGE("Invalid Repeat datetimelist : " << variable << " the datetime " << ts
+                                                         << " is not valid. Please use yyyymmddTHHMMSS format."));
+        }
+    }
+}
+
+void RepeatDateTimeList::gen_variables(std::vector<Variable>& vec) const {
+    for (const auto& entry : generated_) {
+        vec.push_back(entry);
+    }
+    RepeatBase::gen_variables(vec);
+}
+
+const Variable& RepeatDateTimeList::find_gen_variable(const std::string& name) const {
+    if (name == name_) {
+        return var_;
+    }
+    for (const auto& entry : generated_) {
+        if (entry.name() == name) {
+            return entry;
+        }
+    }
+    return Variable::EMPTY();
+}
+
+void RepeatDateTimeList::update_repeat_genvar() const {
+    RepeatBase::update_repeat_genvar();
+
+    // Reset variables values
+    generated_.set_value("<invalid>");
+
+    update_repeat_genvar_value();
+}
+
+void RepeatDateTimeList::update_repeat_genvar_value() const {
+    if (valid()) {
+        std::string date_as_string = valueAsString();
+        try {
+            auto dt = boost::posix_time::from_iso_string(date_as_string);
+
+            auto d = dt.date();
+
+            generated_[name_ + "_DATE"].set_value(boost::gregorian::to_iso_string(d));
+
+            auto year = static_cast<int>(d.year());
+            generated_[name_ + "_YYYY"].set_value(as_4_digits(year));
+
+            auto month = d.month().as_number();
+            generated_[name_ + "_MM"].set_value(as_2_digits(month));
+
+            auto day = d.day().as_number();
+            generated_[name_ + "_DD"].set_value(as_2_digits(day));
+
+            auto julian = d.julian_day();
+            generated_[name_ + "_JULIAN"].set_value(std::to_string(julian));
+
+            auto t = dt.time_of_day();
+
+            generated_[name_ + "_TIME"].set_value(boost::posix_time::to_iso_string(t));
+
+            int hours = t.hours();
+            generated_[name_ + "_HOURS"].set_value(as_2_digits(hours));
+
+            int minutes = t.minutes();
+            generated_[name_ + "_MINUTES"].set_value(as_2_digits(minutes));
+
+            int seconds = t.seconds();
+            generated_[name_ + "_SECONDS"].set_value(as_2_digits(seconds));
+        }
+        catch (std::exception& e) {
+            log(Log::ERR,
+                MESSAGE("RepeatDateTimeList::update_repeat_genvar_value : " << toString() << "\n The current datetime("
+                                                                            << date_as_string << ") is not valid"));
+            return;
+        }
+    }
+}
+
+int RepeatDateTimeList::start() const {
+    if (list_.empty()) {
+        return 0;
+    }
+    return coerce_from_instant_into_seconds(list_[0]);
+}
+
+int RepeatDateTimeList::end() const {
+    if (list_.empty()) {
+        return 0;
+    }
+    return coerce_from_instant_into_seconds(list_[list_.size() - 1]);
+}
+
+long RepeatDateTimeList::value() const {
+    if (list_.empty()) {
+        return 0;
+    }
+    if (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())) {
+        return coerce_from_instant_into_seconds(list_[currentIndex_]);
+    }
+    return 0;
+}
+
+long RepeatDateTimeList::last_valid_value() const {
+    if (list_.empty()) {
+        return 0;
+    }
+    if (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())) {
+        return coerce_from_instant_into_seconds(list_[currentIndex_]);
+    }
+    if (currentIndex_ < 0) {
+        return coerce_from_instant_into_seconds(list_[0]);
+    }
+    if (currentIndex_ >= static_cast<int>(list_.size())) {
+        return coerce_from_instant_into_seconds(list_[list_.size() - 1]);
+    }
+    return 0;
+}
+
+long RepeatDateTimeList::last_valid_value_minus(int val) const {
+    long lv = last_valid_value();
+    if (lv == 0) {
+        return 0;
+    }
+    Instant last    = coerce_from_seconds_into_instant(lv);
+    Instant updated = last - Duration{std::chrono::seconds{val}};
+    return coerce_from_instant_into_seconds(updated);
+}
+
+long RepeatDateTimeList::last_valid_value_plus(int val) const {
+    long lv = last_valid_value();
+    if (lv == 0) {
+        return 0;
+    }
+    Instant last    = coerce_from_seconds_into_instant(lv);
+    Instant updated = last + Duration{std::chrono::seconds{val}};
+    return coerce_from_instant_into_seconds(updated);
+}
+
+bool RepeatDateTimeList::compare(RepeatBase* rb) const {
+    auto* rhs = dynamic_cast<RepeatDateTimeList*>(rb);
+    if (!rhs) {
+        return false;
+    }
+    return operator==(*rhs);
+}
+
+std::string RepeatDateTimeList::dump() const {
+    return MESSAGE(toString() << " ordinal-value(" << value() << ") value-as-string(" << valueAsString() << ")");
+}
+
+void RepeatDateTimeList::reset() {
+    set_value(0);
+}
+
+void RepeatDateTimeList::increment() {
+    set_value(currentIndex_ + 1);
+}
+
+void RepeatDateTimeList::setToLastValue() {
+    if (list_.empty()) {
+        return;
+    }
+    set_value(static_cast<int>(list_.size() - 1));
+}
+
+std::string RepeatDateTimeList::valueAsString() const {
+    if (list_.empty()) {
+        return {};
+    }
+    int index = currentIndex_;
+    if (index < 0) {
+        index = 0;
+    }
+    if (index >= static_cast<int>(list_.size())) {
+        index = static_cast<int>(list_.size() - 1);
+    }
+    try {
+        return boost::lexical_cast<std::string>(list_[index]);
+    }
+    catch (boost::bad_lexical_cast&) {
+    }
+    return {};
+}
+
+std::string RepeatDateTimeList::value_as_string(int index) const {
+    if (list_.empty()) {
+        return {};
+    }
+    if (index < 0) {
+        index = 0;
+    }
+    if (index >= static_cast<int>(list_.size())) {
+        index = static_cast<int>(list_.size() - 1);
+    }
+    try {
+        return boost::lexical_cast<std::string>(list_[index]);
+    }
+    catch (boost::bad_lexical_cast&) {
+    }
+    return {};
+}
+
+std::string RepeatDateTimeList::next_value_as_string() const {
+    if (list_.empty()) {
+        return {};
+    }
+    return value_as_string(currentIndex_ + 1);
+}
+
+std::string RepeatDateTimeList::prev_value_as_string() const {
+    if (list_.empty()) {
+        return {};
+    }
+    return value_as_string(currentIndex_ - 1);
+}
+
+void RepeatDateTimeList::change(const std::string& newValue) {
+    Instant target;
+    try {
+        target = Instant::parse(newValue);
+    }
+    catch (std::exception&) {
+        throw std::runtime_error(
+            MESSAGE("RepeatDateTimeList::change: " << toString() << "\nThe new value " << newValue
+                                                   << " is not a valid datetime (yyyymmddTHHMMSS)"));
+    }
+
+    for (size_t i = 0; i < list_.size(); i++) {
+        if (list_[i] == target) {
+            set_value(static_cast<long>(i));
+            return;
+        }
+    }
+
+    throw std::runtime_error(MESSAGE("RepeatDateTimeList::change: " << toString() << "\nThe new value " << newValue
+                                                                    << " is not a valid member of the datetimelist\n"));
+}
+
+void RepeatDateTimeList::changeValue(long the_new_index) {
+    if (list_.empty()) {
+        return;
+    }
+    if (the_new_index < 0 || the_new_index >= static_cast<long>(list_.size())) {
+        throw std::runtime_error(
+            MESSAGE("RepeatDateTimeList::changeValue:"
+                    << toString() << "\nThe new value '" << the_new_index << "' is not a valid index "
+                    << "expected range[0-" << list_.size() - 1 << "] but found '" << the_new_index << "'"));
+    }
+    set_value(the_new_index);
+}
+
+void RepeatDateTimeList::set_value(long the_new_index) {
+    if (list_.empty()) {
+        return;
+    }
+    currentIndex_ = the_new_index;
+    update_repeat_genvar_value();
+    incr_state_change_no();
+}
+
+bool RepeatDateTimeList::operator==(const RepeatDateTimeList& rhs) const {
+    if (name_ != rhs.name_) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "RepeatDateTimeList::operator==( name_(" << name_ << ") != rhs.name_(" << rhs.name_ << "))\n";
+        }
+#endif
+        return false;
+    }
+    if (list_ != rhs.list_) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "RepeatDateTimeList::operator==( list_ != rhs.list_ )\n";
+        }
+#endif
+        return false;
+    }
+    if (currentIndex_ != rhs.currentIndex_) {
+#ifdef DEBUG
+        if (Ecf::debug_equality()) {
+            std::cout << "RepeatDateTimeList::operator==( currentIndex_(" << currentIndex_ << ") != rhs.currentIndex_("
+                      << rhs.currentIndex_ << "))\n";
+        }
+#endif
+        return false;
+    }
+    return true;
+}
+
+//======================================================================================
+
 RepeatInteger::RepeatInteger(const std::string& variable, int start, int end, int delta)
     : RepeatBase(variable),
       start_(start),
@@ -1767,6 +2076,11 @@ void RepeatDateList::serialize(Archive& ar, std::uint32_t const version) {
 }
 
 template <class Archive>
+void RepeatDateTimeList::serialize(Archive& ar, std::uint32_t const version) {
+    ar(cereal::base_class<RepeatBase>(this), CEREAL_NVP(list_), CEREAL_NVP(currentIndex_));
+}
+
+template <class Archive>
 void RepeatString::serialize(Archive& ar, std::uint32_t const version) {
     ar(cereal::base_class<RepeatBase>(this), CEREAL_NVP(theStrings_), CEREAL_NVP(currentIndex_));
 }
@@ -1785,6 +2099,7 @@ CEREAL_TEMPLATE_SPECIALIZE(RepeatBase);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDate);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDateTime);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDateList);
+CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDateTimeList);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatInteger);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatEnumerated);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatString);
@@ -1794,6 +2109,7 @@ CEREAL_TEMPLATE_SPECIALIZE_V(Repeat);
 CEREAL_REGISTER_TYPE(RepeatDate)
 CEREAL_REGISTER_TYPE(RepeatDateTime)
 CEREAL_REGISTER_TYPE(RepeatDateList)
+CEREAL_REGISTER_TYPE(RepeatDateTimeList)
 CEREAL_REGISTER_TYPE(RepeatInteger)
 CEREAL_REGISTER_TYPE(RepeatEnumerated)
 CEREAL_REGISTER_TYPE(RepeatString)

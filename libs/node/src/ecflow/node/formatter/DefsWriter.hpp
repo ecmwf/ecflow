@@ -1498,6 +1498,33 @@ struct Writer<RepeatDateList, Stream>
 };
 
 template <typename Stream>
+struct Writer<RepeatDateTimeList, Stream>
+{
+    static void write(Stream& output, const RepeatDateTimeList& item, Context& ctx) {
+        Indent l1(ctx);
+        output << l1;
+
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatDateTimeList& item, const Context& ctx) {
+        output << "repeat datetimelist ";
+        output << item.name();
+        for (const auto& instant : item.values()) {
+            output << " \"";
+            output << boost::lexical_cast<std::string>(instant);
+            output << "\"";
+        }
+        if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>() && (item.index_or_value() != 0)) {
+            output << " # ";
+            output << ecf::convert_to<std::string>(item.index_or_value());
+        }
+    }
+};
+
+template <typename Stream>
 struct Writer<RepeatDateTime, Stream>
 {
     static void write(Stream& output, const RepeatDateTime& item, Context& ctx) {
@@ -1628,6 +1655,9 @@ struct Writer<RepeatBase, Stream>
         }
         else if (auto r = dynamic_cast<const RepeatDateList*>(&item)) {
             Writer<RepeatDateList, Stream>::write(output, *r, ctx);
+        }
+        else if (auto r = dynamic_cast<const RepeatDateTimeList*>(&item)) {
+            Writer<RepeatDateTimeList, Stream>::write(output, *r, ctx);
         }
         else if (auto r = dynamic_cast<const RepeatDateTime*>(&item)) {
             Writer<RepeatDateTime, Stream>::write(output, *r, ctx);
