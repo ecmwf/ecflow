@@ -48,12 +48,11 @@ void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<std::pair<std::str
 
         std::string second;
         std::string first = py::extract<std::string>(keys[i]);
-        if (py::extract<std::string>(dict[keys[i]]).check()) {
-            second = py::extract<std::string>(dict[keys[i]]);
+        if (auto v = py::extract<std::string>(dict[keys[i]]); v.check()) {
+            second = v();
         }
-        else if (py::extract<int>(dict[keys[i]]).check()) {
-            int the_int = py::extract<int>(dict[keys[i]]);
-            second      = ecf::convert_to<std::string>(the_int);
+        else if (auto v = py::extract<int>(dict[keys[i]]); v.check()) {
+            second = ecf::convert_to<std::string>(v());
         }
         else {
             throw std::runtime_error("PythonUtil::dict_to_str_vec: type not convertible to string or integer");
@@ -71,12 +70,11 @@ void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<Variable>& vec) {
 
         std::string second;
         std::string first = py::extract<std::string>(keys[i]);
-        if (py::extract<std::string>(dict[keys[i]]).check()) {
-            second = py::extract<std::string>(dict[keys[i]]);
+        if (auto v = py::extract<std::string>(dict[keys[i]]); v.check()) {
+            second = v();
         }
-        else if (py::extract<int>(dict[keys[i]]).check()) {
-            int the_int = py::extract<int>(dict[keys[i]]);
-            second      = ecf::convert_to<std::string>(the_int);
+        else if (auto v = py::extract<int>(dict[keys[i]]); v.check()) {
+            second = ecf::convert_to<std::string>(v());
         }
         else {
             throw std::runtime_error("PythonUtil::dict_to_str_vec: type not convertible to string or integer");

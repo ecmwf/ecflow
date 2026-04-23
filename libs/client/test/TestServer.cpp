@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
 
             BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
-            BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
+            BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() >= 1, "  no suite ?");
         }
         std::cout << " Server handled " << load * 16 << " requests in CPU timer(" << timer << ")" << " Duration timer("
                   << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono timer("
@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
                                       << theClient.errorMsg());
 
             BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
-            BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
+            BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() >= 1, "  no suite ?");
         }
         std::cout << " Server handled " << load * 8 << " requests in boost_timer(" << timer << ")" << " DurationTimer("
                   << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
                               "Group request " << CtsApi::group(groupRequest) << " failed should return 0\n"
                                                << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() >= 1, "  no suite ?");
     }
     std::cout << " Server handled " << load * 8 << " commands using " << load << " group requests in boost_timer("
               << timer << ") DurationTimer(" << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")"
@@ -608,7 +608,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
                               CtsApi::get() << " failed should return 0\n"
                                             << theClient.errorMsg()); // 60
         BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() >= 1, "  no suite ?");
     }
 
     int no_of_client_calls = 74;

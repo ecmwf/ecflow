@@ -299,7 +299,7 @@ static void test_plug_on_multiple_server(const std::string& host1,
                           CtsApi::get() << " failed should return 0\n"
                                         << server2Client.errorMsg());
     BOOST_REQUIRE_MESSAGE(server2Client.defs().get(), "Server returned a NULL defs");
-    BOOST_REQUIRE_MESSAGE(server2Client.defs()->suiteVec().size() == 0, " Expected server2 to have zero suite");
+    BOOST_REQUIRE_MESSAGE(server2Client.defs()->suites().size() == 0, " Expected server2 to have zero suite");
 
     // Move the suite FROM the FIRST server TO the SECOND server and check that it worked
     destPath  = secondServerHostPort;
@@ -310,13 +310,13 @@ static void test_plug_on_multiple_server(const std::string& host1,
                           CtsApi::get() << " failed should return 0\n"
                                         << server1Client.errorMsg());
     BOOST_REQUIRE_MESSAGE(server1Client.defs().get(), "Server returned a NULL defs");
-    BOOST_REQUIRE_MESSAGE(server1Client.defs()->suiteVec().size() == 0, " Expected server1 to have no suites");
+    BOOST_REQUIRE_MESSAGE(server1Client.defs()->suites().size() == 0, " Expected server1 to have no suites");
 
     BOOST_REQUIRE_MESSAGE(server2Client.getDefs() == 0,
                           CtsApi::get() << " failed should return 0\n"
                                         << server2Client.errorMsg());
     BOOST_REQUIRE_MESSAGE(server2Client.defs().get(), "Server returned a NULL defs");
-    BOOST_REQUIRE_MESSAGE(server2Client.defs()->suiteVec().size() == 1, " Expected server2 to have one suite");
+    BOOST_REQUIRE_MESSAGE(server2Client.defs()->suites().size() == 1, " Expected server2 to have one suite");
 
     // ==========================================================================
     // Do it again, but with no defs file in second server. reload defs into server1
@@ -336,13 +336,13 @@ static void test_plug_on_multiple_server(const std::string& host1,
                           CtsApi::get() << " failed should return 0\n"
                                         << server1Client.errorMsg());
     BOOST_REQUIRE_MESSAGE(server1Client.defs().get(), "Server returned a NULL defs");
-    BOOST_REQUIRE_MESSAGE(server1Client.defs()->suiteVec().size() == 0, " Expected server1 to have no suites");
+    BOOST_REQUIRE_MESSAGE(server1Client.defs()->suites().size() == 0, " Expected server1 to have no suites");
 
     BOOST_REQUIRE_MESSAGE(server2Client.getDefs() == 0,
                           CtsApi::get() << " failed should return 0\n"
                                         << server2Client.errorMsg());
     BOOST_REQUIRE_MESSAGE(server2Client.defs().get(), "Server returned a NULL defs");
-    BOOST_REQUIRE_MESSAGE(server2Client.defs()->suiteVec().size() == 1, " Expected server2 to have one suite");
+    BOOST_REQUIRE_MESSAGE(server2Client.defs()->suites().size() == 1, " Expected server2 to have one suite");
 }
 
 BOOST_AUTO_TEST_CASE(test_server_plug_cmd) {

@@ -41,14 +41,14 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd) {
     }
 
     BOOST_REQUIRE_MESSAGE(theClient.load(defs) == 0, "load defs failed \n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() == suites.size(), "load failed");
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() == suites.size(), "load failed");
 
     BOOST_REQUIRE_MESSAGE(theClient.ch1_register(true, suites) == 0, "ch1_register failed\n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() == suites.size(), "register group sync failed");
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() == suites.size(), "register group sync failed");
     BOOST_REQUIRE_MESSAGE(theClient.server_reply().client_handle() == 1, " ch1_register failed expected handle 1");
 
     BOOST_REQUIRE_MESSAGE(theClient.delete_all() == 0, "delete_all failed\n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() == 0, "delete all failed");
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() == 0, "delete all failed");
     BOOST_REQUIRE_MESSAGE(theClient.server_reply().client_handle() == 0,
                           "delete all failed expected handle 0 but found " << theClient.server_reply().client_handle());
 
@@ -56,16 +56,16 @@ BOOST_AUTO_TEST_CASE(test_client_handle_cmd) {
     theClient.set_auto_sync(false);
     BOOST_REQUIRE_MESSAGE(theClient.load(defs) == 0, "load defs failed \n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "sync_local failed \n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() == suites.size(), "load failed");
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() == suites.size(), "load failed");
 
     BOOST_REQUIRE_MESSAGE(theClient.ch1_register(true, suites) == 0, "ch1_register failed\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "sync_local failed \n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() == suites.size(), "register group sync failed");
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() == suites.size(), "register group sync failed");
     BOOST_REQUIRE_MESSAGE(theClient.server_reply().client_handle() == 1, " ch1_register failed expected handle 1");
 
     BOOST_REQUIRE_MESSAGE(theClient.delete_all() == 0, "delete_all failed\n" << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "sync_local failed \n" << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() == 0, "delete all failed");
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() == 0, "delete all failed");
     BOOST_REQUIRE_MESSAGE(theClient.server_reply().client_handle() == 0,
                           "delete all failed expected handle 0 but found " << theClient.server_reply().client_handle());
 

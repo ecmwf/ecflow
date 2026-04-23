@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_client_timeout, *boost::unit_test::disabled()) {
     /// Now see what timeout value we succeed with
     bool loaded_defs = false;
     for (int i = 2; i < 30; ++i) {
-        theClient.set_connect_timeout(i);
+        theClient.set_connect_timeout(std::chrono::seconds{i});
         try {
             std::cout << "Trying with timeout of " << i << " seconds\n";
             theClient.loadDefs(path);

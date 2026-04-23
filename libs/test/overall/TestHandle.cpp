@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(test_handle_sync) {
         TestFixture::client().sync_local(); // sync for any changes to get full update before test starts
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),
                             "Expected a full_sync() after registering");
-        BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 3,
+        BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suites().size() == 3,
                             "Expected 3 suites back from sync, after registering 3 suites "
                                 << ecf::as_string(*TestFixture::client().defs(), PrintStyle::DEFS));
 
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().in_sync(), "Expected to be in sync after syn_local()");
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),
                             "Expected a full_sync() after registering");
-        BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 3,
+        BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suites().size() == 3,
                             "Expected 3 suites back from sync "
                                 << ecf::as_string(*TestFixture::client().defs(), PrintStyle::DEFS));
 
@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
         TestFixture::client().sync_local();
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),
                             "Expected a full_sync() after deleting suite");
-        BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 0,
+        BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suites().size() == 0,
                             "Expected 0 suites back from sync "
                                 << ecf::as_string(*TestFixture::client().defs(), PrintStyle::DEFS));
 
@@ -408,7 +408,7 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
         TestFixture::client().sync_local();
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),
                             "Expected a full_sync() since client handle should be refreshed with new suite_pts");
-        BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 3,
+        BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suites().size() == 3,
                             "Expected 3 suites back from sync "
                                 << ecf::as_string(*TestFixture::client().defs(), PrintStyle::DEFS));
 

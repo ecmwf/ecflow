@@ -58,10 +58,10 @@ static void extract_late_keyword_arguments(std::shared_ptr<ecf::LateAttr> late, 
     py::list keys        = dict.keys();
     const int no_of_keys = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
-        if (py::extract<std::string>(keys[i]).check()) {
-            std::string first = py::extract<std::string>(keys[i]);
-            if (py::extract<std::string>(dict[keys[i]]).check()) {
-                std::string second = py::extract<std::string>(dict[keys[i]]);
+        if (auto k = py::extract<std::string>(keys[i]); k.check()) {
+            std::string first = k();
+            if (auto v = py::extract<std::string>(dict[keys[i]]); v.check()) {
+                std::string second = v();
                 int hour           = 0;
                 int min            = 0;
                 bool relative      = ecf::TimeSeries::getTime(second, hour, min);
@@ -102,15 +102,15 @@ py::object cron_raw_constructor(py::tuple args, py::dict kw) {
     // cout << "cron_raw_constructor len(args):" << len(args) << endl;
     //  args[0] is Cron(i.e self) args[1] is string name
     for (int i = 1; i < len(args); ++i) {
-        if (py::extract<std::string>(args[i]).check()) {
-            std::string time_series = py::extract<std::string>(args[i]);
+        if (auto extracted = py::extract<std::string>(args[i]); extracted.check()) {
+            std::string time_series = extracted();
             if (time_series.empty()) {
                 throw std::runtime_error("cron_raw_constructor: Empty string, please pass a valid time, i.e '12:30'");
             }
             return args[0].attr("__init__")(time_series, kw); // calls -> init(const std::string& ts, dict kw)
         }
-        if (py::extract<ecf::TimeSeries>(args[i]).check()) {
-            ecf::TimeSeries time_series = py::extract<ecf::TimeSeries>(args[i]);
+        if (auto extracted = py::extract<ecf::TimeSeries>(args[i]); extracted.check()) {
+            ecf::TimeSeries time_series = extracted();
             return args[0].attr("__init__")(time_series, kw); // calls -> init(const ecf::TimeSeries& ts, dict kw)
         }
         else {
@@ -126,11 +126,11 @@ static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, 
     const int no_of_keys = len(keys);
     for (int i = 0; i < no_of_keys; ++i) {
 
-        if (py::extract<std::string>(keys[i]).check()) {
-            std::string first = py::extract<std::string>(keys[i]);
-            if (py::extract<py::list>(dict[keys[i]]).check()) {
+        if (auto k = py::extract<std::string>(keys[i]); k.check()) {
+            std::string first = k();
+            if (auto v = py::extract<py::list>(dict[keys[i]]); v.check()) {
 
-                py::list second = py::extract<py::list>(dict[keys[i]]);
+                py::list second = v();
                 std::vector<int> int_vec;
                 pyutil_list_to_int_vec(second, int_vec);
 
@@ -153,7 +153,7 @@ static void extract_cron_keyword_arguments(std::shared_ptr<ecf::CronAttr> cron, 
                         "last_week_days_of_the_month | days_of_month | months | last_day_of_the_month");
                 }
             }
-            else if (py::extract<bool>(dict[keys[i]]).check()) {
+            else if (auto b = py::extract<bool>(dict[keys[i]]); b.check()) {
                 if (first == "last_day_of_the_month") {
                     cron->add_last_day_of_month();
                 }

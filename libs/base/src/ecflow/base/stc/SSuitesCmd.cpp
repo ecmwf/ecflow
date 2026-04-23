@@ -25,11 +25,11 @@ void SSuitesCmd::init(AbstractServer* as) {
     // This command can be re-used hence clear existing data members
     suites_.clear();
 
-    const std::vector<suite_ptr>& suiteVec = as->defs()->suiteVec();
-    size_t suite_vec_size                  = suiteVec.size();
-    suites_.reserve(suite_vec_size);
-    for (size_t i = 0; i < suite_vec_size; i++) {
-        suites_.push_back(suiteVec[i]->name());
+    const auto& suites = as->defs()->suites();
+    size_t size        = suites.size();
+    suites_.reserve(size);
+    for (size_t i = 0; i < size; i++) {
+        suites_.push_back(suites[i]->name());
     }
 }
 

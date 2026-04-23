@@ -19,14 +19,14 @@ static void construct_expr(std::vector<PartExpression>& vec, const py::list& lis
     int the_list_size = len(list);
     for (int i = 0; i < the_list_size; ++i) {
         std::string part_expr;
-        if (py::extract<std::string>(list[i]).check()) {
-            part_expr = py::extract<std::string>(list[i]);
+        if (auto extracted = py::extract<std::string>(list[i]); extracted.check()) {
+            part_expr = extracted();
             if (ecf::algorithm::is_valid_name(part_expr)) {
                 part_expr += " == complete";
             }
         }
-        else if (py::extract<node_ptr>(list[i]).check()) {
-            node_ptr node = py::extract<node_ptr>(list[i]);
+        else if (auto extracted = py::extract<node_ptr>(list[i]); extracted.check()) {
+            node_ptr node = extracted();
             if (node->parent()) {
                 part_expr = node->absNodePath();
             }

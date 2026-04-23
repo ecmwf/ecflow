@@ -50,7 +50,11 @@ LogDataItem::LogDataItem(const std::string& line, qint64& refTimeInMs)
     }
 
     QDateTime dt = QDateTime::fromString(QString::fromStdString(d), "hh:mm:ss d.M.yyyy");
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    dt.setTimeZone(QTimeZone::utc());
+#else
     dt.setTimeSpec(Qt::UTC);
+#endif
 
     if (refTimeInMs == 0) {
         time_       = 0;
@@ -94,7 +98,12 @@ qint64 LogDataItem::getTimeInMs(const std::string& line) {
 
     QString d    = QString::fromStdString(line.substr(pos + 1, pos1 - pos - 1));
     QDateTime dt = QDateTime::fromString(d, "hh:mm:ss d.M.yyyy");
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    dt.setTimeZone(QTimeZone::utc());
+#else
     dt.setTimeSpec(Qt::UTC);
+#endif
+
     return dt.toMSecsSinceEpoch();
 }
 

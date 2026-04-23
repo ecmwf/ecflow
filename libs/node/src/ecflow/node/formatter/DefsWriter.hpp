@@ -2070,7 +2070,7 @@ struct Writer<NodeContainer, Stream>
     static void write(Stream& output, const NodeContainer& item, Context& ctx) {
         // taken from NodeContainer::print(std::string& os) const
 
-        for (const auto& node : item.nodeVec()) {
+        for (const auto& node : item.children()) {
 
             // Note: here we must use dynamic_cast to determine the type of the node
             // This is because we are using a templated Writer, and we need to call the correct
@@ -2179,7 +2179,7 @@ struct Writer<Defs, Stream>
         }
 
         // Write the children (i.e. suites)
-        for (const auto& s : item.suiteVec()) {
+        for (const auto& s : item.suites()) {
             Writer<Suite, Stream>::write(output, *s, ctx);
         }
 

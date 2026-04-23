@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_restore_defs_from_check_pt) {
 
     // make sure we have a valid definition with at least one suite before start
     BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0, "Expected getDefs() to succeed\n");
-    BOOST_REQUIRE_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 1, "Expected 1 suite at the start\n");
+    BOOST_REQUIRE_MESSAGE(TestFixture::client().defs()->suites().size() == 1, "Expected 1 suite at the start\n");
 
     // Check pt, make sure file exist on disk and has a non zero file size\n";
     BOOST_REQUIRE_MESSAGE(TestFixture::client().checkPtDefs() == 0,
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_restore_defs_from_check_pt) {
                               << TestFixture::client().errorMsg());
     BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,
                           "Expected getDefs() to succeed, i.e expected empty defs\n");
-    BOOST_REQUIRE_MESSAGE(TestFixture::client().defs()->suiteVec().empty(), "Expected no suites, after delete_all()\n");
+    BOOST_REQUIRE_MESSAGE(TestFixture::client().defs()->suites().empty(), "Expected no suites, after delete_all()\n");
 
     // make sure check pt file still exists, sanity test\n";
     BOOST_REQUIRE_MESSAGE(fs::exists(check_pt_file_name),
@@ -141,9 +141,9 @@ BOOST_AUTO_TEST_CASE(test_restore_defs_from_check_pt) {
     BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,
                           "Get defs failed should return 0\n"
                               << TestFixture::client().errorMsg());
-    BOOST_REQUIRE_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 1,
+    BOOST_REQUIRE_MESSAGE(TestFixture::client().defs()->suites().size() == 1,
                           "Restore from check pt did not work. expected 1 suite but found "
-                              << TestFixture::client().defs()->suiteVec().size());
+                              << TestFixture::client().defs()->suites().size());
 
     // restore default check pointing, for test that follow
     BOOST_REQUIRE_MESSAGE(TestFixture::client().checkPtDefs(ecf::CheckPt::ON_TIME, 120) == 0,

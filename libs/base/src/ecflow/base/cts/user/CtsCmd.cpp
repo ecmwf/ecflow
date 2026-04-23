@@ -404,7 +404,7 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
         case CtsCmd::STATS: {
             as->update_stats().stats_++;
             as->stats().update_for_serialisation();
-            as->stats().no_of_suites_ = as->defs()->suiteVec().size();
+            as->stats().no_of_suites_ = as->defs()->suites().size();
             std::ostringstream ss;
             as->stats().show(ss); // ECFLOW-880, allow stats to be changed in server, by only returning string
             return PreAllocatedReply::string_cmd(ss.str());

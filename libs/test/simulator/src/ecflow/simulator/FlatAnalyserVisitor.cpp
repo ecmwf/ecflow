@@ -25,8 +25,8 @@ namespace ecf {
 FlatAnalyserVisitor::FlatAnalyserVisitor() = default;
 
 void FlatAnalyserVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
-        s->acceptVisitTraversor(*this);
+    for (auto suite : d->suites()) {
+        suite->acceptVisitTraversor(*this);
     }
 }
 
@@ -48,8 +48,8 @@ void FlatAnalyserVisitor::visitNodeContainer(NodeContainer* nc) {
 
     // Don't traverse children if the parent is holding on trigger/complete expression
     if (traverseChildren) {
-        for (node_ptr t : nc->nodeVec()) {
-            t->acceptVisitTraversor(*this);
+        for (auto node : nc->children()) {
+            node->acceptVisitTraversor(*this);
         }
     }
 }

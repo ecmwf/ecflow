@@ -22,7 +22,7 @@ SStatsCmd::SStatsCmd(AbstractServer* as) {
 void SStatsCmd::init(AbstractServer* as) {
     as->stats().update_for_serialisation();
     stats_               = as->stats();
-    stats_.no_of_suites_ = as->defs()->suiteVec().size();
+    stats_.no_of_suites_ = as->defs()->suites().size();
 }
 
 bool SStatsCmd::equals(ServerToClientCmd* rhs) const {

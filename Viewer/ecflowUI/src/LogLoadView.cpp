@@ -650,7 +650,9 @@ void ChartView::setCallout(qreal val) {
     if (auto* axisY = static_cast<QValueAxis*>(ViewerUtil::chartAxisY(chart()))) {
         qreal m = axisY->max();
         callout_->setAnchor(QPointF(val, m));
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+        QString txt = QDateTime::fromMSecsSinceEpoch(val, QTimeZone::utc()).toString("hh:mm:ss dd/MM/yyyy");
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         QString txt = QDateTime::fromMSecsSinceEpoch(val, Qt::UTC).toString("hh:mm:ss dd/MM/yyyy");
 #else
         QString txt = QDateTime::fromMSecsSinceEpoch(val).toUTC().toString("hh:mm:ss dd/MM/yyyy");
@@ -1581,7 +1583,9 @@ void LogRequestView::scanPositionChanged(qreal pos) {
     QColor dateCol(210, 211, 214);
 
     QString txt = "<table width=\'100%\' cellpadding=\'4px\'>";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    QString dateTxt = QDateTime::fromMSecsSinceEpoch(t, QTimeZone::utc()).toString("hh:mm:ss dd/MM/yyyy");
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QString dateTxt = QDateTime::fromMSecsSinceEpoch(t, Qt::UTC).toString("hh:mm:ss dd/MM/yyyy");
 #else
     QString dateTxt = QDateTime::fromMSecsSinceEpoch(t).toUTC().toString("hh:mm:ss dd/MM/yyyy");
@@ -1594,7 +1598,11 @@ void LogRequestView::scanPositionChanged(qreal pos) {
     //                 QDateTime::fromMSecsSinceEpoch(t,Qt::UTC).toString("hh:mm:ss dd/MM/yyyy"),
     //                 dateCol);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    dateTxt = (hasData)
+                  ? QDateTime::fromMSecsSinceEpoch(seriesTime(idx), QTimeZone::utc()).toString("hh:mm:ss dd/MM/yyyy")
+                  : " N/A";
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     dateTxt =
         (hasData) ? QDateTime::fromMSecsSinceEpoch(seriesTime(idx), Qt::UTC).toString("hh:mm:ss dd/MM/yyyy") : " N/A";
 #else

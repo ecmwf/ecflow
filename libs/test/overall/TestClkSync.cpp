@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
                           CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
     std::ostringstream ss;
     ss << "\nStart time"
-       << "\n  sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString()
+       << "\n  sync_full: suite time : " << TestFixture::client().defs()->suites()[0]->calendar().toString()
        << " cal_count(" << TestFixture::client().defs()->updateCalendarCount() << ")\n";
 
     for (size_t i = 0; i < 3; i++) {
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
         BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local(true /*sync suite clock*/) == 0,
                               "sync_local failed should return 0\n"
                                   << TestFixture::client().errorMsg());
-        auto sync_clock_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
+        auto sync_clock_suiteTime = TestFixture::client().defs()->suites()[0]->calendar().suiteTime();
         ss << "   Sync clock suite time:" << to_simple_string(sync_clock_suiteTime) << " full_sync("
            << TestFixture::client().server_reply().full_sync() << ")" << " in_sync("
            << TestFixture::client().server_reply().in_sync() << ") cal_count("
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(test_suite_calendar_sync) {
         // suiteVec is now invalidated
         BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,
                               CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
-        auto sync_full_suiteTime = TestFixture::client().defs()->suiteVec()[0]->calendar().suiteTime();
+        auto sync_full_suiteTime = TestFixture::client().defs()->suites()[0]->calendar().suiteTime();
         ss << "   Sync full suite time :" << to_simple_string(sync_full_suiteTime) << " full_sync("
            << TestFixture::client().server_reply().full_sync() << ")" << " in_sync("
            << TestFixture::client().server_reply().in_sync() << ") cal_count("

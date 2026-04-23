@@ -27,7 +27,7 @@ ResolveExternsVisitor::ResolveExternsVisitor(Defs* defs)
 }
 
 void ResolveExternsVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
+    for (auto s : d->suites()) {
         s->acceptVisitTraversor(*this);
     }
 }
@@ -43,8 +43,8 @@ void ResolveExternsVisitor::visitNodeContainer(NodeContainer* nc) {
 
     setup(nc);
 
-    for (node_ptr t : nc->nodeVec()) {
-        t->acceptVisitTraversor(*this);
+    for (auto node : nc->children()) {
+        node->acceptVisitTraversor(*this);
     }
 }
 

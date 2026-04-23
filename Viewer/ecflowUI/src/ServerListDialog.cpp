@@ -1047,15 +1047,33 @@ ServerListFilterModel::ServerListFilterModel(QObject* parent)
 void ServerListFilterModel::setFilterStr(QString t) {
     QString newStr = t.simplified();
     if (newStr != filterStr_) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+        beginFilterChange();
+#endif
+
         filterStr_ = newStr;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+        endFilterChange();
+#else
         invalidateFilter();
+#endif
     }
 }
 
 void ServerListFilterModel::setFilterFavourite(bool b) {
     if (b != filterFavourite_) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+        beginFilterChange();
+#endif
+
         filterFavourite_ = b;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+        endFilterChange();
+#else
         invalidateFilter();
+#endif
     }
 }
 

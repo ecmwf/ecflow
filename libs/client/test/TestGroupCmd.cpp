@@ -76,8 +76,8 @@ BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
                                                << theClient.errorMsg());
         defs_ptr serverDefs = theClient.defs();
         BOOST_REQUIRE_MESSAGE(serverDefs.get(), "Server returned a NULL defs");
-        BOOST_REQUIRE_MESSAGE(serverDefs->suiteVec().size() >= 1, "  no suite ?");
-        const std::vector<suite_ptr>& suites   = serverDefs->suiteVec();
+        BOOST_REQUIRE_MESSAGE(serverDefs->suites().size() >= 1, "  no suite ?");
+        const auto& suites                     = serverDefs->suites();
         const std::vector<Variable>& variables = suites[0]->variables();
         expected_var                           = variables.size();
     }
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
                                                << theClient.errorMsg());
         defs_ptr serverDefs = theClient.defs();
         BOOST_REQUIRE_MESSAGE(serverDefs.get(), "Server returned a NULL defs");
-        const std::vector<suite_ptr>& suites = serverDefs->suiteVec();
+        const auto& suites = serverDefs->suites();
         BOOST_REQUIRE_MESSAGE(suites.size() >= 1, "  no suite ?");
         const std::vector<Variable>& variables = suites[0]->variables();
         BOOST_REQUIRE_MESSAGE(variables.size() == expected_var,
@@ -245,8 +245,8 @@ BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
         BOOST_REQUIRE_MESSAGE(!theEvent.empty(), "Could not find the event myEvent");
         BOOST_REQUIRE_MESSAGE(theEvent.value(), "The event was not set");
 
-        const std::vector<suite_ptr>& suiteVec = serverDefs->suiteVec();
-        suite_ptr suite                        = suiteVec.back();
+        const auto& suites = serverDefs->suites();
+        suite_ptr suite    = suites.back();
         BOOST_REQUIRE_MESSAGE(suite->state() == NState::COMPLETE,
                               "Suite expected NState::COMPLETE, but found to be " << NState::toString(suite->state()));
     }

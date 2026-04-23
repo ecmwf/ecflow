@@ -26,8 +26,8 @@ py::object Edit::init(py::tuple args, py::dict kw) {
     // cout << "Edit::init args: " << len(args) << " kwargs " << len(kw) << "\n";
     //  args[0] is Edit(i.e self)
     for (int i = 1; i < len(args); ++i) {
-        if (py::extract<py::dict>(args[i]).check()) {
-            py::dict d = py::extract<py::dict>(args[i]);
+        if (auto extracted = py::extract<py::dict>(args[i]); extracted.check()) {
+            py::dict d = extracted();
             return args[0].attr("__init__")(d, kw); // calls -> .def(init<dict,dict>() -> Edit(dict,dict)
         }
         else {

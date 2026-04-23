@@ -222,9 +222,9 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt) {
         BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0, "Expected halt server to succeed\n" << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.restoreDefsFromCheckPt() == 0, "Expected restoreDefsFromCheckPt succeed\n");
         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0, "Expected getDefs() to succeed, i.e expected empty defs\n");
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() == expected_no_of_suites,
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() == expected_no_of_suites,
                               "Expected " << expected_no_of_suites << " suites, after restoreDefsFromCheckPt but found "
-                                          << theClient.defs()->suiteVec().size() << "\n");
+                                          << theClient.defs()->suites().size() << "\n");
 
         std::string suite = "/s" + ecf::convert_to<std::string>(i);
         BOOST_REQUIRE_MESSAGE(theClient.delete_node(suite) == 0,
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
     MyDefsFixture theDefsFixture; // make sure generated server variable use this port.
     defs_ptr defs_to_be_check_pointed = theDefsFixture.create_defs(port);
 
-    BOOST_REQUIRE_MESSAGE(defs_to_be_check_pointed->suiteVec().size() >= 2, "expected at least 2 suites");
+    BOOST_REQUIRE_MESSAGE(defs_to_be_check_pointed->suites().size() >= 2, "expected at least 2 suites");
 
     {
         // Start a new server. However make sure that on server exit, we not delete check pt files

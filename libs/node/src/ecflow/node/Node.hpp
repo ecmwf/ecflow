@@ -440,8 +440,36 @@ public:
 
     const MiscAttrs* get_misc_attrs() const { return misc_attrs_.get(); }
 
-    [[deprecated]] virtual void gen_variables(std::vector<Variable>&) const;
+    ///
+    /// @brief Retrieves the generated variables associated with this node.
+    ///
+    /// @note generated variables are automatically created from repeat attributes and provide
+    /// additional context about the current repeat iteration.
+    /// @note this virtual function allows derived classes (e.g., Submittable) to add additional
+    /// generated variables beyond those from the repeat attribute.
+    ///
+    /// @param vars Reference to a vector that will be populated with the generated variables.
+    ///            The function appends to the vector rather than replacing its contents.
+    ///
+    /// @see repeat attribute documentation for details on the specific generated variables created
+    /// by each repeat type.
+    ///
+    virtual void gen_variables(std::vector<Variable>& vars) const;
+
+    ///
+    /// @brief Retrieves the generated variables associated with this node.
+    ///
+    /// This is a convenience wrapper around gen_variables(std::vector<Variable>&) that
+    /// creates and returns a new vector containing the generated variables.
+    ///
+    /// @note For performance-critical code where a vector already exists, prefer using
+    /// gen_variables(std::vector<Variable>&) to avoid unnecessary allocations.
+    ///
+    /// @return A vector containing all generated variables for this node's repeat attribute.
+    ///         Returns an empty vector if the node has no repeat attribute.
+    ///
     std::vector<Variable> gen_variables() const;
+
     bool getLabelValue(const std::string& name, std::string& value) const;
     bool getLabelNewValue(const std::string& name, std::string& value) const;
 

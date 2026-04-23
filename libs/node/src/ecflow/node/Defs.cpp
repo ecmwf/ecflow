@@ -354,12 +354,12 @@ void Defs::absorb(Defs* input_defs, bool force) {
     updateCalendarCount_ = 0;
 
     // We must make a copy, otherwise we are iterating over a vector that is being deleted
-    std::vector<suite_ptr> suiteVecCopy = input_defs->suiteVec();
-    size_t theSize                      = suiteVecCopy.size();
+    auto suitesCopy = input_defs->suites();
+    size_t theSize  = suitesCopy.size();
     for (size_t s = 0; s < theSize; s++) {
 
         /// regardless remove the suite from the input defs
-        suite_ptr the_input_suite = input_defs->removeSuite(suiteVecCopy[s]);
+        suite_ptr the_input_suite = input_defs->removeSuite(suitesCopy[s]);
 
         if (force) {
             /// The suite of the same name exists. remove it from *existing* defs
@@ -373,7 +373,7 @@ void Defs::absorb(Defs* input_defs, bool force) {
         /// This stops accidental overwrite
         addSuite(the_input_suite);
     }
-    LOG_ASSERT(input_defs->suiteVec().empty(), "Defs::absorb");
+    LOG_ASSERT(input_defs->suites().empty(), "Defs::absorb");
 
     // Copy over server user variables
     server_state().add_or_update_user_variables(input_defs->server_state().user_variables());

@@ -432,7 +432,12 @@ bool TimelineData::parseLine(const std::string& line,
 
     // Convert status time into secs
     QDateTime dt = QDateTime::fromString(QString::fromStdString(time_stamp), "hh:mm:ss d.M.yyyy");
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    dt.setTimeZone(QTimeZone::utc());
+#else
     dt.setTimeSpec(Qt::UTC);
+#endif
     statusTime = dt.toMSecsSinceEpoch() / 1000;
 
     return true;
