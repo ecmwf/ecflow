@@ -80,11 +80,12 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
         ":YMD / :YMD < 5"s,
         ":YMD * :YMD < 5"s,
         ":YMD % :YMD < 5"s,
-        ":VARIABLE == 20230101T000000"s,
-        ":VARIABLE >= 20230101T000000"s,
-        ":VARIABLE <= 20230101T000000"s,
-        ":VARIABLE + 3 <= 19700101T000000"s,
-        ":VARIABLE <= 19700101T000000 + 3"s};
+        ":YYYYMMDDThhmmss == 20230101T000000"s,
+        ":YYYYMMDDThhmmss >= 20230101T000000"s,
+        ":YYYYMMDDThhmmss <= 20230101T000000"s,
+        ":YYYYMMDDThhmmss + 3 <= 19700101T000000"s,
+        ":YYYYMMDDThhmmss <= 19700101T000000 + 3"s,
+        ":YYYYMMDDThhmmss >= 19700101T000000 + 3"s};
 
     for (const auto& expression : expressions) {
 
@@ -170,7 +171,8 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
         "((:YMD + :YMD) < 5)"s,
         "((:YMD + :YMD) < 5)"s,
         "((:VARIABLE == 19700101T123456) and (b == complete))"s,
-        "((:VARIABLE < 19700101T123456) and (b == complete))"s};
+        "((:VARIABLE < 19700101T123456) and (b == complete))"s,
+        "((:VARIABLE >= (19700101T000000 + 3)) and (b == complete))"s};
 
     for (const auto& expression : expressions) {
 
@@ -458,9 +460,64 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     exprMap[":YMD * :YMD <= 5"]             = std::make_pair(AstLessEqual::stype(), true);
     exprMap[":YMD + 1 == 1"]                = std::make_pair(AstEqual::stype(), true);
 
-    exprMap[":VAR == 20000101T235959"] = std::make_pair(AstEqual::stype(), false);
-    exprMap[":VAR <= 20000101T235959"] = std::make_pair(AstLessEqual::stype(), true);
-    exprMap[":VAR >= 20000101T235959"] = std::make_pair(AstGreaterEqual::stype(), false);
+    //
+    // Notice: in the following trigger expressions, when a variable is refered (e.g. :VAR), it is evaluated to 0.
+    // In this case, because of the DateTime instant nature of the comparison, value 0 represents 19700101T000000.
+    //
+
+    exprMap[":YYYYMMDDThhmmss == 19691231T235959"] = std::make_pair(AstEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss == 19700101T000000"] = std::make_pair(AstEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss == 19700101T000001"] = std::make_pair(AstEqual::stype(), false);
+
+    exprMap["19691231T235959 == :YYYYMMDDThhmmss"] = std::make_pair(AstEqual::stype(), false);
+    exprMap["19700101T000000 == :YYYYMMDDThhmmss"] = std::make_pair(AstEqual::stype(), true);
+    exprMap["19700101T000001 == :YYYYMMDDThhmmss"] = std::make_pair(AstEqual::stype(), false);
+
+    exprMap[":YYYYMMDDThhmmss <= 19691231T235959"] = std::make_pair(AstLessEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss <= 19700101T000000"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss <= 19700101T000001"] = std::make_pair(AstLessEqual::stype(), true);
+
+    exprMap["19691231T235959 <= :YYYYMMDDThhmmss"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["19700101T000000 <= :YYYYMMDDThhmmss"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["19700101T000001 <= :YYYYMMDDThhmmss"] = std::make_pair(AstLessEqual::stype(), false);
+
+    exprMap[":YYYYMMDDThhmmss >= 19691231T235959"] = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss >= 19700101T000000"] = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss >= 19700101T000001"] = std::make_pair(AstGreaterEqual::stype(), false);
+
+    exprMap["19691231T235959 >= :YYYYMMDDThhmmss"] = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["19700101T000000 >= :YYYYMMDDThhmmss"] = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["19700101T000001 >= :YYYYMMDDThhmmss"] = std::make_pair(AstGreaterEqual::stype(), true);
+
+    exprMap[":YYYYMMDDThhmmss + 1 == 19700101T000001"]   = std::make_pair(AstEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss - 1 == 19691231T235959"]   = std::make_pair(AstEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 1) == 19700101T000001"] = std::make_pair(AstEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss - 1) == 19691231T235959"] = std::make_pair(AstEqual::stype(), true);
+
+    exprMap[":YYYYMMDDThhmmss + 1 == 19700101T000000 + 1"]     = std::make_pair(AstEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss - 1 == 19700101T000000 - 1"]     = std::make_pair(AstEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 1) == (19700101T000000 + 1)"] = std::make_pair(AstEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss - 1) == (19700101T000000 - 1)"] = std::make_pair(AstEqual::stype(), true);
+
+    exprMap[":YYYYMMDDThhmmss + 1 >= 19700101T000000"]         = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss + 1 >= 19700101T000002"]         = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss + 1 >= 19700101T000000 + 2"]     = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["(:YYYYMMDDThhmmss + 1) >= 19700101T000000"]       = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 1) >= 19700101T000002"]       = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["(:YYYYMMDDThhmmss + 1) >= (19700101T000000 + 2)"] = std::make_pair(AstGreaterEqual::stype(), false);
+
+    exprMap[":YYYYMMDDThhmmss <= 19700101T000001 + 60"]          = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss >= 19700101T000001 + 60"]          = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss <= (19700101T000001 + 60)"]        = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss >= (19700101T000001 + 60)"]        = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss + 60 <= 19700101T000001"]          = std::make_pair(AstLessEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss + 60 >= 19700101T000001"]          = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 60) <= 19700101T000001"]        = std::make_pair(AstLessEqual::stype(), false);
+    exprMap["(:YYYYMMDDThhmmss + 60) >= 19700101T000001"]        = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss + 60 <= 19700101T000001 + 60"]     = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss + 60 >= 19700101T000001 + 60"]     = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["(:YYYYMMDDThhmmss + 60) <= (19700101T000001 + 60)"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 60) >= (19700101T000001 + 60)"] = std::make_pair(AstGreaterEqual::stype(), false);
 
     int parse_failure = 0;
     int ast_failure   = 0;

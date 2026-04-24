@@ -180,6 +180,39 @@ def test_trigger_arithmetic():
     assert t2.evaluate_trigger(), "Expected 20090131T000000 + 86400 == 20090201T000000"
 
 
+def test_trigger_datetime_instant_rhs_arithmetic():
+    """Trigger expressions with datetime literal + integer seconds on the RHS must parse,
+    pass defs.check(), and evaluate correctly."""
+    defs = ecflow.Defs()
+    s = defs.add_suite("s")
+    t1 = s.add_task("t1")
+    t1.add_repeat(ecflow.RepeatDateTimeList("DT", ["20090101T000000", "20091231T000000"]))
+    t2 = s.add_task("t2")
+
+    # Non-parenthesized: threshold = epoch + 86400 seconds (~20081231T235919 UTC on some systems,
+    # but the key point is DT (20090101T000000 in seconds) is greater, so trigger fires.
+    t2.add_trigger("t1:DT ge 19700102T000000 + 86400")
+    assert len(defs.check()) == 0, "Expected no errors: 't1:DT ge 19700102T000000 + 86400'"
+    assert t2.evaluate_trigger(), "Expected trigger to fire: DT(20090101T000000) >= 19700102T000000 + 86400"
+
+    # Parenthesized form — same semantics, just wrapped in parens
+    t2.change_trigger("t1:DT ge (19700102T000000 + 86400)")
+    assert len(defs.check()) == 0, "Expected no errors: 't1:DT ge (19700102T000000 + 86400)'"
+    assert t2.evaluate_trigger(), "Expected trigger to fire: DT(20090101T000000) >= (19700102T000000 + 86400)"
+
+    # Threshold in the future — trigger must NOT fire
+    t2.change_trigger("t1:DT ge (20240701T000000 + 60)")
+    assert len(defs.check()) == 0, "Expected no errors: 't1:DT ge (20240701T000000 + 60)'"
+    assert not t2.evaluate_trigger(), \
+        "Expected trigger NOT to fire: DT(20090101T000000) < (20240701T000000 + 60)"
+
+    # Threshold just below DT — trigger fires (DT - 1 second)
+    t2.change_trigger("t1:DT ge (20090101T000000 - 1)")
+    assert len(defs.check()) == 0, "Expected no errors: 't1:DT ge (20090101T000000 - 1)'"
+    assert t2.evaluate_trigger(), \
+        "Expected trigger to fire: DT(20090101T000000) >= (20090101T000000 - 1)"
+
+
 def test_defs_check_no_errors():
     """A Defs with RepeatDateTimeList must pass the check with no errors."""
     defs = ecflow.Defs()
@@ -232,6 +265,7 @@ if __name__ == "__main__":
     test_delete_repeat()
     test_generated_variables()
     test_trigger_arithmetic()
+    test_trigger_datetime_instant_rhs_arithmetic()
     test_defs_check_no_errors()
     test_defs_str_contains_datetimelist()
     test_first_and_last_value

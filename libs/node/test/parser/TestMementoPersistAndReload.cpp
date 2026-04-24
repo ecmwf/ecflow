@@ -258,6 +258,54 @@ BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
         suite_ptr suite = defs.add_suite("s1");
         node_ptr t      = suite->add_task("t1");
 
+        Instant dt0    = Instant::parse("20240101T000000");
+        Instant dt1    = Instant::parse("20240105T000000");
+        Duration delta = Duration::parse("1:00:00");
+        Repeat repeat(RepeatDateTime("YMDTHMS", dt0, dt1, delta));
+
+        NodeRepeatMemento memento(repeat);
+        t->set_memento(&memento, aspects, aspect_only); // add repeat;
+
+        PersistHelper helper;
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "NodeRepeatMemento failed: " << helper.errorMsg());
+
+        repeat.increment();
+        NodeRepeatMemento memento1(repeat); // change repeat
+        t->set_memento(&memento1, aspects, aspect_only);
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "NodeRepeatMemento failed: " << helper.errorMsg());
+    }
+
+    {
+        Defs defs;
+        suite_ptr suite = defs.add_suite("s1");
+        node_ptr t      = suite->add_task("t1");
+
+        using ecf::Instant;
+        Instant dt0 = Instant::parse("20240101T000000");
+        Instant dt1 = Instant::parse("20240102T120000");
+        Instant dt2 = Instant::parse("20240103T060000");
+        Repeat repeat(RepeatDateTimeList("YMDTHMS", {dt0, dt1, dt2}));
+
+        NodeRepeatMemento memento(repeat);
+        t->set_memento(&memento, aspects, aspect_only); // add repeat;
+
+        PersistHelper helper;
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "NodeRepeatMemento failed: " << helper.errorMsg());
+
+        repeat.increment();
+        NodeRepeatMemento memento1(repeat); // change repeat
+        t->set_memento(&memento1, aspects, aspect_only);
+        BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),
+                            "NodeRepeatMemento failed: " << helper.errorMsg());
+    }
+    {
+        Defs defs;
+        suite_ptr suite = defs.add_suite("s1");
+        node_ptr t      = suite->add_task("t1");
+
         Limit limit("suiteLimit", 10);
 
         NodeLimitMemento memento(limit);
