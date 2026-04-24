@@ -14,6 +14,7 @@ This can be achieved by defining a :term:`repeat` attribute, which enables itera
 * a sequence of time instants (:code:`repeat datetime`)
 * a list of string  (:code:`repeat string` or :code:`repeat enumerated`)
 * a list of dates (:code:`repeat datelist`)
+* a list of time instants (:code:`repeat datetimelist`)
 
 Sequences of integers, dates or time instants are created by specifying the first and last element, with an optional
 increment (the default is 1 for integers, 1 day for dates, and 24:00:00 for time instants).
@@ -31,13 +32,15 @@ followed by the type of repeat, the name of the repeat, and the values to iterat
    repeat string COLOR red green blue yellow
    repeat enumerated FRUIT apple banana cherry
    repeat datelist YMD 20130101 20130102 20130103 20200101 20190101
+   repeat datetimelist INSTANT 20240101T000000 20240102T120000 20240103T060000
 
 In order to be used by the task script or :term:`trigger` expressions, each :term:`repeat` attribute generates ecFlow variable(s),
 with the name(s) corresponding to the name of the repeat.
 
 .. note::
 
-   If :code:`repeat date`, or :code:`repeat datelist` are used in trigger expressions, they will use date arithmetic.
+   If :code:`repeat date` or :code:`repeat datelist` are used in trigger expressions, they will use date arithmetic.
+   If :code:`repeat datetime` or :code:`repeat datetimelist` are used in trigger expressions, they will use seconds-based arithmetic.
 
 Repeat with day/date
 ----------------------

@@ -31,6 +31,7 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
    template_suite
    shell_suite_definition
    cron_repeat_day_1_repeat_date
+   repeat_using_time_instants
    one_task_wrapper_for_multiple_tasks
    what_is_the_most_efficient_way_to_access_my_suites
    ecflow_ui_web_menu

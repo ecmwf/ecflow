@@ -98,12 +98,12 @@ Definition file grammar
         : !`late_option` >> +`nextline`
     late_option: "-c" >> `hh_mm` | ("-s" >> `hh_mm` ) | "-a" >> `hh_mm`
     repeat: "repeat" >> `repeat_type` >> +`nextline`
-    repeat_type: `repeat_datetime` | `repeat_date` |
+    repeat_type: `repeat_datetime` | `repeat_datetimelist` | `repeat_date` |
                : `repeat_day` | `repeat_month` | `repeat_year` |
-               : `repeat_integer` | `repeat_enumerated` | `repeat_string` | 
+               : `repeat_integer` | `repeat_enumerated` | `repeat_string` |
                : `repeat_datelist`
     repeat_day: "day" >> unsigned integer >> !`ymd`
-    repeat_integer: "integer" >> `identifier` >> integer >> " " >> 
+    repeat_integer: "integer" >> `identifier` >> integer >> " " >>
                   : integer >> " " >> integer
     repeat_enumerated: "enumerated" >> `identifier` >> +`identifier`
     repeat_string: "string" >> `identifier` >> +`identifier`
@@ -111,6 +111,7 @@ Definition file grammar
     repeat_datetime: "datetime" >> `identifier` >>
                    : `instant` >> `instant` >> `duration`
     repeat_datelist: "datelist" >> `identifier` >> +( `ymd` )
+    repeat_datetimelist: "datetimelist" >> `identifier` >> +( `instant` )
     varvalue: `tickquotedstring` | `quotedstring` | `identifier`
     suiteName: `node_name` >> +`nextline`
     familyName: `node_name` >> +`nextline`

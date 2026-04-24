@@ -569,7 +569,7 @@ const char* NodeAttrDoc::repeat_date_list_doc() {
 }
 
 const char* NodeAttrDoc::repeat_datetimelist_doc() {
-    return "Allows a `node`_ to be repeated using an arbitrary list of datetime instants (yyyymmddTHHMMSS format).\n\n"
+    return "Allows a `node`_ to be repeated using an arbitrary list of date+time instants (yyyymmddTHHMMSS format).\n\n"
            "A node can only have one `repeat`_.\n"
            "The repeat name can be referenced in `trigger`_ expressions.\n"
            "\nConstructor::\n\n"
