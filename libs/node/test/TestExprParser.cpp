@@ -519,6 +519,91 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
                           "Found failures parse_failure:" << parse_failure << " ast failure:" << ast_failure);
 }
 
+BOOST_AUTO_TEST_CASE(test_parser_arithmetic_expressions) {
+    ECF_NAME_THIS_TEST();
+
+    // map key      = expression
+    // map value[0] = expected type of the root abstract syntax tree
+    // map value[1] = expected evaluation result
+    // map value[2] = expected value
+
+    std::map<std::string, std::tuple<std::string, bool, int>> expressions;
+
+    expressions["10 + 1"]  = std::make_tuple(AstPlus::stype(), true, 11);
+    expressions["10 - 1"]  = std::make_tuple(AstMinus::stype(), true, 9);
+    expressions["10 * 10"] = std::make_tuple(AstMultiply::stype(), true, 100);
+    expressions["10 / 10"] = std::make_tuple(AstDivide::stype(), true, 1);
+    expressions["11 % 10"] = std::make_tuple(AstModulo::stype(), true, 1);
+
+    // Note: in the following expressions, `:VAR` is considered a nonexistent variable and evaluates to 0
+    expressions[":VAR + 1"]  = std::make_tuple(AstPlus::stype(), true, 1);
+    expressions[":VAR - 1"]  = std::make_tuple(AstMinus::stype(), true, -1);
+    expressions[":VAR * 10"] = std::make_tuple(AstMultiply::stype(), true, 0);
+    expressions[":VAR / 10"] = std::make_tuple(AstDivide::stype(), true, 0);
+    expressions[":VAR % 10"] = std::make_tuple(AstModulo::stype(), true, 0);
+
+    int parse_failure = 0;
+    int ast_failure   = 0;
+    for (const auto& p : expressions) {
+        auto expression = p.first;
+
+        ExprParser parser(expression);
+
+        std::string errorMsg;
+        if (bool ok = parser.doParse(errorMsg); !ok) {
+            parse_failure++;
+            BOOST_CHECK_MESSAGE(ok, errorMsg + "failed for " + expression);
+        }
+        else {
+            auto expected_type   = std::get<0>(p.second);
+            auto expected_result = std::get<1>(p.second);
+            auto expected_value  = std::get<2>(p.second);
+
+            if (Ast* top = parser.getAst(); !top) {
+                ast_failure++;
+                BOOST_CHECK_MESSAGE(top, "No abstract syntax tree for " + expression);
+            }
+            else {
+                BOOST_CHECK_MESSAGE(top->left(), "No root created for " + expression);
+                BOOST_CHECK_MESSAGE(top->left()->isRoot() || top->left()->is_attribute(),
+                                    "First child of top should be a root or attribute for " + expression);
+                BOOST_CHECK_MESSAGE(top->left()->is_evaluateable(),
+                                    "expected ast to be evaluatable. found: " << top->left()->type() << " "
+                                                                              << expression);
+                BOOST_CHECK_MESSAGE(top->left()->type() == expected_type || top->left()->type() == "variable",
+                                    "expected root type '" << expected_type << "' or 'variable' but found '"
+                                                           << top->left()->type() << "' " << expression);
+
+                auto actual_result = top->evaluate();
+                BOOST_CHECK_MESSAGE(expected_result == actual_result,
+                                    "evaluation result for: " << expression << "\n  expected: " << expected_result
+                                                              << "\n  actual: " << actual_result << "\n\n"
+                                                              << ecf::as_string(*top, PrintStyle::DEFS));
+
+                auto actual_value = top->value();
+                BOOST_CHECK_MESSAGE(expected_value == actual_value,
+                                    "evaluation value for: " << expression << "\n  expected: " << expected_value
+                                                             << "\n  obtained: " << actual_value);
+
+                std::string error_msg;
+                BOOST_CHECK_MESSAGE(top->check(error_msg),
+                                    error_msg << ":  Check failed for " << ecf::as_string(*top, PrintStyle::DEFS));
+
+                std::string why;
+                top->why(why);
+                if (top->evaluate()) {
+                    BOOST_CHECK_MESSAGE(why.empty(), "Expected why to be empty when expression evaluates: " << p.first);
+                }
+                else {
+                    BOOST_CHECK_MESSAGE(!why.empty(), "When ast does not evaluate we expect to find why: " << p.first);
+                }
+            }
+        }
+    }
+    BOOST_REQUIRE_MESSAGE(parse_failure == 0 && ast_failure == 0,
+                          "Found failures parse_failure:" << parse_failure << " ast failure:" << ast_failure);
+}
+
 BOOST_AUTO_TEST_CASE(test_trigger_functions) {
     ECF_NAME_THIS_TEST();
 

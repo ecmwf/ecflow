@@ -1671,7 +1671,7 @@ int AstParentVariable::minus(Ast* right) const {
     if (ref_node) {
         return ref_node->findExprVariableValueAndMinus(name_, right->value());
     }
-    return right->value();
+    return -right->value();
 }
 
 int AstParentVariable::plus(Ast* right) const {

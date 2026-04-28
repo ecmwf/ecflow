@@ -87,6 +87,10 @@ public:
     AstTop* isTop() const override { return const_cast<AstTop*>(this); }
     bool evaluate() const override;
     bool check(std::string& error_msg) const override;
+    int value() const override {
+        assert(root_);
+        return root_ ? root_->value() : 0;
+    }
 
     bool empty() const override { return (root_) ? false : true; }
     void print_flat(std::ostream&, bool add_brackets = false) const override;
