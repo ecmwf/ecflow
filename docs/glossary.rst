@@ -1835,11 +1835,12 @@ Glossary
 
          repeat day [<delta>]    # only for suites
          repeat integer VARIABLE <start> <end> [<delta>]
-         repeat enumerated VARIABLE <value-1> [<value-2> [<value-3> [... <value-N>]]]
-         repeat string VARIABLE <string-1> [string-2 [string-3 [... string-N]]]
+         repeat enumerated VARIABLE <value-1> [<value-2> [... <value-N>]]
+         repeat string VARIABLE <string-1> [string-2 [... string-N]]
          repeat date VARIABLE <begin> <end> [<delta>]
-         repeat datelist VARIABLE <date-1> [<date-2> [<date-3> [... <date-N>]]]
+         repeat datelist VARIABLE <date-1> [<date-2> [... <date-N>]]
          repeat datetime VARIABLE <begin> <end> [<delta>]
+         repeat datetimelist VARIABLE <instant-1> [<instant-2> [... <instant-N>]]
 
       There can only be a single repeat per :term:`node`, but several repeats can be used in combination by being
       placed at distinct levels of the suite tree.
@@ -2106,6 +2107,7 @@ Glossary
       - :term:`repeat` *integer*: use the implicit integer values
       - :term:`repeat` *date*: use the date values as integers. Use of plus/minus on repeat date variable uses date arithmetic
       - :term:`repeat` *datetime*: use the date+time instant values as integers. Use of plus/minus on repeat datetime variable uses second arithmetic
+      - :term:`repeat` *datetimelist*: use the date+time instant values as integers. Use of plus/minus on repeat datetimelist variable uses second arithmetic
       - :term:`limit`: the limit value is used as an integer. This allows a degree of prioritisation amongst tasks under a limit
       - :term:`late`: the value is stored in a flag, and is a simple boolean. Used to signify when a task is late.
        

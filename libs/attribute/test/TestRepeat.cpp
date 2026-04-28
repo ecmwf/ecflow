@@ -313,6 +313,167 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
 BOOST_AUTO_TEST_SUITE_END() // test_repeat_datelist
 
 /*
+ * Test Suite: ::test_repeat_datetimelist
+ * ************************************************************ */
+
+BOOST_AUTO_TEST_SUITE(test_repeat_datetimelist)
+
+BOOST_AUTO_TEST_CASE(invariants) {
+    ECF_NAME_THIS_TEST();
+
+    {
+        using ecf::Instant;
+        Instant dt0 = Instant::parse("20240101T000000");
+        Instant dt1 = Instant::parse("20240102T120000");
+        Instant dt2 = Instant::parse("20240103T060000");
+
+        Repeat rep(RepeatDateTimeList("DT", {dt0, dt1, dt2}));
+        BOOST_CHECK_MESSAGE(!rep.empty(), "Repeat should not be empty");
+        BOOST_CHECK_MESSAGE(rep.name() == "DT", "name not as expected");
+        BOOST_CHECK_MESSAGE(rep.step() == 1, "step should be 1");
+        BOOST_CHECK_MESSAGE(rep.index_or_value() == 0, "index_or_value should be 0");
+        BOOST_CHECK_MESSAGE(rep.valid(), "RepeatDateTimeList should be valid");
+        BOOST_CHECK_MESSAGE(rep.valueAsString() == "20240101T000000",
+                            "valueAsString not as expected: " << rep.valueAsString());
+
+        Repeat cloned = Repeat(rep);
+        BOOST_CHECK_MESSAGE(cloned == rep, "Equality failed");
+        BOOST_CHECK_MESSAGE(cloned.name() == "DT", "not as expected");
+        BOOST_CHECK_MESSAGE(cloned.step() == 1, "not as expected");
+        BOOST_CHECK_MESSAGE(cloned.index_or_value() == 0, "not as expected");
+        BOOST_CHECK_MESSAGE(cloned.valueAsString() == "20240101T000000", "not as expected");
+    }
+    {
+        RepeatDateTimeList empty;
+        BOOST_CHECK_MESSAGE(empty.start() == 0, "Start should be 0");
+        BOOST_CHECK_MESSAGE(empty.end() == 0, "end should be 0");
+        BOOST_CHECK_MESSAGE(empty.step() == 1, "step should be 1");
+        BOOST_CHECK_MESSAGE(empty.value() == 0, "value should be 0");
+        BOOST_CHECK_MESSAGE(empty.name().empty(), "name should be empty");
+        BOOST_CHECK_MESSAGE(empty.valueAsString() == "", "expected '' but found " << empty.valueAsString());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(increment_and_validity) {
+    ECF_NAME_THIS_TEST();
+
+    using ecf::Instant;
+    Instant dt0 = Instant::parse("20240101T000000");
+    Instant dt1 = Instant::parse("20240102T120000");
+
+    Repeat rep(RepeatDateTimeList("DT", {dt0, dt1}));
+    BOOST_CHECK_MESSAGE(rep.valid(), "should be valid");
+    BOOST_CHECK_MESSAGE(rep.index_or_value() == 0, "index should be 0");
+    BOOST_CHECK_MESSAGE(rep.valueAsString() == "20240101T000000", "not as expected");
+
+    rep.increment();
+    BOOST_CHECK_MESSAGE(rep.valid(), "should be valid after first increment");
+    BOOST_CHECK_MESSAGE(rep.index_or_value() == 1, "index should be 1");
+    BOOST_CHECK_MESSAGE(rep.valueAsString() == "20240102T120000", "not as expected");
+
+    rep.increment();
+    BOOST_CHECK_MESSAGE(!rep.valid(), "should not be valid after second increment");
+
+    rep.reset();
+    BOOST_CHECK_MESSAGE(rep.valid(), "should be valid after reset");
+    BOOST_CHECK_MESSAGE(rep.index_or_value() == 0, "index should be 0 after reset");
+
+    rep.setToLastValue();
+    BOOST_CHECK_MESSAGE(rep.valid(), "should be valid at last value");
+    BOOST_CHECK_MESSAGE(rep.index_or_value() == 1, "index should be 1 at last value");
+    BOOST_CHECK_MESSAGE(rep.valueAsString() == "20240102T120000", "not as expected at last value");
+}
+
+BOOST_AUTO_TEST_CASE(change_and_change_value) {
+    ECF_NAME_THIS_TEST();
+
+    using ecf::Instant;
+    Instant dt0 = Instant::parse("20240101T000000");
+    Instant dt1 = Instant::parse("20240102T120000");
+    Instant dt2 = Instant::parse("20240103T060000");
+
+    {
+        Repeat rep(RepeatDateTimeList("DT", {dt0, dt1, dt2}));
+        rep.change("20240103T060000");
+        BOOST_CHECK_MESSAGE(rep.index_or_value() == 2, "index should be 2 after change");
+        BOOST_CHECK_MESSAGE(rep.valueAsString() == "20240103T060000", "not as expected");
+    }
+    {
+        Repeat rep(RepeatDateTimeList("DT", {dt0, dt1, dt2}));
+        BOOST_CHECK_THROW(rep.change("20240105T000000"), std::runtime_error);
+    }
+    {
+        Repeat rep(RepeatDateTimeList("DT", {dt0, dt1, dt2}));
+        rep.changeValue(2);
+        BOOST_CHECK_MESSAGE(rep.index_or_value() == 2, "index should be 2 after changeValue");
+    }
+    {
+        Repeat rep(RepeatDateTimeList("DT", {dt0, dt1, dt2}));
+        BOOST_CHECK_THROW(rep.changeValue(3), std::runtime_error);
+        BOOST_CHECK_THROW(rep.changeValue(-1), std::runtime_error);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(generated_variables) {
+    ECF_NAME_THIS_TEST();
+
+    using ecf::Instant;
+    Instant dt0 = Instant::parse("20240315T103045");
+
+    Repeat rep(RepeatDateTimeList("DT", {dt0}));
+    rep.update_repeat_genvar();
+
+    std::vector<Variable> vec;
+    rep.gen_variables(vec);
+    // 9 datetime components + 1 base = 10
+    BOOST_CHECK_MESSAGE(vec.size() == 10, "expected 10 generated variables but found " << vec.size());
+
+    {
+        const Variable& var = rep.find_gen_variable("DT");
+        BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT");
+        BOOST_CHECK_MESSAGE(var.theValue() == "20240315T103045",
+                            "expected '20240315T103045' but found " << var.theValue());
+    }
+    {
+        const Variable& var = rep.find_gen_variable("DT_DATE");
+        BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_DATE");
+        BOOST_CHECK_MESSAGE(var.theValue() == "20240315", "expected '20240315' but found " << var.theValue());
+    }
+    {
+        const Variable& var = rep.find_gen_variable("DT_YYYY");
+        BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_YYYY");
+        BOOST_CHECK_MESSAGE(var.theValue() == "2024", "expected '2024' but found " << var.theValue());
+    }
+    {
+        const Variable& var = rep.find_gen_variable("DT_MM");
+        BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_MM");
+        BOOST_CHECK_MESSAGE(var.theValue() == "03", "expected '03' but found " << var.theValue());
+    }
+    {
+        const Variable& var = rep.find_gen_variable("DT_DD");
+        BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_DD");
+        BOOST_CHECK_MESSAGE(var.theValue() == "15", "expected '15' but found " << var.theValue());
+    }
+    {
+        const Variable& var = rep.find_gen_variable("DT_HOURS");
+        BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_HOURS");
+        BOOST_CHECK_MESSAGE(var.theValue() == "10", "expected '10' but found " << var.theValue());
+    }
+    {
+        const Variable& var = rep.find_gen_variable("DT_MINUTES");
+        BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_MINUTES");
+        BOOST_CHECK_MESSAGE(var.theValue() == "30", "expected '30' but found " << var.theValue());
+    }
+    {
+        const Variable& var = rep.find_gen_variable("DT_SECONDS");
+        BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_SECONDS");
+        BOOST_CHECK_MESSAGE(var.theValue() == "45", "expected '45' but found " << var.theValue());
+    }
+}
+
+BOOST_AUTO_TEST_SUITE_END() // test_repeat_datetimelist
+
+/*
  * Test Suite: ::test_repeat_date
  * ************************************************************ */
 

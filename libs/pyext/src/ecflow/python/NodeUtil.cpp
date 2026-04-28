@@ -151,6 +151,9 @@ py::object NodeUtil::do_add(node_ptr self, const py::object& arg) {
     else if (auto extracted = py::extract<RepeatDateList>(arg); extracted.check()) {
         self->addRepeat(Repeat(extracted()));
     }
+    else if (auto extracted = py::extract<RepeatDateTimeList>(arg); extracted.check()) {
+        self->addRepeat(Repeat(extracted()));
+    }
     else if (auto extracted = py::extract<RepeatInteger>(arg); extracted.check()) {
         self->addRepeat(Repeat(extracted()));
     }

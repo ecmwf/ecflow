@@ -719,6 +719,27 @@ add_repeat( (Node)arg1, (RepeatDateList)arg2) -> Node :
                 RepeatDateList('YMD',[20100111,20100115]))
     
 
+add_repeat( (Node)arg1, (RepeatDateTimeList)arg2) -> Node :
+    Add a RepeatDateTimeList attribute. See :py:class:`ecflow.RepeatDateTimeList`
+    
+    A node can only have one repeat
+    
+    Exception:
+    
+    - Throws a RuntimeError if more than one repeat is added
+    
+    Usage:
+    
+    .. code-block:: python
+    
+      t1 = Task('t1')
+      t1.add_repeat( RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']) )
+    
+      # we can also create a repeat in Task constructor like any other attribute
+      t2 = Task('t2',
+                RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']))
+    
+
 add_repeat( (Node)arg1, (RepeatInteger)arg2) -> Node :
     Add a RepeatInteger attribute. See :py:class:`ecflow.RepeatInteger`
     

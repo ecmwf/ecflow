@@ -111,6 +111,30 @@ private:
 };
 
 template <>
+struct Range<RepeatDateTimeList>
+{
+    using size_type  = std::size_t;
+    using iterator   = std::size_t;
+    using value_type = Instant;
+
+    explicit Range(const RepeatDateTimeList& r)
+        : r_(r) {}
+
+    iterator begin() const { return 0; }
+    iterator end() const { return r_.indexNum(); }
+    iterator current_index() const { return r_.index_or_value(); }
+
+    value_type current_value() const { return r_.values().at(r_.index_or_value()); }
+
+    value_type at(iterator i) const { return r_.values().at(i); }
+
+    size_type size() const { return end() - begin(); }
+
+private:
+    const RepeatDateTimeList& r_;
+};
+
+template <>
 struct Range<RepeatDateTime>
 {
     using size_type  = std::size_t;
@@ -292,6 +316,10 @@ Limits limits_of(const RepeatBase* repeat) {
     }
     else if (auto r3 = dynamic_cast<const RepeatDateList*>(repeat)) {
         Range<RepeatDateList> rng(*r3);
+        return {rng.begin(), rng.end(), rng.current_index()};
+    }
+    else if (auto r3b = dynamic_cast<const RepeatDateTimeList*>(repeat)) {
+        Range<RepeatDateTimeList> rng(*r3b);
         return {rng.begin(), rng.end(), rng.current_index()};
     }
     else if (auto r4 = dynamic_cast<const RepeatDateTime*>(repeat)) {

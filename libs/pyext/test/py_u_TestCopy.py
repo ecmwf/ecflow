@@ -329,6 +329,13 @@ if __name__ == "__main__":
     assert repeat.empty(), "Expected no repeat"
 
     task = ecflow.Task("task")
+    task.add_repeat(ecflow.RepeatDateTimeList("datetime", ["20100111T000000", "20100115T000000"]))
+    task_copy = copy.copy(task)
+    task_copy.delete_repeat()
+    repeat = task_copy.get_repeat();
+    assert repeat.empty(), "Expected no repeat"
+
+    task = ecflow.Task("task")
     task.add_repeat(ecflow.RepeatString("string", ["a", "b", "c"]))
     task_copy = copy.copy(task)
     task_copy.delete_repeat()

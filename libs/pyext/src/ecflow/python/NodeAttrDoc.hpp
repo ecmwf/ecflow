@@ -44,6 +44,7 @@ public:
     static const char* repeat_date_doc();
     static const char* repeat_datetime_doc();
     static const char* repeat_date_list_doc();
+    static const char* repeat_datetimelist_doc();
     static const char* repeat_integer_doc();
     static const char* repeat_enumerated_doc();
     static const char* repeat_string_doc();

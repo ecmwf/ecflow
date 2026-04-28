@@ -47,6 +47,7 @@ BOOST_AUTO_TEST_CASE(test_AttrDefaultConstructor_serialisation) {
     doSaveAndRestore<TimeAttr>(fileName);
     doSaveAndRestore<RepeatDate>(fileName);
     doSaveAndRestore<RepeatDateList>(fileName);
+    doSaveAndRestore<RepeatDateTimeList>(fileName);
     doSaveAndRestore<RepeatInteger>(fileName);
     doSaveAndRestore<RepeatEnumerated>(fileName);
     doSaveAndRestore<RepeatString>(fileName);

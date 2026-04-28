@@ -234,6 +234,20 @@ static std::shared_ptr<RepeatDateList> create_RepeatDateList(const std::string& 
     pyutil_list_to_int_vec(list, vec);
     return std::make_shared<RepeatDateList>(name, vec);
 }
+static std::shared_ptr<RepeatDateTimeList> create_RepeatDateTimeList(const std::string& name, const py::list& list) {
+    auto n = len(list);
+    std::vector<ecf::Instant> vec;
+    vec.reserve(n);
+    for (ssize_t i = 0; i < n; i++) {
+        if (auto extracted = py::extract<std::string>(list[i]); extracted.check()) {
+            vec.push_back(ecf::Instant::parse(extracted()));
+        }
+        else {
+            throw std::runtime_error("RepeatDateTimeList: list elements must be strings in yyyymmddTHHMMSS format");
+        }
+    }
+    return std::make_shared<RepeatDateTimeList>(name, vec);
+}
 static std::shared_ptr<RepeatString> create_RepeatString(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
     pyutil_list_to_str_vec(list, vec);
@@ -972,6 +986,18 @@ void export_NodeAttr() {
              "Return the name of the repeat.")
         .def("start", &RepeatDateList::start, "Return the start date as an integer in yyyymmdd format")
         .def("end", &RepeatDateList::end, "Return the end date as an integer in yyyymmdd format");
+
+    py::class_<RepeatDateTimeList>("RepeatDateTimeList", NodeAttrDoc::repeat_datetimelist_doc())
+        .def("__init__", make_constructor(&create_RepeatDateTimeList))
+        .def(py::self == py::self)                               // __eq__
+        .def("__str__", &RepeatDateTimeList::toString)           // __str__
+        .def("__copy__", pyutil_copy_object<RepeatDateTimeList>) // __copy__ uses copy constructor
+        .def("name",
+             &RepeatDateTimeList::name,
+             py::return_value_policy<py::copy_const_reference>(),
+             "Return the name of the repeat.")
+        .def("start", &RepeatDateTimeList::start, "Return the start instant as seconds since epoch")
+        .def("end", &RepeatDateTimeList::end, "Return the end instant as seconds since epoch");
 
     py::class_<RepeatInteger>("RepeatInteger",
                               NodeAttrDoc::repeat_integer_doc(),

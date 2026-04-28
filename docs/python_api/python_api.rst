@@ -40,6 +40,7 @@ Suite definition
     - :py:class:`ecflow.RepeatDate`
     - :py:class:`ecflow.RepeatDateList`
     - :py:class:`ecflow.RepeatDateTime`
+    - :py:class:`ecflow.RepeatDateTimeList`
     - :py:class:`ecflow.RepeatDay`
     - :py:class:`ecflow.RepeatEnumerated`
     - :py:class:`ecflow.RepeatInteger`
