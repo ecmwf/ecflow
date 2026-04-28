@@ -137,6 +137,19 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         env->set_debug(true);
     }
 
+    // If the `--help` option is provided, display the requested help message and exit
+    if (vm.count("help")) {
+        std::string topic = vm["help"].as<std::string>();
+        std::cout << Help{*desc_, topic};
+        return nullptr;
+    }
+
+    // If the `--version` option is provided, display the version information and exit
+    if (vm.count("version")) {
+        std::cout << Version::description() << "\n";
+        return nullptr;
+    }
+
     // Check to see if host or port, specified. This will override the environment variables
     std::string host, port;
     if (vm.count("port")) {
@@ -248,16 +261,6 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
         //       For example:
         //         --server_load         // this is sent to server
         //         --server_load=<path>  // no command returned, command executed by client
-        if (vm.count("help")) {
-            std::string topic = vm["help"].as<std::string>();
-            std::cout << Help{*desc_, topic};
-            return client_request;
-        }
-
-        if (vm.count("version")) {
-            std::cout << Version::description() << "\n";
-            exit(0);
-        }
 
         std::ostringstream ss;
         ss << print_variable_map(vm) << "\n";

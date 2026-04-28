@@ -761,6 +761,11 @@ struct Client
     bool stdout_contains(const std::string& expected) const {
         return stdout_buffer.find(expected) != std::string::npos;
     }
+    bool stdout_contains(const std::regex& expected) const {
+        std::smatch match;
+        std::regex_search(stdout_buffer, match, expected);
+        return !match.empty();
+    }
 };
 
 class RunClient {
@@ -768,25 +773,45 @@ public:
     using host_t = Host;
     using port_t = Port;
 
+    struct CommandHelp
+    {
+        static constexpr bool contacts_server = false;
+
+        std::vector<std::string> options() const { return {"--help"}; }
+    };
+
+    struct CommandVersion
+    {
+        static constexpr bool contacts_server = false;
+
+        std::vector<std::string> options() const { return {"--version"}; }
+    };
+
     struct CommandPing
     {
-        std::vector<std::string> options() const { return {"--ping", "-d"}; }
+        static constexpr bool contacts_server = true;
 
-        void process_output(const std::string& output) const {}
+        std::vector<std::string> options() const { return {"--ping", "-d"}; }
     };
 
     struct CommandGet
     {
+        static constexpr bool contacts_server = true;
+
         std::vector<std::string> options() const { return {"--get"}; }
     };
 
     struct CommandGetState
     {
+        static constexpr bool contacts_server = true;
+
         std::vector<std::string> options() const { return {"--get_state"}; }
     };
 
     struct CommandLoad
     {
+        static constexpr bool contacts_server = true;
+
         explicit CommandLoad(fs::path defs)
             : defs_{defs} {}
 
@@ -797,6 +822,8 @@ public:
 
     struct CommandReplace
     {
+        static constexpr bool contacts_server = true;
+
         explicit CommandReplace(fs::path defs, std::string node)
             : defs_{defs},
               node_{std::move(node)} {}
@@ -809,6 +836,8 @@ public:
 
     struct CommandDelete
     {
+        static constexpr bool contacts_server = true;
+
         explicit CommandDelete(std::string path)
             : path_{path} {}
 
@@ -819,6 +848,8 @@ public:
 
     struct CommandUpdateLabel
     {
+        static constexpr bool contacts_server = true;
+
         explicit CommandUpdateLabel(std::string path, std::string label, std::string value)
             : path_{path},
               label_{label},
@@ -833,6 +864,8 @@ public:
 
     struct CommandReloadWhitelist
     {
+        static constexpr bool contacts_server = true;
+
         explicit CommandReloadWhitelist() {}
 
         std::vector<std::string> options() const { return {"--reloadwsfile"}; }
@@ -885,16 +918,26 @@ private:
                                                 const User* user,
                                                 const Directory* cwd,
                                                 const Command& command) {
-        BOOST_REQUIRE_MESSAGE(host != nullptr, "The server host is non-null");
-        BOOST_REQUIRE_MESSAGE(port != nullptr, "The server port is non-null");
-        BOOST_REQUIRE_MESSAGE(cwd != nullptr, "The working directory is non-null");
+        if constexpr (Command::contacts_server) {
+            BOOST_REQUIRE_MESSAGE(host != nullptr, "The server host is non-null");
+            BOOST_REQUIRE_MESSAGE(port != nullptr, "The server port is non-null");
+            BOOST_REQUIRE_MESSAGE(cwd != nullptr, "The working directory is non-null");
+        }
 
         auto client_path = find_ecflow_client_path();
 
         BOOST_REQUIRE_MESSAGE(!client_path.empty(), "The ecflow client path is non-empty");
         BOOST_REQUIRE_MESSAGE(fs::exists(client_path), "The ecflow client executable exist at " << client_path);
 
-        auto options = std::vector<std::string>{"--host", host->value(), "--port", std::to_string(port->value())};
+        auto options = std::vector<std::string>{};
+        if (host != nullptr) {
+            options.push_back("--host");
+            options.push_back(host->value());
+        }
+        if (port != nullptr) {
+            options.push_back("--port");
+            options.push_back(std::to_string(port->value()));
+        }
         if (user != nullptr) {
             options.push_back("--user");
             options.push_back(user->username);
@@ -905,7 +948,9 @@ private:
             options.push_back(option);
         }
 
-        auto ecflow_client = Process(client_path, options, cwd->path());
+        auto wd = cwd != nullptr ? cwd->path() : fs::current_path();
+
+        auto ecflow_client = Process(client_path, options, wd);
 
         auto print = [](const auto& executable, const auto& options) {
             std::string buffer = "[ " + pretty_print_path(executable) + (options.empty() ? "" : ", ");
@@ -922,22 +967,22 @@ private:
             ECF_TEST_DBG("Executed " << print(client_path, options));
             ECF_TEST_DBG("         result: [OK]");
             ECF_TEST_DBG("         pid: " << ecflow_client.pid());
-            ECF_TEST_DBG("         cwd: " << cwd->path().string());
-            auto [stdout_buffer, stderr_buffer] = dump_client_execution_report(*cwd, ecflow_client);
+            ECF_TEST_DBG("         cwd: " << wd.string());
+            auto [stdout_buffer, stderr_buffer] = dump_client_execution_report(wd, ecflow_client);
             return Outcome<Client>::success(Client{r, stdout_buffer, stderr_buffer});
         }
         else {
             ECF_TEST_DBG("Executed " << print(client_path, options));
             ECF_TEST_DBG("         result: [FAIL]");
             ECF_TEST_DBG("         pid: " << ecflow_client.pid());
-            ECF_TEST_DBG("         cwd: " << cwd->path().string());
-            auto [stdout_buffer, stderr_buffer] = dump_client_execution_report(*cwd, ecflow_client);
+            ECF_TEST_DBG("         cwd: " << wd.string());
+            auto [stdout_buffer, stderr_buffer] = dump_client_execution_report(wd, ecflow_client);
             return Outcome<Client>::failure("ecflow_client failed, return code: " + std::to_string(r) +
                                             ", stdout: " + stdout_buffer + ", stderr: " + stderr_buffer);
         }
     }
 
-    static std::tuple<std::string, std::string> dump_client_execution_report(const Directory& cwd,
+    static std::tuple<std::string, std::string> dump_client_execution_report(const fs::path& wd,
                                                                              const Process& server) {
         auto out = server.read_stdout();
         auto err = server.read_stderr();
@@ -946,8 +991,8 @@ private:
             std::string{"ecflow_client__execution_report."} + std::to_string(server.pid()) + ".stdout.txt";
         std::string report_stderr_file =
             std::string{"ecflow_client__execution_report."} + std::to_string(server.pid()) + ".stderr.txt";
-        fs::path report_stdout_path = cwd.path() / report_stdout_file;
-        fs::path report_stderr_path = cwd.path() / report_stderr_file;
+        fs::path report_stdout_path = wd / report_stdout_file;
+        fs::path report_stderr_path = wd / report_stderr_file;
 
         {
             std::ofstream ofs(report_stdout_path.c_str());

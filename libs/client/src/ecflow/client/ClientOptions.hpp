@@ -40,9 +40,17 @@ public:
 
     ~ClientOptions();
 
-    /// parse the arguments and create the client request that is to be sent
-    /// to the server. Will throw std::runtime_error if invalid arguments specified
-    Cmd_ptr parse(const CommandLine& cl, ClientEnvironment*) const;
+    ///
+    /// @brief Parse the command line arguments and create the client request that is to be sent to the server.
+    ///
+    /// @param cl The command line arguments to parse
+    /// @param environment The client environment, which may be used by some commands to construct the client request
+    /// @return A pointer to the client request to be sent to the server.
+    ///         The pointer can be nullptr if the command is client specific (e.g. --help, --version)
+    ///         and does not need to send a request to the server.
+    /// @throw std::runtime_error if invalid arguments are specified
+    ///
+    Cmd_ptr parse(const CommandLine& cl, ClientEnvironment* environment) const;
 
 private:
     CtsCmdRegistry cmdRegistry_;
