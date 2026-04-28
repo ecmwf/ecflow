@@ -293,7 +293,8 @@ void RepeatDate::update_repeat_genvar_value() const {
         catch (std::exception& e) {
             log(Log::ERR,
                 MESSAGE("RepeatDate::update_repeat_genvar_value : " << toString() << "\n The current date("
-                                                                    << date_as_string << ") is not valid"));
+                                                                    << date_as_string
+                                                                    << ") is not valid, due to: " << e.what()));
             return;
         }
     }
@@ -619,7 +620,8 @@ void RepeatDateTime::update_repeat_genvar_value() const {
         catch (std::exception& e) {
             log(Log::ERR,
                 MESSAGE("RepeatDateTime::update_repeat_genvar_value : " << toString() << "\n The current date("
-                                                                        << date_as_string << ") is not valid"));
+                                                                        << date_as_string
+                                                                        << ") is not valid, due to: " << e.what()));
             return;
         }
     }
@@ -913,8 +915,8 @@ void RepeatDateList::update_repeat_genvar_value() const {
         }
         catch (std::exception& e) {
             log(Log::ERR,
-                MESSAGE("RepeatDateList::update_repeat_genvar_value(): " << toString() << "\n invalid current date: "
-                                                                         << date_as_string));
+                MESSAGE("RepeatDateList::update_repeat_genvar_value(): "
+                        << toString() << "\n invalid current date: " << date_as_string << ", due to: " << e.what()));
         }
     }
 }
@@ -1214,7 +1216,8 @@ void RepeatDateTimeList::update_repeat_genvar_value() const {
         catch (std::exception& e) {
             log(Log::ERR,
                 MESSAGE("RepeatDateTimeList::update_repeat_genvar_value : " << toString() << "\n The current datetime("
-                                                                            << date_as_string << ") is not valid"));
+                                                                            << date_as_string
+                                                                            << ") is not valid, due to: " << e.what()));
             return;
         }
     }
