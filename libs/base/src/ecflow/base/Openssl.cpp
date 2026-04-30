@@ -116,6 +116,49 @@ void Openssl::init_for_server() {
     if (enabled()) {
         check_server_certificates();
 
+        // --- Server-side SSL context initialisation ---
+        //
+        // The context is created with `tls_server`, the generic server-side
+        // TLS method.  On its own this permits any TLS version that the
+        // underlying OpenSSL library supports.  The `set_options` call below
+        // then explicitly disables every protocol version below TLS 1.3
+        // (SSLv2, SSLv3, TLS 1.0, TLS 1.1, TLS 1.2), leaving TLS 1.3 as
+        // the *only* version the server will accept.
+        //
+        // The practical consequence is that any use of weak cryptography is eliminated:
+        //   - SSLv2/SSLv3 are broken (POODLE, DROWN) -- disabled.
+        //   - TLS 1.0/1.1 rely on SHA-1 and RC4 that are no longer acceptable -- disabled.
+        //   - TLS 1.2 cipher suites can include DES/3DES, RC4 and other weak
+        //     algorithms that are no longer acceptable -- disabled.
+        //
+        //   - TLS 1.3 mandates AEAD cipher suites (AES-GCM, ChaCha20-Poly1305)
+        //     and forward secrecy for every connection.
+        //      ** TLS 1.3 is the effective (and only) option after set_options. **
+        //
+        // Notice that using `tls_server` enables the automatic use of future TLS versions, simply by recompiling
+        // against a newer OpenSSL library that supports them. The server will automatically negotiate the highest
+        // mutually supported TLS version with the client, always guaranteeing the TLS 1.3 is the lowest accepted in
+        // the handshake with the client. This is a future-proof design that does not require code changes to support
+        // new TLS versions as they are released, while still enforcing the use of strong cryptography.
+        // Even so, changes will be need if TLS 1.3 becomes deprecated.
+        //
+        // Client compliance requirement:
+        //   During the TLS handshake the client proposes a list of protocol
+        //   versions and cipher suites it supports.  Because the server
+        //   advertises *only* TLS 1.3, any client that does not support
+        //   TLS 1.3 will fail the handshake with a "protocol version" alert.
+        //   The counterpart `init_for_client()` therefore uses the generic
+        //   `tls_client` method (which supports TLS 1.3) so that the
+        //   negotiation succeeds. Clients built against older OpenSSL versions
+        //   that lack TLS 1.3 support will be rejected.
+        //
+        // Other options:
+        //   - `default_workarounds` enables OpenSSL bug-compatibility shims
+        //     that are harmless on TLS 1.3 but kept for robustness.
+        //   - `single_dh_use` ensures a fresh DH key pair is generated for
+        //     each handshake, preserving forward secrecy for the DH key
+        //     exchange used by the loaded dh2048.pem parameters.
+        //
         ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::tls_server);
 
         // clang-format off
@@ -129,7 +172,8 @@ void Openssl::init_for_server() {
             boost::asio::ssl::context::single_dh_use);
         // clang-format on
 
-        // this must be done before loading any keys. as below
+        // The password callback is registered before any private key is loaded.
+        // OpenSSL calls it immediately during `use_private_key_file` if the key file is passphrase-protected.
         ssl_context_->set_password_callback(
             [this](std::size_t size, boost::asio::ssl::context_base::password_purpose purpose) {
                 return this->get_password();
@@ -144,6 +188,22 @@ void Openssl::init_for_client() {
     if (!init_for_client_ && enabled()) {
         init_for_client_ = true;
 
+        // --- Client-side SSL context initialisation ---
+        //
+        // `tls_client` is the generic, version-flexible client method: it
+        // allows OpenSSL to negotiate the highest mutually supported TLS
+        // version.  Because the server is configured exclusively for TLS 1.3
+        // (see `init_for_server`), the handshake will always settle on
+        // TLS 1.3; the flexibility here is on the client side only and does
+        // not weaken security.
+        //
+        // Certificate verification:
+        //   `load_verify_file` loads the self-signed server certificate (CRT)
+        //   as a trusted CA.  During the handshake OpenSSL verifies the
+        //   server's presented certificate against this file, ensuring the
+        //   client is talking to the expected server and not an impostor
+        //   (i.e. protection against man-in-the-middle attacks).
+        //
         ssl_context_ = std::make_unique<boost::asio::ssl::context>(boost::asio::ssl::context::tls_client);
         ssl_context_->load_verify_file(crt());
     }
