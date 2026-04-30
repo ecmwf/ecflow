@@ -72,9 +72,7 @@ inline authentication_t verify_user_authentication_rules(const AbstractServer& s
         return authentication_t::success("Authentication (user command) successful");
     }
 
-    return authentication_t::failure("Authentication (user command) failed, due to: Incorrect credentials for (" +
-                                     command.identity().username() + " / " + command.identity().password() +
-                                     ") is not authentic");
+    return authentication_t::failure("Authentication (user command) failed, due to: Incorrect credentials detected");
 }
 
 template <typename COMMAND>

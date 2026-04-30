@@ -71,7 +71,7 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
                                          const std::string& remote_username,
                                          const std::string& remote_password) const {
     SLOG(D, "MirrorClient: Accessing " << remote_host << ":" << remote_port << ", path=" << node_path);
-    SLOG(D, "MirrorClient: Authentication Credentials:  " << remote_username << ":" << remote_password);
+    SLOG(D, "MirrorClient: Authentication credentials:  " << remote_username << ":<omitted>");
 
     try {
         if (!impl_->initialized_) {
