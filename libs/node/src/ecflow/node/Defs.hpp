@@ -227,6 +227,16 @@ public:
 
     suite_ptr findSuite(const std::string& name) const;
     std::string find_node_path(const std::string& type, const std::string& name) const;
+
+    ///
+    /// @brief Find a node of the speficied type at the given path
+    ///
+    /// @param type the type of node to find, either "suite", "family", "task", or "alias" -- case insensitive.
+    /// @param pathToNode the path to the requested node
+    /// @return the requested node, if avaible; nullptr, otherwise
+    /// @throws std::runtime_error when the node at the given path is not of the specified type
+    /// (n.b. this is guaranteed to be thrown if the type is not one "suite", "family", "task", or "alias")
+    ///
     node_ptr find_node(const std::string& type, const std::string& pathToNode) const;
 
     [[deprecated]] const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }

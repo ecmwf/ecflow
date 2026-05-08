@@ -1000,10 +1000,8 @@ std::string Defs::find_node_path(const std::string& type, const std::string& nam
 }
 
 node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode) const {
-    // std::cout << "Defs::find_node  type:" << type << " path: " << pathToNode << "\n";
     node_ptr node_p = findAbsNode(pathToNode);
     if (!node_p) {
-        // std::cout << " node not found\n";
         return node_p;
     }
 
@@ -1020,7 +1018,13 @@ node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode)
         return node_ptr();
     }
     if (ecf::algorithm::case_insensitive_compare(type, "suite")) {
-        if (node_p->suite()) {
+        if (node_p->isSuite()) {
+            return node_p;
+        }
+        return node_ptr();
+    }
+    if (ecf::algorithm::case_insensitive_compare(type, "alias")) {
+        if (node_p->isAlias()) {
             return node_p;
         }
         return node_ptr();
