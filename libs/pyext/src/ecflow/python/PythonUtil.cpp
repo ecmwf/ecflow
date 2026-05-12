@@ -15,7 +15,7 @@
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/Converter.hpp"
 
-void pyutil_list_to_int_vec(const py::list& list, std::vector<int>& int_vec) {
+void py_list_to_int_vec(const py::list& list, std::vector<int>& int_vec) {
     auto the_list_size = len(list);
     int_vec.reserve(the_list_size);
     for (size_t i = 0; i < the_list_size; ++i) {
@@ -23,7 +23,7 @@ void pyutil_list_to_int_vec(const py::list& list, std::vector<int>& int_vec) {
     }
 }
 
-void pyutil_list_to_str_vec(const py::list& list, std::vector<std::string>& vec) {
+void py_list_to_str_vec(const py::list& list, std::vector<std::string>& vec) {
     auto the_list_size = len(list);
     vec.reserve(the_list_size);
     for (size_t i = 0; i < the_list_size; ++i) {
@@ -31,7 +31,7 @@ void pyutil_list_to_str_vec(const py::list& list, std::vector<std::string>& vec)
     }
 }
 
-void pyutil_list_to_str_vec(const py::list& list, std::vector<Variable>& vec) {
+void py_list_to_str_vec(const py::list& list, std::vector<Variable>& vec) {
     auto the_list_size = len(list);
     vec.reserve(the_list_size);
     for (size_t i = 0; i < the_list_size; ++i) {
@@ -39,7 +39,7 @@ void pyutil_list_to_str_vec(const py::list& list, std::vector<Variable>& vec) {
     }
 }
 
-void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<std::pair<std::string, std::string>>& vec) {
+void py_dict_to_str_vec(const py::dict& dict, std::vector<std::pair<std::string, std::string>>& vec) {
 
     for (auto entry : dict) {
         std::string first = entry.first.cast<std::string>();
@@ -67,7 +67,7 @@ void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<std::pair<std::str
     }
 }
 
-void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<Variable>& vec) {
+void py_dict_to_str_vec(const py::dict& dict, std::vector<Variable>& vec) {
 
     for (auto entry : dict) {
         std::string first;
@@ -93,3 +93,13 @@ void pyutil_dict_to_str_vec(const py::dict& dict, std::vector<Variable>& vec) {
         vec.emplace_back(first, second);
     }
 }
+
+py::object py_id(const py::object& self) {
+    py::object builtins = py::module_::import("builtins");
+    py::object id_func  = builtins.attr("id");
+    return id_func(self);
+}
+
+ssize_t py_hash(const py::object& self) {
+    return py::hash(py_id(self));
+};

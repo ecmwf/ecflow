@@ -114,12 +114,6 @@ public:
     void write_state(std::string&, bool&) const override;
 
 private:
-    /// For use by python interface,
-    std::vector<alias_ptr>::const_iterator alias_begin() const { return aliases_.begin(); }
-    std::vector<alias_ptr>::const_iterator alias_end() const { return aliases_.end(); }
-    friend void export_Task();
-
-private:
     // Overridden from Node to increment/decrement limits
     void handleStateChange() override;
     bool doDeleteChild(Node* child) override;

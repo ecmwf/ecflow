@@ -442,18 +442,6 @@ private:
     bool placeChild(const node_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
     friend class Node;
 
-    /// For use by python interface,
-    std::vector<suite_ptr>::const_iterator suite_begin() const { return suiteVec_.begin(); }
-    std::vector<suite_ptr>::const_iterator suite_end() const { return suiteVec_.end(); }
-    std::set<std::string>::const_iterator extern_begin() const { return externs_.begin(); }
-    std::set<std::string>::const_iterator extern_end() const { return externs_.end(); }
-    std::vector<Variable>::const_iterator user_variables_begin() const { return server_.user_variables().begin(); }
-    std::vector<Variable>::const_iterator user_variables_end() const { return server_.user_variables().end(); }
-    std::vector<Variable>::const_iterator server_variables_begin() const { return server_.server_variables().begin(); }
-    std::vector<Variable>::const_iterator server_variables_end() const { return server_.server_variables().end(); }
-
-    friend void export_Defs();
-
 private:
     /// Note: restoring from a check point file will reset, defs state and modify numbers
     mutable size_t print_cache_{0}; // NOT persisted

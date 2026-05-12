@@ -932,45 +932,6 @@ private: // All mementos access
     void clear(); /// Clear *ALL* internal attributes
     void delete_attributes();
 
-private: /// For use by python interface,
-    friend void export_Node();
-    friend void export_Task();
-    friend void export_SuiteAndFamily();
-    std::vector<Meter>::const_iterator meter_begin() const { return meters_.begin(); }
-    std::vector<Meter>::const_iterator meter_end() const { return meters_.end(); }
-    std::vector<Event>::const_iterator event_begin() const { return events_.begin(); }
-    std::vector<Event>::const_iterator event_end() const { return events_.end(); }
-    std::vector<Label>::const_iterator label_begin() const { return labels_.begin(); }
-    std::vector<Label>::const_iterator label_end() const { return labels_.end(); }
-    std::vector<ecf::AvisoAttr>::const_iterator aviso_begin() const { return avisos_.begin(); }
-    std::vector<ecf::AvisoAttr>::const_iterator aviso_end() const { return avisos_.end(); }
-    std::vector<ecf::MirrorAttr>::const_iterator mirror_begin() const { return mirrors_.begin(); }
-    std::vector<ecf::MirrorAttr>::const_iterator mirror_end() const { return mirrors_.end(); }
-    std::vector<ecf::TimeAttr>::const_iterator time_begin() const { return times_.begin(); }
-    std::vector<ecf::TimeAttr>::const_iterator time_end() const { return times_.end(); }
-    std::vector<ecf::TodayAttr>::const_iterator today_begin() const { return todays_.begin(); }
-    std::vector<ecf::TodayAttr>::const_iterator today_end() const { return todays_.end(); }
-    std::vector<DateAttr>::const_iterator date_begin() const { return dates_.begin(); }
-    std::vector<DateAttr>::const_iterator date_end() const { return dates_.end(); }
-    std::vector<DayAttr>::const_iterator day_begin() const { return days_.begin(); }
-    std::vector<DayAttr>::const_iterator day_end() const { return days_.end(); }
-    std::vector<ecf::CronAttr>::const_iterator cron_begin() const { return crons_.begin(); }
-    std::vector<ecf::CronAttr>::const_iterator cron_end() const { return crons_.end(); }
-    std::vector<ZombieAttr>::const_iterator zombie_begin() const;
-    std::vector<ZombieAttr>::const_iterator zombie_end() const;
-    std::vector<VerifyAttr>::const_iterator verify_begin() const;
-    std::vector<VerifyAttr>::const_iterator verify_end() const;
-    std::vector<QueueAttr>::const_iterator queue_begin() const;
-    std::vector<QueueAttr>::const_iterator queue_end() const;
-    std::vector<GenericAttr>::const_iterator generic_begin() const;
-    std::vector<GenericAttr>::const_iterator generic_end() const;
-    std::vector<Variable>::const_iterator variable_begin() const { return vars_.begin(); }
-    std::vector<Variable>::const_iterator variable_end() const { return vars_.end(); }
-    std::vector<limit_ptr>::const_iterator limit_begin() const { return limits_.begin(); }
-    std::vector<limit_ptr>::const_iterator limit_end() const { return limits_.end(); }
-    std::vector<InLimit>::const_iterator inlimit_begin() const { return inLimitMgr_.inlimit_begin(); }
-    std::vector<InLimit>::const_iterator inlimit_end() const { return inLimitMgr_.inlimit_end(); }
-
 private:
     Node* parent_{nullptr}; // *NOT* persisted must be set by the parent class
     std::string n_;

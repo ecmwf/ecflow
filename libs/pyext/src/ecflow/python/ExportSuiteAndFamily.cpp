@@ -251,9 +251,10 @@ void export_SuiteAndFamily(py::module& m) {
 
     py::class_<Suite, NodeContainer, std::shared_ptr<Suite>>(m, "Suite", DefsDoc::suite_doc())
 
-        .def(py::init(&Suite_init), DefsDoc::suite_doc())
-        .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true, DefsDoc::suite_doc())
+        .def(py::init(&Suite_init))
+        .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &Suite_str)
         .def("__copy__", pyutil_copy_object<Suite>)
         .def("__enter__", &Suite_enter)
@@ -266,11 +267,12 @@ void export_SuiteAndFamily(py::module& m) {
         .def("get_end_clock", &Suite::clock_end_attr, "Return the suite's end clock. Can be NULL")
         .def("begun", &Suite::begun, "Returns true if the `suite`_ has begun, false otherwise");
 
-    py::class_<Family, NodeContainer, std::shared_ptr<Family>>(m, "Family")
+    py::class_<Family, NodeContainer, std::shared_ptr<Family>>(m, "Family", DefsDoc::family_doc())
 
-        .def(py::init(&Family_init), DefsDoc::family_doc())
-        .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true, DefsDoc::family_doc())
+        .def(py::init(&Family_init))
+        .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &Family_str)
         .def("__copy__", pyutil_copy_object<Family>)
         .def("__enter__", &Family_enter)

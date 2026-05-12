@@ -162,10 +162,10 @@ int ClientInvoker_edit_script_submit(ClientInvoker* self,
                                      bool alias = false,
                                      bool run   = true) {
     std::vector<std::string> file_contents;
-    pyutil_list_to_str_vec(lines, file_contents);
+    py_list_to_str_vec(lines, file_contents);
 
     std::vector<std::string> namv;
-    pyutil_list_to_str_vec(name_values, namv);
+    py_list_to_str_vec(name_values, namv);
     NameValueVec used_variables;
     char sep = '=';
     for (size_t i = 0; i < namv.size(); ++i) {
@@ -309,7 +309,7 @@ void ClientInvoker_free_all_dep(ClientInvoker* self, const std::string& path) {
 ///
 void ClientInvoker_free_trigger_dep1(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->freeDep(paths, true /*trigger*/, false /*all*/, false /*date*/, false /*time*/);
 }
 
@@ -321,7 +321,7 @@ void ClientInvoker_free_trigger_dep1(ClientInvoker* self, const py::list& list) 
 ///
 void ClientInvoker_free_date_dep1(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, false /*all*/, true /*date*/, false /*time*/);
 }
 
@@ -333,7 +333,7 @@ void ClientInvoker_free_date_dep1(ClientInvoker* self, const py::list& list) {
 ///
 void ClientInvoker_free_time_dep1(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, false /*all*/, false /*date*/, true /*time*/);
 }
 
@@ -345,7 +345,7 @@ void ClientInvoker_free_time_dep1(ClientInvoker* self, const py::list& list) {
 ///
 void ClientInvoker_free_all_dep1(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->freeDep(paths, false /*trigger*/, true /*all*/, false /*date*/, false /*time*/);
 }
 
@@ -369,7 +369,7 @@ void ClientInvoker_force_state(ClientInvoker* self, const std::string& path, NSt
 ///
 void ClientInvoker_force_states(ClientInvoker* self, const py::list& list, NState::State state) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->force(paths, NState::toString(state), false);
 }
 
@@ -393,7 +393,7 @@ void ClientInvoker_force_state_recursive(ClientInvoker* self, const std::string&
 ///
 void ClientInvoker_force_states_recursive(ClientInvoker* self, const py::list& list, NState::State state) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->force(paths, NState::toString(state), true);
 }
 
@@ -417,7 +417,7 @@ void ClientInvoker_force_event(ClientInvoker* self, const std::string& path, con
 ///
 void ClientInvoker_force_events(ClientInvoker* self, const py::list& list, const std::string& set_or_clear) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->force(paths, set_or_clear);
 }
 
@@ -441,7 +441,7 @@ void ClientInvoker_run(ClientInvoker* self, const std::string& path, bool force)
 ///
 void ClientInvoker_runs(ClientInvoker* self, const py::list& list, bool force) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->run(paths, force);
 }
 
@@ -465,7 +465,7 @@ void ClientInvoker_requeue(ClientInvoker* self, std::string path, const std::str
 ///
 void ClientInvoker_requeue_s(ClientInvoker* self, const py::list& list, const std::string& option) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->requeue(paths, option);
 }
 
@@ -487,7 +487,7 @@ void ClientInvoker_suspend(ClientInvoker* self, const std::string& path) {
 ///
 void ClientInvoker_suspend_s(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->suspend(paths);
 }
 
@@ -509,7 +509,7 @@ void ClientInvoker_resume(ClientInvoker* self, const std::string& path) {
 ///
 void ClientInvoker_resume_s(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->resume(paths);
 }
 
@@ -531,7 +531,7 @@ void ClientInvoker_archive(ClientInvoker* self, const std::string& path) {
 ///
 void ClientInvoker_archive_s(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->archive(paths);
 }
 
@@ -553,7 +553,7 @@ void ClientInvoker_restore(ClientInvoker* self, const std::string& path) {
 ///
 void ClientInvoker_restore_s(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->restore(paths);
 }
 
@@ -575,7 +575,7 @@ void ClientInvoker_status(ClientInvoker* self, const std::string& path) {
 ///
 void ClientInvoker_status_s(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->status(paths);
 }
 
@@ -597,7 +597,7 @@ void ClientInvoker_kill(ClientInvoker* self, const std::string& path) {
 ///
 void ClientInvoker_kill_s(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->kill(paths);
 }
 
@@ -622,7 +622,7 @@ const std::string& ClientInvoker_check(ClientInvoker* self, const std::string& n
 ///
 const std::string& ClientInvoker_check_s(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->check(paths);
     return self->get_string();
 }
@@ -636,7 +636,7 @@ const std::string& ClientInvoker_check_s(ClientInvoker* self, const py::list& li
 ///
 void ClientInvoker_delete_node_s(ClientInvoker* self, const py::list& list, bool force) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->delete_nodes(paths, force);
 }
 
@@ -661,7 +661,7 @@ void ClientInvoker_ch_suites(ClientInvoker* self) {
 ///
 void ClientInvoker_ch_register(ClientInvoker* self, bool auto_add_new_suites, const py::list& list) {
     std::vector<std::string> suites;
-    pyutil_list_to_str_vec(list, suites);
+    py_list_to_str_vec(list, suites);
     self->ch_register(auto_add_new_suites, suites);
 }
 
@@ -674,7 +674,7 @@ void ClientInvoker_ch_register(ClientInvoker* self, bool auto_add_new_suites, co
 ///
 void ClientInvoker_ch_add(ClientInvoker* self, int client_handle, const py::list& list) {
     std::vector<std::string> suites;
-    pyutil_list_to_str_vec(list, suites);
+    py_list_to_str_vec(list, suites);
     self->ch_add(client_handle, suites);
 }
 
@@ -686,7 +686,7 @@ void ClientInvoker_ch_add(ClientInvoker* self, int client_handle, const py::list
 ///
 void ClientInvoker_ch1_add(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> suites;
-    pyutil_list_to_str_vec(list, suites);
+    py_list_to_str_vec(list, suites);
     self->ch1_add(suites);
 }
 
@@ -699,7 +699,7 @@ void ClientInvoker_ch1_add(ClientInvoker* self, const py::list& list) {
 ///
 void ClientInvoker_ch_remove(ClientInvoker* self, int client_handle, const py::list& list) {
     std::vector<std::string> suites;
-    pyutil_list_to_str_vec(list, suites);
+    py_list_to_str_vec(list, suites);
     self->ch_remove(client_handle, suites);
 }
 
@@ -711,7 +711,7 @@ void ClientInvoker_ch_remove(ClientInvoker* self, int client_handle, const py::l
 ///
 void ClientInvoker_ch1_remove(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> suites;
-    pyutil_list_to_str_vec(list, suites);
+    py_list_to_str_vec(list, suites);
     self->ch1_remove(suites);
 }
 
@@ -792,7 +792,7 @@ void ClientInvoker_alter_s(ClientInvoker* self,
                            const std::string& name  = "",
                            const std::string& value = "") {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->check(paths);
     self->alter(paths, alterType, attrType, name, value);
 }
@@ -825,7 +825,7 @@ void ClientInvoker_alter_sort_s(ClientInvoker* self,
                                 const std::string& attribute_name,
                                 bool recursive = true) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->check(paths);
     self->alter_sort(paths, attribute_name, recursive);
 }
@@ -850,7 +850,7 @@ void ClientInvoker_set_child_pid(ClientInvoker* self, int pid) {
 ///
 void ClientInvoker_set_child_init_add_vars(ClientInvoker* self, const py::dict& dict) {
     std::vector<std::pair<std::string, std::string>> vars;
-    pyutil_dict_to_str_vec(dict, vars);
+    py_dict_to_str_vec(dict, vars);
 
     std::vector<Variable> vec;
     std::transform(vars.begin(),
@@ -869,7 +869,7 @@ void ClientInvoker_set_child_init_add_vars(ClientInvoker* self, const py::dict& 
 ///
 void ClientInvoker_set_child_init_add_vars2(ClientInvoker* self, const py::list& dict) {
     std::vector<Variable> vec;
-    pyutil_list_to_str_vec(dict, vec);
+    py_list_to_str_vec(dict, vec);
     self->set_child_init_add_vars(vec);
 }
 
@@ -881,7 +881,7 @@ void ClientInvoker_set_child_init_add_vars2(ClientInvoker* self, const py::list&
 ///
 void ClientInvoker_set_child_complete_del_vars(ClientInvoker* self, const py::list& dict) {
     std::vector<std::string> vars;
-    pyutil_list_to_str_vec(dict, vars);
+    py_list_to_str_vec(dict, vars);
     self->set_child_complete_del_vars(vars);
 }
 
@@ -930,7 +930,7 @@ const std::vector<Zombie>& ClientInvoker_zombieGet(ClientInvoker* self, int pid)
 ///
 void ClientInvoker_zombieFobCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->zombieFobCliPaths(paths);
 }
 
@@ -942,7 +942,7 @@ void ClientInvoker_zombieFobCli(ClientInvoker* self, const py::list& list) {
 ///
 void ClientInvoker_zombieFailCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->zombieFailCliPaths(paths);
 }
 
@@ -954,7 +954,7 @@ void ClientInvoker_zombieFailCli(ClientInvoker* self, const py::list& list) {
 ///
 void ClientInvoker_zombieAdoptCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->zombieAdoptCliPaths(paths);
 }
 
@@ -966,7 +966,7 @@ void ClientInvoker_zombieAdoptCli(ClientInvoker* self, const py::list& list) {
 ///
 void ClientInvoker_zombieBlockCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->zombieBlockCliPaths(paths);
 }
 
@@ -978,7 +978,7 @@ void ClientInvoker_zombieBlockCli(ClientInvoker* self, const py::list& list) {
 ///
 void ClientInvoker_zombieRemoveCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->zombieRemoveCliPaths(paths);
 }
 
@@ -990,7 +990,7 @@ void ClientInvoker_zombieRemoveCli(ClientInvoker* self, const py::list& list) {
 ///
 void ClientInvoker_zombieKillCli(ClientInvoker* self, const py::list& list) {
     std::vector<std::string> paths;
-    pyutil_list_to_str_vec(list, paths);
+    py_list_to_str_vec(list, paths);
     self->zombieKillCliPaths(paths);
 }
 
@@ -1184,8 +1184,10 @@ void export_Client(py::module& m) {
 
         .def("news_local", &ClientInvoker_news_local, ClientDoc::news())
 
-        .def_property_readonly(
-            "changed_node_paths", &ClientInvoker::changed_node_paths, ClientDoc::changed_node_paths())
+        .def_property_readonly("changed_node_paths",
+                               &ClientInvoker::changed_node_paths,
+                               py::return_value_policy::copy,
+                               ClientDoc::changed_node_paths())
 
         .def("suites", &ClientInvoker_suites, ClientDoc::suites())
 

@@ -208,7 +208,7 @@ node_ptr Node_add_queue(node_ptr self, const QueueAttr& m) {
 ///
 node_ptr Node_add_queue1(node_ptr self, const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
     QueueAttr queue_attr(name, vec);
     self->add_queue(queue_attr);
     return self;
@@ -236,7 +236,7 @@ node_ptr Node_add_generic(node_ptr self, const GenericAttr& m) {
 ///
 node_ptr Node_add_generic1(node_ptr self, const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
     GenericAttr attr(name, vec);
     self->add_generic(attr);
     return self;
@@ -651,7 +651,7 @@ node_ptr Node_add_autorestore(node_ptr self, const ecf::AutoRestoreAttr& attr) {
 ///
 node_ptr Node_add_autorestore1(node_ptr self, const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
     self->add_autorestore(ecf::AutoRestoreAttr(vec));
     return self;
 }
@@ -824,7 +824,7 @@ void Node_sort_attributes1(node_ptr self, ecf::Attr::Type attr, bool recursive) 
 ///
 void Node_sort_attributes2(node_ptr self, ecf::Attr::Type attr, bool recursive, const py::list& list) {
     std::vector<std::string> no_sort;
-    pyutil_list_to_str_vec(list, no_sort);
+    py_list_to_str_vec(list, no_sort);
     self->sort_attributes(attr, recursive, no_sort);
 }
 
@@ -845,7 +845,7 @@ void Node_sort_attributes3(node_ptr self, const std::string& attribute_name, boo
             MESSAGE("sort_attributes: the attribute " << attribute_name_lowered << " is not valid"));
     }
     std::vector<std::string> no_sort;
-    pyutil_list_to_str_vec(list, no_sort);
+    py_list_to_str_vec(list, no_sort);
     self->sort_attributes(attribute, recursive, no_sort);
 }
 

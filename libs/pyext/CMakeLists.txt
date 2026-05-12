@@ -104,6 +104,7 @@ set(u_tests
   u_TestAutoAddExtern
   u_TestAviso
   u_TestCopy
+  u_TestCron
   u_TestDefs
   u_TestDefsCheck
   u_TestDerivable
@@ -116,13 +117,19 @@ set(u_tests
   u_TestExportNodeAttr
   u_TestExportSuiteAndFamily
   u_TestExportTask
+  u_TestExpression
   u_TestFind
   u_TestFlag
+  u_TestGeneratedVariable
+  u_TestGeneric
   u_TestGetAllTasks
   u_TestJobGeneration
+  u_TestMeter
   u_TestMirror
+  u_TestNode
   u_TestParent
   u_TestPrint
+  u_TestPythonBindings
   u_TestRemove
   u_TestRepeatArithmetic
   u_TestRepeatDateTimeList

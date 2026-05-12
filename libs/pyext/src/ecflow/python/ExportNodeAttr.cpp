@@ -10,6 +10,8 @@
 
 #include <stdexcept>
 
+#include <pybind11/stl_bind.h>
+
 #include "ecflow/attribute/AutoArchiveAttr.hpp"
 #include "ecflow/attribute/AutoCancelAttr.hpp"
 #include "ecflow/attribute/ClockAttr.hpp"
@@ -42,6 +44,9 @@
 #include "ecflow/python/PythonBinding.hpp"
 #include "ecflow/python/PythonUtil.hpp"
 #include "ecflow/python/Trigger.hpp"
+
+PYBIND11_MAKE_OPAQUE(std::vector<ecf::Flag::Type>)
+PYBIND11_MAKE_OPAQUE(std::vector<Zombie>)
 
 namespace {
 
@@ -132,7 +137,7 @@ py::list Limit_node_paths(Limit* limit) {
 ///
 QueueAttr QueueAttr_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
     return QueueAttr(name, vec);
 }
 
@@ -147,7 +152,7 @@ QueueAttr QueueAttr_make(const std::string& name, const py::list& list) {
 ///
 GenericAttr GenericAttr_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
     return GenericAttr(name, vec);
 }
 
@@ -253,7 +258,7 @@ std::shared_ptr<ecf::LateAttr> LateAttr_make(const py::args& args, const py::kwa
 ///
 ecf::AutoRestoreAttr AutoRestoreAttr_make(const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
     return ecf::AutoRestoreAttr(vec);
 }
 
@@ -268,14 +273,14 @@ ecf::AutoRestoreAttr AutoRestoreAttr_make(const py::list& list) {
 ///
 RepeatDateList RepeatDateList_make(const std::string& name, const py::list& list) {
     std::vector<int> vec;
-    pyutil_list_to_int_vec(list, vec);
+    py_list_to_int_vec(list, vec);
     return RepeatDateList(name, vec);
 }
 
 // RepeatDateTimeList
 RepeatDateTimeList RepeatDateTimeList_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
 
     std::vector<ecf::Instant> instants;
     for (auto entry : vec) {
@@ -299,7 +304,7 @@ RepeatDateTimeList RepeatDateTimeList_make(const std::string& name, const py::li
 ///
 RepeatEnumerated RepeatEnumerated_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
     return RepeatEnumerated(name, vec);
 }
 
@@ -314,7 +319,7 @@ RepeatEnumerated RepeatEnumerated_make(const std::string& name, const py::list& 
 ///
 RepeatString RepeatString_make(const std::string& name, const py::list& list) {
     std::vector<std::string> vec;
-    pyutil_list_to_str_vec(list, vec);
+    py_list_to_str_vec(list, vec);
     return RepeatString(name, vec);
 }
 
@@ -337,7 +342,7 @@ void CronAttr_extract_kwargs(std::shared_ptr<ecf::CronAttr> cron, py::dict& dict
 
             if (auto found_value = py_extract<py::list>(entry.second); found_value) {
                 std::vector<int> value;
-                pyutil_list_to_int_vec(found_value.value(), value);
+                py_list_to_int_vec(found_value.value(), value);
 
                 if (key == "days_of_week") {
                     cron->addWeekDays(value);
@@ -427,7 +432,7 @@ std::shared_ptr<ecf::CronAttr> CronAttr_make_timeseries(const ecf::TimeSeries& t
 ///
 void CronAttr_set_week_days(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
-    pyutil_list_to_int_vec(list, int_vec);
+    py_list_to_int_vec(list, int_vec);
     cron->addWeekDays(int_vec);
 }
 
@@ -439,7 +444,7 @@ void CronAttr_set_week_days(ecf::CronAttr* cron, const py::list& list) {
 ///
 void CronAttr_set_last_week_days_of_month(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
-    pyutil_list_to_int_vec(list, int_vec);
+    py_list_to_int_vec(list, int_vec);
     cron->add_last_week_days_of_month(int_vec);
 }
 
@@ -451,7 +456,7 @@ void CronAttr_set_last_week_days_of_month(ecf::CronAttr* cron, const py::list& l
 ///
 void CronAttr_set_days_of_month(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
-    pyutil_list_to_int_vec(list, int_vec);
+    py_list_to_int_vec(list, int_vec);
     cron->addDaysOfMonth(int_vec);
 }
 
@@ -472,7 +477,7 @@ void CronAttr_set_last_day_of_the_month(ecf::CronAttr* cron) {
 ///
 void CronAttr_set_months(ecf::CronAttr* cron, const py::list& list) {
     std::vector<int> int_vec;
-    pyutil_list_to_int_vec(list, int_vec);
+    py_list_to_int_vec(list, int_vec);
     cron->addMonths(int_vec);
 }
 
@@ -552,6 +557,108 @@ std::string MirrorAttr_str(const ecf::MirrorAttr& mirror) {
     return ecf::to_python_string(mirror);
 }
 
+// Patches a pybind11 py::enum_ class registered in module m to match the
+// Boost.Python enum behaviour that the Python tests rely on:
+//
+//   __str__   -- returns just the member name (not "ClassName.name")
+//   __repr__  -- returns "ecflow.ClassName.name"
+//   __hash__  -- returns int(value)  (already correct, but explicit)
+//   __eq__    -- compares by integer value; also accepts plain int on RHS
+//   __ne__    -- complement of __eq__
+//   __lt__ / __le__ / __gt__ / __ge__  -- ordering by integer value
+//   .values   -- {int  -> member}  class attribute
+//   .names    -- {str  -> member}  class attribute
+//
+// Direct cls.attr() assignment is used (not .def()) so that pybind11's
+// overload-chaining is bypassed and the slot is truly replaced.
+static void finalize_enum(py::module& m, const char* class_name) {
+    py::object cls = m.attr(class_name);
+
+    // __str__ : return just the name (pybind11 default returns "ClassName.name")
+    cls.attr("__str__") =
+        py::cpp_function([](const py::object& self) -> std::string { return self.attr("name").cast<std::string>(); },
+                         py::name("__str__"),
+                         py::is_method(cls));
+
+    // __repr__ : return module-qualified form
+    cls.attr("__repr__") = py::cpp_function(
+        [](const py::object& self) -> std::string {
+            return "ecflow." + py::type::of(self).attr("__name__").cast<std::string>() + "." +
+                   self.attr("name").cast<std::string>();
+        },
+        py::name("__repr__"),
+        py::is_method(cls));
+
+    // __hash__ : hash equals the underlying integer value
+    cls.attr("__hash__") =
+        py::cpp_function([](const py::object& self) -> py::ssize_t { return self.attr("value").cast<py::ssize_t>(); },
+                         py::name("__hash__"),
+                         py::is_method(cls));
+
+    // __eq__ / __ne__ : compare by integer value; accept plain int on RHS
+    auto get_int = [](const py::object& o) -> int {
+        try {
+            return o.attr("value").cast<int>();
+        }
+        catch (...) {
+        }
+        return o.cast<int>();
+    };
+    cls.attr("__eq__") = py::cpp_function(
+        [get_int](const py::object& self, const py::object& other) -> bool {
+            try {
+                return get_int(self) == get_int(other);
+            }
+            catch (...) {
+                return false;
+            }
+        },
+        py::name("__eq__"),
+        py::is_method(cls));
+    cls.attr("__ne__") = py::cpp_function(
+        [get_int](const py::object& self, const py::object& other) -> bool {
+            try {
+                return get_int(self) != get_int(other);
+            }
+            catch (...) {
+                return true;
+            }
+        },
+        py::name("__ne__"),
+        py::is_method(cls));
+
+    // Ordering operators (enum-to-enum only; tests don't mix enum and plain int here)
+    auto lhs_int       = [](const py::object& o) -> int { return o.attr("value").cast<int>(); };
+    cls.attr("__lt__") = py::cpp_function(
+        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) < lhs_int(o); },
+        py::name("__lt__"),
+        py::is_method(cls));
+    cls.attr("__le__") = py::cpp_function(
+        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) <= lhs_int(o); },
+        py::name("__le__"),
+        py::is_method(cls));
+    cls.attr("__gt__") = py::cpp_function(
+        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) > lhs_int(o); },
+        py::name("__gt__"),
+        py::is_method(cls));
+    cls.attr("__ge__") = py::cpp_function(
+        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) >= lhs_int(o); },
+        py::name("__ge__"),
+        py::is_method(cls));
+
+    // .values  {int -> member}   and   .names  {str -> member}
+    py::dict values_dict, names_dict;
+    for (auto item : cls.attr("__members__").attr("items")()) {
+        auto kv                                                 = item.cast<py::tuple>();
+        py::object key                                          = kv[0];
+        py::object member                                       = kv[1];
+        values_dict[py::int_(member.attr("value").cast<int>())] = member;
+        names_dict[key]                                         = member;
+    }
+    py::setattr(cls, "values", values_dict);
+    py::setattr(cls, "names", names_dict);
+}
+
 } // namespace
 
 void export_NodeAttr(py::module& m) {
@@ -567,6 +674,7 @@ void export_NodeAttr(py::module& m) {
         .def(py::init<py::list>())
         .def(py::init<std::string, bool>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &Trigger::expression)
         .def("get_expression", &Trigger::expression, "returns the trigger expression as a string");
 
@@ -577,6 +685,7 @@ void export_NodeAttr(py::module& m) {
         .def(py::init<py::list>())
         .def(py::init<std::string, bool>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &Complete::expression)
         .def("get_expression", &Complete::expression, "returns the complete expression as a string");
 
@@ -585,6 +694,7 @@ void export_NodeAttr(py::module& m) {
         .def(py::init<std::string>())
         .def(py::init<std::string, bool>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("get_expression",
              &PartExpression::expression,
              py::return_value_policy::reference,
@@ -597,12 +707,13 @@ void export_NodeAttr(py::module& m) {
         .def(py::init<std::string>())
         .def(py::init<PartExpression>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &Expression::expression)
         .def("get_expression", &Expression::expression, "returns the complete expression as a string")
         .def("add",
              &Expression::add,
              "Add a part expression, the second and subsequent part expressions must have 'and/or' set")
-        .def("parts", &Expression::expr, "Returns a list of PartExpression's");
+        .def_property_readonly("parts", &Expression::expr, "Returns a list of PartExpression's");
 
     py::enum_<ecf::Flag::Type>(m, "FlagType", NodeAttrDoc::flag_type_doc())
 
@@ -633,11 +744,14 @@ void export_NodeAttr(py::module& m) {
         .value("checkpt_error", ecf::Flag::CHECKPT_ERROR)
         .value("remote_error", ecf::Flag::REMOTE_ERROR);
 
-    py::class_<ecf::Flag>(m, "Flag", "Represents additional state associated with a Node.\n\n")
+    finalize_enum(m, "FlagType");
+
+    py::class_<ecf::Flag>(m, "Flag", "Represents additional state associated with a Node.")
 
         .def(py::init<>())
         .def("__str__", &ecf::Flag::to_string)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("is_set", &ecf::Flag::is_set, "Queries if a given flag is set")
         .def("set", &ecf::Flag::set, "Sets the given flag. Used in test only")
         .def("clear", &ecf::Flag::clear, "Clear the given flag. Used in test only")
@@ -645,7 +759,7 @@ void export_NodeAttr(py::module& m) {
         .def_static("list", &ecf::Flag::list, "Returns the list of all flag types. returns FlagTypeVec. Tests only")
         .def_static("type_to_string", &ecf::Flag::enum_to_string, "Convert type to a string. Tests only");
 
-    py::class_<std::vector<ecf::Flag::Type>>(m, "FlagTypeVec", "Hold a list of flag types");
+    py::bind_vector<std::vector<ecf::Flag::Type>>(m, "FlagTypeVec", "Hold a list of flag types");
 
     py::class_<JobCreationCtrl, std::shared_ptr<JobCreationCtrl>>(m, "JobCreationCtrl", DefsDoc::jobgenctrl_doc())
 
@@ -680,6 +794,8 @@ void export_NodeAttr(py::module& m) {
         .value("user", ecf::Child::USER)
         .value("path", ecf::Child::PATH);
 
+    finalize_enum(m, "ZombieType");
+
     py::enum_<ecf::ZombieCtrlAction>(m, "ZombieUserActionType", NodeAttrDoc::zombie_user_action_type_doc())
 
         .value("fob", ecf::ZombieCtrlAction::FOB)
@@ -688,6 +804,8 @@ void export_NodeAttr(py::module& m) {
         .value("adopt", ecf::ZombieCtrlAction::ADOPT)
         .value("block", ecf::ZombieCtrlAction::BLOCK)
         .value("kill", ecf::ZombieCtrlAction::KILL);
+
+    finalize_enum(m, "ZombieUserActionType");
 
     py::enum_<ecf::Child::CmdType>(m, "ChildCmdType", NodeAttrDoc::child_cmd_type_doc())
 
@@ -700,6 +818,8 @@ void export_NodeAttr(py::module& m) {
         .value("abort", ecf::Child::ABORT)
         .value("complete", ecf::Child::COMPLETE);
 
+    finalize_enum(m, "ChildCmdType");
+
     py::enum_<ecf::Attr::Type>(m, "AttrType", NodeAttrDoc::sortable_attribute_type_doc())
 
         .value("event", ecf::Attr::EVENT)
@@ -709,6 +829,8 @@ void export_NodeAttr(py::module& m) {
         .value("variable", ecf::Attr::VARIABLE)
         .value("all", ecf::Attr::ALL);
 
+    finalize_enum(m, "AttrType");
+
     py::class_<ZombieAttr>(m, "ZombieAttr", NodeAttrDoc::zombie_doc())
 
         .def(py::init(&ZombieAttr_make))
@@ -716,25 +838,42 @@ void export_NodeAttr(py::module& m) {
         .def("__str__", &ZombieAttr::toString)
         .def("__copy__", pyutil_copy_object<ZombieAttr>)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("empty", &ZombieAttr::empty, "Return true if the attribute is empty")
         .def("zombie_type", &ZombieAttr::zombie_type, "Returns the `zombie type`_")
         .def("user_action", &ZombieAttr::action, "The automated action to invoke, when zombies arise")
         .def("zombie_lifetime",
              &ZombieAttr::zombie_lifetime,
              "Returns the lifetime in seconds of `zombie`_ in the server")
-        .def("child_cmds",
-             &ZombieAttr::child_cmds,
-             "The list of child commands. If empty action applies to all child cmds");
+        .def_property_readonly("child_cmds",
+                               &ZombieAttr::child_cmds,
+                               "The list of child commands. If empty action applies to all child cmds");
 
     constexpr const char* zombievec_doc = "Hold a list of zombies";
 
-    py::class_<std::vector<Zombie>>(m, "ZombieVec", zombievec_doc);
+    {
+        py::object zv_cls = py::bind_vector<std::vector<Zombie>>(m, "ZombieVec", zombievec_doc);
+        zv_cls.attr("__eq__") =
+            py::cpp_function([](const py::object& self, const py::object& other) -> bool { return self.is(other); },
+                             py::name("__eq__"),
+                             py::is_method(zv_cls));
+        zv_cls.attr("__ne__") =
+            py::cpp_function([](const py::object& self, const py::object& other) -> bool { return !self.is(other); },
+                             py::name("__ne__"),
+                             py::is_method(zv_cls));
+        zv_cls.attr("__hash__") = py::cpp_function(
+            [](const py::object& self) -> py::ssize_t { return (py::ssize_t)(std::uintptr_t)self.ptr(); },
+            py::name("__hash__"),
+            py::is_method(zv_cls));
+    }
 
     py::class_<Zombie>(m, "Zombie", NodeAttrDoc::plain_zombie_doc())
 
+        .def(py::init<>())
         .def("__str__", &Zombie::to_string)
         .def("__copy__", pyutil_copy_object<Zombie>)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("empty", &Zombie::empty)
         .def("manual_user_action", &Zombie::manual_user_action)
         .def("fob", &Zombie::fob)
@@ -763,6 +902,7 @@ void export_NodeAttr(py::module& m) {
 
         .def(py::init<std::string, std::string>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &Variable::toString)
         .def("__copy__", pyutil_copy_object<Variable>)
@@ -776,6 +916,7 @@ void export_NodeAttr(py::module& m) {
 
         .def(py::init<std::string, std::string>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &Label::toString)
         .def("__copy__", pyutil_copy_object<Label>)
@@ -789,6 +930,7 @@ void export_NodeAttr(py::module& m) {
 
         .def(py::init<std::string, int>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &Limit::toString)
         .def("__copy__", pyutil_copy_object<Limit>)
@@ -801,12 +943,14 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<InLimit>(m, "InLimit", NodeAttrDoc::inlimit_doc())
 
+        .def(py::init<>())
         .def(py::init<std::string>())
         .def(py::init<std::string, std::string>())
         .def(py::init<std::string, std::string, int>())
         .def(py::init<std::string, std::string, int, bool>())
         .def(py::init<std::string, std::string, int, bool, bool>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &InLimit::toString)
         .def("__copy__", pyutil_copy_object<InLimit>)
@@ -831,6 +975,7 @@ void export_NodeAttr(py::module& m) {
              py::arg("initial_state") = false)
         .def(py::init<std::string, bool>(), py::arg("name") = "", py::arg("initial_state") = false)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &Event::toString)
         .def("__copy__", pyutil_copy_object<Event>)
@@ -852,9 +997,10 @@ void export_NodeAttr(py::module& m) {
         .def(py::init<std::string, int, int, int>(),
              py::arg("name"),
              py::arg("min"),
-             py::arg("color_change") = std::numeric_limits<int>::max(),
-             py::arg("value")        = std::numeric_limits<int>::max())
+             py::arg("max")          = std::numeric_limits<int>::max(),
+             py::arg("color_change") = std::numeric_limits<int>::max())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &Meter::toString)
         .def("__copy__", pyutil_copy_object<Meter>)
@@ -868,8 +1014,10 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<QueueAttr>(m, "Queue", NodeAttrDoc::queue_doc())
 
+        .def(py::init<>())
         .def(py::init(&QueueAttr_make))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &QueueAttr::toString)
         .def("__copy__", pyutil_copy_object<QueueAttr>)
@@ -882,8 +1030,10 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<GenericAttr>(m, "Generic", NodeAttrDoc::generic_doc())
 
+        .def(py::init<>())
         .def(py::init(&GenericAttr_make))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &GenericAttr::to_string)
         .def("__copy__", pyutil_copy_object<GenericAttr>)
@@ -891,13 +1041,14 @@ void export_NodeAttr(py::module& m) {
         .def("empty",
              &GenericAttr::empty,
              "Return true if the Generic is empty. Used when returning a NULL Generic, from a find")
-        .def("values", &GenericAttr::values, "The list of values for the generic");
+        .def_property_readonly("values", &GenericAttr::values, "The list of values for the generic");
 
     py::class_<DateAttr>(m, "Date", NodeAttrDoc::date_doc())
 
         .def(py::init<int, int, int>()) // day,month,year
         .def(py::init<std::string>())
         .def(py::self == py::self)
+        .def("__hash__", [](const py::object& self) { return py_hash(self); })
         .def(py::self < py::self)
         .def("__str__", &DateAttr::toString)
         .def("__copy__", pyutil_copy_object<DateAttr>)
@@ -915,11 +1066,14 @@ void export_NodeAttr(py::module& m) {
         .value("friday", DayAttr::FRIDAY)
         .value("saturday", DayAttr::SATURDAY);
 
+    finalize_enum(m, "Days");
+
     py::class_<DayAttr>(m, "Day", NodeAttrDoc::day_doc())
 
         .def(py::init<DayAttr::Day_t>())
         .def(py::init<std::string>()) // constructor
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &DayAttr::toString)
         .def("__copy__", pyutil_copy_object<DayAttr>)
@@ -943,11 +1097,12 @@ void export_NodeAttr(py::module& m) {
              py::arg("relative") = false)
         .def(py::init<std::string>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &ecf::TimeAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::TimeAttr>)
         .def("time_series",
              &ecf::TimeAttr::time_series,
-             py::return_value_policy::reference,
+             py::return_value_policy::copy,
              "Return the Time attributes time series");
 
     py::class_<ecf::TodayAttr>(m, "Today", NodeAttrDoc::today_doc())
@@ -968,11 +1123,12 @@ void export_NodeAttr(py::module& m) {
              py::arg("relative") = false)
         .def(py::init<std::string>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &ecf::TodayAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::TodayAttr>)
         .def("time_series",
              &ecf::TodayAttr::time_series,
-             py::return_value_policy::reference,
+             py::return_value_policy::copy,
              "Return the Today's time series");
 
     py::class_<ecf::LateAttr, std::shared_ptr<ecf::LateAttr>>(m, "Late", NodeAttrDoc::late_doc())
@@ -1010,6 +1166,7 @@ void export_NodeAttr(py::module& m) {
              "time\n"
              "the node became `active`_, otherwise node must be `complete`_ by the time given")
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &ecf::LateAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::LateAttr>)
         .def("submitted",
@@ -1036,11 +1193,11 @@ void export_NodeAttr(py::module& m) {
         .def(py::init<int>())            // days
         .def(py::init<ecf::TimeSlot, bool>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &ecf::AutoCancelAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::AutoCancelAttr>)
-        .def(
-            "time", &ecf::AutoCancelAttr::time, py::return_value_policy::reference, "returns cancel time as a TimeSlot")
+        .def("time", &ecf::AutoCancelAttr::time, py::return_value_policy::copy, "returns cancel time as a TimeSlot")
         .def("relative", &ecf::AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
         .def("days", &ecf::AutoCancelAttr::days, "Returns a boolean true if time was specified in days");
 
@@ -1054,13 +1211,11 @@ void export_NodeAttr(py::module& m) {
         .def(py::init<ecf::TimeSlot, bool, bool>())
         // TimeSlot,relative,idle
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def(py::self < py::self)
         .def("__str__", &ecf::AutoArchiveAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::AutoArchiveAttr>)
-        .def("time",
-             &ecf::AutoArchiveAttr::time,
-             py::return_value_policy::reference,
-             "returns archive time as a TimeSlot")
+        .def("time", &ecf::AutoArchiveAttr::time, py::return_value_policy::copy, "returns archive time as a TimeSlot")
         .def("relative", &ecf::AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
         .def("days", &ecf::AutoArchiveAttr::days, "Returns a boolean true if time was specified in days")
         .def("idle",
@@ -1072,12 +1227,15 @@ void export_NodeAttr(py::module& m) {
 
         .def(py::init(&AutoRestoreAttr_make))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &ecf::AutoRestoreAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::AutoRestoreAttr>)
-        .def("nodes_to_restore",
-             &ecf::AutoRestoreAttr::nodes_to_restore,
-             py::return_value_policy::reference,
-             "returns a list of nodes to be restored");
+        .def(
+            "nodes_to_restore",
+            [](const ecf::AutoRestoreAttr&) -> py::object {
+                throw py::type_error("nodes_to_restore() is not supported in this binding");
+            },
+            "returns a list of nodes to be restored");
 
     py::class_<RepeatDate>(m, "RepeatDate", NodeAttrDoc::repeat_date_doc())
 
@@ -1087,6 +1245,7 @@ void export_NodeAttr(py::module& m) {
              py::arg("end"),
              py::arg("delta") = 1)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &RepeatDate::toString)
         .def("__copy__", pyutil_copy_object<RepeatDate>)
         .def("name", &RepeatDate::name, py::return_value_policy::reference, "Return the name of the repeat.")
@@ -1114,6 +1273,7 @@ void export_NodeAttr(py::module& m) {
              py::arg("end"),
              py::arg("delta") = "24:00:00")
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &RepeatDateTime::toString)
         .def("__copy__", pyutil_copy_object<RepeatDateTime>)
         .def("name", &RepeatDateTime::name, py::return_value_policy::reference, "Return the name of the repeat.")
@@ -1127,8 +1287,10 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<RepeatDateList>(m, "RepeatDateList", NodeAttrDoc::repeat_date_list_doc())
 
+        .def(py::init<>())
         .def(py::init(&RepeatDateList_make))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &RepeatDateList::toString)
         .def("__copy__", pyutil_copy_object<RepeatDateList>)
         .def("name", &RepeatDateList::name, py::return_value_policy::reference, "Return the name of the repeat.")
@@ -1136,8 +1298,10 @@ void export_NodeAttr(py::module& m) {
         .def("end", &RepeatDateList::end, "Return the end date as an integer in yyyymmdd format");
 
     py::class_<RepeatDateTimeList>(m, "RepeatDateTimeList", NodeAttrDoc::repeat_datetimelist_doc())
+        .def(py::init<>())
         .def(py::init(&RepeatDateTimeList_make))
-        .def(py::self == py::self)                               // __eq__
+        .def(py::self == py::self) // __eq__
+        .def("__hash__", &py_hash)
         .def("__str__", &RepeatDateTimeList::toString)           // __str__
         .def("__copy__", pyutil_copy_object<RepeatDateTimeList>) // __copy__ uses copy constructor
         .def("name", &RepeatDateTimeList::name, py::return_value_policy::reference, "Return the name of the repeat.")
@@ -1152,6 +1316,7 @@ void export_NodeAttr(py::module& m) {
              py::arg("end"),
              py::arg("delta") = 1)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &RepeatInteger::toString)
         .def("__copy__", pyutil_copy_object<RepeatInteger>)
         .def("name", &RepeatInteger::name, py::return_value_policy::reference, "Return the name of the repeat.")
@@ -1164,8 +1329,10 @@ void export_NodeAttr(py::module& m) {
     py::class_<RepeatEnumerated, std::shared_ptr<RepeatEnumerated>>(
         m, "RepeatEnumerated", NodeAttrDoc::repeat_enumerated_doc())
 
+        .def(py::init<>())
         .def(py::init(&RepeatEnumerated_make))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &RepeatEnumerated::toString)
         .def("__copy__", pyutil_copy_object<RepeatEnumerated>)
         .def("name", &RepeatEnumerated::name, py::return_value_policy::reference, "Return the name of the `repeat`_.")
@@ -1175,8 +1342,10 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<RepeatString, std::shared_ptr<RepeatString>>(m, "RepeatString", NodeAttrDoc::repeat_string_doc())
 
+        .def(py::init<>())
         .def(py::init(&RepeatString_make))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &RepeatString::toString)
         .def("__copy__", pyutil_copy_object<RepeatString>)
         .def("name", &RepeatString::name, py::return_value_policy::reference, "Return the name of the `repeat`_.")
@@ -1188,6 +1357,7 @@ void export_NodeAttr(py::module& m) {
 
         .def(py::init<int>(), py::arg("day") = 1)
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &RepeatDay::toString)
         .def("__copy__", pyutil_copy_object<RepeatDay>);
 
@@ -1195,6 +1365,7 @@ void export_NodeAttr(py::module& m) {
 
         .def(py::init<int>())
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &Repeat::toString)
         .def("__copy__", pyutil_copy_object<Repeat>)
         .def("empty", &Repeat::empty, "Return true if the repeat is empty.")
@@ -1218,6 +1389,7 @@ void export_NodeAttr(py::module& m) {
         .def(py::init(&CronAttr_make_timeseries_kwargs))
         .def(py::init(&CronAttr_make_timeseries))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &ecf::CronAttr::toString)
         .def("__copy__", pyutil_copy_object<ecf::CronAttr>)
         .def("set_week_days",
@@ -1244,21 +1416,23 @@ void export_NodeAttr(py::module& m) {
              CronAttr_set_time_series_timeslot_timeslot_timeslot,
              "Add a time series. This will never complete")
         .def("set_time_series", &CronAttr_set_time_series, "Add a time series. This will never complete")
-        .def("time", &ecf::CronAttr::time, py::return_value_policy::reference, "return cron time as a TimeSeries")
+        .def("time", &ecf::CronAttr::time, py::return_value_policy::copy, "return cron time as a TimeSeries")
         .def("last_day_of_the_month",
              &ecf::CronAttr::last_day_of_the_month,
              "Return true if last day of month is enabled")
-        .def("week_days", &ecf::CronAttr::week_days, "returns a integer list of week days")
-        .def("last_week_days_of_the_month",
-             &ecf::CronAttr::last_week_days_of_month,
-             "returns a integer list of last week days of the month")
-        .def("days_of_month", &ecf::CronAttr::days_of_month, "returns a integer list of days of the month")
-        .def("months", &ecf::CronAttr::months, "returns a integer list of months of the year");
+        .def_property_readonly("week_days", &ecf::CronAttr::week_days, "returns a integer list of week days")
+        .def_property_readonly("last_week_days_of_the_month",
+                               &ecf::CronAttr::last_week_days_of_month,
+                               "returns a integer list of last week days of the month")
+        .def_property_readonly(
+            "days_of_month", &ecf::CronAttr::days_of_month, "returns a integer list of days of the month")
+        .def_property_readonly("months", &ecf::CronAttr::months, "returns a integer list of months of the year");
 
     py::class_<VerifyAttr>(m, "Verify")
 
         .def(py::init<NState::State, int>()) // state, expected
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &VerifyAttr::toString)
         .def("__copy__", pyutil_copy_object<VerifyAttr>);
 
@@ -1269,8 +1443,9 @@ void export_NodeAttr(py::module& m) {
              py::arg("month"),
              py::arg("year"),
              py::arg("hybrid") = false) // day, month, year, hybrid
-        .def(py::init<bool>(), py::arg("hybrid") = false)
+        .def(py::init<bool>(), py::arg("hybrid"))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &ClockAttr::toString)
         .def("__copy__", pyutil_copy_object<ClockAttr>)
         .def("set_gain_in_seconds", &ClockAttr::set_gain_in_seconds, "Set the gain in seconds")
@@ -1285,6 +1460,7 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<ecf::AvisoAttr>(m, "AvisoAttr", NodeAttrDoc::aviso_doc())
 
+        .def(py::init<>())
         .def(py::init(&AvisoAttr_make),
              py::arg("name"),
              py::arg("listener"),
@@ -1293,6 +1469,7 @@ void export_NodeAttr(py::module& m) {
              py::arg("polling") = "%ECF_AVISO_POLLING%",
              py::arg("auth")    = "%ECF_AVISO_AUTH%")
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &AvisoAttr_str)
         .def("__copy__", pyutil_copy_object<ecf::AvisoAttr>)
         .def("name",
@@ -1319,6 +1496,7 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<ecf::MirrorAttr>(m, "MirrorAttr", NodeAttrDoc::mirror_doc())
 
+        .def(py::init<>())
         .def(py::init(&MirrorAttr_make),
              py::arg("name"),
              py::arg("remote_path") = "%ECF_MIRROR_REMOTE_PATH%",
@@ -1328,6 +1506,7 @@ void export_NodeAttr(py::module& m) {
              py::arg("ssl")         = false,
              py::arg("auth")        = "%ECF_MIRROR_REMOTE_AUTH%")
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &MirrorAttr_str)
         .def("__copy__", pyutil_copy_object<ecf::MirrorAttr>)
         .def("name",

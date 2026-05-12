@@ -19,7 +19,7 @@ public:
     NodeUtil() = delete;
 
     /// Add the attribute(s), provided as a python object, to the node
-    static void add1(Node& self, const py::object& args);
+    static Node& add1(Node& self, const py::object& args);
 
     /// Add the attribute(s), provided as a python object, to the node
     static void add(Node& self, const py::handle& arg);

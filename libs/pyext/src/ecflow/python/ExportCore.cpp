@@ -38,12 +38,19 @@ void export_Core(py::module& m) {
         .def(py::init<py::dict>())
         .def(py::init<py::kwargs>())
         .def(py::init<py::dict, py::kwargs>())
+        .def(py::init<py::dict, py::dict>())
+        .def("__init__",
+             [](py::object& /*self*/, py::object /*arg*/) {
+                 throw std::runtime_error("Edit: positional argument must be a dict");
+             })
         .def("__str__", &Edit::to_string);
 
     constexpr const char* file_docs = "Utility class, Used in test only.";
 
     py::class_<ecf::File>(m, "File", file_docs)
 
+        .def("__init__",
+             [](py::object& /*self*/) { throw std::runtime_error("File cannot be instantiated from Python"); })
         .def_static("find_server", &ecf::File::find_ecf_server_path, "Provides pathname to the server")
         .def_static("find_client", &ecf::File::find_ecf_client_path, "Provides pathname to the client")
         .def_static("source_dir", &ecf::File::root_source_dir, "Path name to ecflow source directory")
@@ -90,6 +97,8 @@ void export_Core(py::module& m) {
 
     py::class_<PrintStyle>(m, "PrintStyle", printstyle_docs)
 
+        .def("__init__",
+             [](py::object& /*self*/) { throw std::runtime_error("PrintStyle cannot be instantiated from Python"); })
         .def_static("get_style", &PrintStyleHolder::getStyle, "Returns the style, static method")
         .def_static("set_style", &PrintStyleHolder::setStyle, "Set the style, static method");
 
@@ -111,6 +120,8 @@ void export_Core(py::module& m) {
 
     py::class_<Ecf>(m, "Ecf", ecf_docs)
 
+        .def("__init__",
+             [](py::object& /*self*/) { throw std::runtime_error("Ecf cannot be instantiated from Python"); })
         .def_static("debug_equality", &Ecf::debug_equality, "Returns true if debugging of equality is enabled")
         .def_static("set_debug_equality", &Ecf::set_debug_equality, "Set debugging for equality")
         .def_static("debug_level",
@@ -205,6 +216,7 @@ void export_Core(py::module& m) {
         .def("__str__", &ecf::TimeSlot::toString)
         .def("__copy__", pyutil_copy_object<ecf::TimeSlot>) // __copy__ uses copy constructor
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("hour", &ecf::TimeSlot::hour)
         .def("minute", &ecf::TimeSlot::minute)
         .def("empty", &ecf::TimeSlot::isNULL);
@@ -249,7 +261,8 @@ void export_Core(py::module& m) {
              py::arg("finish"),
              py::arg("increment"),
              py::arg("relative") = false)
-        .def(py::self == py::self)                            // __eq__
+        .def(py::self == py::self) // __eq__
+        .def("__hash__", &py_hash)
         .def("__str__", &ecf::TimeSeries::toString)           // __str__
         .def("__copy__", pyutil_copy_object<ecf::TimeSeries>) // __copy__ uses copy constructor
         .def("has_increment",
@@ -258,15 +271,15 @@ void export_Core(py::module& m) {
                                                                                                // slot
         .def("start",
              &ecf::TimeSeries::start,
-             py::return_value_policy::reference,
+             py::return_value_policy::copy,
              "returns the start time") // returns a time slot
         .def("finish",
              &ecf::TimeSeries::finish,
-             py::return_value_policy::reference,
+             py::return_value_policy::copy,
              "returns the finish time if time series specified, else returns a NULL time slot") // returns a time slot
         .def("incr",
              &ecf::TimeSeries::incr,
-             py::return_value_policy::reference,
+             py::return_value_policy::copy,
              " returns the increment time if time series specified, else returns a NULL time slot") // returns a time
                                                                                                     // slot
         .def("relative",

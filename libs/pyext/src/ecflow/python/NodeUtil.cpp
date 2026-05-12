@@ -46,14 +46,15 @@
 
 static void add_variable_dict(Node& self, const py::dict& dict) {
     std::vector<Variable> vec;
-    pyutil_dict_to_str_vec(dict, vec);
+    py_dict_to_str_vec(dict, vec);
     for (const auto& i : vec) {
         self.addVariable(i);
     }
 }
 
-void NodeUtil::add1(Node& self, const py::object& o) {
+Node& NodeUtil::add1(Node& self, const py::object& o) {
     NodeUtil::add(self, py::handle(o));
+    return self;
 }
 
 void NodeUtil::add(Node& self, const py::handle& arg) {
@@ -137,13 +138,13 @@ void NodeUtil::add(Node& self, const py::handle& arg) {
     else if (auto found = py_extract<RepeatDate>(arg); found) {
         self.addRepeat(Repeat(found.value()));
     }
+    else if (auto found = py_extract<RepeatDateList>(arg); found) {
+        self.addRepeat(Repeat(found.value()));
+    }
     else if (auto found = py_extract<RepeatDateTime>(arg); found) {
         self.addRepeat(Repeat(found.value()));
     }
     else if (auto found = py_extract<RepeatDateTimeList>(arg); found) {
-        self.addRepeat(Repeat(found.value()));
-    }
-    else if (auto found = py_extract<RepeatDateList>(arg); found) {
         self.addRepeat(Repeat(found.value()));
     }
     else if (auto found = py_extract<RepeatInteger>(arg); found) {

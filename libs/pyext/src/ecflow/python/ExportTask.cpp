@@ -94,6 +94,10 @@ void export_Task(py::module& m) {
 
     py::class_<Submittable, Node, std::shared_ptr<Submittable>>(m, "Submittable", DefsDoc::submittable_doc())
 
+        .def("__init__",
+             [](py::object& /*self*/, const std::string&) {
+                 throw std::runtime_error("Submittable cannot be instantiated directly from Python");
+             })
         .def("get_jobs_password",
              &Submittable::jobsPassword,
              py::return_value_policy::reference,
@@ -111,21 +115,30 @@ void export_Task(py::module& m) {
 
     py::class_<Task, Submittable, std::shared_ptr<Task>>(m, "Task", DefsDoc::task_doc())
 
-        .def(py::init(&Task_init), DefsDoc::task_doc())
+        .def(py::init(&Task_init))
         .def(py::init<const std::string&>(), py::arg("name"))
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__enter__", &Task_enter)
         .def("__exit__", &Task_exit)
         .def("__str__", &Task_str)
         .def("__copy__", pyutil_copy_object<Task>)
         .def("__len__", &Task_len)
-        .def("__iter__", &Task::aliases)
+        .def(
+            "__iter__",
+            [](const Task& t) { return py::make_iterator(t.aliases().begin(), t.aliases().end()); },
+            py::keep_alive<0, 1>())
         .def_property_readonly("aliases", &Task::aliases, "Returns a list of aliases")
         .def_property_readonly("nodes", &Task::aliases, "Returns a list of aliases");
 
     py::class_<Alias, Submittable, std::shared_ptr<Alias>>(m, "Alias", DefsDoc::alias_doc())
 
+        .def("__init__",
+             [](py::object& /*self*/, const std::string&) {
+                 throw std::runtime_error("Alias cannot be instantiated directly from Python");
+             })
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__str__", &Alias_str)
         .def("__copy__", pyutil_copy_object<Alias>);
 }

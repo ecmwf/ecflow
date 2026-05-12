@@ -254,7 +254,7 @@ defs_ptr Defs_add_variable_variable(defs_ptr self, const Variable& var) {
 ///
 defs_ptr Defs_add_variable_dict(defs_ptr self, const py::dict& dict) {
     std::vector<std::pair<std::string, std::string>> vec;
-    pyutil_dict_to_str_vec(dict, vec);
+    py_dict_to_str_vec(dict, vec);
     std::vector<std::pair<std::string, std::string>>::iterator i;
     auto vec_end = vec.end();
     for (i = vec.begin(); i != vec_end; ++i) {
@@ -292,7 +292,7 @@ void Defs_sort_attributes(defs_ptr self, const std::string& attribute_name, bool
         throw std::runtime_error(MESSAGE("sort_attributes: the attribute " << attribute_name << " is not valid"));
     }
     std::vector<std::string> no_sort;
-    pyutil_list_to_str_vec(list, no_sort);
+    py_list_to_str_vec(list, no_sort);
     self->sort_attributes(attr, recursive, no_sort);
 }
 
@@ -480,6 +480,7 @@ void export_Defs(py::module& m) {
         .def(py::init(&Defs_init))
 
         .def(py::self == py::self)
+        .def("__hash__", &py_hash)
         .def("__copy__", pyutil_copy_object<Defs>)
         .def("__str__", Defs_str)
 
