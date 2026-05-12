@@ -16,7 +16,7 @@ jobs:
   build:
     if: ${{ (github.event_name == 'pull_request' && github.event.action != 'closed') || github.event_name == 'push' }}
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     outputs:
       artifact-id: ${{ steps.archivedocs.outputs.artifact-id }}
@@ -28,6 +28,7 @@ jobs:
           sudo apt update
           sudo apt install -y \
             libboost-all-dev \
+            pybind11-dev \
             libssl-dev \
             doxygen \
             graphviz \
