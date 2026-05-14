@@ -107,6 +107,13 @@ set(u_tests
   u_TestDerivable
   u_TestEcf
   u_TestError
+  u_TestExportClient
+  u_TestExportCore
+  u_TestExportDefs
+  u_TestExportNode
+  u_TestExportNodeAttr
+  u_TestExportSuiteAndFamily
+  u_TestExportTask
   u_TestFind
   u_TestFlag
   u_TestGetAllTasks

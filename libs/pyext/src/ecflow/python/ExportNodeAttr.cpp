@@ -514,6 +514,7 @@ void export_NodeAttr() {
              &JobCreationCtrl::set_dir_for_job_creation,
              "Specify directory, for job creation")
         .def("set_verbose", &JobCreationCtrl::set_verbose, "Output each task as its being checked.")
+        .def("is_verbose", &JobCreationCtrl::verbose, "Returns true if verbose mode is on, false otherwise")
         .def("get_dir_for_job_creation",
              &JobCreationCtrl::dir_for_job_creation,
              py::return_value_policy<py::copy_const_reference>(),
