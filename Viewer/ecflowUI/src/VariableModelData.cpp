@@ -293,8 +293,19 @@ bool VariableModelData::isGenVar(int index) const {
     return (index >= static_cast<int>(vars_.size()));
 }
 
-bool VariableModelData::isMirrorVar(int index) const {
-    return info_->isNode() && info_->node()->node()->isMirror();
+bool VariableModelData::isMirrorVar([[maybe_unused]] int index) const {
+    if (!info_ || !info_->isNode()) {
+        return false;
+    }
+    auto vnode = info_->node();
+    if (!vnode) {
+        return false;
+    }
+    auto node = vnode->node();
+    if (!node) {
+        return false;
+    }
+    return node->isMirror();
 }
 
 bool VariableModelData::isGenVar(const std::string& n) const {
