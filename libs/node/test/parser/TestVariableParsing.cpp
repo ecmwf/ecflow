@@ -395,27 +395,39 @@ BOOST_AUTO_TEST_CASE(test_parsing_variable_with_alias_format) {
     std::vector<Expected> expectations = {
         {"a:\"x\"", "'a'"},
         {"b:x", "b"},
-        {"c:0", "0"},
+        {"c:0", "0 1 2"},
         {"d:1", "1"},
-        {"e:", "1"},
-        {"f:", "1"},
+        {"e:", "1 2"},
+        {"f:", "1 2 3 "},
+        {"g:x y z", "a b#c"},
+        {"h:x -y", "a -# b"},
+        {"i:-x y", "+a -b"},
+        {"variable:some  default  value", "some actual value"},
+        {"resolve:${resolve / }", "${resolve / } "},
+        {"empty:default", ""},
     };
 
     auto content = R"--(
-suite x
-  family f
-    task t
-      alias alias1
-        edit a:"x" ''a'' # some " comment
-        edit b:x "b" # some ' comment
-        edit c:0 0 # some ' comment
-        edit d:1 '1'
-        edit e: '1'
-        edit f: '1'
-      endalias
-  endfamily
-endsuite
-)--";
+    suite x
+      family f
+        task t
+          alias alias1
+            edit a:"x" ''a'' # some " comment
+            edit b:x 'b' # some comment
+            edit c:0 '0 1 2' # some comment
+            edit d:1 '1'
+            edit e: '1 2'
+            edit f: '1 2 3 '
+            edit g:x y z 'a b#c' # some comment
+            edit h:x -y 'a -# b' #
+            edit i:-x y '+a -b'
+            edit variable:some  default  value 'some actual value' # some valid comment
+            edit resolve:${resolve / } '${resolve / } ' # some valid comment
+            edit empty:default ''
+          endalias
+      endfamily
+    endsuite
+    )--";
 
     auto defs = Defs{};
     defs.restore_from_string(content);
@@ -754,6 +766,58 @@ endsuite
     catch (std::exception& e) {
         std::string_view msg = e.what();
         BOOST_CHECK_MESSAGE(msg.find("Mismatched quote detected (only one quote found) in line") != std::string::npos,
+                            "Parsing failed as expected with error: " << msg);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_parsing_alias_unquoted_variable_with_incorrect_format_due_to_invalid_comment_start_marker) {
+    ECF_NAME_THIS_TEST();
+
+    auto content = R"--(
+suite x
+  family f
+    task t
+      alias alias1
+        edit a:default value invalid comment as it does not start with a # marker
+      endalias
+  endfamily
+endsuite
+)--";
+
+    auto defs = Defs{};
+    try {
+        defs.restore_from_string(content);
+        BOOST_CHECK_MESSAGE(false, "Expected parsing to fail due to incorrect variable format, but it succeeded");
+    }
+    catch (std::exception& e) {
+        std::string_view msg = e.what();
+        BOOST_CHECK_MESSAGE(msg.find("Invalid comment at line") != std::string::npos,
+                            "Parsing failed as expected with error: " << msg);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_parsing_alias_quoted_variable_with_incorrect_format_due_to_invalid_comment_start_marker) {
+    ECF_NAME_THIS_TEST();
+
+    auto content = R"--(
+suite x
+  family f
+    task t
+      alias alias1
+        edit a:some default value 'some actual value' invalid comment as it does not start with a # marker
+      endalias
+  endfamily
+endsuite
+)--";
+
+    auto defs = Defs{};
+    try {
+        defs.restore_from_string(content);
+        BOOST_CHECK_MESSAGE(false, "Expected parsing to fail due to incorrect variable format, but it succeeded");
+    }
+    catch (std::exception& e) {
+        std::string_view msg = e.what();
+        BOOST_CHECK_MESSAGE(msg.find("Invalid comment at line") != std::string::npos,
                             "Parsing failed as expected with error: " << msg);
     }
 }
