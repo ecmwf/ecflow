@@ -116,7 +116,19 @@ void DirectoryHandler::init(const std::string& exeStr) {
     // will use  the value of the ECFLOW_SHARED_DIR macro to get
     // the location of the "share/ecflow" dir.
     if (!fs::exists(exePath)) {
-        fs::path shareDir(ECFLOW_SHARED_DIR);
+        fs::path shareDir;
+        if (auto* var = getenv("ECFLOW_SHARED_DIR"); var) {
+            shareDir = var;
+            UiLog().warn() << "Executable path does not exist. Used ECFLOW_SHARED_DIR env variable to find share dir: "
+                           << shareDir.c_str();
+        }
+        else {
+            shareDir = ECFLOW_SHARED_DIR;
+            UiLog().warn()
+                << "Executable path does not exist. Used default ECFLOW_SHARED_DIR location to find share dir: "
+                << shareDir.c_str();
+        }
+
         if (!fs::exists(shareDir)) {
             UserMessage::message(
                 UserMessage::ERROR,

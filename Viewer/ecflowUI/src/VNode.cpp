@@ -721,11 +721,13 @@ QColor VNode::typeFontColour() const {
 }
 
 bool VNode::userLogServer(std::string& host, std::string& port) {
-    if (ServerHandler* sh = server()) {
-        host = sh->conf()->stringValue(VServerSettings::UserLogServerHost).toStdString();
-        if (!host.empty()) {
-            port = sh->conf()->stringValue(VServerSettings::UserLogServerPort).toStdString();
-            return !port.empty();
+    if (auto* sh = server(); sh) {
+        if (auto* conf = sh->conf(); conf) {
+            host = conf->stringValue(VServerSettings::UserLogServerHost).toStdString();
+            if (!host.empty()) {
+                port = conf->stringValue(VServerSettings::UserLogServerPort).toStdString();
+                return !port.empty();
+            }
         }
     }
     return false;
@@ -1199,7 +1201,10 @@ void VServer::clear() {
 
     attrForSearch_.clear();
 
-    bool hasNotifications = server_->conf()->notificationsEnabled();
+    bool hasNotifications = false;
+    if (auto* conf = server_->conf(); conf) {
+        hasNotifications = conf->notificationsEnabled();
+    }
 
     // Delete the children nodes. It will recursively delete all the nodes. It also saves the prevNodeState!!
     for (auto it = children_.begin(); it != children_.end(); ++it) {
@@ -1383,7 +1388,10 @@ void VServer::endScan() {
             return;
         }
 
-        bool hasNotifications = server_->conf()->notificationsEnabled();
+        bool hasNotifications = false;
+        if (auto* conf = server_->conf(); conf) {
+            hasNotifications = conf->notificationsEnabled();
+        }
 
         // Scan the suits.This will recursively scan all nodes in the tree.
         for (const auto& suite : defs->suites()) {
@@ -1471,15 +1479,15 @@ void VServer::beginUpdate(VNode* node, const std::vector<ecf::Aspect::Type>& asp
     // update.
 
     // Update the generated variables. There is no notification about their change so we have to do it!!!
-    if (node->node()) {
+    if (auto n = node->node(); n) {
         Suite* s = nullptr;
-        s        = node->node()->isSuite();
+        s        = n->isSuite();
         if (!s) {
-            s = node->node()->suite();
+            s = n->suite();
         }
 
         if (s && s->begun()) {
-            node->node()->update_generated_variables();
+            n->update_generated_variables();
             s->update_generated_variables();
         }
 
@@ -1726,8 +1734,12 @@ QString VServer::toolTip() {
         }
     }
 
-    auto userLogHost = server_->conf()->stringValue(VServerSettings::UserLogServerHost);
-    auto userLogPort = server_->conf()->stringValue(VServerSettings::UserLogServerPort);
+    QString userLogHost;
+    QString userLogPort;
+    if (auto* conf = server_->conf(); conf) {
+        userLogHost = conf->stringValue(VServerSettings::UserLogServerHost);
+        userLogPort = conf->stringValue(VServerSettings::UserLogServerPort);
+    }
     if (!userLogHost.isEmpty() && !userLogPort.isEmpty()) {
         txt += "<br><b>Custom logserver</b>: " + userLogHost + "@" + userLogPort;
     }

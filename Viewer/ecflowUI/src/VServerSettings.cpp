@@ -106,32 +106,40 @@ VServerSettings::~VServerSettings() {
 }
 
 int VServerSettings::intValue(Param par) const {
-    return property(par)->value().toInt();
+    if (auto* p = property(par); p) {
+        return p->value().toInt();
+    }
+
+    return 0;
 }
 
 bool VServerSettings::boolValue(Param par) const {
-    return property(par)->value().toBool();
+    if (auto* p = property(par); p) {
+        return p->value().toBool();
+    }
+
+    return false;
 }
 
 QString VServerSettings::stringValue(Param par) const {
-    return property(par)->value().toString();
+    if (auto* p = property(par); p) {
+        return p->value().toString();
+    }
+
+    return {};
 }
 
 VProperty* VServerSettings::property(Param par) const {
-    auto it = parToProp_.find(par);
-    if (it != parToProp_.end()) {
+    if (auto it = parToProp_.find(par); it != parToProp_.end()) {
         return it->second;
     }
-    else {
-        assert(0);
-    }
 
+    UiLog().err() << "VServerSettings::property - unknown parameter: " << par;
     return nullptr;
 }
 
 void VServerSettings::notifyChange(VProperty* p) {
-    auto it = propToPar_.find(p);
-    if (it != propToPar_.end()) {
+    if (auto it = propToPar_.find(p); it != propToPar_.end()) {
         server_->confChanged(it->second, it->first);
     }
     else {
@@ -140,10 +148,10 @@ void VServerSettings::notifyChange(VProperty* p) {
 }
 
 std::string VServerSettings::notificationId(Param par) {
-    auto it = notifyIds_.find(par);
-    if (it != notifyIds_.end()) {
+    if (auto it = notifyIds_.find(par); it != notifyIds_.end()) {
         return it->second;
     }
+
     return {};
 }
 
@@ -163,6 +171,7 @@ bool VServerSettings::notificationsEnabled() const {
             return true;
         }
     }
+
     return false;
 }
 

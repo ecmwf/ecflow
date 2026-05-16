@@ -140,9 +140,13 @@ void ServerHandler::logoutAndDelete() {
     }
 
     delete vRoot_;
+    vRoot_ = nullptr;
     delete connectState_;
+    connectState_ = nullptr;
     delete suiteFilter_;
+    suiteFilter_ = nullptr;
     delete conf_;
+    conf_ = nullptr;
 
     if (queueLoggedOut) {
         deleteLater();
