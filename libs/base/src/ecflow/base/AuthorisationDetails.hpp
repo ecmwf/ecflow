@@ -75,23 +75,50 @@ std::vector<std::string> get_affected_paths(const COMMAND& command) {
     return paths;
 }
 
+// NOLINTBEGIN(bugprone-macro-parentheses)
+#define LOG_LEVEL(LEVEL, WHERE, MESSAGE)                                      \
+{                                                                         \
+using namespace ecf;                                                  \
+std::cout << LEVEL << " (" << WHERE << "): " << MESSAGE << std::endl; \
+}
+// NOLINTEND(bugprone-macro-parentheses)
+
+#define LOG_ERROR(WHERE, MESSAGE) LOG_LEVEL("ERR", WHERE, MESSAGE)
+#define LOG_DEBUG(WHERE, MESSAGE) LOG_LEVEL("DBG", WHERE, MESSAGE)
+
 template <typename COMMAND>
 authorisation_t allows_as_per_read_write_rules(const COMMAND& command, AbstractServer& server) {
     static_assert(std::is_base_of_v<TaskCmd, COMMAND> || std::is_base_of_v<UserCmd, COMMAND>,
                   "The command must be either a TaskCmd or a UserCmd");
 
+    auto print_cmd = [](const auto& c) {
+        std::string os;
+        c.print(os);
+        return os;
+    };
+    LOG_DEBUG("allows_as_per_read_write_rules", "authorizing " << print_cmd(command));
+
     if constexpr (std::is_base_of_v<TaskCmd, COMMAND>) {
         // No actual verification is done for task commands
+        LOG_DEBUG("allows_as_per_read_write_rules", "authorizing task command: " << print_cmd(command));
         return authorisation_t::success("Authorisation (task) granted");
     }
 
+    LOG_DEBUG("allows_as_per_read_write_rules", "authorizing user command: " << print_cmd(command));
+
     std::vector<std::string> paths = get_affected_paths(command);
+
+    for (const auto& path : paths) {
+        LOG_DEBUG("allows_as_per_read_write_rules", "affected path: " << path);
+    }
 
     auto required = Authoriser<COMMAND>::required(command);
     ServiceAuthorisationContext ctx{command.identity(), *server.defs(), server.authorisation()};
     if (ctx.allows(paths, required)) {
         return authorisation_t::success("Authorisation (user) granted");
     }
+
+    LOG_DEBUG("allows_as_per_read_write_rules", "Authorisation (user) failed, due to: Insufficient permissions");
 
     return authorisation_t::failure("Authorisation (user) failed, due to: Insufficient permissions");
 }

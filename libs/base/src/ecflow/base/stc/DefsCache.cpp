@@ -32,10 +32,12 @@ unsigned int DefsCache::modify_change_no_          = 0;
 ecf::Identity DefsCache::identity_                 = ecf::Identity::make_none();
 
 void DefsCache::update_cache_if_state_changed(Defs* defs, const ecf::AuthorisationContext& authorisation) {
-    if (state_change_no_ != Ecf::state_change_no() || modify_change_no_ != Ecf::modify_change_no() ||
-        full_server_defs_as_string_.empty()) {
+    // if (state_change_no_ != Ecf::state_change_no() || modify_change_no_ != Ecf::modify_change_no() ||
+    //     full_server_defs_as_string_.empty()) {
+    // TODO: Need to change the cache if the authorisation context has changed, since the cached defs string is for a specific authorisation context
+    // TODO: Maybe a cache entry should be kept per authorisation context?
         update_cache(defs, authorisation);
-    }
+    // }
 }
 
 void DefsCache::update_cache(Defs* defs, const ecf::AuthorisationContext& authorisation) {
