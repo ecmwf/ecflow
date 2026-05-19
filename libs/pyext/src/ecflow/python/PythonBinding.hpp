@@ -11,11 +11,11 @@
 #ifndef ecflow_python_PythonBinding_HPP
 #define ecflow_python_PythonBinding_HPP
 
-#include <boost/python.hpp>
-#include <boost/python/docstring_options.hpp>
-#include <boost/python/raw_function.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <pybind11/iostream.h>
+#include <pybind11/operators.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-namespace py = boost::python;
+namespace py = pybind11;
 
 #endif /* ecflow_python_PythonBinding_HPP */

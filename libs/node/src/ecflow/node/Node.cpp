@@ -2850,56 +2850,8 @@ const std::vector<GenericAttr>& Node::generics() const {
     return generics_;
 }
 
-std::vector<ZombieAttr>::const_iterator Node::zombie_begin() const {
-    if (misc_attrs_) {
-        return misc_attrs_->zombie_begin();
-    }
-    return zombies_.begin();
-}
-std::vector<ZombieAttr>::const_iterator Node::zombie_end() const {
-    if (misc_attrs_) {
-        return misc_attrs_->zombie_end();
-    }
-    return zombies_.end();
-}
-std::vector<VerifyAttr>::const_iterator Node::verify_begin() const {
-    if (misc_attrs_) {
-        return misc_attrs_->verify_begin();
-    }
-    return verifys_.begin();
-}
-std::vector<VerifyAttr>::const_iterator Node::verify_end() const {
-    if (misc_attrs_) {
-        return misc_attrs_->verify_end();
-    }
-    return verifys_.end();
-}
-std::vector<QueueAttr>::const_iterator Node::queue_begin() const {
-    if (misc_attrs_) {
-        return misc_attrs_->queue_begin();
-    }
-    return queues_.begin();
-}
-std::vector<QueueAttr>::const_iterator Node::queue_end() const {
-    if (misc_attrs_) {
-        return misc_attrs_->queue_end();
-    }
-    return queues_.end();
-}
-std::vector<GenericAttr>::const_iterator Node::generic_begin() const {
-    if (misc_attrs_) {
-        return misc_attrs_->generic_begin();
-    }
-    return generics_.begin();
-}
-std::vector<GenericAttr>::const_iterator Node::generic_end() const {
-    if (misc_attrs_) {
-        return misc_attrs_->generic_end();
-    }
-    return generics_.end();
-}
-
 namespace ecf {
+
 std::vector<Variable> inherited_variables(const Node& node) {
     std::vector<Variable> all;
     const Node* current = &node;

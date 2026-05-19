@@ -139,11 +139,6 @@ private:
     friend class Family;
     bool doDeleteChild(Node* child) override;
 
-    /// For use by python interface,
-    std::vector<node_ptr>::const_iterator node_begin() const { return nodes_.begin(); }
-    std::vector<node_ptr>::const_iterator node_end() const { return nodes_.end(); }
-    friend void export_SuiteAndFamily();
-
 protected:
     void force_sync() override;
     void incremental_changes(DefsDelta& changes, compound_memento_ptr& comp) const;
