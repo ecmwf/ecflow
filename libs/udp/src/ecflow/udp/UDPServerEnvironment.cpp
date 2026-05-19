@@ -40,7 +40,7 @@ UDPServerEnvironment::UDPServerEnvironment()
 std::string UDPServerEnvironment::as_configuration_file() const {
     std::ostringstream ss;
     for (const auto& entry : environment_) {
-        if (auto found = options_map.find(entry.first); found != std::end(options_map)) {
+        if (auto found = options_map.find(entry.first); found != std::end(options_map) && !std::empty(entry.second)) {
             ss << found->second << "=" << entry.second << std::endl;
         }
     }

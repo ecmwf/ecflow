@@ -38,11 +38,7 @@ static void run_server(uint16_t port) {
     server.run();
 }
 
-static int launch_server(const ecf::UDPServerOptions& options) {
-    bool verbose = options.has_verbose();
-    TRACE_VERBOSE(verbose)
-
-    auto port = options.get_option<size_t>(ecf::UDPServerOptions::OPTION_PORT);
+static int launch_server(size_t port) {
     TRACE_NFO("UDPServerMain", "starting server on port ", port)
 
     try {
@@ -75,39 +71,60 @@ int main(int argc, char* argv[]) try {
         return EXIT_SUCCESS;
     }
 
+    auto verbose = options.has_verbose();
+    TRACE_VERBOSE(verbose)
+
     {
         // Ensure the Client uses the ecFlow host+port
         auto ecflow_host = options.get_optional_option<std::string>(ecf::UDPServerOptions::OPTION_ECFLOW_HOST);
-        auto ecflow_port = options.get_optional_option<size_t>(ecf::UDPServerOptions::OPTION_ECFLOW_PORT);
         if (ecflow_host) {
+            TRACE_NFO("UDPServerMain", "using custom ecflow host: ", ecflow_host.value());
             setenv(ecf::environment::ECF_HOST, ecflow_host.value().c_str(), 1);
         }
+        else {
+            TRACE_NFO("UDPServerMain", "using default ecflow host: localhost");
+        }
+
+        auto ecflow_port = options.get_optional_option<size_t>(ecf::UDPServerOptions::OPTION_ECFLOW_PORT);
         if (ecflow_port) {
+            TRACE_NFO("UDPServerMain", "using custom ecflow port: ", ecflow_port.value());
             setenv(ecf::environment::ECF_PORT, std::to_string(ecflow_port.value()).c_str(), 1);
         }
+        else {
+            TRACE_NFO("UDPServerMain", "using default ecflow port: 3141");
+        }
+
         auto ecflow_http = options.has_http();
         if (ecflow_http) {
+            TRACE_NFO("UDPServerMain", "using protocol HTTP to communicate with ecFlow");
             const auto selected = std::string{ecf::Enumerate<ecf::Protocol>::as_string(ecf::Protocol::Http)};
             setenv(ecf::environment::ECF_HOST_PROTOCOL, selected.c_str(), 1);
         }
+        else {
+            TRACE_NFO("UDPServerMain", "using protocol TCP to communicate with ecFlow");
+        }
+
         // Avoid that the Client automatically uses environment passwords
         unsetenv(ecf::environment::ECF_PASSWD);
         unsetenv(ecf::environment::ECF_CUSTOM_PASSWD);
 
-        launch_server(options);
+        auto port = options.get_option<size_t>(ecf::UDPServerOptions::OPTION_PORT);
+        TRACE_NFO("UDPServerMain", "using UDP port: ", port);
+
+        launch_server(port);
     }
 
     return EXIT_SUCCESS;
 }
 catch (ecf::InvalidCLIOption& e) {
-    std::cout << "Error: Invalid CLI option detected: " << e.what() << std::endl;
+    TRACE_FATAL("UDPServerMain", "Invalid CLI option detected: ", e.what());
     return EXIT_FAILURE;
 }
 catch (std::exception& e) {
-    std::cout << "Error: Unexpected problem detected: " << e.what() << std::endl;
+    TRACE_FATAL("UDPServerMain", "Unexpected problem detected: ", e.what());
     return EXIT_FAILURE;
 }
 catch (...) {
-    std::cout << "Error: Unknown problem detected. Cowardly giving up!..." << std::endl;
+    TRACE_FATAL("UDPServerMain", "Unknown problem detected. Cowardly giving up!...");
     return EXIT_FAILURE;
 }

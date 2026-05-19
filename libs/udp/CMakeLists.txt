@@ -74,6 +74,7 @@ list(APPEND ${TEST_TARGET}_srcs
   # SOURCES
   test/TestUDP_main.cpp
   test/TestUDPServer.cpp
+  test/TestUDPServerLaunch.cpp
 )
 
 ecbuild_add_test(
