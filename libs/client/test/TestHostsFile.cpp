@@ -137,6 +137,8 @@ host1:invalid
 BOOST_AUTO_TEST_CASE(test_can_parse_from_file) {
     ECF_NAME_THIS_TEST();
 
+    using namespace ecf::test::scaffold;
+
     auto content = fs::path{"test_hostsfile.txt"};
     WithTestFile hostsfile(NamedTestFile{content.c_str()}, R"(
 
@@ -168,6 +170,8 @@ longnamehost5
 
 BOOST_AUTO_TEST_CASE(test_can_parse_from_file_with_comments) {
     ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
 
     auto content = fs::path{"test_hostsfile.txt"};
     WithTestFile hostsfile(NamedTestFile{content.c_str()}, R"(

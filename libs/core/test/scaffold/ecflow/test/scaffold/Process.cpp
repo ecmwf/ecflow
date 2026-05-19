@@ -16,7 +16,6 @@
 #include <boost/version.hpp>
 
 #include "Naming.hpp"
-#include "ecflow/core/Environment.hpp"
 
 #if BOOST_VERSION < 106600
 
@@ -44,7 +43,7 @@ namespace bp = boost::process;
 
 #endif
 
-namespace foolproof::scaffold {
+namespace ecf::test::scaffold {
 
 #if BOOST_PROCESS_VERSION == 1
 
@@ -204,4 +203,4 @@ std::string Process::read_stderr() const {
     return impl_->read_stderr();
 }
 
-} // namespace foolproof::scaffold
+} // namespace ecf::test::scaffold

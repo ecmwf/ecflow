@@ -146,6 +146,8 @@ BOOST_AUTO_TEST_CASE(test_client_environment_empty_host_file) {
 BOOST_AUTO_TEST_CASE(test_client_environment_host_file_policy) {
     ECF_NAME_THIS_TEST();
 
+    using namespace ecf::test::scaffold;
+
     {
         // When no host file policy is specified...
 

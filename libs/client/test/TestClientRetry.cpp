@@ -44,6 +44,8 @@ BOOST_AUTO_TEST_CASE(test_client_does_not_retry_user_command_by_default) {
 BOOST_AUTO_TEST_CASE(test_client_does_not_retry_when_denied_is_set) {
     ECF_NAME_THIS_TEST();
 
+    using namespace ecf::test::scaffold;
+
     WithTestEnvironmentVariable env_var(ecf::environment::ECF_DENIED, "true");
     ClientInvoker client;
     BOOST_CHECK(client.is_not_retrying(ping));
@@ -70,6 +72,8 @@ BOOST_AUTO_TEST_CASE(test_client_retries_task_command_by_default) {
 
 BOOST_AUTO_TEST_CASE(test_client_follows_host_file_policy) {
     ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
 
     {
         WithTestEnvironmentVariable env_var(ecf::environment::ECF_HOSTFILE_POLICY, "task");

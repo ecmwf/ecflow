@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "scaffold/Naming.hpp"
-#include "scaffold/Provisioning.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_disallows_loading_mirror_to_own_server) {
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 

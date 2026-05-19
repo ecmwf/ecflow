@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "scaffold/Naming.hpp"
-#include "scaffold/Provisioning.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_update_label_with_authentication_based_on_passwd_f
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_update_label_with_authorisation_based_on_whitelist
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_reload_whitelist) {
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -464,7 +464,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_reload_whitelist_created_after_server_is_launched)
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -596,7 +596,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_using_just_defaults) {
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -659,7 +659,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_default_
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -723,7 +723,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_default_val
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -792,7 +792,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_specific
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -856,7 +856,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_va
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -925,7 +925,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_va
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 

@@ -12,17 +12,26 @@
 ## Notice: test_scaffold is an INTERFACE-only test utility library.
 ##
 
+if(${SELECTED_BOOST_VERSION} VERSION_GREATER_EQUAL 1.86.0)
+  set(ADDITIONAL_BOOST_COMPONENTS Boost::process)
+endif()
+
 ecbuild_add_library(
   TARGET
     test_scaffold
   NOINSTALL
-  TYPE INTERFACE
+  TYPE STATIC
   SOURCES
     test/scaffold/ecflow/test/scaffold/Naming.hpp
+    test/scaffold/ecflow/test/scaffold/Process.hpp
     test/scaffold/ecflow/test/scaffold/Provisioning.hpp
     test/scaffold/ecflow/test/scaffold/Serialisation.hpp
+    test/scaffold/ecflow/test/scaffold/Process.cpp
   PUBLIC_INCLUDES
     test/scaffold
+  PUBLIC_LIBS
+    Boost::boost
+    ${ADDITIONAL_BOOST_COMPONENTS}
 )
 target_clangformat(test_scaffold)
 

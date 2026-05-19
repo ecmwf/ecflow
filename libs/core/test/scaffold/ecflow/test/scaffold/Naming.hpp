@@ -18,7 +18,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-namespace ecf::test {
+namespace ecf::test::scaffold {
 
 inline std::string name_this_test() {
     std::string fullname = boost::unit_test::framework::current_test_case().p_name;
@@ -33,12 +33,12 @@ inline std::string name_this_test() {
     return fullname;
 }
 
-} // namespace ecf::test
+} // namespace ecf::test::scaffold
 
 // NOLINTBEGIN(bugprone-macro-parentheses)
-#define ECF_NAME_THIS_TEST(ARGS)                                             \
-    do {                                                                     \
-        std::cout << " * " << ecf::test::name_this_test() ARGS << std::endl; \
+#define ECF_NAME_THIS_TEST(ARGS)                                                       \
+    do {                                                                               \
+        std::cout << " * " << ecf::test::scaffold::name_this_test() ARGS << std::endl; \
     } while (0)
 
 #define ECF_TEST_DBG(ARGS)                         \

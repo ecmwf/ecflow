@@ -16,7 +16,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Process.hpp"
 #include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
@@ -27,6 +26,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Process.hpp"
 #include "ecflow/udp/UDPClient.hpp"
 
 namespace ecf::test {
@@ -67,7 +67,7 @@ private:
     hostname_t host_;
     uint16_t port_;
 
-    Process server_;
+    ecf::test::scaffold::Process server_;
 };
 
 /**
@@ -147,7 +147,7 @@ private:
 public:
     static constexpr const char* designation = "ecFlow server";
 
-    static Process launch(const hostname_t& host, port_t port) {
+    static ecf::test::scaffold::Process launch(const hostname_t& host, port_t port) {
         // Just for precaution, in case a previous run didn't clean up...
         cleanup(host, port);
 
@@ -158,7 +158,7 @@ public:
 
         ECF_TEST_DBG("Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command);
 
-        auto server = Process(invoke_command, {"--port", std::to_string(port), "-d"});
+        auto server = ecf::test::scaffold::Process(invoke_command, {"--port", std::to_string(port), "-d"});
 
         ClientInvoker client(ecf::string_constants::localhost, port);
         if (!client.wait_for_server_reply(5)) {
@@ -250,15 +250,15 @@ private:
 public:
     static constexpr const char* designation = "ecFlow UDP";
 
-    static Process launch(const hostname_t& host, port_t port, port_t ecflow_port) {
+    static ecf::test::scaffold::Process launch(const hostname_t& host, port_t port, port_t ecflow_port) {
 
         std::string invoke_command = ecf::File::root_build_dir() + "/bin/ecflow_udp";
 
         ECF_TEST_DBG("   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command);
 
-        auto server =
-            Process(invoke_command,
-                    {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"});
+        auto server = ecf::test::scaffold::Process(
+            invoke_command,
+            {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"});
 
         // Wait for server to start...
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));

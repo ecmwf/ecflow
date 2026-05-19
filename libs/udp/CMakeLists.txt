@@ -70,10 +70,8 @@ set(TEST_TARGET s_udp)
 
 list(APPEND ${TEST_TARGET}_srcs
   # HEADERS
-  test/Process.hpp
   test/TestSupport.hpp
   # SOURCES
-  test/Process.cpp
   test/TestUDP_main.cpp
   test/TestUDPServer.cpp
 )

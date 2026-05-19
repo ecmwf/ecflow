@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "scaffold/Naming.hpp"
-#include "scaffold/Provisioning.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_SUITE(T_Basic)
 BOOST_AUTO_TEST_CASE(test_client_help) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     using command_t = RunClient::CommandHelp;
 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_client_help) {
 BOOST_AUTO_TEST_CASE(test_client_version) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     using command_t = RunClient::CommandVersion;
 
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_client_version) {
 BOOST_AUTO_TEST_CASE(test_e2e_ping) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_ping) {
 BOOST_AUTO_TEST_CASE(test_e2e_load) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
