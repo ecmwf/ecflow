@@ -59,17 +59,17 @@ inline Certificate::Certificate(const std::string& path)
 
 inline Certificate::~Certificate() {
     if (remove((path_ + "/server.crt").c_str()) != 0) {
-        ECF_TEST_ERR(<< "Failed to remove file server.crt");
+        ECF_TEST_ERR("Failed to remove file server.crt");
     }
     else {
-        ECF_TEST_ERR(<< "Removed file " << (path_ + "/server.crt"));
+        ECF_TEST_ERR("Removed file " << (path_ + "/server.crt"));
     }
 
     if (remove((path_ + "/server.key").c_str()) != 0) {
-        ECF_TEST_ERR(<< "Failed to remove file server.key");
+        ECF_TEST_ERR("Failed to remove file server.key");
     }
     else {
-        ECF_TEST_ERR(<< "Removed file " << (path_ + "/server.key"));
+        ECF_TEST_ERR("Removed file " << (path_ + "/server.key"));
     }
 }
 

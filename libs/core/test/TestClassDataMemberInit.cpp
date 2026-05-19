@@ -35,7 +35,7 @@ public:
     MyType(const MyType& other)
         : mName(other.mName) {
 #ifdef DEBUG_ME
-        ECF_TEST_DBG(<< "MyType::MyType(const MyType&) " << mName << " my_int:" << my_int_);
+        ECF_TEST_DBG("MyType::MyType(const MyType&) " << mName << " my_int:" << my_int_);
 #endif
     }
 

@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_NodePath_perf, *boost::unit_test::disabled()) {
         ecf::node::split_path("/this/is/a/test/string/that/will/be/used/to/check/perf/of/node/path/extraction",
                               thePath);
     }
-    ECF_TEST_DBG(<< "Timing for " << n << " NodePath is  " << timer);
+    ECF_TEST_DBG("Timing for " << n << " NodePath is  " << timer);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

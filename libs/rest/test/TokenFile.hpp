@@ -118,7 +118,7 @@ inline TokenFile::TokenFile(const std::string& tokenfile, const std::vector<Bear
 
 inline TokenFile::~TokenFile() {
     if (remove(tokenfile_.c_str()) != 0) {
-        ECF_TEST_ERR(<< "Failed to remove token file " << tokenfile_);
+        ECF_TEST_ERR("Failed to remove token file " << tokenfile_);
     }
     else {
         BOOST_TEST_MESSAGE("Removed token file " << tokenfile_);

@@ -41,14 +41,14 @@ inline std::string name_this_test() {
         std::cout << " * " << ecf::test::name_this_test() ARGS << std::endl; \
     } while (0)
 
-#define ECF_TEST_DBG(ARGS)                      \
-    do {                                        \
-        std::cout << " +++ " ARGS << std::endl; \
+#define ECF_TEST_DBG(ARGS)                         \
+    do {                                           \
+        std::cout << " +++ " << ARGS << std::endl; \
     } while (0)
 
-#define ECF_TEST_ERR(ARGS)                      \
-    do {                                        \
-        std::cerr << " +++ " ARGS << std::endl; \
+#define ECF_TEST_ERR(ARGS)                         \
+    do {                                           \
+        std::cerr << " +++ " << ARGS << std::endl; \
     } while (0)
 // NOLINTEND(bugprone-macro-parentheses)
 

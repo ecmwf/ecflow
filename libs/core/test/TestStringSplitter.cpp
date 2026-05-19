@@ -36,14 +36,14 @@ check(const std::string& line, const StringSplitter& string_splitter, const std:
                                          << "'");
     BOOST_CHECK_MESSAGE(result == expected, "failed for '" << line << "'");
     if (result != expected) {
-        ECF_TEST_DBG(<< "Line    :'" << line);
-        ECF_TEST_DBG(<< "Actual  :");
+        ECF_TEST_DBG("Line    :'" << line);
+        ECF_TEST_DBG("Actual  :");
         for (const std::string& t : result) {
-            ECF_TEST_DBG(<< "   '" << t << "'");
+            ECF_TEST_DBG("   '" << t << "'");
         }
-        ECF_TEST_DBG(<< "Expected:");
+        ECF_TEST_DBG("Expected:");
         for (const std::string& t : expected) {
-            ECF_TEST_DBG(<< "'" << t << "'");
+            ECF_TEST_DBG("'" << t << "'");
         }
     }
 }
@@ -61,14 +61,14 @@ static void check(const std::string& line, const std::vector<std::string>& expec
                                          << "'");
     BOOST_CHECK_MESSAGE(result == expected, "failed for '" << line << "'");
     if (result != expected) {
-        ECF_TEST_DBG(<< "Line    :'" << line);
-        ECF_TEST_DBG(<< "Actual  :");
+        ECF_TEST_DBG("Line    :'" << line);
+        ECF_TEST_DBG("Actual  :");
         for (const std::string& t : result) {
-            ECF_TEST_DBG(<< "   '" << t << "'");
+            ECF_TEST_DBG("   '" << t << "'");
         }
-        ECF_TEST_DBG(<< "Expected:");
+        ECF_TEST_DBG("Expected:");
         for (const std::string& t : expected) {
-            ECF_TEST_DBG(<< "'" << t << "'");
+            ECF_TEST_DBG("'" << t << "'");
         }
     }
 }

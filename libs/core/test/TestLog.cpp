@@ -22,15 +22,15 @@
 using namespace ecf;
 
 void dump_path(const fs::path& path) {
-    ECF_TEST_DBG(<< "path = " << path);
-    ECF_TEST_DBG(<< "path.root_path(): " << path.root_path());
-    ECF_TEST_DBG(<< "path.root_name() : " << path.root_name());
-    ECF_TEST_DBG(<< "path.root_directory()  : " << path.root_directory());
-    ECF_TEST_DBG(<< "path.relative_path()  : " << path.relative_path());
-    ECF_TEST_DBG(<< "path.parent_path()  : " << path.parent_path());
-    ECF_TEST_DBG(<< "path.filename()  : " << path.filename());
-    ECF_TEST_DBG(<< "path.stem()  : " << path.stem());
-    ECF_TEST_DBG(<< "path.extension()  : " << path.extension());
+    ECF_TEST_DBG("path = " << path);
+    ECF_TEST_DBG("path.root_path(): " << path.root_path());
+    ECF_TEST_DBG("path.root_name() : " << path.root_name());
+    ECF_TEST_DBG("path.root_directory()  : " << path.root_directory());
+    ECF_TEST_DBG("path.relative_path()  : " << path.relative_path());
+    ECF_TEST_DBG("path.parent_path()  : " << path.parent_path());
+    ECF_TEST_DBG("path.filename()  : " << path.filename());
+    ECF_TEST_DBG("path.stem()  : " << path.stem());
+    ECF_TEST_DBG("path.extension()  : " << path.extension());
 }
 
 BOOST_AUTO_TEST_SUITE(U_Core)

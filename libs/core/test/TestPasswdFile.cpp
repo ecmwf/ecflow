@@ -32,7 +32,7 @@ void test_passwd_files(const std::string& directory, bool pass) {
     BOOST_CHECK(fs::is_directory(full_path));
 
 #if DEBUG_ME
-    ECF_TEST_DBG(<< "...In directory: " << full_path.relative_path());
+    ECF_TEST_DBG("...In directory: " << full_path.relative_path());
 #endif
 
     fs::directory_iterator end_iter;
@@ -46,7 +46,7 @@ void test_passwd_files(const std::string& directory, bool pass) {
                 continue;
             }
 #if DEBUG_ME
-            ECF_TEST_DBG(<< "......Parsing file " << relPath.string());
+            ECF_TEST_DBG("......Parsing file " << relPath.string());
 #endif
             PasswdFile theFile;
             std::string errorMsg;
@@ -65,12 +65,12 @@ void test_passwd_files(const std::string& directory, bool pass) {
                                                                   << errorMsg << "\n"
                                                                   << theFile.dump());
 #if DEBUG_ME
-                ECF_TEST_DBG(<< errorMsg);
+                ECF_TEST_DBG(errorMsg);
 #endif
             }
         }
         catch (const std::exception& ex) {
-            ECF_TEST_DBG(<< dir_itr->path().filename() << " " << ex.what());
+            ECF_TEST_DBG(dir_itr->path().filename() << " " << ex.what());
         }
     }
 }

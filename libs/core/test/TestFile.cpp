@@ -157,8 +157,8 @@ BOOST_AUTO_TEST_CASE(test_file_tokenizer) {
             BOOST_CHECK_MESSAGE(File::splitFileIntoLines(path, lines),
                                 " Failed to open file " << path << " (" << strerror(errno) << ")");
         }
-        ECF_TEST_DBG(<< "Time for opening file " << openFileNTimes
-                     << " times = " << timer.format(3, Str::cpu_timer_format()));
+        ECF_TEST_DBG("Time for opening file " << openFileNTimes
+                                              << " times = " << timer.format(3, Str::cpu_timer_format()));
     }
 #endif
 
@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE(test_create_missing_directories) {
 
     // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
     if (ecf::environment::has("ECFLOW_CRAY_BATCH")) {
-        ECF_TEST_DBG(<< "Test skipped until HPC team can  fix File::createMissingDirectories.(like mkdir -p)");
+        ECF_TEST_DBG("Test skipped until HPC team can  fix File::createMissingDirectories.(like mkdir -p)");
         return;
     }
 

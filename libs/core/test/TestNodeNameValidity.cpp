@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(test_node_name_validity_random) {
 
             auto ns = t.duration().count();
             o_time += ns;
-            ECF_TEST_DBG(<< "Original approach, name: '" << name << "', duration: " << ns << " ns");
+            ECF_TEST_DBG("Original approach, name: '" << name << "', duration: " << ns << " ns");
         }
 
         bool actual;
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(test_node_name_validity_random) {
 
             auto ns = t.duration().count();
             n_time += ns;
-            ECF_TEST_DBG(<< "    New approach, name: " << name << ", duration: " << ns << " ns");
+            ECF_TEST_DBG("    New approach, name: " << name << ", duration: " << ns << " ns");
         }
 
         BOOST_CHECK_MESSAGE(actual == original,
@@ -320,9 +320,9 @@ BOOST_AUTO_TEST_CASE(test_node_name_validity_random) {
     }
 
     double old_time_per_iteration = o_time / iterations;
-    ECF_TEST_DBG(<< "Original approach time: " << old_time_per_iteration << " ns");
+    ECF_TEST_DBG("Original approach time: " << old_time_per_iteration << " ns");
     double new_time_per_iteration = n_time / iterations;
-    ECF_TEST_DBG(<< "     New approach time: " << new_time_per_iteration << " ns");
+    ECF_TEST_DBG("     New approach time: " << new_time_per_iteration << " ns");
 
     BOOST_WARN_MESSAGE(new_time_per_iteration < old_time_per_iteration, "New algorithm expected faster than original");
 }

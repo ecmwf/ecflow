@@ -1143,14 +1143,14 @@ BOOST_AUTO_TEST_CASE(test_performance_loop, *boost::unit_test::disabled()) {
         for (auto& fred : vec) {
             fred.inc();
         }
-        ECF_TEST_DBG(<< "Time: for(auto &fred : vec) { fred.inc(); }                                                "
+        ECF_TEST_DBG("Time: for(auto &fred : vec) { fred.inc(); }                                                "
                      << timer);
     }
 
     {
         ecf::PerformanceTimer timer;
         std::for_each(vec.begin(), vec.end(), [](Fred& fred) { fred.inc(); });
-        ECF_TEST_DBG(<< "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 "
+        ECF_TEST_DBG("Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 "
                      << timer);
     }
 
@@ -1160,7 +1160,7 @@ BOOST_AUTO_TEST_CASE(test_performance_loop, *boost::unit_test::disabled()) {
         for (auto i = vec.begin(); i < theEnd; i++) {
             (*i).inc();
         }
-        ECF_TEST_DBG(<< "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } "
+        ECF_TEST_DBG("Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } "
                      << timer);
     }
 
@@ -1170,7 +1170,7 @@ BOOST_AUTO_TEST_CASE(test_performance_loop, *boost::unit_test::disabled()) {
         for (size_t i = 0; i < theSize; i++) {
             vec[i].inc();
         }
-        ECF_TEST_DBG(<< "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              "
+        ECF_TEST_DBG("Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              "
                      << timer);
     }
 }
@@ -1263,7 +1263,7 @@ BOOST_AUTO_TEST_CASE(test_performance_convert_string_to_int, *boost::unit_test::
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method1(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for method1  elapsed time = " << timer);
+        ECF_TEST_DBG("Time for method1  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method 1 wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method 1 wrong");
         numberRes.clear();
@@ -1278,7 +1278,7 @@ BOOST_AUTO_TEST_CASE(test_performance_convert_string_to_int, *boost::unit_test::
         for (size_t i = 0; i < numberTokens.size(); i++) {
             methodX(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for methodX  elapsed time = " << timer);
+        ECF_TEST_DBG("Time for methodX  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method X wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method X wrong");
         numberRes.clear();
@@ -1308,7 +1308,7 @@ BOOST_AUTO_TEST_CASE(test_performance_convert_string_to_int, *boost::unit_test::
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method3(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for method3  elapsed time = " << timer);
+        ECF_TEST_DBG("Time for method3  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes,
                             " method3 wrong numberRes.size()=" << numberRes.size()
                                                                << " expected size = " << expectedNumberRes.size());

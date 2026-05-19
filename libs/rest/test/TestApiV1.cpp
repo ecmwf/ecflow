@@ -348,7 +348,7 @@ bool check_for_element(const std::string& path,
         }
         else if (j.is_array() == false) {
             j = ojson::array({j});
-            ECF_TEST_DBG(<< "json is " << j);
+            ECF_TEST_DBG("json is " << j);
         }
 
         for (const auto& x : j) {

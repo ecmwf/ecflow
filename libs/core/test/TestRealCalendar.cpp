@@ -111,12 +111,12 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_relative_complex) {
                                         << suiteTm.tm_hour << ":" << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
                 if (!matches) {
-                    ECF_TEST_DBG(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
-                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
-                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
+                    ECF_TEST_DBG("suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                                     << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                                     << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                                     << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                                     << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                                     << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
             else {
@@ -126,12 +126,12 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_relative_complex) {
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
 
                 if (matches) {
-                    ECF_TEST_DBG(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
-                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
-                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
+                    ECF_TEST_DBG("suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                                     << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                                     << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                                     << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                                     << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                                     << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
         }
@@ -214,12 +214,12 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_complex) {
                                         << suiteTm.tm_hour << ":" << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
                 if (!matches) {
-                    ECF_TEST_DBG(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
-                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
-                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
+                    ECF_TEST_DBG("suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                                     << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                                     << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                                     << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                                     << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                                     << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
             else {
@@ -229,12 +229,12 @@ BOOST_AUTO_TEST_CASE(test_REAL_calendar_time_series_complex) {
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
 
                 if (matches) {
-                    ECF_TEST_DBG(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
-                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
-                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
+                    ECF_TEST_DBG("suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                                     << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                                     << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                                     << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                                     << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                                     << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
         }
