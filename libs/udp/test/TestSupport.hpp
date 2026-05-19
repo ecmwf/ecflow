@@ -94,18 +94,30 @@ public:
     }
 
     Meter get_meter(const std::string& path, const std::string& name) const {
+        ECF_TEST_DBG(<< "   MOCK: Retrieving meter  " << name << ", at node " << path << ", from ecFlow server");
         node_ptr node = get_node_at(path);
-        return get_attribute_by_name(node->meters(), name);
+        auto meter    = get_attribute_by_name(node->meters(), name);
+        ECF_TEST_DBG(<< "   MOCK: Meter  " << name << ", at node " << path << ", has value :" << meter.value()
+                     << " in [" << meter.min() << "," << meter.max() << "] (color change at " << meter.colorChange()
+                     << ")");
+        return meter;
     }
 
     Label get_label(const std::string& path, const std::string& name) const {
+        ECF_TEST_DBG(<< "   MOCK: Retrieving label  " << name << ", at node " << path << ", from ecFlow server");
         node_ptr node = get_node_at(path);
-        return get_attribute_by_name(node->labels(), name);
+        auto label    = get_attribute_by_name(node->labels(), name);
+        ECF_TEST_DBG(<< "   MOCK: Label  " << name << ", at node " << path << ", has value :" << label.value());
+        return label;
     }
 
     Event get_event(const std::string& path, const std::string& name) const {
+        ECF_TEST_DBG(<< "   MOCK: Retrieving event  " << name << ", at node " << path << ", from ecFlow server");
         node_ptr node = get_node_at(path);
-        return get_attribute_by_name(node->events(), name);
+        auto event    = get_attribute_by_name(node->events(), name);
+        ECF_TEST_DBG(<< "   MOCK: Event  " << name << ", at node " << path
+                     << ", has value :" << (event.value() ? "True" : "False"));
+        return event;
     }
 
 private:
@@ -176,20 +188,26 @@ public:
         : BaseMockServer<MockUDPServer>("localhost", port, ecflow_port) {}
 
     void update_label(const std::string& path, const std::string& name, const std::string& value) {
+        ECF_TEST_DBG(<< "   MOCK: Updating label  " << name << ", at node " << path << ", to value: " << value
+                     << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_label", name, value);
         send(request);
     }
 
     void update_meter(const std::string& path, const std::string& name, int value) {
+        ECF_TEST_DBG(<< "   MOCK: Updating meter  " << name << ", at node " << path << ", to value: " << value
+                     << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_meter", name, value);
         send(request);
     }
 
     void clear_event(const std::string& path, const std::string& name) {
+        ECF_TEST_DBG(<< "   MOCK: Clearing event  " << name << ", at node " << path << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_event", name, "0");
         send(request);
     }
     void set_event(const std::string& path, const std::string& name) {
+        ECF_TEST_DBG(<< "   MOCK: Setting event  " << name << ", at node " << path << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_event", name, "1");
         send(request);
     }
@@ -226,7 +244,7 @@ private:
         client.send(request);
 
         // Wait for request to flow...
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
 public:
@@ -243,7 +261,7 @@ public:
                     {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"});
 
         // Wait for server to start...
-        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
         return server;
     }

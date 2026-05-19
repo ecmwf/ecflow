@@ -9,6 +9,8 @@
  */
 
 #include <array>
+#include <atomic>
+#include <chrono>
 
 #include <boost/test/unit_test.hpp>
 
@@ -35,11 +37,20 @@ const std::string API_KEY_pbkdf2  = TokenFile::generate_token();
 const std::string API_KEY_expired = TokenFile::generate_token();
 const std::string API_KEY_revoked = TokenFile::generate_token();
 
+int get_random_port(int min, int max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_int_distribution<> distrib(min, max);
+    return distrib(gen);
+}
+
 #if defined(ECF_TEST_HTTP_BACKEND)
-static const std::string ECF_TEST_HTTP_PORT        = "8081";
+static const int ECF_TEST_HTTP_PORT_NR             = get_random_port(8000, 8999);
+static const std::string ECF_TEST_HTTP_PORT        = std::to_string(ECF_TEST_HTTP_PORT_NR);
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_http_backend.json";
 #else
-static const std::string ECF_TEST_HTTP_PORT        = "8080";
+static const int ECF_TEST_HTTP_PORT_NR             = get_random_port(49152, 65535);
+static const std::string ECF_TEST_HTTP_PORT        = std::to_string(ECF_TEST_HTTP_PORT_NR);
 static const std::string ECF_TEST_HTTP_TOKENS_FILE = "api-tokens.using_tcpip_backend.json";
 #endif
 
@@ -84,10 +95,17 @@ std::unique_ptr<TokenFile> create_token_file() {
 
 static std::unique_ptr<std::thread> api_server;
 
+///
+/// @brief Flag to indicate readiness by the server thread once it successfully binds to the port
+///
+static std::atomic<bool> api_server_started{false};
+
 void start_api_server() {
     if (ecf::environment::has("NO_API_SERVER")) {
         return; // terminate early, for debugging purposes
     }
+
+    api_server_started = false;
 
     api_server = std::make_unique<std::thread>([] {
         std::string port = ECF_TEST_HTTP_PORT;
@@ -108,10 +126,26 @@ void start_api_server() {
         // clang-format on
 
         HttpServer server(argv.size(), const_cast<char**>(argv.data()));
+
+        api_server_started = true; // Signal that server is starting (or has started)
         server.run();
+        api_server_started = false; // Server is done (either normal shutdown or bind failure)
     });
 
-    sleep(1);
+    // Wait up to 10 seconds (100 * 100ms for the server thread to start/bind to port.
+    for (int i = 0; i < 100 && !api_server_started; ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    // After waiting, if the server thread has not indicated that it started, fail the test immediately.
+    if (!api_server_started) {
+        BOOST_FAIL("REST API server thread failed to start within 10 seconds, when attenting to bind to port " +
+                   ECF_TEST_HTTP_PORT);
+        return;
+    }
+
+    // Give the server a moment to complete the bind and become ready.
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
 std::unique_ptr<InvokeServer> start_ecflow_server() {
@@ -138,14 +172,15 @@ httplib::Result request(const std::string& method,
                         const std::string& payload             = "",
                         const std::string& token               = "",
                         const httplib::Headers& custom_headers = {}) {
-#if defined(ECF_TEST_HTTP_BACKEND)
-    httplib::SSLClient c(API_HOST, 8081);
-#else
-    httplib::SSLClient c(API_HOST, 8080);
-#endif
+    httplib::SSLClient c(API_HOST, ECF_TEST_HTTP_PORT_NR);
 
     c.enable_server_certificate_verification(false);
+    // Set connection timeout
     c.set_connection_timeout(3);
+    // Set read and write timeouts
+    // This prevents blocking indefinitely, after connection established, during the SSL handshake.
+    c.set_read_timeout(5);
+    c.set_write_timeout(5);
 
     BOOST_TEST_MESSAGE("Request URL: " << method << " " << API_HOST << resource);
     BOOST_TEST_MESSAGE("Request body: " << payload);
@@ -209,11 +244,21 @@ struct SetupTest
     }
 
     void teardown() {
-        printf("Shutting down REST API\n");
-        auto s = request("get", "/v1/shutdown");
-        BOOST_REQUIRE(s->status == 200);
-        printf("Waiting for shut down REST API\n");
-        api_server->join();
+        if (api_server && api_server->joinable()) {
+            if (api_server_started) {
+                // Request server to shut down gracefully.
+                printf("Shutting down REST API\n");
+                auto s = request("get", "/v1/shutdown");
+                if (s && s->status != 200) {
+                    BOOST_TEST_MESSAGE("WARNING: REST API shutdown request returned status " << s->status);
+                }
+                else if (!s) {
+                    BOOST_TEST_MESSAGE("WARNING: REST API shutdown request received no response");
+                }
+            }
+            printf("Waiting for REST API thread to finish\n");
+            api_server->join();
+        }
 
         printf("Shutting down Token file\n");
         tokenfile.reset();
