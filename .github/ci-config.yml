@@ -8,6 +8,7 @@ cmake_options: >-
   -DBOOST_LIBRARYDIR=${BOOST_LIB_DIR}
   -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}
   -DENABLE_STATIC_BOOST_LIBS=OFF
+  -DCMAKE_PREFIX_PATH=/opt/ecmwf/stack-deps/share/cmake/pybind11
 
 ctest_options: >-
   -L nightly 
