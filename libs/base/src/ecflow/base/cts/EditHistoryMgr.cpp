@@ -15,9 +15,9 @@
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/node/Defs.hpp"
 
-EditHistoryMgr::EditHistoryMgr(const ClientToServerCmd* c, AbstractServer* a)
-    : cts_cmd_(c),
-      as_(a),
+EditHistoryMgr::EditHistoryMgr(const ClientToServerCmd& cmd, const AbstractServer& server)
+    : cts_cmd_(cmd),
+      as_(server),
       state_change_no_(Ecf::state_change_no()),
       modify_change_no_(Ecf::modify_change_no()) {
     assert(cts_cmd_->edit_history_nodes_.empty());
@@ -25,26 +25,29 @@ EditHistoryMgr::EditHistoryMgr(const ClientToServerCmd* c, AbstractServer* a)
 }
 
 EditHistoryMgr::~EditHistoryMgr() {
-    // check if state changed
+    // Detect a state/modify change
     if (state_change_no_ != Ecf::state_change_no() || modify_change_no_ != Ecf::modify_change_no()) {
 
-        // Ignore child commands for edit history, where only interested in user commands
-        if (!cts_cmd_->task_cmd()) {
+        // Ignore child commands for edit history -- only user commands are considered
+        if (!cts_cmd_.task_cmd()) {
 
-            // *ONLY* record edit history to commands that change the data model
-            // Otherwise we will end up making a data model change for read only commands
-            // If there has been a change in defs state then the command must return true from isWrite
-            if (cts_cmd_->isWrite()) {
-                cts_cmd_->add_edit_history(as_->defs().get());
+            // The goal is to *ONLY* record edit history to commands that already change the data model
+            // Otherwise, all read-only commands would actually become write commands!
+            if (cts_cmd_.isWrite()) {
+                cts_cmd_.add_edit_history(as_.defs().get());
             }
             else {
-                // Read only command, that is making data model changes, oops ?
-                // Can happen with check pt command, when ecf_home can't be written to, (exceptional)
-                // i.e set late flag( when saving takes more the 30 seconds) *OR* Flag::CHECKPT_ERROR | Flag::LOG_ERROR
-                //       even though its read only command. In which case is_mutable() should return true.
-                if (!cts_cmd_->is_mutable()) {
+                // Read-only commands should not produce any data model changes!
+                //
+                // Exception to the rule:
+                //   This can happen in very exceptional cases (e.g. when the ECF_HOME_home cannot be written to,
+                //   the checkpt command eventually sets a late or error flag because technically saving is late or was
+                //   not successful).
+                //   These commands are identified as being "mutable", which is gives them a "get out of free" card.
+                //
+                if (!cts_cmd_.is_mutable()) {
                     std::string ss;
-                    cts_cmd_->print(ss);
+                    cts_cmd_.print(ss);
                     std::cout << "cmd " << ss << " should return true from isWrite() ******************\n";
                     std::cout << "Read only command is making data changes to defs ?????\n";
                     std::cout << "Ecf::state_change_no() " << Ecf::state_change_no() << " Ecf::modify_change_no() "
