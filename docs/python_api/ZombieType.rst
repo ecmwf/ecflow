@@ -5,11 +5,26 @@ ecflow.ZombieType
 .. py:class:: ZombieType
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 :term:`zombie`\ s are running jobs that fail authentication when communicating with the :term:`ecflow_server`.
 
 See class :term:`zombie type` and :py:class:`ecflow.ZombieAttr` for further information.
+
+
+Members:
+
+  ecf
+
+  ecf_pid
+
+  ecf_pid_passwd
+
+  ecf_passwd
+
+  user
+
+  path
 
 
 .. py:attribute:: ZombieType.ecf
@@ -32,6 +47,10 @@ See class :term:`zombie type` and :py:class:`ecflow.ZombieAttr` for further info
    :value: ecflow.ZombieType.ecf_pid_passwd
 
 
+.. py:property:: ZombieType.name
+   :module: ecflow
+
+
 .. py:attribute:: ZombieType.names
    :module: ecflow
    :value: {'ecf': ecflow.ZombieType.ecf, 'ecf_passwd': ecflow.ZombieType.ecf_passwd, 'ecf_pid': ecflow.ZombieType.ecf_pid, 'ecf_pid_passwd': ecflow.ZombieType.ecf_pid_passwd, 'path': ecflow.ZombieType.path, 'user': ecflow.ZombieType.user}
@@ -45,6 +64,10 @@ See class :term:`zombie type` and :py:class:`ecflow.ZombieAttr` for further info
 .. py:attribute:: ZombieType.user
    :module: ecflow
    :value: ecflow.ZombieType.user
+
+
+.. py:property:: ZombieType.value
+   :module: ecflow
 
 
 .. py:attribute:: ZombieType.values

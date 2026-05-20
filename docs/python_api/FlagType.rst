@@ -5,7 +5,7 @@ ecflow.FlagType
 .. py:class:: FlagType
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Flags store state associated with a node
 
@@ -34,6 +34,61 @@ Flags store state associated with a node
 - LOG_ERROR     - Error in opening or writing to log file
 - CHECKPT_ERROR - Error in opening or writing to checkpt file 
 - NOT_SET
+
+
+Members:
+
+  force_abort
+
+  user_edit
+
+  task_aborted
+
+  edit_failed
+
+  jobcmd_failed
+
+  killcmd_failed
+
+  statuscmd_failed
+
+  no_script
+
+  killed
+
+  status
+
+  late
+
+  message
+
+  byrule
+
+  queuelimit
+
+  wait
+
+  locked
+
+  zombie
+
+  no_reque
+
+  archived
+
+  restored
+
+  threshold
+
+  sigterm
+
+  not_set
+
+  log_error
+
+  checkpt_error
+
+  remote_error
 
 
 .. py:attribute:: FlagType.archived
@@ -94,6 +149,10 @@ Flags store state associated with a node
 .. py:attribute:: FlagType.message
    :module: ecflow
    :value: ecflow.FlagType.message
+
+
+.. py:property:: FlagType.name
+   :module: ecflow
 
 
 .. py:attribute:: FlagType.names
@@ -159,6 +218,10 @@ Flags store state associated with a node
 .. py:attribute:: FlagType.user_edit
    :module: ecflow
    :value: ecflow.FlagType.user_edit
+
+
+.. py:property:: FlagType.value
+   :module: ecflow
 
 
 .. py:attribute:: FlagType.values

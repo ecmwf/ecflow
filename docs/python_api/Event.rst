@@ -5,7 +5,7 @@ ecflow.Event
 .. py:class:: Event
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 :term:`event`\ s are used as signal mechanism.
 
@@ -48,37 +48,37 @@ Usage:
             Event(2,'event_name'))
 
 
-.. py:method:: Event.empty( (Event)arg1) -> bool :
+.. py:method:: Event.empty(self: ecflow.Event) -> bool
    :module: ecflow
 
 Return true if the Event is empty. Used when returning a NULL Event, from a find
 
 
-.. py:method:: Event.initial_value( (Event)arg1) -> bool :
+.. py:method:: Event.initial_value(self: ecflow.Event) -> bool
    :module: ecflow
 
 Return events initial value, This is value taken for begin/re-queue
 
 
-.. py:method:: Event.name( (Event)arg1) -> str :
+.. py:method:: Event.name(self: ecflow.Event) -> str
    :module: ecflow
 
 Return the Events name as string. If number supplied name may be empty.
 
 
-.. py:method:: Event.name_or_number( (Event)arg1) -> str :
+.. py:method:: Event.name_or_number(self: ecflow.Event) -> str
    :module: ecflow
 
 Returns name or number as string
 
 
-.. py:method:: Event.number( (Event)arg1) -> int :
+.. py:method:: Event.number(self: ecflow.Event) -> int
    :module: ecflow
 
 Return events number as a integer. If not specified return max integer value
 
 
-.. py:method:: Event.value( (Event)arg1) -> bool :
+.. py:method:: Event.value(self: ecflow.Event) -> bool
    :module: ecflow
 
 Return events current value

@@ -5,7 +5,7 @@ ecflow.UrlCmd
 .. py:class:: UrlCmd
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Executes a command ECF_URL_CMD to display a url.
 
@@ -48,7 +48,7 @@ Lets assume that the server has the following definition::
        print(str(e))
 
 
-.. py:method:: UrlCmd.execute( (UrlCmd)arg1) -> None :
+.. py:method:: UrlCmd.execute(self: ecflow.UrlCmd) -> None
    :module: ecflow
 
 Displays url in the chosen browser

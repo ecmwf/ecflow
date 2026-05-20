@@ -5,7 +5,7 @@ ecflow.Style
 .. py:class:: Style
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Style is used to control printing output for the definition
 
@@ -30,32 +30,41 @@ The following shows a summary of the features associated with each choice
    ===================== ==== ===== =======
 
 
+Members:
+
+  NOTHING
+
+  DEFS
+
+  STATE
+
+  MIGRATE
+
+
 .. py:attribute:: Style.DEFS
    :module: ecflow
-   :value: ecflow.Style.DEFS
+   :value: <Style.DEFS: 1>
 
 
 .. py:attribute:: Style.MIGRATE
    :module: ecflow
-   :value: ecflow.Style.MIGRATE
+   :value: <Style.MIGRATE: 3>
 
 
 .. py:attribute:: Style.NOTHING
    :module: ecflow
-   :value: ecflow.Style.NOTHING
+   :value: <Style.NOTHING: 0>
 
 
 .. py:attribute:: Style.STATE
    :module: ecflow
-   :value: ecflow.Style.STATE
+   :value: <Style.STATE: 2>
 
 
-.. py:attribute:: Style.names
+.. py:property:: Style.name
    :module: ecflow
-   :value: {'DEFS': ecflow.Style.DEFS, 'MIGRATE': ecflow.Style.MIGRATE, 'NOTHING': ecflow.Style.NOTHING, 'STATE': ecflow.Style.STATE}
 
 
-.. py:attribute:: Style.values
+.. py:property:: Style.value
    :module: ecflow
-   :value: {0: ecflow.Style.NOTHING, 1: ecflow.Style.DEFS, 2: ecflow.Style.STATE, 3: ecflow.Style.MIGRATE}
 

@@ -5,7 +5,7 @@ ecflow.Cron
 .. py:class:: Cron
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 A :term:`cron` defines a repeating time dependency for a node.
 
@@ -77,7 +77,7 @@ Usage (see the :ref:`cron definition<text_based_def_cron>` for more examples):
 returns a integer list of days of the month
 
 
-.. py:method:: Cron.last_day_of_the_month( (Cron)arg1) -> bool :
+.. py:method:: Cron.last_day_of_the_month(self: ecflow.Cron) -> bool
    :module: ecflow
 
 Return true if last day of month is enabled
@@ -95,52 +95,59 @@ returns a integer list of last week days of the month
 returns a integer list of months of the year
 
 
-.. py:method:: Cron.set_days_of_month( (Cron)arg1, (list)arg2) -> None :
+.. py:method:: Cron.set_days_of_month(self: ecflow.Cron, arg0: list) -> None
    :module: ecflow
 
 Specifies days of the month. Expects a list of integers with integer range 1-31
 
 
-.. py:method:: Cron.set_last_day_of_the_month( (Cron)arg1) -> None :
+.. py:method:: Cron.set_last_day_of_the_month(self: ecflow.Cron) -> None
    :module: ecflow
 
 Set cron for the last day of the month
 
 
-.. py:method:: Cron.set_last_week_days_of_the_month( (Cron)arg1, (list)arg2) -> None :
+.. py:method:: Cron.set_last_week_days_of_the_month(self: ecflow.Cron, arg0: list) -> None
    :module: ecflow
 
 Specifies last week days of the month. Expects a list of integers, with integer range 0==Sun to 6==Sat
 
 
-.. py:method:: Cron.set_months( (Cron)arg1, (list)arg2) -> None :
+.. py:method:: Cron.set_months(self: ecflow.Cron, arg0: list) -> None
    :module: ecflow
 
 Specifies months. Expects a list of integers, with integer range 1-12
 
 
-.. py:method:: Cron.set_time_series( (Cron)arg1, (int)hour, (int)minute [, (bool)relative=False]) -> None :
+.. py:method:: Cron.set_time_series(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. set_time_series(self: ecflow.Cron, hour: typing.SupportsInt | typing.SupportsIndex, minute: typing.SupportsInt | typing.SupportsIndex, relative: bool = False) -> None
 
 time_series(hour(int),minute(int),relative to suite start(bool=false)), Add a time slot
 
-set_time_series( (Cron)arg1, (TimeSeries)arg2) -> None :
-    Add a time series. This will never complete
+2. set_time_series(self: ecflow.Cron, arg0: ecflow.TimeSeries) -> None
 
-set_time_series( (Cron)arg1, (TimeSlot)arg2, (TimeSlot)arg3, (TimeSlot)arg4) -> None :
-    Add a time series. This will never complete
+Add a time series. This will never complete
 
-set_time_series( (Cron)arg1, (str)arg2) -> None :
-    Add a time series. This will never complete
+3. set_time_series(self: ecflow.Cron, arg0: ecflow.TimeSlot, arg1: ecflow.TimeSlot, arg2: ecflow.TimeSlot) -> None
+
+Add a time series. This will never complete
+
+4. set_time_series(self: ecflow.Cron, arg0: str) -> None
+
+Add a time series. This will never complete
 
 
-.. py:method:: Cron.set_week_days( (Cron)arg1, (list)arg2) -> None :
+.. py:method:: Cron.set_week_days(self: ecflow.Cron, arg0: list) -> None
    :module: ecflow
 
 Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat
 
 
-.. py:method:: Cron.time( (Cron)arg1) -> TimeSeries :
+.. py:method:: Cron.time(self: ecflow.Cron) -> ecflow.TimeSeries
    :module: ecflow
 
 return cron time as a TimeSeries

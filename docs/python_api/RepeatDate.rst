@@ -5,7 +5,7 @@ ecflow.RepeatDate
 .. py:class:: RepeatDate
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Allows a :term:`node` to be repeated using a yyyymmdd format
 
@@ -38,26 +38,51 @@ Usage:
    t = Task('t1',
             RepeatDate('YMD', 20050130, 20050203 ))
 
+Accessor methods::
 
-.. py:method:: RepeatDate.end( (RepeatDate)arg1) -> int :
+   current_index() -> int
+      Zero-based position of the current date in the sequence.
+      Computed using calendar-day (Julian-day) arithmetic,
+      so it is correct even when the sequence crosses a month or year boundary.
+      Returns 0 at construction / after reset.
+
+   current_value() -> int
+      The current instant as an integer in yyyymmdd format.
+
+
+.. py:method:: RepeatDate.current_index(self: ecflow.RepeatDate) -> int
+   :module: ecflow
+
+Return the zero-based index of the current date position.
+Uses calendar-day (Julian-day) arithmetic so the result is correct
+even for sequences that cross month or year boundaries.
+
+
+.. py:method:: RepeatDate.current_value(self: ecflow.RepeatDate) -> object
+   :module: ecflow
+
+Return the current date as an integer in yyyymmdd format.
+
+
+.. py:method:: RepeatDate.end(self: ecflow.RepeatDate) -> int
    :module: ecflow
 
 Return the end date as an integer in yyyymmdd format
 
 
-.. py:method:: RepeatDate.name( (RepeatDate)arg1) -> str :
+.. py:method:: RepeatDate.name(self: ecflow.RepeatDate) -> str
    :module: ecflow
 
 Return the name of the repeat.
 
 
-.. py:method:: RepeatDate.start( (RepeatDate)arg1) -> int :
+.. py:method:: RepeatDate.start(self: ecflow.RepeatDate) -> int
    :module: ecflow
 
 Return the start date as an integer in yyyymmdd format
 
 
-.. py:method:: RepeatDate.step( (RepeatDate)arg1) -> int :
+.. py:method:: RepeatDate.step(self: ecflow.RepeatDate) -> int
    :module: ecflow
 
 Return the step increment. This is used to update the repeat, until end date is reached

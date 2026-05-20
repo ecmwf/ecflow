@@ -5,7 +5,7 @@ ecflow.Edit
 .. py:class:: Edit
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Defines a :term:`variable` on a :term:`node` for use in :term:`ecf script`.
 

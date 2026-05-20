@@ -5,7 +5,7 @@ ecflow.ChildCmdType
 .. py:class:: ChildCmdType
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 ChildCmdType represents the different :term:`child command`\ s.
 This type is used as a parameter to the class :py:class:`ecflow.ZombieAttr`
@@ -19,6 +19,25 @@ Child commands are called within a :term:`job file`::
   ChildCmdType::wait     corresponds to : ecflow_client --wait=<expression>
   ChildCmdType::abort    corresponds to : ecflow_client --abort=<reason>
   ChildCmdType::complete corresponds to : ecflow_client --complete
+
+
+Members:
+
+  init
+
+  event
+
+  meter
+
+  label
+
+  wait
+
+  queue
+
+  abort
+
+  complete
 
 
 .. py:attribute:: ChildCmdType.abort
@@ -51,6 +70,10 @@ Child commands are called within a :term:`job file`::
    :value: ecflow.ChildCmdType.meter
 
 
+.. py:property:: ChildCmdType.name
+   :module: ecflow
+
+
 .. py:attribute:: ChildCmdType.names
    :module: ecflow
    :value: {'abort': ecflow.ChildCmdType.abort, 'complete': ecflow.ChildCmdType.complete, 'event': ecflow.ChildCmdType.event, 'init': ecflow.ChildCmdType.init, 'label': ecflow.ChildCmdType.label, 'meter': ecflow.ChildCmdType.meter, 'queue': ecflow.ChildCmdType.queue, 'wait': ecflow.ChildCmdType.wait}
@@ -59,6 +82,10 @@ Child commands are called within a :term:`job file`::
 .. py:attribute:: ChildCmdType.queue
    :module: ecflow
    :value: ecflow.ChildCmdType.queue
+
+
+.. py:property:: ChildCmdType.value
+   :module: ecflow
 
 
 .. py:attribute:: ChildCmdType.values

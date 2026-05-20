@@ -5,7 +5,7 @@ ecflow.RepeatDateTimeList
 .. py:class:: RepeatDateTimeList
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Allows a :term:`node` to be repeated using an arbitrary list of date+time instants (yyyymmddTHHMMSS format).
 
@@ -31,20 +31,39 @@ Usage:
    t = Task('t1',
             RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']))
 
+Accessor methods::
 
-.. py:method:: RepeatDateTimeList.end( (RepeatDateTimeList)arg1) -> int :
+   current_index() -> int
+      Zero-based index of the current instant in the list.
+   current_value() -> str
+      The current instant as a string in yyyymmddTHHMMSS format, or '' if out of bounds.
+
+
+.. py:method:: RepeatDateTimeList.current_index(self: ecflow.RepeatDateTimeList) -> int
+   :module: ecflow
+
+Return the zero-based index of the current instant in the list.
+
+
+.. py:method:: RepeatDateTimeList.current_value(self: ecflow.RepeatDateTimeList) -> object
+   :module: ecflow
+
+Return the current instant as a string in yyyymmddTHHMMSS format.
+
+
+.. py:method:: RepeatDateTimeList.end(self: ecflow.RepeatDateTimeList) -> int
    :module: ecflow
 
 Return the end instant as seconds since epoch
 
 
-.. py:method:: RepeatDateTimeList.name( (RepeatDateTimeList)arg1) -> str :
+.. py:method:: RepeatDateTimeList.name(self: ecflow.RepeatDateTimeList) -> str
    :module: ecflow
 
 Return the name of the repeat.
 
 
-.. py:method:: RepeatDateTimeList.start( (RepeatDateTimeList)arg1) -> int :
+.. py:method:: RepeatDateTimeList.start(self: ecflow.RepeatDateTimeList) -> int
    :module: ecflow
 
 Return the start instant as seconds since epoch

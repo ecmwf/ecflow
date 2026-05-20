@@ -5,7 +5,7 @@ ecflow.MirrorAttr
 .. py:class:: MirrorAttr
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 A :term:`mirror` attribute, assigned to a :term:`node`, enables establishing an external link and locally replicate the state of a node executing on a remote ecFlow server.
 
@@ -37,43 +37,43 @@ Usage:
 The parameters `remote_host`, `remote_port`, `polling`, `ssl`, and `auth` are optional
 
 
-.. py:method:: MirrorAttr.auth( (MirrorAttr)arg1) -> str :
+.. py:method:: MirrorAttr.auth(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 
 Returns the path to Authentication credentials used to contact the remote ecFlow server
 
 
-.. py:method:: MirrorAttr.name( (MirrorAttr)arg1) -> str :
+.. py:method:: MirrorAttr.name(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 
 Returns the name of the Mirror attribute
 
 
-.. py:method:: MirrorAttr.polling( (MirrorAttr)arg1) -> str :
+.. py:method:: MirrorAttr.polling(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 
 Returns the polling interval used to contact the remove ecFlow server
 
 
-.. py:method:: MirrorAttr.remote_host( (MirrorAttr)arg1) -> str :
+.. py:method:: MirrorAttr.remote_host(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 
 Returns the host of the remote ecFlow server
 
 
-.. py:method:: MirrorAttr.remote_path( (MirrorAttr)arg1) -> str :
+.. py:method:: MirrorAttr.remote_path(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 
 Returns the path on the remote ecFlow server
 
 
-.. py:method:: MirrorAttr.remote_port( (MirrorAttr)arg1) -> str :
+.. py:method:: MirrorAttr.remote_port(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 
 Returns the port of the remote ecFlow server
 
 
-.. py:method:: MirrorAttr.ssl( (MirrorAttr)arg1) -> bool :
+.. py:method:: MirrorAttr.ssl(self: ecflow.MirrorAttr) -> bool
    :module: ecflow
 
 Returns a boolean, where true means that SSL is enabled

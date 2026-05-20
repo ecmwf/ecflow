@@ -5,7 +5,7 @@ ecflow.InLimit
 .. py:class:: InLimit
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 :term:`inlimit` is used in conjunction with :term:`limit` to provide simple load management:
 
@@ -25,14 +25,31 @@ created in the order they are defined
 
 Constructor::
 
-   InLimit(name, optional<path = ''>, optional<token = 1>, optional<limit_this_node_only = false>)
-      string name           : The name of the referenced Limit
-      string path<optional> : The path to the Limit, if this is left out, then Limit of 'name' must be specified
-                              some where up the parent hierarchy
-      int value<optional>   : The usage of the Limit. Each job submission will consume 'value' tokens
-                              from the Limit. defaults to 1 if no value specified.
-      bool limit_this_node_only<optional> : Only limits this node and *NOT* its children
-                                            Can be used load balance families
+   InLimit(
+        name,
+        optional<path = ''>,
+        optional<token = 1>,
+        optional<limit_this_node_only = false>,
+        optional<limit_submission_only = false
+   )
+
+      string name
+          : The name of the associated Limit
+      string path<optional>
+          : The path to the node with associated Limit.
+            If not provided, the Limit 'name' will be be found
+            by traversing the node hierarchy towards the root.
+      int value<optional>
+          : The value used from the Limit.
+            Each job submission will consume 'value' tokens from the Limit.
+            Default value is to 1.
+      bool limit_this_node_only<optional>
+          : Only limits this node and *NOT* its children.
+            Can be used to load balance families.
+            Default value is false.
+      bool limit_submission_only<optional>
+          : The limit applies to number of submitted tasks
+            Default value is false.
 
 Usage:
 
@@ -45,31 +62,31 @@ Usage:
    family.add_inlimit(inlimit)                # add existing inlimit using function
 
 
-.. py:method:: InLimit.limit_submission( (InLimit)arg1) -> bool :
+.. py:method:: InLimit.limit_submission(self: ecflow.InLimit) -> bool
    :module: ecflow
 
 Limit submission only
 
 
-.. py:method:: InLimit.limit_this_node_only( (InLimit)arg1) -> bool :
+.. py:method:: InLimit.limit_this_node_only(self: ecflow.InLimit) -> bool
    :module: ecflow
 
 Only this node is limited. i.e. typically Family or Suite
 
 
-.. py:method:: InLimit.name( (InLimit)arg1) -> str :
+.. py:method:: InLimit.name(self: ecflow.InLimit) -> str
    :module: ecflow
 
 Return the :term:`inlimit` name as string
 
 
-.. py:method:: InLimit.path_to_node( (InLimit)arg1) -> str :
+.. py:method:: InLimit.path_to_node(self: ecflow.InLimit) -> str
    :module: ecflow
 
 Path to the node that holds the limit, can be empty
 
 
-.. py:method:: InLimit.tokens( (InLimit)arg1) -> int :
+.. py:method:: InLimit.tokens(self: ecflow.InLimit) -> int
    :module: ecflow
 
 The number of token to consume from the Limit

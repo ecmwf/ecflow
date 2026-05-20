@@ -5,7 +5,7 @@ ecflow.Autorestore
 .. py:class:: Autorestore
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Provides a way to automatically restore a previously archived node
 
@@ -29,7 +29,7 @@ Usage:
    attr = Autorestore( ['/s1/f1','/s1/f2'] )  # restore archived node at /s1/f1 and /s1/f2
 
 
-.. py:method:: Autorestore.nodes_to_restore( (Autorestore)arg1) -> object :
+.. py:method:: Autorestore.nodes_to_restore(self: ecflow.Autorestore) -> object
    :module: ecflow
 
 returns a list of nodes to be restored

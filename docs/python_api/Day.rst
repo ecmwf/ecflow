@@ -5,7 +5,7 @@ ecflow.Day
 .. py:class:: Day
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Defines a :term:`day` dependency.
 
@@ -30,7 +30,7 @@ Usage:
            Day('tuesday'))
 
 
-.. py:method:: Day.day( (Day)arg1) -> Days :
+.. py:method:: Day.day(self: ecflow.Day) -> ecflow.Days
    :module: ecflow
 
 Return the day as enumerator

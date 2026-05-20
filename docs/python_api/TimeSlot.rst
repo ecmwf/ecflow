@@ -5,7 +5,7 @@ ecflow.TimeSlot
 .. py:class:: TimeSlot
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Represents a time slot.
 
@@ -24,14 +24,14 @@ Usage::
    ts = TimeSlot(10,11)
 
 
-.. py:method:: TimeSlot.empty( (TimeSlot)arg1) -> bool
+.. py:method:: TimeSlot.empty(self: ecflow.TimeSlot) -> bool
    :module: ecflow
 
 
-.. py:method:: TimeSlot.hour( (TimeSlot)arg1) -> int
+.. py:method:: TimeSlot.hour(self: ecflow.TimeSlot) -> int
    :module: ecflow
 
 
-.. py:method:: TimeSlot.minute( (TimeSlot)arg1) -> int
+.. py:method:: TimeSlot.minute(self: ecflow.TimeSlot) -> int
    :module: ecflow
 

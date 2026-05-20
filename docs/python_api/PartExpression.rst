@@ -5,7 +5,7 @@ ecflow.PartExpression
 .. py:class:: PartExpression
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 PartExpression holds part of a :term:`trigger` or :term:`complete expression`.
 
@@ -47,16 +47,16 @@ The trigger for task2 is equivalent to
 't1 == complete or t4 == complete and t5 == active or t7 == active'
 
 
-.. py:method:: PartExpression.and_expr( (PartExpression)arg1) -> bool
+.. py:method:: PartExpression.and_expr(self: ecflow.PartExpression) -> bool
    :module: ecflow
 
 
-.. py:method:: PartExpression.get_expression( (PartExpression)arg1) -> str :
+.. py:method:: PartExpression.get_expression(self: ecflow.PartExpression) -> str
    :module: ecflow
 
 returns the part expression as a string
 
 
-.. py:method:: PartExpression.or_expr( (PartExpression)arg1) -> bool
+.. py:method:: PartExpression.or_expr(self: ecflow.PartExpression) -> bool
    :module: ecflow
 

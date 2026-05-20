@@ -5,7 +5,7 @@ ecflow.Client
 .. py:class:: Client
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Class client provides an interface to communicate with the :term:`ecflow_server`.:
 
@@ -66,250 +66,258 @@ Secure communication between client and server can be enabled when creating of a
 A secure connection can also be enabled/disabled using the `Client.enable_ssl()/.disable_ssl()` methods. The behaviour of `Client.enable_ssl()` follows the Client initialisation described above (assuming `ECF_SSL=1` when `ECF_SSL` is not defined).
 
 
-.. py:method:: Client.alter( (Client)arg1, (list)paths, (str)alter_type, (str)attribute_type [, (str)name='' [, (str)value='']]) -> None :
+.. py:method:: Client.alter(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. alter(self: ecflow.Client, paths: list, alter_type: str, attribute_type: str, name: str = '', value: str = '') -> None
 
 Alter command is used to change the attributes of a node
-    ::
-    
-       void alter(
-           (list | string ) paths(s) :
-               One or more paths to the node with the attribute(s) to be altered.
-           string alter_type :
-               The type of alteration to perform.
-               Must be one of [ add, change, delete, set_flag, clear_flag, sort ]
-           string attr_type :
-               The type of attribute affected by the alteration.
-               Depending on the type of alteration, provide one of the following.
-                   for add : [
-                     variable,  time, today, date, day, zombie, event, meter,
-                     late, limit, inlimit, label, aviso, mirror
-                   ]
-                   for delete : [
-                     variable, time, today, date, day, cron, event, meter, late, generic,
-                     queue, label, trigger, complete, repeat, limit, inlimit, limit_path,
-                     zombie, aviso, mirror
-                   ]
-                   for change : [
-                     variable, clock_type, clock_gain, clock_date, clock_sync , event, meter
-                     label, trigger , complete, repeat, limit_max, limit_value, defstatus
-                     late, time, today, aviso, mirror
-                   ]
-                   for set_flag or clear_flag: [
-                     force_aborted, user_edit, task_aborted, edit_failed, ecfcmd_failed,
-                     statuscmd_failed, killcmd_failed, no_script, killed, status, late,
-                     message complete, queue_limit, task_waiting, locked, zombie, archived,
-                     restored, threshold, log_error, checkpt_error
-                   ]
-                   for sort: [
-                     event, meter, label, variable,  limit, all               ]
-          string name :
-              The name of the attribute(s) to be altered.
-              Used when multiple attributes of the same type exist e.g. a variable,
-              a meter, an event or a labet; but optional when changing unnamed attributes,
-              such as trigger or complete.
-          string value :
-              The new/updated value for the attribute.
-       )
-    
-    This function will raise exceptions because:
-    
-    - A provided path does not exist.
-    - A provided value cannot be parsed
-    - A provided value is invalid or out of range
-    
-    The following describes the parameters in more detail:
-    
-    .. code-block:: shell
-    
-     add variable variable_name variable_value
-    
-     add time format
-       # where format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
-    
-     add today format
-       # where format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
-    
-     add date format
-       # where format is dd.mm.yyyy, and '*' can be used to indicate any day, month or year
-    
-     add day format
-       # where format is one of [ sunday,monday,tuesday,wednesday,friday,saturday ]
-    
-     add zombie format
-       # where format is based on the following grammar
-       #       <zombie-type>:<child>:<server-action> | <client-action>:<zombie-lifetime>
-       #       <zombie-type> := [ user | ecf | path ]
-       #       <child> := [ init, event, meter, label, wait, abort, complete ]
-       #       <server-action> := [ adopt | delete ]
-       #       <client-action> := [ fob | fail | block(default) ]
-       #       <zombie-lifetime>:= lifetime of zombie in the server
-       # For example, to fob all child label requests, and remove zombie as soon as possible:
-       #    'add zombie :label:fob:0'
-    
-     add inlimit '/path/to/node:limit' '12'
-       # To add an inlimit, depending on '/path/to/node:limit' and value '12'
-       # Important:
-       #  * an empty inlimit value will add an inlimit with default value of 1
-       #  * if a 0 or negative value is provided, an exception will be raised
-       #  * if the limit node/name is not found, an exception will be raised
-       #  * if both '-s' and '-n' are provided, an exception will be raised
-    
-     add inlimit '/path/to/node:limit' '-s 13'
-       # To add an inlimit, depending on '/path/to/node:limit' and value '13'.
-       # By including '-s' the inlimit will affect submissions only.
-    
-     add inlimit '/path/to/node:limit' '-n 14'
-       # To add an inlimit, depending on '/path/to/node:limit' and value '14'.
-       # By including '-n' the inlimit will affect node only.
-    
-     delete variable name
-       # Important: if name is empty, *all* variables on the node are deleted
-    
-     delete time name
-       # To delete a specific time, enter the time in same format as show above,
-       # or as specified in the defs file
-       # an empty name will delete all time attributes on the node
-    
-     delete today name
-       # To delete a specific today attribute, enter in same format as show above,
-       # or as specified in the defs file.
-       # an empty name will delete all today attributes on the node
-    
-     delete date name
-       # To delete a specific date attribute, enter in same format as show above,
-       # or as specified in the defs file
-       # an empty name will delete all date attributes on the node
-    
-     delete day name
-       # To delete a specific day attribute, enter in same format as show above,
-       # or as specified in the defs file
-       # an empty name will delete all day attributes on the node
-    
-     delete cron name
-       # To delete a specific cron attribute, enter in same as specified in the defs file
-       # an empty name will delete all cron attributes on the node
-    
-     delete event name
-       # To delete a specific event, enter name or number
-       # an empty name will delete all events on the node
-    
-     delete meter name
-       # To delete a specific meter , enter the meter name
-       # an empty name will delete all meter on the node 
-    
-     delete label name
-       # To delete a specific label , enter the label name
-       # an empty name will delete all labels on the node
-    
-     delete limit name
-       # To delete a specific limit , enter the limit name
-       # an empty name will delete all limits on the node
-    
-     delete inlimit name
-       # To delete a specific inlimit , enter the inlimit name
-       # an empty name will delete all inlimits on the node
-    
-     delete limit_path limit_name limit_path
-       # To delete a specific limit path
-    
-     delete trigger
-       # A node can only have one trigger expression, hence the name is not required
-    
-     delete complete
-       # A node can only have one complete expression, hence the name is not required
-    
-     delete repeat
-       # A node can only have one repeat, hence the name is not required
-    
-     change variable name value
-       # Find the specified variable, and set the new value.
-    
-     change clock_type name
-       # The name must be one of 'hybrid' or 'real'.
-    
-     change clock_gain name
-       # The gain must be convertible to an integer.
-    
-     change clock_sync name
-       # Sync suite calendar with the computer.
-    
-     change event name(optional )
-       # if no name specified the event is set, otherwise name must be 'set' or 'clear'
-    
-     change meter name value
-       # The meter value must be convertible to an integer, and between meter min-max range.
-    
-     change label name value
-       # sets the label
-    
-     change trigger name
-       # The name must be expression. returns an error if the expression does not parse
-    
-     change complete name
-       # The name must be expression. returns an error if the expression does not parse
-    
-     change limit_max name value
-       # Sets the max value of the limit. The value must be convertible to an integer
-    
-     change limit_value name value
-       # Sets the consumed tokens to value. The value must be convertible to an integer
-    
-     change repeat value
-       # For date repeats, the value must be an yyyymmdd formtted integer, defined in
-       # the [begin, end] dates range.
-       # For integer repeats, the value must be an integer, defined in the [begin, end]
-       # values range.
-       # For string or enum repeats, the value must either be a valid integer (to be used
-       # as index) or a string matching a valid enum or strings list value.
-    
-    
-    Usage:
-    
-    .. code-block:: python
-    
-      try:
-         ci = Client()     # uses default host(ECF_HOST) & port(ECF_PORT)
-         ci.alter('/suite/task','change','trigger','b2 == complete')
-      except RuntimeError, e:
-         print(str(e))
-    
+::
 
-alter( (Client)arg1, (str)abs_node_path, (str)alter_type, (str)attribute_type [, (str)name='' [, (str)value='']]) -> None
+   void alter(
+       (list | string ) paths(s) :
+           One or more paths to the node with the attribute(s) to be altered.
+       string alter_type :
+           The type of alteration to perform.
+           Must be one of [ add, change, delete, set_flag, clear_flag, sort ]
+       string attr_type :
+           The type of attribute affected by the alteration.
+           Depending on the type of alteration, provide one of the following.
+               for add : [
+                 variable,  time, today, date, day, zombie, event, meter,
+                 late, limit, inlimit, label, aviso, mirror
+               ]
+               for delete : [
+                 variable, time, today, date, day, cron, event, meter, late, generic,
+                 queue, label, trigger, complete, repeat, limit, inlimit, limit_path,
+                 zombie, aviso, mirror
+               ]
+               for change : [
+                 variable, clock_type, clock_gain, clock_date, clock_sync , event, meter
+                 label, trigger , complete, repeat, limit_max, limit_value, defstatus
+                 late, time, today, aviso, mirror
+               ]
+               for set_flag or clear_flag: [
+                 force_aborted, user_edit, task_aborted, edit_failed, ecfcmd_failed,
+                 statuscmd_failed, killcmd_failed, no_script, killed, status, late,
+                 message complete, queue_limit, task_waiting, locked, zombie, archived,
+                 restored, threshold, log_error, checkpt_error
+               ]
+               for sort: [
+                 event, meter, label, variable,  limit, all               ]
+      string name :
+          The name of the attribute(s) to be altered.
+          Used when multiple attributes of the same type exist e.g. a variable,
+          a meter, an event or a labet; but optional when changing unnamed attributes,
+          such as trigger or complete.
+      string value :
+          The new/updated value for the attribute.
+   )
+
+This function will raise exceptions because:
+
+- A provided path does not exist.
+- A provided value cannot be parsed
+- A provided value is invalid or out of range
+
+The following describes the parameters in more detail:
+
+.. code-block:: shell
+
+ add variable variable_name variable_value
+
+ add time format
+   # where format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
+
+ add today format
+   # where format is +hh:mm | hh:mm | hh:mm(start) hh:mm(finish) hh:mm(increment)
+
+ add date format
+   # where format is dd.mm.yyyy, and '*' can be used to indicate any day, month or year
+
+ add day format
+   # where format is one of [ sunday,monday,tuesday,wednesday,friday,saturday ]
+
+ add zombie format
+   # where format is based on the following grammar
+   #       <zombie-type>:<child>:<server-action> | <client-action>:<zombie-lifetime>
+   #       <zombie-type> := [ user | ecf | path ]
+   #       <child> := [ init, event, meter, label, wait, abort, complete ]
+   #       <server-action> := [ adopt | delete ]
+   #       <client-action> := [ fob | fail | block(default) ]
+   #       <zombie-lifetime>:= lifetime of zombie in the server
+   # For example, to fob all child label requests, and remove zombie as soon as possible:
+   #    'add zombie :label:fob:0'
+
+ add inlimit '/path/to/node:limit' '12'
+   # To add an inlimit, depending on '/path/to/node:limit' and value '12'
+   # Important:
+   #  * an empty inlimit value will add an inlimit with default value of 1
+   #  * if a 0 or negative value is provided, an exception will be raised
+   #  * if the limit node/name is not found, an exception will be raised
+   #  * if both '-s' and '-n' are provided, an exception will be raised
+
+ add inlimit '/path/to/node:limit' '-s 13'
+   # To add an inlimit, depending on '/path/to/node:limit' and value '13'.
+   # By including '-s' the inlimit will affect submissions only.
+
+ add inlimit '/path/to/node:limit' '-n 14'
+   # To add an inlimit, depending on '/path/to/node:limit' and value '14'.
+   # By including '-n' the inlimit will affect node only.
+
+ delete variable name
+   # Important: if name is empty, *all* variables on the node are deleted
+
+ delete time name
+   # To delete a specific time, enter the time in same format as show above,
+   # or as specified in the defs file
+   # an empty name will delete all time attributes on the node
+
+ delete today name
+   # To delete a specific today attribute, enter in same format as show above,
+   # or as specified in the defs file.
+   # an empty name will delete all today attributes on the node
+
+ delete date name
+   # To delete a specific date attribute, enter in same format as show above,
+   # or as specified in the defs file
+   # an empty name will delete all date attributes on the node
+
+ delete day name
+   # To delete a specific day attribute, enter in same format as show above,
+   # or as specified in the defs file
+   # an empty name will delete all day attributes on the node
+
+ delete cron name
+   # To delete a specific cron attribute, enter in same as specified in the defs file
+   # an empty name will delete all cron attributes on the node
+
+ delete event name
+   # To delete a specific event, enter name or number
+   # an empty name will delete all events on the node
+
+ delete meter name
+   # To delete a specific meter , enter the meter name
+   # an empty name will delete all meter on the node 
+
+ delete label name
+   # To delete a specific label , enter the label name
+   # an empty name will delete all labels on the node
+
+ delete limit name
+   # To delete a specific limit , enter the limit name
+   # an empty name will delete all limits on the node
+
+ delete inlimit name
+   # To delete a specific inlimit , enter the inlimit name
+   # an empty name will delete all inlimits on the node
+
+ delete limit_path limit_name limit_path
+   # To delete a specific limit path
+
+ delete trigger
+   # A node can only have one trigger expression, hence the name is not required
+
+ delete complete
+   # A node can only have one complete expression, hence the name is not required
+
+ delete repeat
+   # A node can only have one repeat, hence the name is not required
+
+ change variable name value
+   # Find the specified variable, and set the new value.
+
+ change clock_type name
+   # The name must be one of 'hybrid' or 'real'.
+
+ change clock_gain name
+   # The gain must be convertible to an integer.
+
+ change clock_sync name
+   # Sync suite calendar with the computer.
+
+ change event name(optional )
+   # if no name specified the event is set, otherwise name must be 'set' or 'clear'
+
+ change meter name value
+   # The meter value must be convertible to an integer, and between meter min-max range.
+
+ change label name value
+   # sets the label
+
+ change trigger name
+   # The name must be expression. returns an error if the expression does not parse
+
+ change complete name
+   # The name must be expression. returns an error if the expression does not parse
+
+ change limit_max name value
+   # Sets the max value of the limit. The value must be convertible to an integer
+
+ change limit_value name value
+   # Sets the consumed tokens to value. The value must be convertible to an integer
+
+ change repeat value
+   # For date repeats, the value must be an yyyymmdd formtted integer, defined in
+   # the [begin, end] dates range.
+   # For integer repeats, the value must be an integer, defined in the [begin, end]
+   # values range.
+   # For string or enum repeats, the value must either be a valid integer (to be used
+   # as index) or a string matching a valid enum or strings list value.
 
 
-.. py:method:: Client.archive( (Client)arg1, (str)arg2) -> None :
+Usage:
+
+.. code-block:: python
+
+  try:
+     ci = Client()     # uses default host(ECF_HOST) & port(ECF_PORT)
+     ci.alter('/suite/task','change','trigger','b2 == complete')
+  except RuntimeError, e:
+     print(str(e))
+
+
+2. alter(self: ecflow.Client, abs_node_path: str, alter_type: str, attribute_type: str, name: str = '', value: str = '') -> None
+
+
+.. py:method:: Client.archive(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. archive(self: ecflow.Client, arg0: str) -> None
+
 Archives suite or family nodes. Saves the suite/family nodes to disk, and then removes then from the definition
-    This saves memory in the server, when dealing with huge definitions that are not needed.
-    If the node is re-queued or begun, it is automatically restored
-    Use --restore to reload the archived nodes manually
-    The nodes are saved to ECF_HOME/ECF_NAME.check
-    Usage::
-    
-       string archive(
-          list paths # List of paths.
-       )
-       string archive(
-          string absolute_node_path
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
-           print ci.archive('/suite1')
-       except RuntimeError, e:
-           print str(e)
-    
+This saves memory in the server, when dealing with huge definitions that are not needed.
+If the node is re-queued or begun, it is automatically restored
+Use --restore to reload the archived nodes manually
+The nodes are saved to ECF_HOME/ECF_NAME.check
+Usage::
 
-archive( (Client)arg1, (list)arg2) -> None
+   string archive(
+      list paths # List of paths.
+   )
+   string archive(
+      string absolute_node_path
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
+       print ci.archive('/suite1')
+   except RuntimeError, e:
+       print str(e)
 
 
-.. py:method:: Client.begin_all_suites( (Client)arg1 [, (bool)force=False]) -> int :
+2. archive(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.begin_all_suites(self: ecflow.Client, force: bool = False) -> int
    :module: ecflow
 
 Begin playing all the :term:`suite`\ s in the :term:`ecflow_server`
@@ -334,7 +342,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.begin_suite( (Client)arg1, (str)suite_name [, (bool)force=False]) -> int :
+.. py:method:: Client.begin_suite(self: ecflow.Client, suite_name: str, force: bool = False) -> int
    :module: ecflow
 
 Begin playing the chosen :term:`suite`\ s in the :term:`ecflow_server`
@@ -359,129 +367,141 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.ch_add( (Client)arg1, (int)arg2, (list)arg3) -> None :
+.. py:method:: Client.ch_add(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. ch_add(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex, arg1: list) -> None
 
 Add a set of suites, to an existing registered handle
-    
-    When dealing with large definitions, where a user is only interested in a small subset
-    of suites, registering them, improves download performance from the server.
-    Registered suites have an associated handle.
-    ::
-    
-      integer ch_add(
-         integer handle   : the handle obtained after ch_register
-         list suite_names : list of strings representing suite names
-      )
-      integer ch_add(
-         list suite_names : list of strings representing suite names
-      )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           with Client() as ci:       # use default host(ECF_HOST) & port(ECF_PORT)
-              ci.ch_register(True,[]) # register interest in any new suites
-              ci.ch_add(['s1','s2'])  # add suites s1,s2 to the last added handle
-       except RuntimeError, e:
-           print(str(e))
-    
-    
 
-ch_add( (Client)arg1, (list)arg2) -> None
+When dealing with large definitions, where a user is only interested in a small subset
+of suites, registering them, improves download performance from the server.
+Registered suites have an associated handle.
+::
+
+  integer ch_add(
+     integer handle   : the handle obtained after ch_register
+     list suite_names : list of strings representing suite names
+  )
+  integer ch_add(
+     list suite_names : list of strings representing suite names
+  )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       with Client() as ci:       # use default host(ECF_HOST) & port(ECF_PORT)
+          ci.ch_register(True,[]) # register interest in any new suites
+          ci.ch_add(['s1','s2'])  # add suites s1,s2 to the last added handle
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.ch_auto_add( (Client)arg1, (int)arg2, (bool)arg3) -> int :
+
+2. ch_add(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.ch_auto_add(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. ch_auto_add(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex, arg1: bool) -> int
 
 Change an existing handle so that new suites can be added automatically
-    
-    When dealing with large definitions, where a user is only interested in a small subset
-    of suites, registering them, improves download performance from the server.
-    Registered suites have an associated handle.
-    ::
-    
-       void ch_auto_add(
-          integer handle,         : the handle obtained after ch_register
-          bool auto_add_new_suite : automatically add new suites, this handle when they are created
-       )
-       void ch_auto_add(
-          bool auto_add_new_suite : automatically add new suites using handle on the client
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           with Client() as ci:                     # use default host(ECF_HOST) & port(ECF_PORT)
-              ci.ch_register(True,['s1','s2','s3']) # register interest in suites s1,s2,s3 and any new suites
-              ci.ch_auto_add( False )               # disable adding newly created suites to my handle
-       except RuntimeError, e:
-           print(str(e))
-    
-    
 
-ch_auto_add( (Client)arg1, (bool)arg2) -> int
+When dealing with large definitions, where a user is only interested in a small subset
+of suites, registering them, improves download performance from the server.
+Registered suites have an associated handle.
+::
+
+   void ch_auto_add(
+      integer handle,         : the handle obtained after ch_register
+      bool auto_add_new_suite : automatically add new suites, this handle when they are created
+   )
+   void ch_auto_add(
+      bool auto_add_new_suite : automatically add new suites using handle on the client
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       with Client() as ci:                     # use default host(ECF_HOST) & port(ECF_PORT)
+          ci.ch_register(True,['s1','s2','s3']) # register interest in suites s1,s2,s3 and any new suites
+          ci.ch_auto_add( False )               # disable adding newly created suites to my handle
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.ch_drop( (Client)arg1, (int)arg2) -> int :
+
+2. ch_auto_add(self: ecflow.Client, arg0: bool) -> int
+
+
+.. py:method:: Client.ch_drop(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. ch_drop(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> int
+
 Drop/de-register the client handle.
-    
-    When dealing with large definitions, where a user is only interested in a small subset
-    of suites, registering them, improves download performance from the server.
-    Registered suites have an associated handle.
-    Client must ensure un-used handle are dropped otherwise they will stay, in the :term:`ecflow_server`
-    ::
-    
-       void ch_drop(
-          int client_handle : The handle must be an integer that is > 0
-       )
-       void ch_drop()       : Uses the local handle stored on the client, from last call to ch_register()
-    
-    Exception:
-    
-    - RunTimeError thrown if handle has not been previously registered
-    
-    Usage:
-    
-    .. code-block:: python
-    
+
+When dealing with large definitions, where a user is only interested in a small subset
+of suites, registering them, improves download performance from the server.
+Registered suites have an associated handle.
+Client must ensure un-used handle are dropped otherwise they will stay, in the :term:`ecflow_server`
+::
+
+   void ch_drop(
+      int client_handle : The handle must be an integer that is > 0
+   )
+   void ch_drop()       : Uses the local handle stored on the client, from last call to ch_register()
+
+Exception:
+
+- RunTimeError thrown if handle has not been previously registered
+
+Usage:
+
+.. code-block:: python
+
         try:
-          ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)
+      ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)
+      ci.ch_register(False,['s1','s2'])
+      while( 1 ):
+         # get incremental changes to suites s1 & s2, uses data stored on ci/defs
+         ci.sync_local()                # will only retrieve data for suites s1 & s2
+         update(ci.get_defs())
+        finally:
+      ci.ch_drop()
+
+To automatically drop the handle(Preferred) use with
+:
+
+.. code-block:: python
+
+   try:
+       with Client() as ci:
           ci.ch_register(False,['s1','s2'])
           while( 1 ):
-             # get incremental changes to suites s1 & s2, uses data stored on ci/defs
-             ci.sync_local()                # will only retrieve data for suites s1 & s2
-             update(ci.get_defs())
-        finally:
-          ci.ch_drop()
-    
-    To automatically drop the handle(Preferred) use with
-    :
-    
-    .. code-block:: python
-    
-       try:
-           with Client() as ci:
-              ci.ch_register(False,['s1','s2'])
-              while( 1 ):
-                  # get incremental changes to suites s1 & s2, uses data stored on ci/defs
-                  ci.sync_local()                # will only retrieve data for suites s1 & s2
-                  update(ci.get_defs())
-           ....                                  # will automatically drop last handle
-       except RuntimeError, e:
-           print(str(e))
-    
-
-ch_drop( (Client)arg1) -> int
+              # get incremental changes to suites s1 & s2, uses data stored on ci/defs
+              ci.sync_local()                # will only retrieve data for suites s1 & s2
+              update(ci.get_defs())
+       ....                                  # will automatically drop last handle
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.ch_drop_user( (Client)arg1, (str)arg2) -> int :
+2. ch_drop(self: ecflow.Client) -> int
+
+
+.. py:method:: Client.ch_drop_user(self: ecflow.Client, arg0: str) -> int
    :module: ecflow
 
 Drop/de-register all handles associated with user.
@@ -514,8 +534,7 @@ Usage:
       ci.ch_drop_user('') # drop all handles associated with current user
 
 
-
-.. py:method:: Client.ch_handle( (Client)arg1) -> int :
+.. py:method:: Client.ch_handle(self: ecflow.Client) -> int
    :module: ecflow
 
 Register interest in a set of :term:`suite`\ s.
@@ -572,7 +591,7 @@ To automatically drop the handle(preferred) use with:
        print(str(e))
 
 
-.. py:method:: Client.ch_register( (Client)arg1, (bool)arg2, (list)arg3) -> None :
+.. py:method:: Client.ch_register(self: ecflow.Client, arg0: bool, arg1: list) -> None
    :module: ecflow
 
 Register interest in a set of :term:`suite`\ s.
@@ -629,41 +648,45 @@ To automatically drop the handle(preferred) use with:
        print(str(e))
 
 
-.. py:method:: Client.ch_remove( (Client)arg1, (int)arg2, (list)arg3) -> None :
+.. py:method:: Client.ch_remove(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. ch_remove(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex, arg1: list) -> None
 
 Remove a set of suites, from an existing handle
-    
-    When dealing with large definitions, where a user is only interested in a small subset
-    of suites, registering them, improves download performance from the server.
-    Registered suites have an associated handle.
-    ::
-    
-      integer ch_remove(
-         integer handle   : the handle obtained after ch_register
-         list suite_names : list of strings representing suite names
-      )
-      integer ch_remove(
-         list suite_names : list of strings representing suite names
-      )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           with Client() as ci:                     # use default host(ECF_HOST) & port(ECF_PORT)
-              ci.ch_register(True,['s1','s2','s3']) # register interest in suites s1,s2,s3 and any new suites
-              ci.ch_remove( ['s1'] )                # remove suites s1 from the last added handle
-       except RuntimeError, e:
-           print(str(e))
-    
-    
 
-ch_remove( (Client)arg1, (list)arg2) -> None
+When dealing with large definitions, where a user is only interested in a small subset
+of suites, registering them, improves download performance from the server.
+Registered suites have an associated handle.
+::
+
+  integer ch_remove(
+     integer handle   : the handle obtained after ch_register
+     list suite_names : list of strings representing suite names
+  )
+  integer ch_remove(
+     list suite_names : list of strings representing suite names
+  )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       with Client() as ci:                     # use default host(ECF_HOST) & port(ECF_PORT)
+          ci.ch_register(True,['s1','s2','s3']) # register interest in suites s1,s2,s3 and any new suites
+          ci.ch_remove( ['s1'] )                # remove suites s1 from the last added handle
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.ch_suites( (Client)arg1) -> None :
+
+2. ch_remove(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.ch_suites(self: ecflow.Client) -> None
    :module: ecflow
 
 Writes to standard out the list of registered handles and the suites they reference.
@@ -709,38 +732,42 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.check( (Client)arg1, (str)arg2) -> str :
+.. py:method:: Client.check(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. check(self: ecflow.Client, arg0: str) -> str
+
 Check :term:`trigger` and :term:`complete expression`\ s and :term:`limit`\ s
-    
-    The :term:`ecflow_server` does not store :term:`extern`\ s. Hence all unresolved references
-    are reported as errors.
-    Returns a non empty string for any errors or warning
-    ::
-    
-       string check(
-          list paths # List of paths.
-       )
-       string check(
-          string absolute_node_path
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
-           print(ci.check('/suite1'))
-       except RuntimeError, e:
-           print(str(e))
-    
 
-check( (Client)arg1, (list)arg2) -> str
+The :term:`ecflow_server` does not store :term:`extern`\ s. Hence all unresolved references
+are reported as errors.
+Returns a non empty string for any errors or warning
+::
+
+   string check(
+      list paths # List of paths.
+   )
+   string check(
+      string absolute_node_path
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
+       print(ci.check('/suite1'))
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.checkpt( (Client)arg1 [, (CheckPt)mode=ecflow.CheckPt.UNDEFINED [, (int)check_pt_interval=0 [, (int)check_pt_save_alarm_time=0]]]) -> int :
+2. check(self: ecflow.Client, arg0: list) -> str
+
+
+.. py:method:: Client.checkpt(self: ecflow.Client, mode: ecflow.CheckPt = <CheckPt.UNDEFINED: 3>, check_pt_interval: typing.SupportsInt | typing.SupportsIndex = 0, check_pt_save_alarm_time: typing.SupportsInt | typing.SupportsIndex = 0) -> int
    :module: ecflow
 
 Request the :term:`ecflow_server` :term:`check point`\ s the definition held in the server immediately
@@ -793,55 +820,55 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.child_abort( (Client)arg1 [, (str)reason='']) -> None :
+.. py:method:: Client.child_abort(self: ecflow.Client, reason: str = '') -> None
    :module: ecflow
 
 Child command,notify server job has aborted, can provide an optional reason
 
 
-.. py:method:: Client.child_complete( (Client)arg1) -> None :
+.. py:method:: Client.child_complete(self: ecflow.Client) -> None
    :module: ecflow
 
 Child command,notify server job has complete
 
 
-.. py:method:: Client.child_event( (Client)arg1, (str)event_name [, (bool)value=True]) -> None :
+.. py:method:: Client.child_event(self: ecflow.Client, event_name: str, value: bool = True) -> None
    :module: ecflow
 
 Child command,notify server event occurred, requires the event name
 
 
-.. py:method:: Client.child_init( (Client)arg1) -> None :
+.. py:method:: Client.child_init(self: ecflow.Client) -> None
    :module: ecflow
 
 Child command,notify server job has started
 
 
-.. py:method:: Client.child_label( (Client)arg1, (str)arg2, (str)arg3) -> None :
+.. py:method:: Client.child_label(self: ecflow.Client, arg0: str, arg1: str) -> None
    :module: ecflow
 
 Child command,notify server label changed, requires label name, and new value
 
 
-.. py:method:: Client.child_meter( (Client)arg1, (str)arg2, (int)arg3) -> None :
+.. py:method:: Client.child_meter(self: ecflow.Client, arg0: str, arg1: typing.SupportsInt | typing.SupportsIndex) -> None
    :module: ecflow
 
 Child command,notify server meter changed, requires meter name and value
 
 
-.. py:method:: Client.child_queue( (Client)arg1, (str)queue_name, (str)action [, (str)step='' [, (str)path_to_node_with_queue='']]) -> str :
+.. py:method:: Client.child_queue(self: ecflow.Client, queue_name: str, action: str, step: str = '', path_to_node_with_queue: str = '') -> str
    :module: ecflow
 
-Child command,active:return current step as string, then increment index, requires queue name, and optionally path to node with the queue
+Child command,active:return current step as string, then increment index,requires queue name, and optionally path to node with the queue
 
 
-.. py:method:: Client.child_wait( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.child_wait(self: ecflow.Client, arg0: str) -> None
    :module: ecflow
 
 Child command,wait for expression to come true
 
 
-.. py:method:: Client.clear_log( (Client)arg1) -> int :
+.. py:method:: Client.clear_log(self: ecflow.Client) -> int
    :module: ecflow
 
 Request the :term:`ecflow_server` to clear log file.
@@ -860,62 +887,66 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.debug( (Client)arg1, (bool)arg2) -> None :
+.. py:method:: Client.debug(self: ecflow.Client, arg0: bool) -> None
    :module: ecflow
 
 enable/disable client api debug
 
 
-.. py:method:: Client.debug_server_off( (Client)arg1) -> int :
+.. py:method:: Client.debug_server_off(self: ecflow.Client) -> int
    :module: ecflow
 
 Disable server debug
 
 
-.. py:method:: Client.debug_server_on( (Client)arg1) -> int :
+.. py:method:: Client.debug_server_on(self: ecflow.Client) -> int
    :module: ecflow
 
 Enable server debug, Will dump to standard out on server host.
 
 
-.. py:method:: Client.delete( (Client)arg1, (str)abs_node_path [, (bool)force=False]) -> int :
+.. py:method:: Client.delete(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. delete(self: ecflow.Client, abs_node_path: str, force: bool = False) -> int
+
 Delete the :term:`node` (s) specified.
-    
-    If a node is :term:`submitted` or :term:`active`, then a Exception will be raised.
-    To force the deletion at the expense of :term:`zombie` creation, then set
-    the force parameter to true
-    ::
-    
-       void delete(
-          list paths          : List of paths.
-          [(bool)force=False] : If true delete even if in 'active' or 'submitted' states
-                                Which risks creating zombies.
-       )
-       void delete(
-          string absolute_node_path: Path name of node to delete.
-          [(bool)force=False]       : If true delete even if in 'active' or 'submitted' states
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.delete('/s1/f1/task1')
-    
-           paths = ['/s1/f1/t1','/s2/f1/t2']
-           ci.delete(paths)                  # delete all tasks specified in the paths
-       except RuntimeError, e:
-           print(str(e))
-    
 
-delete( (Client)arg1, (list)paths [, (bool)force=False]) -> None
+If a node is :term:`submitted` or :term:`active`, then a Exception will be raised.
+To force the deletion at the expense of :term:`zombie` creation, then set
+the force parameter to true
+::
+
+   void delete(
+      list paths          : List of paths.
+      [(bool)force=False] : If true delete even if in 'active' or 'submitted' states
+                            Which risks creating zombies.
+   )
+   void delete(
+      string absolute_node_path: Path name of node to delete.
+      [(bool)force=False]       : If true delete even if in 'active' or 'submitted' states
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()                     # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.delete('/s1/f1/task1')
+
+       paths = ['/s1/f1/t1','/s2/f1/t2']
+       ci.delete(paths)                  # delete all tasks specified in the paths
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.delete_all( (Client)arg1 [, (bool)force=False]) -> int :
+2. delete(self: ecflow.Client, paths: list, force: bool = False) -> None
+
+
+.. py:method:: Client.delete_all(self: ecflow.Client, force: bool = False) -> int
    :module: ecflow
 
 Delete all the :term:`node`\ s held in the :term:`ecflow_server`.
@@ -943,7 +974,7 @@ Usage:
        print(str(e));    # expect failure since all nodes deleted
 
 
-.. py:method:: Client.disable_ssl( (Client)arg1) -> None :
+.. py:method:: Client.disable_ssl(self: ecflow.Client) -> None
    :module: ecflow
 
 Disable secure communication between client and server.
@@ -961,21 +992,19 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.edit_script_edit( (Client)arg1, (str)arg2) -> str :
+.. py:method:: Client.edit_script_edit(self: ecflow.Client, arg0: str) -> str
    :module: ecflow
 
 get script for Edit
-    
 
 
-.. py:method:: Client.edit_script_preprocess( (Client)arg1, (str)arg2) -> str :
+.. py:method:: Client.edit_script_preprocess(self: ecflow.Client, arg0: str) -> str
    :module: ecflow
 
 get script for Edit Preprocess
-    
 
 
-.. py:method:: Client.edit_script_submit( (Client)arg1, (str)arg2, (list)arg3, (list)arg4, (bool)arg5, (bool)arg6) -> int :
+.. py:method:: Client.edit_script_submit(self: ecflow.Client, arg0: str, arg1: list, arg2: list, arg3: bool, arg4: bool) -> int
    :module: ecflow
 
 submit script from Edit/Preprocess 
@@ -985,26 +1014,26 @@ to run as alias or not:
 
  ci = Client()
  ci.edit_script_submit(path_to_task,
-                       used_variables, # array name=value
-                       file_contents,  # strings array
-                       alias, # bool False,
-                       run  # bool true
+                           used_variables, # array name=value
+                           file_contents,  # strings array
+                           alias, # bool False,
+                           run  # bool true
                       )
 
 
-.. py:method:: Client.enable_http( (Client)arg1) -> None :
+.. py:method:: Client.enable_http(self: ecflow.Client) -> None
    :module: ecflow
 
 Enable HTTP communication
 
 
-.. py:method:: Client.enable_https( (Client)arg1) -> None :
+.. py:method:: Client.enable_https(self: ecflow.Client) -> None
    :module: ecflow
 
 Enable HTTPS communication
 
 
-.. py:method:: Client.enable_ssl( (Client)arg1) -> None :
+.. py:method:: Client.enable_ssl(self: ecflow.Client) -> None
    :module: ecflow
 
 Enable secure communication between client and server.
@@ -1022,7 +1051,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.flush_log( (Client)arg1) -> int :
+.. py:method:: Client.flush_log(self: ecflow.Client) -> int
    :module: ecflow
 
 Request the :term:`ecflow_server` to flush and then close log file
@@ -1041,232 +1070,260 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.force_event( (Client)arg1, (str)arg2, (str)arg3) -> None :
+.. py:method:: Client.force_event(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. force_event(self: ecflow.Client, arg0: str, arg1: str) -> None
 
 Set or clear a :term:`event`
-    ::
-    
-       void force_event(
-          string absolute_node_path:event: Path name to node: < event name | number>
-                                           The paths must begin with a leading '/'
-          string signal                  : [ set | clear ]
-       )
-       void force_event(
-          list paths    : A list of absolute node paths. Each path must include a event name
-                          The paths must begin with a leading '/'
-          string signal : [ set | clear ]
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.force_event('/s1/f1:event_name','set')
-    
-           # Set or clear a event for a list of events
-           paths = [ '/s1/t1:ev1', '/s2/t2:ev2' ]
-           ci.force_event(paths,'clear')
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-force_event( (Client)arg1, (list)arg2, (str)arg3) -> None
+   void force_event(
+      string absolute_node_path:event: Path name to node: < event name | number>
+                                       The paths must begin with a leading '/'
+      string signal                  : [ set | clear ]
+   )
+   void force_event(
+      list paths    : A list of absolute node paths. Each path must include a event name
+                      The paths must begin with a leading '/'
+      string signal : [ set | clear ]
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.force_event('/s1/f1:event_name','set')
+
+       # Set or clear a event for a list of events
+       paths = [ '/s1/t1:ev1', '/s2/t2:ev2' ]
+       ci.force_event(paths,'clear')
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.force_state( (Client)arg1, (str)arg2, (State)arg3) -> None :
+2. force_event(self: ecflow.Client, arg0: list, arg1: str) -> None
+
+
+.. py:method:: Client.force_state(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. force_state(self: ecflow.Client, arg0: str, arg1: ecflow.State) -> None
 
 Force a node(s) to a given state
-    
-    When a :term:`task` is set to :term:`complete`, it may be automatically re-queued if it has
-    multiple time :term:`dependencies`. In the specific case where a task has a single
-    time dependency and we want to interactively set it to :term:`complete`
-    a flag is set so that it is not automatically re-queued when set to complete.
-    The flag is applied up the node hierarchy until reach a node with a :term:`repeat`
-    or :term:`cron` attribute. This behaviour allow :term:`repeat` values to be incremented interactively.
-    A :term:`repeat` attribute is incremented when all the child nodes are :term:`complete`
-    in this case the child nodes are automatically re-queued
-    ::
-    
-       void force_state(
-          string absolute_node_path: Path name to node. The path must begin with a leading '/'
-          State::State state       : [ unknown | complete | queued | submitted | active | aborted ]
-       )
-       void force_state(
-          list paths         : A list of absolute node paths. The paths must begin with a leading '/'
-          State::State state : [ unknown | complete | queued | submitted | active | aborted ]
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-           # force a single node to complete
-           ci.force_state('/s1/f1',State.complete)
-    
-           # force a list of nodes to complete
-           paths = [ '/s1/t1', '/s1/t2', '/s1/f1/t1' ]
-           ci.force_state(paths,State.complete)
-       except RuntimeError, e:
-           print(str(e))
-    
-    Effect:
-    
-    Lets see the effect of forcing complete on the following defs
-    
-    .. code-block:: shell
-    
-       suite s1
-          task t1; time 10:00             # will complete straight away
-          task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth 
-    
-    In the last case (task t2) after each force complete, the next time slot is incremented.
-    This can be seen by calling the Why command.
 
-force_state( (Client)arg1, (list)arg2, (State)arg3) -> None
+When a :term:`task` is set to :term:`complete`, it may be automatically re-queued if it has
+multiple time :term:`dependencies`. In the specific case where a task has a single
+time dependency and we want to interactively set it to :term:`complete`
+a flag is set so that it is not automatically re-queued when set to complete.
+The flag is applied up the node hierarchy until reach a node with a :term:`repeat`
+or :term:`cron` attribute. This behaviour allow :term:`repeat` values to be incremented interactively.
+A :term:`repeat` attribute is incremented when all the child nodes are :term:`complete`
+in this case the child nodes are automatically re-queued
+::
+
+   void force_state(
+      string absolute_node_path: Path name to node. The path must begin with a leading '/'
+      State::State state       : [ unknown | complete | queued | submitted | active | aborted ]
+   )
+   void force_state(
+      list paths         : A list of absolute node paths. The paths must begin with a leading '/'
+      State::State state : [ unknown | complete | queued | submitted | active | aborted ]
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
+       # force a single node to complete
+       ci.force_state('/s1/f1',State.complete)
+
+       # force a list of nodes to complete
+       paths = [ '/s1/t1', '/s1/t2', '/s1/f1/t1' ]
+       ci.force_state(paths,State.complete)
+   except RuntimeError, e:
+       print(str(e))
+
+Effect:
+
+Lets see the effect of forcing complete on the following defs
+
+.. code-block:: shell
+
+   suite s1
+      task t1; time 10:00             # will complete straight away
+      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth 
+
+In the last case (task t2) after each force complete, the next time slot is incremented.
+This can be seen by calling the Why command.
+
+2. force_state(self: ecflow.Client, arg0: list, arg1: ecflow.State) -> None
 
 
-.. py:method:: Client.force_state_recursive( (Client)arg1, (str)arg2, (State)arg3) -> None :
+.. py:method:: Client.force_state_recursive(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. force_state_recursive(self: ecflow.Client, arg0: str, arg1: ecflow.State) -> None
 
 Force node(s) to a given state recursively
-    ::
-    
-       void force_state_recursive(
-          string absolute_node_path: Path name to node.The paths must begin with a leading '/'
-          State::State state       : [ unknown | complete | queued | submitted | active | aborted ]
-       )
-       void force_state_recursive(
-          list  paths         : A list of absolute node paths.The paths must begin with a leading '/'
-          State::State state  : [ unknown | complete | queued | submitted | active | aborted ]
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-      try:
-          ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-          ci.force_state_recursive('/s1/f1',State.complete)
-    
-          # recursively force a list of nodes to complete
-          paths = [ '/s1', '/s2', '/s1/f1/t1' ]
-          ci.force_state_recursive(paths,State.complete)
-      except RuntimeError, e:
-          print(str(e))
-    
+::
 
-force_state_recursive( (Client)arg1, (list)arg2, (State)arg3) -> None
+   void force_state_recursive(
+      string absolute_node_path: Path name to node.The paths must begin with a leading '/'
+      State::State state       : [ unknown | complete | queued | submitted | active | aborted ]
+   )
+   void force_state_recursive(
+      list  paths         : A list of absolute node paths.The paths must begin with a leading '/'
+      State::State state  : [ unknown | complete | queued | submitted | active | aborted ]
+   )
+
+Usage:
+
+.. code-block:: python
+
+  try:
+      ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
+      ci.force_state_recursive('/s1/f1',State.complete)
+
+      # recursively force a list of nodes to complete
+      paths = [ '/s1', '/s2', '/s1/f1/t1' ]
+      ci.force_state_recursive(paths,State.complete)
+  except RuntimeError, e:
+      print(str(e))
 
 
-.. py:method:: Client.free_all_dep( (Client)arg1, (str)arg2) -> None :
+2. force_state_recursive(self: ecflow.Client, arg0: list, arg1: ecflow.State) -> None
+
+
+.. py:method:: Client.free_all_dep(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. free_all_dep(self: ecflow.Client, arg0: str) -> None
 
 Free all :term:`trigger`, :term:`date` and all time(:term:`day`, :term:`today`, :term:`cron`,etc) :term:`dependencies`
-    ::
-    
-       void free_all_dep(
-          string absolute_node_path : Path name to node
-       )
-    
-    After freeing the time related dependencies (i.e time,today,cron)
-    the next time slot will be missed.
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.free_all_dep('/s1/task')
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-free_all_dep( (Client)arg1, (list)arg2) -> None
+   void free_all_dep(
+      string absolute_node_path : Path name to node
+   )
+
+After freeing the time related dependencies (i.e time,today,cron)
+the next time slot will be missed.
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.free_all_dep('/s1/task')
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.free_date_dep( (Client)arg1, (str)arg2) -> None :
+2. free_all_dep(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.free_date_dep(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. free_date_dep(self: ecflow.Client, arg0: str) -> None
 
 Free :term:`date` :term:`dependencies` for a :term:`node`
-    ::
-    
-       void free_date_dep(
-          string absolute_node_path : Path name to node
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.free_date_dep('/s1/task')
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-free_date_dep( (Client)arg1, (list)arg2) -> None
+   void free_date_dep(
+      string absolute_node_path : Path name to node
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.free_date_dep('/s1/task')
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.free_time_dep( (Client)arg1, (str)arg2) -> None :
+2. free_date_dep(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.free_time_dep(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. free_time_dep(self: ecflow.Client, arg0: str) -> None
 
 Free all time :term:`dependencies`. i.e :term:`time`, :term:`day`, :term:`today`, :term:`cron`
-    ::
-    
-       void free_time_dep(
-          string absolute_node_path : Path name to node
-       )
-    
-    After freeing the time related dependencies (i.e time,today,cron)
-    the next time slot will be missed.
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.free_time_dep('/s1/task')
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-free_time_dep( (Client)arg1, (list)arg2) -> None
+   void free_time_dep(
+      string absolute_node_path : Path name to node
+   )
+
+After freeing the time related dependencies (i.e time,today,cron)
+the next time slot will be missed.
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.free_time_dep('/s1/task')
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.free_trigger_dep( (Client)arg1, (str)arg2) -> None :
+2. free_time_dep(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.free_trigger_dep(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. free_trigger_dep(self: ecflow.Client, arg0: str) -> None
+
 Free :term:`trigger` :term:`dependencies` for a :term:`node`
-    ::
-    
-       void free_trigger_dep(
-          string absolute_node_path : Path name to node
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.free_trigger_dep('/s1/f1/task')
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-free_trigger_dep( (Client)arg1, (list)arg2) -> None
+   void free_trigger_dep(
+      string absolute_node_path : Path name to node
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()         # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.free_trigger_dep('/s1/f1/task')
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.get_certificate( (Client)arg1) -> str :
+2. free_trigger_dep(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.get_certificate(self: ecflow.Client) -> str
    :module: ecflow
 
 Retrieves the full path to the secure communication certificate currently used by the client.
@@ -1284,7 +1341,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.get_defs( (Client)arg1) -> Defs :
+.. py:method:: Client.get_defs(self: ecflow.Client) -> ecflow.Defs
    :module: ecflow
 
 Returns the :term:`suite definition` stored on the Client.
@@ -1305,7 +1362,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.get_file( (Client)arg1, (str)task [, (str)type='script' [, (str)max_lines='10000' [, (bool)as_bytes=False]]]) -> object :
+.. py:method:: Client.get_file(self: ecflow.Client, task: str, type: str = 'script', max_lines: str = '10000', as_bytes: bool = False) -> object
    :module: ecflow
 
 The File command is used to request the various file types associated with a :term:`node`.
@@ -1334,13 +1391,13 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.get_host( (Client)arg1) -> str :
+.. py:method:: Client.get_host(self: ecflow.Client) -> str
    :module: ecflow
 
-Return the host, assume set_host_port() has been set, otherwise return localhost
+Returns the host, assume set_host_port() has been set, otherwise return localhost
 
 
-.. py:method:: Client.get_log( (Client)arg1, (int)arg2) -> str :
+.. py:method:: Client.get_log(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> str
    :module: ecflow
 
 Request the :term:`ecflow_server` to return the log file contents as a string
@@ -1359,13 +1416,13 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.get_port( (Client)arg1) -> str :
+.. py:method:: Client.get_port(self: ecflow.Client) -> str
    :module: ecflow
 
-Return the port, assume set_host_port() has been set. otherwise returns 3141
+Returns the port, assume set_host_port() has been set, otherwise returns 3141
 
 
-.. py:method:: Client.get_server_defs( (Client)arg1) -> int :
+.. py:method:: Client.get_server_defs(self: ecflow.Client) -> int
    :module: ecflow
 
 Get all suite Node tree's from the :term:`ecflow_server`.
@@ -1390,7 +1447,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.group( (Client)arg1, (str)arg2) -> int :
+.. py:method:: Client.group(self: ecflow.Client, arg0: str) -> int
    :module: ecflow
 
 Allows a series of commands to be executed in the :term:`ecflow_server`
@@ -1412,7 +1469,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.halt_server( (Client)arg1) -> int :
+.. py:method:: Client.halt_server(self: ecflow.Client) -> int
    :module: ecflow
 
 Halt the :term:`ecflow_server`
@@ -1431,7 +1488,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.in_sync( (Client)arg1) -> bool :
+.. py:method:: Client.in_sync(self: ecflow.Client) -> bool
    :module: ecflow
 
 Returns true if the definition on the client is in sync with the :term:`ecflow_server`
@@ -1455,13 +1512,13 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.is_auto_sync_enabled( (Client)arg1) -> bool :
+.. py:method:: Client.is_auto_sync_enabled(self: ecflow.Client) -> bool
    :module: ecflow
 
 Returns true if automatic syncing enabled
 
 
-.. py:method:: Client.job_generation( (Client)arg1, (str)arg2) -> int :
+.. py:method:: Client.job_generation(self: ecflow.Client, arg0: str) -> int
    :module: ecflow
 
 Job submission for chosen Node *based* on :term:`dependencies`
@@ -1487,120 +1544,128 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.kill( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.kill(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. kill(self: ecflow.Client, arg0: str) -> None
 
 Kills the job associated with the :term:`node`
-    ::
-    
-       void kill(
-          list paths: List of paths. Paths must begin with a leading '/' character
-       )
-       void kill(
-          string absolute_node_path: Path name to node to kill.
-       )
-    
-    If a :term:`family` or :term:`suite` is selected, will kill hierarchically.
-    Kill uses the ECF_KILL_CMD variable. After :term:`variable substitution` it is invoked as a command.
-    The ECF_KILL_CMD variable should be written in such a way that the output is written to %ECF_JOB%.kill, i.e:
-    
-    .. code-block:: shell
-    
-       kill -15 %ECF_RID% > %ECF_JOB%.kill 2>&1
-       /home/ma/emos/bin/ecfkill %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1
-    
-    
-    Exceptions can be raised because:
-    
-    - The absolute_node_path does not exist in the server
-    - ECF_KILL_CMD variable is not defined
-    - :term:`variable substitution` fails
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.kill('/s1/f1')
-           time.sleep(2)
-           print(ci.file('/s1/t1','kill')) # request kill output
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-kill( (Client)arg1, (list)arg2) -> None
+   void kill(
+      list paths: List of paths. Paths must begin with a leading '/' character
+   )
+   void kill(
+      string absolute_node_path: Path name to node to kill.
+   )
+
+If a :term:`family` or :term:`suite` is selected, will kill hierarchically.
+Kill uses the ECF_KILL_CMD variable. After :term:`variable substitution` it is invoked as a command.
+The ECF_KILL_CMD variable should be written in such a way that the output is written to %ECF_JOB%.kill, i.e:
+
+.. code-block:: shell
+
+   kill -15 %ECF_RID% > %ECF_JOB%.kill 2>&1
+   /home/ma/emos/bin/ecfkill %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1
 
 
-.. py:method:: Client.load( (Client)arg1, (str)path_to_defs [, (bool)force=False [, (bool)check_only=False [, (bool)print=False [, (bool)stats=False]]]]) -> int :
+Exceptions can be raised because:
+
+- The absolute_node_path does not exist in the server
+- ECF_KILL_CMD variable is not defined
+- :term:`variable substitution` fails
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.kill('/s1/f1')
+       time.sleep(2)
+       print(ci.file('/s1/t1','kill')) # request kill output
+   except RuntimeError, e:
+       print(str(e))
+
+
+2. kill(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.load(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. load(self: ecflow.Client, path_to_defs: str, force: bool = False, check_only: bool = False, print: bool = False, stats: bool = False) -> int
 
 Load a :term:`suite definition` or checkpoint file given by the file_path argument into the :term:`ecflow_server`
-    ::
-    
-       void load(
-          string file_path     : path name to the definition file
-          [(bool)force=False]  : If true overwrite suite of same name
-          [(bool)print=False]  : print parsed defs to standard out
-       )
-    
-    By default throws a RuntimeError exception for errors.
-    If force is not used and :term:`suite` of the same name already exists in the server,
-    then a error is thrown
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       defs_file = 'Hello.def' 
-       defs = Defs()
-       suite = def.add_suite('s1')
-       family = suite.add_family('f1')
-       for i in [ '_1', '_2', '_3' ]:
-          family.add_task( 't' + i )
-       defs.save_as_defs(defs_file)  # write out in memory defs into the file 'Hello.def'
-       ...
-       try:
-           ci = Client()       # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.load(defs_file)  # open and parse defs or checkpoint file, and load into server.
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-load( (Client)arg1, (Defs)defs [, (bool)force=False]) -> int :
-    Load a in memory :term:`suite definition` into the :term:`ecflow_server`
-    ::
-    
-       void load(
-          Defs defs           : A in memory definition
-          [(bool)force=False] : for true overwrite suite of same name
-       )
-    
-    If force is not used and :term:`suite` already exists in the server, then a error is thrown.
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       defs = Defs()
-       suite = defs.add_suite('s1')
-       family = suite.add_family('f1')
-       for i in [ '_1', '_2', '_3' ]: 
-           family.add_task( Task( 't' + i) )
-       ...
-       try:
-           ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.load(defs)    # Load in memory defs, into the server
-       except RuntimeError, e:
-           print(str(e))
-    
+   void load(
+      string file_path     : path name to the definition file
+      [(bool)force=False]  : If true overwrite suite of same name
+      [(bool)print=False]  : print parsed defs to standard out
+   )
+
+By default throws a RuntimeError exception for errors.
+If force is not used and :term:`suite` of the same name already exists in the server,
+then a error is thrown
+
+Usage:
+
+.. code-block:: python
+
+   defs_file = 'Hello.def' 
+   defs = Defs()
+   suite = def.add_suite('s1')
+   family = suite.add_family('f1')
+   for i in [ '_1', '_2', '_3' ]:
+      family.add_task( 't' + i )
+   defs.save_as_defs(defs_file)  # write out in memory defs into the file 'Hello.def'
+   ...
+   try:
+       ci = Client()       # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.load(defs_file)  # open and parse defs or checkpoint file, and load into server.
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.log_msg( (Client)arg1, (str)arg2) -> int
+2. load(self: ecflow.Client, defs: ecflow.Defs, force: bool = False) -> int
+
+Load a in memory :term:`suite definition` into the :term:`ecflow_server`
+::
+
+   void load(
+      Defs defs           : A in memory definition
+      [(bool)force=False] : for true overwrite suite of same name
+   )
+
+If force is not used and :term:`suite` already exists in the server, then a error is thrown.
+
+Usage:
+
+.. code-block:: python
+
+   defs = Defs()
+   suite = defs.add_suite('s1')
+   family = suite.add_family('f1')
+   for i in [ '_1', '_2', '_3' ]: 
+       family.add_task( Task( 't' + i) )
+   ...
+   try:
+       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.load(defs)    # Load in memory defs, into the server
+   except RuntimeError, e:
+       print(str(e))
+
+
+.. py:method:: Client.log_msg(self: ecflow.Client, arg0: str) -> int
    :module: ecflow
 
 
-.. py:method:: Client.new_log( (Client)arg1 [, (str)path='']) -> int :
+.. py:method:: Client.new_log(self: ecflow.Client, path: str = '') -> int
    :module: ecflow
 
 Request the :term:`ecflow_server` to use the path provided, as the new log file
@@ -1621,7 +1686,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.news_local( (Client)arg1) -> bool :
+.. py:method:: Client.news_local(self: ecflow.Client) -> bool
    :module: ecflow
 
 Query the :term:`ecflow_server` to detect any changes.
@@ -1650,7 +1715,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.order( (Client)arg1, (str)arg2, (str)arg3) -> None :
+.. py:method:: Client.order(self: ecflow.Client, arg0: str, arg1: str) -> None
    :module: ecflow
 
 Re-orders the :term:`node`\ s in the :term:`suite definition` held by the :term:`ecflow_server`
@@ -1687,7 +1752,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.ping( (Client)arg1) -> int :
+.. py:method:: Client.ping(self: ecflow.Client) -> int
    :module: ecflow
 
 Checks if the :term:`ecflow_server` is running
@@ -1713,7 +1778,7 @@ Usage:
        print('------- Server *NOT* running------' + str(e))
 
 
-.. py:method:: Client.plug( (Client)arg1, (str)arg2, (str)arg3) -> int :
+.. py:method:: Client.plug(self: ecflow.Client, arg0: str, arg1: str) -> int
    :module: ecflow
 
 Plug command is used to move :term:`node`\ s
@@ -1750,7 +1815,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.query( (Client)arg1, (str)arg2, (str)arg3 [, (str)arg4]) -> str :
+.. py:method:: Client.query(self: ecflow.Client, query_type: str, path_to_attribute: str, attribute: str = '') -> str
    :module: ecflow
 
 Query the status of event, meter, state, variable, limit, limit_max or trigger expression without blocking
@@ -1803,19 +1868,19 @@ Usage:
        print str(e)
 
 
-.. py:method:: Client.reload_custom_passwd_file( (Client)arg1) -> int :
+.. py:method:: Client.reload_custom_passwd_file(self: ecflow.Client) -> int
    :module: ecflow
 
 reload the custom passwd file. <host>.<port>.ecf.custom_passwd. For users using ECF_USER or --user or set_user_name()
 
 
-.. py:method:: Client.reload_passwd_file( (Client)arg1) -> int :
+.. py:method:: Client.reload_passwd_file(self: ecflow.Client) -> int
    :module: ecflow
 
 reload the passwd file. <host>.<port>.ecf.passwd
 
 
-.. py:method:: Client.reload_wl_file( (Client)arg1) -> int :
+.. py:method:: Client.reload_wl_file(self: ecflow.Client) -> int
    :module: ecflow
 
 Request that the :term:`ecflow_server` reload the white list file.
@@ -1836,107 +1901,115 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.replace( (Client)arg1, (str)arg2, (str)arg3, (bool)arg4, (bool)arg5) -> int :
+.. py:method:: Client.replace(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. replace(self: ecflow.Client, arg0: str, arg1: str, arg2: bool, arg3: bool) -> int
 
 Replaces a :term:`node` in a :term:`suite definition` with the given path. The definition is in the :term:`ecflow_server`
-    ::
-    
-       void replace(
-          string absolute_node_path: Path name to node in the client defs.
-                                     This is also the node we want to replace in the server.
-          string client_defs_file  : File path to defs files, that provides the definition of the new node
-          [(bool)parent=False]     : create parent families or suite as needed,
-                                     when absolute_node_path does not exist in the server
-          [(bool)force=False]      : check for zombies, if force = true, bypass checks
-       )
-    
-       void replace(
-          string absolute_node_path: Path name to node in the client defs.
-                                     This is also the node we want to replace in the server.
-          Defs client_defs         : In memory client definition that provides the definition of the new node
-          [(bool)parent=False]     : create parent families or suite as needed,
-                                     when absolute_node_path does not exist in the server
-          [(bool)force=False]      : check for zombies, force = true, bypass checks
-       )
-    
-    Exceptions can be raised because:
-    
-    - The absolute_node_path does not exist in the provided definition
-    - The provided client definition must be free of errors
-    - If the third argument is not provided, then the absolute_node_path must exist in the server defs
-    - replace will fail, if child task nodes are in :term:`active` / :term:`submitted` state
-    
-    After replace is done, we check trigger expressions. These are reported to standard output.
-    It is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.
-    Please note, you can use check() to check trigger expression and limits in the server.
-    
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.replace('/s1/f1','/tmp/defs.def')
-       except RuntimeError, e:
-           print(str(e))
-    
-       try:
-           ci.replace('/s1',client_defs) # replace suite 's1' in the server, with 's1' in the client_defs
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-replace( (Client)arg1, (str)arg2, (Defs)arg3, (bool)arg4, (bool)arg5) -> int
+   void replace(
+      string absolute_node_path: Path name to node in the client defs.
+                                 This is also the node we want to replace in the server.
+      string client_defs_file  : File path to defs files, that provides the definition of the new node
+      [(bool)parent=False]     : create parent families or suite as needed,
+                                 when absolute_node_path does not exist in the server
+      [(bool)force=False]      : check for zombies, if force = true, bypass checks
+   )
 
-replace( (Client)arg1, (str)arg2, (Defs)arg3) -> None
+   void replace(
+      string absolute_node_path: Path name to node in the client defs.
+                                 This is also the node we want to replace in the server.
+      Defs client_defs         : In memory client definition that provides the definition of the new node
+      [(bool)parent=False]     : create parent families or suite as needed,
+                                 when absolute_node_path does not exist in the server
+      [(bool)force=False]      : check for zombies, force = true, bypass checks
+   )
 
-replace( (Client)arg1, (str)arg2, (str)arg3) -> None
+Exceptions can be raised because:
+
+- The absolute_node_path does not exist in the provided definition
+- The provided client definition must be free of errors
+- If the third argument is not provided, then the absolute_node_path must exist in the server defs
+- replace will fail, if child task nodes are in :term:`active` / :term:`submitted` state
+
+After replace is done, we check trigger expressions. These are reported to standard output.
+It is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.
+Please note, you can use check() to check trigger expression and limits in the server.
 
 
-.. py:method:: Client.requeue( (Client)arg1, (str)abs_node_path [, (str)option='']) -> None :
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.replace('/s1/f1','/tmp/defs.def')
+   except RuntimeError, e:
+       print(str(e))
+
+   try:
+       ci.replace('/s1',client_defs) # replace suite 's1' in the server, with 's1' in the client_defs
+   except RuntimeError, e:
+       print(str(e))
+
+
+2. replace(self: ecflow.Client, arg0: str, arg1: ecflow.Defs, arg2: bool, arg3: bool) -> int
+
+3. replace(self: ecflow.Client, arg0: str, arg1: ecflow.Defs) -> None
+
+4. replace(self: ecflow.Client, arg0: str, arg1: str) -> None
+
+
+.. py:method:: Client.requeue(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. requeue(self: ecflow.Client, abs_node_path: str, option: str = '') -> None
+
 Re queues the specified :term:`node` (s)
-    ::
-    
-       void requeue(
-          list paths     : A list of paths. Node paths must begin with a leading '/' character
-          [(str)option=''] : option = ('' | 'abort' | 'force')
-              ''   : empty string, the default, re-queue the node
-              abort: means re-queue only aborted tasks below node
-              force: means re-queueing even if there are nodes that are active or submitted
-       )
-       void requeue(
-          string absolute_node_path : Path name to node
-          [(string)option='']       : option = ('' | 'abort' | 'force')
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()                   # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.requeue('/s1','abort')       # re-queue aborted tasks below suite /s1
-    
-           path_list = ['/s1/f1/t1','/s2/f1/t2']
-           ci.requeue(path_list)
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-requeue( (Client)arg1, (list)paths [, (str)option='']) -> None
+   void requeue(
+      list paths     : A list of paths. Node paths must begin with a leading '/' character
+      [(str)option=''] : option = ('' | 'abort' | 'force')
+          ''   : empty string, the default, re-queue the node
+          abort: means re-queue only aborted tasks below node
+          force: means re-queueing even if there are nodes that are active or submitted
+   )
+   void requeue(
+      string absolute_node_path : Path name to node
+      [(string)option='']       : option = ('' | 'abort' | 'force')
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()                   # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.requeue('/s1','abort')       # re-queue aborted tasks below suite /s1
+
+       path_list = ['/s1/f1/t1','/s2/f1/t2']
+       ci.requeue(path_list)
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.reset( (Client)arg1) -> None :
+2. requeue(self: ecflow.Client, paths: list, option: str = '') -> None
+
+
+.. py:method:: Client.reset(self: ecflow.Client) -> None
    :module: ecflow
 
 reset client definition, and handle number
 
 
-.. py:method:: Client.restart_server( (Client)arg1) -> int :
+.. py:method:: Client.restart_server(self: ecflow.Client) -> int
    :module: ecflow
 
 Restart the :term:`ecflow_server`
@@ -1955,34 +2028,38 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.restore( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.restore(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. restore(self: ecflow.Client, arg0: str) -> None
+
 Restore archived nodes.
-    Usage::
-    
-       string restore(
-          list paths # List of paths.
-       )
-       string restore(
-          string absolute_node_path
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
-           print ci.restore('/suite1')
-       except RuntimeError, e:
-           print str(e)
-    
+Usage::
 
-restore( (Client)arg1, (list)arg2) -> None
+   string restore(
+      list paths # List of paths.
+   )
+   string restore(
+      string absolute_node_path
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
+       print ci.restore('/suite1')
+   except RuntimeError, e:
+       print str(e)
 
 
-.. py:method:: Client.restore_from_checkpt( (Client)arg1) -> int :
+2. restore(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.restore_from_checkpt(self: ecflow.Client) -> int
    :module: ecflow
 
 Request the :term:`ecflow_server` loads the :term:`check point` file from disk
@@ -2003,121 +2080,134 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.resume( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.resume(*args, **kwargs)
    :module: ecflow
+
+Overloaded function.
+
+1. resume(self: ecflow.Client, arg0: str) -> None
 
 Resume `job creation` / generation for the given :term:`node`
-    ::
-    
-       void resume(
-          list paths: List of paths. Paths must begin with a leading '/' character
-       )
-       void resume(
-          string absolute_node_path: Path name to node to resume.
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.resume('/s1/f1/task1')
-           paths = ['/s1/f1/t1','/s2/f1/t2']
-           ci.resume(paths)
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-resume( (Client)arg1, (list)arg2) -> None
+   void resume(
+      list paths: List of paths. Paths must begin with a leading '/' character
+   )
+   void resume(
+      string absolute_node_path: Path name to node to resume.
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()   # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.resume('/s1/f1/task1')
+       paths = ['/s1/f1/t1','/s2/f1/t2']
+       ci.resume(paths)
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.run( (Client)arg1, (str)arg2, (bool)arg3) -> None :
+2. resume(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.run(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. run(self: ecflow.Client, arg0: str, arg1: bool) -> None
+
 Immediately run the jobs associated with the input :term:`node`.
-    
-    Ignore :term:`trigger`\ s, :term:`limit`\ s, :term:`suspended`, :term:`time` or :term:`date` dependencies,
-    just run the :term:`task`.
-    When a job completes, it may be automatically re-queued if it has
-    multiple time :term:`dependencies`. In the specific case where a :term:`task` has a SINGLE
-    time dependency and we want to avoid re running the :term:`task` then
-    a flag is set so that it is not automatically re-queued when set to :term:`complete`.
-    The flag is applied up the :term:`node` hierarchy until we reach a node with a :term:`repeat`
-    or :term:`cron` attribute. This behaviour allow :term:`repeat` values to be incremented interactively.
-    A :term:`repeat` attribute is incremented when all the child nodes are :term:`complete`
-    in this case the child nodes are automatically re-queued
-    ::
-    
-       void run(
-          string absolute_node_path : Path name to node. If the path is suite/family will recursively
-                                      run all child tasks
-          [(bool)force=False]       : If true, run even if there are nodes that are active or submitted.
-       )
-       void run(
-          list  paths               : List of paths. If the path is suite/family will recursively run all child tasks
-          [(bool)force=False]       : If true, run even if there are nodes that are active or submitted.
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()                          # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.run('/s1')                          # run all tasks under suite /s1
-    
-           ci.run(['/s1/f1/t1','/s2/f1/t2'])      # run all tasks specified
-       except RuntimeError, e:
-           print(str(e))
-    
-    Effect:
-    
-       Lets see the effect of run command on the following defs:
-    
-    .. code-block:: shell
-    
-       suite s1
-          task t1; time 10:00             # will complete straight away
-          task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth run
-    
-    In the last case (task t2) after each run the next time slot is incremented.
-    This can be seen by calling the Why command.
 
-run( (Client)arg1, (list)arg2, (bool)arg3) -> None
+Ignore :term:`trigger`\ s, :term:`limit`\ s, :term:`suspended`, :term:`time` or :term:`date` dependencies,
+just run the :term:`task`.
+When a job completes, it may be automatically re-queued if it has
+multiple time :term:`dependencies`. In the specific case where a :term:`task` has a SINGLE
+time dependency and we want to avoid re running the :term:`task` then
+a flag is set so that it is not automatically re-queued when set to :term:`complete`.
+The flag is applied up the :term:`node` hierarchy until we reach a node with a :term:`repeat`
+or :term:`cron` attribute. This behaviour allow :term:`repeat` values to be incremented interactively.
+A :term:`repeat` attribute is incremented when all the child nodes are :term:`complete`
+in this case the child nodes are automatically re-queued
+::
+
+   void run(
+      string absolute_node_path : Path name to node. If the path is suite/family will recursively
+                                  run all child tasks
+      [(bool)force=False]       : If true, run even if there are nodes that are active or submitted.
+   )
+   void run(
+      list  paths               : List of paths. If the path is suite/family will recursively run all child tasks
+      [(bool)force=False]       : If true, run even if there are nodes that are active or submitted.
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()                          # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.run('/s1')                          # run all tasks under suite /s1
+
+       ci.run(['/s1/f1/t1','/s2/f1/t2'])      # run all tasks specified
+   except RuntimeError, e:
+       print(str(e))
+
+Effect:
+
+   Lets see the effect of run command on the following defs:
+
+.. code-block:: shell
+
+   suite s1
+      task t1; time 10:00             # will complete straight away
+      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth run
+
+In the last case (task t2) after each run the next time slot is incremented.
+This can be seen by calling the Why command.
+
+2. run(self: ecflow.Client, arg0: list, arg1: bool) -> None
 
 
-.. py:method:: Client.server_version( (Client)arg1) -> str :
+.. py:method:: Client.server_version(self: ecflow.Client) -> str
    :module: ecflow
 
 Returns the server version, can throw for old servers, that did not implement this request.
 
 
-.. py:method:: Client.set_auto_sync( (Client)arg1, (bool)arg2) -> None :
+.. py:method:: Client.set_auto_sync(self: ecflow.Client, arg0: bool) -> None
    :module: ecflow
 
 If true automatically sync with local definition after each call.
 
 
-.. py:method:: Client.set_child_complete_del_vars( (Client)arg1, (list)arg2) -> None :
+.. py:method:: Client.set_child_complete_del_vars(self: ecflow.Client, arg0: list) -> None
    :module: ecflow
 
 Set the list of variables to be deleted when a task becomes complete
 Needs a list of strings, representing the variable names.
 
 
-.. py:method:: Client.set_child_init_add_vars( (Client)arg1, (dict)arg2) -> None :
+.. py:method:: Client.set_child_init_add_vars(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. set_child_init_add_vars(self: ecflow.Client, arg0: dict) -> None
+
 Set the list of variables to be added when a task becomes active
-    Needs a dictionary of name/value pairs, or a list of ecflow Variables
+Needs a dictionary of name/value pairs, or a list of ecflow Variables
 
-set_child_init_add_vars( (Client)arg1, (list)arg2) -> None :
-    Set the list of variables to be added when a task becomes active
-    Needs a dictionary of name/value pairs, or a list of ecflow Variables
+2. set_child_init_add_vars(self: ecflow.Client, arg0: list) -> None
+
+Set the list of variables to be added when a task becomes active
+Needs a dictionary of name/value pairs, or a list of ecflow Variables
 
 
-.. py:method:: Client.set_child_password( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.set_child_password(self: ecflow.Client, arg0: str) -> None
    :module: ecflow
 
 Set the password, needed for authentication, provided by the server using %ECF_PASS%
@@ -2126,7 +2216,7 @@ By default the environment variable ECF_PASS is read for the jobs password
 This can be overridden for the python child api
 
 
-.. py:method:: Client.set_child_path( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.set_child_path(self: ecflow.Client, arg0: str) -> None
    :module: ecflow
 
 Set the path to the task, obtained from server using %ECF_NAME%
@@ -2135,22 +2225,27 @@ By default the environment variable ECF_NAME is read for the task path
 This can be overridden for the python child api
 
 
-.. py:method:: Client.set_child_pid( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.set_child_pid(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. set_child_pid(self: ecflow.Client, arg0: str) -> None
+
 Set the process id of this job
-    
-    By default the environment variable ECF_RID is read for the jobs process or remote id
-    This can be overridden for the python child api
 
-set_child_pid( (Client)arg1, (int)arg2) -> None :
-    Set the process id of this job
-    
-    By default the environment variable ECF_RID is read for the jobs process or remote id
-    This can be overridden for the python child api
+By default the environment variable ECF_RID is read for the jobs process or remote id
+This can be overridden for the python child api
+
+2. set_child_pid(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None
+
+Set the process id of this job
+
+By default the environment variable ECF_RID is read for the jobs process or remote id
+This can be overridden for the python child api
 
 
-.. py:method:: Client.set_child_timeout( (Client)arg1, (int)arg2) -> None :
+.. py:method:: Client.set_child_timeout(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None
    :module: ecflow
 
 Set timeout if child cannot connect to server, default is 24 hours. The input is required to be in seconds
@@ -2159,7 +2254,7 @@ By default the environment variable  ECF_TIMEOUT is read to control how long chi
 This can be overridden for the python child api
 
 
-.. py:method:: Client.set_child_try_no( (Client)arg1, (int)arg2) -> None :
+.. py:method:: Client.set_child_try_no(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None
    :module: ecflow
 
 Set the try no, i.e the number of times this job has run, obtained from the server, using %ECF_TRYNO%
@@ -2168,7 +2263,7 @@ By default the environment variable ECF_TRYNO is read to record number of times 
 This can be overridden for the python child api
 
 
-.. py:method:: Client.set_connection_attempts( (Client)arg1, (int)arg2) -> None :
+.. py:method:: Client.set_connection_attempts(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None
    :module: ecflow
 
 Set the number of times to connect to :term:`ecflow_server`, in case of connection failures
@@ -2197,51 +2292,55 @@ Usage:
    ci.set_retry_connection_period(1) # wait 1 second between each attempt
 
 
-.. py:method:: Client.set_host_port( (Client)arg1, (str)arg2, (str)arg3) -> None :
+.. py:method:: Client.set_host_port(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. set_host_port(self: ecflow.Client, arg0: str, arg1: str) -> None
+
 Explicitly set the host and port to be used by the client, overriding the default host name (localhost) and port (3141) and the environment variables: ECF_HOST and ECF_PORT.
-    
-    .. code-block:: shell
-    
-       set_host_port(
-          string host, # The server name. Cannot be empty.
-          string port  # The port on the server, must be unique to the server
-       )
-    
-       set_host_port(
-          string host, # The server name. Cannot be empty.
-          int port     # The port on the server, must be unique to the server
-       )
-    
-       set_host_port(
-          string host_port, # Expects <host>:<port> or <host>@<port>
-       )
-    
-    Exceptions:
-    
-    - Raise a RuntimeError if the host or port is empty
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()
-           ci.set_host_port('localhost','3150')
-           ci.set_host_port('avi',3150)
-           ci.set_host_port('avi:3150')
-       except RuntimeError, e:
-           print(str(e))
-    
-    
 
-set_host_port( (Client)arg1, (str)arg2) -> None
+.. code-block:: shell
 
-set_host_port( (Client)arg1, (str)arg2, (int)arg3) -> None
+   set_host_port(
+      string host, # The server name. Cannot be empty.
+      string port  # The port on the server, must be unique to the server
+   )
+
+   set_host_port(
+      string host, # The server name. Cannot be empty.
+      int port     # The port on the server, must be unique to the server
+   )
+
+   set_host_port(
+      string host_port, # Expects <host>:<port> or <host>@<port>
+   )
+
+Exceptions:
+
+- Raise a RuntimeError if the host or port is empty
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()
+       ci.set_host_port('localhost','3150')
+       ci.set_host_port('avi',3150)
+       ci.set_host_port('avi:3150')
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.set_retry_connection_period( (Client)arg1, (int)arg2) -> None :
+
+2. set_host_port(self: ecflow.Client, arg0: str) -> None
+
+3. set_host_port(self: ecflow.Client, arg0: str, arg1: typing.SupportsInt | typing.SupportsIndex) -> None
+
+
+.. py:method:: Client.set_retry_connection_period(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None
    :module: ecflow
 
 Set the sleep period between connection attempts
@@ -2272,19 +2371,19 @@ Usage:
    ci.set_retry_connection_period(1) # wait 1 second between each attempt
 
 
-.. py:method:: Client.set_user_name( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.set_user_name(self: ecflow.Client, arg0: str) -> None
    :module: ecflow
 
-set user name. A password must be provided in the file <host>.<port>.ecf.custom_passwd
+Set user name. A password must be provided in the file <host>.<port>.ecf.custom_passwd
 
 
-.. py:method:: Client.set_zombie_child_timeout( (Client)arg1, (int)arg2) -> None :
+.. py:method:: Client.set_zombie_child_timeout(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> None
    :module: ecflow
 
 Set timeout for zombie child commands,that cannot connect to server, default is 24 hours. The input is required to be in seconds
 
 
-.. py:method:: Client.shutdown_server( (Client)arg1) -> int :
+.. py:method:: Client.shutdown_server(self: ecflow.Client) -> int
    :module: ecflow
 
 Shut down the :term:`ecflow_server`
@@ -2303,13 +2402,17 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.sort_attributes( (Client)arg1, (str)abs_node_path, (str)attribute_name [, (bool)recursive=True]) -> None
+.. py:method:: Client.sort_attributes(*args, **kwargs)
    :module: ecflow
 
-sort_attributes( (Client)arg1, (list)paths, (str)attribute_name [, (bool)recursive=True]) -> None
+Overloaded function.
+
+1. sort_attributes(self: ecflow.Client, abs_node_path: str, attribute_name: str, recursive: bool = True) -> None
+
+2. sort_attributes(self: ecflow.Client, paths: list, attribute_name: str, recursive: bool = True) -> None
 
 
-.. py:method:: Client.stats( (Client)arg1 [, (bool)to_stdout]) -> str :
+.. py:method:: Client.stats(self: ecflow.Client, to_stdout: bool = True) -> str
    :module: ecflow
 
 Returns the :term:`ecflow_server` statistics as a string
@@ -2333,7 +2436,7 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.stats_reset( (Client)arg1) -> None :
+.. py:method:: Client.stats_reset(self: ecflow.Client) -> None
    :module: ecflow
 
 Resets the statistical data in the server
@@ -2352,50 +2455,54 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.status( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.status(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. status(self: ecflow.Client, arg0: str) -> None
+
 Shows the status of a job associated with a :term:`task`
-    ::
-    
-       void status(
-          list paths: List of paths. Paths must begin with a leading '/' character
-       )
-       void status(
-          string absolute_node_path
-       )
-    
-    If a :term:`family` or :term:`suite` is selected, will invoke status command hierarchically.
-    Status uses the ECF_STATUS_CMD variable. After :term:`variable substitution` it is invoked as a command.
-    The command should be written in such a way that the output is written to %ECF_JOB%.stat, i.e:
-    
-    .. code-block:: shell
-    
-       /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1
-    
-    Exceptions can be raised because:
-    
-    - The absolute_node_path does not exist in the server
-    - ECF_STATUS_CMD variable is not defined
-    - :term:`variable substitution` fails
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.status('/s1/t1')
-           time.sleep(2)
-           print(ci.file('/s1/t1','stats')) # request status output
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-status( (Client)arg1, (list)arg2) -> None
+   void status(
+      list paths: List of paths. Paths must begin with a leading '/' character
+   )
+   void status(
+      string absolute_node_path
+   )
+
+If a :term:`family` or :term:`suite` is selected, will invoke status command hierarchically.
+Status uses the ECF_STATUS_CMD variable. After :term:`variable substitution` it is invoked as a command.
+The command should be written in such a way that the output is written to %ECF_JOB%.stat, i.e:
+
+.. code-block:: shell
+
+   /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1
+
+Exceptions can be raised because:
+
+- The absolute_node_path does not exist in the server
+- ECF_STATUS_CMD variable is not defined
+- :term:`variable substitution` fails
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.status('/s1/t1')
+       time.sleep(2)
+       print(ci.file('/s1/t1','stats')) # request status output
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.suites( (Client)arg1) -> list :
+2. status(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.suites(self: ecflow.Client) -> list
    :module: ecflow
 
 Returns a list strings representing the :term:`suite` names
@@ -2415,36 +2522,40 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.suspend( (Client)arg1, (str)arg2) -> None :
+.. py:method:: Client.suspend(*args, **kwargs)
    :module: ecflow
 
+Overloaded function.
+
+1. suspend(self: ecflow.Client, arg0: str) -> None
+
 Suspend `job creation` / generation for the given :term:`node`
-    ::
-    
-       void suspend(
-          list paths: List of paths. Paths must begin with a leading '/' character
-       )
-       void suspend(
-          string absolute_node_path: Path name to node to suspend.
-       )
-    
-    Usage:
-    
-    .. code-block:: python
-    
-       try:
-           ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
-           ci.suspend('/s1/f1/task1')
-           paths = ['/s1/f1/t1','/s2/f1/t2']
-           ci.suspend(paths)
-       except RuntimeError, e:
-           print(str(e))
-    
+::
 
-suspend( (Client)arg1, (list)arg2) -> None
+   void suspend(
+      list paths: List of paths. Paths must begin with a leading '/' character
+   )
+   void suspend(
+      string absolute_node_path: Path name to node to suspend.
+   )
+
+Usage:
+
+.. code-block:: python
+
+   try:
+       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)
+       ci.suspend('/s1/f1/task1')
+       paths = ['/s1/f1/t1','/s2/f1/t2']
+       ci.suspend(paths)
+   except RuntimeError, e:
+       print(str(e))
 
 
-.. py:method:: Client.sync_local( (Client)arg1 [, (bool)sync_suite_clock=False]) -> int :
+2. suspend(self: ecflow.Client, arg0: list) -> None
+
+
+.. py:method:: Client.sync_local(self: ecflow.Client, sync_suite_clock: bool = False) -> int
    :module: ecflow
 
 Requests that :term:`ecflow_server` returns the full definition or incremental change made and applies them to the client Defs
@@ -2484,7 +2595,7 @@ Usage:
 Calling sync_local() is considerably faster than calling get_server_defs() for large Definitions
 
 
-.. py:method:: Client.terminate_server( (Client)arg1) -> int :
+.. py:method:: Client.terminate_server(self: ecflow.Client) -> int
    :module: ecflow
 
 Terminate the :term:`ecflow_server`
@@ -2501,13 +2612,13 @@ Usage:
        print(str(e))
 
 
-.. py:method:: Client.version( (Client)arg1) -> str :
+.. py:method:: Client.version(self: ecflow.Client) -> str
    :module: ecflow
 
 Returns the current client version
 
 
-.. py:method:: Client.wait_for_server_reply( (Client)arg1 [, (int)time_out=60]) -> bool :
+.. py:method:: Client.wait_for_server_reply(self: ecflow.Client, time_out: typing.SupportsInt | typing.SupportsIndex = 60) -> bool
    :module: ecflow
 
 Wait for a response from the :term:`ecflow_server`::
@@ -2530,42 +2641,66 @@ Usage:
       print('Timed out after 30 second wait for server response.?')
 
 
-.. py:method:: Client.zombie_adopt( (Client)arg1, (str)arg2) -> int
+.. py:method:: Client.zombie_adopt(*args, **kwargs)
    :module: ecflow
 
-zombie_adopt( (Client)arg1, (list)arg2) -> None
+Overloaded function.
+
+1. zombie_adopt(self: ecflow.Client, arg0: str) -> int
+
+2. zombie_adopt(self: ecflow.Client, arg0: list) -> None
 
 
-.. py:method:: Client.zombie_block( (Client)arg1, (str)arg2) -> int
+.. py:method:: Client.zombie_block(*args, **kwargs)
    :module: ecflow
 
-zombie_block( (Client)arg1, (list)arg2) -> None
+Overloaded function.
+
+1. zombie_block(self: ecflow.Client, arg0: str) -> int
+
+2. zombie_block(self: ecflow.Client, arg0: list) -> None
 
 
-.. py:method:: Client.zombie_fail( (Client)arg1, (str)arg2) -> int
+.. py:method:: Client.zombie_fail(*args, **kwargs)
    :module: ecflow
 
-zombie_fail( (Client)arg1, (list)arg2) -> None
+Overloaded function.
+
+1. zombie_fail(self: ecflow.Client, arg0: str) -> int
+
+2. zombie_fail(self: ecflow.Client, arg0: list) -> None
 
 
-.. py:method:: Client.zombie_fob( (Client)arg1, (str)arg2) -> int
+.. py:method:: Client.zombie_fob(*args, **kwargs)
    :module: ecflow
 
-zombie_fob( (Client)arg1, (list)arg2) -> None
+Overloaded function.
+
+1. zombie_fob(self: ecflow.Client, arg0: str) -> int
+
+2. zombie_fob(self: ecflow.Client, arg0: list) -> None
 
 
-.. py:method:: Client.zombie_get( (Client)arg1, (int)arg2) -> ZombieVec
+.. py:method:: Client.zombie_get(self: ecflow.Client, arg0: typing.SupportsInt | typing.SupportsIndex) -> list[ecflow.Zombie]
    :module: ecflow
 
 
-.. py:method:: Client.zombie_kill( (Client)arg1, (str)arg2) -> int
+.. py:method:: Client.zombie_kill(*args, **kwargs)
    :module: ecflow
 
-zombie_kill( (Client)arg1, (list)arg2) -> None
+Overloaded function.
+
+1. zombie_kill(self: ecflow.Client, arg0: str) -> int
+
+2. zombie_kill(self: ecflow.Client, arg0: list) -> None
 
 
-.. py:method:: Client.zombie_remove( (Client)arg1, (str)arg2) -> int
+.. py:method:: Client.zombie_remove(*args, **kwargs)
    :module: ecflow
 
-zombie_remove( (Client)arg1, (list)arg2) -> None
+Overloaded function.
+
+1. zombie_remove(self: ecflow.Client, arg0: str) -> int
+
+2. zombie_remove(self: ecflow.Client, arg0: list) -> None
 

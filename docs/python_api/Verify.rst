@@ -5,5 +5,5 @@ ecflow.Verify
 .. py:class:: Verify
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 

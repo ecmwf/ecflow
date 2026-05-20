@@ -5,7 +5,7 @@ ecflow.Today
 .. py:class:: Today
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 :term:`today` is a time dependency that does not wrap to tomorrow.
 
@@ -49,8 +49,8 @@ Usage:
             Today('10:30 20:10 00:10')) # Create today in place
 
 
-.. py:method:: Today.time_series( (Today)arg1) -> TimeSeries :
+.. py:method:: Today.time_series(self: ecflow.Today) -> ecflow.TimeSeries
    :module: ecflow
 
-Return the Todays time series
+Return the Today's time series
 

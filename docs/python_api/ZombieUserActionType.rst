@@ -5,7 +5,7 @@ ecflow.ZombieUserActionType
 .. py:class:: ZombieUserActionType
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 ZombieUserActionType is used define an automated response. See class :py:class:`ZombieAttr`
 
@@ -29,6 +29,21 @@ server side:
   :term:`zombie` may well re-appear
 
 Note: Only adopt will allow the :term:`child command` to continue and change the :term:`node` tree
+
+
+Members:
+
+  fob
+
+  fail
+
+  remove
+
+  adopt
+
+  block
+
+  kill
 
 
 .. py:attribute:: ZombieUserActionType.adopt
@@ -56,6 +71,10 @@ Note: Only adopt will allow the :term:`child command` to continue and change the
    :value: ecflow.ZombieUserActionType.kill
 
 
+.. py:property:: ZombieUserActionType.name
+   :module: ecflow
+
+
 .. py:attribute:: ZombieUserActionType.names
    :module: ecflow
    :value: {'adopt': ecflow.ZombieUserActionType.adopt, 'block': ecflow.ZombieUserActionType.block, 'fail': ecflow.ZombieUserActionType.fail, 'fob': ecflow.ZombieUserActionType.fob, 'kill': ecflow.ZombieUserActionType.kill, 'remove': ecflow.ZombieUserActionType.remove}
@@ -64,6 +83,10 @@ Note: Only adopt will allow the :term:`child command` to continue and change the
 .. py:attribute:: ZombieUserActionType.remove
    :module: ecflow
    :value: ecflow.ZombieUserActionType.remove
+
+
+.. py:property:: ZombieUserActionType.value
+   :module: ecflow
 
 
 .. py:attribute:: ZombieUserActionType.values

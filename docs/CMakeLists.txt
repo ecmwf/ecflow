@@ -16,7 +16,11 @@ ecbuild_info("Locating Sphinx")
 
 find_package(Sphinx REQUIRED)
 
-ecbuild_info("Sphinx found at ${SPHINX_EXECUTABLE}")
+if(EXISTS ${SPHINX_EXECUTABLE})
+  ecbuild_info("Sphinx found at ${SPHINX_EXECUTABLE}")
+else()
+  ecbuild_fatal_error("Sphinx executable not present at ${SPHINX_EXECUTABLE}")
+endif()
 
 #
 # (Re-)generate ecFlow CLI documentation

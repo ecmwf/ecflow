@@ -5,7 +5,7 @@ ecflow.CheckPt
 .. py:class:: CheckPt
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 CheckPt is enum that is used to control check pointing in the :term:`ecflow_server`
 
@@ -15,32 +15,41 @@ CheckPt is enum that is used to control check pointing in the :term:`ecflow_serv
 - UNDEFINED : None of the the above, used to provide default argument
 
 
+Members:
+
+  NEVER
+
+  ON_TIME
+
+  ALWAYS
+
+  UNDEFINED
+
+
 .. py:attribute:: CheckPt.ALWAYS
    :module: ecflow
-   :value: ecflow.CheckPt.ALWAYS
+   :value: <CheckPt.ALWAYS: 2>
 
 
 .. py:attribute:: CheckPt.NEVER
    :module: ecflow
-   :value: ecflow.CheckPt.NEVER
+   :value: <CheckPt.NEVER: 0>
 
 
 .. py:attribute:: CheckPt.ON_TIME
    :module: ecflow
-   :value: ecflow.CheckPt.ON_TIME
+   :value: <CheckPt.ON_TIME: 1>
 
 
 .. py:attribute:: CheckPt.UNDEFINED
    :module: ecflow
-   :value: ecflow.CheckPt.UNDEFINED
+   :value: <CheckPt.UNDEFINED: 3>
 
 
-.. py:attribute:: CheckPt.names
+.. py:property:: CheckPt.name
    :module: ecflow
-   :value: {'ALWAYS': ecflow.CheckPt.ALWAYS, 'NEVER': ecflow.CheckPt.NEVER, 'ON_TIME': ecflow.CheckPt.ON_TIME, 'UNDEFINED': ecflow.CheckPt.UNDEFINED}
 
 
-.. py:attribute:: CheckPt.values
+.. py:property:: CheckPt.value
    :module: ecflow
-   :value: {0: ecflow.CheckPt.NEVER, 1: ecflow.CheckPt.ON_TIME, 2: ecflow.CheckPt.ALWAYS, 3: ecflow.CheckPt.UNDEFINED}
 

@@ -5,9 +5,23 @@ ecflow.AttrType
 .. py:class:: AttrType
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Sortable attribute type, currently [event | meter | label | limit | variable | all ]
+
+Members:
+
+  event
+
+  meter
+
+  label
+
+  limit
+
+  variable
+
+  all
 
 
 .. py:attribute:: AttrType.all
@@ -35,9 +49,17 @@ Sortable attribute type, currently [event | meter | label | limit | variable | a
    :value: ecflow.AttrType.meter
 
 
+.. py:property:: AttrType.name
+   :module: ecflow
+
+
 .. py:attribute:: AttrType.names
    :module: ecflow
    :value: {'all': ecflow.AttrType.all, 'event': ecflow.AttrType.event, 'label': ecflow.AttrType.label, 'limit': ecflow.AttrType.limit, 'meter': ecflow.AttrType.meter, 'variable': ecflow.AttrType.variable}
+
+
+.. py:property:: AttrType.value
+   :module: ecflow
 
 
 .. py:attribute:: AttrType.values

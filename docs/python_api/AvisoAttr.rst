@@ -5,7 +5,7 @@ ecflow.AvisoAttr
 .. py:class:: AvisoAttr
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 An :term:`aviso` attribute, assigned to a :term:`node`, represents an external trigger holding the node queued untilan Aviso notification matching the attribute configuration is detected.
 
@@ -51,37 +51,37 @@ Usage:
 The parameters `url`, `schema`, `polling`, and `auth` are optional
 
 
-.. py:method:: AvisoAttr.auth( (AvisoAttr)arg1) -> str :
+.. py:method:: AvisoAttr.auth(self: ecflow.AvisoAttr) -> str
    :module: ecflow
 
 Returns the path to Authentication credentials used to contact the Aviso server
 
 
-.. py:method:: AvisoAttr.listener( (AvisoAttr)arg1) -> str :
+.. py:method:: AvisoAttr.listener(self: ecflow.AvisoAttr) -> str
    :module: ecflow
 
 Returns the Aviso listener configuration
 
 
-.. py:method:: AvisoAttr.name( (AvisoAttr)arg1) -> str :
+.. py:method:: AvisoAttr.name(self: ecflow.AvisoAttr) -> str
    :module: ecflow
 
 Returns the name of the Aviso attribute
 
 
-.. py:method:: AvisoAttr.polling( (AvisoAttr)arg1) -> str :
+.. py:method:: AvisoAttr.polling(self: ecflow.AvisoAttr) -> str
    :module: ecflow
 
 Returns polling interval used to contact the Aviso server
 
 
-.. py:method:: AvisoAttr.schema( (AvisoAttr)arg1) -> str :
+.. py:method:: AvisoAttr.schema(self: ecflow.AvisoAttr) -> str
    :module: ecflow
 
 Returns the path to the schema used to contact the Aviso server
 
 
-.. py:method:: AvisoAttr.url( (AvisoAttr)arg1) -> str :
+.. py:method:: AvisoAttr.url(self: ecflow.AvisoAttr) -> str
    :module: ecflow
 
 Returns the URL used to contact the Aviso server

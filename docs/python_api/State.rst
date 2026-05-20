@@ -5,7 +5,7 @@ ecflow.State
 .. py:class:: State
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Each :term:`node` can have a status, which reflects the life cycle of a node.
 
@@ -23,43 +23,55 @@ It varies as follows:
 
 Jobs end by becoming either :term:`complete` or :term:`aborted`
 
+Members:
+
+  unknown
+
+  complete
+
+  queued
+
+  aborted
+
+  submitted
+
+  active
+
 
 .. py:attribute:: State.aborted
    :module: ecflow
-   :value: ecflow.State.aborted
+   :value: <State.aborted: 3>
 
 
 .. py:attribute:: State.active
    :module: ecflow
-   :value: ecflow.State.active
+   :value: <State.active: 5>
 
 
 .. py:attribute:: State.complete
    :module: ecflow
-   :value: ecflow.State.complete
+   :value: <State.complete: 1>
 
 
-.. py:attribute:: State.names
+.. py:property:: State.name
    :module: ecflow
-   :value: {'aborted': ecflow.State.aborted, 'active': ecflow.State.active, 'complete': ecflow.State.complete, 'queued': ecflow.State.queued, 'submitted': ecflow.State.submitted, 'unknown': ecflow.State.unknown}
 
 
 .. py:attribute:: State.queued
    :module: ecflow
-   :value: ecflow.State.queued
+   :value: <State.queued: 2>
 
 
 .. py:attribute:: State.submitted
    :module: ecflow
-   :value: ecflow.State.submitted
+   :value: <State.submitted: 4>
 
 
 .. py:attribute:: State.unknown
    :module: ecflow
-   :value: ecflow.State.unknown
+   :value: <State.unknown: 0>
 
 
-.. py:attribute:: State.values
+.. py:property:: State.value
    :module: ecflow
-   :value: {0: ecflow.State.unknown, 1: ecflow.State.complete, 2: ecflow.State.queued, 3: ecflow.State.aborted, 4: ecflow.State.submitted, 5: ecflow.State.active}
 
