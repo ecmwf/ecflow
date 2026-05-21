@@ -10,6 +10,9 @@ on:
       - 'main'
     tags:
       - '**'
+    paths-ignore:
+      - ".cd/**"
+      - ".github/cd-config.yml"
 
 jobs:
   # Setup environment and build ecflow documentation
