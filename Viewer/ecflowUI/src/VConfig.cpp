@@ -90,7 +90,7 @@ void VConfig::init(const std::string& parDirPath) {
 }
 
 void VConfig::loadInit(const std::string& parFile) {
-    // Parse param file using the boost JSON property tree parser
+    // Parse JSON file using ecf::PTree (SAX-based, supports repeated keys)
     ecf::PTree pt;
 
     try {
@@ -300,7 +300,7 @@ void VConfig::loadSettings(const std::string& parFile, VProperty* guiProp, bool 
     std::vector<VProperty*> linkVec;
     guiProp->collectLinks(linkVec);
 
-    // Parse file using the boost JSON property tree parser
+    // Parse JSON file using ecf::PTree (SAX-based, supports repeated keys)
     ecf::PTree pt;
 
     try {
