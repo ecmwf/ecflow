@@ -199,7 +199,7 @@ builds:
             - qt/6.6.1
             - cmake/new
             - ecbuild/new
-          test_command: &test_cmd "ctest --output-on-failure -j 8 -L nightly"
+          test_command: *test_cmd
           cmake_options: &common_cmake_options
             -DCMAKE_VERBOSE_MAKEFILE: ON
             -DENABLE_ALL_TESTS: ON
