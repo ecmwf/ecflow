@@ -37,8 +37,8 @@
 #include "VNode.hpp"
 #include "VProperty.hpp"
 #include "ViewerUtil.hpp"
-#include "ecflow/core/Str.hpp"
 #include "ecflow/core/PTree.hpp"
+#include "ecflow/core/Str.hpp"
 
 int MenuItem::idCnt_ = 0;
 
