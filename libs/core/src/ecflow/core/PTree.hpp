@@ -69,11 +69,7 @@ void read_json(const std::string& filename, PTree& out);
 /// @brief Serialize a property tree to JSON and write it to a file.
 ///
 /// @attention Writing a PTree with repeated keys WILL TRUNCATE the output
-///            (JSON objects cannot have duplicate keys).
-///
-/// This is acceptable because:
-///  * Files with repeated keys (e.g. ecflowview_gui.json) are never written back by ecFlow.
-///  * User settings written by write_json always/only have unique keys.
+///   (see Known Limitation of PTree class).
 ///
 /// @param filename the name of the output file
 /// @param in a property tree to serialize
@@ -98,6 +94,19 @@ void write_json(const std::string& filename, const PTree& in, int indent = 4);
 ///   2) No JSON-parser implementation type is exposed in this header
 ///
 ///   3) Implemented as a replacement for boost::property_tree::ptree.
+///
+/// * Known Limitations
+///
+///   1) Writing a PTree with repeated keys WILL TRUNCATE the output
+///      (JSON objects cannot have duplicate keys).
+///
+///      This is acceptable because:
+///        * Files with repeated keys (e.g. ecflowview_gui.json) are never written back by ecFlow.
+///        * User settings written by write_json always/only have unique keys.
+///
+///   2) Large number values are silently truncated to fit into an int.
+///
+///      This is acceptable because ecFlow settings files are not expected to contain very large numbers.
 ///
 /// * Node structure
 ///
