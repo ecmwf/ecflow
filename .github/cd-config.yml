@@ -297,7 +297,8 @@ builds:
             - python3/3.12.9-01
             - cmake/new
             - ecbuild
-          test_command: "ctest --output-on-failure -j 8 -L nightly -E 's_foolproof|s_test|s_zombies'"
+          test_command: >-
+            ctest --output-on-failure -j 8 -L nightly -E "s_foolproof|s_test|s_zombies"
           install_command: |
             cmake --install .
           cmake_options:
