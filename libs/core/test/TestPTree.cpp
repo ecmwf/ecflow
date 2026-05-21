@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(ctor_copy_constructor_does_not_share_content) {
     BOOST_CHECK(b.get<std::string>("x") == "99");
 }
 
-BOOST_AUTO_TEST_CASE(c_tor_move_constructor_transfers_content) {
+BOOST_AUTO_TEST_CASE(ctor_move_constructor_transfers_content) {
     ECF_NAME_THIS_TEST();
 
     using ecf::PTree;
@@ -1659,6 +1659,64 @@ BOOST_AUTO_TEST_CASE(PTreeInvalidStateError_from_array_guard_is_catchable_as_std
         caught = true;
     }
     BOOST_CHECK(caught);
+}
+
+BOOST_AUTO_TEST_CASE(get_value_bool_recognises_true_and_1_as_true) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK(ecf::PTree(std::string("true")).get_value<bool>() == true);
+    BOOST_CHECK(ecf::PTree(std::string("1")).get_value<bool>()    == true);
+}
+
+BOOST_AUTO_TEST_CASE(get_value_bool_recognises_false_and_0_as_false) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK(ecf::PTree(std::string("false")).get_value<bool>() == false);
+    BOOST_CHECK(ecf::PTree(std::string("0")).get_value<bool>()     == false);
+}
+
+BOOST_AUTO_TEST_CASE(get_value_bool_throws_PTreeValueError_for_unrecognised_string) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_THROW(ecf::PTree(std::string("yes")).get_value<bool>(),  ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(std::string("no")).get_value<bool>(),   ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(std::string("True")).get_value<bool>(), ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(std::string("")).get_value<bool>(),     ecf::PTreeValueError);
+}
+
+BOOST_AUTO_TEST_CASE(get_value_bool_throws_PTreeValueError_for_int_node) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_THROW(ecf::PTree(1).get_value<bool>(),  ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(0).get_value<bool>(),  ecf::PTreeValueError);
+}
+
+BOOST_AUTO_TEST_CASE(get_value_bool_throws_PTreeValueError_for_null_node) {
+    ECF_NAME_THIS_TEST();
+
+    BOOST_CHECK_THROW(ecf::PTree{}.get_value<bool>(), ecf::PTreeValueError);
+}
+
+BOOST_AUTO_TEST_CASE(read_json_number_large_unsigned_branch_is_exercised_without_crash) {
+    ECF_NAME_THIS_TEST();
+
+    auto tmp = fs::temp_directory_path() / "ptree_n6_unsigned.json";
+    {
+        std::ofstream out(tmp);
+        // UINT64_MAX = 18446744073709551615  (> INT64_MAX, triggers number_unsigned)
+        // INT64_MAX+1 = 9223372036854775808  (also triggers number_unsigned)
+        out << R"({ "uint64max": 18446744073709551615, "int64_plus1": 9223372036854775808 })";
+    }
+
+    ecf::PTree t;
+    BOOST_REQUIRE_NO_THROW(read_json(tmp.string(), t));
+
+    // Both keys must be present
+    // These values are valid JSON numbers, but too big for int64_t, so will return invalid/different values
+    BOOST_CHECK(t.contains("uint64max"));
+    BOOST_CHECK(t.contains("int64_plus1"));
+
+    fs::remove(tmp);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
