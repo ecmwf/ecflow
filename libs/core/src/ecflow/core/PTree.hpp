@@ -318,8 +318,8 @@ public:
     /// @brief Set a scalar integer at a dotted path, creating intermediate objects as needed.
     ///        Important: Last-wins if the final key already exists!!!
     ///
-    /// @param path the dotted integer to set (e.g. "server.notification.enabled")
-    /// @param value the scalar string to set
+    /// @param path the dotted path to set (e.g. "server.notification.enabled")
+    /// @param value the scalar integer to set
     ///
     void put(std::string_view path, int value);
 
@@ -329,7 +329,7 @@ public:
     /// If path is empty, appends as an anonymous array element
     ///   — this is to handle the existing pattern `tree.put_child("", value)` used in readRcFile.
     ///
-    /// @param path the dotted integer to set (e.g. "server.notification.enabled")
+    /// @param path the dotted path to set (e.g. "server.notification.enabled")
     /// @param child the subtree
     ///
     void put_child(std::string_view path, PTree child);
@@ -370,12 +370,12 @@ public:
 private:
     name_t name_{}; ///< This node's own name (key in the parent's children list).
 
-    Kind kind_{Kind::Null}; ///< when kind_==Children: true → array ("" names), false → object
+    Kind kind_{Kind::Null}; ///< discriminant: Null, String, Int, or Children
 
     // Object
     std::string str_{};
     int int_{0};
-    bool arr_{false};
+    bool arr_{false}; ///< when kind_==Children: true → array ("" names), false → object
 
     // Array
     children_t children_{}; ///< Each child carries its own name_ member.

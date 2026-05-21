@@ -54,7 +54,7 @@ void Palette::load(const std::string& parFile) {
         paletteId["linkvisited"]     = QPalette::LinkVisited;
     }
 
-    // Parse param file using the boost JSON property tree parser
+    // Parse JSON file using ecf::PTree (SAX-based, supports repeated keys)
     ecf::PTree pt;
 
     try {

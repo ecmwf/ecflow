@@ -139,7 +139,7 @@ PTree::const_iterator_t PTree::find(std::string_view key) const {
 }
 
 static const PTree::children_t& sentinel_vec() {
-    // A atable empty vector is used as a sentinel so that begin() == end()
+    // A stable empty vector is used as a sentinel so that begin() == end()
     // for null/leaf nodes without undefined behaviour from cross-container comparisons.
     static const PTree::children_t sv;
     return sv;

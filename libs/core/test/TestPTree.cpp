@@ -20,7 +20,7 @@
 
 namespace {
 
-static std::string test_data_file(const std::string& name) {
+std::string test_data_file(const std::string& name) {
     std::string path = ecf::File::test_data("libs/core/test/data/PTree", "libs/core");
     return path + "/" + name;
 }

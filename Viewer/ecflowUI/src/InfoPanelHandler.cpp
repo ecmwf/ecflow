@@ -35,7 +35,7 @@ InfoPanelHandler* InfoPanelHandler::instance() {
 }
 
 void InfoPanelHandler::init(const std::string& configFile) {
-    // parse the response using the boost JSON property tree parser
+    // Parse JSON file using ecf::PTree (SAX-based, supports repeated keys)
 
     ecf::PTree pt;
 
