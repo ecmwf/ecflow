@@ -1,0 +1,48 @@
+{
+  "menus": [
+    {
+      "name": "Node",
+      "parent": ""
+    },
+    {
+      "name": "Server",
+      "parent": ""
+    },
+    {
+      "name": "NodeContext",
+      "parent": "Node"
+    }
+  ],
+  "menu_items": [
+    {
+      "name":    "Execute",
+      "command": "execute",
+      "handler": "NodeHandler",
+      "icon":    "run.png",
+      "tooltip": "Submit the selected node",
+      "enabled": "true",
+      "hidden":  "false",
+      "separator": "false"
+    },
+    {
+      "name":    "Suspend",
+      "command": "suspend",
+      "handler": "NodeHandler",
+      "icon":    "pause.png",
+      "tooltip": "Suspend the selected node",
+      "enabled": "true",
+      "hidden":  "false",
+      "separator": "false"
+    },
+    {
+      "name":    "---",
+      "command": "NoCommand",
+      "handler": "",
+      "icon":    "",
+      "tooltip": "",
+      "enabled": "false",
+      "hidden":  "false",
+      "separator": "true"
+    }
+  ]
+}

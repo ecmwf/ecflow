@@ -20,8 +20,6 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidgetAction>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
     #include <QRegExp>
@@ -40,6 +38,7 @@
 #include "VProperty.hpp"
 #include "ViewerUtil.hpp"
 #include "ecflow/core/Str.hpp"
+#include "ecflow/core/PTree.hpp"
 
 int MenuItem::idCnt_ = 0;
 
@@ -61,13 +60,12 @@ MenuHandler::MenuHandler() {
 bool MenuHandler::readMenuConfigFile(const std::string& configFile) {
     // parse the response using the boost JSON property tree parser
 
-    using boost::property_tree::ptree;
-    ptree pt;
+    ecf::PTree pt;
 
     try {
         read_json(configFile, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         std::string errorMessage = e.what();
         UserMessage::message(
             UserMessage::ERROR, true, std::string("Error, unable to parse JSON menu file : " + errorMessage));

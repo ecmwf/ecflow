@@ -10,8 +10,9 @@
 
 #include "VConfig.hpp"
 
+#include <fstream>
+
 #include <QDebug>
-#include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
 #include "SessionHandler.hpp"
@@ -21,6 +22,7 @@
 #include "VProperty.hpp"
 #include "VSettings.hpp"
 #include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/PTree.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 
@@ -89,13 +91,12 @@ void VConfig::init(const std::string& parDirPath) {
 
 void VConfig::loadInit(const std::string& parFile) {
     // Parse param file using the boost JSON property tree parser
-    using boost::property_tree::ptree;
-    ptree pt;
+    ecf::PTree pt;
 
     try {
         read_json(parFile, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         std::string errorMessage = e.what();
         UserMessage::message(UserMessage::ERROR,
                              true,
@@ -123,11 +124,7 @@ void VConfig::loadInit(const std::string& parFile) {
     }
 }
 
-void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* prop) {
-    using boost::property_tree::ptree;
-
-    ptree::const_assoc_iterator itProp;
-
+void VConfig::loadProperty(const ecf::PTree& pt, VProperty* prop) {
     // Loop over the possible properties
     for (auto& [propertyName, propertyValue] : pt) {
 
@@ -256,8 +253,7 @@ void VConfig::saveSettings() {
 
 // Saves the settings per server that can be edited through the servers option gui
 void VConfig::saveSettings(const std::string& parFile, VProperty* guiProp, VSettings* vs, bool global) {
-    using boost::property_tree::ptree;
-    ptree pt;
+    ecf::PTree pt;
 
     // Get editable properties. We will operate on the links.
     std::vector<VProperty*> linkVec;
@@ -305,13 +301,12 @@ void VConfig::loadSettings(const std::string& parFile, VProperty* guiProp, bool 
     guiProp->collectLinks(linkVec);
 
     // Parse file using the boost JSON property tree parser
-    using boost::property_tree::ptree;
-    ptree pt;
+    ecf::PTree pt;
 
     try {
         read_json(parFile, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         if (fs::exists(parFile)) {
             std::string errorMessage = e.what();
             UserMessage::message(UserMessage::ERROR,
@@ -353,7 +348,7 @@ void VConfig::loadSettings(const std::string& parFile, VProperty* guiProp, bool 
     }
 }
 
-void VConfig::loadImportedSettings(const boost::property_tree::ptree& pt, VProperty* guiProp) {
+void VConfig::loadImportedSettings(const ecf::PTree& pt, VProperty* guiProp) {
     std::vector<VProperty*> linkVec;
     guiProp->collectLinks(linkVec);
 
@@ -369,7 +364,7 @@ void VConfig::loadImportedSettings(const boost::property_tree::ptree& pt, VPrope
 }
 
 void VConfig::importSettings() {
-    boost::property_tree::ptree pt;
+    ecf::PTree pt;
 
     std::string globalRcFile(DirectoryHandler::concatenate(DirectoryHandler::rcDir(), "user.default.options"));
     if (readRcFile(globalRcFile, pt)) {
@@ -379,7 +374,7 @@ void VConfig::importSettings() {
     }
 }
 
-bool VConfig::readRcFile(const std::string& rcFile, boost::property_tree::ptree& pt) {
+bool VConfig::readRcFile(const std::string& rcFile, ecf::PTree& pt) {
     std::ifstream in(rcFile.c_str());
 
     if (!in.good()) {
@@ -464,11 +459,11 @@ bool VConfig::readRcFile(const std::string& rcFile, boost::property_tree::ptree&
                     hasValue = true;
                 }
                 else if (par[0] == "suites") {
-                    boost::property_tree::ptree suites;
-                    suites.push_back(std::make_pair(std::string{}, boost::property_tree::ptree(par[1])));
+                    ecf::PTree suites;
+                    suites.put_child(std::string{}, ecf::PTree(par[1]));
 
                     for (unsigned int j = 1; j < vec.size(); j++) {
-                        suites.push_back(std::make_pair(std::string{}, boost::property_tree::ptree(vec.at(j))));
+                        suites.put_child(std::string{}, ecf::PTree(vec.at(j)));
                     }
 
                     pt.put_child("suite_filter.suites", suites);
