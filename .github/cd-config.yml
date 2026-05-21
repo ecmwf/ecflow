@@ -191,6 +191,7 @@ builds:
             -DCMAKE_PYTHON_INSTALL_TYPE: local
             -DINSTALL_LIB_DIR: lib
             -DUI_SYSTEM_SERVERS_LIST: /ec/vol/ecflow_def/servers.list.all
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
         
         - name: python312
           modules:
@@ -202,6 +203,7 @@ builds:
           test_command: *test_cmd
           cmake_options:
             <<: *common_cmake_options
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.12.9-01/lib/python3.12/site-packages/pybind11/share/cmake/pybind11
           install_command: |
             cmake --install . --component python
 
@@ -217,6 +219,7 @@ builds:
             <<: *common_cmake_options
             -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/8.5/include
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.11.8-01/lib/python3.11/site-packages/pybind11/share/cmake/pybind11
             -DENABLE_UI: OFF
           install_command: |
             cmake --install . --component python
@@ -234,6 +237,7 @@ builds:
             ENABLE_UI: OFF
             -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/12.2/include
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
           install_command: |
             cmake --install . --component python
 
@@ -250,6 +254,7 @@ builds:
             -DENABLE_UI: OFF
             -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/8.5/include
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
           install_command: |
             cmake --install . --component python
 
