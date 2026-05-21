@@ -1586,7 +1586,8 @@ BOOST_AUTO_TEST_CASE(get_or_create_child_array_is_not_corrupted_after_throw) {
     try {
         arr.put("key", std::string("x"));
     }
-    catch (const ecf::PTreeInvalidStateError&) { /* expected */ }
+    catch (const ecf::PTreeInvalidStateError&) { /* expected */
+    }
 
     // Must still be an array
     BOOST_REQUIRE(arr.is_array());
@@ -1665,30 +1666,30 @@ BOOST_AUTO_TEST_CASE(get_value_bool_recognises_true_and_1_as_true) {
     ECF_NAME_THIS_TEST();
 
     BOOST_CHECK(ecf::PTree(std::string("true")).get_value<bool>() == true);
-    BOOST_CHECK(ecf::PTree(std::string("1")).get_value<bool>()    == true);
+    BOOST_CHECK(ecf::PTree(std::string("1")).get_value<bool>() == true);
 }
 
 BOOST_AUTO_TEST_CASE(get_value_bool_recognises_false_and_0_as_false) {
     ECF_NAME_THIS_TEST();
 
     BOOST_CHECK(ecf::PTree(std::string("false")).get_value<bool>() == false);
-    BOOST_CHECK(ecf::PTree(std::string("0")).get_value<bool>()     == false);
+    BOOST_CHECK(ecf::PTree(std::string("0")).get_value<bool>() == false);
 }
 
 BOOST_AUTO_TEST_CASE(get_value_bool_throws_PTreeValueError_for_unrecognised_string) {
     ECF_NAME_THIS_TEST();
 
-    BOOST_CHECK_THROW(ecf::PTree(std::string("yes")).get_value<bool>(),  ecf::PTreeValueError);
-    BOOST_CHECK_THROW(ecf::PTree(std::string("no")).get_value<bool>(),   ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(std::string("yes")).get_value<bool>(), ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(std::string("no")).get_value<bool>(), ecf::PTreeValueError);
     BOOST_CHECK_THROW(ecf::PTree(std::string("True")).get_value<bool>(), ecf::PTreeValueError);
-    BOOST_CHECK_THROW(ecf::PTree(std::string("")).get_value<bool>(),     ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(std::string("")).get_value<bool>(), ecf::PTreeValueError);
 }
 
 BOOST_AUTO_TEST_CASE(get_value_bool_throws_PTreeValueError_for_int_node) {
     ECF_NAME_THIS_TEST();
 
-    BOOST_CHECK_THROW(ecf::PTree(1).get_value<bool>(),  ecf::PTreeValueError);
-    BOOST_CHECK_THROW(ecf::PTree(0).get_value<bool>(),  ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(1).get_value<bool>(), ecf::PTreeValueError);
+    BOOST_CHECK_THROW(ecf::PTree(0).get_value<bool>(), ecf::PTreeValueError);
 }
 
 BOOST_AUTO_TEST_CASE(get_value_bool_throws_PTreeValueError_for_null_node) {
