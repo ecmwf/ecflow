@@ -404,6 +404,7 @@ private:
     ///
     /// @param key the key associated to the child (not a dotted path)
     /// @return the node associated to the key, or a new null node if the key was not found among direct children
+    /// @throws PTreeInvalidStateError if this node is an array (mixing named and anonymous children is not permitted).
     ///
     PTree& get_or_create_child(const std::string& key);
 

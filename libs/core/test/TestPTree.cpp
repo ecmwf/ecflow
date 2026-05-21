@@ -1531,6 +1531,136 @@ BOOST_AUTO_TEST_CASE(write_json_throws_JsonParseError_for_unwritable_path) {
     BOOST_CHECK_THROW(write_json("/no/such/directory/file.json", t), ecf::PTreeParseError);
 }
 
+BOOST_AUTO_TEST_CASE(get_or_create_child_on_array_via_put_string_throws) {
+    ECF_NAME_THIS_TEST();
+
+    ecf::PTree arr;
+    arr.push_back_array_element(ecf::PTree(std::string("alpha")));
+    arr.push_back_array_element(ecf::PTree(std::string("beta")));
+
+    BOOST_CHECK_THROW(arr.put("key", std::string("x")), ecf::PTreeInvalidStateError);
+}
+
+BOOST_AUTO_TEST_CASE(get_or_create_child_on_array_via_put_int_throws) {
+    ECF_NAME_THIS_TEST();
+
+    ecf::PTree arr;
+    arr.push_back_array_element(ecf::PTree(std::string("alpha")));
+
+    BOOST_CHECK_THROW(arr.put("count", 42), ecf::PTreeInvalidStateError);
+}
+
+BOOST_AUTO_TEST_CASE(get_or_create_child_on_array_via_put_child_throws) {
+    ECF_NAME_THIS_TEST();
+
+    ecf::PTree arr;
+    arr.push_back_array_element(ecf::PTree(std::string("alpha")));
+
+    ecf::PTree child;
+    child.put("x", std::string("1"));
+    BOOST_CHECK_THROW(arr.put_child("sub", std::move(child)), ecf::PTreeInvalidStateError);
+}
+
+BOOST_AUTO_TEST_CASE(get_or_create_child_error_message_contains_key_name) {
+    ECF_NAME_THIS_TEST();
+
+    ecf::PTree arr;
+    arr.push_back_array_element(ecf::PTree(std::string("v")));
+
+    try {
+        arr.put("offending_key", std::string("x"));
+        BOOST_FAIL("expected PTreeInvalidStateError");
+    }
+    catch (const ecf::PTreeInvalidStateError& e) {
+        BOOST_CHECK(std::string(e.what()).find("offending_key") != std::string::npos);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(get_or_create_child_array_is_not_corrupted_after_throw) {
+    ECF_NAME_THIS_TEST();
+
+    ecf::PTree arr;
+    arr.push_back_array_element(ecf::PTree(std::string("first")));
+    arr.push_back_array_element(ecf::PTree(std::string("second")));
+
+    try {
+        arr.put("key", std::string("x"));
+    }
+    catch (const ecf::PTreeInvalidStateError&) { /* expected */ }
+
+    // Must still be an array
+    BOOST_REQUIRE(arr.is_array());
+
+    // Must still have exactly 2 anonymous elements with the original values
+    std::vector<std::string> elems;
+    for (const auto& [k, v] : arr) {
+        BOOST_CHECK(k.empty()); // array elements have empty names
+        elems.push_back(v.get_value<std::string>());
+    }
+    BOOST_REQUIRE_EQUAL(elems.size(), 2u);
+    BOOST_CHECK_EQUAL(elems[0], "first");
+    BOOST_CHECK_EQUAL(elems[1], "second");
+}
+
+BOOST_AUTO_TEST_CASE(get_or_create_child_intermediate_array_in_dotted_path_throws) {
+    ECF_NAME_THIS_TEST();
+
+    // Build: root → tabs (array of two strings)
+    ecf::PTree tabs;
+    tabs.push_back_array_element(ecf::PTree(std::string("tab1")));
+    tabs.push_back_array_element(ecf::PTree(std::string("tab2")));
+    ecf::PTree root;
+    root.put_child("tabs", std::move(tabs));
+
+    // Navigating INTO the array via a dotted path must throw
+    BOOST_CHECK_THROW(root.put("tabs.count", 2), ecf::PTreeInvalidStateError);
+    BOOST_CHECK_THROW(root.put("tabs.name", std::string("list")), ecf::PTreeInvalidStateError);
+
+    // The tabs array must remain intact
+    auto t = root.get_child_optional("tabs");
+    BOOST_REQUIRE(t.has_value());
+    BOOST_REQUIRE(t->is_array());
+    int count = 0;
+    for ([[maybe_unused]] const auto& child : *t) {
+        ++count;
+    }
+    BOOST_CHECK_EQUAL(count, 2);
+}
+
+BOOST_AUTO_TEST_CASE(put_child_replacing_an_array_node_does_not_throw) {
+    ECF_NAME_THIS_TEST();
+
+    ecf::PTree old_arr;
+    old_arr.push_back_array_element(ecf::PTree(std::string("old")));
+    ecf::PTree root;
+    root.put_child("list", std::move(old_arr));
+    BOOST_REQUIRE(root.get_child_optional("list")->is_array());
+
+    // Replace the array with a plain object subtree
+    ecf::PTree replacement;
+    replacement.put("name", std::string("replaced"));
+    BOOST_REQUIRE_NO_THROW(root.put_child("list", std::move(replacement)));
+
+    BOOST_CHECK_EQUAL(root.get<std::string>("list.name", ""), "replaced");
+    BOOST_CHECK(!root.get_child_optional("list")->is_array());
+}
+
+BOOST_AUTO_TEST_CASE(PTreeInvalidStateError_from_array_guard_is_catchable_as_std_runtime_error) {
+    ECF_NAME_THIS_TEST();
+
+    ecf::PTree arr;
+    arr.push_back_array_element(ecf::PTree(std::string("v")));
+
+    bool caught = false;
+    try {
+        arr.put("key", std::string("x"));
+    }
+    catch (const std::runtime_error&) {
+        caught = true;
+    }
+    BOOST_CHECK(caught);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -70,6 +70,16 @@ PTree& PTree::navigate_or_create(std::string_view path) {
 }
 
 PTree& PTree::get_or_create_child(const std::string& key) {
+    if (kind_ == Kind::Children && arr_) {
+        //
+        // _Navigating_ into an array with a named key is always a programming error.
+        //
+        // This check prevents to silently append a named child to the array,
+        // and thus mixing anonymous and named elements in the same children
+        // vector and corrupting the node.
+        //
+        throw PTreeInvalidStateError("PTree: cannot navigate into an array node with key '" + key + "'");
+    }
     if (kind_ != Kind::Children) {
         kind_ = Kind::Children;
         arr_  = false;
