@@ -20,8 +20,8 @@ EditHistoryMgr::EditHistoryMgr(const ClientToServerCmd& cmd, const AbstractServe
       as_(server),
       state_change_no_(Ecf::state_change_no()),
       modify_change_no_(Ecf::modify_change_no()) {
-    assert(cts_cmd_->edit_history_nodes_.empty());
-    assert(cts_cmd_->edit_history_node_paths_.empty());
+    assert(cts_cmd_.edit_history_nodes_.empty());
+    assert(cts_cmd_.edit_history_node_paths_.empty());
 }
 
 EditHistoryMgr::~EditHistoryMgr() {
