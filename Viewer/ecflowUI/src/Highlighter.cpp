@@ -15,11 +15,11 @@
 #include <QTextDocument>
 #include <QTextDocumentFragment>
 #include <QTextLayout>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
 
+#include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "VParam.hpp"
+#include "ecflow/core/PTree.hpp"
 
 std::string Highlighter::parFile_;
 
@@ -72,13 +72,13 @@ void Highlighter::init(const std::string& parFile) {
 
 void Highlighter::load(QString id) {
     // Parse param file using the boost JSON property tree parser
-    using boost::property_tree::ptree;
-    ptree pt;
+
+    ecf::PTree pt;
 
     try {
         read_json(parFile_, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         std::string errorMessage = e.what();
         UserMessage::message(UserMessage::ERROR,
                              true,
@@ -88,7 +88,7 @@ void Highlighter::load(QString id) {
     }
 
     auto itTop = pt.find(id.toStdString());
-    if (itTop == pt.not_found()) { // Not found!
+    if (itTop == pt.end()) { // Not found!
         return;
     }
 
@@ -97,18 +97,18 @@ void Highlighter::load(QString id) {
         QString pattern;
         QTextCharFormat format;
 
-        if (auto itPar = ruleValue.find("pattern"); itPar != ruleValue.not_found()) { // Found!
+        if (auto itPar = ruleValue.find("pattern"); itPar != ruleValue.end()) { // Found!
             pattern = QString::fromStdString(itPar->second.get_value<std::string>());
         }
-        if (auto itPar = ruleValue.find("colour"); itPar != ruleValue.not_found()) { // Found!
+        if (auto itPar = ruleValue.find("colour"); itPar != ruleValue.end()) { // Found!
             format.setForeground(VProperty::toColour(itPar->second.get_value<std::string>()));
         }
-        if (auto itPar = ruleValue.find("bold"); itPar != ruleValue.not_found()) { // Found!
+        if (auto itPar = ruleValue.find("bold"); itPar != ruleValue.end()) { // Found!
             if (itPar->second.get_value<std::string>() == "true") {
                 format.setFontWeight(QFont::Bold);
             }
         }
-        if (auto itPar = ruleValue.find("italic"); itPar != ruleValue.not_found()) { // Found!
+        if (auto itPar = ruleValue.find("italic"); itPar != ruleValue.end()) { // Found!
             if (itPar->second.get_value<std::string>() == "true") {
                 format.setFontItalic(true);
             }

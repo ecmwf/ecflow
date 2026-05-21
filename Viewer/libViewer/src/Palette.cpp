@@ -22,8 +22,9 @@
 #endif
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
+
+#include "UiLog.hpp"
+#include "ecflow/core/PTree.hpp"
 
 static QMap<std::string, QPalette::ColorRole> paletteId;
 
@@ -54,13 +55,12 @@ void Palette::load(const std::string& parFile) {
     }
 
     // Parse param file using the boost JSON property tree parser
-    using boost::property_tree::ptree;
-    ptree pt;
+    ecf::PTree pt;
 
     try {
         read_json(parFile, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         std::string errorMessage = e.what();
         UserMessage::message(UserMessage::ERROR,
                              true,

@@ -13,7 +13,7 @@
 
 #include <vector>
 
-#include <boost/property_tree/ptree.hpp>
+#include "ecflow/core/PTree.hpp"
 
 class VProperty;
 class VServerSettings;
@@ -44,12 +44,12 @@ protected:
     VConfig();
 
     void loadInit(const std::string& parFile);
-    void loadProperty(const boost::property_tree::ptree& pt, VProperty* prop);
+    void loadProperty(const ecf::PTree& pt, VProperty* prop);
     void loadSettings();
     void saveSettings(const std::string& parFile, VProperty* guiProp, VSettings* vs, bool);
     void loadSettings(const std::string& parFile, VProperty* guiProp, bool);
-    void loadImportedSettings(const boost::property_tree::ptree& pt, VProperty* guiProp);
-    bool readRcFile(const std::string& rcFile, boost::property_tree::ptree& pt);
+    void loadImportedSettings(const ecf::PTree& pt, VProperty* guiProp);
+    bool readRcFile(const std::string& rcFile, ecf::PTree& pt);
 
     VProperty* group(const std::string& name);
 

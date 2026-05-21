@@ -12,8 +12,6 @@
 
 #include <cassert>
 
-#include <boost/property_tree/json_parser.hpp>
-
 #include "DirectoryHandler.hpp"
 #include "ServerHandler.hpp"
 #include "ServerItem.hpp"
@@ -26,6 +24,7 @@
 #include "VProperty.hpp"
 #include "VSettings.hpp"
 #include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/PTree.hpp"
 
 std::map<VServerSettings::Param, std::string> VServerSettings::notifyIds_;
 std::map<VServerSettings::Param, std::string> VServerSettings::parNames_;
@@ -213,8 +212,7 @@ void VServerSettings::importRcFiles() {
 
         std::string rcFile(DirectoryHandler::concatenate(DirectoryHandler::rcDir(), name + ".options"));
 
-        using boost::property_tree::ptree;
-        ptree pt;
+        ecf::PTree pt;
 
         if (VConfig::instance()->readRcFile(rcFile, pt)) {
             std::string jsonName = cs->serverFile(name);

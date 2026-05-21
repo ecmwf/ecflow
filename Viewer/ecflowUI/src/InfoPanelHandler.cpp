@@ -10,12 +10,10 @@
 
 #include "InfoPanelHandler.hpp"
 
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-
 #include "NodeExpression.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+#include "ecflow/core/PTree.hpp"
 
 InfoPanelHandler* InfoPanelHandler::instance_ = nullptr;
 
@@ -39,13 +37,12 @@ InfoPanelHandler* InfoPanelHandler::instance() {
 void InfoPanelHandler::init(const std::string& configFile) {
     // parse the response using the boost JSON property tree parser
 
-    using boost::property_tree::ptree;
-    ptree pt;
+    ecf::PTree pt;
 
     try {
         read_json(configFile, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         std::string errorMessage = e.what();
         UserMessage::message(
             UserMessage::ERROR, true, std::string("Error, unable to parse JSON menu file : " + errorMessage));
@@ -58,7 +55,7 @@ void InfoPanelHandler::init(const std::string& configFile) {
             UiLog().dbg() << "Panels:";
 
             // iterate through all the panels
-            for (auto& [panelName, panelValue] : topLevelValue) {
+            for (auto& [_, panelValue] : topLevelValue) {
                 std::string cname = panelValue.get("name", "");
 
                 UiLog().dbg() << "  " << cname;

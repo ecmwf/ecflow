@@ -1,0 +1,23 @@
+{
+  "active": {
+    "Window":     "#f0f0f0",
+    "WindowText": "#000000",
+    "Base":       "#ffffff",
+    "Button":     "#e0e0e0",
+    "Highlight":  "#0078d4"
+  },
+  "inactive": {
+    "Window":     "#d8d8d8",
+    "WindowText": "#555555",
+    "Base":       "#f8f8f8",
+    "Button":     "#cccccc",
+    "Highlight":  "#4a9fcf"
+  },
+  "disabled": {
+    "Window":     "#c0c0c0",
+    "WindowText": "#888888",
+    "Base":       "#eeeeee",
+    "Button":     "#b8b8b8",
+    "Highlight":  "#999999"
+  }
+}
