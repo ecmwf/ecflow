@@ -10,6 +10,7 @@ on:
       - '**'
     paths-ignore:
       - ".cd/**"
+      - ".github/cd-config.yml"
 
   # Trigger the workflow on pull request
   pull_request: ~
