@@ -252,7 +252,7 @@ public:
     ///         or `default_value` if the path is absent or if type conversion fails
     ///
     template <class T>
-    T get(std::string_view path, T default_value) const noexcept;
+    T get(std::string_view path, T default_value) const;
 
     /// Convenience overloads for const char* / string literal defaults.
     std::string get(std::string_view path, const char* dv) const;
@@ -548,7 +548,7 @@ inline bool PTree::get_value<bool>() const {
 }
 
 template <class T>
-T PTree::get(std::string_view path, T default_value) const noexcept {
+T PTree::get(std::string_view path, T default_value) const {
     const PTree* node = navigate(path);
     if (!node) {
         return default_value;
