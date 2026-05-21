@@ -72,7 +72,6 @@ builds:
       dependencies:
         - ecmwf/ecbuild
       cmake_options:
-        -DPython3_EXECUTABLE: /usr/bin/python3
         -DBOOST_ROOT: ${BOOST_ROOT_DIR}
         -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
         -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
@@ -102,7 +101,6 @@ builds:
       dependencies:
         - ecmwf/ecbuild
       cmake_options:
-        -DPython3_EXECUTABLE: /usr/bin/python3
         -DBOOST_ROOT: ${BOOST_ROOT_DIR}
         -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
         -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
@@ -175,6 +173,25 @@ builds:
       self_test: true
 
       stages:
+        - name: python313
+          modules:
+            - boost/1.87.0
+            - python3/3.13.13-01
+            - qt/6.6.1
+            - cmake/new
+            - ecbuild/new
+          test_command: &test_cmd "ctest --output-on-failure -j 8 -L nightly"
+          cmake_options: &common_cmake_options
+            -DCMAKE_VERBOSE_MAKEFILE: ON
+            -DENABLE_ALL_TESTS: ON
+            -DENABLE_STATIC_BOOST_LIBS: ON
+            -DENABLE_WARNINGS: ON
+            -DCMAKE_BUILD_TYPE: Release
+            -DCMAKE_CXX_FLAGS: -Wno-deprecated-declarations
+            -DCMAKE_PYTHON_INSTALL_TYPE: local
+            -DINSTALL_LIB_DIR: lib
+            -DUI_SYSTEM_SERVERS_LIST: /ec/vol/ecflow_def/servers.list.all
+        
         - name: python312
           modules:
             - boost/1.87.0
@@ -193,10 +210,12 @@ builds:
             -DCMAKE_PYTHON_INSTALL_TYPE: local
             -DINSTALL_LIB_DIR: lib
             -DUI_SYSTEM_SERVERS_LIST: /ec/vol/ecflow_def/servers.list.all
+          install_command: |
+            cmake --install . --component python
 
         - name: python311
           modules:
-            - boost/1.84.0
+            - boost/1.87.0
             - python3/3.11.8-01
             - qt/5.12.0
             - cmake/new
@@ -206,19 +225,14 @@ builds:
             <<: *common_cmake_options
             -DBoost_ROOT: /usr/local/apps/boost/1.84.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.84.0/GNU/8.5/include
-            -DBoost_PYTHON311_LIBRARY_RELEASE: /usr/local/apps/boost/1.84.0/GNU/8.5/lib/libboost_python311.so
             -DPython3_ROOT_DIR: /usr/local/apps/python3/3.11.8-01
-            -DPython3_EXECUTABLE: /usr/local/apps/python3/3.11.8-01/bin/python3
-            -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.11.8-01/include/python3.11
-            -DPython3_LIBRARIES: /usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so
-            -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.11.8-01/lib64
             -DENABLE_UI: OFF
           install_command: |
             cmake --install . --component python
 
         - name: python310
           modules:
-            - boost/1.81.0
+            - boost/1.87.0
             - python3/3.10.10-01
             - qt/6.2.0
             - cmake/new
@@ -229,18 +243,12 @@ builds:
             ENABLE_UI: OFF
             -DBoost_ROOT: /usr/local/apps/boost/1.81.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.81.0/GNU/12.2/include
-            -DBoost_PYTHON310_LIBRARY_RELEASE: /usr/local/apps/boost/1.81.0/GNU/8.5/lib/libboost_python310.so
-            -DPython3_ROOT_DIR: /usr/local/apps/python3/3.10.10-01
-            -DPython3_EXECUTABLE: /usr/local/apps/python3/3.10.10-01/bin/python3
-            -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.10.10-01/include/python3.10
-            -DPython3_LIBRARIES: /usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
-            -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.10.10-01/lib64
           install_command: |
             cmake --install . --component python
 
         - name: python38
           modules:
-            - boost/1.75.0
+            - boost/1.87.0
             - python3/3.8.8-01
             - qt/5.12.0
             - cmake/new
@@ -251,12 +259,6 @@ builds:
             -DENABLE_UI: OFF
             -DBoost_ROOT: /usr/local/apps/boost/1.75.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.75.0/GNU/8.5/include
-            -DBoost_PYTHON38_LIBRARY_RELEASE: /usr/local/apps/boost/1.75.0/GNU/8.5/lib/libboost_python38.so
-            -DPython3_ROOT_DIR: /usr/local/apps/python3/3.8.8-01
-            -DPython3_EXECUTABLE: /usr/local/apps/python3/3.8.8-01/bin/python3
-            -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.8.8-01/include/python3.8
-            -DPython3_LIBRARIES: /usr/local/apps/python3/3.8.8-01/lib64/libpython3.8.so
-            -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.8.8-01/lib64
           install_command: |
             cmake --install . --component python
 
