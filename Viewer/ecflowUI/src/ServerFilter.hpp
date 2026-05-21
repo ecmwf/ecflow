@@ -18,8 +18,6 @@
 
 class VSettings;
 
-#include <boost/property_tree/ptree.hpp>
-
 class ServerFilterObserver {
 public:
     virtual ~ServerFilterObserver()                     = default;

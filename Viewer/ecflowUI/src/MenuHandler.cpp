@@ -76,69 +76,49 @@ bool MenuHandler::readMenuConfigFile(const std::string& configFile) {
 
     // iterate over the top level of the tree
 
-    for (ptree::const_iterator itTopLevel = pt.begin(); itTopLevel != pt.end(); ++itTopLevel) {
-        // parse the menu definitions?
+    for (auto& [nameTop, valueTop] : pt) {
 
-        if (itTopLevel->first == "menus") {
+        if (nameTop == "menus") {
             UiLog().dbg() << "Menus:";
-
-            ptree const& menusDef = itTopLevel->second;
 
             // iterate through all the menus
 
-            for (ptree::const_iterator itMenus = menusDef.begin(); itMenus != menusDef.end(); ++itMenus) {
-                ptree const& menuDef = itMenus->second;
+            for (auto& [menuName, menuValue] : valueTop) {
 
-                std::string cname = menuDef.get("name", "NoName");
+                std::string cname = menuValue.get("name", "NoName");
                 UiLog().dbg() << "  " << cname;
                 auto* menu = new Menu(cname);
 
-                // ptree const &menuModesDef = menuDef.get_child("modes");
-
-                // for (ptree::const_iterator itMenuModes = menuModesDef.begin(); itMenuModes != menuModesDef.end();
-                // ++itMenuModes)
-                //{
-                //    std::cout << "   +" << itMenuModes->second.data() << std::endl;
-                //}
-
-                std::string parentMenuName = menuDef.get("parent", "None");
-
-                if (parentMenuName != "None") {}
+                std::string parentMenuName = menuValue.get("parent", "None");
 
                 addMenu(menu); // add to our list of available menus
             }
         }
-
-        // parse the menu items?
-
-        else if (itTopLevel->first == "menu_items") {
+        else if (nameTop == "menu_items") {
             UiLog().dbg() << "Menu items:";
 
-            ptree const& itemsDef = itTopLevel->second;
+            // iterator through all menu_items
 
-            // iterate through all the items
+            for (auto& [itemName, itemValue] : valueTop) {
 
-            for (ptree::const_iterator itItems = itemsDef.begin(); itItems != itemsDef.end(); ++itItems) {
-                ptree const& ItemDef = itItems->second;
-
-                std::string name              = ItemDef.get("name", "NoName");
-                std::string menuName          = ItemDef.get("menu", "NoMenu");
-                std::string command           = ItemDef.get("command", "NoCommand");
-                std::string type              = ItemDef.get("type", "Command");
-                std::string enabled           = ItemDef.get("enabled_for", "");
-                std::string visible           = ItemDef.get("visible_for", "");
-                std::string questFor          = ItemDef.get("question_for", "");
-                std::string question          = ItemDef.get("question", "");
-                std::string questionControl   = ItemDef.get("question_control", "");
-                std::string warning           = ItemDef.get("warning", "");
-                std::string handler           = ItemDef.get("handler", "");
-                std::string views             = ItemDef.get("view", "");
-                std::string icon              = ItemDef.get("icon", "");
-                std::string hidden            = ItemDef.get("hidden", "false");
-                std::string multiSelect       = ItemDef.get("multi", "true");
-                std::string statustip         = ItemDef.get("status_tip", "");
-                std::string shortcut          = ItemDef.get("shortcut", "");
-                std::string panelPopupControl = ItemDef.get("panel_control", "");
+                std::string name              = itemValue.get("name", "NoName");
+                std::string menuName          = itemValue.get("menu", "NoMenu");
+                std::string command           = itemValue.get("command", "NoCommand");
+                std::string type              = itemValue.get("type", "Command");
+                std::string enabled           = itemValue.get("enabled_for", "");
+                std::string visible           = itemValue.get("visible_for", "");
+                std::string questFor          = itemValue.get("question_for", "");
+                std::string question          = itemValue.get("question", "");
+                std::string questionControl   = itemValue.get("question_control", "");
+                std::string warning           = itemValue.get("warning", "");
+                std::string handler           = itemValue.get("handler", "");
+                std::string views             = itemValue.get("view", "");
+                std::string icon              = itemValue.get("icon", "");
+                std::string hidden            = itemValue.get("hidden", "false");
+                std::string multiSelect       = itemValue.get("multi", "true");
+                std::string statustip         = itemValue.get("status_tip", "");
+                std::string shortcut          = itemValue.get("shortcut", "");
+                std::string panelPopupControl = itemValue.get("panel_control", "");
 
                 // std::cout << "  " << name << " :" << menuName << std::endl;
 

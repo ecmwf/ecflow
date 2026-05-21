@@ -32,8 +32,6 @@ class VNode;
 class VSettings;
 class VTree;
 
-#include <boost/property_tree/ptree.hpp>
-
 class VParamSet : public QObject {
     Q_OBJECT
 

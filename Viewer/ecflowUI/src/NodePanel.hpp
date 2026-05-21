@@ -12,7 +12,6 @@
 #define ecflow_viewer_NodePanel_HPP
 
 #include <QIcon>
-#include <boost/property_tree/ptree.hpp>
 
 #include "TabWidget.hpp"
 #include "VInfo.hpp"

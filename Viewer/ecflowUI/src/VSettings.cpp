@@ -154,26 +154,24 @@ void VSettings::putAsBool(const std::string& key, bool val) {
 }
 
 void VSettings::get(const std::string& key, std::vector<std::string>& val) {
-    boost::optional<boost::property_tree::ptree&> ptArray = pt_.get_child_optional(path_.path(key));
+    auto ptArray = pt_.get_child_optional(path_.path(key));
     if (!ptArray) {
         return;
     }
 
-    // boost::property_tree::ptree ptArray=it->second;
-    for (boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it) {
-        auto name = it->second.get_value<std::string>();
-        val.push_back(name);
+    for (auto& [_, value] : ptArray.value()) {
+        val.push_back(value.get_value<std::string>());
     }
 }
 
 void VSettings::get(const std::string& key, std::vector<int>& val) {
-    boost::optional<boost::property_tree::ptree&> ptArray = pt_.get_child_optional(path_.path(key));
+    auto ptArray = pt_.get_child_optional(path_.path(key));
     if (!ptArray) {
         return;
     }
 
-    for (boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it) {
-        val.push_back(it->second.get_value<int>());
+    for (auto& [_, value] : ptArray.value()) {
+        val.push_back(value.get_value<int>());
     }
 }
 
@@ -188,13 +186,13 @@ bool VSettings::getAsBool(const std::string& key, bool defaultVal) {
 
 // for getting a list of 'structs'
 void VSettings::get(const std::string& key, std::vector<VSettings>& val) {
-    boost::optional<boost::property_tree::ptree&> ptArray = pt_.get_child_optional(path_.path(key));
+    auto ptArray = pt_.get_child_optional(path_.path(key));
     if (!ptArray) {
         return;
     }
 
-    for (boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it) {
-        boost::property_tree::ptree child = it->second;
+    for (auto& it : ptArray.value()) {
+        auto child = it.second;
         VSettings vs(child);
         val.push_back(vs);
     }
