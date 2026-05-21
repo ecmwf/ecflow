@@ -53,33 +53,29 @@ void InfoPanelHandler::init(const std::string& configFile) {
     }
 
     // iterate over the top level of the tree
-    for (ptree::const_iterator itTopLevel = pt.begin(); itTopLevel != pt.end(); ++itTopLevel) {
-        if (itTopLevel->first == "info_panel") {
+    for (auto& [topLevelName, topLevelValue] : pt) {
+        if (topLevelName == "info_panel") {
             UiLog().dbg() << "Panels:";
 
-            ptree const& panelsPt = itTopLevel->second;
-
             // iterate through all the panels
-            for (ptree::const_iterator itPanel = panelsPt.begin(); itPanel != panelsPt.end(); ++itPanel) {
-                ptree const& panelPt = itPanel->second;
-
-                std::string cname = panelPt.get("name", "");
+            for (auto& [panelName, panelValue] : topLevelValue) {
+                std::string cname = panelValue.get("name", "");
 
                 UiLog().dbg() << "  " << cname;
 
                 auto* def = new InfoPanelDef(cname);
 
-                def->setLabel(panelPt.get("label", ""));
-                def->setIcon(panelPt.get("icon", ""));
-                def->setDockIcon(panelPt.get("dock_icon", ""));
-                def->setShow(panelPt.get("show", ""));
-                def->setTooltip(panelPt.get("tooltip", ""));
-                def->setButtonTooltip(panelPt.get("button_tooltip", ""));
+                def->setLabel(panelValue.get("label", ""));
+                def->setIcon(panelValue.get("icon", ""));
+                def->setDockIcon(panelValue.get("dock_icon", ""));
+                def->setShow(panelValue.get("show", ""));
+                def->setTooltip(panelValue.get("tooltip", ""));
+                def->setButtonTooltip(panelValue.get("button_tooltip", ""));
 
-                std::string enabled = panelPt.get("enabled_for", "");
-                std::string visible = panelPt.get("visible_for", "");
+                std::string enabled = panelValue.get("enabled_for", "");
+                std::string visible = panelValue.get("visible_for", "");
 
-                if (panelPt.get("hidden", "") == "1") {
+                if (panelValue.get("hidden", "") == "1") {
                     def->setHidden(true);
                 }
 

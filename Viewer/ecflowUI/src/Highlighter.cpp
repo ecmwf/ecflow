@@ -87,30 +87,28 @@ void Highlighter::load(QString id) {
         return;
     }
 
-    ptree::const_assoc_iterator itTop = pt.find(id.toStdString());
-    if (itTop == pt.not_found()) {
+    auto itTop = pt.find(id.toStdString());
+    if (itTop == pt.not_found()) { // Not found!
         return;
     }
 
-    // For each parameter
-    for (ptree::const_iterator itRule = itTop->second.begin(); itRule != itTop->second.end(); ++itRule) {
+    // For each Rule
+    for (auto& [ruleName, ruleValue] : itTop->second) {
         QString pattern;
         QTextCharFormat format;
 
-        ptree ptPar = itRule->second;
-
-        if (auto itPar = ptPar.find("pattern"); itPar != ptPar.not_found()) {
+        if (auto itPar = ruleValue.find("pattern"); itPar != ruleValue.not_found()) { // Found!
             pattern = QString::fromStdString(itPar->second.get_value<std::string>());
         }
-        if (auto itPar = ptPar.find("colour"); itPar != ptPar.not_found()) {
+        if (auto itPar = ruleValue.find("colour"); itPar != ruleValue.not_found()) { // Found!
             format.setForeground(VProperty::toColour(itPar->second.get_value<std::string>()));
         }
-        if (auto itPar = ptPar.find("bold"); itPar != ptPar.not_found()) {
+        if (auto itPar = ruleValue.find("bold"); itPar != ruleValue.not_found()) { // Found!
             if (itPar->second.get_value<std::string>() == "true") {
                 format.setFontWeight(QFont::Bold);
             }
         }
-        if (auto itPar = ptPar.find("italic"); itPar != ptPar.not_found()) {
+        if (auto itPar = ruleValue.find("italic"); itPar != ruleValue.not_found()) { // Found!
             if (itPar->second.get_value<std::string>() == "true") {
                 format.setFontItalic(true);
             }

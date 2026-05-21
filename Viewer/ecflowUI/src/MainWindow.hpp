@@ -13,7 +13,6 @@
 
 #include <QMainWindow>
 #include <QSettings>
-#include <boost/property_tree/ptree.hpp>
 
 #include "VInfo.hpp"
 #include "ui_MainWindow.h"
