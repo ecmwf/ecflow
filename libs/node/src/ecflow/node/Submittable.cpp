@@ -1097,6 +1097,8 @@ SubGenVariables::SubGenVariables(const Submittable* sub)
       genvar_ecfjobout_(ecf::environment::ECF_JOBOUT, "", false),
       genvar_ecftryno_(ecf::environment::ECF_TRYNO, "", false),
       genvar_task_("TASK", "", false),
+      genvar_dirname_("ECF_DIRNAME", "", false),
+      genvar_basename_("ECF_BASENAME", "", false),
       genvar_ecfpass_(ecf::environment::ECF_PASS, "", false),
       genvar_ecfscript_(ecf::environment::ECF_SCRIPT, "", false),
       genvar_ecfname_(ecf::environment::ECF_NAME, "", false),
@@ -1123,6 +1125,9 @@ void SubGenVariables::update_static_generated_variables(const std::string& ecf_h
     }
 
     genvar_ecfname_.set_value(theAbsNodePath); // does *not* modify Variable::state_change_no
+
+    genvar_dirname_.set_value(submittable_->dirname());
+    genvar_basename_.set_value(submittable_->basename());
 
     genvar_ecfscript_.value_by_ref().reserve(ecf_home.size() + theAbsNodePath.size() + 4);
     genvar_ecfscript_.value_by_ref() = ecf_home; // does *not* modify Variable::state_change_no
@@ -1191,6 +1196,12 @@ const Variable& SubGenVariables::findGenVariable(const std::string& name) const 
     if (genvar_task_.name() == name) {
         return genvar_task_;
     }
+    if (genvar_dirname_.name() == name) {
+        return genvar_dirname_;
+    }
+    if (genvar_basename_.name() == name) {
+        return genvar_basename_;
+    }
     if (genvar_ecfpass_.name() == name) {
         return genvar_ecfpass_;
     }
@@ -1205,6 +1216,8 @@ const Variable& SubGenVariables::findGenVariable(const std::string& name) const 
 
 void SubGenVariables::gen_variables(std::vector<Variable>& vec) const {
     vec.push_back(genvar_task_);
+    vec.push_back(genvar_dirname_);
+    vec.push_back(genvar_basename_);
     vec.push_back(genvar_ecfjob_);
     vec.push_back(genvar_ecfscript_);
     vec.push_back(genvar_ecfjobout_);
