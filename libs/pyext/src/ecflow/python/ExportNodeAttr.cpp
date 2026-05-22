@@ -1253,7 +1253,13 @@ void export_NodeAttr(py::module& m) {
         .def("end", &RepeatDate::end, "Return the end date as an integer in yyyymmdd format")
         .def("step",
              &RepeatDate::step,
-             "Return the step increment. This is used to update the repeat, until end date is reached");
+             "Return the step increment. This is used to update the repeat, until end date is reached")
+        .def("current_index",
+             &RepeatDate::current_index,
+             "Return the zero-based index of the current date position.\n"
+             "Uses calendar-day (Julian-day) arithmetic so the result is correct\n"
+             "even for sequences that cross month or year boundaries.")
+        .def("current_value", &RepeatDate::current_value, "Return the current date as a string in yyyymmdd format.");
 
     py::class_<RepeatDateTime>(m, "RepeatDateTime", NodeAttrDoc::repeat_datetime_doc())
 
@@ -1283,7 +1289,14 @@ void export_NodeAttr(py::module& m) {
         .def("step",
              &RepeatDateTime::step,
              "Return the step increment (in seconds). This is used to update the repeat, until end instant is "
-             "reached");
+             "reached")
+        .def("current_index",
+             &RepeatDateTime::current_index,
+             "Return the zero-based index of the current instant position:\n"
+             "(seconds(current) - seconds(start)) / seconds(step).")
+        .def("current_value",
+             &RepeatDateTime::current_value,
+             "Return the current instant as a string in yyyymmddTHHMMSS format.");
 
     py::class_<RepeatDateList>(m, "RepeatDateList", NodeAttrDoc::repeat_date_list_doc())
 
@@ -1295,7 +1308,13 @@ void export_NodeAttr(py::module& m) {
         .def("__copy__", pyutil_copy_object<RepeatDateList>)
         .def("name", &RepeatDateList::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def("start", &RepeatDateList::start, "Return the start date as an integer in yyyymmdd format")
-        .def("end", &RepeatDateList::end, "Return the end date as an integer in yyyymmdd format");
+        .def("end", &RepeatDateList::end, "Return the end date as an integer in yyyymmdd format")
+        .def("current_index",
+             &RepeatDateList::current_index,
+             "Return the zero-based index of the current date in the list.")
+        .def("current_value",
+             &RepeatDateList::current_value,
+             "Return the current date as a string in yyyymmdd format, or '' if out of bounds.");
 
     py::class_<RepeatDateTimeList>(m, "RepeatDateTimeList", NodeAttrDoc::repeat_datetimelist_doc())
         .def(py::init<>())
@@ -1306,7 +1325,13 @@ void export_NodeAttr(py::module& m) {
         .def("__copy__", pyutil_copy_object<RepeatDateTimeList>) // __copy__ uses copy constructor
         .def("name", &RepeatDateTimeList::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def("start", &RepeatDateTimeList::start, "Return the start instant as seconds since epoch")
-        .def("end", &RepeatDateTimeList::end, "Return the end instant as seconds since epoch");
+        .def("end", &RepeatDateTimeList::end, "Return the end instant as seconds since epoch")
+        .def("current_index",
+             &RepeatDateTimeList::current_index,
+             "Return the zero-based index of the current instant in the list.")
+        .def("current_value",
+             &RepeatDateTimeList::current_value,
+             "Return the current instant as a string in yyyymmddTHHMMSS format, or '' if out of bounds.");
 
     py::class_<RepeatInteger>(m, "RepeatInteger", NodeAttrDoc::repeat_integer_doc())
 
@@ -1322,7 +1347,11 @@ void export_NodeAttr(py::module& m) {
         .def("name", &RepeatInteger::name, py::return_value_policy::reference, "Return the name of the repeat.")
         .def("start", &RepeatInteger::start)
         .def("end", &RepeatInteger::end)
-        .def("step", &RepeatInteger::step);
+        .def("step", &RepeatInteger::step)
+        .def("current_index",
+             &RepeatInteger::current_index,
+             "Return the zero-based index of the current value: (value - start) / step.")
+        .def("current_value", &RepeatInteger::current_value, "Return the current integer value as a decimal string.");
 
     // Create as shared because: we want to pass a Python list as part of the constructor,
     // and the only way make_constructor works is with a pointer.
@@ -1338,7 +1367,13 @@ void export_NodeAttr(py::module& m) {
         .def("name", &RepeatEnumerated::name, py::return_value_policy::reference, "Return the name of the `repeat`_.")
         .def("start", &RepeatEnumerated::start)
         .def("end", &RepeatEnumerated::end)
-        .def("step", &RepeatEnumerated::step);
+        .def("step", &RepeatEnumerated::step)
+        .def("current_index",
+             &RepeatEnumerated::current_index,
+             "Return the zero-based index of the current enumeration value.")
+        .def("current_value",
+             &RepeatEnumerated::current_value,
+             "Return the enumeration string at the current index, or '' if out of bounds.");
 
     py::class_<RepeatString, std::shared_ptr<RepeatString>>(m, "RepeatString", NodeAttrDoc::repeat_string_doc())
 
@@ -1351,7 +1386,11 @@ void export_NodeAttr(py::module& m) {
         .def("name", &RepeatString::name, py::return_value_policy::reference, "Return the name of the `repeat`_.")
         .def("start", &RepeatString::start)
         .def("end", &RepeatString::end)
-        .def("step", &RepeatString::step);
+        .def("step", &RepeatString::step)
+        .def("current_index", &RepeatString::current_index, "Return the zero-based index into the string list.")
+        .def("current_value",
+             &RepeatString::current_value,
+             "Return the string at the current index, or '' if out of bounds.");
 
     py::class_<RepeatDay>(m, "RepeatDay", NodeAttrDoc::repeat_day_doc())
 
@@ -1359,7 +1398,11 @@ void export_NodeAttr(py::module& m) {
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
         .def("__str__", &RepeatDay::toString)
-        .def("__copy__", pyutil_copy_object<RepeatDay>);
+        .def("__copy__", pyutil_copy_object<RepeatDay>)
+        .def("current_index",
+             &RepeatDay::current_index,
+             "Return the step value (RepeatDay has no position concept; the step is its only numeric attribute).")
+        .def("current_value", &RepeatDay::current_value, "Return the step value as a decimal string.");
 
     py::class_<Repeat>(m, "Repeat", NodeAttrDoc::repeat_doc())
 
@@ -1376,7 +1419,10 @@ void export_NodeAttr(py::module& m) {
         .def("start", &Repeat::start, "The start value of the repeat, as an integer")
         .def("end", &Repeat::end, "The last value of the repeat, as an integer")
         .def("step", &Repeat::step, "The increment for the repeat, as an integer")
-        .def("value", &Repeat::last_valid_value, "The current value of the repeat as an integer");
+        .def("value", &Repeat::last_valid_value, "The current value of the repeat as an integer")
+        .def("current_value", &Repeat::current_value, "The current value of the repeat (as a string)")
+        .def("current_index", &Repeat::current_index, "The current index of the repeat (as an integer)")
+        .def("increment", &Repeat::increment, "Increment the repeat to the next value");
 
     void (ecf::CronAttr::*CronAttr_set_time_series_timeseries)(const ecf::TimeSeries&) = &ecf::CronAttr::addTimeSeries;
     void (ecf::CronAttr::*CronAttr_set_time_series_timeslot_timeslot_timeslot)(
