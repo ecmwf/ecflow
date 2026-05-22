@@ -238,7 +238,7 @@ endsuite;
 
     { // #authorisation, perform write operation with "rw" access -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -259,7 +259,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "attempted_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -279,7 +279,7 @@ endsuite;
 
     { // #authentication, using incorrect password -- attempt to update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_c).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "attempted_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -299,7 +299,7 @@ endsuite;
 
     { // #authentication, inexistent user -- attempt to update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_d).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "attempted_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -393,7 +393,7 @@ endsuite;
 
     { // #authorisation, perform write operation with "rw" access -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -402,7 +402,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -430,7 +430,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -441,7 +441,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "rw" access -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -522,7 +522,7 @@ endsuite;
 
     { // #authorisation, perform write operation (without whitelist) -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -531,7 +531,7 @@ endsuite;
 
     { // #authorisation, perform write operation (without whitelist) -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -554,7 +554,7 @@ endsuite;
 
     { // #authorisation, perform write operation with "rw" access -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -563,7 +563,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(

@@ -951,11 +951,53 @@ public:
         std::string path_;
     };
 
-    struct CommandUpdateLabel
+    struct CommandAlterAddInlimit
     {
         static constexpr bool contacts_server = true;
 
-        explicit CommandUpdateLabel(std::string path, std::string label, std::string value)
+        explicit CommandAlterAddInlimit(std::string limit_path, std::string inlimit_value, std::string node_path)
+            : limit_path_{std::move(limit_path)},
+              inlimit_value_{std::move(inlimit_value)},
+              node_path_{std::move(node_path)} {}
+
+        std::vector<std::string> options() const {
+            return {"--alter", "add", "inlimit", limit_path_, inlimit_value_, node_path_};
+        }
+
+        std::string limit_path_;
+        std::string inlimit_value_;
+        std::string node_path_;
+    };
+
+    struct CommandAlterDeleteInlimit
+    {
+        static constexpr bool contacts_server = true;
+
+        explicit CommandAlterDeleteInlimit(std::string node_path)
+            : node_path_{std::move(node_path)},
+              inlimit_name_{} {}
+        explicit CommandAlterDeleteInlimit(std::string inlimit_name, std::string node_path)
+            : node_path_{std::move(node_path)},
+              inlimit_name_{inlimit_name} {}
+
+        std::vector<std::string> options() const {
+            if (inlimit_name_) {
+                return {"--alter", "delete", "inlimit", inlimit_name_.value(), node_path_};
+            }
+            else {
+                return {"--alter", "delete", "inlimit", node_path_};
+            }
+        }
+
+        std::string node_path_;
+        std::optional<std::string> inlimit_name_;
+    };
+
+    struct CommandAlterUpdateLabel
+    {
+        static constexpr bool contacts_server = true;
+
+        explicit CommandAlterUpdateLabel(std::string path, std::string label, std::string value)
             : path_{path},
               label_{label},
               value_{value} {}

@@ -16,7 +16,7 @@ namespace ecf {
 
 namespace {
 
-bool is_valid_path(const std::string& path) {
+bool is_valid_path(std::string_view path) {
     return !path.empty() && path[0] == '/';
 }
 
@@ -101,9 +101,32 @@ void parse_alter(ClientOptionsParser::option_set_t& processed_options, ClientOpt
     // This effectively always collects an argument (i.e. the operation)
     parse_option(alter, processed_options, args);
 
-    // Collect up to 4 positional arguments, that are not paths
-    parse_positional_arguments(
-        alter, processed_options, args, 4, [](const std::string& arg) { return !is_valid_path(arg); });
+    //
+    // The selector collects up to 4 positional arguments.
+    //
+    // In general, arguments are processed until the first valid node path (one
+    // starting with '/') is found and collection stops.
+    //
+    // Special case — "add inlimit": the inlimit name is a reference to the
+    // associated limit and can take the form [/path/to/node:]limit_name.
+    //
+    // In the specific case of "inlimit", the inlimit "name" is actually a reference
+    // to the associated limit which can take the form [</path/to/node>:]<limit_name>.
+    // To prevent the leading '/' from stopping collection early, the first 3
+    // positional arguments are always accepted when the attribute type is "inlimit".
+    //
+    bool is_inlimit       = false;
+    size_t selector_index = 0;
+    auto selector         = [&is_inlimit, &selector_index](std::string_view arg) -> bool {
+        if (selector_index == 0 && arg == "inlimit") {
+            is_inlimit = true;
+        }
+        bool is_selected = (is_inlimit && selector_index < 3) ? true : !is_valid_path(arg);
+        ++selector_index;
+        return is_selected;
+    };
+
+    parse_positional_arguments(alter, processed_options, args, 4, selector);
 
     // Collect remaining positional arguments, that are paths
     parse_positional_arguments(
