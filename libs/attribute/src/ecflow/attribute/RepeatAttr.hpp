@@ -884,4 +884,94 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+template <typename Result, typename RepeatType>
+inline std::optional<Result> current_value_of(const RepeatType& repeat) {
+    return std::nullopt; // default implementation returns empty optional for all RepeatTypes
+}
+
+template <>
+inline std::optional<int> current_value_of(const RepeatDate& repeat) {
+    return repeat.value();
+}
+
+template <>
+inline std::optional<int> current_value_of(const RepeatDateList& repeat) {
+    return repeat.value();
+}
+
+template <>
+inline std::optional<std::string> current_value_of(const RepeatDateTime& repeat) {
+    return repeat.current_value();
+}
+
+template <>
+inline std::optional<std::string> current_value_of(const RepeatDateTimeList& repeat) {
+    return repeat.current_value();
+}
+
+template <>
+inline std::optional<int> current_value_of(const RepeatInteger& repeat) {
+    return repeat.value();
+}
+
+template <>
+inline std::optional<std::string> current_value_of(const RepeatEnumerated& repeat) {
+    return repeat.current_value();
+}
+
+template <>
+inline std::optional<std::string> current_value_of(const RepeatString& repeat) {
+    return repeat.current_value();
+}
+
+template <>
+inline std::optional<int> current_value_of(const RepeatDay& repeat) {
+    return repeat.value();
+}
+
+template <typename Result>
+inline std::optional<Result> current_value_as(const RepeatBase& base) {
+    if (base.isDate()) {
+        auto& repeat = dynamic_cast<const RepeatDate&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isDateTime()) {
+        auto& repeat = dynamic_cast<const RepeatDateTime&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isDateList()) {
+        auto& repeat = dynamic_cast<const RepeatDateList&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isDateTimeList()) {
+        auto& repeat = dynamic_cast<const RepeatDateTimeList&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isInteger()) {
+        auto& repeat = dynamic_cast<const RepeatInteger&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isEnumerated()) {
+        auto& repeat = dynamic_cast<const RepeatEnumerated&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isString()) {
+        auto& repeat = dynamic_cast<const RepeatString&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isDay()) {
+        auto& repeat = dynamic_cast<const RepeatDay&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+template <typename T>
+std::optional<T> current_value_as(const Repeat& repeat) {
+    auto base = repeat.repeatBase();
+    return (base) ? current_value_as<T>(*base) : std::nullopt;
+}
+
 #endif /* ecflow_attribute_RepeatAttr_HPP */
