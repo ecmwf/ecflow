@@ -48,24 +48,19 @@ public:
     virtual int end() const   = 0;
     virtual int step() const  = 0;
 
+    ///
+    /// @brief Retrieve the zero-based index of the current repeat position.
+    ///
+    /// @return the zero-based index of the current repeat position
+    ///
     virtual long current_index() const = 0;
-    ///< Returns the zero-based index of the current repeat position.
-    ///< For index-based types (RepeatString, RepeatEnumerated, RepeatDateList,
-    ///< RepeatDateTimeList) this equals the raw currentIndex_ field.
-    ///< For range-based types (RepeatDate, RepeatDateTime, RepeatInteger) it
-    ///< equals (current_value - start) / step using the appropriate arithmetic
-    ///< for the type (calendar days for dates, seconds for datetimes, integers
-    ///< for integers).  RepeatDay returns its step value unchanged.
-    ///<
-    ///< Returns 0 when the repeat is freshly constructed or has been reset.
 
+    ///
+    /// @brief Retrieve the current repeat value
+    ///
+    /// @return the current repeat value as a human-readable string.
+    ///
     virtual std::string current_value() const = 0;
-    ///< Returns the current repeat value as a human-readable string.
-    ///< For date types the format is yyyymmdd; for date-time types it is
-    ///< yyyymmddTHHMMSS; for integer/day types it is the decimal representation;
-    ///< for string/enumerated types it is the string at the current index.
-    ///<
-    ///< Returns an empty string when the repeat is empty or out of bounds.
 
     // Handle generated variables
     virtual void gen_variables(std::vector<Variable>& vec) const { vec.push_back(var_); }
@@ -167,10 +162,19 @@ public:
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
     long current_index() const override;
-    ///< Returns the zero-based calendar-day index: (julianDay(value) - julianDay(start)) / delta.
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value as a yyyymmdd decimal string.
+    ///
     std::string current_value() const override { return std::to_string(value_); }
-    ///< Returns the current date as a yyyymmdd decimal string.
 
     void delta(int d) { delta_ = d; }
     int delta() const { return delta_; }
@@ -254,10 +258,19 @@ public:
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
     long current_index() const override { return (value() - start()) / step(); };
-    ///< Returns (seconds(value) - seconds(start)) / seconds(step).
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value as a yyyymmddTHHMMSS decimal string.
+    ///
     std::string current_value() const override { return ecf::Instant::format(value_); }
-    ///< Returns the current instant formatted as yyyymmddTHHMMSS.
 
     void delta(const ecf::Duration& d) { delta_ = d; }
     bool operator==(const RepeatDateTime& rhs) const;
@@ -357,14 +370,23 @@ public:
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
     long current_index() const override { return currentIndex_; };
-    ///< Returns the current list index (0-based).
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value as a yyyymmddT decimal string, or "" if out of bounds.
+    ///
     std::string current_value() const override {
         return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())
                    ? std::to_string(list_[currentIndex_])
                    : "";
     }
-    ///< Returns the current date as a yyyymmdd decimal string, or "" if out of bounds.
 
     RepeatBase* clone() const override { return new RepeatDateList(name_, list_, currentIndex_); }
     bool compare(RepeatBase*) const override;
@@ -433,14 +455,23 @@ public:
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
     long current_index() const override { return currentIndex_; };
-    ///< Returns the current list index (0-based).
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value as a yyyymmddTHHMMSS decimal string, or "" if out of bounds.
+    ///
     std::string current_value() const override {
         return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())
                    ? ecf::Instant::format(list_[currentIndex_])
                    : "";
     }
-    ///< Returns the current instant as yyyymmddTHHMMSS, or "" if out of bounds.
 
     RepeatBase* clone() const override { return new RepeatDateTimeList(name_, list_, currentIndex_); }
     bool compare(RepeatBase*) const override;
@@ -513,10 +544,19 @@ public:
     long last_valid_value() const override;
     int delta() const { return delta_; }
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
     long current_index() const override { return (value_ - start_) / delta_; };
-    ///< Returns (value - start) / delta as a zero-based integer index.
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value as a decimal string.
+    ///
     std::string current_value() const override { return std::to_string(value_); }
-    ///< Returns the current integer value as a decimal string.
 
     RepeatInteger* clone() const override { return new RepeatInteger(name_, start_, end_, delta_, value_); }
     bool compare(RepeatBase*) const override;
@@ -578,10 +618,15 @@ public:
 
     long current_index() const override { return currentIndex_; };
     ///< Returns the current enumeration index (0-based).
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current string value, or "" if out of bounds.
+    ///
     std::string current_value() const override {
         return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(theEnums_.size()) ? theEnums_[currentIndex_] : "";
     }
-    ///< Returns the enumeration string at the current index, or "" if out of bounds.
 
     const std::vector<std::string>& values() const { return theEnums_; }
 
@@ -636,13 +681,22 @@ public:
     long index_or_value() const override { return currentIndex_; }
     long last_valid_value() const override; // returns the index
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
     long current_index() const override { return currentIndex_; };
-    ///< Returns the current string index (0-based).
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current string value, or "" if out of bounds.
+    ///
     std::string current_value() const override {
         return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(theStrings_.size()) ? theStrings_[currentIndex_]
                                                                                           : "";
     }
-    ///< Returns the string at the current index, or "" if out of bounds.
 
     RepeatBase* clone() const override { return new RepeatString(name_, theStrings_, currentIndex_); }
     bool compare(RepeatBase*) const override;
@@ -722,10 +776,25 @@ public:
     long index_or_value() const override { return step_; }
     long last_valid_value() const override { return step_; }
 
+    ///
+    /// @brief Retrieve the current index
+    ///
+    /// For RepeatDay the index is not really meaningful, but we return the step value for consistency with other Repeat
+    /// types.
+    ///
+    /// @return the current index
+    ///
     long current_index() const override { return step_; };
-    ///< RepeatDay has no position concept; returns the step value itself.
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// For RepeatDay the value is not really meaningful, but we return the step value as a string for consistency with
+    /// other Repeat types.
+    ///
+    /// @return the current value as a decimal string.
+    ///
     std::string current_value() const override { return std::to_string(step_); }
-    ///< Returns the step value as a decimal string.
 
     RepeatBase* clone() const override { return new RepeatDay(step_, valid_); }
     bool compare(RepeatBase*) const override;
@@ -815,10 +884,19 @@ public:
     long last_valid_value_minus(int val) const { return (type_) ? type_->last_valid_value_minus(val) : -val; }
     long last_valid_value_plus(int val) const { return (type_) ? type_->last_valid_value_plus(val) : val; }
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the current index, or 0 if not holding a specific Repeat type.
+    ///
     long current_index() const { return (type_) ? type_->current_index() : 0; }
-    ///< Delegates to the wrapped RepeatBase; returns 0 if empty.
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current string value, or "" if not holding a specific Repeat type.
+    ///
     std::string current_value() const { return (type_) ? type_->current_value() : std::string{}; }
-    ///< Delegates to the wrapped RepeatBase; returns "" if empty.
 
     bool valid() const { return (type_) ? type_->valid() : false; }
     void setToLastValue() {
