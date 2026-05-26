@@ -553,7 +553,12 @@ const char* NodeAttrDoc::autorestore_doc() {
 }
 
 const char* NodeAttrDoc::repeat_doc() {
-    return "Represents one of RepeatString,RepeatEnumerated,RepeatInteger,RepeatDate,RepeatDay\n\n";
+    return "Represents one of RepeatString, RepeatEnumerated, RepeatInteger, RepeatDate,\n"
+           "RepeatDateTime, RepeatDateList, RepeatDateTimeList, or RepeatDay.\n"
+           "\nAccessor methods::\n\n"
+           "   current_value() -> None # if empty\n"
+           "   current_value() -> int  # if holding RepeatDate/DateList/Integer/Day\n"
+           "   current_value() -> str  # if holdind RepeatDateTime/DateTimeList/Enumerated/RepeatString\n";
 }
 
 const char* NodeAttrDoc::repeat_date_doc() {
@@ -577,7 +582,15 @@ const char* NodeAttrDoc::repeat_date_doc() {
            "   rep = RepeatDate('YMD', 20050130, 20050203 )\n"
            "   rep = RepeatDate('YMD', 20050130, 20050203, 2)\n"
            "   t = Task('t1',\n"
-           "            RepeatDate('YMD', 20050130, 20050203 ))\n";
+           "            RepeatDate('YMD', 20050130, 20050203 ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based position of the current date in the sequence.\n"
+           "      Computed using calendar-day (Julian-day) arithmetic,\n"
+           "      so it is correct even when the sequence crosses a month or year boundary.\n"
+           "      Returns 0 at construction / after reset.\n\n"
+           "   current_value() -> int\n"
+           "      The current instant as an integer in yyyymmdd format.\n";
 }
 
 const char* NodeAttrDoc::repeat_datetime_doc() {
@@ -603,7 +616,12 @@ const char* NodeAttrDoc::repeat_datetime_doc() {
            "   rep = RepeatDateTime('DATETIME', '20050130T000000', '20050203T000000')\n"
            "   rep = RepeatDateTime('DATETIME', '20050130T000000', '20050203T000000', '48:00:00')\n"
            "   t = Task('t1',\n"
-           "            RepeatDateTime('DATETIME', '20050130T000000', '20050203T120000', '1:00:00'))\n";
+           "            RepeatDateTime('DATETIME', '20050130T000000', '20050203T120000', '1:00:00'))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based position: (seconds(current) - seconds(start)) / seconds(step).\n"
+           "   current_value() -> str\n"
+           "      The current instant as a string in yyyymmddTHHMMSS format.\n";
 }
 
 const char* NodeAttrDoc::repeat_date_list_doc() {
@@ -625,7 +643,12 @@ const char* NodeAttrDoc::repeat_date_list_doc() {
            ".. code-block:: python\n\n"
            "   rep = RepeatDateList('YMD', [20050130, 20050203] )\n"
            "   t = Task('t1',\n"
-           "            RepeatDateList('YMD',[20050130, 20050203] ))\n";
+           "            RepeatDateList('YMD',[20050130, 20050203] ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based index of the current date in the list.\n"
+           "   current_value() -> int\n"
+           "      The current date as an integer in yyyymmdd format.\n";
 }
 
 const char* NodeAttrDoc::repeat_datetimelist_doc() {
@@ -643,7 +666,12 @@ const char* NodeAttrDoc::repeat_datetimelist_doc() {
            ".. code-block:: python\n\n"
            "   rep = RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000', '20240103T060000'])\n"
            "   t = Task('t1',\n"
-           "            RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']))\n";
+           "            RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based index of the current instant in the list.\n"
+           "   current_value() -> str\n"
+           "      The current instant as a string in yyyymmddTHHMMSS format, or '' if out of bounds.\n";
 }
 
 const char* NodeAttrDoc::repeat_integer_doc() {
@@ -660,7 +688,12 @@ const char* NodeAttrDoc::repeat_integer_doc() {
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t = Task('t1',\n"
-           "            RepeatInteger('HOUR', 6, 24, 6 ))\n";
+           "            RepeatInteger('HOUR', 6, 24, 6 ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based position: (value - start) / step.\n"
+           "   current_value() -> int\n"
+           "      The current integer value.\n";
 }
 
 const char* NodeAttrDoc::repeat_enumerated_doc() {
@@ -675,7 +708,12 @@ const char* NodeAttrDoc::repeat_enumerated_doc() {
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t = Task('t1',\n"
-           "            RepeatEnumerated('COLOR', [ 'red', 'green', 'blue' ] ))\n";
+           "            RepeatEnumerated('COLOR', [ 'red', 'green', 'blue' ] ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based index of the current enumeration value.\n"
+           "   current_value() -> str\n"
+           "      The enumeration string at the current index, or '' if out of bounds.\n";
 }
 
 const char* NodeAttrDoc::repeat_string_doc() {
@@ -690,7 +728,12 @@ const char* NodeAttrDoc::repeat_string_doc() {
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t = Task('t1',\n"
-           "            RepeatString('COLOR', [ 'red', 'green', 'blue' ] ))\n";
+           "            RepeatString('COLOR', [ 'red', 'green', 'blue' ] ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based index into the string list.\n"
+           "   current_value() -> str\n"
+           "      The string at the current index, or '' if out of bounds.\n";
 }
 
 const char* NodeAttrDoc::repeat_day_doc() {
@@ -702,7 +745,12 @@ const char* NodeAttrDoc::repeat_day_doc() {
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t = Task('t1',\n"
-           "             RepeatDay( 1 ))\n";
+           "             RepeatDay( 1 ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      RepeatDay has no position concept; returns the step value.\n"
+           "   current_value() -> int\n"
+           "      The step value as an integer.\n";
 }
 
 const char* NodeAttrDoc::cron_doc() {

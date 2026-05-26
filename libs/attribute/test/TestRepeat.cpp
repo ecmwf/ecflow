@@ -64,6 +64,111 @@ BOOST_AUTO_TEST_CASE(construction) {
     BOOST_CHECK_MESSAGE(empty.state_change_no() == 0, " empty  failed");
 }
 
+BOOST_AUTO_TEST_CASE(current_index_current_value_delegates_to_concrete_type) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    // Repeat is a type-erasing wrapper; current_index / current_value must
+    // delegate correctly to each wrapped type.
+    {
+        // RepeatDate: index increments with Julian-day arithmetic
+        Repeat r{RepeatDate("YMD", 20241129, 20241207, 3)};
+        BOOST_CHECK_EQUAL(r.current_index(), 0L);
+        BOOST_CHECK_EQUAL(r.current_value(), "20241129");
+        {
+            auto value = current_value_as<int>(r);
+            BOOST_CHECK(value.has_value() && value.value() == 20241129);
+        }
+        {
+            auto value = current_value_as<std::string>(r);
+            BOOST_CHECK(!value.has_value());
+        }
+        r.increment();
+        BOOST_CHECK_EQUAL(r.current_index(), 1L);
+        BOOST_CHECK_EQUAL(r.current_value(), "20241202");
+        {
+            auto value = current_value_as<int>(r);
+            BOOST_CHECK(value.has_value() && value.value() == 20241202);
+        }
+        {
+            auto value = current_value_as<std::string>(r);
+            BOOST_CHECK(!value.has_value());
+        }
+    }
+    {
+        // RepeatInteger
+        Repeat r{RepeatInteger("N", 0, 4, 2)};
+        BOOST_CHECK_EQUAL(r.current_index(), 0L);
+        BOOST_CHECK_EQUAL(r.current_value(), "0");
+        {
+            auto value = current_value_as<int>(r);
+            BOOST_CHECK(value.has_value() && value.value() == 0);
+        }
+        {
+            auto value = current_value_as<std::string>(r);
+            BOOST_CHECK(!value.has_value());
+        }
+        r.increment();
+        BOOST_CHECK_EQUAL(r.current_index(), 1L);
+        BOOST_CHECK_EQUAL(r.current_value(), "2");
+        {
+            auto value = current_value_as<int>(r);
+            BOOST_CHECK(value.has_value() && value.value() == 2);
+        }
+        {
+            auto value = current_value_as<std::string>(r);
+            BOOST_CHECK(!value.has_value());
+        }
+    }
+    {
+        // RepeatString
+        using namespace std::string_literals;
+        Repeat r{RepeatString("S", {"x"s, "y"s})};
+        BOOST_CHECK_EQUAL(r.current_index(), 0L);
+        BOOST_CHECK_EQUAL(r.current_value(), "x");
+        {
+            auto value = current_value_as<int>(r);
+            BOOST_CHECK(!value.has_value());
+        }
+        {
+            auto value = current_value_as<std::string>(r);
+            BOOST_CHECK(value.has_value() && value.value() == "x");
+        }
+        r.increment();
+        BOOST_CHECK_EQUAL(r.current_index(), 1L);
+        BOOST_CHECK_EQUAL(r.current_value(), "y");
+        {
+            auto value = current_value_as<int>(r);
+            BOOST_CHECK(!value.has_value());
+        }
+        {
+            auto value = current_value_as<std::string>(r);
+            BOOST_CHECK(value.has_value() && value.value() == "y");
+        }
+    }
+    {
+        // RepeatDay: index == step
+        Repeat r{RepeatDay(5)};
+        BOOST_CHECK_EQUAL(r.current_index(), 5L);
+        BOOST_CHECK_EQUAL(r.current_value(), "5");
+        {
+            auto value = current_value_as<int>(r);
+            BOOST_CHECK(value.has_value() && value.value() == 5);
+        }
+        {
+            auto value = current_value_as<std::string>(r);
+            BOOST_CHECK(!value.has_value());
+        }
+    }
+    {
+        // Empty Repeat: returns 0 / ""
+        Repeat empty;
+        BOOST_CHECK_EQUAL(empty.current_index(), 0L);
+        BOOST_CHECK_EQUAL(empty.current_value(), "");
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END() // test_repeat
 
 /*
@@ -310,6 +415,46 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(iterate_over_datelist_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    RepeatDateList r("DL", {20100101, 20100201, 20100301});
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20100101");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20100101);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20100201");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20100201);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20100301");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20100301);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END() // test_repeat_datelist
 
 /*
@@ -468,6 +613,49 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
         const Variable& var = rep.find_gen_variable("DT_SECONDS");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_SECONDS");
         BOOST_CHECK_MESSAGE(var.theValue() == "45", "expected '45' but found " << var.theValue());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(iterate_over_datetimelist_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    RepeatDateTimeList r("DTL",
+                         {ecf::Instant::parse("19700101T000000"),
+                          ecf::Instant::parse("19700101T120000"),
+                          ecf::Instant::parse("19700102T000000")});
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "19700101T000000");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "19700101T000000");
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "19700101T120000");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "19700101T120000");
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "19700102T000000");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "19700102T000000");
     }
 }
 
@@ -986,6 +1174,140 @@ BOOST_AUTO_TEST_CASE(more_generated_variables) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_within_month) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    RepeatDate r("YMD", 20100101, 20100110, 3);
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20100101");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20100101);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20100104");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20100104);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20100107");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20100107);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 3L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20100110");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20100110);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_over_month_boundary) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    RepeatDate r("YMD", 20241129, 20241207, 3);
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20241129");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20241129);
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20241202");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20241202);
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20241205");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20241205);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_over_year_boundary) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    // Another cross-boundary regression: Jan 1st is 2 days after Dec 30th.
+    RepeatDate r("YMD", 20231230, 20240103, 2);
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20231230");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20231230);
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20240101");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20240101);
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20240103");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20240103);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_negative_delta) {
+    ECF_NAME_THIS_TEST();
+
+    RepeatDate r("YMD", 20240103, 20231230, -2);
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20240103");
+    {
+        auto value = ecf::repeat::current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20240103);
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20240101");
+    {
+        auto value = ecf::repeat::current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20240101);
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20231230");
+    {
+        auto value = ecf::repeat::current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20231230);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
     ECF_NAME_THIS_TEST();
 
@@ -1283,6 +1605,46 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(iterate_over_datetime_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    RepeatDateTime r("DT", "19700101T000000", "19700102T000000", "12:00:00");
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "19700101T000000");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "19700101T000000");
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "19700101T120000");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "19700101T120000");
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "19700102T000000");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "19700102T000000");
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END() // test_repeat_datetime
 
 /*
@@ -1466,6 +1828,47 @@ BOOST_AUTO_TEST_CASE(handling_errors) {
     BOOST_REQUIRE_THROW(RepeatEnumerated("AEnum", empty), std::runtime_error);  // empty enumerations
 }
 
+BOOST_AUTO_TEST_CASE(iterate_over_enumerated_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    using namespace std::string_literals;
+    RepeatEnumerated r("E", {"red"s, "green"s, "blue"s});
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "red");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "red");
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "green");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "green");
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "blue");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "blue");
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END() // test_repeat_enumerated
 
 /*
@@ -1585,6 +1988,46 @@ BOOST_AUTO_TEST_CASE(increment) {
     BOOST_CHECK_MESSAGE(rep.last_valid_value() == 10, " Expected 10 but found " << rep.last_valid_value());
 }
 
+BOOST_AUTO_TEST_CASE(iterate_over_integer_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    RepeatInteger r("N", 1, 6, 2);
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "1");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 1);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "3");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 3);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "5");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 5);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END() // test_repeat_integer
 
 /*
@@ -1616,6 +2059,36 @@ BOOST_AUTO_TEST_CASE(invariants) {
         BOOST_CHECK_MESSAGE(empty.valueAsString() == "", "not as expected");
         BOOST_CHECK_MESSAGE(empty.next_value_as_string() == "", "not as expected");
         BOOST_CHECK_MESSAGE(empty.prev_value_as_string() == "", "not as expected");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(iterate_over_day_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
+    // RepeatDay has no position concept: current_index() returns the step value.
+    RepeatDay r(3);
+    BOOST_CHECK_EQUAL(r.current_index(), 3L);
+    BOOST_CHECK_EQUAL(r.current_value(), "3");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 3);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 3L);
+    BOOST_CHECK_EQUAL(r.current_value(), "3");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 3);
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(!value.has_value());
     }
 }
 
@@ -1701,6 +2174,47 @@ BOOST_AUTO_TEST_CASE(handling_errors) {
     BOOST_REQUIRE_THROW(RepeatString(" ", stringList), std::runtime_error);         // empty name
     BOOST_REQUIRE_THROW(RepeatString("!£$%^&*()", stringList), std::runtime_error); // illegal name
     BOOST_REQUIRE_THROW(RepeatString("AEnum", empty), std::runtime_error);          // empty string list
+}
+
+BOOST_AUTO_TEST_CASE(iterate_over_string_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+    using namespace std::string_literals;
+
+    RepeatString r("S", {"a"s, "b"s, "c"s});
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "a");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "a");
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "b");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "b");
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "c");
+    {
+        auto value = current_value_as<int>(r);
+        BOOST_CHECK(!value.has_value());
+    }
+    {
+        auto value = current_value_as<std::string>(r);
+        BOOST_CHECK(value.has_value() && value.value() == "c");
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END() // test_repeat_string

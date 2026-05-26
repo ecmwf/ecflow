@@ -10685,6 +10685,45 @@ class TestRepeatDate(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             ecf.RepeatDate("YMD", 20100101, -20100101)
 
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+
+    def test_current_index_initial_is_zero(self):
+        """current_index() is 0 on a freshly constructed RepeatDate."""
+        rd = ecf.RepeatDate("YMD", 20100101, 20100110, 1)
+        self.assertEqual(rd.current_index(), 0)
+
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatDate("YMD", 20100101, 20100110).current_index(), int)
+
+    def test_current_value_initial_is_start(self):
+        """current_value() is the start date string at construction."""
+        self.assertEqual(ecf.RepeatDate("YMD", 20100101, 20100110).current_value(), 20100101)
+
+    def test_current_value_returns_int(self):
+        """current_value() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatDate("YMD", 20100101, 20100110).current_value(), int)
+
+    def test_current_index_via_node_after_advance(self):
+        """current_index() on get_repeat() advances correctly via the node."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatDate("YMD", 20241129, 20241207, 3))
+        # Advance the repeat
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), 20241129)
+        r.increment()
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 1)
+        self.assertEqual(r.current_value(), 20241202)
+        t.get_repeat().increment()
+        r2 = t.get_repeat()
+        self.assertEqual(r2.current_index(), 2)
+        self.assertEqual(r2.current_value(), 20241205)
+
 
 class TestRepeatDateTime(unittest.TestCase):
     """Tests for py::class_<RepeatDateTime> exposed as ecf.RepeatDateTime in ExportNodeAttr.cpp.
@@ -11054,6 +11093,48 @@ class TestRepeatDateTime(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             ecf.RepeatDateTime("DT", "20100101T000000", "-0100101T000000")
 
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+
+    def test_current_index_initial_is_zero(self):
+        """current_index() is 0 on a freshly constructed RepeatDateTime."""
+        r = ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000", "24:00:00")
+        self.assertEqual(r.current_index(), 0)
+
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(
+            ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000").current_index(), int)
+
+    def test_current_value_initial_is_start(self):
+        """current_value() is the start instant string at construction."""
+        r = ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000", "24:00:00")
+        self.assertEqual(r.current_value(), "19700101T000000")
+
+    def test_current_value_returns_str(self):
+        """current_value() returns a Python str."""
+        self.assertIsInstance(
+            ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000").current_value(), str)
+
+    def test_current_index_via_node_after_advance(self):
+        """current_index() on get_repeat() advances correctly via the node."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000", "24:00:00"))
+        # Advance the repeat twice (simulates two steps)
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), "19700101T000000")
+        r.increment()
+        r2 = t.get_repeat()
+        self.assertEqual(r, r2)
+        self.assertEqual(r2.current_index(), 1)
+        self.assertEqual(r2.current_value(), "19700102T000000")
+        r2.increment()
+        self.assertEqual(r2.current_index(), 2)
+        self.assertEqual(r2.current_value(), "19700103T000000")
+
 
 class TestRepeatDateList(unittest.TestCase):
     """Tests for py::class_<RepeatDateList> exposed as ecf.RepeatDateList in ExportNodeAttr.cpp.
@@ -11329,6 +11410,43 @@ class TestRepeatDateList(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             ecf.RepeatDateList("DL", [20100101, 20101301, 20100110])
 
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+
+    def test_current_index_initial_is_zero(self):
+        """current_index() is 0 on a freshly constructed RepeatDateList."""
+        self.assertEqual(ecf.RepeatDateList("DL", [20100101, 20100115]).current_index(), 0)
+
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatDateList("DL", [20100101, 20100115]).current_index(), int)
+
+    def test_current_value_initial_is_first_entry(self):
+        """current_value() is the first list entry at construction."""
+        self.assertEqual(ecf.RepeatDateList("DL", [20100101, 20100115]).current_value(), 20100101)
+
+    def test_current_value_returns_int(self):
+        """current_value() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatDateList("DL", [20100101]).current_value(), int)
+
+    def test_current_index_via_node_after_advance(self):
+        """current_index() on get_repeat() advances correctly via the node."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatDateList("DL", [19700101, 19700103, 19700104]))
+        # Advance the repeat
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), 19700101)
+        r.increment()
+        r2 = t.get_repeat()
+        self.assertEqual(r, r2)
+        self.assertEqual(r2.current_index(), 1)
+        self.assertEqual(r2.current_value(), 19700103)
+        r2.increment()
+        self.assertEqual(r2.current_index(), 2)
+        self.assertEqual(r2.current_value(), 19700104)
 
 class TestRepeatDateTimeList(unittest.TestCase):
     """Tests for py::class_<RepeatDateTimeList> exposed as ecf.RepeatDateTimeList in ExportNodeAttr.cpp.
@@ -11625,6 +11743,48 @@ class TestRepeatDateTimeList(unittest.TestCase):
             ecf.RepeatDateTimeList(
                 "DTL", ["20100101T000000", "20101301T000000", "20100110T000000"]
             )
+
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+
+    def test_current_index_initial_is_zero(self):
+        """current_index() is 0 on a freshly constructed RepeatDateTimeList."""
+        r = ecf.RepeatDateTimeList("DTL", ["19700101T000000", "19700102T000000"])
+        self.assertEqual(r.current_index(), 0)
+
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(
+            ecf.RepeatDateTimeList("DTL", ["19700101T000000"]).current_index(), int)
+
+    def test_current_value_initial_is_first_entry(self):
+        """current_value() is the first instant string at construction."""
+        r = ecf.RepeatDateTimeList("DTL", ["19700101T000000", "19700102T000000"])
+        self.assertEqual(r.current_value(), "19700101T000000")
+
+    def test_current_value_returns_str(self):
+        """current_value() returns a Python str."""
+        self.assertIsInstance(
+            ecf.RepeatDateTimeList("DTL", ["19700101T000000"]).current_value(), str)
+
+    def test_current_index_via_node_after_advance(self):
+        """current_index() on get_repeat() advances correctly via the node."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatDateTimeList("DL", ["19700101T000001", "19700103T000003", "19700104T000004"]))
+        # Advance the repeat
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), "19700101T000001")
+        r.increment()
+        r2 = t.get_repeat()
+        self.assertEqual(r, r2)
+        self.assertEqual(r2.current_index(), 1)
+        self.assertEqual(r2.current_value(), "19700103T000003")
+        r2.increment()
+        self.assertEqual(r2.current_index(), 2)
+        self.assertEqual(r2.current_value(), "19700104T000004")
 
 
 class TestRepeatInteger(unittest.TestCase):
@@ -11953,6 +12113,44 @@ class TestRepeatInteger(unittest.TestCase):
         with self.assertRaises((TypeError, RuntimeError)):
             ecf.RepeatInteger("VAR", "0", 10)
 
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+
+    def test_current_index_initial_is_zero(self):
+        """current_index() is 0 on a freshly constructed RepeatInteger."""
+        self.assertEqual(ecf.RepeatInteger("N", 0, 10, 2).current_index(), 0)
+
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatInteger("N", 0, 10).current_index(), int)
+
+    def test_current_value_initial_is_start(self):
+        """current_value() is the start value integer at construction."""
+        self.assertEqual(ecf.RepeatInteger("N", 5, 10).current_value(), 5)
+
+    def test_current_value_returns_int(self):
+        """current_value() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatInteger("N", 0, 10).current_value(), int)
+
+    def test_current_index_via_node_after_advance(self):
+        """current_index() on get_repeat() advances correctly via the node."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatInteger("N", 100, 110, 5))
+        # Advance the repeat
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), 100)
+        r.increment()
+        r2 = t.get_repeat()
+        self.assertEqual(r, r2)
+        self.assertEqual(r2.current_index(), 1)
+        self.assertEqual(r2.current_value(), 105)
+        r2.increment()
+        self.assertEqual(r2.current_index(), 2)
+        self.assertEqual(r2.current_value(), 110)
+
 
 class TestRepeatEnumerated(unittest.TestCase):
     """Tests for py::class_<RepeatEnumerated> exposed as ecf.RepeatEnumerated in ExportNodeAttr.cpp.
@@ -12206,6 +12404,44 @@ class TestRepeatEnumerated(unittest.TestCase):
         """A list containing integers instead of strings raises TypeError."""
         with self.assertRaises((TypeError, RuntimeError)):
             ecf.RepeatEnumerated("E", [1, 2, 3])
+
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+
+    def test_current_index_initial_is_zero(self):
+        """current_index() is 0 on a freshly constructed RepeatEnumerated."""
+        self.assertEqual(ecf.RepeatEnumerated("E", ["red", "green", "blue"]).current_index(), 0)
+
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatEnumerated("E", ["a"]).current_index(), int)
+
+    def test_current_value_initial_is_first_entry(self):
+        """current_value() is the first enumeration string at construction."""
+        self.assertEqual(ecf.RepeatEnumerated("E", ["red", "green"]).current_value(), "red")
+
+    def test_current_value_returns_str(self):
+        """current_value() returns a Python str."""
+        self.assertIsInstance(ecf.RepeatEnumerated("E", ["x"]).current_value(), str)
+
+    def test_current_index_via_node_after_advance(self):
+        """current_index() on get_repeat() advances correctly via the node."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatEnumerated("E", ["r", "g", "b"]))
+        # Advance the repeat
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), "r")
+        r.increment()
+        r2 = t.get_repeat()
+        self.assertEqual(r, r2)
+        self.assertEqual(r2.current_index(), 1)
+        self.assertEqual(r2.current_value(), "g")
+        r2.increment()
+        self.assertEqual(r2.current_index(), 2)
+        self.assertEqual(r2.current_value(), "b")
 
 
 class TestRepeatString(unittest.TestCase):
@@ -12461,6 +12697,44 @@ class TestRepeatString(unittest.TestCase):
         with self.assertRaises((TypeError, RuntimeError)):
             ecf.RepeatString("S", [1, 2])
 
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+
+    def test_current_index_initial_is_zero(self):
+        """current_index() is 0 on a freshly constructed RepeatString."""
+        self.assertEqual(ecf.RepeatString("S", ["a", "b", "c"]).current_index(), 0)
+
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatString("S", ["x"]).current_index(), int)
+
+    def test_current_value_initial_is_first_entry(self):
+        """current_value() is the first string at construction."""
+        self.assertEqual(ecf.RepeatString("S", ["alpha", "beta"]).current_value(), "alpha")
+
+    def test_current_value_returns_str(self):
+        """current_value() returns a Python str."""
+        self.assertIsInstance(ecf.RepeatString("S", ["x"]).current_value(), str)
+
+    def test_current_index_via_node_after_advance(self):
+        """current_index() on get_repeat() advances correctly via the node."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatString("S", ["x", "y", "z"]))
+        # Advance the repeat
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), "x")
+        r.increment()
+        r2 = t.get_repeat()
+        self.assertEqual(r, r2)
+        self.assertEqual(r2.current_index(), 1)
+        self.assertEqual(r2.current_value(), "y")
+        r2.increment()
+        self.assertEqual(r2.current_index(), 2)
+        self.assertEqual(r2.current_value(), "z")
+
 
 class TestRepeatDay(unittest.TestCase):
     """Tests for py::class_<RepeatDay> exposed as ecf.RepeatDay in ExportNodeAttr.cpp.
@@ -12648,6 +12922,48 @@ class TestRepeatDay(unittest.TestCase):
         rd = ecf.RepeatDay(-1)
         self.assertEqual(str(rd), "  repeat day -1\n")
 
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+
+    def test_current_index_is_step(self):
+        """current_index() returns the step value (RepeatDay has no position concept)."""
+        self.assertEqual(ecf.RepeatDay(3).current_index(), 3)
+
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatDay(1).current_index(), int)
+
+    def test_current_value_is_step_integer(self):
+        """current_value() returns the step as an integer."""
+        self.assertEqual(ecf.RepeatDay(5).current_value(), 5)
+
+    def test_current_value_returns_int(self):
+        """current_value() returns a Python int."""
+        self.assertIsInstance(ecf.RepeatDay(2).current_value(), int)
+
+    def test_current_index_via_node_after_advance(self):
+        """
+        current_index() on get_repeat() advances correctly via the node.
+        For RepeatDay, increment is currently a no-op!
+        Neither the value nor the index actually advance!!
+        """
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatDay(31))
+        # Advance the repeat
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 31)
+        self.assertEqual(r.current_value(), 31)
+        r.increment()
+        r2 = t.get_repeat()
+        self.assertEqual(r, r2)
+        self.assertEqual(r2.current_index(), 31)
+        self.assertEqual(r2.current_value(), 31)
+        r2.increment()
+        self.assertEqual(r2.current_index(), 31)
+        self.assertEqual(r2.current_value(), 31)
+
 
 class TestRepeat(unittest.TestCase):
     """Tests for py::class_<Repeat> exposed as ecf.Repeat in ExportNodeAttr.cpp.
@@ -12658,8 +12974,8 @@ class TestRepeat(unittest.TestCase):
     In practice, Repeat instances are most commonly obtained from node.get_repeat(),
     which returns whatever concrete repeat is attached to the node.
 
-    The Python binding exposes a single constructor accepting an int.  Boost.Python
-    resolves this via the implicit-conversion chain
+    The Python binding exposes a single constructor accepting an int.
+    This is resolved via the implicit-conversion chain:
         int -> RepeatDay(int) -> Repeat(const RepeatDay&)
     so all tests here exercise the RepeatDay-backed specialisation.  All accessor
     methods delegate to the wrapped type and return 0 / empty string when the Repeat
@@ -12669,7 +12985,6 @@ class TestRepeat(unittest.TestCase):
     -----------
     Constructors
         Repeat(step)   -- step (int); creates a Repeat wrapping RepeatDay(step)
-                          via Boost.Python implicit conversion
 
     Instance methods
         empty()   -> bool   -- True when no concrete type is held (e.g. obtained
@@ -12920,6 +13235,52 @@ class TestRepeat(unittest.TestCase):
         """Passing a float raises TypeError."""
         with self.assertRaises((TypeError, RuntimeError)):
             ecf.Repeat(1.5)
+
+    # ------------------------------------------------------------------
+    # current_index() / current_value()
+    # ------------------------------------------------------------------
+    def test_current_index_returns_int(self):
+        """current_index() returns a Python int."""
+        self.assertIsInstance(ecf.Repeat(1).current_index(), int)
+
+    def test_current_index_is_step_for_repeat_day(self):
+        """For Repeat(N), current_index() equals N (RepeatDay semantics)."""
+        self.assertEqual(ecf.Repeat(4).current_index(), 4)
+
+    def test_current_value_returns_int(self):
+        """current_value() returns a Python int."""
+        self.assertIsInstance(ecf.Repeat(1).current_value(), int)
+
+    def test_current_value_is_step_integer_for_repeat_day(self):
+        """For Repeat(N), current_value() is int(N)."""
+        self.assertEqual(ecf.Repeat(7).current_value(), 7)
+
+    def test_current_index_via_repeat_date_node(self):
+        """current_index() advances correctly for a RepeatDate-backed Repeat obtained from a node."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatDate("YMD", 20100101, 20100110, 1))
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), 20100101)
+
+    def test_current_index_via_repeat_integer_node(self):
+        """current_index() and current_value() for a RepeatInteger-backed Repeat."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatInteger("N", 3, 10, 2))
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), 3)
+
+    def test_current_index_via_repeat_string_node(self):
+        """current_index() and current_value() for a RepeatString-backed Repeat."""
+        defs = ecf.Defs()
+        t = defs.add_suite("s").add_family("f").add_task("t")
+        t.add_repeat(ecf.RepeatString("S", ["alpha", "beta", "gamma"]))
+        r = t.get_repeat()
+        self.assertEqual(r.current_index(), 0)
+        self.assertEqual(r.current_value(), "alpha")
 
 
 class TestCron(unittest.TestCase):

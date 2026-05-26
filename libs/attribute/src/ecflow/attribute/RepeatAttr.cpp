@@ -312,6 +312,14 @@ void RepeatDate::setToLastValue() {
     set_value(end_);
 }
 
+long RepeatDate::current_index() const {
+    // Use Julian-day arithmetic so the index is correct even when the
+    // date sequence crosses a month or year boundary.
+    auto start_julian = ecf::CalendarDate(start_).as_julian_day().value();
+    auto value_julian = ecf::CalendarDate(value_).as_julian_day().value();
+    return (value_julian - start_julian) / delta_;
+}
+
 long RepeatDate::last_valid_value() const {
     return valid_value(value_);
 }

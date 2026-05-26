@@ -25,11 +25,14 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/Chrono.hpp"
+#include "ecflow/core/TypeTraits.hpp"
 
 /////////////////////////////////////////////////////////////////////////
 // Node can only have one repeat.
@@ -46,6 +49,20 @@ public:
     virtual int start() const = 0;
     virtual int end() const   = 0;
     virtual int step() const  = 0;
+
+    ///
+    /// @brief Retrieve the zero-based index of the current repeat position.
+    ///
+    /// @return the zero-based index of the current repeat position
+    ///
+    virtual long current_index() const = 0;
+
+    ///
+    /// @brief Retrieve the current repeat value
+    ///
+    /// @return the current repeat value as a human-readable string.
+    ///
+    virtual std::string current_value() const = 0;
 
     // Handle generated variables
     virtual void gen_variables(std::vector<Variable>& vec) const { vec.push_back(var_); }
@@ -147,6 +164,20 @@ public:
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
+    long current_index() const override;
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current date formatted as a yyyymmdd string.
+    ///
+    std::string current_value() const override { return std::to_string(value_); }
+
     void delta(int d) { delta_ = d; }
     int delta() const { return delta_; }
     bool operator==(const RepeatDate& rhs) const;
@@ -228,6 +259,20 @@ public:
     long last_valid_value() const override;
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;
+
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
+    long current_index() const override { return (value() - start()) / step(); }
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value formatted as a yyyymmddTHHMMSS string.
+    ///
+    std::string current_value() const override { return ecf::Instant::format(value_); }
 
     void delta(const ecf::Duration& d) { delta_ = d; }
     bool operator==(const RepeatDateTime& rhs) const;
@@ -321,11 +366,29 @@ public:
     long value_at(size_t i) const {
         assert(i < list_.size());
         return list_[i];
-    };
+    }
     long index_or_value() const override { return currentIndex_; }
     long last_valid_value() const override;
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;
+
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
+    long current_index() const override { return currentIndex_; }
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value formatted as a yyyymmdd string, or "" if out of bounds.
+    ///
+    std::string current_value() const override {
+        return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())
+                   ? std::to_string(list_[currentIndex_])
+                   : "";
+    }
 
     RepeatBase* clone() const override { return new RepeatDateList(name_, list_, currentIndex_); }
     bool compare(RepeatBase*) const override;
@@ -393,6 +456,24 @@ public:
     long last_valid_value() const override;
     long last_valid_value_minus(int value) const override;
     long last_valid_value_plus(int value) const override;
+
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
+    long current_index() const override { return currentIndex_; }
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value fomratted as a yyyymmddTHHMMSS string, or "" if out of bounds.
+    ///
+    std::string current_value() const override {
+        return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())
+                   ? ecf::Instant::format(list_[currentIndex_])
+                   : "";
+    }
 
     RepeatBase* clone() const override { return new RepeatDateTimeList(name_, list_, currentIndex_); }
     bool compare(RepeatBase*) const override;
@@ -465,6 +546,20 @@ public:
     long last_valid_value() const override;
     int delta() const { return delta_; }
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
+    long current_index() const override { return (value_ - start_) / delta_; }
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current value as a decimal string.
+    ///
+    std::string current_value() const override { return std::to_string(value_); }
+
     RepeatInteger* clone() const override { return new RepeatInteger(name_, start_, end_, delta_, value_); }
     bool compare(RepeatBase*) const override;
     bool valid() const override { return (delta_ > 0) ? (value_ <= end_) : (value_ >= end_); }
@@ -523,6 +618,22 @@ public:
     long index_or_value() const override { return currentIndex_; }
     long last_valid_value() const override;
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
+    long current_index() const override { return currentIndex_; }
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current string value, or "" if out of bounds.
+    ///
+    std::string current_value() const override {
+        return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(theEnums_.size()) ? theEnums_[currentIndex_] : "";
+    }
+
     const std::vector<std::string>& values() const { return theEnums_; }
 
     RepeatBase* clone() const override { return new RepeatEnumerated(name_, theEnums_, currentIndex_); }
@@ -575,6 +686,23 @@ public:
     long value() const override { return currentIndex_; }
     long index_or_value() const override { return currentIndex_; }
     long last_valid_value() const override; // returns the index
+
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
+    long current_index() const override { return currentIndex_; }
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current string value, or "" if out of bounds.
+    ///
+    std::string current_value() const override {
+        return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(theStrings_.size()) ? theStrings_[currentIndex_]
+                                                                                          : "";
+    }
 
     RepeatBase* clone() const override { return new RepeatString(name_, theStrings_, currentIndex_); }
     bool compare(RepeatBase*) const override;
@@ -654,10 +782,30 @@ public:
     long index_or_value() const override { return step_; }
     long last_valid_value() const override { return step_; }
 
+    ///
+    /// @brief Retrieve the current index
+    ///
+    /// For RepeatDay the index is not really meaningful, but we return the step value for consistency with other Repeat
+    /// types.
+    ///
+    /// @return the current index
+    ///
+    long current_index() const override { return step_; }
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// For RepeatDay the value is not really meaningful, but we return the step value as a string for consistency with
+    /// other Repeat types.
+    ///
+    /// @return the current value as a decimal string.
+    ///
+    std::string current_value() const override { return std::to_string(step_); }
+
     RepeatBase* clone() const override { return new RepeatDay(step_, valid_); }
     bool compare(RepeatBase*) const override;
     bool valid() const override { return valid_; }
-    std::string valueAsString() const override { return std::string{}; };
+    std::string valueAsString() const override { return std::string{}; }
     std::string value_as_string(int) const override { return std::string{}; }
     std::string next_value_as_string() const override { return std::string{}; }
     std::string prev_value_as_string() const override { return std::string{}; }
@@ -742,6 +890,20 @@ public:
     long last_valid_value_minus(int val) const { return (type_) ? type_->last_valid_value_minus(val) : -val; }
     long last_valid_value_plus(int val) const { return (type_) ? type_->last_valid_value_plus(val) : val; }
 
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the current index, or 0 if not holding a specific Repeat type.
+    ///
+    long current_index() const { return (type_) ? type_->current_index() : 0; }
+
+    ///
+    /// @brief Retrieve the current value
+    ///
+    /// @return the current string value, or "" if not holding a specific Repeat type.
+    ///
+    std::string current_value() const { return (type_) ? type_->current_value() : std::string{}; }
+
     bool valid() const { return (type_) ? type_->valid() : false; }
     void setToLastValue() {
         if (type_) {
@@ -806,5 +968,123 @@ private:
     template <class Archive>
     void serialize(Archive& ar, std::uint32_t const version);
 };
+
+namespace ecf {
+
+namespace repeat {
+template <typename Result, typename RepeatType>
+inline std::optional<Result> current_value_of(const RepeatType& repeat) {
+    //
+    // This primary template is intentionally reached for combinations where the
+    // Result type does not match the native type of RepeatType — for example,
+    // current_value_of<std::string>(const RepeatDate&) has no specialisation and
+    // should return nullopt silently (RepeatDate yields int, not string).
+    //
+    // If RepeatType is a completely unknown type (e.g. a new RepeatBase subtype with no
+    // specialisations at all), that is a programming error caught here at compile time.
+    //
+    static_assert(
+        ecf::is_one_of_v<RepeatType,
+                         RepeatDate,
+                         RepeatDateTime,
+                         RepeatDateList,
+                         RepeatDateTimeList,
+                         RepeatInteger,
+                         RepeatEnumerated,
+                         RepeatString,
+                         RepeatDay>,
+        "current_value_of: RepeatType is an unknown Repeat subtype. "
+        "Add explicit specialisation of current_value_of<int/std::string>(const RepeatType&) in RepeatAttr.hpp.");
+    return std::nullopt;
+}
+
+template <>
+inline std::optional<int> current_value_of(const RepeatDate& repeat) {
+    return repeat.value();
+}
+
+template <>
+inline std::optional<int> current_value_of(const RepeatDateList& repeat) {
+    return repeat.value();
+}
+
+template <>
+inline std::optional<std::string> current_value_of(const RepeatDateTime& repeat) {
+    return repeat.current_value();
+}
+
+template <>
+inline std::optional<std::string> current_value_of(const RepeatDateTimeList& repeat) {
+    return repeat.current_value();
+}
+
+template <>
+inline std::optional<int> current_value_of(const RepeatInteger& repeat) {
+    return repeat.value();
+}
+
+template <>
+inline std::optional<std::string> current_value_of(const RepeatEnumerated& repeat) {
+    return repeat.current_value();
+}
+
+template <>
+inline std::optional<std::string> current_value_of(const RepeatString& repeat) {
+    return repeat.current_value();
+}
+
+template <>
+inline std::optional<int> current_value_of(const RepeatDay& repeat) {
+    return repeat.value();
+}
+
+template <typename Result>
+inline std::optional<Result> current_value_as(const RepeatBase& base) {
+    if (base.isDate()) {
+        auto& repeat = static_cast<const RepeatDate&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isDateTime()) {
+        auto& repeat = static_cast<const RepeatDateTime&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isDateList()) {
+        auto& repeat = static_cast<const RepeatDateList&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isDateTimeList()) {
+        auto& repeat = static_cast<const RepeatDateTimeList&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isInteger()) {
+        auto& repeat = static_cast<const RepeatInteger&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isEnumerated()) {
+        auto& repeat = static_cast<const RepeatEnumerated&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isString()) {
+        auto& repeat = static_cast<const RepeatString&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else if (base.isDay()) {
+        auto& repeat = static_cast<const RepeatDay&>(base);
+        return current_value_of<Result>(repeat);
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+template <typename T>
+std::optional<T> current_value_as(const Repeat& repeat) {
+    auto base = repeat.repeatBase();
+    return (base) ? current_value_as<T>(*base) : std::nullopt;
+}
+
+} // namespace repeat
+
+} // namespace ecf
 
 #endif /* ecflow_attribute_RepeatAttr_HPP */
