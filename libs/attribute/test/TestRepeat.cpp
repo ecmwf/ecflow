@@ -65,6 +65,10 @@ BOOST_AUTO_TEST_CASE(construction) {
 }
 
 BOOST_AUTO_TEST_CASE(current_index_current_value_delegates_to_concrete_type) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     // Repeat is a type-erasing wrapper; current_index / current_value must
     // delegate correctly to each wrapped type.
     {
@@ -412,6 +416,10 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_datelist_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     RepeatDateList r("DL", {20100101, 20100201, 20100301});
     BOOST_CHECK_EQUAL(r.current_index(), 0L);
     BOOST_CHECK_EQUAL(r.current_value(), "20100101");
@@ -609,6 +617,10 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_datetimelist_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     RepeatDateTimeList r("DTL",
                          {ecf::Instant::parse("19700101T000000"),
                           ecf::Instant::parse("19700101T120000"),
@@ -1163,6 +1175,10 @@ BOOST_AUTO_TEST_CASE(more_generated_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_within_month) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     RepeatDate r("YMD", 20100101, 20100110, 3);
     BOOST_CHECK_EQUAL(r.current_index(), 0L);
     BOOST_CHECK_EQUAL(r.current_value(), "20100101");
@@ -1210,6 +1226,10 @@ BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_within_month)
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_over_month_boundary) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     RepeatDate r("YMD", 20241129, 20241207, 3);
     BOOST_CHECK_EQUAL(r.current_index(), 0L);
     BOOST_CHECK_EQUAL(r.current_value(), "20241129");
@@ -1234,6 +1254,10 @@ BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_over_month_bo
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_over_year_boundary) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     // Another cross-boundary regression: Jan 1st is 2 days after Dec 30th.
     RepeatDate r("YMD", 20231230, 20240103, 2);
     BOOST_CHECK_EQUAL(r.current_index(), 0L);
@@ -1258,37 +1282,63 @@ BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_current_value_over_year_bou
     }
 }
 
-// BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
-//     ECF_NAME_THIS_TEST();
-//
-//     auto check_date = [](int start, int end, int delta) {
-//         auto bdate = boost::gregorian::from_undelimited_string(boost::lexical_cast<std::string>(start));
-//
-//         Repeat rep(RepeatDate("YMD", start, end, delta));
-//         Repeat rep2(RepeatDate("YMD", start, end, delta));
-//         while (rep.valid()) {
-//
-//             // xref repeat date with boost date, essentially checking bdate with rep
-//             std::string str_value = boost::lexical_cast<std::string>(rep.value());
-//             auto date2            = boost::gregorian::from_undelimited_string(str_value);
-//             BOOST_CHECK_MESSAGE(bdate == date2, "expected same value, but found " << bdate << "  " << date2);
-//
-//             // check change value
-//             rep2.change(str_value);
-//             BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),
-//                                 "expected same value, but found " << rep.value() << "  " << rep2.value());
-//
-//             // increment repeat and boost date
-//             rep.increment();
-//             bdate += boost::gregorian::days(delta);
-//         }
-//     };
-//
-//     check_date(19800101, 20621231, 1);
-//     check_date(19800101, 20621231, 7);
-//     check_date(20621231, 19800101, -7);
-//     check_date(20150514, 20150730, 7);
-// }
+BOOST_AUTO_TEST_CASE(iterate_over_date_current_index_negative_delta) {
+    ECF_NAME_THIS_TEST();
+
+    RepeatDate r("YMD", 20240103, 20231230, -2);
+    BOOST_CHECK_EQUAL(r.current_index(), 0L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20240103");
+    {
+        auto value = ecf::repeat::current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20240103);
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 1L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20240101");
+    {
+        auto value = ecf::repeat::current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20240101);
+    }
+    r.increment();
+    BOOST_CHECK_EQUAL(r.current_index(), 2L);
+    BOOST_CHECK_EQUAL(r.current_value(), "20231230");
+    {
+        auto value = ecf::repeat::current_value_as<int>(r);
+        BOOST_CHECK(value.has_value() && value.value() == 20231230);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
+    ECF_NAME_THIS_TEST();
+
+    auto check_date = [](int start, int end, int delta) {
+        auto bdate = boost::gregorian::from_undelimited_string(boost::lexical_cast<std::string>(start));
+
+        Repeat rep(RepeatDate("YMD", start, end, delta));
+        Repeat rep2(RepeatDate("YMD", start, end, delta));
+        while (rep.valid()) {
+
+            // xref repeat date with boost date, essentially checking bdate with rep
+            std::string str_value = boost::lexical_cast<std::string>(rep.value());
+            auto date2            = boost::gregorian::from_undelimited_string(str_value);
+            BOOST_CHECK_MESSAGE(bdate == date2, "expected same value, but found " << bdate << "  " << date2);
+
+            // check change value
+            rep2.change(str_value);
+            BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),
+                                "expected same value, but found " << rep.value() << "  " << rep2.value());
+
+            // increment repeat and boost date
+            rep.increment();
+            bdate += boost::gregorian::days(delta);
+        }
+    };
+
+    check_date(19800101, 20621231, 1);
+    check_date(19800101, 20621231, 7);
+    check_date(20621231, 19800101, -7);
+    check_date(20150514, 20150730, 7);
+}
 
 BOOST_AUTO_TEST_SUITE_END() // test_repeat_date
 
@@ -1556,6 +1606,10 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_datetime_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     RepeatDateTime r("DT", "19700101T000000", "19700102T000000", "12:00:00");
     BOOST_CHECK_EQUAL(r.current_index(), 0L);
     BOOST_CHECK_EQUAL(r.current_value(), "19700101T000000");
@@ -1775,6 +1829,10 @@ BOOST_AUTO_TEST_CASE(handling_errors) {
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_enumerated_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     using namespace std::string_literals;
     RepeatEnumerated r("E", {"red"s, "green"s, "blue"s});
     BOOST_CHECK_EQUAL(r.current_index(), 0L);
@@ -1931,6 +1989,10 @@ BOOST_AUTO_TEST_CASE(increment) {
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_integer_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     RepeatInteger r("N", 1, 6, 2);
     BOOST_CHECK_EQUAL(r.current_index(), 0L);
     BOOST_CHECK_EQUAL(r.current_value(), "1");
@@ -2001,6 +2063,10 @@ BOOST_AUTO_TEST_CASE(invariants) {
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_day_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
+
     // RepeatDay has no position concept: current_index() returns the step value.
     RepeatDay r(3);
     BOOST_CHECK_EQUAL(r.current_index(), 3L);
@@ -2111,7 +2177,11 @@ BOOST_AUTO_TEST_CASE(handling_errors) {
 }
 
 BOOST_AUTO_TEST_CASE(iterate_over_string_current_index_current_value) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::repeat;
     using namespace std::string_literals;
+
     RepeatString r("S", {"a"s, "b"s, "c"s});
     BOOST_CHECK_EQUAL(r.current_index(), 0L);
     BOOST_CHECK_EQUAL(r.current_value(), "a");

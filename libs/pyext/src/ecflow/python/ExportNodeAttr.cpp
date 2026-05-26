@@ -1261,7 +1261,9 @@ void export_NodeAttr(py::module& m) {
              "even for sequences that cross month or year boundaries.")
         .def(
             "current_value",
-            [](const RepeatDate& self) -> py::object { return py::cast(current_value_of<int>(self).value()); },
+            [](const RepeatDate& self) -> py::object {
+                return py::cast(ecf::repeat::current_value_of<int>(self).value());
+            },
             "Return the current date as an integer in yyyymmdd format.");
 
     py::class_<RepeatDateTime>(m, "RepeatDateTime", NodeAttrDoc::repeat_datetime_doc())
@@ -1300,7 +1302,7 @@ void export_NodeAttr(py::module& m) {
         .def(
             "current_value",
             [](const RepeatDateTime& self) -> py::object {
-                return py::cast(current_value_of<std::string>(self).value());
+                return py::cast(ecf::repeat::current_value_of<std::string>(self).value());
             },
             "Return the current instant as a string in yyyymmddTHHMMSS format.");
 
@@ -1320,8 +1322,10 @@ void export_NodeAttr(py::module& m) {
              "Return the zero-based index of the current date in the list.")
         .def(
             "current_value",
-            [](const RepeatDateList& self) -> py::object { return py::cast(current_value_of<int>(self).value()); },
-            "Return the current date as a integer in yyyymmdd format.");
+            [](const RepeatDateList& self) -> py::object {
+                return py::cast(ecf::repeat::current_value_of<int>(self).value());
+            },
+            "Return the current date as an integer in yyyymmdd format.");
 
     py::class_<RepeatDateTimeList>(m, "RepeatDateTimeList", NodeAttrDoc::repeat_datetimelist_doc())
         .def(py::init<>())
@@ -1339,7 +1343,7 @@ void export_NodeAttr(py::module& m) {
         .def(
             "current_value",
             [](const RepeatDateTimeList& self) -> py::object {
-                return py::cast(current_value_of<std::string>(self).value());
+                return py::cast(ecf::repeat::current_value_of<std::string>(self).value());
             },
             "Return the current instant as a string in yyyymmddTHHMMSS format.");
 
@@ -1363,7 +1367,9 @@ void export_NodeAttr(py::module& m) {
              "Return the zero-based index of the current value: (value - start) / step.")
         .def(
             "current_value",
-            [](const RepeatInteger& self) -> py::object { return py::cast(current_value_of<int>(self).value()); },
+            [](const RepeatInteger& self) -> py::object {
+                return py::cast(ecf::repeat::current_value_of<int>(self).value());
+            },
             "Return the current integer value.");
 
     // Create as shared because: we want to pass a Python list as part of the constructor,
@@ -1387,7 +1393,7 @@ void export_NodeAttr(py::module& m) {
         .def(
             "current_value",
             [](const RepeatEnumerated& self) -> py::object {
-                return py::cast(current_value_of<std::string>(self).value());
+                return py::cast(ecf::repeat::current_value_of<std::string>(self).value());
             },
             "Return the enumeration string at the current index.");
 
@@ -1407,7 +1413,7 @@ void export_NodeAttr(py::module& m) {
         .def(
             "current_value",
             [](const RepeatString& self) -> py::object {
-                return py::cast(current_value_of<std::string>(self).value());
+                return py::cast(ecf::repeat::current_value_of<std::string>(self).value());
             },
             "Return the string at the current index.");
 
@@ -1424,7 +1430,9 @@ void export_NodeAttr(py::module& m) {
              "numeric attribute).")
         .def(
             "current_value",
-            [](const RepeatDay& self) -> py::object { return py::cast(current_value_of<int>(self).value()); },
+            [](const RepeatDay& self) -> py::object {
+                return py::cast(ecf::repeat::current_value_of<int>(self).value());
+            },
             "Return the step value as an integer value.");
 
     py::class_<Repeat>(m, "Repeat", NodeAttrDoc::repeat_doc())
@@ -1443,13 +1451,14 @@ void export_NodeAttr(py::module& m) {
         .def("end", &Repeat::end, "The last value of the repeat, as an integer")
         .def("step", &Repeat::step, "The increment for the repeat, as an integer")
         .def("value", &Repeat::last_valid_value, "The current value of the repeat as an integer")
+        .def("current_index", &Repeat::current_index, "The current index of the repeat (as an integer)")
         .def(
             "current_value",
             [](const Repeat& self) -> py::object {
-                if (auto found = current_value_as<int>(self); found.has_value()) {
+                if (auto found = ecf::repeat::current_value_as<int>(self); found.has_value()) {
                     return py::cast(found.value());
                 }
-                if (auto found = current_value_as<std::string>(self); found.has_value()) {
+                if (auto found = ecf::repeat::current_value_as<std::string>(self); found.has_value()) {
                     return py::cast(found.value());
                 }
                 else {
@@ -1458,9 +1467,10 @@ void export_NodeAttr(py::module& m) {
             },
             "The current value of the repeat (as a string for RepeatDateTime, RepeatDateTimeList, RepeatEnumerated, "
             "RepeatString; as an integer for RepeatDate, RepeatDateList, RepeatInteger and RepeatDay)")
-        .def("current_value", &Repeat::current_value, "The current value of the repeat (as a string)")
-        .def("current_index", &Repeat::current_index, "The current index of the repeat (as an integer)")
-        .def("increment", &Repeat::increment, "Increment the repeat to the next value");
+        .def("increment",
+             &Repeat::increment,
+             "Increment the repeat to the next value\n\n"
+             "n.b. this modifies the in-memory local object only --it does not update the ecFlow server.");
 
     void (ecf::CronAttr::*CronAttr_set_time_series_timeseries)(const ecf::TimeSeries&) = &ecf::CronAttr::addTimeSeries;
     void (ecf::CronAttr::*CronAttr_set_time_series_timeslot_timeslot_timeslot)(

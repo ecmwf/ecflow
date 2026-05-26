@@ -27,10 +27,12 @@
 #include <memory>
 #include <optional>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 #include "ecflow/attribute/Variable.hpp"
 #include "ecflow/core/Chrono.hpp"
+#include "ecflow/core/TypeTraits.hpp"
 
 /////////////////////////////////////////////////////////////////////////
 // Node can only have one repeat.
@@ -172,7 +174,7 @@ public:
     ///
     /// @brief Retrieve the current value
     ///
-    /// @return the current value as a yyyymmdd decimal string.
+    /// @return the current date formatted as a yyyymmdd string.
     ///
     std::string current_value() const override { return std::to_string(value_); }
 
@@ -263,12 +265,12 @@ public:
     ///
     /// @return the zero-based index into the repeat sequence
     ///
-    long current_index() const override { return (value() - start()) / step(); };
+    long current_index() const override { return (value() - start()) / step(); }
 
     ///
     /// @brief Retrieve the current value
     ///
-    /// @return the current value as a yyyymmddTHHMMSS decimal string.
+    /// @return the current value formatted as a yyyymmddTHHMMSS string.
     ///
     std::string current_value() const override { return ecf::Instant::format(value_); }
 
@@ -364,7 +366,7 @@ public:
     long value_at(size_t i) const {
         assert(i < list_.size());
         return list_[i];
-    };
+    }
     long index_or_value() const override { return currentIndex_; }
     long last_valid_value() const override;
     long last_valid_value_minus(int value) const override;
@@ -375,12 +377,12 @@ public:
     ///
     /// @return the zero-based index into the repeat sequence
     ///
-    long current_index() const override { return currentIndex_; };
+    long current_index() const override { return currentIndex_; }
 
     ///
     /// @brief Retrieve the current value
     ///
-    /// @return the current value as a yyyymmddT decimal string, or "" if out of bounds.
+    /// @return the current value formatted as a yyyymmdd string, or "" if out of bounds.
     ///
     std::string current_value() const override {
         return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())
@@ -460,12 +462,12 @@ public:
     ///
     /// @return the zero-based index into the repeat sequence
     ///
-    long current_index() const override { return currentIndex_; };
+    long current_index() const override { return currentIndex_; }
 
     ///
     /// @brief Retrieve the current value
     ///
-    /// @return the current value as a yyyymmddTHHMMSS decimal string, or "" if out of bounds.
+    /// @return the current value fomratted as a yyyymmddTHHMMSS string, or "" if out of bounds.
     ///
     std::string current_value() const override {
         return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())
@@ -549,7 +551,7 @@ public:
     ///
     /// @return the zero-based index into the repeat sequence
     ///
-    long current_index() const override { return (value_ - start_) / delta_; };
+    long current_index() const override { return (value_ - start_) / delta_; }
 
     ///
     /// @brief Retrieve the current value
@@ -616,8 +618,12 @@ public:
     long index_or_value() const override { return currentIndex_; }
     long last_valid_value() const override;
 
-    long current_index() const override { return currentIndex_; };
-    ///< Returns the current enumeration index (0-based).
+    ///
+    /// @brief Retrieve the current zero-based index
+    ///
+    /// @return the zero-based index into the repeat sequence
+    ///
+    long current_index() const override { return currentIndex_; }
 
     ///
     /// @brief Retrieve the current value
@@ -686,7 +692,7 @@ public:
     ///
     /// @return the zero-based index into the repeat sequence
     ///
-    long current_index() const override { return currentIndex_; };
+    long current_index() const override { return currentIndex_; }
 
     ///
     /// @brief Retrieve the current value
@@ -784,7 +790,7 @@ public:
     ///
     /// @return the current index
     ///
-    long current_index() const override { return step_; };
+    long current_index() const override { return step_; }
 
     ///
     /// @brief Retrieve the current value
@@ -799,7 +805,7 @@ public:
     RepeatBase* clone() const override { return new RepeatDay(step_, valid_); }
     bool compare(RepeatBase*) const override;
     bool valid() const override { return valid_; }
-    std::string valueAsString() const override { return std::string{}; };
+    std::string valueAsString() const override { return std::string{}; }
     std::string value_as_string(int) const override { return std::string{}; }
     std::string next_value_as_string() const override { return std::string{}; }
     std::string prev_value_as_string() const override { return std::string{}; }
@@ -963,9 +969,33 @@ private:
     void serialize(Archive& ar, std::uint32_t const version);
 };
 
+namespace ecf {
+
+namespace repeat {
 template <typename Result, typename RepeatType>
 inline std::optional<Result> current_value_of(const RepeatType& repeat) {
-    return std::nullopt; // default implementation returns empty optional for all RepeatTypes
+    //
+    // This primary template is intentionally reached for combinations where the
+    // Result type does not match the native type of RepeatType — for example,
+    // current_value_of<std::string>(const RepeatDate&) has no specialisation and
+    // should return nullopt silently (RepeatDate yields int, not string).
+    //
+    // If RepeatType is a completely unknown type (e.g. a new RepeatBase subtype with no
+    // specialisations at all), that is a programming error caught here at compile time.
+    //
+    static_assert(
+        ecf::is_one_of_v<RepeatType,
+                         RepeatDate,
+                         RepeatDateTime,
+                         RepeatDateList,
+                         RepeatDateTimeList,
+                         RepeatInteger,
+                         RepeatEnumerated,
+                         RepeatString,
+                         RepeatDay>,
+        "current_value_of: RepeatType is an unknown Repeat subtype. "
+        "Add explicit specialisation of current_value_of<int/std::string>(const RepeatType&) in RepeatAttr.hpp.");
+    return std::nullopt;
 }
 
 template <>
@@ -1011,35 +1041,35 @@ inline std::optional<int> current_value_of(const RepeatDay& repeat) {
 template <typename Result>
 inline std::optional<Result> current_value_as(const RepeatBase& base) {
     if (base.isDate()) {
-        auto& repeat = dynamic_cast<const RepeatDate&>(base);
+        auto& repeat = static_cast<const RepeatDate&>(base);
         return current_value_of<Result>(repeat);
     }
     else if (base.isDateTime()) {
-        auto& repeat = dynamic_cast<const RepeatDateTime&>(base);
+        auto& repeat = static_cast<const RepeatDateTime&>(base);
         return current_value_of<Result>(repeat);
     }
     else if (base.isDateList()) {
-        auto& repeat = dynamic_cast<const RepeatDateList&>(base);
+        auto& repeat = static_cast<const RepeatDateList&>(base);
         return current_value_of<Result>(repeat);
     }
     else if (base.isDateTimeList()) {
-        auto& repeat = dynamic_cast<const RepeatDateTimeList&>(base);
+        auto& repeat = static_cast<const RepeatDateTimeList&>(base);
         return current_value_of<Result>(repeat);
     }
     else if (base.isInteger()) {
-        auto& repeat = dynamic_cast<const RepeatInteger&>(base);
+        auto& repeat = static_cast<const RepeatInteger&>(base);
         return current_value_of<Result>(repeat);
     }
     else if (base.isEnumerated()) {
-        auto& repeat = dynamic_cast<const RepeatEnumerated&>(base);
+        auto& repeat = static_cast<const RepeatEnumerated&>(base);
         return current_value_of<Result>(repeat);
     }
     else if (base.isString()) {
-        auto& repeat = dynamic_cast<const RepeatString&>(base);
+        auto& repeat = static_cast<const RepeatString&>(base);
         return current_value_of<Result>(repeat);
     }
     else if (base.isDay()) {
-        auto& repeat = dynamic_cast<const RepeatDay&>(base);
+        auto& repeat = static_cast<const RepeatDay&>(base);
         return current_value_of<Result>(repeat);
     }
     else {
@@ -1052,5 +1082,9 @@ std::optional<T> current_value_as(const Repeat& repeat) {
     auto base = repeat.repeatBase();
     return (base) ? current_value_as<T>(*base) : std::nullopt;
 }
+
+} // namespace repeat
+
+} // namespace ecf
 
 #endif /* ecflow_attribute_RepeatAttr_HPP */
