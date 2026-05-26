@@ -57,51 +57,6 @@ static std::string dump_args(const std::vector<std::string>& options, const std:
 
 namespace ecf {
 
-InlimitOptions parse_inlimit_value(std::string value) {
-    if (value.empty()) {
-        return InlimitOptions{/* tokens = */ 1, /* limited_submission = */ false, /* limited_node = */ false};
-    }
-
-    bool limited_submission               = false;
-    constexpr const char* submission_flag = "-s";
-    if (ecf::algorithm::contains(value, submission_flag)) {
-        limited_submission = true;
-        ecf::algorithm::remove_all(value, submission_flag);
-    }
-
-    bool limited_node               = false;
-    constexpr const char* node_flag = "-n";
-    if (ecf::algorithm::contains(value, node_flag)) {
-        limited_node = true;
-        ecf::algorithm::remove_all(value, node_flag);
-    }
-
-    if (limited_submission && limited_node) {
-        throw std::runtime_error("AlterCmd: an inlimit cannot be limited for both submission and node");
-    }
-
-    ecf::algorithm::trim(value);
-
-    if (value.empty()) {
-        return InlimitOptions{/* tokens = */ 1, limited_submission, limited_node};
-    }
-
-    try {
-        int tokens = ecf::convert_to<int>(value);
-
-        if (tokens <= 0) {
-            throw std::runtime_error(
-                MESSAGE("AlterCmd: the inlimit value must be > 0, but value was: '" << tokens << "'"));
-        }
-
-        return InlimitOptions{tokens, limited_submission, limited_node};
-    }
-    catch (const ecf::bad_conversion&) {
-        throw std::runtime_error(
-            MESSAGE("AlterCmd: the inlimit value, '" << value << "', cannot be converted to an integer"));
-    }
-}
-
 namespace detail {
 
 template <>
@@ -615,19 +570,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
                     break;
                 }
                 case AlterCmd::ADD_INLIMIT: {
-                    // Parse the limit path and name, which the inlimit depends on.
-                    std::string limit_path; // This can be empty
-                    std::string limit_name;
-                    if (!Extract::pathAndName(name_, limit_path, limit_name)) {
-                        throw std::runtime_error("AlterCmd::ADD_INLIMIT: Invalid inlimit : " + name_);
-                    }
-
-                    // Parse the inlimit options, including token value
-                    auto [tokens, limited_submission, limited_node] = parse_inlimit_value(value_);
-
-                    // Add the inlimit to the node
-                    // Note: the InLimit ctor performs validation of the parameters and can throw if they are not valid
-                    node->addInLimit(InLimit(limit_name, limit_path, tokens, limited_node, limited_submission));
+                    auto inlimit = InLimit::make_from_name_and_value(name_, value_);
+                    node->addInLimit(inlimit);
                     break;
                 }
                 case AlterCmd::ADD_ATTR_ND:
@@ -635,7 +579,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const {
             }
         }
         catch (std::exception& e) {
-            ss << "Alter (add) failed for " << paths_[i] << ": Could not parse " << name_ << " : " << e.what() << "\n";
+            ss << "Alter (add) failed for paths " << paths_[i] << ", unable to handle request for " << name_
+               << " due to : " << e.what() << "\n";
         }
 
         // Change flags
@@ -1008,9 +953,9 @@ void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrTyp
         }
         case AlterCmd::ADD_INLIMIT: { // inlimit /obs/limits:hpcd 2 name=hpcd, path=/obs/limits, tokens=2(optional)
             // options[0]  - add
-            // options[1]  - [ inlimit ]
-            // options[2]  - [ path_to_limit:limit_name ]   --> name
-            // options[3]  - integer (optional)             --> value
+            // options[1]  - inlimit
+            // options[2]  - [/path/to/limit:]limit_name   --> name
+            // options[3]  - [integer [-s] [-n ]]          --> value
             if (options.size() < 3) {
                 throw std::runtime_error(MESSAGE(
                     "AlterCmd: add: Expected 'add inlimit <path-to-limit:limit_name> <int>(optional) <paths>. Not "
@@ -1093,27 +1038,8 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
             Limit check(name, int_value); // will throw if not valid
             break;
         }
-        case AlterCmd::ADD_INLIMIT: { // inlimit /obs/limits:hpcd 2 name=hpcd, path=/obs/limits, tokens=2(optional)
-            // options[0]  - add
-            // options[1]  - [ inlimit ]
-            // options[2]  - [ path_to_limit:limit_name ]  ---> name
-            // options[3]  - integer (optional)            ---> value
-            std::string path_to_limit; // This can be empty
-            std::string limitName;
-            if (!Extract::pathAndName(name, path_to_limit, limitName)) {
-                throw std::runtime_error("AlterCmd add inlimit Invalid inlimit : " + name);
-            }
-            int token_value = 1;
-            if (!value.empty()) {
-                try {
-                    token_value = ecf::convert_to<int>(value);
-                }
-                catch (const ecf::bad_conversion&) {
-                    throw std::runtime_error(MESSAGE("AlterCmd add inlimit expected optional limit token '"
-                                                     << value << "' to be convertible to an integer\n"));
-                }
-            }
-            InLimit inlimit(limitName, path_to_limit, token_value); // will throw if not valid
+        case AlterCmd::ADD_INLIMIT: {
+            InLimit::make_from_name_and_value(name, value); // throws if either name or value are invalid
             break;
         }
         case AlterCmd::ADD_ATTR_ND:

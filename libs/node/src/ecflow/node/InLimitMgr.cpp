@@ -68,7 +68,7 @@ bool InLimitMgr::operator==(const InLimitMgr& rhs) const {
 
 void InLimitMgr::addInLimit(const InLimit& l, bool check) {
     if (check && findInLimitByNameAndPath(l)) {
-        throw std::runtime_error("Add InLimit failed: Duplicate InLimit see node " + node_->debugNodePath());
+        throw std::runtime_error("Add InLimit failed: already exists at " + node_->debugNodePath());
     }
     vec_.push_back(l);
 }
