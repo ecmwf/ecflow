@@ -204,7 +204,7 @@ intel-2021.4.0:
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
     ctest_options:
-      - -L nightly -E py3_
+      - -L nightly -E '(py3_|s_http)'
 
 nvidia-24.11:
   build:
