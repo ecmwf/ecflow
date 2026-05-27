@@ -1,5 +1,5 @@
 
-FROM debian:13.5-slim AS base
+FROM debian:13.5-slim
 
 RUN apt-get update \
     && apt-get install -y \
@@ -8,31 +8,6 @@ RUN apt-get update \
         libssl-dev \
         libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Set the working directory
-WORKDIR /workspace
-
-
-FROM base AS builder
-
-RUN apt-get update \
-    && apt-get install -y \
-        gcc \
-        g++ \
-        cmake \
-        ninja-build \
-        qt6-base-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy build workflow script
-COPY builder/workspace/build.workflow.sh /workspace/build.workflow.sh
-# Make the build workflow script executable
-RUN chmod +x build.workflow.sh
-# Set the entrypoint to the build script
-ENTRYPOINT ["/workspace/build.workflow.sh"]
-
-
-FROM base AS deploy
 
 # Provision ecFlow dependencies
 RUN python3 -m venv /opt/local/python \
@@ -50,5 +25,8 @@ RUN dpkg -i /tmp/${ECFLOW_PACKAGE} \
 ARG ECFLOW_LAUNCH="launch.sh"
 COPY ${ECFLOW_LAUNCH} /opt/local/bin/${ECFLOW_LAUNCH}
 RUN chmod +x /opt/local/bin/${ECFLOW_LAUNCH}
+
+# Set the working directory
+WORKDIR /workspace
 
 ENTRYPOINT ["/opt/local/bin/launch.sh"]
