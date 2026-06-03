@@ -13,6 +13,8 @@
 #include <stdexcept>
 
 #include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Extract.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/Limit.hpp"
@@ -22,7 +24,54 @@
 
 using namespace ecf;
 
-/////////////////////////////////////////////////////////////////////////////////////////////
+namespace ecf {
+
+InlimitOptions parse_inlimit_value(std::string value) {
+    if (value.empty()) {
+        return InlimitOptions{/* tokens = */ 1, /* limited_submission = */ false, /* limited_node = */ false};
+    }
+
+    bool limited_submission               = false;
+    constexpr const char* submission_flag = "-s";
+    if (ecf::algorithm::contains(value, submission_flag)) {
+        limited_submission = true;
+        ecf::algorithm::remove_all(value, submission_flag);
+    }
+
+    bool limited_node               = false;
+    constexpr const char* node_flag = "-n";
+    if (ecf::algorithm::contains(value, node_flag)) {
+        limited_node = true;
+        ecf::algorithm::remove_all(value, node_flag);
+    }
+
+    if (limited_submission && limited_node) {
+        throw std::runtime_error("AlterCmd: an inlimit cannot be limited for both submission and node");
+    }
+
+    ecf::algorithm::trim(value);
+
+    if (value.empty()) {
+        return InlimitOptions{/* tokens = */ 1, limited_submission, limited_node};
+    }
+
+    try {
+        int tokens = ecf::convert_to<int>(value);
+
+        if (tokens <= 0) {
+            throw std::runtime_error(
+                MESSAGE("AlterCmd: the inlimit value must be > 0, but value was: '" << tokens << "'"));
+        }
+
+        return InlimitOptions{tokens, limited_submission, limited_node};
+    }
+    catch (const ecf::bad_conversion&) {
+        throw std::runtime_error(
+            MESSAGE("AlterCmd: the inlimit value, '" << value << "', cannot be converted to an integer"));
+    }
+}
+
+} // namespace ecf
 
 InLimit::InLimit(const std::string& name,
                  const std::string& pathToNode,
@@ -35,13 +84,28 @@ InLimit::InLimit(const std::string& name,
       tokens_(tokens),
       limit_this_node_only_(limit_this_node_only),
       limit_submission_(limit_submission) {
-    if (check && !Str::valid_name(name)) {
+    if (check && !ecf::algorithm::is_valid_name(name)) {
         throw std::runtime_error("InLimit::InLimit: Invalid InLimit name: " + name);
     }
     if (limit_this_node_only_ && limit_submission_) {
         throw std::runtime_error(
             "InLimit::InLimit: can't limit family only(-n) and limit submission(-s) at the same time");
     }
+}
+
+InLimit InLimit::make_from_name_and_value(const std::string& name, const std::string& value) {
+    // Parse the inlimit 'name', separating it into path and actual name
+    std::string l_path; // This can be empty
+    std::string l_name;
+    if (!Extract::pathAndName(name, l_path, l_name)) {
+        throw std::runtime_error("Invalid inlimit reference to '[</path/to/node:]<limit-name>': " + name);
+    }
+
+    // Parse the inlimit 'value', separating tokens from the flags for submission and node only
+    auto [l_tokens, l_submission, l_node] = parse_inlimit_value(value);
+
+    // Create the actual limit, performing additional validation of the parameters (throwing if not valid)
+    return InLimit(l_name, l_path, l_tokens, l_node, l_submission);
 }
 
 bool InLimit::operator==(const InLimit& rhs) const {
@@ -121,7 +185,7 @@ void InLimit::write(std::string& ret) const {
     }
     else {
         ret += path_;
-        ret += Str::COLON();
+        ret += ecf::string_constants::colon;
         ret += n_;
     }
     if (tokens_ != 1) {

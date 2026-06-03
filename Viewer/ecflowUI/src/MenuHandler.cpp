@@ -420,9 +420,9 @@ void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem* item) {
                 std::string cmdEquals    = minusCmd + "=";
                 std::string cmdEqualsYes = cmdEquals + "yes ";
                 std::string cmdYes       = minusCmd + " yes ";
-                if (!ecf::Str::replace(command, cmdEquals, cmdEqualsYes)) // --command=foo -> --command=yes foo
+                if (!ecf::algorithm::replace(command, cmdEquals, cmdEqualsYes)) // --command=foo -> --command=yes foo
                 {
-                    ecf::Str::replace(command, minusCmd, cmdYes); // --command foo -> --command yes foo
+                    ecf::algorithm::replace(command, minusCmd, cmdYes); // --command foo -> --command yes foo
                 }
                 item->setCommand(command);
             }

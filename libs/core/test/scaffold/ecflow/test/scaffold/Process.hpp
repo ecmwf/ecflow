@@ -11,13 +11,14 @@
 #ifndef ecflow_test_foolproof_scaffold_Process_HPP
 #define ecflow_test_foolproof_scaffold_Process_HPP
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "ecflow/core/Filesystem.hpp"
+namespace fs = std::filesystem;
 
-namespace foolproof::scaffold {
+namespace ecf::test::scaffold {
 
 class Process {
 public:
@@ -47,6 +48,6 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace foolproof::scaffold
+} // namespace ecf::test::scaffold
 
 #endif /* ecflow_test_foolproof_scaffold_Process_HPP */

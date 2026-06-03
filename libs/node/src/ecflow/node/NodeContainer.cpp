@@ -359,14 +359,14 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord) {
                 catch (const ecf::bad_conversion&) {
                 }
 
-                return Str::caseInsLess(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_less(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             break;
         }
         case NOrder::ORDER: {
             std::sort(nodes_.begin(), nodes_.end(), [](const node_ptr& a, const node_ptr& b) {
-                return Str::caseInsGreater(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_greater(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             break;
@@ -1087,15 +1087,16 @@ std::string NodeContainer::archive_path() const {
     }
 
     std::string the_archive_file_name = absNodePath();
-    Str::replaceall(the_archive_file_name, "/", ":"); // we use ':' since it is not allowed in the node names
+    // The following uses ':' since it is not allowed in the node names
+    ecf::algorithm::replace_all(the_archive_file_name, "/", ":");
     the_archive_file_name += ".check";
 
-    std::string port = Str::DEFAULT_PORT_NUMBER();
+    std::string port = ecf::string_constants::default_port_number;
     Defs* the_defs   = defs();
     if (the_defs) {
         port = the_defs->server_state().find_variable(ecf::environment::ECF_PORT);
         if (port.empty()) {
-            port = Str::DEFAULT_PORT_NUMBER();
+            port = ecf::string_constants::default_port_number;
         }
     }
     Host host;

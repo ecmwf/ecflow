@@ -33,19 +33,21 @@
 #
 
 # =============================================================================
-# Configure __init__.py to add __version__
+# Configure __init__.py
+#   - effectively defines the __version__ used for bindings
 # =============================================================================
-set(INIT_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
-set(INIT_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
-configure_file(${INIT_PY_IN} ${INIT_PY_OUT} )
+set(INIT_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
+set(INIT_PY    "${CMAKE_CURRENT_BINARY_DIR}/ecflow/__init__.py")
+configure_file(${INIT_PY_IN} ${INIT_PY} )
 
 
 # =============================================================================
-# Configure setup.py. Note used locally. Uses existing libraries
+# Configure setup.py
+#   - used locally for tests
 # =============================================================================
-set(SETUP_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
-set(SETUP_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
-configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT} )
+set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
+set(SETUP_PY    "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
+configure_file(${SETUP_PY_IN} ${SETUP_PY} )
 
 # ==============================================================================
 # source files (paths relative to dirs .../python3)
@@ -55,6 +57,7 @@ set(srcs
   ../src/ecflow/python/ClientDoc.hpp
   ../src/ecflow/python/DefsDoc.hpp
   ../src/ecflow/python/Edit.hpp
+  ../src/ecflow/python/ExportCollections.hpp
   ../src/ecflow/python/GlossaryDoc.hpp
   ../src/ecflow/python/NodeAttrDoc.hpp
   ../src/ecflow/python/NodeUtil.hpp
@@ -67,6 +70,7 @@ set(srcs
   ../src/ecflow/python/EcfExt.cpp
   ../src/ecflow/python/Edit.cpp
   ../src/ecflow/python/ExportClient.cpp
+  ../src/ecflow/python/ExportCollections.cpp
   ../src/ecflow/python/ExportCore.cpp
   ../src/ecflow/python/ExportDefs.cpp
   ../src/ecflow/python/ExportNode.cpp
@@ -100,20 +104,35 @@ set(u_tests
   u_TestAutoAddExtern
   u_TestAviso
   u_TestCopy
+  u_TestCron
   u_TestDefs
   u_TestDefsCheck
   u_TestDerivable
   u_TestEcf
   u_TestError
+  u_TestExportClient
+  u_TestExportCore
+  u_TestExportDefs
+  u_TestExportNode
+  u_TestExportNodeAttr
+  u_TestExportSuiteAndFamily
+  u_TestExportTask
+  u_TestExpression
   u_TestFind
   u_TestFlag
+  u_TestGeneratedVariable
+  u_TestGeneric
   u_TestGetAllTasks
   u_TestJobGeneration
+  u_TestMeter
   u_TestMirror
+  u_TestNode
   u_TestParent
   u_TestPrint
+  u_TestPythonBindings
   u_TestRemove
   u_TestRepeatArithmetic
+  u_TestRepeatDateTimeList
   u_TestSimulator
   u_TestTraversal
   u_TestUserManual
@@ -127,6 +146,6 @@ set(s_tests
   s_TestSslSetup
 )
 
-if (Python3_FOUND AND (Boost_PYTHON3_FOUND OR Boost_PYTHON${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}_FOUND))
+if (Python3_FOUND AND pybind11_FOUND)
   add_subdirectory( python3 )
 endif()

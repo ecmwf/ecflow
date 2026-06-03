@@ -5,7 +5,7 @@ ecflow.Variable
 .. py:class:: Variable
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Defines a :term:`variable` on a :term:`node` for use in :term:`ecf script`.
 
@@ -57,19 +57,19 @@ The following use example of using Edit, which allow multiple variables to added
                  Edit(d='d') ]
 
 
-.. py:method:: Variable.empty( (Variable)arg1) -> bool :
+.. py:method:: Variable.empty(self: ecflow.Variable) -> bool
    :module: ecflow
 
 Return true if the variable is empty. Used when returning a Null variable, from a find
 
 
-.. py:method:: Variable.name( (Variable)arg1) -> str :
+.. py:method:: Variable.name(self: ecflow.Variable) -> str
    :module: ecflow
 
 Return the variable name as string
 
 
-.. py:method:: Variable.value( (Variable)arg1) -> str :
+.. py:method:: Variable.value(self: ecflow.Variable) -> str
    :module: ecflow
 
 Return the variable value as a string

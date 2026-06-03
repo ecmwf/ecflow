@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "scaffold/Naming.hpp"
-#include "scaffold/Provisioning.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_use_extern_to_local_node_in_partial_suite) {
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_use_extern_to_local_attribute_in_partial_suite) {
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 

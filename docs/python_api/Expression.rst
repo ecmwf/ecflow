@@ -5,7 +5,7 @@ ecflow.Expression
 .. py:class:: Expression
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Expression holds :term:`trigger` or :term:`complete expression`. Also see :py:class:`ecflow.Trigger`
 
@@ -57,13 +57,13 @@ Here the trigger for task2 is equivalent to
 't0 == complete and t1 == complete or t4 == complete or t5 == active'
 
 
-.. py:method:: Expression.add( (Expression)arg1, (PartExpression)arg2) -> None :
+.. py:method:: Expression.add(self: ecflow.Expression, arg0: ecflow.PartExpression) -> None
    :module: ecflow
 
 Add a part expression, the second and subsequent part expressions must have 'and/or' set
 
 
-.. py:method:: Expression.get_expression( (Expression)arg1) -> str :
+.. py:method:: Expression.get_expression(self: ecflow.Expression) -> str
    :module: ecflow
 
 returns the complete expression as a string

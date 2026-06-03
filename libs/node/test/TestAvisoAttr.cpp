@@ -29,6 +29,7 @@ BOOST_AUTO_TEST_CASE(can_run_aviso_attribute_with_variable_substitution) {
     ECF_NAME_THIS_TEST();
 
     using namespace ecf;
+    using namespace ecf::test::scaffold;
 
     WithTestFile schema(NamedTestFile{"schema.aviso.json"}, R"(
       {
@@ -75,7 +76,7 @@ BOOST_AUTO_TEST_CASE(can_run_aviso_attribute_with_variable_substitution) {
     bool parsedOK = parser.doParse(errorMsg, warningMsg);
     BOOST_CHECK_MESSAGE(parsedOK, "Failed to parse definition: " << errorMsg);
 
-    const auto& suites = defs.suiteVec();
+    const auto& suites = defs.suites();
     BOOST_CHECK_EQUAL(suites.size(), static_cast<size_t>(1));
 
     const auto& families = suites[0]->familyVec();

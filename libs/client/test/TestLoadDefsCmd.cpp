@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs_cmd_handleRequest) {
         BOOST_CHECK_MESSAGE(parse, "Parse failed. " << errorMsg);
         firstDefs->clear_externs(); // server defs should not have externs.
     }
-    size_t noOfSuites = firstDefs->suiteVec().size();
+    size_t noOfSuites = firstDefs->suites().size();
 
     // load the SECOND file, which should resolve the externs
     std::string secondDef = File::test_data("libs/client/test/data/second.def", "libs/client");
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs_cmd_handleRequest) {
         bool parse = secondDefs.restore(secondDef, errorMsg, warningMsg);
         BOOST_CHECK_MESSAGE(parse, "Parse failed. " << errorMsg);
     }
-    noOfSuites += secondDefs.suiteVec().size();
+    noOfSuites += secondDefs.suites().size();
 
     // Create a LoadDefsCmd. This capable of merging defs files
     // Externs are NOT loaded into the server.
@@ -80,13 +80,13 @@ BOOST_AUTO_TEST_CASE(test_load_defs_cmd_handleRequest) {
     STC_Cmd_ptr requestStatus = cmd.handleRequest(&mockServer);
     BOOST_CHECK_MESSAGE(requestStatus, "Handle Request " << cmd << " returned NULL\n");
     BOOST_CHECK_MESSAGE(requestStatus->error().empty(), requestStatus->error());
-    BOOST_CHECK_MESSAGE(secondDefs.suiteVec().size() == noOfSuites, "Merge failed to add suites");
+    BOOST_CHECK_MESSAGE(secondDefs.suites().size() == noOfSuites, "Merge failed to add suites");
 
     // Modify the Defs file to add a task/trigger that references the undefined
     // extern path defined in file 'first.def' This should fail.
     task_ptr task = Task::create("AMadeUpName");
     task->add_trigger("/a/b/c/d/e/f/g/h/j == complete");
-    secondDefs.suiteVec().back()->familyVec().back()->addTask(task);
+    secondDefs.suites().back()->familyVec().back()->addTask(task);
 
     // we just added an expression, re-parse to create AST
     // This should also attempt to resolve the extern node path /a/b/c/d/e/f/g/h/j
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs_check_only) {
         BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "Expected sync to succeed\n" << theClient.errorMsg());
 
         // Note: when running with ECF_HOST=localhost the defs may exist, but the number of suites should be empty
-        BOOST_REQUIRE_MESSAGE(!theClient.defs() || theClient.defs()->suiteVec().empty(),
+        BOOST_REQUIRE_MESSAGE(!theClient.defs() || theClient.defs()->suites().empty(),
                               "Expected no defs, since nothing should have been loaded\n"
                                   << theClient.errorMsg());
     }
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_load_defs_check_only) {
         BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path, false, true /* check only*/) == 0,
                               "Expected load to succeed\n"
                                   << theClient.errorMsg());
-        BOOST_REQUIRE_MESSAGE(!theClient.defs() || theClient.defs()->suiteVec().empty(),
+        BOOST_REQUIRE_MESSAGE(!theClient.defs() || theClient.defs()->suites().empty(),
                               "Expected no defs, since nothing should have been loaded\n"
                                   << theClient.errorMsg());
     }

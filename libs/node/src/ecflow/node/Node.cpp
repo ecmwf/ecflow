@@ -69,7 +69,7 @@ Node::Node(const std::string& n, bool check)
     : n_(n) {
     if (check) {
         std::string msg;
-        if (!Str::valid_name(n, msg)) {
+        if (!ecf::algorithm::is_valid_name(n, msg)) {
             throw std::runtime_error("Invalid node name : " + msg);
         }
     }
@@ -279,7 +279,7 @@ void Node::begin() {
 
     if (!mirrors_.empty()) {
         // In case mirror attributes are available, the node state becomes UNKNOWN
-        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+        setStateOnly(NState::State::UNKNOWN, true, ecf::string_constants::empty, false);
     }
 
     clearTrigger();
@@ -352,7 +352,7 @@ void Node::requeue(Requeue_args& args) {
 
     if (!mirrors_.empty()) {
         // In case mirror attributes are available, the node state becomes UNKNOWN
-        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+        setStateOnly(NState::State::UNKNOWN, true, ecf::string_constants::empty, false);
     }
 
     // Set the state without causing any side effects
@@ -458,7 +458,7 @@ void Node::reset() {
 
     if (!mirrors_.empty()) {
         // In case of mirror attributes, the node state becomes UNKNOWN
-        setStateOnly(NState::State::UNKNOWN, true /*force*/, Str::EMPTY() /* additional info to log */, false);
+        setStateOnly(NState::State::UNKNOWN, true, ecf::string_constants::empty, false);
     }
 
     clearTrigger();
@@ -614,7 +614,7 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes)
         /// Note: DState::SUSPENDED is not a real state, its really a user interaction
         /// Replace with suspend, and set underlying state as queued
         suspend();
-        setStateOnly(NState::QUEUED, false /*force*/, Str::EMPTY() /* additional info to log */, log_state_changes);
+        setStateOnly(NState::QUEUED, false, ecf::string_constants::empty, log_state_changes);
     }
     else {
 
@@ -624,10 +624,7 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes)
 
         // convert DState --> NState.
         // NOTE::  NState does *NOT* have SUSPENDED
-        setStateOnly(DState::convert(d_st_.state()),
-                     false /*force*/,
-                     Str::EMPTY() /* additional info to log */,
-                     log_state_changes);
+        setStateOnly(DState::convert(d_st_.state()), false, ecf::string_constants::empty, log_state_changes);
     }
 }
 
@@ -985,7 +982,7 @@ bool Node::evaluateTrigger() const {
 }
 
 const std::string& Node::abortedReason() const {
-    return Str::EMPTY();
+    return ecf::string_constants::empty;
 }
 
 void Node::set_state(NState::State newState, bool force, const std::string& additional_info_to_log) {
@@ -1571,7 +1568,7 @@ bool Node::variable_dollar_substitution(std::string& cmd) const {
             break;
         }
 
-        size_t secondPos = cmd.find_first_not_of(Str::ALPHANUMERIC_UNDERSCORE(), firstPos + 1);
+        size_t secondPos = cmd.find_first_not_of(ecf::string_constants::alphanumeric_underscore_chars, firstPos + 1);
         if (secondPos == std::string::npos) {
             secondPos = cmd.size();
         }
@@ -2435,8 +2432,11 @@ bool Node::checkInvariants(std::string& errorMsg) const {
 }
 
 std::string Node::absNodePath() const {
+    const auto NR_OF_PATH_ELEMENTS = 16;
+    const auto BASE_PATH_LENGTH    = 64;
+
     std::vector<std::string> vec;
-    vec.reserve(Str::reserve_16());
+    vec.reserve(NR_OF_PATH_ELEMENTS);
     vec.push_back(name());
     Node* theParent = parent();
     while (theParent) {
@@ -2444,30 +2444,19 @@ std::string Node::absNodePath() const {
         theParent = theParent->parent();
     }
     std::string ret;
-    ret.reserve(Str::reserve_64());
+    ret.reserve(BASE_PATH_LENGTH);
     auto r_end = vec.rend();
     for (auto r = vec.rbegin(); r != r_end; ++r) {
         ret += '/';
         ret += *r;
     }
 
-    //	// Another algorithm broadly similar results
-    //	std::string ret; ret.reserve(Str::reserve_64());
-    // 	ret += '/';
-    //	ret += name();
-    // 	Node* theParent = parent();
-    //	while (theParent) {
-    //		ret.insert(0,"/");
-    //		ret.insert(1,theParent->name());
-    // 		theParent = theParent->parent();
-    //	}
-
     return ret;
 }
 
 std::string Node::debugNodePath() const {
     std::string ret = debugType();
-    ret += Str::COLON();
+    ret += ecf::string_constants::colon;
     ret += absNodePath();
     return ret;
 }
@@ -2704,13 +2693,15 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
             }
         }
     }
-    auto caseInsen = [](const auto& a, const auto& b) { return Str::caseInsLess(a.name(), b.name()); };
+    auto caseInsen = [](const auto& a, const auto& b) {
+        return ecf::algorithm::case_insensitive_less(a.name(), b.name());
+    };
 
     state_change_no_ = Ecf::incr_state_change_no();
     switch (attr) {
         case Attr::EVENT:
             sort(events_.begin(), events_.end(), [](const Event& a, const Event& b) {
-                return Str::caseInsLess(a.name_or_number(), b.name_or_number());
+                return ecf::algorithm::case_insensitive_less(a.name_or_number(), b.name_or_number());
             });
             break;
         case Attr::METER:
@@ -2721,7 +2712,7 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
             break;
         case Attr::LIMIT:
             sort(limits_.begin(), limits_.end(), [](const limit_ptr& a, const limit_ptr& b) {
-                return Str::caseInsLess(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_less(a->name(), b->name());
             });
             break;
         case Attr::VARIABLE:
@@ -2730,12 +2721,12 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool recursive, const std::vect
         case Attr::ALL:
             sort(vars_.begin(), vars_.end(), caseInsen);
             sort(events_.begin(), events_.end(), [](const Event& a, const Event& b) {
-                return Str::caseInsLess(a.name_or_number(), b.name_or_number());
+                return ecf::algorithm::case_insensitive_less(a.name_or_number(), b.name_or_number());
             });
             sort(meters_.begin(), meters_.end(), caseInsen);
             sort(labels_.begin(), labels_.end(), caseInsen);
             sort(limits_.begin(), limits_.end(), [](const limit_ptr& a, const limit_ptr& b) {
-                return Str::caseInsLess(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_less(a->name(), b->name());
             });
             break;
         case Attr::UNKNOWN:
@@ -2859,56 +2850,8 @@ const std::vector<GenericAttr>& Node::generics() const {
     return generics_;
 }
 
-std::vector<ZombieAttr>::const_iterator Node::zombie_begin() const {
-    if (misc_attrs_) {
-        return misc_attrs_->zombie_begin();
-    }
-    return zombies_.begin();
-}
-std::vector<ZombieAttr>::const_iterator Node::zombie_end() const {
-    if (misc_attrs_) {
-        return misc_attrs_->zombie_end();
-    }
-    return zombies_.end();
-}
-std::vector<VerifyAttr>::const_iterator Node::verify_begin() const {
-    if (misc_attrs_) {
-        return misc_attrs_->verify_begin();
-    }
-    return verifys_.begin();
-}
-std::vector<VerifyAttr>::const_iterator Node::verify_end() const {
-    if (misc_attrs_) {
-        return misc_attrs_->verify_end();
-    }
-    return verifys_.end();
-}
-std::vector<QueueAttr>::const_iterator Node::queue_begin() const {
-    if (misc_attrs_) {
-        return misc_attrs_->queue_begin();
-    }
-    return queues_.begin();
-}
-std::vector<QueueAttr>::const_iterator Node::queue_end() const {
-    if (misc_attrs_) {
-        return misc_attrs_->queue_end();
-    }
-    return queues_.end();
-}
-std::vector<GenericAttr>::const_iterator Node::generic_begin() const {
-    if (misc_attrs_) {
-        return misc_attrs_->generic_begin();
-    }
-    return generics_.begin();
-}
-std::vector<GenericAttr>::const_iterator Node::generic_end() const {
-    if (misc_attrs_) {
-        return misc_attrs_->generic_end();
-    }
-    return generics_.end();
-}
-
 namespace ecf {
+
 std::vector<Variable> inherited_variables(const Node& node) {
     std::vector<Variable> all;
     const Node* current = &node;

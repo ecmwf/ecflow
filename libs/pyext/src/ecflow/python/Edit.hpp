@@ -19,10 +19,13 @@
 class Edit {
 public:
     explicit Edit(const py::dict& dict);
-    Edit(const py::dict& dict, const py::dict& dict2);
+    explicit Edit(const py::kwargs& kw);
+    Edit(const py::dict& dict, const py::kwargs& kw);
+    Edit(const py::dict& dict1, const py::dict& dict2);
+
     const std::vector<Variable>& variables() const { return vec_; }
+
     static std::string to_string() { return "edit"; }
-    static py::object init(py::tuple args, py::dict kw);
 
 private:
     std::vector<Variable> vec_;

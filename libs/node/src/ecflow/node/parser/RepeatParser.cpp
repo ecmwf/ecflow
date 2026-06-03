@@ -86,8 +86,10 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
             if (theEnum[0] == '#') {
                 break;
             }
-            Str::removeSingleQuotes(theEnum); // remove quotes, they get added back when we persist
-            Str::removeQuotes(theEnum);       // remove quotes, they get added back when we persist
+
+            // remove quotes, as they get added back when we persist
+            ecf::algorithm::remove_double_quotes(theEnum);
+            ecf::algorithm::remove_single_quotes(theEnum);
 
             int date = 0;
             try {
@@ -111,6 +113,46 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
 
         nodeStack_top()->addRepeat(Repeat(rep));
     }
+    else if (lineTokens[1] == "datetimelist") {
+
+        if (line_token_size < 4) {
+            throw std::runtime_error(errorMsg);
+        }
+
+        // repeat datetimelist VARIABLE "yyyymmddTHHMMSS" "yyyymmddTHHMMSS" # index
+        std::string name = lineTokens[2];
+        std::vector<Instant> theList;
+        theList.reserve(line_token_size);
+        for (size_t i = 3; i < line_token_size; i++) {
+            std::string token = lineTokens[i];
+            if (token[0] == '#') {
+                break;
+            }
+
+            // remove quotes, as they get added back when we persist
+            ecf::algorithm::remove_double_quotes(token);
+            ecf::algorithm::remove_single_quotes(token);
+
+            try {
+                theList.push_back(Instant::parse(token));
+            }
+            catch (std::exception&) {
+                throw std::runtime_error("RepeatParser::doParse: repeat datetimelist " + name +
+                                         ", invalid datetime : " + token);
+            }
+        }
+        if (theList.empty()) {
+            throw std::runtime_error(errorMsg);
+        }
+
+        RepeatDateTimeList rep(name, theList);
+        int index = 0; // This is *assumed to be the index* and not the value
+        if (get_value(lineTokens, index)) {
+            rep.set_value(index);
+        }
+
+        nodeStack_top()->addRepeat(Repeat(rep));
+    }
     else if (lineTokens[1] == "enumerated") {
 
         if (line_token_size < 4) {
@@ -126,8 +168,11 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
             if (theEnum[0] == '#') {
                 break;
             }
-            Str::removeSingleQuotes(theEnum); // remove quotes, they get added back when we persist
-            Str::removeQuotes(theEnum);       // remove quotes, they get added back when we persist
+
+            // remove quotes, as they get added back when we persist
+            ecf::algorithm::remove_single_quotes(theEnum);
+            ecf::algorithm::remove_double_quotes(theEnum);
+
             theEnums.push_back(theEnum);
         }
         if (theEnums.empty()) {
@@ -187,8 +232,11 @@ bool RepeatParser::doParse(const std::string& line, std::vector<std::string>& li
             if (theEnum[0] == '#') {
                 break;
             }
-            Str::removeSingleQuotes(theEnum); // remove quotes, they get added back when we persist
-            Str::removeQuotes(theEnum);       // remove quotes, they get added back when we persist
+
+            // remove quotes, as they get added back when we persist
+            ecf::algorithm::remove_single_quotes(theEnum);
+            ecf::algorithm::remove_double_quotes(theEnum);
+
             theEnums.push_back(theEnum);
         }
         if (theEnums.empty()) {

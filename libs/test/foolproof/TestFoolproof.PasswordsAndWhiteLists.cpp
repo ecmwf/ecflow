@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "scaffold/Naming.hpp"
-#include "scaffold/Provisioning.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_update_label_with_authentication_based_on_passwd_f
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_update_label_with_authorisation_based_on_whitelist
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -238,7 +238,7 @@ endsuite;
 
     { // #authorisation, perform write operation with "rw" access -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -259,7 +259,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "attempted_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -279,7 +279,7 @@ endsuite;
 
     { // #authentication, using incorrect password -- attempt to update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_c).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "attempted_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -299,7 +299,7 @@ endsuite;
 
     { // #authentication, inexistent user -- attempt to update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_d).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "attempted_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_reload_whitelist) {
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -393,7 +393,7 @@ endsuite;
 
     { // #authorisation, perform write operation with "rw" access -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -402,7 +402,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -430,7 +430,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -441,7 +441,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "rw" access -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -464,7 +464,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_reload_whitelist_created_after_server_is_launched)
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -522,7 +522,7 @@ endsuite;
 
     { // #authorisation, perform write operation (without whitelist) -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -531,7 +531,7 @@ endsuite;
 
     { // #authorisation, perform write operation (without whitelist) -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -554,7 +554,7 @@ endsuite;
 
     { // #authorisation, perform write operation with "rw" access -- update label value % [success]
         auto client = RunClient{}.with(host).with(port).with(user_a).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "updated_value"});
         BOOST_REQUIRE(client.ok());
         auto c = client.value();
 
@@ -563,7 +563,7 @@ endsuite;
 
     { // #authorisation, perform write operation with only "r" access -- update label value % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_b).with(cwd).execute(
-            RunClient::CommandUpdateLabel{"/s/f/task", "l", "another_updated_value"});
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "another_updated_value"});
         BOOST_REQUIRE(!client.ok());
 
         BOOST_CHECK(
@@ -596,7 +596,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_using_just_defaults) {
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -659,7 +659,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_default_
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -723,7 +723,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_default_val
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -792,7 +792,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_envvar_with_specific
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -856,7 +856,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_va
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -925,7 +925,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_load_password_file_defined_in_cfg_with_specific_va
      *
      */
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 

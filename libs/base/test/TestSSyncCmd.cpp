@@ -265,7 +265,7 @@ void remove_a_family(defs_ptr defs) {
 }
 
 void change_clock_gain(defs_ptr defs) {
-    for (suite_ptr suite : defs->suiteVec()) {
+    for (suite_ptr suite : defs->suites()) {
         if (suite->clockAttr().get()) {
             SuiteChanged changed(suite);
             suite->changeClockGain("100001");
@@ -274,7 +274,7 @@ void change_clock_gain(defs_ptr defs) {
 }
 void change_clock_type_to_real(defs_ptr defs) {
 
-    for (suite_ptr suite : defs->suiteVec()) {
+    for (suite_ptr suite : defs->suites()) {
         if (suite->clockAttr().get()) {
             SuiteChanged changed(suite);
             suite->changeClockType("real");
@@ -283,7 +283,7 @@ void change_clock_type_to_real(defs_ptr defs) {
 }
 void change_clock_type_to_hybrid(defs_ptr defs) {
 
-    for (suite_ptr suite : defs->suiteVec()) {
+    for (suite_ptr suite : defs->suites()) {
         if (suite->clockAttr().get()) {
             SuiteChanged changed(suite);
             suite->changeClockType("hybrid");
@@ -292,7 +292,7 @@ void change_clock_type_to_hybrid(defs_ptr defs) {
 }
 void change_clock_date(defs_ptr defs) {
 
-    for (suite_ptr suite : defs->suiteVec()) {
+    for (suite_ptr suite : defs->suites()) {
         if (suite->clockAttr().get()) {
             SuiteChanged changed(suite);
             suite->changeClockDate("1.1.2001");
@@ -301,7 +301,7 @@ void change_clock_date(defs_ptr defs) {
 }
 void change_clock_sync(defs_ptr defs) {
 
-    for (suite_ptr suite : defs->suiteVec()) {
+    for (suite_ptr suite : defs->suites()) {
         if (suite->clockAttr().get()) {
             SuiteChanged changed(suite);
             suite->changeClockSync();
@@ -314,25 +314,25 @@ void change_clock_sync(defs_ptr defs) {
 /// max value, however because we had, changed value as well it got masked.
 void change_limit_max(defs_ptr defs) {
 
-    for (suite_ptr s : defs->suiteVec()) {
-        std::vector<limit_ptr> theLimits = s->limits();
+    for (suite_ptr suite : defs->suites()) {
+        std::vector<limit_ptr> theLimits = suite->limits();
         for (limit_ptr l : theLimits) {
             // std::cout << "found " << l->toString() << "\n";
-            TestHelper::invokeRequest(defs.get(),
-                                      Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::LIMIT_MAX, l->name(), "90")));
-            limit_ptr v = s->find_limit(l->name());
+            TestHelper::invokeRequest(
+                defs.get(), Cmd_ptr(new AlterCmd(suite->absNodePath(), AlterCmd::LIMIT_MAX, l->name(), "90")));
+            limit_ptr v = suite->find_limit(l->name());
             BOOST_CHECK_MESSAGE(v.get() && v->theLimit() == 90, "expected to find limit with max value of 90");
         }
     }
 }
 void change_limit_value(defs_ptr defs) {
 
-    for (suite_ptr s : defs->suiteVec()) {
-        std::vector<limit_ptr> theLimits = s->limits();
+    for (suite_ptr suite : defs->suites()) {
+        std::vector<limit_ptr> theLimits = suite->limits();
         for (limit_ptr l : theLimits) {
-            TestHelper::invokeRequest(defs.get(),
-                                      Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::LIMIT_VAL, l->name(), "33")));
-            limit_ptr v = s->find_limit(l->name());
+            TestHelper::invokeRequest(
+                defs.get(), Cmd_ptr(new AlterCmd(suite->absNodePath(), AlterCmd::LIMIT_VAL, l->name(), "33")));
+            limit_ptr v = suite->find_limit(l->name());
             BOOST_CHECK_MESSAGE(v.get() && v->value() == 33, "expected to find limit with value of 33");
         }
     }
@@ -359,7 +359,7 @@ void update_calendar(defs_ptr defs) {
     defs->updateCalendar(p);
 
     // Currently updating the calendar, does not cause change, Hence force a change
-    for (suite_ptr suite : defs->suiteVec()) {
+    for (suite_ptr suite : defs->suites()) {
         SuiteChanged changed(suite);
         suite->add_variable("name", "value");
     }
@@ -371,9 +371,9 @@ void update_calendar(defs_ptr defs) {
 }
 
 void delete_suite(defs_ptr defs) {
-    std::vector<suite_ptr> vec = defs->suiteVec();
-    BOOST_REQUIRE_MESSAGE(!vec.empty(), "Expected suites");
-    vec[0]->remove();
+    auto suites = defs->suites();
+    BOOST_REQUIRE_MESSAGE(!suites.empty(), "Expected suites");
+    suites[0]->remove();
 }
 
 void set_server_state_shutdown(defs_ptr defs) {
@@ -401,21 +401,21 @@ void delete_server_variable(defs_ptr defs) {
 }
 
 void reorder_suites(defs_ptr defs) {
-    std::vector<suite_ptr> suiteVec = defs->suiteVec();
-    BOOST_REQUIRE_MESSAGE(!suiteVec.empty(), "Expected suites");
-    std::string path = "/" + suiteVec[0]->name();
+    auto suites = defs->suites();
+    BOOST_REQUIRE_MESSAGE(!suites.empty(), "Expected suites");
+    std::string path = "/" + suites[0]->name();
     TestHelper::invokeRequest(defs.get(), Cmd_ptr(new OrderNodeCmd(path, NOrder::ALPHA)));
 }
 
 void move_peers(defs_ptr defs) {
-    std::vector<suite_ptr> suiteVec = defs->suiteVec();
-    BOOST_REQUIRE_MESSAGE(suiteVec.size() >= 2, "Expected suites");
-    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new PlugCmd(suiteVec[0]->absNodePath(), suiteVec[1]->absNodePath())));
+    auto suites = defs->suites();
+    BOOST_REQUIRE_MESSAGE(suites.size() >= 2, "Expected suites");
+    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new PlugCmd(suites[0]->absNodePath(), suites[1]->absNodePath())));
 }
 void move_peers1(defs_ptr defs) {
-    std::vector<suite_ptr> suiteVec = defs->suiteVec();
-    BOOST_REQUIRE_MESSAGE(suiteVec.size() >= 2, "Expected suites");
-    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new PlugCmd(suiteVec[1]->absNodePath(), suiteVec[0]->absNodePath())));
+    auto suites = defs->suites();
+    BOOST_REQUIRE_MESSAGE(suites.size() >= 2, "Expected suites");
+    TestHelper::invokeRequest(defs.get(), Cmd_ptr(new PlugCmd(suites[1]->absNodePath(), suites[0]->absNodePath())));
 }
 
 void set_defs_flag(defs_ptr defs) {

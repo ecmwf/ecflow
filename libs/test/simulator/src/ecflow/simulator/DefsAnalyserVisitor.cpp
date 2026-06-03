@@ -24,8 +24,8 @@ namespace ecf {
 DefsAnalyserVisitor::DefsAnalyserVisitor() = default;
 
 void DefsAnalyserVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
-        s->acceptVisitTraversor(*this);
+    for (auto suite : d->suites()) {
+        suite->acceptVisitTraversor(*this);
     }
 }
 
@@ -40,8 +40,8 @@ void DefsAnalyserVisitor::visitNodeContainer(NodeContainer* nc) {
     std::set<Node*> dependentNodes;
     analyse(nc, dependentNodes);
 
-    for (node_ptr t : nc->nodeVec()) {
-        t->acceptVisitTraversor(*this);
+    for (auto node : nc->children()) {
+        node->acceptVisitTraversor(*this);
     }
 }
 
@@ -84,8 +84,8 @@ void DefsAnalyserVisitor::analyse(Node* node, std::set<Node*>& dependentNodes, b
         // follow child nodes
         auto* nc = dynamic_cast<NodeContainer*>(node);
         if (nc) {
-            for (node_ptr t : nc->nodeVec()) {
-                t->acceptVisitTraversor(*this);
+            for (auto n : nc->children()) {
+                n->acceptVisitTraversor(*this);
             }
         }
     }
@@ -97,8 +97,8 @@ void DefsAnalyserVisitor::analyse(Node* node, std::set<Node*>& dependentNodes, b
         // follow child nodes
         auto* nc = dynamic_cast<NodeContainer*>(node);
         if (nc) {
-            for (node_ptr t : nc->nodeVec()) {
-                t->acceptVisitTraversor(*this);
+            for (node_ptr n : nc->children()) {
+                n->acceptVisitTraversor(*this);
             }
         }
     }

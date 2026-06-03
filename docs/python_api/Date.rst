@@ -5,7 +5,7 @@ ecflow.Date
 .. py:class:: Date
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Used to define a :term:`date` dependency.
 
@@ -38,19 +38,19 @@ Usage:
             Date('1.*.*'));  # Create Date in place.
 
 
-.. py:method:: Date.day( (Date)arg1) -> int :
+.. py:method:: Date.day(self: ecflow.Date) -> int
    :module: ecflow
 
 Return the day. The range is 0-31, 0 means its wild-carded
 
 
-.. py:method:: Date.month( (Date)arg1) -> int :
+.. py:method:: Date.month(self: ecflow.Date) -> int
    :module: ecflow
 
 Return the month. The range is 0-12, 0 means its wild-carded
 
 
-.. py:method:: Date.year( (Date)arg1) -> int :
+.. py:method:: Date.year(self: ecflow.Date) -> int
    :module: ecflow
 
 Return the year, 0 means its wild-carded

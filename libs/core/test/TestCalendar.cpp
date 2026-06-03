@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
 
     // read the state, into a different calendar & compare
     std::vector<std::string> lineTokens;
-    Str::split(calendar_state, lineTokens);
+    ecf::algorithm::split_at(lineTokens, calendar_state);
     Calendar calendar2;
     calendar2.read_state(calendar_state, lineTokens);
     BOOST_CHECK_MESSAGE(calendar == calendar2,
@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE(test_calendar_state_parsing) {
     calendar_state.clear();
     calendar.write_state(calendar_state);
 
-    Str::split(calendar_state, lineTokens);
+    ecf::algorithm::split_at(lineTokens, calendar_state);
     calendar2.read_state(calendar_state, lineTokens);
 
     BOOST_CHECK_MESSAGE(calendar == calendar2, "Calendar should be the same");
@@ -499,30 +499,30 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_relative_complex) {
             if (intersects && boundaryOk) {
                 BOOST_CHECK_MESSAGE(matches,
                                     "Calendar should match relative time series at "
-                                        << suiteTm.tm_hour << Str::COLON() << suiteTm.tm_min
+                                        << suiteTm.tm_hour << ecf::string_constants::colon << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
                 if (!matches) {
-                    ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
-                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
-                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
+                    ECF_TEST_ERR("suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                                     << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                                     << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                                     << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                                     << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                                     << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
             else {
                 BOOST_CHECK_MESSAGE(!matches,
                                     "Calendar should NOT match relative time series at "
-                                        << suiteTm.tm_hour << Str::COLON() << suiteTm.tm_min
+                                        << suiteTm.tm_hour << ecf::string_constants::colon << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
 
                 if (matches) {
-                    ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
-                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
-                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
+                    ECF_TEST_ERR("suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                                     << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                                     << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                                     << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                                     << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                                     << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
         }
@@ -601,12 +601,12 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
                                         << suiteTm.tm_hour << ":" << suiteTm.tm_min
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
                 if (!matches) {
-                    ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
-                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
-                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
+                    ECF_TEST_ERR("suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                                     << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                                     << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                                     << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                                     << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                                     << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
             else {
@@ -616,12 +616,12 @@ BOOST_AUTO_TEST_CASE(test_calendar_time_series_real_complex) {
                                         << " suite time = " << to_simple_string(calendar.suiteTime()));
 
                 if (matches) {
-                    ECF_TEST_ERR(<< "suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
-                                 << " timeSeries.start().hour() " << timeSeries.start().hour()
-                                 << " timeSeries.start().minute() " << timeSeries.start().minute()
-                                 << " timeSeries.finish().hour() " << timeSeries.finish().hour()
-                                 << " timeSeries.finish().minute() " << timeSeries.finish().minute()
-                                 << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
+                    ECF_TEST_ERR("suiteTm.tm_hour =" << suiteTm.tm_hour << " suiteTm.tm_min = " << suiteTm.tm_min
+                                                     << " timeSeries.start().hour() " << timeSeries.start().hour()
+                                                     << " timeSeries.start().minute() " << timeSeries.start().minute()
+                                                     << " timeSeries.finish().hour() " << timeSeries.finish().hour()
+                                                     << " timeSeries.finish().minute() " << timeSeries.finish().minute()
+                                                     << " suiteTm.tm_min % 15 = " << suiteTm.tm_min % 15);
                 }
             }
         }

@@ -1724,7 +1724,7 @@ int ClientInvoker::edit_script_submit(const std::string& path_to_task,
 
 std::string ClientInvoker::client_env_host_port() const {
     std::string host_port = clientEnv_.host();
-    host_port += Str::COLON();
+    host_port += ecf::string_constants::colon;
     host_port += clientEnv_.port();
     return host_port;
 }

@@ -146,9 +146,10 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
         // This check only valid if server was invoked locally. Ignore for remote servers
 
         // make sure edit history updated
-        BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                              CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                        << theClient.errorMsg());
+        BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                              CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                                  << " should return 0\n"
+                                  << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 7,
                               "Expected edit history of size 7, but found "
                                   << theClient.server_reply().get_string_vec().size());
@@ -157,17 +158,18 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes) {
         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                               CtsApi::get() << " failed should return 0\n"
                                             << theClient.errorMsg());
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() == 0,
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(ecf::string_constants::root_path).size() == 0,
                               "Expected edit history of size 0, but found "
-                                  << theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
+                                  << theClient.defs()->get_edit_history(ecf::string_constants::root_path).size());
 
         // clear edit history
         BOOST_REQUIRE_MESSAGE(theClient.edit_history("clear") == 0,
                               CtsApi::to_string(CtsApi::edit_history("clear")) << " should return 0\n"
                                                                                << theClient.errorMsg());
-        BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                              CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                        << theClient.errorMsg());
+        BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                              CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                                  << " should return 0\n"
+                                  << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 0,
                               "Expected no edit history " << theClient.server_reply().get_string_vec().size());
     }
@@ -219,23 +221,24 @@ BOOST_AUTO_TEST_CASE(test_server_state_changes_with_auto_sync) {
         // This check only valid if server was invoked locally. Ignore for remote servers
 
         // make sure edit history updated
-        BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                              CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                        << theClient.errorMsg());
+        BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                              CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                                  << " should return 0\n"
+                                  << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 8 &&
                                   theClient.server_reply().get_string_vec().size() <=
                                       Defs::max_edit_history_size_per_node(),
                               "Expected edit history of size 8, but found "
                                   << theClient.server_reply().get_string_vec().size() << "\n"
-                                  << Str::dump_string_vec(theClient.server_reply().get_string_vec()));
+                                  << ecf::algorithm::as_string(theClient.server_reply().get_string_vec()));
 
         // make sure edit history was *NOT* serialized, It is only serialized when check pointing
         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                               CtsApi::get() << " failed should return 0\n"
                                             << theClient.errorMsg());
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() == 0,
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(ecf::string_constants::root_path).size() == 0,
                               "Expected edit history of size 0, but found "
-                                  << theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
+                                  << theClient.defs()->get_edit_history(ecf::string_constants::root_path).size());
     }
 }
 
@@ -291,7 +294,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
             BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
 
             BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
-            BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
+            BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() >= 1, "  no suite ?");
         }
         std::cout << " Server handled " << load * 16 << " requests in CPU timer(" << timer << ")" << " Duration timer("
                   << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono timer("
@@ -325,7 +328,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test) {
                                       << theClient.errorMsg());
 
             BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
-            BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
+            BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() >= 1, "  no suite ?");
         }
         std::cout << " Server handled " << load * 8 << " requests in boost_timer(" << timer << ")" << " DurationTimer("
                   << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")" << " Chrono_timer("
@@ -379,7 +382,7 @@ BOOST_AUTO_TEST_CASE(test_server_group_stress_test) {
                               "Group request " << CtsApi::group(groupRequest) << " failed should return 0\n"
                                                << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() >= 1, "  no suite ?");
     }
     std::cout << " Server handled " << load * 8 << " commands using " << load << " group requests in boost_timer("
               << timer << ") DurationTimer(" << DurationTimer::to_simple_string(duration_timer.elapsed()) << ")"
@@ -605,7 +608,7 @@ BOOST_AUTO_TEST_CASE(test_server_stress_test_2) {
                               CtsApi::get() << " failed should return 0\n"
                                             << theClient.errorMsg()); // 60
         BOOST_REQUIRE_MESSAGE(theClient.defs().get(), "Server returned a NULL defs");
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1, "  no suite ?");
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() >= 1, "  no suite ?");
     }
 
     int no_of_client_calls = 74;

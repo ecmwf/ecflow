@@ -133,7 +133,7 @@ void Defs::handle_migration() {
     auto it = edit_history_.begin();
     while (it != edit_history_.end()) {
 
-        if ((*it).first == Str::ROOT_PATH()) {
+        if ((*it).first == ecf::string_constants::root_path) {
             it++;
             continue; // root path is defs, which is not a node, hence ignore
         }
@@ -354,12 +354,12 @@ void Defs::absorb(Defs* input_defs, bool force) {
     updateCalendarCount_ = 0;
 
     // We must make a copy, otherwise we are iterating over a vector that is being deleted
-    std::vector<suite_ptr> suiteVecCopy = input_defs->suiteVec();
-    size_t theSize                      = suiteVecCopy.size();
+    auto suitesCopy = input_defs->suites();
+    size_t theSize  = suitesCopy.size();
     for (size_t s = 0; s < theSize; s++) {
 
         /// regardless remove the suite from the input defs
-        suite_ptr the_input_suite = input_defs->removeSuite(suiteVecCopy[s]);
+        suite_ptr the_input_suite = input_defs->removeSuite(suitesCopy[s]);
 
         if (force) {
             /// The suite of the same name exists. remove it from *existing* defs
@@ -373,7 +373,7 @@ void Defs::absorb(Defs* input_defs, bool force) {
         /// This stops accidental overwrite
         addSuite(the_input_suite);
     }
-    LOG_ASSERT(input_defs->suiteVec().empty(), "Defs::absorb");
+    LOG_ASSERT(input_defs->suites().empty(), "Defs::absorb");
 
     // Copy over server user variables
     server_state().add_or_update_user_variables(input_defs->server_state().user_variables());
@@ -692,7 +692,7 @@ std::string Defs::dump_edit_history() const {
             }
             else {
                 std::string h = c;
-                Str::replaceall(h, "\n", "\\n");
+                ecf::algorithm::replace_all(h, "\n", "\\n");
                 ss << " ";
                 ss << h;
             }
@@ -791,7 +791,7 @@ void Defs::read_history(const std::string& line, const std::vector<std::string>&
                 size_t close_p   = parsed_message.find("]");
                 std::string date = parsed_message.substr(space_pos + 1, close_p - space_pos - 1);
                 vec.clear();
-                Str::split(date, vec, ".");
+                ecf::algorithm::split_at(vec, date, ".");
                 if (vec.size() == 3) {
                     try {
                         int day   = ecf::convert_to<int>(vec[0]);
@@ -907,7 +907,7 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const {
     // This is 14% quicker than the previous algorithm, that split 'pathToNode' into a vector of strings first.
     node_ptr ret;
     bool first = false;
-    StringSplitter string_splitter(pathToNode, Str::PATH_SEPARATOR());
+    StringSplitter string_splitter(pathToNode, ecf::string_constants::path_separator);
     while (!string_splitter.finished()) {
         std::string_view path_token = string_splitter.next();
         if (!first) {
@@ -941,7 +941,7 @@ node_ptr Defs::findAbsNode(const std::string& pathToNode) const {
 
 node_ptr Defs::find_closest_matching_node(const std::string& pathToNode) const {
     std::vector<std::string> theNodeNames;
-    NodePath::split(pathToNode, theNodeNames);
+    ecf::node::split_path(pathToNode, theNodeNames);
     if (theNodeNames.empty()) {
         return node_ptr();
     }
@@ -971,7 +971,7 @@ bool Defs::find_extern(const std::string& pathToNode, const std::string& node_at
     }
 
     std::string extern_path = pathToNode;
-    extern_path += Str::COLON();
+    extern_path += ecf::string_constants::colon;
     extern_path += node_attr_name;
 
     if (externs_.find(extern_path) != externs_.end()) {
@@ -1000,27 +1000,31 @@ std::string Defs::find_node_path(const std::string& type, const std::string& nam
 }
 
 node_ptr Defs::find_node(const std::string& type, const std::string& pathToNode) const {
-    // std::cout << "Defs::find_node  type:" << type << " path: " << pathToNode << "\n";
     node_ptr node_p = findAbsNode(pathToNode);
     if (!node_p) {
-        // std::cout << " node not found\n";
         return node_p;
     }
 
-    if (Str::caseInsCompare(type, "task")) {
+    if (ecf::algorithm::case_insensitive_compare(type, "task")) {
         if (node_p->isTask()) {
             return node_p;
         }
         return node_ptr();
     }
-    if (Str::caseInsCompare(type, "family")) {
+    if (ecf::algorithm::case_insensitive_compare(type, "family")) {
         if (node_p->isFamily()) {
             return node_p;
         }
         return node_ptr();
     }
-    if (Str::caseInsCompare(type, "suite")) {
-        if (node_p->suite()) {
+    if (ecf::algorithm::case_insensitive_compare(type, "suite")) {
+        if (node_p->isSuite()) {
+            return node_p;
+        }
+        return node_ptr();
+    }
+    if (ecf::algorithm::case_insensitive_compare(type, "alias")) {
+        if (node_p->isAlias()) {
             return node_p;
         }
         return node_ptr();
@@ -1495,7 +1499,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord) {
                 catch (const ecf::bad_conversion&) {
                 }
 
-                return Str::caseInsLess(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_less(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             client_suite_mgr_.update_suite_order();
@@ -1503,7 +1507,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord) {
         }
         case NOrder::ORDER: {
             std::sort(suiteVec_.begin(), suiteVec_.end(), [](const suite_ptr& a, const suite_ptr& b) {
-                return Str::caseInsGreater(a->name(), b->name());
+                return ecf::algorithm::case_insensitive_greater(a->name(), b->name());
             });
             order_state_change_no_ = Ecf::incr_state_change_no();
             client_suite_mgr_.update_suite_order();
@@ -1640,7 +1644,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Create StateMemento to signal a change in state change of the Defs
     if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         comp->add(std::make_shared<StateMemento>(state_.state()));
     }
@@ -1648,7 +1652,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Create OrderMemento to signal a change in Suite order
     if (order_state_change_no_ > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         std::vector<std::string> order;
         order.reserve(suiteVec_.size());
@@ -1661,7 +1665,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Create FlagMemento to signal a change in the flag value
     if (flag_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         comp->add(std::make_shared<FlagMemento>(flag_));
     }
@@ -1670,7 +1674,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Currently only watching server state i.e., HALTED, SHUTDOWN, RUNNING.
     if (server_.state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         comp->add(std::make_shared<ServerStateMemento>(server_.get_state()));
     }
@@ -1678,7 +1682,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const {
     // Create a ServerVariableMemento to signal a change in the list of server variables
     if (server_.variable_state_change_no() > incremental_changes.client_state_change_no()) {
         if (!comp.get()) {
-            comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+            comp = std::make_shared<CompoundMemento>(ecf::string_constants::root_path);
         }
         comp->add(std::make_shared<ServerVariableMemento>(server_.user_variables()));
     }
@@ -1901,7 +1905,7 @@ void DefsHistoryParser::parse(const std::string& line) {
     if (pos != std::string::npos) {
         // keep compatibility with the current way of writing history
         std::string requests = line.substr(pos);
-        Str::split(requests, parsed_messages_, "\b");
+        ecf::algorithm::split_at(parsed_messages_, requests, "\b");
         return;
     }
 

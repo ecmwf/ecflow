@@ -48,7 +48,7 @@ ecf::authorisation_t LabelCmd::authorise(AbstractServer& server) const {
 }
 
 void LabelCmd::print(std::string& os) const {
-    os += Str::CHILD_CMD();
+    os += ecf::string_constants::child_cmd;
     os += "label ";
     os += name_;
     os += " '";

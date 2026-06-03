@@ -73,7 +73,8 @@ BOOST_AUTO_TEST_CASE(test_triggers_and_meters) {
         for (int i = 0; i < taskSize; i++) {
             task_ptr task = fam->add_task("t" + ecf::convert_to<std::string>(i * 10 + 10));
             task->addVerify(VerifyAttr(NState::COMPLETE, 1));
-            task->add_trigger(taskName + Str::COLON() + meterName + " ge " + ecf::convert_to<std::string>(i * 10 + 10));
+            task->add_trigger(taskName + ecf::string_constants::colon + meterName + " ge " +
+                              ecf::convert_to<std::string>(i * 10 + 10));
         }
     }
 

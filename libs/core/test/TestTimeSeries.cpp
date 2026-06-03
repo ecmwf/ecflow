@@ -689,7 +689,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
         size_t index         = 0;
         std::string the_time = "+00:00 20:00 00:10";
         std::vector<std::string> lineTokens;
-        Str::split(the_time, lineTokens);
+        ecf::algorithm::split_at(lineTokens, the_time);
         BOOST_CHECK_MESSAGE(TimeSeries::create(index, lineTokens) ==
                                 ecf::TimeSeries(TimeSlot(0, 0), TimeSlot(20, 0), TimeSlot(0, 10), true),
                             "Error");
@@ -698,7 +698,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
         size_t index         = 0;
         std::string the_time = "+10:10";
         std::vector<std::string> lineTokens;
-        Str::split(the_time, lineTokens);
+        ecf::algorithm::split_at(lineTokens, the_time);
         BOOST_CHECK_MESSAGE(TimeSeries::create(index, lineTokens) == ecf::TimeSeries(TimeSlot(10, 10), true), "Error");
     }
     {
@@ -708,7 +708,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
         expected.set_isValid(false);
 
         std::vector<std::string> lineTokens;
-        Str::split(the_time, lineTokens);
+        ecf::algorithm::split_at(lineTokens, the_time);
         ecf::TimeSeries parsed_ts = TimeSeries::create(index, lineTokens, true);
         BOOST_CHECK_MESSAGE(parsed_ts == expected,
                             "Expected \n'" << expected.toString() << expected.state_to_string(false) << "'"
@@ -722,7 +722,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
         expected.set_isValid(false);
 
         std::vector<std::string> lineTokens;
-        Str::split(the_time, lineTokens);
+        ecf::algorithm::split_at(lineTokens, the_time);
         ecf::TimeSeries parsed_ts = TimeSeries::create(index, lineTokens, true);
         BOOST_CHECK_MESSAGE(parsed_ts == expected,
                             "Expected \n'" << expected.toString() << expected.state_to_string(false) << "'"
@@ -743,7 +743,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
         expected.calendarChanged(calendar);
 
         std::vector<std::string> lineTokens;
-        Str::split(the_time, lineTokens);
+        ecf::algorithm::split_at(lineTokens, the_time);
         ecf::TimeSeries parsed_ts = TimeSeries::create(index, lineTokens, true);
         BOOST_CHECK_MESSAGE(parsed_ts == expected,
                             "Expected \n'" << expected.toString() << expected.state_to_string(false) << "'"
@@ -764,7 +764,7 @@ BOOST_AUTO_TEST_CASE(test_time_series_state_parsing) {
         expected.set_isValid(false);
 
         std::vector<std::string> lineTokens;
-        Str::split(the_time, lineTokens);
+        ecf::algorithm::split_at(lineTokens, the_time);
         size_t index              = 0;
         ecf::TimeSeries parsed_ts = TimeSeries::create(index, lineTokens, true);
 

@@ -110,7 +110,7 @@ bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const {
     if (api_ != the_rhs->api()) {
         return false;
     }
-    if (absNodePath_ != the_rhs->absNodePath()) {
+    if (absNodePath_ != the_rhs->pathToNode()) {
         return false;
     }
     return UserCmd::equals(rhs);

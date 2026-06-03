@@ -5,7 +5,7 @@ ecflow.Label
 .. py:class:: Label
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 A :term:`label` has a name and value and provides a way of displaying information in a GUI.
 
@@ -39,25 +39,25 @@ Usage:
       print(label)
 
 
-.. py:method:: Label.empty( (Label)arg1) -> bool :
+.. py:method:: Label.empty(self: ecflow.Label) -> bool
    :module: ecflow
 
 Return true if the Label is empty. Used when returning a NULL Label, from a find
 
 
-.. py:method:: Label.name( (Label)arg1) -> str :
+.. py:method:: Label.name(self: ecflow.Label) -> str
    :module: ecflow
 
 Return the :term:`label` name as string
 
 
-.. py:method:: Label.new_value( (Label)arg1) -> str :
+.. py:method:: Label.new_value(self: ecflow.Label) -> str
    :module: ecflow
 
 Return the new label value as string
 
 
-.. py:method:: Label.value( (Label)arg1) -> str :
+.. py:method:: Label.value(self: ecflow.Label) -> str
    :module: ecflow
 
 Return the original :term:`label` value as string

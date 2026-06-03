@@ -287,6 +287,7 @@ set(srcs
   core/src/ecflow/core/TimeSeries.hpp
   core/src/ecflow/core/TimeSlot.hpp
   core/src/ecflow/core/TimeStamp.hpp
+  core/src/ecflow/core/TypeTraits.hpp
   core/src/ecflow/core/User.hpp
   core/src/ecflow/core/Version.hpp
   core/src/ecflow/core/WhiteListFile.hpp

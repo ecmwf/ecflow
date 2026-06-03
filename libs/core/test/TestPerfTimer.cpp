@@ -38,10 +38,10 @@ BOOST_AUTO_TEST_CASE(test_perf_with_chrono) {
     [[maybe_unused]] auto t3 = ecf::FunctionPerformanceTimer<std::chrono::milliseconds>::duration(func, 100000);
 
 #if PRINT_TIMING_RESULTS
-    ECF_TEST_DBG(<< "   " << std::chrono::duration<double, std::micro>(t).count() << " micro");
-    ECF_TEST_DBG(<< "   " << std::chrono::duration<double, std::milli>(t).count() << " milli");
-    ECF_TEST_DBG(<< "   " << std::chrono::duration<double, std::nano>(t).count() << " nano");
-    ECF_TEST_DBG(<< "   " << std::chrono::duration<double, std::milli>(t1 + t2 + t3).count() << " milli");
+    ECF_TEST_DBG("   " << std::chrono::duration<double, std::micro>(t).count() << " micro");
+    ECF_TEST_DBG("   " << std::chrono::duration<double, std::milli>(t).count() << " milli");
+    ECF_TEST_DBG("   " << std::chrono::duration<double, std::nano>(t).count() << " nano");
+    ECF_TEST_DBG("   " << std::chrono::duration<double, std::milli>(t1 + t2 + t3).count() << " milli");
 #endif
 
     BOOST_CHECK_MESSAGE(true, "dummy to keep unit test happy");
@@ -57,9 +57,9 @@ BOOST_AUTO_TEST_CASE(test_chrono_timer) {
 
 #if PRINT_TIMING_RESULTS
         using namespace std::chrono;
-        ECF_TEST_DBG(<< "    " << duration<double, std::micro>(timer.elapsed()).count() << " micro");
-        ECF_TEST_DBG(<< "    " << duration<double, std::milli>(timer.elapsed()).count() << " milli");
-        ECF_TEST_DBG(<< "    " << duration<double, std::nano>(timer.elapsed()).count() << " nano");
+        ECF_TEST_DBG("    " << duration<double, std::micro>(timer.elapsed()).count() << " micro");
+        ECF_TEST_DBG("    " << duration<double, std::milli>(timer.elapsed()).count() << " milli");
+        ECF_TEST_DBG("    " << duration<double, std::nano>(timer.elapsed()).count() << " nano");
 #endif
     }
     {

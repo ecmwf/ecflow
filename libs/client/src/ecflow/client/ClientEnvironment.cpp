@@ -102,7 +102,7 @@ void ClientEnvironment::init() {
 
     // If no host specified default to local host and default port number
     if (host_vec_.empty()) {
-        host_vec_.emplace_back(ecf::Str::LOCALHOST(), ecf::Str::DEFAULT_PORT_NUMBER());
+        host_vec_.emplace_back(ecf::string_constants::localhost, ecf::string_constants::default_port_number);
     }
 
     // Program options are read in last, and will override any previous setting
@@ -215,7 +215,7 @@ std::string ClientEnvironment::toString() const {
        << "\n";
     if (!host_vec_.empty()) {
         for (std::pair<std::string, std::string> i : host_vec_) {
-            ss << "   " << i.first << ecf::Str::COLON() << i.second << "\n";
+            ss << "   " << i.first << ecf::string_constants::colon << i.second << "\n";
         }
     }
     ss << "   " << ecf::environment::ECF_NAME << " = " << task_path_ << "\n";
@@ -250,7 +250,7 @@ std::string ClientEnvironment::hostSpecified() {
 }
 
 std::string ClientEnvironment::portSpecified() {
-    std::string specified_port = ecf::Str::DEFAULT_PORT_NUMBER();
+    std::string specified_port = ecf::string_constants::default_port_number;
     ecf::environment::get(ecf::environment::ECF_PORT, specified_port);
     return specified_port;
 }
@@ -310,8 +310,8 @@ void ClientEnvironment::read_environment_variables() {
     }
 
     /// Override the config settings *IF* any
-    std::string port = ecf::Str::DEFAULT_PORT_NUMBER();
-    std::string host = ecf::Str::LOCALHOST();
+    std::string port = ecf::string_constants::default_port_number;
+    std::string host = ecf::string_constants::localhost;
     if (!host_vec_.empty()) {
         const auto& selected = host_vec_[0]; //  the first entry holds the selected host/port
         host                 = selected.first;
@@ -336,7 +336,7 @@ void ClientEnvironment::read_environment_variables() {
 
 bool ClientEnvironment::parseHostsFile(std::string& errorMsg) {
 
-    std::string configured_port = host_vec_.empty() ? ecf::Str::DEFAULT_PORT_NUMBER() : host_vec_[0].second;
+    std::string configured_port = host_vec_.empty() ? ecf::string_constants::default_port_number : host_vec_[0].second;
     int port                    = ecf::convert_to<int>(configured_port);
 
     try {
@@ -388,7 +388,7 @@ const std::string& ClientEnvironment::get_password(const char* env, const std::s
         }
     }
 
-    return ecf::Str::EMPTY();
+    return ecf::string_constants::empty;
 }
 
 struct TokenFile

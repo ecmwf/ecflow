@@ -45,9 +45,23 @@ private:
     std::string expr_;
 };
 
-// This class was added to mitigate the slowness of the boost classic spirit parser
-// we will recognise very simple expression, and bypass spirit. Very limited
-// But the simple expression do form a very large subset
+///
+/// @brief This class enables quick 'simple' expression parsing without the overhead of the Boost spirit parser.
+///
+/// This is used as a first pass to quickly parse simple expressions. A 'simple' expression is of the form:
+///  - `/path/to/node==<state>`
+///  - `/path/to/node == <state>`
+///  - `/path/to/node eq <state>`
+///  - `<number>==<number>`
+///  - `<number> == <number>`
+///  - `<number> eq <number>`
+///
+/// This optimisation significantly improves performance when a significant number of expressions are 'simple',
+/// which is typical based on empirical observations.
+///
+/// If the provided expression is not 'simple', the parsing fails and the overall parser falls back to the full boost
+/// spirit parser.
+///
 class SimpleExprParser {
 public:
     explicit SimpleExprParser(const std::string& expression)

@@ -59,6 +59,7 @@ public:
     static const char* add_repeat_date_doc();
     static const char* add_repeat_datetime_doc();
     static const char* add_repeat_date_list_doc();
+    static const char* add_repeat_datetime_list_doc();
     static const char* add_repeat_integer_doc();
     static const char* add_repeat_string_doc();
     static const char* add_repeat_enumerated_doc();

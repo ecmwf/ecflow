@@ -492,7 +492,9 @@ qint64 LogLoadData::period() const {
 }
 
 QDateTime LogLoadData::startTime() const {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[0], QTimeZone::utc());
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[0], Qt::UTC);
 #else
     return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[0]).toUTC();
@@ -500,7 +502,9 @@ QDateTime LogLoadData::startTime() const {
 }
 
 QDateTime LogLoadData::endTime() const {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[0], QTimeZone::utc());
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[time_.size() - 1], Qt::UTC);
 #else
     return (time_.empty()) ? QDateTime() : QDateTime::fromMSecsSinceEpoch(time_[time_.size() - 1]).toUTC();
@@ -823,7 +827,11 @@ void LogLoadData::add(std::vector<std::string> time_stamp,
     QString s = QString::fromStdString(time_stamp[0]) + " " + QString::fromStdString(time_stamp[1]);
 
     QDateTime dt = QDateTime::fromString(s, "HH:mm:ss d.M.yyyy");
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    dt.setTimeZone(QTimeZone::utc());
+#else
     dt.setTimeSpec(Qt::UTC);
+#endif
     time_.push_back(dt.toMSecsSinceEpoch());
 
     size_t index = time_.size() - 1;
@@ -1083,10 +1091,10 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
 
         bool child_cmd = false;
         bool user_cmd  = false;
-        if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos) {
+        if (line.find(ecf::string_constants::child_cmd) != std::string::npos) {
             child_cmd = true;
         }
-        else if (line.find(ecf::Str::USER_CMD()) != std::string::npos) {
+        else if (line.find(ecf::string_constants::user_cmd) != std::string::npos) {
             user_cmd = true;
         }
 
@@ -1121,7 +1129,7 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
             }
             std::string time_stamp = line.substr(0, first_closed_bracket);
 
-            ecf::Str::split(time_stamp, parseHelper_.new_time_stamp);
+            ecf::algorithm::split_at(parseHelper_.new_time_stamp, time_stamp);
             if (parseHelper_.new_time_stamp.size() != 2) {
                 continue;
             }
@@ -1141,7 +1149,7 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
         numOfRows_++;
 
         std::vector<std::string> items;
-        ecf::Str::split(line, items, delimiter);
+        ecf::algorithm::split_at(items, line, delimiter);
         for (size_t i = 0; i < items.size(); ++i) {
             // Should be just left with " chd:<child command> " or " --<user command>, since we have removed the time
             // stamp
@@ -1151,10 +1159,10 @@ void LogLoadData::loadLogFileCore(const std::string& logFile,
             line      = items[i];
             child_cmd = false;
             user_cmd  = false;
-            if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos) {
+            if (line.find(ecf::string_constants::child_cmd) != std::string::npos) {
                 child_cmd = true;
             }
-            else if (line.find(ecf::Str::USER_CMD()) != std::string::npos) {
+            else if (line.find(ecf::string_constants::user_cmd) != std::string::npos) {
                 user_cmd = true;
                 if (i > 0 && line.find("--sync") != std::string::npos) {
                     continue;
@@ -1243,10 +1251,10 @@ std::streamoff LogLoadData::getStartPos(const std::string& logFile, int numOfRow
 
             bool child_cmd = false;
             bool user_cmd  = false;
-            if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos) {
+            if (line.find(ecf::string_constants::child_cmd) != std::string::npos) {
                 child_cmd = true;
             }
-            else if (line.find(ecf::Str::USER_CMD()) != std::string::npos) {
+            else if (line.find(ecf::string_constants::user_cmd) != std::string::npos) {
                 user_cmd = true;
             }
 
@@ -1386,7 +1394,7 @@ bool LogLoadData::extract_suite_path(const std::string& line,
             if (!path.empty()) {
                 if (path.find(":") != std::string::npos) {
                     std::vector<std::string> pathParts;
-                    ecf::Str::split(path, pathParts, ":");
+                    ecf::algorithm::split_at(pathParts, path, ":");
                     if (pathParts.size() > 1) {
                         path = pathParts[0];
                     }
@@ -1394,7 +1402,7 @@ bool LogLoadData::extract_suite_path(const std::string& line,
 
                 std::vector<std::string> theNodeNames;
                 theNodeNames.reserve(4);
-                NodePath::split(path, theNodeNames);
+                ecf::node::split_path(path, theNodeNames);
                 if (!theNodeNames.empty()) {
                     suite_name = theNodeNames[0];
                 }

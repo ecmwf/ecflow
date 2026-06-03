@@ -41,6 +41,24 @@ public:
     );
     InLimit() = default;
 
+    ///
+    /// @brief Create a new InLimit based on the provided name and value.
+    ///
+    /// The name contains the optional path to the node holding the limit and the limit name, separated by a colon ':'.
+    ///   - "<limit-name>"
+    ///   - "[</path/to/node>:]<limit-name>"
+    ///
+    /// The value contains the inlimit options, including token value and flags for limited submission and node.
+    ///   - "[tokens] [-s] [-n]"
+    ///
+    /// @param name the name of the inlimit
+    /// @param value the value of the inlimit
+    /// @return the inlimit created based on the provided name and value
+    /// @throws std::runtime_error if the name is invalid (e.g. missing limit name) or if the value is invalid (e.g.
+    /// cannot be parsed, or contains incompatible options)
+    ///
+    static InLimit make_from_name_and_value(const std::string& name, const std::string& value);
+
     bool operator==(const InLimit& rhs) const;
     bool operator<(const InLimit& rhs) const { return n_ < rhs.name(); }
 
@@ -82,5 +100,42 @@ private:
     template <class Archive>
     void serialize(Archive& ar);
 };
+
+namespace ecf {
+
+struct InlimitOptions
+{
+    ///
+    /// @brief the number of tokens considered for the inlimit, the minimum/default is 1
+    ///
+    int tokens = 1;
+
+    ///
+    /// @brief flag indicating whether the inlimit is limited for submission
+    ///
+    bool limited_submission = false;
+
+    ///
+    /// @brief flag indicating whether the inlimit is limited for node
+    ///
+    bool limited_node = false;
+};
+
+///
+/// @brief Parses the inlimit options from a given value and returns the corresponding InlimitOptions struct.
+///
+/// @param value the value to parse, which can be in the following formats:
+///              - "" (tokens = 1, limited_submission = false, limited_node = false)
+///              - "10" (tokens = 10, limited_submission = false, limited_node = false)
+///              - "-s 10" (tokens = 10, limited_submission = true, limited_node = false)
+///              - "-n 10" (tokens = 10, limited_submission = false, limited_node = true)
+/// @return the InlimitOptions containing the tokens, limited_submission, and limited_node values
+/// @throws std::runtime_error for the following cases:
+///         - the value, after stripped of '-n' and '-s' options, and 'spaces' trimmed, is not a valid positive integer
+///         - both '-n' and '-s' options are specified at the same time
+///
+InlimitOptions parse_inlimit_value(std::string value);
+
+} // namespace ecf
 
 #endif /* ecflow_node_InLimit_HPP */

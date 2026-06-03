@@ -16,7 +16,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "Process.hpp"
 #include "ecflow/attribute/NodeAttr.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/core/EcfPortLock.hpp"
@@ -27,6 +26,7 @@
 #include "ecflow/node/Defs.hpp"
 #include "ecflow/node/Node.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Process.hpp"
 #include "ecflow/udp/UDPClient.hpp"
 
 namespace ecf::test {
@@ -46,7 +46,7 @@ public:
         BOOST_REQUIRE_MESSAGE(port_ > 0, "port is be larger than 0");
 
         server_ = std::move(SERVER::launch(host_, port_, std::forward<Args>(args)...));
-        ECF_TEST_DBG(<< "   MOCK: " << SERVER::designation << " has been started!");
+        ECF_TEST_DBG("   MOCK: " << SERVER::designation << " has been started!");
     }
 
     BaseMockServer(const BaseMockServer&)            = delete;
@@ -57,7 +57,7 @@ public:
     ~BaseMockServer() {
         server_.terminate();
         SERVER::cleanup(host_, port_);
-        ECF_TEST_DBG(<< "   MOCK: " << SERVER::designation << " has been terminated!");
+        ECF_TEST_DBG("   MOCK: " << SERVER::designation << " has been terminated!");
     }
 
     const hostname_t& host() const { return host_; }
@@ -67,7 +67,7 @@ private:
     hostname_t host_;
     uint16_t port_;
 
-    Process server_;
+    ecf::test::scaffold::Process server_;
 };
 
 /**
@@ -79,7 +79,7 @@ public:
         : BaseMockServer<MockServer>(ecf::Host{}.name(), port) {}
 
     void load_definition(const std::string& defs) const {
-        ClientInvoker client(ecf::Str::LOCALHOST(), port());
+        ClientInvoker client(ecf::string_constants::localhost, port());
         try {
             BOOST_REQUIRE_MESSAGE(fs::exists(defs), "definitions file doesn't exist at: " + defs);
             auto error = client.loadDefs(defs);
@@ -90,28 +90,40 @@ public:
                 false, "load definitions, without throwing exception (but threw: " + std::string(e.what()) + ")");
         }
 
-        ECF_TEST_DBG(<< "   MOCK: reference ecFlow suite has been loaded");
+        ECF_TEST_DBG("   MOCK: reference ecFlow suite has been loaded");
     }
 
     Meter get_meter(const std::string& path, const std::string& name) const {
+        ECF_TEST_DBG("   MOCK: Retrieving meter  " << name << ", at node " << path << ", from ecFlow server");
         node_ptr node = get_node_at(path);
-        return get_attribute_by_name(node->meters(), name);
+        auto meter    = get_attribute_by_name(node->meters(), name);
+        ECF_TEST_DBG("   MOCK: Meter  " << name << ", at node " << path << ", has value :" << meter.value() << " in ["
+                                        << meter.min() << "," << meter.max() << "] (color change at "
+                                        << meter.colorChange() << ")");
+        return meter;
     }
 
     Label get_label(const std::string& path, const std::string& name) const {
+        ECF_TEST_DBG("   MOCK: Retrieving label  " << name << ", at node " << path << ", from ecFlow server");
         node_ptr node = get_node_at(path);
-        return get_attribute_by_name(node->labels(), name);
+        auto label    = get_attribute_by_name(node->labels(), name);
+        ECF_TEST_DBG("   MOCK: Label  " << name << ", at node " << path << ", has value :" << label.value());
+        return label;
     }
 
     Event get_event(const std::string& path, const std::string& name) const {
+        ECF_TEST_DBG("   MOCK: Retrieving event  " << name << ", at node " << path << ", from ecFlow server");
         node_ptr node = get_node_at(path);
-        return get_attribute_by_name(node->events(), name);
+        auto event    = get_attribute_by_name(node->events(), name);
+        ECF_TEST_DBG("   MOCK: Event  " << name << ", at node " << path
+                                        << ", has value :" << (event.value() ? "True" : "False"));
+        return event;
     }
 
 private:
     node_ptr get_node_at(const std::string& path) const {
-        ECF_TEST_DBG(<< "   Creating ecflow_client connected to " << host() << ":" << port());
-        ClientInvoker client(ecf::Str::LOCALHOST(), port());
+        ECF_TEST_DBG("   Creating ecflow_client connected to " << host() << ":" << port());
+        ClientInvoker client(ecf::string_constants::localhost, port());
 
         // load all definitions
         std::shared_ptr<Defs> defs = nullptr;
@@ -135,7 +147,7 @@ private:
 public:
     static constexpr const char* designation = "ecFlow server";
 
-    static Process launch(const hostname_t& host, port_t port) {
+    static ecf::test::scaffold::Process launch(const hostname_t& host, port_t port) {
         // Just for precaution, in case a previous run didn't clean up...
         cleanup(host, port);
 
@@ -144,11 +156,11 @@ public:
         BOOST_REQUIRE_MESSAGE(!invoke_command.empty(), "The server program could not be found");
         BOOST_REQUIRE_MESSAGE(fs::exists(invoke_command), "Server exe does not exist at:" << invoke_command);
 
-        ECF_TEST_DBG(<< "Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command);
+        ECF_TEST_DBG("Launching ecflow_server @" << host << ":" << port << ", with: " << invoke_command);
 
-        auto server = Process(invoke_command, {"--port", std::to_string(port), "-d"});
+        auto server = ecf::test::scaffold::Process(invoke_command, {"--port", std::to_string(port), "-d"});
 
-        ClientInvoker client(ecf::Str::LOCALHOST(), port);
+        ClientInvoker client(ecf::string_constants::localhost, port);
         if (!client.wait_for_server_reply(5)) {
             BOOST_REQUIRE_MESSAGE(false, "could not launch ecflow server");
         }
@@ -176,26 +188,32 @@ public:
         : BaseMockServer<MockUDPServer>("localhost", port, ecflow_port) {}
 
     void update_label(const std::string& path, const std::string& name, const std::string& value) {
+        ECF_TEST_DBG("   MOCK: Updating label  " << name << ", at node " << path << ", to value: " << value
+                                                 << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_label", name, value);
         send(request);
     }
 
     void update_meter(const std::string& path, const std::string& name, int value) {
+        ECF_TEST_DBG("   MOCK: Updating meter  " << name << ", at node " << path << ", to value: " << value
+                                                 << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_meter", name, value);
         send(request);
     }
 
     void clear_event(const std::string& path, const std::string& name) {
+        ECF_TEST_DBG("   MOCK: Clearing event  " << name << ", at node " << path << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_event", name, "0");
         send(request);
     }
     void set_event(const std::string& path, const std::string& name) {
+        ECF_TEST_DBG("   MOCK: Setting event  " << name << ", at node " << path << ", via ecFlow UDP server");
         auto request = format_request(path, "alter_event", name, "1");
         send(request);
     }
 
     void send(const std::string& request) {
-        ECF_TEST_DBG(<< "   MOCK: UDP Client sending request: " << request);
+        ECF_TEST_DBG("   MOCK: UDP Client sending request: " << request);
         sendRequest(port(), request);
     }
 
@@ -221,29 +239,29 @@ private:
 
     static void sendRequest(uint16_t port, const std::string& request) {
         const std::string host = "localhost";
-        ECF_TEST_DBG(<< "   Creating ecflow_udp client connected to " << host << ":" << port);
+        ECF_TEST_DBG("   Creating ecflow_udp client connected to " << host << ":" << port);
         ecf::UDPClient client(host, std::to_string(port));
         client.send(request);
 
         // Wait for request to flow...
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
 public:
     static constexpr const char* designation = "ecFlow UDP";
 
-    static Process launch(const hostname_t& host, port_t port, port_t ecflow_port) {
+    static ecf::test::scaffold::Process launch(const hostname_t& host, port_t port, port_t ecflow_port) {
 
         std::string invoke_command = ecf::File::root_build_dir() + "/bin/ecflow_udp";
 
-        ECF_TEST_DBG(<< "   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command);
+        ECF_TEST_DBG("   Launching ecflow_udp @" << host << ":" << port << ", with: " << invoke_command);
 
-        auto server =
-            Process(invoke_command,
-                    {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"});
+        auto server = ecf::test::scaffold::Process(
+            invoke_command,
+            {"--port", std::to_string(port), "--ecflow_port", std::to_string(ecflow_port), "--verbose"});
 
         // Wait for server to start...
-        std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
         return server;
     }
@@ -268,13 +286,13 @@ struct EnableServersFixture
 private:
     static MockServer::port_t get_ecflow_server_port() {
         MockServer::port_t selected_port = 3199;
-        ECF_TEST_DBG(<< "   Attempting to use port: " << selected_port);
+        ECF_TEST_DBG("   Attempting to use port: " << selected_port);
         while (!EcfPortLock::is_free(selected_port)) {
-            ECF_TEST_DBG(<< "   Selected port: " << selected_port << " is not available.");
+            ECF_TEST_DBG("   Selected port: " << selected_port << " is not available.");
             ++selected_port;
-            ECF_TEST_DBG(<< "   Attempting to use port: " << selected_port);
+            ECF_TEST_DBG("   Attempting to use port: " << selected_port);
         }
-        ECF_TEST_DBG(<< "   Found free port: " << selected_port);
+        ECF_TEST_DBG("   Found free port: " << selected_port);
         return selected_port;
     }
     static MockServer::port_t get_ecflow_udp_port() { return 3198; }

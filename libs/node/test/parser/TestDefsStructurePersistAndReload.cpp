@@ -65,10 +65,10 @@ void test_find_task_using_path(NodeContainer* f, const Defs& defs) {
     BOOST_CHECK_MESSAGE(f == defs.findAbsNode(f->absNodePath()).get(),
                         "Could not find path " << f->absNodePath() << "\n");
 
-    for (node_ptr t : f->nodeVec()) {
-        BOOST_CHECK_MESSAGE(t.get() == defs.findAbsNode(t->absNodePath()).get(),
-                            "Could not find path " << t->absNodePath() << "\n");
-        Family* family = t->isFamily();
+    for (auto node : f->children()) {
+        BOOST_CHECK_MESSAGE(node.get() == defs.findAbsNode(node->absNodePath()).get(),
+                            "Could not find path " << node->absNodePath() << "\n");
+        Family* family = node->isFamily();
         if (family) {
             test_find_task_using_path(family, defs);
         }
@@ -80,9 +80,9 @@ BOOST_AUTO_TEST_CASE(test_find_task_using_paths) {
 
     MyDefsFixture theDefsFixture;
 
-    const std::vector<suite_ptr>& suiteVec = theDefsFixture.defsfile_.suiteVec();
-    for (suite_ptr s : suiteVec) {
-        test_find_task_using_path(s.get(), theDefsFixture.defsfile_);
+    const auto& suites = theDefsFixture.defsfile_.suites();
+    for (suite_ptr suite : suites) {
+        test_find_task_using_path(suite.get(), theDefsFixture.defsfile_);
     }
 }
 

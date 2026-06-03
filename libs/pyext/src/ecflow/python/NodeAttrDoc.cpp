@@ -10,6 +10,43 @@
 
 #include "ecflow/python/NodeAttrDoc.hpp"
 
+const char* NodeAttrDoc::flag_type_doc() {
+    return "Flags store state associated with a node\n\n"
+           "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
+           "- USER_EDIT     - task\n"
+           "- TASK_ABORTED  - task*\n"
+           "- EDIT_FAILED   - task*\n"
+           "- JOBCMD_FAILED - task*\n"
+           "- KILLCMD_FAILED   - task*\n"
+           "- STATUSCMD_FAILED - task*\n"
+           "- NO_SCRIPT     - task*\n"
+           "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+           "- STATUS        - task* indicates that the status command has been run\n"
+           "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
+           "- MESSAGE       - Node\n"
+           "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
+           "- QUEUELIMIT    - Node\n"
+           "- WAIT          - task* \n"
+           "- LOCKED        - Server\n"
+           "- ZOMBIE        - task*\n"
+           "- NO_REQUE      - task\n"
+           "- ARCHIVED      - Suite/Family\n"
+           "- RESTORED      - Family/Family\n"
+           "- THRESHOLD     - task\n"
+           "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
+           "- LOG_ERROR     - Error in opening or writing to log file\n"
+           "- CHECKPT_ERROR - Error in opening or writing to checkpt file \n"
+           "- NOT_SET\n";
+}
+
+const char* NodeAttrDoc::sortable_attribute_type_doc() {
+    return "Sortable attribute type, currently [event | meter | label | limit | variable | all ]";
+}
+
+const char* NodeAttrDoc::plain_zombie_doc() {
+    return "Represent a zombie process stored by the server";
+}
+
 const char* NodeAttrDoc::variable_doc() {
     return "Defines a `variable`_ on a `node`_ for use in `ecf script`_.\n\n"
            "A Node can have a number of variables.\n"
@@ -47,6 +84,10 @@ const char* NodeAttrDoc::variable_doc() {
            "  defs.s1.a += [ Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b'),\n"
            "                 Edit({ 'var':10, 'aa':'bb'}),\n"
            "                 Edit(d='d') ]\n";
+}
+
+const char* NodeAttrDoc::variable_list_doc() {
+    return "Hold a list of Variables";
 }
 
 const char* NodeAttrDoc::zombie_doc() {
@@ -176,15 +217,30 @@ const char* NodeAttrDoc::inlimit_doc() {
            "between tasks 't1' and 't2'. There is no need to change the tasks. The jobs are\n"
            "created in the order they are defined\n"
            "\nConstructor::\n\n"
-           "   InLimit(name, optional<path = ''>, optional<token = 1>, optional<limit_this_node_only = false>)\n"
-           "      string name           : The name of the referenced Limit\n"
-           "      string path<optional> : The path to the Limit, if this is left out, then Limit of 'name' must be "
-           "specified\n"
-           "                              some where up the parent hierarchy\n"
-           "      int value<optional>   : The usage of the Limit. Each job submission will consume 'value' tokens\n"
-           "                              from the Limit. defaults to 1 if no value specified.\n"
-           "      bool limit_this_node_only<optional> : Only limits this node and *NOT* its children\n"
-           "                                            Can be used load balance families\n"
+           "   InLimit(\n"
+           "        name,\n"
+           "        optional<path = ''>,\n"
+           "        optional<token = 1>,\n"
+           "        optional<limit_this_node_only = false>,\n"
+           "        optional<limit_submission_only = false\n"
+           "   )\n\n"
+           "      string name\n"
+           "          : The name of the associated Limit\n"
+           "      string path<optional>\n"
+           "          : The path to the node with associated Limit.\n"
+           "            If not provided, the Limit 'name' will be be found\n"
+           "            by traversing the node hierarchy towards the root.\n"
+           "      int value<optional>\n"
+           "          : The value used from the Limit.\n"
+           "            Each job submission will consume 'value' tokens from the Limit.\n"
+           "            Default value is to 1.\n"
+           "      bool limit_this_node_only<optional>\n"
+           "          : Only limits this node and *NOT* its children.\n"
+           "            Can be used to load balance families.\n"
+           "            Default value is false.\n"
+           "      bool limit_submission_only<optional>\n"
+           "          : The limit applies to number of submitted tasks\n"
+           "            Default value is false.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   inlimit = InLimit('fast','/x/f', 2)\n"
@@ -267,6 +323,10 @@ const char* NodeAttrDoc::meter_doc() {
 
 const char* NodeAttrDoc::queue_doc() {
     return "Queue allows specification of queue on Task, Family and Suite nodes\n\n";
+}
+
+const char* NodeAttrDoc::generic_doc() {
+    return "A generic attribute, used to add new attributes for the future, without requiring a API change";
 }
 
 const char* NodeAttrDoc::date_doc() {
@@ -493,7 +553,12 @@ const char* NodeAttrDoc::autorestore_doc() {
 }
 
 const char* NodeAttrDoc::repeat_doc() {
-    return "Represents one of RepeatString,RepeatEnumerated,RepeatInteger,RepeatDate,RepeatDay\n\n";
+    return "Represents one of RepeatString, RepeatEnumerated, RepeatInteger, RepeatDate,\n"
+           "RepeatDateTime, RepeatDateList, RepeatDateTimeList, or RepeatDay.\n"
+           "\nAccessor methods::\n\n"
+           "   current_value() -> None # if empty\n"
+           "   current_value() -> int  # if holding RepeatDate/DateList/Integer/Day\n"
+           "   current_value() -> str  # if holdind RepeatDateTime/DateTimeList/Enumerated/RepeatString\n";
 }
 
 const char* NodeAttrDoc::repeat_date_doc() {
@@ -517,7 +582,15 @@ const char* NodeAttrDoc::repeat_date_doc() {
            "   rep = RepeatDate('YMD', 20050130, 20050203 )\n"
            "   rep = RepeatDate('YMD', 20050130, 20050203, 2)\n"
            "   t = Task('t1',\n"
-           "            RepeatDate('YMD', 20050130, 20050203 ))\n";
+           "            RepeatDate('YMD', 20050130, 20050203 ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based position of the current date in the sequence.\n"
+           "      Computed using calendar-day (Julian-day) arithmetic,\n"
+           "      so it is correct even when the sequence crosses a month or year boundary.\n"
+           "      Returns 0 at construction / after reset.\n\n"
+           "   current_value() -> int\n"
+           "      The current instant as an integer in yyyymmdd format.\n";
 }
 
 const char* NodeAttrDoc::repeat_datetime_doc() {
@@ -543,7 +616,12 @@ const char* NodeAttrDoc::repeat_datetime_doc() {
            "   rep = RepeatDateTime('DATETIME', '20050130T000000', '20050203T000000')\n"
            "   rep = RepeatDateTime('DATETIME', '20050130T000000', '20050203T000000', '48:00:00')\n"
            "   t = Task('t1',\n"
-           "            RepeatDateTime('DATETIME', '20050130T000000', '20050203T120000', '1:00:00'))\n";
+           "            RepeatDateTime('DATETIME', '20050130T000000', '20050203T120000', '1:00:00'))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based position: (seconds(current) - seconds(start)) / seconds(step).\n"
+           "   current_value() -> str\n"
+           "      The current instant as a string in yyyymmddTHHMMSS format.\n";
 }
 
 const char* NodeAttrDoc::repeat_date_list_doc() {
@@ -565,7 +643,35 @@ const char* NodeAttrDoc::repeat_date_list_doc() {
            ".. code-block:: python\n\n"
            "   rep = RepeatDateList('YMD', [20050130, 20050203] )\n"
            "   t = Task('t1',\n"
-           "            RepeatDateList('YMD',[20050130, 20050203] ))\n";
+           "            RepeatDateList('YMD',[20050130, 20050203] ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based index of the current date in the list.\n"
+           "   current_value() -> int\n"
+           "      The current date as an integer in yyyymmdd format.\n";
+}
+
+const char* NodeAttrDoc::repeat_datetimelist_doc() {
+    return "Allows a `node`_ to be repeated using an arbitrary list of date+time instants (yyyymmddTHHMMSS format).\n\n"
+           "A node can only have one `repeat`_.\n"
+           "The repeat name can be referenced in `trigger`_ expressions.\n"
+           "\nConstructor::\n\n"
+           "   RepeatDateTimeList(variable, list)\n"
+           "      string variable:          The name of the repeat. The current datetime can be referenced in\n"
+           "                                trigger expressions using the variable name\n"
+           "      list list_of_str:         Arbitrary list of datetime strings in yyyymmddTHHMMSS format\n"
+           "\nException:\n\n"
+           "- Throws a RuntimeError if any string is not a valid datetime\n"
+           "\nUsage:\n\n"
+           ".. code-block:: python\n\n"
+           "   rep = RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000', '20240103T060000'])\n"
+           "   t = Task('t1',\n"
+           "            RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based index of the current instant in the list.\n"
+           "   current_value() -> str\n"
+           "      The current instant as a string in yyyymmddTHHMMSS format, or '' if out of bounds.\n";
 }
 
 const char* NodeAttrDoc::repeat_integer_doc() {
@@ -582,7 +688,12 @@ const char* NodeAttrDoc::repeat_integer_doc() {
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t = Task('t1',\n"
-           "            RepeatInteger('HOUR', 6, 24, 6 ))\n";
+           "            RepeatInteger('HOUR', 6, 24, 6 ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based position: (value - start) / step.\n"
+           "   current_value() -> int\n"
+           "      The current integer value.\n";
 }
 
 const char* NodeAttrDoc::repeat_enumerated_doc() {
@@ -597,7 +708,12 @@ const char* NodeAttrDoc::repeat_enumerated_doc() {
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t = Task('t1',\n"
-           "            RepeatEnumerated('COLOR', [ 'red', 'green', 'blue' ] ))\n";
+           "            RepeatEnumerated('COLOR', [ 'red', 'green', 'blue' ] ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based index of the current enumeration value.\n"
+           "   current_value() -> str\n"
+           "      The enumeration string at the current index, or '' if out of bounds.\n";
 }
 
 const char* NodeAttrDoc::repeat_string_doc() {
@@ -612,7 +728,12 @@ const char* NodeAttrDoc::repeat_string_doc() {
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t = Task('t1',\n"
-           "            RepeatString('COLOR', [ 'red', 'green', 'blue' ] ))\n";
+           "            RepeatString('COLOR', [ 'red', 'green', 'blue' ] ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      Zero-based index into the string list.\n"
+           "   current_value() -> str\n"
+           "      The string at the current index, or '' if out of bounds.\n";
 }
 
 const char* NodeAttrDoc::repeat_day_doc() {
@@ -624,7 +745,12 @@ const char* NodeAttrDoc::repeat_day_doc() {
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t = Task('t1',\n"
-           "             RepeatDay( 1 ))\n";
+           "             RepeatDay( 1 ))\n"
+           "\nAccessor methods::\n\n"
+           "   current_index() -> int\n"
+           "      RepeatDay has no position concept; returns the step value.\n"
+           "   current_value() -> int\n"
+           "      The step value as an integer.\n";
 }
 
 const char* NodeAttrDoc::cron_doc() {

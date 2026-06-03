@@ -27,7 +27,7 @@ Host::Host() {
 
 Host::Host(const std::string& host)
     : the_host_name_(host) {
-    if (the_host_name_ == Str::LOCALHOST()) {
+    if (the_host_name_ == ecf::string_constants::localhost) {
         get_host_name();
     }
 }
@@ -64,7 +64,7 @@ std::string Host::ecf_backup_checkpt_file(const std::string& port) const {
 }
 
 std::string Host::ecf_lists_file(const std::string& port) const {
-    return prefix_host_and_port(port, Str::WHITE_LIST_FILE());
+    return prefix_host_and_port(port, ecf::string_constants::white_list_file);
 }
 
 std::string Host::ecf_passwd_file(const std::string& port) const {

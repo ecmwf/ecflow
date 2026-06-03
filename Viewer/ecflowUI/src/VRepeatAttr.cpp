@@ -20,6 +20,7 @@
 std::string VRepeatDateAttr::subType_("date");
 std::string VRepeatDateTimeAttr::subType_("datetime");
 std::string VRepeatDateListAttr::subType_("datelist");
+std::string VRepeatDateTimeListAttr::subType_("datetimelist");
 std::string VRepeatIntAttr::subType_("integer");
 std::string VRepeatStringAttr::subType_("string");
 std::string VRepeatEnumAttr::subType_("enumerated");
@@ -75,7 +76,7 @@ QString VRepeatAttrType::definition(QStringList d) const {
             t += " " + d[EndIndex];
             t += " " + d[StepIndex];
         }
-        else if (subType == "string" || subType == "enumerated" || subType == "datelist") {
+        else if (subType == "string" || subType == "enumerated" || subType == "datelist" || subType == "datetimelist") {
             t += " " + d[NameIndex];
             t += " " + d[AllValuesIndex];
         }
@@ -171,6 +172,9 @@ void VRepeatAttr::scan(VNode* vnode, std::vector<VAttribute*>& vec) {
             }
             else if (r.repeatBase()->isDateList()) {
                 a = new VRepeatDateListAttr(vnode);
+            }
+            else if (r.repeatBase()->isDateTimeList()) {
+                a = new VRepeatDateTimeListAttr(vnode);
             }
             else if (r.repeatBase()->isInteger()) {
                 a = new VRepeatIntAttr(vnode);
@@ -461,6 +465,80 @@ int VRepeatDateListAttr::currentPosition() const {
         const Repeat& r = node->repeat();
         if (auto* rdl = static_cast<const RepeatDateList*>(r.repeatBase())) {
             return get_repeat_position(*rdl);
+        }
+    }
+    return -1;
+}
+
+//=====================================================
+//
+// VRepeatDateTimeListAttr
+//
+//=====================================================
+
+std::string VRepeatDateTimeListAttr::value(int index) const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        return r.value_as_string(index);
+    }
+    return {};
+}
+
+int VRepeatDateTimeListAttr::endIndex() const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        if (auto* rdtl = static_cast<const RepeatDateTimeList*>(r.repeatBase())) {
+            return rdtl->indexNum() - 1;
+        }
+    }
+    return 0;
+}
+
+int VRepeatDateTimeListAttr::currentIndex() const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        return r.index_or_value();
+    }
+    return 0;
+}
+
+QString VRepeatDateTimeListAttr::startValue() const {
+    return QString::fromStdString(value(0));
+}
+
+QString VRepeatDateTimeListAttr::endValue() const {
+    return QString::fromStdString(value(endIndex()));
+}
+
+QString VRepeatDateTimeListAttr::allValues() const {
+    QString vals;
+
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+
+        int start = 0;
+        int end   = endIndex();
+
+        if (end <= start) {
+            return {};
+        }
+
+        for (int i = start; i <= end; i++) {
+            if (!vals.isEmpty()) {
+                vals += " ";
+            }
+            vals += "\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
+        }
+        return vals;
+    }
+    return vals;
+}
+
+int VRepeatDateTimeListAttr::currentPosition() const {
+    if (node_ptr node = parent_->node()) {
+        const Repeat& r = node->repeat();
+        if (auto* rdtl = static_cast<const RepeatDateTimeList*>(r.repeatBase())) {
+            return get_repeat_position(*rdtl);
         }
     }
     return -1;

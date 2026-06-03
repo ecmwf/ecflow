@@ -10,17 +10,105 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "scaffold/Naming.hpp"
-#include "scaffold/Provisioning.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
 BOOST_AUTO_TEST_SUITE(T_Basic)
 
+BOOST_AUTO_TEST_CASE(test_client_help) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    using command_t = RunClient::CommandHelp;
+
+    auto version  = std::regex(R"---(Ecflow( \([^)]+\))? version\([^)]+\))---");
+    auto commands = std::regex(R"---(Commands:)---");
+
+    {
+        auto client = RunClient{}.execute(command_t{});
+        BOOST_CHECK(client.ok());
+        auto& c = client.value();
+
+        ECF_TEST_DBG("Output of --help:\n" << c.stdout_buffer);
+
+        BOOST_CHECK(c.stdout_contains(version));
+        BOOST_CHECK(c.stdout_contains(commands));
+    }
+    {
+        auto ecf_ssl = MakeEnvironmentVariable{}.with("ECF_SSL", "1").create();
+
+        auto client = RunClient{}.execute(command_t{});
+        BOOST_CHECK(client.ok());
+        auto& c = client.value();
+
+        ECF_TEST_DBG("Output of --help:\n" << c.stdout_buffer);
+
+        BOOST_CHECK(c.stdout_contains(version));
+        BOOST_CHECK(c.stdout_contains(commands));
+    }
+    {
+        auto ecf_ssl = MakeEnvironmentVariable{}.with("ECF_SSL", "x").create();
+
+        auto client = RunClient{}.execute(command_t{});
+        BOOST_CHECK(client.ok());
+        auto& c = client.value();
+
+        ECF_TEST_DBG("Output of --help:\n" << c.stdout_buffer);
+
+        BOOST_CHECK(c.stdout_contains(version));
+        BOOST_CHECK(c.stdout_contains(commands));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_client_version) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
+
+    using command_t = RunClient::CommandVersion;
+
+    auto version = std::regex(R"---(Ecflow( \([^)]+\))? version\([^)]+\))---");
+
+    {
+        auto client = RunClient{}.execute(command_t{});
+        BOOST_CHECK(client.ok());
+        auto& c = client.value();
+
+        ECF_TEST_DBG("Output of --version:\n" << c.stdout_buffer);
+
+        BOOST_CHECK(c.stdout_contains(version));
+    }
+    {
+        auto ecf_ssl = MakeEnvironmentVariable{}.with("ECF_SSL", "1").create();
+
+        auto client = RunClient{}.execute(command_t{});
+        BOOST_CHECK(client.ok());
+        auto& c = client.value();
+
+        ECF_TEST_DBG("Output of --version:\n" << c.stdout_buffer);
+
+        BOOST_CHECK(c.stdout_contains(version));
+    }
+    {
+        auto ecf_ssl = MakeEnvironmentVariable{}.with("ECF_SSL", "x").create();
+
+        auto client = RunClient{}.execute(command_t{});
+        BOOST_CHECK(client.ok());
+        auto& c = client.value();
+
+        ECF_TEST_DBG("Output of --version:\n" << c.stdout_buffer);
+
+        BOOST_CHECK(c.stdout_contains(version));
+    }
+}
+
 BOOST_AUTO_TEST_CASE(test_e2e_ping) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 
@@ -53,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_e2e_ping) {
 BOOST_AUTO_TEST_CASE(test_e2e_load) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 

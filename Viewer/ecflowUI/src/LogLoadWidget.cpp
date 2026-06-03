@@ -834,7 +834,10 @@ void LogLoadWidget::setMaxReadSize(int maxReadSizeInMb) {
 }
 
 void LogLoadWidget::periodChanged(qint64 start, qint64 end) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    QDateTime startDt = QDateTime::fromMSecsSinceEpoch(start, QTimeZone::utc());
+    QDateTime endDt   = QDateTime::fromMSecsSinceEpoch(end, QTimeZone::utc());
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QDateTime startDt = QDateTime::fromMSecsSinceEpoch(start, Qt::UTC);
     QDateTime endDt   = QDateTime::fromMSecsSinceEpoch(end, Qt::UTC);
 #else

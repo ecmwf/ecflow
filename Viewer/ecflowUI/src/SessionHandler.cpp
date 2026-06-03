@@ -172,7 +172,7 @@ void SessionHandler::readSessionListFromDisk() {
         std::string dirName       = (*it);
         std::string toRemove      = ".session";
         std::string toReplaceWith = "";
-        ecf::Str::replace(dirName, toRemove, toReplaceWith);
+        ecf::algorithm::replace(dirName, toRemove, toReplaceWith);
         add(dirName);
     }
 }

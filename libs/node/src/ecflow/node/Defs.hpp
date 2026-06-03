@@ -227,6 +227,16 @@ public:
 
     suite_ptr findSuite(const std::string& name) const;
     std::string find_node_path(const std::string& type, const std::string& name) const;
+
+    ///
+    /// @brief Find a node of the speficied type at the given path
+    ///
+    /// @param type the type of node to find, either "suite", "family", "task", or "alias" -- case insensitive.
+    /// @param pathToNode the path to the requested node
+    /// @return the requested node, if avaible; nullptr, otherwise
+    /// @throws std::runtime_error when the node at the given path is not of the specified type
+    /// (n.b. this is guaranteed to be thrown if the type is not one "suite", "family", "task", or "alias")
+    ///
     node_ptr find_node(const std::string& type, const std::string& pathToNode) const;
 
     [[deprecated]] const std::vector<suite_ptr>& suiteVec() const { return suiteVec_; }
@@ -431,18 +441,6 @@ private:
      */
     bool placeChild(const node_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
     friend class Node;
-
-    /// For use by python interface,
-    std::vector<suite_ptr>::const_iterator suite_begin() const { return suiteVec_.begin(); }
-    std::vector<suite_ptr>::const_iterator suite_end() const { return suiteVec_.end(); }
-    std::set<std::string>::const_iterator extern_begin() const { return externs_.begin(); }
-    std::set<std::string>::const_iterator extern_end() const { return externs_.end(); }
-    std::vector<Variable>::const_iterator user_variables_begin() const { return server_.user_variables().begin(); }
-    std::vector<Variable>::const_iterator user_variables_end() const { return server_.user_variables().end(); }
-    std::vector<Variable>::const_iterator server_variables_begin() const { return server_.server_variables().begin(); }
-    std::vector<Variable>::const_iterator server_variables_end() const { return server_.server_variables().end(); }
-
-    friend void export_Defs();
 
 private:
     /// Note: restoring from a check point file will reset, defs state and modify numbers

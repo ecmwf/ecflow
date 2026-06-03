@@ -21,6 +21,8 @@ BOOST_AUTO_TEST_SUITE(T_Perms)
 BOOST_AUTO_TEST_CASE(test_file_automatic_name_exists) {
     ECF_NAME_THIS_TEST();
 
+    using namespace ecf::test::scaffold;
+
     std::vector<fs::path> paths;
     for (int i = 0; i < 10; i++) {
         WithTestFile file;
@@ -37,6 +39,8 @@ BOOST_AUTO_TEST_CASE(test_file_automatic_name_exists) {
 
 BOOST_AUTO_TEST_CASE(test_file_automatic_prefix_name_exists) {
     ECF_NAME_THIS_TEST();
+
+    using namespace ecf::test::scaffold;
 
     std::vector<fs::path> paths;
     for (int i = 0; i < 10; i++) {

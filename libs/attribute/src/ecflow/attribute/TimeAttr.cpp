@@ -28,7 +28,7 @@ TimeAttr::TimeAttr(const std::string& str) {
         throw std::runtime_error("Time::Time: empty string passed");
     }
     std::vector<std::string> tokens;
-    Str::split(str, tokens);
+    ecf::algorithm::split_at(tokens, str);
     if (tokens.empty()) {
         throw std::runtime_error("Time::Time: incorrect time string ?");
     }

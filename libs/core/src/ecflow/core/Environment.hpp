@@ -143,23 +143,26 @@ struct Wrapper<std::chrono::milliseconds>
 
 } // namespace
 
+///
+/// @brief Exception thrown when a required environment variable is not found.
+///
 struct EnvVarNotFound : public std::runtime_error
 {
     explicit EnvVarNotFound(std::basic_string<char> what)
         : std::runtime_error(what) {}
 };
 
-/**
- * @brief Retrieves the environment variable value and stores it in the given variable.
- *        If the environment variable is not found, the variable is left unchanged.
- *
- *        In case of integral types, the environment variable is converted to the corresponding type.
- *        In case of bool type, if the environment variable is set, the variable is set to true.
- *
- * @tparam T
- * @param name
- * @param value
- */
+///
+/// @brief Retrieve the environment variable value and store it in the given variable.
+///        If the environment variable is not found, the variable is left unchanged.
+///
+///        For integral types, the environment variable value is converted to the corresponding type.
+///        For bool type, if the environment variable is set, the variable is set to true.
+///
+/// @tparam T    the type to convert the environment variable value to
+/// @param name  the name of the environment variable
+/// @param value the variable to store the retrieved value in
+///
 template <typename T>
 void get(const char* name, T& value) {
     if (auto found = Wrapper<T>::get(name); found) {
@@ -167,16 +170,18 @@ void get(const char* name, T& value) {
     }
 }
 
-/**
- * @brief Retrieves the environment variable value and returns it.
- *        If the environment variable is not found, an exception is thrown.
- *
- *        In case of integral types, the environment variable is converted to the corresponding type.
- *        In case of bool type, if the environment variable is set, the result is true.
- *
- * @tparam T
- * @param name
- */
+///
+/// @brief Retrieve the environment variable value and return it.
+///        If the environment variable is not found, an exception is thrown.
+///
+///        For integral types, the environment variable value is converted to the corresponding type.
+///        For bool type, if the environment variable is set, the result is true.
+///
+/// @tparam T   the type to convert the environment variable value to; defaults to std::string
+/// @param name the name of the environment variable
+/// @return the value of the environment variable, converted to type T
+/// @throws EnvVarNotFound if the environment variable is not set
+///
 template <typename T = std::string>
 T get(const char* name) {
     if (auto found = Wrapper<T>::get(name); found) {
@@ -186,27 +191,28 @@ T get(const char* name) {
     throw EnvVarNotFound(Message(name).str());
 }
 
-/**
- * @brief Retrieves the environment variable value and returns it (wrapped in a std::optional<>).
- *        If the environment variable is not found, std::nullopt is returned.
- *
- *        In case of integral types, the environment variable is converted to the corresponding type.
- *        In case of bool type, if the environment variable is set, the result is true.
- *
- * @tparam T
- * @param name
- */
+///
+/// @brief Retrieve the environment variable value and return it wrapped in a std::optional.
+///        If the environment variable is not found, std::nullopt is returned.
+///
+///        For integral types, the environment variable value is converted to the corresponding type.
+///        For bool type, if the environment variable is set, the result is true.
+///
+/// @tparam T   the type to convert the environment variable value to; defaults to std::string
+/// @param name the name of the environment variable
+/// @return the value of the environment variable converted to type T, or std::nullopt if not set
+///
 template <typename T = std::string>
 std::optional<T> fetch(const char* name) {
     return Wrapper<T>::get(name);
 }
 
-/**
- * @brief Checks if an environment variable is set.
- *
- * @tparam T
- * @param name
- */
+///
+/// @brief Check if an environment variable is set.
+///
+/// @param name the name of the environment variable
+/// @return true if the environment variable is set; false otherwise
+///
 inline bool has(const char* name) {
     return std::getenv(name) != nullptr;
 }

@@ -40,8 +40,8 @@ SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename)
 }
 
 void SimulatorVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
-        s->acceptVisitTraversor(*this);
+    for (suite_ptr suite : d->suites()) {
+        suite->acceptVisitTraversor(*this);
     }
 }
 
@@ -128,8 +128,8 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc) {
         foundTime_ = true;
     }
 
-    for (node_ptr t : nc->nodeVec()) {
-        t->acceptVisitTraversor(*this);
+    for (auto node : nc->children()) {
+        node->acceptVisitTraversor(*this);
     }
 }
 

@@ -458,6 +458,8 @@ public:
      */
     bool is_not_retrying(const ClientToServerCmd& cmd) const;
 
+    const auto& changed_node_paths() const { return server_reply_.changed_nodes(); }
+
 private:
     /**
      * @return 1 when command is selected; 0 if no command is selected (e.g. --help)
@@ -478,15 +480,6 @@ private:
 private:
     friend class RoundTripRecorder;
     friend class RequestLogger;
-
-    /// For use by python interface,
-    std::vector<std::string>::const_iterator changed_node_paths_begin() const {
-        return server_reply_.changed_nodes().begin();
-    }
-    std::vector<std::string>::const_iterator changed_node_paths_end() const {
-        return server_reply_.changed_nodes().end();
-    }
-    friend void export_Client();
 
 private:
 #ifdef DEBUG

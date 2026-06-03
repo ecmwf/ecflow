@@ -5,7 +5,7 @@ ecflow.RepeatInteger
 .. py:class:: RepeatInteger
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Allows a :term:`node` to be repeated using a integer range.
 
@@ -28,21 +28,40 @@ Usage:
    t = Task('t1',
             RepeatInteger('HOUR', 6, 24, 6 ))
 
+Accessor methods::
 
-.. py:method:: RepeatInteger.end( (RepeatInteger)arg1) -> int
+   current_index() -> int
+      Zero-based position: (value - start) / step.
+   current_value() -> int
+      The current integer value.
+
+
+.. py:method:: RepeatInteger.current_index(self: ecflow.RepeatInteger) -> int
+   :module: ecflow
+
+Return the zero-based index of the current value: (value - start) / step.
+
+
+.. py:method:: RepeatInteger.current_value(self: ecflow.RepeatInteger) -> object
+   :module: ecflow
+
+Return the current integer value.
+
+
+.. py:method:: RepeatInteger.end(self: ecflow.RepeatInteger) -> int
    :module: ecflow
 
 
-.. py:method:: RepeatInteger.name( (RepeatInteger)arg1) -> str :
+.. py:method:: RepeatInteger.name(self: ecflow.RepeatInteger) -> str
    :module: ecflow
 
 Return the name of the repeat.
 
 
-.. py:method:: RepeatInteger.start( (RepeatInteger)arg1) -> int
+.. py:method:: RepeatInteger.start(self: ecflow.RepeatInteger) -> int
    :module: ecflow
 
 
-.. py:method:: RepeatInteger.step( (RepeatInteger)arg1) -> int
+.. py:method:: RepeatInteger.step(self: ecflow.RepeatInteger) -> int
    :module: ecflow
 

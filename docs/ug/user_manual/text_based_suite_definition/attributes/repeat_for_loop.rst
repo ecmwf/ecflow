@@ -19,15 +19,16 @@ generated for each iteration):
 
 .. code-block:: shell
 
-  repeat enumerated <variable> <value-1> [<value-2> [<value-3> [... <value-N>]]]
+  repeat enumerated <variable> <value-1> [<value-2> [... <value-N>]]
     # <value-X> are string values
 
 - a sequence of string values
 
 .. code-block:: shell
 
-  repeat string <variable> <string-1> [<string-2> [<string-3> [... <string-N>]]]
+  repeat string <variable> <string-1> [<string-2> [... <string-N>]]
     # <string-X> are string values
+    # the iteration will follow the order of the list, and not the alphabetical order of the string values
 
 - a sequence of dates, determined by [begin, end] and a delta
 
@@ -43,9 +44,10 @@ generated for each iteration):
 
 .. code-block:: shell
 
-  repeat datelist <variable> <date-1> [<date-2> [<date-3> [... <date-N>]]]
+  repeat datelist <variable> <date-1> [<date-2> [... <date-N>]]
     # <date-X> are given as YYYYMMDD
     # date arithmetic is used when evaluating trigger/complete expressions
+    # the iteration will follow the order of the list, and not the chronological order of the dates
 
 - a sequence of time instants, determined by [begin, end] and a delta
 
@@ -55,6 +57,16 @@ generated for each iteration):
     # <begin> and <end> are given as YYYYMMDDTHHMMSS
     # <delta> is given as a duration in the format HH:MM:SS
     # if <delta> is not provided, the default value is '24:00:00'
+    # seconds-based arithmetic is used when evaluating trigger/complete expressions
+
+- a sequence of time instants, determined by an arbitrary list of time instants
+
+.. code-block:: shell
+
+  repeat datetimelist <variable> <instant-1> [<instant-2> [... <instant-N>]]
+    # <instant-X> are given as YYYYMMDDTHHMMSS
+    # seconds-based arithmetic is used when evaluating trigger/complete expressions
+    # the iteration will follow the order of the list, and not the chronological order of the time instants
 
 .. code-block:: shell
 
@@ -101,7 +113,7 @@ The value of these variables is automatically updated when the node associated w
 completes and the node is re-queued -- except, of course, when the iteration reaches the end.
 
 The set of generated variables depends on the type of repeat, but in general includes the current value of the
-iteration, and for date and datetime repeats, components of the date/datetime. The following table specifies the
+iteration, and for date and datetime repeats, components of the date/time instant. The following table specifies the
 generated variables for each repeat type:
 
 .. list-table:: Generated variables for each repeat type
@@ -117,7 +129,7 @@ generated variables for each repeat type:
    * - ``enumerated``
      - ``<variable>``, the current string value (the item from the list for this iteration).
 
-   * - ``date``
+   * - ``date``, ``datelist``
      - ``<variable>``, the current date value, formatted as ``YYYYMMDD``.
 
        ``<variable>_YYYY``, the Year component of the current date (four digits, ``YYYY``).
@@ -129,40 +141,28 @@ generated variables for each repeat type:
        ``<variable>_DOW``, the Day of week of the current date.
 
        ``<variable>_JULIAN``, the Julian day corresponding to the current date.
-   * - ``datelist``
-     - ``<variable>``, the current date value from the list, formatted as ``YYYYMMDD``.
+   * - ``datetime``, ``datetimelist``
+     - ``<variable>``, the current time instant value, formatted as ``YYYYMMDDThhmmss``.
 
-       ``<variable>_YYYY``, the Year component of the current date (four digits, ``YYYY``).
+       ``<variable>_DATE``, the Date of the current time instant, formatted as ``YYYYMMDD``.
 
-       ``<variable>_MM``, the Month component of the current date (two digits, ``MM``).
+       ``<variable>_YYYY``, the Year component of the current time instant (four digits, ``YYYY``).
 
-       ``<variable>_DD``, the Day component of the current date (two digits, ``DD``).
+       ``<variable>_MM``, the Month component of the current time instant (two digits, ``MM``).
 
-       ``<variable>_DOW``, the Day of week of the current date.
+       ``<variable>_DD``, the Day component of the current time instant (two digits, ``DD``).
 
-       ``<variable>_JULIAN``, the Julian day corresponding to the current date.
-   * - ``datetime``
-     - ``<variable>``, the current datetime value, formatted as ``YYYYMMDDThhmmss``.
+       ``<variable>_DOW``, the Day of week of the current time instant.
 
-       ``<variable>_DATE``, the Date of the current datetime, formatted as ``YYYYMMDD``.
+       ``<variable>_TIME``, the Time of the current time instant, formatted as ``hhmmss``.
 
-       ``<variable>_YYYY``, the Year component of the current datetime (four digits, ``YYYY``).
+       ``<variable>_HOURS``, the Hour component of the current time instant (two digits, ``hh``).
 
-       ``<variable>_MM``, the Month component of the current datetime (two digits, ``MM``).
+       ``<variable>_MINUTES``, the Minute component of the current time instant (two digits, ``mm``).
 
-       ``<variable>_DD``, the Day component of the current datetime (two digits, ``DD``).
+       ``<variable>_SECONDS``, the Seconds component of the current time instant (two digits, ``ss``).
 
-       ``<variable>_DOW``, the Day of week of the current datetime.
-
-       ``<variable>_TIME``, the Time of the current datetime, formatted as ``hhmmss``.
-
-       ``<variable>_HOURS``, the Hour component of the current datetime (two digits, ``hh``).
-
-       ``<variable>_MINUTES``, the Minute component of the current datetime (two digits, ``mm``).
-
-       ``<variable>_SECONDS``, the Seconds component of the current datetime (two digits, ``ss``).
-
-       ``<variable>_JULIAN``, the Julian day corresponding to the date of the current datetime.
+       ``<variable>_JULIAN``, the Julian day corresponding to the date of the current time instant.
 
 When used in trigger or complete expressions, for integer arithmetic, the interpretation of the variables value depends
 on the repeat type -- see the following table for details.
@@ -179,15 +179,12 @@ on the repeat type -- see the following table for details.
      - The value of ``<variable>`` is interpreted as the current index in the list (0-based).
    * - ``enumerated``
      - The value of ``<variable>`` is interpreted as the current enumeration value converted to integer, if convertible; otherwise, the value is the current index in the list (0-based).
-   * - ``date``
-     - The value of ``<variable>`` is interpreted as the current date value, formatted as ``YYYYMMDD``.
+   * - ``date``, ``datelist``
+     - The value of ``<variable>`` is interpreted as the current date integer value, formatted as ``YYYYMMDD``.
        This value will be subject to date arithmetic (e.g ``20090101 - 1 == 20081231``).
-   * - ``datelist``
-     - The value of ``<variable>`` is interpreted as the current date value, formatted as ``YYYYMMDD``.
-       This value will be subject to date arithmetic (e.g ``20090101 - 1 == 20081231``).
-   * - ``datetime``
-     - The value of ``<variable>_DATE`` is interpreted as the current date value, formatted as ``YYYYMMDD``.
-       This value will be subject to date arithmetic (e.g ``20090101 - 1 == 20081231``).
+   * - ``datetime``, ``datetimelist``
+     - The value of ``<variable>`` is interpreted as the current time instant value, as integer seconds since ``19700101T000000``.
+       Integer arithmetic applies (e.g. adding ``86400`` advances the value by one day).
 
 Used in combination with relative time
 --------------------------------------
@@ -223,7 +220,7 @@ See also:
  * - :ref:`ecflow_cli`
    - :ref:`add_cli`, :ref:`alter_cli`
  * - :ref:`python_api`
-   - :py:class:`ecflow.Node.add_repeat`, :py:class:`ecflow.Repeat`, :py:class:`ecflow.RepeatDate`, :py:class:`ecflow.RepeatEnumerated`, :py:class:`ecflow.RepeatInteger`, :py:class:`ecflow.RepeatDay`
+   - :py:class:`ecflow.Node.add_repeat`, :py:class:`ecflow.Repeat`, :py:class:`ecflow.RepeatDate`, :py:class:`ecflow.RepeatDateList`, :py:class:`ecflow.RepeatDateTime`, :py:class:`ecflow.RepeatDateTimeList`, :py:class:`ecflow.RepeatEnumerated`, :py:class:`ecflow.RepeatInteger`, :py:class:`ecflow.RepeatDay`
  * - :ref:`grammar`
    - :token:`repeat`
  * - :ref:`glossary`

@@ -5,7 +5,7 @@ ecflow.TimeSeries
 .. py:class:: TimeSeries
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 A TimeSeries can hold a single time slot or a series.
 
@@ -44,31 +44,31 @@ Usage::
    time_series = TimeSeries(TimeSlot(10,11),False)
 
 
-.. py:method:: TimeSeries.finish( (TimeSeries)arg1) -> TimeSlot :
+.. py:method:: TimeSeries.finish(self: ecflow.TimeSeries) -> ecflow.TimeSlot
    :module: ecflow
 
 returns the finish time if time series specified, else returns a NULL time slot
 
 
-.. py:method:: TimeSeries.has_increment( (TimeSeries)arg1) -> bool :
+.. py:method:: TimeSeries.has_increment(self: ecflow.TimeSeries) -> bool
    :module: ecflow
 
 distinguish between a single time slot and a series. returns true for a series
 
 
-.. py:method:: TimeSeries.incr( (TimeSeries)arg1) -> TimeSlot :
+.. py:method:: TimeSeries.incr(self: ecflow.TimeSeries) -> ecflow.TimeSlot
    :module: ecflow
 
 returns the increment time if time series specified, else returns a NULL time slot
 
 
-.. py:method:: TimeSeries.relative( (TimeSeries)arg1) -> bool :
+.. py:method:: TimeSeries.relative(self: ecflow.TimeSeries) -> bool
    :module: ecflow
 
 returns a boolean where true means that the time series is relative
 
 
-.. py:method:: TimeSeries.start( (TimeSeries)arg1) -> TimeSlot :
+.. py:method:: TimeSeries.start(self: ecflow.TimeSeries) -> ecflow.TimeSlot
    :module: ecflow
 
 returns the start time

@@ -27,7 +27,7 @@ ResolveExternsVisitor::ResolveExternsVisitor(Defs* defs)
 }
 
 void ResolveExternsVisitor::visitDefs(Defs* d) {
-    for (suite_ptr s : d->suiteVec()) {
+    for (auto s : d->suites()) {
         s->acceptVisitTraversor(*this);
     }
 }
@@ -43,8 +43,8 @@ void ResolveExternsVisitor::visitNodeContainer(NodeContainer* nc) {
 
     setup(nc);
 
-    for (node_ptr t : nc->nodeVec()) {
-        t->acceptVisitTraversor(*this);
+    for (auto node : nc->children()) {
+        node->acceptVisitTraversor(*this);
     }
 }
 
@@ -142,7 +142,7 @@ void AstResolveExternVisitor::visitFlag(AstFlag* astVar) {
 void AstResolveExternVisitor::addExtern(const std::string& absNodePath, const std::string& var) {
     std::string ext = absNodePath;
     if (!var.empty()) {
-        ext += Str::COLON();
+        ext += ecf::string_constants::colon;
         ext += var;
     }
     // cout << " AstResolveExternVisitor::addExtern " << ext << "\n";

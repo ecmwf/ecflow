@@ -155,8 +155,40 @@ public:
     virtual bool show_cmd() const { return false; }
     virtual void add_edit_history(Defs*) const;
 
-    // used by group_cmd to postfix syncCmd on all user commands that modify defs
-    virtual void set_client_handle(int /*client_handle*/) {} // used by group_cmd
+    ///
+    /// @brief Sets the client handle for this command, used during group command execution.
+    ///
+    /// This function is part of the client handle synchronisation mechanism used when commands
+    /// are executed as part of a GroupCTSCmd. It allows commands that create, modify, or drop
+    /// client handles to propagate that information to subsequent commands in the group
+    /// (typically a sync command).
+    ///
+    /// Client handles are identifiers that allow clients to register interest in a specific
+    /// subset of suites on the server, enabling efficient synchronisation:
+    /// - client_handle > 0: References a specific registered set of suites
+    /// - client_handle == 0: References all suites (global scope)
+    ///
+    /// Call flow example when a group contains [ClientHandleCmd, CSyncCmd]:
+    /// 1. ClientHandleCmd creates a new handle (e.g., 42)
+    /// 2. ClientHandleCmd calls group_cmd_->set_client_handle(42)
+    /// 3. GroupCTSCmd propagates this to the next command (CSyncCmd)
+    /// 4. CSyncCmd stores the handle and uses it to sync only the relevant suites
+    ///
+    /// This function is const because it's called from const member functions (doHandleRequest).
+    /// It doesn't modify the command's observable state, only propagates information or updates
+    /// internal synchronisation state (via mutable members in derived classes).
+    ///
+    /// @param client_handle The client handle to set. Use 0 for global scope (all suites),
+    ///                      or a positive value for a specific registered set of suites.
+    ///
+    /// @see GroupCTSCmd::set_client_handle() for propagation logic
+    /// @see CSyncCmd::set_client_handle() for storage and usage
+    /// @see ClientHandleCmd for client handle creation/management
+    ///
+    virtual void set_client_handle([[maybe_unused]] int client_handle) const {
+        // Default implementation: no-op, ignored by most command types
+    }
+
     virtual void set_group_cmd(const GroupCTSCmd*) {}
 
     // CLIENT side Parse and command construction, create can throw std::runtime_error for errors

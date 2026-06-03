@@ -125,10 +125,10 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
 
         bool child_cmd = false;
         bool user_cmd  = false;
-        if (line.find(Str::CHILD_CMD()) != std::string::npos) {
+        if (line.find(ecf::string_constants::child_cmd) != std::string::npos) {
             child_cmd = true;
         }
-        else if (line.find(Str::USER_CMD()) != std::string::npos) {
+        else if (line.find(ecf::string_constants::user_cmd) != std::string::npos) {
             user_cmd = true;
         }
         if (!child_cmd && !user_cmd) {
@@ -155,7 +155,7 @@ std::string Gnuplot::create_gnuplot_file(std::vector<SuiteLoad>& suite_vec, cons
             }
             std::string time_stamp = line.substr(0, first_closed_bracket);
 
-            Str::split(time_stamp, new_time_stamp);
+            ecf::algorithm::split_at(new_time_stamp, time_stamp);
             if (new_time_stamp.size() != 2) {
                 continue;
             }
@@ -384,7 +384,7 @@ bool Gnuplot::extract_suite_path(const std::string& line,
 
             std::vector<std::string> theNodeNames;
             theNodeNames.reserve(4);
-            NodePath::split(path, theNodeNames);
+            ecf::node::split_path(path, theNodeNames);
             if (!theNodeNames.empty()) {
                 for (size_t n = 0; n < suite_vec.size(); n++) {
                     if (suite_vec[n].suite_name_ == theNodeNames[0]) {

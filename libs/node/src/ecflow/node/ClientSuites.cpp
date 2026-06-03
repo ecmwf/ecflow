@@ -143,14 +143,14 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const {
 
     // If the user has registered *ALL* the suites just return the server defs
     auto suites_end = suites_.end();
-    if (suites_.size() == server_defs->suiteVec().size()) {
+    if (suites_.size() == server_defs->suites().size()) {
         size_t real_suite_count = 0;
         for (auto i = suites_.begin(); i != suites_end; ++i) {
             if (suite_ptr suite = (*i).weak_suite_ptr_.lock(); suite.get()) {
                 real_suite_count++;
             }
         }
-        if (real_suite_count == server_defs->suiteVec().size()) {
+        if (real_suite_count == server_defs->suites().size()) {
 
             server_defs->set_state_change_no(Ecf::state_change_no());
             server_defs->set_modify_change_no(Ecf::modify_change_no());
@@ -277,13 +277,13 @@ std::string ClientSuites::dump() const {
 }
 
 void ClientSuites::update_suite_order() {
-    const std::vector<suite_ptr>& server_suite_vec = defs_->suiteVec();
-    size_t server_suite_vec_size                   = server_suite_vec.size();
+    const auto& suites = defs_->suites();
+    size_t size        = suites.size();
 
     auto suites_end = suites_.end();
     for (auto i = suites_.begin(); i != suites_end; ++i) {
-        for (size_t s = 0; s < server_suite_vec_size; s++) {
-            if ((*i).name_ == server_suite_vec[s]->name()) {
+        for (size_t s = 0; s < size; s++) {
+            if ((*i).name_ == suites[s]->name()) {
                 (*i).index_ = static_cast<int>(s);
                 break;
             }

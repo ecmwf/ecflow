@@ -179,7 +179,7 @@ bool BaseServer::restore_from_checkpt(const std::string& filename, bool& failed)
             defs_->handle_migration();  // handle any migration of checkpt file.
             update_defs_server_state(); // works on def_
             LOG(Log::MSG,
-                "Loading of *DEFS* check point file SUCCEDED. Loaded " << defs_->suiteVec().size() << " suites");
+                "Loading of *DEFS* check point file SUCCEDED. Loaded " << defs_->suites().size() << " suites");
 
             // fast forward any time attributes, if suite clock is *ONLY* 1 hour behind real time
             // This may remove autocancelled nodes, may autoarchive, may set late attribute,
@@ -304,7 +304,7 @@ void BaseServer::restore_defs_from_checkpt() {
         throw std::runtime_error("Cannot restore from checkpt the server must be halted first");
     }
 
-    if (!defs_->suiteVec().empty()) {
+    if (!defs_->suites().empty()) {
         // suites must be deleted manually first
         throw std::runtime_error("Cannot restore from checkpt the server suites must be deleted first");
     }

@@ -43,7 +43,7 @@
 struct MyDefsFixture
 {
 
-    explicit MyDefsFixture(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER())
+    explicit MyDefsFixture(const std::string& port = ecf::string_constants::default_port_number)
         : defsfile_(port) {
         suite_ptr suite = create_suite();
 
@@ -68,7 +68,7 @@ struct MyDefsFixture
 
     const Defs& fixtureDefsFile() const { return defsfile_; }
 
-    defs_ptr create_defs(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER()) const {
+    defs_ptr create_defs(const std::string& port = ecf::string_constants::default_port_number) const {
 
         defs_ptr defs = Defs::create(port);
 

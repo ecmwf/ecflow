@@ -27,7 +27,7 @@
 using namespace ecf;
 
 void InitCmd::print(std::string& os) const {
-    os += Str::CHILD_CMD();
+    os += ecf::string_constants::child_cmd;
     os += "init ";
     os += path_to_node();
     if (!var_to_add_.empty()) {
@@ -135,7 +135,7 @@ void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
             variable_vec.reserve(var_args.size());
             for (const auto& v : var_args) {
                 std::vector<std::string> tokens;
-                Str::split(v, tokens, "=");
+                ecf::algorithm::split_at(tokens, v, "=");
                 if (tokens.size() != 2) {
                     throw std::runtime_error(
                         "Could not parse variable provided to --add; Expected  var1=value1 var2=value2 but found " + v);

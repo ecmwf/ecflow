@@ -5,7 +5,7 @@ ecflow.Meter
 .. py:class:: Meter
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 :term:`meter`\ s can be used to indicate proportional completion of :term:`task`
 
@@ -64,37 +64,37 @@ Using a meter requires:
   as a result triggers's which use meter equality may never evaluate
 
 
-.. py:method:: Meter.color_change( (Meter)arg1) -> int :
+.. py:method:: Meter.color_change(self: ecflow.Meter) -> int
    :module: ecflow
 
 returns the color change
 
 
-.. py:method:: Meter.empty( (Meter)arg1) -> bool :
+.. py:method:: Meter.empty(self: ecflow.Meter) -> bool
    :module: ecflow
 
 Return true if the Meter is empty. Used when returning a NULL Meter, from a find
 
 
-.. py:method:: Meter.max( (Meter)arg1) -> int :
+.. py:method:: Meter.max(self: ecflow.Meter) -> int
    :module: ecflow
 
 Return the Meters maximum value
 
 
-.. py:method:: Meter.min( (Meter)arg1) -> int :
+.. py:method:: Meter.min(self: ecflow.Meter) -> int
    :module: ecflow
 
 Return the Meters minimum value
 
 
-.. py:method:: Meter.name( (Meter)arg1) -> str :
+.. py:method:: Meter.name(self: ecflow.Meter) -> str
    :module: ecflow
 
 Return the Meters name as string
 
 
-.. py:method:: Meter.value( (Meter)arg1) -> int :
+.. py:method:: Meter.value(self: ecflow.Meter) -> int
    :module: ecflow
 
 Return meters current value

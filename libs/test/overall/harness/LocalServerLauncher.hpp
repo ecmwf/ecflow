@@ -57,12 +57,10 @@ public:
     }
 
 private:
-    std::string host_        = ecf::Str::LOCALHOST();
-    std::string port_        = default_port();
+    std::string host_        = ecf::string_constants::localhost;
+    std::string port_        = ecf::string_constants::default_port_number;
     bool use_http_           = false;
     int submission_interval_ = job_submission_interval();
-
-    static std::string default_port() { return "3141"; }
 };
 
 #endif /* ecflow_test_harness_LocalServerLauncher_HPP */

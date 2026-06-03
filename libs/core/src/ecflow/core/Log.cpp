@@ -110,7 +110,7 @@ void Log::cache_time_stamp() {
 const std::string& Log::get_cached_time_stamp() const {
     std::scoped_lock lock(mx_);
 
-    return (logImpl_) ? logImpl_->get_cached_time_stamp() : Str::EMPTY();
+    return (logImpl_) ? logImpl_->get_cached_time_stamp() : ecf::string_constants::empty;
 }
 
 void Log::flush() {
@@ -392,7 +392,7 @@ bool LogImpl::do_log(Log::LogType lt, const std::string& message, bool newline) 
     else {
         // If message has \n then split into multiple lines
         std::vector<std::string> lines;
-        Str::split(message, lines, "\n");
+        ecf::algorithm::split_at(lines, message, "\n");
         size_t theSize = lines.size();
         for (size_t i = 0; i < theSize; ++i) {
             file_ << log_type_and_time_stamp_ << lines[i] << '\n';

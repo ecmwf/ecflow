@@ -547,8 +547,7 @@ void ServerComThread::attach(defs_ptr d) {
 
     d->attach(this);
 
-    const std::vector<suite_ptr>& suites = d->suiteVec();
-    for (const auto& suite : suites) {
+    for (const auto& suite : d->suites()) {
         attach(suite.get());
     }
 }
@@ -585,8 +584,7 @@ void ServerComThread::detach(defs_ptr d) {
 
     d->detach(this);
 
-    const std::vector<suite_ptr>& suites = d->suiteVec();
-    for (const auto& suite : suites) {
+    for (const auto& suite : d->suites()) {
         detach(suite.get());
     }
 }

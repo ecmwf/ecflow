@@ -105,7 +105,7 @@ static DayAttr print_and_parse_attr(DayAttr& day) {
     output.erase(output.begin() + output.size() - 1); // remove trailing newline
 
     std::vector<std::string> tokens;
-    Str::split_orig(output, tokens);
+    ecf::algorithm::split_at(tokens, output);
 
     return DayAttr::create(tokens, true /*read state*/);
 }

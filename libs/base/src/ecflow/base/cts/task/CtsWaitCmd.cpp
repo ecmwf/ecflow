@@ -44,7 +44,7 @@ CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
 }
 
 void CtsWaitCmd::print(std::string& os) const {
-    os += Str::CHILD_CMD();
+    os += ecf::string_constants::child_cmd;
     os += "wait ";
     os += expression_;
     os += " ";

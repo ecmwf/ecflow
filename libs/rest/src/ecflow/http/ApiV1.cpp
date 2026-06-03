@@ -155,7 +155,7 @@ ojson filter_json(const ojson& j, const httplib::Request& r) {
     // the elements are consumed by the dive() function
 
     std::vector<std::string> path_elems;
-    ecf::Str::split(path, path_elems, ".");
+    ecf::algorithm::split_at(path_elems, path, ".");
     std::reverse(path_elems.begin(), path_elems.end());
 
     if (path_elems.empty()) {

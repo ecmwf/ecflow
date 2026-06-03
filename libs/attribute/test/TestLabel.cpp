@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
     {
         std::string line = "label name \"value\"";
         std::vector<std::string> linetokens;
-        Str::split(line, linetokens);
+        ecf::algorithm::split_at(linetokens, line);
 
         Label label;
         label.parse(line, linetokens, false);
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
     {
         std::string line = R"(label name "value\nvalue")";
         std::vector<std::string> linetokens;
-        Str::split(line, linetokens);
+        ecf::algorithm::split_at(linetokens, line);
 
         Label label;
         label.parse(line, linetokens, false);
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
     {
         std::string line = "label name \"value that is multiple token !!!! 23445 !^ & * ( )\"";
         std::vector<std::string> linetokens;
-        Str::split(line, linetokens);
+        ecf::algorithm::split_at(linetokens, line);
 
         Label label;
         label.parse(line, linetokens, false);
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
     {
         std::string line = R"(label name "value\n that\n is\n multiple\n token\n and\n new\n \nlines")";
         std::vector<std::string> linetokens;
-        Str::split(line, linetokens);
+        ecf::algorithm::split_at(linetokens, line);
 
         Label label;
         label.parse(line, linetokens, false);

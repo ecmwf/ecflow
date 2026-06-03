@@ -5,7 +5,7 @@ ecflow.Autoarchive
 .. py:class:: Autoarchive
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Provides a way to automatically archive a suite/family which has completed or is *idle*
 
@@ -48,25 +48,25 @@ Usage:
    attr = Autoarchive( 3,true  )                 # archive node 3 days after complete,queued or aborted, i.e node is idle
 
 
-.. py:method:: Autoarchive.days( (Autoarchive)arg1) -> bool :
+.. py:method:: Autoarchive.days(self: ecflow.Autoarchive) -> bool
    :module: ecflow
 
 Returns a boolean true if time was specified in days
 
 
-.. py:method:: Autoarchive.idle( (Autoarchive)arg1) -> bool :
+.. py:method:: Autoarchive.idle(self: ecflow.Autoarchive) -> bool
    :module: ecflow
 
 Returns a boolean true if archiving when idle, i.e queued,aborted,complete and time elapsed
 
 
-.. py:method:: Autoarchive.relative( (Autoarchive)arg1) -> bool :
+.. py:method:: Autoarchive.relative(self: ecflow.Autoarchive) -> bool
    :module: ecflow
 
 Returns a boolean where true means the time is relative
 
 
-.. py:method:: Autoarchive.time( (Autoarchive)arg1) -> TimeSlot :
+.. py:method:: Autoarchive.time(self: ecflow.Autoarchive) -> ecflow.TimeSlot
    :module: ecflow
 
 returns archive time as a TimeSlot

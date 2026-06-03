@@ -98,7 +98,7 @@ void AutoRestoreAttr::check(std::string& errorMsg) const {
             // OK a little bit of duplication, since findReferencedNode, will also look for externs
             // See if the Path:name is defined as an extern, in which case *DONT* error:
             // This is client side specific, since server does not have externs.
-            if (node_->defs()->find_extern(i, Str::EMPTY())) {
+            if (node_->defs()->find_extern(i, ecf::string_constants::empty)) {
                 continue;
             }
 

@@ -16,7 +16,6 @@
 #include <boost/version.hpp>
 
 #include "Naming.hpp"
-#include "ecflow/core/Environment.hpp"
 
 #if BOOST_VERSION < 106600
 
@@ -44,7 +43,7 @@ namespace bp = boost::process;
 
 #endif
 
-namespace foolproof::scaffold {
+namespace ecf::test::scaffold {
 
 #if BOOST_PROCESS_VERSION == 1
 
@@ -55,13 +54,11 @@ struct Process::Impl
           err_{},
           handle_{} {
         // Determine the invocation command
-        auto invoke_command = std::string(executable);
-        for (const auto& arg : args) {
-            invoke_command += " " + arg;
-        }
+        auto exe  = std::string{executable};
+        auto argv = std::vector<std::string>{args.begin(), args.end()};
 
         // Start the process
-        handle_ = bp::child{invoke_command, bp::std_out > out_, bp::std_err > err_, bp::start_dir(cwd.string())};
+        handle_ = bp::child{exe, bp::args(argv), bp::std_out > out_, bp::std_err > err_, bp::start_dir(cwd.string())};
     }
     ~Impl() = default;
 
@@ -204,4 +201,4 @@ std::string Process::read_stderr() const {
     return impl_->read_stderr();
 }
 
-} // namespace foolproof::scaffold
+} // namespace ecf::test::scaffold

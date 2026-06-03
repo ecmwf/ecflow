@@ -1,0 +1,70 @@
+ecflow.RepeatDateTimeList
+/////////////////////////
+
+
+.. py:class:: RepeatDateTimeList
+   :module: ecflow
+
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
+
+Allows a :term:`node` to be repeated using an arbitrary list of date+time instants (yyyymmddTHHMMSS format).
+
+A node can only have one :term:`repeat`.
+The repeat name can be referenced in :term:`trigger` expressions.
+
+Constructor::
+
+   RepeatDateTimeList(variable, list)
+      string variable:          The name of the repeat. The current datetime can be referenced in
+                                trigger expressions using the variable name
+      list list_of_str:         Arbitrary list of datetime strings in yyyymmddTHHMMSS format
+
+Exception:
+
+- Throws a RuntimeError if any string is not a valid datetime
+
+Usage:
+
+.. code-block:: python
+
+   rep = RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000', '20240103T060000'])
+   t = Task('t1',
+            RepeatDateTimeList('DT', ['20240101T000000', '20240102T120000']))
+
+Accessor methods::
+
+   current_index() -> int
+      Zero-based index of the current instant in the list.
+   current_value() -> str
+      The current instant as a string in yyyymmddTHHMMSS format, or '' if out of bounds.
+
+
+.. py:method:: RepeatDateTimeList.current_index(self: ecflow.RepeatDateTimeList) -> int
+   :module: ecflow
+
+Return the zero-based index of the current instant in the list.
+
+
+.. py:method:: RepeatDateTimeList.current_value(self: ecflow.RepeatDateTimeList) -> object
+   :module: ecflow
+
+Return the current instant as a string in yyyymmddTHHMMSS format.
+
+
+.. py:method:: RepeatDateTimeList.end(self: ecflow.RepeatDateTimeList) -> int
+   :module: ecflow
+
+Return the end instant as seconds since epoch
+
+
+.. py:method:: RepeatDateTimeList.name(self: ecflow.RepeatDateTimeList) -> str
+   :module: ecflow
+
+Return the name of the repeat.
+
+
+.. py:method:: RepeatDateTimeList.start(self: ecflow.RepeatDateTimeList) -> int
+   :module: ecflow
+
+Return the start instant as seconds since epoch
+

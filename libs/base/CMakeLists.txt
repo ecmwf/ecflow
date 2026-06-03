@@ -16,6 +16,7 @@ set(test_srcs
   test/TestArchiveAndRestoreCmd.cpp
   test/TestBase_main.cpp # test entry point
   test/TestClientHandleCmd.cpp
+  test/TestClientOptionsParser.cpp
   test/TestCmd.cpp
   test/TestDeleteNodeCmd.cpp
   test/TestForceCmd.cpp

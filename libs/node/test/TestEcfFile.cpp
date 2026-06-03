@@ -983,16 +983,13 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
 
     /// Test extraction of all the used variables
     std::vector<std::string> script_lines;
-    Str::split(file_with_used_variables, script_lines, "\n"); //  will ignore empty lines, but will do for this case
+    ecf::algorithm::split_at(script_lines, file_with_used_variables, "\n");
     NameValueMap extracted_used_variables;
     EcfFile::extract_used_variables(extracted_used_variables, script_lines);
     for (std::pair<std::string, std::string> p : expected_used_variables) {
         BOOST_CHECK_MESSAGE(extracted_used_variables.find(p.first) != extracted_used_variables.end(),
                             " expected to find variable " << p.first << " in the extracted variables\n");
     }
-    //    std::cout << "Expected:----\n"; for(p:expected_used_variables) { std::cout << p.first << " " << p.second <<
-    //    "\n";} std::cout << "Actual:------\n"; for(p:extracted_used_variables) { std::cout << p.first << " " <<
-    //    p.second << "\n";}
 
     /// Test pre-processing
     std::string pre_processed_file;

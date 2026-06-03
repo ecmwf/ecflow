@@ -5,7 +5,7 @@ ecflow.Autocancel
 .. py:class:: Autocancel
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Provides a way to automatically delete/remove a node which has completed
 
@@ -38,19 +38,19 @@ Usage:
               Autocancel(2,0,true))             # delete task 2 hours after completion
 
 
-.. py:method:: Autocancel.days( (Autocancel)arg1) -> bool :
+.. py:method:: Autocancel.days(self: ecflow.Autocancel) -> bool
    :module: ecflow
 
 Returns a boolean true if time was specified in days
 
 
-.. py:method:: Autocancel.relative( (Autocancel)arg1) -> bool :
+.. py:method:: Autocancel.relative(self: ecflow.Autocancel) -> bool
    :module: ecflow
 
 Returns a boolean where true means the time is relative
 
 
-.. py:method:: Autocancel.time( (Autocancel)arg1) -> TimeSlot :
+.. py:method:: Autocancel.time(self: ecflow.Autocancel) -> ecflow.TimeSlot
    :module: ecflow
 
 returns cancel time as a TimeSlot

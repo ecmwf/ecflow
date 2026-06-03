@@ -22,7 +22,7 @@
 namespace ecf {
 
 bool MirrorAttr::is_valid_name(const std::string& name) {
-    return ecf::Str::valid_name(name);
+    return ecf::algorithm::is_valid_name(name);
 }
 
 MirrorAttr::MirrorAttr(Node* parent,

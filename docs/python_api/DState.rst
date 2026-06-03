@@ -5,7 +5,7 @@ ecflow.DState
 .. py:class:: DState
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 A DState is like a ecflow.State, except for the addition of SUSPENDED
 
@@ -24,47 +24,62 @@ Usage::
                Defstatus('complete')) # create in place
 
 
+Members:
+
+  unknown
+
+  complete
+
+  queued
+
+  aborted
+
+  submitted
+
+  suspended
+
+  active
+
+
 .. py:attribute:: DState.aborted
    :module: ecflow
-   :value: ecflow.DState.aborted
+   :value: <DState.aborted: 3>
 
 
 .. py:attribute:: DState.active
    :module: ecflow
-   :value: ecflow.DState.active
+   :value: <DState.active: 5>
 
 
 .. py:attribute:: DState.complete
    :module: ecflow
-   :value: ecflow.DState.complete
+   :value: <DState.complete: 1>
 
 
-.. py:attribute:: DState.names
+.. py:property:: DState.name
    :module: ecflow
-   :value: {'aborted': ecflow.DState.aborted, 'active': ecflow.DState.active, 'complete': ecflow.DState.complete, 'queued': ecflow.DState.queued, 'submitted': ecflow.DState.submitted, 'suspended': ecflow.DState.suspended, 'unknown': ecflow.DState.unknown}
 
 
 .. py:attribute:: DState.queued
    :module: ecflow
-   :value: ecflow.DState.queued
+   :value: <DState.queued: 2>
 
 
 .. py:attribute:: DState.submitted
    :module: ecflow
-   :value: ecflow.DState.submitted
+   :value: <DState.submitted: 4>
 
 
 .. py:attribute:: DState.suspended
    :module: ecflow
-   :value: ecflow.DState.suspended
+   :value: <DState.suspended: 6>
 
 
 .. py:attribute:: DState.unknown
    :module: ecflow
-   :value: ecflow.DState.unknown
+   :value: <DState.unknown: 0>
 
 
-.. py:attribute:: DState.values
+.. py:property:: DState.value
    :module: ecflow
-   :value: {0: ecflow.DState.unknown, 1: ecflow.DState.complete, 2: ecflow.DState.queued, 3: ecflow.DState.aborted, 4: ecflow.DState.submitted, 5: ecflow.DState.active, 6: ecflow.DState.suspended}
 

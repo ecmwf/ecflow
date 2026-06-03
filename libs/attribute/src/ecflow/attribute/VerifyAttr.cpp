@@ -50,11 +50,12 @@ void VerifyAttr::reset() {
 }
 
 std::string VerifyAttr::toString() const {
-    return MESSAGE("verify " << NState::toString(state_) << Str::COLON() << expected_);
+    return MESSAGE("verify " << NState::toString(state_) << ecf::string_constants::colon << expected_);
 }
 
 std::string VerifyAttr::dump() const {
-    return MESSAGE("verify " << NState::toString(state_) << Str::COLON() << expected_ << " actual(" << actual_ << ")");
+    return MESSAGE("verify " << NState::toString(state_) << ecf::string_constants::colon << expected_ << " actual("
+                             << actual_ << ")");
 }
 
 template <class Archive>

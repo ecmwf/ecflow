@@ -25,7 +25,7 @@ public:
 
     template <typename... ARGS>
     void add(const std::string& qualifier, const std::string& location, ARGS... args) const {
-        if (verbose_) {
+        if (verbose_ || qualifier == "error" || qualifier == "fatal") {
             std::ostringstream ss;
             ss << "   " << location << " (" << qualifier << "): ";
             ((ss << args), ...);
@@ -54,6 +54,6 @@ Trace& getTrace();
     { ecf::log::getTrace().add("error", location, __VA_ARGS__); }
 
 #define TRACE_FATAL(location, ...) \
-    { ecf::log::getTrace().add("error", location, __VA_ARGS__); }
+    { ecf::log::getTrace().add("fatal", location, __VA_ARGS__); }
 
 #endif /* ecflow_udp_Trace_HPP */

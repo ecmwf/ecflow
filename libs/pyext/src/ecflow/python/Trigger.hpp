@@ -12,7 +12,7 @@
 #define ecflow_python_Trigger_HPP
 
 #include "ecflow/node/Expression.hpp"
-#include "ecflow/python/PythonBinding.hpp"
+#include "ecflow/python/PythonUtil.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Trigger & Complete thin wrapper over Expression, allows us to call:

@@ -222,9 +222,9 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt) {
         BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0, "Expected halt server to succeed\n" << theClient.errorMsg());
         BOOST_REQUIRE_MESSAGE(theClient.restoreDefsFromCheckPt() == 0, "Expected restoreDefsFromCheckPt succeed\n");
         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0, "Expected getDefs() to succeed, i.e expected empty defs\n");
-        BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() == expected_no_of_suites,
+        BOOST_REQUIRE_MESSAGE(theClient.defs()->suites().size() == expected_no_of_suites,
                               "Expected " << expected_no_of_suites << " suites, after restoreDefsFromCheckPt but found "
-                                          << theClient.defs()->suiteVec().size() << "\n");
+                                          << theClient.defs()->suites().size() << "\n");
 
         std::string suite = "/s" + ecf::convert_to<std::string>(i);
         BOOST_REQUIRE_MESSAGE(theClient.delete_node(suite) == 0,
@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
     MyDefsFixture theDefsFixture; // make sure generated server variable use this port.
     defs_ptr defs_to_be_check_pointed = theDefsFixture.create_defs(port);
 
-    BOOST_REQUIRE_MESSAGE(defs_to_be_check_pointed->suiteVec().size() >= 2, "expected at least 2 suites");
+    BOOST_REQUIRE_MESSAGE(defs_to_be_check_pointed->suites().size() >= 2, "expected at least 2 suites");
 
     {
         // Start a new server. However make sure that on server exit, we not delete check pt files
@@ -320,9 +320,10 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
                           "Server failed to start on " << invokeServer.host() << ":" << invokeServer.port());
 
     ClientInvoker theClient(invokeServer.host(), invokeServer.port());
-    BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                          CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                    << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                          CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                              << " should return 0\n"
+                              << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 0,
                           "Expected edit history of size 0 after server start, but found "
                               << theClient.server_reply().get_string_vec().size());
@@ -344,9 +345,10 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
                                                   << theClient.errorMsg());
 
     // make sure edit history updated
-    BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,
-                          CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n"
-                                                                                    << theClient.errorMsg());
+    BOOST_REQUIRE_MESSAGE(theClient.edit_history(ecf::string_constants::root_path) == 0,
+                          CtsApi::to_string(CtsApi::edit_history(ecf::string_constants::root_path))
+                              << " should return 0\n"
+                              << theClient.errorMsg());
     BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 5,
                           "Expected edit history of size 5, but found "
                               << theClient.server_reply().get_string_vec().size());
@@ -355,9 +357,9 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
     BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,
                           CtsApi::get() << " failed should return 0\n"
                                         << theClient.errorMsg());
-    BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() == 0,
+    BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(ecf::string_constants::root_path).size() == 0,
                           "Expected edit history of size 0, but found "
-                              << theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
+                              << theClient.defs()->get_edit_history(ecf::string_constants::root_path).size());
 
     // This should write the edit history
     BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs() == 0,
@@ -374,9 +376,9 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
     {
         Defs defs;
         defs.restore(invokeServer.ecf_checkpt_file()); // restore defs from checkpoint
-        BOOST_REQUIRE_MESSAGE(defs.get_edit_history(Str::ROOT_PATH()).size() == 5,
+        BOOST_REQUIRE_MESSAGE(defs.get_edit_history(ecf::string_constants::root_path).size() == 5,
                               "Expected edit history of size 5, but found "
-                                  << defs.get_edit_history(Str::ROOT_PATH()).size());
+                                  << defs.get_edit_history(ecf::string_constants::root_path).size());
     }
 
     {

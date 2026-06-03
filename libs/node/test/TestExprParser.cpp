@@ -80,11 +80,12 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
         ":YMD / :YMD < 5"s,
         ":YMD * :YMD < 5"s,
         ":YMD % :YMD < 5"s,
-        ":VARIABLE == 20230101T000000"s,
-        ":VARIABLE >= 20230101T000000"s,
-        ":VARIABLE <= 20230101T000000"s,
-        ":VARIABLE + 3 <= 19700101T000000"s,
-        ":VARIABLE <= 19700101T000000 + 3"s};
+        ":YYYYMMDDThhmmss == 20230101T000000"s,
+        ":YYYYMMDDThhmmss >= 20230101T000000"s,
+        ":YYYYMMDDThhmmss <= 20230101T000000"s,
+        ":YYYYMMDDThhmmss + 3 <= 19700101T000000"s,
+        ":YYYYMMDDThhmmss <= 19700101T000000 + 3"s,
+        ":YYYYMMDDThhmmss >= 19700101T000000 + 3"s};
 
     for (const auto& expression : expressions) {
 
@@ -107,6 +108,43 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
         else {
             BOOST_CHECK_MESSAGE(!why.empty(), "When ast does not evaluate we expect to find why: " << expression);
         }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_expression_simple_parser) {
+    ECF_NAME_THIS_TEST();
+
+    struct TestCase
+    {
+        std::string expression;
+        bool parseable;
+    };
+
+    std::vector<TestCase> test_cases = {{"1 eq 2", true},
+                                        {"1eq2 eq ", false},
+                                        {" eq 1eq2", false},
+                                        {"1eq2 eq complete", true},
+                                        {"xeqz eq complete ", true},
+                                        {"xeqz eq complete a", false},
+                                        {"xeqz eq complete a ", false},
+                                        {"a eq complete", true},
+                                        {"a eq complete ", true},
+                                        {" a eq complete", true},
+                                        {" a == complete ", true},
+                                        {"a eq complete a", false},
+                                        {"a eq complete a ", false},
+                                        {"1 == 2", true},
+                                        {"1==2", true},
+                                        {"1==2 == ", false},
+                                        {"1==2==", false},
+                                        {" == 3==4", false},
+                                        {"==3==4", false}};
+
+    for (const auto& tc : test_cases) {
+        SimpleExprParser parser(tc.expression);
+        auto parsed = parser.doParse();
+        BOOST_REQUIRE_MESSAGE(parsed == tc.parseable,
+                              "Parsing '" << tc.expression << "', expected " << tc.parseable << " found " << parsed);
     }
 }
 
@@ -133,7 +171,8 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
         "((:YMD + :YMD) < 5)"s,
         "((:YMD + :YMD) < 5)"s,
         "((:VARIABLE == 19700101T123456) and (b == complete))"s,
-        "((:VARIABLE < 19700101T123456) and (b == complete))"s};
+        "((:VARIABLE < 19700101T123456) and (b == complete))"s,
+        "((:VARIABLE >= (19700101T000000 + 3)) and (b == complete))"s};
 
     for (const auto& expression : expressions) {
 
@@ -421,9 +460,64 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     exprMap[":YMD * :YMD <= 5"]             = std::make_pair(AstLessEqual::stype(), true);
     exprMap[":YMD + 1 == 1"]                = std::make_pair(AstEqual::stype(), true);
 
-    exprMap[":VAR == 20000101T235959"] = std::make_pair(AstEqual::stype(), false);
-    exprMap[":VAR <= 20000101T235959"] = std::make_pair(AstLessEqual::stype(), true);
-    exprMap[":VAR >= 20000101T235959"] = std::make_pair(AstGreaterEqual::stype(), false);
+    //
+    // Notice: in the following trigger expressions, when a variable is refered (e.g. :VAR), it is evaluated to 0.
+    // In this case, because of the DateTime instant nature of the comparison, value 0 represents 19700101T000000.
+    //
+
+    exprMap[":YYYYMMDDThhmmss == 19691231T235959"] = std::make_pair(AstEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss == 19700101T000000"] = std::make_pair(AstEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss == 19700101T000001"] = std::make_pair(AstEqual::stype(), false);
+
+    exprMap["19691231T235959 == :YYYYMMDDThhmmss"] = std::make_pair(AstEqual::stype(), false);
+    exprMap["19700101T000000 == :YYYYMMDDThhmmss"] = std::make_pair(AstEqual::stype(), true);
+    exprMap["19700101T000001 == :YYYYMMDDThhmmss"] = std::make_pair(AstEqual::stype(), false);
+
+    exprMap[":YYYYMMDDThhmmss <= 19691231T235959"] = std::make_pair(AstLessEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss <= 19700101T000000"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss <= 19700101T000001"] = std::make_pair(AstLessEqual::stype(), true);
+
+    exprMap["19691231T235959 <= :YYYYMMDDThhmmss"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["19700101T000000 <= :YYYYMMDDThhmmss"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["19700101T000001 <= :YYYYMMDDThhmmss"] = std::make_pair(AstLessEqual::stype(), false);
+
+    exprMap[":YYYYMMDDThhmmss >= 19691231T235959"] = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss >= 19700101T000000"] = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss >= 19700101T000001"] = std::make_pair(AstGreaterEqual::stype(), false);
+
+    exprMap["19691231T235959 >= :YYYYMMDDThhmmss"] = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["19700101T000000 >= :YYYYMMDDThhmmss"] = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["19700101T000001 >= :YYYYMMDDThhmmss"] = std::make_pair(AstGreaterEqual::stype(), true);
+
+    exprMap[":YYYYMMDDThhmmss + 1 == 19700101T000001"]   = std::make_pair(AstEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss - 1 == 19691231T235959"]   = std::make_pair(AstEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 1) == 19700101T000001"] = std::make_pair(AstEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss - 1) == 19691231T235959"] = std::make_pair(AstEqual::stype(), true);
+
+    exprMap[":YYYYMMDDThhmmss + 1 == 19700101T000000 + 1"]     = std::make_pair(AstEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss - 1 == 19700101T000000 - 1"]     = std::make_pair(AstEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 1) == (19700101T000000 + 1)"] = std::make_pair(AstEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss - 1) == (19700101T000000 - 1)"] = std::make_pair(AstEqual::stype(), true);
+
+    exprMap[":YYYYMMDDThhmmss + 1 >= 19700101T000000"]         = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss + 1 >= 19700101T000002"]         = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss + 1 >= 19700101T000000 + 2"]     = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["(:YYYYMMDDThhmmss + 1) >= 19700101T000000"]       = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 1) >= 19700101T000002"]       = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["(:YYYYMMDDThhmmss + 1) >= (19700101T000000 + 2)"] = std::make_pair(AstGreaterEqual::stype(), false);
+
+    exprMap[":YYYYMMDDThhmmss <= 19700101T000001 + 60"]          = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss >= 19700101T000001 + 60"]          = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss <= (19700101T000001 + 60)"]        = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss >= (19700101T000001 + 60)"]        = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss + 60 <= 19700101T000001"]          = std::make_pair(AstLessEqual::stype(), false);
+    exprMap[":YYYYMMDDThhmmss + 60 >= 19700101T000001"]          = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 60) <= 19700101T000001"]        = std::make_pair(AstLessEqual::stype(), false);
+    exprMap["(:YYYYMMDDThhmmss + 60) >= 19700101T000001"]        = std::make_pair(AstGreaterEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss + 60 <= 19700101T000001 + 60"]     = std::make_pair(AstLessEqual::stype(), true);
+    exprMap[":YYYYMMDDThhmmss + 60 >= 19700101T000001 + 60"]     = std::make_pair(AstGreaterEqual::stype(), false);
+    exprMap["(:YYYYMMDDThhmmss + 60) <= (19700101T000001 + 60)"] = std::make_pair(AstLessEqual::stype(), true);
+    exprMap["(:YYYYMMDDThhmmss + 60) >= (19700101T000001 + 60)"] = std::make_pair(AstGreaterEqual::stype(), false);
 
     int parse_failure = 0;
     int ast_failure   = 0;
@@ -469,6 +563,91 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
                 std::string why;
                 top->why(why);
                 // cout << "why: " << p.first << " -> " << why << "\n";
+                if (top->evaluate()) {
+                    BOOST_CHECK_MESSAGE(why.empty(), "Expected why to be empty when expression evaluates: " << p.first);
+                }
+                else {
+                    BOOST_CHECK_MESSAGE(!why.empty(), "When ast does not evaluate we expect to find why: " << p.first);
+                }
+            }
+        }
+    }
+    BOOST_REQUIRE_MESSAGE(parse_failure == 0 && ast_failure == 0,
+                          "Found failures parse_failure:" << parse_failure << " ast failure:" << ast_failure);
+}
+
+BOOST_AUTO_TEST_CASE(test_parser_arithmetic_expressions) {
+    ECF_NAME_THIS_TEST();
+
+    // map key      = expression
+    // map value[0] = expected type of the root abstract syntax tree
+    // map value[1] = expected evaluation result
+    // map value[2] = expected value
+
+    std::map<std::string, std::tuple<std::string, bool, int>> expressions;
+
+    expressions["10 + 1"]  = std::make_tuple(AstPlus::stype(), true, 11);
+    expressions["10 - 1"]  = std::make_tuple(AstMinus::stype(), true, 9);
+    expressions["10 * 10"] = std::make_tuple(AstMultiply::stype(), true, 100);
+    expressions["10 / 10"] = std::make_tuple(AstDivide::stype(), true, 1);
+    expressions["11 % 10"] = std::make_tuple(AstModulo::stype(), true, 1);
+
+    // Note: in the following expressions, `:VAR` is considered a nonexistent variable and evaluates to 0
+    expressions[":VAR + 1"]  = std::make_tuple(AstPlus::stype(), true, 1);
+    expressions[":VAR - 1"]  = std::make_tuple(AstMinus::stype(), true, -1);
+    expressions[":VAR * 10"] = std::make_tuple(AstMultiply::stype(), true, 0);
+    expressions[":VAR / 10"] = std::make_tuple(AstDivide::stype(), true, 0);
+    expressions[":VAR % 10"] = std::make_tuple(AstModulo::stype(), true, 0);
+
+    int parse_failure = 0;
+    int ast_failure   = 0;
+    for (const auto& p : expressions) {
+        auto expression = p.first;
+
+        ExprParser parser(expression);
+
+        std::string errorMsg;
+        if (bool ok = parser.doParse(errorMsg); !ok) {
+            parse_failure++;
+            BOOST_CHECK_MESSAGE(ok, errorMsg + "failed for " + expression);
+        }
+        else {
+            auto expected_type   = std::get<0>(p.second);
+            auto expected_result = std::get<1>(p.second);
+            auto expected_value  = std::get<2>(p.second);
+
+            if (Ast* top = parser.getAst(); !top) {
+                ast_failure++;
+                BOOST_CHECK_MESSAGE(top, "No abstract syntax tree for " + expression);
+            }
+            else {
+                BOOST_CHECK_MESSAGE(top->left(), "No root created for " + expression);
+                BOOST_CHECK_MESSAGE(top->left()->isRoot() || top->left()->is_attribute(),
+                                    "First child of top should be a root or attribute for " + expression);
+                BOOST_CHECK_MESSAGE(top->left()->is_evaluateable(),
+                                    "expected ast to be evaluatable. found: " << top->left()->type() << " "
+                                                                              << expression);
+                BOOST_CHECK_MESSAGE(top->left()->type() == expected_type || top->left()->type() == "variable",
+                                    "expected root type '" << expected_type << "' or 'variable' but found '"
+                                                           << top->left()->type() << "' " << expression);
+
+                auto actual_result = top->evaluate();
+                BOOST_CHECK_MESSAGE(expected_result == actual_result,
+                                    "evaluation result for: " << expression << "\n  expected: " << expected_result
+                                                              << "\n  actual: " << actual_result << "\n\n"
+                                                              << ecf::as_string(*top, PrintStyle::DEFS));
+
+                auto actual_value = top->value();
+                BOOST_CHECK_MESSAGE(expected_value == actual_value,
+                                    "evaluation value for: " << expression << "\n  expected: " << expected_value
+                                                             << "\n  obtained: " << actual_value);
+
+                std::string error_msg;
+                BOOST_CHECK_MESSAGE(top->check(error_msg),
+                                    error_msg << ":  Check failed for " << ecf::as_string(*top, PrintStyle::DEFS));
+
+                std::string why;
+                top->why(why);
                 if (top->evaluate()) {
                     BOOST_CHECK_MESSAGE(why.empty(), "Expected why to be empty when expression evaluates: " << p.first);
                 }

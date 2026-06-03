@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
                                             << theClient.errorMsg());
         defs_ptr serverDefs = theClient.defs();
         BOOST_REQUIRE_MESSAGE(serverDefs.get(), "Server returned a NULL defs");
-        BOOST_REQUIRE_MESSAGE(serverDefs->suiteVec().size() >= 1, "  no suite ?");
+        BOOST_REQUIRE_MESSAGE(serverDefs->suites().size() >= 1, "  no suite ?");
     }
 
     // Now go through and simulate client request to change Node tree state.
@@ -267,8 +267,8 @@ BOOST_AUTO_TEST_CASE(test_client_lifecyle) {
         BOOST_REQUIRE_MESSAGE(!theEvent.empty(), "Could not find the event myEvent");
         BOOST_REQUIRE_MESSAGE(theEvent.value(), "The event was not set");
 
-        const std::vector<suite_ptr>& suiteVec = serverDefs->suiteVec();
-        suite_ptr suite                        = suiteVec.back();
+        const auto& suites = serverDefs->suites();
+        suite_ptr suite    = suites.back();
         BOOST_REQUIRE_MESSAGE(suite->state() == NState::COMPLETE,
                               "Suite expected NState::COMPLETE, but found to be " << NState::toString(suite->state()));
     }

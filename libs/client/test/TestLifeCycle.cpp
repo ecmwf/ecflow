@@ -68,8 +68,8 @@ BOOST_AUTO_TEST_CASE(test_node_tree_lifecycle) {
     //	endsuite
 
     // get the suite, before we do anything initial state should be UNKNOWN
-    const std::vector<suite_ptr>& suiteVec = defs.suiteVec();
-    suite_ptr suite                        = suiteVec.back();
+    const auto& suites = defs.suites();
+    auto suite         = suites.back();
     BOOST_CHECK_MESSAGE(suite->state() == NState::UNKNOWN, " Initial suite state should be NState::UNKNOWN");
 
     std::string suite1_family1_a  = "suite1/family1/a";

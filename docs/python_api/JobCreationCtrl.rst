@@ -5,7 +5,7 @@ ecflow.JobCreationCtrl
 .. py:class:: JobCreationCtrl
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 The class JobCreationCtrl is used in `job creation` checking
 
@@ -35,37 +35,43 @@ Usage:
    print(job_ctrl.get_error_msg())
 
 
-.. py:method:: JobCreationCtrl.generate_temp_dir( (JobCreationCtrl)arg1) -> None :
+.. py:method:: JobCreationCtrl.generate_temp_dir(self: ecflow.JobCreationCtrl) -> None
    :module: ecflow
 
 Automatically generated temporary directory for job creation. Directory written to stdout for information
 
 
-.. py:method:: JobCreationCtrl.get_dir_for_job_creation( (JobCreationCtrl)arg1) -> str :
+.. py:method:: JobCreationCtrl.get_dir_for_job_creation(self: ecflow.JobCreationCtrl) -> str
    :module: ecflow
 
 Returns the directory set for job creation
 
 
-.. py:method:: JobCreationCtrl.get_error_msg( (JobCreationCtrl)arg1) -> str :
+.. py:method:: JobCreationCtrl.get_error_msg(self: ecflow.JobCreationCtrl) -> str
    :module: ecflow
 
 Returns an error message generated during checking of job creation
 
 
-.. py:method:: JobCreationCtrl.set_dir_for_job_creation( (JobCreationCtrl)arg1, (str)arg2) -> None :
+.. py:method:: JobCreationCtrl.is_verbose(self: ecflow.JobCreationCtrl) -> bool
+   :module: ecflow
+
+Returns true if verbose mode is on, false otherwise
+
+
+.. py:method:: JobCreationCtrl.set_dir_for_job_creation(self: ecflow.JobCreationCtrl, arg0: str) -> None
    :module: ecflow
 
 Specify directory, for job creation
 
 
-.. py:method:: JobCreationCtrl.set_node_path( (JobCreationCtrl)arg1, (str)arg2) -> None :
+.. py:method:: JobCreationCtrl.set_node_path(self: ecflow.JobCreationCtrl, arg0: str) -> None
    :module: ecflow
 
 The node we want to check job creation for. If no node specified check all tasks
 
 
-.. py:method:: JobCreationCtrl.set_verbose( (JobCreationCtrl)arg1, (bool)arg2) -> None :
+.. py:method:: JobCreationCtrl.set_verbose(self: ecflow.JobCreationCtrl, arg0: bool) -> None
    :module: ecflow
 
 Output each task as its being checked.

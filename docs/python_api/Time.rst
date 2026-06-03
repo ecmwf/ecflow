@@ -5,7 +5,7 @@ ecflow.Time
 .. py:class:: Time
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Is used to define a :term:`time` dependency
 
@@ -52,7 +52,7 @@ Usage:
             Time('10:30 20:10 00:10')) # Create time in place
 
 
-.. py:method:: Time.time_series( (Time)arg1) -> TimeSeries :
+.. py:method:: Time.time_series(self: ecflow.Time) -> ecflow.TimeSeries
    :module: ecflow
 
 Return the Time attributes time series

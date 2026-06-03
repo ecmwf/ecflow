@@ -22,6 +22,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <boost/asio.hpp>
+
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Environment.hpp"
 #include "ecflow/core/File.hpp"
@@ -109,11 +111,55 @@ public:
         fs::remove(the_file);
     }
 
+    ///
+    /// @brief Checks whether the given TCP port can be bound on the local machine.
+    ///
+    /// @param port The TCP port number to check.
+    /// @return true if port is free, false if it is occupied or if any error occurs during the check.
+    ///
+    static bool is_tcp_port_free(unsigned short port) {
+        using namespace boost::asio;
+
+        io_context io;
+        ip::tcp::acceptor a(io);
+
+        boost::system::error_code ec;
+        a.open(ip::tcp::v4(), ec);
+        if (ec) {
+            // If we cannot open a socket, assume the port is in use.
+            std::cout << "  EcfPortLock::is_port_free(" << port << ") : FALSE (unable to open socket)\n ";
+            return false;
+        }
+        a.bind({ip::tcp::v4(), port}, ec);
+        if (ec) {
+            if (ec == error::address_in_use) {
+                std::cout << "  EcfPortLock::is_port_free(" << port
+                          << ") : FALSE (unable to bind, due to port already in use)\n ";
+            }
+            else {
+                std::cout << "  EcfPortLock::is_port_free(" << port
+                          << ") : FALSE (unable to bind, due to unknown issue)\n ";
+            }
+            return false;
+        }
+        return true;
+    }
+
     static bool is_free(int port, bool debug = false) {
         std::string the_port = ecf::convert_to<std::string>(port);
+        // 1. File-lock check (fast path)
         if (fs::exists(port_file(the_port))) {
             if (debug) {
-                std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE\n ";
+                std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE (lock file exists)\n ";
+            }
+            return false;
+        }
+
+        // 2. TCP socket check
+        // This ensures the port is free, by actually trying to binding to it (and immediatelly releasing it).
+        if (!is_tcp_port_free(port)) {
+            if (debug) {
+                std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE (TCP port occupied)\n ";
             }
             return false;
         }

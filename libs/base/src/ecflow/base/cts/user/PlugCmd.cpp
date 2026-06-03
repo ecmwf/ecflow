@@ -140,7 +140,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
 
         // Dest could still be on the same server. Extract host and port
         // expect: host:port/suite/family/node
-        if (!NodePath::extractHostPort(dest_, host, port)) {
+        if (!ecf::node::extract_host_and_port_from_path(dest_, host, port)) {
             std::string errorMsg = "Plug command failed. The destination path ";
             errorMsg += dest_;
             errorMsg += " does not exist on server, and could not extract host/port from the destination path";
@@ -148,7 +148,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
         }
 
         // Remove the host:port from the path
-        destPath = NodePath::removeHostPortFromPath(dest_);
+        destPath = ecf::node::remove_host_and_port_from_path(dest_);
 
         std::pair<std::string, std::string> hostPortPair = as->hostPort();
         if ((hostPortPair.first == host || host == "localhost") && hostPortPair.second == port) {

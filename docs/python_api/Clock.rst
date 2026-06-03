@@ -5,7 +5,7 @@ ecflow.Clock
 .. py:class:: Clock
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Specifies the :term:`clock` type used by the :term:`suite`.
 
@@ -43,43 +43,43 @@ Usage:
    suite.add_clock(clock)
 
 
-.. py:method:: Clock.day( (Clock)arg1) -> int :
+.. py:method:: Clock.day(self: ecflow.Clock) -> int
    :module: ecflow
 
 Returns the day as an integer, range 1-31
 
 
-.. py:method:: Clock.gain( (Clock)arg1) -> int :
+.. py:method:: Clock.gain(self: ecflow.Clock) -> int
    :module: ecflow
 
 Returns the gain as an long. This represents seconds
 
 
-.. py:method:: Clock.month( (Clock)arg1) -> int :
+.. py:method:: Clock.month(self: ecflow.Clock) -> int
    :module: ecflow
 
 Returns the month as an integer, range 1-12
 
 
-.. py:method:: Clock.positive_gain( (Clock)arg1) -> bool :
+.. py:method:: Clock.positive_gain(self: ecflow.Clock) -> bool
    :module: ecflow
 
 Returns a boolean, where true means that the gain is positive
 
 
-.. py:method:: Clock.set_gain( (Clock)arg1, (int)arg2, (int)arg3, (bool)arg4) -> None :
+.. py:method:: Clock.set_gain(self: ecflow.Clock, arg0: typing.SupportsInt | typing.SupportsIndex, arg1: typing.SupportsInt | typing.SupportsIndex, arg2: bool) -> None
    :module: ecflow
 
 Set the gain in hours and minutes
 
 
-.. py:method:: Clock.set_gain_in_seconds( (Clock)arg1, (int)arg2, (bool)arg3) -> None :
+.. py:method:: Clock.set_gain_in_seconds(self: ecflow.Clock, arg0: typing.SupportsInt | typing.SupportsIndex, arg1: bool) -> None
    :module: ecflow
 
 Set the gain in seconds
 
 
-.. py:method:: Clock.year( (Clock)arg1) -> int :
+.. py:method:: Clock.year(self: ecflow.Clock) -> int
    :module: ecflow
 
 Returns the year as an integer, > 1400

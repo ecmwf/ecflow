@@ -13,9 +13,6 @@
 
 #include <string>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Result.hpp"
 #include "ecflow/node/Defs.hpp"
@@ -44,10 +41,8 @@ struct Path
         }
 
         std::vector<std::string> tokens;
-        boost::tokenizer<boost::char_separator<char>> tokenizer(path, boost::char_separator<char>("/ "));
-        for (const auto& token : tokenizer) {
-            tokens.push_back(token);
-        }
+        ecf::algorithm::split_at(tokens, path, "/ ");
+
         return Result<Path>::success(Path(std::move(tokens)));
     }
 

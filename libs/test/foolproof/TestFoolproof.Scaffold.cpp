@@ -10,8 +10,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "scaffold/Naming.hpp"
-#include "scaffold/Provisioning.hpp"
+#include "ecflow/test/scaffold/Naming.hpp"
+#include "ecflow/test/scaffold/Provisioning.hpp"
 
 BOOST_AUTO_TEST_SUITE(S_Foolproof)
 
@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_SUITE(T_Scaffold)
 BOOST_AUTO_TEST_CASE(test_creating_host) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     {
         auto host = MakeHost{}.create();
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_locking_known_ports) {
     ECF_NAME_THIS_TEST();
 
     using namespace ecf;
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto port_a = MakePort{}.with(SpecificPortValue{44444}).create();
     auto port_b = MakePort{}.with(SpecificPortValue{44445}).create();
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_locking_automatic_ports) {
     ECF_NAME_THIS_TEST();
 
     using namespace ecf;
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto port_a = MakePort{}.with(AutomaticPortValue{}).create();
     auto port_b = MakePort{}.with(AutomaticPortValue{44444}).create();
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_locking_automatic_ports) {
 BOOST_AUTO_TEST_CASE(test_setting_environment_variables) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     {
         std::string name     = "";
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(test_setting_environment_variables) {
 BOOST_AUTO_TEST_CASE(test_creating_working_directory) {
     ECF_NAME_THIS_TEST();
 
-    using namespace foolproof::scaffold;
+    using namespace ecf::test::scaffold;
 
     auto cwd = MakeDirectory{}.create();
 

@@ -1,0 +1,101 @@
+name: dockit
+
+on:
+  # Trigger the workflow manually
+  workflow_dispatch: ~
+
+jobs:
+
+  # Create the ecflow package
+  build-and-package:
+    name: build
+    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-docker' }}
+
+    strategy:
+      max-parallel: 8
+      fail-fast: false
+      matrix:
+        os:
+          - debian-13.5
+        preset:
+          - linux.gcc.serveronly.relwithdebinfo
+        jobs: [ 4 ]
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: marcosbento/lumen:${{ matrix.os }}
+      options: --user root
+
+    timeout-minutes: 60
+
+    steps:
+
+      - name: Display build context
+        run: |
+          echo "Working directory: ${{ github.workspace }}"
+          echo "Environment:"
+          echo "$(env)"
+          echo "OS info:"
+          echo "$(cat /etc/os-release)"
+          echo "CPU info:"
+          echo "$(cat /proc/cpuinfo)"
+          echo "Memory info:"
+          echo "$(cat /proc/meminfo)"
+          echo "Disk info:"
+          echo "$(df -h)"
+
+      - name: Checkout 'ecbuild'
+        uses: actions/checkout@v4
+        with:
+          repository: ecmwf/ecbuild
+          path: ecbuild
+
+      - name: Checkout 'ecflow'
+        uses: actions/checkout@v4
+        with:
+          path: ecflow
+
+      - name: Generate ecflow debian package custom version
+        id: generate-package-custom-version
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+
+      - name: Define ecflow build environment
+        id: vars
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          sha1=$(git rev-parse --short HEAD)
+          version=$(cat VERSION)
+          echo "sha1=${sha1}" >> $GITHUB_OUTPUT
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+      - name: Configure ecflow
+        id: configure-ecflow
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          cmake --preset ${{ matrix.preset }} \
+                -DCUSTOM_DEBIAN_PACKAGE_VERSION=${{ steps.vars.outputs.version }}_${{ steps.vars.outputs.sha1 }} \
+                -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+      - name: Build ecflow
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }} --target all
+
+      - name: Test ecflow
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -j ${{ matrix.jobs }}
+
+      - name: Package ecflow
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          cmake --build --preset ${{ matrix.preset }} --target package
+
+      - name: Create ecflow docker image
+        run: |
+          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
+          cp -v ${RUNNER_WORKSPACE}/ecflow/ecflow/build/${{ matrix.preset }}/ecflow-*.deb \
+                ${RUNNER_WORKSPACE}/ecflow/ecflow/releng/imachination/ecflow/ecflow-latest-Linux.deb || true
+          docker build -t ecflow:latest -f ${RUNNER_WORKSPACE}/ecflow/ecflow/releng/imachination/ecflow/Dockerfile ${RUNNER_WORKSPACE}/ecflow/ecflow/releng/imachination/ecflow

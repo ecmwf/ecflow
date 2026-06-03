@@ -19,7 +19,7 @@ namespace ecf::http {
 
 std::pair<std::string, std::string> BasicAuth::get_credentials(const std::string& token) {
     std::vector<std::string> elems;
-    ecf::Str::split(decode_base64(token), elems, ":");
+    ecf::algorithm::split_at(elems, decode_base64(token), ":");
 
     return std::make_pair(elems[0], PasswordEncryption::encrypt(elems[1], elems[0]));
 }

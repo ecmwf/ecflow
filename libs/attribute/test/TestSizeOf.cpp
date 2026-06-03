@@ -48,7 +48,7 @@ TYPE_STRING(DayAttr)
 template <typename T>
 void inspect_size_of(T t = T{}) {
 #if PRINT_SIZEOF_RESULTS
-    ECF_TEST_DBG(<< "   * sizeof(" << typeName<T>() << ") = " << sizeof(T));
+    ECF_TEST_DBG("   * sizeof(" << typeName<T>() << ") = " << sizeof(T));
 #endif
     BOOST_REQUIRE_EQUAL(sizeof(T), sizeof(T));
 }

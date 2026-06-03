@@ -66,11 +66,14 @@ import sphinx.ext.autodoc
 
 
 class TargetFile:
-    LAST_NAME = "ZombieVec"
-
     def __init__(self):
         self.name = ""
         self.fp = None
+
+    def close(self):
+        if self.fp is not None:
+            self.fp.close()
+            self.fp = None
 
     def write(self, source, line):
         _, _, s = source.rpartition("docstring of ecflow.")
@@ -78,12 +81,16 @@ class TargetFile:
         if s:
             name = s[0]
             if name and name[0].isupper():
+                # Normal case: "docstring of ecflow.ClassName" or "docstring of ecflow.ClassName.method"
                 self._open(name)
                 if self.fp is not None:
                     self.fp.write(line + "\n")
-                    if self.name == self.LAST_NAME:
-                        self.fp.close()
-                        self.fp = None
+            elif name.startswith("pybind11_") and self.fp is not None:
+                # Because pybind11 leaks the type used to wrap the ABI type (i.e. pybind11_detail_function_record_v1_...)
+                # as the descriptor type for class methods, we detect this and continue to write to the currently open
+                # class file — this assumes that autodoc always processes a class's methods immediately after the class
+                # own docstring.
+                self.fp.write(line + "\n")
 
     def _open(self, name):
         if self.name == name and self.name != "":
@@ -91,9 +98,7 @@ class TargetFile:
                 self.fp = open(f"rst/{name}.rst", "a")
         else:
             self.name = name
-            if self.fp is not None:
-                self.fp.close()
-                self.fp = None
+            self.close()
             if self.name != "" and self.name[0].isupper():
                 self.fp = open(f"rst/{self.name}.rst", "w")
                 title = f"ecflow.{name}"
@@ -106,12 +111,12 @@ targetFile = TargetFile()
 
 def add_line(self, line, source, *lineno):
     """Append one line of generated reST to the output."""
-    # _RST_FP.write(line + "\n")
-    # print(f"source={source}")
     targetFile.write(source, line)
     self.directive.result.append(self.indent + line, source, *lineno)
 
 
 sphinx.ext.autodoc.Documenter.add_line = add_line
 
-#
+
+def setup(app):
+    app.connect("build-finished", lambda app, exception: targetFile.close())

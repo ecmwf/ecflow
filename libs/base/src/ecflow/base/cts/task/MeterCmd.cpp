@@ -49,7 +49,7 @@ ecf::authorisation_t MeterCmd::authorise(AbstractServer& server) const {
 }
 
 void MeterCmd::print(std::string& os) const {
-    os += Str::CHILD_CMD();
+    os += ecf::string_constants::child_cmd;
     os += "meter ";
     os += name_;
     os += " ";

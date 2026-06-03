@@ -10,7 +10,7 @@
 
 import os
 from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, \
-    Event, Meter, Label, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatDateList, RepeatString, \
+    Event, Meter, Label, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatDateList, RepeatDateTimeList, RepeatString, \
     TimeSlot, TimeSeries, Today, Time, Date, Day, Days, Cron, Autocancel, Late, \
     DState, Clock, ChildCmdType, ZombieType, ZombieAttr, ZombieUserActionType, Client, debug_build
 import ecflow_test_util as Test
@@ -85,5 +85,25 @@ if __name__ == "__main__":
     except RuntimeError:
         expected_error = True
     assert expected_error, "RepeatDateList adding an empty date list should be an error"
+
+    #
+    # Adding a RepeatDateTimeList with an empty list should be an error
+    expected_error = False
+    task = Task("t")
+    try:
+        task.add_repeat(RepeatDateTimeList("dt", []))
+    except RuntimeError:
+        expected_error = True
+    assert expected_error, "RepeatDateTimeList with empty list should raise RuntimeError"
+
+    #
+    # Adding a RepeatDateTimeList with an invalid datetime string should be an error
+    expected_error = False
+    task = Task("t")
+    try:
+        task.add_repeat(RepeatDateTimeList("dt", ["not-a-datetime"]))
+    except RuntimeError:
+        expected_error = True
+    assert expected_error, "RepeatDateTimeList with invalid datetime string should raise RuntimeError"
 
     print("All Tests pass")

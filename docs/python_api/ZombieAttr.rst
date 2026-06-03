@@ -5,7 +5,7 @@ ecflow.ZombieAttr
 .. py:class:: ZombieAttr
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 The :term:`zombie` attribute defines how a :term:`zombie` should be handled in an automated fashion
 
@@ -48,25 +48,25 @@ Usage:
 The list of child commands. If empty action applies to all child cmds
 
 
-.. py:method:: ZombieAttr.empty( (ZombieAttr)arg1) -> bool :
+.. py:method:: ZombieAttr.empty(self: ecflow.ZombieAttr) -> bool
    :module: ecflow
 
 Return true if the attribute is empty
 
 
-.. py:method:: ZombieAttr.user_action( (ZombieAttr)arg1) -> ZombieUserActionType :
+.. py:method:: ZombieAttr.user_action(self: ecflow.ZombieAttr) -> ecflow.ZombieUserActionType
    :module: ecflow
 
 The automated action to invoke, when zombies arise
 
 
-.. py:method:: ZombieAttr.zombie_lifetime( (ZombieAttr)arg1) -> int :
+.. py:method:: ZombieAttr.zombie_lifetime(self: ecflow.ZombieAttr) -> int
    :module: ecflow
 
 Returns the lifetime in seconds of :term:`zombie` in the server
 
 
-.. py:method:: ZombieAttr.zombie_type( (ZombieAttr)arg1) -> ZombieType :
+.. py:method:: ZombieAttr.zombie_type(self: ecflow.ZombieAttr) -> ecflow.ZombieType
    :module: ecflow
 
 Returns the :term:`zombie type`

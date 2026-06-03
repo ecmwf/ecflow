@@ -64,6 +64,14 @@ void to_json(ojson& j, const ::RepeatDateList& a) {
     j = ojson({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
 }
 
+void to_json(ojson& j, const ::RepeatDateTimeList& a) {
+    std::vector<std::string> lst;
+    for (int i = 0; i < a.indexNum(); i++) {
+        lst.push_back(a.value_as_string(i));
+    }
+    j = ojson({{"name", a.name()}, {"index", a.index_or_value()}, {"value", a.valueAsString()}, {"values", lst}});
+}
+
 void to_json(ojson& j, const ::RepeatDate& a) {
     j = ojson({{"name", a.name()}, {"start", a.start()}, {"end", a.end()}, {"step", a.step()}, {"value", a.value()}});
 }
@@ -121,6 +129,7 @@ void to_json(ojson& j, const Repeat& a) {
     repeat_to_json<RepeatDate,
                    RepeatDateTime,
                    RepeatDateList,
+                   RepeatDateTimeList,
                    RepeatInteger,
                    RepeatDay,
                    RepeatString,

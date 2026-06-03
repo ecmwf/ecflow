@@ -15,6 +15,7 @@ Adding Repeats
       RepeatString,
       RepeatInteger,
       RepeatDateList,
+      RepeatDateTimeList,
    )
 
    def add_tasks(fam):
@@ -49,6 +50,18 @@ Adding Repeats
    )  # arbitrary date list
    add_tasks(f6)
 
+   f7 = s1.add_family("f7")
+   f7.add_repeat(
+      RepeatDateTime("INSTANT", "20240101T000000", "20240102T000000", "12:00:00")
+   )  # sequence of datetime instants
+   add_tasks(f7)
+
+   f8 = s1.add_family("f8")
+   f8.add_repeat(
+      RepeatDateTimeList("INSTANT", ["20240101T000000", "20240102T120000", "20240103T060000"])
+   )  # arbitrary datetime instant list
+   add_tasks(f8)
+
 The following examples show alternative styles that produces the same definition:
 
 .. code-block:: python
@@ -82,6 +95,16 @@ The following examples show alternative styles that produces the same definition
                RepeatDateList("YMD", [20130101, 20130102, 20130103]),
                [Task("t{}".format(i)) for i in range(1, 3)],
          ),
+         Family(
+               "f8",
+               RepeatDateTime("INSTANT", "20240101T000000", "20240102T000000", "12:00:00"),
+               [Task("t{}".format(i)) for i in range(1, 3)],
+         ),
+         Family(
+               "f8",
+               RepeatDateTimeList("INSTANT", ["20240101T000000", "20240102T120000", "20240103T060000"]),
+               [Task("t{}".format(i)) for i in range(1, 3)],
+         ),
       )
    )
 
@@ -90,7 +113,7 @@ The following examples show alternative styles that produces the same definition
    defs = Defs() + Suite("s1")
    defs.s1 += [
       Family("f{}".format(i)).add([Task("t{}".format(i)) for i in range(1, 3)])
-      for i in range(1, 6)
+      for i in range(1, 8)
    ]
    defs.s1.f1 += RepeatDate("YMD", 20100111, 20100115, 2)
    defs.s1.f2 += RepeatInteger("count", 0, 100, 2)
@@ -98,8 +121,9 @@ The following examples show alternative styles that produces the same definition
    defs.s1.f4 += RepeatString("enum", ["a", "b", "c"])
    defs.s1.f5 += RepeatDay(1)
    defs.s1.f6 += RepeatDateList("YMD", [20130101, 20130102, 20130103])
+   defs.s1.f7 += RepeatDateTime("INSTANT", "20240101T000000", "20240102T000000", "12:00:00")
+   defs.s1.f8 += RepeatDateTimeList("INSTANT", ["20240101T000000", "20240102T120000", "20240103T060000"])
 
 .. warning::
 
    In the second example above we use 'defs.s1.*' to reference a node by name. This is useful in small designs but will produce maintenance issues in large designs IF the node names are changed.
-

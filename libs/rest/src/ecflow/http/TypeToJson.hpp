@@ -60,6 +60,7 @@ void to_json(ecf::http::ojson&, const ::RepeatDate&);
 void to_json(ecf::http::ojson&, const ::RepeatDateTime&);
 void to_json(ecf::http::ojson&, const ::RepeatDay&);
 void to_json(ecf::http::ojson&, const ::RepeatDateList&);
+void to_json(ecf::http::ojson&, const ::RepeatDateTimeList&);
 void to_json(ecf::http::ojson&, const ::RepeatInteger&);
 void to_json(ecf::http::ojson&, const ::RepeatEnumerated&);
 void to_json(ecf::http::ojson&, const ::RepeatString&);

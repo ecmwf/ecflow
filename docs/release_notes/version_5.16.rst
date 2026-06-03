@@ -12,7 +12,7 @@ Version 5.16 updates
 Version 5.16.0
 ==============
 
-* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2026-02-06
+* `Released <https://confluence.ecmwf.int/display/ECFLOW/Releases>`__\  on 2026-03-25
 
 General
 -------

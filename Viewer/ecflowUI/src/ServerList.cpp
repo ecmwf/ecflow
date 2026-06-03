@@ -92,7 +92,7 @@ std::vector<std::string> ServerListSystemFileManager::buildFileList() {
         if (!s.empty()) {
             useProp = true;
             std::vector<std::string> sVec;
-            ecf::Str::split(s, sVec, ":");
+            ecf::algorithm::split_at(sVec, s, ":");
             for (auto v : sVec) {
                 if (std::find(paths.begin(), paths.end(), v) == paths.end()) {
                     paths.push_back(v);
@@ -108,7 +108,7 @@ std::vector<std::string> ServerListSystemFileManager::buildFileList() {
             auto s = std::string(ch);
             if (!s.empty()) {
                 std::vector<std::string> sVec;
-                ecf::Str::split(s, sVec, ":");
+                ecf::algorithm::split_at(sVec, s, ":");
                 for (auto v : sVec) {
                     if (std::find(paths.begin(), paths.end(), v) == paths.end()) {
                         paths.push_back(v);
@@ -276,13 +276,13 @@ void ServerListSystemFileManager::loadFile(const std::string& fPath,
     if (in.good()) {
         std::string line;
         while (getline(in, line)) {
-            std::string buf = boost::trim_left_copy(line);
+            std::string buf = ecf::algorithm::trim_leading_copy(line);
             if (buf.size() > 0 && buf[0] == '#') {
                 continue;
             }
 
             if (buf.size() > 0 && buf[0] == '/') {
-                std::string p = boost::trim_right_copy(buf);
+                std::string p = ecf::algorithm::trim_trailing_copy(buf);
                 if (std::find(includedPaths.begin(), includedPaths.end(), p) == includedPaths.end()) {
                     includedPaths.emplace_back(p);
                 }
@@ -542,14 +542,14 @@ bool ServerList::load() {
     int lineCnt = 1;
     while (getline(in, line)) {
         // We ignore comment lines
-        std::string buf = boost::trim_left_copy(line);
+        std::string buf = ecf::algorithm::trim_leading_copy(line);
         if (buf.size() > 0 && buf.at(0) == '#') {
             lineCnt++;
             continue;
         }
 
         std::vector<std::string> sv;
-        ecf::algorithm::split(sv, line, ",");
+        ecf::algorithm::split_at(sv, line, ",");
 
         bool favourite = false;
         if (sv.size() >= 4) {

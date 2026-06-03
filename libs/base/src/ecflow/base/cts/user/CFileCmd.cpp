@@ -318,7 +318,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
     }
 
     /// The file could get very large, hence truncate at the start
-    if (Str::truncate_at_start(fileContents, max_lines_)) {
+    if (ecf::algorithm::tail(fileContents, max_lines_)) {
         fileContents += MESSAGE("\n# >>>>>>>> File truncated down to "
                                 << max_lines_ << ". Truncated from the end of the file <<<<<<<<<\n");
     }

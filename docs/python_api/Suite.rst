@@ -40,29 +40,29 @@ Usage:
                  Task('t1'))))   # create in in-place
 
 
-.. py:method:: Suite.add_clock( (Suite)arg1, (Clock)arg2) -> Suite
+.. py:method:: Suite.add_clock(self: ecflow.Suite, arg0: ecflow.Clock) -> ecflow.Suite
    :module: ecflow
 
 
-.. py:method:: Suite.add_end_clock( (Suite)arg1, (Clock)arg2) -> Suite :
+.. py:method:: Suite.add_end_clock(self: ecflow.Suite, arg0: ecflow.Clock) -> ecflow.Suite
    :module: ecflow
 
 End clock, used to mark end of simulation
 
 
-.. py:method:: Suite.begun( (Suite)arg1) -> bool :
+.. py:method:: Suite.begun(self: ecflow.Suite) -> bool
    :module: ecflow
 
 Returns true if the :term:`suite` has begun, false otherwise
 
 
-.. py:method:: Suite.get_clock( (Suite)arg1) -> Clock :
+.. py:method:: Suite.get_clock(self: ecflow.Suite) -> ecflow.Clock
    :module: ecflow
 
 Returns the :term:`suite` :term:`clock`
 
 
-.. py:method:: Suite.get_end_clock( (Suite)arg1) -> Clock :
+.. py:method:: Suite.get_end_clock(self: ecflow.Suite) -> ecflow.Clock
    :module: ecflow
 
 Return the suite's end clock. Can be NULL

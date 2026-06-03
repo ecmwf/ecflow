@@ -18,18 +18,40 @@ namespace TimeStamp {
 
 namespace {
 
+///
+/// @brief Format policy for the regular timestamp, including the year.
+///
+/// Format: `"[HH:MM:SS DD.MM.YYYY] "` (strftime pattern: `"[%H:%M:%S %d.%m.%Y] "`).
+///
 struct regular
 {
+    /// strftime format string.
     static constexpr char const* format = "[%H:%M:%S %d.%m.%Y] ";
-    static constexpr size_t size        = 23;
+    /// Buffer size in bytes, including the null terminator.
+    static constexpr size_t size = 23;
 };
 
+///
+/// @brief Format policy for the brief timestamp, omitting the year.
+///
+/// Format: `"[HH:MM:SS DD.MM] "` (strftime pattern: `"[%H:%M:%S %d.%m] "`).
+///
 struct brief
 {
+    /// strftime format string.
     static constexpr char const* format = "[%H:%M:%S %d.%m] ";
-    static constexpr size_t size        = 18;
+    /// Buffer size in bytes, including the null terminator.
+    static constexpr size_t size = 18;
 };
 
+///
+/// @brief Format the current local time as a timestamp string.
+///
+/// @tparam FMT A format policy providing a strftime-compatible `format` string and the
+///         corresponding `size` (in bytes, including the null terminator). Defaults to `regular`.
+///
+/// @return The current local time formatted according to `FMT::format`.
+///
 template <typename FMT = regular>
 std::string format_now() {
     std::time_t now = std::time(nullptr);
@@ -44,12 +66,12 @@ std::string now() {
     return format_now();
 }
 
-void now(std::string& time_stamp) {
-    time_stamp = format_now();
+void now(std::string& buffer) {
+    buffer = format_now();
 }
 
-void now_in_brief(std::string& time_stamp) {
-    time_stamp = format_now<brief>();
+void now_in_brief(std::string& buffer) {
+    buffer = format_now<brief>();
 }
 
 } // namespace TimeStamp

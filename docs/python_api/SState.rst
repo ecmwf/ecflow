@@ -5,34 +5,40 @@ ecflow.SState
 .. py:class:: SState
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 A SState holds the :term:`ecflow_server` state
 
 See :term:`server states`
 
+Members:
+
+  HALTED
+
+  SHUTDOWN
+
+  RUNNING
+
 
 .. py:attribute:: SState.HALTED
    :module: ecflow
-   :value: ecflow.SState.HALTED
+   :value: <SState.HALTED: 0>
 
 
 .. py:attribute:: SState.RUNNING
    :module: ecflow
-   :value: ecflow.SState.RUNNING
+   :value: <SState.RUNNING: 2>
 
 
 .. py:attribute:: SState.SHUTDOWN
    :module: ecflow
-   :value: ecflow.SState.SHUTDOWN
+   :value: <SState.SHUTDOWN: 1>
 
 
-.. py:attribute:: SState.names
+.. py:property:: SState.name
    :module: ecflow
-   :value: {'HALTED': ecflow.SState.HALTED, 'RUNNING': ecflow.SState.RUNNING, 'SHUTDOWN': ecflow.SState.SHUTDOWN}
 
 
-.. py:attribute:: SState.values
+.. py:property:: SState.value
    :module: ecflow
-   :value: {0: ecflow.SState.HALTED, 1: ecflow.SState.SHUTDOWN, 2: ecflow.SState.RUNNING}
 

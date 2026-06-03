@@ -81,7 +81,7 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*>* sections) // 
             range.length = qMin(l->position() + l->size(), index) - lineStart - range.start;
             range.format = l->format();
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
             formatMap.insert(l->priority(), range);
 #else
             formatMap.insertMulti(l->priority(), range);

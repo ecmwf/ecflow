@@ -12,10 +12,6 @@ if (NOT ENABLE_SERVER)
   return() # Do not proceed if server is not enabled
 endif ()
 
-if(${SELECTED_BOOST_VERSION} VERSION_GREATER_EQUAL 1.86.0)
-  set(ADDITIONAL_BOOST_COMPONENTS Boost::process)
-endif()
-
 ecbuild_add_test(
   TARGET
     s_foolproof
@@ -23,21 +19,18 @@ ecbuild_add_test(
     integration
     nightly
   SOURCES
-    # Scaffolding
-    scaffold/Naming.hpp
-    scaffold/Process.hpp
-    scaffold/Process.cpp
-    scaffold/Provisioning.hpp
     # Test entry point
     TestFoolproof_main.cpp # test entry point
     # Test sources
     TestFoolproof.Basic.cpp
+    TestFoolproof.InLimit.cpp
     TestFoolproof.Mirror.cpp
     TestFoolproof.NodeExtern.cpp
     TestFoolproof.PasswordsAndWhiteLists.cpp
     TestFoolproof.Scaffold.cpp
   LIBS
     ecflow_all
+    test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     Boost::unit_test_framework
     ${ADDITIONAL_BOOST_COMPONENTS}

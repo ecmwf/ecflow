@@ -5,7 +5,7 @@ ecflow.Trigger
 .. py:class:: Trigger
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Add a :term:`trigger` or :term:`complete expression`.
 
@@ -64,7 +64,7 @@ If however node taskx has not yet been added to its parent, we use a relative na
   t2 ==complete and taskx == complete
 
 
-.. py:method:: Trigger.get_expression( (Trigger)arg1) -> str :
+.. py:method:: Trigger.get_expression(self: ecflow.Trigger) -> str
    :module: ecflow
 
 returns the trigger expression as a string

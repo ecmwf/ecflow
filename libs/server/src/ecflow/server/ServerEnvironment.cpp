@@ -131,7 +131,7 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     if (ecf_checkpt_file_[0] != '/') {
         // Prepend with ECF_HOME
         std::string check_pt = ecf_home();
-        check_pt += Str::PATH_SEPARATOR();
+        check_pt += ecf::string_constants::path_separator;
         check_pt += ecf_checkpt_file_;
         ecf_checkpt_file_ = check_pt;
     }
@@ -142,12 +142,12 @@ void ServerEnvironment::init(const CommandLine& cl, const std::string& path_to_c
     }
     if (ecf_backup_checkpt_file_[0] != '/') {
         std::string check_pt = ecf_home();
-        check_pt += Str::PATH_SEPARATOR();
+        check_pt += ecf::string_constants::path_separator;
         check_pt += ecf_backup_checkpt_file_;
         ecf_backup_checkpt_file_ = check_pt;
     }
 
-    if (ecf_white_list_file_ == Str::WHITE_LIST_FILE()) {
+    if (ecf_white_list_file_ == ecf::string_constants::white_list_file) {
         ecf_white_list_file_ = host_name_.prefix_host_and_port(port, ecf_white_list_file_);
     }
 
@@ -523,7 +523,7 @@ void ServerEnvironment::read_config_file(std::string& log_file_name, const std::
             ("ECF_URL_BASE", po::value<std::string>(&urlBase_)->default_value(Ecf::URL_BASE()), "Defines url base.")
             ("ECF_URL", po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
             ("ECF_MICRODEF", po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
-            ("ECF_LISTS", po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and their access rights")
+            ("ECF_LISTS", po::value<std::string>(&ecf_white_list_file_)->default_value(ecf::string_constants::white_list_file), "Path name to file the list valid users and their access rights")
             ("ECF_PASSWD", po::value<std::string>(&passwd_file)->default_value(std::string{AuthenticationService::default_passwd_file()}), "Path name to passwd file")
             ("ECF_CUSTOM_PASSWD", po::value<std::string>(&custom_passwd_file)->default_value(std::string{AuthenticationService::default_custom_passwd_file()}), "Path name to custom passwd file, for user who don't use login name")
             ("ECF_TASK_THRESHOLD", po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()), "The defaults thresholds when profiling job generation")

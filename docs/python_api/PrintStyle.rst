@@ -5,7 +5,7 @@ ecflow.PrintStyle
 .. py:class:: PrintStyle
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Singleton used to control the print Style. See :py:class:`ecflow.Style`
 
@@ -19,14 +19,14 @@ Usage::
    PrintStyle.set_style(old_style) # reset previous style
 
 
-.. py:method:: PrintStyle.get_style() -> Style :
+.. py:method:: PrintStyle.get_style() -> ecflow.Style
    :module: ecflow
    :staticmethod:
 
 Returns the style, static method
 
 
-.. py:method:: PrintStyle.set_style( (Style)arg1) -> None :
+.. py:method:: PrintStyle.set_style(arg0: ecflow.Style) -> None
    :module: ecflow
    :staticmethod:
 

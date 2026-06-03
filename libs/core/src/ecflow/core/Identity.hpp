@@ -81,7 +81,7 @@ public:
     [[nodiscard]] std::string username() const { return username_; }
     [[nodiscard]] std::string password() const { return password_; }
 
-    [[nodiscard]] std::string as_string() const { return "{UserX: " + username_ + ":" + password_ + "}"; }
+    [[nodiscard]] std::string as_string() const { return "{UserX: " + username_ + ":<omitted>}"; }
 
 private:
     std::string username_;
@@ -97,7 +97,7 @@ public:
     [[nodiscard]] std::string username() const { return username_; }
     [[nodiscard]] std::string password() const { return password_; }
 
-    [[nodiscard]] std::string as_string() const { return "{SecuredUserX: " + username_ + ":" + password_ + "}"; }
+    [[nodiscard]] std::string as_string() const { return "{SecuredUserX: " + username_ + ":<omitted>}"; }
 
 private:
     std::string username_;

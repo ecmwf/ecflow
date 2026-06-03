@@ -11,7 +11,7 @@
 from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
     Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
     JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
-    Repeat, RepeatDate, RepeatDateList, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
+    Repeat, RepeatDate, RepeatDateList, RepeatDateTimeList, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
     Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
     VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import unittest
@@ -33,7 +33,8 @@ class Test_get_attr(unittest.TestCase):
 
     def test_get_attr_generated_variables(self):
         defs = Defs() + (Suite('s') + Family('f').add((Task('t') + Edit(var="1") + RepeatDate("YMD", 20100111, 20100115, 2)),
-                                                      (Task('t2') + Edit(var="1") + RepeatDateList("YMD", [20100111, 20100115]))))
+                                                      (Task('t2') + Edit(var="1") + RepeatDateList("YMD", [20100111, 20100115])),
+                                                      (Task('t3') + Edit(var="1") + RepeatDateTimeList("DT", ["20240315T103045"]))))
         defs.s.f.t += Meter("meter", 0, 100)
         defs.s.f.t += Event("event")
         defs.s.f.t += Limit("limitx", 10)
@@ -104,6 +105,16 @@ class Test_get_attr(unittest.TestCase):
         self.assertEqual(defs.s.f.t2.YMD_DD.value(), '11', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t2.YMD_DOW.value(), '1', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t2.YMD_JULIAN.value(), '2455208', "expected generated YMD of value")
+
+        # RepeatDateTimeList generated variables
+        self.assertEqual(defs.s.f.t3.DT.value(), '20240315T103045', "expected DT='20240315T103045'")
+        self.assertEqual(defs.s.f.t3.DT_DATE.value(), '20240315', "expected DT_DATE='20240315'")
+        self.assertEqual(defs.s.f.t3.DT_YYYY.value(), '2024', "expected DT_YYYY='2024'")
+        self.assertEqual(defs.s.f.t3.DT_MM.value(), '03', "expected DT_MM='03'")
+        self.assertEqual(defs.s.f.t3.DT_DD.value(), '15', "expected DT_DD='15'")
+        self.assertEqual(defs.s.f.t3.DT_HOURS.value(), '10', "expected DT_HOURS='10'")
+        self.assertEqual(defs.s.f.t3.DT_MINUTES.value(), '30', "expected DT_MINUTES='30'")
+        self.assertEqual(defs.s.f.t3.DT_SECONDS.value(), '45', "expected DT_SECONDS='45'")
 
 
 if __name__ == "__main__":

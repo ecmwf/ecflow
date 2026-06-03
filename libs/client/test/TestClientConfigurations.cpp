@@ -37,6 +37,8 @@ BOOST_AUTO_TEST_SUITE(S_Client)
 
 BOOST_AUTO_TEST_SUITE(T_ClientConfiguration)
 
+using namespace ecf::test::scaffold;
+
 /*
  * The following exports an environment variable used for tests, which changes the location of the SSL certificates.
  * Instead of the default location (HOME/.ecflowrc/ssl), we use the current test directory.

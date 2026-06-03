@@ -15,11 +15,27 @@
 
 namespace ecf {
 
+///
+/// @brief Represents a host and provides helpers to build ecFlow server file names
+///        prefixed with the host and port (e.g. @c <host>.<port>.ecf.log).
+///
 class Host {
 public:
-    /// can throw std::runtime_error if the gethostname fails
+    ///
+    /// @brief Create a Host instance by resolving the current machine's hostname.
+    ///
+    /// @throws std::runtime_error if the hostname cannot be determined
+    ///
     Host();
 
+    ///
+    /// @brief Create a Host instance with the given hostname.
+    ///
+    /// If @p host is @c "localhost", the actual machine hostname is resolved.
+    ///
+    /// @param host the hostname to use
+    /// @throws std::runtime_error if @p host is @c "localhost" and the hostname cannot be determined
+    ///
     explicit Host(const std::string& host);
 
     // Disable copy (and move) semantics
@@ -30,28 +46,77 @@ public:
 
     ~Host() = default;
 
-    /// return the host name
+    ///
+    /// @brief Get the hostname.
+    ///
+    /// @return the hostname
+    ///
     std::string name() const;
 
-    /// returns the log file name
+    ///
+    /// @brief Get the log file name prefixed with the host and port.
+    ///
+    /// @param port the server port
+    /// @return the log file name of the form @c <host>.<port>.ecf.log
+    ///
     std::string ecf_log_file(const std::string& port) const;
 
-    /// return checkPoint file
+    ///
+    /// @brief Get the checkpoint file name prefixed with the host and port.
+    ///
+    /// @param port the server port
+    /// @return the checkpoint file name of the form @c <host>.<port>.check
+    ///
     std::string ecf_checkpt_file(const std::string& port) const;
 
-    /// return backup checkPoint file
+    ///
+    /// @brief Get the backup checkpoint file name prefixed with the host and port.
+    ///
+    /// @param port the server port
+    /// @return the backup checkpoint file name of the form @c <host>.<port>.check.b
+    ///
     std::string ecf_backup_checkpt_file(const std::string& port) const;
 
-    /// return ecf.list file. White list file used for authentication & authorisation
+    ///
+    /// @brief Get the white-list file name prefixed with the host and port.
+    ///
+    /// The white-list file is used for authentication and authorisation.
+    ///
+    /// @param port the server port
+    /// @return the white-list file name of the form @c <host>.<port>.ecf.lists
+    ///
     std::string ecf_lists_file(const std::string& port) const;
 
-    /// return ecf.passwd file. Used for authentication
+    ///
+    /// @brief Get the password file name prefixed with the host and port.
+    ///
+    /// The password file is used for authentication.
+    ///
+    /// @param port the server port
+    /// @return the password file name of the form @c <host>.<port>.ecf.passwd
+    ///
     std::string ecf_passwd_file(const std::string& port) const;
 
-    /// return ecf.custom_passwd file. Used for authentication
+    ///
+    /// @brief Get the custom password file name prefixed with the host and port.
+    ///
+    /// The custom password file is used for authentication.
+    ///
+    /// @param port the server port
+    /// @return the custom password file name of the form @c <host>.<port>.ecf.custom_passwd
+    ///
     std::string ecf_custom_passwd_file(const std::string& port) const;
 
-    /// Given a port and file name, will return <host>.<port>.file_name
+    ///
+    /// @brief Build a file name prefixed with the host and port.
+    ///
+    /// If @p file_name contains a path separator (@c /), it is returned unchanged.
+    /// Otherwise, returns a name of the form @c <host>.<port>.<file_name>.
+    ///
+    /// @param port      the server port
+    /// @param file_name the base file name or absolute path
+    /// @return the prefixed file name, or @p file_name unchanged if it contains a path separator
+    ///
     std::string prefix_host_and_port(const std::string& port, std::string_view file_name) const;
 
 private:

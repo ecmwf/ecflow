@@ -5,7 +5,7 @@ ecflow.RepeatDateTime
 .. py:class:: RepeatDateTime
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 Allows a :term:`node` to be repeated based on date+time instants (using yyyymmddTHHMMSS format).
 
@@ -40,26 +40,46 @@ Usage:
    t = Task('t1',
             RepeatDateTime('DATETIME', '20050130T000000', '20050203T120000', '1:00:00'))
 
+Accessor methods::
 
-.. py:method:: RepeatDateTime.end( (RepeatDateTime)arg1) -> int :
+   current_index() -> int
+      Zero-based position: (seconds(current) - seconds(start)) / seconds(step).
+   current_value() -> str
+      The current instant as a string in yyyymmddTHHMMSS format.
+
+
+.. py:method:: RepeatDateTime.current_index(self: ecflow.RepeatDateTime) -> int
+   :module: ecflow
+
+Return the zero-based index of the current instant position:
+(seconds(current) - seconds(start)) / seconds(step).
+
+
+.. py:method:: RepeatDateTime.current_value(self: ecflow.RepeatDateTime) -> object
+   :module: ecflow
+
+Return the current instant as a string in yyyymmddTHHMMSS format.
+
+
+.. py:method:: RepeatDateTime.end(self: ecflow.RepeatDateTime) -> int
    :module: ecflow
 
 Return the end date as an integer (i.e. seconds since 19700101T000000)
 
 
-.. py:method:: RepeatDateTime.name( (RepeatDateTime)arg1) -> str :
+.. py:method:: RepeatDateTime.name(self: ecflow.RepeatDateTime) -> str
    :module: ecflow
 
 Return the name of the repeat.
 
 
-.. py:method:: RepeatDateTime.start( (RepeatDateTime)arg1) -> int :
+.. py:method:: RepeatDateTime.start(self: ecflow.RepeatDateTime) -> int
    :module: ecflow
 
 Return the start date as an integer (i.e. seconds since 19700101T000000)
 
 
-.. py:method:: RepeatDateTime.step( (RepeatDateTime)arg1) -> int :
+.. py:method:: RepeatDateTime.step(self: ecflow.RepeatDateTime) -> int
    :module: ecflow
 
 Return the step increment (in seconds). This is used to update the repeat, until end instant is reached

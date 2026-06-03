@@ -182,7 +182,7 @@ std::vector<Token> ReadTokens(const std::string& filename) {
             const std::string& hash = o.at("hash").get<std::string>();
 
             std::vector<std::string> elems;
-            ecf::Str::split(hash, elems, "$");
+            ecf::algorithm::split_at(elems, hash, "$");
 
             if (elems.size() != 3) {
                 throw std::invalid_argument("Invalid hash format: " + hash);

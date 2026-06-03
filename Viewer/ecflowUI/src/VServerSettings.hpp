@@ -54,9 +54,30 @@ public:
         UserLogServerPort
     };
 
+    ///
+    /// @brief Access the associated integer value of the given parameter.
+    ///
+    /// @param par The parameter for which to retrieve the integer value.
+    /// @return The integer value for the given parameter, or 0 if the parameter is not found/not an integer.
+    ///
     int intValue(Param par) const;
+
+    ///
+    /// @brief Access the associated boolean value of the given parameter.
+    ///
+    /// @param par The parameter for which to retrieve the boolean value.
+    /// @return The boolean value for the given parameter, or false if the parameter is not found/not a boolean.
+    ///
     bool boolValue(Param par) const;
+
+    ///
+    /// @brief Access the associated string value of the given parameter.
+    ///
+    /// @param par The parameter for which to retrieve the string value.
+    /// @return The string value for the given parameter, or an empty string if the parameter is not found/not a string.
+    ///
     QString stringValue(Param par) const;
+
     VProperty* guiProp() const { return guiProp_; }
     bool notificationsEnabled() const;
     static std::string notificationId(Param);
@@ -76,6 +97,12 @@ protected:
     explicit VServerSettings(ServerHandler* server);
     ~VServerSettings() override;
 
+    ///
+    /// @brief Access the property associated with the given parameter.
+    ///
+    /// @param par The parameter for which to retrieve the property.
+    /// @return The property associated with the parameter; or nullptr, if parameter is not found
+    ///
     VProperty* property(Param par) const;
     void loadSettings();
 

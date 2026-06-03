@@ -20,659 +20,1116 @@
 #include "ecflow/core/Timer.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-using namespace ecf;
-
 BOOST_AUTO_TEST_SUITE(U_Core)
 
 BOOST_AUTO_TEST_SUITE(T_Str)
 
-BOOST_AUTO_TEST_CASE(test_str) {
+BOOST_AUTO_TEST_CASE(test_algorithm_join) {
     ECF_NAME_THIS_TEST();
 
+    struct tc
     {
-        std::string str;
+        std::vector<std::string> input;
+        std::string delimiter;
         std::string expected;
-        Str::removeQuotes(str);
-        BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
+    };
 
-        str      = "\"\"";
-        expected = "";
-        Str::removeQuotes(str);
-        BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
+    std::vector<tc> test_cases = {
+        {{}, ",", ""},
+        {{"a", "b", "c"}, "", "abc"},
+        {{"a"}, ",", "a"},
+        {{"a", "b"}, ",", "a,b"},
+        {{"a", "b", "c"}, ",", "a,b,c"},
+        {{"a", "b", "c"}, ";;", "a;;b;;c"},
+    };
 
-        str      = "fred";
-        expected = "fred";
-        Str::removeQuotes(str);
-        BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
-
-        str      = "\"fred\"";
-        expected = "fred";
-        Str::removeQuotes(str);
-        BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::join(tc.input, tc.delimiter);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_replace_first) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
     {
-        std::string str;
+        std::string input;
+        std::string search;
+        std::string replace;
         std::string expected;
-        Str::removeSingleQuotes(str);
-        BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
+    };
 
-        str      = "''";
-        expected = "";
-        Str::removeSingleQuotes(str);
-        BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
+    std::vector<tc> test_cases = {
+        {"abc def abc def abc", " ", "", "abcdef abc def abc"},
+        {"abc def abc def abc", "a", "x", "xbc def abc def abc"},
+        {"abc def abc def abc", "b", "x", "axc def abc def abc"},
+        {"abc def abc def abc", "c", "x", "abx def abc def abc"},
+        {"abc def abc def abc", "d", "x", "abc xef abc def abc"},
+        {"abc def abc def abc", "abc", "xxx", "xxx def abc def abc"},
+    };
 
-        str      = "fred";
-        expected = "fred";
-        Str::removeSingleQuotes(str);
-        BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
-
-        str      = "'fred'";
-        expected = "fred";
-        Str::removeSingleQuotes(str);
-        BOOST_CHECK_MESSAGE(str == expected, " Expected " << expected << " but found " << str);
+    for (const auto& tc : test_cases) {
+        auto actual = tc.input;
+        ecf::algorithm::replace_first(actual, tc.search, tc.replace);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_split_at) {
+    ECF_NAME_THIS_TEST();
+    struct tc
     {
-        std::string test;
-        BOOST_CHECK_MESSAGE(!Str::truncate_at_start(test, 7), "Empty sring should return false");
+        std::string input;
+        std::vector<std::string> expected;
+    };
 
-        test                 = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        std::string expected = "line";
-        BOOST_CHECK_MESSAGE(Str::truncate_at_start(test, 1) && test == expected,
-                            "Expected:\n"
-                                << expected << "\nbut found:\n"
-                                << test);
+    std::vector<tc> test_cases = {
+        {"", {}},
+        {"  ", {}},
+        {"a", {"a"}},
+        {" a", {"a"}},
+        {"a ", {"a"}},
+        {" a ", {"a"}},
+        {"\ta", {"a"}},
+        {"a\t", {"a"}},
+        {"\ta\t", {"a"}},
+        {"\n", {"\n"}},
+        {" \t a\t \t", {"a"}},
+        {"\t\t\ta\t\t\t", {"a"}},
+        {"\n", {"\n"}},
+        {"        a     b     c       d        ", {"a", "b", "c", "d"}},
+        {" - !   $ % ^ & * ( ) - + ?", {"-", "!", "$", "%", "^", "&", "*", "(", ")", "-", "+", "?"}},
+        {"This is a string", {"This", "is", "a", "string"}},
+        {"		 verify complete:8	       # 4 sundays in october hence expect 8 task completions",
+         {"verify",
+          "complete:8",
+          "#",
+          "4",
+          "sundays",
+          "in",
+          "october",
+          "hence",
+          "expect",
+          "8",
+          "task",
+          "completions"}}};
 
-        test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        expected = "a\nstring\nwith\nlots\nof\nnew\nline";
-        BOOST_CHECK_MESSAGE(Str::truncate_at_start(test, 7) && test == expected,
-                            "Expected:\n"
-                                << expected << "\nbut found:\n"
-                                << test);
+    for (const auto& tc : test_cases) {
+        std::vector<std::string> splits;
 
-        test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        expected = test;
-        BOOST_CHECK_MESSAGE(!Str::truncate_at_start(test, 9) && test == expected,
+        auto& actual = ecf::algorithm::split_at(splits, tc.input);
+
+        BOOST_CHECK_MESSAGE(&actual == &splits,
+                            "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to have same content");
+        BOOST_CHECK_MESSAGE(splits == tc.expected,
                             "Expected:\n"
-                                << expected << "\nbut found:\n"
-                                << test);
+                                << ecf::algorithm::as_string(tc.expected) << "\nbut found:\n"
+                                << ecf::algorithm::as_string(splits));
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_split_at_with_separators) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
     {
-        std::string test;
-        BOOST_CHECK_MESSAGE(!Str::truncate_at_end(test, 7), "Empty string should return false");
+        std::string input;
+        std::string separator;
+        std::vector<std::string> expected;
+    };
 
-        test                 = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        std::string expected = "this\n";
-        BOOST_CHECK_MESSAGE(Str::truncate_at_end(test, 1) && test == expected,
-                            "Expected:\n"
-                                << expected << "\nbut found:\n"
-                                << test);
+    std::vector<tc> test_cases = {{"", ",", {}},
+                                  {"abc,def,ghi", ",", {"abc", "def", "ghi"}},
+                                  {"abc,,def,ghi", ",", {"abc", "def", "ghi"}},
+                                  {",abc,def,ghi", ",", {"abc", "def", "ghi"}},
+                                  {"abc,def,ghi,", ",", {"abc", "def", "ghi"}},
+                                  {"xxx;,;yyy;,;zzz", ";,", {"xxx", "yyy", "zzz"}},
+                                  {"xxx;a,b;yyy;c,d;zzz", ";,", {"xxx", "a", "b", "yyy", "c", "d", "zzz"}},
+                                  {"aeiou,12345 12345,aeiou", " ", {"aeiou,12345", "12345,aeiou"}},
+                                  {"a,,b,c;d; ;e;;;f;", ",,;", {"a", "b", "c", "d", " ", "e", "f"}}};
 
-        test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        expected = "this\nis\n";
-        BOOST_CHECK_MESSAGE(Str::truncate_at_end(test, 2) && test == expected,
-                            "Expected:\n"
-                                << expected << "\nbut found:\n"
-                                << test);
+    for (const auto& tc : test_cases) {
+        std::vector<std::string> splits{"this", "is", "garbage"};
 
-        test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        expected = "this\nis\na\nstring\nwith\nlots\nof\n";
-        BOOST_CHECK_MESSAGE(Str::truncate_at_end(test, 7) && test == expected,
-                            "Expected:\n"
-                                << expected << "\nbut found:\n"
-                                << test);
+        const auto& actual = ecf::algorithm::split_at(splits, tc.input, tc.separator);
 
-        test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
-        expected = test;
-        BOOST_CHECK_MESSAGE(!Str::truncate_at_end(test, 9) && test == expected,
-                            "Expected:\n"
-                                << expected << "\nbut found:\n"
-                                << test);
+        BOOST_CHECK_MESSAGE(&actual == &splits,
+                            "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to have same content");
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Splitting >>>" << tc.input << "<<<, Expected " << ecf::algorithm::as_string(tc.expected)
+                                            << ", found " << ecf::algorithm::as_string(actual));
     }
 }
 
-static void
-check(const std::string& line, const std::vector<std::string>& result, const std::vector<std::string>& expected) {
-    BOOST_CHECK_MESSAGE(result.size() == expected.size(),
-                        "expected size " << expected.size() << " but found " << result.size() << " for '" << line
-                                         << "'");
-    BOOST_CHECK_MESSAGE(result == expected, "failed for '" << line << "'");
-    if (result != expected) {
-        ECF_TEST_DBG(<< "Line    :'" << line);
-        ECF_TEST_DBG(<< "Actual  :");
-        for (const std::string& t : result) {
-            ECF_TEST_DBG(<< "   '" << t << "'");
+BOOST_AUTO_TEST_CASE(test_algorithm_split_by_with_separators) {
+
+    struct TestCase
+    {
+        std::string input;
+        std::string pattern;
+        std::vector<std::string> expected;
+    };
+
+    std::vector<TestCase> testCases = {
+        {"This is a string", "...", {"This is a string"}},
+        {"This...is...a...string", "...", {"This", "is", "a", "string"}},
+        {"This...is...a...string...", "...", {"This", "is", "a", "string"}},
+        {"...This...is...a...string", "...", {"This", "is", "a", "string"}},
+        {"...This...is...a...string...", "...", {"This", "is", "a", "string"}},
+        {"......This......is......a......string......", "...", {"This", "is", "a", "string"}},
+        {"..This.....is.....a.....string.....", "...", {"..This", "..is", "..a", "..string", ".."}},
+        {"expression 1==expression 2", "==", {"expression 1", "expression 2"}},
+        {"expression 1==expression 2==expression 3", "==", {"expression 1", "expression 2", "expression 3"}},
+        {"expression 1 == expression 2", " == ", {"expression 1", "expression 2"}},
+        {"expression 1 == expression 2 == expression 3", " == ", {"expression 1", "expression 2", "expression 3"}},
+        {"expression 1 eq expression 2", " eq ", {"expression 1", "expression 2"}},
+        {"expression 1eqexpression 2", " eq ", {"expression 1eqexpression 2"}}};
+
+    for (const auto& testCase : testCases) {
+        std::vector<std::string> splits;
+        auto& actual = ecf::algorithm::split_by(splits, testCase.input, testCase.pattern);
+
+        BOOST_CHECK_MESSAGE(&actual == &splits,
+                            "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to have same content");
+        BOOST_CHECK_MESSAGE(splits == testCase.expected,
+                            "Failed for input: '" << testCase.input << "' pattern: '" << testCase.pattern
+                                                  << "'. Expected: " << ecf::algorithm::as_string(testCase.expected)
+                                                  << " but found: " << ecf::algorithm::as_string(splits));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_split_fields_at_with_separators) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string separator;
+        std::vector<std::string> expected;
+    };
+
+    std::vector<tc> test_cases = {
+        {"", ",", {}},
+        {"abc,def,ghi", ",", {"abc", "def", "ghi"}},
+        {"abc,def,ghi,", ",", {"abc", "def", "ghi", ""}},
+        {",abc,def,ghi", ",", {"", "abc", "def", "ghi"}},
+        {",abc,def,ghi,", ",", {"", "abc", "def", "ghi", ""}},
+        {",abc,,def,,ghi,", ",", {"", "abc", "", "def", "", "ghi", ""}},
+        {"abc,,def,ghi", ",", {"abc", "", "def", "ghi"}},
+        {"abc,def,,ghi", ",", {"abc", "def", "", "ghi"}},
+        {"abc,,def,,ghi,", ",", {"abc", "", "def", "", "ghi", ""}},
+        {"xxx;,;yyy;,;zzz", ";,", {"xxx", "", "", "yyy", "", "", "zzz"}},
+        {"xxx;a,b;yyy;c,d;zzz", ";,", {"xxx", "a", "b", "yyy", "c", "d", "zzz"}},
+        {"aeiou,12345 12345,aeiou", " ", {"aeiou,12345", "12345,aeiou"}},
+        {"a;,b,c;d; ;e;,; f;", ",,;", {"a", "", "b", "c", "d", " ", "e", "", "", " f", ""}},
+        {",,a,,b,c;d; ;e,;f;", ",,;", {"", "", "a", "", "b", "c", "d", " ", "e", "", "f", ""}}};
+
+    for (const auto& tc : test_cases) {
+        std::vector<std::string> splits{"this", "is", "garbage"};
+
+        const auto& actual = ecf::algorithm::split_fields_at(splits, tc.input, tc.separator);
+
+        BOOST_CHECK_MESSAGE(&actual == &splits,
+                            "Expected the returned value and the input vector to be the same object");
+        BOOST_CHECK_MESSAGE(actual == splits, "Expected the returned value and the input vector to have same content");
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Splitting >>>" << tc.input << "<<<, Expected " << ecf::algorithm::as_string(tc.expected)
+                                            << ", found " << ecf::algorithm::as_string(actual));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_split_within_quotes) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string quotes;
+        std::vector<std::string_view> expected;
+    };
+
+    std::vector<tc> test_cases = {{"", "'", {}},
+                                  {"''", "'", {"''"}},
+                                  {"''  ' '", "'", {"''", "' '"}},
+                                  {"'a'  'b' ''", "'", {"'a'", "'b'", "''"}},
+                                  {"'abc'  'def' 'ghi'", "'", {"'abc'", "'def'", "'ghi'"}},
+                                  {"'a'  'b' '", "'", {"'a'", "'b'", "'"}},
+                                  {"'a'  b' '", "'", {"'a'", "' '"}},
+                                  {"'a'  x  'b' y 'c'  zz  ", "'", {"'a'", "x", "'b'", "y", "'c'", "zz"}},
+                                  {"\"a\" x \"b\" x \"c\"", "\"", {"\"a\"", "x", "\"b\"", "x", "\"c\""}},
+                                  {"'a \" b \" c' \"d ' e ' f\"", "\"'", {"'a \" b \" c'", "\"d ' e ' f\""}}};
+
+    for (const auto& tc : test_cases) {
+        const auto& actual = ecf::algorithm::split_within_quotes(tc.input, tc.quotes);
+
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Splitting >>>" << tc.input << "<<<, Expected " << ecf::algorithm::as_string(tc.expected)
+                                            << ", found " << ecf::algorithm::as_string(actual));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_starts_with) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string prefix;
+        bool expected;
+    };
+
+    std::vector<tc> test_cases = {{"", "", true},
+                                  {"abcdef", "", true},
+                                  {"abcdef", "a", true},
+                                  {"abcdef", "ab", true},
+                                  {"abcdef", "abc", true},
+                                  {"abcdef", "abcx", false},
+                                  {"abcdef", "abcdefx", false},
+                                  {"zabcdef", "abcdef", false}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::starts_with(tc.input, tc.prefix);
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Expected " << ecf::algorithm::as_string(tc.expected) << ", found "
+                                        << ecf::algorithm::as_string(actual));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_ends_with) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string prefix;
+        bool expected;
+    };
+
+    std::vector<tc> test_cases = {{"", "", true},
+                                  {"abcdef", "", true},
+                                  {"abcdef", "f", true},
+                                  {"abcdef", "ef", true},
+                                  {"abcdef", "def", true},
+                                  {"abcdef", "xdef", false},
+                                  {"abcdef", "xabcdef", false},
+                                  {"abcdefz", "abcdef", false}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::ends_with(tc.input, tc.prefix);
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Expected " << ecf::algorithm::as_string(tc.expected) << ", found "
+                                        << ecf::algorithm::as_string(actual));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_trim) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string expected_trim_both;
+        std::string expected_trim_leading;
+        std::string expected_trim_trailing;
+    };
+
+    std::vector<tc> test_cases = {
+        {"", "", "", ""},
+        {" ", "", "", ""},
+        {"  ", "", "", ""},
+        {"abc", "abc", "abc", "abc"},
+        {" abc", "abc", "abc", " abc"},
+        {"abc ", "abc", "abc ", "abc"},
+        {" abc ", "abc", "abc ", " abc"},
+        {"\tabc\t", "abc", "abc\t", "\tabc"},
+        {"\nabc\n", "abc", "abc\n", "\nabc"},
+        {" \t\nabc \t\n", "abc", "abc \t\n", " \t\nabc"},
+        {" \t\n abc \t\n ", "abc", "abc \t\n ", " \t\n abc"},
+    };
+
+    for (const auto& tc : test_cases) {
+        auto actual = tc.input;
+        ecf::algorithm::trim(actual);
+        auto expected = tc.expected_trim_both;
+        BOOST_CHECK_MESSAGE(actual == expected, "Expected '" << expected << "', found '" << actual << "'");
+    }
+
+    for (const auto& tc : test_cases) {
+        auto actual = tc.input;
+        ecf::algorithm::trim_leading(actual);
+        auto expected = tc.expected_trim_leading;
+        BOOST_CHECK_MESSAGE(actual == expected, "Expected '" << expected << "', found '" << actual << "'");
+    }
+
+    for (const auto& tc : test_cases) {
+        auto actual   = ecf::algorithm::trim_leading_copy(tc.input);
+        auto expected = tc.expected_trim_leading;
+        BOOST_CHECK_MESSAGE(actual == expected, "Expected '" << expected << "', found '" << actual << "'");
+    }
+
+    for (const auto& tc : test_cases) {
+        auto actual = tc.input;
+        ecf::algorithm::trim_trailing(actual);
+        auto expected = tc.expected_trim_trailing;
+        BOOST_CHECK_MESSAGE(actual == expected, "Expected '" << expected << "', found '" << actual << "'");
+    }
+
+    for (const auto& tc : test_cases) {
+        auto actual   = ecf::algorithm::trim_trailing_copy(tc.input);
+        auto expected = tc.expected_trim_trailing;
+        BOOST_CHECK_MESSAGE(actual == expected, "Expected '" << expected << "', found '" << actual << "'");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_contains) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string pattern;
+        bool expected;
+    };
+
+    std::vector<tc> test_cases = {{"", "", true},
+                                  {"abcdef", "", true},
+                                  {"abcdef", "a", true},
+                                  {"abcdef", "ab", true},
+                                  {"abcdef", "abc", true},
+                                  {"abcdef", "abcx", false},
+                                  {"abcdef", "abcdefx", false},
+                                  {"zabcdef", "abcdef", true}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::contains(tc.input, tc.pattern);
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Expected " << ecf::algorithm::as_string(tc.expected) << ", found "
+                                        << ecf::algorithm::as_string(actual));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_remove_all) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string pattern;
+        std::string expected;
+    };
+
+    std::vector<tc> test_cases = {{"", "", ""},
+                                  {"abcdef", "", "abcdef"},
+                                  {"abcdef", "a", "bcdef"},
+                                  {"abcdef", "ab", "cdef"},
+                                  {"abcdef", "abc", "def"},
+                                  {"abcdef", "abcd", "ef"},
+                                  {"abcdef", "abcx", "abcdef"},
+                                  {"abcdef", "abcdefx", "abcdef"},
+                                  {"zabcdef", "abcdef", "z"},
+                                  {"abcxyzdef", "xyz", "abcdef"},
+                                  {"xyzabcdef", "xyz", "abcdef"},
+                                  {"abcxyzdef", "xyz", "abcdef"},
+                                  {"xaxbxcxdxexfx", "x", "abcdef"},
+                                  {"xyzaxyzbxyzcxyzdxyzexyzfxyz", "xyz", "abcdef"}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = tc.input;
+        ecf::algorithm::remove_all(actual, tc.pattern);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected " << tc.expected << ", found " << actual);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_transform_to_vector) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf::algorithm;
+
+    {
+        std::vector<int> input    = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+        std::vector<int> expected = {1, 4, 9, 16, 25, 36, 49, 64, 81, 0};
+
+        auto actual = ecf::algorithm::transform_to_vector(input, [](int v) { return v * v; });
+        BOOST_CHECK_MESSAGE(actual == expected,
+                            "Expected '" << ecf::algorithm::as_string(expected) << "', found '"
+                                         << ecf::algorithm::as_string(actual) << "'");
+    }
+
+    {
+        std::vector<int> input            = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+        std::vector<std::string> expected = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
+
+        auto actual = ecf::algorithm::transform_to_vector(input, [](int v) { return std::to_string(v); });
+        BOOST_CHECK_MESSAGE(actual == expected,
+                            "Expected '" << ecf::algorithm::as_string(expected) << "', found '"
+                                         << ecf::algorithm::as_string(actual) << "'");
+    }
+
+    {
+        std::vector<std::string> input = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
+        std::vector<int> expected      = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+
+        auto actual = ecf::algorithm::transform_to_vector(input, [](const std::string& v) { return std::stoi(v); });
+        BOOST_CHECK_MESSAGE(actual == expected,
+                            "Expected '" << ecf::algorithm::as_string(expected) << "', found '"
+                                         << ecf::algorithm::as_string(actual) << "'");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_tolower) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string expected;
+    };
+
+    std::vector<tc> test_cases = {{"", ""},
+                                  {"a", "a"},
+                                  {"A", "a"},
+                                  {"a1", "a1"},
+                                  {"A1", "a1"},
+                                  {"abc", "abc"},
+                                  {"ABC", "abc"},
+                                  {"AbC", "abc"},
+                                  {"aBc", "abc"},
+                                  {"aBC", "abc"},
+                                  {"Abc", "abc"},
+                                  {"abC", "abc"},
+                                  {"123", "123"},
+                                  {"!@#$%^&*()_+", "!@#$%^&*()_+"},
+                                  {"a1B2c3D4e5F6g7H8i9J0", "a1b2c3d4e5f6g7h8i9j0"}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::tolower(tc.input);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_is_valid_name) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        bool expected;
+    };
+
+    std::vector<tc> test_cases = {
+        {"", false},
+        {"a", true},
+        {"abc", true},
+        {"1abc", true},
+        {"abc1", true},
+        {"a1b2c3", true},
+        {"a1c", true},
+        {"_abc", true},     // '_' is an allowed character as the first character of a name
+        {"a_b_c", true},    // '_' is an allowed character as the first character of a name
+        {"-abc", false},    // '-' is not an allowed character
+        {"a-b-c", false},   // '-' is not an allowed character
+        {".abc", false},    // '.' is an allowed character but not as the first character of a name'
+        {"a.b.c", true},    // '.' is an allowed character but not as the first character of a name'
+        {"a_b-c.d", false}, // '-' is not an allowed character
+    };
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::is_valid_name(tc.input);
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Validating '" << tc.input << "', Expected '" << tc.expected << "', found '" << actual
+                                           << "'");
+    }
+
+    for (const auto& tc : test_cases) {
+        std::string error;
+        auto actual = ecf::algorithm::is_valid_name(tc.input, error);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+        if (tc.expected) {
+            BOOST_CHECK_MESSAGE(error.empty(), "Expected empty error, found '" << error << "'");
         }
-        ECF_TEST_DBG(<< "Expected:");
-        for (const std::string& t : expected) {
-            ECF_TEST_DBG(<< "'" << t << "'");
+        else {
+            BOOST_CHECK_MESSAGE(!error.empty(), "Expected non-empty error, found '" << error << "'");
         }
     }
 }
 
-static void
-check(const std::string& line, const std::vector<std::string_view>& result2, const std::vector<std::string>& expected) {
-    std::vector<std::string> result;
-    for (auto ref : result2) {
-        result.emplace_back(ref.begin(), ref.end());
-    }
-    check(line, result, expected);
-}
+BOOST_AUTO_TEST_CASE(test_algorithm_remove_double_quotes) {
+    ECF_NAME_THIS_TEST();
 
-static void check(const std::string& line,
-                  boost::split_iterator<std::string::const_iterator> res,
-                  const std::vector<std::string>& expected) {
-    std::vector<std::string> result;
-    using split_iter_t = boost::split_iterator<std::string::const_iterator>;
-    for (; res != split_iter_t(); res++) {
-        result.push_back(boost::copy_range<std::string>(*res));
-    }
-    check(line, result, expected);
-}
+    struct tc
+    {
+        std::string input;
+        std::string expected;
+    };
 
-static void check_splitters(const std::string& line, const std::vector<std::string>& expected) {
-    std::vector<std::string> result, result1, result2, result3;
-    std::vector<std::string_view> result4;
+    const std::vector<tc> test_cases = {
+        {"", ""},
+        {"\"\"", ""},
+        {"\"", "\""},
+        {"''", "''"},
+        {"'", "'"},
+        {"abc", "abc"},
+        {"\"abc\"", "abc"},
+        {"\"abc", "\"abc"},
+        {"abc\"", "abc\""},
+        {"'abc", "'abc"},
+        {"abc'", "abc'"},
+        {"'abc'", "'abc'"},
+    };
 
-    Str::split_orig(line, result);
-    check(line, result, expected);
-    Str::split_orig1(line, result1);
-    check(line, result1, expected);
-    Str::split_using_string_view(line, result2);
-    check(line, result2, expected);
-    Str::split_using_string_view2(line, result3);
-    check(line, result3, expected);
-    StringSplitter::split(line, result4);
-    check(line, result4, expected);
-
-    // While were at it also check get_token
-    for (size_t i = 0; i < result1.size(); i++) {
-        std::string token;
-        BOOST_CHECK_MESSAGE(Str::get_token(line, i, token) && token == result1[i],
-                            "Str::get_token failed for pos " << i << " line:'" << line << "' expected '" << result1[i]
-                                                             << "' but found '" << token << "'");
-
-        token.clear();
-        BOOST_CHECK_MESSAGE(Str::get_token2(line, i, token) && token == result1[i],
-                            "Str::get_token2 failed for pos " << i << " line:'" << line << "' expected '" << result1[i]
-                                                              << "' but found '" << token << "'");
-
-        token.clear();
-        BOOST_CHECK_MESSAGE(Str::get_token3(line, i, token) && token == result1[i],
-                            "Str::get_token3 failed for pos " << i << " line:'" << line << "' expected '" << result1[i]
-                                                              << "' but found '" << token << "'");
-
-        token.clear();
-        BOOST_CHECK_MESSAGE(StringSplitter::get_token(line, i, token) && token == result1[i],
-                            "StringSplitter::get_token failed for pos " << i << " line:'" << line << "' expected '"
-                                                                        << result1[i] << "' but found '" << token
-                                                                        << "'");
+    for (const auto& tc : test_cases) {
+        {
+            std::string actual = tc.input;
+            ecf::algorithm::remove_double_quotes(actual);
+            BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+        }
+        {
+            std::string actual = ecf::algorithm::remove_double_quotes_copy(tc.input);
+            BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+        }
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_str_split) {
+BOOST_AUTO_TEST_CASE(test_algorithm_remove_single_quotes) {
     ECF_NAME_THIS_TEST();
 
-    std::vector<std::string> expected;
-
-    std::string line = "This is a string";
-    expected.emplace_back("This");
-    expected.emplace_back("is");
-    expected.emplace_back("a");
-    expected.emplace_back("string");
-    check_splitters(line, expected);
-
-    expected.clear();
-    line = "  ";
-    check_splitters(line, expected);
-
-    line = "a";
-    expected.clear();
-    expected.emplace_back("a");
-    check_splitters(line, expected);
-
-    // Some implementation fail this test
-    line = "\n";
-    expected.clear();
-    expected.emplace_back("\n");
-    check_splitters(line, expected);
-
-    line = "a ";
-    expected.clear();
-    expected.emplace_back("a");
-    check_splitters(line, expected);
-
-    line = " a";
-    expected.clear();
-    expected.emplace_back("a");
-    check_splitters(line, expected);
-
-    line = "	a"; // check tabs
-    expected.clear();
-    expected.emplace_back("a");
-    check_splitters(line, expected);
-
-    line = "		a		"; // check sequential tabs
-    expected.clear();
-    expected.emplace_back("a");
-    check_splitters(line, expected);
-
-    line = " a ";
-    expected.clear();
-    expected.emplace_back("a");
-    check_splitters(line, expected);
-
-    line = "        a     b     c       d        ";
-    expected.clear();
-    expected.emplace_back("a");
-    expected.emplace_back("b");
-    expected.emplace_back("c");
-    expected.emplace_back("d");
-    check_splitters(line, expected);
-
-    line = " - !   $ % ^ & * ( ) - + ?";
-    expected.clear();
-    expected.emplace_back("-");
-    expected.emplace_back("!");
-    expected.emplace_back("$");
-    expected.emplace_back("%");
-    expected.emplace_back("^");
-    expected.emplace_back("&");
-    expected.emplace_back("*");
-    expected.emplace_back("(");
-    expected.emplace_back(")");
-    expected.emplace_back("-");
-    expected.emplace_back("+");
-    expected.emplace_back("?");
-    check_splitters(line, expected);
-
-    // Check tabs
-    line = "		 verify complete:8		                # 4 sundays in october hence expect 8 task "
-           "completions";
-    expected.clear();
-    expected.emplace_back("verify");
-    expected.emplace_back("complete:8");
-    expected.emplace_back("#");
-    expected.emplace_back("4");
-    expected.emplace_back("sundays");
-    expected.emplace_back("in");
-    expected.emplace_back("october");
-    expected.emplace_back("hence");
-    expected.emplace_back("expect");
-    expected.emplace_back("8");
-    expected.emplace_back("task");
-    expected.emplace_back("completions");
-    check_splitters(line, expected);
-}
-
-BOOST_AUTO_TEST_CASE(test_str_split_make_split_iterator) {
-    ECF_NAME_THIS_TEST();
-
-    std::string line = "This is a string";
-    std::vector<std::string> expected;
-    expected.emplace_back("This");
-    expected.emplace_back("is");
-    expected.emplace_back("a");
-    expected.emplace_back("string");
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    expected.emplace_back("");
-    line = "";
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    expected.emplace_back("");
-    expected.emplace_back("");
-    line = "  "; // If start/end is delimeter, then preserved as empty token
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    line = "a";
-    expected.emplace_back("a");
-    check(line, Str::make_split_iterator(line), expected);
-
-    // Some implementation fail this test
-    expected.clear();
-    line = "\n";
-    expected.emplace_back("\n");
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    line = "a ";
-    expected.emplace_back("a");
-    expected.emplace_back(""); // delimeter at start/end preserved, as empty token
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    line = " a";
-    expected.emplace_back("");
-    expected.emplace_back("a"); // delimeter at start/end preserved, as empty token
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    line = " a"; // check tabs
-    expected.emplace_back("");
-    expected.emplace_back("a"); // delimeter at start/end preserved, as empty token
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    line = "    a     "; // check sequential tabs
-    expected.emplace_back("");
-    expected.emplace_back("a"); // delimeter at start/end preserved, as empty token
-    expected.emplace_back("");
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    line = " a ";
-    expected.emplace_back("");
-    expected.emplace_back("a"); // delimeter at start/end preserved, as empty token
-    expected.emplace_back("");
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    line = "        a     b     c       d        ";
-    expected.emplace_back(""); // delimeter at start/end preserved, as empty token
-    expected.emplace_back("a");
-    expected.emplace_back("b");
-    expected.emplace_back("c");
-    expected.emplace_back("d");
-    expected.emplace_back("");
-    check(line, Str::make_split_iterator(line), expected);
-
-    expected.clear();
-    line = " - !   $ % ^  & * ( ) - + ?";
-    expected.emplace_back(""); // delimeter at start/end preserved, as empty token
-    expected.emplace_back("-");
-    expected.emplace_back("!");
-    expected.emplace_back("$");
-    expected.emplace_back("%");
-    expected.emplace_back("^");
-    expected.emplace_back("&");
-    expected.emplace_back("*");
-    expected.emplace_back("(");
-    expected.emplace_back(")");
-    expected.emplace_back("-");
-    expected.emplace_back("+");
-    expected.emplace_back("?");
-    check(line, Str::make_split_iterator(line), expected);
-
-    // Check tabs
-    expected.clear();
-    line = "     verify complete:8                      # 4 sundays in october hence expect 8 task completions";
-    expected.emplace_back(""); // delimeter at start/end preserved, as empty token
-    expected.emplace_back("verify");
-    expected.emplace_back("complete:8");
-    expected.emplace_back("#");
-    expected.emplace_back("4");
-    expected.emplace_back("sundays");
-    expected.emplace_back("in");
-    expected.emplace_back("october");
-    expected.emplace_back("hence");
-    expected.emplace_back("expect");
-    expected.emplace_back("8");
-    expected.emplace_back("task");
-    expected.emplace_back("completions");
-    check(line, Str::make_split_iterator(line), expected);
-}
-
-static void
-test_replace(std::string& testStr, const std::string& find, const std::string& replace, const std::string& expected) {
-    BOOST_CHECK_MESSAGE(Str::replace(testStr, find, replace),
-                        "Replace failed for " << testStr << " find(" << find << ") replace(" << replace << ")");
-    BOOST_CHECK_MESSAGE(testStr == expected, "Expected '" << expected << "' but found '" << testStr << "'");
-}
-
-static void test_replace_all(std::string& testStr,
-                             const std::string& find,
-                             const std::string& replace,
-                             const std::string& expected) {
-    std::string testStrCopy = testStr;
-
-    BOOST_CHECK_MESSAGE(Str::replace_all(testStr, find, replace),
-                        "Replace failed for " << testStr << " find(" << find << ") replace(" << replace << ")");
-    BOOST_CHECK_MESSAGE(testStr == expected, "Expected '" << expected << "' but found '" << testStr << "'");
-
-    Str::replaceall(testStrCopy, find, replace);
-    BOOST_CHECK_MESSAGE(testStr == testStrCopy, "Expected '" << testStrCopy << "' but found '" << testStr << "'");
-}
-
-BOOST_AUTO_TEST_CASE(test_str_replace) {
-    ECF_NAME_THIS_TEST();
-
-    std::string testStr = "This is a string";
-    test_replace(testStr, "This", "That", "That is a string");
-
-    testStr = "This is a string";
-    test_replace(testStr, "This is a string", "", "");
-
-    testStr = "This is a string";
-    test_replace(testStr, "is a", "was a", "This was a string");
-
-    testStr = "This\n is a string";
-    test_replace(testStr, "\n", "\\n", "This\\n is a string");
-
-    testStr = "This\n is\n a\n string\n";
-    test_replace_all(testStr, "\n", "\\n", R"(This\n is\n a\n string\n)");
-
-    // Test case insenstive string comparison
-    BOOST_CHECK_MESSAGE(Str::caseInsCompare("", ""), " bug1");
-    BOOST_CHECK_MESSAGE(!Str::caseInsCompare("Str", "Str1"), " bug1");
-    BOOST_CHECK_MESSAGE(!Str::caseInsCompare("", "Str1"), " bug1");
-    BOOST_CHECK_MESSAGE(Str::caseInsCompare("Str", "STR"), " bug1");
-    BOOST_CHECK_MESSAGE(Str::caseInsCompare("Case", "CaSE"), " bug1");
-}
-
-BOOST_AUTO_TEST_CASE(test_str_replace_all) {
-    ECF_NAME_THIS_TEST();
-
-    std::string testStr = "This is a string";
-    test_replace_all(testStr, "This", "That", "That is a string");
-
-    testStr = "This is a string";
-    test_replace_all(testStr, "This is a string", "", "");
-
-    testStr = "This is a string";
-    test_replace_all(testStr, "is a", "was a", "This was a string");
-
-    testStr = "This\n is a string";
-    test_replace_all(testStr, "\n", "\\n", "This\\n is a string");
-
-    testStr = "This\n is\n a\n string\n";
-    test_replace_all(testStr, "\n", "\\n", R"(This\n is\n a\n string\n)");
-
-    testStr = "This\n is\n a\n string\n";
-    test_replace_all(testStr, "\n", "", "This is a string");
-}
-
-BOOST_AUTO_TEST_CASE(test_str_to_int) {
-    ECF_NAME_THIS_TEST();
-
-    BOOST_CHECK_MESSAGE(Str::to_int("0") == 0, "Expected 0");
-    BOOST_CHECK_MESSAGE(Str::to_int("1") == 1, "Expected 1");
-    BOOST_CHECK_MESSAGE(Str::to_int("-0") == 0, "Expected 0");
-    BOOST_CHECK_MESSAGE(Str::to_int("-1") == -1, "Expected -1");
-    BOOST_CHECK_MESSAGE(Str::to_int("") == std::numeric_limits<int>::max(), "Expected max int");
-    BOOST_CHECK_MESSAGE(Str::to_int("-") == std::numeric_limits<int>::max(), "Expected max int");
-    BOOST_CHECK_MESSAGE(Str::to_int(" ") == std::numeric_limits<int>::max(), "Expected max int");
-    BOOST_CHECK_MESSAGE(Str::to_int("q") == std::numeric_limits<int>::max(), "Expected max int");
-    BOOST_CHECK_MESSAGE(Str::to_int("q22") == std::numeric_limits<int>::max(), "Expected max int");
-    BOOST_CHECK_MESSAGE(Str::to_int("q22", -1) == -1, "Expected -1 on failure");
-    BOOST_CHECK_MESSAGE(Str::to_int("99 99") == std::numeric_limits<int>::max(), "Expected max int");
-    BOOST_CHECK_MESSAGE(Str::to_int("99 99", 0) == 0, "Expected 0 for failure");
-}
-
-BOOST_AUTO_TEST_CASE(test_str_is_int) {
-    ECF_NAME_THIS_TEST();
-
-    BOOST_CHECK_EQUAL(Str::is_int("0"), true);
-    BOOST_CHECK_EQUAL(Str::is_int("1"), true);
-    BOOST_CHECK_EQUAL(Str::is_int("-0"), true);
-    BOOST_CHECK_EQUAL(Str::is_int("-1"), true);
-    BOOST_CHECK_EQUAL(Str::is_int(""), false);
-    BOOST_CHECK_EQUAL(Str::is_int("-"), false);
-    BOOST_CHECK_EQUAL(Str::is_int(" "), false);
-    BOOST_CHECK_EQUAL(Str::is_int("q"), false);
-    BOOST_CHECK_EQUAL(Str::is_int("q22"), false);
-    BOOST_CHECK_EQUAL(Str::is_int("99 99"), false);
-    BOOST_CHECK_EQUAL(Str::is_int("99 99"), false);
-}
-
-BOOST_AUTO_TEST_CASE(test_extract_data_member_value) {
-    ECF_NAME_THIS_TEST();
-
-    std::string expected = "value";
-    std::string actual;
-    std::string str = "aa bb c fred:value";
-    BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str, "fred:", actual), " failed");
-    BOOST_CHECK_MESSAGE(expected == actual, "expected '" << expected << "' but found '" << actual << "'");
-
-    str      = "fred:x  bill:zzz jake:12345 1234:99  6677";
-    expected = "x";
-    BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str, "fred:", actual), " failed");
-    BOOST_CHECK_MESSAGE(expected == actual, "expected '" << expected << "' but found '" << actual << "'");
-
-    expected = "zzz";
-    BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str, "bill:", actual), " failed");
-    BOOST_CHECK_MESSAGE(expected == actual, "expected '" << expected << "' but found '" << actual << "'");
-
-    expected = "12345";
-    BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str, "jake:", actual), " failed");
-    BOOST_CHECK_MESSAGE(expected == actual, "expected '" << expected << "' but found '" << actual << "'");
-
-    expected = "99";
-    BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str, "1234:", actual), " failed");
-    BOOST_CHECK_MESSAGE(expected == actual, "expected '" << expected << "' but found '" << actual << "'");
-
-    expected = "77";
-    BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str, "66", actual), " failed");
-    BOOST_CHECK_MESSAGE(expected == actual, "expected '" << expected << "' but found '" << actual << "'");
-}
-
-std::string toString(const std::vector<std::string>& c) {
-    std::ostringstream ss;
-    std::copy(c.begin(), c.end(), std::ostream_iterator<std::string>(ss, ", "));
-    return ss.str();
-}
-
-BOOST_AUTO_TEST_CASE(test_str_less_greater) {
-    ECF_NAME_THIS_TEST();
-
-    std::vector<std::string> expected;
-    expected.emplace_back("a1");
-    expected.emplace_back("A2");
-    expected.emplace_back("b1");
-    expected.emplace_back("B2");
-    expected.emplace_back("c");
-
-    std::vector<std::string> expectedGreater;
-    expectedGreater.emplace_back("c");
-    expectedGreater.emplace_back("B2");
-    expectedGreater.emplace_back("b1");
-    expectedGreater.emplace_back("A2");
-    expectedGreater.emplace_back("a1");
-
-    std::vector<std::string> vec;
-    vec.emplace_back("c");
-    vec.emplace_back("A2");
-    vec.emplace_back("a1");
-    vec.emplace_back("b1");
-    vec.emplace_back("B2");
-
-    std::sort(vec.begin(), vec.end(), Str::caseInsLess);
-    BOOST_REQUIRE_MESSAGE(vec == expected, "expected " << toString(expected) << " but found " << toString(vec));
-
-    std::sort(vec.begin(), vec.end(), Str::caseInsGreater);
-    BOOST_REQUIRE_MESSAGE(vec == expectedGreater,
-                          "expected " << toString(expectedGreater) << " but found " << toString(vec));
-
-    // --------------------------------------------------------------------
-
-    expected.clear();
-    expected.emplace_back("a");
-    expected.emplace_back("A");
-    expected.emplace_back("b");
-    expected.emplace_back("B");
-    expected.emplace_back("c");
-
-    expectedGreater.clear();
-    expectedGreater.emplace_back("c");
-    expectedGreater.emplace_back("B");
-    expectedGreater.emplace_back("b");
-    expectedGreater.emplace_back("A");
-    expectedGreater.emplace_back("a");
-
-    vec.clear();
-    vec.emplace_back("c");
-    vec.emplace_back("B");
-    vec.emplace_back("A");
-    vec.emplace_back("b");
-    vec.emplace_back("a");
-
-    std::sort(vec.begin(), vec.end(), Str::caseInsLess);
-    BOOST_REQUIRE_MESSAGE(vec == expected, "expected " << toString(expected) << " but found " << toString(vec));
-
-    std::sort(vec.begin(), vec.end(), Str::caseInsGreater);
-    BOOST_REQUIRE_MESSAGE(vec == expectedGreater,
-                          "expected " << toString(expectedGreater) << " but found " << toString(vec));
-
-    // --------------------------------------------------------------------
-
-    expected.clear();
-    expected.emplace_back("1234");
-    expected.emplace_back("baSE");
-    expected.emplace_back("Base");
-    expected.emplace_back("case");
-    expected.emplace_back("CaSe");
-    expected.emplace_back("suite");
-    expected.emplace_back("SUITE");
-
-    expectedGreater.clear();
-    expectedGreater.emplace_back("SUITE");
-    expectedGreater.emplace_back("suite");
-    expectedGreater.emplace_back("CaSe");
-    expectedGreater.emplace_back("case");
-    expectedGreater.emplace_back("Base");
-    expectedGreater.emplace_back("baSE");
-    expectedGreater.emplace_back("1234");
-
-    vec.clear();
-    vec.emplace_back("suite");
-    vec.emplace_back("SUITE");
-    vec.emplace_back("baSE");
-    vec.emplace_back("Base");
-    vec.emplace_back("case");
-    vec.emplace_back("CaSe");
-    vec.emplace_back("1234");
-
-    std::sort(vec.begin(), vec.end(), Str::caseInsLess);
-    BOOST_REQUIRE_MESSAGE(vec == expected, "expected " << toString(expected) << " but found " << toString(vec));
-
-    std::sort(vec.begin(), vec.end(), Str::caseInsGreater);
-    BOOST_REQUIRE_MESSAGE(vec == expectedGreater,
-                          "expected " << toString(expectedGreater) << " but found " << toString(vec));
-}
-
-//// ==============================================================
-//// Timing to find the fastest looping
-//// ==============================================================
-class Fred {
-public:
-    explicit Fred(int i = 0)
-        : i_(i) {
-        // Do nothing...
+    struct tc
+    {
+        std::string input;
+        std::string expected;
+    };
+
+    std::vector<tc> test_cases = {
+        {"", ""},
+        {"\"\"", "\"\""},
+        {"\"", "\""},
+        {"''", ""},
+        {"'", "'"},
+        {"abc", "abc"},
+        {"\"abc\"", "\"abc\""},
+        {"\"abc", "\"abc"},
+        {"abc\"", "abc\""},
+        {"'abc", "'abc"},
+        {"abc'", "abc'"},
+        {"'abc'", "abc"},
+    };
+
+    for (const auto& tc : test_cases) {
+        {
+            std::string actual = tc.input;
+            ecf::algorithm::remove_single_quotes(actual);
+            BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+        }
+        {
+            std::string actual = ecf::algorithm::remove_single_quotes_copy(tc.input);
+            BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+        }
     }
-    Fred(const Fred& rhs)            = default;
-    Fred& operator=(const Fred& rhs) = default;
-    ~Fred()                          = default;
+}
 
-    void inc() { i_++; }
-
-private:
-    int i_;
-};
-
-BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(test_algorithm_case_insensitive_compare) {
     ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string lhs;
+        std::string rhs;
+        bool expected;
+    };
+
+    std::vector<tc> test_cases = {{"", "", true},
+                                  {"a", "a", true},
+                                  {"a", "A", true},
+                                  {"A", "a", true},
+                                  {"abc", "abc", true},
+                                  {"abc", "ABC", true},
+                                  {"Abc", "aBC", true},
+                                  {"Str", "Str", true},
+                                  {"Str", "Str1", false},
+                                  {"", "Str1", false},
+                                  {"Str", "STR", true},
+                                  {"Case", "CaSE", true}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::case_insensitive_compare(tc.lhs, tc.rhs);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_case_insensitive_less) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string lhs;
+        std::string rhs;
+        bool expected;
+    };
+
+    std::vector<tc> test_cases = {{"", "", false},
+                                  {"a", "a", false},
+                                  {"a", "A", true},
+                                  {"A", "a", false},
+                                  {"abc", "abc", false},
+                                  {"abc", "ABC", true},
+                                  {"Abc", "aBC", false},
+                                  {"Str", "Str", false},
+                                  {"Str", "Str1", true},
+                                  {"", "Str1", true},
+                                  {"Str", "STR", true},
+                                  {"Case", "CaSE", true},
+                                  {"abc", "abd", true},
+                                  {"abd", "abc", false}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::case_insensitive_less(tc.lhs, tc.rhs);
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Comparing '" << tc.lhs << "' < '" << tc.rhs << "' Expected '" << tc.expected
+                                          << "', found '" << actual << "'");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_case_insensitive_greater) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string lhs;
+        std::string rhs;
+        bool expected;
+    };
+
+    std::vector<tc> test_cases = {{"", "", false},
+                                  {"a", "a", false},
+                                  {"a", "A", false},
+                                  {"A", "a", true},
+                                  {"abc", "abc", false},
+                                  {"abc", "ABC", false},
+                                  {"Abc", "aBC", true},
+                                  {"Str", "Str", false},
+                                  {"Str", "Str1", true},
+                                  {"", "Str1", true},
+                                  {"Str", "STR", false},
+                                  {"Case", "CaSE", false},
+                                  {"abc", "abd", false},
+                                  {"abd", "abc", true}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::case_insensitive_greater(tc.lhs, tc.rhs);
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Comparing '" << tc.lhs << "' > '" << tc.rhs << "' Expected '" << tc.expected
+                                          << "', found '" << actual << "'");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_is_int) {
+    ECF_NAME_THIS_TEST();
+
+    struct test_case
+    {
+        std::string input;
+        bool expected;
+    };
+
+    std::vector<test_case> test_cases = {{"0", true},
+                                         {"1", true},
+                                         {"-0", true},
+                                         {"-1", true},
+                                         {"", false},
+                                         {"-", false},
+                                         {" ", false},
+                                         {"q", false},
+                                         {"q22", false},
+                                         {"99 99", false},
+                                         {"99\t99", false}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::is_int(tc.input);
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Checking '" << tc.input << "', Expected " << tc.expected << ", found " << actual);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_to_int) {
+    ECF_NAME_THIS_TEST();
+
+    struct test_case
+    {
+        std::string input;
+        int expected;
+    };
+
+    std::vector<test_case> test_cases = {{"0", 0},
+                                         {"1", 1},
+                                         {"-0", 0},
+                                         {"-1", -1},
+                                         {"", std::numeric_limits<int>::max()},
+                                         {"-", std::numeric_limits<int>::max()},
+                                         {" ", std::numeric_limits<int>::max()},
+                                         {"q", std::numeric_limits<int>::max()},
+                                         {"q22", std::numeric_limits<int>::max()},
+                                         {"99 99", std::numeric_limits<int>::max()}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::to_int(tc.input);
+        BOOST_CHECK_MESSAGE(actual == tc.expected,
+                            "Converting '" << tc.input << "' to int, Expected " << tc.expected << ", found " << actual);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_tail) {
+    ECF_NAME_THIS_TEST();
+    std::string test;
+    BOOST_CHECK_MESSAGE(!ecf::algorithm::tail(test, 7), "Empty sring should return false");
+
+    test                 = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+    std::string expected = "line";
+    BOOST_CHECK_MESSAGE(ecf::algorithm::tail(test, 1) && test == expected,
+                        "Expected:\n"
+                            << expected << "\nbut found:\n"
+                            << test);
+
+    test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+    expected = "a\nstring\nwith\nlots\nof\nnew\nline";
+    BOOST_CHECK_MESSAGE(ecf::algorithm::tail(test, 7) && test == expected,
+                        "Expected:\n"
+                            << expected << "\nbut found:\n"
+                            << test);
+
+    test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+    expected = test;
+    BOOST_CHECK_MESSAGE(!ecf::algorithm::tail(test, 9) && test == expected,
+                        "Expected:\n"
+                            << expected << "\nbut found:\n"
+                            << test);
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_head) {
+    ECF_NAME_THIS_TEST();
+    std::string test;
+    BOOST_CHECK_MESSAGE(!ecf::algorithm::head(test, 7), "Empty string should return false");
+
+    test                 = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+    std::string expected = "this\n";
+    BOOST_CHECK_MESSAGE(ecf::algorithm::head(test, 1) && test == expected,
+                        "Expected:\n"
+                            << expected << "\nbut found:\n"
+                            << test);
+
+    test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+    expected = "this\nis\n";
+    BOOST_CHECK_MESSAGE(ecf::algorithm::head(test, 2) && test == expected,
+                        "Expected:\n"
+                            << expected << "\nbut found:\n"
+                            << test);
+
+    test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+    expected = "this\nis\na\nstring\nwith\nlots\nof\n";
+    BOOST_CHECK_MESSAGE(ecf::algorithm::head(test, 7) && test == expected,
+                        "Expected:\n"
+                            << expected << "\nbut found:\n"
+                            << test);
+
+    test     = "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+    expected = test;
+    BOOST_CHECK_MESSAGE(!ecf::algorithm::head(test, 9) && test == expected,
+                        "Expected:\n"
+                            << expected << "\nbut found:\n"
+                            << test);
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_as_string_for_bool) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        bool input;
+        std::string expected;
+    };
+
+    std::vector<tc> test_cases = {{true, "true"}, {false, "false"}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::as_string(tc.input);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+    };
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_as_string_for_vector_of_arithmetic) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::vector<int> input;
+        std::string expected;
+    };
+
+    std::vector<tc> test_cases = {
+        {{}, "[  ]"}, {{1}, "[ 1 ]"}, {{1, 2}, "[ 1, 2 ]"}, {{123, 456, 789}, "[ 123, 456, 789 ]"}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::as_string(tc.input);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+    };
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_as_string_for_vector_of_strings) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::vector<std::string> input;
+        std::string expected;
+    };
+
+    std::vector<tc> test_cases = {
+        {{}, "[  ]"}, {{"a"}, "[ a ]"}, {{"a", "b"}, "[ a, b ]"}, {{"abc", "def", "ghi"}, "[ abc, def, ghi ]"}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::as_string(tc.input);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+    };
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_as_string_for_vector_of_string_views) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::vector<std::string_view> input;
+        std::string expected;
+    };
+
+    std::vector<tc> test_cases = {
+        {{}, "[  ]"}, {{"a"}, "[ a ]"}, {{"a", "b"}, "[ a, b ]"}, {{"abc", "def", "ghi"}, "[ abc, def, ghi ]"}};
+
+    for (const auto& tc : test_cases) {
+        auto actual = ecf::algorithm::as_string(tc.input);
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "', found '" << actual << "'");
+    };
+}
+
+BOOST_AUTO_TEST_CASE(test_algortihm_replace) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string find;
+        std::string replace;
+        std::string expected;
+        bool result;
+    };
+
+    std::vector<tc> test_cases = {{"This is a string", "", "Replacement", "This is a string", false},
+                                  {"This is a string", "Pattern", "Replacment", "This is a string", false},
+                                  {"This is a string", "This", "That", "That is a string", true},
+                                  {"This is a string", "This is a string", "", "", true},
+                                  {"This is a string", "is a", "was a", "This was a string", true},
+                                  {"This\n is a string", "\n", "\\n", "This\\n is a string", true}};
+
+    for (const auto& tc : test_cases) {
+        std::string actual = tc.input;
+
+        auto result = ecf::algorithm::replace(actual, tc.find, tc.replace);
+
+        BOOST_CHECK_MESSAGE(result == tc.result,
+                            "Replace failed for " << actual << " find(" << tc.find << ") replace(" << tc.replace
+                                                  << ")");
+        BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "' but found '" << actual << "'");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_replace_all) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::string input;
+        std::string find;
+        std::string replace;
+        std::string expected;
+        bool result;
+    };
+
+    std::vector<tc> test_cases = {
+        {"This is a string", "", "Replacement", "This is a string", false},
+        {"This is a string", "Pattern", "Replacement", "This is a string", false},
+        {"This is a string", "This", "That", "That is a string", true},
+        {"This is a string", "This is a string", "", "", true},
+        {"This is a string", "is a", "was a", "This was a string", true},
+        {"This\n is a string", "\n", "\\n", "This\\n is a string", true},
+        {"This\n is\n a\n string\n", "\n", "\\n", R"(This\n is\n a\n string\n)", true},
+        {"This\n is\n a\n string\n", "\n", "", "This is a string", true},
+    };
+
+    for (const auto& tc : test_cases) {
+        auto actual = tc.input;
+
+        { // Check that replacement happens as expected
+            bool result = ecf::algorithm::replace_all(actual, tc.find, tc.replace);
+
+            BOOST_CHECK_MESSAGE(result == tc.result,
+                                "Replace successful for " << actual << " find(" << tc.find << ") replace(" << tc.replace
+                                                          << ")");
+            BOOST_CHECK_MESSAGE(actual == tc.expected, "Expected '" << tc.expected << "' but found '" << actual << "'");
+        }
+
+        auto copy = actual;
+
+        { // Ensure that attempting replacement again returns false and does not change the input string
+            bool result = ecf::algorithm::replace_all(copy, tc.find, tc.replace);
+
+            BOOST_CHECK_MESSAGE(!result,
+                                "Replace unsuccessful for " << copy << " find(" << tc.find << ") replace(" << tc.replace
+                                                            << "), since no occurrences were left");
+            BOOST_CHECK_MESSAGE(actual == copy, "Expected '" << actual << "' but found '" << copy << "'");
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_sort_using_case_insensitive_order) {
+    ECF_NAME_THIS_TEST();
+
+    struct tc
+    {
+        std::vector<std::string> input;
+        std::vector<std::string> expected_less;
+        std::vector<std::string> expected_greater;
+    };
+
+    std::vector<tc> test_cases = {
+        // clang-format off
+        {
+            {"c", "A2", "a1", "b1", "B2"},
+            {"a1", "A2", "b1", "B2", "c"},
+            {"c", "B2", "b1", "A2", "a1"}
+        },
+        {
+            {"c", "B", "A", "b", "a"},
+            {"a", "A", "b", "B", "c"},
+            {"c", "B", "b", "A", "a"}
+        },
+        {
+            {"suite", "SUITE", "baSE", "Base", "case", "CaSe", "1234"},
+            {"1234", "baSE", "Base", "case", "CaSe", "suite", "SUITE"},
+            {"SUITE", "suite", "CaSe", "case", "Base", "baSE", "1234"}
+        }
+        // clang-format on
+    };
+
+    for (const auto& tc : test_cases) {
+
+        {
+            auto actual = tc.input;
+            std::sort(actual.begin(), actual.end(), ecf::algorithm::case_insensitive_less);
+            BOOST_REQUIRE_MESSAGE(actual == tc.expected_less,
+                                  "expected " << ecf::algorithm::as_string(tc.expected_less) << " but found "
+                                              << ecf::algorithm::as_string(actual));
+        }
+
+        {
+            auto actual = tc.input;
+            std::sort(actual.begin(), actual.end(), ecf::algorithm::case_insensitive_greater);
+            BOOST_REQUIRE_MESSAGE(actual == tc.expected_greater,
+                                  "expected " << ecf::algorithm::as_string(tc.expected_greater) << " but found "
+                                              << ecf::algorithm::as_string(actual));
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_algorithm_get_token) {
+
+    struct TestCase
+    {
+        std::string input;
+        size_t index;
+        std::string delimiters;
+        bool expected_outcome;
+        std::string expected_token;
+    };
+
+    std::vector<TestCase> testCases = {
+        // all tokens can be accessed
+        {"0,1,2,3,4,5,6,7,8,9,10", 0, ",", true, "0"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 1, ",", true, "1"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 2, ",", true, "2"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 3, ",", true, "3"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 4, ",", true, "4"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 5, ",", true, "5"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 6, ",", true, "6"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 7, ",", true, "7"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 8, ",", true, "8"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 9, ",", true, "9"},
+        {"0,1,2,3,4,5,6,7,8,9,10", 10, ",", true, "10"},
+
+        // out-of-range tokens are correctly handled
+        {"0,1,2,3,4,5,6,7,8,9,10", 11, ",", false, ""},
+        {"0,1,2,3,4,5,6,7,8,9,10", 12, ",", false, ""},
+
+        // now using another delimiter
+        {"0 1 2 3 4 5 6 7 8 9 10", 0, " ", true, "0"},
+        {"0 1 2 3 4 5 6 7 8 9 10", 5, " ", true, "5"},
+        {"0 1 2 3 4 5 6 7 8 9 10", 10, " ", true, "10"},
+        {"0 1 2 3 4 5 6 7 8 9 10", 42, " ", false, ""},
+
+        // now using multiple delimiters
+        {"0 1\t2 3\t4 5\t6 7\t8 9\t10", 0, " \t", true, "0"},
+        {"0 1\t2 3\t4 5\t6 7\t8 9\t10", 5, " \t", true, "5"},
+        {"0 1\t2 3\t4 5\t6 7\t8 9\t10", 10, " \t", true, "10"},
+        {"0 1\t2 3\t4 5\t6 7\t8 9\t10", 42, " \t", false, ""},
+    };
+
+    for (const auto& testCase : testCases) {
+        std::string actual_token;
+        auto actual_outcome =
+            ecf::algorithm::get_token(testCase.input, testCase.index, actual_token, testCase.delimiters);
+
+        BOOST_REQUIRE_MESSAGE(actual_outcome == testCase.expected_outcome,
+                              "Correct output getting token from '" << testCase.input << "' at index " << testCase.index
+                                                                    << " with delimiters '" << testCase.delimiters
+                                                                    << "'");
+
+        if (testCase.expected_outcome) {
+            BOOST_CHECK_MESSAGE(actual_token == testCase.expected_token,
+                                "Found correct token with input: '"
+                                    << testCase.input << "' at index " << testCase.index << " with delimiters '"
+                                    << testCase.delimiters << "'. Expected '" << testCase.expected_token << "' found '"
+                                    << actual_token << "'");
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_performance_loop, *boost::unit_test::disabled()) {
+    ECF_NAME_THIS_TEST();
+
+    //
+    // The goal of this test is to investigate the fastest looping mechanism over an std::vector, by comparing:
+    //  - raw for loop
+    //  - std::for_each
+    //  - std::vector<T>::iterator-based iteration
+    //  - index-based iteration
+    //
+
+    class Fred {
+    public:
+        explicit Fred(int i = 0)
+            : i_(i) {
+            // Do nothing...
+        }
+        Fred(const Fred& rhs)            = default;
+        Fred& operator=(const Fred& rhs) = default;
+        ~Fred()                          = default;
+
+        void inc() { i_++; }
+
+    private:
+        int i_;
+    };
 
     const size_t size = 200000000;
     std::vector<Fred> vec;
@@ -682,72 +1139,68 @@ BOOST_AUTO_TEST_CASE(test_loop, *boost::unit_test::disabled()) {
     }
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         for (auto& fred : vec) {
             fred.inc();
         }
-        ECF_TEST_DBG(<< "Time: for(auto &fred : vec) { fred.inc(); }                                                "
+        ECF_TEST_DBG("Time: for(auto &fred : vec) { fred.inc(); }                                                "
                      << timer);
     }
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         std::for_each(vec.begin(), vec.end(), [](Fred& fred) { fred.inc(); });
-        ECF_TEST_DBG(<< "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 "
+        ECF_TEST_DBG("Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 "
                      << timer);
     }
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         auto theEnd = vec.end();
         for (auto i = vec.begin(); i < theEnd; i++) {
             (*i).inc();
         }
-        ECF_TEST_DBG(<< "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } "
+        ECF_TEST_DBG("Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } "
                      << timer);
     }
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         size_t theSize = vec.size();
         for (size_t i = 0; i < theSize; i++) {
             vec[i].inc();
         }
-        ECF_TEST_DBG(<< "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              "
+        ECF_TEST_DBG("Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              "
                      << timer);
     }
 }
 
-/// ==============================================================
-/// Timing to find the fastest conversion from string to int
-/// ==============================================================
-static void methodX(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
-    // 0.81
-    // for bad conversion istringstream seems to return 0, hence add guard
-    if (str.find_first_of(Str::NUMERIC(), 0) == 0) {
-        int number = 0;
-        std::istringstream(str) >> number;
-        numberRes.push_back(number);
-    }
-    else {
-        stringRes.push_back(str);
-    }
-}
+BOOST_AUTO_TEST_CASE(test_performance_convert_string_to_int, *boost::unit_test::disabled()) {
+    ECF_NAME_THIS_TEST();
 
-static void method1(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
-    // 12.2
-    try {
-        int number = ecf::convert_to<int>(str);
-        numberRes.push_back(number);
-    }
-    catch (const ecf::bad_conversion&) {
-        stringRes.push_back(str);
-    }
-}
+    //
+    // The goal of this test is to investigate the fastest mechanism to convert from string to int, by comparing:
+    //  - methodX, using istringstream marshalling
+    //  - method1, using ecf::convert_to with try/catch
+    //  - method2, using ecf::convert_to with try/catch but only if the first character of the string is a numeric char
+    //  - method3, using atoi (which we known to be fast but does not handle errors)
+    //
 
-static void method2(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
-    // 0.6
-    if (str.find_first_of(Str::NUMERIC(), 0) == 0) {
+    auto methodX = [](const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
+        // 0.81
+        // for bad conversion istringstream seems to return 0, hence add guard
+        if (str.find_first_of(ecf::string_constants::numeric_chars, 0) == 0) {
+            int number = 0;
+            std::istringstream(str) >> number;
+            numberRes.push_back(number);
+        }
+        else {
+            stringRes.push_back(str);
+        }
+    };
+
+    auto method1 = [](const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
+        // 12.2
         try {
             int number = ecf::convert_to<int>(str);
             numberRes.push_back(number);
@@ -755,26 +1208,35 @@ static void method2(const std::string& str, std::vector<std::string>& stringRes,
         catch (const ecf::bad_conversion&) {
             stringRes.push_back(str);
         }
-    }
-    else {
-        stringRes.push_back(str);
-    }
-}
+    };
 
-static void method3(const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
-    // 0.14
-    // atoi return 0 for errors,
-    int number = atoi(str.c_str()); // does not handle errors
-    if (number == 0 && str.size() != 1) {
-        stringRes.push_back(str);
-    }
-    else {
-        numberRes.push_back(number);
-    }
-}
+    auto method2 = [](const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
+        // 0.6
+        if (str.find_first_of(ecf::string_constants::numeric_chars, 0) == 0) {
+            try {
+                int number = ecf::convert_to<int>(str);
+                numberRes.push_back(number);
+            }
+            catch (const ecf::bad_conversion&) {
+                stringRes.push_back(str);
+            }
+        }
+        else {
+            stringRes.push_back(str);
+        }
+    };
 
-BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
-    ECF_NAME_THIS_TEST();
+    auto method3 = [](const std::string& str, std::vector<std::string>& stringRes, std::vector<int>& numberRes) {
+        // 0.14
+        // atoi return 0 for errors,
+        int number = atoi(str.c_str()); // does not handle errors
+        if (number == 0 && str.size() != 1) {
+            stringRes.push_back(str);
+        }
+        else {
+            numberRes.push_back(number);
+        }
+    };
 
     size_t the_size = 1000000;
     std::vector<std::string> stringTokens;
@@ -794,14 +1256,14 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     numberRes.reserve(expectedNumberRes.size());
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         for (size_t i = 0; i < stringTokens.size(); i++) {
             method1(stringTokens[i], stringRes, numberRes);
         }
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method1(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for method1  elapsed time = " << timer);
+        ECF_TEST_DBG("Time for method1  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method 1 wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method 1 wrong");
         numberRes.clear();
@@ -809,14 +1271,14 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     }
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         for (size_t i = 0; i < stringTokens.size(); i++) {
             methodX(stringTokens[i], stringRes, numberRes);
         }
         for (size_t i = 0; i < numberTokens.size(); i++) {
             methodX(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for methodX  elapsed time = " << timer);
+        ECF_TEST_DBG("Time for methodX  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes, " method X wrong");
         BOOST_CHECK_MESSAGE(stringTokens == stringRes, "method X wrong");
         numberRes.clear();
@@ -824,7 +1286,7 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     }
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         for (size_t i = 0; i < stringTokens.size(); i++) {
             method2(stringTokens[i], stringRes, numberRes);
         }
@@ -839,14 +1301,14 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     }
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         for (size_t i = 0; i < stringTokens.size(); i++) {
             method3(stringTokens[i], stringRes, numberRes);
         }
         for (size_t i = 0; i < numberTokens.size(); i++) {
             method3(numberTokens[i], stringRes, numberRes);
         }
-        ECF_TEST_DBG(<< "Time for method3  elapsed time = " << timer);
+        ECF_TEST_DBG("Time for method3  elapsed time = " << timer);
         BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes,
                             " method3 wrong numberRes.size()=" << numberRes.size()
                                                                << " expected size = " << expectedNumberRes.size());
@@ -858,16 +1320,19 @@ BOOST_AUTO_TEST_CASE(test_lexical_cast_perf, *boost::unit_test::disabled()) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(test_performance_convert_int_to_string, *boost::unit_test::disabled()) {
     ECF_NAME_THIS_TEST();
 
-    // Lexical_cast is approx twice as fast as using streams
-    // time for ostream = 0.97
-    // time for lexical_cast = 0.45
+    //
+    // The goal of this test is to investigate the fastest mechanism to convert from string to int, by comparing:
+    //  - ostream = 0.97
+    //  - lexical_cast = 0.45
+    //
 
     const int the_size = 1000000;
+
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         for (size_t i = 0; i < the_size; i++) {
             std::ostringstream st;
             st << i;
@@ -877,69 +1342,11 @@ BOOST_AUTO_TEST_CASE(test_int_to_str_perf, *boost::unit_test::disabled()) {
     }
 
     {
-        PerformanceTimer timer;
+        ecf::PerformanceTimer timer;
         for (size_t i = 0; i < the_size; i++) {
             [[maybe_unused]] std::string s = ecf::convert_to<std::string>(i);
         }
         ECF_TEST_DBG("Time for int to string using ecf::convert_to elapsed time = " << timer);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(test_str_valid_name) {
-    ECF_NAME_THIS_TEST();
-
-    std::vector<std::string> valid;
-    valid.emplace_back("a");
-    valid.emplace_back("a122345");
-    valid.emplace_back("_a122345");
-    valid.emplace_back("_");
-    valid.emplace_back("0");
-    valid.emplace_back("1");
-    valid.emplace_back("2");
-    valid.emplace_back("3");
-    valid.emplace_back("4");
-    valid.emplace_back("5");
-    valid.emplace_back("6");
-    valid.emplace_back("7");
-    valid.emplace_back("8");
-    valid.emplace_back("9");
-    valid.emplace_back("11");
-    valid.emplace_back("111");
-    for (const auto& i : valid) {
-        std::string msg;
-        BOOST_CHECK_MESSAGE(Str::valid_name(i, msg), "Expected " << i << " to be valid");
-        BOOST_CHECK_MESSAGE(Str::valid_name(i), "Expected " << i << " to be valid");
-    }
-
-    BOOST_CHECK_MESSAGE(!Str::valid_name(""), "Expected empty string to be in-valid");
-    BOOST_CHECK_MESSAGE(!Str::valid_name("."), "Expected '.' string to be in-valid");
-    std::vector<std::string> invalid;
-    invalid.emplace_back("?");
-    invalid.emplace_back("!");
-    invalid.emplace_back("\"");
-    invalid.emplace_back("$");
-    invalid.emplace_back("%");
-    invalid.emplace_back("^");
-    invalid.emplace_back("*");
-    invalid.emplace_back("(");
-    invalid.emplace_back(")");
-    invalid.emplace_back("-");
-    invalid.emplace_back("+");
-    invalid.emplace_back(":");
-    invalid.emplace_back(";");
-    invalid.emplace_back("@");
-    invalid.emplace_back("~");
-    invalid.emplace_back("<");
-    invalid.emplace_back(">");
-    invalid.emplace_back("!");
-    for (const auto& i : invalid) {
-        std::string msg;
-        BOOST_CHECK_MESSAGE(!Str::valid_name(i, msg), "Expected " << i << " to be in-valid");
-        BOOST_CHECK_MESSAGE(!Str::valid_name(i), "Expected " << i << " to be in-valid");
-
-        std::string s = "a" + i;
-        BOOST_CHECK_MESSAGE(!Str::valid_name(s, msg), "Expected " << s << " to be in-valid");
-        BOOST_CHECK_MESSAGE(!Str::valid_name(s), "Expected " << s << " to be in-valid");
     }
 }
 

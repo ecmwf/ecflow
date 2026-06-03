@@ -5,7 +5,7 @@ ecflow.WhyCmd
 .. py:class:: WhyCmd
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.instance`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 The why command reports, the reason why a node is not running.
 
@@ -35,7 +35,7 @@ Usage::
        print(str(e))
 
 
-.. py:method:: WhyCmd.why( (WhyCmd)arg1) -> str :
+.. py:method:: WhyCmd.why(self: ecflow.WhyCmd) -> str
    :module: ecflow
 
 returns a '/n' separated string, with reasons why node is not running

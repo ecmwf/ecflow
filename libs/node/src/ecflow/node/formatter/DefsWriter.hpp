@@ -836,7 +836,7 @@ struct Writer<AstVariable, Stream>
     static void writeln(Stream& output, const AstVariable& item) {
         output << "# ";
         output << item.nodePath();
-        output << Str::COLON();
+        output << ecf::string_constants::colon;
         output << item.name();
 
         std::string error;
@@ -873,7 +873,7 @@ struct Writer<AstParentVariable, Stream>
 
     static void writeln(Stream& output, const AstParentVariable& item) {
         output << "# ";
-        output << Str::COLON();
+        output << ecf::string_constants::colon;
         output << item.name();
 
         if (const auto* ref_node = item.find_node_which_references_variable(); ref_node) {
@@ -1265,7 +1265,7 @@ struct Writer<Label, Stream>
                 }
                 else {
                     std::string value = item.new_value();
-                    Str::replaceall(value, "\n", "\\n");
+                    ecf::algorithm::replace_all(value, "\n", "\\n");
                     output << " # \"";
                     output << value;
                     output << "\"";
@@ -1498,6 +1498,33 @@ struct Writer<RepeatDateList, Stream>
 };
 
 template <typename Stream>
+struct Writer<RepeatDateTimeList, Stream>
+{
+    static void write(Stream& output, const RepeatDateTimeList& item, Context& ctx) {
+        Indent l1(ctx);
+        output << l1;
+
+        writeln(output, item, ctx);
+
+        output << "\n";
+    }
+
+    static void writeln(Stream& output, const RepeatDateTimeList& item, const Context& ctx) {
+        output << "repeat datetimelist ";
+        output << item.name();
+        for (const auto& instant : item.values()) {
+            output << " \"";
+            output << boost::lexical_cast<std::string>(instant);
+            output << "\"";
+        }
+        if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>() && (item.index_or_value() != 0)) {
+            output << " # ";
+            output << ecf::convert_to<std::string>(item.index_or_value());
+        }
+    }
+};
+
+template <typename Stream>
 struct Writer<RepeatDateTime, Stream>
 {
     static void write(Stream& output, const RepeatDateTime& item, Context& ctx) {
@@ -1628,6 +1655,9 @@ struct Writer<RepeatBase, Stream>
         }
         else if (auto r = dynamic_cast<const RepeatDateList*>(&item)) {
             Writer<RepeatDateList, Stream>::write(output, *r, ctx);
+        }
+        else if (auto r = dynamic_cast<const RepeatDateTimeList*>(&item)) {
+            Writer<RepeatDateTimeList, Stream>::write(output, *r, ctx);
         }
         else if (auto r = dynamic_cast<const RepeatDateTime*>(&item)) {
             Writer<RepeatDateTime, Stream>::write(output, *r, ctx);
@@ -2070,7 +2100,7 @@ struct Writer<NodeContainer, Stream>
     static void write(Stream& output, const NodeContainer& item, Context& ctx) {
         // taken from NodeContainer::print(std::string& os) const
 
-        for (const auto& node : item.nodeVec()) {
+        for (const auto& node : item.children()) {
 
             // Note: here we must use dynamic_cast to determine the type of the node
             // This is because we are using a templated Writer, and we need to call the correct
@@ -2179,7 +2209,7 @@ struct Writer<Defs, Stream>
         }
 
         // Write the children (i.e. suites)
-        for (const auto& s : item.suiteVec()) {
+        for (const auto& s : item.suites()) {
             Writer<Suite, Stream>::write(output, *s, ctx);
         }
 
@@ -2269,7 +2299,7 @@ private:
                     }
                     else {
                         std::string h = c;
-                        Str::replaceall(h, "\n", "\\n");
+                        ecf::algorithm::replace_all(h, "\n", "\\n");
                         output << "\b";
                         output << h;
                     }

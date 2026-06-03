@@ -48,7 +48,7 @@ ecf::authorisation_t EventCmd::authorise(AbstractServer& server) const {
 }
 
 void EventCmd::print(std::string& os) const {
-    os += Str::CHILD_CMD();
+    os += ecf::string_constants::child_cmd;
     os += "event ";
     os += name_;
     os += " ";

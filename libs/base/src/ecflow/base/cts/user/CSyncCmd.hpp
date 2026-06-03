@@ -39,7 +39,7 @@ public:
     int client_modify_change_no() const { return client_modify_change_no_; }
     int client_handle() const { return client_handle_; }
 
-    void set_client_handle(int client_handle) override { client_handle_ = client_handle; } // used by group_cmd
+    void set_client_handle(int client_handle) const override { client_handle_ = client_handle; } // used by group_cmd
     void print(std::string&) const override;
     std::string print_short() const override;
     void print_only(std::string&) const override;
@@ -61,7 +61,7 @@ private:
     STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
     Api api_{SYNC};
-    int client_handle_{0};
+    mutable int client_handle_{0};
     int client_state_change_no_{0};
     int client_modify_change_no_{0};
 

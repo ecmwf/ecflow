@@ -5,7 +5,7 @@ ecflow.Days
 .. py:class:: Days
    :module: ecflow
 
-   Bases: :py:class:`~Boost.Python.enum`
+   Bases: :py:class:`~pybind11_builtins.pybind11_object`
 
 This enum is used as argument to a :py:class:`ecflow.Day` class.
 
@@ -23,6 +23,23 @@ Usage:
            Day(Days.tuesday))
 
 
+Members:
+
+  sunday
+
+  monday
+
+  tuesday
+
+  wednesday
+
+  thursday
+
+  friday
+
+  saturday
+
+
 .. py:attribute:: Days.friday
    :module: ecflow
    :value: ecflow.Days.friday
@@ -31,6 +48,10 @@ Usage:
 .. py:attribute:: Days.monday
    :module: ecflow
    :value: ecflow.Days.monday
+
+
+.. py:property:: Days.name
+   :module: ecflow
 
 
 .. py:attribute:: Days.names
@@ -56,6 +77,10 @@ Usage:
 .. py:attribute:: Days.tuesday
    :module: ecflow
    :value: ecflow.Days.tuesday
+
+
+.. py:property:: Days.value
+   :module: ecflow
 
 
 .. py:attribute:: Days.values
