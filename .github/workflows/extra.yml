@@ -74,12 +74,21 @@ jobs:
         with:
           path: ecflow
 
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
       - name: Configure ecflow
+        env:
+          SCCACHE_GHA_ENABLED: "true"
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
-          cmake --preset ${{ matrix.preset }}
+          cmake --preset ${{ matrix.preset }} \
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build ecflow
+        env:
+          SCCACHE_GHA_ENABLED: "true"
         run: |
           cd ${RUNNER_WORKSPACE}/ecflow/ecflow
           cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }}
