@@ -72,7 +72,6 @@ builds:
       dependencies:
         - ecmwf/ecbuild
       cmake_options:
-        -DPython3_EXECUTABLE: /usr/bin/python3
         -DBOOST_ROOT: ${BOOST_ROOT_DIR}
         -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
         -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
@@ -102,7 +101,6 @@ builds:
       dependencies:
         - ecmwf/ecbuild
       cmake_options:
-        -DPython3_EXECUTABLE: /usr/bin/python3
         -DBOOST_ROOT: ${BOOST_ROOT_DIR}
         -DBOOST_INCLUDEDIR: ${BOOST_INCLUDE_DIR}
         -DBOOST_LIBRARYDIR: ${BOOST_LIB_DIR}
@@ -175,10 +173,10 @@ builds:
       self_test: true
 
       stages:
-        - name: python312
+        - name: python313
           modules:
             - boost/1.87.0
-            - python3/3.12.9-01
+            - python3/3.13.13-01
             - qt/6.6.1
             - cmake/new
             - ecbuild/new
@@ -193,20 +191,34 @@ builds:
             -DCMAKE_PYTHON_INSTALL_TYPE: local
             -DINSTALL_LIB_DIR: lib
             -DUI_SYSTEM_SERVERS_LIST: /ec/vol/ecflow_def/servers.list.all
-
-        - name: python311
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+        
+        - name: python312
           modules:
-            - boost/1.84.0
-            - python3/3.11.8-01
-            - qt/5.12.0
+            - boost/1.87.0
+            - python3/3.12.9-01
             - cmake/new
             - ecbuild/new
           test_command: *test_cmd
           cmake_options:
             <<: *common_cmake_options
-            -DBoost_ROOT: /usr/local/apps/boost/1.84.0/GNU/8.5
-            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.84.0/GNU/8.5/include
-            -DBoost_PYTHON311_LIBRARY_RELEASE: /usr/local/apps/boost/1.84.0/GNU/8.5/lib/libboost_python311.so
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.12.9-01/lib/python3.12/site-packages/pybind11/share/cmake/pybind11
+            -DENABLE_UI: OFF
+          install_command: |
+            cmake --install . --component python
+
+        - name: python311
+          modules:
+            - boost/1.87.0
+            - python3/3.11.8-01
+            - cmake/new
+            - ecbuild/new
+          test_command: *test_cmd
+          cmake_options:
+            <<: *common_cmake_options
+            -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
+            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/8.5/include
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.11.8-01/lib/python3.11/site-packages/pybind11/share/cmake/pybind11
             -DPython3_ROOT_DIR: /usr/local/apps/python3/3.11.8-01
             -DPython3_EXECUTABLE: /usr/local/apps/python3/3.11.8-01/bin/python3
             -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.11.8-01/include/python3.11
@@ -218,18 +230,17 @@ builds:
 
         - name: python310
           modules:
-            - boost/1.81.0
+            - boost/1.87.0
             - python3/3.10.10-01
-            - qt/6.2.0
             - cmake/new
             - ecbuild/new
           test_command: *test_cmd
           cmake_options:
             <<: *common_cmake_options
             ENABLE_UI: OFF
-            -DBoost_ROOT: /usr/local/apps/boost/1.81.0/GNU/8.5
-            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.81.0/GNU/12.2/include
-            -DBoost_PYTHON310_LIBRARY_RELEASE: /usr/local/apps/boost/1.81.0/GNU/8.5/lib/libboost_python310.so
+            -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
+            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/12.2/include
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
             -DPython3_ROOT_DIR: /usr/local/apps/python3/3.10.10-01
             -DPython3_EXECUTABLE: /usr/local/apps/python3/3.10.10-01/bin/python3
             -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.10.10-01/include/python3.10
@@ -240,18 +251,17 @@ builds:
 
         - name: python38
           modules:
-            - boost/1.75.0
+            - boost/1.87.0
             - python3/3.8.8-01
-            - qt/5.12.0
             - cmake/new
             - ecbuild/new
           test_command: *test_cmd
           cmake_options:
             <<: *common_cmake_options
             -DENABLE_UI: OFF
-            -DBoost_ROOT: /usr/local/apps/boost/1.75.0/GNU/8.5
-            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.75.0/GNU/8.5/include
-            -DBoost_PYTHON38_LIBRARY_RELEASE: /usr/local/apps/boost/1.75.0/GNU/8.5/lib/libboost_python38.so
+            -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
+            -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/8.5/include
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.8.8-01/lib/python3.8/site-packages/pybind11/share/cmake/
             -DPython3_ROOT_DIR: /usr/local/apps/python3/3.8.8-01
             -DPython3_EXECUTABLE: /usr/local/apps/python3/3.8.8-01/bin/python3
             -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.8.8-01/include/python3.8
@@ -284,7 +294,8 @@ builds:
             - python3/3.12.9-01
             - cmake/new
             - ecbuild
-          test_command: *test_cmd
+          test_command: >-
+            ctest --output-on-failure -j 8 -L nightly -E "s_foolproof|s_test|s_zombies"
           install_command: |
             cmake --install .
           cmake_options:
