@@ -64,6 +64,16 @@ highlight_language = "none"
 
 import sphinx.ext.autodoc
 
+#
+# The behaviour of `sphinx.ext.autodoc.Documenter.add_line` changed in Sphinx v9.0
+#  -- as per https://github.com/sphinx-doc/sphinx/issues/14089.
+#
+# The following enables the use of legacy (pre-v9.0) behaviour, used here to write
+# the generated reST to separate files as the docstrings are processed.
+#
+# TODO: Modernize the use of `sphinx.ext.autodoc` to avoid the need for this legacy behaviour.
+#
+autodoc_use_legacy_class_based = True
 
 class TargetFile:
     def __init__(self):
