@@ -161,12 +161,12 @@ void Submittable::begin() {
 #endif
 }
 
-void Submittable::requeue(Requeue_args& args) {
+void Submittable::requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) {
     /// It is *very* important that we reset the passwords. This allows us to detect zombies.
     tryNo_ = 0; // reset try number
     clear();    // jobs password, process_id, aborted_reason
 
-    Node::requeue(args);
+    Node::requeue(args, authorisation);
     update_generated_variables();
 
 #ifdef DEBUG_STATE_CHANGE_NO

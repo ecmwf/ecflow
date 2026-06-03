@@ -44,7 +44,8 @@ public:
 
     void begin() override;
     bool resolveDependencies(JobsParam&) override; // overriden to speicy family for job profiler
-    void requeue(Requeue_args&) override;
+    using Node::requeue;
+    void requeue(Requeue_args& args, const ecf::AuthorisationContext& authorisation) override;
     void accept(ecf::NodeTreeVisitor&) override;
     void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
     void update_generated_variables() const override;
@@ -56,7 +57,7 @@ public:
 
     bool operator==(const Family& rhs) const;
 
-    void collateChanges(DefsDelta&) const override;
+    void collateChanges(DefsDelta& changes, const ecf::AuthorisationContext& ctx) const override;
     void set_memento(const OrderMemento* m, std::vector<ecf::Aspect::Type>& aspects, bool f) {
         NodeContainer::set_memento(m, aspects, f);
     }

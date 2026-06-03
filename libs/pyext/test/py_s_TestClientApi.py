@@ -134,7 +134,13 @@ def test_set_host_port():
 
 
 def print_test(ci, test_name):
-    print(test_name, flush=True)
+    class fg:
+        NAME = '\033[92m'
+        TITLE = '\033[93m'
+        BOLD = '\033[1m'
+        ENDC = '\033[0m'
+
+    print(f' *** {fg.TITLE}{fg.BOLD}RUNNING TEST:{fg.ENDC} {fg.NAME}{test_name}{fg.ENDC}', flush=True)
     if ci.is_auto_sync_enabled():
         ci.log_msg(test_name + " ============= AUTO SYNC ENABLED ================================ ")
     else:

@@ -70,15 +70,15 @@ STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd(ecf::Child::ZombieType zt
     return block_client_zombie_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::defs_cmd(AbstractServer* as, bool save_edit_history) {
+STC_Cmd_ptr PreAllocatedReply::defs_cmd(const ecf::Identity& identity, AbstractServer* as, bool save_edit_history) {
     auto* cmd = dynamic_cast<DefsCmd*>(defs_cmd_.get());
-    cmd->init(as, save_edit_history);
+    cmd->init(identity, as, save_edit_history);
     return defs_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::node_cmd(AbstractServer* as, node_ptr node) {
+STC_Cmd_ptr PreAllocatedReply::node_cmd(const ecf::Identity& identity, AbstractServer* as, node_ptr node) {
     auto* cmd = dynamic_cast<SNodeCmd*>(node_cmd_.get());
-    cmd->init(as, node);
+    cmd->init(identity, as, node);
     return node_cmd_;
 }
 
@@ -148,6 +148,7 @@ STC_Cmd_ptr PreAllocatedReply::news_cmd(unsigned int client_handle,
 STC_Cmd_ptr PreAllocatedReply::sync_cmd(unsigned int client_handle,
                                         unsigned int client_state_change_no,
                                         unsigned int client_modify_change_no,
+                                        const ecf::Identity& identity,
                                         AbstractServer* as) {
     auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
     cmd->init(client_handle,
@@ -155,6 +156,7 @@ STC_Cmd_ptr PreAllocatedReply::sync_cmd(unsigned int client_handle,
               client_modify_change_no,
               false /*full sync*/,
               false /*sync suite clock*/,
+              identity,
               as);
     return sync_cmd_;
 }
@@ -162,6 +164,7 @@ STC_Cmd_ptr PreAllocatedReply::sync_cmd(unsigned int client_handle,
 STC_Cmd_ptr PreAllocatedReply::sync_clock_cmd(unsigned int client_handle,
                                               unsigned int client_state_change_no,
                                               unsigned int client_modify_change_no,
+                                              const ecf::Identity& identity,
                                               AbstractServer* as) {
     auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get());
     cmd->init(client_handle,
@@ -169,13 +172,15 @@ STC_Cmd_ptr PreAllocatedReply::sync_clock_cmd(unsigned int client_handle,
               client_modify_change_no,
               false /*full sync*/,
               true /*sync suite clock*/,
+              identity,
               as);
     return sync_cmd_;
 }
 
-STC_Cmd_ptr PreAllocatedReply::sync_full_cmd(unsigned int client_handle, AbstractServer* as) {
+STC_Cmd_ptr
+PreAllocatedReply::sync_full_cmd(unsigned int client_handle, const ecf::Identity& identity, AbstractServer* as) {
     auto* cmd = dynamic_cast<SSyncCmd*>(sync_cmd_.get()); // can reuse the same command
-    cmd->init(client_handle, 0, 0, true /*full sync*/, false /*sync suite clock*/, as);
+    cmd->init(client_handle, 0, 0, true /*full sync*/, false /*sync suite clock*/, identity, as);
     return sync_cmd_;
 }
 

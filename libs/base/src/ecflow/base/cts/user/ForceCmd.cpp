@@ -153,7 +153,8 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
             }
 
             if (recursive_) {
-                node->set_state_hierarchically(new_state, true /* force */);
+                ServiceAuthorisationContext ctx{this->identity(), *defs, as->authorisation()};
+                node->set_state_hierarchically(new_state, ctx, true /* force */);
             }
             else {
                 node->set_state(new_state, true /* force */);

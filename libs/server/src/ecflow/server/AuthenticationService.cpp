@@ -82,13 +82,17 @@ bool AuthenticationService::is_authentic(const Identity& identity) const {
     const auto& username = identity.username();
     const auto& password = identity.password();
 
+    // The following means that:
+    //  - UserX and SecureUserX are checked against the passwd_file_
+    //  - CustomUserX are checked against the passwd_custom_file_
+
     if (!identity.is_custom()) {
-        if (!passwd_file_.authenticate(username, password)) {
+        if (!passwd_file_.authenticate(username.value(), password.value())) {
             return false;
         }
     }
     else {
-        if (!passwd_custom_file_.authenticate(username, password)) {
+        if (!passwd_custom_file_.authenticate(username.value(), password.value())) {
             return false;
         }
     }
