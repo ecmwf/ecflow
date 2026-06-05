@@ -86,6 +86,8 @@ void export_Core(py::module& m) {
         .value("STATE", PrintStyle::STATE)
         .value("MIGRATE", PrintStyle::MIGRATE);
 
+    py_finalize_enum(m, "Style");
+
     constexpr const char* printstyle_docs =
         "Singleton used to control the print Style. See :py:class:`ecflow.Style`\n\n"
         "\nUsage::\n\n"
@@ -115,6 +117,8 @@ void export_Core(py::module& m) {
         .value("ON_TIME", ecf::CheckPt::ON_TIME)
         .value("ALWAYS", ecf::CheckPt::ALWAYS)
         .value("UNDEFINED", ecf::CheckPt::UNDEFINED);
+
+    py_finalize_enum(m, "CheckPt");
 
     constexpr const char* ecf_docs = "Singleton used to control ecf debugging\n\n";
 
@@ -154,6 +158,8 @@ void export_Core(py::module& m) {
         .value("submitted", NState::SUBMITTED)
         .value("active", NState::ACTIVE);
 
+    py_finalize_enum(m, "State");
+
     constexpr const char* dstate_docs = "A DState is like a ecflow.State, except for the addition of SUSPENDED\n\n"
                                         "Suspended stops job generation, and hence is an attribute of a Node.\n"
                                         "DState can be used for setting the default state of node when it is\n"
@@ -178,6 +184,8 @@ void export_Core(py::module& m) {
         .value("suspended", DState::SUSPENDED)
         .value("active", DState::ACTIVE);
 
+    py_finalize_enum(m, "DState");
+
     constexpr const char* defstatus_docs = "A `node`_ can be set with a default status other the `queued`_\n\n"
                                            "The default state of a `node`_ is `queued`_.\n"
                                            "This defines the state to take at 'begin' or 're-queue' time\n"
@@ -198,6 +206,8 @@ void export_Core(py::module& m) {
         .value("HALTED", SState::HALTED)
         .value("SHUTDOWN", SState::SHUTDOWN)
         .value("RUNNING", SState::RUNNING);
+
+    py_finalize_enum(m, "SState");
 
     constexpr const char* timeslot_docs = "Represents a time slot.\n\n"
                                           "It is typically used as an argument to a :py:class:`TimeSeries` or\n"

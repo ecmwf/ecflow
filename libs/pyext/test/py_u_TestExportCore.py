@@ -289,6 +289,41 @@ class TestStyle(unittest.TestCase):
         """Style.NOTHING has integer value 0."""
         self.assertEqual(int(ecf.Style.NOTHING), 0)
 
+    # ------------------------------------------------------------------
+    # py_finalize_enum — str / repr / hash / .values / .names
+    # ------------------------------------------------------------------
+
+    def test_str_returns_member_name_only(self):
+        """str(Style.DEFS) returns 'DEFS', not 'Style.DEFS'."""
+        self.assertEqual(str(ecf.Style.DEFS), "DEFS")
+        self.assertEqual(str(ecf.Style.STATE), "STATE")
+
+    def test_repr_is_module_qualified(self):
+        """repr(Style.DEFS) returns 'ecflow.Style.DEFS'."""
+        self.assertEqual(repr(ecf.Style.DEFS), "ecflow.Style.DEFS")
+
+    def test_hash_is_integer(self):
+        """hash(Style.DEFS) is a Python int."""
+        self.assertIsInstance(hash(ecf.Style.DEFS), int)
+
+    def test_hash_equals_underlying_int_value(self):
+        """hash(member) equals member.value."""
+        self.assertEqual(hash(ecf.Style.DEFS), ecf.Style.DEFS.value)
+
+    def test_values_dict_maps_int_to_member(self):
+        """Style.values is a dict mapping integer value -> enum member."""
+        values = ecf.Style.values
+        self.assertIsInstance(values, dict)
+        self.assertIn(ecf.Style.DEFS.value, values)
+        self.assertEqual(values[ecf.Style.DEFS.value], ecf.Style.DEFS)
+
+    def test_names_dict_maps_str_to_member(self):
+        """Style.names is a dict mapping name string -> enum member."""
+        names = ecf.Style.names
+        self.assertIsInstance(names, dict)
+        self.assertIn("DEFS", names)
+        self.assertEqual(names["DEFS"], ecf.Style.DEFS)
+
 
 class TestPrintStyle(unittest.TestCase):
     """Tests for py::class_<PrintStyle, boost::noncopyable> exposed as ecf.PrintStyle in ExportCore.cpp.
@@ -428,6 +463,41 @@ class TestCheckPt(unittest.TestCase):
     def test_ne_different_values(self):
         """Different CheckPt members are not equal."""
         self.assertNotEqual(ecf.CheckPt.NEVER, ecf.CheckPt.ALWAYS)
+
+    # ------------------------------------------------------------------
+    # py_finalize_enum — str / repr / hash / .values / .names
+    # ------------------------------------------------------------------
+
+    def test_str_returns_member_name_only(self):
+        """str(CheckPt.NEVER) returns 'NEVER', not 'CheckPt.NEVER'."""
+        self.assertEqual(str(ecf.CheckPt.NEVER), "NEVER")
+        self.assertEqual(str(ecf.CheckPt.ALWAYS), "ALWAYS")
+
+    def test_repr_is_module_qualified(self):
+        """repr(CheckPt.ON_TIME) returns 'ecflow.CheckPt.ON_TIME'."""
+        self.assertEqual(repr(ecf.CheckPt.ON_TIME), "ecflow.CheckPt.ON_TIME")
+
+    def test_hash_is_integer(self):
+        """hash(CheckPt.NEVER) is a Python int."""
+        self.assertIsInstance(hash(ecf.CheckPt.NEVER), int)
+
+    def test_hash_equals_underlying_int_value(self):
+        """hash(member) equals member.value."""
+        self.assertEqual(hash(ecf.CheckPt.ON_TIME), ecf.CheckPt.ON_TIME.value)
+
+    def test_values_dict_maps_int_to_member(self):
+        """CheckPt.values is a dict mapping integer value -> enum member."""
+        values = ecf.CheckPt.values
+        self.assertIsInstance(values, dict)
+        self.assertIn(ecf.CheckPt.NEVER.value, values)
+        self.assertEqual(values[ecf.CheckPt.NEVER.value], ecf.CheckPt.NEVER)
+
+    def test_names_dict_maps_str_to_member(self):
+        """CheckPt.names is a dict mapping name string -> enum member."""
+        names = ecf.CheckPt.names
+        self.assertIsInstance(names, dict)
+        self.assertIn("ALWAYS", names)
+        self.assertEqual(names["ALWAYS"], ecf.CheckPt.ALWAYS)
 
 
 class TestEcf(unittest.TestCase):
@@ -590,6 +660,41 @@ class TestState(unittest.TestCase):
         """Different State members are not equal."""
         self.assertNotEqual(ecf.State.queued, ecf.State.active)
 
+    # ------------------------------------------------------------------
+    # py_finalize_enum — str / repr / hash / .values / .names
+    # ------------------------------------------------------------------
+
+    def test_str_returns_member_name_only(self):
+        """str(State.active) returns 'active', not 'State.active'."""
+        self.assertEqual(str(ecf.State.active), "active")
+        self.assertEqual(str(ecf.State.complete), "complete")
+
+    def test_repr_is_module_qualified(self):
+        """repr(State.active) returns 'ecflow.State.active'."""
+        self.assertEqual(repr(ecf.State.active), "ecflow.State.active")
+
+    def test_hash_is_integer(self):
+        """hash(State.active) is a Python int."""
+        self.assertIsInstance(hash(ecf.State.active), int)
+
+    def test_hash_equals_underlying_int_value(self):
+        """hash(member) equals member.value."""
+        self.assertEqual(hash(ecf.State.active), ecf.State.active.value)
+
+    def test_values_dict_maps_int_to_member(self):
+        """State.values is a dict mapping integer value -> enum member."""
+        values = ecf.State.values
+        self.assertIsInstance(values, dict)
+        self.assertIn(ecf.State.active.value, values)
+        self.assertEqual(values[ecf.State.active.value], ecf.State.active)
+
+    def test_names_dict_maps_str_to_member(self):
+        """State.names is a dict mapping name string -> enum member."""
+        names = ecf.State.names
+        self.assertIsInstance(names, dict)
+        self.assertIn("active", names)
+        self.assertEqual(names["active"], ecf.State.active)
+
 
 class TestDState(unittest.TestCase):
     """Tests for py::enum_<DState::State> exposed as ecf.DState in ExportCore.cpp.
@@ -674,6 +779,41 @@ class TestDState(unittest.TestCase):
     def test_suspended_not_in_state_enum(self):
         """ecf.State does not expose a 'suspended' member (only DState does)."""
         self.assertFalse(hasattr(ecf.State, "suspended"))
+
+    # ------------------------------------------------------------------
+    # py_finalize_enum — str / repr / hash / .values / .names
+    # ------------------------------------------------------------------
+
+    def test_str_returns_member_name_only(self):
+        """str(DState.active) returns 'active', not 'DState.active'."""
+        self.assertEqual(str(ecf.DState.active), "active")
+        self.assertEqual(str(ecf.DState.suspended), "suspended")
+
+    def test_repr_is_module_qualified(self):
+        """repr(DState.complete) returns 'ecflow.DState.complete'."""
+        self.assertEqual(repr(ecf.DState.complete), "ecflow.DState.complete")
+
+    def test_hash_is_integer(self):
+        """hash(DState.queued) is a Python int."""
+        self.assertIsInstance(hash(ecf.DState.queued), int)
+
+    def test_hash_equals_underlying_int_value(self):
+        """hash(member) equals member.value."""
+        self.assertEqual(hash(ecf.DState.active), ecf.DState.active.value)
+
+    def test_values_dict_maps_int_to_member(self):
+        """DState.values is a dict mapping integer value -> enum member."""
+        values = ecf.DState.values
+        self.assertIsInstance(values, dict)
+        self.assertIn(ecf.DState.active.value, values)
+        self.assertEqual(values[ecf.DState.active.value], ecf.DState.active)
+
+    def test_names_dict_maps_str_to_member(self):
+        """DState.names is a dict mapping name string -> enum member."""
+        names = ecf.DState.names
+        self.assertIsInstance(names, dict)
+        self.assertIn("suspended", names)
+        self.assertEqual(names["suspended"], ecf.DState.suspended)
 
 
 class TestDefstatus(unittest.TestCase):
@@ -860,6 +1000,41 @@ class TestSState(unittest.TestCase):
     def test_ne_different_values(self):
         """Different SState members are not equal."""
         self.assertNotEqual(ecf.SState.HALTED, ecf.SState.RUNNING)
+
+    # ------------------------------------------------------------------
+    # py_finalize_enum — str / repr / hash / .values / .names
+    # ------------------------------------------------------------------
+
+    def test_str_returns_member_name_only(self):
+        """str(SState.RUNNING) returns 'RUNNING', not 'SState.RUNNING'."""
+        self.assertEqual(str(ecf.SState.RUNNING), "RUNNING")
+        self.assertEqual(str(ecf.SState.HALTED), "HALTED")
+
+    def test_repr_is_module_qualified(self):
+        """repr(SState.RUNNING) returns 'ecflow.SState.RUNNING'."""
+        self.assertEqual(repr(ecf.SState.RUNNING), "ecflow.SState.RUNNING")
+
+    def test_hash_is_integer(self):
+        """hash(SState.RUNNING) is a Python int."""
+        self.assertIsInstance(hash(ecf.SState.RUNNING), int)
+
+    def test_hash_equals_underlying_int_value(self):
+        """hash(member) equals member.value."""
+        self.assertEqual(hash(ecf.SState.RUNNING), ecf.SState.RUNNING.value)
+
+    def test_values_dict_maps_int_to_member(self):
+        """SState.values is a dict mapping integer value -> enum member."""
+        values = ecf.SState.values
+        self.assertIsInstance(values, dict)
+        self.assertIn(ecf.SState.RUNNING.value, values)
+        self.assertEqual(values[ecf.SState.RUNNING.value], ecf.SState.RUNNING)
+
+    def test_names_dict_maps_str_to_member(self):
+        """SState.names is a dict mapping name string -> enum member."""
+        names = ecf.SState.names
+        self.assertIsInstance(names, dict)
+        self.assertIn("RUNNING", names)
+        self.assertEqual(names["RUNNING"], ecf.SState.RUNNING)
 
 
 class TestTimeSlot(unittest.TestCase):
