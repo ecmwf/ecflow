@@ -1101,7 +1101,8 @@ void export_Client(py::module& m) {
     static const char* ClientInvoker_child_complete_doc = "Child command,notify server job has complete";
 
     // Need std::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
-    py::class_<ClientInvoker, std::shared_ptr<ClientInvoker>>(m, "Client", ClientDoc::class_client())
+    py::class_<ClientInvoker, std::shared_ptr<ClientInvoker>>(
+        m, "Client", py::dynamic_attr(), ClientDoc::class_client())
 
         .def(py::init(&ClientInvoker_make<>))
         .def(py::init(&ClientInvoker_make<const std::string&>))
@@ -1441,7 +1442,7 @@ void export_Client(py::module& m) {
                                        "   except RuntimeError, e:\n"
                                        "       print(str(e))\n\n";
 
-    py::class_<WhyCmd>(m, "WhyCmd", WhyCmd_doc)
+    py::class_<WhyCmd>(m, "WhyCmd", py::dynamic_attr(), WhyCmd_doc)
 
         .def(py::init<defs_ptr, std::string>())
         .def("why", &WhyCmd::why, "returns a '/n' separated string, with reasons why node is not running");
@@ -1477,7 +1478,7 @@ void export_Client(py::module& m) {
         "   except RuntimeError, e:\n"
         "       print(str(e))\n\n";
 
-    py::class_<UrlCmd>(m, "UrlCmd", UrlCmd_doc)
+    py::class_<UrlCmd>(m, "UrlCmd", py::dynamic_attr(), UrlCmd_doc)
 
         .def(py::init<defs_ptr, std::string>())
         .def("execute", &UrlCmd::execute, "Displays url in the chosen browser");
