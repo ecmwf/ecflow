@@ -6,34 +6,54 @@ on:
 
 jobs:
 
-  # Create the ecflow package
-  build-and-package:
-    name: build
-    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-docker' }}
+  # Collect timestamp for docker image labelling
+  bootstrap:
+    name: bootstrap
+    runs-on: ubuntu-latest
 
-    strategy:
-      max-parallel: 8
-      fail-fast: false
-      matrix:
-        os:
-          - debian-13.5
-        preset:
-          - linux.gcc.serveronly.relwithdebinfo
-        jobs: [ 4 ]
+    outputs:
+      timestamp: ${{ steps.timestamp.outputs.timestamp }}
+      preset: ${{ steps.timestamp.outputs.preset }}
+      jobs: ${{ steps.timestamp.outputs.jobs }}
+
+    steps:
+      - name: Collect timestamp
+        id: timestamp
+        run: |
+          echo "timestamp=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
+          echo "preset=linux.gcc.serveronly.relwithdebinfo" >> $GITHUB_OUTPUT
+          echo "jobs=4" >> $GITHUB_OUTPUT
+
+  # Create the ecflow package
+  package:
+    name: package
+    needs: bootstrap
+    if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-docker' }}
 
     runs-on: ubuntu-latest
 
     container:
-      image: marcosbento/lumen:${{ matrix.os }}
+      image: marcosbento/lumen:debian-13.5
       options: --user root
 
     timeout-minutes: 60
+
+    outputs:
+      version: ${{ steps.vars.outputs.version }}
 
     steps:
 
       - name: Display build context
         run: |
-          echo "Working directory: ${{ github.workspace }}"
+          echo "github.sha === ${{ github.sha }}"
+          echo "github.ref === ${{ github.ref }}"
+          echo "github.workspace === ${{ github.workspace }}"
+          echo "GITHUB_WORKSPACE === ${GITHUB_WORKSPACE}"
+          echo "runner.workspace === ${{ runner.workspace }}"
+          echo "RUNNER_WORKSPACE === ${RUNNER_WORKSPACE}"
+          echo "env === ${{ env }}"
+          echo "Container user: $(whoami)"
+          echo "Container working directory: $(pwd)"
           echo "Environment:"
           echo "$(env)"
           echo "OS info:"
@@ -44,6 +64,7 @@ jobs:
           echo "$(cat /proc/meminfo)"
           echo "Disk info:"
           echo "$(df -h)"
+
 
       - name: Checkout 'ecbuild'
         uses: actions/checkout@v4
@@ -56,46 +77,99 @@ jobs:
         with:
           path: ecflow
 
-      - name: Generate ecflow debian package custom version
-        id: generate-package-custom-version
-        run: |
-          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
-
-      - name: Define ecflow build environment
+      - name: Generate ecflow custom version information
         id: vars
         run: |
-          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
-          sha1=$(git rev-parse --short HEAD)
-          version=$(cat VERSION)
-          echo "sha1=${sha1}" >> $GITHUB_OUTPUT
+          cd ${GITHUB_WORKSPACE}/ecflow
+          version=$(cat CMakeLists.txt  | grep -e '^project' | sed 's/project( [a-zA-Z ]*\([0-9.]*\) )/\1/g')_${{ github.sha }}
           echo "version=${version}" >> $GITHUB_OUTPUT
 
       - name: Configure ecflow
         id: configure-ecflow
         run: |
-          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
-          cmake --preset ${{ matrix.preset }} \
-                -DCUSTOM_DEBIAN_PACKAGE_VERSION=${{ steps.vars.outputs.version }}_${{ steps.vars.outputs.sha1 }} \
-                -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cd ${GITHUB_WORKSPACE}/ecflow
+          cmake --preset ${{ needs.bootstrap.outputs.preset }} \
+                -DCUSTOM_DEBIAN_PACKAGE_VERSION=${{ steps.vars.outputs.version }}
 
       - name: Build ecflow
         run: |
-          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
-          cmake --build --preset ${{ matrix.preset }} --jobs ${{ matrix.jobs }} --target all
-
-      - name: Test ecflow
-        run: |
-          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
-          ctest --preset  ${{ matrix.preset }} --output-on-failure -L nightly -j ${{ matrix.jobs }}
+          cd ${GITHUB_WORKSPACE}/ecflow
+          cmake --build \
+                --preset ${{ needs.bootstrap.outputs.preset }} \
+                --jobs ${{ needs.bootstrap.outputs.jobs }} \
+                --target all
 
       - name: Package ecflow
         run: |
-          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
-          cmake --build --preset ${{ matrix.preset }} --target package
+          cd ${GITHUB_WORKSPACE}/ecflow
+          cmake --build \
+                --preset ${{ needs.bootstrap.outputs.preset }} \
+                --target package
 
-      - name: Create ecflow docker image
-        run: |
-          cd ${RUNNER_WORKSPACE}/ecflow/ecflow
-          cp -v ${RUNNER_WORKSPACE}/ecflow/ecflow/build/${{ matrix.preset }}/ecflow-*.deb \
-                ${RUNNER_WORKSPACE}/ecflow/ecflow/releng/imachination/ecflow/ecflow-latest-Linux.deb || true
-          docker build -t ecflow:latest -f ${RUNNER_WORKSPACE}/ecflow/ecflow/releng/imachination/ecflow/Dockerfile ${RUNNER_WORKSPACE}/ecflow/ecflow/releng/imachination/ecflow
+      - name: Upload ecflow debian package
+        uses: actions/upload-artifact@v7
+        with:
+          name: ecflow-debian-package
+          path: ecflow/.deploy/build/${{ needs.bootstrap.outputs.preset }}/ecflow-*.deb
+          if-no-files-found: error
+
+#      - name: Test ecflow
+#        run: |
+#          cd ${{ github.workspace }}/ecflow
+#          ctest --preset  ${{ needs.bootstrap.outputs.preset }} \
+#                --jobs ${{ needs.bootstrap.outputs.jobs }} \
+#                --output-on-failure \
+#                -L nightly
+
+  # Create ecflow docker image
+  dockerize:
+    name: dockerize
+    needs: [ bootstrap, package ]
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout 'ecflow'
+        uses: actions/checkout@v4
+        with:
+          path: ecflow
+
+      - name: Download ecflow debian package
+        uses: actions/download-artifact@v7
+        with:
+          name: ecflow-debian-package
+          path: ecflow/releng/ecflow-deploy
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: eccr.ecmwf.int
+          username: ${{ secrets.ECCR_ECMWF_USER }}
+          password: ${{ secrets.ECCR_ECMWF_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          file: ecflow/releng/ecflow-deploy/Dockerfile
+          context: ecflow/releng/ecflow-deploy
+          build-args: |
+            ECFLOW_VERSION=${{ needs.package.outputs.version }}
+            ECFLOW_PACKAGE=ecflow-${{ needs.package.outputs.version }}-Linux_x86_64.deb
+          platforms: linux/amd64
+          push: true
+          tags: |
+            eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
+            eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:${{ needs.package.outputs.version }}_${{ needs.bootstrap.outputs.timestamp }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.package.outputs.version }}
+            org.opencontainers.image.created=${{ needs.bootstrap.outputs.timestamp }}
