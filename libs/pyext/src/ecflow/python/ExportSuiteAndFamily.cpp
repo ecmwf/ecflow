@@ -234,7 +234,8 @@ bool Family_contains(family_ptr self, const std::string& name) {
 
 void export_SuiteAndFamily(py::module& m) {
 
-    py::class_<NodeContainer, Node, std::shared_ptr<NodeContainer>>(m, "NodeContainer", DefsDoc::node_container_doc())
+    py::class_<NodeContainer, Node, std::shared_ptr<NodeContainer>>(
+        m, "NodeContainer", py::dynamic_attr(), DefsDoc::node_container_doc())
 
         .def(
             "__iter__",
@@ -249,7 +250,7 @@ void export_SuiteAndFamily(py::module& m) {
         .def("find_family", &NodeContainer::findFamily, "Find a family given a name")
         .def_property_readonly("nodes", &NodeContainer::children, "Returns a list of Node's");
 
-    py::class_<Suite, NodeContainer, std::shared_ptr<Suite>>(m, "Suite", DefsDoc::suite_doc())
+    py::class_<Suite, NodeContainer, std::shared_ptr<Suite>>(m, "Suite", py::dynamic_attr(), DefsDoc::suite_doc())
 
         .def(py::init(&Suite_init))
         .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true)
@@ -267,7 +268,7 @@ void export_SuiteAndFamily(py::module& m) {
         .def("get_end_clock", &Suite::clock_end_attr, "Return the suite's end clock. Can be NULL")
         .def("begun", &Suite::begun, "Returns true if the `suite`_ has begun, false otherwise");
 
-    py::class_<Family, NodeContainer, std::shared_ptr<Family>>(m, "Family", DefsDoc::family_doc())
+    py::class_<Family, NodeContainer, std::shared_ptr<Family>>(m, "Family", py::dynamic_attr(), DefsDoc::family_doc())
 
         .def(py::init(&Family_init))
         .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true)
