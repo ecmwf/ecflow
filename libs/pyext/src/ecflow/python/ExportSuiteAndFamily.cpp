@@ -242,9 +242,9 @@ void export_SuiteAndFamily(py::module& m) {
             [](const NodeContainer& n) { return py::make_iterator(n.children().begin(), n.children().end()); },
             py::keep_alive<0, 1>())
         .def("add_family", &NodeContainer_add_family_by_name, DefsDoc::add_family_doc())
-        .def("add_family", NodeContainer_add_family)
+        .def("add_family", NodeContainer_add_family, py::keep_alive<1, 2>())
         .def("add_task", &NodeContainer_add_task_by_name, DefsDoc::add_task_doc())
-        .def("add_task", NodeContainer_add_task)
+        .def("add_task", NodeContainer_add_task, py::keep_alive<1, 2>())
         .def("find_node", &NodeContainer::find_by_name, "Find immediate child node given a name")
         .def("find_task", &NodeContainer::findTask, "Find a task given a name")
         .def("find_family", &NodeContainer::findFamily, "Find a family given a name")
