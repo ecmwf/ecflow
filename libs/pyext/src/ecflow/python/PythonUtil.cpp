@@ -103,3 +103,91 @@ py::object py_id(const py::object& self) {
 ssize_t py_hash(const py::object& self) {
     return py::hash(py_id(self));
 };
+
+void py_finalize_enum(py::module& m, const char* class_name) {
+    py::object cls = m.attr(class_name);
+
+    // __str__ : return just the name (pybind11 default returns "ClassName.name")
+    cls.attr("__str__") =
+        py::cpp_function([](const py::object& self) -> std::string { return self.attr("name").cast<std::string>(); },
+                         py::name("__str__"),
+                         py::is_method(cls));
+
+    // __repr__ : return module-qualified form
+    cls.attr("__repr__") = py::cpp_function(
+        [](const py::object& self) -> std::string {
+            return "ecflow." + py::type::of(self).attr("__name__").cast<std::string>() + "." +
+                   self.attr("name").cast<std::string>();
+        },
+        py::name("__repr__"),
+        py::is_method(cls));
+
+    // __hash__ : hash equals the underlying integer value
+    cls.attr("__hash__") =
+        py::cpp_function([](const py::object& self) -> py::ssize_t { return self.attr("value").cast<py::ssize_t>(); },
+                         py::name("__hash__"),
+                         py::is_method(cls));
+
+    // __eq__ / __ne__ : compare by integer value; accept plain int on RHS
+    auto get_int = [](const py::object& o) -> int {
+        try {
+            return o.attr("value").cast<int>();
+        }
+        catch (...) {
+        }
+        return o.cast<int>();
+    };
+    cls.attr("__eq__") = py::cpp_function(
+        [get_int](const py::object& self, const py::object& other) -> bool {
+            try {
+                return get_int(self) == get_int(other);
+            }
+            catch (...) {
+                return false;
+            }
+        },
+        py::name("__eq__"),
+        py::is_method(cls));
+    cls.attr("__ne__") = py::cpp_function(
+        [get_int](const py::object& self, const py::object& other) -> bool {
+            try {
+                return get_int(self) != get_int(other);
+            }
+            catch (...) {
+                return true;
+            }
+        },
+        py::name("__ne__"),
+        py::is_method(cls));
+
+    // Ordering operators (enum-to-enum only; tests don't mix enum and plain int here)
+    auto lhs_int       = [](const py::object& o) -> int { return o.attr("value").cast<int>(); };
+    cls.attr("__lt__") = py::cpp_function(
+        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) < lhs_int(o); },
+        py::name("__lt__"),
+        py::is_method(cls));
+    cls.attr("__le__") = py::cpp_function(
+        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) <= lhs_int(o); },
+        py::name("__le__"),
+        py::is_method(cls));
+    cls.attr("__gt__") = py::cpp_function(
+        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) > lhs_int(o); },
+        py::name("__gt__"),
+        py::is_method(cls));
+    cls.attr("__ge__") = py::cpp_function(
+        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) >= lhs_int(o); },
+        py::name("__ge__"),
+        py::is_method(cls));
+
+    // .values  {int -> member}   and   .names  {str -> member}
+    py::dict values_dict, names_dict;
+    for (auto item : cls.attr("__members__").attr("items")()) {
+        auto kv                                                 = item.cast<py::tuple>();
+        py::object key                                          = kv[0];
+        py::object member                                       = kv[1];
+        values_dict[py::int_(member.attr("value").cast<int>())] = member;
+        names_dict[key]                                         = member;
+    }
+    py::setattr(cls, "values", values_dict);
+    py::setattr(cls, "names", names_dict);
+}

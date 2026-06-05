@@ -557,108 +557,6 @@ std::string MirrorAttr_str(const ecf::MirrorAttr& mirror) {
     return ecf::to_python_string(mirror);
 }
 
-// Patches a pybind11 py::enum_ class registered in module m to match the
-// Boost.Python enum behaviour that the Python tests rely on:
-//
-//   __str__   -- returns just the member name (not "ClassName.name")
-//   __repr__  -- returns "ecflow.ClassName.name"
-//   __hash__  -- returns int(value)  (already correct, but explicit)
-//   __eq__    -- compares by integer value; also accepts plain int on RHS
-//   __ne__    -- complement of __eq__
-//   __lt__ / __le__ / __gt__ / __ge__  -- ordering by integer value
-//   .values   -- {int  -> member}  class attribute
-//   .names    -- {str  -> member}  class attribute
-//
-// Direct cls.attr() assignment is used (not .def()) so that pybind11's
-// overload-chaining is bypassed and the slot is truly replaced.
-static void finalize_enum(py::module& m, const char* class_name) {
-    py::object cls = m.attr(class_name);
-
-    // __str__ : return just the name (pybind11 default returns "ClassName.name")
-    cls.attr("__str__") =
-        py::cpp_function([](const py::object& self) -> std::string { return self.attr("name").cast<std::string>(); },
-                         py::name("__str__"),
-                         py::is_method(cls));
-
-    // __repr__ : return module-qualified form
-    cls.attr("__repr__") = py::cpp_function(
-        [](const py::object& self) -> std::string {
-            return "ecflow." + py::type::of(self).attr("__name__").cast<std::string>() + "." +
-                   self.attr("name").cast<std::string>();
-        },
-        py::name("__repr__"),
-        py::is_method(cls));
-
-    // __hash__ : hash equals the underlying integer value
-    cls.attr("__hash__") =
-        py::cpp_function([](const py::object& self) -> py::ssize_t { return self.attr("value").cast<py::ssize_t>(); },
-                         py::name("__hash__"),
-                         py::is_method(cls));
-
-    // __eq__ / __ne__ : compare by integer value; accept plain int on RHS
-    auto get_int = [](const py::object& o) -> int {
-        try {
-            return o.attr("value").cast<int>();
-        }
-        catch (...) {
-        }
-        return o.cast<int>();
-    };
-    cls.attr("__eq__") = py::cpp_function(
-        [get_int](const py::object& self, const py::object& other) -> bool {
-            try {
-                return get_int(self) == get_int(other);
-            }
-            catch (...) {
-                return false;
-            }
-        },
-        py::name("__eq__"),
-        py::is_method(cls));
-    cls.attr("__ne__") = py::cpp_function(
-        [get_int](const py::object& self, const py::object& other) -> bool {
-            try {
-                return get_int(self) != get_int(other);
-            }
-            catch (...) {
-                return true;
-            }
-        },
-        py::name("__ne__"),
-        py::is_method(cls));
-
-    // Ordering operators (enum-to-enum only; tests don't mix enum and plain int here)
-    auto lhs_int       = [](const py::object& o) -> int { return o.attr("value").cast<int>(); };
-    cls.attr("__lt__") = py::cpp_function(
-        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) < lhs_int(o); },
-        py::name("__lt__"),
-        py::is_method(cls));
-    cls.attr("__le__") = py::cpp_function(
-        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) <= lhs_int(o); },
-        py::name("__le__"),
-        py::is_method(cls));
-    cls.attr("__gt__") = py::cpp_function(
-        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) > lhs_int(o); },
-        py::name("__gt__"),
-        py::is_method(cls));
-    cls.attr("__ge__") = py::cpp_function(
-        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) >= lhs_int(o); },
-        py::name("__ge__"),
-        py::is_method(cls));
-
-    // .values  {int -> member}   and   .names  {str -> member}
-    py::dict values_dict, names_dict;
-    for (auto item : cls.attr("__members__").attr("items")()) {
-        auto kv                                                 = item.cast<py::tuple>();
-        py::object key                                          = kv[0];
-        py::object member                                       = kv[1];
-        values_dict[py::int_(member.attr("value").cast<int>())] = member;
-        names_dict[key]                                         = member;
-    }
-    py::setattr(cls, "values", values_dict);
-    py::setattr(cls, "names", names_dict);
-}
-
 } // namespace
 
 void export_NodeAttr(py::module& m) {
@@ -744,7 +642,7 @@ void export_NodeAttr(py::module& m) {
         .value("checkpt_error", ecf::Flag::CHECKPT_ERROR)
         .value("remote_error", ecf::Flag::REMOTE_ERROR);
 
-    finalize_enum(m, "FlagType");
+    py_finalize_enum(m, "FlagType");
 
     py::class_<ecf::Flag>(m, "Flag", "Represents additional state associated with a Node.")
 
@@ -794,7 +692,7 @@ void export_NodeAttr(py::module& m) {
         .value("user", ecf::Child::USER)
         .value("path", ecf::Child::PATH);
 
-    finalize_enum(m, "ZombieType");
+    py_finalize_enum(m, "ZombieType");
 
     py::enum_<ecf::ZombieCtrlAction>(m, "ZombieUserActionType", NodeAttrDoc::zombie_user_action_type_doc())
 
@@ -805,7 +703,7 @@ void export_NodeAttr(py::module& m) {
         .value("block", ecf::ZombieCtrlAction::BLOCK)
         .value("kill", ecf::ZombieCtrlAction::KILL);
 
-    finalize_enum(m, "ZombieUserActionType");
+    py_finalize_enum(m, "ZombieUserActionType");
 
     py::enum_<ecf::Child::CmdType>(m, "ChildCmdType", NodeAttrDoc::child_cmd_type_doc())
 
@@ -818,7 +716,7 @@ void export_NodeAttr(py::module& m) {
         .value("abort", ecf::Child::ABORT)
         .value("complete", ecf::Child::COMPLETE);
 
-    finalize_enum(m, "ChildCmdType");
+    py_finalize_enum(m, "ChildCmdType");
 
     py::enum_<ecf::Attr::Type>(m, "AttrType", NodeAttrDoc::sortable_attribute_type_doc())
 
@@ -829,7 +727,7 @@ void export_NodeAttr(py::module& m) {
         .value("variable", ecf::Attr::VARIABLE)
         .value("all", ecf::Attr::ALL);
 
-    finalize_enum(m, "AttrType");
+    py_finalize_enum(m, "AttrType");
 
     py::class_<ZombieAttr>(m, "ZombieAttr", NodeAttrDoc::zombie_doc())
 
@@ -1066,7 +964,7 @@ void export_NodeAttr(py::module& m) {
         .value("friday", DayAttr::FRIDAY)
         .value("saturday", DayAttr::SATURDAY);
 
-    finalize_enum(m, "Days");
+    py_finalize_enum(m, "Days");
 
     py::class_<DayAttr>(m, "Day", NodeAttrDoc::day_doc())
 
