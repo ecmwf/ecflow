@@ -26,14 +26,8 @@ tests that previously lived in py_u_TestExportNodeAttr.py:
     * a fresh attribute can be set and read back, and
     * that attribute can subsequently be deleted.
 
-Types that are NOT currently bound with py::dynamic_attr() will FAIL these
-tests (AttributeError: ... has no __dict__ for setting new attributes).  This
-is intentional: the failures document the gap.  As of this writing the
-following types lack py::dynamic_attr() and are therefore expected to fail
-until the binding is updated:
-
-    * enums  : ZombieType, ZombieUserActionType, ChildCmdType, AttrType, Days
-    * vectors: FlagTypeVec, ZombieVec, VariableList
+All ecflow types are bound with py::dynamic_attr(), so all tests in this
+file are expected to pass.
 """
 
 import ecflow as ecf
