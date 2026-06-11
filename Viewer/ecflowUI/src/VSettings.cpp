@@ -12,8 +12,6 @@
 
 #include <sstream>
 
-#include <boost/property_tree/json_parser.hpp>
-
 #include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
@@ -61,7 +59,7 @@ VSettings::VSettings(const std::string& file)
     : file_(file) {
 }
 
-VSettings::VSettings(boost::property_tree::ptree pt)
+VSettings::VSettings(ecf::PTree pt)
     : pt_(pt) {
 }
 
@@ -78,18 +76,18 @@ bool VSettings::fileExists() const {
 }
 
 bool VSettings::contains(const std::string& key) {
-    return (pt_.get_child_optional(path_.path(key)) != boost::none);
+    return pt_.contains(path_.path(key));
 }
 
 bool VSettings::containsFullPath(const std::string& key) {
-    return (pt_.get_child_optional(key) != boost::none);
+    return pt_.contains(key);
 }
 
 bool VSettings::read(bool showPopupOnError, const std::string& extraMessage) {
     try {
-        boost::property_tree::json_parser::read_json(file_, pt_);
+        read_json(file_, pt_);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         std::string errorMessage = e.what();
         if (!DirectoryHandler::isFirstStartUp()) {
             std::string m = "Unable to parse config file : " + errorMessage;
@@ -123,30 +121,30 @@ void VSettings::put(const std::string& key, const std::string& val) {
 }
 
 void VSettings::put(const std::string& key, const std::vector<std::string>& val) {
-    boost::property_tree::ptree array;
+    ecf::PTree array;
     for (const auto& it : val) {
-        array.push_back(std::make_pair("", boost::property_tree::ptree(it)));
+        array.push_back_array_element(ecf::PTree(it));
     }
     pt_.put_child(path_.path(key), array);
 }
 
 void VSettings::put(const std::string& key, const std::vector<int>& val) {
-    boost::property_tree::ptree array;
+    ecf::PTree array;
     for (int it : val) {
         std::stringstream ss;
         ss << it;
-        array.push_back(std::make_pair("", boost::property_tree::ptree(ss.str())));
+        array.push_back_array_element(ecf::PTree(ss.str()));
     }
     pt_.put_child(path_.path(key), array);
 }
 
 // for adding a list of 'structs'
 void VSettings::put(const std::string& key, const std::vector<VSettings>& val) {
-    boost::property_tree::ptree array;
+    ecf::PTree array;
     for (const auto& it : val) {
-        array.push_back(std::make_pair("", it.pt_));
+        array.push_back_array_element(it.pt_);
     }
-    pt_.put_child(path_.path(key), array);
+    pt_.add_child(path_.path(key), array);
 }
 
 void VSettings::putAsBool(const std::string& key, bool val) {
@@ -154,26 +152,24 @@ void VSettings::putAsBool(const std::string& key, bool val) {
 }
 
 void VSettings::get(const std::string& key, std::vector<std::string>& val) {
-    boost::optional<boost::property_tree::ptree&> ptArray = pt_.get_child_optional(path_.path(key));
+    auto ptArray = pt_.get_child_optional(path_.path(key));
     if (!ptArray) {
         return;
     }
 
-    // boost::property_tree::ptree ptArray=it->second;
-    for (boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it) {
-        auto name = it->second.get_value<std::string>();
-        val.push_back(name);
+    for (auto& [_, value] : ptArray.value()) {
+        val.push_back(value.get_value<std::string>());
     }
 }
 
 void VSettings::get(const std::string& key, std::vector<int>& val) {
-    boost::optional<boost::property_tree::ptree&> ptArray = pt_.get_child_optional(path_.path(key));
+    auto ptArray = pt_.get_child_optional(path_.path(key));
     if (!ptArray) {
         return;
     }
 
-    for (boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it) {
-        val.push_back(it->second.get_value<int>());
+    for (auto& [_, value] : ptArray.value()) {
+        val.push_back(value.get_value<int>());
     }
 }
 
@@ -188,13 +184,13 @@ bool VSettings::getAsBool(const std::string& key, bool defaultVal) {
 
 // for getting a list of 'structs'
 void VSettings::get(const std::string& key, std::vector<VSettings>& val) {
-    boost::optional<boost::property_tree::ptree&> ptArray = pt_.get_child_optional(path_.path(key));
+    auto ptArray = pt_.get_child_optional(path_.path(key));
     if (!ptArray) {
         return;
     }
 
-    for (boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it) {
-        boost::property_tree::ptree child = it->second;
+    for (auto& it : ptArray.value()) {
+        auto child = it.second;
         VSettings vs(child);
         val.push_back(vs);
     }

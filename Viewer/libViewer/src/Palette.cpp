@@ -22,8 +22,9 @@
 #endif
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
+
+#include "UiLog.hpp"
+#include "ecflow/core/PTree.hpp"
 
 static QMap<std::string, QPalette::ColorRole> paletteId;
 
@@ -53,14 +54,13 @@ void Palette::load(const std::string& parFile) {
         paletteId["linkvisited"]     = QPalette::LinkVisited;
     }
 
-    // Parse param file using the boost JSON property tree parser
-    using boost::property_tree::ptree;
-    ptree pt;
+    // Parse JSON file using ecf::PTree (SAX-based, supports repeated keys)
+    ecf::PTree pt;
 
     try {
         read_json(parFile, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         std::string errorMessage = e.what();
         UserMessage::message(UserMessage::ERROR,
                              true,
@@ -71,34 +71,26 @@ void Palette::load(const std::string& parFile) {
 
     QPalette palette = qApp->palette();
 
-    for (ptree::const_iterator it = pt.begin(); it != pt.end(); ++it) {
-        std::string name = it->first;
-        ptree ptItem     = it->second;
-
+    for (auto& [topName, topValue] : pt) {
         QPalette::ColorGroup group = QPalette::Active;
-        if (name == "active") {
+        if (topName == "active") {
             group = QPalette::Active;
         }
-        else if (name == "inactive") {
+        else if (topName == "inactive") {
             group = QPalette::Inactive;
         }
-        else if (name == "disabled") {
+        else if (topName == "disabled") {
             group = QPalette::Disabled;
         }
         else {
             UserMessage::message(
-                UserMessage::ERROR, true, std::string("Error! Palette::load() unable to identify group: " + name));
+                UserMessage::ERROR, true, std::string("Error! Palette::load() unable to identify group: " + topName));
             continue;
         }
 
-        for (ptree::const_iterator itItem = ptItem.begin(); itItem != ptItem.end(); ++itItem) {
-            std::string role = itItem->first;
-            auto val         = itItem->second.get_value<std::string>();
-
-            QMap<std::string, QPalette::ColorRole>::const_iterator itP = paletteId.find(role);
-            if (itP != paletteId.end()) {
-                QColor col = toColour(val);
-                if (col.isValid()) {
+        for (auto& [itemName, itemValue] : topValue) {
+            if (auto itP = paletteId.find(itemName); itP != paletteId.end()) {
+                if (auto col = toColour(itemValue.get_value<std::string>()); col.isValid()) {
                     palette.setColor(group, itP.value(), col);
                 }
             }

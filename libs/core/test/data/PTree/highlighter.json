@@ -1,0 +1,22 @@
+{
+  "ecfscript": [
+    {
+      "pattern": "^%[A-Z_]+%",
+      "color":   "#0000cc",
+      "bold":    "true"
+    },
+    {
+      "pattern": "#.*$",
+      "color":   "#808080",
+      "bold":    "false"
+    }
+  ],
+  "triggers": [
+    {
+      "pattern": "\\b(complete|aborted|submitted|queued|active)\\b",
+      "color":   "#cc0000",
+      "bold":    "false"
+    }
+  ],
+  "unknown_group": []
+}

@@ -10,8 +10,9 @@
 
 #include "VConfig.hpp"
 
+#include <fstream>
+
 #include <QDebug>
-#include <boost/property_tree/json_parser.hpp>
 
 #include "DirectoryHandler.hpp"
 #include "SessionHandler.hpp"
@@ -21,6 +22,7 @@
 #include "VProperty.hpp"
 #include "VSettings.hpp"
 #include "ecflow/core/Filesystem.hpp"
+#include "ecflow/core/PTree.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/core/Version.hpp"
 
@@ -38,7 +40,7 @@ VConfig::VConfig() {
 }
 
 VConfig::~VConfig() {
-    for (auto& group : groups_) {
+    for (auto group : groups_) {
         delete group;
     }
     groups_.clear();
@@ -60,16 +62,16 @@ void VConfig::init(const std::string& parDirPath) {
 
         // The conf files have to be loaded in alphabetical order!! At least NotifyChange require it!
         // So we read the paths into a vector and sort it.
-        std::vector<fs::path> vec;
-        copy(fs::directory_iterator(parDir), fs::directory_iterator(), back_inserter(vec));
-        std::sort(vec.begin(), vec.end());
+        std::vector<fs::path> paths;
+        copy(fs::directory_iterator(parDir), fs::directory_iterator(), back_inserter(paths));
+        std::sort(paths.begin(), paths.end());
 
         // The paths are now in alphabetical order
-        for (auto it = vec.begin(); it != vec.end(); ++it) {
-            if (fs::is_regular_file(*it)) {
-                std::string name = it->filename().string();
+        for (const auto& path : paths) {
+            if (fs::is_regular_file(path)) {
+                std::string name = path.filename().string();
                 if (name.find("_conf.json") != std::string::npos) {
-                    loadInit(it->string());
+                    loadInit(path.string());
                 }
             }
         }
@@ -88,14 +90,13 @@ void VConfig::init(const std::string& parDirPath) {
 }
 
 void VConfig::loadInit(const std::string& parFile) {
-    // Parse param file using the boost JSON property tree parser
-    using boost::property_tree::ptree;
-    ptree pt;
+    // Parse JSON file using ecf::PTree (SAX-based, supports repeated keys)
+    ecf::PTree pt;
 
     try {
         read_json(parFile, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         std::string errorMessage = e.what();
         UserMessage::message(UserMessage::ERROR,
                              true,
@@ -106,49 +107,41 @@ void VConfig::loadInit(const std::string& parFile) {
     }
 
     // Loop over the groups
-    for (ptree::const_iterator itGr = pt.begin(); itGr != pt.end(); ++itGr) {
-        ptree ptGr = itGr->second;
+    for (auto& [groupName, groupValue] : pt) {
 
         // Get the group name and create it
-        std::string groupName = itGr->first;
-        auto* grProp          = new VProperty(groupName);
-        groups_.push_back(grProp);
+        auto* groupProp = new VProperty(groupName);
+        groups_.push_back(groupProp);
 
         UiLog().dbg() << "VConfig::loadInit() read config group: " << groupName;
 
         // Load the property parameters. It will recursively add all the
         // children properties.
-        loadProperty(ptGr, grProp);
+        loadProperty(groupValue, groupProp);
 
         // Add the group we created to the registered configloader
-        VConfigLoader::process(groupName, grProp);
+        VConfigLoader::process(groupName, groupProp);
     }
 }
 
-void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* prop) {
-    using boost::property_tree::ptree;
-
-    ptree::const_assoc_iterator itProp;
-
+void VConfig::loadProperty(const ecf::PTree& pt, VProperty* prop) {
     // Loop over the possible properties
-    for (ptree::const_iterator it = pt.begin(); it != pt.end(); ++it) {
-        std::string name = it->first;
-        ptree ptProp     = it->second;
+    for (auto& [propertyName, propertyValue] : pt) {
 
 #ifdef UI_CONFIG_LOAD_DEBUG
-        UiLog().dbg() << "   VConfig::loadProperty() read item: " << name;
+        UiLog().dbg() << "   VConfig::loadProperty() read item: " << propertyName;
 #endif
         // Default value
-        if (name == "default") {
-            auto val = ptProp.get_value<std::string>();
+        if (propertyName == "default") {
+            auto val = propertyValue.get_value<std::string>();
             prop->setDefaultValue(val);
         }
 
         // If it is just a key/value pair "line"
-        else if (name == "line" && ptProp.empty()) {
-            auto* chProp = new VProperty(name);
+        else if (propertyName == "line" && propertyValue.empty()) {
+            auto* chProp = new VProperty(propertyName);
             prop->addChild(chProp);
-            auto val = ptProp.get_value<std::string>();
+            auto val = propertyValue.get_value<std::string>();
 
             QString prefix = prop->param("prefix");
             if (!prefix.isEmpty()) {
@@ -171,8 +164,8 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* pro
             }
         }
         // If the property is a "line" (i.e. a line with additional parameters)
-        else if (prop->name() == "line" && name == "link") {
-            auto val = ptProp.get_value<std::string>();
+        else if (prop->name() == "line" && propertyName == "link") {
+            auto val = propertyValue.get_value<std::string>();
 
 #ifdef UI_CONFIG_LOAD_DEBUG
             UiLog().dbg() << "   VConfig::loadProperty() line link: " << val;
@@ -193,15 +186,15 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* pro
         // Here we only load the properties with
         // children (i.e. key/value pairs (like "line" etc above)
         // are ignored.
-        else if (!ptProp.empty()) {
-            auto* chProp = new VProperty(name);
+        else if (!propertyValue.empty()) {
+            auto* chProp = new VProperty(propertyName);
             prop->addChild(chProp);
-            loadProperty(ptProp, chProp);
+            loadProperty(propertyValue, chProp);
             chProp->adjustAfterLoad();
         }
         else {
-            QString val = QString::fromStdString(ptProp.get_value<std::string>());
-            prop->setParam(QString::fromStdString(name), val);
+            QString val = QString::fromStdString(propertyValue.get_value<std::string>());
+            prop->setParam(QString::fromStdString(propertyName), val);
         }
     }
 }
@@ -209,8 +202,8 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt, VProperty* pro
 VProperty* VConfig::find(const std::string& path) {
     VProperty* res = nullptr;
 
-    for (auto it = groups_.begin(); it != groups_.end(); ++it) {
-        VProperty* vGroup = *it;
+    for (auto it : groups_) {
+        VProperty* vGroup = it;
         res               = vGroup->find(path);
         if (res) {
             return res;
@@ -221,9 +214,9 @@ VProperty* VConfig::find(const std::string& path) {
 }
 
 VProperty* VConfig::group(const std::string& name) {
-    for (auto it = groups_.begin(); it != groups_.end(); ++it) {
-        if ((*it)->strName() == name) {
-            return *it;
+    for (auto it : groups_) {
+        if (it->strName() == name) {
+            return it;
         }
     }
 
@@ -260,23 +253,22 @@ void VConfig::saveSettings() {
 
 // Saves the settings per server that can be edited through the servers option gui
 void VConfig::saveSettings(const std::string& parFile, VProperty* guiProp, VSettings* vs, bool global) {
-    using boost::property_tree::ptree;
-    ptree pt;
+    ecf::PTree pt;
 
     // Get editable properties. We will operate on the links.
     std::vector<VProperty*> linkVec;
     guiProp->collectLinks(linkVec);
 
-    for (auto it = linkVec.begin(); it != linkVec.end(); ++it) {
+    for (auto it : linkVec) {
         if (global) {
-            if ((*it)->changed()) {
-                pt.put((*it)->path(), (*it)->valueAsStdString());
+            if (it->changed()) {
+                pt.put((*it).path(), (*it).valueAsStdString());
             }
         }
 
         else {
-            if (!(*it)->useMaster()) {
-                pt.put((*it)->path(), (*it)->valueAsStdString());
+            if (!it->useMaster()) {
+                pt.put((*it).path(), (*it).valueAsStdString());
             }
         }
     }
@@ -284,8 +276,8 @@ void VConfig::saveSettings(const std::string& parFile, VProperty* guiProp, VSett
     // Add settings stored in VSettings
     if (vs) {
         // Loop over the possible properties
-        for (ptree::const_iterator it = vs->propertyTree().begin(); it != vs->propertyTree().end(); ++it) {
-            pt.add_child(it->first, it->second);
+        for (auto& it : vs->propertyTree()) {
+            pt.add_child(it.first, it.second);
         }
     }
 
@@ -308,14 +300,13 @@ void VConfig::loadSettings(const std::string& parFile, VProperty* guiProp, bool 
     std::vector<VProperty*> linkVec;
     guiProp->collectLinks(linkVec);
 
-    // Parse file using the boost JSON property tree parser
-    using boost::property_tree::ptree;
-    ptree pt;
+    // Parse JSON file using ecf::PTree (SAX-based, supports repeated keys)
+    ecf::PTree pt;
 
     try {
         read_json(parFile, pt);
     }
-    catch (const boost::property_tree::json_parser::json_parser_error& e) {
+    catch (const ecf::PTreeParseError& e) {
         if (fs::exists(parFile)) {
             std::string errorMessage = e.what();
             UserMessage::message(UserMessage::ERROR,
@@ -326,15 +317,16 @@ void VConfig::loadSettings(const std::string& parFile, VProperty* guiProp, bool 
         return;
     }
 
-    for (auto it = linkVec.begin(); it != linkVec.end(); ++it) {
-        if (pt.get_child_optional((*it)->path()) != boost::none) {
-            auto val = pt.get<std::string>((*it)->path());
+    for (auto it : linkVec) {
+        const auto& path = it->path();
+        if (auto found = pt.get_child_optional(path); found) {
+            auto val = found.value().get_value<std::string>();
 
             if (!global) {
-                (*it)->setUseMaster(false);
+                it->setUseMaster(false);
             }
 
-            (*it)->setValue(val);
+            it->setValue(val);
         }
     }
 
@@ -344,11 +336,11 @@ void VConfig::loadSettings(const std::string& parFile, VProperty* guiProp, bool 
     if (global) {
         std::string prevPath = "menu.access.nodeMenuMode";
         std::string actPath  = "server.menu.nodeMenuMode";
-        if (pt.get_child_optional(prevPath) != boost::none) {
-            for (auto it = linkVec.begin(); it != linkVec.end(); ++it) {
-                if ((*it)->path() == actPath) {
-                    auto val = pt.get<std::string>(prevPath);
-                    (*it)->setValue(val);
+        if (auto found = pt.get_child_optional(prevPath); found) {
+            for (auto it : linkVec) {
+                if (it->path() == actPath) {
+                    auto val = found.value().get_value<std::string>();
+                    it->setValue(val);
                     break;
                 }
             }
@@ -356,23 +348,23 @@ void VConfig::loadSettings(const std::string& parFile, VProperty* guiProp, bool 
     }
 }
 
-void VConfig::loadImportedSettings(const boost::property_tree::ptree& pt, VProperty* guiProp) {
+void VConfig::loadImportedSettings(const ecf::PTree& pt, VProperty* guiProp) {
     std::vector<VProperty*> linkVec;
     guiProp->collectLinks(linkVec);
 
-    for (auto it = linkVec.begin(); it != linkVec.end(); ++it) {
-        if (pt.get_child_optional((*it)->path()) != boost::none) {
-            auto val = pt.get<std::string>((*it)->path());
-            (*it)->setValue(val);
+    for (auto it : linkVec) {
+        if (auto found = pt.get_child_optional(it->path()); found) {
+            auto val = found.value().get_value<std::string>();
+            it->setValue(val);
         }
-        else if ((*it)->master()) {
-            (*it)->setUseMaster(true);
+        else if (it->master()) {
+            it->setUseMaster(true);
         }
     }
 }
 
 void VConfig::importSettings() {
-    boost::property_tree::ptree pt;
+    ecf::PTree pt;
 
     std::string globalRcFile(DirectoryHandler::concatenate(DirectoryHandler::rcDir(), "user.default.options"));
     if (readRcFile(globalRcFile, pt)) {
@@ -382,7 +374,7 @@ void VConfig::importSettings() {
     }
 }
 
-bool VConfig::readRcFile(const std::string& rcFile, boost::property_tree::ptree& pt) {
+bool VConfig::readRcFile(const std::string& rcFile, ecf::PTree& pt) {
     std::ifstream in(rcFile.c_str());
 
     if (!in.good()) {
@@ -467,11 +459,11 @@ bool VConfig::readRcFile(const std::string& rcFile, boost::property_tree::ptree&
                     hasValue = true;
                 }
                 else if (par[0] == "suites") {
-                    boost::property_tree::ptree suites;
-                    suites.push_back(std::make_pair(std::string{}, boost::property_tree::ptree(par[1])));
+                    ecf::PTree suites;
+                    suites.put_child(std::string{}, ecf::PTree(par[1]));
 
                     for (unsigned int j = 1; j < vec.size(); j++) {
-                        suites.push_back(std::make_pair(std::string{}, boost::property_tree::ptree(vec.at(j))));
+                        suites.put_child(std::string{}, ecf::PTree(vec.at(j)));
                     }
 
                     pt.put_child("suite_filter.suites", suites);

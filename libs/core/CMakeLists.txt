@@ -61,6 +61,7 @@ set(test_srcs
   test/TestPasswdFile.cpp
   test/TestPasswordEncryption.cpp
   test/TestPerfTimer.cpp
+  test/TestPTree.cpp
   test/TestRealCalendar.cpp
   test/TestResources.cpp
   test/TestResult.cpp

@@ -14,7 +14,8 @@
 #include <vector>
 
 #include <QSettings>
-#include <boost/property_tree/ptree.hpp>
+
+#include "ecflow/core/PTree.hpp"
 
 class VSettingsPath {
 public:
@@ -34,7 +35,7 @@ protected:
 class VSettings {
 public:
     explicit VSettings(const std::string& file);
-    explicit VSettings(boost::property_tree::ptree pt);
+    explicit VSettings(ecf::PTree pt);
     virtual ~VSettings() = default;
 
     // bool read(const std::string &fs);
@@ -68,10 +69,10 @@ public:
     bool getAsBool(const std::string& key, bool defaultVal);
     void get(const std::string& key, std::vector<VSettings>& val);
 
-    const boost::property_tree::ptree& propertyTree() const { return pt_; }
+    const ecf::PTree& propertyTree() const { return pt_; }
 
 protected:
-    boost::property_tree::ptree pt_;
+    ecf::PTree pt_;
     VSettingsPath path_;
     std::string file_;
 };

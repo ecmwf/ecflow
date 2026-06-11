@@ -1,0 +1,12 @@
+{
+  "name": "Alice",
+  "age": 30,
+  "active": true,
+  "score": 9.5,
+  "address": {
+    "city": "London",
+    "zip": "EC1A 1BB"
+  },
+  "empty_obj": {},
+  "null_val": null
+}
