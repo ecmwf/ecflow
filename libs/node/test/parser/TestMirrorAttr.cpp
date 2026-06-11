@@ -106,6 +106,51 @@ BOOST_AUTO_TEST_CASE(can_parse_mirror_attribute_on_task_with_all_attributes) {
     BOOST_CHECK_EQUAL(mirror.ssl(), true);
 }
 
+BOOST_AUTO_TEST_CASE(mirror_disabled_when_ECF_MIRROR_DISABLE_is_set) {
+    ECF_NAME_THIS_TEST();
+
+    using namespace ecf;
+
+    std::string definition = R"(
+        suite s1
+          edit ECF_MIRROR_DISABLE "yes"
+          family f1
+            task t1
+              mirror --name A --remote_path /s1/f1/t2 --remote_host invalid-host --remote_port 9999 --polling 1
+          endfamily
+    )";
+
+    Defs defs;
+    DefsStructureParser parser(&defs, definition, true);
+
+    std::string errorMsg, warningMsg;
+    bool parsedOK = parser.doParse(errorMsg, warningMsg);
+    BOOST_CHECK_MESSAGE(parsedOK, "Failed to parse definition: " << errorMsg);
+
+    const auto& suites = defs.suiteVec();
+    BOOST_CHECK_EQUAL(suites.size(), static_cast<size_t>(1));
+
+    const auto& families = suites[0]->familyVec();
+    BOOST_CHECK_EQUAL(families.size(), static_cast<size_t>(1));
+
+    const auto& tasks = families[0]->taskVec();
+    BOOST_CHECK_EQUAL(tasks.size(), static_cast<size_t>(1));
+
+    Task* task = tasks[0].get();
+    auto& mirrors = task->mirrors();
+    BOOST_CHECK_EQUAL(mirrors.size(), static_cast<size_t>(1));
+
+    // Verify the flag is initially clear
+    BOOST_CHECK(!task->get_flag().is_set(Flag::REMOTE_ERROR));
+
+    // Call mirror() which would normally set REMOTE_ERROR if the controller fails to start
+    // But with ECF_MIRROR_DISABLE set, it should return early and NOT set REMOTE_ERROR
+    mirrors[0].mirror();
+
+    // Verify the flag remains clear (proving mirror() did not attempt to start controller)
+    BOOST_CHECK(!task->get_flag().is_set(Flag::REMOTE_ERROR));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

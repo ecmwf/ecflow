@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "ecflow/core/Ecf.hpp"
+#include "ecflow/core/Environment.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Overload.hpp"
 #include "ecflow/core/exceptions/Exceptions.hpp"
@@ -89,6 +90,16 @@ void MirrorAttr::finish() {
 
 void MirrorAttr::mirror() {
     SLOG(D, "MirrorAttr: poll Mirror attribute '" << absolute_name() << "'");
+
+    // Check if local mirrors are disabled via ECF_MIRROR_DISABLE variable
+    if (parent_) {
+        std::string disable_mirrors;
+        if (parent_->findParentVariableValue(ecf::environment::ECF_MIRROR_DISABLE, disable_mirrors)) {
+            // ECF_MIRROR_DISABLE is defined and non-empty; skip mirror polling
+            SLOG(D, "MirrorAttr: Mirror attribute '" << absolute_name() << "' disabled via ECF_MIRROR_DISABLE");
+            return;
+        }
+    }
 
     start_controller();
     if (!controller_) {

@@ -60,6 +60,10 @@ constexpr const char* ECF_USER = "ECF_USER";
 constexpr const char* ECF_DEBUG_CLIENT = "ECF_DEBUG_CLIENT";
 constexpr const char* ECF_DEBUG_LEVEL  = "ECF_DEBUG_LEVEL";
 
+// Mirror kill-switches
+constexpr const char* ECF_MIRROR_DISABLE         = "ECF_MIRROR_DISABLE";
+constexpr const char* ECF_MIRROR_DISABLE_QUERIES = "ECF_MIRROR_DISABLE_QUERIES";
+
 namespace /* anonymous */ {
 
 template <typename T>
