@@ -801,6 +801,7 @@ void export_NodeAttr(py::module& m) {
     py::class_<Variable>(m, "Variable", py::dynamic_attr(), NodeAttrDoc::variable_doc())
 
         .def(py::init<std::string, std::string>())
+        .def(py::init([](const std::string name, int value) { return Variable(name, std::to_string(value)); }))
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
         .def(py::self < py::self)
