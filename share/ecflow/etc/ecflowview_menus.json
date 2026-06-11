@@ -865,6 +865,13 @@
             "status_tip"     : "__cmd__"
         },
         {
+            "menu"           : "Defstatus",
+            "name"           : "Suspended",
+            "visible_for"    : "node",
+            "command"        : "ecflow_client --alter change defstatus suspended <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+        {
             "menu"           : "Node",
             "name"           : "-"
         },
