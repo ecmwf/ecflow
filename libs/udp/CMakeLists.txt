@@ -81,7 +81,7 @@ ecbuild_add_test(
   TARGET
     ${TEST_TARGET}
   LABELS
-    integration nightly
+    integration nightly slow
   SOURCES
     ${${TEST_TARGET}_srcs}
   LIBS

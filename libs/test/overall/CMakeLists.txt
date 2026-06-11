@@ -50,8 +50,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       s_test
     LABELS
-      integration
-      nightly
+      integration nightly slow
     SOURCES
       ${test_srcs}
     LIBS
@@ -69,8 +68,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       s_test_using_http_backend
     LABELS
-      integration
-      nightly
+      integration nightly slow
     SOURCES
       ${test_srcs}
     DEFINITIONS
@@ -91,8 +89,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       s_zombies
     LABELS
-      integration
-      nightly
+      integration nightly slow
     SOURCES
       TestZombies.cpp
       TestZombies_main.cpp # test entry point
@@ -112,8 +109,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       s_single
     LABELS
-      integration
-      manual
+      integration manual
     SOURCES
       TestSingle.cpp
       TestSingle_main.cpp # test entry point

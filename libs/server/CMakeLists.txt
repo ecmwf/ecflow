@@ -57,7 +57,7 @@ ecbuild_add_test(
   TARGET
     u_server
   LABELS
-    unit nightly
+    unit nightly fast
   INCLUDES
     src
   SOURCES
@@ -101,7 +101,7 @@ ecbuild_add_test(
   TARGET
     s_periodic_scheduler
   LABELS
-    integration nightly
+    integration nightly slow
   INCLUDES
     src
   SOURCES

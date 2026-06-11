@@ -18,7 +18,7 @@ ecbuild_add_test(
   TARGET
     u_service_executor
   LABELS
-    unit nightly
+    unit nightly fast
   SOURCES
     # Sources
     test/executor/TestExecutor_main.cpp # test entry point
@@ -39,7 +39,7 @@ ecbuild_add_test(
   TARGET
     u_service_auth
   LABELS
-    unit nightly
+    unit nightly fast
   SOURCES
     # Headers -- utilities
     test/TestContentProvider.hpp
@@ -66,7 +66,7 @@ ecbuild_add_test(
   TARGET
     u_service_aviso
   LABELS
-    unit nightly
+    unit nightly fast
   SOURCES
     # Headers -- utilities
     test/TestContentProvider.hpp
@@ -97,7 +97,7 @@ ecbuild_add_test(
   TARGET
     u_service_mirror
   LABELS
-    unit nightly
+    unit nightly fast
   SOURCES
     # Sources
     test/mirror/TestMirror_main.cpp # test entry point

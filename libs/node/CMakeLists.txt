@@ -63,8 +63,7 @@ ecbuild_add_test(
   TARGET
     u_node
   LABELS
-    unit
-    nightly
+    unit nightly fast
   SOURCES
     ${test_srcs}
   LIBS
@@ -99,8 +98,7 @@ ecbuild_add_test(
   TARGET
     u_parser
   LABELS
-    unit
-    nightly
+    unit nightly fast
   SOURCES
     ${test_srcs}
   INCLUDES
@@ -127,8 +125,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       u_node_single
     LABELS
-      unit
-      nightly
+      unit nightly fast
     SOURCES
       ${test_srcs}
     LIBS
@@ -158,8 +155,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       p_parser
     LABELS
-      performance
-      nightly
+      performance nightly fast
     SOURCES
       ${test_srcs}
     LIBS
@@ -188,8 +184,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       p_parser_timer
     LABELS
-      performance
-      nightly
+      performance nightly fast
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/data/single_defs/mega.def
     SOURCES
@@ -212,8 +207,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       p_parser_only
     LABELS
-      performance
-      nightly
+      performance nightly fast
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/data/single_defs/mega.def
     SOURCES

@@ -16,8 +16,7 @@ ecbuild_add_test(
   TARGET
     s_foolproof
   LABELS
-    integration
-    nightly
+    integration nightly fast
   SOURCES
     # Test entry point
     TestFoolproof_main.cpp # test entry point

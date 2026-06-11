@@ -82,8 +82,7 @@ ecbuild_add_test(
   TARGET
     u_core
   LABELS
-    unit
-    nightly
+    unit nightly fast
   SOURCES
     ${test_srcs}
   LIBS
