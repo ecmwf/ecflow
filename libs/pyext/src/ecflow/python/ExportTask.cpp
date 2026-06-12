@@ -92,7 +92,8 @@ std::string Alias_str(alias_ptr self) {
 
 void export_Task(py::module& m) {
 
-    py::class_<Submittable, Node, std::shared_ptr<Submittable>>(m, "Submittable", DefsDoc::submittable_doc())
+    py::class_<Submittable, Node, std::shared_ptr<Submittable>>(
+        m, "Submittable", py::dynamic_attr(), DefsDoc::submittable_doc())
 
         .def("__init__",
              [](py::object& /*self*/, const std::string&) {
@@ -113,7 +114,7 @@ void export_Task(py::module& m) {
              py::return_value_policy::reference,
              "If node was aborted and a reason was provided, return the string");
 
-    py::class_<Task, Submittable, std::shared_ptr<Task>>(m, "Task", DefsDoc::task_doc())
+    py::class_<Task, Submittable, std::shared_ptr<Task>>(m, "Task", py::dynamic_attr(), DefsDoc::task_doc())
 
         .def(py::init(&Task_init))
         .def(py::init<const std::string&>(), py::arg("name"))
@@ -131,7 +132,7 @@ void export_Task(py::module& m) {
         .def_property_readonly("aliases", &Task::aliases, "Returns a list of aliases")
         .def_property_readonly("nodes", &Task::aliases, "Returns a list of aliases");
 
-    py::class_<Alias, Submittable, std::shared_ptr<Alias>>(m, "Alias", DefsDoc::alias_doc())
+    py::class_<Alias, Submittable, std::shared_ptr<Alias>>(m, "Alias", py::dynamic_attr(), DefsDoc::alias_doc())
 
         .def("__init__",
              [](py::object& /*self*/, const std::string&) {

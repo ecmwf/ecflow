@@ -33,7 +33,7 @@ void export_Core(py::module& m) {
     // The following is used, in tests only, to detect a debug build
     m.def("debug_build", debug_build);
 
-    py::class_<Edit>(m, "Edit", NodeAttrDoc::variable_doc())
+    py::class_<Edit>(m, "Edit", py::dynamic_attr(), NodeAttrDoc::variable_doc())
 
         .def(py::init<py::dict>())
         .def(py::init<py::kwargs>())
@@ -47,7 +47,7 @@ void export_Core(py::module& m) {
 
     constexpr const char* file_docs = "Utility class, Used in test only.";
 
-    py::class_<ecf::File>(m, "File", file_docs)
+    py::class_<ecf::File>(m, "File", py::dynamic_attr(), file_docs)
 
         .def("__init__",
              [](py::object& /*self*/) { throw std::runtime_error("File cannot be instantiated from Python"); })
@@ -86,6 +86,8 @@ void export_Core(py::module& m) {
         .value("STATE", PrintStyle::STATE)
         .value("MIGRATE", PrintStyle::MIGRATE);
 
+    py_finalize_enum(m, "Style");
+
     constexpr const char* printstyle_docs =
         "Singleton used to control the print Style. See :py:class:`ecflow.Style`\n\n"
         "\nUsage::\n\n"
@@ -95,7 +97,7 @@ void export_Core(py::module& m) {
         "   print(defs)                     # show the node state\n"
         "   PrintStyle.set_style(old_style) # reset previous style\n";
 
-    py::class_<PrintStyle>(m, "PrintStyle", printstyle_docs)
+    py::class_<PrintStyle>(m, "PrintStyle", py::dynamic_attr(), printstyle_docs)
 
         .def("__init__",
              [](py::object& /*self*/) { throw std::runtime_error("PrintStyle cannot be instantiated from Python"); })
@@ -116,9 +118,11 @@ void export_Core(py::module& m) {
         .value("ALWAYS", ecf::CheckPt::ALWAYS)
         .value("UNDEFINED", ecf::CheckPt::UNDEFINED);
 
+    py_finalize_enum(m, "CheckPt");
+
     constexpr const char* ecf_docs = "Singleton used to control ecf debugging\n\n";
 
-    py::class_<Ecf>(m, "Ecf", ecf_docs)
+    py::class_<Ecf>(m, "Ecf", py::dynamic_attr(), ecf_docs)
 
         .def("__init__",
              [](py::object& /*self*/) { throw std::runtime_error("Ecf cannot be instantiated from Python"); })
@@ -154,6 +158,8 @@ void export_Core(py::module& m) {
         .value("submitted", NState::SUBMITTED)
         .value("active", NState::ACTIVE);
 
+    py_finalize_enum(m, "State");
+
     constexpr const char* dstate_docs = "A DState is like a ecflow.State, except for the addition of SUSPENDED\n\n"
                                         "Suspended stops job generation, and hence is an attribute of a Node.\n"
                                         "DState can be used for setting the default state of node when it is\n"
@@ -178,12 +184,14 @@ void export_Core(py::module& m) {
         .value("suspended", DState::SUSPENDED)
         .value("active", DState::ACTIVE);
 
+    py_finalize_enum(m, "DState");
+
     constexpr const char* defstatus_docs = "A `node`_ can be set with a default status other the `queued`_\n\n"
                                            "The default state of a `node`_ is `queued`_.\n"
                                            "This defines the state to take at 'begin' or 're-queue' time\n"
                                            "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.DState`\n";
 
-    py::class_<Defstatus>(m, "Defstatus", defstatus_docs)
+    py::class_<Defstatus>(m, "Defstatus", py::dynamic_attr(), defstatus_docs)
 
         .def(py::init<DState::State>())
         .def(py::init<std::string>()) // constructor
@@ -199,6 +207,8 @@ void export_Core(py::module& m) {
         .value("SHUTDOWN", SState::SHUTDOWN)
         .value("RUNNING", SState::RUNNING);
 
+    py_finalize_enum(m, "SState");
+
     constexpr const char* timeslot_docs = "Represents a time slot.\n\n"
                                           "It is typically used as an argument to a :py:class:`TimeSeries` or\n"
                                           "other time dependent attributes of a node.\n"
@@ -210,7 +220,7 @@ void export_Core(py::module& m) {
                                           "\nUsage::\n\n"
                                           "   ts = TimeSlot(10,11)\n";
 
-    py::class_<ecf::TimeSlot>(m, "TimeSlot", timeslot_docs)
+    py::class_<ecf::TimeSlot>(m, "TimeSlot", py::dynamic_attr(), timeslot_docs)
 
         .def(py::init<int, int>())
         .def("__str__", &ecf::TimeSlot::toString)
@@ -251,8 +261,7 @@ void export_Core(py::module& m) {
         "\nUsage::\n\n"
         "   time_series = TimeSeries(TimeSlot(10,11),False)\n";
 
-    // single slot, | start, finish, incr,  bool relative to suite start
-    py::class_<ecf::TimeSeries>(m, "TimeSeries", timeseries_docs)
+    py::class_<ecf::TimeSeries>(m, "TimeSeries", py::dynamic_attr(), timeseries_docs)
 
         .def(py::init<ecf::TimeSlot, bool>(), py::arg("ts"), py::arg("relative") = false)
         .def(py::init<int, int, bool>(), py::arg("hour"), py::arg("minute"), py::arg("relative") = false)

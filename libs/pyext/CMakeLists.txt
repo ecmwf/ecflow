@@ -108,6 +108,7 @@ set(u_tests
   u_TestDefs
   u_TestDefsCheck
   u_TestDerivable
+  u_TestDynamicObjects
   u_TestEcf
   u_TestError
   u_TestExportClient

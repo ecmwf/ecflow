@@ -40,38 +40,48 @@ Members:
 
 .. py:attribute:: State.aborted
    :module: ecflow
-   :value: <State.aborted: 3>
+   :value: ecflow.State.aborted
 
 
 .. py:attribute:: State.active
    :module: ecflow
-   :value: <State.active: 5>
+   :value: ecflow.State.active
 
 
 .. py:attribute:: State.complete
    :module: ecflow
-   :value: <State.complete: 1>
+   :value: ecflow.State.complete
 
 
 .. py:property:: State.name
    :module: ecflow
 
 
+.. py:attribute:: State.names
+   :module: ecflow
+   :value: {'aborted': ecflow.State.aborted, 'active': ecflow.State.active, 'complete': ecflow.State.complete, 'queued': ecflow.State.queued, 'submitted': ecflow.State.submitted, 'unknown': ecflow.State.unknown}
+
+
 .. py:attribute:: State.queued
    :module: ecflow
-   :value: <State.queued: 2>
+   :value: ecflow.State.queued
 
 
 .. py:attribute:: State.submitted
    :module: ecflow
-   :value: <State.submitted: 4>
+   :value: ecflow.State.submitted
 
 
 .. py:attribute:: State.unknown
    :module: ecflow
-   :value: <State.unknown: 0>
+   :value: ecflow.State.unknown
 
 
 .. py:property:: State.value
    :module: ecflow
+
+
+.. py:attribute:: State.values
+   :module: ecflow
+   :value: {0: ecflow.State.unknown, 1: ecflow.State.complete, 2: ecflow.State.queued, 3: ecflow.State.aborted, 4: ecflow.State.submitted, 5: ecflow.State.active}
 
