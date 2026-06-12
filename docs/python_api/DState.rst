@@ -43,43 +43,53 @@ Members:
 
 .. py:attribute:: DState.aborted
    :module: ecflow
-   :value: <DState.aborted: 3>
+   :value: ecflow.DState.aborted
 
 
 .. py:attribute:: DState.active
    :module: ecflow
-   :value: <DState.active: 5>
+   :value: ecflow.DState.active
 
 
 .. py:attribute:: DState.complete
    :module: ecflow
-   :value: <DState.complete: 1>
+   :value: ecflow.DState.complete
 
 
 .. py:property:: DState.name
    :module: ecflow
 
 
+.. py:attribute:: DState.names
+   :module: ecflow
+   :value: {'aborted': ecflow.DState.aborted, 'active': ecflow.DState.active, 'complete': ecflow.DState.complete, 'queued': ecflow.DState.queued, 'submitted': ecflow.DState.submitted, 'suspended': ecflow.DState.suspended, 'unknown': ecflow.DState.unknown}
+
+
 .. py:attribute:: DState.queued
    :module: ecflow
-   :value: <DState.queued: 2>
+   :value: ecflow.DState.queued
 
 
 .. py:attribute:: DState.submitted
    :module: ecflow
-   :value: <DState.submitted: 4>
+   :value: ecflow.DState.submitted
 
 
 .. py:attribute:: DState.suspended
    :module: ecflow
-   :value: <DState.suspended: 6>
+   :value: ecflow.DState.suspended
 
 
 .. py:attribute:: DState.unknown
    :module: ecflow
-   :value: <DState.unknown: 0>
+   :value: ecflow.DState.unknown
 
 
 .. py:property:: DState.value
    :module: ecflow
+
+
+.. py:attribute:: DState.values
+   :module: ecflow
+   :value: {0: ecflow.DState.unknown, 1: ecflow.DState.complete, 2: ecflow.DState.queued, 3: ecflow.DState.aborted, 4: ecflow.DState.submitted, 5: ecflow.DState.active, 6: ecflow.DState.suspended}
 

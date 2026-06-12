@@ -22,23 +22,33 @@ Members:
 
 .. py:attribute:: SState.HALTED
    :module: ecflow
-   :value: <SState.HALTED: 0>
+   :value: ecflow.SState.HALTED
 
 
 .. py:attribute:: SState.RUNNING
    :module: ecflow
-   :value: <SState.RUNNING: 2>
+   :value: ecflow.SState.RUNNING
 
 
 .. py:attribute:: SState.SHUTDOWN
    :module: ecflow
-   :value: <SState.SHUTDOWN: 1>
+   :value: ecflow.SState.SHUTDOWN
 
 
 .. py:property:: SState.name
    :module: ecflow
 
 
+.. py:attribute:: SState.names
+   :module: ecflow
+   :value: {'HALTED': ecflow.SState.HALTED, 'RUNNING': ecflow.SState.RUNNING, 'SHUTDOWN': ecflow.SState.SHUTDOWN}
+
+
 .. py:property:: SState.value
    :module: ecflow
+
+
+.. py:attribute:: SState.values
+   :module: ecflow
+   :value: {0: ecflow.SState.HALTED, 1: ecflow.SState.SHUTDOWN, 2: ecflow.SState.RUNNING}
 
