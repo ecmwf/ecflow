@@ -107,6 +107,9 @@ ssize_t py_hash(const py::object& self) {
 void py_finalize_enum(py::module& m, const char* class_name) {
     py::object cls = m.attr(class_name);
 
+    // Use `NotImplemented` in __eq__ as return value when comparing enum with something not actually and enum/int
+    static py::object NotImplemented = py::module_::import("builtins").attr("NotImplemented");
+
     // __str__ : return just the name (pybind11 default returns "ClassName.name")
     cls.attr("__str__") =
         py::cpp_function([](const py::object& self) -> std::string { return self.attr("name").cast<std::string>(); },
@@ -138,23 +141,23 @@ void py_finalize_enum(py::module& m, const char* class_name) {
         return o.cast<int>();
     };
     cls.attr("__eq__") = py::cpp_function(
-        [get_int](const py::object& self, const py::object& other) -> bool {
+        [get_int](const py::object& self, const py::object& other) -> py::object {
             try {
-                return get_int(self) == get_int(other);
+                return py::bool_(get_int(self) == get_int(other));
             }
             catch (...) {
-                return false;
+                return NotImplemented;
             }
         },
         py::name("__eq__"),
         py::is_method(cls));
     cls.attr("__ne__") = py::cpp_function(
-        [get_int](const py::object& self, const py::object& other) -> bool {
+        [get_int](const py::object& self, const py::object& other) -> py::object {
             try {
-                return get_int(self) != get_int(other);
+                return py::bool_(get_int(self) != get_int(other));
             }
             catch (...) {
-                return true;
+                return NotImplemented;
             }
         },
         py::name("__ne__"),

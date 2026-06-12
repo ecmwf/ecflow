@@ -277,6 +277,14 @@ class TestStyle(unittest.TestCase):
         """Different Style members are not equal."""
         self.assertNotEqual(ecf.Style.DEFS, ecf.Style.STATE)
 
+    def test_eq_incompatible_type_returns_not_implemented(self):
+        """__eq__ returns NotImplemented for an incompatible RHS type."""
+        self.assertIs(ecf.Style.DEFS.__eq__("DEFS"), NotImplemented)
+
+    def test_ne_incompatible_type_returns_not_implemented(self):
+        """__ne__ returns NotImplemented for an incompatible RHS type."""
+        self.assertIs(ecf.Style.DEFS.__ne__("DEFS"), NotImplemented)
+
     # ------------------------------------------------------------------
     # __int__
     # ------------------------------------------------------------------
