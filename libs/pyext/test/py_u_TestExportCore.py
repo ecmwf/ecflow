@@ -234,6 +234,10 @@ class TestStyle(unittest.TestCase):
     Operators
         __eq__   -- value comparison between Style members
         __ne__   -- implicit complement of __eq__
+        __lt__   -- ordering by underlying integer value
+        __le__   -- ordering by underlying integer value
+        __gt__   -- ordering by underlying integer value
+        __ge__   -- ordering by underlying integer value
         __int__  -- integer value of the enum member
     """
 
@@ -284,6 +288,42 @@ class TestStyle(unittest.TestCase):
     def test_ne_incompatible_type_returns_not_implemented(self):
         """__ne__ returns NotImplemented for an incompatible RHS type."""
         self.assertIs(ecf.Style.DEFS.__ne__("DEFS"), NotImplemented)
+
+    # ------------------------------------------------------------------
+    # __lt__ / __le__ / __gt__ / __ge__
+    # ------------------------------------------------------------------
+
+    def test_lt_orders_by_value(self):
+        """Style.NOTHING < Style.DEFS (integer value 0 < 1)."""
+        self.assertLess(ecf.Style.NOTHING, ecf.Style.DEFS)
+
+    def test_gt_orders_by_value(self):
+        """Style.DEFS > Style.NOTHING."""
+        self.assertGreater(ecf.Style.DEFS, ecf.Style.NOTHING)
+
+    def test_le_equal_members(self):
+        """Style.DEFS <= Style.DEFS holds."""
+        self.assertLessEqual(ecf.Style.DEFS, ecf.Style.DEFS)
+
+    def test_ge_equal_members(self):
+        """Style.DEFS >= Style.DEFS holds."""
+        self.assertGreaterEqual(ecf.Style.DEFS, ecf.Style.DEFS)
+
+    def test_lt_incompatible_type_returns_not_implemented(self):
+        """__lt__ returns NotImplemented for an incompatible RHS type."""
+        self.assertIs(ecf.Style.DEFS.__lt__("DEFS"), NotImplemented)
+
+    def test_le_incompatible_type_returns_not_implemented(self):
+        """__le__ returns NotImplemented for an incompatible RHS type."""
+        self.assertIs(ecf.Style.DEFS.__le__("DEFS"), NotImplemented)
+
+    def test_gt_incompatible_type_returns_not_implemented(self):
+        """__gt__ returns NotImplemented for an incompatible RHS type."""
+        self.assertIs(ecf.Style.DEFS.__gt__("DEFS"), NotImplemented)
+
+    def test_ge_incompatible_type_returns_not_implemented(self):
+        """__ge__ returns NotImplemented for an incompatible RHS type."""
+        self.assertIs(ecf.Style.DEFS.__ge__("DEFS"), NotImplemented)
 
     # ------------------------------------------------------------------
     # __int__

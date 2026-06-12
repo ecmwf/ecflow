@@ -162,23 +162,48 @@ void py_finalize_enum(py::module& m, const char* class_name) {
         },
         py::name("__ne__"),
         py::is_method(cls));
-
-    // Ordering operators (enum-to-enum only; tests don't mix enum and plain int here)
-    auto lhs_int       = [](const py::object& o) -> int { return o.attr("value").cast<int>(); };
     cls.attr("__lt__") = py::cpp_function(
-        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) < lhs_int(o); },
+        [get_int](const py::object& s, const py::object& o) -> py::object {
+            try {
+                return py::bool_(get_int(s) < get_int(o));
+            }
+            catch (...) {
+                return NotImplemented;
+            }
+        },
         py::name("__lt__"),
         py::is_method(cls));
     cls.attr("__le__") = py::cpp_function(
-        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) <= lhs_int(o); },
+        [get_int](const py::object& s, const py::object& o) -> py::object {
+            try {
+                return py::bool_(get_int(s) <= get_int(o));
+            }
+            catch (...) {
+                return NotImplemented;
+            }
+        },
         py::name("__le__"),
         py::is_method(cls));
     cls.attr("__gt__") = py::cpp_function(
-        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) > lhs_int(o); },
+        [get_int](const py::object& s, const py::object& o) -> py::object {
+            try {
+                return py::bool_(get_int(s) > get_int(o));
+            }
+            catch (...) {
+                return NotImplemented;
+            }
+        },
         py::name("__gt__"),
         py::is_method(cls));
     cls.attr("__ge__") = py::cpp_function(
-        [lhs_int](const py::object& s, const py::object& o) -> bool { return lhs_int(s) >= lhs_int(o); },
+        [get_int](const py::object& s, const py::object& o) -> py::object {
+            try {
+                return py::bool_(get_int(s) >= get_int(o));
+            }
+            catch (...) {
+                return NotImplemented;
+            }
+        },
         py::name("__ge__"),
         py::is_method(cls));
 
