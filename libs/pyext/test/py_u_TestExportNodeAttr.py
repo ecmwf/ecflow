@@ -4578,6 +4578,31 @@ class TestVariable(unittest.TestCase):
         with self.assertRaises((TypeError, RuntimeError)):
             ecf.Variable("VAR", None)
 
+    def test_int_value_above_int32_max_accepted(self):
+        """Values above 2^31-1 (C++ int max) are accepted without overflow or TypeError."""
+        v = ecf.Variable("BIG", 2**31)
+        self.assertEqual(v.value(), "2147483648")
+
+    def test_int_value_below_int32_min_accepted(self):
+        """Values below -2^31 (C++ int min) are accepted without overflow or TypeError."""
+        v = ecf.Variable("BIG", -(2**31) - 1)
+        self.assertEqual(v.value(), "-2147483649")
+
+    def test_int_value_large_positive(self):
+        """A large Python integer (10**12) is stored as its full decimal string."""
+        v = ecf.Variable("COUNTER", 10**12)
+        self.assertEqual(v.value(), "1000000000000")
+
+    def test_int_value_large_negative(self):
+        """A large negative Python integer (-10**12) is stored as its full decimal string."""
+        v = ecf.Variable("COUNTER", -(10**12))
+        self.assertEqual(v.value(), "-1000000000000")
+
+    def test_int_value_int64_max(self):
+        """2^63-1 (int64 max) is stored as its full decimal string."""
+        v = ecf.Variable("X", 2**63 - 1)
+        self.assertEqual(v.value(), "9223372036854775807")
+
     # ------------------------------------------------------------------
     # name()
     # ------------------------------------------------------------------

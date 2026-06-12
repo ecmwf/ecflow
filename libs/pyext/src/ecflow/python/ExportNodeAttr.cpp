@@ -8,6 +8,7 @@
  * nor does it submit to any jurisdiction.
  */
 
+#include <cstdint>
 #include <stdexcept>
 
 #include <pybind11/stl_bind.h>
@@ -801,7 +802,9 @@ void export_NodeAttr(py::module& m) {
     py::class_<Variable>(m, "Variable", py::dynamic_attr(), NodeAttrDoc::variable_doc())
 
         .def(py::init<std::string, std::string>())
-        .def(py::init([](const std::string name, int value) { return Variable(name, std::to_string(value)); }))
+        .def(py::init([](const std::string name, const py::int_& value) {
+            return Variable(name, std::to_string(value.cast<int64_t>()));
+        }))
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
         .def(py::self < py::self)
