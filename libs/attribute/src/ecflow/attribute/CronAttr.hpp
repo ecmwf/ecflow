@@ -88,16 +88,16 @@ public:
 
     /// parse the line tokens and create a cron attribute. Can throw std::runtime_error
     /// The index parameter allows us to parse:
-    /// cron -w 0,1 10:00      // index = 1
-    /// -w 0,1 10:00           // index = 0
+    ///   cron -w 0,1 10:00      // index = 1
+    ///   -w 0,1 10:00           // index = 0
     /// Expect to parse:
-    /// 	cron 23:00                 # run every day at 23:00
-    /// 	cron 10:00 20:00 01:00     # run every hour between 10am and 8pm
+    ///   cron 23:00                 # run every day at 23:00
+    ///   cron 10:00 20:00 01:00     # run every hour between 10am and 8pm
     ///   cron -w 0,1 10:00          # run every sunday and monday at 10am
     ///   cron -w 0,1L  10:00        # run every sunday and last monday of the month at 10am
     ///   cron -d 10,11,12 12:00     # run 10th, 11th and 12th of each month at noon
     ///   cron -d 10,L     12:00     # run 10th, and last day of the month at noon
-    /// 	cron -m 1,2,3 12:00        # run on Jan,Feb and March every day at noon.
+    ///   cron -m 1,2,3 12:00        # run on Jan,Feb and March every day at noon.
     ///   cron -w 0   -m 5,6,7,8 10:00 20:00 01:00 # run every sunday, between May-Aug, every hour between 10am and 8pm
     ///   cron -d 1,L -m 5,6,7,8 10:00 20:00 01:00 # run on first and last day of month, between May-Aug, every hour
     ///   between 10am and 8pm

@@ -253,7 +253,16 @@ Glossary
       
    cron
       A :term:`cron` defines a time dependency for a :term:`node`, similar to :term:`time`,
-      but one that will be repeated indefinitely.
+      but defined in terms of a time series at which the node is allowed to execute.
+
+      The time series can be either absolute (:code:`hh:mm`, based on plain wall-clock)
+      or relative (:code:`+hh:mm`, considering the suite begin or the last :term:`repeat`
+      increment as reference).
+
+      An absolute cron resets itself automatically every day at midnight, while a relative cron
+      does not (i.e. once its elapsed window runs out it stays inactive forever, unless it
+      is associated with a :term:`repeat` attribute that resets it).
+      See :ref:`text_based_def_cron` for the detailed timing tables.
 
       See also:
 
