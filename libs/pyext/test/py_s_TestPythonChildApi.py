@@ -69,6 +69,7 @@ def create_defs(name, port, protocol):
 def wait_for_suite_to_complete(ci, suite_name):
     count = 0
     while 1:
+        print(f"Waiting for suite {suite_name} to complete, loop {count}...")
         count += 1
         ci.sync_local()  # get the changes, synced with local defs
         suite = ci.get_defs().find_suite(suite_name)
@@ -86,107 +87,123 @@ def wait_for_suite_to_complete(ci, suite_name):
 
 
 def test_python_child_api(ci, protocol):
+
     suite_name = "test_python_child_api"
-    print("\n" + suite_name + " " + ci.get_host() + ":" + str(ci.get_port()))
-    print(" ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")")
+    host = ci.get_host()
+    port = ci.get_port()
+
+    ecf_home = Test.ecf_home(port)
+    test_home = ecf_home + "/" + suite_name
+    family_dir = test_home + "/f1"
+
+    # Make the directory tree for the suite
+    if not os.path.exists(family_dir): os.makedirs(family_dir)
+
+    # Dump some information
+    print("\n" + suite_name + " " + host + ":" + str(port))
+    print(" ECF_HOME(" + ecf_home + ")")
     print(" ECF_INCLUDES(" + ecf_includes() + ")")
+
+    # Clear the server
     ci.delete_all(True)
-    defs = create_defs(suite_name, ci.get_port(), protocol)
+
+    # Setup defs on server (and a copy on disk)
+    defs = create_defs(suite_name, port, protocol)
     suite = defs.find_suite(suite_name)
     suite.add_defstatus(DState.suspended)
+    defs.save_as_defs(os.path.join(test_home, suite_name + ".def")) # .../<suite-name>/<suite-name>.def
 
-    # create the ecf file /test_python_child_api/f1/t1
-    ecf_home = Test.ecf_home(ci.get_port())
-    test_home = ecf_home + "/" + suite_name
-    dir = test_home + "/f1"
-
-    # on cray creating recursive directories can fail, try again. yuk
-    try:
-        if not os.path.exists(dir): os.makedirs(dir)
-    except:
-        try:
-            if not os.path.exists(dir): os.makedirs(dir)
-        except:
-            # try breaking down
-            if not os.path.exists(ecf_home): os.makedirs(ecf_home)
-            new_dir = ecf_home + "/test_python_child_api"
-            if not os.path.exists(new_dir): os.makedirs(new_dir)
-            new_dir = ecf_home + "/test_python_child_api/f1"
-            if not os.path.exists(new_dir): os.makedirs(new_dir)
-    if not os.path.exists(dir): os.makedirs(dir)
-
-    # record the log file with the test
-    ci.new_log(test_home + "/" + suite_name + ".log")
+    # Set the log file to a location inside the test
+    ci.new_log(os.path.join(test_home, suite_name + ".log")) # .../<suite-name>/<suite-name>.log
 
     server_version = ci.server_version()
-    file = dir + "/t1.ecf"
-    contents = "%include <head.py>\n\n"
-    contents += "with Client(True) as ci:\n"  # Here True means add variables durint init and remove them on complete ECFLOW-1573
-    if protocol == Test.Protocol.HTTP:
-        contents += "    ci.enable_http()\n"
-    contents += "    print('   doing some work: t1.ecf')\n"
-    contents += "    if ci.version() != '" + server_version + "':\n"
-    contents += "        assert False, 'Client and server versions different'\n"
-    contents += "    ci.child_event('event_fred')      # set the event\n"
-    contents += "    ci.child_event('event_set',False) # clear the event ECFLOW-1526\n"
-    contents += "    ci.child_meter('meter',100)\n"
-    contents += "    ci.child_label('label_name','100')\n"
-    contents += "    step = ci.child_queue('q1','active')\n"
-    contents += "    assert step == '1','expected first step to be 1'\n"
-    contents += "    step = ci.child_queue('q1','complete',step)\n"
-    contents += "    step = ci.child_queue('q1','active')\n"
-    contents += "    assert step == '2','expected second step to be 2'\n"
-    contents += "    step = ci.child_queue('q1','complete',step)\n"
-    contents += "    step = ci.child_queue('q1','active')\n"
-    contents += "    assert step == '3','expected third step to be 3'\n"
-    contents += "    step = ci.child_queue('q1','complete',step)\n"
-    contents += "    step = ci.child_queue('q1','active')\n"
-    contents += "    assert step == '<NULL>','expected <NULL? for end of queue'\n"
-    contents += "    print('   Finished event,meter,label and queue child commands')\n"
+
+    if ci.version() != server_version:
+        assert False, 'Client and server versions different'
+
+    # Create the Task script at .../<suite-name>/f1/t1
+    file = family_dir + "/t1.ecf"
+    contents = f"""
+%include <head.py>
+
+with Client(True) as ci:
+
+    {'ci.enable_http()' if protocol == Test.Protocol.HTTP else ''}
+    print('   doing some work: t1.ecf')
+    ci.child_event('event_fred')      # set the event
+    ci.child_event('event_set',False) # clear the event ECFLOW-1526
+    ci.child_meter('meter',100)
+    ci.child_label('label_name','100')
+    step = ci.child_queue('q1','active')
+    assert step == '1','expected first step to be 1'
+    step = ci.child_queue('q1','complete',step)
+    step = ci.child_queue('q1','active')
+    assert step == '2','expected second step to be 2'
+    step = ci.child_queue('q1','complete',step)
+    step = ci.child_queue('q1','active')
+    assert step == '3','expected third step to be 3'
+    step = ci.child_queue('q1','complete',step)
+    step = ci.child_queue('q1','active')
+    assert step == '<NULL>','expected <NULL? for end of queue'
+    print('   Finished event,meter,label and queue child commands')
+"""
     open(file, 'w').write(contents)
     print(" Created file " + file)
 
-    # create the ecf file /test_python_child_api/f1/t2
-    file = dir + "/t2.ecf"
-    contents = "%include <head.py>\n\n"
-    contents += "with Client() as ci:\n"
-    if protocol == Test.Protocol.HTTP:
-        contents += "    ci.enable_http()\n"
-    contents += "    print('   Waiting for /test_python_child_api/f1/t1 == complete')\n"
-    contents += "    ci.child_wait('/test_python_child_api/f1/t1 == complete')\n"
-    contents += "    print('   Finished waiting')\n"
+    # Create the Task script at /<suite-name>/f1/t2
+    file = family_dir + "/t2.ecf"
+    contents = f"""
+%include <head.py>
+
+with Client() as ci:
+
+    {'ci.enable_http()' if protocol == Test.Protocol.HTTP else ''}
+    print('   Waiting for /{suite_name}/f1/t1 == complete')
+    ci.child_wait('/{suite_name}/f1/t1 == complete')
+    print('   Finished waiting')
+"""
     open(file, 'w').write(contents)
     print(" Created file " + file)
 
-    # create the ecf file /test_python_child_api/f1/t3
-    file = dir + "/t3.ecf"
-    contents = "%include <head.py>\n\n"
-    contents += "with Client() as ci:\n"
-    if protocol == Test.Protocol.HTTP:
-        contents += "    ci.enable_http()\n"
-    contents += "    print('   Running t3.ecf')\n"
+    # Create the Task script at .../<suite-name>/f1/t3
+    file = family_dir + "/t3.ecf"
+    contents = f"""
+%include <head.py>
+    
+with Client() as ci:
+    print('   Running t3.ecf')
+"""
     open(file, 'w').write(contents)
     print(" Created file " + file)
 
-    # create the ecf file /test_python_child_api/f1/t4
-    file = dir + "/t4.ecf"
-    contents = "%include <head.py>\n\n"
-    contents += "with Client() as ci:\n"
-    if protocol == Test.Protocol.HTTP:
-        contents += "    ci.enable_http()\n"
-    contents += "    print('   Running t4.ecf')\n"
+    # Create the Task script at .../<suite-name>/f1/t4
+    file = family_dir + "/t4.ecf"
+    contents = """
+%include <head.py>
+    
+with Client() as ci:
+
+    print('   Running t4.ecf')
+"""
     open(file, 'w').write(contents)
     print(" Created file " + file)
 
+    # Start the server
     ci.restart_server()
+
+    # Load the definitions
     ci.load(defs)
+    ci.checkpt() # store the checkpoint, useful for debugging...
+
+    # Start the merry-go-round!...
     ci.begin_all_suites()
+
     print(" Running the test, wait for suite to complete ...")
-    ci.run("/test_python_child_api", False)
+    ci.run(f"/{suite_name}", False)
 
     wait_for_suite_to_complete(ci, suite_name);
 
-    defs.save_as_defs(os.path.join(ecf_home, suite_name, suite_name + ".def"))
+    ci.checkpt() # store the checkpoint, useful for debugging...
 
     if not Test.debugging():
         print(" Test OK: removing directory ", test_home)
