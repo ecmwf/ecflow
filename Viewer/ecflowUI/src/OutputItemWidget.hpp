@@ -68,6 +68,8 @@ protected Q_SLOTS:
     void slotWordWrapSupportChanged(bool);
     void slotLoadWholeFile();
     void loadCurrentJobout();
+    void on_autoReloadTb__clicked(bool st);
+    void slotAutoReload();
 
 protected:
     void updateState(const FlagSet<ChangeFlag>&) override;
@@ -86,6 +88,9 @@ protected:
     VProperty* lineNumProp_{nullptr};
     VProperty* wordWrapProp_{nullptr};
     VProperty* expandFileInfoProp_{nullptr};
+
+    QTimer* autoReloadTimer_{nullptr};
+    static constexpr int autoReloadIntervalMs_ = 30 * 1000;
 };
 
 #endif /* ecflow_viewer_OutputItemWidget_HPP */
