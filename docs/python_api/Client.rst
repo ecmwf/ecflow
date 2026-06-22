@@ -767,7 +767,7 @@ Usage:
 2. check(self: ecflow.Client, arg0: list) -> str
 
 
-.. py:method:: Client.checkpt(self: ecflow.Client, mode: ecflow.CheckPt = <CheckPt.UNDEFINED: 3>, check_pt_interval: typing.SupportsInt | typing.SupportsIndex = 0, check_pt_save_alarm_time: typing.SupportsInt | typing.SupportsIndex = 0) -> int
+.. py:method:: Client.checkpt(self: ecflow.Client, mode: ecflow.CheckPt = ecflow.CheckPt.UNDEFINED, check_pt_interval: typing.SupportsInt | typing.SupportsIndex = 0, check_pt_save_alarm_time: typing.SupportsInt | typing.SupportsIndex = 0) -> int
    :module: ecflow
 
 Request the :term:`ecflow_server` :term:`check point`\ s the definition held in the server immediately

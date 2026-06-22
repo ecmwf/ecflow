@@ -28,28 +28,38 @@ Members:
 
 .. py:attribute:: CheckPt.ALWAYS
    :module: ecflow
-   :value: <CheckPt.ALWAYS: 2>
+   :value: ecflow.CheckPt.ALWAYS
 
 
 .. py:attribute:: CheckPt.NEVER
    :module: ecflow
-   :value: <CheckPt.NEVER: 0>
+   :value: ecflow.CheckPt.NEVER
 
 
 .. py:attribute:: CheckPt.ON_TIME
    :module: ecflow
-   :value: <CheckPt.ON_TIME: 1>
+   :value: ecflow.CheckPt.ON_TIME
 
 
 .. py:attribute:: CheckPt.UNDEFINED
    :module: ecflow
-   :value: <CheckPt.UNDEFINED: 3>
+   :value: ecflow.CheckPt.UNDEFINED
 
 
 .. py:property:: CheckPt.name
    :module: ecflow
 
 
+.. py:attribute:: CheckPt.names
+   :module: ecflow
+   :value: {'ALWAYS': ecflow.CheckPt.ALWAYS, 'NEVER': ecflow.CheckPt.NEVER, 'ON_TIME': ecflow.CheckPt.ON_TIME, 'UNDEFINED': ecflow.CheckPt.UNDEFINED}
+
+
 .. py:property:: CheckPt.value
    :module: ecflow
+
+
+.. py:attribute:: CheckPt.values
+   :module: ecflow
+   :value: {0: ecflow.CheckPt.NEVER, 1: ecflow.CheckPt.ON_TIME, 2: ecflow.CheckPt.ALWAYS, 3: ecflow.CheckPt.UNDEFINED}
 

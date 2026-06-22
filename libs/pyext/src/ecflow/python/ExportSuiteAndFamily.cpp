@@ -234,22 +234,23 @@ bool Family_contains(family_ptr self, const std::string& name) {
 
 void export_SuiteAndFamily(py::module& m) {
 
-    py::class_<NodeContainer, Node, std::shared_ptr<NodeContainer>>(m, "NodeContainer", DefsDoc::node_container_doc())
+    py::class_<NodeContainer, Node, std::shared_ptr<NodeContainer>>(
+        m, "NodeContainer", py::dynamic_attr(), DefsDoc::node_container_doc())
 
         .def(
             "__iter__",
             [](const NodeContainer& n) { return py::make_iterator(n.children().begin(), n.children().end()); },
             py::keep_alive<0, 1>())
         .def("add_family", &NodeContainer_add_family_by_name, DefsDoc::add_family_doc())
-        .def("add_family", NodeContainer_add_family)
+        .def("add_family", NodeContainer_add_family, py::keep_alive<1, 2>())
         .def("add_task", &NodeContainer_add_task_by_name, DefsDoc::add_task_doc())
-        .def("add_task", NodeContainer_add_task)
+        .def("add_task", NodeContainer_add_task, py::keep_alive<1, 2>())
         .def("find_node", &NodeContainer::find_by_name, "Find immediate child node given a name")
         .def("find_task", &NodeContainer::findTask, "Find a task given a name")
         .def("find_family", &NodeContainer::findFamily, "Find a family given a name")
         .def_property_readonly("nodes", &NodeContainer::children, "Returns a list of Node's");
 
-    py::class_<Suite, NodeContainer, std::shared_ptr<Suite>>(m, "Suite", DefsDoc::suite_doc())
+    py::class_<Suite, NodeContainer, std::shared_ptr<Suite>>(m, "Suite", py::dynamic_attr(), DefsDoc::suite_doc())
 
         .def(py::init(&Suite_init))
         .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true)
@@ -267,7 +268,7 @@ void export_SuiteAndFamily(py::module& m) {
         .def("get_end_clock", &Suite::clock_end_attr, "Return the suite's end clock. Can be NULL")
         .def("begun", &Suite::begun, "Returns true if the `suite`_ has begun, false otherwise");
 
-    py::class_<Family, NodeContainer, std::shared_ptr<Family>>(m, "Family", DefsDoc::family_doc())
+    py::class_<Family, NodeContainer, std::shared_ptr<Family>>(m, "Family", py::dynamic_attr(), DefsDoc::family_doc())
 
         .def(py::init(&Family_init))
         .def(py::init<std::string, bool>(), py::arg("name"), py::arg("check") = true)

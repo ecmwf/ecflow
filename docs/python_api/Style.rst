@@ -43,28 +43,38 @@ Members:
 
 .. py:attribute:: Style.DEFS
    :module: ecflow
-   :value: <Style.DEFS: 1>
+   :value: ecflow.Style.DEFS
 
 
 .. py:attribute:: Style.MIGRATE
    :module: ecflow
-   :value: <Style.MIGRATE: 3>
+   :value: ecflow.Style.MIGRATE
 
 
 .. py:attribute:: Style.NOTHING
    :module: ecflow
-   :value: <Style.NOTHING: 0>
+   :value: ecflow.Style.NOTHING
 
 
 .. py:attribute:: Style.STATE
    :module: ecflow
-   :value: <Style.STATE: 2>
+   :value: ecflow.Style.STATE
 
 
 .. py:property:: Style.name
    :module: ecflow
 
 
+.. py:attribute:: Style.names
+   :module: ecflow
+   :value: {'DEFS': ecflow.Style.DEFS, 'MIGRATE': ecflow.Style.MIGRATE, 'NOTHING': ecflow.Style.NOTHING, 'STATE': ecflow.Style.STATE}
+
+
 .. py:property:: Style.value
    :module: ecflow
+
+
+.. py:attribute:: Style.values
+   :module: ecflow
+   :value: {0: ecflow.Style.NOTHING, 1: ecflow.Style.DEFS, 2: ecflow.Style.STATE, 3: ecflow.Style.MIGRATE}
 
