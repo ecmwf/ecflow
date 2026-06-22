@@ -49,6 +49,7 @@ public:
         NotifyAliasPopup,
         NotifyAliasSound,
         UidForServerLogTransfer,
+        OutputRefreshInSec,
         UnknownParam,
         UserLogServerHost,
         UserLogServerPort
@@ -85,6 +86,14 @@ public:
 
     void saveSettings();
 
+    ///
+    /// @brief Access the property associated with the given parameter.
+    ///
+    /// @param par The parameter for which to retrieve the property.
+    /// @return The property associated with the parameter; or nullptr, if parameter is not found
+    ///
+    VProperty* property(Param par) const;
+
     // From VPropertyObserver
     void notifyChange(VProperty*) override;
 
@@ -96,14 +105,6 @@ public:
 protected:
     explicit VServerSettings(ServerHandler* server);
     ~VServerSettings() override;
-
-    ///
-    /// @brief Access the property associated with the given parameter.
-    ///
-    /// @param par The parameter for which to retrieve the property.
-    /// @return The property associated with the parameter; or nullptr, if parameter is not found
-    ///
-    VProperty* property(Param par) const;
     void loadSettings();
 
     ServerHandler* server_;

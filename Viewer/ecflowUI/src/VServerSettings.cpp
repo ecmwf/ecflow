@@ -41,6 +41,7 @@ VServerSettings::VServerSettings(ServerHandler* server)
         parNames_[AdaptiveUpdateIncrement] = "server.update.adaptiveUpdateIncrementInSec";
         parNames_[MaxAdaptiveUpdateRate]   = "server.update.maxAdaptiveUpdateRateInMin";
         parNames_[AdaptiveUpdateMode]      = "server.update.adaptiveUpdateMode";
+        parNames_[OutputRefreshInSec]      = "server.update.outputRefreshInSec";
 
         parNames_[MaxOutputFileLines] = "server.files.maxOutputFileLines";
         parNames_[ReadFromDisk]       = "server.files.readFilesFromDisk";
