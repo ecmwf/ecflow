@@ -42,7 +42,7 @@ suite ealadin
   edit THREADS_LBC '6'
   edit EMOS_TIME_STEP_H 'undef'
   edit STREAM 'undef'
-  edit ECF_URLBASE 'http://www.ecmwf.int'
+  edit ECF_URL_BASE 'http://www.ecmwf.int'
   edit NB_TASKS_FRA '38'
   edit SCLOGDIR '/s1a/emos_esuite/emos_data/0047/log'
   edit USER 'emos'
@@ -54,7 +54,7 @@ suite ealadin
   edit ECF_OUT '/vol/emos_nc/output'
   edit FSFAMILY 'undef'
   edit USE_YMD 'true'
-  edit ECF_URLCMD '${BROWSER:=firefox} -new-tab %ECF_URLBASE%/%ECF_URL%'
+  edit ECF_URL_CMD '${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%'
   edit NB_TASKS_LBC '32'
   edit DELTA_DAY '0'
   edit STHOST '/s1a'
@@ -91,7 +91,7 @@ suite ealadin
   family main
     repeat date YMD 20100607 20201212 1
     edit LOGTASK 'main'
-    edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+    edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
     edit ECPDS_STREAM 'JSN2'
     edit DESTINATION 'FRA'
     family 12
@@ -475,7 +475,7 @@ suite ealadin
       family prod
         defstatus complete
         trigger prl eq complete
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit TO_ECFS 'false'
         edit ECPDS_AT '17:58'
         limit mutex 1
@@ -991,7 +991,7 @@ suite ealadin
       family prod
         defstatus complete
         trigger prl eq complete
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit TO_ECFS 'false'
         edit ECPDS_AT '00:00'
         limit mutex 1
@@ -1470,7 +1470,7 @@ suite ealadin
       family prod
         defstatus complete
         trigger prl eq complete
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit TO_ECFS 'false'
         edit ECPDS_AT '06:01'
         limit mutex 1
@@ -1987,7 +1987,7 @@ suite ealadin
       family prod
         defstatus complete
         trigger prl eq complete
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit TO_ECFS 'false'
         edit ECPDS_AT '12:00'
         limit mutex 1
@@ -2373,7 +2373,7 @@ suite ealadin
       family prod
         defstatus complete
         trigger prl eq complete
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit TO_ECFS 'false'
         edit ECPDS_AT '18:06'
         limit mutex 1
@@ -2745,7 +2745,7 @@ suite ealadin
       family prod
         defstatus complete
         trigger prl eq complete
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit TO_ECFS 'false'
         edit ECPDS_AT '00:06'
         limit mutex 1
@@ -3118,7 +3118,7 @@ suite ealadin
       family prod
         defstatus complete
         trigger prl eq complete
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit TO_ECFS 'false'
         edit ECPDS_AT '06:06'
         limit mutex 1
@@ -3491,7 +3491,7 @@ suite ealadin
       family prod
         defstatus complete
         trigger prl eq complete
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit TO_ECFS 'false'
         edit ECPDS_AT '12:06'
         limit mutex 1
@@ -3558,7 +3558,7 @@ suite ealadin
         trigger /ealadin/main/12 eq complete
         trigger -a /ealadin/main:YMD eq /ealadin/lag:YMD
         trigger -a /ealadin/main:YMD gt /ealadin/lag:YMD
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit ECPDS_STREAM 'JSN2'
         edit DESTINATION 'FRA'
         edit CALL_ECPDS 'false'
@@ -3580,7 +3580,7 @@ suite ealadin
         trigger /ealadin/main/18 eq complete
         trigger -a /ealadin/main:YMD eq /ealadin/lag:YMD
         trigger -a /ealadin/main:YMD gt /ealadin/lag:YMD
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit ECPDS_STREAM 'JSN2'
         edit DESTINATION 'FRA'
         edit CALL_ECPDS 'false'
@@ -3602,7 +3602,7 @@ suite ealadin
         trigger /ealadin/main/00 eq complete
         trigger -a /ealadin/main:YMD eq /ealadin/lag:YMD
         trigger -a /ealadin/main:YMD gt /ealadin/lag:YMD
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit ECPDS_STREAM 'JSN2'
         edit DESTINATION 'FRA'
         edit CALL_ECPDS 'false'
@@ -3625,7 +3625,7 @@ suite ealadin
         trigger /ealadin/main/06 eq complete
         trigger -a /ealadin/main:YMD eq /ealadin/lag:YMD
         trigger -a /ealadin/main:YMD gt /ealadin/lag:YMD
-        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECF_URL_BASE 'http://diss.ecmwf.int/do/monitoring/arrival'
         edit ECPDS_STREAM 'JSN2'
         edit DESTINATION 'FRA'
         edit CALL_ECPDS 'false'

@@ -29,77 +29,111 @@ The table below shows a list of ecFlow variables.
      - Explanation
      - Default
      - Example
-   * - ECF_URLCMD
-     - Command to be executed to allow the user to view related web pages
+   * - :code:`ECF_DUMMY_TASK`
+     - Some tasks have no associated '.ecf' file. Setting this variable disables job generation checking, thus avoiding related errors.
      - No
-     - .. code-block:: shell
-          
-          ${BROWSER:=firefox} -remote 'openURL(%ECF_URLBASE%/%ECF_URL%)'
-          
-       Where ECF_URLBASE is the base web address and ECF_URL the specific page.
-   * - ECF_TRIES
-     - The number of times a job should rerun if it aborts. If more than one and the job aborts, the job is automatically re-run by ECF. Useful when jobs are run in unreliable environments.
-       
-       For example, using commands like ftp(1) in a job can fail easily, but re-running the job will often work. 
+     - Any value is sufficient
+   * - :code:`ECF_EXTN`
+     - Setting this variable allows the customisation of the default task script extension.
+       If not set, the default extension is '.ecf'.
      - Yes
-     - 2
-   * - ECF_STATUS_CMD
-     - Command to be used to check the status of a submitted or running job. Can use the generated variable %ECF_JOB%.stat for storing command output
+     - :code:`.sms`
+   * - :code:`ECF_FILES`
+     - This directory path serves as anchor for locating task scripts. It is used by ecFlow only to find the task scripts.
+
+       This variable can be defined, in conjunction with :code:`ECF_HOME`, and this allows separating the generated files from the task scripts.
+     - No
+     - /path/to/workspace/$SUITE/scripts
+   * - :code:`ECF_HOME`
+     - This directory path serves as anchor for locating all ecFlow files, both while finding task scripts and storing generated ecFlow files (such as the job files and the job output).
+
+       In order to customise task script location, consider overriding :code:`ECF_FILES`, as this allows separating the task scripts from the files generated during workflow execution.
+     - Yes
+     - /path/to/workspace/$SUITE
+   * - :code:`ECF_INCLUDE`
+     - This directory path is used by ecFlow to find included files.
+     - No
+     - /path/to/workspace/$SUITE/include
+   * - :code:`ECF_JOB_CMD`
+     - The command executed to submit a job.
+
+       The command itself is generic and, in practice, may involve using a queuing system (e.g Slurm) or running the job in the background.
+     - Yes
+     - .. code-block:: shell
+
+          # Example 1: Submit the job locally, running it in background
+          %ECF_JOB% 1> %ECF_JOBOUT% 2>&1 &
+
+          # Example 2: Job submitted as a remote process over an ssh connection
+          ssh -v -o StrictHostKeyChecking=no %USER%@%REMOTE_HOST% ksh -s < %ECF_JOB% > %ECF_JOBOUT% 2>&1 &
+
+          # Example 3: Job submitted to a queuing system
+          %SCHOST% submit %ECF_JOB%
+
+   * - :code:`ECF_KILL_CMD`
+     - The command executed to kill a running job.
+
+       In practice, this command is highly linked with how the task was submitted via :code:`ECF_JOB_CMD`.
+
+       The command definition can use the value of job remote-id (i.e. :code:`ECF_RID`),
+       and can leverage on the Unix command :code:`kill` to kill a local job,
+       or perform remote operations in the cases where the tasks are submitted to a remote host.
+
+       Consider defining this command such that it stores the kill command output
+       (e.g. by redirecting the output to a file, such as :code:`%ECF_JOB%.kill`)
      - No
      - .. code-block:: shell
-        
-         'rsh %SCHOST% qstat -f %ECF_RID%.%SCHOST% %ECF_JOB% 2>&1' "ssh -v -o StrictHostKeyChecking=no %USER%@%REMOTE_HOST% bash -c 'ps -elf %ECF_RID% | grep \" %USER% \"' >>%ECF_JOB%.stat"
 
-   * - ECF_OUT
-     - Alternate location for job and cmd output files. If this variable exists it is used as a base for ECF_JOBOUT but it is also used to search for the output by ecFlow when asked by ecflow_ui/CLI. 
-     
-       If the output is in ECF_HOME/ECF_NODE.ECF_TRYNO it is returned, otherwise ECF_OUT/ECF_NODE.ECF_TRYNO that is ECF_JOBOUT is used. 
-       
+          # Example 1: Kill a local jobq
+          kill -9 %ECF_RID%
+
+          # Example 2: Kill a remote job over an ssh connection
+          ssh -v -o StrictHostKeyChecking=no %USER%@%REMOTE_HOST% kill -9 %ECF_RID%
+
+          # Example 3: Kill a job submitted to a queuing system
+          rsh %SCHOST% qdel -2 %ECF_RID% > %ECF_JOB% 2>&1
+
+   * - :code:`ECF_MICRO`
+     - The ecFlow pre-processor character, is used when generating job scripts
+       (i.e. when pre-processing a '.ecf' file + include files, and performing variable substitution).
+
+       The default value is the percent sign (:code:`%`), but it can be set to any character.
+     - Yes
+     - :code:`%`
+   * - :code:`ECF_OUT`
+     - Alternate location for job and cmd output files. If this variable exists it is used as a base for ECF_JOBOUT but it is also used to search for the output by ecFlow when asked by ecflow_ui/CLI.
+
+       If the output is in ECF_HOME/ECF_NODE.ECF_TRYNO it is returned, otherwise ECF_OUT/ECF_NODE.ECF_TRYNO that is ECF_JOBOUT is used.
+
        The job may continue to use ECF_JOBOUT (as in a QSUB directive) but should copy its own output file back into ECF_HOME/ECF_NODE.ECF_TRYNO at the end of their run.
      - No
      - /scratch/ECF/
-   * - ECF_MICRO
-     - ecFlow pre-process character to be used by ecFlow pre-processor for variable substitution and including files.
-     - Yes
-     - %
-   * - ECF_KILL_CMD
-     - Method to kill a running task. Depends on how the task was submitted via ECF_JOB_CMD. ecFlow must know the value of remote-id (ECF_RID). Variable enables kill(CLI) command to be used. Can use the generated variable %ECF_JOB%.kill for storing command output
-     - No
-     - .. code-block:: shell 
-          
-          rsh %SCHOST% qdel -2 %ECF_RID% > %ECF_JOB% 2>&1 "ssh -v -o StrictHostKeyChecking=no %USER%@%REMOTE_HOST% kill -9 %ECF_RID%"
+   * - :code:`ECF_STATUS_CMD`
+     - The command executed to retrieve the status of a submitted or running job.
 
-   * - ECF_JOB_CMD
-     - Command to be executed to submit a job. May involve using a queuing system, like NQS, or may run the job in the background.
-     - Yes
-     - .. code-block:: shell 
-         
-          %ECF_JOB% 1> %ECF_JOBOUT% 2>&1 "mkdir -p $(dirname %ECF_JOBOUT%) && ssh -v -o StrictHostKeyChecking=no %USER%@%REMOTE_HOST% ksh -s <%ECF_JOB% >%ECF_JOBOUT% 2>&1 &"
+       Consider defining this command such that it stores the status command output
+       (e.g. by redirecting the output to a file, such as :code:`%ECF_JOB%.stat`)
+     - No
+     - .. code-block:: shell
 
-   * - ECF_INCLUDE
-     - Path for the include files.
-     - No
-     - /home/user/ECF/$SUITE/include
-   * - ECF_HOME
-     - The default location for ecFlow files if ECF_FILES is not used.
+         'rsh %SCHOST% qstat -f %ECF_RID%.%SCHOST% %ECF_JOB% 2>&1' "ssh -v -o StrictHostKeyChecking=no %USER%@%REMOTE_HOST% bash -c 'ps -elf %ECF_RID% | grep \" %USER% \"' >>%ECF_JOB%.stat"
+
+   * - :code:`ECF_TRIES`
+     - The number of times a job should automatically rerun if it aborts.
+
+       When this variable is set to a value higher than 1, any job that terminates by aborting will be automatically
+       re-run by ECF, until the number of retries reaches the configured value.
+
+       This variable is useful when jobs execute in unreliable environments or, perhaps, run network dependent commands
+       (e.g. upload data over FTP).
      - Yes
-     - /tmp/ECF/$SUITE
-   * - ECF_FILES
-     - Alternate location for ecFlow files
+     - 2
+   * - :code:`ECF_URL_CMD`
+     - The command executed to view related web pages.
      - No
-     - /home/user/ECF/$SUITE
-   * - ECF_EXTN
-     - Overrides the default script extension
-     - Yes
-     - .sms (default is .ecf)
-   * - ECF_DUMMY_TASK
-     - Some tasks have no associated '.ecf' file. The addition of this variable stops job generation checking from raising errors.
-     - No
-     - Any value is sufficient
-   * - ???
-     - The location for generated files. These are the job-files and the job-output. Setting this variable to a different directory to ECF_FILES enables you to clean up all the files produced by running ECF.
-     - ???
-     - .. code-block:: shell  
-        
-         %SCHOST%submit %ECF_JOB%
- 
+     - .. code-block:: shell
+
+          ${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'
+
+       Where ECF_URL_BASE is the base web address and ECF_URL the specific page.
+       Notice that `ECF_URL_BASE` and `ECF_URL` themselves are not suite definition variables, but can be defined in the suite definition file.
