@@ -17,6 +17,15 @@
 
 namespace ecf::http {
 
+struct InfoQueryContext
+{
+    bool recursive;
+    std::string node_types;
+    std::string node_states;
+    std::string sortby;
+    std::string count;
+};
+
 ojson get_basic_node_tree(const std::string& path);
 ojson get_full_node_tree(const std::string& path, bool with_id, bool with_gen_vars);
 ojson get_sparser_node_tree(const std::string& path);
@@ -24,6 +33,8 @@ ojson get_sparser_node_tree(const std::string& path);
 void add_suite(const httplib::Request& request, httplib::Response& response);
 
 ojson get_suites();
+
+ojson get_suites_info(const InfoQueryContext& ctx);
 
 ojson get_server_attributes();
 ojson add_server_attribute(const httplib::Request& request);
@@ -40,6 +51,8 @@ ojson delete_node_attribute(const httplib::Request& request);
 
 ojson get_node_status(const httplib::Request& request);
 ojson update_node_status(const httplib::Request& request);
+
+ojson get_node_info(const std::string& path, const InfoQueryContext& ctx);
 
 ojson get_node_output(const httplib::Request& request);
 

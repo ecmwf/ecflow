@@ -22,6 +22,7 @@ Constructor::
       string polling: The polling interval used to contact the remote ecFlow server
       Bool ssl: `true`, when using SSL to contact the remote ecFlow server; `false`, otherwise
       string auth: The path to the Mirror Authentication credentials
+      Bool propagate: `true`, to propagate the node state up local tree; `false`, otherwise (default)
 
 
 Usage:
@@ -31,10 +32,10 @@ Usage:
    t1 = Task('t1',
              MirrorAttr('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth'))
 
-   t2 = Task('t2')
-   t2.add_aviso('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth')
+   t2 = Task('t2',
+             MirrorAttr('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth', True))
 
-The parameters `remote_host`, `remote_port`, `polling`, `ssl`, and `auth` are optional
+The parameters `remote_host`, `remote_port`, `polling`, `ssl`, `auth`, and `propagate` are optional
 
 
 .. py:method:: MirrorAttr.auth(self: ecflow.MirrorAttr) -> str
@@ -52,7 +53,7 @@ Returns the name of the Mirror attribute
 .. py:method:: MirrorAttr.polling(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 
-Returns the polling interval used to contact the remote ecFlow server
+Returns the polling interval used to contact the remove ecFlow server
 
 
 .. py:method:: MirrorAttr.propagate(self: ecflow.MirrorAttr) -> bool

@@ -10,6 +10,7 @@
 
 #include "ecflow/http/ApiV1Impl.hpp"
 
+#include <algorithm>
 #include <optional>
 #include <string>
 
@@ -117,6 +118,252 @@ ojson get_node_status(const httplib::Request& request) {
     return j;
 }
 
+static ojson make_node_info_entry(const node_ptr& node) {
+    ojson entry;
+    entry["path"]  = node->absNodePath();
+    entry["state"] = NState::toString(node->state());
+
+    const boost::posix_time::ptime t = node->state_change_time();
+    if (t.is_not_a_date_time()) {
+        entry["state_change_time"] = nullptr;
+    }
+    else {
+        entry["state_change_time"] = boost::posix_time::to_iso_extended_string(t);
+    }
+
+    return entry;
+}
+
+static std::vector<std::string> parse_type_filter(const std::string& param) {
+    if (param.empty()) {
+        return {};
+    }
+
+    static const std::string_view suite_type  = "suite";
+    static const std::string_view family_type = "family";
+    static const std::string_view task_type   = "task";
+    static const std::string_view alias_type  = "alias";
+
+    std::vector<std::string> tokens;
+    ecf::algorithm::split_at(tokens, param, ",");
+
+    // A non-empty parameter that yields no tokens (e.g. only separators, such as ',' or ',,') is invalid
+    if (tokens.empty()) {
+        throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid node type: '" + param + "'");
+    }
+
+    std::vector<std::string> result;
+    for (const auto& token : tokens) {
+        if (token != suite_type && token != family_type && token != task_type && token != alias_type) {
+            throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid node type: '" + token + "'");
+        }
+        result.push_back(token);
+    }
+
+    // Deduplicate the options (in case of the same type is defined multiple times e.g. "task,task,alias")
+    std::sort(result.begin(), result.end());
+    result.erase(std::unique(result.begin(), result.end()), result.end());
+
+    return result;
+}
+
+static bool is_node_with_type(const node_ptr& node, const std::vector<std::string>& filter) {
+    if (filter.empty()) {
+        return true;
+    }
+    const std::string type = ecf::algorithm::tolower(node->debugType());
+    for (const auto& f : filter) {
+        if (f == type) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static std::vector<NState::State> parse_state_filter(const std::string& param) {
+    if (param.empty()) {
+        return {};
+    }
+
+    std::vector<std::string> tokens;
+    ecf::algorithm::split_at(tokens, param, ",");
+
+    // A non-empty parameter that yields no tokens (e.g. only separators, such as ',' or ',,') is invalid
+    if (tokens.empty()) {
+        throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid state value: '" + param + "'");
+    }
+
+    std::vector<NState::State> result;
+    for (const auto& token : tokens) {
+        const auto [state, valid] = NState::to_state(token);
+        if (!valid) {
+            throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid state value: '" + token + "'");
+        }
+        result.push_back(state);
+    }
+
+    // Deduplicate the options (in case of the same type is defined multiple times e.g. "task,task,alias")
+    std::sort(result.begin(), result.end());
+    result.erase(std::unique(result.begin(), result.end()), result.end());
+
+    return result;
+}
+
+static bool is_node_with_state(const node_ptr& node, const std::vector<NState::State>& filter) {
+    if (filter.empty()) {
+        return true;
+    }
+    const NState::State s = node->state();
+    for (const auto& f : filter) {
+        if (f == s) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void collect_single_node_info(const node_ptr& node,
+                                     ojson& result,
+                                     const std::vector<std::string>& selected_types,
+                                     const std::vector<NState::State>& selected_states) {
+    if (is_node_with_type(node, selected_types) && is_node_with_state(node, selected_states)) {
+        result.push_back(make_node_info_entry(node));
+    }
+}
+
+static void collect_node_info(const node_ptr& node,
+                              ojson& result,
+                              const std::vector<std::string>& type_filter,
+                              const std::vector<NState::State>& state_filter) {
+    // Collect node (if it passes the filters)
+    collect_single_node_info(node, result, type_filter, state_filter);
+
+    // Collect node children
+    if (auto container = std::dynamic_pointer_cast<NodeContainer>(node)) {
+        for (const auto& child : container->children()) {
+            collect_node_info(child, result, type_filter, state_filter);
+        }
+    }
+    // Collect task aliases (Task is not a NodeContainer, so its aliases are not covered above)
+    else if (auto task = std::dynamic_pointer_cast<Task>(node)) {
+        for (const auto& alias : task->aliases()) {
+            collect_single_node_info(alias, result, type_filter, state_filter);
+        }
+    }
+}
+
+namespace {
+
+struct InfoSortSpecification
+{
+    enum class Field { path, state, state_change_time };
+    Field field;
+    bool ascending;
+};
+
+} // anonymous namespace
+
+static InfoSortSpecification parse_sortby(const std::string& param) {
+    bool ascending    = true;
+    std::string field = param;
+    if (!param.empty() && (param[0] == '+' || param[0] == '-')) {
+        ascending = (param[0] == '+');
+        field     = param.substr(1);
+    }
+    if (field == "path") {
+        return {InfoSortSpecification::Field::path, ascending};
+    }
+    if (field == "state") {
+        return {InfoSortSpecification::Field::state, ascending};
+    }
+    if (field == "state_change_time") {
+        return {InfoSortSpecification::Field::state_change_time, ascending};
+    }
+    throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid sortby value: '" + param + "'");
+}
+
+static size_t parse_count(const std::string& param) {
+    int n;
+    try {
+        n = std::stoi(param);
+    }
+    catch (const std::exception&) {
+        throw HttpServerException(HttpStatusCode::client_error_bad_request, "Invalid count value: '" + param + "'");
+    }
+    if (n < 0) {
+        throw HttpServerException(HttpStatusCode::client_error_bad_request, "count must not be negative");
+    }
+    return static_cast<size_t>(n);
+}
+
+static void apply_sortby(ojson& result, const InfoSortSpecification& spec) {
+    auto& arr = result.get_ref<ojson::array_t&>();
+    std::stable_sort(arr.begin(), arr.end(), [&](const ojson& a, const ojson& b) {
+        using Field = InfoSortSpecification::Field;
+        switch (spec.field) {
+            case Field::path: {
+                auto pa = a["path"].get<std::string>();
+                auto pb = b["path"].get<std::string>();
+                return spec.ascending ? (pa < pb) : (pa > pb);
+            }
+            case Field::state: {
+                auto sa = a["state"].get<std::string>();
+                auto sb = b["state"].get<std::string>();
+                return spec.ascending ? (sa < sb) : (sa > sb);
+            }
+            case Field::state_change_time: {
+                bool a_null = a["state_change_time"].is_null();
+                bool b_null = b["state_change_time"].is_null();
+                if (a_null && b_null) {
+                    return false;
+                }
+                if (a_null) {
+                    return spec.ascending; // null < non-null when ascending
+                }
+                if (b_null) {
+                    return !spec.ascending;
+                }
+                auto ta = a["state_change_time"].get<std::string>();
+                auto tb = b["state_change_time"].get<std::string>();
+                return spec.ascending ? (ta < tb) : (ta > tb);
+            }
+        }
+        return false;
+    });
+}
+
+ojson get_node_info(const std::string& path, const InfoQueryContext& ctx) {
+    node_ptr node = get_node(path);
+
+    const auto type_filter  = parse_type_filter(ctx.node_types);
+    const auto state_filter = parse_state_filter(ctx.node_states);
+
+    ojson result = ojson::array();
+    // Collect all node information
+    if (ctx.recursive) {
+        collect_node_info(node, result, type_filter, state_filter);
+    }
+    else {
+        collect_single_node_info(node, result, type_filter, state_filter);
+    }
+
+    // Apply sorting
+    if (!ctx.sortby.empty()) {
+        apply_sortby(result, parse_sortby(ctx.sortby));
+    }
+
+    // Apply count limit
+    if (!ctx.count.empty()) {
+        const size_t limit = parse_count(ctx.count);
+        auto& arr          = result.get_ref<ojson::array_t&>();
+        if (limit < arr.size()) {
+            arr.resize(limit);
+        }
+    }
+
+    return result;
+}
+
 template <typename F>
 void apply_to_parents(const Node* node, F f) {
     for (const Node* up = node; up != nullptr; up = up->parent()) {
@@ -210,6 +457,38 @@ ojson get_suites() {
         j.push_back(s->name());
     }
     return j;
+}
+
+ojson get_suites_info(const InfoQueryContext& ctx) {
+    const auto type_filter  = parse_type_filter(ctx.node_types);
+    const auto state_filter = parse_state_filter(ctx.node_states);
+
+    ojson result = ojson::array();
+    // Collect all node information
+    for (const auto& suite : get_defs()->suites()) {
+        if (ctx.recursive) {
+            collect_node_info(suite, result, type_filter, state_filter);
+        }
+        else {
+            collect_single_node_info(suite, result, type_filter, state_filter);
+        }
+    }
+
+    // Apply sorting
+    if (!ctx.sortby.empty()) {
+        apply_sortby(result, parse_sortby(ctx.sortby));
+    }
+
+    // Apply count limit
+    if (!ctx.count.empty()) {
+        const size_t limit = parse_count(ctx.count);
+        auto& arr          = result.get_ref<ojson::array_t&>();
+        if (limit < arr.size()) {
+            arr.resize(limit);
+        }
+    }
+
+    return result;
 }
 
 ojson get_server_attributes() {

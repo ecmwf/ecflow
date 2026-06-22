@@ -284,11 +284,12 @@ API v1 Documentation
 
 The API supports operations using GET, POST, PUT and DELETE methods.
 Generally the last word of the URL defines the target of the query. For
-example, https://localhost/v1/suites. There are seven different
+example, https://localhost/v1/suites. There are eight different
 supported targets:
 
 -  attributes
 -  definition
+-  info
 -  output
 -  ping
 -  script
@@ -312,6 +313,14 @@ definition
 
 Definition is the definition of an ecflow suite or a part of it in the
 ecflow domain specific language. Supported REST methods are: GET, PUT.
+
+info
+~~~~
+
+Info provides a compact summary of one or more nodes: absolute path, current runtime state,
+and the timestamp of the last state change. Supports query parameters to traverse the node
+subtree recursively, restrict results to specific node kinds (suite, family, task, alias), and
+filter by state. Supported REST methods are: GET.
 
 output
 ~~~~~~
@@ -363,6 +372,9 @@ API v1 supports the following endpoints -- specification for each endpoing can b
    * - /v1/suites/tree
      - GET
      - Operations related to Suite trees
+   * - /v1/suites/info
+     - GET
+     - Obtain compact info aggregated across all suites
    * - /v1/suites/{path}
      - DELETE
      - Operations related to Nodes
@@ -375,6 +387,9 @@ API v1 supports the following endpoints -- specification for each endpoing can b
    * - /v1/suites/{path}/status
      - GET, PUT
      - Operations related to Node status
+   * - /v1/suites/{path}/info
+     - GET
+     - Obtain compact Node info (path, state, state change time)
    * - /v1/suites/{path}/attributes
      - POST, GET, PUT, DELETE
      - Operations related to Node attributes
@@ -651,6 +666,49 @@ When query parameters :code:`content=full&with_id=true` are used, the full Suite
 
 When using the query parameter :code:`gen_vars=true` the generated variables are included in the :code:`attributes` section.
 Generated variables can be identified by a :code:`generate` attribute set to :code:`true`.
+
+Endpoint :code:`/v1/suites/info`
+--------------------------------
+
+Obtain Node information (across Suites)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/info`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** compact Node information aggregated across *all* suites. Without :code:`recursive=1`, only the
+       root node of each suite is included. With :code:`recursive=1`, all nodes in all suites
+       are collected. See more details of query parameters provided with :code:`/v1/suites/{path}/info`.
+   * - Parameters
+     - :code:`recursive`, (optional), possible values: :code:`1` (only the value :code:`1` activates recursive traversal; any other value is treated as non-recursive)
+
+       :code:`type`, (optional), possible values: comma-separated list of node kinds
+
+       :code:`state`, (optional), possible values: comma-separated list of state names
+
+       :code:`sortby`, (optional), possible values: :code:`[+|-]{path|state|state_change_time}`
+
+       :code:`count`, (optional), possible values: non-negative integer
+
+   * - Payload
+     - *empty*
+   * - Response
+     - See :ref:`below <response with node info>` for response format details.
+   * - Example
+     - :code:`curl https://localhost:8080/v1/suites/info`
+
+       :code:`curl https://localhost:8080/v1/suites/info?recursive=1`
+
+       :code:`curl "https://localhost:8080/v1/suites/info?recursive=1&type=task&state=aborted"`
+
+       :code:`curl "https://localhost:8080/v1/suites/info?recursive=1&type=task&state=aborted&sortby=-state_change_time&count=10"`
 
 Endpoint :code:`/v1/suites/{path}`
 ----------------------------------
@@ -1275,6 +1333,187 @@ Obtain the Node job output
      - :code:`{"job_output": "..."}`
    * - Example
      - :code:`curl https://localhost:8080/v1/suites/path/to/node/output`
+
+Endpoint :code:`/v1/suites/{path}/info`
+----------------------------------------
+
+Obtain Node information
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :stub-columns: 1
+   :width: 100%
+   :widths: 20 80
+
+   * - Endpoint
+     - :code:`/v1/suites/{path}/info`
+   * - Method
+     - :code:`GET`
+   * - Description
+     - **Read** compact info for the node at :code:`/{path}`: absolute path, current runtime state, and the
+       ISO 8601 timestamp of the last state change. Returns a JSON array; each element describes one node.
+       The array always contains at least the requested node, unless a filter excludes it.
+   * - Parameters
+     - :code:`recursive`, (optional), possible values: :code:`1` (only the value :code:`1` activates recursive traversal; any other value is treated as non-recursive)
+
+       :code:`type`, (optional), possible values: comma-separated list of node kinds
+
+       :code:`state`, (optional), possible values: comma-separated list of state names
+
+       :code:`sortby`, (optional), possible values: :code:`[+|-]{path|state|state_change_time}`
+
+       :code:`count`, (optional), possible values: non-negative integer
+
+   * - Payload
+     - *empty*
+   * - Response
+     - See :ref:`below <response with node info>` for details.
+   * - Example
+     - :code:`curl https://localhost:8080/v1/suites/my_suite/info`
+
+       :code:`curl https://localhost:8080/v1/suites/my_suite/info?recursive=1`
+
+       :code:`curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&type=task,alias"`
+
+       :code:`curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&state=active,queued"`
+
+       :code:`curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&sortby=-state_change_time"`
+
+       :code:`curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&state=aborted&sortby=path&count=10"`
+
+.. _response with node info:
+
+Response with Node info
+"""""""""""""""""""""""
+
+The response is a JSON array. The following is an example of the fields for each element of the array:
+
+.. code-block:: json
+
+  [
+    {
+      "path": "/suite1/family/task1",
+      "state": "active",
+      "state_change_time": "2024-06-22T10:30:00"
+    },
+    {
+      "path": "/suite1/family/task2",
+      "state": "submitted",
+      "state_change_time": "2024-06-22T09:21:10"
+    },
+    {
+      "path": "/suite2/family",
+      "state": "unknown",
+      "state_change_time": null
+    }
+  ]
+
+where
+
+- :code:`path` is the absolute path of the node in the ecFlow node tree
+- :code:`state` is the current runtime state of the node (see valid state values below)
+- :code:`state_change_time` is the ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SS) of the last state change, or :code:`null`
+  if the suite containing the node has not been started yet (i.e. :code:`begin` has not been called)
+
+Query Parameters
+""""""""""""""""
+
+.. list-table::
+   :header-rows: 1
+
+   * - Parameter
+     - Value
+     - Description
+   * - :code:`recursive`
+     - :code:`1`
+     - Traverse the node subtree depth-first and include all descendant nodes in the response.
+       Without this parameter, or when set to any value other than :code:`1`, only the node at
+       :code:`/{path}` itself is included.
+   * - :code:`type`
+     - comma-separated list of node kinds
+     - Restrict the result to nodes whose kind matches one of the listed values.
+       Valid kinds are :code:`suite`, :code:`family`, :code:`task`, :code:`alias`.
+       Multiple kinds are combined as a union. When :code:`recursive=1`, container nodes are still
+       traversed even when they are excluded by the filter, so descendant tasks or aliases remain
+       reachable. Any other value, including uppercase variants, results in an HTTP :code:`400 Bad Request` error.
+   * - :code:`state`
+     - comma-separated list of state names
+     - Restrict the result to nodes whose current runtime state matches one of the listed states.
+       Multiple states are combined as a union (a node is included if it matches *any* of them).
+       Duplicate state names are accepted. Only the following lowercase values are valid:
+       :code:`unknown`, :code:`complete`, :code:`queued`, :code:`aborted`, :code:`submitted`, :code:`active`.
+       Any other value, including uppercase variants, results in an HTTP :code:`400 Bad Request` error.
+   * - :code:`sortby`
+     - :code:`[+|-]{path|state|state_change_time}`
+     - Sort the response array. An optional leading :code:`+` (or no prefix) means ascending order;
+       :code:`-` means descending order. The sort field must be one of :code:`path` (lexicographic),
+       :code:`state` (lexicographic), or :code:`state_change_time` (ISO 8601 string comparison;
+       :code:`null` values sort first in ascending order, last in descending order).
+       Sorting is stable. Any other value results in an HTTP :code:`400 Bad Request` error.
+
+       .. note::
+
+          In URL query strings the :code:`+` character is reserved and is often decoded as a
+          space by HTTP clients and servers.
+          When specifying ascending order explicitly, consider using the percent-encoded form
+          :code:`%2B` instead (e.g. :code:`sortby=%2Bpath`) to avoid ambiguity.
+
+          The :code:`-` prefix for descending order requires no encoding.
+
+   * - :code:`count`
+     - non-negative integer
+     - Limit the number of items in the response array. Applied after filtering and sorting.
+       Omitting this parameter returns all matching entries. A negative value results in an
+       HTTP :code:`400 Bad Request` error.
+
+All parameters are fully composable: when used together a node is included in the response
+only if it satisfies all active filters simultaneously, after which the result is sorted
+and truncated to the requested count.
+
+Usage examples
+""""""""""""""
+
+Return info for a single node:
+
+.. code-block:: bash
+
+  curl https://localhost:8080/v1/suites/my_suite/info
+
+Return info for all nodes in the subtree rooted at :code:`/my_suite/my_family`:
+
+.. code-block:: bash
+
+  curl https://localhost:8080/v1/suites/my_suite/my_family/info?recursive=1
+
+Return only tasks and aliases across an entire suite:
+
+.. code-block:: bash
+
+  curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&type=task,alias"
+
+Return only active or queued tasks across an entire suite:
+
+.. code-block:: bash
+
+  curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&type=task,alias&state=active,queued"
+
+Return only aborted tasks across an entire suite (useful for monitoring):
+
+.. code-block:: bash
+
+  curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&type=task,alias&state=aborted"
+
+Return all nodes sorted by most recently changed first:
+
+.. code-block:: bash
+
+  curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&sortby=-state_change_time"
+
+Return the 10 most recently changed aborted tasks:
+
+.. code-block:: bash
+
+  curl "https://localhost:8080/v1/suites/my_suite/info?recursive=1&type=task&state=aborted&sortby=-state_change_time&count=10"
 
 Endpoint :code:`/v1/server/status`
 ----------------------------------
