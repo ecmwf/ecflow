@@ -27,6 +27,7 @@ The state of the elements of a suite definition can be set using the Client-serv
    reference/Autoarchive
    reference/Autocancel
    reference/Autorestore
+   reference/AvisoAttr
    reference/Clock
    reference/Complete
    reference/Cron
@@ -46,6 +47,7 @@ The state of the elements of a suite definition can be set using the Client-serv
    reference/Late
    reference/Limit
    reference/Meter
+   reference/MirrorAttr
    reference/Node
    reference/NodeContainer
    reference/PartExpression
