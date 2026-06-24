@@ -16,11 +16,28 @@
 #include "ecflow/base/Authorisation.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 
+namespace {
+
+/**
+ * @brief Builds the message returned to the client when a command is rejected.
+ *
+ * The originating user name is appended to the message to help identify who attempted the (rejected) connection.
+ *
+ * @param reason The reason for the rejection.
+ * @param identity The identity of the user who attempted the command.
+ * @return A string containing the rejection message.
+ */
+std::string make_rejection_message(const std::string& reason, const ecf::Identity& identity) {
+    return std::string{"Command not accepted, due to: "} + reason + " [" + identity.username() + "]";
+}
+
+} // namespace
+
 STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
     if (cmd_.get()) {
         // Perform Authentication (i.e. user/task identity) control
         if (auto result = ecf::is_authentic(*cmd_, *as); !result.ok()) {
-            return PreAllocatedReply::error_cmd(std::string{"Command not accepted, due to: "} + result.reason());
+            return PreAllocatedReply::error_cmd(make_rejection_message(result.reason(), cmd_->identity()));
         }
 
         // Perform Autorisation (i.e. access rules) control
@@ -29,7 +46,7 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
         }
         else {
             // The command is not accepted, return an error
-            return PreAllocatedReply::error_cmd(std::string{"Command not accepted, due to: "} + result.reason());
+            return PreAllocatedReply::error_cmd(make_rejection_message(result.reason(), cmd_->identity()));
         }
     }
 
