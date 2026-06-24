@@ -1,12 +1,23 @@
 - suite_definition:
-  title: Suite definition
+  title: Suite Definition API
+  intro: |
+    The Suite Definition API is used to define suites, families, tasks and their attributes,
+    and can be used to create a suite definition in memory, which can then be written to a
+    file or submitted to the server.
+    
+    The elements in this API do not allow to directly set the state of a suite, family or task,
+    or any of their attributes. Such a state is only relevant when the suite definition is submitted to the server,
+    and the server is responsible for maintaining the state of the suite, family, task and their attributes.
+    
+    The state of the elements of a suite definition can be set using the Client-server API.
+
   items:
     - Alias
     - Autoarchive
     - Autocancel
     - Autorestore
-    - Complete
     - Clock
+    - Complete
     - Cron
     - Date
     - Day
@@ -15,21 +26,19 @@
     - Edit
     - Event
     - Expression
+    - Family
     - File
     - Flag
+    - Generic
     - InLimit
     - Label
     - Late
     - Limit
     - Meter
-    - Queue
-    - Generic
     - Node
-    - Family
-    - Suite
-    - Task
+    - NodeContainer
     - PartExpression
-    - PrintStyle
+    - Queue
     - Repeat
     - RepeatDate
     - RepeatDateList
@@ -42,43 +51,54 @@
     - SState
     - State
     - Submittable
+    - Suite
+    - Task
     - Time
     - TimeSeries
     - TimeSlot
-    - Trigger
     - Today
+    - Trigger
     - Variable
     - Verify
     - Zombie
     - ZombieAttr
 - container:
   title: Container API
+  intro: |
+    The Container API provides types capable of holding a set of objects.
   items:
     - FamilyVec
     - FlagTypeVec
     - NodeVec
-    - NodeContainer
     - SuiteVec
     - TaskVec
     - VariableList
     - ZombieVec
 - command_api:
   title: Command API
+  intro: |
+    The Command API provides command types, that can be executed directly by the client.
   items:
     - UrlCmd
     - WhyCmd
 - client:
-  title: Client-server API
+  title: Client-Server API
+  intro: |
+    The Client-Server API provides the capability of communicating with the server.
   items:
     - Client
 - common:
   title: Common API
+  intro: |
+    The Common API provides configuration or support types for other parts of the API.
   items:
     - Ecf
     - PrintStyle
     - JobCreationCtrl
 - enums:
-  title: Enums
+  title: Enums API
+  intro: |
+    The Enums API provides types representing enumerations used in the Suite Definition API.
   items:
     - AttrType
     - CheckPt

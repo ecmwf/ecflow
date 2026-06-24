@@ -43,32 +43,31 @@ def build_toc():
         conf = yaml.load(f, Loader=yaml.FullLoader)
         for category in conf:
             title = category["title"]
+            intro = category["intro"]
             t += f"""
 {title}
 {"=" * len(title)}
-"""
-            for name in category["items"]:
-                t += f"""    - :py:class:`ecflow.{name}`\n"""
-                names.add(name)
 
-        t += """
-API Reference
-=============
+{intro}
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   reference/*
+"""
 
-  
+            for name in category["items"]:
+                t += f"""   reference/{name}\n"""
+
+            t +="""
+
 .. contents::
    :depth: 2
    :local:
    :backlinks: top
     
-
 """
+
     with open("python_api.rst", "w") as f:
         f.write(t)
 
