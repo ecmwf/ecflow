@@ -98,14 +98,14 @@ Enums
     - :py:class:`ecflow.ZombieType`
     - :py:class:`ecflow.ZombieUserActionType`
 
-Api
-===
+API Reference
+=============
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   *
+   reference/*
 
   
 .. contents::

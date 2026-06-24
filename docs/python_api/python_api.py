@@ -5,7 +5,13 @@ import os
 import pathlib
 import yaml
 
-RST_DIR = pathlib.Path().joinpath("rst").absolute()
+"""
+
+  This script creates the `python_api.rst` file, which is used to generate the Python API documentation.
+
+"""
+
+RST_DIR = (pathlib.Path() / "reference").absolute()
 
 
 def check_usage(names):
@@ -46,14 +52,14 @@ def build_toc():
                 names.add(name)
 
         t += """
-Api
-===
+API Reference
+=============
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   *
+   reference/*
 
   
 .. contents::
