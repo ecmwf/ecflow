@@ -5,7 +5,13 @@ import os
 import pathlib
 import yaml
 
-RST_DIR = pathlib.Path().joinpath("rst").absolute()
+"""
+
+  This script creates the `python_api.rst` file, which is used to generate the Python API documentation.
+
+"""
+
+RST_DIR = (pathlib.Path() / "reference").absolute()
 
 
 def check_usage(names):
@@ -37,32 +43,31 @@ def build_toc():
         conf = yaml.load(f, Loader=yaml.FullLoader)
         for category in conf:
             title = category["title"]
+            intro = category["intro"]
             t += f"""
 {title}
 {"=" * len(title)}
-"""
-            for name in category["items"]:
-                t += f"""    - :py:class:`ecflow.{name}`\n"""
-                names.add(name)
 
-        t += """
-Api
-===
+{intro}
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   *
+"""
 
-  
+            for name in category["items"]:
+                t += f"""   reference/{name}\n"""
+
+            t +="""
+
 .. contents::
    :depth: 2
    :local:
    :backlinks: top
     
-
 """
+
     with open("python_api.rst", "w") as f:
         f.write(t)
 
