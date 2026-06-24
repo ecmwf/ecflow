@@ -88,7 +88,7 @@ void MirrorAttr::finish() {
 }
 
 void MirrorAttr::mirror() {
-    SLOG(D, "MirrorAttr: poll Mirror attribute '" << absolute_name() << "'");
+    SLOG(T, "MirrorAttr: poll Mirror attribute '" << absolute_name() << "'");
 
     start_controller();
     if (!controller_) {
@@ -163,7 +163,7 @@ void MirrorAttr::mirror() {
         }
     }
     else {
-        SLOG(D, "MirrorAttr: No notifications found for Mirror attribute (name: " << name_ << ")");
+        SLOG(T, "MirrorAttr: No notifications found for Mirror attribute (name: " << name_ << ")");
     }
 
     // No notifications, nothing to do...
