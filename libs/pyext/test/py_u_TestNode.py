@@ -8,84 +8,122 @@
 # nor does it submit to any jurisdiction.
 #
 
+import ecflow_test_util as ect
 import ecflow as ecf
+import unittest
 import sys
 import os
-import ecflow_test_util as Test
 
 
-def can_chain_adding_variables_using_dicts():
-    t = ecf.Task("t")
-    d1 = {'n1': 'v1', 'n10': 'v10', }
-    d2 = {'n2': 'v2'}
-    d3 = {'n3': 'v3'}
-    t.add_variable(d1).add_variable(d2).add_variable(d3)
+class TestNode(unittest.TestCase):
 
-    assert t.find_variable("n1").value() == "v1", "expected variable n1 to have value v1"
-    assert t.find_variable("n10").value() == "v10", "expected variable n10 to have value v10"
-    assert t.find_variable("n2").value() == "v2", "expected variable n2 to have value v2"
-    assert t.find_variable("n3").value() == "v3", "expected variable n3 to have value v3"
+    def setUp(self):
+        self.defs = ecf.Defs()
+        self.suite = self.defs.add_suite("suite");
 
+        self.suite.add_variable("VARIABLE", "value");
 
-def can_chain_adding_variables_using_variable_objects():
-    t = ecf.Task("t")
-    v1 = ecf.Variable("name1", "value1")
-    v2 = ecf.Variable("name2", "value2")
-    v3 = ecf.Variable("name3", "value3")
-    t.add_variable(v1).add_variable(v2).add_variable(v3)
+        self.family = self.suite.add_family("family")
+        self.family.add_repeat(ecf.RepeatDate("REPEAT", 20010101, 20010102, 1))
 
-    assert t.find_variable("name1").value() == "value1", "expected variable name1 to have value value1"
-    assert t.find_variable("name2").value() == "value2", "expected variable name2 to have value value2"
-    assert t.find_variable("name3").value() == "value3", "expected variable name3 to have value value3"
+        self.task = self.family.add_task("task")
 
+    def test_is_able_to_retrieve_suite_generated_variables_using_variable_list(self):
+        vars = ecf.VariableList()
+        self.suite.get_generated_variables(vars)
 
-def can_chain_adding_variables_using_edit_objects():
-    t = ecf.Task("t")
-    e1 = ecf.Edit({"ea1": "ev1", "ea2": "ev2"})
-    e2 = ecf.Edit(eb1="ev3")
-    t.add_variable(e1).add_variable(e2)
+        names = [v.name() for v in vars]
+        self.assertIn("SUITE", names)
+        self.assertIn("ECF_DATE", names)
+        self.assertIn("ECF_CLOCK", names)
+        self.assertIn("ECF_TIME", names)
+        self.assertIn("ECF_JULIAN", names)
 
-    assert t.find_variable("ea1").value() == "ev1", "expected variable ea1 to have value ev1"
-    assert t.find_variable("ea2").value() == "ev2", "expected variable ea2 to have value ev2"
-    assert t.find_variable("eb1").value() == "ev3", "expected variable eb1 to have value ev3"
+        self.assertIn("YYYY", names)
+        self.assertIn("DD", names)
+        self.assertIn("MM", names)
+        self.assertIn("DAY", names)
+        self.assertIn("MONTH", names)
+        self.assertIn("DATE", names)
+        self.assertIn("TIME", names)
+        self.assertIn("DOW", names)
+        self.assertIn("DOY", names)
 
+    def test_is_able_to_retrieve_suite_generated_variables_using_python_list(self):
+        vars = self.suite.get_generated_variables()
 
-def can_chain_adding_variables_using_name_and_string_value():
-    t = ecf.Task("t")
-    t.add_variable("sv1", "hello").add_variable("sv2", "world").add_variable("sv3", "!")
+        names = [v.name() for v in vars]
+        self.assertIn("SUITE", names)
+        self.assertIn("ECF_DATE", names)
+        self.assertIn("ECF_CLOCK", names)
+        self.assertIn("ECF_TIME", names)
+        self.assertIn("ECF_JULIAN", names)
 
-    assert t.find_variable("sv1").value() == "hello", "expected variable sv1 to have value hello"
-    assert t.find_variable("sv2").value() == "world", "expected variable sv2 to have value world"
-    assert t.find_variable("sv3").value() == "!", "expected variable sv3 to have value !"
+        self.assertIn("YYYY", names)
+        self.assertIn("DD", names)
+        self.assertIn("MM", names)
+        self.assertIn("DAY", names)
+        self.assertIn("MONTH", names)
+        self.assertIn("DATE", names)
+        self.assertIn("TIME", names)
+        self.assertIn("DOW", names)
+        self.assertIn("DOY", names)
 
+    def test_is_able_to_retrieve_family_generated_variables_using_variable_list(self):
+        vars = ecf.VariableList()
+        self.family.get_generated_variables(vars)
 
-def can_chain_adding_variables_using_name_and_integer_value():
-    t = ecf.Task("t")
-    t.add_variable("iv1", 1).add_variable("iv2", 42).add_variable("iv3", 0)
+        names = [v.name() for v in vars]
+        self.assertIn("FAMILY", names)
+        self.assertIn("FAMILY1", names)
+        self.assertIn("REPEAT", names)
+        self.assertIn("REPEAT_YYYY", names)
+        self.assertIn("REPEAT_MM", names)
+        self.assertIn("REPEAT_DD", names)
+        self.assertIn("REPEAT_DOW", names)
+        self.assertIn("REPEAT_JULIAN", names)
 
-    assert t.find_variable("iv1").value() == "1", "expected variable iv1 to have value 1"
-    assert t.find_variable("iv2").value() == "42", "expected variable iv2 to have value 42"
-    assert t.find_variable("iv3").value() == "0", "expected variable iv3 to have value 0"
+    def test_is_able_to_retrieve_family_generated_variables_using_python_list(self):
+        vars = self.family.get_generated_variables()
 
+        names = [v.name() for v in vars]
+        self.assertIn("FAMILY", names)
+        self.assertIn("FAMILY1", names)
+        self.assertIn("REPEAT", names)
+        self.assertIn("REPEAT_YYYY", names)
+        self.assertIn("REPEAT_MM", names)
+        self.assertIn("REPEAT_DD", names)
+        self.assertIn("REPEAT_DOW", names)
+        self.assertIn("REPEAT_JULIAN", names)
 
-def can_add_task_to_family_to_suite():
-    s = ecf.Suite("s")
-    f = s.add_family("f")
-    t = f.add_task("t")
+    def test_is_able_to_retrieve_task_generated_variables_using_variable_list(self):
+        vars = ecf.VariableList()
+        self.task.get_generated_variables(vars)
 
-    assert t.name() == "t"
-    assert f.name() == "f"
-    assert s.name() == "s"
+        names = [v.name() for v in vars]
+        self.assertIn("TASK", names)
+        self.assertIn("ECF_JOB", names)
+        self.assertIn("ECF_SCRIPT", names)
+        self.assertIn("ECF_JOBOUT", names)
+        self.assertIn("ECF_TRYNO", names)
+        self.assertIn("ECF_RID", names)
+        self.assertIn("ECF_PASS", names)
+        self.assertIn("ECF_NAME", names)
+
+    def test_is_able_to_retrieve_task_generated_variables_using_python_list(self):
+        vars = self.task.get_generated_variables()
+
+        names = [v.name() for v in vars]
+        self.assertIn("TASK", names)
+        self.assertIn("ECF_JOB", names)
+        self.assertIn("ECF_SCRIPT", names)
+        self.assertIn("ECF_JOBOUT", names)
+        self.assertIn("ECF_TRYNO", names)
+        self.assertIn("ECF_RID", names)
+        self.assertIn("ECF_PASS", names)
+        self.assertIn("ECF_NAME", names)
 
 
 if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    can_chain_adding_variables_using_dicts()
-    can_chain_adding_variables_using_variable_objects()
-    can_chain_adding_variables_using_edit_objects()
-    can_chain_adding_variables_using_name_and_string_value()
-    can_chain_adding_variables_using_name_and_integer_value()
-    can_add_task_to_family_to_suite()
-
-    print("All tests pass")
+    unittest.main()
+    print("All Tests pass")
