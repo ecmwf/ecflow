@@ -55,6 +55,12 @@ Returns the name of the Mirror attribute
 Returns the polling interval used to contact the remove ecFlow server
 
 
+.. py:method:: MirrorAttr.propagate(self: ecflow.MirrorAttr) -> bool
+   :module: ecflow
+
+Returns a boolean, where true means the Node state is propagated up the Node tree
+
+
 .. py:method:: MirrorAttr.remote_host(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 

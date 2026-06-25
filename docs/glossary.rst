@@ -1689,7 +1689,7 @@ Glossary
         as this may lead to undesired behaviour, including deadlocks.
 
       `Only one mirror attribute is allowed per node`, and each attribute is
-      defined by the following properties:
+      defined by the following options:
 
         - :code:`name`, an identifier
         - :code:`remote_path`, the path of the node on the remote ecFlow server
@@ -1698,6 +1698,7 @@ Glossary
         - :code:`ssl`, to connect to the ecFlow server using SSL
         - :code:`polling`, the value (in seconds) used to periodically contact the remote ecFlow server
         - :code:`auth`, the location to the Mirror authentication credentials file
+        - :code:`propagate`, to enable the propagation of the remote node state up the tree of local nodes
 
       .. warning::
 

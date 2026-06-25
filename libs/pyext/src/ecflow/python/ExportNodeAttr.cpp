@@ -536,6 +536,7 @@ std::string AvisoAttr_str(const ecf::AvisoAttr& aviso) {
 /// @param polling The polling interval (defaults to `MirrorAttr::default_polling`).
 /// @param ssl Whether to use SSL for the remote connection.
 /// @param auth The authentication configuration (defaults to `MirrorAttr::default_remote_auth`).
+/// @param propagate If true, the remote node state is propagated up the local node tree (default false).
 /// @return The newly created MirrorAttr.
 ///
 ecf::MirrorAttr MirrorAttr_make(const std::string& name,

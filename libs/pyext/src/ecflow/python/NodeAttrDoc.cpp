@@ -893,14 +893,16 @@ const char* NodeAttrDoc::mirror_doc() {
            "      string polling: The polling interval used to contact the remote ecFlow server\n"
            "      Bool ssl: `true`, when using SSL to contact the remote ecFlow server; `false`, otherwise\n"
            "      string auth: The path to the Mirror Authentication credentials\n"
+           "      Bool propagate: `true`, to propagate the node state up local tree; `false`, otherwise (default)\n"
            "\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   t1 = Task('t1',\n"
            "             MirrorAttr('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth'))\n"
            "\n"
-           "   t2 = Task('t2')\n"
-           "   t2.add_aviso('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth')\n"
+           "   t2 = Task('t2',\n"
+           "             MirrorAttr('name', '/remote/task', 'remote-ecflow', '3141', '60', True, '/path/to/auth', "
+           "True))\n"
            "\n"
-           "The parameters `remote_host`, `remote_port`, `polling`, `ssl`, and `auth` are optional\n";
+           "The parameters `remote_host`, `remote_port`, `polling`, `ssl`, `auth`, and `propagate` are optional\n";
 }
