@@ -33,7 +33,8 @@ MirrorAttr::MirrorAttr(Node* parent,
                        polling_t polling,
                        flag_t ssl,
                        auth_t auth,
-                       reason_t reason)
+                       reason_t reason,
+                       flag_t propagate)
     : parent_{parent},
       name_{std::move(name)},
       remote_path_{std::move(remote_path)},
@@ -43,6 +44,7 @@ MirrorAttr::MirrorAttr(Node* parent,
       ssl_{ssl},
       auth_{std::move(auth)},
       reason_{std::move(reason)},
+      propagate_{propagate},
       controller_{nullptr} {
     if (!is_valid_name(name_)) {
         throw ecf::InvalidArgument(ecf::Message("Invalid MirrorAttr name :", name_));
@@ -65,7 +67,7 @@ std::string MirrorAttr::absolute_name() const {
         return parent_->absNodePath() + ':' + name_;
     }
     else {
-        return "<undetermined>:" + name_;
+        return "(detached):" + name_;
     }
 }
 
@@ -122,6 +124,9 @@ void MirrorAttr::mirror() {
                                      parent_->get_flag().clear(Flag::REMOTE_ERROR);
                                      parent_->get_flag().set_state_change_no(state_change_no_);
                                      parent_->setStateOnly(latest_state, true);
+                                     if (propagate_) {
+                                         parent_->set_most_significant_state_up_node_tree();
+                                     }
 
                                      // ** Node Variables
                                      std::vector<Variable> all_variables = notification.data().regular_variables;
@@ -270,9 +275,8 @@ void MirrorAttr::start_controller() {
 void MirrorAttr::stop_controller() {
     if (controller_) {
         SLOG(T,
-             "MirrorAttr: finishing polling for Mirror attribute \"" << parent_->absNodePath() << ":" << name_
-                                                                     << "\", from host: " << remote_host_
-                                                                     << ", port: " << remote_port_ << ")");
+             "MirrorAttr: finishing polling for Mirror attribute \""
+                 << absolute_name() << "\", from host: " << remote_host_ << ", port: " << remote_port_ << ")");
 
         controller_->stop();
         controller_.reset();
@@ -283,7 +287,7 @@ bool operator==(const MirrorAttr& lhs, const MirrorAttr& rhs) {
     return lhs.name() == rhs.name() && lhs.remote_path() == rhs.remote_path() &&
            lhs.remote_host() == rhs.remote_host() && lhs.remote_port() == rhs.remote_port() &&
            lhs.polling() == rhs.polling() && lhs.ssl() == rhs.ssl() && lhs.auth() == rhs.auth() &&
-           lhs.reason() == rhs.reason();
+           lhs.reason() == rhs.reason() && lhs.propagate() == rhs.propagate();
 }
 
 std::string to_python_string(const MirrorAttr& mirror) {
@@ -300,7 +304,9 @@ std::string to_python_string(const MirrorAttr& mirror) {
     s += ", polling=";
     s += mirror.polling();
     s += ", ssl=";
-    s += mirror.ssl();
+    s += mirror.ssl() ? "1" : "0";
+    s += ", propagate=";
+    s += mirror.propagate() ? "1" : "0";
     s += ", auth=";
     s += mirror.auth();
     s += ", reason=";

@@ -45,7 +45,8 @@ private:
         PollingIndex    = 5,
         SslIndex        = 6,
         AuthIndex       = 7,
-        ReasonIndex     = 8
+        ReasonIndex     = 8,
+        PropagateIndex  = 9
     };
 };
 

@@ -79,6 +79,7 @@ ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, Node* p
     description.add_options()(option_remote_auth,
                               po::value<std::string>()->default_value(ecf::MirrorAttr::default_remote_auth));
     description.add_options()(option_reason, po::value<std::string>()->default_value(""));
+    description.add_options()(option_propagate, "Propagate State up the node tree");
 
     po::parsed_options parsed_options = po::command_line_parser(tokens).options(description).run();
 
@@ -94,8 +95,9 @@ ecf::MirrorAttr MirrorParser::parse_mirror_line(const std::string& line, Node* p
     auto ssl         = get_option_value<ecf::MirrorAttr::flag_t>(vm, option_ssl, line);
     auto auth        = get_option_value<ecf::MirrorAttr::auth_t>(vm, option_remote_auth, line);
     auto reason      = get_option_value<ecf::MirrorAttr::reason_t>(vm, option_reason, line);
+    auto propagate   = get_option_value<ecf::MirrorAttr::flag_t>(vm, option_propagate, line);
 
-    return ecf::MirrorAttr{parent, name, ecflow_path, ecflow_host, ecflow_port, polling, ssl, auth, reason};
+    return ecf::MirrorAttr{parent, name, ecflow_path, ecflow_host, ecflow_port, polling, ssl, auth, reason, propagate};
 }
 
 bool MirrorParser::doParse(const std::string& line, std::vector<std::string>& lineTokens) {

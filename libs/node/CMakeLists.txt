@@ -36,6 +36,7 @@ set(test_srcs
   test/TestJobProfiler.cpp
   test/TestLimit.cpp
   test/TestMigration.cpp
+  test/TestMirrorAttr.cpp
   test/TestMissNextTimeSlot.cpp
   test/TestMovePeer.cpp
   test/TestNodeAlgorithms.cpp
