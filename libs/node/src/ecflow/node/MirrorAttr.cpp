@@ -61,7 +61,12 @@ MirrorAttr::~MirrorAttr() {
 }
 
 std::string MirrorAttr::absolute_name() const {
-    return parent_->absNodePath() + ':' + name_;
+    if (parent_) {
+        return parent_->absNodePath() + ':' + name_;
+    }
+    else {
+        return "<undetermined>:" + name_;
+    }
 }
 
 bool MirrorAttr::why(std::string& theReasonWhy) const {
@@ -103,11 +108,14 @@ void MirrorAttr::mirror() {
 
         // Notifications found -- Node state to be updated or error to be reported
         std::visit(ecf::overload{[this](const service::mirror::MirrorNotification& notification) {
-                                     auto latest_state = static_cast<NState::State>(notification.data().state);
+                                     auto latest_state      = static_cast<NState::State>(notification.data().state);
+                                     auto latest_state_name = NState::toString(latest_state);
 
-                                     SLOG(D,
-                                          "MirrorAttr: Updating Mirror attribute (name: " << name_ << ") to state "
-                                                                                          << latest_state);
+                                     SLOG(T,
+                                          "MirrorAttr: Sync Mirror '"
+                                              << absolute_name() << "' to {path: '" << remote_path_ << "', host: '"
+                                              << remote_host_ << "', port: '" << remote_port_ << "', ssl: '" << ssl_
+                                              << "'} to state '" << latest_state_name << "'");
 
                                      // ** Node State
                                      reason_ = "";
@@ -134,7 +142,7 @@ void MirrorAttr::mirror() {
                                      parent_->replace_events(notification.data().events);
                                  },
                                  [this](const service::mirror::MirrorError& error) {
-                                     SLOG(D,
+                                     SLOG(T,
                                           "MirrorAttr: Failure detected on Mirror attribute (name: "
                                               << name_ << ") due to " << error.reason());
                                      reason_ = error.reason();
@@ -227,7 +235,7 @@ void MirrorAttr::start_controller() {
         auto polling     = resolve_cfg(polling_, default_polling, fallback_polling);
         auto auth        = resolve_cfg(auth_, default_remote_auth, fallback_remote_auth);
 
-        SLOG(D,
+        SLOG(T,
              "MirrorAttr: start polling Mirror attribute '" << absolute_name() << "', from " << remote_path_ << " @ "
                                                             << remote_host << ':' << remote_port
                                                             << ") using polling: " << polling << " s");
@@ -251,8 +259,8 @@ void MirrorAttr::start_controller() {
 
         // Controller -- start up the Mirror controller, and configure the Mirror request
         controller_ = std::make_shared<controller_t>();
-        controller_->subscribe(
-            ecf::service::mirror::MirrorRequest{remote_path_, remote_host, remote_port, polling_value, ssl_, auth});
+        controller_->subscribe(ecf::service::mirror::MirrorRequest{
+            absolute_name(), remote_path_, remote_host, remote_port, polling_value, ssl_, auth});
         // Controller -- effectively start the Mirror process
         // n.b. this must be done after subscribing in the controller, so that the polling interval is set
         controller_->start();
@@ -261,7 +269,7 @@ void MirrorAttr::start_controller() {
 
 void MirrorAttr::stop_controller() {
     if (controller_) {
-        SLOG(D,
+        SLOG(T,
              "MirrorAttr: finishing polling for Mirror attribute \"" << parent_->absNodePath() << ":" << name_
                                                                      << "\", from host: " << remote_host_
                                                                      << ", port: " << remote_port_ << ")");

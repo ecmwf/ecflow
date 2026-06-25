@@ -70,8 +70,8 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
                                          bool ssl,
                                          const std::string& remote_username,
                                          const std::string& remote_password) const {
-    SLOG(D, "MirrorClient: Accessing " << remote_host << ":" << remote_port << ", path=" << node_path);
-    SLOG(D, "MirrorClient: Authentication credentials:  " << remote_username << ":<omitted>");
+    SLOG(T, "MirrorClient: Accessing " << remote_host << ":" << remote_port << ", path=" << node_path);
+    SLOG(T, "MirrorClient: Authentication credentials:  " << remote_username << ":<omitted>");
 
     try {
         if (!impl_->initialized_) {
@@ -92,12 +92,12 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
             impl_->invoker_.ch1_register(false, std::vector{selected_suite});
         }
 
-        SLOG(D, "MirrorClient: retrieving the latest defs");
+        SLOG(T, "MirrorClient: retrieving the latest defs");
         impl_->invoker_.sync_local();
 
         auto defs = impl_->invoker_.defs();
         if (!defs) {
-            SLOG(E, "MirrorClient: unable to sync with remote defs");
+            SLOG(T, "MirrorClient: unable to sync with remote defs");
             throw std::runtime_error("MirrorClient: Failed to sync with remote defs");
         }
 
@@ -136,7 +136,7 @@ MirrorData MirrorClient::get_node_status(const std::string& remote_host,
         // ** Node Events
         data.events = node->events();
 
-        SLOG(D, "MirrorClient: found node (" << node_path << "), with state " << data.state);
+        SLOG(T, "MirrorClient: found node (" << node_path << "), with state " << data.state);
         return data;
     }
     catch (std::exception& e) {
