@@ -31,7 +31,6 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    Boost::unit_test_framework
     ${ADDITIONAL_BOOST_COMPONENTS}
   DEPENDS
     ecflow_server
