@@ -88,8 +88,7 @@ ecbuild_add_test(
     ${LIB_TARGET}
     ecflow_all
     test_scaffold
-    Boost::boost
-    Boost::unit_test_framework
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     ${ADDITIONAL_BOOST_COMPONENTS}
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   DEPENDS
