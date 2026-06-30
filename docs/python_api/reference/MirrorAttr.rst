@@ -52,7 +52,7 @@ Returns the name of the Mirror attribute
 .. py:method:: MirrorAttr.polling(self: ecflow.MirrorAttr) -> str
    :module: ecflow
 
-Returns the polling interval used to contact the remove ecFlow server
+Returns the polling interval used to contact the remote ecFlow server
 
 
 .. py:method:: MirrorAttr.propagate(self: ecflow.MirrorAttr) -> bool
