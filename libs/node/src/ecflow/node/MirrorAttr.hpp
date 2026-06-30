@@ -52,6 +52,7 @@ public:
     static constexpr const char* default_remote_auth = "%ECF_MIRROR_REMOTE_AUTH%";
 
     // Fallback option values, used when the variables providing default values are not defined
+    static constexpr const char* fallback_remote_host = "localhost";
     static constexpr const char* fallback_remote_port = "3141";
     static constexpr const char* fallback_polling     = "120";
     static constexpr const char* fallback_remote_auth = "";
@@ -98,7 +99,7 @@ public:
     [[nodiscard]] inline flag_t propagate() const { return propagate_; }
 
     [[nodiscard]] inline std::string resolved_remote_host() const {
-        return resolve_cfg(remote_host_, default_remote_host, fallback_remote_port);
+        return resolve_cfg(remote_host_, default_remote_host, fallback_remote_host);
     }
     [[nodiscard]] inline std::string resolved_remote_port() const {
         return resolve_cfg(remote_port_, default_remote_port, fallback_remote_port);
