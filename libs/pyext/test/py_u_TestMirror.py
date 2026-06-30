@@ -78,7 +78,7 @@ def can_create_mirror_from_default_parameters_4():
     assert mirror.remote_port() == "r_port"
     assert mirror.polling() == "polling"
     assert mirror.ssl() == True
-    assert mirror.auth() == "%ECF_MIRROR_AUTH%"
+    assert mirror.auth() == "%ECF_MIRROR_REMOTE_AUTH%"
 
 
 def can_create_mirror_propagate_defaults_to_false():
@@ -214,6 +214,7 @@ if __name__ == "__main__":
     can_create_mirror_from_default_parameters_1()
     can_create_mirror_from_default_parameters_2()
     can_create_mirror_from_default_parameters_3()
+    can_create_mirror_from_default_parameters_4()
     can_create_mirror_propagate_defaults_to_false()
     can_create_mirror_with_propagate_as_positional_argument()
     can_create_mirror_with_propagate_as_keyword_argument()
