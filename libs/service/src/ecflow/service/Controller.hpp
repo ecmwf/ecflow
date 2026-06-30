@@ -36,7 +36,7 @@ public:
     // Attribute-facing API
 
     void subscribe(const subscription_t& s) {
-        SLOG(D, "Controller: subscribe " << s);
+        SLOG(T, "Controller: subscribe " << s);
 
         {
             std::scoped_lock lock(subscribe_);
@@ -45,7 +45,7 @@ public:
     }
 
     notifications_t get_notifications(const std::string& name) {
-        SLOG(D, "Controller::get_notifications for " << name);
+        SLOG(T, "Controller::get_notifications for " << name);
 
         notifications_t found;
 
@@ -61,7 +61,7 @@ public:
     // Background Thread-facing API
 
     subscriptions_t get_subscriptions() {
-        SLOG(D, "Controller: collect subscriptions");
+        SLOG(T, "Controller: collect subscriptions");
 
         subscriptions_t found;
         {
@@ -74,7 +74,7 @@ public:
     }
 
     void notify(const notification_t& notification) {
-        SLOG(D, "Controller: notify " << notification);
+        SLOG(T, "Controller: notify " << notification);
 
         {
             std::scoped_lock lock(notify_);

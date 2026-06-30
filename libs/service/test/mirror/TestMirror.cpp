@@ -19,8 +19,9 @@ BOOST_AUTO_TEST_SUITE(T_MirrorRequest)
 BOOST_AUTO_TEST_CASE(can_create_parameterised_mirror_request) {
     using namespace ecf::service::mirror;
 
-    MirrorRequest request{"path", "host", "1234", 60, true, "auth"};
+    MirrorRequest request{"/path/to/node:mirror", "path", "host", "1234", 60, true, "auth"};
 
+    BOOST_CHECK_EQUAL(request.attribute, "/path/to/node:mirror");
     BOOST_CHECK_EQUAL(request.path, "path");
     BOOST_CHECK_EQUAL(request.host, "host");
     BOOST_CHECK_EQUAL(request.port, "1234");
@@ -32,7 +33,7 @@ BOOST_AUTO_TEST_CASE(can_create_parameterised_mirror_request) {
 BOOST_AUTO_TEST_CASE(can_print_mirror_request) {
     using namespace ecf::service::mirror;
 
-    MirrorRequest request{"path", "host", "1234", 60, true, "auth"};
+    MirrorRequest request{"/path/to/node:mirror", "path", "host", "1234", 60, true, "auth"};
 
     BOOST_CHECK(MESSAGE(request).find("MirrorRequest") != std::string::npos);
 }

@@ -17,12 +17,9 @@
 #include <string>
 
 #include "ecflow/core/Log.hpp"
+#include "ecflow/core/Serialization.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/service/mirror/MirrorService.hpp"
-
-namespace cereal {
-class access;
-}
 
 class Node;
 
@@ -55,6 +52,7 @@ public:
     static constexpr const char* default_remote_auth = "%ECF_MIRROR_REMOTE_AUTH%";
 
     // Fallback option values, used when the variables providing default values are not defined
+    static constexpr const char* fallback_remote_host = "localhost";
     static constexpr const char* fallback_remote_port = "3141";
     static constexpr const char* fallback_polling     = "120";
     static constexpr const char* fallback_remote_auth = "";
@@ -78,7 +76,8 @@ public:
                polling_t polling,
                flag_t ssl,
                auth_t auth,
-               reason_t reason);
+               reason_t reason,
+               flag_t propagate);
 
     MirrorAttr(const MirrorAttr& rhs) = default;
     ~MirrorAttr();
@@ -97,9 +96,10 @@ public:
     [[nodiscard]] inline flag_t ssl() const { return ssl_; }
     [[nodiscard]] inline const std::string& auth() const { return auth_; }
     [[nodiscard]] inline const std::string& reason() const { return reason_; }
+    [[nodiscard]] inline flag_t propagate() const { return propagate_; }
 
     [[nodiscard]] inline std::string resolved_remote_host() const {
-        return resolve_cfg(remote_host_, default_remote_host, fallback_remote_port);
+        return resolve_cfg(remote_host_, default_remote_host, fallback_remote_host);
     }
     [[nodiscard]] inline std::string resolved_remote_port() const {
         return resolve_cfg(remote_port_, default_remote_port, fallback_remote_port);
@@ -146,9 +146,10 @@ private:
     remote_host_t remote_host_;
     remote_port_t remote_port_;
     polling_t polling_;
-    flag_t ssl_;
+    flag_t ssl_ = false;
     auth_t auth_;
     reason_t reason_;
+    flag_t propagate_ = false;
 
     unsigned int state_change_no_{0}; // *not* persisted, only used on the server side
 
@@ -171,8 +172,13 @@ void serialize(Archive& ar, MirrorAttr& mirror, [[maybe_unused]] std::uint32_t v
     ar & mirror.ssl_;
     ar & mirror.auth_;
     ar & mirror.reason_;
+    if (version >= 1) {
+        ar & mirror.propagate_;
+    }
 }
 
 } // namespace ecf
+
+CEREAL_CLASS_VERSION(ecf::MirrorAttr, 1);
 
 #endif /* ecflow_node_MirrorAttr_HPP */

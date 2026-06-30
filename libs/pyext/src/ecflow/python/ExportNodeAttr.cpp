@@ -536,6 +536,7 @@ std::string AvisoAttr_str(const ecf::AvisoAttr& aviso) {
 /// @param polling The polling interval (defaults to `MirrorAttr::default_polling`).
 /// @param ssl Whether to use SSL for the remote connection.
 /// @param auth The authentication configuration (defaults to `MirrorAttr::default_remote_auth`).
+/// @param propagate If true, the remote node state is propagated up the local node tree (default false).
 /// @return The newly created MirrorAttr.
 ///
 ecf::MirrorAttr MirrorAttr_make(const std::string& name,
@@ -544,8 +545,9 @@ ecf::MirrorAttr MirrorAttr_make(const std::string& name,
                                 const std::string& port    = ecf::MirrorAttr::default_remote_port,
                                 const std::string& polling = ecf::MirrorAttr::default_polling,
                                 bool ssl                   = false,
-                                const std::string& auth    = ecf::MirrorAttr::default_remote_auth) {
-    return ecf::MirrorAttr(nullptr, name, path, host, port, polling, ssl, auth, "");
+                                const std::string& auth    = ecf::MirrorAttr::default_remote_auth,
+                                bool propagate             = false) {
+    return ecf::MirrorAttr(nullptr, name, path, host, port, polling, ssl, auth, "", propagate);
 }
 
 ///
@@ -1503,7 +1505,8 @@ void export_NodeAttr(py::module& m) {
              py::arg("remote_port") = "%ECF_MIRROR_REMOTE_PORT%",
              py::arg("polling")     = "%ECF_MIRROR_REMOTE_POLLING%",
              py::arg("ssl")         = false,
-             py::arg("auth")        = "%ECF_MIRROR_REMOTE_AUTH%")
+             py::arg("auth")        = "%ECF_MIRROR_REMOTE_AUTH%",
+             py::arg("propagate")   = false)
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
         .def("__str__", &MirrorAttr_str)
@@ -1531,5 +1534,8 @@ void export_NodeAttr(py::module& m) {
         .def("auth",
              &ecf::MirrorAttr::auth,
              py::return_value_policy::reference,
-             "Returns the path to Authentication credentials used to contact the remote ecFlow server");
+             "Returns the path to Authentication credentials used to contact the remote ecFlow server")
+        .def("propagate",
+             &ecf::MirrorAttr::propagate,
+             "Returns a boolean, where true means the Node state is propagated up the Node tree");
 }

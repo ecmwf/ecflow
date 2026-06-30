@@ -68,6 +68,17 @@ at :term:`suite` level:
      Variables that are referred in trigger expressions *must* be defined, as a placeholder
      for variables that eventually get synchronised.
 
+  .. note::
+
+     By default, only the mirrored task's own state is updated; parent families and triggers
+     are unaffected. To propagate the mirrored state up the local node tree and cause dependent
+     triggers to fire, add the ``--propagate`` option::
+
+         mirror --name A --remote_path /s1/f1/t1 ... --ssl --propagate
+
+     Use ``--propagate`` only when you explicitly want state changes on the mirrored task to
+     drive the evaluation of triggers on its parent families.
+
 Deploy the Suite with a `mirrored` Task
 =======================================
 

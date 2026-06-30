@@ -16,6 +16,7 @@ namespace ecf::service::mirror {
 
 std::ostream& operator<<(std::ostream& os, const MirrorRequest& r) {
     os << "MirrorRequest{";
+    os << "attribute=" << r.attribute << ", ";
     os << "path=" << r.path << ", ";
     os << "host=" << r.host << ", ";
     os << "port=" << r.port << ", ";

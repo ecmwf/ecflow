@@ -27,6 +27,7 @@ namespace ecf::service::mirror {
  */
 class MirrorRequest {
 public:
+    std::string attribute; // '<node-path>:<mirror-name>' of the MirrorAttr that requested the mirror service
     std::string path;
     std::string host;
     std::string port;
