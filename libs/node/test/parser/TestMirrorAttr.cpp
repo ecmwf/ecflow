@@ -167,7 +167,12 @@ BOOST_AUTO_TEST_CASE(can_roundtrip_serialise_mirror_preserving_propagate_option)
 
         BOOST_CHECK_EQUAL(restored.name(), "A");
         BOOST_CHECK_EQUAL(restored.remote_path(), "/s/f/t");
+        BOOST_CHECK_EQUAL(restored.remote_host(), "host");
+        BOOST_CHECK_EQUAL(restored.remote_port(), "1234");
+        BOOST_CHECK_EQUAL(restored.polling(), "20");
         BOOST_CHECK_EQUAL(restored.ssl(), true);
+        BOOST_CHECK_EQUAL(restored.auth(), "auth");
+        BOOST_CHECK_EQUAL(restored.reason(), "");
         BOOST_CHECK_EQUAL(restored.propagate(), true);
     }
 
@@ -179,6 +184,14 @@ BOOST_AUTO_TEST_CASE(can_roundtrip_serialise_mirror_preserving_propagate_option)
         MirrorAttr restored;
         ecf::restore_from_string(data, restored);
 
+        BOOST_CHECK_EQUAL(restored.name(), "B");
+        BOOST_CHECK_EQUAL(restored.remote_path(), "/s/f/t");
+        BOOST_CHECK_EQUAL(restored.remote_host(), "host");
+        BOOST_CHECK_EQUAL(restored.remote_port(), "1234");
+        BOOST_CHECK_EQUAL(restored.polling(), "20");
+        BOOST_CHECK_EQUAL(restored.ssl(), false);
+        BOOST_CHECK_EQUAL(restored.auth(), "auth");
+        BOOST_CHECK_EQUAL(restored.reason(), "");
         BOOST_CHECK_EQUAL(restored.propagate(), false);
     }
 }
@@ -238,7 +251,12 @@ BOOST_AUTO_TEST_CASE(can_deserialise_mirror_v0_with_propagate_defaulting_to_fals
     // Fields present in v0 are restored as expected...
     BOOST_CHECK_EQUAL(restored.name(), "A");
     BOOST_CHECK_EQUAL(restored.remote_path(), "/s/f/t");
+    BOOST_CHECK_EQUAL(restored.remote_host(), "host");
+    BOOST_CHECK_EQUAL(restored.remote_port(), "1234");
+    BOOST_CHECK_EQUAL(restored.polling(), "20");
     BOOST_CHECK_EQUAL(restored.ssl(), true);
+    BOOST_CHECK_EQUAL(restored.auth(), "auth");
+    BOOST_CHECK_EQUAL(restored.reason(), "");
     // ...and the absent `propagate` field defaults deterministically to false (rather than an indeterminate value)
     BOOST_CHECK_EQUAL(restored.propagate(), false);
 }
