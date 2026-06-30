@@ -115,7 +115,7 @@ void MirrorAttr::mirror() {
 
                                      SLOG(T,
                                           "MirrorAttr: Sync Mirror '"
-                                              << absolute_name() << "' to {path: '" << remote_path_ << "', host: '"
+                                              << absolute_name() << "' with {path: '" << remote_path_ << "', host: '"
                                               << remote_host_ << "', port: '" << remote_port_ << "', ssl: '" << ssl_
                                               << "'} to state '" << latest_state_name << "'");
 
