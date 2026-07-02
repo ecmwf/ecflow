@@ -482,9 +482,22 @@ Glossary
       Also the script *must* include calls to the **init** and **complete** :term:`child command`\ s so that
       the :term:`ecflow_server` is aware when the job starts (i.e changes state to :term:`active`) and finishes (i.e changes state to :term:`complete`)
        
+   ECF_BASENAME
+      This is a generated :term:`variable`. It defines the base name of the :term:`node`, i.e. the node's own name without any path information.
+      Together with :term:`ECF_DIRNAME`, it can be used to reconstruct the node's absolute path as ``%ECF_DIRNAME%/%ECF_BASENAME%``.
+
+      This variable is available on all node types (:term:`suite`, :term:`family`, :term:`task`).
+
+   ECF_DIRNAME
+      This is a generated :term:`variable`. It defines the absolute path of the parent :term:`node`.
+      For :term:`suite` nodes, which have no parent, ECF_DIRNAME is an empty string.
+      Together with :term:`ECF_BASENAME`, it can be used to reconstruct the node's absolute path as ``%ECF_DIRNAME%/%ECF_BASENAME%``.
+
+      This variable is available on all node types (:term:`suite`, :term:`family`, :term:`task`).
+
    ECF_DUMMY_TASK
       This is a user variable that can be added to :term:`task` to indicate that there is no
-      associated :term:`ecf script` file. 
+      associated :term:`ecf script` file.
       
       If this variable is added to :term:`suite` or :term:`family` then all child tasks are treated as dummy.
       

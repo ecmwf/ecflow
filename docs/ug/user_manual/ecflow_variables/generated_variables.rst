@@ -201,6 +201,14 @@ The table below shows a list of generated variables.
      - ECF_JOBOUT
      - The filename of the job output. ecFlow makes the directory from ECF_HOME down to the last level.The variable is composed of ECF_HOME/ECF_NAME.ECF_TRYNO.
      - /some/path/ back/get/ getobs/ getobs.1
+   * - suite/family/task
+     - ECF_DIRNAME
+     - The absolute path of the node's parent. Empty string for suite nodes (which have no parent). Together with ECF_BASENAME reconstructs the node's absolute path as ECF_DIRNAME/ECF_BASENAME.
+     - /suite/family
+   * - suite/family/task
+     - ECF_BASENAME
+     - The base name of the node, i.e. the node's own name without any path information. Together with ECF_DIRNAME reconstructs the node's absolute path as ECF_DIRNAME/ECF_BASENAME.
+     - task
 
 
 .. note::
