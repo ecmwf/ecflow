@@ -3,7 +3,7 @@ builds:
 
   - name: "rpm-rocky-8-ui"
     type: system-package
-    enabled: true
+    enabled: false
     config:
       os: rocky-8
       dependencies:
@@ -36,7 +36,7 @@ builds:
 
   - name: "deb-debian-11-server"
     type: system-package
-    enabled: true
+    enabled: false
     config:
       os: debian-11
       dependencies:
@@ -66,7 +66,7 @@ builds:
 
   - name: "deb-debian-12-server"
     type: system-package
-    enabled: true
+    enabled: false
     config:
       os: debian-12
       dependencies:
@@ -95,7 +95,7 @@ builds:
 
   - name: "deb-debian-13-server"
     type: system-package
-    enabled: true
+    enabled: false
     config:
       os: debian-13
       dependencies:
@@ -124,7 +124,7 @@ builds:
 
   - name: "tarball"
     type: "tarball"
-    enabled: true
+    enabled: false
     config:
       cmake_options:
         -DBOOST_ROOT: ${BOOST_ROOT_DIR}
@@ -161,7 +161,7 @@ builds:
 
   - name: ecflow-hpc
     type: hpc
-    enabled: true
+    enabled: false
     config:
       platform: gnu-8.5.0
       install_type: module
@@ -287,7 +287,7 @@ builds:
 
   - name: ecflow-hpc-ag
     type: hpc
-    enabled: true
+    enabled: false
     config:
       site: ag-batch
       queue: ng
