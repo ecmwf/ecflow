@@ -234,6 +234,11 @@ struct SetupTest
         setenv("ECF_PORT", "3199", 0);
 #endif
         setenv("ECF_HOST", "localhost", 1);
+
+        // Ensure each separate test uses its own ECF_HOME...
+        std::string ecf_home = (fs::current_path() / ("ecf_home_" + ecf::environment::get("ECF_PORT"))).string();
+        fs::create_directories(ecf_home);
+        setenv("ECF_HOME", ecf_home.c_str(), 1);
     }
     void setup() {
         // This needs to be initialized in setup() instead
