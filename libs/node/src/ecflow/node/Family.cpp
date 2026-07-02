@@ -167,7 +167,9 @@ std::string Family::find_node_path(const std::string& type, const std::string& n
 FamGenVariables::FamGenVariables(const Family* f)
     : family_(f),
       genvar_family_("FAMILY", "", false),
-      genvar_family1_("FAMILY1", "", false) {
+      genvar_family1_("FAMILY1", "", false),
+      genvar_dirname_("ECF_DIRNAME", "", false),
+      genvar_basename_("ECF_BASENAME", "", false) {
 }
 
 void FamGenVariables::update_generated_variables() const {
@@ -177,11 +179,14 @@ void FamGenVariables::update_generated_variables() const {
     // Since family generated not persisted, allow for demand creation by client
     genvar_family1_.set_value(family_->name());
 
-    // FAMILY is the full path excluding the suite, there is *NO* leading slash
+    // FAMILY is the absolute path excluding the suite, *WITHOUT* a leading slash
     std::string path = family_->absNodePath();
     auto secondSlash = path.find('/', 1);
     path.erase(0, secondSlash + 1);
     genvar_family_.set_value(path);
+
+    genvar_dirname_.set_value(family_->dirname());
+    genvar_basename_.set_value(family_->basename());
 }
 
 const Variable& FamGenVariables::findGenVariable(const std::string& name) const {
@@ -191,12 +196,20 @@ const Variable& FamGenVariables::findGenVariable(const std::string& name) const 
     if (genvar_family1_.name() == name) {
         return genvar_family1_;
     }
+    if (genvar_dirname_.name() == name) {
+        return genvar_dirname_;
+    }
+    if (genvar_basename_.name() == name) {
+        return genvar_basename_;
+    }
     return Variable::EMPTY();
 }
 
 void FamGenVariables::gen_variables(std::vector<Variable>& vec) const {
     vec.push_back(genvar_family_);
     vec.push_back(genvar_family1_);
+    vec.push_back(genvar_dirname_);
+    vec.push_back(genvar_basename_);
 }
 
 template <class Archive>

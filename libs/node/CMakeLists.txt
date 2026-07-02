@@ -41,6 +41,7 @@ set(test_srcs
   test/TestMovePeer.cpp
   test/TestNodeAlgorithms.cpp
   test/TestNodeBeginRequeue.cpp
+  test/TestNodeGeneratedVariables.cpp
   test/TestNodeState.cpp
   test/TestNode_main.cpp # test entry point
   test/TestOrder.cpp

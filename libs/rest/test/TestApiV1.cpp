@@ -613,7 +613,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
         BOOST_REQUIRE(content.contains("f"));
         // Check family attributes
         BOOST_REQUIRE(content["f"].contains("attributes"));
-        BOOST_REQUIRE(content["f"]["attributes"].size() == 2);
+        BOOST_REQUIRE(content["f"]["attributes"].size() == 4);
         {
             size_t count = 0;
             for (const auto& attr : content["f"]["attributes"]) {
@@ -633,7 +633,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
         BOOST_REQUIRE(content["f"]["children"].contains("t"));
         // Check task attributes
         BOOST_REQUIRE(content["f"]["children"]["t"].contains("attributes"));
-        BOOST_REQUIRE(content["f"]["children"]["t"]["attributes"].size() == 11);
+        BOOST_REQUIRE(content["f"]["children"]["t"]["attributes"].size() == 13);
         {
             size_t count = 0;
             for (const auto& attr : content["f"]["children"]["t"]["attributes"]) {

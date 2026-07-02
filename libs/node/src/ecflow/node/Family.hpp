@@ -99,6 +99,8 @@ private:
     const Family* family_;
     mutable Variable genvar_family_;
     mutable Variable genvar_family1_;
+    mutable Variable genvar_dirname_;
+    mutable Variable genvar_basename_;
 };
 
 #endif /* ecflow_node_Family_HPP */
