@@ -75,6 +75,7 @@ protected Q_SLOTS:
     void slotAutoReload();
     void notifyChange(VProperty*) override;
     void updateAutoReloadIntervalProp();
+    void updateAutoReloadTb();
 
 protected:
     void updateState(const FlagSet<ChangeFlag>&) override;

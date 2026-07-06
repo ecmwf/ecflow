@@ -499,12 +499,23 @@ void OutputItemWidget::updateAutoReloadIntervalProp() {
             autoReloadTimer_->setInterval(autoReloadIntervalProp_->value().toInt() * 1000);
         }
     }
+    updateAutoReloadTb();
 }
 
 void OutputItemWidget::notifyChange(VProperty* p) {
     if (p == autoReloadIntervalProp_) {
         autoReloadTimer_->setInterval(p->value().toInt() * 1000);
+        updateAutoReloadTb();
     }
+}
+
+void OutputItemWidget::updateAutoReloadTb() {
+    QString tt = "Automatically/periodically reload output and scroll to bottom";
+    if (autoReloadIntervalProp_) {
+        tt += " (currently every " + QString::number(autoReloadIntervalProp_->value().toInt()) +
+              " seconds, configurable in Preferences)";
+    }
+    autoReloadTb_->setToolTip(tt);
 }
 
 // called when the reload button is clicked
