@@ -169,6 +169,36 @@ button, the file viewer will switch to the **current** version of the
 file (it assumes there is no need to reload an old version of the file).
 This button also causes the file listing to be updated.
 
+Automatic reload
+----------------
+
+.. image:: /_static/ecflow_ui/viewing_scripts_jobs_and_output/reload_output_clock.svg
+   :width: 0.23659in
+   :height: 0.20001in
+
+Next to the **Reload** button is an **Automatic reload** button (showcasing
+a download arrow with an overlaying clock icon). When enabled, the **current**
+job output file is reloaded at a regular interval and the view is scrolled to
+the bottom, so that a running task's output can be watched as it grows, without
+needing to click **Reload** repeatedly.
+
+The refresh period defaults to 30 seconds and can be changed via the
+**Output log refresh period** setting, found alongside the other update
+settings in the :ref:`Server
+Settings <communication_with_ecflow_servers>`; a minimum of 5 seconds is
+enforced. Changing the setting while automatic reload is active takes
+effect immediately, without needing to toggle the button off and on.
+
+Clicking the manual **Reload** button while automatic reload is active
+restarts the automatic reload period, to avoid an unnecessary reload
+happening shortly afterwards.
+
+Automatic reload only runs while the node is selected and the server is
+not suspended; it is automatically stopped if the node is deselected or
+the server suspended, and resumes when the node is reselected or the
+server resumed. If a reload triggered by the timer is still in progress,
+the next scheduled reload is skipped rather than queued.
+
 Saving a local copy of the job output
 -------------------------------------
 
