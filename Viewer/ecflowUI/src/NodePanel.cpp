@@ -328,20 +328,16 @@ void NodePanel::writeSettings(VComboSettings* vs) {
     vs->put("currentTabId", currentIdx);
 
     for (int i = 0; i < count(); i++) {
-        // boost::property_tree::ptree ptTab;
         if (Dashboard* nw = nodeWidget(i)) {
             std::string id = NodePanel::tabSettingsId(i);
             vs->beginGroup(id);
             nw->writeSettings(vs);
             vs->endGroup();
-            // pt.add_child("tab_"+   ecf::convert_to<std::string>(i),ptTab);
         }
     }
 }
 
 void NodePanel::readSettings(VComboSettings* vs) {
-    using boost::property_tree::ptree;
-
     auto cnt          = vs->get<int>("tabCount", 0);
     auto currentIndex = vs->get<int>("currentTabId", -1);
 

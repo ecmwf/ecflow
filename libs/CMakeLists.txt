@@ -277,6 +277,7 @@ set(srcs
   core/src/ecflow/core/PasswordEncryption.hpp
   core/src/ecflow/core/Pid.hpp
   core/src/ecflow/core/PrintStyle.hpp
+  core/src/ecflow/core/PTree.hpp
   core/src/ecflow/core/Result.hpp
   core/src/ecflow/core/SState.hpp
   core/src/ecflow/core/Serialization.hpp
@@ -319,6 +320,7 @@ set(srcs
   core/src/ecflow/core/PasswdFile.cpp
   core/src/ecflow/core/Pid.cpp
   core/src/ecflow/core/PrintStyle.cpp
+  core/src/ecflow/core/PTree.cpp
   core/src/ecflow/core/SState.cpp
   core/src/ecflow/core/Str.cpp
   core/src/ecflow/core/StringSplitter.cpp
