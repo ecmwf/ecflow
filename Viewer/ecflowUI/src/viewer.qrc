@@ -129,6 +129,7 @@
     <file alias="period.svg">../images/period.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
     <file alias="reload_green.svg">../images/reload_green.svg</file>
+    <file alias="reload_output_clock.svg">../images/reload_output_clock.svg</file>
     <file alias="reload_one.svg">../images/reload_one.svg</file>
     <file alias="remote.svg">../images/remote.svg</file>
     <file alias="remove.svg">../images/remove.svg</file>

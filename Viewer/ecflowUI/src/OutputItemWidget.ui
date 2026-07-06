@@ -389,14 +389,14 @@
          <item>
           <widget class="QToolButton" name="autoReloadTb_">
            <property name="toolTip">
-            <string>Automatically reload output every 30 seconds and scroll to bottom</string>
+            <string>Automatically/periodically reload output and scroll to bottom</string>
            </property>
            <property name="text">
             <string>...</string>
            </property>
            <property name="icon">
             <iconset resource="viewer.qrc">
-             <normaloff>:/viewer/reload_green.svg</normaloff>:/viewer/reload_green.svg</iconset>
+             <normaloff>:/viewer/reload_output_clock.svg</normaloff>:/viewer/reload_output_clock.svg</iconset>
            </property>
            <property name="checkable">
             <bool>true</bool>
