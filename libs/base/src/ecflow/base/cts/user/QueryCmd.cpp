@@ -193,7 +193,8 @@ const char* QueryCmd::desc() {
            " - limit_max return limit max value to standard out\n"
            " - label     return new value otherwise the old value\n"
            " - variable  return value of the variable, repeat or generated variable to standard out,\n"
-           "             will search up the node tree\n"
+           "             will search up the node tree. When path is '/', the variable is looked up on the\n"
+           "             server itself, i.e. 'ecflow_client --query variable /:name'\n"
            " - trigger   returns 'true' if the expression is true, otherwise 'false'\n\n"
            "If this command is called within a '.ecf' script we will additionally log the task calling this command\n"
            "This is required to aid debugging for excessive use of this command\n"
@@ -203,11 +204,13 @@ const char* QueryCmd::desc() {
            " - meter    The meter is not found\n"
            " - limit/limit_max The limit is not found\n"
            " - label    The label is not found\n"
-           " - variable No user or generated variable or repeat of that name found on node, or any of its parents\n"
+           " - variable No user or generated variable or repeat of that name found on node or its parents,\n"
+           "            or (when path is '/') no user or server variable of that name found on the server\n"
            " - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid\n"
            "Arguments:\n"
            "  arg1 = [ state | dstate | repeat | event | meter | label | variable | trigger | limit | limit_max ]\n"
-           "  arg2 = <path> | <path>:name where name is name of a event, meter, label, limit or variable\n"
+           "  arg2 = <path> | <path>:name where name is name of a event, meter, label, limit or variable.\n"
+           "         path '/' represents the server itself, and can only be used with 'state' or 'variable'\n"
            "  arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat\n\n"
            "Usage:\n"
            " ecflow_client --query state /                                     # return top level state to standard "
@@ -229,6 +232,8 @@ const char* QueryCmd::desc() {
            "label to standard out\n"
            " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to "
            "standard out\n"
+           " ecflow_client --query variable /:var_name                         # returns the server variable value "
+           "to standard out\n"
            " ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if "
            "expression evaluates false otherwise\n";
 }
@@ -242,8 +247,21 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
         if (query_type_ == "state") {
             return PreAllocatedReply::string_cmd(NState::toString(defs->state()));
         }
-        throw std::runtime_error(
-            MESSAGE("QueryCmd: The only valid query for the server is 'state', i.e. ecflow_client --query state /"));
+        if (query_type_ == "variable") {
+            // Variable is attached to the server itself (i.e. `ecflow_client --query variable /:name`).
+            // Preference is given to user defined variables, and only then to server defined variables
+            // (see ServerState::find_variable).
+            if (defs->server_state().variable_exists(attribute_)) {
+                auto& the_value = defs->server_state().find_variable(attribute_);
+                return PreAllocatedReply::string_cmd(the_value);
+            }
+            else {
+                throw std::runtime_error(MESSAGE("QueryCmd: Cannot find server variable of name " << attribute_));
+            }
+        }
+        throw std::runtime_error(MESSAGE(
+            "QueryCmd: The only valid query for the server is 'state' or 'variable', i.e. ecflow_client --query "
+            "state / or ecflow_client --query variable /:name"));
     }
 
     node_ptr node = find_node(defs, path_to_attribute_);
