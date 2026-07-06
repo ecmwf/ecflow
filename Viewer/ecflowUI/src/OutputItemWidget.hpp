@@ -14,15 +14,18 @@
 #include "InfoPanelItem.hpp"
 #include "VDir.hpp"
 #include "VFile.hpp"
+#include "VProperty.hpp"
 #include "ui_OutputItemWidget.h"
 
 class OutputDirProvider;
 class OutputFileFetchInfo;
 class OutputDirWidget;
-class VProperty;
 class QTimer;
 
-class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget {
+class OutputItemWidget : public QWidget,
+                         public InfoPanelItem,
+                         public VPropertyObserver,
+                         protected Ui::OutputItemWidget {
     Q_OBJECT
 
 public:
@@ -68,6 +71,10 @@ protected Q_SLOTS:
     void slotWordWrapSupportChanged(bool);
     void slotLoadWholeFile();
     void loadCurrentJobout();
+    void on_autoReloadTb__clicked(bool st);
+    void slotAutoReload();
+    void notifyChange(VProperty*) override;
+    void updateAutoReloadIntervalProp();
 
 protected:
     void updateState(const FlagSet<ChangeFlag>&) override;
@@ -86,6 +93,9 @@ protected:
     VProperty* lineNumProp_{nullptr};
     VProperty* wordWrapProp_{nullptr};
     VProperty* expandFileInfoProp_{nullptr};
+
+    QTimer* autoReloadTimer_{nullptr};
+    VProperty* autoReloadIntervalProp_{nullptr};
 };
 
 #endif /* ecflow_viewer_OutputItemWidget_HPP */

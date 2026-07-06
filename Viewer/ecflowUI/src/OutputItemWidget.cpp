@@ -26,6 +26,7 @@
 #include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "VServerSettings.hpp"
 #include "ViewerUtil.hpp"
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     #include <QGuiApplication>
@@ -42,6 +43,7 @@
 #include <QMenu>
 #include <QMovie>
 #include <QTime>
+#include <QTimer>
 #include <QWidgetAction>
 
 #define UI_OUTPUTITEMWIDGET_DEBUG
@@ -160,9 +162,16 @@ OutputItemWidget::OutputItemWidget(QWidget* parent)
     connect(actionLoadWhole_, SIGNAL(triggered()), this, SLOT(slotLoadWholeFile()));
 
     connect(actionLoadCurrentJobout_, SIGNAL(triggered()), this, SLOT(loadCurrentJobout()));
+
+    autoReloadTimer_ = new QTimer(this);
+    connect(autoReloadTimer_, &QTimer::timeout, this, &OutputItemWidget::slotAutoReload);
 }
 
-OutputItemWidget::~OutputItemWidget() = default;
+OutputItemWidget::~OutputItemWidget() {
+    if (autoReloadIntervalProp_) {
+        autoReloadIntervalProp_->removeObserver(this);
+    }
+}
 
 QWidget* OutputItemWidget::realWidget() {
     return this;
@@ -182,6 +191,11 @@ void OutputItemWidget::reload(VInfo_ptr info) {
 
     userClickedReload_ = false;
 
+    updateAutoReloadIntervalProp();
+    if (autoReloadTb_->isChecked()) {
+        autoReloadTimer_->start();
+    }
+
     // info must be a node
     if (info_ && info_->isNode() && info_->node()) {
         // Get file contents
@@ -193,12 +207,17 @@ void OutputItemWidget::reload(VInfo_ptr info) {
 }
 
 void OutputItemWidget::clearContents() {
+    if (autoReloadIntervalProp_) {
+        autoReloadIntervalProp_->removeObserver(this);
+        autoReloadIntervalProp_ = nullptr;
+    }
     InfoPanelItem::clear();
     dirW_->clear();
     messageLabel_->hide();
     messageLabel_->stopProgress();
     fileLabel_->clear();
     browser_->clear();
+    autoReloadTimer_->stop();
     reloadTb_->setEnabled(true);
     userClickedReload_ = false;
     fetchInfo_->clearInfo();
@@ -209,10 +228,14 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
     if (flags.isSet(SelectedChanged)) {
         if (selected_ && !suspended_) {
             dirW_->reload();
+            if (autoReloadTb_->isChecked()) {
+                autoReloadTimer_->start();
+            }
         }
         // If unselected we stop the automatic dir update
         else {
             dirW_->suspendAutoUpdate();
+            autoReloadTimer_->stop();
         }
     }
 
@@ -221,6 +244,7 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
         if (suspended_) {
             reloadTb_->setEnabled(false);
             dirW_->clear();
+            autoReloadTimer_->stop();
         }
         // Resume
         else {
@@ -229,6 +253,9 @@ void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags) {
                 dirW_->clear();
                 if (selected_) {
                     dirW_->reload();
+                    if (autoReloadTb_->isChecked()) {
+                        autoReloadTimer_->start();
+                    }
                 }
             }
             else {
@@ -413,6 +440,9 @@ void OutputItemWidget::infoFailed(VReply* reply) {
 void OutputItemWidget::on_reloadTb__clicked() {
     userClickedReload_ = true;
     reloadTb_->setEnabled(false);
+    if (autoReloadTimer_->isActive()) {
+        autoReloadTimer_->start(); // restart the 30s window to avoid double-reload
+    }
     reloadCurrentFile(false);
 }
 
@@ -438,6 +468,43 @@ void OutputItemWidget::loadCurrentJobout() {
 
     // get the directory listing
     dirW_->reload();
+}
+
+void OutputItemWidget::on_autoReloadTb__clicked(bool st) {
+    if (st) {
+        autoReloadTimer_->start();
+    }
+    else {
+        autoReloadTimer_->stop();
+    }
+}
+
+void OutputItemWidget::slotAutoReload() {
+    if (!reloadTb_->isEnabled()) {
+        return; // previous reload still in progress
+    }
+    userClickedReload_ = true;
+    reloadCurrentFile(false);
+}
+
+void OutputItemWidget::updateAutoReloadIntervalProp() {
+    if (autoReloadIntervalProp_) {
+        autoReloadIntervalProp_->removeObserver(this);
+        autoReloadIntervalProp_ = nullptr;
+    }
+    if (info_ && info_->server()) {
+        autoReloadIntervalProp_ = info_->server()->conf()->property(VServerSettings::OutputRefreshInSec);
+        if (autoReloadIntervalProp_) {
+            autoReloadIntervalProp_->addObserver(this);
+            autoReloadTimer_->setInterval(autoReloadIntervalProp_->value().toInt() * 1000);
+        }
+    }
+}
+
+void OutputItemWidget::notifyChange(VProperty* p) {
+    if (p == autoReloadIntervalProp_) {
+        autoReloadTimer_->setInterval(p->value().toInt() * 1000);
+    }
 }
 
 // called when the reload button is clicked
