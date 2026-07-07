@@ -911,6 +911,27 @@ BOOST_AUTO_TEST_CASE(test_query_print_includes_calling_task_path) {
                         "expected print() output to include the calling task path but found: " << out);
 }
 
+BOOST_AUTO_TEST_CASE(test_query_increments_server_query_stats_counter) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: handling a QueryCmd increments AbstractServer::update_stats().query_ by exactly one.
+    // The MockServer is constructed directly here (rather than via invoke_query()), so that its
+    // stats can be inspected after the request completes.
+    //
+
+    Defs defs = make_test_defs();
+    MockServer server(&defs);
+    BOOST_REQUIRE_EQUAL(server.stats().query_, 0u);
+
+    ClientToServerRequest request;
+    request.set_cmd(Cmd_ptr(new QueryCmd("state", "/suite", "", "/suite/f/t1")));
+    request.handleRequest(&server);
+
+    BOOST_CHECK_EQUAL(server.stats().query_, 1u);
+}
+
 BOOST_AUTO_TEST_CASE(test_query_fails_for_unrecognised_query_type) {
     ECF_NAME_THIS_TEST();
     TestLog test_log("test_query_cmd.log");

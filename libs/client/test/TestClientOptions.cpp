@@ -21,6 +21,7 @@
 #include "ecflow/base/cts/user/AlterCmd.hpp"
 #include "ecflow/base/cts/user/BeginCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
+#include "ecflow/base/cts/user/QueryCmd.hpp"
 #include "ecflow/client/ClientEnvironment.hpp"
 #include "ecflow/client/ClientInvoker.hpp"
 #include "ecflow/client/ClientOptions.hpp"
@@ -1396,6 +1397,229 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_handle_queue) {
             BOOST_CHECK_EQUAL(command.path_to_node_with_queue(), "/s/f/t");
         });
     }
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(T_Query) // --query (QueryCmd)
+
+BOOST_AUTO_TEST_CASE(test_is_able_to_handle_query) {
+    ECF_NAME_THIS_TEST();
+
+    using Command = QueryCmd;
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "state", "/path/to/node");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "state");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "dstate", "/path/to/node");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "dstate");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "repeat", "/path/to/node");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "repeat");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "repeat", "/path/to/node", "next");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "repeat");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "next");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "repeat", "/path/to/node", "prev");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "repeat");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "prev");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "event", "/path/to/node:event_name");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "event");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "event_name");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "meter", "/path/to/node:meter_name");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "meter");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "meter_name");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "label", "/path/to/node:label_name");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "label");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "label_name");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "limit", "/path/to/node:limit_name");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "limit");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "limit_name");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "limit_max", "/path/to/node:limit_name");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "limit_max");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "limit_name");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "variable", "/path/to/node:MY_VAR");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "variable");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "MY_VAR");
+        });
+    }
+    {
+        // path '/' represents the server itself
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "variable", "/:SERVER_VAR");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "variable");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/");
+            BOOST_CHECK_EQUAL(command.attribute(), "SERVER_VAR");
+        });
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "trigger", "/path/to/node", "1 == 1");
+        test_user_command<Command>(cl, [&](const auto& command, const ClientEnvironment& env) {
+            BOOST_CHECK_EQUAL(command.query_type(), "trigger");
+            BOOST_CHECK_EQUAL(command.path_to_attribute(), "/path/to/node");
+            BOOST_CHECK_EQUAL(command.attribute(), "1 == 1");
+        });
+    }
+}
+
+/// Goal: exercise the validation/error paths of QueryCmd::create(), none of which were previously
+/// covered by any test in the codebase -- every QueryCmd test in TestQueryCmd.cpp constructs the
+/// command directly, bypassing create() (and therefore CLI parsing) entirely. Unlike
+/// test_user_command()/test_task_command() above, these cases construct ClientOptions directly and
+/// assert on the thrown exception, since the helpers only catch
+/// boost::program_options::unknown_option, not the std::runtime_error thrown by create().
+BOOST_AUTO_TEST_CASE(test_query_rejects_invalid_arguments) {
+    ECF_NAME_THIS_TEST();
+
+    ClientEnvironment environment(false);
+
+    // event/meter/label/variable/limit/limit_max require '<path>:name'; an empty second argument
+    // cannot be split into path and name at all.
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "event", "");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    // ... they expect exactly 2 arguments (query_type + <path>:name) -- too few...
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "event");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    // ... and too many.
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "event", "/path/to/node:name", "extra");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    // ... a bare path with no ':name' leaves the attribute empty.
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "event", "/path/to/node");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    // ... a bare word with no ':name' and no leading '/' leaves the path empty.
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "event", "somename");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // trigger requires an expression.
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "trigger", "/path/to/node");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    // ... and the expression must parse (validated eagerly, client-side, in create()).
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "trigger", "/path/to/node", "1 == ");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // state/dstate accept at most one path argument.
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "state", "/path/to/node", "extra");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "dstate", "/path/to/node", "extra");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // repeat's optional third argument must be 'next' or 'prev'...
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "repeat", "/path/to/node", "bogus");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    // ... and accepts at most 3 arguments in total.
+    {
+        auto cl =
+            CommandLine::make_command_line("ecflow_client", "--query", "repeat", "/path/to/node", "next", "extra");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // the first argument must be one of the recognised query types.
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "bogus", "/path/to/node");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // the path to the attribute must be absolute (start with '/'), whether it ends up empty...
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "state", "relative/path");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+    // ... or just relative.
+    {
+        auto cl = CommandLine::make_command_line("ecflow_client", "--query", "variable", "somename:VAR");
+        ClientOptions options;
+        BOOST_CHECK_THROW(options.parse(cl, &environment), std::runtime_error);
+    }
+
+    // Note: the "invalid path to task" validation (create() rejects a non-empty path_to_task that
+    // does not start with '/') is not covered here, since path_to_task is derived from the ECF_NAME
+    // environment variable read internally by ClientEnvironment, which this harness has no way to
+    // override per-test.
 }
 
 BOOST_AUTO_TEST_SUITE_END()
