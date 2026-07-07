@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(test_query_state_reflects_all_possible_states) {
     // Test: querying the state of a node correctly reflects every possible NState value.
     //
 
-    Defs defs     = make_test_defs();
+    Defs defs = make_test_defs();
 
     // Note: a task out of the repeat on `suite` is selected, because setting a task to complete inside a repeat would
     //       immediately cause it to requeue. The node is mutated directly (bypassing commands) purely to set up the
@@ -192,6 +192,20 @@ BOOST_AUTO_TEST_CASE(test_query_state_reflects_all_possible_states) {
         std::string res = invoke_query(defs, "state", task->absNodePath());
         BOOST_CHECK_MESSAGE(res == state, "expected query state to return " << state << " but found: " << res);
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_query_state_returns_server_state) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: querying state at path '/' returns the server's own state, not a node's.
+    //
+
+    Defs defs = make_test_defs();
+    defs.set_state_only(NState::State::UNKNOWN);
+    std::string res = invoke_query(defs, "state", "/");
+    BOOST_CHECK_MESSAGE(res == "unknown", "expected query state to return unknown but found: " << res);
 }
 
 BOOST_AUTO_TEST_SUITE_END() // T_State
@@ -372,6 +386,21 @@ BOOST_AUTO_TEST_CASE(test_query_event_returns_current_value) {
     BOOST_CHECK_MESSAGE(res == "clear", "expected query event to return clear but found: " << res);
 }
 
+BOOST_AUTO_TEST_CASE(test_query_event_returns_set_when_event_is_set) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: once an event is set, querying it returns 'set' rather than the default 'clear'.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->set_event(k_event_name);
+
+    std::string res = invoke_query(defs, "event", "/suite/f/t1", k_event_name);
+    BOOST_CHECK_MESSAGE(res == "set", "expected query event to return set but found: " << res);
+}
+
 BOOST_AUTO_TEST_SUITE_END() // T_Event
 
 BOOST_AUTO_TEST_SUITE(T_Meter)
@@ -415,6 +444,21 @@ BOOST_AUTO_TEST_CASE(test_query_meter_returns_current_value) {
     Defs defs       = make_test_defs();
     std::string res = invoke_query(defs, "meter", "/suite/f/t1", k_meter_name);
     BOOST_CHECK_MESSAGE(res == "0", "expected query meter to return 0 but found: " << res);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_meter_returns_updated_value) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: after the meter's value is changed, querying it returns the new value, not just 0.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite/f/t1")->set_meter(k_meter_name, 42);
+
+    std::string res = invoke_query(defs, "meter", "/suite/f/t1", k_meter_name);
+    BOOST_CHECK_MESSAGE(res == "42", "expected query meter to return 42 but found: " << res);
 }
 
 BOOST_AUTO_TEST_SUITE_END() // T_Meter
@@ -473,6 +517,22 @@ BOOST_AUTO_TEST_CASE(test_query_limit_max_returns_maximum_value) {
     Defs defs       = make_test_defs();
     std::string res = invoke_query(defs, "limit_max", "/suite", k_limit_name);
     BOOST_CHECK_MESSAGE(res == "12", "expected query limit_max to return 12 but found: " << res);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_limit_returns_updated_value) {
+    ECF_NAME_THIS_TEST();
+    TestLog test_log("test_query_cmd.log");
+
+    //
+    // Test: after some of the limit's tokens have been consumed, querying it returns the updated
+    // value, not the initial 0.
+    //
+
+    Defs defs = make_test_defs();
+    defs.findAbsNode("/suite")->find_limit(k_limit_name)->increment(5, "/suite/f/t1");
+
+    std::string res = invoke_query(defs, "limit", "/suite", k_limit_name);
+    BOOST_CHECK_MESSAGE(res == "5", "expected query limit to return 5 but found: " << res);
 }
 
 BOOST_AUTO_TEST_SUITE_END() // T_Limit
@@ -834,6 +894,22 @@ BOOST_AUTO_TEST_CASE(test_query_fails_for_unsupported_query_type_against_server)
 }
 
 BOOST_AUTO_TEST_SUITE_END() // T_ServerVariable
+
+BOOST_AUTO_TEST_CASE(test_query_print_includes_calling_task_path) {
+    ECF_NAME_THIS_TEST();
+
+    //
+    // Test: when a QueryCmd is constructed with a non-empty path_to_task (as when invoked from a
+    // '.ecf' script), print() includes that path, distinct from path_to_attribute, so the log can be
+    // traced back to the calling task.
+    //
+
+    QueryCmd cmd("state", "/suite/f/t1", "", "/suite/f/t2");
+    std::string out;
+    cmd.print(out);
+    BOOST_CHECK_MESSAGE(out.find("/suite/f/t2") != std::string::npos,
+                        "expected print() output to include the calling task path but found: " << out);
+}
 
 BOOST_AUTO_TEST_CASE(test_query_fails_for_unrecognised_query_type) {
     ECF_NAME_THIS_TEST();
