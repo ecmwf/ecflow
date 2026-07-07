@@ -758,6 +758,8 @@ std::string Suite::find_node_path(const std::string& type, const std::string& no
 SuiteGenVariables::SuiteGenVariables(const Suite* s)
     : suite_(s),
       genvar_suite_("SUITE", "", false),
+      genvar_dirname_("ECF_DIRNAME", "", false),
+      genvar_basename_("ECF_BASENAME", "", false),
       genvar_ecf_time_("ECF_TIME", "", false),
       genvar_time_("TIME", "", false),
       genvar_yyyy_("YYYY", "", false),
@@ -777,6 +779,9 @@ SuiteGenVariables::SuiteGenVariables(const Suite* s)
 void SuiteGenVariables::update_generated_variables() const {
     genvar_suite_.set_value(suite_->name());
 
+    genvar_dirname_.set_value(suite_->dirname());
+    genvar_basename_.set_value(suite_->basename());
+
     // The cal_ is only initialised once the suite has begun
     if (!suite_->begun_) {
         return;
@@ -784,31 +789,6 @@ void SuiteGenVariables::update_generated_variables() const {
 
     // The code below ASSUMES calendar has been initialised
     auto time_of_day = suite_->cal_.suiteTime().time_of_day();
-
-    // #ifdef DEBUG
-    //     tm t = to_tm(suite_->cal_.suiteTime());  // to_tm can be a bit of a performance hog
-    ////  cerr << "\ntm_year = " << t.tm_year << "\n";  /* year - 1900              */
-    ////  cerr << "tm_mon = " << t.tm_mon << "\n";      /* month of year (0 - 11)   */
-    ////  cerr << "tm_mday = " << t.tm_mday << "\n";    /* day of month (1 - 31)    */
-    ////  cerr << "tm_wday = " << t.tm_wday << "\n";    /* day of week (Sunday = 0) */
-    ////  cerr << "tm_yday = " << t.tm_yday << "\n";    /* day of year (0 - 365)    */
-    ////  cerr << "tm_hour = " << t.tm_hour << "\n";    /* hours (0 - 23)           */
-    ////  cerr << "tm_min = " << t.tm_min << "\n";      /* minutes (0 - 59)         */
-    ////  cerr << "tm_sec = " << t.tm_sec << "\n";      /* seconds (0 - 59)         */
-    //
-    //    // ***IMPORTANT*** suiteTime is only valid for real clock, note that
-    //    // *************** for hybrid the day does not change. hence assertion
-    //    // *************** needs to take into account calendar type
-    //       if (!suite_->cal_.hybrid()) {
-    //          assert( t.tm_wday   == cal_.day_of_week());
-    //          assert( t.tm_mday   == cal_.day_of_month());
-    //          assert( t.tm_yday+1 == cal_.day_of_year());
-    //          assert( t.tm_mon+1  == cal_.month());
-    //       }
-    //    assert( time_of_day.hours() == t.tm_hour);
-    //    assert( time_of_day.minutes() == t.tm_min);
-    //    assert( t.tm_year + 1900 == cal_.year());
-    // #endif
 
     int hours   = time_of_day.hours();
     int minutes = time_of_day.minutes();
@@ -820,9 +800,6 @@ void SuiteGenVariables::update_generated_variables() const {
     snprintf(buffer.data(), buffer.size(), "%02d:%02d", hours, minutes);
     genvar_ecf_time_.set_value(buffer.data());
 
-    // cout << "genvar_time_ = " << genvar_time_.theValue() << "\n";
-    // cout << "genvar_ecf_time_ = " << genvar_ecf_time_.theValue() << "\n";
-
     // **********************************************************************
     // The following generated variable need only be updated if NULL or if day changed
     // Under: HYBRID the day will never change, hence a one time update
@@ -833,9 +810,6 @@ void SuiteGenVariables::update_generated_variables() const {
         genvar_yyyy_.set_value(ecf::convert_to<std::string>(suite_->cal_.year()));
         genvar_dow_.set_value(ecf::convert_to<std::string>(suite_->cal_.day_of_week()));
         genvar_doy_.set_value(ecf::convert_to<std::string>(suite_->cal_.day_of_year()));
-        // cout << "genvar_yyyy_ = " << genvar_yyyy_.theValue() << "\n";
-        // cout << "genvar_dow_ = " << genvar_dow_.theValue() << "\n";
-        // cout << "genvar_doy_ = " << genvar_doy_.theValue() << "\n";
 
         snprintf(buffer.data(),
                  buffer.size(),
@@ -844,7 +818,6 @@ void SuiteGenVariables::update_generated_variables() const {
                  suite_->cal_.month(),
                  suite_->cal_.year());
         genvar_date_.set_value(buffer.data());
-        // cout << "genvar_date_ = " << genvar_date_.theValue() << "\n";
 
         std::array day_name = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
         genvar_day_.set_value(day_name[suite_->cal_.day_of_week()]);
@@ -902,6 +875,12 @@ const Variable& SuiteGenVariables::findGenVariable(const std::string& name) cons
     if (genvar_suite_.name() == name) {
         return genvar_suite_;
     }
+    if (genvar_dirname_.name() == name) {
+        return genvar_dirname_;
+    }
+    if (genvar_basename_.name() == name) {
+        return genvar_basename_;
+    }
     if (genvar_ecf_date_.name() == name) {
         return genvar_ecf_date_;
     }
@@ -946,6 +925,8 @@ const Variable& SuiteGenVariables::findGenVariable(const std::string& name) cons
 
 void SuiteGenVariables::gen_variables(std::vector<Variable>& vec) const {
     vec.push_back(genvar_suite_);
+    vec.push_back(genvar_dirname_);
+    vec.push_back(genvar_basename_);
     vec.push_back(genvar_ecf_date_);
     vec.push_back(genvar_yyyy_);
     vec.push_back(genvar_dow_);

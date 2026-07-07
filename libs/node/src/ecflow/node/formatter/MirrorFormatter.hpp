@@ -50,6 +50,9 @@ struct Formatter<MirrorAttr, Stream>
             output << " --reason ";
             output << item.reason();
         }
+        if (item.propagate()) {
+            output << " --propagate";
+        }
     }
 };
 

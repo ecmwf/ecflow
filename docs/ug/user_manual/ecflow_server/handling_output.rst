@@ -12,7 +12,7 @@ the following command in a start-up script:
 
 .. code-block:: shell
 
-    ecflow_server > /dev/null 1>&2                                 
+    ecflow_server > /dev/null 2>&1                                 
 
 When learning how to use ECF, you may open a window and run ecFlow in
 that window interactively. Notice that server still writes the log file

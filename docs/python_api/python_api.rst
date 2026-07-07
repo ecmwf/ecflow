@@ -5,112 +5,194 @@ Python API
 **********
 
 
-Suite definition
-================
-    - :py:class:`ecflow.Alias`
-    - :py:class:`ecflow.Autoarchive`
-    - :py:class:`ecflow.Autocancel`
-    - :py:class:`ecflow.Autorestore`
-    - :py:class:`ecflow.Complete`
-    - :py:class:`ecflow.Clock`
-    - :py:class:`ecflow.Cron`
-    - :py:class:`ecflow.Date`
-    - :py:class:`ecflow.Day`
-    - :py:class:`ecflow.Defs`
-    - :py:class:`ecflow.Defstatus`
-    - :py:class:`ecflow.Edit`
-    - :py:class:`ecflow.Event`
-    - :py:class:`ecflow.Expression`
-    - :py:class:`ecflow.File`
-    - :py:class:`ecflow.Flag`
-    - :py:class:`ecflow.InLimit`
-    - :py:class:`ecflow.Label`
-    - :py:class:`ecflow.Late`
-    - :py:class:`ecflow.Limit`
-    - :py:class:`ecflow.Meter`
-    - :py:class:`ecflow.Queue`
-    - :py:class:`ecflow.Generic`
-    - :py:class:`ecflow.Node`
-    - :py:class:`ecflow.Family`
-    - :py:class:`ecflow.Suite`
-    - :py:class:`ecflow.Task`
-    - :py:class:`ecflow.PartExpression`
-    - :py:class:`ecflow.PrintStyle`
-    - :py:class:`ecflow.Repeat`
-    - :py:class:`ecflow.RepeatDate`
-    - :py:class:`ecflow.RepeatDateList`
-    - :py:class:`ecflow.RepeatDateTime`
-    - :py:class:`ecflow.RepeatDateTimeList`
-    - :py:class:`ecflow.RepeatDay`
-    - :py:class:`ecflow.RepeatEnumerated`
-    - :py:class:`ecflow.RepeatInteger`
-    - :py:class:`ecflow.RepeatString`
-    - :py:class:`ecflow.SState`
-    - :py:class:`ecflow.State`
-    - :py:class:`ecflow.Submittable`
-    - :py:class:`ecflow.Time`
-    - :py:class:`ecflow.TimeSeries`
-    - :py:class:`ecflow.TimeSlot`
-    - :py:class:`ecflow.Trigger`
-    - :py:class:`ecflow.Today`
-    - :py:class:`ecflow.Variable`
-    - :py:class:`ecflow.Verify`
-    - :py:class:`ecflow.Zombie`
-    - :py:class:`ecflow.ZombieAttr`
+Suite Definition API
+====================
 
-Container API
-=============
-    - :py:class:`ecflow.FamilyVec`
-    - :py:class:`ecflow.FlagTypeVec`
-    - :py:class:`ecflow.NodeVec`
-    - :py:class:`ecflow.NodeContainer`
-    - :py:class:`ecflow.SuiteVec`
-    - :py:class:`ecflow.TaskVec`
-    - :py:class:`ecflow.VariableList`
-    - :py:class:`ecflow.ZombieVec`
+The Suite Definition API is used to define suites, families, tasks and their attributes,
+and can be used to create a suite definition in memory, which can then be written to a
+file or submitted to the server.
 
-Command API
-===========
-    - :py:class:`ecflow.UrlCmd`
-    - :py:class:`ecflow.WhyCmd`
+The elements in this API do not allow to directly set the state of a suite, family or task,
+or any of their attributes. Such a state is only relevant when the suite definition is submitted to the server,
+and the server is responsible for maintaining the state of the suite, family, task and their attributes.
 
-Client-server API
-=================
-    - :py:class:`ecflow.Client`
+The state of the elements of a suite definition can be set using the Client-server API.
 
-Common API
-==========
-    - :py:class:`ecflow.Ecf`
-    - :py:class:`ecflow.PrintStyle`
-    - :py:class:`ecflow.JobCreationCtrl`
-
-Enums
-=====
-    - :py:class:`ecflow.AttrType`
-    - :py:class:`ecflow.CheckPt`
-    - :py:class:`ecflow.ChildCmdType`
-    - :py:class:`ecflow.DState`
-    - :py:class:`ecflow.Days`
-    - :py:class:`ecflow.FlagType`
-    - :py:class:`ecflow.State`
-    - :py:class:`ecflow.SState`
-    - :py:class:`ecflow.Style`
-    - :py:class:`ecflow.ZombieType`
-    - :py:class:`ecflow.ZombieUserActionType`
-
-Api
-===
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   *
+   reference/Alias
+   reference/Autoarchive
+   reference/Autocancel
+   reference/Autorestore
+   reference/AvisoAttr
+   reference/Clock
+   reference/Complete
+   reference/Cron
+   reference/Date
+   reference/Day
+   reference/Defs
+   reference/Defstatus
+   reference/Edit
+   reference/Event
+   reference/Expression
+   reference/Family
+   reference/File
+   reference/Flag
+   reference/Generic
+   reference/InLimit
+   reference/Label
+   reference/Late
+   reference/Limit
+   reference/Meter
+   reference/MirrorAttr
+   reference/Node
+   reference/NodeContainer
+   reference/PartExpression
+   reference/Queue
+   reference/Repeat
+   reference/RepeatDate
+   reference/RepeatDateList
+   reference/RepeatDateTime
+   reference/RepeatDateTimeList
+   reference/RepeatDay
+   reference/RepeatEnumerated
+   reference/RepeatInteger
+   reference/RepeatString
+   reference/SState
+   reference/State
+   reference/Submittable
+   reference/Suite
+   reference/Task
+   reference/Time
+   reference/TimeSeries
+   reference/TimeSlot
+   reference/Today
+   reference/Trigger
+   reference/Variable
+   reference/Verify
+   reference/Zombie
+   reference/ZombieAttr
 
-  
+
 .. contents::
    :depth: 2
    :local:
    :backlinks: top
     
 
+Container API
+=============
+
+The Container API provides types capable of holding a set of objects.
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   reference/FamilyVec
+   reference/FlagTypeVec
+   reference/NodeVec
+   reference/SuiteVec
+   reference/TaskVec
+   reference/VariableList
+   reference/ZombieVec
+
+
+.. contents::
+   :depth: 2
+   :local:
+   :backlinks: top
+    
+
+Command API
+===========
+
+The Command API provides command types, that can be executed directly by the client.
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   reference/UrlCmd
+   reference/WhyCmd
+
+
+.. contents::
+   :depth: 2
+   :local:
+   :backlinks: top
+    
+
+Client-Server API
+=================
+
+The Client-Server API provides the capability of communicating with the server.
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   reference/Client
+
+
+.. contents::
+   :depth: 2
+   :local:
+   :backlinks: top
+    
+
+Common API
+==========
+
+The Common API provides configuration or support types for other parts of the API.
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   reference/Ecf
+   reference/PrintStyle
+   reference/JobCreationCtrl
+
+
+.. contents::
+   :depth: 2
+   :local:
+   :backlinks: top
+    
+
+Enums API
+=========
+
+The Enums API provides types representing enumerations used in the Suite Definition API.
+
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   reference/AttrType
+   reference/CheckPt
+   reference/ChildCmdType
+   reference/DState
+   reference/Days
+   reference/FlagType
+   reference/State
+   reference/SState
+   reference/Style
+   reference/ZombieType
+   reference/ZombieUserActionType
+
+
+.. contents::
+   :depth: 2
+   :local:
+   :backlinks: top
+    

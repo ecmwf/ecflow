@@ -234,6 +234,11 @@ struct SetupTest
         setenv("ECF_PORT", "3199", 0);
 #endif
         setenv("ECF_HOST", "localhost", 1);
+
+        // Ensure each separate test uses its own ECF_HOME...
+        std::string ecf_home = (fs::current_path() / ("ecf_home_" + ecf::environment::get("ECF_PORT"))).string();
+        fs::create_directories(ecf_home);
+        setenv("ECF_HOME", ecf_home.c_str(), 1);
     }
     void setup() {
         // This needs to be initialized in setup() instead
@@ -468,18 +473,18 @@ BOOST_AUTO_TEST_CASE(test_suite) {
 BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
     ECF_NAME_THIS_TEST();
 
-    // (0) Clean up -- in case there is any left-over from passed/failed tests
+    // Clean up -- in case there is any left-over from passed/failed tests
     request("delete", "/v1/suites/basic_suite/definition", "", API_KEY);
     wait_until([] { return false == check_for_path("/v1/suites/basic_suite/definition"); });
 
-    // (1) Publish 'basic_suite' suite
+    // Publish 'basic_suite' suite
 
     std::string suite_definition =
         R"({"definition" : "suite basic_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
     handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
     wait_until([] { return check_for_path("/v1/suites/basic_suite/definition"); });
 
-    // (2) Retrieve 'basic_suite' suite tree
+    // Retrieve 'basic_suite' suite tree
     {
         auto result  = handle_response(request("get", "/v1/suites/tree"));
         auto content = ojson::parse(result.body);
@@ -489,7 +494,7 @@ BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
         BOOST_REQUIRE(content["basic_suite"]["f"].contains("t"));
     }
 
-    // (3) Retrieve 'basic_suite' suite tree, explicitly specifying basic content
+    // Retrieve 'basic_suite' suite tree, explicitly specifying basic content
     {
         auto result  = handle_response(request("get", "/v1/suites/tree?content=basic"));
         auto content = ojson::parse(result.body);
@@ -499,7 +504,7 @@ BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
         BOOST_REQUIRE(content["basic_suite"]["f"].contains("t"));
     }
 
-    // (4) Retrieve specific node tree
+    // Retrieve specific node tree
     {
         auto result  = handle_response(request("get", "/v1/suites/basic_suite/f/tree?content=basic"));
         auto content = ojson::parse(result.body);
@@ -508,7 +513,7 @@ BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
         BOOST_REQUIRE(content["f"].contains("t"));
     }
 
-    // (5) Clean up
+    // Clean up
     request("delete", "/v1/suites/basic_suite/definition", "", API_KEY);
     wait_until([] { return false == check_for_path("/v1/suites/basic_suite/definition"); });
 }
@@ -516,18 +521,18 @@ BOOST_AUTO_TEST_CASE(test_node_basic_tree) {
 BOOST_AUTO_TEST_CASE(test_node_full_tree) {
     ECF_NAME_THIS_TEST();
 
-    // (0) Clean up -- in case there is any left-over from passed/failed tests
+    // Clean up -- in case there is any left-over from passed/failed tests
     request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 
-    // (1) Publish 'full_tree' suite
+    // Publish 'full_tree' suite
 
     std::string suite_definition =
         R"({"definition" : "suite full_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
     handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
     wait_until([] { return check_for_path("/v1/suites/full_suite/definition"); });
 
-    // (2) Retrieve 'full_suite' suite tree, explicitly specifying full content
+    // Retrieve 'full_suite' suite tree, explicitly specifying full content
     {
         auto result  = handle_response(request("get", "/v1/suites/tree?content=full"));
         auto content = ojson::parse(result.body);
@@ -560,7 +565,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree) {
         BOOST_REQUIRE(content["full_suite"]["children"]["f"]["children"]["t"]["aliases"].size() == 0);
     }
 
-    // (2) Retrieve 'full_suite' suite tree, explicitly specifying full content
+    // Retrieve 'full_suite' suite tree, explicitly specifying full content
     {
         auto result  = handle_response(request("get", "/v1/suites/full_suite/f/tree?content=full"));
         auto content = ojson::parse(result.body);
@@ -581,7 +586,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree) {
         BOOST_REQUIRE(content["f"]["children"]["t"]["aliases"].size() == 0);
     }
 
-    // (4) Clean up
+    // Clean up
     request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 }
@@ -589,18 +594,18 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree) {
 BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
     std::cout << "======== " << boost::unit_test::framework::current_test_case().p_name << " =========" << std::endl;
 
-    // (0) Clean up -- in case there is any left-over from passed/failed tests
+    // Clean up -- in case there is any left-over from passed/failed tests
     request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
 
-    // (1) Publish 'full_tree' suite
+    // Publish 'full_tree' suite
 
     std::string suite_definition =
         R"({"definition" : "suite full_suite\n  family f\n    task t\n      label l \"value\"\n      meter m 0 100 50\n      event e\n  endfamily\nendsuite\n# comment"})";
     handle_response(request("post", "/v1/suites", suite_definition, API_KEY), HttpStatusCode::success_created);
     wait_until([] { return check_for_path("/v1/suites/full_suite/definition"); });
 
-    // (2) Retrieve 'full_suite' suite tree, explicitly requesting generated variables
+    // Retrieve 'full_suite' suite tree, explicitly requesting generated variables
     {
         auto result  = handle_response(request("get", "/v1/suites/full_suite/f/tree?content=full&gen_vars=true"));
         auto content = ojson::parse(result.body);
@@ -608,7 +613,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
         BOOST_REQUIRE(content.contains("f"));
         // Check family attributes
         BOOST_REQUIRE(content["f"].contains("attributes"));
-        BOOST_REQUIRE(content["f"]["attributes"].size() == 2);
+        BOOST_REQUIRE(content["f"]["attributes"].size() == 4);
         {
             size_t count = 0;
             for (const auto& attr : content["f"]["attributes"]) {
@@ -628,7 +633,7 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
         BOOST_REQUIRE(content["f"]["children"].contains("t"));
         // Check task attributes
         BOOST_REQUIRE(content["f"]["children"]["t"].contains("attributes"));
-        BOOST_REQUIRE(content["f"]["children"]["t"]["attributes"].size() == 11);
+        BOOST_REQUIRE(content["f"]["children"]["t"]["attributes"].size() == 13);
         {
             size_t count = 0;
             for (const auto& attr : content["f"]["children"]["t"]["attributes"]) {
@@ -646,9 +651,675 @@ BOOST_AUTO_TEST_CASE(test_node_full_tree_with_generated_variables) {
         }
     }
 
-    // (4) Clean up
+    // Clean up
     request("delete", "/v1/suites/full_suite/definition", "", API_KEY);
     wait_until([] { return false == check_for_path("/v1/suites/full_suite/definition"); });
+}
+
+BOOST_AUTO_TEST_CASE(test_node_info) {
+    ECF_NAME_THIS_TEST();
+
+    // Clean up
+    request("delete", "/v1/suites/suiteX/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/suiteX/definition"); });
+
+    // Create suite 'suiteX'
+    //       `-- suiteX
+    //         `-- f
+    //           `-- t
+    handle_response(request("post",
+                            "/v1/suites",
+                            R"({"definition" : "suite suiteX\n  family f\n    task t\n  endfamily\nendsuite"})",
+                            API_KEY),
+                    HttpStatusCode::success_created);
+    wait_until([] { return check_for_path("/v1/suites/suiteX/definition"); });
+
+    // Check single-element array with correct path, "unknown" state, null time change
+    //     This is done before beginning to ensure we handle the "unknown" state, and null time change correctly
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        const auto& entry = content[0];
+        BOOST_REQUIRE(entry.contains("path"));
+        BOOST_REQUIRE(entry["path"] == "/suiteX");
+        BOOST_REQUIRE(entry.contains("state"));
+        BOOST_REQUIRE(entry["state"] == "unknown");
+        BOOST_REQUIRE(entry.contains("state_change_time"));
+        BOOST_REQUIRE(entry["state_change_time"].is_null());
+    }
+
+    // Check single-element array with correct full path
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/f/t/info"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX/f/t");
+        BOOST_REQUIRE(content[0]["state"] == "unknown");
+    }
+
+    // Check recursive=1, must include all nodes in the tree (suite + family + task = 3)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3); // suiteX, f, t
+
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX");
+        BOOST_REQUIRE(content[1]["path"] == "/suiteX/f");
+        BOOST_REQUIRE(content[2]["path"] == "/suiteX/f/t");
+    }
+
+    // Check recursive=1 + type=task, must return only the task
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&type=task"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX/f/t");
+    }
+
+    // Check recursive=1 + type=family,task, must return family and task (2 nodes)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&type=family,task"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 2);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX/f");
+        BOOST_REQUIRE(content[1]["path"] == "/suiteX/f/t");
+    }
+
+    // Check type=task without recursive on a suite node, must return empty array since suite is not a task
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?type=task"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.empty());
+    }
+
+    // Check type=task directly on the task node, must return the task itself
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/f/t/info?type=task"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX/f/t");
+    }
+
+    // Check type=suite on the suite node, must return the suite itself
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?type=suite"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX");
+    }
+
+    // Check that can handle invalid type value (invalid) → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?type=invalid"), HttpStatusCode::client_error_bad_request);
+
+    // Check that can handle invalid type value (uppercase type not accepted) → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?type=Task"), HttpStatusCode::client_error_bad_request);
+
+    // Check that a separator-only type value (no actual tokens) → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?type=,"), HttpStatusCode::client_error_bad_request);
+    handle_response(request("get", "/v1/suites/suiteX/info?type=,,"), HttpStatusCode::client_error_bad_request);
+
+    // Check state=unknown, must return suite (n.b. no recursive)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?state=unknown"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX");
+    }
+
+    // Check recursive=1&state=unknown, must return all 3 nodes
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&state=unknown"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+    }
+
+    // Check recursive=1&state=complete, must return empty array as all nodes are in unknown state before begin
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&state=complete"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.empty());
+    }
+
+    // Check state=queued,unknown, must consider both valid states (OR)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?state=queued,unknown"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1); // suite is unknown, matches first term
+    }
+
+    // Check that can handle invalid state value (uppercase state name) → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?state=Active"), HttpStatusCode::client_error_bad_request);
+
+    // Check that can handle invalid state value (invalid state name) → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?state=invalid"), HttpStatusCode::client_error_bad_request);
+
+    // Check that a separator-only state value (no actual tokens) → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?state=,"), HttpStatusCode::client_error_bad_request);
+    handle_response(request("get", "/v1/suites/suiteX/info?state=,,"), HttpStatusCode::client_error_bad_request);
+
+    // Check combined type+state (AND semantics): type=suite AND state=unknown
+    //      must return exactly the suite root (1 result, non-recursive)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?type=suite&state=unknown"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX");
+    }
+
+    // Check combined type+state: type=task AND state=unknown AND recursive=1
+    //      must return only the task (not the suite or family)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&type=task&state=unknown"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX/f/t");
+    }
+
+    // Check combined type+state: type=task AND state=complete AND recursive=1
+    //      must return empty (no completed tasks before begin)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&type=task&state=complete"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.empty());
+    }
+
+    // Check combined type+state: type=suite,family AND state=unknown AND recursive=1
+    //      must return suite + family (2 results), not the task
+    {
+        auto result =
+            handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&type=suite,family&state=unknown"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 2);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX");
+        BOOST_REQUIRE(content[1]["path"] == "/suiteX/f");
+    }
+
+    // Check combined type+state: type=task AND state=queued AND recursive=1
+    //      must return empty before begin (task is unknown, not queued)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&type=task&state=queued"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.empty());
+    }
+
+    // Begin the suite
+    handle_response(request("put", "/v1/suites/suiteX/status", R"({"action":"begin"})", API_KEY));
+
+    // Check that state_change_time is populated and state is no longer "unknown"
+    wait_until([] {
+        try {
+            auto r       = handle_response(request("get", "/v1/suites/suiteX/info"), HttpStatusCode::success_ok, true);
+            auto content = ojson::parse(r.body);
+            return content.is_array() && !content[0]["state_change_time"].is_null() &&
+                   content[0]["state"].get<std::string>() != "unknown";
+        }
+        catch (...) {
+            return false;
+        }
+    });
+
+    // Check that can handle non-existent node returns 404
+    handle_response(request("get", "/v1/suites/suiteX/nonexistent/info"), HttpStatusCode::client_error_not_found);
+
+    // Check that filter=[0] returns the first element as an object
+    //      n.b. the filter query parameter is a generic functionality, applied to all endpoints
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?filter=[0]"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_object());
+        BOOST_REQUIRE(content.contains("path"));
+        BOOST_REQUIRE(content.contains("state"));
+        BOOST_REQUIRE(content.contains("state_change_time"));
+    }
+
+    // Check sortby=+path, must return output in ascending lexicographic order of the path
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&sortby=%2Bpath"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX");
+        BOOST_REQUIRE(content[1]["path"] == "/suiteX/f");
+        BOOST_REQUIRE(content[2]["path"] == "/suiteX/f/t");
+    }
+
+    // Check sortby=-path, must return output in descending lexicographic order of the path
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&sortby=-path"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX/f/t");
+        BOOST_REQUIRE(content[1]["path"] == "/suiteX/f");
+        BOOST_REQUIRE(content[2]["path"] == "/suiteX");
+    }
+
+    // Check sortby=path, must return output (by default) in ascending lexicographic order of the path
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&sortby=path"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX");
+        BOOST_REQUIRE(content[1]["path"] == "/suiteX/f");
+        BOOST_REQUIRE(content[2]["path"] == "/suiteX/f/t");
+    }
+
+    // Check sortby=state, must return output (by default) in ascending alphabetical order of the state
+    //
+    // Note: The check verifies only that the order is correct, but not the values themselves because at this
+    // point the suite is running and the states change as the suite progresses, so the exact values are not known.
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&sortby=state"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+        for (size_t i = 1; i < content.size(); ++i) {
+            BOOST_REQUIRE(content[i - 1]["state"].get<std::string>() <= content[i]["state"].get<std::string>());
+        }
+    }
+
+    // Check sortby=-state, must return output in descending alphabetical order of the state
+    //
+    // Note: The check verifies only that the order is correct, but not the values themselves because at this
+    // point the suite is running and the states change as the suite progresses, so the exact values are not known.
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&sortby=-state"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+        for (size_t i = 1; i < content.size(); ++i) {
+            BOOST_REQUIRE(content[i - 1]["state"].get<std::string>() >= content[i]["state"].get<std::string>());
+        }
+    }
+
+    // Check sortby=state_change_time, must return output in ascending order of the time (nulls first, then ISO
+    // strings)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&sortby=state_change_time"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+        for (size_t i = 1; i < content.size(); ++i) {
+            const bool a_null = content[i - 1]["state_change_time"].is_null();
+            const bool b_null = content[i]["state_change_time"].is_null();
+            if (!a_null && !b_null) {
+                BOOST_REQUIRE(content[i - 1]["state_change_time"].get<std::string>() <=
+                              content[i]["state_change_time"].get<std::string>());
+            }
+            else {
+                BOOST_REQUIRE(!b_null || a_null); // null must not follow a non-null (null comes first)
+            }
+        }
+    }
+
+    // Check that can handle invalid sortby value → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?sortby=invalid_field"),
+                    HttpStatusCode::client_error_bad_request);
+
+    // Check count=2, must return only 2 items
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&count=2"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 2);
+    }
+
+    // Check count=0, must return empty array
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&count=0"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.empty());
+    }
+
+    // Check count=10, must return all 3 items, since N is larger than the result set
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&count=10"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+    }
+
+    // Check that can handle invalid count values (negative values) → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?count=-1"), HttpStatusCode::client_error_bad_request);
+
+    // Check that can handle invalid count values (alphanumerical values) → 400
+    handle_response(request("get", "/v1/suites/suiteX/info?count=abc1"), HttpStatusCode::client_error_bad_request);
+
+    // Check sortby=-path&count=2, must sort by descending path, and then truncate output to 2
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteX/info?recursive=1&sortby=-path&count=2"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 2);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteX/f/t");
+        BOOST_REQUIRE(content[1]["path"] == "/suiteX/f");
+    }
+
+    // Check HEAD requests: must return 200 with an empty body on both /info endpoints
+    //       HEAD is declared as an allowed method in the OPTIONS handler; cpp-httplib automatically
+    //       serves HEAD by running the GET handler and stripping the response body.
+    {
+        httplib::SSLClient c(API_HOST, ECF_TEST_HTTP_PORT_NR);
+        c.enable_server_certificate_verification(false);
+        c.set_connection_timeout(3);
+        c.set_read_timeout(5);
+        c.set_write_timeout(5);
+        c.set_default_headers(httplib::Headers{{"Content-type", "application/json"}});
+
+        // HEAD /v1/suites/suiteX/info
+        auto r1 = c.Head("/v1/suites/suiteX/info");
+        BOOST_REQUIRE(r1);
+        BOOST_REQUIRE_EQUAL(r1->status, HttpStatusCode::success_ok);
+        BOOST_REQUIRE(r1->body.empty());
+
+        // HEAD /v1/suites/info
+        auto r2 = c.Head("/v1/suites/info");
+        BOOST_REQUIRE(r2);
+        BOOST_REQUIRE_EQUAL(r2->status, HttpStatusCode::success_ok);
+        BOOST_REQUIRE(r2->body.empty());
+    }
+
+    // Clean up
+    request("delete", "/v1/suites/suiteX/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/suiteX/definition"); });
+}
+
+BOOST_AUTO_TEST_CASE(test_suites_info) {
+    ECF_NAME_THIS_TEST();
+
+    // Clean up
+    //       |-- suite1
+    //       | `-- fa
+    //       |   `-- ta
+    //       `-- suite2
+    //         `-- fb
+    //           `-- tb
+    request("delete", "/v1/suites/suite1/definition", "", API_KEY);
+    request("delete", "/v1/suites/suite2/definition", "", API_KEY);
+    wait_until([] {
+        return !check_for_path("/v1/suites/suite1/definition") && !check_for_path("/v1/suites/suite2/definition");
+    });
+
+    // Create two suites: suite1 (family fa, task ta) and suite2 (family fb, task tb)
+    handle_response(request("post",
+                            "/v1/suites",
+                            R"({"definition" : "suite suite1\n  family fa\n    task ta\n  endfamily\nendsuite"})",
+                            API_KEY),
+                    HttpStatusCode::success_created);
+    handle_response(request("post",
+                            "/v1/suites",
+                            R"({"definition" : "suite suite2\n  family fb\n    task tb\n  endfamily\nendsuite"})",
+                            API_KEY),
+                    HttpStatusCode::success_created);
+    wait_until([] {
+        return check_for_path("/v1/suites/suite1/definition") && check_for_path("/v1/suites/suite2/definition");
+    });
+
+    // Check without recursive, must return both suite roots
+    {
+        auto result  = handle_response(request("get", "/v1/suites/info"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() >= 2);
+        bool has_a = false, has_b = false;
+        for (const auto& entry : content) {
+            if (entry["path"] == "/suite1") {
+                has_a = true;
+            }
+            if (entry["path"] == "/suite2") {
+                has_b = true;
+            }
+        }
+        BOOST_REQUIRE(has_a);
+        BOOST_REQUIRE(has_b);
+    }
+
+    // Check with recursive=1: must return suite1 and suite2 (each with 3 nodes)
+    {
+        auto result  = handle_response(request("get", "/v1/suites/info?recursive=1"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        size_t count_a = 0, count_b = 0;
+        for (const auto& entry : content) {
+            const auto path = entry["path"].get<std::string>();
+            if (path == "/suite1" || path.rfind("/suite1/", 0) == 0) {
+                ++count_a;
+            }
+            if (path == "/suite2" || path.rfind("/suite2/", 0) == 0) {
+                ++count_b;
+            }
+        }
+        BOOST_REQUIRE(count_a == 3); // suite + family + task
+        BOOST_REQUIRE(count_b == 3); // suite + family + task
+    }
+
+    // Check recursive=1 + type=task, must return 2 tasks, one from each suite
+    {
+        auto result  = handle_response(request("get", "/v1/suites/info?recursive=1&type=task"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        bool has_ta = false, has_tb = false;
+        for (const auto& entry : content) {
+            const auto path = entry["path"].get<std::string>();
+            if (path == "/suite1/fa/ta") {
+                has_ta = true;
+                BOOST_REQUIRE(entry["state"] == "unknown");
+            }
+            if (path == "/suite2/fb/tb") {
+                has_tb = true;
+                BOOST_REQUIRE(entry["state"] == "unknown");
+            }
+        }
+        BOOST_REQUIRE(has_ta);
+        BOOST_REQUIRE(has_tb);
+    }
+
+    // Check sortby=-path with recursive=1, must return entries in descending path order
+    {
+        auto result  = handle_response(request("get", "/v1/suites/info?recursive=1&sortby=-path"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() >= 2);
+        std::string first = content[0]["path"].get<std::string>();
+        std::string last  = content[content.size() - 1]["path"].get<std::string>();
+        BOOST_REQUIRE(first > last);
+    }
+
+    // Check count=3, must truncate the result to exactly 3 entries
+    {
+        auto result  = handle_response(request("get", "/v1/suites/info?recursive=1&count=3"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 3);
+    }
+
+    // Check state=unknown without recursive, must return both suite1 and suite2
+    {
+        auto result  = handle_response(request("get", "/v1/suites/info?state=unknown"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        bool has_a = false, has_b = false;
+        for (const auto& entry : content) {
+            if (entry["path"] == "/suite1") {
+                has_a = true;
+            }
+            if (entry["path"] == "/suite2") {
+                has_b = true;
+            }
+        }
+        BOOST_REQUIRE(has_a);
+        BOOST_REQUIRE(has_b);
+    }
+
+    // Check state=active without recursive, must return an empty array since neither suite is active
+    {
+        auto result  = handle_response(request("get", "/v1/suites/info?state=active"));
+        auto content = ojson::parse(result.body);
+        BOOST_REQUIRE(content.is_array());
+        for (const auto& entry : content) {
+            // Neither of our test suites should appear as active
+            BOOST_REQUIRE(entry["path"] != "/suite1");
+            BOOST_REQUIRE(entry["path"] != "/suite2");
+        }
+    }
+
+    // Clean up
+    request("delete", "/v1/suites/suite1/definition", "", API_KEY);
+    request("delete", "/v1/suites/suite2/definition", "", API_KEY);
+    wait_until([] {
+        return !check_for_path("/v1/suites/suite1/definition") && !check_for_path("/v1/suites/suite2/definition");
+    });
+}
+
+BOOST_AUTO_TEST_CASE(test_node_info_aliases) {
+    ECF_NAME_THIS_TEST();
+
+    // Aliases are 'special' children of a Task.
+    //
+    // This test ensures that the traversal of the .../info endpoint reaches aliases, when using 'type=alias' filter
+
+    // Clean up
+    request("delete", "/v1/suites/suiteY/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/suiteY/definition"); });
+
+    // Create suite 'suiteY'
+    //       `-- suiteY
+    //         `-- f
+    //           `-- t
+    handle_response(request("post",
+                            "/v1/suites",
+                            R"({"definition" : "suite suiteY\n  family f\n    task t\n  endfamily\nendsuite"})",
+                            API_KEY),
+                    HttpStatusCode::success_created);
+    wait_until([] { return check_for_path("/v1/suites/suiteY/definition"); });
+
+    // Create an alias under the task '/suiteY/f/t' directly on the ecFlow server.
+    //     Note: we use ecFlow Python API to create aliases.
+    {
+        std::string port = ecf::environment::get("ECF_PORT");
+        ClientInvoker client("localhost", port);
+#if defined(ECF_TEST_HTTP_BACKEND)
+        client.enable_http();
+#endif
+        std::vector<std::string> user_file_contents = {"%comment", "%end", "echo \"alias body\""};
+        BOOST_REQUIRE_NO_THROW(client.edit_script_submit(
+            "/suiteY/f/t", NameValueVec{}, user_file_contents, true /* create_alias */, false /* run */));
+    }
+
+    // Wait for the REST server to pick up the newly created alias '/suiteY/f/t/alias0'
+    wait_until([] {
+        try {
+            auto r = handle_response(
+                request("get", "/v1/suites/suiteY/info?recursive=1&type=alias"), HttpStatusCode::success_ok, true);
+            auto content = ojson::parse(r.body);
+            return content.is_array() && !content.empty() && content[0]["path"] == "/suiteY/f/t/alias0";
+        }
+        catch (...) {
+            return false;
+        }
+    });
+
+    // Check recursive=1, must return 4 nodes, including suite + family + task + alias
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteY/info?recursive=1"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        bool has_alias = false;
+        for (const auto& entry : content) {
+            if (entry["path"] == "/suiteY/f/t/alias0") {
+                has_alias = true;
+            }
+        }
+        BOOST_REQUIRE(has_alias);
+    }
+
+    // Check recursive=1 + type=alias, must return exactly only the alias
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteY/info?recursive=1&type=alias"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteY/f/t/alias0");
+    }
+
+    // Check recursive=1 + type=task,alias, must return both the task and its alias
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteY/info?recursive=1&type=task,alias"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 2);
+        bool has_task = false, has_alias = false;
+        for (const auto& entry : content) {
+            if (entry["path"] == "/suiteY/f/t") {
+                has_task = true;
+            }
+            if (entry["path"] == "/suiteY/f/t/alias0") {
+                has_alias = true;
+            }
+        }
+        BOOST_REQUIRE(has_task);
+        BOOST_REQUIRE(has_alias);
+    }
+
+    // Check that querying the alias node directly (without recursive) returns the alias itself
+    {
+        auto result  = handle_response(request("get", "/v1/suites/suiteY/f/t/alias0/info"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        BOOST_REQUIRE(content.size() == 1);
+        BOOST_REQUIRE(content[0]["path"] == "/suiteY/f/t/alias0");
+    }
+
+    // Check that aliases are accessible through /v1/suites/info endpoint
+    {
+        auto result  = handle_response(request("get", "/v1/suites/info?recursive=1&type=alias"));
+        auto content = ojson::parse(result.body);
+
+        BOOST_REQUIRE(content.is_array());
+        bool has_alias = false;
+        for (const auto& entry : content) {
+            if (entry["path"] == "/suiteY/f/t/alias0") {
+                has_alias = true;
+            }
+        }
+        BOOST_REQUIRE(has_alias);
+    }
+
+    // Clean up
+    request("delete", "/v1/suites/suiteY/definition", "", API_KEY);
+    wait_until([] { return false == check_for_path("/v1/suites/suiteY/definition"); });
 }
 
 BOOST_AUTO_TEST_CASE(test_token_authentication) {

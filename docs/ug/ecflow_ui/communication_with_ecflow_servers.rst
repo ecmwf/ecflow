@@ -90,6 +90,11 @@ seconds away. This increment will stop being added once the refresh
 period has reached an hour. All these parameters are configurable from
 the `Server Settings <#changing-the-server-settings>`__.
 
+The same **Update** settings also include the **Output log refresh
+period**, which controls how often the :ref:`job output panel
+<viewing_scripts,_jobs_and_output>` automatically reloads the current
+output file when its **Automatic reload** button is enabled.
+
 Changing the server settings
 ============================
 

@@ -123,7 +123,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       TARGET
         s_http
       LABELS
-        integration nightly
+        integration nightly slow
       SOURCES
         ${test_srcs}
       LIBS
@@ -148,7 +148,7 @@ if (ENABLE_HTTP AND ENABLE_SERVER)
       TARGET
         s_http_using_http_backend
       LABELS
-        integration nightly
+        integration nightly slow
       SOURCES
         ${test_srcs}
       DEFINITIONS

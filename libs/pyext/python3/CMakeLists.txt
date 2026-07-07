@@ -67,7 +67,7 @@ foreach( test ${u_tests} )
     TARGET
       py3_${test}
     LABELS
-      python nightly
+      unit python nightly fast
     TYPE PYTHON
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py
@@ -86,7 +86,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
       TARGET
         py3_${test}
       LABELS
-        python nightly
+        integration python nightly slow
       TYPE PYTHON
       ARGS
         ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py

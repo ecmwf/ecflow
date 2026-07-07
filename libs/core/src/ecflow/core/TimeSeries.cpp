@@ -89,10 +89,6 @@ TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const Time
     }
 
     compute_last_time_slot();
-
-    // #ifdef DEBUG_TIME_SERIES
-    //	cout << "TimeSeries::TimeSeries "  << dump() << "\n";
-    // #endif
 }
 
 bool TimeSeries::operator<(const TimeSeries& rhs) const {
@@ -325,11 +321,7 @@ bool TimeSeries::isFree(const ecf::Calendar& calendar) const {
     //     |     |     |     |     |     |     |     |     |     |     |
     //  ------time---->
     //
-    bool ret = match_duration_with_time_series(duration(calendar));
-    //	if (ret) {
-    //	   std::cout << "TimeSeries::isFree " << dump() << " is free at calendar: " << calendar.toString() << "\n";
-    //	}
-    return ret;
+    return match_duration_with_time_series(duration(calendar));
 }
 
 bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_duration& relative_or_real_td) const {

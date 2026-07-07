@@ -26,6 +26,9 @@ void suites_options(const httplib::Request& request, httplib::Response& response
 void suites_create(const httplib::Request& request, httplib::Response& response);
 void suites_read(const httplib::Request& request, httplib::Response& response);
 
+void suites_info_options(const httplib::Request& request, httplib::Response& response);
+void suites_info_read(const httplib::Request& request, httplib::Response& response);
+
 void node_tree_options(const httplib::Request& request, httplib::Response& response);
 void node_tree_read(const httplib::Request& request, httplib::Response& response);
 
@@ -37,6 +40,9 @@ void node_definition_delete(const httplib::Request& request, httplib::Response& 
 void node_status_options(const httplib::Request& request, httplib::Response& response);
 void node_status_read(const httplib::Request& request, httplib::Response& response);
 void node_status_update(const httplib::Request& request, httplib::Response& response);
+
+void node_info_options(const httplib::Request& request, httplib::Response& response);
+void node_info_read(const httplib::Request& request, httplib::Response& response);
 
 void node_attributes_options(const httplib::Request& request, httplib::Response& response);
 void node_attributes_create(const httplib::Request& request, httplib::Response& response);

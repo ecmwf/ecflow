@@ -22,7 +22,6 @@
 #include <QSplitter>
 #include <QToolBar>
 #include <QVBoxLayout>
-#include <boost/property_tree/json_parser.hpp>
 
 #include "AboutDialog.hpp"
 #include "ChangeNotify.hpp"

@@ -4450,6 +4450,8 @@ class TestVariable(unittest.TestCase):
                                             - first character must be alphanumeric or underscore
                                             - subsequent characters: alphanumeric, underscore or dot
                                             - empty name always raises RuntimeError
+        Variable(str, int)               -- name and integer value; the int is converted to its
+                                            decimal string representation (e.g. 42 -> "42")
 
     Instance methods
         name()  -> str                   -- the variable name (returned by const reference)
@@ -4542,15 +4544,64 @@ class TestVariable(unittest.TestCase):
         with self.assertRaises((TypeError, RuntimeError)):
             ecf.Variable(None, "val")
 
-    def test_create_from_int_value_raises(self):
-        """No constructor accepts an integer as the value."""
-        with self.assertRaises((TypeError, RuntimeError)):
-            ecf.Variable("VAR", 42)
+    # ------------------------------------------------------------------
+    # Constructor: Variable(str, int)
+    # ------------------------------------------------------------------
+
+    def test_create_from_int_value_accepted(self):
+        """Variable(name, int) is accepted; the integer is stored as its decimal string."""
+        v = ecf.Variable("CNT", 42)
+        self.assertIsInstance(v, ecf.Variable)
+
+    def test_int_value_stored_as_decimal_string(self):
+        """The integer 42 is stored as the string '42'."""
+        self.assertEqual(ecf.Variable("CNT", 42).value(), "42")
+
+    def test_int_value_zero_stored_as_string(self):
+        """Zero is stored as '0'."""
+        self.assertEqual(ecf.Variable("CNT", 0).value(), "0")
+
+    def test_int_value_negative_stored_as_string(self):
+        """Negative integers are stored as their decimal string representation."""
+        self.assertEqual(ecf.Variable("CNT", -5).value(), "-5")
+
+    def test_int_value_name_preserved(self):
+        """Variable(name, int) stores the name correctly."""
+        self.assertEqual(ecf.Variable("MY_COUNT", 7).name(), "MY_COUNT")
+
+    def test_int_ctor_equal_to_str_ctor(self):
+        """Variable('X', 42) is equal to Variable('X', '42') since both store '42'."""
+        self.assertEqual(ecf.Variable("X", 42), ecf.Variable("X", "42"))
 
     def test_create_from_none_value_raises(self):
         """No constructor accepts None as the value."""
         with self.assertRaises((TypeError, RuntimeError)):
             ecf.Variable("VAR", None)
+
+    def test_int_value_above_int32_max_accepted(self):
+        """Values above 2^31-1 (C++ int max) are accepted without overflow or TypeError."""
+        v = ecf.Variable("BIG", 2**31)
+        self.assertEqual(v.value(), "2147483648")
+
+    def test_int_value_below_int32_min_accepted(self):
+        """Values below -2^31 (C++ int min) are accepted without overflow or TypeError."""
+        v = ecf.Variable("BIG", -(2**31) - 1)
+        self.assertEqual(v.value(), "-2147483649")
+
+    def test_int_value_large_positive(self):
+        """A large Python integer (10**12) is stored as its full decimal string."""
+        v = ecf.Variable("COUNTER", 10**12)
+        self.assertEqual(v.value(), "1000000000000")
+
+    def test_int_value_large_negative(self):
+        """A large negative Python integer (-10**12) is stored as its full decimal string."""
+        v = ecf.Variable("COUNTER", -(10**12))
+        self.assertEqual(v.value(), "-1000000000000")
+
+    def test_int_value_int64_max(self):
+        """2^63-1 (int64 max) is stored as its full decimal string."""
+        v = ecf.Variable("X", 2**63 - 1)
+        self.assertEqual(v.value(), "9223372036854775807")
 
     # ------------------------------------------------------------------
     # name()
@@ -4756,6 +4807,23 @@ class TestVariable(unittest.TestCase):
         v = ecf.Variable("VAR", "val")
         d = {v: "entry"}
         self.assertEqual(d[v], "entry")
+
+    # ------------------------------------------------------------------
+    # py::dynamic_attr() -- arbitrary Python attributes
+    # ------------------------------------------------------------------
+
+    def test_supports_dynamic_attribute(self):
+        """Variable supports setting arbitrary Python attributes (py::dynamic_attr())."""
+        v = ecf.Variable("VAR", "val")
+        v.my_custom = "sentinel"
+        self.assertEqual(v.my_custom, "sentinel")
+
+    def test_dynamic_attribute_deletion(self):
+        """A dynamic attribute can be deleted from a Variable instance."""
+        v = ecf.Variable("VAR", "val")
+        v.tag = 99
+        del v.tag
+        self.assertFalse(hasattr(v, "tag"))
 
 
 class TestVariableList(unittest.TestCase):

@@ -36,10 +36,12 @@ set(test_srcs
   test/TestJobProfiler.cpp
   test/TestLimit.cpp
   test/TestMigration.cpp
+  test/TestMirrorAttr.cpp
   test/TestMissNextTimeSlot.cpp
   test/TestMovePeer.cpp
   test/TestNodeAlgorithms.cpp
   test/TestNodeBeginRequeue.cpp
+  test/TestNodeGeneratedVariables.cpp
   test/TestNodeState.cpp
   test/TestNode_main.cpp # test entry point
   test/TestOrder.cpp
@@ -63,8 +65,7 @@ ecbuild_add_test(
   TARGET
     u_node
   LABELS
-    unit
-    nightly
+    unit nightly fast
   SOURCES
     ${test_srcs}
   LIBS
@@ -99,8 +100,7 @@ ecbuild_add_test(
   TARGET
     u_parser
   LABELS
-    unit
-    nightly
+    unit nightly fast
   SOURCES
     ${test_srcs}
   INCLUDES
@@ -127,8 +127,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       u_node_single
     LABELS
-      unit
-      nightly
+      unit nightly fast
     SOURCES
       ${test_srcs}
     LIBS
@@ -158,8 +157,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       p_parser
     LABELS
-      performance
-      nightly
+      performance nightly fast
     SOURCES
       ${test_srcs}
     LIBS
@@ -188,8 +186,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       p_parser_timer
     LABELS
-      performance
-      nightly
+      performance nightly fast
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/data/single_defs/mega.def
     SOURCES
@@ -212,8 +209,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       p_parser_only
     LABELS
-      performance
-      nightly
+      performance nightly fast
     ARGS
       ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/data/single_defs/mega.def
     SOURCES

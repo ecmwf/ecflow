@@ -53,34 +53,70 @@ add_custom_target(ecflow_client_docs DEPENDS generate_ecflow_client_docs)
 # (Re-)generate ecFlow Python documentation
 #
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/rst)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python_api/reference)
 add_custom_command(
   OUTPUT generate_ecflow_python_docs
   COMMAND
-    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/python_api/*
+    #
+    # Clear the reference source directory to avoid stale files
+    #
+    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/python_api/reference/*
   COMMAND
-    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/rst/*
+    #
+    # Clear the reference binary directory to avoid stale files
+    #
+    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/python_api/rst/*
   COMMAND
-    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/_build
+    #
+    # Clear the documentation build directory to avoid stale files
+    #
+    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/python_api/_build
   COMMAND
+    #
+    # Generate the Python API documentation
+    #
+    #  * Sphinx is driven by the .../python_api/conf.py file
+    #  * The API documentation generation is driven by the .../python_api/index.rst file
+    #  * The API documentation is based on the docstrings in the Python module (using sphinx.ext.autodoc)
+    #  * The API documentation .../python_api/reference/*.rst files are created in the binary directory
+    #
     ${CMAKE_COMMAND} -E env "PYTHONPATH=${ECFLOW_PYTHONPATH}"
         ${SPHINX_EXECUTABLE} -M html
-          ${CMAKE_CURRENT_SOURCE_DIR}/build_python_api
-          ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/_build
+          ${CMAKE_CURRENT_SOURCE_DIR}/python_api
+          ${CMAKE_CURRENT_BINARY_DIR}/python_api/_build
   COMMAND
+    #
+    # Copy the glossary and categories lists to the binary directory, to be used by python_api.py script
+    #
     ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/build_python_api/glossary.yaml
-        ${CMAKE_CURRENT_SOURCE_DIR}/build_python_api/categories.yaml
-        ${CMAKE_CURRENT_BINARY_DIR}/build_python_api
+        ${CMAKE_CURRENT_SOURCE_DIR}/python_api/glossary.yaml
+        ${CMAKE_CURRENT_SOURCE_DIR}/python_api/categories.yaml
+        ${CMAKE_CURRENT_BINARY_DIR}/python_api
   COMMAND
-    ${CMAKE_CURRENT_SOURCE_DIR}/build_python_api/fix_rst.py
+    #
+    # Apply a correction to the generated reference files
+    #
+    #  * Corrects `<ref>`_ in the docstrings to valid reStructuredText references `:ref:`<ref>`
+    #
+    ${CMAKE_CURRENT_SOURCE_DIR}/python_api/reference.fix.py
   COMMAND
-    ${CMAKE_CURRENT_SOURCE_DIR}/build_python_api/build_toc.py
+    #
+    # Generate the Python API Reference index file, based on the reference files list
+    #
+    #  * The .../python_api/python_api.rst file is created in the binary directory
+    #
+    ${CMAKE_CURRENT_SOURCE_DIR}/python_api/python_api.py
   COMMAND
-    ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/python_api.rst ${CMAKE_CURRENT_SOURCE_DIR}/python_api
+    #
+    #  Copy the Python API Reference index file to the source directory
+    #
+    ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/python_api/python_api.rst ${CMAKE_CURRENT_SOURCE_DIR}/python_api
   COMMAND
-    ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/build_python_api/rst/* ${CMAKE_CURRENT_SOURCE_DIR}/python_api
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build_python_api
+    #
+    #  Copy the API documentation .../python_api/reference/*.rst files to the source directory
+    #
+    ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/python_api/reference/* ${CMAKE_CURRENT_SOURCE_DIR}/python_api/reference/
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python_api
   USES_TERMINAL
   DEPENDS ecflow3
 )

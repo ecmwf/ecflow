@@ -97,24 +97,31 @@ BOOST_AUTO_TEST_CASE(can_create_process_meter) {
 
     BOOST_REQUIRE(meter.get("maximum_memory_available").has_value());
     BOOST_CHECK(meter.get("maximum_memory_available").value() == ProcessMeter::memory_t{1024});
+    BOOST_CHECK(meter.get("maximum_memory_available").value().unit() == "MB");
 
     BOOST_REQUIRE(meter.get("virtual_memory_used").has_value());
     BOOST_CHECK(meter.get("virtual_memory_used").value() == ProcessMeter::memory_t{1024 * 1024});
+    BOOST_CHECK(meter.get("virtual_memory_used").value().unit() == "MB");
 
     BOOST_REQUIRE(meter.get("resident_memory_used").has_value());
     BOOST_CHECK(meter.get("resident_memory_used").value() == ProcessMeter::memory_t{1024 * 1024 * 1024});
+    BOOST_CHECK(meter.get("resident_memory_used").value().unit() == "MB");
 
     BOOST_REQUIRE(meter.get("page_size").has_value());
     BOOST_CHECK(meter.get("page_size").value() == ProcessMeter::page_size_t{4096});
+    BOOST_CHECK(meter.get("page_size").value().unit() == "kB");
 
     BOOST_REQUIRE(meter.get("arena_memory").has_value());
     BOOST_CHECK(meter.get("arena_memory").value() == ProcessMeter::page_size_t{2048});
+    BOOST_CHECK(meter.get("arena_memory").value().unit() == "kB");
 
     BOOST_REQUIRE(meter.get("tracked_memory").has_value());
     BOOST_CHECK(meter.get("tracked_memory").value() == ProcessMeter::page_size_t{2049});
+    BOOST_CHECK(meter.get("tracked_memory").value().unit() == "kB");
 
     BOOST_REQUIRE(meter.get("freed_memory").has_value());
     BOOST_CHECK(meter.get("freed_memory").value() == ProcessMeter::page_size_t{2050});
+    BOOST_CHECK(meter.get("freed_memory").value().unit() == "kB");
 
     BOOST_REQUIRE(meter.get("n_cpu_online").has_value());
     BOOST_CHECK(meter.get("n_cpu_online").value() == ProcessMeter::n_cpu_t{1});
@@ -172,12 +179,15 @@ BOOST_AUTO_TEST_CASE(can_measure_process_resources) {
 
         BOOST_REQUIRE(meter.get("arena_memory").has_value());
         BOOST_CHECK(meter.get("arena_memory").value() > ProcessMeter::memory_t{0});
+        BOOST_CHECK(meter.get("arena_memory").value().unit() == "kB");
 
         BOOST_REQUIRE(meter.get("tracked_memory").has_value());
         BOOST_CHECK(meter.get("tracked_memory").value() > ProcessMeter::memory_t{0});
+        BOOST_CHECK(meter.get("tracked_memory").value().unit() == "kB");
 
         BOOST_REQUIRE(meter.get("freed_memory").has_value());
         BOOST_CHECK(meter.get("freed_memory").value() > ProcessMeter::memory_t{0});
+        BOOST_CHECK(meter.get("freed_memory").value().unit() == "kB");
 
 #else
 

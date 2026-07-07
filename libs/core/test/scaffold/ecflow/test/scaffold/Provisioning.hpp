@@ -1210,16 +1210,22 @@ private:
     streams_t shutdown_ecflow_server() {
         if (auto o = process_.terminate(); o == 0) {
             ECF_TEST_DBG("Shutdown server: [OK]");
-            return dump_server_execution_report(cwd_, process_);
         }
         else {
             ECF_TEST_DBG("Shutdown server: [FAIL]");
-            return dump_server_execution_report(cwd_, process_);
         }
 
+        auto streams = dump_server_execution_report(cwd_, process_);
+
+        // Ensure the server has actually stopped responding (and thus released its port) before returning.
+        // Otherwise, a subsequent test may attempt to launch a new server on the same port before the previous
+        // server has fully shutdown, leading to spurious "Timed out waiting for ecflow server to start" failures.
+        // Note: this is invoked from the Server destructor, so failures are reported rather than thrown.
         if (auto o = ensure_ecflow_server_is_shutdown(host_, port_, cwd_); !o.ok()) {
-            throw UnableToShutdownServer(o.reason());
+            ECF_TEST_DBG("Shutdown server: " << o.reason());
         }
+
+        return streams;
     }
 
     static Outcome<std::string>
@@ -1357,7 +1363,7 @@ private:
     ensure_ecflow_server_is_running(const Host& host,
                                     const Port& port,
                                     const Directory& cwd,
-                                    std::chrono::seconds timeout = std::chrono::seconds(10)) {
+                                    std::chrono::seconds timeout = std::chrono::seconds(30)) {
         auto start = std::chrono::system_clock::now();
         for (;;) {
             auto r = RunClient{}.with(host).with(port).with(cwd).execute(RunClient::CommandPing{});

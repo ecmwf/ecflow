@@ -1,0 +1,50 @@
+{
+  "geom": {
+    "x": "100",
+    "y": "200",
+    "w": "1280",
+    "h": "800"
+  },
+  "tabCount": "3",
+  "currentTabId": "0",
+  "theme": "dark",
+  "favourites": [
+    "host1:3141",
+    "host2:3141",
+    "host3:3141"
+  ],
+  "recentFiles": [
+    "/tmp/a.def",
+    "/tmp/b.def"
+  ],
+  "tabs": [
+    {
+      "id": "0",
+      "name": "Operations",
+      "server": "oper"
+    },
+    {
+      "id": "1",
+      "name": "Research",
+      "server": "rd"
+    },
+    {
+      "id": "2",
+      "name": "Backup",
+      "server": "backup"
+    }
+  ],
+  "server": {
+    "notification": {
+      "aborted": {
+        "enabled": "true",
+        "maxItems": "100"
+      },
+      "submitted": {
+        "enabled": "false",
+        "maxItems": "50"
+      }
+    },
+    "timeout": "30"
+  }
+}

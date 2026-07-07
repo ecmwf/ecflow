@@ -9,4 +9,4 @@
  */
 
 #define BOOST_TEST_MODULE Test_UDP
-#include <boost/test/unit_test.hpp>
+#include <boost/test/included/unit_test.hpp>

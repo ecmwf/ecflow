@@ -787,11 +787,9 @@ if(ECFLOW_LOGVIEW)
 endif()
 
 if(Qt6_FOUND)
-  qt6_wrap_cpp(VIEWER_MOC ${viewer_moc_files} TARGET ecflow_ui.x)
   qt6_add_resources(VIEWER_RES viewer.qrc)
   qt6_wrap_ui(VIEWER_FORMS_HEADERS ${viewer_wrap_ui_files})
 elseif(Qt5_FOUND)
-  qt5_wrap_cpp(VIEWER_MOC ${viewer_moc_files} TARGET ecflow_ui.x)
   qt5_add_resources(VIEWER_RES viewer.qrc)
   qt5_wrap_ui(VIEWER_FORMS_HEADERS ${viewer_wrap_ui_files})
 endif()
@@ -806,7 +804,7 @@ ecbuild_add_executable(
     ecflow_ui.x
   SOURCES
     ${viewer_srcs}
-    ${VIEWER_MOC}
+    ${viewer_moc_files}
     ${VIEWER_RES}
     ${VIEWER_FORMS_HEADERS}
   INCLUDES
@@ -836,6 +834,7 @@ ecbuild_add_executable(
     $<$<TARGET_EXISTS:Qt6::Charts>:Qt6::Charts>
     $<$<TARGET_EXISTS:Qt6::Core5Compat>:Qt6::Core5Compat>
 )
+set_target_properties(ecflow_ui.x PROPERTIES AUTOMOC ON)
 target_clangformat(ecflow_ui.x)
 
 set(ENABLE_ECFLOW_UI_LOG "OFF")
@@ -876,7 +875,7 @@ if(${ENABLE_ECFLOW_UI_LOG})
     SOURCES
       #LogEvent.cpp
       ${viewer_srcs}
-      ${VIEWER_MOC}
+      ${viewer_moc_files}
       ${VIEWER_RES}
       ${VIEWER_FORMS_HEADERS}
     INCLUDES
@@ -910,6 +909,7 @@ if(${ENABLE_ECFLOW_UI_LOG})
       $<$<TARGET_EXISTS:Qt6::Charts>:Qt6::Charts>
       $<$<TARGET_EXISTS:Qt6::Core5Compat>:Qt6::Core5Compat>
   )
+  set_target_properties(ecflow_ui_log PROPERTIES AUTOMOC ON)
   target_clangformat(ecflow_ui_log)
 
 endif()

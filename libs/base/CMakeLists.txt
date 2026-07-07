@@ -43,7 +43,7 @@ ecbuild_add_test(
   TARGET
     u_base
   LABELS
-    unit nightly
+    unit nightly fast
   SOURCES
     ${test_srcs}
   INCLUDES
@@ -70,7 +70,7 @@ ecbuild_add_test(
   TARGET
     u_base_algorithms
   LABELS
-    unit nightly
+    unit nightly fast
   SOURCES
     ${test_srcs}
   LIBS

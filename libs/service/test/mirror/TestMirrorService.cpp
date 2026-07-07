@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(can_create_start_and_stop_mirror_controller) {
 
     MirrorController controller;
 
-    controller.subscribe(MirrorRequest{"path", "host", "1234", 60, true, "auth"});
+    controller.subscribe(MirrorRequest{"/path/to/node:mirror", "path", "host", "1234", 60, true, "auth"});
 
     controller.start();
 

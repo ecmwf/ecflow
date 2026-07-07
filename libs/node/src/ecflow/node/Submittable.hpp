@@ -202,6 +202,8 @@ private:
     mutable Variable genvar_ecfjobout_;
     mutable Variable genvar_ecftryno_;
     mutable Variable genvar_task_;
+    mutable Variable genvar_dirname_;
+    mutable Variable genvar_basename_;
     mutable Variable genvar_ecfpass_;
     mutable Variable genvar_ecfscript_;
     mutable Variable genvar_ecfname_;

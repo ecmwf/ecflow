@@ -1,5 +1,5 @@
 
-FROM debian:12.11-slim AS base
+FROM debian:13.5-slim AS base
 
 RUN apt-get update \
     && apt-get install -y \

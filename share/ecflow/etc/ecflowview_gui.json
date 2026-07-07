@@ -605,7 +605,8 @@
                         },
                         "line" : "adaptiveUpdateMode",
                         "line" : "adaptiveUpdateIncrementInSec",
-                        "line" : "maxAdaptiveUpdateRateInMin"
+                        "line" : "maxAdaptiveUpdateRateInMin",
+                        "line" : "outputRefreshInSec"
                     }
                 },
 

@@ -61,6 +61,7 @@ set(test_srcs
   test/TestPasswdFile.cpp
   test/TestPasswordEncryption.cpp
   test/TestPerfTimer.cpp
+  test/TestPTree.cpp
   test/TestRealCalendar.cpp
   test/TestResources.cpp
   test/TestResult.cpp
@@ -82,8 +83,7 @@ ecbuild_add_test(
   TARGET
     u_core
   LABELS
-    unit
-    nightly
+    unit nightly fast
   SOURCES
     ${test_srcs}
   LIBS

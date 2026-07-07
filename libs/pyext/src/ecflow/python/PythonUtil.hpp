@@ -85,4 +85,29 @@ py::object py_id(const py::object& self);
 
 ssize_t py_hash(const py::object& self);
 
+///
+/// @brief Patch a pybind11 py::enum_ class registered in module m to match the Boost.Python enum behaviour.
+///
+/// The following is considered
+///
+///   __str__   -- returns just the member name (not "ClassName.name")
+///   __repr__  -- returns "ecflow.ClassName.name"
+///   __hash__  -- returns int(value)  (already correct, but explicit)
+///   __eq__    -- compares by integer value; also accepts plain int on RHS
+///   __ne__    -- complement of __eq__
+///   __lt__ / __le__ / __gt__ / __ge__  -- ordering by integer value
+///   .values   -- {int  -> member}  class attribute
+///   .names    -- {str  -> member}  class attribute
+///
+/// Direct cls.attr() assignment is used (not .def()) so that pybind11's
+/// overload-chaining is bypassed and the slot is truly replaced.
+///
+/// @param m The pybind11 module containing the enum class to patch.
+/// @param class_name The name of the enum class to patch.
+///
+/// @note Must be called inside PYBIND11_MODULE, before the module is made
+///       available to Python threads.
+///
+void py_finalize_enum(py::module& m, const char* class_name);
+
 #endif /* ecflow_python_PythonUtil_HPP */

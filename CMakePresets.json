@@ -164,7 +164,7 @@
         "ENABLE_TESTS": "ON",
         "ENABLE_ALL_TESTS": "ON",
         "ENABLE_DOCS": "OFF",
-        "ENABLE_PYTHON": "OFF",
+        "ENABLE_PYTHON": "ON",
         "ENABLE_SERVER": "ON",
         "ENABLE_SSL": "ON",
         "ENABLE_UDP": "ON",

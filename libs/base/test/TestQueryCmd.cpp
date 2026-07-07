@@ -13,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "TestHelper.hpp"
+#include "ecflow/attribute/Variable.hpp"
 #include "ecflow/base/cts/task/LabelCmd.hpp"
 #include "ecflow/base/cts/user/PathsCmd.hpp"
 #include "ecflow/base/cts/user/QueryCmd.hpp"
@@ -205,6 +206,57 @@ BOOST_AUTO_TEST_CASE(test_query_cmd) {
     res =
         TestHelper::invokeRequest(&defs, Cmd_ptr(new QueryCmd("variable", "/suite/f/t1", "YMD", "/suite/f/t1")), false);
     BOOST_CHECK_MESSAGE(res == "20090916", "expected query variable to return 20090916 but found: " << res);
+
+    // Server variable: path `/` represents the server itself, i.e. `ecflow_client --query variable /:name`
+    std::string server_var_name  = "SERVER_VAR";
+    std::string server_var_value = "server_var_value";
+    defs.server_state().add_or_update_user_variables(server_var_name, server_var_value);
+
+    res =
+        TestHelper::invokeRequest(&defs, Cmd_ptr(new QueryCmd("variable", "/", server_var_name, "/suite/f/t1")), false);
+    BOOST_CHECK_MESSAGE(res == server_var_value,
+                        "expected query variable to return " << server_var_value << " but found: " << res);
+
+    // A generated/server defined variable (as opposed to user defined) should also be found
+    std::string generated_var_name  = "ECF_PORT";
+    std::string generated_var_value = "3141";
+    defs.server_state().set_server_variables({Variable(generated_var_name, generated_var_value)});
+
+    res = TestHelper::invokeRequest(
+        &defs, Cmd_ptr(new QueryCmd("variable", "/", generated_var_name, "/suite/f/t1")), false);
+    BOOST_CHECK_MESSAGE(res == generated_var_value,
+                        "expected query variable to return " << generated_var_value << " but found: " << res);
+
+    // User variables take precedence over server variables of the same name
+    std::string user_override_value = "user_override_value";
+    defs.server_state().add_or_update_user_variables(generated_var_name, user_override_value);
+
+    res = TestHelper::invokeRequest(
+        &defs, Cmd_ptr(new QueryCmd("variable", "/", generated_var_name, "/suite/f/t1")), false);
+    BOOST_CHECK_MESSAGE(res == user_override_value,
+                        "expected query variable to return "
+                            << user_override_value << " (user variable should take precedence) but found: " << res);
+
+    // A server variable can legitimately hold an empty value; querying it should succeed and
+    // return an empty string, rather than being reported as "not found"
+    std::string empty_var_name = "EMPTY_SERVER_VAR";
+    defs.server_state().add_or_update_user_variables(empty_var_name, "");
+
+    try {
+        res = TestHelper::invokeRequest(
+            &defs, Cmd_ptr(new QueryCmd("variable", "/", empty_var_name, "/suite/f/t1")), false);
+        BOOST_CHECK_MESSAGE(res.empty(), "expected query variable to return an empty string but found: " << res);
+    }
+    catch (std::exception& e) {
+        BOOST_CHECK_MESSAGE(false,
+                            "Expected query variable for an empty-valued server variable to succeed " << e.what());
+    }
+
+    // Unknown server variable should fail
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new QueryCmd("variable", "/", "XXXX_SERVER_VAR", "/suite/f/t1")));
+
+    // Server only supports 'state' and 'variable' queries, everything else should fail
+    TestHelper::invokeFailureRequest(&defs, Cmd_ptr(new QueryCmd("event", "/", "event", "/suite/f/t1")));
 
     /// Destroy System singleton to avoid valgrind from complaining
     System::destroy();

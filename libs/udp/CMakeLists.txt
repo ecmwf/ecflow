@@ -81,15 +81,14 @@ ecbuild_add_test(
   TARGET
     ${TEST_TARGET}
   LABELS
-    integration nightly
+    integration nightly slow
   SOURCES
     ${${TEST_TARGET}_srcs}
   LIBS
     ${LIB_TARGET}
     ecflow_all
     test_scaffold
-    Boost::boost
-    Boost::unit_test_framework
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
     ${ADDITIONAL_BOOST_COMPONENTS}
     $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
   DEPENDS

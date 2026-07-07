@@ -253,7 +253,16 @@ Glossary
       
    cron
       A :term:`cron` defines a time dependency for a :term:`node`, similar to :term:`time`,
-      but one that will be repeated indefinitely.
+      but defined in terms of a time series at which the node is allowed to execute.
+
+      The time series can be either absolute (:code:`hh:mm`, based on plain wall-clock)
+      or relative (:code:`+hh:mm`, considering the suite begin or the last :term:`repeat`
+      increment as reference).
+
+      An absolute cron resets itself automatically every day at midnight, while a relative cron
+      does not (i.e. once its elapsed window runs out it stays inactive forever, unless it
+      is associated with a :term:`repeat` attribute that resets it).
+      See :ref:`text_based_def_cron` for the detailed timing tables.
 
       See also:
 
@@ -473,9 +482,22 @@ Glossary
       Also the script *must* include calls to the **init** and **complete** :term:`child command`\ s so that
       the :term:`ecflow_server` is aware when the job starts (i.e changes state to :term:`active`) and finishes (i.e changes state to :term:`complete`)
        
+   ECF_BASENAME
+      This is a generated :term:`variable`. It defines the base name of the :term:`node`, i.e. the node's own name without any path information.
+      Together with :term:`ECF_DIRNAME`, it can be used to reconstruct the node's absolute path as ``%ECF_DIRNAME%/%ECF_BASENAME%``.
+
+      This variable is available on all node types (:term:`suite`, :term:`family`, :term:`task`).
+
+   ECF_DIRNAME
+      This is a generated :term:`variable`. It defines the absolute path of the parent :term:`node`.
+      For :term:`suite` nodes, which have no parent, ECF_DIRNAME is an empty string.
+      Together with :term:`ECF_BASENAME`, it can be used to reconstruct the node's absolute path as ``%ECF_DIRNAME%/%ECF_BASENAME%``.
+
+      This variable is available on all node types (:term:`suite`, :term:`family`, :term:`task`).
+
    ECF_DUMMY_TASK
       This is a user variable that can be added to :term:`task` to indicate that there is no
-      associated :term:`ecf script` file. 
+      associated :term:`ecf script` file.
       
       If this variable is added to :term:`suite` or :term:`family` then all child tasks are treated as dummy.
       
@@ -1680,7 +1702,7 @@ Glossary
         as this may lead to undesired behaviour, including deadlocks.
 
       `Only one mirror attribute is allowed per node`, and each attribute is
-      defined by the following properties:
+      defined by the following options:
 
         - :code:`name`, an identifier
         - :code:`remote_path`, the path of the node on the remote ecFlow server
@@ -1689,6 +1711,7 @@ Glossary
         - :code:`ssl`, to connect to the ecFlow server using SSL
         - :code:`polling`, the value (in seconds) used to periodically contact the remote ecFlow server
         - :code:`auth`, the location to the Mirror authentication credentials file
+        - :code:`propagate`, to enable the propagation of the remote node state up the tree of local nodes
 
       .. warning::
 

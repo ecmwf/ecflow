@@ -402,6 +402,27 @@ public:
 
     // Access functions: ======================================================
     const std::string& name() const { return n_; }
+
+    ///
+    /// @brief Retrieves the basename of the node.
+    ///
+    /// @return the basename of the node, which is the name of the node without any path information.
+    ///
+    const std::string& basename() const { return n_; }
+
+    ///
+    /// @brief Retrieves the path of the node's parent.
+    ///
+    /// If the node doesn't have a parent the dirname is empty (i.e. "");
+    /// otherwise it is the absolute path to the parent node (e.g. "/path/to/parent").
+    ///
+    /// This allows to compose the absolute path to the node by appending:
+    ///  `dirname` + `/` + `basename`.
+    ///
+    /// @return the path of the node's parent; or an empty string if the node has no parent.
+    ///
+    std::string dirname() const { return (parent_) ? parent_->absNodePath() : ""; }
+
     const Repeat& repeat() const { return repeat_; } // can be empty()
     const std::vector<Variable>& variables() const { return vars_; }
     const std::vector<limit_ptr>& limits() const { return limits_; }

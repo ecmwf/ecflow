@@ -16,8 +16,7 @@ ecbuild_add_test(
   TARGET
     s_foolproof
   LABELS
-    integration
-    nightly
+    integration nightly fast
   SOURCES
     # Test entry point
     TestFoolproof_main.cpp # test entry point
@@ -32,7 +31,6 @@ ecbuild_add_test(
     ecflow_all
     test_scaffold
     Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
-    Boost::unit_test_framework
     ${ADDITIONAL_BOOST_COMPONENTS}
   DEPENDS
     ecflow_server

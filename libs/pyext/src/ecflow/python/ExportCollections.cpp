@@ -17,7 +17,8 @@
 void export_Collections(py::module& m) {
     // Export the vector of Variable
     {
-        py::object vl_cls = py::bind_vector<std::vector<Variable>>(m, "VariableList", "Hold a list of Variables");
+        py::object vl_cls =
+            py::bind_vector<std::vector<Variable>>(m, "VariableList", py::dynamic_attr(), "Hold a list of Variables");
         vl_cls.attr("__eq__") =
             py::cpp_function([](const py::object& self, const py::object& other) -> bool { return self.is(other); },
                              py::name("__eq__"),

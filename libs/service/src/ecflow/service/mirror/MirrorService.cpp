@@ -54,7 +54,6 @@ void MirrorService::start() {
         });
         expiry     = std::chrono::seconds{found->mirror_request_.polling};
     }
-    SLOG(D, "MirrorService: start polling, requested polling interval: " << expiry.count() << " s");
 
     if (expiry < minimum_expiry) {
         SLOG(W,
@@ -63,7 +62,7 @@ void MirrorService::start() {
         expiry = minimum_expiry;
     }
 
-    SLOG(D, "MirrorService: start polling, with polling interval: " << expiry.count() << " s");
+    SLOG(T, "MirrorService: start polling, with polling interval: " << expiry.count() << " s");
     executor_.start(std::chrono::seconds{expiry});
 }
 
@@ -72,10 +71,11 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
     // Check notification for each listener
     {
         for (auto& entry : listeners_) {
-            SLOG(D,
+            SLOG(T,
                  "MirrorService: Mirroring " << entry.mirror_request_.path << " node from "
                                              << entry.mirror_request_.host << ":" << entry.mirror_request_.port);
 
+            auto attribute   = entry.mirror_request_.attribute;
             auto remote_path = entry.mirror_request_.path;
             auto remote_host = entry.mirror_request_.host;
             auto remote_port = entry.mirror_request_.port;
@@ -88,13 +88,21 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
                 auto data =
                     mirror_.get_node_status(remote_host, remote_port, remote_path, ssl, remote_user, remote_pass);
 
-                SLOG(D, "MirrorService: Notifying remote node state: " << data.state);
+                auto latest_state      = static_cast<NState::State>(data.state);
+                auto latest_state_name = NState::toString(latest_state);
+                SLOG(D,
+                     "MirrorService: Notifying Mirror '"
+                         << attribute << "' from {path: '" << remote_path << "', host: '" << remote_host << "', port: '"
+                         << remote_port << "', ssl: '" << ssl << "'} to state '" << latest_state_name << "'");
                 MirrorNotification notification{remote_path, data};
                 notify_(notification);
             }
             catch (std::runtime_error& e) {
-                SLOG(W, "MirrorService: Failed to sync with remote node: " << e.what());
                 MirrorError error{remote_path, e.what()};
+                SLOG(W,
+                     "MirrorService: Failed to sync with remote {path: '"
+                         << remote_path << "', host: '" << remote_host << "', port: '" << remote_port << "', user: '"
+                         << remote_user << "', ssl: '" << ssl << "'}, due to: " << error.reason());
                 notify_(error);
             }
         }
@@ -102,14 +110,17 @@ void MirrorService::operator()(const std::chrono::system_clock::time_point& now)
 }
 
 void MirrorService::register_listener(const MirrorRequest& request) {
-    SLOG(D, "MirrorService: Registering Mirror: {" << request.path << "}");
+    SLOG(D,
+         "MirrorService: Register Mirror '" << request.attribute << "' to {path: '" << request.path << "', host: '"
+                                            << request.host << "', port: '" << request.port << "', polling: '"
+                                            << request.polling << "', ssl: '" << request.ssl << "'}");
     Entry& inserted = listeners_.emplace_back(Entry{request, "", ""});
     if (!request.auth.empty()) {
-        SLOG(D, "MirrorService: Loading auth {" << request.auth << "}");
+        SLOG(T, "MirrorService: Loading auth {" << request.auth << "}");
         auto found = ecf::service::auth::Credentials::load(request.auth);
         std::visit(ecf::overload{[&inserted](const ecf::service::auth::Credentials& credentials) {
                                      auto url = credentials.value("url").value_or("unknown");
-                                     SLOG(D, "MirrorService: using credentials for mirror: " << url);
+                                     SLOG(T, "MirrorService: using credentials for mirror: " << url);
 
                                      if (auto user = credentials.user(); user) {
                                          inserted.remote_username_ = user->username;

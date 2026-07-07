@@ -63,16 +63,16 @@ inline authentication_t verify_task_authentication_rules(AbstractServer& server,
     //   but there is no "user account" that is used to authenticate the exchange.
     //
 
-    return authentication_t::success("Authentication (task command) successful");
+    return authentication_t::success("Authentication (task) successful");
 }
 
 inline authentication_t verify_user_authentication_rules(const AbstractServer& server, const UserCmd& command) {
     const auto& service = server.authentication();
     if (service.is_authentic(command.identity())) {
-        return authentication_t::success("Authentication (user command) successful");
+        return authentication_t::success("Authentication (user) successful");
     }
 
-    return authentication_t::failure("Authentication (user command) failed, due to: Incorrect credentials detected");
+    return authentication_t::failure("Authentication (user) failed, due to: Incorrect credentials detected");
 }
 
 template <typename COMMAND>

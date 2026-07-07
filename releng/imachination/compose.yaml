@@ -24,13 +24,10 @@ services:
       inner:
         ipv4_address: 172.42.0.3
 
-  ecflow-deploy:
+  ecflow-server:
+    platform: linux/amd64
     hostname: ecflow-server
-    build: 
-      context: ./ecflow
-      target: deploy
-      args:
-        - ECFLOW_VERSION=5.15.1
+    image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
     ports:
       - "8888:8888"
       - "8889:8889"
@@ -39,13 +36,6 @@ services:
     networks:
       inner:
         ipv4_address: 172.42.0.4
-
-  ecflow-builder:
-    build: 
-      context: ./ecflow
-      target: builder
-    profiles:
-      - development
 
 networks:
   inner:

@@ -20,7 +20,7 @@
 
 VMirrorAttrType::VMirrorAttrType()
     : VAttributeType("mirror") {
-    dataCount_                             = 9;
+    dataCount_                             = 10;
     searchKeyToData_["mirror_name"]        = NameIndex;
     searchKeyToData_["mirror_remote_path"] = RemotePathIndex;
     searchKeyToData_["mirror_remote_host"] = RemoteHostIndex;
@@ -38,10 +38,11 @@ QString VMirrorAttrType::toolTip(QStringList d) const {
         t += "<b>Remote Port:</b> " + d[RemotePortIndex] + "<br>";
         t += "<b>Polling:</b> " + d[PollingIndex] + "<br>";
         t += "<b>SSL:</b> " + d[SslIndex] + "<br>";
-        t += "<b>Auth:</b> " + d[AuthIndex];
+        t += "<b>Auth:</b> " + d[AuthIndex] + "<br>";
         if (const auto& reason = d[ReasonIndex]; !reason.isEmpty()) {
-            t += "<br><b>Reason:</b> <span style=\"color:red\">" + d[ReasonIndex] + "</span>";
+            t += "<br><b>Reason:</b> <span style=\"color:red\">" + d[ReasonIndex] + "</span><br>";
         }
+        t += "<b>Propagate:</b> " + d[PropagateIndex];
     }
     return t;
 }
@@ -57,15 +58,16 @@ QString VMirrorAttrType::definition(QStringList d) const {
 
 void VMirrorAttrType::encode(const ecf::MirrorAttr& mirror, QStringList& data, bool firstLine) const {
 
-    data << qName_                                                  // TypeIndex
-         << QString::fromStdString(mirror.name())                   // NameIndex
-         << QString::fromStdString(mirror.remote_path())            // RemotePathIndex
-         << QString::fromStdString(mirror.remote_host())            // RemoteHostIndex
-         << QString::fromStdString(mirror.remote_port())            // RemotePortIndex
-         << QString::fromStdString(mirror.polling())                // PollingIndex
-         << QString::fromStdString(mirror.ssl() ? "true" : "false") // SslIndex
-         << QString::fromStdString(mirror.auth())                   // AuthIndex
-         << QString::fromStdString(mirror.reason());                // ReasonIndex
+    data << qName_                                                         // TypeIndex
+         << QString::fromStdString(mirror.name())                          // NameIndex
+         << QString::fromStdString(mirror.remote_path())                   // RemotePathIndex
+         << QString::fromStdString(mirror.remote_host())                   // RemoteHostIndex
+         << QString::fromStdString(mirror.remote_port())                   // RemotePortIndex
+         << QString::fromStdString(mirror.polling())                       // PollingIndex
+         << QString::fromStdString(mirror.ssl() ? "true" : "false")        // SslIndex
+         << QString::fromStdString(mirror.auth())                          // AuthIndex
+         << QString::fromStdString(mirror.reason())                        // ReasonIndex
+         << QString::fromStdString(mirror.propagate() ? "true" : "false"); // PropagateIndex
 }
 
 void VMirrorAttrType::encode_empty(QStringList& data) const {

@@ -37,6 +37,7 @@ gnu-15.2.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.13.13-01/lib64/libpython3.13.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.13.13-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
@@ -63,7 +64,12 @@ gnu-14.2.0:
         -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.12.9-01/include/python3.12
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.12.9-01/lib64/libpython3.12.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.12.9-01/lib64
-        -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.12.11-01/lib/python3.12/site-packages/pybind11/share/cmake/pybind11
+        -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
+      #
+      # Important:
+      #   The CMAKE_PREFIX_PATH above points to Python 3.13.13-01, but the Python version used is 3.12.9-01!
+      #   This is intentional, to avoid using Pybind11 3.0.1 which is known to have issues handling py::dynamic_attr.
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
@@ -91,6 +97,7 @@ gnu-12.2.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.10.10-01, provides Pybind11 2.10.3.
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
@@ -118,6 +125,7 @@ gnu-8.5.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.11.8-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.11.8-01/lib/python3.11/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.11.8-01, provides Pybind11 2.11.1.
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
@@ -147,6 +155,7 @@ intel-2025.3.1:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.13.13-01/lib64/libpython3.10.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.13.13-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
@@ -174,7 +183,12 @@ intel-2025.0.1:
         -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.12.9-01/include/python3.12
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.12.9-01/lib64/libpython3.12.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.12.9-01/lib64
-        -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.12.9-01/lib/python3.12/site-packages/pybind11/share/cmake/pybind11
+        -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
+      #
+      # Important:
+      #   The CMAKE_PREFIX_PATH above points to Python 3.13.13-01, but the Python version used is 3.12.9-01!
+      #   This is intentional, to avoid using Pybind11 3.0.1 which is known to have issues handling py::dynamic_attr.
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
@@ -203,6 +217,7 @@ intel-2021.4.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.10.10-01, provides Pybind11 2.10.3.
     ctest_options:
       - -L nightly -E '(py3_|s_http)'
 
@@ -228,7 +243,12 @@ nvidia-24.11:
         -DPython3_INCLUDE_DIRS=/usr/local/apps/python3/3.12.9-01/include/python3.12
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.12.9-01/lib64/libpython3.12.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.12.9-01/lib64
-        -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.12.9-01/lib/python3.12/site-packages/pybind11/share/cmake/pybind11
+        -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
+      #
+      # Important:
+      #   The CMAKE_PREFIX_PATH above points to Python 3.13.13-01, but the Python version used is 3.12.9-01!
+      #   This is intentional, to avoid using Pybind11 3.0.1 which is known to have issues handling py::dynamic_attr.
     ctest_options:
       # disable all tests
       - --version
@@ -256,6 +276,7 @@ nvidia-22.11:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.10.10-01, provides Pybind11 2.10.3.
     ctest_options: 
       # disable all tests
       - --version
@@ -283,6 +304,7 @@ aocc-4.0.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.10.10-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
+      # Note: Python 3.10.10-01, provides Pybind11 2.10.3.
     ctest_options:
       # disable all tests
       - --version

@@ -192,6 +192,7 @@ builds:
             -DINSTALL_LIB_DIR: lib
             -DUI_SYSTEM_SERVERS_LIST: /ec/vol/ecflow_def/servers.list.all
             -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+          # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
         
         - name: python312
           modules:
@@ -202,8 +203,13 @@ builds:
           test_command: *test_cmd
           cmake_options:
             <<: *common_cmake_options
-            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.12.9-01/lib/python3.12/site-packages/pybind11/share/cmake/pybind11
             -DENABLE_UI: OFF
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.12.9-01/lib/python3.12/site-packages/pybind11/share/cmake/pybind11
+          # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
+          #
+          # Important:
+          #   The CMAKE_PREFIX_PATH above points to Python 3.13.13-01, but the Python version used is 3.12.9-01!
+          #   This is intentional, to avoid using Pybind11 3.0.1 which is known to have issues handling py::dynamic_attr.
           install_command: |
             cmake --install . --component python
 
@@ -216,15 +222,16 @@ builds:
           test_command: *test_cmd
           cmake_options:
             <<: *common_cmake_options
+            -DENABLE_UI: OFF
             -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/8.5/include
-            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.11.8-01/lib/python3.11/site-packages/pybind11/share/cmake/pybind11
             -DPython3_ROOT_DIR: /usr/local/apps/python3/3.11.8-01
             -DPython3_EXECUTABLE: /usr/local/apps/python3/3.11.8-01/bin/python3
             -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.11.8-01/include/python3.11
             -DPython3_LIBRARIES: /usr/local/apps/python3/3.11.8-01/lib64/libpython3.11.so
             -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.11.8-01/lib64
-            -DENABLE_UI: OFF
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.11.8-01/lib/python3.11/site-packages/pybind11/share/cmake/pybind11
+          # Note: Python 3.11.8-01, provides Pybind11 2.11.1.
           install_command: |
             cmake --install . --component python
 
@@ -237,15 +244,16 @@ builds:
           test_command: *test_cmd
           cmake_options:
             <<: *common_cmake_options
-            ENABLE_UI: OFF
+            -DENABLE_UI: OFF
             -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/12.2/include
-            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
             -DPython3_ROOT_DIR: /usr/local/apps/python3/3.10.10-01
             -DPython3_EXECUTABLE: /usr/local/apps/python3/3.10.10-01/bin/python3
             -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.10.10-01/include/python3.10
             -DPython3_LIBRARIES: /usr/local/apps/python3/3.10.10-01/lib64/libpython3.10.so
             -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.10.10-01/lib64
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
+          # Note: Python 3.10.10-01, provides Pybind11 2.10.3.
           install_command: |
             cmake --install . --component python
 
@@ -261,12 +269,17 @@ builds:
             -DENABLE_UI: OFF
             -DBoost_ROOT: /usr/local/apps/boost/1.87.0/GNU/8.5
             -DBoost_INCLUDE_DIR: /usr/local/apps/boost/1.87.0/GNU/8.5/include
-            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.8.8-01/lib/python3.8/site-packages/pybind11/share/cmake/
             -DPython3_ROOT_DIR: /usr/local/apps/python3/3.8.8-01
             -DPython3_EXECUTABLE: /usr/local/apps/python3/3.8.8-01/bin/python3
             -DPython3_INCLUDE_DIRS: /usr/local/apps/python3/3.8.8-01/include/python3.8
             -DPython3_LIBRARIES: /usr/local/apps/python3/3.8.8-01/lib64/libpython3.8.so
             -DPython3_LIBRARY_DIRS: /usr/local/apps/python3/3.8.8-01/lib64
+            -DCMAKE_PREFIX_PATH: /usr/local/apps/python3/3.10.10-01/lib/python3.10/site-packages/pybind11/share/cmake/pybind11
+          # Note: Python 3.10.10-01, provides Pybind11 2.10.3.
+          #
+          # Important:
+          #   The CMAKE_PREFIX_PATH above points to Python 3.10.10-01, but the Python version used is 3.8.8-01!
+          #   This is intentional, to avoid using Pybind11 2.6.2 which is below the minimum required.
           install_command: |
             cmake --install . --component python
 

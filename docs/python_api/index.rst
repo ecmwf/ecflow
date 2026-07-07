@@ -1,6 +1,6 @@
 .. index::
    single: python_api
-   
+
 .. _python_api:
 
 ecFlow Python Api
@@ -12,12 +12,11 @@ Api
 ---
 
 .. automodule:: ecflow
-   :members:   
+   :members:
    :undoc-members:
    :show-inheritance:
-   
+
 .. contents::
    :depth: 2
    :local:
    :backlinks: top
-    

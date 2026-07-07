@@ -767,7 +767,7 @@ Usage:
 2. check(self: ecflow.Client, arg0: list) -> str
 
 
-.. py:method:: Client.checkpt(self: ecflow.Client, mode: ecflow.CheckPt = <CheckPt.UNDEFINED: 3>, check_pt_interval: typing.SupportsInt | typing.SupportsIndex = 0, check_pt_save_alarm_time: typing.SupportsInt | typing.SupportsIndex = 0) -> int
+.. py:method:: Client.checkpt(self: ecflow.Client, mode: ecflow.CheckPt = ecflow.CheckPt.UNDEFINED, check_pt_interval: typing.SupportsInt | typing.SupportsIndex = 0, check_pt_save_alarm_time: typing.SupportsInt | typing.SupportsIndex = 0) -> int
    :module: ecflow
 
 Request the :term:`ecflow_server` :term:`check point`\ s the definition held in the server immediately
@@ -1820,22 +1820,27 @@ Usage:
 
 Query the status of event, meter, state, variable, limit, limit_max or trigger expression without blocking
 
- - state     return [unknown | complete | queued |             aborted | submitted | active] to standard out
- - dstate    return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out
- - event     return 'set' | 'clear' to standard out
- - meter     return value of the meter to standard out
- - limit     return value of the limit to standard out
- - limit_max return max value of the limit to standard out
- - variable  return value to standard out
- - trigger   returns 'true' if the expression is true, otherwise 'false'
+- state,     return :code:`unknown` | :code:`complete` | :code:`queued` | :code:`aborted` | :code:`submitted` | :code:`active` to standard out
+- dstate,    return :code:`unknown` | :code:`complete` | :code:`queued` | :code:`suspended` | :code:`aborted` | :code:`submitted` | :code:`active` to standard out
+- event,     return :code:`set` | :code:`clear` to standard out
+- meter,     return value of the meter to standard out
+- limit,     return value of the limit to standard out
+- limit_max, return maximum value of the limit to standard out
+- trigger,   returns :code:`true` if the expression is true, otherwise :code:`false`
+- variable,  return the variable value to standard out.
 
-:
+
+.. important:: 
+
+  When path_to_attribute is '/', the variable is looked up on the server itself
+
 
 .. code-block:: shell
 
   string query(
      string query_type        # [ event | meter | variable | trigger | limit | limit_max ]
-     string path_to_attribute # path to the attribute
+     string path_to_attribute # path to the attribute.
+                              # the path '/', the server itself, can only be used with 'state' or 'variable'
      string attribute         # name of the attribute or trigger expression
   )
 
@@ -1846,9 +1851,10 @@ Exceptions can be raised if the path to the attribute does not exist and because
 - No event of the given name exists on the specified node
 - No meter of the given name exists on the specified node
 - No limit of the given name exists on the specified node
-- No variable of the given name (repeat or generated variable) exists on the
-  specified node or any of its parent
 - trigger expression does not parse, or if references to node/attributes are not defined
+- No variable of the given name (repeat or generated variable) exists on the
+  specified node or any of its parent, or (when path_to_attribute is '/') no user or
+  server variable of that name exists on the server
 
 Usage:
 
@@ -1861,6 +1867,7 @@ Usage:
        res = ci.query('limit','/path/to/node','limit_name') # returns limit value as a string
        res = ci.query('limit_max','/path/to/node','limit_name') # returns max limit value as a string
        res = ci.query('variable','/path/to/node,'var')      # returns variable value as a string
+       res = ci.query('variable','/','SCHOST')              # returns value of server variable as a string
        res = ci.query('trigger','/path/to/node','/joe90 == complete') # return 'true' | 'false' as a string
        res = ci.query('state','/path/to/node') # return node state as a string
        res = ci.query('dstate','/path/to/node') # return node state as a string,can include suspended

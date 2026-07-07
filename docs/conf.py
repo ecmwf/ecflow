@@ -13,7 +13,10 @@
 
 import datetime
 import os
+import re
 import sys
+
+from pathlib import Path
 
 # Adds path to the folder _ext, where extensions are stored
 sys.path.insert(0, os.path.abspath("."))
@@ -95,11 +98,38 @@ rst_prolog = """
 # built documents.
 #
 
+def extract_project_version(file_path):
+    """
+    Reads a file and returns the X.Y.Z version from the line starting with 'project'.
+    Returns None if the line or version is not found.
+    """
+    # Regex matches 3 groups of numbers separated by dots (e.g., 1.2.3)
+    version_pattern = re.compile(r'\d+\.\d+\.\d+')
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                # Clean whitespace and check if line starts with 'project'
+                cleaned_line = line.strip()
+                if cleaned_line.lower().startswith('project'):
+                    match = version_pattern.search(cleaned_line)
+                    if match:
+                        return match.group(0)
+    except FileNotFoundError:
+        print(f"Error: The file at {file_path} was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        
+    return None
 
 def get_ecflow_version():
-    version = "5.16.0"
+    current_dir = Path(__file__).resolve().parent
+    cmake_file_path = (current_dir / ".." / "CMakeLists.txt").resolve()
+
+    print(f"Extracting ecflow version from: {cmake_file_path}")
+    version = extract_project_version(cmake_file_path)
     ecflow_version = version.split(".")
-    print("Extracted ecflow version '" + str(ecflow_version))
+    print(f"Extracted ecflow version: '{ecflow_version}'")
     return ecflow_version
 
 

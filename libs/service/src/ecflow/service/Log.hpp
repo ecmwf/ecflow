@@ -18,11 +18,13 @@
 #include "ecflow/core/Log.hpp"
 
 // NOLINTBEGIN(bugprone-macro-parentheses)
-#define SLOG(LEVEL, MESSAGE)                                                      \
-    [&]() {                                                                       \
-        using namespace ecf::service::log;                                        \
-        LOG(LevelTraits<Level::LEVEL>::mapping_type,                              \
-            MESSAGE << " {" << LevelTraits<Level::LEVEL>::name << "}" << Meta{}); \
+#define SLOG(LEVEL, MESSAGE)                                                          \
+    [&]() {                                                                           \
+        using namespace ecf::service::log;                                            \
+        if constexpr (LevelTraits<Level::LEVEL>::permitted) {                         \
+            LOG(LevelTraits<Level::LEVEL>::mapping_type,                              \
+                MESSAGE << " {" << LevelTraits<Level::LEVEL>::name << "}" << Meta{}); \
+        }                                                                             \
     }()
 // NOLINTEND(bugprone-macro-parentheses)
 
@@ -30,14 +32,27 @@ namespace ecf::service {
 
 namespace log {
 
-enum class Level { D /*ebug*/, I /*nformation*/, W /*arning*/, E /*rror*/, F /*atal*/ };
+enum class Level { T /*race*/, D /*ebug*/, I /*nformation*/, W /*arning*/, E /*rror*/, F /*atal*/ };
 
 template <Level L>
 struct LevelTraits;
 
 template <>
+struct LevelTraits<Level::T>
+{
+#if defined(NDEBUG)
+    static constexpr bool permitted = false;
+#else
+    static constexpr bool permitted = true; // Only Debug builds log "Trace messages
+#endif
+    static constexpr const char* name               = "T";
+    static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::DBG;
+};
+
+template <>
 struct LevelTraits<Level::D>
 {
+    static constexpr bool permitted                 = true;
     static constexpr const char* name               = "D";
     static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::DBG;
 };
@@ -45,6 +60,7 @@ struct LevelTraits<Level::D>
 template <>
 struct LevelTraits<Level::I>
 {
+    static constexpr bool permitted                 = true;
     static constexpr const char* name               = "I";
     static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::LOG;
 };
@@ -52,6 +68,7 @@ struct LevelTraits<Level::I>
 template <>
 struct LevelTraits<Level::W>
 {
+    static constexpr bool permitted                 = true;
     static constexpr const char* name               = "W";
     static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::WAR;
 };
@@ -59,6 +76,7 @@ struct LevelTraits<Level::W>
 template <>
 struct LevelTraits<Level::E>
 {
+    static constexpr bool permitted                 = true;
     static constexpr const char* name               = "E";
     static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::ERR;
 };
@@ -66,6 +84,7 @@ struct LevelTraits<Level::E>
 template <>
 struct LevelTraits<Level::F>
 {
+    static constexpr bool permitted                 = true;
     static constexpr const char* name               = "F";
     static constexpr ecf::Log::LogType mapping_type = ecf::Log::LogType::ERR;
 };

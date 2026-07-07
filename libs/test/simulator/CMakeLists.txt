@@ -59,7 +59,7 @@ ecbuild_add_test(
   TARGET
     s_simulator
   LABELS
-    integration nightly
+    integration nightly fast
   SOURCES
     ${test_srcs}
   LIBS
@@ -76,7 +76,7 @@ if (ENABLE_ALL_TESTS)
     TARGET
       s_simulator_single
     LABELS
-      integration nightly
+      integration nightly fast
     SOURCES
       test/TestSingleSimulator.cpp
       test/TestSingleSimulator_main.cpp # test entry point

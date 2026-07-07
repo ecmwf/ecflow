@@ -19,7 +19,8 @@ The general format of the :term:`ecflow_client` command :code:`--query` is as fo
 Where:
 
 * arg1 = [ state | event | meter | label | variable | trigger | limit | limit_max | ... ]
-* arg2 = <path> | <path>:name     where name is name of a event, meter,limit or variable
+* arg2 = <path> | <path>:name     where name is name of a event, meter,limit or variable.
+  Path :code:`/` represents the server itself, and can only be used with :code:`state` or :code:`variable`
 * arg3 = trigger expression (optional)  | prev | next    # prev,next only used when arg1 is repeat
 
 Some examples using the query command:
@@ -48,8 +49,11 @@ Some examples using the query command:
     meter=$(ecflow_client --query meter /path/to/task/with/meter:meter_name) 
     
     # returns the variable value
-    value=$(ecflow_client --query variable /path/to/task/with/var:var_name)   
-    
+    value=$(ecflow_client --query variable /path/to/task/with/var:var_name)
+
+    # returns the value of a variable attached to the server itself
+    value=$(ecflow_client --query variable /:ECF_PORT)
+
     # returns the current value of the limit 
     limit_value=$(ecflow_client --query limit  /path/to/task/with/limit:limit_name) 
     

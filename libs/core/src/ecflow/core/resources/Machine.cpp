@@ -256,7 +256,7 @@ ProcessMeter LinuxMachine::get_process_meter() const {
     const uint64_t maximum_memory_kb = static_cast<uint64_t>(info.totalram) * info.mem_unit / 1024;
 
     // Retrieve page size
-    const long page_size = sysconf(_SC_PAGESIZE);
+    const long page_size = sysconf(_SC_PAGESIZE); // sysconf(_SC_PAGESIZE) returns the page size in bytes
     if (page_size <= 0) {
         throw ResourceUnavailable("Unable to retrieve page size");
     }
@@ -296,17 +296,17 @@ ProcessMeter LinuxMachine::get_process_meter() const {
 
     return ProcessMeter::make()
         .with_pid(pid)
-        .with_maximum_memory(maximum_memory_kb)
-        .with_virtual_memory(virtual_memory_kb)
-        .with_resident_memory(resident_memory_kb)
-        .with_page_size(page_size)
+        .with_maximum_memory(maximum_memory_kb / 1024)           // kB -> MB
+        .with_virtual_memory(virtual_memory_kb / 1024)           // kB -> MB
+        .with_resident_memory(resident_memory_kb / 1024)         // kB -> MB
+        .with_page_size(static_cast<uint64_t>(page_size) / 1024) // bytes -> kB
         .with_n_cpu_online(n_cpus_online)
         .with_n_cpu_maximum(n_cpus_maximum)
         .with_n_threads(threads)
     #if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
-        .with_arena_memory(arena)
-        .with_tracked_memory(tracked_memory)
-        .with_freed_memory(freed_memory)
+        .with_arena_memory(arena / 1024)     // bytes -> kB
+        .with_tracked_memory(tracked_memory) // already in kB
+        .with_freed_memory(freed_memory)     // already in kB
     #endif
         ;
 }
@@ -341,12 +341,12 @@ ProcessMeter DarwinMachine::get_process_meter() const {
 
     return ProcessMeter::make()
         .with_pid(pid)
-        .with_maximum_memory(this->host_nfo.max_mem / 1024 / 1024)
-        .with_page_size(vm_kernel_page_size / 1024)
+        .with_maximum_memory(this->host_nfo.max_mem / 1024 / 1024) // host_basic_info.max_mem is in bytes -> MB
+        .with_page_size(vm_kernel_page_size / 1024)                // vm_kernel_page_size is in bytes -> kB
         .with_n_cpu_online(this->host_nfo.physical_cpu)
         .with_n_cpu_maximum(this->host_nfo.physical_cpu_max)
-        .with_virtual_memory(pti.pti_virtual_size / 1024 / 1024)
-        .with_resident_memory(pti.pti_resident_size / 1024 / 1024)
+        .with_virtual_memory(pti.pti_virtual_size / 1024 / 1024)   // proc_taskinfo.pti_virtual_size is in bytes -> MB
+        .with_resident_memory(pti.pti_resident_size / 1024 / 1024) // proc_taskinfo.pti_resident_size is in bytes -> MB
         .with_n_threads(pti.pti_threadnum);
 }
 

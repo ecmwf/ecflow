@@ -18,3 +18,4 @@ Using ecFlow
    ecflow_ui/index.rst
    cookbook/index.rst
    elearning
+   related

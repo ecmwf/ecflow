@@ -64,6 +64,16 @@ highlight_language = "none"
 
 import sphinx.ext.autodoc
 
+#
+# The behaviour of `sphinx.ext.autodoc.Documenter.add_line` changed in Sphinx v9.0
+#  -- as per https://github.com/sphinx-doc/sphinx/issues/14089.
+#
+# The following enables the use of legacy (pre-v9.0) behaviour, used here to write
+# the generated reST to separate files as the docstrings are processed.
+#
+# TODO: Modernize the use of `sphinx.ext.autodoc` to avoid the need for this legacy behaviour.
+#
+autodoc_use_legacy_class_based = True
 
 class TargetFile:
     def __init__(self):
@@ -95,12 +105,12 @@ class TargetFile:
     def _open(self, name):
         if self.name == name and self.name != "":
             if self.fp is None:
-                self.fp = open(f"rst/{name}.rst", "a")
+                self.fp = open(f"reference/{name}.rst", "a")
         else:
             self.name = name
             self.close()
             if self.name != "" and self.name[0].isupper():
-                self.fp = open(f"rst/{self.name}.rst", "w")
+                self.fp = open(f"reference/{self.name}.rst", "w")
                 title = f"ecflow.{name}"
                 self.fp.write(f"{title}\n")
                 self.fp.write("/" * len(title) + "\n\n")

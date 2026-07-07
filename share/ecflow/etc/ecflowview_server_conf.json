@@ -58,9 +58,17 @@
                     "label": "Show time of last refresh in automatic refresh mode",
                     "tooltip": "If enabled shows the <b>time of the last refresh</b> in automatic refresh mode. If the automatic refresh is switched off the last refresh time is always visible.",
                     "default": "false"
-                 }
+                 },
 
-            }, 
+                "outputRefreshInSec": {
+                    "label": "Output log refresh period",
+                    "suffix": "seconds",
+                    "tooltip": "Defines the automatic refresh period for the Output log panel.",
+                    "default": "30",
+                    "min": "5"
+                }
+
+            },
 
 			"files": {
 				"label" : "Files",

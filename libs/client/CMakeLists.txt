@@ -90,7 +90,7 @@ ecbuild_add_test(
   TARGET
     s_client
   LABELS
-    integration nightly
+    integration nightly slow
   SOURCES
     ${test_srcs}
   INCLUDES

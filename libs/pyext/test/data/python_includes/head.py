@@ -38,7 +38,14 @@ class Client(object):
     def __init__(self,init_add_vars = False):
         print ("Creating Client")
         self.ci = ecflow.Client()
-        self.ci.set_host_port("%ECF_HOST%","%ECF_PORT%")
+
+        #
+        # Important!
+        #
+        # Using 'localhost' directly instead of '%ECF_HOST%', because (on the macOS CI runner)
+        # the ecflow client is not able to resolve the '<hostname>.local' that is currently configured.
+        #
+        self.ci.set_host_port("localhost","%ECF_PORT%")
         if %ECF_USING_HTTP_BACKEND%:
             self.ci.enable_http()
         self.ci.set_child_pid(os.getpid())

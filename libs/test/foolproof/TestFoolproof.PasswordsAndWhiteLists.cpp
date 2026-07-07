@@ -106,20 +106,18 @@ endsuite;
         auto client = RunClient{}.with(host).with(port).with(user_c).with(cwd).execute(RunClient::CommandDelete{"/s"});
         BOOST_REQUIRE(!client.ok());
 
-        BOOST_CHECK(
-            client.reason().find(
-                "Command not accepted, due to: Authentication (user command) failed, due to: Incorrect credentials") !=
-            std::string::npos);
+        BOOST_CHECK(client.reason().find(
+                        "Command not accepted, due to: Authentication (user) failed, due to: Incorrect credentials") !=
+                    std::string::npos);
     }
 
     { // #authentication, using inexistent user -- attempt to delete suite % [failure]
         auto client = RunClient{}.with(host).with(port).with(user_d).with(cwd).execute(RunClient::CommandDelete{"/s"});
         BOOST_REQUIRE(!client.ok());
 
-        BOOST_CHECK(
-            client.reason().find(
-                "Command not accepted, due to: Authentication (user command) failed, due to: Incorrect credentials") !=
-            std::string::npos);
+        BOOST_CHECK(client.reason().find(
+                        "Command not accepted, due to: Authentication (user) failed, due to: Incorrect credentials") !=
+                    std::string::npos);
     }
 }
 
@@ -282,10 +280,9 @@ endsuite;
             RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
-        BOOST_CHECK(
-            client.reason().find(
-                "Command not accepted, due to: Authentication (user command) failed, due to: Incorrect credentials") !=
-            std::string::npos);
+        BOOST_CHECK(client.reason().find(
+                        "Command not accepted, due to: Authentication (user) failed, due to: Incorrect credentials") !=
+                    std::string::npos);
     }
 
     { // ... check that previous update did not take effect
@@ -302,10 +299,9 @@ endsuite;
             RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
         BOOST_REQUIRE(!client.ok());
 
-        BOOST_CHECK(
-            client.reason().find(
-                "Command not accepted, due to: Authentication (user command) failed, due to: Incorrect credentials") !=
-            std::string::npos);
+        BOOST_CHECK(client.reason().find(
+                        "Command not accepted, due to: Authentication (user) failed, due to: Incorrect credentials") !=
+                    std::string::npos);
     }
 
     { // ... check that previous update did not take effect
@@ -570,6 +566,107 @@ endsuite;
             client.reason().find(
                 "Command not accepted, due to: Authorisation (user) failed, due to: Insufficient permissions") !=
             std::string::npos);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_e2e_rejection_message_includes_username) {
+    ECF_NAME_THIS_TEST();
+
+    /*
+     * Description
+     *
+     * This test case verifies that, when a command is rejected, the rejection message returned to the client
+     * includes the originating user name (within square brackets). See ECFLOW-2097.
+     *
+     * Requirements
+     *
+     * - An authorisation failure message ends with the offending user name, as: [<username>].
+     * - An authentication failure message includes the offending user name, as: [<username>].
+     *
+     */
+
+    using namespace ecf::test::scaffold;
+
+    auto cwd = MakeDirectory{}.create();
+
+    auto user_alice   = User{"alice", "somesecret", "rw"};
+    auto user_bob     = User{"bob", "anothersecret", "r"};
+    auto user_charlie = User{"charlie", "topsecret", "rw"}; // Note: not included in password file!
+
+    auto host = MakeHost{}.create();
+    auto port = MakePort{}.with(AutomaticPortValue{}).create();
+
+    auto authentication = MakeTestFile{}
+                              .with(SpecificFileLocation{"custom.passwds", cwd})
+                              .with(PasswordsFile{host, port, user_alice, user_bob}.data())
+                              .create();
+
+    auto authorisation = MakeTestFile{}
+                             .with(SpecificFileLocation{"custom.lists", cwd})
+                             .with(WhitelistFile{user_alice, user_bob}.data())
+                             .create();
+
+    auto server_environment_cfg =
+        MakeTestFile{}
+            .with(SpecificFileLocation{"server_environment.cfg", cwd})
+            .with(ServerEnvironmentFile{std::make_tuple("ECF_PASSWD", authentication.filename()),
+                                        std::make_tuple("ECF_CUSTOM_PASSWD", authentication.filename()),
+                                        std::make_tuple("ECF_LISTS", authorisation.filename())}
+                      .data())
+            .create();
+
+    const auto server = MakeServer{}.with(host).with(port).with(cwd).launch();
+    {
+        BOOST_REQUIRE(server.ok());
+        auto& s = server.value();
+        BOOST_CHECK(s.pid() > 0);
+        BOOST_CHECK(s.port().value() == port.value());
+        BOOST_CHECK(s.host().is_valid());
+    }
+
+    auto defs = MakeTestFile{}
+                    .with(SpecificFileLocation{"suite.def", cwd})
+                    .with(R"--(
+suite s
+  family f
+    task task
+      label l "original_value"
+  endfamily
+endsuite;
+)--")
+                    .create();
+
+    { // #authorisation, load defs file with alice's "rw" access % [success]
+        auto client =
+            RunClient{}.with(host).with(port).with(user_alice).with(cwd).execute(RunClient::CommandLoad{defs.path()});
+        BOOST_REQUIRE(client.ok());
+    }
+
+    { // #authorisation, perform write operation with bob's "r" only access
+        auto client = RunClient{}.with(host).with(port).with(user_bob).with(cwd).execute(
+            RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
+        BOOST_REQUIRE(!client.ok());
+
+        BOOST_CHECK(client.reason().find("Command not accepted, due to: Authorisation (user) failed, due to: "
+                                         "Insufficient permissions") != std::string::npos);
+        // The originating user name is present in the rejection message
+        BOOST_CHECK(client.reason().find("[bob]") != std::string::npos);
+    }
+
+    { // #authentication, perform operation with unknow user (i.e. not present in password file)
+        auto client = RunClient{}
+                          .with(host)
+                          .with(port)
+                          .with(user_charlie)
+                          .with(cwd)
+                          .execute(RunClient::CommandAlterUpdateLabel{"/s/f/task", "l", "attempted_value"});
+        BOOST_REQUIRE(!client.ok());
+
+        BOOST_CHECK(client.reason().find(
+                        "Command not accepted, due to: Authentication (user) failed, due to: Incorrect credentials") !=
+                    std::string::npos);
+        // The originating user name is present in the rejection message
+        BOOST_CHECK(client.reason().find("[charlie]") != std::string::npos);
     }
 }
 

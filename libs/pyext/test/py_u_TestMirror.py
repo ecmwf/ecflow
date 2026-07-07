@@ -78,7 +78,60 @@ def can_create_mirror_from_default_parameters_4():
     assert mirror.remote_port() == "r_port"
     assert mirror.polling() == "polling"
     assert mirror.ssl() == True
-    assert mirror.auth() == "%ECF_MIRROR_AUTH%"
+    assert mirror.auth() == "%ECF_MIRROR_REMOTE_AUTH%"
+
+
+def can_create_mirror_propagate_defaults_to_false():
+    mirror = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling", True, "auth")
+    assert mirror.propagate() == False
+
+
+def can_create_mirror_with_propagate_as_positional_argument():
+    mirror = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling", True, "auth", True)
+    assert mirror.name() == "name"
+    assert mirror.remote_path() == "r_path"
+    assert mirror.remote_host() == "r_host"
+    assert mirror.remote_port() == "r_port"
+    assert mirror.polling() == "polling"
+    assert mirror.ssl() == True
+    assert mirror.auth() == "auth"
+    assert mirror.propagate() == True
+
+
+def can_create_mirror_with_propagate_as_keyword_argument():
+    mirror = ecf.MirrorAttr("name", "r_path", propagate=True)
+    assert mirror.name() == "name"
+    assert mirror.remote_path() == "r_path"
+    assert mirror.ssl() == False
+    assert mirror.propagate() == True
+
+
+def mirror_str_reflects_ssl_and_propagate_flags():
+    enabled = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling", True, "auth", True)
+    assert "ssl=1" in str(enabled)
+    assert "propagate=1" in str(enabled)
+
+    disabled = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling", False, "auth", False)
+    assert "ssl=0" in str(disabled)
+    assert "propagate=0" in str(disabled)
+
+
+def can_add_mirror_with_propagate_to_task():
+    suite = ecf.Suite("s1")
+
+    family = ecf.Family("f1")
+    suite.add_family(family)
+
+    task = ecf.Task("t1")
+    family.add_task(task)
+
+    mirror = ecf.MirrorAttr("name", "r_path", "r_host", "r_port", "polling", True, "auth", True)
+    task.add_mirror(mirror)
+    assert len(list(task.mirrors)) == 1
+
+    actual = list(task.mirrors)[0]
+    assert actual.name() == "name"
+    assert actual.propagate() == True
 
 
 def can_add_mirror_to_task():
@@ -161,6 +214,12 @@ if __name__ == "__main__":
     can_create_mirror_from_default_parameters_1()
     can_create_mirror_from_default_parameters_2()
     can_create_mirror_from_default_parameters_3()
+    can_create_mirror_from_default_parameters_4()
+    can_create_mirror_propagate_defaults_to_false()
+    can_create_mirror_with_propagate_as_positional_argument()
+    can_create_mirror_with_propagate_as_keyword_argument()
+    mirror_str_reflects_ssl_and_propagate_flags()
+    can_add_mirror_with_propagate_to_task()
     can_add_mirror_to_task()
     can_embed_mirror_into_task()
     cannot_have_multiple_mirrors_in_single_task()

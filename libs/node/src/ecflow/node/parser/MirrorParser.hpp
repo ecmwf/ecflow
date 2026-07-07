@@ -45,6 +45,7 @@ public:
     static constexpr const char* option_ssl         = "ssl";
     static constexpr const char* option_remote_auth = "remote_auth";
     static constexpr const char* option_reason      = "reason";
+    static constexpr const char* option_propagate   = "propagate";
 
     static ecf::MirrorAttr parse_mirror_line(const std::string& line);
     static ecf::MirrorAttr parse_mirror_line(const std::string& line, const std::string& name);

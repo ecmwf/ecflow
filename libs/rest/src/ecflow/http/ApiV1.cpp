@@ -206,6 +206,14 @@ ojson filter_json(const ojson& j, const httplib::Request& r) {
     return dive(j, path_elems);
 }
 
+static InfoQueryContext make_info_context(const httplib::Request& request) {
+    return {request.get_param_value("recursive") == "1",
+            request.get_param_value("type"),
+            request.get_param_value("state"),
+            request.get_param_value("sortby"),
+            request.get_param_value("count")};
+}
+
 static std::string get_tree_content_kind(const httplib::Request& request) {
     constexpr const char* parameter = "content";
     return request.has_param(parameter) ? request.get_param_value(parameter) : "basic";
@@ -251,6 +259,25 @@ void suites_read(const httplib::Request& request, httplib::Response& response) {
     trycatch(request, response, [&]() {
         num_cached_requests++;
         ojson j = filter_json(ecf::http::get_suites(), request);
+
+        response.status = HttpStatusCode::success_ok;
+        response.set_content(j.dump(), "application/json");
+        set_cors(response);
+    });
+}
+
+void suites_info_options(const httplib::Request& request, httplib::Response& response) {
+    trycatch(request, response, [&]() {
+        response.status = HttpStatusCode::success_no_content;
+        set_allowed_methods(response, "GET, HEAD");
+        set_cors(response);
+    });
+}
+
+void suites_info_read(const httplib::Request& request, httplib::Response& response) {
+    trycatch(request, response, [&]() {
+        num_cached_requests++;
+        ojson j = filter_json(get_suites_info(make_info_context(request)), request);
 
         response.status = HttpStatusCode::success_ok;
         response.set_content(j.dump(), "application/json");
@@ -348,6 +375,26 @@ void node_status_read(const httplib::Request& request, httplib::Response& respon
 void node_status_update(const httplib::Request& request, httplib::Response& response) {
     trycatch(request, response, [&]() {
         ojson j         = update_node_status(request);
+        response.status = HttpStatusCode::success_ok;
+        response.set_content(j.dump(), "application/json");
+        set_cors(response);
+    });
+}
+
+void node_info_options(const httplib::Request& request, httplib::Response& response) {
+    trycatch(request, response, [&]() {
+        response.status = HttpStatusCode::success_no_content;
+        set_allowed_methods(response, "GET, HEAD");
+        set_cors(response);
+    });
+}
+
+void node_info_read(const httplib::Request& request, httplib::Response& response) {
+    trycatch(request, response, [&]() {
+        num_cached_requests++;
+        const std::string path = request.matches[1];
+        ojson j                = filter_json(get_node_info(path, make_info_context(request)), request);
+
         response.status = HttpStatusCode::success_ok;
         response.set_content(j.dump(), "application/json");
         set_cors(response);
@@ -660,6 +707,28 @@ void routing(httplib::Server& http_server) {
         http_server.Get(resource_path, v1::node_status_read);        // Read
         http_server.Put(resource_path, v1::node_status_update);      // Update
         http_server.Delete(resource_path, v1::not_implemented);      // Delete
+    }
+
+    /* /v1/suites/info */
+    {
+        std::string resource_path = R"(/v1/suites/info$)";
+
+        http_server.Options(resource_path, v1::suites_info_options); // Options
+        http_server.Post(resource_path, v1::not_implemented);        // Create
+        http_server.Get(resource_path, v1::suites_info_read);        // Read
+        http_server.Put(resource_path, v1::not_implemented);         // Update
+        http_server.Delete(resource_path, v1::not_implemented);      // Delete
+    }
+
+    /* .../suites/<path>/info */
+    {
+        std::string resource_path = R"(/v1/suites([A-Za-z0-9_\/\.]+)/info$)";
+
+        http_server.Options(resource_path, v1::node_info_options); // Options
+        http_server.Post(resource_path, v1::not_implemented);      // Create
+        http_server.Get(resource_path, v1::node_info_read);        // Read
+        http_server.Put(resource_path, v1::not_implemented);       // Update
+        http_server.Delete(resource_path, v1::not_implemented);    // Delete
     }
 
     /* .../suites/<path>/attributes */

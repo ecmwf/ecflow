@@ -13,14 +13,14 @@ A :term:`cron` defines a repeating time dependency for a node.
 Constructor::
 
    Cron()
-   Cron(string time_series,
-        days_of_week=list of ints,   # 0-6, Sunday-Saturday
-        days_of_month=list of ints,  # 1-31
-        months=list of ints)         # 1-12
-   Cron(TimeSeries time_series,
-        days_of_week=list of ints,
-        days_of_month=list of ints,
-        months=list of ints)
+   Cron(time_series: str,
+        days_of_week: list of ints,   # 0-6, Sunday-Saturday
+        days_of_month: list of ints,  # 1-31
+        months: list of ints)         # 1-12
+   Cron(time_series: TimeSeries,
+        days_of_week: list of ints,
+        days_of_month: list of ints,
+        months: list of ints)
 
 Exceptions:
 
@@ -40,7 +40,9 @@ Usage (see the :ref:`cron definition<text_based_def_cron>` for more examples):
     cron = Cron('+01:30',days_of_week=[0,1,2,3,4,5,6])
 
     # Run relative to suite start time or task requeue time
-    cron = Cron('+00:15 23:00 00:30', days_of_week=[0,1,2],days_of_month=[4,5,6], months=[1,2,3])
+    # This runs every 30 minutes, from <start-time>+00:15 until <start-time>+23:00,
+    # and then remains inactive until the explicitly requeued.
+    cron = Cron('+00:15 23:00 00:30')
 
     # Define Cron based on start/end/increment
     start = TimeSlot(0 , 0)

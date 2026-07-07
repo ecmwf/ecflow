@@ -88,26 +88,20 @@ set(srcs
 # tests
 # =====================================================================
 set(u_tests
-  u_test_add
-  u_test_collection
-  u_test_cron
-  u_test_defs_constructor
-  u_test_get_attr
-  u_test_manual
-  u_test_node
-  u_test_late
-  u_test_replace_node
-  u_test_tutorial
-  u_TestAddDelete
-  u_TestAddDeleteFunc
-  u_TestAddNodeFunc
+  u_TestAttributeAddDelete
+  u_TestAttributeAddDeleteError
+  u_TestAttributeAddDeleteInTasks
   u_TestAutoAddExtern
   u_TestAviso
+  u_TestCollection
   u_TestCopy
   u_TestCron
+  u_TestCronConstructor
   u_TestDefs
   u_TestDefsCheck
+  u_TestDefsConstructor
   u_TestDerivable
+  u_TestDynamicObjects
   u_TestEcf
   u_TestError
   u_TestExportClient
@@ -123,10 +117,17 @@ set(u_tests
   u_TestGeneratedVariable
   u_TestGeneric
   u_TestGetAllTasks
+  u_TestGetAttributes
   u_TestJobGeneration
+  u_TestLate
+  u_TestManual
   u_TestMeter
   u_TestMirror
   u_TestNode
+  u_TestNodeAdd
+  u_TestNodeAddInDefs
+  u_TestNodeChaining
+  u_TestNodeReplace
   u_TestParent
   u_TestPrint
   u_TestPythonBindings
@@ -134,10 +135,11 @@ set(u_tests
   u_TestRepeatArithmetic
   u_TestRepeatDateTimeList
   u_TestSimulator
+  u_TestSortAttributes
   u_TestTraversal
+  u_TestTutorial
   u_TestUserManual
   u_TestWith
-  u_sort
 )
 
 set(s_tests
