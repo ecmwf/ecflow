@@ -179,6 +179,6 @@ void serialize(Archive& ar, MirrorAttr& mirror, [[maybe_unused]] std::uint32_t v
 
 } // namespace ecf
 
-CEREAL_CLASS_VERSION(ecf::MirrorAttr, 1);
+CEREAL_CLASS_VERSION(ecf::MirrorAttr, 1)
 
 #endif /* ecflow_node_MirrorAttr_HPP */
