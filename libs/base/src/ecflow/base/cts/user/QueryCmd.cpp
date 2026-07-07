@@ -243,125 +243,173 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const {
 
     Defs* defs = as->defs().get();
 
-    if (path_to_attribute_ == "/") {
-        if (query_type_ == "state") {
-            return PreAllocatedReply::string_cmd(NState::toString(defs->state()));
-        }
-        if (query_type_ == "variable") {
-            // Variable is attached to the server itself (i.e. `ecflow_client --query variable /:name`).
-            // Preference is given to user defined variables, and only then to server defined variables
-            // (see ServerState::find_variable).
-            if (defs->server_state().variable_exists(attribute_)) {
-                auto& the_value = defs->server_state().find_variable(attribute_);
-                return PreAllocatedReply::string_cmd(the_value);
-            }
-            else {
-                throw std::runtime_error(MESSAGE("QueryCmd: Cannot find server variable of name " << attribute_));
-            }
-        }
-        throw std::runtime_error(MESSAGE(
-            "QueryCmd: The only valid query for the server is 'state' or 'variable', i.e. ecflow_client --query "
-            "state / or ecflow_client --query variable /:name"));
-    }
-
-    node_ptr node = find_node(defs, path_to_attribute_);
-
-    if (query_type_ == "event") {
-        const Event& event = node->findEventByNameOrNumber(attribute_);
-        if (event.empty()) {
-            throw std::runtime_error(
-                MESSAGE("QueryCmd: Cannot find event " << attribute_ << " on node " << path_to_attribute_));
-        }
-        if (event.value()) {
-            return PreAllocatedReply::string_cmd(Event::SET());
-        }
-        return PreAllocatedReply::string_cmd(Event::CLEAR());
-    }
-
-    if (query_type_ == "meter") {
-        const Meter& meter = node->findMeter(attribute_);
-        if (meter.empty()) {
-            throw std::runtime_error(
-                MESSAGE("QueryCmd: Cannot find meter " << attribute_ << " on node " << path_to_attribute_));
-        }
-        return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(meter.value()));
-    }
-
-    if (query_type_ == "limit") {
-        limit_ptr limit = node->find_limit(attribute_);
-        if (!limit.get()) {
-            throw std::runtime_error("QueryCmd: Could not find limit " + attribute_);
-        }
-        return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(limit->value()));
-    }
-    if (query_type_ == "limit_max") {
-        limit_ptr limit = node->find_limit(attribute_);
-        if (!limit.get()) {
-            throw std::runtime_error("QueryCmd: Could not find limit " + attribute_);
-        }
-        return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(limit->theLimit()));
-    }
-
-    if (query_type_ == "label") {
-        const Label& label = node->find_label(attribute_);
-        if (label.empty()) {
-            throw std::runtime_error(
-                MESSAGE("QueryCmd: Cannot find label " << attribute_ << " on node " << path_to_attribute_));
-        }
-        if (label.new_value().empty()) {
-            return PreAllocatedReply::string_cmd(label.value());
-        }
-        return PreAllocatedReply::string_cmd(label.new_value());
-    }
-
-    if (query_type_ == "variable") {
-        std::string the_value;
-        if (node->findParentVariableValue(attribute_, the_value)) {
-            return PreAllocatedReply::string_cmd(the_value);
-        }
-        throw std::runtime_error(MESSAGE("QueryCmd: Cannot find variable, repeat or generated var' of name "
-                                         << attribute_ << " on node " << path_to_attribute_ << " or its parents"));
-    }
-
-    if (query_type_ == "trigger") {
-        std::unique_ptr<AstTop> ast =
-            node->parse_and_check_expressions(attribute_, true, "QueryCmd:"); // will throw for errors
-        if (ast->evaluate()) {
-            return PreAllocatedReply::string_cmd("true");
-        }
-        return PreAllocatedReply::string_cmd("false");
-    }
-
     if (query_type_ == "state") {
-        return PreAllocatedReply::string_cmd(NState::toString(node->state()));
+        return doHandleQueryForState(defs);
     }
-
-    if (query_type_ == "dstate") {
-        return PreAllocatedReply::string_cmd(DState::to_string(node->dstate()));
+    else if (query_type_ == "dstate") {
+        return doHandleQueryForDState(defs);
     }
-
-    if (query_type_ == "repeat") {
-        const Repeat& repeat = node->repeat();
-        if (repeat.empty()) {
-            throw std::runtime_error(MESSAGE("QueryCmd: Cannot find repeat on node " << path_to_attribute_));
-        }
-        if (attribute_.empty()) {
-            return PreAllocatedReply::string_cmd(repeat.valueAsString());
-        }
-        if (attribute_ == "next") {
-            return PreAllocatedReply::string_cmd(repeat.next_value_as_string());
-        }
-        if (attribute_ == "prev") {
-            return PreAllocatedReply::string_cmd(repeat.prev_value_as_string());
-        }
-        throw std::runtime_error(
-            MESSAGE("QueryCmd: invalid repeat attribute expected next | prev but found " << attribute_));
+    else if (query_type_ == "repeat") {
+        return doHandleQueryForRepeat(defs);
+    }
+    else if (query_type_ == "event") {
+        return doHandleQueryForEvent(defs);
+    }
+    else if (query_type_ == "meter") {
+        return doHandleQueryForMeter(defs);
+    }
+    else if (query_type_ == "limit") {
+        return doHandleQueryForLimit(defs);
+    }
+    else if (query_type_ == "limit_max") {
+        return doHandleQueryForLimitMax(defs);
+    }
+    else if (query_type_ == "label") {
+        return doHandleQueryForLabel(defs);
+    }
+    else if (query_type_ == "variable") {
+        return doHandleQueryForVariable(defs);
+    }
+    else if (query_type_ == "trigger") {
+        return doHandleQueryForTrigger(defs);
     }
     else {
         throw std::runtime_error(MESSAGE("QueryCmd: unrecognised query_type " << query_type_));
     }
+}
 
-    // This function must return on one of the above conditions!
+node_ptr QueryCmd::find_node_for_query(Defs* defs) const {
+    // Only 'state' and 'variable' queries can be addressed at the server itself (path_to_attribute_ == "/");
+    // every other query type requires an actual node.
+    if (path_to_attribute_ == "/") {
+        throw std::runtime_error(MESSAGE(
+            "QueryCmd: The only valid query for the server is 'state' or 'variable', i.e. ecflow_client --query "
+            "state / or ecflow_client --query variable /:name"));
+    }
+    return find_node(defs, path_to_attribute_);
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForState(Defs* defs) const {
+    if (path_to_attribute_ == "/") {
+        return PreAllocatedReply::string_cmd(NState::toString(defs->state()));
+    }
+    node_ptr node = find_node(defs, path_to_attribute_);
+    return PreAllocatedReply::string_cmd(NState::toString(node->state()));
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForDState(Defs* defs) const {
+    node_ptr node = find_node_for_query(defs);
+    return PreAllocatedReply::string_cmd(DState::to_string(node->dstate()));
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForRepeat(Defs* defs) const {
+    node_ptr node = find_node_for_query(defs);
+
+    const Repeat& repeat = node->repeat();
+    if (repeat.empty()) {
+        throw std::runtime_error(MESSAGE("QueryCmd: Cannot find repeat on node " << path_to_attribute_));
+    }
+    if (attribute_.empty()) {
+        return PreAllocatedReply::string_cmd(repeat.valueAsString());
+    }
+    if (attribute_ == "next") {
+        return PreAllocatedReply::string_cmd(repeat.next_value_as_string());
+    }
+    if (attribute_ == "prev") {
+        return PreAllocatedReply::string_cmd(repeat.prev_value_as_string());
+    }
+    throw std::runtime_error(
+        MESSAGE("QueryCmd: invalid repeat attribute expected next | prev but found " << attribute_));
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForEvent(Defs* defs) const {
+    node_ptr node = find_node_for_query(defs);
+
+    const Event& event = node->findEventByNameOrNumber(attribute_);
+    if (event.empty()) {
+        throw std::runtime_error(
+            MESSAGE("QueryCmd: Cannot find event " << attribute_ << " on node " << path_to_attribute_));
+    }
+    if (event.value()) {
+        return PreAllocatedReply::string_cmd(Event::SET());
+    }
+    return PreAllocatedReply::string_cmd(Event::CLEAR());
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForMeter(Defs* defs) const {
+    node_ptr node = find_node_for_query(defs);
+
+    const Meter& meter = node->findMeter(attribute_);
+    if (meter.empty()) {
+        throw std::runtime_error(
+            MESSAGE("QueryCmd: Cannot find meter " << attribute_ << " on node " << path_to_attribute_));
+    }
+    return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(meter.value()));
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForLimit(Defs* defs) const {
+    node_ptr node = find_node_for_query(defs);
+
+    limit_ptr limit = node->find_limit(attribute_);
+    if (!limit.get()) {
+        throw std::runtime_error("QueryCmd: Could not find limit " + attribute_);
+    }
+    return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(limit->value()));
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForLimitMax(Defs* defs) const {
+    node_ptr node = find_node_for_query(defs);
+
+    limit_ptr limit = node->find_limit(attribute_);
+    if (!limit.get()) {
+        throw std::runtime_error("QueryCmd: Could not find limit " + attribute_);
+    }
+    return PreAllocatedReply::string_cmd(ecf::convert_to<std::string>(limit->theLimit()));
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForLabel(Defs* defs) const {
+    node_ptr node = find_node_for_query(defs);
+
+    const Label& label = node->find_label(attribute_);
+    if (label.empty()) {
+        throw std::runtime_error(
+            MESSAGE("QueryCmd: Cannot find label " << attribute_ << " on node " << path_to_attribute_));
+    }
+    if (label.new_value().empty()) {
+        return PreAllocatedReply::string_cmd(label.value());
+    }
+    return PreAllocatedReply::string_cmd(label.new_value());
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForVariable(Defs* defs) const {
+    if (path_to_attribute_ == "/") {
+        // Variable is attached to the server itself (i.e. `ecflow_client --query variable /:name`).
+        // Preference is given to user defined variables, and only then to server defined variables
+        // (see ServerState::find_variable).
+        if (!defs->server_state().variable_exists(attribute_)) {
+            throw std::runtime_error(MESSAGE("QueryCmd: Cannot find server variable of name " << attribute_));
+        }
+        return PreAllocatedReply::string_cmd(defs->server_state().find_variable(attribute_));
+    }
+
+    node_ptr node = find_node(defs, path_to_attribute_);
+    std::string the_value;
+    if (node->findParentVariableValue(attribute_, the_value)) {
+        return PreAllocatedReply::string_cmd(the_value);
+    }
+    throw std::runtime_error(MESSAGE("QueryCmd: Cannot find variable, repeat or generated var' of name "
+                                     << attribute_ << " on node " << path_to_attribute_ << " or its parents"));
+}
+
+STC_Cmd_ptr QueryCmd::doHandleQueryForTrigger(Defs* defs) const {
+    node_ptr node = find_node_for_query(defs);
+
+    std::unique_ptr<AstTop> ast =
+        node->parse_and_check_expressions(attribute_, true, "QueryCmd:"); // will throw for errors
+    if (ast->evaluate()) {
+        return PreAllocatedReply::string_cmd("true");
+    }
+    return PreAllocatedReply::string_cmd("false");
 }
 
 std::ostream& operator<<(std::ostream& os, const QueryCmd& c) {
