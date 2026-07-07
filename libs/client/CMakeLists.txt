@@ -48,27 +48,59 @@ SET_TARGET_PROPERTIES(ecflow_client
 
 add_subdirectory(test/harness)
 
-# ================================================================================                         
-# TEST
+# ================================================================================
+# Test (Unit) - does not require server to be running
 set(test_srcs
   # Sources
   test/TestClient_main.cpp # test entry point
-  test/TestClientConfigurations.cpp
-  test/TestClientEnvironment.cpp
-  test/TestClientOptions.cpp
-  test/TestClientRetry.cpp
-  test/TestClientInterface.cpp
-  test/TestHostsFile.cpp
-  test/TestJobGenOnly.cpp
-  test/TestLifeCycle.cpp
-  test/TestInitAddVariables.cpp
-  test/TestRtt.cpp
+  test/TestClientOptions.cpp #
+  test/TestClientInterface.cpp #
+  test/TestClientConfigurations.cpp #
+  test/TestClientEnvironment.cpp #
+  test/TestClientRetry.cpp #
+  test/TestHostsFile.cpp #
+  test/TestInitAddVariables.cpp #
+  test/TestLifeCycle.cpp #
+  test/TestJobGenOnly.cpp #
+  test/TestRtt.cpp #
   test/TestUrlCmd.cpp
 )
 
+ecbuild_add_test(
+  TARGET
+    u_client
+  LABELS
+    unit nightly fast
+  SOURCES
+    ${test_srcs}
+  INCLUDES
+    ../base/test
+    ../node/test
+  LIBS
+    ecflow_all
+    test_scaffold
+    test_harness.base
+    test_harness.client
+    Boost::boost # Boost header-only libraries must be available (namely unit_test_framework)
+    $<$<BOOL:${OPENSSL_FOUND}>:OpenSSL::SSL>
+  DEPENDS
+    ecflow_all
+  TEST_DEPENDS
+    u_base
+  CONDITION
+    ENABLE_SERVER # AND ENABLE_TESTS
+)
+target_clangformat(u_client
+  CONDITION ENABLE_SERVER # AND ENABLE_TESTS
+)
+
+# ================================================================================                         
+# TEST (Integration) - requires server to be running
+
 if (ENABLE_SERVER)
-  list(APPEND test_srcs
+  set(test_srcs
     # Sources
+    test/TestClient_main.cpp # test entry point
     test/TestClientTimeout.cpp
     test/TestClientHandleCmd.cpp
     test/TestCheckPtDefsCmd.cpp
