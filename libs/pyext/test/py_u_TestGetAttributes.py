@@ -75,30 +75,27 @@ from ecflow import (
     Edit,
     Defstatus,
 )
-import unittest
 import sys
 import os
 
 
-class Test_get_attr(unittest.TestCase):
+class Test_get_attr:
     def test_get_attr(self):
         defs = Defs() + (Suite("s") + Family("f").add(Task("t") + Edit(var="1")))
         defs += Edit(var="1")
 
-        self.assertIsInstance(defs.s, Suite, "Expected suite")
-        self.assertIsInstance(defs.s.f, Family, "Expected family")
-        self.assertIsInstance(
-            defs.s.f.t, Task, "Expected Task but found " + str(type(defs.s.f.t))
+        assert isinstance(defs.s, Suite), "Expected suite"
+        assert isinstance(defs.s.f, Family), "Expected family"
+        assert isinstance(defs.s.f.t, Task), "Expected Task but found " + str(
+            type(defs.s.f.t)
         )
 
-        self.assertIsInstance(
-            defs.var, Variable, "Expected Variable but found " + str(type(defs.var))
+        assert isinstance(defs.var, Variable), "Expected Variable but found " + str(
+            type(defs.var)
         )
-        self.assertIsInstance(
-            defs.s.f.t.var,
-            Variable,
-            "Expected Variable but found " + str(type(defs.s.f.t.var)),
-        )
+        assert isinstance(
+            defs.s.f.t.var, Variable
+        ), "Expected Variable but found " + str(type(defs.s.f.t.var))
 
     def test_get_attr_generated_variables(self):
         defs = Defs() + (
@@ -123,130 +120,97 @@ class Test_get_attr(unittest.TestCase):
         # PrintStyle.set_style(Style.STATE)
         # print(defs)
 
-        self.assertTrue(defs.ECF_MICRO, "expected generated variable")
-        self.assertTrue(defs.ECF_HOME, "expected generated variable")
-        self.assertTrue(defs.ECF_JOB_CMD, "expected generated variable")
-        self.assertTrue(defs.ECF_KILL_CMD, "expected generated variable")
-        self.assertTrue(defs.ECF_STATUS_CMD, "expected generated variable")
-        self.assertTrue(defs.ECF_URL_CMD, "expected generated variable")
-        self.assertTrue(defs.ECF_LOG, "expected generated variable")
-        self.assertTrue(defs.ECF_INTERVAL, "expected generated variable")
-        self.assertTrue(defs.ECF_LISTS, "expected generated variable")
-        self.assertTrue(defs.ECF_CHECK, "expected generated variable")
-        self.assertTrue(defs.ECF_CHECKOLD, "expected generated variable")
-        self.assertTrue(defs.ECF_CHECKINTERVAL, "expected generated variable")
-        self.assertTrue(defs.ECF_CHECKMODE, "expected generated variable")
-        self.assertTrue(defs.ECF_TRIES, "expected generated variable")
-        self.assertTrue(defs.ECF_VERSION, "expected generated variable")
-        self.assertTrue(defs.ECF_PORT, "expected generated variable")
-        self.assertTrue(defs.ECF_HOST, "expected generated variable")
+        assert defs.ECF_MICRO, "expected generated variable"
+        assert defs.ECF_HOME, "expected generated variable"
+        assert defs.ECF_JOB_CMD, "expected generated variable"
+        assert defs.ECF_KILL_CMD, "expected generated variable"
+        assert defs.ECF_STATUS_CMD, "expected generated variable"
+        assert defs.ECF_URL_CMD, "expected generated variable"
+        assert defs.ECF_LOG, "expected generated variable"
+        assert defs.ECF_INTERVAL, "expected generated variable"
+        assert defs.ECF_LISTS, "expected generated variable"
+        assert defs.ECF_CHECK, "expected generated variable"
+        assert defs.ECF_CHECKOLD, "expected generated variable"
+        assert defs.ECF_CHECKINTERVAL, "expected generated variable"
+        assert defs.ECF_CHECKMODE, "expected generated variable"
+        assert defs.ECF_TRIES, "expected generated variable"
+        assert defs.ECF_VERSION, "expected generated variable"
+        assert defs.ECF_PORT, "expected generated variable"
+        assert defs.ECF_HOST, "expected generated variable"
 
-        self.assertTrue(defs.s.SUITE, "expected generated variable")
-        self.assertEqual(
-            defs.s.SUITE.value(), "s", "expected suite name of 's' but found"
-        )
-        self.assertTrue(defs.s.ECF_DATE, "expected generated variable")
-        self.assertTrue(defs.s.YYYY, "expected generated variable")
-        self.assertTrue(defs.s.DOW, "expected generated variable")
-        self.assertTrue(defs.s.DOY, "expected generated variable")
-        self.assertTrue(defs.s.DATE, "expected generated variable")
-        self.assertTrue(defs.s.DAY, "expected generated variable")
-        self.assertTrue(defs.s.DD, "expected generated variable")
-        self.assertTrue(defs.s.MM, "expected generated variable")
-        self.assertTrue(defs.s.MONTH, "expected generated variable")
-        self.assertTrue(defs.s.ECF_CLOCK, "expected generated variable")
-        self.assertTrue(defs.s.ECF_TIME, "expected generated variable")
-        self.assertTrue(defs.s.TIME, "expected generated variable")
+        assert defs.s.SUITE, "expected generated variable"
+        assert defs.s.SUITE.value() == "s", "expected suite name of 's' but found"
+        assert defs.s.ECF_DATE, "expected generated variable"
+        assert defs.s.YYYY, "expected generated variable"
+        assert defs.s.DOW, "expected generated variable"
+        assert defs.s.DOY, "expected generated variable"
+        assert defs.s.DATE, "expected generated variable"
+        assert defs.s.DAY, "expected generated variable"
+        assert defs.s.DD, "expected generated variable"
+        assert defs.s.MM, "expected generated variable"
+        assert defs.s.MONTH, "expected generated variable"
+        assert defs.s.ECF_CLOCK, "expected generated variable"
+        assert defs.s.ECF_TIME, "expected generated variable"
+        assert defs.s.TIME, "expected generated variable"
 
-        self.assertTrue(defs.s.f.FAMILY, "expected generated variable")
-        self.assertTrue(defs.s.f.FAMILY1, "expected generated variable")
+        assert defs.s.f.FAMILY, "expected generated variable"
+        assert defs.s.f.FAMILY1, "expected generated variable"
 
-        self.assertTrue(defs.s.f.t.TASK, "expected generated variable")
-        self.assertEqual(defs.s.f.t.TASK.value(), "t", "expected task name of 's'")
-        self.assertTrue(defs.s.f.t.ECF_JOB, "expected generated variable")
-        self.assertTrue(defs.s.f.t.ECF_SCRIPT, "expected generated variable")
-        self.assertTrue(defs.s.f.t.ECF_JOBOUT, "expected generated variable")
-        self.assertTrue(defs.s.f.t.ECF_TRYNO, "expected generated variable")
-        self.assertEqual(
-            defs.s.f.t.ECF_TRYNO.value(), "0", "expected task try no of '0'"
-        )
-        self.assertTrue(defs.s.f.t.ECF_RID, "expected generated variable")
-        self.assertTrue(defs.s.f.t.ECF_NAME, "expected generated variable")
-        self.assertEqual(
-            defs.s.f.t.ECF_NAME.value(), "/s/f/t", "expected task ECF_NAME of '/s/f/t'"
-        )
-        self.assertTrue(defs.s.f.t.ECF_PASS, "expected generated variable")
+        assert defs.s.f.t.TASK, "expected generated variable"
+        assert defs.s.f.t.TASK.value() == "t", "expected task name of 's'"
+        assert defs.s.f.t.ECF_JOB, "expected generated variable"
+        assert defs.s.f.t.ECF_SCRIPT, "expected generated variable"
+        assert defs.s.f.t.ECF_JOBOUT, "expected generated variable"
+        assert defs.s.f.t.ECF_TRYNO, "expected generated variable"
+        assert defs.s.f.t.ECF_TRYNO.value() == "0", "expected task try no of '0'"
+        assert defs.s.f.t.ECF_RID, "expected generated variable"
+        assert defs.s.f.t.ECF_NAME, "expected generated variable"
+        assert (
+            defs.s.f.t.ECF_NAME.value() == "/s/f/t"
+        ), "expected task ECF_NAME of '/s/f/t'"
+        assert defs.s.f.t.ECF_PASS, "expected generated variable"
 
-        self.assertEqual(
-            defs.s.f.t.YMD.value(), "20100111", "expected generated YMD of value"
+        assert defs.s.f.t.YMD.value() == "20100111", "expected generated YMD of value"
+        assert defs.s.f.t.YMD_YYYY.value() == "2010", "expected generated YMD of value"
+        assert defs.s.f.t.YMD_MM.value() == "01", "expected generated YMD of value"
+        assert defs.s.f.t.YMD_DD.value() == "11", "expected generated YMD of value"
+        assert defs.s.f.t.YMD_DOW.value() == "1", "expected generated YMD of value"
+        assert (
+            defs.s.f.t.YMD_JULIAN.value() == "2455208"
+        ), "expected generated YMD of value"
+        assert (
+            defs.s.f.t.event.value() == 0
+        ), "expected generated event of value 0 but found " + str(
+            defs.s.f.t.event.value()
         )
-        self.assertEqual(
-            defs.s.f.t.YMD_YYYY.value(), "2010", "expected generated YMD of value"
+        assert (
+            defs.s.f.t.meter.value() == 0
+        ), "expected generated meter of value 0 but found " + str(
+            defs.s.f.t.meter.value()
         )
-        self.assertEqual(
-            defs.s.f.t.YMD_MM.value(), "01", "expected generated YMD of value"
+        assert (
+            defs.s.f.t.limitx.value() == 0
+        ), "expected generated limit of value 0 but found " + str(
+            defs.s.f.t.limitx.value()
         )
-        self.assertEqual(
-            defs.s.f.t.YMD_DD.value(), "11", "expected generated YMD of value"
-        )
-        self.assertEqual(
-            defs.s.f.t.YMD_DOW.value(), "1", "expected generated YMD of value"
-        )
-        self.assertEqual(
-            defs.s.f.t.YMD_JULIAN.value(), "2455208", "expected generated YMD of value"
-        )
-        self.assertEqual(
-            defs.s.f.t.event.value(),
-            0,
-            "expected generated event of value 0 but found "
-            + str(defs.s.f.t.event.value()),
-        )
-        self.assertEqual(
-            defs.s.f.t.meter.value(),
-            0,
-            "expected generated meter of value 0 but found "
-            + str(defs.s.f.t.meter.value()),
-        )
-        self.assertEqual(
-            defs.s.f.t.limitx.value(),
-            0,
-            "expected generated limit of value 0 but found "
-            + str(defs.s.f.t.limitx.value()),
-        )  #
 
-        self.assertEqual(
-            defs.s.f.t2.YMD.value(), "20100111", "expected generated YMD of value"
-        )
-        self.assertEqual(
-            defs.s.f.t2.YMD_YYYY.value(), "2010", "expected generated YMD of value"
-        )
-        self.assertEqual(
-            defs.s.f.t2.YMD_MM.value(), "01", "expected generated YMD of value"
-        )
-        self.assertEqual(
-            defs.s.f.t2.YMD_DD.value(), "11", "expected generated YMD of value"
-        )
-        self.assertEqual(
-            defs.s.f.t2.YMD_DOW.value(), "1", "expected generated YMD of value"
-        )
-        self.assertEqual(
-            defs.s.f.t2.YMD_JULIAN.value(), "2455208", "expected generated YMD of value"
-        )
+        assert defs.s.f.t2.YMD.value() == "20100111", "expected generated YMD of value"
+        assert defs.s.f.t2.YMD_YYYY.value() == "2010", "expected generated YMD of value"
+        assert defs.s.f.t2.YMD_MM.value() == "01", "expected generated YMD of value"
+        assert defs.s.f.t2.YMD_DD.value() == "11", "expected generated YMD of value"
+        assert defs.s.f.t2.YMD_DOW.value() == "1", "expected generated YMD of value"
+        assert (
+            defs.s.f.t2.YMD_JULIAN.value() == "2455208"
+        ), "expected generated YMD of value"
 
         # RepeatDateTimeList generated variables
-        self.assertEqual(
-            defs.s.f.t3.DT.value(), "20240315T103045", "expected DT='20240315T103045'"
-        )
-        self.assertEqual(
-            defs.s.f.t3.DT_DATE.value(), "20240315", "expected DT_DATE='20240315'"
-        )
-        self.assertEqual(defs.s.f.t3.DT_YYYY.value(), "2024", "expected DT_YYYY='2024'")
-        self.assertEqual(defs.s.f.t3.DT_MM.value(), "03", "expected DT_MM='03'")
-        self.assertEqual(defs.s.f.t3.DT_DD.value(), "15", "expected DT_DD='15'")
-        self.assertEqual(defs.s.f.t3.DT_HOURS.value(), "10", "expected DT_HOURS='10'")
-        self.assertEqual(
-            defs.s.f.t3.DT_MINUTES.value(), "30", "expected DT_MINUTES='30'"
-        )
-        self.assertEqual(
-            defs.s.f.t3.DT_SECONDS.value(), "45", "expected DT_SECONDS='45'"
-        )
+        assert (
+            defs.s.f.t3.DT.value() == "20240315T103045"
+        ), "expected DT='20240315T103045'"
+        assert defs.s.f.t3.DT_DATE.value() == "20240315", "expected DT_DATE='20240315'"
+        assert defs.s.f.t3.DT_YYYY.value() == "2024", "expected DT_YYYY='2024'"
+        assert defs.s.f.t3.DT_MM.value() == "03", "expected DT_MM='03'"
+        assert defs.s.f.t3.DT_DD.value() == "15", "expected DT_DD='15'"
+        assert defs.s.f.t3.DT_HOURS.value() == "10", "expected DT_HOURS='10'"
+        assert defs.s.f.t3.DT_MINUTES.value() == "30", "expected DT_MINUTES='30'"
+        assert defs.s.f.t3.DT_SECONDS.value() == "45", "expected DT_SECONDS='45'"

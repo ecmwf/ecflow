@@ -9,12 +9,11 @@
 #
 
 import copy
-import unittest
-
 import ecflow as ecf
+import pytest
 
 
-class TestDebugBuild(unittest.TestCase):
+class TestDebugBuild:
     """Tests for the free function debug_build() exposed in ExportCore.cpp.
 
     Exposed API
@@ -29,19 +28,19 @@ class TestDebugBuild(unittest.TestCase):
 
     def test_returns_bool(self):
         """debug_build() returns a Python bool."""
-        self.assertIsInstance(ecf.debug_build(), bool)
+        assert isinstance(ecf.debug_build(), bool)
 
     def test_callable_with_no_arguments(self):
         """debug_build() takes no arguments."""
         result = ecf.debug_build()
-        self.assertIn(result, (True, False))
+        assert result in (True, False)
 
     def test_result_is_stable(self):
         """Repeated calls return the same value (it is a build-time constant)."""
-        self.assertEqual(ecf.debug_build(), ecf.debug_build())
+        assert ecf.debug_build() == ecf.debug_build()
 
 
-class TestEdit(unittest.TestCase):
+class TestEdit:
     """Tests for py::class_<Edit> exposed as ecf.Edit in ExportCore.cpp.
 
     Exposed API
@@ -67,25 +66,25 @@ class TestEdit(unittest.TestCase):
     def test_ctor_dict_is_accepted(self):
         """Edit(dict) constructs successfully."""
         e = ecf.Edit({"X": "1"})
-        self.assertIsInstance(e, ecf.Edit)
+        assert isinstance(e, ecf.Edit)
 
     def test_ctor_empty_dict_is_accepted(self):
         """Edit({}) constructs without error."""
         e = ecf.Edit({})
-        self.assertIsInstance(e, ecf.Edit)
+        assert isinstance(e, ecf.Edit)
 
     def test_ctor_dict_adds_variable_when_passed_to_node(self):
         """Edit(dict) variables are visible on the node after Node.add(Edit(...))."""
         t = ecf.Task("t1")
         t.add(ecf.Edit({"MY_VAR": "hello"}))
-        self.assertEqual(t.find_variable("MY_VAR").value(), "hello")
+        assert t.find_variable("MY_VAR").value() == "hello"
 
     def test_ctor_dict_multiple_entries_all_added(self):
         """All key-value pairs in the dict become node variables."""
         t = ecf.Task("t1")
         t.add(ecf.Edit({"A": "1", "B": "2"}))
-        self.assertEqual(t.find_variable("A").value(), "1")
-        self.assertEqual(t.find_variable("B").value(), "2")
+        assert t.find_variable("A").value() == "1"
+        assert t.find_variable("B").value() == "2"
 
     # ------------------------------------------------------------------
     # Constructor: Edit(dict, dict)
@@ -95,13 +94,13 @@ class TestEdit(unittest.TestCase):
         """Edit(dict, dict) combines variables from both dicts."""
         t = ecf.Task("t1")
         t.add(ecf.Edit({"X": "10"}, {"Y": "20"}))
-        self.assertEqual(t.find_variable("X").value(), "10")
-        self.assertEqual(t.find_variable("Y").value(), "20")
+        assert t.find_variable("X").value() == "10"
+        assert t.find_variable("Y").value() == "20"
 
     def test_ctor_two_empty_dicts_is_accepted(self):
         """Edit({}, {}) constructs without error."""
         e = ecf.Edit({}, {})
-        self.assertIsInstance(e, ecf.Edit)
+        assert isinstance(e, ecf.Edit)
 
     # ------------------------------------------------------------------
     # Constructor: Edit(**kwargs)  via raw_function
@@ -111,8 +110,8 @@ class TestEdit(unittest.TestCase):
         """Edit(**kwargs) variables are visible on the node after Node.add(Edit(...))."""
         t = ecf.Task("t1")
         t.add(ecf.Edit(ALPHA="a", BETA="b"))
-        self.assertEqual(t.find_variable("ALPHA").value(), "a")
-        self.assertEqual(t.find_variable("BETA").value(), "b")
+        assert t.find_variable("ALPHA").value() == "a"
+        assert t.find_variable("BETA").value() == "b"
 
     # ------------------------------------------------------------------
     # Constructor: Edit(dict, **kwargs)
@@ -122,8 +121,8 @@ class TestEdit(unittest.TestCase):
         """Edit(dict, **kwargs) combines positional dict and keyword arguments."""
         t = ecf.Task("t1")
         t.add(ecf.Edit({"FROM_DICT": "d"}, FROM_KW="k"))
-        self.assertEqual(t.find_variable("FROM_DICT").value(), "d")
-        self.assertEqual(t.find_variable("FROM_KW").value(), "k")
+        assert t.find_variable("FROM_DICT").value() == "d"
+        assert t.find_variable("FROM_KW").value() == "k"
 
     # ------------------------------------------------------------------
     # Invalid argument
@@ -131,7 +130,7 @@ class TestEdit(unittest.TestCase):
 
     def test_ctor_non_dict_positional_raises(self):
         """Edit accepts only dict positional arguments; a plain string raises RuntimeError."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Edit("not_a_dict")
 
     # ------------------------------------------------------------------
@@ -142,11 +141,11 @@ class TestEdit(unittest.TestCase):
         """str(Edit(...)) raises because __str__ is bound to a static C++ method
         that takes no arguments; Boost.Python cannot pass the implicit self."""
         e = ecf.Edit({"A": "1"})
-        with self.assertRaises(Exception):
+        with pytest.raises(Exception):
             str(e)
 
 
-class TestFile(unittest.TestCase):
+class TestFile:
     """Tests for py::class_<ecf::File, boost::noncopyable> exposed as ecf.File in ExportCore.cpp.
 
     Exposed API
@@ -167,7 +166,7 @@ class TestFile(unittest.TestCase):
 
     def test_direct_construction_raises(self):
         """File cannot be instantiated from Python."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.File()
 
     # ------------------------------------------------------------------
@@ -176,12 +175,12 @@ class TestFile(unittest.TestCase):
 
     def test_find_server_returns_str(self):
         """File.find_server() returns a Python str."""
-        self.assertIsInstance(ecf.File.find_server(), str)
+        assert isinstance(ecf.File.find_server(), str)
 
     def test_find_server_callable_without_instance(self):
         """find_server() is a static method callable on the class."""
         result = ecf.File.find_server()
-        self.assertIsInstance(result, str)
+        assert isinstance(result, str)
 
     # ------------------------------------------------------------------
     # find_client()
@@ -189,11 +188,11 @@ class TestFile(unittest.TestCase):
 
     def test_find_client_returns_str(self):
         """File.find_client() returns a Python str."""
-        self.assertIsInstance(ecf.File.find_client(), str)
+        assert isinstance(ecf.File.find_client(), str)
 
     def test_find_client_callable_without_instance(self):
         """find_client() is a static method callable on the class."""
-        self.assertIsInstance(ecf.File.find_client(), str)
+        assert isinstance(ecf.File.find_client(), str)
 
     # ------------------------------------------------------------------
     # source_dir()
@@ -201,11 +200,11 @@ class TestFile(unittest.TestCase):
 
     def test_source_dir_returns_str(self):
         """File.source_dir() returns a Python str."""
-        self.assertIsInstance(ecf.File.source_dir(), str)
+        assert isinstance(ecf.File.source_dir(), str)
 
     def test_source_dir_callable_without_instance(self):
         """source_dir() is a static method callable on the class."""
-        self.assertIsInstance(ecf.File.source_dir(), str)
+        assert isinstance(ecf.File.source_dir(), str)
 
     # ------------------------------------------------------------------
     # build_dir()
@@ -213,14 +212,14 @@ class TestFile(unittest.TestCase):
 
     def test_build_dir_returns_str(self):
         """File.build_dir() returns a Python str."""
-        self.assertIsInstance(ecf.File.build_dir(), str)
+        assert isinstance(ecf.File.build_dir(), str)
 
     def test_build_dir_callable_without_instance(self):
         """build_dir() is a static method callable on the class."""
-        self.assertIsInstance(ecf.File.build_dir(), str)
+        assert isinstance(ecf.File.build_dir(), str)
 
 
-class TestStyle(unittest.TestCase):
+class TestStyle:
     """Tests for py::enum_<PrintStyle::Type_t> exposed as ecf.Style in ExportCore.cpp.
 
     Exposed API
@@ -267,7 +266,7 @@ class TestStyle(unittest.TestCase):
         for i, a in enumerate(values):
             for j, b in enumerate(values):
                 if i != j:
-                    self.assertNotEqual(a, b)
+                    assert a != b
 
     # ------------------------------------------------------------------
     # __eq__ and __ne__
@@ -275,19 +274,19 @@ class TestStyle(unittest.TestCase):
 
     def test_eq_same_value(self):
         """A Style member compares equal to itself."""
-        self.assertEqual(ecf.Style.DEFS, ecf.Style.DEFS)
+        assert ecf.Style.DEFS == ecf.Style.DEFS
 
     def test_ne_different_values(self):
         """Different Style members are not equal."""
-        self.assertNotEqual(ecf.Style.DEFS, ecf.Style.STATE)
+        assert ecf.Style.DEFS != ecf.Style.STATE
 
     def test_eq_incompatible_type_returns_not_implemented(self):
         """__eq__ returns NotImplemented for an incompatible RHS type."""
-        self.assertIs(ecf.Style.DEFS.__eq__("DEFS"), NotImplemented)
+        assert ecf.Style.DEFS.__eq__("DEFS") is NotImplemented
 
     def test_ne_incompatible_type_returns_not_implemented(self):
         """__ne__ returns NotImplemented for an incompatible RHS type."""
-        self.assertIs(ecf.Style.DEFS.__ne__("DEFS"), NotImplemented)
+        assert ecf.Style.DEFS.__ne__("DEFS") is NotImplemented
 
     # ------------------------------------------------------------------
     # __lt__ / __le__ / __gt__ / __ge__
@@ -295,35 +294,35 @@ class TestStyle(unittest.TestCase):
 
     def test_lt_orders_by_value(self):
         """Style.NOTHING < Style.DEFS (integer value 0 < 1)."""
-        self.assertLess(ecf.Style.NOTHING, ecf.Style.DEFS)
+        assert ecf.Style.NOTHING < ecf.Style.DEFS
 
     def test_gt_orders_by_value(self):
         """Style.DEFS > Style.NOTHING."""
-        self.assertGreater(ecf.Style.DEFS, ecf.Style.NOTHING)
+        assert ecf.Style.DEFS > ecf.Style.NOTHING
 
     def test_le_equal_members(self):
         """Style.DEFS <= Style.DEFS holds."""
-        self.assertLessEqual(ecf.Style.DEFS, ecf.Style.DEFS)
+        assert ecf.Style.DEFS <= ecf.Style.DEFS
 
     def test_ge_equal_members(self):
         """Style.DEFS >= Style.DEFS holds."""
-        self.assertGreaterEqual(ecf.Style.DEFS, ecf.Style.DEFS)
+        assert ecf.Style.DEFS >= ecf.Style.DEFS
 
     def test_lt_incompatible_type_returns_not_implemented(self):
         """__lt__ returns NotImplemented for an incompatible RHS type."""
-        self.assertIs(ecf.Style.DEFS.__lt__("DEFS"), NotImplemented)
+        assert ecf.Style.DEFS.__lt__("DEFS") is NotImplemented
 
     def test_le_incompatible_type_returns_not_implemented(self):
         """__le__ returns NotImplemented for an incompatible RHS type."""
-        self.assertIs(ecf.Style.DEFS.__le__("DEFS"), NotImplemented)
+        assert ecf.Style.DEFS.__le__("DEFS") is NotImplemented
 
     def test_gt_incompatible_type_returns_not_implemented(self):
         """__gt__ returns NotImplemented for an incompatible RHS type."""
-        self.assertIs(ecf.Style.DEFS.__gt__("DEFS"), NotImplemented)
+        assert ecf.Style.DEFS.__gt__("DEFS") is NotImplemented
 
     def test_ge_incompatible_type_returns_not_implemented(self):
         """__ge__ returns NotImplemented for an incompatible RHS type."""
-        self.assertIs(ecf.Style.DEFS.__ge__("DEFS"), NotImplemented)
+        assert ecf.Style.DEFS.__ge__("DEFS") is NotImplemented
 
     # ------------------------------------------------------------------
     # __int__
@@ -331,11 +330,11 @@ class TestStyle(unittest.TestCase):
 
     def test_int_conversion(self):
         """Style values can be converted to int."""
-        self.assertIsInstance(int(ecf.Style.DEFS), int)
+        assert isinstance(int(ecf.Style.DEFS), int)
 
     def test_nothing_has_int_value_zero(self):
         """Style.NOTHING has integer value 0."""
-        self.assertEqual(int(ecf.Style.NOTHING), 0)
+        assert int(ecf.Style.NOTHING) == 0
 
     # ------------------------------------------------------------------
     # py_finalize_enum — str / repr / hash / .values / .names
@@ -343,37 +342,37 @@ class TestStyle(unittest.TestCase):
 
     def test_str_returns_member_name_only(self):
         """str(Style.DEFS) returns 'DEFS', not 'Style.DEFS'."""
-        self.assertEqual(str(ecf.Style.DEFS), "DEFS")
-        self.assertEqual(str(ecf.Style.STATE), "STATE")
+        assert str(ecf.Style.DEFS) == "DEFS"
+        assert str(ecf.Style.STATE) == "STATE"
 
     def test_repr_is_module_qualified(self):
         """repr(Style.DEFS) returns 'ecflow.Style.DEFS'."""
-        self.assertEqual(repr(ecf.Style.DEFS), "ecflow.Style.DEFS")
+        assert repr(ecf.Style.DEFS) == "ecflow.Style.DEFS"
 
     def test_hash_is_integer(self):
         """hash(Style.DEFS) is a Python int."""
-        self.assertIsInstance(hash(ecf.Style.DEFS), int)
+        assert isinstance(hash(ecf.Style.DEFS), int)
 
     def test_hash_equals_underlying_int_value(self):
         """hash(member) equals member.value."""
-        self.assertEqual(hash(ecf.Style.DEFS), ecf.Style.DEFS.value)
+        assert hash(ecf.Style.DEFS) == ecf.Style.DEFS.value
 
     def test_values_dict_maps_int_to_member(self):
         """Style.values is a dict mapping integer value -> enum member."""
         values = ecf.Style.values
-        self.assertIsInstance(values, dict)
-        self.assertIn(ecf.Style.DEFS.value, values)
-        self.assertEqual(values[ecf.Style.DEFS.value], ecf.Style.DEFS)
+        assert isinstance(values, dict)
+        assert ecf.Style.DEFS.value in values
+        assert values[ecf.Style.DEFS.value] == ecf.Style.DEFS
 
     def test_names_dict_maps_str_to_member(self):
         """Style.names is a dict mapping name string -> enum member."""
         names = ecf.Style.names
-        self.assertIsInstance(names, dict)
-        self.assertIn("DEFS", names)
-        self.assertEqual(names["DEFS"], ecf.Style.DEFS)
+        assert isinstance(names, dict)
+        assert "DEFS" in names
+        assert names["DEFS"] == ecf.Style.DEFS
 
 
-class TestPrintStyle(unittest.TestCase):
+class TestPrintStyle:
     """Tests for py::class_<PrintStyle, boost::noncopyable> exposed as ecf.PrintStyle in ExportCore.cpp.
 
     Exposed API
@@ -386,11 +385,11 @@ class TestPrintStyle(unittest.TestCase):
         set_style(Style)       -- sets the global print style
     """
 
-    def setUp(self):
+    def setup_method(self):
         """Save current style so tests can restore it."""
         self._original = ecf.PrintStyle.get_style()
 
-    def tearDown(self):
+    def teardown_method(self):
         """Restore the original style after each test."""
         ecf.PrintStyle.set_style(self._original)
 
@@ -400,7 +399,7 @@ class TestPrintStyle(unittest.TestCase):
 
     def test_direct_construction_raises(self):
         """PrintStyle cannot be instantiated from Python."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.PrintStyle()
 
     # ------------------------------------------------------------------
@@ -410,10 +409,12 @@ class TestPrintStyle(unittest.TestCase):
     def test_get_style_returns_a_style_value(self):
         """get_style() returns a member of the Style enum."""
         style = ecf.PrintStyle.get_style()
-        self.assertIn(
-            style,
-            [ecf.Style.NOTHING, ecf.Style.DEFS, ecf.Style.STATE, ecf.Style.MIGRATE],
-        )
+        assert style in [
+            ecf.Style.NOTHING,
+            ecf.Style.DEFS,
+            ecf.Style.STATE,
+            ecf.Style.MIGRATE,
+        ]
 
     def test_get_style_callable_on_class(self):
         """get_style() is a static method callable without an instance."""
@@ -426,22 +427,22 @@ class TestPrintStyle(unittest.TestCase):
     def test_set_style_defs(self):
         """set_style(Style.DEFS) makes get_style() return DEFS."""
         ecf.PrintStyle.set_style(ecf.Style.DEFS)
-        self.assertEqual(ecf.PrintStyle.get_style(), ecf.Style.DEFS)
+        assert ecf.PrintStyle.get_style() == ecf.Style.DEFS
 
     def test_set_style_state(self):
         """set_style(Style.STATE) makes get_style() return STATE."""
         ecf.PrintStyle.set_style(ecf.Style.STATE)
-        self.assertEqual(ecf.PrintStyle.get_style(), ecf.Style.STATE)
+        assert ecf.PrintStyle.get_style() == ecf.Style.STATE
 
     def test_set_style_migrate(self):
         """set_style(Style.MIGRATE) makes get_style() return MIGRATE."""
         ecf.PrintStyle.set_style(ecf.Style.MIGRATE)
-        self.assertEqual(ecf.PrintStyle.get_style(), ecf.Style.MIGRATE)
+        assert ecf.PrintStyle.get_style() == ecf.Style.MIGRATE
 
     def test_set_style_nothing(self):
         """set_style(Style.NOTHING) makes get_style() return NOTHING."""
         ecf.PrintStyle.set_style(ecf.Style.NOTHING)
-        self.assertEqual(ecf.PrintStyle.get_style(), ecf.Style.NOTHING)
+        assert ecf.PrintStyle.get_style() == ecf.Style.NOTHING
 
     def test_set_then_get_round_trips(self):
         """Each style value round-trips through set_style/get_style."""
@@ -452,10 +453,10 @@ class TestPrintStyle(unittest.TestCase):
             ecf.Style.NOTHING,
         ]:
             ecf.PrintStyle.set_style(style)
-            self.assertEqual(ecf.PrintStyle.get_style(), style)
+            assert ecf.PrintStyle.get_style() == style
 
 
-class TestCheckPt(unittest.TestCase):
+class TestCheckPt:
     """Tests for py::enum_<ecf::CheckPt::Mode> exposed as ecf.CheckPt in ExportCore.cpp.
 
     Exposed API
@@ -498,7 +499,7 @@ class TestCheckPt(unittest.TestCase):
         for i, a in enumerate(values):
             for j, b in enumerate(values):
                 if i != j:
-                    self.assertNotEqual(a, b)
+                    assert a != b
 
     # ------------------------------------------------------------------
     # __eq__ and __ne__
@@ -506,11 +507,11 @@ class TestCheckPt(unittest.TestCase):
 
     def test_eq_same_value(self):
         """A CheckPt member compares equal to itself."""
-        self.assertEqual(ecf.CheckPt.ON_TIME, ecf.CheckPt.ON_TIME)
+        assert ecf.CheckPt.ON_TIME == ecf.CheckPt.ON_TIME
 
     def test_ne_different_values(self):
         """Different CheckPt members are not equal."""
-        self.assertNotEqual(ecf.CheckPt.NEVER, ecf.CheckPt.ALWAYS)
+        assert ecf.CheckPt.NEVER != ecf.CheckPt.ALWAYS
 
     # ------------------------------------------------------------------
     # py_finalize_enum — str / repr / hash / .values / .names
@@ -518,37 +519,37 @@ class TestCheckPt(unittest.TestCase):
 
     def test_str_returns_member_name_only(self):
         """str(CheckPt.NEVER) returns 'NEVER', not 'CheckPt.NEVER'."""
-        self.assertEqual(str(ecf.CheckPt.NEVER), "NEVER")
-        self.assertEqual(str(ecf.CheckPt.ALWAYS), "ALWAYS")
+        assert str(ecf.CheckPt.NEVER) == "NEVER"
+        assert str(ecf.CheckPt.ALWAYS) == "ALWAYS"
 
     def test_repr_is_module_qualified(self):
         """repr(CheckPt.ON_TIME) returns 'ecflow.CheckPt.ON_TIME'."""
-        self.assertEqual(repr(ecf.CheckPt.ON_TIME), "ecflow.CheckPt.ON_TIME")
+        assert repr(ecf.CheckPt.ON_TIME) == "ecflow.CheckPt.ON_TIME"
 
     def test_hash_is_integer(self):
         """hash(CheckPt.NEVER) is a Python int."""
-        self.assertIsInstance(hash(ecf.CheckPt.NEVER), int)
+        assert isinstance(hash(ecf.CheckPt.NEVER), int)
 
     def test_hash_equals_underlying_int_value(self):
         """hash(member) equals member.value."""
-        self.assertEqual(hash(ecf.CheckPt.ON_TIME), ecf.CheckPt.ON_TIME.value)
+        assert hash(ecf.CheckPt.ON_TIME) == ecf.CheckPt.ON_TIME.value
 
     def test_values_dict_maps_int_to_member(self):
         """CheckPt.values is a dict mapping integer value -> enum member."""
         values = ecf.CheckPt.values
-        self.assertIsInstance(values, dict)
-        self.assertIn(ecf.CheckPt.NEVER.value, values)
-        self.assertEqual(values[ecf.CheckPt.NEVER.value], ecf.CheckPt.NEVER)
+        assert isinstance(values, dict)
+        assert ecf.CheckPt.NEVER.value in values
+        assert values[ecf.CheckPt.NEVER.value] == ecf.CheckPt.NEVER
 
     def test_names_dict_maps_str_to_member(self):
         """CheckPt.names is a dict mapping name string -> enum member."""
         names = ecf.CheckPt.names
-        self.assertIsInstance(names, dict)
-        self.assertIn("ALWAYS", names)
-        self.assertEqual(names["ALWAYS"], ecf.CheckPt.ALWAYS)
+        assert isinstance(names, dict)
+        assert "ALWAYS" in names
+        assert names["ALWAYS"] == ecf.CheckPt.ALWAYS
 
 
-class TestEcf(unittest.TestCase):
+class TestEcf:
     """Tests for py::class_<Ecf, boost::noncopyable> exposed as ecf.Ecf in ExportCore.cpp.
 
     Exposed API
@@ -563,12 +564,12 @@ class TestEcf(unittest.TestCase):
         set_debug_level(int)               -- set the debug level
     """
 
-    def setUp(self):
+    def setup_method(self):
         """Save current Ecf state to restore after each test."""
         self._orig_eq = ecf.Ecf.debug_equality()
         self._orig_lvl = ecf.Ecf.debug_level()
 
-    def tearDown(self):
+    def teardown_method(self):
         """Restore Ecf state after each test."""
         ecf.Ecf.set_debug_equality(self._orig_eq)
         ecf.Ecf.set_debug_level(self._orig_lvl)
@@ -579,7 +580,7 @@ class TestEcf(unittest.TestCase):
 
     def test_direct_construction_raises(self):
         """Ecf cannot be instantiated from Python."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Ecf()
 
     # ------------------------------------------------------------------
@@ -588,24 +589,24 @@ class TestEcf(unittest.TestCase):
 
     def test_debug_equality_returns_bool(self):
         """debug_equality() returns a Python bool."""
-        self.assertIsInstance(ecf.Ecf.debug_equality(), bool)
+        assert isinstance(ecf.Ecf.debug_equality(), bool)
 
     def test_set_debug_equality_true_is_reflected(self):
         """set_debug_equality(True) causes debug_equality() to return True."""
         ecf.Ecf.set_debug_equality(True)
-        self.assertTrue(ecf.Ecf.debug_equality())
+        assert ecf.Ecf.debug_equality()
 
     def test_set_debug_equality_false_is_reflected(self):
         """set_debug_equality(False) causes debug_equality() to return False."""
         ecf.Ecf.set_debug_equality(False)
-        self.assertFalse(ecf.Ecf.debug_equality())
+        assert not ecf.Ecf.debug_equality()
 
     def test_set_debug_equality_toggles(self):
         """set_debug_equality can be toggled between True and False."""
         ecf.Ecf.set_debug_equality(True)
-        self.assertTrue(ecf.Ecf.debug_equality())
+        assert ecf.Ecf.debug_equality()
         ecf.Ecf.set_debug_equality(False)
-        self.assertFalse(ecf.Ecf.debug_equality())
+        assert not ecf.Ecf.debug_equality()
 
     def test_debug_equality_callable_on_class(self):
         """debug_equality() is a static method callable without an instance."""
@@ -617,29 +618,29 @@ class TestEcf(unittest.TestCase):
 
     def test_debug_level_returns_int(self):
         """debug_level() returns a Python int."""
-        self.assertIsInstance(ecf.Ecf.debug_level(), int)
+        assert isinstance(ecf.Ecf.debug_level(), int)
 
     def test_set_debug_level_zero(self):
         """set_debug_level(0) turns off debug output."""
         ecf.Ecf.set_debug_level(0)
-        self.assertEqual(ecf.Ecf.debug_level(), 0)
+        assert ecf.Ecf.debug_level() == 0
 
     def test_set_debug_level_one(self):
         """set_debug_level(1) sets debug level to 1."""
         ecf.Ecf.set_debug_level(1)
-        self.assertEqual(ecf.Ecf.debug_level(), 1)
+        assert ecf.Ecf.debug_level() == 1
 
     def test_set_debug_level_arbitrary_positive(self):
         """set_debug_level accepts arbitrary positive integers."""
         ecf.Ecf.set_debug_level(5)
-        self.assertEqual(ecf.Ecf.debug_level(), 5)
+        assert ecf.Ecf.debug_level() == 5
 
     def test_debug_level_callable_on_class(self):
         """debug_level() is a static method callable without an instance."""
         _ = ecf.Ecf.debug_level()
 
 
-class TestState(unittest.TestCase):
+class TestState:
     """Tests for py::enum_<NState::State> exposed as ecf.State in ExportCore.cpp.
 
     Exposed API
@@ -694,7 +695,7 @@ class TestState(unittest.TestCase):
         for i, a in enumerate(values):
             for j, b in enumerate(values):
                 if i != j:
-                    self.assertNotEqual(a, b)
+                    assert a != b
 
     # ------------------------------------------------------------------
     # __eq__ and __ne__
@@ -702,11 +703,11 @@ class TestState(unittest.TestCase):
 
     def test_eq_same_value(self):
         """A State member compares equal to itself."""
-        self.assertEqual(ecf.State.queued, ecf.State.queued)
+        assert ecf.State.queued == ecf.State.queued
 
     def test_ne_different_values(self):
         """Different State members are not equal."""
-        self.assertNotEqual(ecf.State.queued, ecf.State.active)
+        assert ecf.State.queued != ecf.State.active
 
     # ------------------------------------------------------------------
     # py_finalize_enum — str / repr / hash / .values / .names
@@ -714,37 +715,37 @@ class TestState(unittest.TestCase):
 
     def test_str_returns_member_name_only(self):
         """str(State.active) returns 'active', not 'State.active'."""
-        self.assertEqual(str(ecf.State.active), "active")
-        self.assertEqual(str(ecf.State.complete), "complete")
+        assert str(ecf.State.active) == "active"
+        assert str(ecf.State.complete) == "complete"
 
     def test_repr_is_module_qualified(self):
         """repr(State.active) returns 'ecflow.State.active'."""
-        self.assertEqual(repr(ecf.State.active), "ecflow.State.active")
+        assert repr(ecf.State.active) == "ecflow.State.active"
 
     def test_hash_is_integer(self):
         """hash(State.active) is a Python int."""
-        self.assertIsInstance(hash(ecf.State.active), int)
+        assert isinstance(hash(ecf.State.active), int)
 
     def test_hash_equals_underlying_int_value(self):
         """hash(member) equals member.value."""
-        self.assertEqual(hash(ecf.State.active), ecf.State.active.value)
+        assert hash(ecf.State.active) == ecf.State.active.value
 
     def test_values_dict_maps_int_to_member(self):
         """State.values is a dict mapping integer value -> enum member."""
         values = ecf.State.values
-        self.assertIsInstance(values, dict)
-        self.assertIn(ecf.State.active.value, values)
-        self.assertEqual(values[ecf.State.active.value], ecf.State.active)
+        assert isinstance(values, dict)
+        assert ecf.State.active.value in values
+        assert values[ecf.State.active.value] == ecf.State.active
 
     def test_names_dict_maps_str_to_member(self):
         """State.names is a dict mapping name string -> enum member."""
         names = ecf.State.names
-        self.assertIsInstance(names, dict)
-        self.assertIn("active", names)
-        self.assertEqual(names["active"], ecf.State.active)
+        assert isinstance(names, dict)
+        assert "active" in names
+        assert names["active"] == ecf.State.active
 
 
-class TestDState(unittest.TestCase):
+class TestDState:
     """Tests for py::enum_<DState::State> exposed as ecf.DState in ExportCore.cpp.
 
     Exposed API
@@ -810,7 +811,7 @@ class TestDState(unittest.TestCase):
         for i, a in enumerate(values):
             for j, b in enumerate(values):
                 if i != j:
-                    self.assertNotEqual(a, b)
+                    assert a != b
 
     # ------------------------------------------------------------------
     # __eq__ and __ne__
@@ -818,15 +819,15 @@ class TestDState(unittest.TestCase):
 
     def test_eq_same_value(self):
         """A DState member compares equal to itself."""
-        self.assertEqual(ecf.DState.complete, ecf.DState.complete)
+        assert ecf.DState.complete == ecf.DState.complete
 
     def test_ne_different_values(self):
         """Different DState members are not equal."""
-        self.assertNotEqual(ecf.DState.queued, ecf.DState.suspended)
+        assert ecf.DState.queued != ecf.DState.suspended
 
     def test_suspended_not_in_state_enum(self):
         """ecf.State does not expose a 'suspended' member (only DState does)."""
-        self.assertFalse(hasattr(ecf.State, "suspended"))
+        assert not hasattr(ecf.State, "suspended")
 
     # ------------------------------------------------------------------
     # py_finalize_enum — str / repr / hash / .values / .names
@@ -834,37 +835,37 @@ class TestDState(unittest.TestCase):
 
     def test_str_returns_member_name_only(self):
         """str(DState.active) returns 'active', not 'DState.active'."""
-        self.assertEqual(str(ecf.DState.active), "active")
-        self.assertEqual(str(ecf.DState.suspended), "suspended")
+        assert str(ecf.DState.active) == "active"
+        assert str(ecf.DState.suspended) == "suspended"
 
     def test_repr_is_module_qualified(self):
         """repr(DState.complete) returns 'ecflow.DState.complete'."""
-        self.assertEqual(repr(ecf.DState.complete), "ecflow.DState.complete")
+        assert repr(ecf.DState.complete) == "ecflow.DState.complete"
 
     def test_hash_is_integer(self):
         """hash(DState.queued) is a Python int."""
-        self.assertIsInstance(hash(ecf.DState.queued), int)
+        assert isinstance(hash(ecf.DState.queued), int)
 
     def test_hash_equals_underlying_int_value(self):
         """hash(member) equals member.value."""
-        self.assertEqual(hash(ecf.DState.active), ecf.DState.active.value)
+        assert hash(ecf.DState.active) == ecf.DState.active.value
 
     def test_values_dict_maps_int_to_member(self):
         """DState.values is a dict mapping integer value -> enum member."""
         values = ecf.DState.values
-        self.assertIsInstance(values, dict)
-        self.assertIn(ecf.DState.active.value, values)
-        self.assertEqual(values[ecf.DState.active.value], ecf.DState.active)
+        assert isinstance(values, dict)
+        assert ecf.DState.active.value in values
+        assert values[ecf.DState.active.value] == ecf.DState.active
 
     def test_names_dict_maps_str_to_member(self):
         """DState.names is a dict mapping name string -> enum member."""
         names = ecf.DState.names
-        self.assertIsInstance(names, dict)
-        self.assertIn("suspended", names)
-        self.assertEqual(names["suspended"], ecf.DState.suspended)
+        assert isinstance(names, dict)
+        assert "suspended" in names
+        assert names["suspended"] == ecf.DState.suspended
 
 
-class TestDefstatus(unittest.TestCase):
+class TestDefstatus:
     """Tests for py::class_<Defstatus> exposed as ecf.Defstatus in ExportCore.cpp.
 
     Exposed API
@@ -887,37 +888,37 @@ class TestDefstatus(unittest.TestCase):
     def test_ctor_dstate_complete(self):
         """Defstatus(DState.complete) stores the complete state."""
         ds = ecf.Defstatus(ecf.DState.complete)
-        self.assertEqual(ds.state(), ecf.DState.complete)
+        assert ds.state() == ecf.DState.complete
 
     def test_ctor_dstate_queued(self):
         """Defstatus(DState.queued) stores the queued state."""
         ds = ecf.Defstatus(ecf.DState.queued)
-        self.assertEqual(ds.state(), ecf.DState.queued)
+        assert ds.state() == ecf.DState.queued
 
     def test_ctor_dstate_aborted(self):
         """Defstatus(DState.aborted) stores the aborted state."""
         ds = ecf.Defstatus(ecf.DState.aborted)
-        self.assertEqual(ds.state(), ecf.DState.aborted)
+        assert ds.state() == ecf.DState.aborted
 
     def test_ctor_dstate_suspended(self):
         """Defstatus(DState.suspended) stores the suspended state."""
         ds = ecf.Defstatus(ecf.DState.suspended)
-        self.assertEqual(ds.state(), ecf.DState.suspended)
+        assert ds.state() == ecf.DState.suspended
 
     def test_ctor_dstate_unknown(self):
         """Defstatus(DState.unknown) stores the unknown state."""
         ds = ecf.Defstatus(ecf.DState.unknown)
-        self.assertEqual(ds.state(), ecf.DState.unknown)
+        assert ds.state() == ecf.DState.unknown
 
     def test_ctor_dstate_active(self):
         """Defstatus(DState.active) stores the active state."""
         ds = ecf.Defstatus(ecf.DState.active)
-        self.assertEqual(ds.state(), ecf.DState.active)
+        assert ds.state() == ecf.DState.active
 
     def test_ctor_dstate_submitted(self):
         """Defstatus(DState.submitted) stores the submitted state."""
         ds = ecf.Defstatus(ecf.DState.submitted)
-        self.assertEqual(ds.state(), ecf.DState.submitted)
+        assert ds.state() == ecf.DState.submitted
 
     # ------------------------------------------------------------------
     # Constructor: Defstatus(str)
@@ -926,36 +927,36 @@ class TestDefstatus(unittest.TestCase):
     def test_ctor_str_complete(self):
         """Defstatus('complete') stores DState.complete."""
         ds = ecf.Defstatus("complete")
-        self.assertEqual(ds.state(), ecf.DState.complete)
+        assert ds.state() == ecf.DState.complete
 
     def test_ctor_str_queued(self):
         """Defstatus('queued') stores DState.queued."""
         ds = ecf.Defstatus("queued")
-        self.assertEqual(ds.state(), ecf.DState.queued)
+        assert ds.state() == ecf.DState.queued
 
     def test_ctor_str_aborted(self):
         """Defstatus('aborted') stores DState.aborted."""
         ds = ecf.Defstatus("aborted")
-        self.assertEqual(ds.state(), ecf.DState.aborted)
+        assert ds.state() == ecf.DState.aborted
 
     def test_ctor_str_suspended(self):
         """Defstatus('suspended') stores DState.suspended."""
         ds = ecf.Defstatus("suspended")
-        self.assertEqual(ds.state(), ecf.DState.suspended)
+        assert ds.state() == ecf.DState.suspended
 
     def test_ctor_str_unknown(self):
         """Defstatus('unknown') stores DState.unknown."""
         ds = ecf.Defstatus("unknown")
-        self.assertEqual(ds.state(), ecf.DState.unknown)
+        assert ds.state() == ecf.DState.unknown
 
     def test_ctor_str_bad_name_raises(self):
         """Defstatus with an unrecognised string raises RuntimeError."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Defstatus("not_a_valid_state")
 
     def test_ctor_str_empty_string_raises(self):
         """Defstatus('') raises RuntimeError."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.Defstatus("")
 
     # ------------------------------------------------------------------
@@ -964,15 +965,13 @@ class TestDefstatus(unittest.TestCase):
 
     def test_state_returns_dstate_value(self):
         """state() returns the DState enum value passed at construction."""
-        self.assertEqual(
-            ecf.Defstatus(ecf.DState.complete).state(), ecf.DState.complete
-        )
+        assert ecf.Defstatus(ecf.DState.complete).state() == ecf.DState.complete
 
     def test_state_from_str_and_dstate_agree(self):
         """Defstatus(DState.complete).state() == Defstatus('complete').state()."""
-        self.assertEqual(
-            ecf.Defstatus(ecf.DState.complete).state(),
-            ecf.Defstatus("complete").state(),
+        assert (
+            ecf.Defstatus(ecf.DState.complete).state()
+            == ecf.Defstatus("complete").state()
         )
 
     # ------------------------------------------------------------------
@@ -981,11 +980,11 @@ class TestDefstatus(unittest.TestCase):
 
     def test_str_returns_state_name(self):
         """str(Defstatus(...)) returns the state name string."""
-        self.assertEqual(str(ecf.Defstatus(ecf.DState.complete)), "complete")
+        assert str(ecf.Defstatus(ecf.DState.complete)) == "complete"
 
     def test_str_queued(self):
         """str(Defstatus(DState.queued)) returns 'queued'."""
-        self.assertEqual(str(ecf.Defstatus(ecf.DState.queued)), "queued")
+        assert str(ecf.Defstatus(ecf.DState.queued)) == "queued"
 
     def test_str_is_consistent_with_ctor_str(self):
         """The string used in Defstatus(str) matches str(Defstatus(DState))."""
@@ -999,10 +998,10 @@ class TestDefstatus(unittest.TestCase):
             "submitted",
         ]:
             ds = ecf.Defstatus(name)
-            self.assertEqual(str(ds), name)
+            assert str(ds) == name
 
 
-class TestSState(unittest.TestCase):
+class TestSState:
     """Tests for py::enum_<SState::State> exposed as ecf.SState in ExportCore.cpp.
 
     Exposed API
@@ -1035,7 +1034,7 @@ class TestSState(unittest.TestCase):
         for i, a in enumerate(values):
             for j, b in enumerate(values):
                 if i != j:
-                    self.assertNotEqual(a, b)
+                    assert a != b
 
     # ------------------------------------------------------------------
     # __eq__ and __ne__
@@ -1043,11 +1042,11 @@ class TestSState(unittest.TestCase):
 
     def test_eq_same_value(self):
         """An SState member compares equal to itself."""
-        self.assertEqual(ecf.SState.RUNNING, ecf.SState.RUNNING)
+        assert ecf.SState.RUNNING == ecf.SState.RUNNING
 
     def test_ne_different_values(self):
         """Different SState members are not equal."""
-        self.assertNotEqual(ecf.SState.HALTED, ecf.SState.RUNNING)
+        assert ecf.SState.HALTED != ecf.SState.RUNNING
 
     # ------------------------------------------------------------------
     # py_finalize_enum — str / repr / hash / .values / .names
@@ -1055,37 +1054,37 @@ class TestSState(unittest.TestCase):
 
     def test_str_returns_member_name_only(self):
         """str(SState.RUNNING) returns 'RUNNING', not 'SState.RUNNING'."""
-        self.assertEqual(str(ecf.SState.RUNNING), "RUNNING")
-        self.assertEqual(str(ecf.SState.HALTED), "HALTED")
+        assert str(ecf.SState.RUNNING) == "RUNNING"
+        assert str(ecf.SState.HALTED) == "HALTED"
 
     def test_repr_is_module_qualified(self):
         """repr(SState.RUNNING) returns 'ecflow.SState.RUNNING'."""
-        self.assertEqual(repr(ecf.SState.RUNNING), "ecflow.SState.RUNNING")
+        assert repr(ecf.SState.RUNNING) == "ecflow.SState.RUNNING"
 
     def test_hash_is_integer(self):
         """hash(SState.RUNNING) is a Python int."""
-        self.assertIsInstance(hash(ecf.SState.RUNNING), int)
+        assert isinstance(hash(ecf.SState.RUNNING), int)
 
     def test_hash_equals_underlying_int_value(self):
         """hash(member) equals member.value."""
-        self.assertEqual(hash(ecf.SState.RUNNING), ecf.SState.RUNNING.value)
+        assert hash(ecf.SState.RUNNING) == ecf.SState.RUNNING.value
 
     def test_values_dict_maps_int_to_member(self):
         """SState.values is a dict mapping integer value -> enum member."""
         values = ecf.SState.values
-        self.assertIsInstance(values, dict)
-        self.assertIn(ecf.SState.RUNNING.value, values)
-        self.assertEqual(values[ecf.SState.RUNNING.value], ecf.SState.RUNNING)
+        assert isinstance(values, dict)
+        assert ecf.SState.RUNNING.value in values
+        assert values[ecf.SState.RUNNING.value] == ecf.SState.RUNNING
 
     def test_names_dict_maps_str_to_member(self):
         """SState.names is a dict mapping name string -> enum member."""
         names = ecf.SState.names
-        self.assertIsInstance(names, dict)
-        self.assertIn("RUNNING", names)
-        self.assertEqual(names["RUNNING"], ecf.SState.RUNNING)
+        assert isinstance(names, dict)
+        assert "RUNNING" in names
+        assert names["RUNNING"] == ecf.SState.RUNNING
 
 
-class TestTimeSlot(unittest.TestCase):
+class TestTimeSlot:
     """Tests for py::class_<ecf::TimeSlot> exposed as ecf.TimeSlot in ExportCore.cpp.
 
     Exposed API
@@ -1119,26 +1118,26 @@ class TestTimeSlot(unittest.TestCase):
     def test_ctor_stores_hour_and_minute(self):
         """TimeSlot(h, m) stores h and m verbatim."""
         ts = ecf.TimeSlot(10, 30)
-        self.assertEqual(ts.hour(), 10)
-        self.assertEqual(ts.minute(), 30)
+        assert ts.hour() == 10
+        assert ts.minute() == 30
 
     def test_ctor_midnight(self):
         """TimeSlot(0, 0) constructs successfully."""
         ts = ecf.TimeSlot(0, 0)
-        self.assertEqual(ts.hour(), 0)
-        self.assertEqual(ts.minute(), 0)
+        assert ts.hour() == 0
+        assert ts.minute() == 0
 
     def test_ctor_end_of_day(self):
         """TimeSlot(23, 59) constructs successfully."""
         ts = ecf.TimeSlot(23, 59)
-        self.assertEqual(ts.hour(), 23)
-        self.assertEqual(ts.minute(), 59)
+        assert ts.hour() == 23
+        assert ts.minute() == 59
 
     def test_ctor_hour_zero_minute_nonzero(self):
         """TimeSlot(0, 45) correctly stores 0 hours and 45 minutes."""
         ts = ecf.TimeSlot(0, 45)
-        self.assertEqual(ts.hour(), 0)
-        self.assertEqual(ts.minute(), 45)
+        assert ts.hour() == 0
+        assert ts.minute() == 45
 
     # ------------------------------------------------------------------
     # hour() and minute()
@@ -1146,11 +1145,11 @@ class TestTimeSlot(unittest.TestCase):
 
     def test_hour_returns_int(self):
         """hour() returns a Python int."""
-        self.assertIsInstance(ecf.TimeSlot(5, 0).hour(), int)
+        assert isinstance(ecf.TimeSlot(5, 0).hour(), int)
 
     def test_minute_returns_int(self):
         """minute() returns a Python int."""
-        self.assertIsInstance(ecf.TimeSlot(0, 15).minute(), int)
+        assert isinstance(ecf.TimeSlot(0, 15).minute(), int)
 
     # ------------------------------------------------------------------
     # empty()
@@ -1158,16 +1157,16 @@ class TestTimeSlot(unittest.TestCase):
 
     def test_empty_is_false_for_normal_slot(self):
         """empty() returns False for a normally constructed TimeSlot."""
-        self.assertFalse(ecf.TimeSlot(10, 30).empty())
+        assert not ecf.TimeSlot(10, 30).empty()
 
     def test_empty_is_false_for_midnight(self):
         """empty() returns False even for TimeSlot(0, 0); NULL means unset, not zero."""
-        self.assertFalse(ecf.TimeSlot(0, 0).empty())
+        assert not ecf.TimeSlot(0, 0).empty()
 
     def test_empty_is_true_for_null_slot_from_single_series_finish(self):
         """A NULL TimeSlot obtained from TimeSeries.finish() on a single slot reports empty."""
         single = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertTrue(single.finish().empty())
+        assert single.finish().empty()
 
     # ------------------------------------------------------------------
     # __str__
@@ -1175,15 +1174,15 @@ class TestTimeSlot(unittest.TestCase):
 
     def test_str_format_hh_mm(self):
         """str(TimeSlot) uses 'HH:MM' format with zero-padded fields."""
-        self.assertEqual(str(ecf.TimeSlot(10, 30)), "10:30")
+        assert str(ecf.TimeSlot(10, 30)) == "10:30"
 
     def test_str_midnight(self):
         """str(TimeSlot(0, 0)) is '00:00'."""
-        self.assertEqual(str(ecf.TimeSlot(0, 0)), "00:00")
+        assert str(ecf.TimeSlot(0, 0)) == "00:00"
 
     def test_str_single_digit_hour_is_zero_padded(self):
         """Single-digit hours are zero-padded in str output."""
-        self.assertEqual(str(ecf.TimeSlot(5, 7)), "05:07")
+        assert str(ecf.TimeSlot(5, 7)) == "05:07"
 
     # ------------------------------------------------------------------
     # __copy__
@@ -1192,12 +1191,12 @@ class TestTimeSlot(unittest.TestCase):
     def test_copy_is_value_equal(self):
         """copy.copy(TimeSlot) returns a value-equal instance."""
         ts = ecf.TimeSlot(10, 30)
-        self.assertEqual(copy.copy(ts), ts)
+        assert copy.copy(ts) == ts
 
     def test_copy_is_identity_distinct(self):
         """copy.copy(TimeSlot) returns a different object."""
         ts = ecf.TimeSlot(10, 30)
-        self.assertIsNot(copy.copy(ts), ts)
+        assert copy.copy(ts) is not ts
 
     # ------------------------------------------------------------------
     # __eq__ and __ne__
@@ -1205,20 +1204,20 @@ class TestTimeSlot(unittest.TestCase):
 
     def test_eq_same_values(self):
         """Two TimeSlots with the same hour and minute are equal."""
-        self.assertEqual(ecf.TimeSlot(10, 30), ecf.TimeSlot(10, 30))
+        assert ecf.TimeSlot(10, 30) == ecf.TimeSlot(10, 30)
 
     def test_ne_different_hour(self):
         """TimeSlots differing only in hour are not equal."""
-        self.assertNotEqual(ecf.TimeSlot(10, 30), ecf.TimeSlot(11, 30))
+        assert ecf.TimeSlot(10, 30) != ecf.TimeSlot(11, 30)
 
     def test_ne_different_minute(self):
         """TimeSlots differing only in minute are not equal."""
-        self.assertNotEqual(ecf.TimeSlot(10, 30), ecf.TimeSlot(10, 31))
+        assert ecf.TimeSlot(10, 30) != ecf.TimeSlot(10, 31)
 
     def test_eq_with_itself(self):
         """A TimeSlot is equal to itself."""
         ts = ecf.TimeSlot(10, 30)
-        self.assertEqual(ts, ts)
+        assert ts == ts
 
     # ------------------------------------------------------------------
     # __hash__
@@ -1228,22 +1227,22 @@ class TestTimeSlot(unittest.TestCase):
         """Two value-equal TimeSlots kept simultaneously have different hashes."""
         ts1 = ecf.TimeSlot(10, 30)
         ts2 = ecf.TimeSlot(10, 30)
-        self.assertEqual(ts1, ts2)
-        self.assertNotEqual(hash(ts1), hash(ts2))
+        assert ts1 == ts2
+        assert hash(ts1) != hash(ts2)
 
     def test_hash_same_object_is_stable(self):
         """The hash of a single TimeSlot is the same across repeated calls."""
         ts = ecf.TimeSlot(10, 30)
-        self.assertEqual(hash(ts), hash(ts))
+        assert hash(ts) == hash(ts)
 
     def test_hash_usable_as_dict_key(self):
         """A TimeSlot can be used as a dictionary key."""
         ts = ecf.TimeSlot(10, 30)
         d = {ts: "value"}
-        self.assertEqual(d[ts], "value")
+        assert d[ts] == "value"
 
 
-class TestTimeSeries(unittest.TestCase):
+class TestTimeSeries:
     """Tests for py::class_<ecf::TimeSeries> exposed as ecf.TimeSeries in ExportCore.cpp.
 
     Exposed API
@@ -1269,7 +1268,7 @@ class TestTimeSeries(unittest.TestCase):
         __hash__  -- identity-based (boost.python C-extension type)
     """
 
-    def setUp(self):
+    def setup_method(self):
         self.start = ecf.TimeSlot(0, 0)
         self.finish = ecf.TimeSlot(23, 0)
         self.incr = ecf.TimeSlot(1, 0)
@@ -1281,47 +1280,47 @@ class TestTimeSeries(unittest.TestCase):
     def test_ctor_single_slot(self):
         """TimeSeries(TimeSlot) creates a single-slot series."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertFalse(ts.has_increment())
+        assert not ts.has_increment()
 
     def test_ctor_single_slot_start_is_stored(self):
         """TimeSeries(TimeSlot) stores the slot as the start time."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertEqual(ts.start(), ecf.TimeSlot(10, 30))
+        assert ts.start() == ecf.TimeSlot(10, 30)
 
     def test_ctor_single_slot_finish_is_null(self):
         """TimeSeries(TimeSlot) has an empty (NULL) finish slot."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertTrue(ts.finish().empty())
+        assert ts.finish().empty()
 
     def test_ctor_single_slot_incr_is_null(self):
         """TimeSeries(TimeSlot) has an empty (NULL) increment slot."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertTrue(ts.incr().empty())
+        assert ts.incr().empty()
 
     def test_ctor_single_slot_default_not_relative(self):
         """TimeSeries(TimeSlot) defaults to non-relative (absolute time)."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertFalse(ts.relative())
+        assert not ts.relative()
 
     def test_ctor_single_slot_relative_true(self):
         """TimeSeries(TimeSlot, True) marks the series as relative."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30), True)
-        self.assertTrue(ts.relative())
+        assert ts.relative()
 
     def test_ctor_single_slot_relative_false(self):
         """TimeSeries(TimeSlot, False) explicitly marks the series as non-relative."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30), False)
-        self.assertFalse(ts.relative())
+        assert not ts.relative()
 
     def test_ctor_single_slot_str_absolute(self):
         """str(TimeSeries(TimeSlot)) renders as 'HH:MM'."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertEqual(str(ts), "10:30")
+        assert str(ts) == "10:30"
 
     def test_ctor_single_slot_str_relative(self):
         """str(TimeSeries(TimeSlot, True)) renders as '+HH:MM'."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30), True)
-        self.assertEqual(str(ts), "+10:30")
+        assert str(ts) == "+10:30"
 
     # ------------------------------------------------------------------
     # Constructor: TimeSeries(int, int, [bool])
@@ -1330,24 +1329,24 @@ class TestTimeSeries(unittest.TestCase):
     def test_ctor_hour_minute(self):
         """TimeSeries(h, m) creates a single-slot series from integers."""
         ts = ecf.TimeSeries(10, 30)
-        self.assertFalse(ts.has_increment())
-        self.assertEqual(ts.start(), ecf.TimeSlot(10, 30))
+        assert not ts.has_increment()
+        assert ts.start() == ecf.TimeSlot(10, 30)
 
     def test_ctor_hour_minute_default_not_relative(self):
         """TimeSeries(h, m) defaults to non-relative."""
-        self.assertFalse(ecf.TimeSeries(10, 30).relative())
+        assert not ecf.TimeSeries(10, 30).relative()
 
     def test_ctor_hour_minute_relative_true(self):
         """TimeSeries(h, m, True) marks the series as relative."""
-        self.assertTrue(ecf.TimeSeries(10, 30, True).relative())
+        assert ecf.TimeSeries(10, 30, True).relative()
 
     def test_ctor_hour_minute_relative_false(self):
         """TimeSeries(h, m, False) explicitly marks the series as non-relative."""
-        self.assertFalse(ecf.TimeSeries(10, 30, False).relative())
+        assert not ecf.TimeSeries(10, 30, False).relative()
 
     def test_ctor_hour_minute_str(self):
         """str(TimeSeries(h, m)) renders as 'HH:MM'."""
-        self.assertEqual(str(ecf.TimeSeries(10, 30)), "10:30")
+        assert str(ecf.TimeSeries(10, 30)) == "10:30"
 
     # ------------------------------------------------------------------
     # Constructor: TimeSeries(start, finish, incr, [bool])
@@ -1356,47 +1355,47 @@ class TestTimeSeries(unittest.TestCase):
     def test_ctor_series_has_increment(self):
         """TimeSeries(start, finish, incr) creates a series with has_increment True."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertTrue(ts.has_increment())
+        assert ts.has_increment()
 
     def test_ctor_series_start_is_stored(self):
         """TimeSeries(start, finish, incr) stores the start slot."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertEqual(ts.start(), self.start)
+        assert ts.start() == self.start
 
     def test_ctor_series_finish_is_stored(self):
         """TimeSeries(start, finish, incr) stores the finish slot."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertEqual(ts.finish(), self.finish)
+        assert ts.finish() == self.finish
 
     def test_ctor_series_incr_is_stored(self):
         """TimeSeries(start, finish, incr) stores the increment slot."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertEqual(ts.incr(), self.incr)
+        assert ts.incr() == self.incr
 
     def test_ctor_series_default_not_relative(self):
         """TimeSeries(start, finish, incr) defaults to non-relative."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertFalse(ts.relative())
+        assert not ts.relative()
 
     def test_ctor_series_relative_true(self):
         """TimeSeries(start, finish, incr, True) marks the series as relative."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr, True)
-        self.assertTrue(ts.relative())
+        assert ts.relative()
 
     def test_ctor_series_relative_false(self):
         """TimeSeries(start, finish, incr, False) explicitly non-relative."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr, False)
-        self.assertFalse(ts.relative())
+        assert not ts.relative()
 
     def test_ctor_series_str_absolute(self):
         """str(TimeSeries series) renders as 'HH:MM HH:MM HH:MM'."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertEqual(str(ts), "00:00 23:00 01:00")
+        assert str(ts) == "00:00 23:00 01:00"
 
     def test_ctor_series_str_relative(self):
         """str(TimeSeries series, relative=True) renders with leading '+'."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr, True)
-        self.assertEqual(str(ts), "+00:00 23:00 01:00")
+        assert str(ts) == "+00:00 23:00 01:00"
 
     # ------------------------------------------------------------------
     # has_increment()
@@ -1404,13 +1403,11 @@ class TestTimeSeries(unittest.TestCase):
 
     def test_has_increment_false_for_single(self):
         """has_increment() is False for a single-slot TimeSeries."""
-        self.assertFalse(ecf.TimeSeries(ecf.TimeSlot(10, 0)).has_increment())
+        assert not ecf.TimeSeries(ecf.TimeSlot(10, 0)).has_increment()
 
     def test_has_increment_true_for_series(self):
         """has_increment() is True for a start/finish/incr TimeSeries."""
-        self.assertTrue(
-            ecf.TimeSeries(self.start, self.finish, self.incr).has_increment()
-        )
+        assert ecf.TimeSeries(self.start, self.finish, self.incr).has_increment()
 
     # ------------------------------------------------------------------
     # relative()
@@ -1418,11 +1415,11 @@ class TestTimeSeries(unittest.TestCase):
 
     def test_relative_false_by_default(self):
         """relative() defaults to False."""
-        self.assertFalse(ecf.TimeSeries(ecf.TimeSlot(10, 0)).relative())
+        assert not ecf.TimeSeries(ecf.TimeSlot(10, 0)).relative()
 
     def test_relative_true_when_set(self):
         """relative() returns True when the relative flag was set at construction."""
-        self.assertTrue(ecf.TimeSeries(ecf.TimeSlot(10, 0), True).relative())
+        assert ecf.TimeSeries(ecf.TimeSlot(10, 0), True).relative()
 
     # ------------------------------------------------------------------
     # __eq__ and __ne__
@@ -1430,27 +1427,27 @@ class TestTimeSeries(unittest.TestCase):
 
     def test_eq_identical_single_slots(self):
         """Two single-slot TimeSeries with the same slot are equal."""
-        self.assertEqual(
-            ecf.TimeSeries(ecf.TimeSlot(10, 30)), ecf.TimeSeries(ecf.TimeSlot(10, 30))
+        assert ecf.TimeSeries(ecf.TimeSlot(10, 30)) == ecf.TimeSeries(
+            ecf.TimeSlot(10, 30)
         )
 
     def test_ne_different_slots(self):
         """Single-slot TimeSeries with different slots are not equal."""
-        self.assertNotEqual(
-            ecf.TimeSeries(ecf.TimeSlot(10, 30)), ecf.TimeSeries(ecf.TimeSlot(10, 31))
+        assert ecf.TimeSeries(ecf.TimeSlot(10, 30)) != ecf.TimeSeries(
+            ecf.TimeSlot(10, 31)
         )
 
     def test_eq_identical_series(self):
         """Two series TimeSeries with the same parameters are equal."""
         ts1 = ecf.TimeSeries(self.start, self.finish, self.incr)
         ts2 = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertEqual(ts1, ts2)
+        assert ts1 == ts2
 
     def test_ne_different_relative_flag(self):
         """TimeSeries objects differing only in the relative flag are not equal."""
         ts1 = ecf.TimeSeries(ecf.TimeSlot(10, 30), False)
         ts2 = ecf.TimeSeries(ecf.TimeSlot(10, 30), True)
-        self.assertNotEqual(ts1, ts2)
+        assert ts1 != ts2
 
     # ------------------------------------------------------------------
     # __copy__
@@ -1459,12 +1456,12 @@ class TestTimeSeries(unittest.TestCase):
     def test_copy_is_value_equal(self):
         """copy.copy(TimeSeries) returns a value-equal instance."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertEqual(copy.copy(ts), ts)
+        assert copy.copy(ts) == ts
 
     def test_copy_is_identity_distinct(self):
         """copy.copy(TimeSeries) returns a different object."""
         ts = ecf.TimeSeries(self.start, self.finish, self.incr)
-        self.assertIsNot(copy.copy(ts), ts)
+        assert copy.copy(ts) is not ts
 
     # ------------------------------------------------------------------
     # __hash__
@@ -1474,10 +1471,10 @@ class TestTimeSeries(unittest.TestCase):
         """Two value-equal TimeSeries kept simultaneously have different hashes."""
         ts1 = ecf.TimeSeries(ecf.TimeSlot(10, 30))
         ts2 = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertEqual(ts1, ts2)
-        self.assertNotEqual(hash(ts1), hash(ts2))
+        assert ts1 == ts2
+        assert hash(ts1) != hash(ts2)
 
     def test_hash_same_object_is_stable(self):
         """The hash of a single TimeSeries is the same across repeated calls."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30))
-        self.assertEqual(hash(ts), hash(ts))
+        assert hash(ts) == hash(ts)

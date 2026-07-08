@@ -73,7 +73,6 @@ from ecflow import (
     Edit,
     Defstatus,
 )
-import unittest
 import shutil  # used to remove directory tree
 import os, sys
 
@@ -106,8 +105,8 @@ def do_tear_down():
 
 
 ######################################################################################################
-class TestNewSuite(unittest.TestCase):
-    def setUp(self):
+class TestNewSuite:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         home = os.path.join(os.getenv("HOME"), "course")
@@ -132,9 +131,7 @@ class TestNewSuite(unittest.TestCase):
         # print("Creating suite definition")
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs(Suite("test", Task("t1"), ECF_HOME=home))
-        self.assertEqual(
-            self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
-        )
+        assert self.defs == defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
 
         text = """import os
 from ecflow import Defs,Suite,Task,Edit
@@ -151,23 +148,21 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs, defs, "defs not equal\n" + str(test_defs) + "\n" + str(defs)
-        )
+        assert test_defs == defs, "defs not equal\n" + str(test_defs) + "\n" + str(defs)
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_defs_equal(self):
-        self.assertEqual(self.defs, self.defs2, "defs not the equal")
-        self.assertEqual(self.defs, self.defs3, "defs not the equal")
-        self.assertEqual(self.defs, self.defs4, "defs not the equal")
-        self.assertEqual(self.defs, self.defs5, "defs not the equal")
-
-    def tearDown(self):
-        do_tear_down()
+        assert self.defs == self.defs2, "defs not the equal"
+        assert self.defs == self.defs3, "defs not the equal"
+        assert self.defs == self.defs4, "defs not the equal"
+        assert self.defs == self.defs5, "defs not the equal"
 
 
 ######################################################################################################
-class TestFamilies(unittest.TestCase):
-    def setUp(self):
+class TestFamilies:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         home = os.path.join(os.getenv("HOME"), "course")
@@ -181,6 +176,9 @@ class TestFamilies(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -207,10 +205,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -222,16 +218,13 @@ defs.save_as_defs('test.def')
         defs.test += Family("f1") + [Task("t{0}".format(i)) for i in range(1, 3)]
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestVariables(unittest.TestCase):
-    def setUp(self):
+class TestVariables:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f1():
@@ -249,6 +242,9 @@ class TestVariables(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """#import os
@@ -275,10 +271,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me2(self):
@@ -293,8 +287,8 @@ defs.save_as_defs('test.def')
             )
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
     def test_me3(self):
@@ -308,16 +302,13 @@ defs.save_as_defs('test.def')
         )
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestVariableInheritance(unittest.TestCase):
-    def setUp(self):
+class TestVariableInheritance:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f1():
@@ -332,6 +323,9 @@ class TestVariableInheritance(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -359,10 +353,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -376,16 +368,13 @@ defs.save_as_defs('test.def')
         defs.test += [Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home)]
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestTriggers(unittest.TestCase):
-    def setUp(self):
+class TestTriggers:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f1():
@@ -402,6 +391,9 @@ class TestTriggers(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -433,10 +425,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -451,16 +441,13 @@ defs.save_as_defs('test.def')
         defs = Defs().add(suite)
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestEvents(unittest.TestCase):
-    def setUp(self):
+class TestEvents:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f1():
@@ -481,6 +468,9 @@ class TestEvents(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -519,10 +509,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -543,16 +531,13 @@ defs.save_as_defs('test.def')
         defs.test += [Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f1()]
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestComplete(unittest.TestCase):
-    def setUp(self):
+class TestComplete:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f1():
@@ -573,6 +558,9 @@ class TestComplete(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -612,10 +600,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -634,16 +620,13 @@ defs.save_as_defs('test.def')
         defs.test += create_family_f1()
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestMeter(unittest.TestCase):
-    def setUp(self):
+class TestMeter:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f1():
@@ -667,6 +650,9 @@ class TestMeter(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -703,10 +689,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -729,16 +713,13 @@ defs.save_as_defs('test.def')
         defs.test += create_family_f1()
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestTime(unittest.TestCase):
-    def setUp(self):
+class TestTime:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f2():
@@ -776,6 +757,9 @@ class TestTime(unittest.TestCase):
 
         self.defs = defs
 
+    def teardown_method(self):
+        do_tear_down()
+
     def test_me0(self):
         text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date
@@ -811,10 +795,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -837,8 +819,8 @@ defs.save_as_defs('test.def')
         defs.test += create_family_f2()
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
     def test_add(self):
@@ -862,16 +844,13 @@ defs.save_as_defs('test.def')
         )
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestCron(unittest.TestCase):
-    def setUp(self):
+class TestCron:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_house_keeping():
@@ -895,6 +874,9 @@ class TestCron(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -925,18 +907,13 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestIndentation(unittest.TestCase):
-    def setUp(self):
+class TestIndentation:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         # version = sys.version_info
@@ -969,6 +946,9 @@ class TestIndentation(unittest.TestCase):
 
         defs.save_as_defs(_tutorial_def_file())
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_preferred(self):
         text = """import os
@@ -1008,10 +988,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -1044,16 +1022,13 @@ defs.save_as_defs('test.def')
 
         defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        assert self.defs == defs, (
+            "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestLabel(unittest.TestCase):
-    def setUp(self):
+class TestLabel:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f3():
@@ -1074,6 +1049,9 @@ class TestLabel(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me(self):
         text = """import os
@@ -1103,18 +1081,13 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestRepeat(unittest.TestCase):
-    def setUp(self):
+class TestRepeat:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         self.ecf_home = (
@@ -1144,8 +1117,7 @@ class TestRepeat(unittest.TestCase):
         file.write(t1_ecf)
         file.close()
 
-    def tearDown(self):
-        unittest.TestCase.tearDown(self)
+    def teardown_method(self):
         do_tear_down()
         os.remove(self.t1_ecf_path)
         shutil.rmtree(self.ecf_home, ignore_errors=True)
@@ -1179,7 +1151,7 @@ class TestRepeat(unittest.TestCase):
         # print(defs)
 
         result = defs.check_job_creation()
-        self.assertEqual(result, "", "expected job creation to succeed " + result)
+        assert result == "", "expected job creation to succeed " + result
 
         text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
@@ -1242,7 +1214,7 @@ defs.save_as_defs('test.def')
         # print(defs)
 
         result = defs.check_job_creation()
-        self.assertEqual(result, "", "expected job creation to succeed " + result)
+        assert result == "", "expected job creation to succeed " + result
 
         defs.save_as_defs(_tutorial_def_file())
 
@@ -1266,13 +1238,13 @@ defs.save_as_defs('test.def')
         ]
         # print(defs)
         result = defs.check_job_creation()
-        self.assertEqual(result, "", "expected job creation to succeed " + result)
+        assert result == "", "expected job creation to succeed " + result
 
         defs.save_as_defs(_tutorial_def_file())
 
 
-class TestLimit(unittest.TestCase):
-    def setUp(self):
+class TestLimit:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f5():
@@ -1294,6 +1266,9 @@ class TestLimit(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -1326,18 +1301,13 @@ defs.save_as_defs(_tutorial_def_file())
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestLateAttribute(unittest.TestCase):
-    def setUp(self):
+class TestLateAttribute:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_family_f6():
@@ -1363,6 +1333,9 @@ class TestLateAttribute(unittest.TestCase):
         defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
+
+    def teardown_method(self):
+        do_tear_down()
 
     def test_me0(self):
         text = """import os
@@ -1395,18 +1368,13 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
-    def tearDown(self):
-        do_tear_down()
 
-
-class TestPythonScripting(unittest.TestCase):
-    def setUp(self):
+class TestPythonScripting:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_suite(name):
@@ -1418,6 +1386,9 @@ class TestPythonScripting(unittest.TestCase):
             return suite
 
         self.defs = Defs(create_suite("s1"))
+
+    def teardown_method(self):
+        Ecf.set_debug_equality(False)
 
     def test_me(self):
         def create_suite(name):
@@ -1433,16 +1404,11 @@ class TestPythonScripting(unittest.TestCase):
 
         defs = Defs(create_suite("s1"))
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
-        )
-
-    def tearDown(self):
-        Ecf.set_debug_equality(False)
+        assert self.defs == defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
 
 
-class TestPythonScripting2(unittest.TestCase):
-    def setUp(self):
+class TestPythonScripting2:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         def create_sequential_suite(name):
@@ -1459,6 +1425,9 @@ class TestPythonScripting2(unittest.TestCase):
 
         self.defs = Defs(create_sequential_suite("s1"))
 
+    def teardown_method(self):
+        Ecf.set_debug_equality(False)
+
     def test_me(self):
         def create_sequential_suite(name):
             suite = Suite(name)
@@ -1474,16 +1443,11 @@ class TestPythonScripting2(unittest.TestCase):
 
         defs = Defs(create_sequential_suite("s1"))
 
-        self.assertEqual(
-            self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
-        )
-
-    def tearDown(self):
-        Ecf.set_debug_equality(False)
+        assert self.defs == defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
 
 
-class TestDataAquistionSolution(unittest.TestCase):
-    def setUp(self):
+class TestDataAquistionSolution:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         defs = Defs()
@@ -1524,6 +1488,9 @@ class TestDataAquistionSolution(unittest.TestCase):
         # print(defs)
         self.defs = defs
 
+    def teardown_method(self):
+        Ecf.set_debug_equality(False)
+
     def test_me0(self):
         text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
@@ -1561,10 +1528,8 @@ defs.save_as_defs('test.def')
 """
         _compile_tutorial_text(text)
         test_defs = Defs(_tutorial_def_file())
-        self.assertEqual(
-            test_defs,
-            self.defs,
-            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        assert test_defs == self.defs, (
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs)
         )
 
     def test_me(self):
@@ -1606,14 +1571,11 @@ defs.save_as_defs('test.def')
                 type_fam.process += Trigger("get eq complete")
                 type_fam.store += Trigger("get eq complete")
 
-        self.assertEqual(self.defs, defs, "defs not equal")
-
-    def tearDown(self):
-        Ecf.set_debug_equality(False)
+        assert self.defs == defs, "defs not equal"
 
 
-class TestOperationalSolution(unittest.TestCase):
-    def setUp(self):
+class TestOperationalSolution:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         defs = Defs()
@@ -1674,6 +1636,9 @@ class TestOperationalSolution(unittest.TestCase):
 
             # print(defs)
         self.defs = defs
+
+    def teardown_method(self):
+        Ecf.set_debug_equality(False)
 
     def test_sol1(self):
         import os
@@ -1750,14 +1715,11 @@ class TestOperationalSolution(unittest.TestCase):
         )
         # print(defs)
 
-        self.assertEqual(self.defs, defs, "defs not equal")
-
-    def tearDown(self):
-        Ecf.set_debug_equality(False)
+        assert self.defs == defs, "defs not equal"
 
 
-class TestBackArchivingSolution(unittest.TestCase):
-    def setUp(self):
+class TestBackArchivingSolution:
+    def setup_method(self):
         Ecf.set_debug_equality(True)
 
         home = os.path.join(os.getenv("HOME"), "course")
@@ -1780,6 +1742,9 @@ class TestBackArchivingSolution(unittest.TestCase):
         # print(defs)
 
         self.defs = defs
+
+    def teardown_method(self):
+        Ecf.set_debug_equality(False)
 
     def test_sol1(self):
         import os
@@ -1815,7 +1780,4 @@ class TestBackArchivingSolution(unittest.TestCase):
         )
         # print(defs)
 
-        self.assertEqual(self.defs, defs, "defs not equal")
-
-    def tearDown(self):
-        Ecf.set_debug_equality(False)
+        assert self.defs == defs, "defs not equal"

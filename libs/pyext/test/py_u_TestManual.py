@@ -75,11 +75,10 @@ from ecflow import (
     Defstatus,
 )
 import os
-import unittest
 
 
-class TestAddSuiteFamilyTask0(unittest.TestCase):
-    def setUp(self):
+class TestAddSuiteFamilyTask0:
+    def setup_method(self):
         defs = Defs()
         s = Suite("s1")
         f = Family("f1")
@@ -92,23 +91,23 @@ class TestAddSuiteFamilyTask0(unittest.TestCase):
     def test_0(self):
         defs = Defs()
         defs.add_suite("s1").add_family("f1").add_task("t1")
-        self.assertEqual(self.defs, defs, "defs not equal")
+        assert self.defs == defs, "defs not equal"
 
     def test_1(self):
         defs = Defs().add(Suite("s1").add(Family("f1").add(Task("t1"))))
-        self.assertEqual(self.defs, defs, "defs not equal")
+        assert self.defs == defs, "defs not equal"
 
     def test_2(self):
         defs = Defs(Suite("s1", Family("f1", Task("t1"))))
-        self.assertEqual(self.defs, defs, "defs not equal")
+        assert self.defs == defs, "defs not equal"
 
     def test_3(self):
         defs = Defs() + (Suite("s1") + (Family("f1") + Task("t1")))
-        self.assertEqual(self.defs, defs, "defs not equal")
+        assert self.defs == defs, "defs not equal"
 
 
-class TestAddSuiteFamilyTask(unittest.TestCase):
-    def setUp(self):
+class TestAddSuiteFamilyTask:
+    def setup_method(self):
         defs = Defs()  # create an empty definition
         suite = defs.add_suite("s1")  # create a suite and add it to the defs
         family = suite.add_family("f1")  # create a family and add it to suite
@@ -117,6 +116,12 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
         defs.save_as_defs("test.def")  # save defs to file "test.def"
 
         self.defs = defs
+
+    def teardown_method(self):
+        try:
+            os.remove("test.def")
+        except:
+            pass
 
     def test_me(self):
         with Defs() as defs:
@@ -128,7 +133,7 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(self.defs, defs, "defs not equal")
+            assert self.defs == defs, "defs not equal"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -142,7 +147,7 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(self.defs, defs, "defs not equal")
+            assert self.defs == defs, "defs not equal"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -155,7 +160,7 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(self.defs, defs, "defs not equal")
+            assert self.defs == defs, "defs not equal"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -167,7 +172,7 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(self.defs, defs, "defs not equal")
+            assert self.defs == defs, "defs not equal"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -217,16 +222,9 @@ class TestAddSuiteFamilyTask(unittest.TestCase):
             for fam in suites:
                 assert len(fam) == 5, " expected 5 tasks but found " + str(len(fam))
 
-    def tearDown(self):
-        unittest.TestCase.tearDown(self)
-        try:
-            os.remove("test.def")
-        except:
-            pass
 
-
-class TestAddMeterEventLabel(unittest.TestCase):
-    def setUp(self):
+class TestAddMeterEventLabel:
+    def setup_method(self):
         defs = Defs()
         suite = Suite("s1")
         task = Task("t1")
@@ -255,7 +253,7 @@ class TestAddMeterEventLabel(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -272,7 +270,7 @@ class TestAddMeterEventLabel(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -290,7 +288,7 @@ class TestAddMeterEventLabel(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -311,14 +309,14 @@ class TestAddMeterEventLabel(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddLimitInlimit(unittest.TestCase):
+class TestAddLimitInlimit:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs()
         s1 = defs.add_suite("s1")
         s1.add_limit("limitName4", 10)  # name, maximum token
@@ -344,7 +342,7 @@ class TestAddLimitInlimit(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -358,7 +356,7 @@ class TestAddLimitInlimit(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -374,7 +372,7 @@ class TestAddLimitInlimit(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -395,14 +393,14 @@ class TestAddLimitInlimit(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddVariable(unittest.TestCase):
+class TestAddVariable:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs()
         s1 = defs.add_suite("s1")
         s1.add_variable("HELLO", "world")  # name, value
@@ -428,7 +426,7 @@ class TestAddVariable(unittest.TestCase):
         defs.s1.sort_attributes("variable")
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -450,7 +448,7 @@ class TestAddVariable(unittest.TestCase):
         defs.s1.sort_attributes("variable")
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -467,7 +465,7 @@ class TestAddVariable(unittest.TestCase):
         defs.s1.sort_attributes("variable")
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -490,14 +488,14 @@ class TestAddVariable(unittest.TestCase):
         defs.s1.sort_attributes("variable")
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddTrigger(unittest.TestCase):
+class TestAddTrigger:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs()
         s1 = defs.add_suite("s1")
         t1 = s1.add_task("t1")
@@ -523,7 +521,7 @@ class TestAddTrigger(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -541,7 +539,7 @@ class TestAddTrigger(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -555,14 +553,14 @@ class TestAddTrigger(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddTaskChain(unittest.TestCase):
+class TestAddTaskChain:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs(
             Suite(
                 "s1",
@@ -583,7 +581,7 @@ class TestAddTaskChain(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -594,26 +592,36 @@ class TestAddTaskChain(unittest.TestCase):
         defs.s1.t3 += Trigger([defs.s1.t2])
         defs.s1.t4 += Trigger([defs.s1.t3])
 
+        expected = Defs(
+            Suite(
+                "s1",
+                Task("t1"),
+                Task("t2", Trigger("/s1/t1 == complete")),
+                Task("t3", Trigger("/s1/t2 == complete")),
+                Task("t4", Trigger("/s1/t3 == complete")),
+            )
+        )
+
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == expected, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
-    def test_alternative1(self):
+    def test_alternative2(self):
         defs = Defs(Suite("s1"))
         defs.s1 >> Task("t1") >> Task("t2") >> Task("t3") >> Task("t4")
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddReverseTaskChain(unittest.TestCase):
+class TestAddReverseTaskChain:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs(
             Suite(
                 "s1",
@@ -631,14 +639,14 @@ class TestAddReverseTaskChain(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddLargeTrigger(unittest.TestCase):
+class TestAddLargeTrigger:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs()
         s1 = defs.add_suite("s1")
         t1 = s1.add_task("t1")
@@ -666,7 +674,7 @@ class TestAddLargeTrigger(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -684,7 +692,7 @@ class TestAddLargeTrigger(unittest.TestCase):
         )
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -699,14 +707,14 @@ class TestAddLargeTrigger(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddTimeDependencies(unittest.TestCase):
+class TestAddTimeDependencies:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs()
         s1 = defs.add_suite("s1")
         t1 = s1.add_task("date")
@@ -796,7 +804,7 @@ class TestAddTimeDependencies(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -833,7 +841,7 @@ class TestAddTimeDependencies(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -868,14 +876,14 @@ class TestAddTimeDependencies(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddDefStatus(unittest.TestCase):
+class TestAddDefStatus:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs()
         s1 = defs.add_suite("s1")
         s1.add_task("t1").add_defstatus(Defstatus("complete"))
@@ -894,7 +902,7 @@ class TestAddDefStatus(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -908,7 +916,7 @@ class TestAddDefStatus(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -919,14 +927,14 @@ class TestAddDefStatus(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddAutocancel(unittest.TestCase):
+class TestAddAutocancel:
 
-    def setUp(self):
+    def setup_method(self):
         defs = Defs()
         s1 = defs.add_suite("s1")
         s1.add_task("t1").add_autocancel(3)  # delete task after 3 days after completion
@@ -971,7 +979,7 @@ class TestAddAutocancel(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -989,7 +997,7 @@ class TestAddAutocancel(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -1004,13 +1012,13 @@ class TestAddAutocancel(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddRepeat(unittest.TestCase):
-    def setUp(self):
+class TestAddRepeat:
+    def setup_method(self):
         def add_tasks(fam):
             for i in range(1, 3):
                 fam.add_task(Task("t{0}".format(i)))
@@ -1084,7 +1092,7 @@ class TestAddRepeat(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -1121,7 +1129,7 @@ class TestAddRepeat(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -1142,13 +1150,13 @@ class TestAddRepeat(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class TestAddLate(unittest.TestCase):
-    def setUp(self):
+class TestAddLate:
+    def setup_method(self):
         defs = Defs()
         suite = defs.add_suite("s1")
 
@@ -1170,7 +1178,7 @@ class TestAddLate(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
@@ -1181,13 +1189,13 @@ class TestAddLate(unittest.TestCase):
 
         Ecf.set_debug_equality(True)
         try:
-            self.assertEqual(defs, self.defs, "expected defs to be the same")
+            assert defs == self.defs, "expected defs to be the same"
         finally:
             Ecf.set_debug_equality(False)
 
 
-class Deadlock(unittest.TestCase):
-    def setUp(self):
+class Deadlock:
+    def setup_method(self):
         defs = Defs().add(
             Suite("dead_lock").add(
                 Family("family").add(
@@ -1211,4 +1219,4 @@ class Deadlock(unittest.TestCase):
             )
         )
 
-        self.assertEqual(defs, self.defs, "expected defs to be the same")
+        assert defs == self.defs, "expected defs to be the same"
