@@ -107,6 +107,7 @@ public:
     ///
     /// @brief Returns the current variable value, converted to an R value.
     ///
+    /// @tparam R The target conversion type.
     /// @return The variable value, or a default value if the value fails the conversion to R.
     ///
     /// @note This is defined to establish a generic contract for specific conversions to R. No implementation provided.
@@ -114,12 +115,6 @@ public:
     ///
     template <class R>
     R value() const;
-
-    template <>
-    inline int value<int>() const {
-        // check if the value is convertible to an integer
-        return ecf::algorithm::to_int(v_, 0 /* value to return if conversion fails*/);
-    }
 
     ///
     /// @brief Sets the variable value.
@@ -198,6 +193,17 @@ private:
     template <class Archive>
     void serialize(Archive& ar);
 };
+
+///
+/// @brief Parses the variable value as an integer.
+///
+/// @return The integer value, or `0` if the value cannot be converted.
+///
+template <>
+inline int Variable::value<int>() const {
+    // check if the value is convertible to an integer
+    return ecf::algorithm::to_int(v_, 0 /* value to return if conversion fails*/);
+}
 
 ///
 /// @brief Stores a collection of Variables and provides indexed lookup by name.
