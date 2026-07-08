@@ -545,13 +545,13 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
             TestHelper::invokeRequest(&defs,
                                       Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::VARIABLE, "FRED1", "BILL1")));
             const Variable& v = s->findVariable("FRED1");
-            BOOST_CHECK_MESSAGE(!v.empty() && v.theValue() == "BILL1",
+            BOOST_CHECK_MESSAGE(!v.empty() && v.value() == "BILL1",
                                 "expected to find variable FRED1, with value BILL1");
         }
         {
             TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(s->absNodePath(), AlterCmd::VARIABLE, "FRED1")));
             const Variable& v = s->findVariable("FRED1");
-            BOOST_CHECK_MESSAGE(!v.empty() && v.theValue() == "", "expected to find variable FRED1, with empty value");
+            BOOST_CHECK_MESSAGE(!v.empty() && v.value() == "", "expected to find variable FRED1, with empty value");
         }
     }
 
@@ -583,7 +583,7 @@ BOOST_AUTO_TEST_CASE(test_alter_cmd) {
             TestHelper::invokeRequest(&defs, Cmd_ptr(new AlterCmd(paths, AlterCmd::VARIABLE, "FRED1", "BILL1")));
             for (size_t i = 0; i < nodes.size(); i++) {
                 const Variable& v = s->findVariable("FRED1");
-                BOOST_CHECK_MESSAGE(!v.empty() && v.theValue() == "BILL1",
+                BOOST_CHECK_MESSAGE(!v.empty() && v.value() == "BILL1",
                                     "expected to find variable FRED1, with value BILL1");
             }
         }

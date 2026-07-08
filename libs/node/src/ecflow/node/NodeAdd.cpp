@@ -64,7 +64,7 @@ bool Node::update_variable(const std::string& name, const std::string& value) {
 
 void Node::addVariable(const Variable& v) {
     state_change_no_ = Ecf::incr_state_change_no();
-    if (update_variable(v.name(), v.theValue())) {
+    if (update_variable(v.name(), v.value())) {
         return;
     }
     if (vars_.capacity() == 0) {
@@ -81,7 +81,7 @@ void Node::add_variable(const std::string& name, const std::string& value) {
     if (vars_.capacity() == 0) {
         vars_.reserve(5);
     }
-    vars_.emplace_back(name, value);
+    vars_.push_back(Variable::new_variable(name, value));
 }
 
 void Node::add_variable_bypass_name_check(const std::string& name, const std::string& value) {
@@ -92,7 +92,9 @@ void Node::add_variable_bypass_name_check(const std::string& name, const std::st
     if (vars_.capacity() == 0) {
         vars_.reserve(5);
     }
-    vars_.emplace_back(name, value, false);
+
+    // The following Variable is created without checking the name validity
+    vars_.emplace_back(name, value);
 }
 
 void Node::add_variable_int(const std::string& name, int some_int) {

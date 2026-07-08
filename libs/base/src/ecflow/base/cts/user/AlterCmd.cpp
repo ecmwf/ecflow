@@ -1010,7 +1010,10 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,
             break;
         case AlterCmd::ADD_VARIABLE: {
             // Create a Variable to check valid names
-            Variable check(name, value);
+            std::string msg;
+            if (!Variable::is_valid_variable_name(name, msg)) {
+                throw std::runtime_error(MESSAGE("AlterCmd::check_for_add: " << msg));
+            }
             break;
         }
         case AlterCmd::ADD_LABEL: {
@@ -1142,7 +1145,10 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,
     switch (theAttrType) {
         case AlterCmd::DEL_VARIABLE: {
             if (!name.empty()) {
-                Variable check(name, ""); // Create a Variable to check valid names
+                std::string msg;
+                if (!Variable::is_valid_variable_name(name, msg)) {
+                    throw std::runtime_error(MESSAGE("AlterCmd::check_for_delete: " << name));
+                }
             }
             break;
         }

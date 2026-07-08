@@ -34,7 +34,7 @@ void Node::changeVariable(const std::string& name, const std::string& value) {
     }
 
     LOG(Log::MSG,
-        "Variable at " + this->absNodePath() + ":" + found->name() + " updating from '" + found->theValue() + "' to '" +
+        "Variable at " + this->absNodePath() + ":" + found->name() + " updating from '" + found->value() + "' to '" +
             value + "'");
 
     found->set_value(value);

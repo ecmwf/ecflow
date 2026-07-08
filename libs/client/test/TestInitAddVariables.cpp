@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variables) {
 
     {
         // Test that init command with --add, will add variables
-        std::vector<Variable> vec{Variable("name", "1"), Variable("name2", "2")};
+        std::vector<Variable> vec{Variable::new_variable("name", "1"), Variable::new_variable("name2", "2")};
         TestHelper::invokeRequest(&defs,
                                   Cmd_ptr(new InitCmd(t1->absNodePath(),
                                                       Submittable::DUMMY_JOBS_PASSWORD(),

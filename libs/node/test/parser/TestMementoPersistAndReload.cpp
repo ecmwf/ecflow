@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(test_memento_persist_and_reload) {
         suite_ptr suite = defs.add_suite("s1");
         node_ptr t      = suite->add_task("t1");
 
-        Variable variable("name", "value");
+        auto variable = Variable::new_variable("name", "value");
 
         NodeVariableMemento memento(variable);
         t->set_memento(&memento, aspects, aspect_only); // add variable;

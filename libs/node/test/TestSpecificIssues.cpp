@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_real_clock) {
     {
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151001", "expected 20151001 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151001", "expected 20151001 but found " << ecf_date.value());
     }
 
     // now requeue and date should be reset
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_real_clock) {
         defs->requeue();
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151001", "expected 20151001 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151001", "expected 20151001 but found " << ecf_date.value());
     }
 
     // Now change the clock date to 10.10.2015.
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_real_clock) {
         s1->changeClockDate("10.10.2015");
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151010", "expected 20151010 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151010", "expected 20151010 but found " << ecf_date.value());
     }
 
     // now requeue
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_real_clock) {
         defs->requeue();
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151010", "expected 20151010 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151010", "expected 20151010 but found " << ecf_date.value());
     }
 }
 
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_hybrid_clock) {
     {
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151001", "expected 20151001 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151001", "expected 20151001 but found " << ecf_date.value());
     }
 
     // now requeue and date should be incremented
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_hybrid_clock) {
         defs->requeue();
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151002", "expected 20151002 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151002", "expected 20151002 but found " << ecf_date.value());
     }
 
     // now requeue again and date should be incremented
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_hybrid_clock) {
         defs->requeue();
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151003", "expected 20151003 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151003", "expected 20151003 but found " << ecf_date.value());
     }
 
     // Now change the clock date to 10.10.2015. We expect date to decremented to 09.10.2015,
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_hybrid_clock) {
         s1->changeClockDate("10.10.2015");
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151009", "expected 20151009 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151009", "expected 20151009 but found " << ecf_date.value());
     }
 
     // now requeue and date should be incremented
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_417_hybrid_clock) {
         defs->requeue();
         const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
         BOOST_CHECK_MESSAGE(!ecf_date.empty(), "Did not find ECF_DATE");
-        BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151010", "expected 20151010 but found " << ecf_date.theValue());
+        BOOST_CHECK_MESSAGE(ecf_date.value() == "20151010", "expected 20151010 but found " << ecf_date.value());
     }
 
     // Now update calendar for more than 24 hours, and calendar date should *NOT* change for hybrid

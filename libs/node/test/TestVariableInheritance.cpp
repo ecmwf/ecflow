@@ -42,18 +42,18 @@ BOOST_AUTO_TEST_CASE(test_variable_inheritance) {
     Defs defs;
     {
         suite_ptr suite = defs.add_suite("suite");
-        suite->addVariable(Variable("TOPLEVEL", "10"));
-        suite->addVariable(Variable("MIDDLE", "10"));
-        suite->addVariable(Variable("LOWER", "10"));
+        suite->addVariable(Variable::new_variable("TOPLEVEL", "10"));
+        suite->addVariable(Variable::new_variable("MIDDLE", "10"));
+        suite->addVariable(Variable::new_variable("LOWER", "10"));
 
         family_ptr fam = suite->add_family("f");
-        fam->addVariable(Variable("MIDDLE", "20"));
+        fam->addVariable(Variable::new_variable("MIDDLE", "20"));
         t = fam->add_task("t");
-        t->addVariable(Variable("LOWER", "abc"));
+        t->addVariable(Variable::new_variable("LOWER", "abc"));
         t2 = fam->add_task("t2");
 
         family_ptr fam2 = suite->add_family("f2");
-        fam2->addVariable(Variable("TOPLEVEL", "40"));
+        fam2->addVariable(Variable::new_variable("TOPLEVEL", "40"));
         z = fam2->add_task("z");
     }
 

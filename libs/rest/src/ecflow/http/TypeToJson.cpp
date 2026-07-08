@@ -25,7 +25,7 @@ void to_json(ojson& j, const ::Label& a) {
 }
 
 void to_json(ojson& j, const ::Variable& a) {
-    j = ojson({{"name", a.name()}, {"value", a.theValue()}, {"const", false}});
+    j = ojson({{"name", a.name()}, {"value", a.value()}, {"const", false}});
 }
 
 void to_json(ojson& j, const ::Event& a) {

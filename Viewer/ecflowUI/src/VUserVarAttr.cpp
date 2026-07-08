@@ -42,7 +42,7 @@ QString VUserVarAttrType::toolTip(QStringList d) const {
 }
 
 void VUserVarAttrType::encode(const Variable& v, QStringList& data) const {
-    data << qName_ << QString::fromStdString(v.name()) << QString::fromStdString(v.theValue());
+    data << qName_ << QString::fromStdString(v.name()) << QString::fromStdString(v.value());
 }
 
 //=====================================================

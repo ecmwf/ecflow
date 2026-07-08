@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_after_delete) {
         t0->addDefStatus(DState::COMPLETE);
         t1->addEvent(Event(0, "event", true));
         t2->addMeter(Meter("meter", 0, 100, 100));
-        t3->addVariable(Variable("user_var", "1"));
+        t3->addVariable(Variable::new_variable("user_var", "1"));
         t4->addRepeat(RepeatInteger("repeat_var", 0, 10, 2));
 
         f->addTask(t0);

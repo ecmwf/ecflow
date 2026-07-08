@@ -50,12 +50,12 @@ bool ServerState::operator==(const ServerState& rhs) const {
             std::cout << "ServerState::compare user_variables_ != rhs.user_variables_\n";
             std::cout << "user_variables_:\n";
             for (std::vector<Variable>::const_iterator i = user_variables_.begin(); i != user_variables_.end(); ++i) {
-                std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
+                std::cout << "   " << (*i).name() << " " << (*i).value() << "\n";
             }
             std::cout << "rhs.user_variables_:\n";
             for (std::vector<Variable>::const_iterator i = rhs.user_variables_.begin(); i != rhs.user_variables_.end();
                  ++i) {
-                std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
+                std::cout << "   " << (*i).name() << " " << (*i).value() << "\n";
             }
         }
 #endif
@@ -72,13 +72,13 @@ bool ServerState::operator==(const ServerState& rhs) const {
             std::cout << "server_variables_:\n";
             for (std::vector<Variable>::const_iterator i = server_variables_.begin(); i != server_variables_.end();
                  ++i) {
-                std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
+                std::cout << "   " << (*i).name() << " " << (*i).value() << "\n";
             }
             std::cout << "rhs.server_variables_:\n";
             for (std::vector<Variable>::const_iterator i = rhs.server_variables_.begin();
                  i != rhs.server_variables_.end();
                  ++i) {
-                std::cout << "   " << (*i).name() << " " << (*i).theValue() << "\n";
+                std::cout << "   " << (*i).name() << " " << (*i).value() << "\n";
             }
         }
 #endif
@@ -105,12 +105,12 @@ bool ServerState::compare(const ServerState& rhs) const {
             std::cout << "ServerState::compare user_variables_ != rhs.user_variables_\n";
             std::cout << "user_variables_:\n";
             for (const auto& u : user_variables_) {
-                std::cout << "   " << u.name() << " " << u.theValue() << "\n";
+                std::cout << "   " << u.name() << " " << u.value() << "\n";
             }
 
             std::cout << "rhs.user_variables_:\n";
             for (const auto& u : rhs.user_variables_) {
-                std::cout << "   " << u.name() << " " << u.theValue() << "\n";
+                std::cout << "   " << u.name() << " " << u.value() << "\n";
             }
         }
 #endif
@@ -123,12 +123,12 @@ bool ServerState::compare(const ServerState& rhs) const {
             std::cout << "ServerState::compare server_variables_ != rhs.server_variables_\n";
             std::cout << "server_variables_:\n";
             for (const auto& s : server_variables_) {
-                std::cout << "   " << s.name() << " " << s.theValue() << "\n";
+                std::cout << "   " << s.name() << " " << s.value() << "\n";
             }
 
             std::cout << "rhs.server_variables_:\n";
             for (const auto& s : rhs.server_variables_) {
-                std::cout << "   " << s.name() << " " << s.theValue() << "\n";
+                std::cout << "   " << s.name() << " " << s.value() << "\n";
             }
         }
 #endif
@@ -157,12 +157,10 @@ void ServerState::add_or_update_server_variable(const std::string& name, const s
     for (auto& s : server_variables_) {
         if (s.name() == name) {
             s.set_value(value);
-            //         std::cout << "   Server Variables: Updating " << name << "   " << value << "\n";
             return;
         }
     }
-    //   std::cout << "   Server Variables: Adding " << name << "   " << value << "\n";
-    server_variables_.emplace_back(name, value);
+    server_variables_.push_back(Variable::new_variable(name, value));
 }
 
 void ServerState::set_server_variables(const std::vector<Variable>& e) {
@@ -189,7 +187,7 @@ void ServerState::add_or_update_user_variables(const NameValueVec& env) {
 
 void ServerState::add_or_update_user_variables(const std::vector<Variable>& env) {
     for (const auto& v : env) {
-        add_or_update_user_variables(v.name(), v.theValue());
+        add_or_update_user_variables(v.name(), v.value());
     }
 }
 
@@ -205,7 +203,7 @@ void ServerState::add_or_update_user_variables(const std::string& name, const st
     }
 
     //	std::cout << "   ServerState::add_or_update_user_variables: Adding " << name << "   " << value << "\n";
-    user_variables_.emplace_back(name, value);
+    user_variables_.push_back(Variable::new_variable(name, value));
     variable_state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -230,7 +228,7 @@ void ServerState::delete_user_variable(const std::string& var) {
 bool ServerState::find_user_variable(const std::string& name, std::string& value) const {
     for (const auto& u : user_variables_) {
         if (u.name() == name) {
-            value = u.theValue();
+            value = u.value();
             return true;
         }
     }
@@ -241,15 +239,15 @@ const std::string& ServerState::find_variable(const std::string& theVarName) con
     // SEARCH USER variables FIRST
     for (const auto& u : user_variables_) {
         if (u.name() == theVarName) {
-            return u.theValue();
+            return u.value();
         }
     }
 
     // NOW search server variables
     for (const auto& s : server_variables_) {
         if (s.name() == theVarName) {
-            LOG_ASSERT(!s.theValue().empty(), "");
-            return s.theValue();
+            LOG_ASSERT(!s.value().empty(), "");
+            return s.value();
         }
     }
 
@@ -260,7 +258,6 @@ const Variable& ServerState::findVariable(const std::string& name) const {
     // SEARCH USER variables FIRST
     for (const auto& u : user_variables_) {
         if (u.name() == name) {
-            // if (u.theValue().empty() )  std::cout << u.name() << " has a empty value\n";
             return u;
         }
     }
@@ -268,8 +265,7 @@ const Variable& ServerState::findVariable(const std::string& name) const {
     // NOW search server variables
     for (const auto& s : server_variables_) {
         if (s.name() == name) {
-            LOG_ASSERT(!s.theValue().empty(), "");
-            // if (s.theValue().empty() )  std::cout << s.name() << " has a empty value\n";
+            LOG_ASSERT(!s.value().empty(), "");
             return s;
         }
     }
@@ -316,8 +312,8 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
     // To prevent this we will use a simple count
     char micro                = '%';
     const Variable& micro_var = findVariable(ecf::environment::ECF_MICRO);
-    if (!micro_var.empty() && !micro_var.theValue().empty()) {
-        micro = micro_var.theValue()[0];
+    if (!micro_var.empty() && !micro_var.value().empty()) {
+        micro = micro_var.value()[0];
     }
 
     bool double_micro_found    = false;
@@ -358,7 +354,7 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
         // Note: When a variable is found, it can have an empty value  which is still valid
         const Variable& variable = findVariable(percentVar);
         if (!variable.empty()) {
-            std::string varValue = variable.theValue();
+            std::string varValue = variable.value();
             cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
         }
         else {
@@ -370,7 +366,7 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
 
                 const Variable& variable2 = findVariable(var);
                 if (!variable2.empty()) {
-                    std::string varValue = variable2.theValue();
+                    std::string varValue = variable2.value();
                     cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
                 }
                 else {
@@ -434,43 +430,63 @@ void ServerState::setup_default_env(const std::string& port) {
 
 void ServerState::setup_default_server_variables(std::vector<Variable>& server_variables, const std::string& port) {
     Host host;
-    server_variables.emplace_back(ecf::environment::ECF_MICRO,
-                                  Ecf::MICRO()); // Preprocessor character for variable substitution and including files
-    server_variables.emplace_back(ecf::environment::ECF_HOME, std::string("."));
-    server_variables.emplace_back(std::string("ECF_JOB_CMD"), Ecf::JOB_CMD()); // Command to be executed to submit a job
-    server_variables.emplace_back(std::string("ECF_KILL_CMD"), Ecf::KILL_CMD()); // Command to be executed to kill a job
-    server_variables.emplace_back(std::string("ECF_STATUS_CMD"),
-                                  Ecf::STATUS_CMD()); // Command to be executed to get status of job
-    server_variables.emplace_back(std::string("ECF_URL_CMD"), Ecf::URL_CMD());
-    server_variables.emplace_back(std::string("ECF_URL_BASE"), Ecf::URL_BASE());
-    server_variables.emplace_back(std::string("ECF_URL"), Ecf::URL());
-    server_variables.emplace_back(std::string("ECF_LOG"), host.ecf_log_file(port));
-    server_variables.emplace_back(std::string("ECF_INTERVAL"),
-                                  std::string("60")); // Check time dependencies and submit any jobs
-    server_variables.emplace_back(std::string("ECF_LISTS"), host.ecf_lists_file(port));
-    server_variables.emplace_back(std::string("ECF_PASSWD"), host.ecf_passwd_file(port));
-    server_variables.emplace_back(std::string("ECF_CUSTOM_PASSWD"), host.ecf_custom_passwd_file(port));
-    server_variables.emplace_back(std::string("ECF_CHECK"), host.ecf_checkpt_file(port));
-    server_variables.emplace_back(std::string("ECF_CHECKOLD"), host.ecf_backup_checkpt_file(port));
-    server_variables.emplace_back(std::string("ECF_CHECKINTERVAL"),
-                                  std::string("120")); // The interval in seconds to save check point file
-    server_variables.emplace_back(
-        std::string("ECF_CHECKMODE"),
-        std::string("CHECK_ON_TIME")); // The check mode, must be one of NEVER, ON_TIME, ALWAYS
+
+    // Preprocessor character for variable substitution and including files
+    server_variables.push_back(Variable::new_variable(ecf::environment::ECF_MICRO, Ecf::MICRO()));
+
+    server_variables.push_back(Variable::new_variable(ecf::environment::ECF_HOME, "."));
+
+    // Command to be executed to submit a job
+    server_variables.push_back(Variable::new_variable("ECF_JOB_CMD", Ecf::JOB_CMD()));
+
+    // Command to be executed to kill a job
+    server_variables.push_back(Variable::new_variable("ECF_KILL_CMD", Ecf::KILL_CMD()));
+
+    // Command to be executed to get status of job
+    server_variables.push_back(Variable::new_variable("ECF_STATUS_CMD", Ecf::STATUS_CMD()));
+
+    server_variables.push_back(Variable::new_variable("ECF_URL_CMD", Ecf::URL_CMD()));
+
+    server_variables.push_back(Variable::new_variable("ECF_URL_BASE", Ecf::URL_BASE()));
+
+    server_variables.push_back(Variable::new_variable("ECF_URL", Ecf::URL()));
+
+    server_variables.push_back(Variable::new_variable("ECF_LOG", host.ecf_log_file(port)));
+
+    // Check time dependencies and submit any jobs
+    server_variables.push_back(Variable::new_variable("ECF_INTERVAL", std::string("60")));
+
+    server_variables.push_back(Variable::new_variable("ECF_LISTS", host.ecf_lists_file(port)));
+
+    server_variables.push_back(Variable::new_variable("ECF_PASSWD", host.ecf_passwd_file(port)));
+
+    server_variables.push_back(Variable::new_variable("ECF_CUSTOM_PASSWD", host.ecf_custom_passwd_file(port)));
+
+    server_variables.push_back(Variable::new_variable("ECF_CHECK", host.ecf_checkpt_file(port)));
+
+    server_variables.push_back(Variable::new_variable("ECF_CHECKOLD", host.ecf_backup_checkpt_file(port)));
+
+    // The interval in seconds to save check point file
+    server_variables.push_back(Variable::new_variable("ECF_CHECKINTERVAL", std::string("120")));
+
+    // The check mode, must be one of NEVER, ON_TIME, ALWAYS
+    server_variables.push_back(Variable::new_variable("ECF_CHECKMODE", "CHECK_ON_TIME"));
 
     // Number of times a job should rerun if it aborts. If more than one and
     // job aborts, the job is automatically re-run. Useful when jobs are run in
     // an unreliable environments. For example using using commands like ftp(1)
     // in a job can fail easily, but re-running the job will often work
-    server_variables.emplace_back(ecf::environment::ECF_TRIES, std::string("2"));
+    server_variables.push_back(Variable::new_variable(ecf::environment::ECF_TRIES, "2"));
 
-    server_variables.emplace_back(std::string("ECF_VERSION"), Version::full()); // server version
+    // server version
+    server_variables.push_back(Variable::new_variable("ECF_VERSION", Version::full()));
 
     // Needed to setup client environment.
     // The server sets these variable for use by the client. i.e when creating the jobs
     // The clients then uses them to communicate with the server.
-    server_variables.emplace_back(ecf::environment::ECF_PORT, port);
-    server_variables.emplace_back(ecf::environment::ECF_HOST, ecf::string_constants::localhost);
+    server_variables.push_back(Variable::new_variable(ecf::environment::ECF_PORT, port));
+
+    server_variables.push_back(Variable::new_variable(ecf::environment::ECF_HOST, ecf::string_constants::localhost));
 }
 
 /// determines why the node is not running.

@@ -488,7 +488,8 @@ static void wait_for_no_zombies(int max_time_to_wait) {
 
 static void populate_defs(Defs& theDefs, const std::string& suite_name) {
     suite_ptr suite = theDefs.add_suite(suite_name);
-    suite->addVariable(Variable("SLEEPTIME", "5")); // sleep for longer than normal to allow for creation of zombies
+    suite->addVariable(
+        Variable::new_variable("SLEEPTIME", "5")); // sleep for longer than normal to allow for creation of zombies
     family_ptr family = suite->add_family("f");
     for (int i = 0; i < NUM_OF_TASKS; i++) {
         family->add_task("t" + ecf::convert_to<std::string>(i));

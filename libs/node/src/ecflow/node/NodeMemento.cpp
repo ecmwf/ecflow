@@ -758,7 +758,7 @@ void Node::set_memento(const NodeVariableMemento* memento, std::vector<ecf::Aspe
     // Attempt to update an existing variable
     for (auto& var : vars_) {
         if (var.name() == memento->var_.name()) {
-            var.set_value(memento->var_.theValue());
+            var.set_value(memento->var_.value());
             return;
         }
     }

@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_include_file) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_simple_include_file"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_495) {
     // endsuite
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite(Pid::unique_name("test_ECFLOW_495"));
-    suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+    suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
     task_ptr task_t1 = suite->add_task("t1");
 
     // PrintStyle style(PrintStyle::STATE);
@@ -248,8 +248,8 @@ BOOST_AUTO_TEST_CASE(test_ECF_SCRIPT_CMD_ECFLOW_427) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ECF_SCRIPT_CMD_ECFLOW_427"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable("body", "body"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable("body", "body"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
@@ -400,9 +400,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_file) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_include_file"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable("SLEEPTIME", "1"));
-        suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "1"));
+        suite->addVariable(Variable::new_variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
@@ -483,9 +483,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_multi_paths_ECFLOW_261) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_include_multi_paths_ECFLOW_261"));
     Defs theDefs;
     {
-        suite->addVariable(
-            Variable(ecf::environment::ECF_INCLUDE,
-                     "$ECF_HOME/empty_include1:$ECF_HOME/empty_include2:$ECF_HOME/includes:$ECF_HOME/includes2"));
+        suite->addVariable(Variable::new_variable(
+            ecf::environment::ECF_INCLUDE,
+            "$ECF_HOME/empty_include1:$ECF_HOME/empty_include2:$ECF_HOME/includes:$ECF_HOME/includes2"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
@@ -567,7 +567,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_include_ECFLOW_274) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_include_ECFLOW_274"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables) {
     Defs theDefs;
     {
         suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables"));
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("ESUITE", "suite");
         task_t1 = suite->add_family("f1")->add_task("t1");
     }
@@ -737,7 +737,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_with_comments) {
     Defs theDefs;
     {
         suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables_with_comments"));
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("ETASK", "suite");
         suite->add_variable("FRED", "fred");
         task_t1 = suite->add_family("f1")->add_task("t1");
@@ -809,7 +809,7 @@ BOOST_AUTO_TEST_CASE(test_ecf_simple_used_variables_errors) {
     Defs theDefs;
     {
         suite = theDefs.add_suite(Pid::unique_name("test_ecf_simple_used_variables_errors"));
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("ETASK", "suite");
         task_t1 = suite->add_family("f1")->add_task("t1");
     }
@@ -879,11 +879,11 @@ BOOST_AUTO_TEST_CASE(test_ecf_file) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_file"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable("SLEEPTIME", "1"));
-        suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "1"));
+        suite->addVariable(Variable::new_variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         for (const NameValueMap::value_type& p : expected_used_variables) {
-            task_t1->addVariable(Variable(p.first, p.second));
+            task_t1->addVariable(Variable::new_variable(p.first, p.second));
         }
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
@@ -1069,9 +1069,9 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_includenoop) {
     suite_ptr suite  = Suite::create(Pid::unique_name("test_ecf_file_includenoop"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable("SLEEPTIME", "1"));
-        suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "1"));
+        suite->addVariable(Variable::new_variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
@@ -1164,13 +1164,13 @@ BOOST_AUTO_TEST_CASE(test_ecf_file_override_ECF_JOB) {
 
     // Create a defs file, where the task name mirrors the ecf files in the given directory
     task_ptr task_t1 = Task::create("t1");
-    task_t1->addVariable(Variable("ECF_JOB", job_file_location));
+    task_t1->addVariable(Variable::new_variable("ECF_JOB", job_file_location));
     suite_ptr suite = Suite::create(Pid::unique_name("test_ecf_file_override_ECF_JOB"));
     Defs theDefs;
     {
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable("SLEEPTIME", "1"));
-        suite->addVariable(Variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "1"));
+        suite->addVariable(Variable::new_variable("ECF_CLIENT_EXE_PATH", "a/made/up/path"));
         suite->addTask(task_t1);
         theDefs.addSuite(suite);
     }
@@ -1245,7 +1245,7 @@ BOOST_AUTO_TEST_CASE(test_manual_files) {
     // Create a defs file, where the task name mirrors the ecf files in the given directory
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite("suite"); // ** relies on name of suite, in SMSHOME/suite
-    suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
+    suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/../includes"));
     family_ptr family = suite->add_family("family");
     task_ptr task_t1  = family->add_task("t1");
 
@@ -1334,7 +1334,7 @@ BOOST_AUTO_TEST_CASE(test_ECFLOW_672) {
     // endsuite
     Defs theDefs;
     suite_ptr suite = theDefs.add_suite("ECFLOW_672");
-    suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/ECFLOW_672"));
+    suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/ECFLOW_672"));
     task_ptr task_t1 = suite->add_task("t");
 
     // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
@@ -1393,7 +1393,7 @@ static void basic_test_template(const std::string& test_name,
     suite_ptr suite  = Suite::create(Pid::unique_name(test_name));
     Defs theDefs;
     {
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
         suite->add_variable("simple", "simple");
         suite->add_variable("tail", "tail");
         if (!ecf_micro.empty()) {

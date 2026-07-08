@@ -608,9 +608,9 @@ BOOST_AUTO_TEST_CASE(test_server_state) {
     {
         Defs defs;
         std::vector<Variable> vec;
-        vec.emplace_back("name", "value1");
-        vec.emplace_back("name2", "val with 'spaces' ");
-        vec.emplace_back("name3", "");
+        vec.push_back(Variable::new_variable("name", "value1"));
+        vec.push_back(Variable::new_variable("name2", "val with 'spaces' "));
+        vec.push_back(Variable::new_variable("name3", ""));
         defs.server_state().set_user_variables(vec);
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE(helper.test_state_persist_and_reload_with_checkpt(defs),

@@ -93,17 +93,17 @@ defs_ptr ServerTestHarness::doRun(Defs& theClientDefs,
     for (auto s : theClientDefs.suites()) {
 
         // Always override these to correctly locate files.
-        s->addVariable(Variable(ecf::environment::ECF_HOME, ecf_home));
-        s->addVariable(Variable("ECF_CLIENT_EXE_PATH", theClientExePath));
-        s->addVariable(Variable(ecf::environment::ECF_INCLUDE, TestFixture::includes()));
+        s->addVariable(Variable::new_variable(ecf::environment::ECF_HOME, ecf_home));
+        s->addVariable(Variable::new_variable("ECF_CLIENT_EXE_PATH", theClientExePath));
+        s->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, TestFixture::includes()));
 
         if (s->findVariable("SLEEPTIME").empty()) {
-            s->addVariable(Variable("SLEEPTIME", "1"));
+            s->addVariable(Variable::new_variable("SLEEPTIME", "1"));
         }
 
         if (check_task_duration_less_than_server_poll_) {
             if (s->findVariable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL").empty()) {
-                s->addVariable(Variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL", "_any_"));
+                s->addVariable(Variable::new_variable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL", "_any_"));
             }
         }
         suiteName = s->name();

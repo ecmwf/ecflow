@@ -29,16 +29,20 @@ BOOST_AUTO_TEST_CASE(test_defs_variable_substitution) {
 
     Defs defs;
     {
+        std::vector<std::pair<std::string, std::string>> pairs = {{"AVI", "avi"},
+                                                                  {"BAHRA", "bahra"},
+                                                                  {"LOWER", "10"},
+                                                                  {"PATH", "/fred/bill/joe"},
+                                                                  {"fred", "%bill%"},
+                                                                  {"bill", "%fred%"},
+                                                                  {"hello", "%hello%"},
+                                                                  {"mary", "%jane%"},
+                                                                  {"jane", "10"}};
+
         std::vector<Variable> vec;
-        vec.emplace_back("AVI", "avi");
-        vec.emplace_back("BAHRA", "bahra");
-        vec.emplace_back("LOWER", "10");
-        vec.emplace_back("PATH", "/fred/bill/joe");
-        vec.emplace_back("fred", "%bill%");
-        vec.emplace_back("bill", "%fred%");
-        vec.emplace_back("hello", "%hello%");
-        vec.emplace_back("mary", "%jane%");
-        vec.emplace_back("jane", "10");
+        for (auto& [name, value] : pairs) {
+            vec.push_back(Variable::new_variable(name, value));
+        }
         defs.server_state().add_or_update_user_variables(vec);
     }
 

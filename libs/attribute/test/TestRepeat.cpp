@@ -281,38 +281,38 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
             {
                 const Variable& var = rep.find_gen_variable("YMD");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD,
-                                    "expected YMD " << expected.YMD << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD,
+                                    "expected YMD " << expected.YMD << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_YYYY");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_YYYY");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_YYYY,
-                                    "expected YYYY " << expected.YMD_YYYY << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_YYYY,
+                                    "expected YYYY " << expected.YMD_YYYY << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_MM");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_MM");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_MM,
-                                    "expected MM " << expected.YMD_MM << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_MM,
+                                    "expected MM " << expected.YMD_MM << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_DD");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_DD");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_DD,
-                                    "expected DD " << expected.YMD_DD << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_DD,
+                                    "expected DD " << expected.YMD_DD << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_DOW");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_DOW");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_DOW,
-                                    "expected DOW " << expected.YMD_DOW << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_DOW,
+                                    "expected DOW " << expected.YMD_DOW << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_JULIAN");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_JULIAN");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_JULIAN,
-                                    "expected JULIAN " << expected.YMD_JULIAN << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_JULIAN,
+                                    "expected JULIAN " << expected.YMD_JULIAN << " but found " << var.value());
             }
         }
     }
@@ -350,38 +350,38 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
             {
                 const Variable& var = rep.find_gen_variable("YMD");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD,
-                                    "expected YMD " << expected.YMD << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD,
+                                    "expected YMD " << expected.YMD << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_YYYY");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_YYYY");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_YYYY,
-                                    "expected YYYY " << expected.YMD_YYYY << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_YYYY,
+                                    "expected YYYY " << expected.YMD_YYYY << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_MM");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_MM");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_MM,
-                                    "expected MM " << expected.YMD_MM << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_MM,
+                                    "expected MM " << expected.YMD_MM << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_DD");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_DD");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_DD,
-                                    "expected DD " << expected.YMD_DD << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_DD,
+                                    "expected DD " << expected.YMD_DD << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_DOW");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_DOW");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_DOW,
-                                    "expected DOW " << expected.YMD_DOW << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_DOW,
+                                    "expected DOW " << expected.YMD_DOW << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("YMD_JULIAN");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_JULIAN");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.YMD_JULIAN,
-                                    "expected JULIAN " << expected.YMD_JULIAN << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.YMD_JULIAN,
+                                    "expected JULIAN " << expected.YMD_JULIAN << " but found " << var.value());
             }
 
             rep.increment();
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
         {
             const Variable& var = rep.find_gen_variable("YMD_YYYY");
             BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_YYYY");
-            BOOST_CHECK_MESSAGE(var.theValue() == "2020", "expected '2020' but found " << var.theValue());
+            BOOST_CHECK_MESSAGE(var.value() == "2020", "expected '2020' but found " << var.value());
         }
 
         rep.increment();
@@ -409,8 +409,8 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
         {
             const Variable& var = rep.find_gen_variable("YMD_YYYY");
             BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_YYYY");
-            BOOST_CHECK_MESSAGE(var.theValue() == "<invalid>",
-                                "expected '<invalid>' after expiry but found " << var.theValue());
+            BOOST_CHECK_MESSAGE(var.value() == "<invalid>",
+                                "expected '<invalid>' after expiry but found " << var.value());
         }
     }
 }
@@ -576,43 +576,42 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
     {
         const Variable& var = rep.find_gen_variable("DT");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT");
-        BOOST_CHECK_MESSAGE(var.theValue() == "20240315T103045",
-                            "expected '20240315T103045' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "20240315T103045", "expected '20240315T103045' but found " << var.value());
     }
     {
         const Variable& var = rep.find_gen_variable("DT_DATE");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_DATE");
-        BOOST_CHECK_MESSAGE(var.theValue() == "20240315", "expected '20240315' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "20240315", "expected '20240315' but found " << var.value());
     }
     {
         const Variable& var = rep.find_gen_variable("DT_YYYY");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_YYYY");
-        BOOST_CHECK_MESSAGE(var.theValue() == "2024", "expected '2024' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "2024", "expected '2024' but found " << var.value());
     }
     {
         const Variable& var = rep.find_gen_variable("DT_MM");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_MM");
-        BOOST_CHECK_MESSAGE(var.theValue() == "03", "expected '03' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "03", "expected '03' but found " << var.value());
     }
     {
         const Variable& var = rep.find_gen_variable("DT_DD");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_DD");
-        BOOST_CHECK_MESSAGE(var.theValue() == "15", "expected '15' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "15", "expected '15' but found " << var.value());
     }
     {
         const Variable& var = rep.find_gen_variable("DT_HOURS");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_HOURS");
-        BOOST_CHECK_MESSAGE(var.theValue() == "10", "expected '10' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "10", "expected '10' but found " << var.value());
     }
     {
         const Variable& var = rep.find_gen_variable("DT_MINUTES");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_MINUTES");
-        BOOST_CHECK_MESSAGE(var.theValue() == "30", "expected '30' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "30", "expected '30' but found " << var.value());
     }
     {
         const Variable& var = rep.find_gen_variable("DT_SECONDS");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find DT_SECONDS");
-        BOOST_CHECK_MESSAGE(var.theValue() == "45", "expected '45' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "45", "expected '45' but found " << var.value());
     }
 }
 
@@ -837,9 +836,9 @@ BOOST_AUTO_TEST_CASE(last_value) {
         Repeat rep(RepeatDate("YMD", 20090916, 20090930, 1));
         rep.update_repeat_genvar();
         const Variable& gen_var = rep.find_gen_variable("YMD_JULIAN");
-        int old_value           = gen_var.value();
+        int old_value           = gen_var.value<int>();
         rep.setToLastValue();
-        int new_value = gen_var.value();
+        int new_value = gen_var.value<int>();
 
         BOOST_CHECK_MESSAGE(rep.value() == 20090930,
                             "Set to last value did not work, expected 20090930 but found " << rep.value());
@@ -877,8 +876,8 @@ BOOST_AUTO_TEST_CASE(increment) {
         rep.update_repeat_genvar();
         const Variable& gen_var  = rep.find_gen_variable("YMD_JULIAN");
         const Variable& gen_var2 = rep.find_gen_variable("YMD_DOW");
-        int old_value            = gen_var.value();
-        int old_value2           = gen_var2.value();
+        int old_value            = gen_var.value<int>();
+        int old_value2           = gen_var2.value<int>();
 
         while (rep.valid()) {
             rep.increment();
@@ -887,12 +886,14 @@ BOOST_AUTO_TEST_CASE(increment) {
         BOOST_CHECK_MESSAGE(rep.value() == 20090921, "expected 20090921 but found " << rep.value());
         BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20090920,
                             "expected 20090920 but found " << rep.last_valid_value());
-        BOOST_CHECK_MESSAGE(old_value != gen_var.value(), "Expected generated variables to change on increment");
-        BOOST_CHECK_MESSAGE(old_value2 != gen_var2.value(), "Expected generated variables to change on increment");
+        BOOST_CHECK_MESSAGE(old_value != gen_var.value<int>(), "Expected generated variables to change on increment");
+        BOOST_CHECK_MESSAGE(old_value2 != gen_var2.value<int>(), "Expected generated variables to change on increment");
 
         rep.reset();
-        BOOST_CHECK_MESSAGE(old_value = gen_var.value(), "Expected generated variables to be the same after reset");
-        BOOST_CHECK_MESSAGE(old_value2 = gen_var2.value(), "Expected generated variables to be the same after reset");
+        BOOST_CHECK_MESSAGE(old_value = gen_var.value<int>(),
+                            "Expected generated variables to be the same after reset");
+        BOOST_CHECK_MESSAGE(old_value2 = gen_var2.value<int>(),
+                            "Expected generated variables to be the same after reset");
     }
     {
         Repeat rep(RepeatDate("YMD", 20090920, 20090916, -1));
@@ -1013,39 +1014,38 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
     {
         const Variable& var = rep.find_gen_variable("YMD");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_YYYY");
-        BOOST_CHECK_MESSAGE(var.theValue() == "20090916",
-                            "expected year to be '20090916'  but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "20090916", "expected year to be '20090916'  but found " << var.value());
     }
 
     {
         const Variable& var = rep.find_gen_variable("YMD_YYYY");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_YYYY");
-        BOOST_CHECK_MESSAGE(var.theValue() == "2009", "expected year to be '2009'  but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "2009", "expected year to be '2009'  but found " << var.value());
     }
 
     {
         const Variable& var = rep.find_gen_variable("YMD_MM");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_MM");
-        BOOST_CHECK_MESSAGE(var.theValue() == "09", "expected month to be '09'  but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "09", "expected month to be '09'  but found " << var.value());
     }
 
     {
         const Variable& var = rep.find_gen_variable("YMD_DD");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_DD");
-        BOOST_CHECK_MESSAGE(var.theValue() == "16", "expected day of month to be '16' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "16", "expected day of month to be '16' but found " << var.value());
     }
 
     {
         const Variable& var = rep.find_gen_variable("YMD_DOW");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_DOW");
-        BOOST_CHECK_MESSAGE(var.theValue() == "3", "expected day of week to be '3' but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == "3", "expected day of week to be '3' but found " << var.value());
     }
 
     {
         const Variable& var = rep.find_gen_variable("YMD_JULIAN");
         BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_JULIAN");
         std::string expected = ecf::convert_to<std::string>(ecf::CalendarDate(20090916).as_julian_day().value());
-        BOOST_CHECK_MESSAGE(var.theValue() == expected, "expected " << expected << " but found " << var.theValue());
+        BOOST_CHECK_MESSAGE(var.value() == expected, "expected " << expected << " but found " << var.value());
     }
 }
 
@@ -1129,45 +1129,45 @@ BOOST_AUTO_TEST_CASE(more_generated_variables) {
         {
             const Variable& var = rep.find_gen_variable("YMD");
             BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_YYYY");
-            BOOST_CHECK_MESSAGE(var.theValue() == expected_YMD[i],
-                                "expected YMD " << expected_YMD[i] << " but found " << var.theValue());
+            BOOST_CHECK_MESSAGE(var.value() == expected_YMD[i],
+                                "expected YMD " << expected_YMD[i] << " but found " << var.value());
         }
 
         {
             const Variable& var = rep.find_gen_variable("YMD_YYYY");
             BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_YYYY");
-            BOOST_CHECK_MESSAGE(var.theValue() == expected_year[i],
-                                "expected year to be " << expected_year[i] << " but found " << var.theValue());
+            BOOST_CHECK_MESSAGE(var.value() == expected_year[i],
+                                "expected year to be " << expected_year[i] << " but found " << var.value());
         }
 
         {
             const Variable& var = rep.find_gen_variable("YMD_MM");
             BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_MM");
-            BOOST_CHECK_MESSAGE(var.theValue() == expected_MM[i],
-                                "expected month to be " << expected_MM[i] << " but found " << var.theValue());
+            BOOST_CHECK_MESSAGE(var.value() == expected_MM[i],
+                                "expected month to be " << expected_MM[i] << " but found " << var.value());
         }
 
         {
             const Variable& var = rep.find_gen_variable("YMD_DD");
             BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_DD");
-            BOOST_CHECK_MESSAGE(var.theValue() == expected_day_of_month[i],
+            BOOST_CHECK_MESSAGE(var.value() == expected_day_of_month[i],
                                 "expected day of month to be " << expected_day_of_month[i] << " but found "
-                                                               << var.theValue());
+                                                               << var.value());
         }
 
         {
             const Variable& var = rep.find_gen_variable("YMD_DOW");
             BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_DOW");
-            BOOST_CHECK_MESSAGE(var.theValue() == expected_day_of_week[i],
+            BOOST_CHECK_MESSAGE(var.value() == expected_day_of_week[i],
                                 "expected day of week to be " << expected_day_of_week[i] << " but found "
-                                                              << var.theValue());
+                                                              << var.value());
         }
 
         {
             const Variable& var = rep.find_gen_variable("YMD_JULIAN");
             BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable YMD_JULIAN");
-            BOOST_CHECK_MESSAGE(var.theValue() == expected_julian[i],
-                                "expected " << expected_julian[i] << " but found " << var.theValue());
+            BOOST_CHECK_MESSAGE(var.value() == expected_julian[i],
+                                "expected " << expected_julian[i] << " but found " << var.value());
         }
 
         rep.increment();
@@ -1507,62 +1507,62 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
             {
                 const Variable& var = rep.find_gen_variable("DT");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT,
-                                    "expected '" << expected.DT << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT,
+                                    "expected '" << expected.DT << "' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_DATE");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_DATE");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_DATE,
-                                    "expected '" << expected.DT_DATE << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_DATE,
+                                    "expected '" << expected.DT_DATE << "' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_YYYY");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_YYYY");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_YYYY,
-                                    "expected '" << expected.DT_YYYY << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_YYYY,
+                                    "expected '" << expected.DT_YYYY << "' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_MM");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_MM");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_MM,
-                                    "expected '" << expected.DT_MM << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_MM,
+                                    "expected '" << expected.DT_MM << "' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_DD");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_DD");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_DD,
-                                    "expected '" << expected.DT_DD << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_DD,
+                                    "expected '" << expected.DT_DD << "' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_JULIAN");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_JULIAN");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_JULIAN,
-                                    "expected " << expected.DT_JULIAN << " but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_JULIAN,
+                                    "expected " << expected.DT_JULIAN << " but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_TIME");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_TIME");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_TIME,
-                                    "expected '" << expected.DT_TIME << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_TIME,
+                                    "expected '" << expected.DT_TIME << "' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_HOURS");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_HOURS");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_HOURS,
-                                    "expected '" << expected.DT_HOURS << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_HOURS,
+                                    "expected '" << expected.DT_HOURS << "' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_MINUTES");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_MINUTES");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_MINUTES,
-                                    "expected '" << expected.DT_MINUTES << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_MINUTES,
+                                    "expected '" << expected.DT_MINUTES << "' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_SECONDS");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_SECONDS");
-                BOOST_CHECK_MESSAGE(var.theValue() == expected.DT_SECONDS,
-                                    "expected '" << expected.DT_SECONDS << "' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == expected.DT_SECONDS,
+                                    "expected '" << expected.DT_SECONDS << "' but found " << var.value());
             }
 
             rep.increment();
@@ -1575,17 +1575,17 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
             {
                 const Variable& var = rep.find_gen_variable("DT_DATE");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_DATE");
-                BOOST_CHECK_MESSAGE(var.theValue() == "20170101", "expected '20170101' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == "20170101", "expected '20170101' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_YYYY");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_YYYY");
-                BOOST_CHECK_MESSAGE(var.theValue() == "2017", "expected '2017' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == "2017", "expected '2017' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_HOURS");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_HOURS");
-                BOOST_CHECK_MESSAGE(var.theValue() == "12", "expected '12' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == "12", "expected '12' but found " << var.value());
             }
 
             rep.increment();
@@ -1594,12 +1594,12 @@ BOOST_AUTO_TEST_CASE(generated_variables) {
             {
                 const Variable& var = rep.find_gen_variable("DT_DATE");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_DATE");
-                BOOST_CHECK_MESSAGE(var.theValue() == "20161231", "expected '20161231' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == "20161231", "expected '20161231' but found " << var.value());
             }
             {
                 const Variable& var = rep.find_gen_variable("DT_YYYY");
                 BOOST_CHECK_MESSAGE(!var.empty(), "Did not find generated variable DT_YYYY");
-                BOOST_CHECK_MESSAGE(var.theValue() == "2016", "expected '2016' but found " << var.theValue());
+                BOOST_CHECK_MESSAGE(var.value() == "2016", "expected '2016' but found " << var.value());
             }
         }
     }

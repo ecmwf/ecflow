@@ -853,10 +853,10 @@ void ClientInvoker_set_child_init_add_vars(ClientInvoker* self, const py::dict& 
     py_dict_to_str_vec(dict, vars);
 
     std::vector<Variable> vec;
-    std::transform(vars.begin(),
-                   vars.end(),
-                   std::back_inserter(vec),
-                   [](const std::pair<std::string, std::string>& var) { return Variable(var.first, var.second); });
+    std::transform(
+        vars.begin(), vars.end(), std::back_inserter(vec), [](const std::pair<std::string, std::string>& var) {
+            return Variable::new_variable(var.first, var.second);
+        });
 
     self->set_child_init_add_vars(vec);
 }

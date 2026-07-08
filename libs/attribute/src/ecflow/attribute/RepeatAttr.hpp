@@ -327,18 +327,18 @@ private:
     mutable VariableMap generated_{
         // clang-format off
         // Date
-        Variable(name_ + "_DATE", "<invalid>"),
+        Variable::new_variable(name_ + "_DATE", "<invalid>"),
         // Date Components
-        Variable(name_ + "_YYYY", "<invalid>"),
-        Variable(name_ + "_MM", "<invalid>"),
-        Variable(name_ + "_DD", "<invalid>"),
-        Variable(name_ + "_JULIAN", "<invalid>"),
+        Variable::new_variable(name_ + "_YYYY", "<invalid>"),
+        Variable::new_variable(name_ + "_MM", "<invalid>"),
+        Variable::new_variable(name_ + "_DD", "<invalid>"),
+        Variable::new_variable(name_ + "_JULIAN", "<invalid>"),
         // Time
-        Variable(name_ + "_TIME", "<invalid>"),
+        Variable::new_variable(name_ + "_TIME", "<invalid>"),
         // Time Components4
-        Variable(name_ + "_HOURS", "<invalid>"),
-        Variable(name_ + "_MINUTES", "<invalid>"),
-        Variable(name_ + "_SECONDS", "<invalid>")
+        Variable::new_variable(name_ + "_HOURS", "<invalid>"),
+        Variable::new_variable(name_ + "_MINUTES", "<invalid>"),
+        Variable::new_variable(name_ + "_SECONDS", "<invalid>")
         // clang-format on
     };
 
@@ -513,15 +513,15 @@ private:
     // *not* persisted
     mutable VariableMap generated_{
         // clang-format off
-        Variable(name_ + "_DATE", "<invalid>"),
-        Variable(name_ + "_YYYY", "<invalid>"),
-        Variable(name_ + "_MM", "<invalid>"),
-        Variable(name_ + "_DD", "<invalid>"),
-        Variable(name_ + "_JULIAN", "<invalid>"),
-        Variable(name_ + "_TIME", "<invalid>"),
-        Variable(name_ + "_HOURS", "<invalid>"),
-        Variable(name_ + "_MINUTES", "<invalid>"),
-        Variable(name_ + "_SECONDS", "<invalid>")
+        Variable::new_variable(name_ + "_DATE", "<invalid>"),
+        Variable::new_variable(name_ + "_YYYY", "<invalid>"),
+        Variable::new_variable(name_ + "_MM", "<invalid>"),
+        Variable::new_variable(name_ + "_DD", "<invalid>"),
+        Variable::new_variable(name_ + "_JULIAN", "<invalid>"),
+        Variable::new_variable(name_ + "_TIME", "<invalid>"),
+        Variable::new_variable(name_ + "_HOURS", "<invalid>"),
+        Variable::new_variable(name_ + "_MINUTES", "<invalid>"),
+        Variable::new_variable(name_ + "_SECONDS", "<invalid>")
         // clang-format on
     };
 

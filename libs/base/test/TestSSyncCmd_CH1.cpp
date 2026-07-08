@@ -271,8 +271,8 @@ static bool add_variable_to_suite_s4(defs_ptr defs) {
 static bool add_server_user_variables(defs_ptr defs) {
     // Change server. This is outside of any suites
     std::vector<Variable> user_variables;
-    user_variables.emplace_back("a", "b");
-    user_variables.emplace_back("c", "d");
+    user_variables.push_back(Variable::new_variable("a", "b"));
+    user_variables.push_back(Variable::new_variable("c", "d"));
     defs->server_state().set_user_variables(user_variables);
     return true; // expect change
 }

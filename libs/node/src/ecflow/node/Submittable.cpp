@@ -360,18 +360,18 @@ EcfFile Submittable::locatedEcfFile() const {
 
 #ifdef DEBUG_TASK_LOCATION
     std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " searching ECF_SCRIPT = '"
-              << genvar_ecfscript.theValue() << "'\n";
+              << genvar_ecfscript.value() << "'\n";
 #endif
-    if (fs::exists(genvar_ecfscript.theValue())) {
+    if (fs::exists(genvar_ecfscript.value())) {
 #ifdef DEBUG_TASK_LOCATION
         std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_SCRIPT = '"
-                  << genvar_ecfscript.theValue() << "' exists\n";
+                  << genvar_ecfscript.value() << "' exists\n";
 #endif
-        return EcfFile(const_cast<Submittable*>(this), genvar_ecfscript.theValue(), EcfFile::ECF_SCRIPT);
+        return EcfFile(const_cast<Submittable*>(this), genvar_ecfscript.value(), EcfFile::ECF_SCRIPT);
     }
     else {
         reasonEcfFileNotFound += "   ECF_SCRIPT(";
-        reasonEcfFileNotFound += genvar_ecfscript.theValue();
+        reasonEcfFileNotFound += genvar_ecfscript.value();
         reasonEcfFileNotFound += ") does not exist:\n";
     }
 
@@ -811,7 +811,7 @@ void Submittable::kill(const std::string& zombie_pid) {
 
         /// If we are in active state, then ECF_RID must have been setup
         /// This is typically used in the KILL CMD, make sure its there
-        if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty()) {
+        if (state() == NState::ACTIVE && get_genvar_ecfrid().value().empty()) {
             get_flag().set(ecf::Flag::KILLCMD_FAILED);
             throw std::runtime_error(
                 MESSAGE("Submittable::kill: Generated variable ECF_RID is empty for task " << absNodePath()));
@@ -878,7 +878,7 @@ void Submittable::status() {
     }
 
     /// If we are in active state, then ECF_RID must have been setup
-    if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty()) {
+    if (state() == NState::ACTIVE && get_genvar_ecfrid().value().empty()) {
         get_flag().set(ecf::Flag::STATUSCMD_FAILED);
         throw std::runtime_error(
             MESSAGE("Submittable::status: Generated variable ECF_RID is empty for ACTIVE task " << absNodePath()));
@@ -1093,16 +1093,16 @@ void Submittable::set_genvar_ecfrid(const std::string& value) {
 // Check the variable names. i.e. we know they are valid
 SubGenVariables::SubGenVariables(const Submittable* sub)
     : submittable_(sub),
-      genvar_ecfjob_(ecf::environment::ECF_JOB, "", false),
-      genvar_ecfjobout_(ecf::environment::ECF_JOBOUT, "", false),
-      genvar_ecftryno_(ecf::environment::ECF_TRYNO, "", false),
-      genvar_task_("TASK", "", false),
-      genvar_dirname_("ECF_DIRNAME", "", false),
-      genvar_basename_("ECF_BASENAME", "", false),
-      genvar_ecfpass_(ecf::environment::ECF_PASS, "", false),
-      genvar_ecfscript_(ecf::environment::ECF_SCRIPT, "", false),
-      genvar_ecfname_(ecf::environment::ECF_NAME, "", false),
-      genvar_ecfrid_(ecf::environment::ECF_RID, "", false) {
+      genvar_ecfjob_(Variable(ecf::environment::ECF_JOB, "")),
+      genvar_ecfjobout_(Variable(ecf::environment::ECF_JOBOUT, "")),
+      genvar_ecftryno_(Variable(ecf::environment::ECF_TRYNO, "")),
+      genvar_task_(Variable("TASK", "")),
+      genvar_dirname_(Variable("ECF_DIRNAME", "")),
+      genvar_basename_(Variable("ECF_BASENAME", "")),
+      genvar_ecfpass_(Variable(ecf::environment::ECF_PASS, "")),
+      genvar_ecfscript_(Variable(ecf::environment::ECF_SCRIPT, "")),
+      genvar_ecfname_(Variable(ecf::environment::ECF_NAME, "")),
+      genvar_ecfrid_(Variable(ecf::environment::ECF_RID, "")) {
 }
 
 void SubGenVariables::update_generated_variables() const {

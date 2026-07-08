@@ -1117,7 +1117,7 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_handle_init) {
             BOOST_CHECK_EQUAL(command.process_or_remote_id(), "1234");
             BOOST_REQUIRE_EQUAL(command.variables_to_add().size(), static_cast<size_t>(1));
             BOOST_CHECK_EQUAL(command.variables_to_add()[0].name(), "name1");
-            BOOST_CHECK_EQUAL(command.variables_to_add()[0].theValue(), "value1");
+            BOOST_CHECK_EQUAL(command.variables_to_add()[0].value(), "value1");
         });
     }
     {
@@ -1127,9 +1127,9 @@ BOOST_AUTO_TEST_CASE(test_is_able_to_handle_init) {
             BOOST_CHECK_EQUAL(command.process_or_remote_id(), "1234");
             BOOST_REQUIRE_EQUAL(command.variables_to_add().size(), static_cast<size_t>(2));
             BOOST_CHECK_EQUAL(command.variables_to_add()[0].name(), "name1");
-            BOOST_CHECK_EQUAL(command.variables_to_add()[0].theValue(), "--value1");
+            BOOST_CHECK_EQUAL(command.variables_to_add()[0].value(), "--value1");
             BOOST_CHECK_EQUAL(command.variables_to_add()[1].name(), "name2");
-            BOOST_CHECK_EQUAL(command.variables_to_add()[1].theValue(), "--value2");
+            BOOST_CHECK_EQUAL(command.variables_to_add()[1].value(), "--value2");
         });
     }
 }
