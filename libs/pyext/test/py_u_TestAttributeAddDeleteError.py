@@ -10,7 +10,12 @@
 
 import pytest
 
-from ecflow import Defs, Suite, Task, RepeatDateList, RepeatDateTimeList
+from ecflow import (
+    Defs,
+    Task,
+    RepeatDateList,
+    RepeatDateTimeList,
+)
 
 
 @pytest.fixture

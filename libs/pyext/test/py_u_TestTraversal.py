@@ -15,7 +15,6 @@
 
 import os
 import fnmatch
-import sys
 import pathlib
 
 import pytest

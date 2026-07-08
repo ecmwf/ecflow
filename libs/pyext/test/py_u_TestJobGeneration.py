@@ -15,7 +15,11 @@ import shutil
 
 import pytest
 
-from ecflow import Defs, JobCreationCtrl, File, Client
+from ecflow import (
+    Defs,
+    JobCreationCtrl,
+    File,
+)
 
 
 @pytest.fixture

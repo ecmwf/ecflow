@@ -8,8 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-import os
-
 import pytest
 
 from ecflow import (

@@ -9,12 +9,8 @@
 #
 
 from ecflow import (
-    Alias,
-    AttrType,
     Autocancel,
-    CheckPt,
     ChildCmdType,
-    Client,
     Clock,
     Cron,
     DState,
@@ -22,27 +18,13 @@ from ecflow import (
     Day,
     Days,
     Defs,
-    Ecf,
     Event,
-    Expression,
     Family,
-    FamilyVec,
-    File,
-    Flag,
-    FlagType,
-    FlagTypeVec,
     InLimit,
-    JobCreationCtrl,
     Label,
     Late,
     Limit,
     Meter,
-    Node,
-    NodeContainer,
-    NodeVec,
-    PartExpression,
-    PrintStyle,
-    Repeat,
     RepeatDate,
     RepeatDateTime,
     RepeatDateList,
@@ -50,23 +32,12 @@ from ecflow import (
     RepeatEnumerated,
     RepeatInteger,
     RepeatString,
-    SState,
-    State,
-    Style,
-    Submittable,
     Suite,
-    SuiteVec,
     Task,
-    TaskVec,
     Time,
     TimeSeries,
     TimeSlot,
     Today,
-    UrlCmd,
-    Variable,
-    VariableList,
-    Verify,
-    WhyCmd,
     ZombieAttr,
     ZombieType,
     ZombieUserActionType,
@@ -75,8 +46,6 @@ from ecflow import (
     Edit,
     Defstatus,
 )
-import sys
-import pytest
 
 
 class Test_dunder_rshift:
@@ -612,13 +581,6 @@ class TestFamilyAdd:
     def test_add_task(self):
         s = Family("a").add(Task("a").add(Edit(a="b")))
         assert len(s) == 1, "Expected 1 child to be added"
-
-
-class TestDefstatus:
-    def test_illegal_defstatus(self):
-        if sys.version_info[0] == 2 and sys.version_info[1] >= 7:
-            with pytest.raises(RuntimeError):
-                Defstatus("fred")
 
 
 class TestEdit:

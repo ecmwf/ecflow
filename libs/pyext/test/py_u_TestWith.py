@@ -10,7 +10,13 @@
 
 # This test ensures the use of the `with` statement, and thus runtime context, works as expected.
 
-from ecflow import Defs, Suite, Task, Family, Variable, Edit
+from ecflow import (
+    Defs,
+    Suite,
+    Task,
+    Family,
+    Edit,
+)
 
 
 def test_context_manager_adds_hierarchy_to_defs():
