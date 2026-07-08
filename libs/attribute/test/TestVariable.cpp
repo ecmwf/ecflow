@@ -24,75 +24,81 @@ BOOST_AUTO_TEST_SUITE(T_Variable)
 BOOST_AUTO_TEST_CASE(test_multi_line_variable_values) {
     ECF_NAME_THIS_TEST();
 
+    struct tc
     {
-        auto var = Variable::new_variable("name", "value");
-        BOOST_CHECK_MESSAGE(var.name() == "name", "name not as expected");
-        BOOST_CHECK_MESSAGE(var.value() == "value", "value not as expected");
+        std::string name;
+        std::string value;
+        std::string expected;
+    };
 
-        std::string expected = "edit name 'value'";
-        BOOST_CHECK_MESSAGE(var.toString() == expected, "expected " << expected << " but found " << var.toString());
-    }
-    {
-        auto var             = Variable::new_variable("name", "");
-        std::string expected = "edit name ''";
-        BOOST_CHECK_MESSAGE(var.toString() == expected, "expected " << expected << " but found " << var.toString());
-    }
-    {
-        auto var             = Variable::new_variable("name", "value\n");
-        std::string expected = "edit name 'value\\n'";
-        BOOST_CHECK_MESSAGE(var.toString() == expected, "expected " << expected << " but found " << var.toString());
-    }
-    {
-        auto var             = Variable::new_variable("name", "val1\nxxx\nval2");
-        std::string expected = "edit name 'val1\\nxxx\\nval2'";
-        BOOST_CHECK_MESSAGE(var.toString() == expected, "expected " << expected << " but found " << var.toString());
+    auto values = std::vector<tc>{{"name", "value", "edit name 'value'"},
+                                  {"name", "", "edit name ''"},
+                                  {"name", "value\n", "edit name 'value\\n'"},
+                                  {"name", "val1\nxxx\nval2", "edit name 'val1\\nxxx\\nval2'"}};
+
+    for (const auto& [name, value, expected] : values) {
+        auto variable = Variable::new_variable(name, value);
+
+        {
+            auto actual = variable.name();
+            BOOST_CHECK_MESSAGE(actual == name, "expected name '" << name << "', but found '" << actual << "'");
+        }
+        {
+            auto actual = variable.value();
+            BOOST_CHECK_MESSAGE(actual == value, "expected value '" << value << "', but found '" << actual << "'");
+        }
+        {
+            auto actual = variable.toString();
+            BOOST_CHECK_MESSAGE(actual == expected, "expected '" << expected << "', but found '" << actual << "'");
+        }
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_variable_value) {
+BOOST_AUTO_TEST_CASE(test_variable_integer_value) {
     ECF_NAME_THIS_TEST();
 
-    std::vector<std::string> values;
-    values.emplace_back("sdsd");
-    values.emplace_back("0fred0");
-    values.emplace_back("fted");
-    values.emplace_back("%value%");
-    values.emplace_back("a");
-    values.emplace_back("");
-    values.emplace_back("0");
-    values.emplace_back("00");
-    values.emplace_back("000");
-    values.emplace_back("0000");
-    values.emplace_back("0000000000000");
-    for (const auto& value : values) {
-        auto var = Variable::new_variable("name", "");
-        var.set_value(value);
-        BOOST_CHECK_MESSAGE(var.value<int>() == 0, "expected 0 but found " << var.value<int>() << " for " << value);
-    }
+    struct tc
+    {
+        std::string value;
+        int expected;
+    };
 
-    {
-        auto var = Variable::new_variable("name", "0100");
-        BOOST_CHECK_MESSAGE(var.value<int>() == 100, "expected 100 but found " << var.value<int>());
-    }
-    {
-        auto var = Variable::new_variable("name", "0001");
-        BOOST_CHECK_MESSAGE(var.value<int>() == 1, "expected 1 but found " << var.value<int>());
-    }
-    {
-        auto var = Variable::new_variable("name", "2359");
-        BOOST_CHECK_MESSAGE(var.value<int>() == 2359, "expected 2359 but found " << var.value<int>());
-    }
+    auto values = std::vector<tc>{{"sdsd", 0},
+                                  {"0fred0", 0},
+                                  {"fted", 0},
+                                  {"%value%", 0},
+                                  {"a", 0},
+                                  {"", 0},
+                                  {"0", 0},
+                                  {"00", 0},
+                                  {"000", 0},
+                                  {"0000", 0},
+                                  {"0000000000000", 0},
+                                  {"0100", 100},
+                                  {"0001", 1},
+                                  {"2359", 2359}};
 
-    // make sure time is convertible to an integer
+    for (const auto& [value, expected] : values) {
+        auto variable = Variable::new_variable("name", value);
+        auto actual   = variable.value<int>();
+        BOOST_CHECK_MESSAGE(actual == expected, "expected '0' but found " << actual << " for " << value);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_variable_time_value) {
+    ECF_NAME_THIS_TEST();
+
     std::array<char, 255> smstime;
     for (int h = 0; h < 24; h++) {
-        for (int m = 1; m < 60; m++) {
+        for (int m = 0; m < 60; m++) {
             int output_written = snprintf(smstime.data(), smstime.size(), "%02d%02d", h, m);
             BOOST_CHECK_MESSAGE(output_written == 4, " expected size 4 but found " << output_written);
-            auto var = Variable::new_variable("name", "");
-            var.set_value(smstime.data());
-            int value = stoi(std::string(smstime.data(), smstime.size()));
-            BOOST_CHECK_MESSAGE(var.value<int>() == value, "expected " << value << " but found " << var.value<int>());
+            auto variable = Variable::new_variable("name", smstime.data());
+
+            int actual   = variable.value<int>();
+            int expected = stoi(std::string(smstime.data(), smstime.size()));
+
+            BOOST_CHECK_MESSAGE(actual == expected, "expected '" << expected << "' but found '" << actual << "'");
         }
     }
 }
