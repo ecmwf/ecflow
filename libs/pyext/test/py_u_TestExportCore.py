@@ -1481,7 +1481,3 @@ class TestTimeSeries(unittest.TestCase):
         """The hash of a single TimeSeries is the same across repeated calls."""
         ts = ecf.TimeSeries(ecf.TimeSlot(10, 30))
         self.assertEqual(hash(ts), hash(ts))
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

@@ -17,31 +17,46 @@ import sys  # determine python version
 from datetime import datetime
 import shutil  # used to remove directory tree
 
-from ecflow import Defs, Clock, DState, Event, Style, State, PrintStyle, File, Client, SState, File, debug_build
+from ecflow import (
+    Defs,
+    Clock,
+    DState,
+    Event,
+    Style,
+    State,
+    PrintStyle,
+    File,
+    Client,
+    SState,
+    File,
+    debug_build,
+)
 import ecflow_test_util as Test
 
 
-def ecf_includes(): return File.source_dir() + "/libs/pyext/test/data/python_includes"
+def ecf_includes():
+    return File.source_dir() + "/libs/pyext/test/data/python_includes"
 
 
 def create_defs(name, port, protocol):
     defs = Defs()
     suite_name = name
-    if len(suite_name) == 0: suite_name = "s1"
-    suite = defs.add_suite(suite_name);
+    if len(suite_name) == 0:
+        suite_name = "s1"
+    suite = defs.add_suite(suite_name)
 
-    ecfhome = Test.ecf_home(port);
-    suite.add_variable("ECF_HOME", ecfhome);
-    suite.add_variable("ECF_INCLUDE", ecf_includes());
+    ecfhome = Test.ecf_home(port)
+    suite.add_variable("ECF_HOME", ecfhome)
+    suite.add_variable("ECF_INCLUDE", ecf_includes())
     protocol_option = "True" if protocol == Test.Protocol.HTTP else "False"
-    suite.add_variable("ECF_USING_HTTP_BACKEND", protocol_option);
+    suite.add_variable("ECF_USING_HTTP_BACKEND", protocol_option)
 
     # Setup the job command, based on the current environment
     job_cmd = ""
-    if 'PYTHONPATH' in os.environ:
-        job_cmd = "export PYTHONPATH=" + os.environ['PYTHONPATH'] + ";"
-    if 'LD_LIBRARY_PATH' in os.environ:
-        job_cmd += "export LD_LIBRARY_PATH=" + os.environ['LD_LIBRARY_PATH'] + ";"
+    if "PYTHONPATH" in os.environ:
+        job_cmd = "export PYTHONPATH=" + os.environ["PYTHONPATH"] + ";"
+    if "LD_LIBRARY_PATH" in os.environ:
+        job_cmd += "export LD_LIBRARY_PATH=" + os.environ["LD_LIBRARY_PATH"] + ";"
     # Use the current python interpreter to run the job
     job_cmd += f"{sys.executable} %ECF_JOB% 1> %ECF_JOBOUT% 2>&1"
 
@@ -57,13 +72,16 @@ def create_defs(name, port, protocol):
 
     family.add_task("t2")  # test wait
     family.add_task("t3").add_trigger(
-        "t1:q1 >= 3 and t1:event_fred and t1:event_set == clear")  # wait on queue q1 and events
+        "t1:q1 >= 3 and t1:event_fred and t1:event_set == clear"
+    )  # wait on queue q1 and events
     family.add_task("t4").add_trigger(
-        "t1:name1 == 1 and t1:name2 == 2 and t1:name3 == 3 and t1:name4 == 4")  # test ECFLOW-1573
+        "t1:name1 == 1 and t1:name2 == 2 and t1:name3 == 3 and t1:name4 == 4"
+    )  # test ECFLOW-1573
 
     defs.auto_add_externs(
-        True)  # because variable name1,name2,name3,name4  are not added until t1 is active.(i.e. runtime)
-    return defs;
+        True
+    )  # because variable name1,name2,name3,name4  are not added until t1 is active.(i.e. runtime)
+    return defs
 
 
 def wait_for_suite_to_complete(ci, suite_name):
@@ -73,15 +91,23 @@ def wait_for_suite_to_complete(ci, suite_name):
         count += 1
         ci.sync_local()  # get the changes, synced with local defs
         suite = ci.get_defs().find_suite(suite_name)
-        assert suite is not None, " Expected to find suite " + suite_name + ":\n" + str(ci.get_defs())
+        assert suite is not None, (
+            " Expected to find suite " + suite_name + ":\n" + str(ci.get_defs())
+        )
         if suite.get_state() == State.complete:
-            break;
+            break
         if suite.get_state() == State.aborted:
-            print(ci.get_defs());
+            print(ci.get_defs())
             assert False, " Suite aborted \n"
         time.sleep(2)
         if count > 20:
-            assert False, suite_name + " aborted after " + str(count) + " loops, printing defs:\n" + str(ci.get_defs())
+            assert False, (
+                suite_name
+                + " aborted after "
+                + str(count)
+                + " loops, printing defs:\n"
+                + str(ci.get_defs())
+            )
 
     ci.log_msg("Looped " + str(count) + " times")
 
@@ -97,7 +123,8 @@ def test_python_child_api(ci, protocol):
     family_dir = test_home + "/f1"
 
     # Make the directory tree for the suite
-    if not os.path.exists(family_dir): os.makedirs(family_dir)
+    if not os.path.exists(family_dir):
+        os.makedirs(family_dir)
 
     # Dump some information
     print("\n" + suite_name + " " + host + ":" + str(port))
@@ -111,15 +138,19 @@ def test_python_child_api(ci, protocol):
     defs = create_defs(suite_name, port, protocol)
     suite = defs.find_suite(suite_name)
     suite.add_defstatus(DState.suspended)
-    defs.save_as_defs(os.path.join(test_home, suite_name + ".def")) # .../<suite-name>/<suite-name>.def
+    defs.save_as_defs(
+        os.path.join(test_home, suite_name + ".def")
+    )  # .../<suite-name>/<suite-name>.def
 
     # Set the log file to a location inside the test
-    ci.new_log(os.path.join(test_home, suite_name + ".log")) # .../<suite-name>/<suite-name>.log
+    ci.new_log(
+        os.path.join(test_home, suite_name + ".log")
+    )  # .../<suite-name>/<suite-name>.log
 
     server_version = ci.server_version()
 
     if ci.version() != server_version:
-        assert False, 'Client and server versions different'
+        assert False, "Client and server versions different"
 
     # Create the Task script at .../<suite-name>/f1/t1
     file = family_dir + "/t1.ecf"
@@ -147,7 +178,7 @@ with Client(True) as ci:
     assert step == '<NULL>','expected <NULL? for end of queue'
     print('   Finished event,meter,label and queue child commands')
 """
-    open(file, 'w').write(contents)
+    open(file, "w").write(contents)
     print(" Created file " + file)
 
     # Create the Task script at /<suite-name>/f1/t2
@@ -162,7 +193,7 @@ with Client() as ci:
     ci.child_wait('/{suite_name}/f1/t1 == complete')
     print('   Finished waiting')
 """
-    open(file, 'w').write(contents)
+    open(file, "w").write(contents)
     print(" Created file " + file)
 
     # Create the Task script at .../<suite-name>/f1/t3
@@ -173,7 +204,7 @@ with Client() as ci:
 with Client() as ci:
     print('   Running t3.ecf')
 """
-    open(file, 'w').write(contents)
+    open(file, "w").write(contents)
     print(" Created file " + file)
 
     # Create the Task script at .../<suite-name>/f1/t4
@@ -185,7 +216,7 @@ with Client() as ci:
 
     print('   Running t4.ecf')
 """
-    open(file, 'w').write(contents)
+    open(file, "w").write(contents)
     print(" Created file " + file)
 
     # Start the server
@@ -193,7 +224,7 @@ with Client() as ci:
 
     # Load the definitions
     ci.load(defs)
-    ci.checkpt() # store the checkpoint, useful for debugging...
+    ci.checkpt()  # store the checkpoint, useful for debugging...
 
     # Start the merry-go-round!...
     ci.begin_all_suites()
@@ -201,9 +232,9 @@ with Client() as ci:
     print(" Running the test, wait for suite to complete ...")
     ci.run(f"/{suite_name}", False)
 
-    wait_for_suite_to_complete(ci, suite_name);
+    wait_for_suite_to_complete(ci, suite_name)
 
-    ci.checkpt() # store the checkpoint, useful for debugging...
+    ci.checkpt()  # store the checkpoint, useful for debugging...
 
     if not Test.debugging():
         print(" Test OK: removing directory ", test_home)
@@ -211,7 +242,7 @@ with Client() as ci:
 
 
 def launch_tests(ci, protocol):
-    server_version = ci.server_version();
+    server_version = ci.server_version()
     print("Running ecflow server version " + server_version)
     print("Running ecflow client version " + ci.version())
     assert ci.version() == server_version, "Client version not same as server version"
@@ -219,7 +250,9 @@ def launch_tests(ci, protocol):
     PrintStyle.set_style(Style.STATE)  # show node state
     test_python_child_api(ci, protocol)
 
-    print("\nAll Tests pass ======================================================================")
+    print(
+        "\nAll Tests pass ======================================================================"
+    )
 
 
 if __name__ == "__main__":

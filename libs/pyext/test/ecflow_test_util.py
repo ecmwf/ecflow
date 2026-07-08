@@ -23,9 +23,9 @@ from enum import Enum
 import ecflow as ecf
 
 
-def all_files(root, patterns='*', single_level=False, yield_folders=False):
+def all_files(root, patterns="*", single_level=False, yield_folders=False):
     """Expand patterns from semi-colon separated string to list"""
-    patterns = patterns.split(';')
+    patterns = patterns.split(";")
     for path, subdirs, files in os.walk(root):
         if yield_folders:
             files.extend(subdirs)
@@ -41,7 +41,8 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
         # Enable to stop data being deleted, and stop server from being terminated
 
 
-def debugging(): return False
+def debugging():
+    return False
 
 
 def ecf_home(port):
@@ -54,9 +55,13 @@ def ecf_home(port):
     build_type = "debug" if ecf.debug_build() else "release"
     pid = os.getpid()
 
-    ecf_home_dir = f"ecf_home_py{python_version}__pid_{pid}__build_{build_type}__port_{port}"
+    ecf_home_dir = (
+        f"ecf_home_py{python_version}__pid_{pid}__build_{build_type}__port_{port}"
+    )
 
-    ecf_home_path = pathlib.Path.joinpath(pathlib.Path.cwd(), "test", "data", ecf_home_dir)
+    ecf_home_path = pathlib.Path.joinpath(
+        pathlib.Path.cwd(), "test", "data", ecf_home_dir
+    )
 
     return str(ecf_home_path.absolute())
 
@@ -65,27 +70,50 @@ def get_parent_dir(file_path):
     return os.path.dirname(file_path)
 
 
-def log_file_path(port): return "./" + gethostname() + "." + port + ".ecf.log"
+def log_file_path(port):
+    return "./" + gethostname() + "." + port + ".ecf.log"
 
 
-def checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check"
+def checkpt_file_path(port):
+    return "./" + gethostname() + "." + port + ".ecf.check"
 
 
-def backup_checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check.b"
+def backup_checkpt_file_path(port):
+    return "./" + gethostname() + "." + port + ".ecf.check.b"
 
 
-def white_list_file_path(port): return "./" + gethostname() + "." + port + ".ecf.lists"
+def white_list_file_path(port):
+    return "./" + gethostname() + "." + port + ".ecf.lists"
 
 
 def print_test_start(test_name):
-    print("#######################################################################################")
+    print(
+        "#######################################################################################"
+    )
     print(test_name)
-    print("ecflow version(" + ecf.Client().version() + ") debug build(" + str(ecf.debug_build()) + ")  python(" + platform.python_version() + ")")
-    print("PYTHONPATH                : " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
+    print(
+        "ecflow version("
+        + ecf.Client().version()
+        + ") debug build("
+        + str(ecf.debug_build())
+        + ")  python("
+        + platform.python_version()
+        + ")"
+    )
+    print(
+        "PYTHONPATH                : " + str(os.environ["PYTHONPATH"].split(os.pathsep))
+    )
     # print("sys.path                  : " + str(sys.path))
     print("Current working directory : " + str(os.getcwd()))
-    print("Python version            : " + str(sys.version_info[0]) + "." + str(sys.version_info[1]))
-    print("#######################################################################################")
+    print(
+        "Python version            : "
+        + str(sys.version_info[0])
+        + "."
+        + str(sys.version_info[1])
+    )
+    print(
+        "#######################################################################################"
+    )
 
 
 def clean_up_server(port):
@@ -134,19 +162,31 @@ class EcfPortLock(object):
         pass
 
     def at_time(self):
-        return datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+        return datetime.datetime.fromtimestamp(time.time()).strftime("%H:%M:%S")
 
     def find_free_port(self, seed_port):
-        print("   EcfPortLock:find_free_port starting with " + str(seed_port) + " at time " + self.at_time())
+        print(
+            "   EcfPortLock:find_free_port starting with "
+            + str(seed_port)
+            + " at time "
+            + self.at_time()
+        )
         port = seed_port
         while 1:
             # port must be free for at least 15 seconds
             if self._timed_free_port(port, 3) == True:
-                print("   *FOUND* free server port " + str(port) + " : " + self.at_time())
+                print(
+                    "   *FOUND* free server port " + str(port) + " : " + self.at_time()
+                )
                 if self.do_lock(port):
                     break
             else:
-                print("   *Server* port " + str(port) + " busy( by  ping), trying next port " + self.at_time())
+                print(
+                    "   *Server* port "
+                    + str(port)
+                    + " busy( by  ping), trying next port "
+                    + self.at_time()
+                )
             port = port + 1
 
         return str(port)
@@ -175,26 +215,48 @@ class EcfPortLock(object):
     def do_lock(self, port):
         file = self._lock_file(port)
         if os.path.exists(file):
-            print("   *LOCKED* lock file exists " + file + " trying next port : " + self.at_time())
+            print(
+                "   *LOCKED* lock file exists "
+                + file
+                + " trying next port : "
+                + self.at_time()
+            )
             return False
         try:
-            fp = open(file, 'w')
+            fp = open(file, "w")
             try:
                 self.lock_time = self.at_time()
                 fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 self.lock_file_fp = fp
                 print("   *LOCKED* file " + file + " : " + self.lock_time)
-                return True;
+                return True
             except IOError:
-                print("   Could *NOT* lock file " + file + " trying next port : " + self.at_time())
+                print(
+                    "   Could *NOT* lock file "
+                    + file
+                    + " trying next port : "
+                    + self.at_time()
+                )
                 return False
         except IOError as e:
-            print("   Could not open file " + file + " for write trying next port : " + self.at_time())
+            print(
+                "   Could not open file "
+                + file
+                + " for write trying next port : "
+                + self.at_time()
+            )
             return False
 
     def remove(self, port):
         file = self._lock_file(port)
-        print("   Remove lock file : " + file + " : lock_time: " + self.lock_time + " release_time: " + self.at_time())
+        print(
+            "   Remove lock file : "
+            + file
+            + " : lock_time: "
+            + self.lock_time
+            + " release_time: "
+            + self.at_time()
+        )
         self.lock_file_fp.close()
         os.remove(file)
 
@@ -212,6 +274,7 @@ class EcfPortLock(object):
 
 # ===============================================================================
 
+
 class Server(object):
     """TestServer: allow debug and release version of python tests to run at the same
     time, by generating a unique port each time"""
@@ -220,10 +283,11 @@ class Server(object):
         print("Server:__init__: Starting server")
         self._protocol = protocol
         if not debugging():
-            seed_port = int(os.getenv('ECF_FREE_PORT', '3153'))
+            seed_port = int(os.getenv("ECF_FREE_PORT", "3153"))
             if sys.version_info[0] == 3:  # python3 can run at same time
-                seed_port = int(os.getenv('ECF_FREE_PORT', '3154'))
-            if ecf.debug_build(): seed_port = seed_port + 1
+                seed_port = int(os.getenv("ECF_FREE_PORT", "3154"))
+            if ecf.debug_build():
+                seed_port = seed_port + 1
             self.lock_file = EcfPortLock(self._protocol)
             self.the_port = self.lock_file.find_free_port(seed_port)
         else:
@@ -238,13 +302,25 @@ class Server(object):
             self.ci.enable_http()
 
     def at_time(self):
-        return datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+        return datetime.datetime.fromtimestamp(time.time()).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
     def __enter__(self):
         try:
-            print("Server:__enter__: About to ping localhost: " + self.the_port + " : " + self.at_time())
+            print(
+                "Server:__enter__: About to ping localhost: "
+                + self.the_port
+                + " : "
+                + self.at_time()
+            )
             self.ci.ping()
-            print("   ------- Server all ready running on port " + self.the_port + " *UNEXPECTED* -- : " + self.at_time())
+            print(
+                "   ------- Server all ready running on port "
+                + self.the_port
+                + " *UNEXPECTED* -- : "
+                + self.at_time()
+            )
             sys.exit(1)
         except RuntimeError as e:
             while 1:
@@ -256,13 +332,21 @@ class Server(object):
                 if self._protocol == Protocol.HTTP:
                     self.ci.enable_http()
 
-                print("   ------- Server *NOT* running on port " + self.the_port + " as *EXPECTED* ------ ")
-                print("   ------- Start the server on port " + self.the_port + " ---------")
+                print(
+                    "   ------- Server *NOT* running on port "
+                    + self.the_port
+                    + " as *EXPECTED* ------ "
+                )
+                print(
+                    "   ------- Start the server on port "
+                    + self.the_port
+                    + " ---------"
+                )
                 if not debugging():
                     clean_up_server(str(self.the_port))
                     clean_up_data(str(self.the_port))
 
-                server_exe = ecf.File.find_server();
+                server_exe = ecf.File.find_server()
                 assert len(server_exe) != 0, "Could not locate the server executable"
 
                 server_exe += " --port=" + self.the_port + " --ecfinterval=4"
@@ -277,8 +361,13 @@ class Server(object):
                     print("   Server has started " + self.at_time())
                     break
                 else:
-                    print("   Server failed to start after 60 second, trying next port !!!!!! " + self.at_time())
-                    self.the_port = self.lock_file.find_free_port(int(self.the_port) + 1)
+                    print(
+                        "   Server failed to start after 60 second, trying next port !!!!!! "
+                        + self.at_time()
+                    )
+                    self.the_port = self.lock_file.find_free_port(
+                        int(self.the_port) + 1
+                    )
 
         print("   Run the tests, leaving Server:__enter__:")
 
@@ -286,7 +375,10 @@ class Server(object):
         return [self.ci, self._protocol]
 
     def __exit__(self, exctype, value, tb):
-        print("Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME " + self.at_time())
+        print(
+            "Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME "
+            + self.at_time()
+        )
         print("   exctype:", exctype)
         print("   value:", value)
         print("   tb:", tb)
@@ -309,8 +401,8 @@ class MockEnvironment:
         self.expected_env = env
 
     def __enter__(self):
-        self.original_env = {};
-        for (name, value) in self.expected_env.items():
+        self.original_env = {}
+        for name, value in self.expected_env.items():
             if name in os.environ:
                 self.original_env[name] = os.environ[name]
             else:
@@ -318,7 +410,7 @@ class MockEnvironment:
             os.environ[name] = value
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
-        for (name, value) in self.original_env.items():
+        for name, value in self.original_env.items():
             if value is None:
                 del os.environ[name]
             else:
@@ -360,9 +452,13 @@ def test_started():
 
 # ==============================================================================
 def test_success():
-    print("#######################################################################################")
+    print(
+        "#######################################################################################"
+    )
     print(" All Tests passed")
-    print("#######################################################################################")
+    print(
+        "#######################################################################################"
+    )
 
 
 def execute_all(clazz):

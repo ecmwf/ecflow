@@ -858,7 +858,3 @@ class TestMirrorAttr(unittest.TestCase):
         obj.tag = 99
         del obj.tag
         self.assertFalse(hasattr(obj, "tag"))
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

@@ -2036,7 +2036,3 @@ class TestNode(unittest.TestCase):
         t = ecf.Task("t1")
         t.add_verify(ecf.Verify(ecf.State.complete, 1))
         self.assertEqual(len(list(t.verifies)), 1)
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

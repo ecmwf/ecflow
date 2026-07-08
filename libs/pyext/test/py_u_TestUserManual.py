@@ -10,121 +10,124 @@
 
 from ecflow import Suite, Task, RepeatDate
 
-if __name__ == "__main__":
 
-    class ExperimentalSuite(object):
-        def __init__(self, start, end):
-            self.start_ = start
-            self.end_ = end
-            self.start_cycle_ = 12
-            self.end_cycle_ = 12
+class _ExperimentalSuite:
+    def __init__(self, start, end):
+        self.start_ = start
+        self.end_ = end
+        self.start_cycle_ = 12
+        self.end_cycle_ = 12
 
-        def generate(self):
-            x_suite = Suite("x")
-            make_fam = x_suite.add_family("make")
-            make_fam.add_task("build")
-            make_fam.add_task("more_work")
+    def generate(self):
+        x_suite = Suite("x")
+        make_fam = x_suite.add_family("make")
+        make_fam.add_task("build")
+        make_fam.add_task("more_work")
 
-            main_fam = x_suite.add_family("main")
-            main_fam.add_repeat(RepeatDate("YMD", self.start_, self.end_))
-            main_fam.add_trigger("make == complete")
+        main_fam = x_suite.add_family("main")
+        main_fam.add_repeat(RepeatDate("YMD", self.start_, self.end_))
+        main_fam.add_trigger("make == complete")
 
-            previous = 0
-            for FAM in (0, 6, 12, 18):
-                fam_fam = x_suite.add_family(str(FAM))
-                if FAM > 0:
-                    fam_fam.add_trigger("./" + str(previous) + " == complete ")
+        previous = 0
+        for fam in (0, 6, 12, 18):
+            fam_fam = x_suite.add_family(str(fam))
+            if fam > 0:
+                fam_fam.add_trigger("./" + str(previous) + " == complete ")
 
-                self.add_complete(fam_fam, FAM)
+            self.add_complete(fam_fam, fam)
 
-                fam_fam.add_task("run")
-                fam_fam.add_task("run_more").add_trigger("run == complete")
-                previous = FAM
-            return x_suite
+            fam_fam.add_task("run")
+            fam_fam.add_task("run_more").add_trigger("run == complete")
+            previous = fam
+        return x_suite
 
-        def add_complete(self, family, fam):
-            if fam < self.start_cycle_ and fam > self.end_cycle_:
-                family.add_complete("../main:YMD eq " + str(self.start_) + " or ../main:YMD ge " + str(self.end_))
-            elif fam < self.start_cycle_:
-                family.add_complete("../main:YMD eq " + str(self.start_))
-            elif fam > self.end_cycle_:
-                family.add_complete("../main:YMD ge " + str(self.end_))
-            return
-
-
-    print(str(ExperimentalSuite(20050601, 20050605).generate()))
-
-    # ==========================================================================
-
-    # Control structure and looping
-    var = "aa"
-    if var in ("a", "aa", "aaa"):
-        print("it is a kind of a ")
-    elif var in ("b", "bb", "bb"):
-        print("it is a kind of b ")
-    else:
-        print("it is something else ")
+    def add_complete(self, family, fam):
+        if fam < self.start_cycle_ and fam > self.end_cycle_:
+            family.add_complete(
+                "../main:YMD eq "
+                + str(self.start_)
+                + " or ../main:YMD ge "
+                + str(self.end_)
+            )
+        elif fam < self.start_cycle_:
+            family.add_complete("../main:YMD eq " + str(self.start_))
+        elif fam > self.end_cycle_:
+            family.add_complete("../main:YMD ge " + str(self.end_))
 
 
-    # ====================================================================================
+class _VarAdder:
+    def __init__(self, node):
+        self.node = node
 
-    # Reuseable class for adding synoptic times
-    class VarAdder(object):
-        def __init__(self, node):
-            self.node = node
+    def add(self, time):
+        {
+            6: lambda self: self.add6(time),
+            12: lambda self: self.add12(time),
+            18: lambda self: self.add18(time),
+            24: lambda self: self.add24(time),
+        }.get(time, self.errorHandler)(self)
 
-        def add(self, time):
-            {
-                6: lambda self: self.add6(time),
-                12: lambda self: self.add12(time),
-                18: lambda self: self.add18(time),
-                24: lambda self: self.add24(time)
-            }.get(time, self.errorHandler)(self)
+    def add6(self, time):
+        self.node.add_today(17, 30)
+        self.node.add_variable("ANTIME", str(time))
 
-        def add6(self, time):
-            print("add6 " + str(time))
-            self.node.add_today(17, 30)
-            self.node.add_variable("ANTIME", str(time))
+    def add12(self, time):
+        self.node.add_today(19, 15)
+        self.node.add_variable("ANTIME", str(time))
 
-        def add12(self, time):
-            print("add12 " + str(time))
-            self.node.add_today(19, 15)
-            self.node.add_variable("ANTIME", str(time))
+    def add18(self, time):
+        self.node.add_time(1, 30)
+        self.node.add_variable("ANTIME", str(time))
 
-        def add18(self, time):
-            print("add18 " + str(time))
-            self.node.add_time(1, 30)
-            self.node.add_variable("ANTIME", str(time))
+    def add24(self, time):
+        self.node.add_time(3, 0)
+        self.node.add_variable("ANTIME", "0")
+        self.node.add_variable("DELTA_DAY", "1")
+        self.node.add_variable("EXPVER", "0002")
 
-        def add24(self, time):
-            print("add24 " + str(time))
-            self.node.add_time(3, 0)
-            self.node.add_variable("ANTIME", "0")
-            self.node.add_variable("DELTA_DAY", "1")
-            self.node.add_variable("EXPVER", "0002")
+    def errorHandler(self, ignore):
+        pass
 
-        def errorHandler(self, ignore): print("invalid time " + str(ignore))
 
-for i in (0, 6):
-    task = Task("t" + str(i))
-    print(task.name())
-    varAdder = VarAdder(task)
-    varAdder.add(114)
-    for var in task.variables:
-        print(str(var) + "\n")
-    for the_time in task.times:
-        print(str(the_time) + "\n")
-    for today in task.todays:
-        print(str(today) + "\n")
+def test_experimental_suite_generates_expected_structure():
+    suite = _ExperimentalSuite(20050601, 20050605).generate()
+    assert suite.find_family("make") is not None
+    assert suite.find_family("main") is not None
+    assert suite.find_family("0") is not None
+    assert suite.find_family("18") is not None
+    rendered = str(suite)
+    assert "suite x" in rendered
+    assert "family make" in rendered
+    assert "family main" in rendered
 
-# ==========================================================================
 
-suite = Suite("x")
-previous_time = 0
-for i in (0, 6, 12, 18, 24):
-    the_fam = suite.add_family(str(i))
-    if i != 0:
-        the_fam.add_trigger("./" + previous_time + " == complete ")
-    the_fam.add_task("t1")
-    the_fam.add_task("t2").add_trigger("t1 == complete")
-    previous_time = str(i)
+def test_var_adder_invalid_time_is_handled():
+    task = Task("t0")
+    var_adder = _VarAdder(task)
+    var_adder.add(114)
+    assert len(list(task.variables)) == 0
+    assert len(list(task.times)) == 0
+    assert len(list(task.todays)) == 0
+
+
+def test_var_adder_adds_time_and_variable_for_valid_times():
+    for time in (6, 12, 18, 24):
+        task = Task("t" + str(time))
+        var_adder = _VarAdder(task)
+        var_adder.add(time)
+        assert len(list(task.variables)) >= 1
+        assert len(list(task.times)) + len(list(task.todays)) >= 1
+
+
+def test_manual_chained_family_trigger_example():
+    suite = Suite("x")
+    previous_time = "0"
+    for i in (0, 6, 12, 18, 24):
+        the_fam = suite.add_family(str(i))
+        if i != 0:
+            the_fam.add_trigger("./" + previous_time + " == complete ")
+        the_fam.add_task("t1")
+        the_fam.add_task("t2").add_trigger("t1 == complete")
+        previous_time = str(i)
+
+    assert len(list(suite))

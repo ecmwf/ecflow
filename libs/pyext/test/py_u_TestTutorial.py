@@ -8,35 +8,90 @@
 # nor does it submit to any jurisdiction.
 #
 
-from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
-    Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
-    JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
-    Repeat, RepeatDate, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
-    Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
-    VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
-import ecflow_test_util as Test
+from ecflow import (
+    Alias,
+    AttrType,
+    Autocancel,
+    CheckPt,
+    ChildCmdType,
+    Client,
+    Clock,
+    Cron,
+    DState,
+    Date,
+    Day,
+    Days,
+    Defs,
+    Ecf,
+    Event,
+    Expression,
+    Family,
+    FamilyVec,
+    File,
+    Flag,
+    FlagType,
+    FlagTypeVec,
+    InLimit,
+    JobCreationCtrl,
+    Label,
+    Late,
+    Limit,
+    Meter,
+    Node,
+    NodeContainer,
+    NodeVec,
+    PartExpression,
+    PrintStyle,
+    Repeat,
+    RepeatDate,
+    RepeatDay,
+    RepeatEnumerated,
+    RepeatInteger,
+    RepeatString,
+    SState,
+    State,
+    Style,
+    Submittable,
+    Suite,
+    SuiteVec,
+    Task,
+    TaskVec,
+    Time,
+    TimeSeries,
+    TimeSlot,
+    Today,
+    UrlCmd,
+    Variable,
+    VariableList,
+    Verify,
+    WhyCmd,
+    ZombieAttr,
+    ZombieType,
+    ZombieUserActionType,
+    Trigger,
+    Complete,
+    Edit,
+    Defstatus,
+)
 import unittest
 import shutil  # used to remove directory tree
 import os, sys
 
 
-def test_def_file():
-    # return "test.def"
+def _tutorial_def_file():
     return "test_tutorial_def_" + str(os.getpid()) + ".def"
 
 
-def test_compile(text):
-    # replace test.def in the text with test_def_file() so that we have a unique file per process
-    text = text.replace('test.def', test_def_file())
+def _compile_tutorial_text(text):
+    text = text.replace("test.def", _tutorial_def_file())
 
     test_file = "py_u_test_tutorial_" + str(os.getpid()) + ".def"
-    file = open(test_file, 'w')
-    file.write(text)
-    file.close()
+    with open(test_file, "w") as file:
+        file.write(text)
 
     # execfile(test_file) only work for python 2.7
     with open(test_file) as f:
-        code = compile(f.read(), test_file, 'exec')
+        code = compile(f.read(), test_file, "exec")
         exec(code)
 
     os.remove(test_file)
@@ -45,7 +100,7 @@ def test_compile(text):
 def do_tear_down():
     Ecf.set_debug_equality(False)
     try:
-        os.remove(test_def_file())
+        os.remove(_tutorial_def_file())
     except:
         pass
 
@@ -67,26 +122,19 @@ class TestNewSuite(unittest.TestCase):
                 suite.add_task("t1")
 
         with Defs() as self.defs3:
-            self.defs3.add(
-                Suite("test",
-                      Edit(ECF_HOME=home),
-                      Task("t1")))
+            self.defs3.add(Suite("test", Edit(ECF_HOME=home), Task("t1")))
 
         self.defs4 = Defs() + (Suite("test") + Edit(ECF_HOME=home))
         self.defs4.test += Task("t1")
 
-        self.defs5 = Defs().add(
-            Suite("test").add(
-                Edit(ECF_HOME=home),
-                Task("t1")))
+        self.defs5 = Defs().add(Suite("test").add(Edit(ECF_HOME=home), Task("t1")))
 
         # print("Creating suite definition")
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs(
-            Suite('test',
-                  Task('t1'),
-                  ECF_HOME=home))
-        self.assertEqual(self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs))
+        defs = Defs(Suite("test", Task("t1"), ECF_HOME=home))
+        self.assertEqual(
+            self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
+        )
 
         text = """import os
 from ecflow import Defs,Suite,Task,Edit
@@ -101,9 +149,11 @@ defs = Defs(
 
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, defs, "defs not equal\n" + str(test_defs) + "\n" + str(defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs, defs, "defs not equal\n" + str(test_defs) + "\n" + str(defs)
+        )
 
     def test_defs_equal(self):
         self.assertEqual(self.defs, self.defs2, "defs not the equal")
@@ -123,11 +173,12 @@ class TestFamilies(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(
             Suite("test").add(
-                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home),
-                Family("f1").add(
-                    Task("t1"),
-                    Task("t2"))))
-        defs.save_as_defs(test_def_file())
+                Edit(ECF_HOME=home),
+                Edit(ECF_INCLUDE=home),
+                Family("f1").add(Task("t1"), Task("t2")),
+            )
+        )
+        defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
 
@@ -154,9 +205,13 @@ defs = Defs(
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
@@ -165,9 +220,11 @@ defs.save_as_defs('test.def')
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
         defs.test += Family("f1") + [Task("t{0}".format(i)) for i in range(1, 3)]
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -179,15 +236,17 @@ class TestVariables(unittest.TestCase):
 
         def create_family_f1():
             return Family("f1").add(
-                Task("t1").add(Edit(SLEEP=20)),
-                Task("t2").add(Edit(SLEEP=20)))
+                Task("t1").add(Edit(SLEEP=20)), Task("t2").add(Edit(SLEEP=20))
+            )
 
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(Suite("test").add(
-            Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home),
-            create_family_f1()))
+        defs = Defs().add(
+            Suite("test").add(
+                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f1()
+            )
+        )
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
 
@@ -214,33 +273,44 @@ defs = Defs(
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def') 
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me2(self):
         import os
+
         home = os.path.join(os.getenv("HOME"), "course")
 
         with Defs() as defs:
-            defs += Suite("test").add(
-                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home))
+            defs += Suite("test").add(Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home))
             defs.test += Family("f1").add(
-                Task("t1").add(Edit(SLEEP=20)),
-                Task("t2").add(Edit(SLEEP=20)))
-        defs.save_as_defs(test_def_file())
+                Task("t1").add(Edit(SLEEP=20)), Task("t2").add(Edit(SLEEP=20))
+            )
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def test_me3(self):
         import os
+
         home = os.path.join(os.getenv("HOME"), "course")
 
         defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
-        defs.test += Family("f1") + (Task("t1") + Edit(SLEEP=20)) + (Task("t2") + Edit(SLEEP=20))
-        defs.save_as_defs(test_def_file())
+        defs.test += (
+            Family("f1") + (Task("t1") + Edit(SLEEP=20)) + (Task("t2") + Edit(SLEEP=20))
+        )
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -251,18 +321,17 @@ class TestVariableInheritance(unittest.TestCase):
         Ecf.set_debug_equality(True)
 
         def create_family_f1():
-            return Family("f1").add(
-                Edit(SLEEP=20),
-                Task("t1"),
-                Task("t2"))
+            return Family("f1").add(Edit(SLEEP=20), Task("t1"), Task("t2"))
 
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(Suite("test").add(
-            Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home),
-            create_family_f1()))
-        defs.save_as_defs(test_def_file())
+        defs = Defs().add(
+            Suite("test").add(
+                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f1()
+            )
+        )
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.defs = defs;
+        self.defs = defs
 
     def test_me0(self):
         text = """import os
@@ -288,9 +357,13 @@ defs = Defs(
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
@@ -301,9 +374,11 @@ defs.save_as_defs('test.def')
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs() + (Suite("test") + create_family_f1())
         defs.test += [Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home)]
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -315,17 +390,18 @@ class TestTriggers(unittest.TestCase):
 
         def create_family_f1():
             return Family("f1").add(
-                Edit(SLEEP=20),
-                Task("t1"),
-                Task("t2").add(Trigger("t1 == complete")))
+                Edit(SLEEP=20), Task("t1"), Task("t2").add(Trigger("t1 == complete"))
+            )
 
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(Suite("test").add(
-            Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home),
-            create_family_f1()))
-        defs.save_as_defs(test_def_file())
+        defs = Defs().add(
+            Suite("test").add(
+                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f1()
+            )
+        )
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.defs = defs;
+        self.defs = defs
 
     def test_me0(self):
         text = """import os
@@ -355,9 +431,13 @@ assert len(errors) == 0,errors
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
@@ -369,9 +449,11 @@ defs.save_as_defs('test.def')
             suite.f1.t2 += Trigger(["t1"])
 
         defs = Defs().add(suite)
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -385,21 +467,20 @@ class TestEvents(unittest.TestCase):
             return Family("f1").add(
                 Edit(SLEEP=20),
                 Task("t1"),
-                Task("t2").add(
-                    Trigger("t1 == complete"),
-                    Event("a"),
-                    Event("b")),
+                Task("t2").add(Trigger("t1 == complete"), Event("a"), Event("b")),
                 Task("t3").add(Trigger("t2:a")),
-                Task("t4").add(Trigger("t2:b")))
+                Task("t4").add(Trigger("t2:b")),
+            )
 
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(
             Suite("test").add(
-                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home),
-                create_family_f1()))
-        defs.save_as_defs(test_def_file())
+                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f1()
+            )
+        )
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.defs = defs;
+        self.defs = defs
 
     def test_me0(self):
         text = """import os
@@ -436,27 +517,35 @@ assert len(errors) == 0,errors
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
 
         def create_family_f1():
-            f1 = Family("f1") + [Edit(SLEEP=20),
-                                 Task("t1"),
-                                 Task("t2") + Trigger(["t1"]) + Event("a") + Event("b"),
-                                 Task("t3") + Trigger("t2:a"),
-                                 Task("t4") + Trigger("t2:b")]
+            f1 = Family("f1") + [
+                Edit(SLEEP=20),
+                Task("t1"),
+                Task("t2") + Trigger(["t1"]) + Event("a") + Event("b"),
+                Task("t3") + Trigger("t2:a"),
+                Task("t4") + Trigger("t2:b"),
+            ]
             return f1
 
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs() + Suite("test")
         defs.test += [Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f1()]
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -470,19 +559,20 @@ class TestComplete(unittest.TestCase):
             return Family("f1").add(
                 Edit(SLEEP=20),
                 Task("t1"),
-                Task("t2").add(Trigger("t1 == complete"),
-                               Event("a"), Event("b")),
+                Task("t2").add(Trigger("t1 == complete"), Event("a"), Event("b")),
                 Task("t3").add(Trigger("t2:a")),
-                Task("t4").add(Trigger("t2 == complete"),
-                               Complete("t2:b")))
+                Task("t4").add(Trigger("t2 == complete"), Complete("t2:b")),
+            )
 
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(Suite("test").add(
-            Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home),
-            create_family_f1()))
-        defs.save_as_defs(test_def_file())
+        defs = Defs().add(
+            Suite("test").add(
+                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f1()
+            )
+        )
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.defs = defs;
+        self.defs = defs
 
     def test_me0(self):
         text = """import os
@@ -520,9 +610,13 @@ assert len(errors) == 0,errors
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
@@ -538,9 +632,11 @@ defs.save_as_defs('test.def')
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
         defs.test += create_family_f1()
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -554,23 +650,23 @@ class TestMeter(unittest.TestCase):
             return Family("f1").add(
                 Edit(SLEEP=20),
                 Task("t1").add(Meter("progress", 1, 100, 90)),
-                Task("t2").add(Trigger("t1 == complete"),
-                               Event("a"),
-                               Event("b")),
+                Task("t2").add(Trigger("t1 == complete"), Event("a"), Event("b")),
                 Task("t3").add(Trigger("t2:a")),
-                Task("t4").add(Trigger("t2 == complete"),
-                               Complete("t2:b")),
+                Task("t4").add(Trigger("t2 == complete"), Complete("t2:b")),
                 Task("t5").add(Trigger("t1:progress ge 30")),
                 Task("t6").add(Trigger("t1:progress ge 60")),
-                Task("t7").add(Trigger("t1:progress ge 90")))
+                Task("t7").add(Trigger("t1:progress ge 90")),
+            )
 
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(Suite("test").add(
-            Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home),
-            create_family_f1()))
-        defs.save_as_defs(test_def_file())
+        defs = Defs().add(
+            Suite("test").add(
+                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f1()
+            )
+        )
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.defs = defs;
+        self.defs = defs
 
     def test_me0(self):
         text = """import os
@@ -605,9 +701,13 @@ assert len(errors) == 0,errors
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
@@ -627,9 +727,11 @@ defs.save_as_defs('test.def')
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
         defs.test += create_family_f1()
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -642,7 +744,9 @@ class TestTime(unittest.TestCase):
         def create_family_f2():
             f2 = Family("f2")
             f2.add_variable("SLEEP", 20)
-            f2.add_task("t1").add_time("00:30 23:30 00:30")  # start(hh:mm) end(hh:mm) increment(hh:mm)
+            f2.add_task("t1").add_time(
+                "00:30 23:30 00:30"
+            )  # start(hh:mm) end(hh:mm) increment(hh:mm)
             f2.add_task("t2").add_day("sunday")
 
             # for add_date(): day,month,year; here 0 means every month, and every year
@@ -650,7 +754,9 @@ class TestTime(unittest.TestCase):
             t3.add_date(1, 0, 0)  # day month year, first of every month or every year
             t3.add_time(12, 0)  # hour, minutes at 12 o'clock
 
-            f2.add_task("t4").add_time(0, 2, True)  # hour, minutes, relative to suite start
+            f2.add_task("t4").add_time(
+                0, 2, True
+            )  # hour, minutes, relative to suite start
             # 2 minutes after family f2 start
             f2.add_task("t5").add_time(0, 2)  # hour, minutes suite site
             # 2 minutes past midnight
@@ -666,9 +772,9 @@ class TestTime(unittest.TestCase):
         errors = defs.check()
         assert len(errors) == 0, errors
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.defs = defs;
+        self.defs = defs
 
     def test_me0(self):
         text = """import os
@@ -703,9 +809,13 @@ assert len(errors) == 0,errors
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
@@ -713,10 +823,11 @@ defs.save_as_defs('test.def')
         def create_family_f2():
             f1 = Family("f2") + Edit(SLEEP=20)
             f1 += [Task("t{0}".format(i)) for i in range(1, 6)]
-            f1.t1 += Time("00:30 23:30 00:30")  # start(hh:mm) end(hh:mm) increment(hh:mm)
+            f1.t1 += Time(
+                "00:30 23:30 00:30"
+            )  # start(hh:mm) end(hh:mm) increment(hh:mm)
             f1.t2 += Day("sunday")
-            f1.t3 += [Date("1.*.*"),
-                      Time("12:00")]
+            f1.t3 += [Date("1.*.*"), Time("12:00")]
             f1.t4 += Time("+00:02")
             f1.t5 += Time("00:02")
             return f1
@@ -724,9 +835,11 @@ defs.save_as_defs('test.def')
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
         defs.test += create_family_f2()
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def test_add(self):
         import os
@@ -736,18 +849,22 @@ defs.save_as_defs('test.def')
                 Edit(SLEEP=20),
                 Task("t1").add(Time("00:30 23:30 00:30")),
                 Task("t2").add(Day("sunday")),
-                Task("t3").add(Date("1.*.*"),
-                               Time("12:00")),
+                Task("t3").add(Date("1.*.*"), Time("12:00")),
                 Task("t4").add(Time("+00:02")),
-                Task("t5").add(Time("00:02")))
+                Task("t5").add(Time("00:02")),
+            )
 
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs().add(Suite("test").add(
-            Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home),
-            create_family_f2()))
-        defs.save_as_defs(test_def_file())
+        defs = Defs().add(
+            Suite("test").add(
+                Edit(ECF_HOME=home), Edit(ECF_INCLUDE=home), create_family_f2()
+            )
+        )
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -775,9 +892,9 @@ class TestCron(unittest.TestCase):
         errors = defs.check()
         assert len(errors) == 0, errors
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.defs = defs;
+        self.defs = defs
 
     def test_me0(self):
         text = """import os
@@ -806,9 +923,13 @@ assert len(errors) == 0,errors
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -846,8 +967,8 @@ class TestIndentation(unittest.TestCase):
                 f2 += Task("t4", Time(0, 2, True))
                 f2 += Task("t5", Time(0, 2))
 
-        defs.save_as_defs(test_def_file())
-        self.defs = defs;
+        defs.save_as_defs(_tutorial_def_file())
+        self.defs = defs
 
     def test_preferred(self):
         text = """import os
@@ -885,9 +1006,13 @@ assert len(defs.check()) == 0, defs.check()
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
@@ -907,16 +1032,21 @@ defs.save_as_defs('test.def')
                     f1.t6 += Trigger("t1:progress ge 60")
                     f1.t7 += Trigger("t1:progress ge 90")
                 with suite.add_family("f2") as f2:
-                    f2 += [Edit(SLEEP=20), [Task("t{0}".format(i)) for i in range(1, 6)]]
+                    f2 += [
+                        Edit(SLEEP=20),
+                        [Task("t{0}".format(i)) for i in range(1, 6)],
+                    ]
                     f2.t1 += Time("00:30 23:30 00:30")
                     f2.t2 += Day("sunday")
                     f2.t3 += [Date("1.*.*"), Time("12:00")]
                     f2.t4 += Time("+00:02")
                     f2.t5 += Time("00:02")
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.assertEqual(self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal:\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -927,8 +1057,8 @@ class TestLabel(unittest.TestCase):
         Ecf.set_debug_equality(True)
 
         def create_family_f3():
-            fam = Family('f3')
-            fam.add_task('t1').add_label("info", "")
+            fam = Family("f3")
+            fam.add_task("t1").add_label("info", "")
             return fam
 
         home = os.path.join(os.getenv("HOME"), "course")
@@ -941,9 +1071,9 @@ class TestLabel(unittest.TestCase):
         errors = defs.check()
         assert len(errors) == 0, errors
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
-        self.defs = defs;
+        self.defs = defs
 
     def test_me(self):
         text = """import os
@@ -971,9 +1101,13 @@ assert len(defs.check()) == 0, defs.check()
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -983,7 +1117,13 @@ class TestRepeat(unittest.TestCase):
     def setUp(self):
         Ecf.set_debug_equality(True)
 
-        self.ecf_home = File.build_dir() + "/libs/pyext/test/data/course_py" + str(sys.version_info[0]) + "_" + str(os.getpid())  # allow paralled runs
+        self.ecf_home = (
+            File.build_dir()
+            + "/libs/pyext/test/data/course_py"
+            + str(sys.version_info[0])
+            + "_"
+            + str(os.getpid())
+        )  # allow paralled runs
         self.ecf_includes = File.source_dir() + "/libs/pyext/test/data/includes"
         # print("self.ecf_home ",self.ecf_home )
 
@@ -992,11 +1132,11 @@ class TestRepeat(unittest.TestCase):
         except:
             pass
 
-        t1_ecf = '%include <head.h>\n'
+        t1_ecf = "%include <head.h>\n"
         t1_ecf += 'ecflow_client --label=info "My name is %NAME% My value is %VALUE% My date is %DATE%\n'
         t1_ecf += 'ecflow_client --label=date "year:%DATE_YYYY% month:%DATE_MM% day of month:%DATE_DD% day of week:%DATE_DOW%"\n'
-        t1_ecf += 'sleep %SLEEP%\n'
-        t1_ecf += '%include <tail.h>\n'
+        t1_ecf += "sleep %SLEEP%\n"
+        t1_ecf += "%include <tail.h>\n"
 
         self.t1_ecf_path = self.ecf_home + "/test/f4/f5/t1.ecf"
         # print("self.t1_ecf_path",self.t1_ecf_path)
@@ -1013,20 +1153,29 @@ class TestRepeat(unittest.TestCase):
     def test_repeat0(self):
 
         def create_family_f4():
-            return Family("f4",
-                          Edit(SLEEP=2),
-                          RepeatString("NAME", ["a", "b", "c", "d", "e", "f"]),
-                          Family("f5",
-                                 RepeatInteger("VALUE", 1, 10),
-                                 Task("t1",
-                                      RepeatDate("DATE", 20101230, 20110105),
-                                      Label("info", ""),
-                                      Label("date", ""))))
+            return Family(
+                "f4",
+                Edit(SLEEP=2),
+                RepeatString("NAME", ["a", "b", "c", "d", "e", "f"]),
+                Family(
+                    "f5",
+                    RepeatInteger("VALUE", 1, 10),
+                    Task(
+                        "t1",
+                        RepeatDate("DATE", 20101230, 20110105),
+                        Label("info", ""),
+                        Label("date", ""),
+                    ),
+                ),
+            )
 
         defs = Defs(
-            Suite("test",
-                  Edit(ECF_HOME=self.ecf_home, ECF_INCLUDE=self.ecf_includes),
-                  create_family_f4()))
+            Suite(
+                "test",
+                Edit(ECF_HOME=self.ecf_home, ECF_INCLUDE=self.ecf_includes),
+                create_family_f4(),
+            )
+        )
         # print(defs)
 
         result = defs.check_job_creation()
@@ -1064,48 +1213,62 @@ assert len(defs.check()) == 0,defs.check()
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
+        _compile_tutorial_text(text)
 
     def test_repeat(self):
 
         # print("Creating suite definition")
         defs = Defs(
-            Suite("test",
-                  Edit(ECF_HOME=self.ecf_home, ECF_INCLUDE=self.ecf_includes),
-                  Family("f4",
-                         Edit(SLEEP=2),
-                         RepeatString("NAME", ["a", "b", "c", "d", "e", "f"]),
-                         Family("f5",
-                                RepeatInteger("VALUE", 1, 10),
-                                Task("t1",
-                                     RepeatDate("DATE", 20101230, 20110105),
-                                     Label("info", ""),
-                                     Label("date", ""))))))
+            Suite(
+                "test",
+                Edit(ECF_HOME=self.ecf_home, ECF_INCLUDE=self.ecf_includes),
+                Family(
+                    "f4",
+                    Edit(SLEEP=2),
+                    RepeatString("NAME", ["a", "b", "c", "d", "e", "f"]),
+                    Family(
+                        "f5",
+                        RepeatInteger("VALUE", 1, 10),
+                        Task(
+                            "t1",
+                            RepeatDate("DATE", 20101230, 20110105),
+                            Label("info", ""),
+                            Label("date", ""),
+                        ),
+                    ),
+                ),
+            )
+        )
         # print(defs)
 
         result = defs.check_job_creation()
         self.assertEqual(result, "", "expected job creation to succeed " + result)
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
     def test_repeat3(self):
 
         defs = Defs().add(Suite("test"))
-        defs.test += [{"ECF_INCLUDE": self.ecf_includes, "ECF_HOME": self.ecf_home},
-                      Family("f4")]
-        defs.test.f4 += [Edit(SLEEP=2),
-                         RepeatString("NAME", ["a", "b", "c", "d", "e", "f"]),
-                         Family("f5")]
-        defs.test.f4.f5 += [RepeatInteger("VALUE", 1, 10),
-                            Task("t1")]
-        defs.test.f4.f5.t1 += [RepeatDate("DATE", 20101230, 20110105),
-                               Label("info", ""),
-                               Label("date", "")]
+        defs.test += [
+            {"ECF_INCLUDE": self.ecf_includes, "ECF_HOME": self.ecf_home},
+            Family("f4"),
+        ]
+        defs.test.f4 += [
+            Edit(SLEEP=2),
+            RepeatString("NAME", ["a", "b", "c", "d", "e", "f"]),
+            Family("f5"),
+        ]
+        defs.test.f4.f5 += [RepeatInteger("VALUE", 1, 10), Task("t1")]
+        defs.test.f4.f5.t1 += [
+            RepeatDate("DATE", 20101230, 20110105),
+            Label("info", ""),
+            Label("date", ""),
+        ]
         # print(defs)
         result = defs.check_job_creation()
         self.assertEqual(result, "", "expected job creation to succeed " + result)
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
 
 class TestLimit(unittest.TestCase):
@@ -1128,7 +1291,7 @@ class TestLimit(unittest.TestCase):
         suite.add_limit("l1", 2)
         suite.add_family(create_family_f5())
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
 
@@ -1159,11 +1322,15 @@ defs = Defs(
 assert len(defs.check()) == 0,defs.check()
  
 #xx print("Saving definition to file 'test.def'")
-defs.save_as_defs(test_def_file()) 
+defs.save_as_defs(_tutorial_def_file()) 
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -1178,7 +1345,9 @@ class TestLateAttribute(unittest.TestCase):
             f6.add_variable("SLEEP", 120)
             t1 = f6.add_task("t1")
             late = Late()
-            late.complete(0, 1, True)  # hour,minute,relative,    set late flag if task take longer than a minute
+            late.complete(
+                0, 1, True
+            )  # hour,minute,relative,    set late flag if task take longer than a minute
             t1.add_late(late)
             return f6
 
@@ -1191,7 +1360,7 @@ class TestLateAttribute(unittest.TestCase):
 
         assert len(defs.check()) == 0, defs.check()
 
-        defs.save_as_defs(test_def_file())
+        defs.save_as_defs(_tutorial_def_file())
 
         self.defs = defs
 
@@ -1224,9 +1393,13 @@ assert len(defs.check()) == 0,defs.check()
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def tearDown(self):
         do_tear_down()
@@ -1244,18 +1417,25 @@ class TestPythonScripting(unittest.TestCase):
                     fam.add_task(t)
             return suite
 
-        self.defs = Defs(create_suite('s1'))
+        self.defs = Defs(create_suite("s1"))
 
     def test_me(self):
         def create_suite(name):
-            return Suite(name,
-                         [Family("f{0}".format(i),
-                                 [Task(t) for t in ("a", "b", "c", "d", "e")])
-                          for i in range(1, 7)])
+            return Suite(
+                name,
+                [
+                    Family(
+                        "f{0}".format(i), [Task(t) for t in ("a", "b", "c", "d", "e")]
+                    )
+                    for i in range(1, 7)
+                ],
+            )
 
-        defs = Defs(create_suite('s1'))
+        defs = Defs(create_suite("s1"))
 
-        self.assertEqual(self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         Ecf.set_debug_equality(False)
@@ -1270,12 +1450,14 @@ class TestPythonScripting2(unittest.TestCase):
             for i in range(1, 7):
                 fam = suite.add_family("f" + str(i))
                 if i != 1:
-                    fam.add_trigger("f" + str(i - 1) + " == complete")  # or fam.add_family( "f%d == complete" % (i-1) )
+                    fam.add_trigger(
+                        "f" + str(i - 1) + " == complete"
+                    )  # or fam.add_family( "f%d == complete" % (i-1) )
                 for t in ("a", "b", "c", "d", "e"):
                     fam.add_task(t)
             return suite
 
-        self.defs = Defs(create_sequential_suite('s1'))
+        self.defs = Defs(create_sequential_suite("s1"))
 
     def test_me(self):
         def create_sequential_suite(name):
@@ -1283,14 +1465,18 @@ class TestPythonScripting2(unittest.TestCase):
             for i in range(1, 7):
                 fam = suite.add_family("f" + str(i))
                 if i != 1:
-                    fam += Trigger("f" + str(i - 1) + " == complete")  # or fam.add_family( "f%d == complete" % (i-1) )
+                    fam += Trigger(
+                        "f" + str(i - 1) + " == complete"
+                    )  # or fam.add_family( "f%d == complete" % (i-1) )
                 for t in ("a", "b", "c", "d", "e"):
                     fam.add_task(t)
             return suite
 
-        defs = Defs(create_sequential_suite('s1'))
+        defs = Defs(create_sequential_suite("s1"))
 
-        self.assertEqual(self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs))
+        self.assertEqual(
+            self.defs, defs, "defs not equal\n" + str(self.defs) + "\n" + str(defs)
+        )
 
     def tearDown(self):
         Ecf.set_debug_equality(False)
@@ -1307,16 +1493,29 @@ class TestDataAquistionSolution(unittest.TestCase):
         suite.add_variable("ECF_INCLUDE", os.getenv("HOME") + "/course")
         suite.add_variable("ECF_FILES", os.getenv("HOME") + "/course/data")
         suite.add_variable("SLEEP", "2")
-        for city in ("Exeter", "Toulouse", "Offenbach", "Washington", "Tokyo", "Melbourne", "Montreal"):
+        for city in (
+            "Exeter",
+            "Toulouse",
+            "Offenbach",
+            "Washington",
+            "Tokyo",
+            "Melbourne",
+            "Montreal",
+        ):
             fcity = suite.add_family(city)
             fcity.add_task("archive")
             for obs_type in ("observations", "fields", "images"):
                 type_fam = fcity.add_family(obs_type)
-                if city in ("Exeter", "Toulouse", "Offenbach"): type_fam.add_time("00:00 23:00 01:00")
-                if city in ("Washington"):                     type_fam.add_time("00:00 23:00 03:00")
-                if city in ("Tokyo"):                          type_fam.add_time("12:00")
-                if city in ("Melbourne"):                      type_fam.add_day("monday")
-                if city in ("Montreal"):                       type_fam.add_date(1, 0, 0)
+                if city in ("Exeter", "Toulouse", "Offenbach"):
+                    type_fam.add_time("00:00 23:00 01:00")
+                if city in ("Washington"):
+                    type_fam.add_time("00:00 23:00 03:00")
+                if city in ("Tokyo"):
+                    type_fam.add_time("12:00")
+                if city in ("Melbourne"):
+                    type_fam.add_day("monday")
+                if city in ("Montreal"):
+                    type_fam.add_date(1, 0, 0)
 
                 type_fam.add_task("get")
                 type_fam.add_task("process").add_trigger("get eq complete")
@@ -1360,9 +1559,13 @@ assert len(defs.check()) == 0, defs.check()
 #xx print("Saving definition to file 'test.def'")
 defs.save_as_defs('test.def')
 """
-        test_compile(text)
-        test_defs = Defs(test_def_file())
-        self.assertEqual(test_defs, self.defs, "defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        _compile_tutorial_text(text)
+        test_defs = Defs(_tutorial_def_file())
+        self.assertEqual(
+            test_defs,
+            self.defs,
+            "defs not equal\n" + str(test_defs) + "\n" + str(self.defs),
+        )
 
     def test_me(self):
         import os
@@ -1373,17 +1576,31 @@ defs.save_as_defs('test.def')
             Edit(ECF_HOME=home),
             Edit(ECF_INCLUDE=home),
             Edit(ECF_FILES=home + "/data"),
-            Edit(SLEEP=2))
-        for city in ("Exeter", "Toulouse", "Offenbach", "Washington", "Tokyo", "Melbourne", "Montreal"):
+            Edit(SLEEP=2),
+        )
+        for city in (
+            "Exeter",
+            "Toulouse",
+            "Offenbach",
+            "Washington",
+            "Tokyo",
+            "Melbourne",
+            "Montreal",
+        ):
             fcity = defs.data_aquisition.add_family(city)
             fcity += Task("archive")
             for obs_type in ("observations", "fields", "images"):
                 type_fam = fcity.add_family(obs_type)
-                if city in ("Exeter", "Toulouse", "Offenbach"): type_fam + Time("00:00 23:00 01:00")
-                if city in ("Washington"):                     type_fam + Time("00:00 23:00 03:00")
-                if city in ("Tokyo"):                          type_fam + Time("12:00")
-                if city in ("Melbourne"):                      type_fam + Day("monday")
-                if city in ("Montreal"):                       type_fam + Date(1, 0, 0)
+                if city in ("Exeter", "Toulouse", "Offenbach"):
+                    type_fam + Time("00:00 23:00 01:00")
+                if city in ("Washington"):
+                    type_fam + Time("00:00 23:00 03:00")
+                if city in ("Tokyo"):
+                    type_fam + Time("12:00")
+                if city in ("Melbourne"):
+                    type_fam + Day("monday")
+                if city in ("Montreal"):
+                    type_fam + Date(1, 0, 0)
 
                 type_fam += [Task("get"), Task("process"), Task("store")]
                 type_fam.process += Trigger("get eq complete")
@@ -1424,8 +1641,12 @@ class TestOperationalSolution(unittest.TestCase):
 
             analysis_fam = fcycle_fam.add_family("analysis")
             analysis_fam.add_task("get_observations")
-            analysis_fam.add_task("run_analysis").add_trigger("get_observations == complete")
-            analysis_fam.add_task("post_processing").add_trigger("run_analysis == complete")
+            analysis_fam.add_task("run_analysis").add_trigger(
+                "get_observations == complete"
+            )
+            analysis_fam.add_task("post_processing").add_trigger(
+                "run_analysis == complete"
+            )
 
             forecast_fam = fcycle_fam.add_family("forecast")
             forecast_fam.add_trigger("analysis == complete")
@@ -1459,55 +1680,73 @@ class TestOperationalSolution(unittest.TestCase):
 
         home = os.getenv("HOME") + "/course"
         cycle_triggers = None
-        last_step = {"12": 240,
-                     "00": 24, }
+        last_step = {
+            "12": 240,
+            "00": 24,
+        }
 
         def cycle_trigger(cycle):
-            if cycle == "12": return Trigger("./00 == complete")
+            if cycle == "12":
+                return Trigger("./00 == complete")
             return None
 
         defs = Defs(
-            Suite("operation_suite",
-                  RepeatDay(1),
-                  Edit(ECF_HOME=home),
-                  Edit(ECF_INCLUDE=home),
-                  Edit(ECF_FILES=home + "/oper"),
-                  [Family(cycle,
-                          Edit(CYCLE=cycle),
-                          Edit(LAST_STEP=last_step[cycle]),
-
-                          cycle_trigger(cycle),
-
-                          Family("analysis",
-                                 Task("get_observations"),
-                                 Task("run_analysis", Trigger(["get_observations"])),
-                                 Task("post_processing", Trigger(["run_analysis"]))
-                                 ),
-
-                          Family("forecast",
-                                 Trigger(["analysis"]),
-                                 Task("get_input_data"),
-                                 Task("run_forecast",
-                                      Trigger(["get_input_data"]),
-                                      Meter("step", 0, last_step[cycle])),
-                                 ),
-
-                          Family("archive",
-                                 Family("analysis",
-                                        Edit(TYPE="analysis"),
-                                        Edit(STEP=0),
-                                        Trigger("../analysis/run_analysis == complete"),
+            Suite(
+                "operation_suite",
+                RepeatDay(1),
+                Edit(ECF_HOME=home),
+                Edit(ECF_INCLUDE=home),
+                Edit(ECF_FILES=home + "/oper"),
+                [
+                    Family(
+                        cycle,
+                        Edit(CYCLE=cycle),
+                        Edit(LAST_STEP=last_step[cycle]),
+                        cycle_trigger(cycle),
+                        Family(
+                            "analysis",
+                            Task("get_observations"),
+                            Task("run_analysis", Trigger(["get_observations"])),
+                            Task("post_processing", Trigger(["run_analysis"])),
+                        ),
+                        Family(
+                            "forecast",
+                            Trigger(["analysis"]),
+                            Task("get_input_data"),
+                            Task(
+                                "run_forecast",
+                                Trigger(["get_input_data"]),
+                                Meter("step", 0, last_step[cycle]),
+                            ),
+                        ),
+                        Family(
+                            "archive",
+                            Family(
+                                "analysis",
+                                Edit(TYPE="analysis"),
+                                Edit(STEP=0),
+                                Trigger("../analysis/run_analysis == complete"),
+                                Task("save"),
+                                [
+                                    Family(
+                                        "step_{0}".format(i),
+                                        Edit(TYPE="forecast"),
+                                        Edit(STEP=i),
+                                        Trigger(
+                                            "../../forecast/run_forecast:step ge {0}".format(
+                                                i
+                                            )
+                                        ),
                                         Task("save"),
-                                        [Family("step_{0}".format(i),
-                                                Edit(TYPE="forecast"),
-                                                Edit(STEP=i),
-                                                Trigger("../../forecast/run_forecast:step ge {0}".format(i)),
-                                                Task("save"))
-                                         for i in range(6, last_step[cycle] + 1, 6)]
-                                        )
-                                 )
-                          ) for cycle in ("00", "12")]
-                  )
+                                    )
+                                    for i in range(6, last_step[cycle] + 1, 6)
+                                ],
+                            ),
+                        ),
+                    )
+                    for cycle in ("00", "12")
+                ],
+            )
         )
         # print(defs)
 
@@ -1544,30 +1783,39 @@ class TestBackArchivingSolution(unittest.TestCase):
 
     def test_sol1(self):
         import os
+
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs(
-            Suite("back_archiving",
-                  RepeatDay(1),
-                  Edit(ECF_HOME=home),
-                  Edit(ECF_INCLUDE=home),
-                  Edit(ECF_FILES=home + "/back"),
-                  Edit(SLEEP=2),
-                  Limit("access", 2),
-                  [Family(kind,
-                          RepeatDate("DATE", 19900101, 19950712),
-                          Edit(KIND=kind),
-                          Task("get_old", InLimit("access")),
-                          Task("convert", Trigger("get_old == complete")),
-                          Task("save_new", Trigger("convert == complete")))
-                   for kind in ("analysis", "forecast", "climatology", "observations", "images")]))
+            Suite(
+                "back_archiving",
+                RepeatDay(1),
+                Edit(ECF_HOME=home),
+                Edit(ECF_INCLUDE=home),
+                Edit(ECF_FILES=home + "/back"),
+                Edit(SLEEP=2),
+                Limit("access", 2),
+                [
+                    Family(
+                        kind,
+                        RepeatDate("DATE", 19900101, 19950712),
+                        Edit(KIND=kind),
+                        Task("get_old", InLimit("access")),
+                        Task("convert", Trigger("get_old == complete")),
+                        Task("save_new", Trigger("convert == complete")),
+                    )
+                    for kind in (
+                        "analysis",
+                        "forecast",
+                        "climatology",
+                        "observations",
+                        "images",
+                    )
+                ],
+            )
+        )
         # print(defs)
 
         self.assertEqual(self.defs, defs, "defs not equal")
 
     def tearDown(self):
         Ecf.set_debug_equality(False)
-
-
-if __name__ == "__main__":
-    unittest.main()
-    print("All Tests pass")

@@ -13,190 +13,209 @@
 # The test loads a defs file from the disk, traverses the defs file, and creates another defs file.
 # The original and the copy are compared and should be the same when traversal is correct.
 
+import os
+import fnmatch
+import sys
+import pathlib
+
+import pytest
+
 import ecflow
-import ecflow_test_util as Test
-import os, fnmatch, sys
 
 
-class Indentor:
-    """This class manages indentation, for use with context manager
-    It is used to correctly indent the definition node tree hierarchy
-    """
+class _Indentor:
+    """Manages indentation, for use with context manager."""
+
     _index = 0
 
     def __init__(self):
-        Indentor._index += 1
+        _Indentor._index += 1
 
     def __del__(self):
-        Indentor._index -= 1
+        _Indentor._index -= 1
 
     @classmethod
     def indent(cls, the_file):
-        for i in range(Indentor._index):
-            the_file.write(' ')
+        for _ in range(cls._index):
+            the_file.write(" ")
 
 
 class DefsTraverser:
-    """Traverse the ecflow.Defs definition and write to file.
-    
-    This demonstrates that all nodes in the node tree and all attributes are accessible.
-    Additionally the state data is also accessible. This class will write state data as
-    comments. If the definition was returned from the server, it allows access to latest 
-    snapshot of the state data held in the server. 
-    """
+    """Traverse the ecflow.Defs definition and write to file."""
 
     def __init__(self, defs, file_name):
-        assert (isinstance(defs, ecflow.Defs)), "Expected ecflow.Defs as first argument"
-        assert (isinstance(file_name, str)), "Expected a string argument. Representing a file name"
-        self.__defs = defs
-        self.__file = open(file_name, 'w')
+        self._defs = defs
+        self._file = open(file_name, "w")
 
     def write_to_file(self):
-        for extern in self.__defs.externs:
-            self.__writeln("extern " + extern)
-        for suite in self.__defs:
-            self.__write("suite ")
-            self.__print_node(suite)
+        for extern in self._defs.externs:
+            self._writeln("extern " + extern)
+        for suite in self._defs:
+            self._write("suite ")
+            self._print_node(suite)
             clock = suite.get_clock()
             if clock:
-                indent = Indentor()
-                self.__writeln(str(clock))
+                indent = _Indentor()
+                self._writeln(str(clock))
                 del indent
-            self.__print_nc(suite)
-            self.__writeln("endsuite")
-        self.__file.close()
+            self._print_nc(suite)
+            self._writeln("endsuite")
+        self._file.close()
 
-    def __print_nc(self, node_container):
-        indent = Indentor()
+    def _print_nc(self, node_container):
+        indent = _Indentor()
         for node in node_container:
             if isinstance(node, ecflow.Task):
-                self.__write("task ")
-                self.__print_node(node)
-                self.__print_alias(node)
+                self._write("task ")
+                self._print_node(node)
+                self._print_alias(node)
             else:
-                self.__write("family ")
-                self.__print_node(node)
-                self.__print_nc(node)
-                self.__writeln("endfamily")
+                self._write("family ")
+                self._print_node(node)
+                self._print_nc(node)
+                self._writeln("endfamily")
         del indent
 
-    def __print_alias(self, task):
-        indent = Indentor()
+    def _print_alias(self, task):
+        indent = _Indentor()
         for alias in task:
-            self.__write("alias ")
-            self.__print_node(alias)
-            self.__writeln("endalias")
+            self._write("alias ")
+            self._print_node(alias)
+            self._writeln("endalias")
         del indent
 
-    def __print_node(self, node):
-        self.__file.write(node.name() + " # state:" + str(node.get_state()) + "\n")
+    def _print_node(self, node):
+        self._file.write(node.name() + " # state:" + str(node.get_state()) + "\n")
 
-        indent = Indentor()
-        defStatus = node.get_defstatus()
-        if defStatus != ecflow.DState.queued:
-            self.__writeln("defstatus " + str(defStatus))
+        indent = _Indentor()
+        def_status = node.get_defstatus()
+        if def_status != ecflow.DState.queued:
+            self._writeln("defstatus " + str(def_status))
 
         autocancel = node.get_autocancel()
-        if autocancel: self.__writeln(str(autocancel))
+        if autocancel:
+            self._writeln(str(autocancel))
 
         autoarchive = node.get_autoarchive()
-        if autoarchive: self.__writeln(str(autoarchive))
+        if autoarchive:
+            self._writeln(str(autoarchive))
 
         autorestore = node.get_autorestore()
-        if autorestore: self.__writeln(str(autorestore))
+        if autorestore:
+            self._writeln(str(autorestore))
 
         repeat = node.get_repeat()
-        if not repeat.empty(): self.__writeln(str(repeat) + " # value: " + str(repeat.value()))
+        if not repeat.empty():
+            self._writeln(str(repeat) + " # value: " + str(repeat.value()))
 
         late = node.get_late()
-        if late: self.__writeln(str(late) + " # is_late: " + str(late.is_late()))
+        if late:
+            self._writeln(str(late) + " # is_late: " + str(late.is_late()))
 
         complete_expr = node.get_complete()
         if complete_expr:
             for part_expr in complete_expr.parts:
                 trig = "complete "
-                if part_expr.and_expr(): trig = trig + "-a "
-                if part_expr.or_expr():  trig = trig + "-o "
-                self.__write(trig)
-                self.__file.write(part_expr.get_expression() + "\n")
+                if part_expr.and_expr():
+                    trig = trig + "-a "
+                if part_expr.or_expr():
+                    trig = trig + "-o "
+                self._write(trig)
+                self._file.write(part_expr.get_expression() + "\n")
         trigger_expr = node.get_trigger()
         if trigger_expr:
             for part_expr in trigger_expr.parts:
                 trig = "trigger "
-                if part_expr.and_expr(): trig = trig + "-a "
-                if part_expr.or_expr():  trig = trig + "-o "
-                self.__write(trig)
-                self.__file.write(part_expr.get_expression() + "\n")
+                if part_expr.and_expr():
+                    trig = trig + "-a "
+                if part_expr.or_expr():
+                    trig = trig + "-o "
+                self._write(trig)
+                self._file.write(part_expr.get_expression() + "\n")
 
-        for var in node.variables:    self.__writeln("edit " + var.name() + " '" + var.value() + "'")
-        for meter in node.meters:     self.__writeln(str(meter) + " # value: " + str(meter.value()))
-        for event in node.events:     self.__writeln(str(event) + " # value: " + str(event.value()))
-        for label in node.labels:     self.__writeln(str(label) + " # value: " + label.new_value())
-        for limit in node.limits:     self.__writeln(str(limit) + " # value: " + str(limit.value()))
-        for inlimit in node.inlimits: self.__writeln(str(inlimit))
-        for the_time in node.times:   self.__writeln(str(the_time))
-        for today in node.todays:     self.__writeln(str(today))
-        for date in node.dates:       self.__writeln(str(date))
-        for day in node.days:         self.__writeln(str(day))
-        for cron in node.crons:       self.__writeln(str(cron))
-        for verify in node.verifies:  self.__writeln(str(verify))
-        for zombie in node.zombies:   self.__writeln(str(zombie))
-        for queue in node.queues:     self.__writeln(str(queue))
-        for generic in node.generics: self.__writeln(str(generic))
+        for var in node.variables:
+            self._writeln("edit " + var.name() + " '" + var.value() + "'")
+        for meter in node.meters:
+            self._writeln(str(meter) + " # value: " + str(meter.value()))
+        for event in node.events:
+            self._writeln(str(event) + " # value: " + str(event.value()))
+        for label in node.labels:
+            self._writeln(str(label) + " # value: " + label.new_value())
+        for limit in node.limits:
+            self._writeln(str(limit) + " # value: " + str(limit.value()))
+        for inlimit in node.inlimits:
+            self._writeln(str(inlimit))
+        for the_time in node.times:
+            self._writeln(str(the_time))
+        for today in node.todays:
+            self._writeln(str(today))
+        for date in node.dates:
+            self._writeln(str(date))
+        for day in node.days:
+            self._writeln(str(day))
+        for cron in node.crons:
+            self._writeln(str(cron))
+        for verify in node.verifies:
+            self._writeln(str(verify))
+        for zombie in node.zombies:
+            self._writeln(str(zombie))
+        for queue in node.queues:
+            self._writeln(str(queue))
+        for generic in node.generics:
+            self._writeln(str(generic))
 
         del indent
 
-    def __write(self, the_string):
-        Indentor.indent(self.__file)
-        self.__file.write(the_string)
+    def _write(self, the_string):
+        _Indentor.indent(self._file)
+        self._file.write(the_string)
 
-    def __writeln(self, the_string):
-        Indentor.indent(self.__file)
-        self.__file.write(the_string + "\n")
+    def _writeln(self, the_string):
+        _Indentor.indent(self._file)
+        self._file.write(the_string + "\n")
 
 
-def check_traversal(path_to_def):
-    # Open a def on disk *and* load into memory
+def _check_traversal(path_to_def):
     reference_def = ecflow.Defs(path_to_def)
 
-    # traverse the opened def and write it out again
     file_name = "copy.def"
     traverser = DefsTraverser(reference_def, file_name)
     traverser.write_to_file()
 
-    # restore the defs we create via traversal. If traversal was good it should
-    # be the same as def on disk.
     try:
         traversed_def = ecflow.Defs(file_name)
     except RuntimeError as e:
-        print("Could not parse file " + file_name + "\n" + str(e))
-        sys.exit(1)
+        pytest.fail("Could not parse file " + file_name + "\n" + str(e))
 
-    # compare the two defs
     ecflow.Ecf.set_debug_equality(True)
-    defs_equal = (traversed_def == reference_def)
-    if not defs_equal:
-        print(str(path_to_def) + " FAILED ")
-        print("The traversed defs=========\n" + str(traversed_def) + "\nnot the same as reference def============\n" + str(reference_def))
-        print("===================== " + file_name + " ====================================")
-        the_traversed_def_on_disk = open(file_name)
-        for line in the_traversed_def_on_disk:
-            print(line)
+    try:
+        defs_equal = traversed_def == reference_def
+        if not defs_equal:
+            with open(file_name) as f:
+                traversed_content = f.read()
+            pytest.fail(
+                str(path_to_def) + " FAILED\n"
+                "The traversed defs=========\n" + str(traversed_def) + "\n"
+                "not the same as reference def============\n"
+                + str(reference_def)
+                + "\n"
+                "===================== "
+                + file_name
+                + " ====================================\n"
+                + traversed_content
+            )
+    finally:
+        ecflow.Ecf.set_debug_equality(False)
 
-        assert defs_equal, "Failed: ---"
-
-        # Notice: this path does not delete file_name, left for analysis of failure
-    else:
-        print(str(path_to_def) + " PASSED ")
+    if os.path.exists(file_name):
         os.remove(file_name)
 
 
-def all_files(root, patterns='*', single_level=False, yield_folders=False):
-    """Expand patterns from semi-colon separated string to list"""
-    patterns = patterns.split(';')
-    for path, subdirs, files in os.walk(root):
+def _all_files(root, patterns="*", single_level=False, yield_folders=False):
+    patterns = patterns.split(";")
+    for path, _subdirs, files in os.walk(root):
         if yield_folders:
-            files.extend(subdirs)
+            files.extend(_subdirs)
         files.sort()
         for name in files:
             for pattern in patterns:
@@ -207,27 +226,22 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
             break
 
 
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
+@pytest.fixture
+def parser_good_defs_dir():
+    source_dir = ecflow.File.source_dir()
+    path = (
+        pathlib.Path(source_dir)
+        / "libs"
+        / "node"
+        / "test"
+        / "parser"
+        / "data"
+        / "good_defs"
+    )
+    assert path.exists(), f"Parser good_defs directory not found: {path}"
+    return path
 
-    cwd = os.getcwd()
-    # print cwd
-    # print "split = " + str(os.path.split(cwd))
-    # print "basename = " + os.path.basename(cwd)
-    # print "dirname = " + os.path.dirname(cwd)
-    # print "splitext = " + str( os.path.splitext(cwd) )
-    # print "isdir = " + str(os.path.isdir(cwd))
 
-    # Traverse all the good defs in the Parser directory
-    newpath = ""
-    if os.path.basename(cwd) == "libs/pyext":
-        newpath = os.path.join(os.path.dirname(cwd), "libs/node/parser/test/data/good_defs")
-
-    # print newpath
-    for path_to_defs_file in all_files(newpath, '*.def;*.txt'):
-        check_traversal(path_to_defs_file)
-
-    # try the mega_def. Commented out since it takes to long
-    # mega_def = os.path.join( os.path.dirname(cwd), "libs/node/parser/test/data/single_defs/mega.def")
-    # check_traversal(mega_def)
-    print("All Tests pass")
+def test_traversal_of_all_good_defs(parser_good_defs_dir):
+    for path_to_defs_file in _all_files(str(parser_good_defs_dir), "*.def;*.txt"):
+        _check_traversal(path_to_defs_file)

@@ -18,7 +18,7 @@ from typing import List, Dict
 
 def _is_running_test_on(prefix):
     """Helper to detect if running on a CI runner with a name starting with the given prefix."""
-    envvar = environ.get('RUNNER_NAME')
+    envvar = environ.get("RUNNER_NAME")
     return envvar is not None and envvar.startswith(prefix)
 
 
@@ -10764,15 +10764,21 @@ class TestRepeatDate(unittest.TestCase):
 
     def test_current_index_returns_int(self):
         """current_index() returns a Python int."""
-        self.assertIsInstance(ecf.RepeatDate("YMD", 20100101, 20100110).current_index(), int)
+        self.assertIsInstance(
+            ecf.RepeatDate("YMD", 20100101, 20100110).current_index(), int
+        )
 
     def test_current_value_initial_is_start(self):
         """current_value() is the start date string at construction."""
-        self.assertEqual(ecf.RepeatDate("YMD", 20100101, 20100110).current_value(), 20100101)
+        self.assertEqual(
+            ecf.RepeatDate("YMD", 20100101, 20100110).current_value(), 20100101
+        )
 
     def test_current_value_returns_int(self):
         """current_value() returns a Python int."""
-        self.assertIsInstance(ecf.RepeatDate("YMD", 20100101, 20100110).current_value(), int)
+        self.assertIsInstance(
+            ecf.RepeatDate("YMD", 20100101, 20100110).current_value(), int
+        )
 
     def test_current_index_via_node_after_advance(self):
         """current_index() on get_repeat() advances correctly via the node."""
@@ -11173,7 +11179,11 @@ class TestRepeatDateTime(unittest.TestCase):
     def test_current_index_returns_int(self):
         """current_index() returns a Python int."""
         self.assertIsInstance(
-            ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000").current_index(), int)
+            ecf.RepeatDateTime(
+                "DT", "19700101T000000", "19700103T000000"
+            ).current_index(),
+            int,
+        )
 
     def test_current_value_initial_is_start(self):
         """current_value() is the start instant string at construction."""
@@ -11183,13 +11193,19 @@ class TestRepeatDateTime(unittest.TestCase):
     def test_current_value_returns_str(self):
         """current_value() returns a Python str."""
         self.assertIsInstance(
-            ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000").current_value(), str)
+            ecf.RepeatDateTime(
+                "DT", "19700101T000000", "19700103T000000"
+            ).current_value(),
+            str,
+        )
 
     def test_current_index_via_node_after_advance(self):
         """current_index() on get_repeat() advances correctly via the node."""
         defs = ecf.Defs()
         t = defs.add_suite("s").add_family("f").add_task("t")
-        t.add_repeat(ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000", "24:00:00"))
+        t.add_repeat(
+            ecf.RepeatDateTime("DT", "19700101T000000", "19700103T000000", "24:00:00")
+        )
         # Advance the repeat twice (simulates two steps)
         r = t.get_repeat()
         self.assertEqual(r.current_index(), 0)
@@ -11484,15 +11500,21 @@ class TestRepeatDateList(unittest.TestCase):
 
     def test_current_index_initial_is_zero(self):
         """current_index() is 0 on a freshly constructed RepeatDateList."""
-        self.assertEqual(ecf.RepeatDateList("DL", [20100101, 20100115]).current_index(), 0)
+        self.assertEqual(
+            ecf.RepeatDateList("DL", [20100101, 20100115]).current_index(), 0
+        )
 
     def test_current_index_returns_int(self):
         """current_index() returns a Python int."""
-        self.assertIsInstance(ecf.RepeatDateList("DL", [20100101, 20100115]).current_index(), int)
+        self.assertIsInstance(
+            ecf.RepeatDateList("DL", [20100101, 20100115]).current_index(), int
+        )
 
     def test_current_value_initial_is_first_entry(self):
         """current_value() is the first list entry at construction."""
-        self.assertEqual(ecf.RepeatDateList("DL", [20100101, 20100115]).current_value(), 20100101)
+        self.assertEqual(
+            ecf.RepeatDateList("DL", [20100101, 20100115]).current_value(), 20100101
+        )
 
     def test_current_value_returns_int(self):
         """current_value() returns a Python int."""
@@ -11515,6 +11537,7 @@ class TestRepeatDateList(unittest.TestCase):
         r2.increment()
         self.assertEqual(r2.current_index(), 2)
         self.assertEqual(r2.current_value(), 19700104)
+
 
 class TestRepeatDateTimeList(unittest.TestCase):
     """Tests for py::class_<RepeatDateTimeList> exposed as ecf.RepeatDateTimeList in ExportNodeAttr.cpp.
@@ -11824,7 +11847,8 @@ class TestRepeatDateTimeList(unittest.TestCase):
     def test_current_index_returns_int(self):
         """current_index() returns a Python int."""
         self.assertIsInstance(
-            ecf.RepeatDateTimeList("DTL", ["19700101T000000"]).current_index(), int)
+            ecf.RepeatDateTimeList("DTL", ["19700101T000000"]).current_index(), int
+        )
 
     def test_current_value_initial_is_first_entry(self):
         """current_value() is the first instant string at construction."""
@@ -11834,13 +11858,18 @@ class TestRepeatDateTimeList(unittest.TestCase):
     def test_current_value_returns_str(self):
         """current_value() returns a Python str."""
         self.assertIsInstance(
-            ecf.RepeatDateTimeList("DTL", ["19700101T000000"]).current_value(), str)
+            ecf.RepeatDateTimeList("DTL", ["19700101T000000"]).current_value(), str
+        )
 
     def test_current_index_via_node_after_advance(self):
         """current_index() on get_repeat() advances correctly via the node."""
         defs = ecf.Defs()
         t = defs.add_suite("s").add_family("f").add_task("t")
-        t.add_repeat(ecf.RepeatDateTimeList("DL", ["19700101T000001", "19700103T000003", "19700104T000004"]))
+        t.add_repeat(
+            ecf.RepeatDateTimeList(
+                "DL", ["19700101T000001", "19700103T000003", "19700104T000004"]
+            )
+        )
         # Advance the repeat
         r = t.get_repeat()
         self.assertEqual(r.current_index(), 0)
@@ -12479,7 +12508,9 @@ class TestRepeatEnumerated(unittest.TestCase):
 
     def test_current_index_initial_is_zero(self):
         """current_index() is 0 on a freshly constructed RepeatEnumerated."""
-        self.assertEqual(ecf.RepeatEnumerated("E", ["red", "green", "blue"]).current_index(), 0)
+        self.assertEqual(
+            ecf.RepeatEnumerated("E", ["red", "green", "blue"]).current_index(), 0
+        )
 
     def test_current_index_returns_int(self):
         """current_index() returns a Python int."""
@@ -12487,7 +12518,9 @@ class TestRepeatEnumerated(unittest.TestCase):
 
     def test_current_value_initial_is_first_entry(self):
         """current_value() is the first enumeration string at construction."""
-        self.assertEqual(ecf.RepeatEnumerated("E", ["red", "green"]).current_value(), "red")
+        self.assertEqual(
+            ecf.RepeatEnumerated("E", ["red", "green"]).current_value(), "red"
+        )
 
     def test_current_value_returns_str(self):
         """current_value() returns a Python str."""
@@ -12779,7 +12812,9 @@ class TestRepeatString(unittest.TestCase):
 
     def test_current_value_initial_is_first_entry(self):
         """current_value() is the first string at construction."""
-        self.assertEqual(ecf.RepeatString("S", ["alpha", "beta"]).current_value(), "alpha")
+        self.assertEqual(
+            ecf.RepeatString("S", ["alpha", "beta"]).current_value(), "alpha"
+        )
 
     def test_current_value_returns_str(self):
         """current_value() returns a Python str."""
@@ -14411,9 +14446,10 @@ class TestClock(unittest.TestCase):
         self.assertEqual(c.year(), 9999)
 
     @unittest.skipIf(
-        _is_running_test_on('platform-builder-rl-86')
-        , "The (1400-9999) year range restriction was introduced by Boost 1.67.0."
-          "Disabling tests for CI runners known to use previous versions of Boost.")
+        _is_running_test_on("platform-builder-rl-86"),
+        "The (1400-9999) year range restriction was introduced by Boost 1.67.0."
+        "Disabling tests for CI runners known to use previous versions of Boost.",
+    )
     def test_constructor_year_10000_raises(self):
         """Clock(d, m, 10000) raises IndexError (year must be <= 9999)."""
         with self.assertRaises(IndexError):
@@ -15506,7 +15542,3 @@ class TestMirrorAttr(unittest.TestCase):
         """copy.copy preserves ssl=False."""
         m = ecf.MirrorAttr("m", "/p", "host", "3141", "120", False)
         self.assertFalse(copy.copy(m).ssl())
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

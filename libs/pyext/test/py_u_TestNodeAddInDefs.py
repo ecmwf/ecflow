@@ -8,12 +8,10 @@
 # nor does it submit to any jurisdiction.
 #
 
-from ecflow import Defs, Client, debug_build
-import ecflow_test_util as Test
-import os
+from ecflow import Defs
 
 
-def create_defs_sequentially():
+def _create_defs_sequentially():
     local_defs = Defs()
     suite = local_defs.add_suite("s1")
     suite.add_variable("Var", "value")
@@ -38,30 +36,33 @@ def create_defs_sequentially():
     return local_defs
 
 
-def create_defs_functionally():
+def _create_defs_functionally():
     f_defs = Defs()
     suite = f_defs.add_suite("s1")
-    suite.add_variable("Var", "value").add_family("f1").add_family("f1").add_task("t1").add_variable("fred", "jones")
+    suite.add_variable("Var", "value").add_family("f1").add_family("f1").add_task(
+        "t1"
+    ).add_variable("fred", "jones")
     suite.add_family("f2").add_family("f1").add_task("t1").add_variable("fred", "jones")
-    suite.add_meter("metername3", 0, 100, 50).add_family("f3").add_task("t1").add_variable("fred", "jones")
+    suite.add_meter("metername3", 0, 100, 50).add_family("f3").add_task(
+        "t1"
+    ).add_variable("fred", "jones")
     suite.add_event(2).add_event(3).add_task("t1").add_variable("fred", "jones")
     return f_defs
 
 
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    #
-    # Add Nodes functional way
-    #
+def test_add_nodes_functionally_creates_multiple_suites():
     defs = Defs()
     defs.add_suite("s1").add_task("t1").add_variable("var", "v")
     defs.add_suite("s2").add_family("f1").add_task("t1").add_variable("var", "v")
-    defs.add_suite("s3").add_family("f1").add_family("f2").add_task("t1").add_variable("var", "v")
+    defs.add_suite("s3").add_family("f1").add_family("f2").add_task("t1").add_variable(
+        "var", "v"
+    )
     assert len(defs) == 3, "Expected 3 suites"
 
-    # These test show that although add_variable() returns a node_ptr, its really a suite
-    # hence calling add_family/add_task still works.
-    assert create_defs_sequentially() == create_defs_functionally(), "Functional suite not as expected "
 
-    print("All Tests pass")
+def test_sequential_and_functional_construction_are_equivalent():
+    # These tests show that although add_variable() returns a node_ptr,
+    # it's really a suite, hence calling add_family/add_task still works.
+    assert (
+        _create_defs_sequentially() == _create_defs_functionally()
+    ), "Functional suite not as expected "

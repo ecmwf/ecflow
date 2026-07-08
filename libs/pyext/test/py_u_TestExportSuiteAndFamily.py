@@ -399,7 +399,8 @@ class TestNodeContainer(unittest.TestCase):
 
     def test_add_family_dynamic_attr_survives(self):
         """A dynamic attribute set on a Family before add_family(ptr) is still present on the
-        Python wrapper returned by find_family (py::keep_alive preserves the wrapper)."""
+        Python wrapper returned by find_family (py::keep_alive preserves the wrapper).
+        """
         s = ecf.Suite("s")
         f = ecf.Family("tagged")
         f._marker = "hello"
@@ -408,8 +409,10 @@ class TestNodeContainer(unittest.TestCase):
         gc.collect()
         gc.collect()
         found = s.find_family("tagged")
-        self.assertTrue(hasattr(found, "_marker"),
-                        "Dynamic attribute should survive after add_family (py::keep_alive)")
+        self.assertTrue(
+            hasattr(found, "_marker"),
+            "Dynamic attribute should survive after add_family (py::keep_alive)",
+        )
         self.assertEqual(found._marker, "hello")
 
     def test_add_task_dynamic_attr_survives(self):
@@ -423,8 +426,10 @@ class TestNodeContainer(unittest.TestCase):
         gc.collect()
         gc.collect()
         found = s.find_task("tagged")
-        self.assertTrue(hasattr(found, "_marker"),
-                        "Dynamic attribute should survive after add_task (py::keep_alive)")
+        self.assertTrue(
+            hasattr(found, "_marker"),
+            "Dynamic attribute should survive after add_task (py::keep_alive)",
+        )
         self.assertEqual(found._marker, "world")
 
 
@@ -909,7 +914,3 @@ class TestSuite(unittest.TestCase):
         s = ecf.Suite("s")
         result = s.begun()
         self.assertIsInstance(result, (bool, int))
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

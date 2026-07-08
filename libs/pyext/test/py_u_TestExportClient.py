@@ -393,7 +393,7 @@ class TestClient(unittest.TestCase):
     def test_debug_true_does_not_raise(self):
         """debug(True) enables verbose output; must not raise."""
         ci = ecf.Client()
-        ci.debug(True)   # must not raise
+        ci.debug(True)  # must not raise
         ci.debug(False)  # restore to silent
 
     def test_debug_false_does_not_raise(self):
@@ -881,7 +881,3 @@ class TestUrlCmd(unittest.TestCase):
         cmd1 = ecf.UrlCmd(defs, "/s/f/t")
         cmd2 = ecf.UrlCmd(defs, "/s/f/t")
         self.assertNotEqual(hash(cmd1), hash(cmd2))
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

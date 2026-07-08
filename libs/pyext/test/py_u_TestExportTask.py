@@ -502,7 +502,3 @@ class TestAlias(unittest.TestCase):
         """Without a server, a task's aliases list is always empty."""
         t = ecf.Task("t1")
         self.assertEqual(list(t.aliases), [])
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)

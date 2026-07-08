@@ -1073,7 +1073,3 @@ class TestDefs(unittest.TestCase):
         d = ecf.Defs()
         d.add_suite("s1")
         self.assertEqual(str(copy.copy(d)), str(d))
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
