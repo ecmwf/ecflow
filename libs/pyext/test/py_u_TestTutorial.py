@@ -33,8 +33,11 @@ from ecflow import (
     Complete,
     Edit,
 )
+import pathlib
 import shutil  # used to remove directory tree
 import os, sys
+
+import pytest
 
 
 def _tutorial_def_file():
@@ -48,20 +51,33 @@ def _compile_tutorial_text(text):
     with open(test_file, "w") as file:
         file.write(text)
 
-    # execfile(test_file) only work for python 2.7
-    with open(test_file) as f:
-        code = compile(f.read(), test_file, "exec")
-        exec(code)
+    try:
+        # execfile(test_file) only work for python 2.7
+        with open(test_file) as f:
+            code = compile(f.read(), test_file, "exec")
+            exec(code)
+    finally:
+        os.remove(test_file)
 
-    os.remove(test_file)
+
+def _remove_tutorial_artifacts():
+    for pattern in ("test_tutorial_def_*.def", "py_u_test_tutorial_*.def"):
+        for path in pathlib.Path.cwd().glob(pattern):
+            try:
+                path.unlink()
+            except OSError:
+                pass
 
 
 def do_tear_down():
     Ecf.set_debug_equality(False)
-    try:
-        os.remove(_tutorial_def_file())
-    except:
-        pass
+    _remove_tutorial_artifacts()
+
+
+@pytest.fixture(autouse=True)
+def cleanup_tutorial_artifacts():
+    yield
+    do_tear_down()
 
 
 ######################################################################################################
