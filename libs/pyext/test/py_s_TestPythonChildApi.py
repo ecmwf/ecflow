@@ -17,6 +17,8 @@ import sys  # determine python version
 from datetime import datetime
 import shutil  # used to remove directory tree
 
+import pytest
+
 from ecflow import (
     Defs,
     Clock,
@@ -112,7 +114,7 @@ def wait_for_suite_to_complete(ci, suite_name):
     ci.log_msg("Looped " + str(count) + " times")
 
 
-def test_python_child_api(ci, protocol):
+def _test_python_child_api(ci, protocol):
 
     suite_name = "test_python_child_api"
     host = ci.get_host()
@@ -241,31 +243,25 @@ with Client() as ci:
         shutil.rmtree(test_home, ignore_errors=True)
 
 
-def launch_tests(ci, protocol):
+@pytest.fixture(
+    params=[Test.Protocol.CUSTOM, Test.Protocol.HTTP], ids=["custom", "http"]
+)
+def protocol(request):
+    return request.param
+
+
+@pytest.fixture
+def server(protocol):
+    with Test.Server(protocol) as ctx:
+        yield ctx[0], ctx[1]
+
+
+def test_python_child_api(server):
+    ci, protocol = server
     server_version = ci.server_version()
     print("Running ecflow server version " + server_version)
     print("Running ecflow client version " + ci.version())
     assert ci.version() == server_version, "Client version not same as server version"
 
     PrintStyle.set_style(Style.STATE)  # show node state
-    test_python_child_api(ci, protocol)
-
-    print(
-        "\nAll Tests pass ======================================================================"
-    )
-
-
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    # Run tests using ecFlow server (using custom TCP/IP protocol)
-    with Test.Server(Test.Protocol.CUSTOM) as ctx:
-        ci = ctx[0]
-        protocol = ctx[1]
-        launch_tests(ci, protocol)
-
-    # Run tests using ecFlow server (using HTTP protocol)
-    with Test.Server(Test.Protocol.HTTP) as ctx:
-        ci = ctx[0]
-        protocol = ctx[1]
-        launch_tests(ci, protocol)
+    _test_python_child_api(ci, protocol)

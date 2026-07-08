@@ -62,9 +62,9 @@ set_target_properties(ecflow3
 # =====================================================================
 # tests
 
-# The python unit tests are executed via 'python -m pytest' (see below), so
+# The python tests are executed via 'python -m pytest' (see below), so
 # pytest must be available for the selected interpreter. Detect it at configure
-# time and warn early, rather than having every py3_u_* test fail at run time
+# time and warn early, rather than having every py3_u_* / py3_s_* test fail at run time
 # with 'No module named pytest'.
 execute_process(
   COMMAND ${Python3_EXECUTABLE} -c "import pytest"
@@ -72,8 +72,8 @@ execute_process(
   OUTPUT_QUIET ERROR_QUIET)
 if( NOT _ecflow_have_pytest EQUAL 0 )
   message( WARNING
-    "pytest was not found for ${Python3_EXECUTABLE}; the python unit tests "
-    "(py3_u_*) will fail to run. Install it with:\n"
+    "pytest was not found for ${Python3_EXECUTABLE}; the python tests "
+    "(py3_u_* and py3_s_*) will fail to run. Install it with:\n"
     "    ${Python3_EXECUTABLE} -m pip install -r "
     "${CMAKE_CURRENT_SOURCE_DIR}/../test/requirements-test.txt" )
 endif()
@@ -105,7 +105,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
         integration python nightly slow
       TYPE PYTHON
       ARGS
-        ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py
+        -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py -v
       ENVIRONMENT
         "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH};PYTHONPATH=${ECFLOW_PYTHONPATH};ECF_SSL_DIR=${CMAKE_CURRENT_BINARY_DIR}/"
       TEST_DEPENDS

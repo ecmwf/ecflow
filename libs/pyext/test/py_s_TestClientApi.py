@@ -19,6 +19,8 @@ import threading
 from datetime import datetime
 import shutil  # used to remove directory tree
 
+import pytest
+
 # ecflow_test_util, see File ecflow_test_util.py
 import ecflow_test_util as Test
 from ecflow import (
@@ -92,7 +94,7 @@ def create_defs(name, port, protocol):
     return defs
 
 
-def test_host_port(ci, host, port):
+def _test_host_port(ci, host, port):
     try:
         ci.set_host_port(host, port)
         return True
@@ -100,7 +102,7 @@ def test_host_port(ci, host, port):
         return False
 
 
-def test_host_port_(ci, host_port):
+def _test_host_port_(ci, host_port):
     try:
         ci.set_host_port(host_port)
         return True
@@ -108,7 +110,7 @@ def test_host_port_(ci, host_port):
         return False
 
 
-def test_client_host_port(host, port):
+def _test_client_host_port(host, port):
     try:
         Client(host, port)
         return True
@@ -116,7 +118,7 @@ def test_client_host_port(host, port):
         return False
 
 
-def test_client_host_port_(host_port):
+def _test_client_host_port_(host_port):
     try:
         Client(host_port)
         return True
@@ -130,37 +132,37 @@ def sync_local(ci):
     ci.sync_local()
 
 
-def test_set_host_port():
+def _test_set_host_port():
     print("test_set_host_port")
     ci = Client()
     ci.debug(True)
     ci.enable_http()
     print(" Client.get_host() = " + ci.get_host())
     print(" Client.get_port() = " + ci.get_port())
-    assert test_host_port(ci, "host", "3141"), "Expected no errors"
-    assert test_host_port(ci, "host", 4444), "Expected no errors"
-    assert test_host_port_(ci, "host:4444"), "Expected no errors"
-    assert test_host_port_(ci, "host@4444"), "Expected no errors"
-    assert test_host_port(ci, "", "") == False, "Expected errors"
-    assert test_host_port(ci, "host", "") == False, "Expected errors"
-    assert test_host_port(ci, "host", "host") == False, "Expected errors"
-    assert test_host_port_(ci, "host:host") == False, "Expected errors"
-    assert test_host_port_(ci, "3141:host") == False, "Expected errors"
-    assert test_host_port_(ci, "3141@host") == False, "Expected errors"
-    assert test_host_port_(ci, "3141@") == False, "Expected errors"
+    assert _test_host_port(ci, "host", "3141"), "Expected no errors"
+    assert _test_host_port(ci, "host", 4444), "Expected no errors"
+    assert _test_host_port_(ci, "host:4444"), "Expected no errors"
+    assert _test_host_port_(ci, "host@4444"), "Expected no errors"
+    assert _test_host_port(ci, "", "") == False, "Expected errors"
+    assert _test_host_port(ci, "host", "") == False, "Expected errors"
+    assert _test_host_port(ci, "host", "host") == False, "Expected errors"
+    assert _test_host_port_(ci, "host:host") == False, "Expected errors"
+    assert _test_host_port_(ci, "3141:host") == False, "Expected errors"
+    assert _test_host_port_(ci, "3141@host") == False, "Expected errors"
+    assert _test_host_port_(ci, "3141@") == False, "Expected errors"
 
-    assert test_client_host_port("host", "3141"), "Expected no errors"
-    assert test_client_host_port("host", 4444), "Expected no errors"
-    assert test_client_host_port_("host:4444"), "Expected no errors"
-    assert test_client_host_port("", "") == False, "Expected errors"
-    assert test_client_host_port("host", "") == False, "Expected errors"
-    assert test_client_host_port("host", "host") == False, "Expected errors"
-    assert test_client_host_port_("host:host") == False, "Expected errors"
-    assert test_client_host_port_("3141:host") == False, "Expected errors"
+    assert _test_client_host_port("host", "3141"), "Expected no errors"
+    assert _test_client_host_port("host", 4444), "Expected no errors"
+    assert _test_client_host_port_("host:4444"), "Expected no errors"
+    assert _test_client_host_port("", "") == False, "Expected errors"
+    assert _test_client_host_port("host", "") == False, "Expected errors"
+    assert _test_client_host_port("host", "host") == False, "Expected errors"
+    assert _test_client_host_port_("host:host") == False, "Expected errors"
+    assert _test_client_host_port_("3141:host") == False, "Expected errors"
 
 
 def print_test(ci, test_name):
-    print(test_name, flush=True)
+    print(f"=====> Running: {test_name}", flush=True)
     if ci.is_auto_sync_enabled():
         ci.log_msg(
             test_name
@@ -173,7 +175,7 @@ def print_test(ci, test_name):
         )
 
 
-def test_version(ci):
+def _test_version(ci):
     print_test(ci, "test_version")
     client_version = ci.version()
     server_version = ci.server_version()
@@ -188,7 +190,7 @@ def test_version(ci):
     )
 
 
-def test_client_get_server_defs(ci, protocol):
+def _test_client_get_server_defs(ci, protocol):
     print_test(ci, "test_client_get_server_defs")
     ci.delete_all()  # start fresh
     ci.load(create_defs("", ci.get_port(), protocol))
@@ -206,7 +208,7 @@ def test_client_get_server_defs(ci, protocol):
     ), "Expected to find suite of name s1:\n" + str(ci.get_defs())
 
 
-def test_client_new_log(ci):
+def _test_client_new_log(ci):
     print_test(ci, "test_client_new_log")
     log_path = Test.log_file_path(ci.get_port())
     if not os.path.exists(log_path):
@@ -244,7 +246,7 @@ def test_client_new_log(ci):
         print(log_path + " : log does not exist ?")
 
 
-def test_client_clear_log(ci):
+def _test_client_clear_log(ci):
     if debugging():
         return  # dont run this test when debugging as log file is lost
     print_test(ci, "test_client_clear_log")
@@ -277,7 +279,7 @@ def test_client_clear_log(ci):
         print(log_path + " : log does not exist ?")
 
 
-def test_client_log_msg(ci):
+def _test_client_log_msg(ci):
     if debugging():
         return  # dont run this test when debugging
 
@@ -304,7 +306,7 @@ def test_client_log_msg(ci):
         print(log_path + " : log does not exist ?")
 
 
-def test_client_restart_server(ci):
+def _test_client_restart_server(ci):
     print_test(ci, "test_client_restart_server")
     ci.restart_server()
     sync_local(ci)
@@ -317,7 +319,7 @@ def test_client_restart_server(ci):
     assert paths[0] == "/", "Expected root path but found " + str(paths[0])
 
 
-def test_client_halt_server(ci):
+def _test_client_halt_server(ci):
     print_test(ci, "test_client_halt_server")
     ci.halt_server()
     sync_local(ci)
@@ -331,7 +333,7 @@ def test_client_halt_server(ci):
     ci.restart_server()
 
 
-def test_client_shutdown_server(ci):
+def _test_client_shutdown_server(ci):
     print_test(ci, "test_client_shutdown_server")
     ci.shutdown_server()
     sync_local(ci)
@@ -344,7 +346,7 @@ def test_client_shutdown_server(ci):
     assert paths[0] == "/", "Expected root path but found " + str(paths[0])
 
 
-def test_client_load_in_memory_defs(ci, protocol):
+def _test_client_load_in_memory_defs(ci, protocol):
     print_test(ci, "test_client_load_in_memory_defs")
     ci.delete_all()  # start fresh
     ci.load(create_defs("", ci.get_port(), protocol))
@@ -354,7 +356,7 @@ def test_client_load_in_memory_defs(ci, protocol):
     ), "Expected to find suite of name s1:\n" + str(ci.get_defs())
 
 
-def test_client_load_from_disk(ci, protocol):
+def _test_client_load_from_disk(ci, protocol):
     print_test(ci, "test_client_load_from_disk")
     ci.delete_all()  # start fresh
     defs = create_defs("", ci.get_port(), protocol)
@@ -372,7 +374,7 @@ def test_client_load_from_disk(ci, protocol):
     os.remove(defs_file)
 
 
-def test_client_checkpt(ci, protocol):
+def _test_client_checkpt(ci, protocol):
     print_test(ci, "test_client_checkpt")
     # start fresh
     ci.delete_all()
@@ -409,7 +411,7 @@ def test_client_checkpt(ci, protocol):
     os.remove(Test.backup_checkpt_file_path(port))
 
 
-def test_client_restore_from_checkpt(ci, protocol):
+def _test_client_restore_from_checkpt(ci, protocol):
     print_test(ci, "test_client_restore_from_checkpt")
     # start fresh
     ci.delete_all()
@@ -443,7 +445,7 @@ def get_username():
     return pwd.getpwuid(os.getuid())[0]
 
 
-def test_client_reload_wl_file(ci):
+def _test_client_reload_wl_file(ci):
     print_test(ci, "test_client_reload_wl_file")
 
     expected = False
@@ -473,7 +475,7 @@ def test_client_reload_wl_file(ci):
     os.remove(Test.white_list_file_path(port))
 
 
-def test_client_run(ci, protocol):
+def _test_client_run(ci, protocol):
     print_test(ci, "test_client_run")
     ci.delete_all()
     port = ci.get_port()
@@ -518,7 +520,7 @@ def test_client_run(ci, protocol):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
-def test_client_run_with_multiple_paths(ci, protocol):
+def _test_client_run_with_multiple_paths(ci, protocol):
     print_test(ci, "test_client_run_with_multiple_paths")
     ci.delete_all()
     port = ci.get_port()
@@ -566,7 +568,7 @@ def test_client_run_with_multiple_paths(ci, protocol):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
-def test_client_requeue(ci, protocol):
+def _test_client_requeue(ci, protocol):
     print_test(ci, "test_client_requeue")
     ci.delete_all()
     port = ci.get_port()
@@ -598,7 +600,7 @@ def test_client_requeue(ci, protocol):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
-def test_client_requeue_with_multiple_paths(ci, protocol):
+def _test_client_requeue_with_multiple_paths(ci, protocol):
     print_test(ci, "test_client_requeue_with_multiple_paths")
     ci.delete_all()
     port = ci.get_port()
@@ -650,7 +652,7 @@ def test_client_requeue_with_multiple_paths(ci, protocol):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
-def test_client_free_dep(ci, protocol):
+def _test_client_free_dep(ci, protocol):
     print_test(ci, "test_client_free_dep")
     ci.delete_all()
 
@@ -769,7 +771,7 @@ class CustomStdOut:
 
 
 @disable_on("macOS-13.*-arm64-.*")
-def test_client_stats(ci):
+def _test_client_stats(ci):
     print_test(ci, "test_client_stats")
     out = CustomStdOut()
     with out:
@@ -779,7 +781,7 @@ def test_client_stats(ci):
 
 
 @disable_on("macOS-13.*-arm64-.*")
-def test_client_stats_with_stdout(ci):
+def _test_client_stats_with_stdout(ci):
     print_test(ci, "test_client_stats_with_stdout")
     out = CustomStdOut()
     with out:
@@ -789,7 +791,7 @@ def test_client_stats_with_stdout(ci):
 
 
 @disable_on("macOS-13.*-arm64-.*")
-def test_client_stats_without_stdout(ci):
+def _test_client_stats_without_stdout(ci):
     print_test(ci, "test_client_stats_without_stdout")
     out = CustomStdOut()
     with out:
@@ -798,20 +800,20 @@ def test_client_stats_without_stdout(ci):
     assert not out.value(), "No captured output expected, but found: " + out.value()
 
 
-def test_client_stats_reset(ci):
+def _test_client_stats_reset(ci):
     print_test(ci, "test_client_stats_reset")
     ci.stats_reset()
     stats = ci.stats()
     assert "Statistics" in stats, "Expected 'Statistics' in the response"
 
 
-def test_client_debug_server_on_off(ci):
+def _test_client_debug_server_on_off(ci):
     print_test(ci, "test_client_debug_server_on_off")
     ci.debug_server_on()  # writes to standard out
     ci.debug_server_off()
 
 
-def test_client_check(ci):
+def _test_client_check(ci):
     print_test(ci, "test_client_check")
     ci.delete_all()
 
@@ -860,7 +862,7 @@ def test_client_check(ci):
     assert len(server_check) > 0, "Expected defs to fail, since no externs in server "
 
 
-def test_client_suites(ci, protocol):
+def _test_client_suites(ci, protocol):
     print_test(ci, "test_client_suites")
     ci.delete_all()
     assert len(ci.suites()) == 0, "expected 0 suite "
@@ -875,7 +877,7 @@ def test_client_suites(ci, protocol):
     assert len(ci.suites()) == 2, "expected 2 suite "
 
 
-def test_client_ch_suites(ci):
+def _test_client_ch_suites(ci):
     print_test(ci, "test_client_ch_suites")
     try:
         ci.ch_drop_user("")  # drop all handle associated with current user
@@ -918,7 +920,7 @@ def test_client_ch_suites(ci):
     )
 
 
-def test_client_ch_register(ci):
+def _test_client_ch_register(ci):
     print_test(ci, "test_client_ch_register")
     try:
         ci.ch_drop_user("")  # drop all handle associated with current user
@@ -945,7 +947,7 @@ def test_client_ch_register(ci):
     )
 
 
-def test_client_ch_drop(ci):
+def _test_client_ch_drop(ci):
     print_test(ci, "test_client_ch_drop")
     try:
         ci.ch_drop_user("")  # drop all handle associated with current user
@@ -971,7 +973,7 @@ def test_client_ch_drop(ci):
     )
 
 
-def test_client_ch_drop_user(ci):
+def _test_client_ch_drop_user(ci):
     print_test(ci, "test_client_ch_drop_user")
     ci.delete_all()
     try:
@@ -1002,7 +1004,7 @@ def test_client_ch_drop_user(ci):
     )
 
 
-def test_client_ch_add(ci):
+def _test_client_ch_add(ci):
     print_test(ci, "test_client_ch_add")
     ci.delete_all()
     try:
@@ -1042,7 +1044,7 @@ def test_client_ch_add(ci):
     )
 
 
-def test_client_ch_auto_add(ci):
+def _test_client_ch_auto_add(ci):
     print_test(ci, "test_client_ch_auto_add")
     ci.delete_all()
     try:
@@ -1083,7 +1085,7 @@ def test_client_ch_auto_add(ci):
     )
 
 
-def test_client_ch_remove(ci):
+def _test_client_ch_remove(ci):
     print_test(ci, "test_client_ch_remove")
     ci.delete_all()
     try:
@@ -1132,7 +1134,7 @@ def test_client_ch_remove(ci):
     )
 
 
-def test_client_get_file(ci):
+def _test_client_get_file(ci, protocol):
     print_test(ci, "test_client_get_file")
     ci.delete_all()
     port = ci.get_port()
@@ -1287,11 +1289,11 @@ def test_client_get_file(ci):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
-def test_client_plug(ci):
+def _test_client_plug(ci):
     pass
 
 
-def test_client_alter_sort(ci, protocol):
+def _test_client_alter_sort(ci, protocol):
     print_test(ci, "test_client_alter_sort")
     ci.delete_all()
 
@@ -1373,7 +1375,7 @@ def test_client_alter_sort(ci, protocol):
     )
 
 
-def test_client_alter_sort_defs(ci, protocol):
+def _test_client_alter_sort_defs(ci, protocol):
     print_test(ci, "test_client_alter_sort_defs")
     ci.delete_all()
 
@@ -1455,7 +1457,7 @@ def test_client_alter_sort_defs(ci, protocol):
     )
 
 
-def test_client_alter_add(ci, protocol):
+def _test_client_alter_add(ci, protocol):
     print_test(ci, "test_client_alter_add")
     ci.delete_all()
     ci.load(create_defs("test_client_alter_add", ci.get_port(), protocol))
@@ -1504,7 +1506,7 @@ def test_client_alter_add(ci, protocol):
     ), "Expected late 'late -s +00:15 -a 20:00 -c +02:00'" + str(ci.get_defs())
 
 
-def test_client_alter_delete(ci, protocol):
+def _test_client_alter_delete(ci, protocol):
     print_test(ci, "test_client_alter_delete")
     ci.delete_all()
     defs = create_defs("test_client_alter_delete", ci.get_port(), protocol)
@@ -1712,7 +1714,7 @@ def test_client_alter_delete(ci, protocol):
     assert repeat.empty(), "Expected repeat to be deleted:\n" + str(ci.get_defs())
 
 
-def test_client_alter_change(ci, protocol):
+def _test_client_alter_change(ci, protocol):
     print_test(ci, "test_client_alter_change")
     ci.delete_all()
     defs = create_defs("test_client_alter_change", ci.get_port(), protocol)
@@ -1925,7 +1927,7 @@ def test_client_alter_change(ci, protocol):
     )
 
 
-def test_client_alter_flag(ci, protocol):
+def _test_client_alter_flag(ci, protocol):
     print_test(ci, "test_client_alter_flag")
     ci.delete_all()
     defs = create_defs("test_client_alter_flag", ci.get_port(), protocol)
@@ -1973,7 +1975,7 @@ def test_client_alter_flag(ci, protocol):
     #         "                               # if it is a string, it must correspond to one of enum's or strings list\n"
 
 
-def test_client_force(ci, protocol):
+def _test_client_force(ci, protocol):
     print_test(ci, "test_client_force")
     ci.delete_all()
     defs = create_defs("test_client_force", ci.get_port(), protocol)
@@ -2062,7 +2064,7 @@ def test_client_force(ci, protocol):
             assert event_fnd == True, " Expected event to be found"
 
 
-def test_client_replace(ci, on_disk, protocol):
+def _test_client_replace(ci, on_disk, protocol):
     print_test(ci, "test_client_replace client_defs on disk = " + str(on_disk))
     # Create and load the following defs
     # s1
@@ -2162,7 +2164,7 @@ def test_client_replace(ci, on_disk, protocol):
         os.remove(test_client_replace_def_file)
 
 
-def test_node_replace(ci):
+def _test_node_replace(ci):
     print_test(ci, "test_node_replace")
     PrintStyle.set_style(Style.MIGRATE)  # show node state
     ci.delete_all()
@@ -2238,23 +2240,23 @@ def test_node_replace(ci):
     ), "Expected node to be suspended:\n" + str(ci.get_defs())
 
 
-def test_client_kill(ci):
+def _test_client_kill(ci):
     pass
 
 
-def test_client_status(ci):
+def _test_client_status(ci):
     pass
 
 
-def test_client_order(ci):
+def _test_client_order(ci):
     pass
 
 
-def test_client_group(ci):
+def _test_client_group(ci):
     pass
 
 
-def test_client_suspend(ci, protocol):
+def _test_client_suspend(ci, protocol):
     print_test(ci, "test_client_suspend")
     ci.delete_all()
     defs = create_defs("test_client_suspend", ci.get_port(), protocol)
@@ -2278,7 +2280,7 @@ def test_client_suspend(ci, protocol):
     )
 
 
-def test_client_suspend_multiple_paths(ci, protocol):
+def _test_client_suspend_multiple_paths(ci, protocol):
     print_test(ci, "test_client_suspend_multiple_paths")
     ci.delete_all()
     defs = create_defs("test_client_suspend_multiple_paths", ci.get_port(), protocol)
@@ -2301,7 +2303,7 @@ def test_client_suspend_multiple_paths(ci, protocol):
     assert task_t2.is_suspended(), "Expected to find task t2 to be suspended"
 
 
-def test_client_resume(ci, protocol):
+def _test_client_resume(ci, protocol):
     print_test(ci, "test_client_resume")
     ci.delete_all()
     defs = create_defs("test_client_resume", ci.get_port(), protocol)
@@ -2322,7 +2324,7 @@ def test_client_resume(ci, protocol):
     assert suite.is_suspended() == False, "Expected to find suite resumed"
 
 
-def test_client_resume_multiple_paths(ci, protocol):
+def _test_client_resume_multiple_paths(ci, protocol):
     print_test(ci, "test_client_resume_multiple_paths")
     ci.delete_all()
     defs = create_defs("test_client_resume_multiple_paths", ci.get_port(), protocol)
@@ -2352,7 +2354,7 @@ def test_client_resume_multiple_paths(ci, protocol):
     assert task_t2.is_suspended() == False, "Expected to find task t2 to be resumed"
 
 
-def test_client_delete_node(ci, protocol):
+def _test_client_delete_node(ci, protocol):
     print_test(ci, "test_client_delete_node")
     ci.delete_all()
     defs = create_defs("test_client_delete_node", ci.get_port(), protocol)
@@ -2385,7 +2387,7 @@ def test_client_delete_node(ci, protocol):
         )
 
 
-def test_client_delete_node_multiple_paths(ci, protocol):
+def _test_client_delete_node_multiple_paths(ci, protocol):
     print_test(ci, "test_client_delete_node_multiple_paths")
     ci.delete_all()
     defs = create_defs(
@@ -2424,7 +2426,7 @@ def test_client_delete_node_multiple_paths(ci, protocol):
         )
 
 
-def test_client_archive_and_restore(ci, protocol):
+def _test_client_archive_and_restore(ci, protocol):
     suite_name = "test_client_archive_and_restore"
     print_test(ci, suite_name)
     ci.delete_all()
@@ -2463,7 +2465,7 @@ def test_client_archive_and_restore(ci, protocol):
     ), "expected archive flag to be cleared"
 
 
-def test_client_check_defstatus(ci, protocol):
+def _test_client_check_defstatus(ci, protocol):
     print_test(ci, "test_client_check_defstatus")
     ci.delete_all()
     port = ci.get_port()
@@ -2511,7 +2513,7 @@ def test_client_check_defstatus(ci, protocol):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
-def test_ECFLOW_189(ci, protocol):
+def _test_ECFLOW_189(ci, protocol):
     # Bug, when a node is resumed it ignored holding dependencies higher up the tree.
     # i.e Previously when we resumed a node, it ignored trigger/time/node state, dependencies higher up the tree
     print_test(ci, "test_ECFLOW_189")
@@ -2577,7 +2579,7 @@ def test_ECFLOW_189(ci, protocol):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
-def test_ECFLOW_1761(ci):
+def _test_ECFLOW_1761(ci):
     print_test(ci, "test_ECFLOW_1761")
     print("# get log: last 10 lines")
     ci.get_log(10)
@@ -2597,7 +2599,7 @@ def test_ECFLOW_1761(ci):
     #        False)  # run
 
 
-def test_ECFLOW_199(ci, protocol):
+def _test_ECFLOW_199(ci, protocol):
     # Test ClientInvoker::changed_node_paths
     print_test(ci, "test_ECFLOW_199")
     ci.delete_all()
@@ -2648,7 +2650,7 @@ def test_ECFLOW_199(ci, protocol):
     shutil.rmtree(dir_to_remove, ignore_errors=True)
 
 
-def test_client_ch_with_drops_handles(ci, protocol):
+def _test_client_ch_with_drops_handles(ci, protocol):
     print_test(ci, "test_client_ch_with_drops_handles")
     try:
         port = ci.get_port()
@@ -2677,114 +2679,109 @@ def test_client_ch_with_drops_handles(ci, protocol):
     ci.ch_suites()  # should be empty
 
 
-def do_tests(ci, protocol):
-    test_version(ci)
+def _test_client_api(ci, protocol):
+    _test_version(ci)
     PrintStyle.set_style(Style.STATE)  # show node state
 
-    test_client_get_server_defs(ci, protocol)
-    test_client_new_log(ci)
-    test_client_clear_log(ci)
-    test_client_log_msg(ci)
+    _test_client_get_server_defs(ci, protocol)
+    _test_client_new_log(ci)
+    _test_client_clear_log(ci)
+    _test_client_log_msg(ci)
 
-    test_client_restart_server(ci)
-    test_client_halt_server(ci)
-    test_client_shutdown_server(ci)
+    _test_client_restart_server(ci)
+    _test_client_halt_server(ci)
+    _test_client_shutdown_server(ci)
 
-    test_client_load_in_memory_defs(ci, protocol)
-    test_client_load_from_disk(ci, protocol)
-    test_client_checkpt(ci, protocol)
-    test_client_restore_from_checkpt(ci, protocol)
+    _test_client_load_in_memory_defs(ci, protocol)
+    _test_client_load_from_disk(ci, protocol)
+    _test_client_checkpt(ci, protocol)
+    _test_client_restore_from_checkpt(ci, protocol)
 
-    test_client_reload_wl_file(ci)
+    _test_client_reload_wl_file(ci)
 
-    test_client_run(ci, protocol)
-    test_client_run_with_multiple_paths(ci, protocol)
-    test_client_requeue(ci, protocol)
-    test_client_requeue_with_multiple_paths(ci, protocol)
-    test_client_free_dep(ci, protocol)
+    _test_client_run(ci, protocol)
+    _test_client_run_with_multiple_paths(ci, protocol)
+    _test_client_requeue(ci, protocol)
+    _test_client_requeue_with_multiple_paths(ci, protocol)
+    _test_client_free_dep(ci, protocol)
 
-    test_client_suites(ci, protocol)
-    test_client_ch_with_drops_handles(ci, protocol)
-    test_client_ch_suites(ci)
-    test_client_ch_register(ci)
-    test_client_ch_drop(ci)
-    test_client_ch_drop_user(ci)
-    test_client_ch_add(ci)
-    test_client_ch_auto_add(ci)
-    test_client_ch_remove(ci)
+    _test_client_suites(ci, protocol)
+    _test_client_ch_with_drops_handles(ci, protocol)
+    _test_client_ch_suites(ci)
+    _test_client_ch_register(ci)
+    _test_client_ch_drop(ci)
+    _test_client_ch_drop_user(ci)
+    _test_client_ch_add(ci)
+    _test_client_ch_auto_add(ci)
+    _test_client_ch_remove(ci)
 
-    test_client_get_file(ci)
-    # test_client_plug(ci)
-    test_client_alter_sort(ci, protocol)
-    test_client_alter_sort_defs(ci, protocol)
-    test_client_alter_add(ci, protocol)
-    test_client_alter_delete(ci, protocol)
-    test_client_alter_change(ci, protocol)
-    test_client_alter_flag(ci, protocol)
+    _test_client_get_file(ci, protocol)
+    _test_client_plug(ci)
+    _test_client_alter_sort(ci, protocol)
+    _test_client_alter_sort_defs(ci, protocol)
+    _test_client_alter_add(ci, protocol)
+    _test_client_alter_delete(ci, protocol)
+    _test_client_alter_change(ci, protocol)
+    _test_client_alter_flag(ci, protocol)
 
-    test_client_force(ci, protocol)
-    test_client_replace(ci, False, protocol)
-    test_client_replace(ci, True, protocol)
-    test_node_replace(ci)
+    _test_client_force(ci, protocol)
+    _test_client_replace(ci, False, protocol)
+    _test_client_replace(ci, True, protocol)
+    _test_node_replace(ci)
 
-    # test_client_kill(ci)
-    # test_client_status(ci)
-    # test_client_order(ci)
-    # test_client_group(ci)
-    test_client_suspend(ci, protocol)
-    test_client_suspend_multiple_paths(ci, protocol)
-    test_client_resume(ci, protocol)
-    test_client_resume_multiple_paths(ci, protocol)
-    test_client_delete_node(ci, protocol)
-    test_client_delete_node_multiple_paths(ci, protocol)
-    test_client_archive_and_restore(ci, protocol)
+    _test_client_kill(ci)
+    _test_client_status(ci)
+    _test_client_order(ci)
+    _test_client_group(ci)
+    _test_client_suspend(ci, protocol)
+    _test_client_suspend_multiple_paths(ci, protocol)
+    _test_client_resume(ci, protocol)
+    _test_client_resume_multiple_paths(ci, protocol)
+    _test_client_delete_node(ci, protocol)
+    _test_client_delete_node_multiple_paths(ci, protocol)
+    _test_client_archive_and_restore(ci, protocol)
 
-    test_client_check(ci)
-    test_client_check_defstatus(ci, protocol)
+    _test_client_check(ci)
+    _test_client_check_defstatus(ci, protocol)
 
-    test_client_stats(ci)
-    test_client_stats_with_stdout(ci)
-    test_client_stats_without_stdout(ci)
-    test_client_stats_reset(ci)
-    test_client_debug_server_on_off(ci)
+    _test_client_stats(ci)
+    _test_client_stats_with_stdout(ci)
+    _test_client_stats_without_stdout(ci)
+    _test_client_stats_reset(ci)
+    _test_client_debug_server_on_off(ci)
 
-    test_ECFLOW_189(ci, protocol)
-    test_ECFLOW_199(ci, protocol)
-    test_ECFLOW_1761(ci)
+    _test_ECFLOW_189(ci, protocol)
+    _test_ECFLOW_199(ci, protocol)
+    _test_ECFLOW_1761(ci)
 
 
-def launch_tests(ci, protocol):
+@pytest.fixture(
+    params=[Test.Protocol.CUSTOM, Test.Protocol.HTTP], ids=["custom", "http"]
+)
+def protocol(request):
+    return request.param
+
+
+@pytest.fixture
+def server(protocol):
+    with Test.Server(protocol) as ctx:
+        yield ctx[0], ctx[1]
+
+
+def test_set_host_port():
+    _test_set_host_port()
+
+
+def test_client_api(server):
+    ci, protocol = server
     server_version = ci.server_version()
     print("Running ecflow server version " + server_version)
     print("Running ecflow client version " + ci.version())
     assert ci.version() == server_version, " Client version not same as server version"
 
     # test with sync_local
-    do_tests(ci, protocol)
+    _test_client_api(ci, protocol)
 
     # test with auto sync
     ci.set_auto_sync(True)
-    do_tests(ci, protocol)
-
-    print(
-        "All Tests pass ======================================================================"
-    )
-
-
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    # server independent tests
-    test_set_host_port()
-
-    # Run tests using ecFlow server (using custom TCP/IP protocol)
-    with Test.Server(Test.Protocol.CUSTOM) as ctx:
-        ci = ctx[0]
-        protocol = ctx[1]
-        launch_tests(ci, protocol)
-
-    # Run tests using ecFlow server (using HTTP protocol)
-    with Test.Server(Test.Protocol.HTTP) as ctx:
-        ci = ctx[0]
-        protocol = ctx[1]
-        launch_tests(ci, protocol)
+    _test_client_api(ci, protocol)
