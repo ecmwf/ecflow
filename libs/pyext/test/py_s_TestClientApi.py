@@ -2679,109 +2679,205 @@ def _test_client_ch_with_drops_handles(ci, protocol):
     ci.ch_suites()  # should be empty
 
 
-def _test_client_api(ci, protocol):
-    _test_version(ci)
-    PrintStyle.set_style(Style.STATE)  # show node state
-
-    _test_client_get_server_defs(ci, protocol)
-    _test_client_new_log(ci)
-    _test_client_clear_log(ci)
-    _test_client_log_msg(ci)
-
-    _test_client_restart_server(ci)
-    _test_client_halt_server(ci)
-    _test_client_shutdown_server(ci)
-
-    _test_client_load_in_memory_defs(ci, protocol)
-    _test_client_load_from_disk(ci, protocol)
-    _test_client_checkpt(ci, protocol)
-    _test_client_restore_from_checkpt(ci, protocol)
-
-    _test_client_reload_wl_file(ci)
-
-    _test_client_run(ci, protocol)
-    _test_client_run_with_multiple_paths(ci, protocol)
-    _test_client_requeue(ci, protocol)
-    _test_client_requeue_with_multiple_paths(ci, protocol)
-    _test_client_free_dep(ci, protocol)
-
-    _test_client_suites(ci, protocol)
-    _test_client_ch_with_drops_handles(ci, protocol)
-    _test_client_ch_suites(ci)
-    _test_client_ch_register(ci)
-    _test_client_ch_drop(ci)
-    _test_client_ch_drop_user(ci)
-    _test_client_ch_add(ci)
-    _test_client_ch_auto_add(ci)
-    _test_client_ch_remove(ci)
-
-    _test_client_get_file(ci, protocol)
-    _test_client_plug(ci)
-    _test_client_alter_sort(ci, protocol)
-    _test_client_alter_sort_defs(ci, protocol)
-    _test_client_alter_add(ci, protocol)
-    _test_client_alter_delete(ci, protocol)
-    _test_client_alter_change(ci, protocol)
-    _test_client_alter_flag(ci, protocol)
-
-    _test_client_force(ci, protocol)
-    _test_client_replace(ci, False, protocol)
-    _test_client_replace(ci, True, protocol)
-    _test_node_replace(ci)
-
-    _test_client_kill(ci)
-    _test_client_status(ci)
-    _test_client_order(ci)
-    _test_client_group(ci)
-    _test_client_suspend(ci, protocol)
-    _test_client_suspend_multiple_paths(ci, protocol)
-    _test_client_resume(ci, protocol)
-    _test_client_resume_multiple_paths(ci, protocol)
-    _test_client_delete_node(ci, protocol)
-    _test_client_delete_node_multiple_paths(ci, protocol)
-    _test_client_archive_and_restore(ci, protocol)
-
-    _test_client_check(ci)
-    _test_client_check_defstatus(ci, protocol)
-
-    _test_client_stats(ci)
-    _test_client_stats_with_stdout(ci)
-    _test_client_stats_without_stdout(ci)
-    _test_client_stats_reset(ci)
-    _test_client_debug_server_on_off(ci)
-
-    _test_ECFLOW_189(ci, protocol)
-    _test_ECFLOW_199(ci, protocol)
-    _test_ECFLOW_1761(ci)
-
-
 @pytest.fixture(
-    params=[Test.Protocol.CUSTOM, Test.Protocol.HTTP], ids=["custom", "http"]
+    scope="class",
+    params=[Test.Protocol.CUSTOM, Test.Protocol.HTTP],
+    ids=["custom", "http"],
 )
 def protocol(request):
     return request.param
 
 
-@pytest.fixture
-def server(protocol):
+@pytest.fixture(scope="class", params=[False, True], ids=["sync_local", "auto_sync"])
+def auto_sync(request):
+    return request.param
+
+
+@pytest.fixture(scope="class")
+def server(protocol, auto_sync):
     with Test.Server(protocol) as ctx:
-        yield ctx[0], ctx[1]
+        ci, protocol = ctx
+        server_version = ci.server_version()
+        print("Running ecflow server version " + server_version)
+        print("Running ecflow client version " + ci.version())
+        assert (
+            ci.version() == server_version
+        ), " Client version not same as server version"
+        PrintStyle.set_style(Style.STATE)  # show node state
+        if auto_sync:
+            ci.set_auto_sync(True)
+        yield ci, protocol
 
 
-def test_set_host_port():
-    _test_set_host_port()
+class TestClientConstruction:
+    def test_set_host_port(self):
+        _test_set_host_port()
 
 
-def test_client_api(server):
-    ci, protocol = server
-    server_version = ci.server_version()
-    print("Running ecflow server version " + server_version)
-    print("Running ecflow client version " + ci.version())
-    assert ci.version() == server_version, " Client version not same as server version"
+class TestClientApi:
+    @pytest.fixture(autouse=True)
+    def setup(self, server):
+        self.ci, self.protocol = server
 
-    # test with sync_local
-    _test_client_api(ci, protocol)
+    def test_version(self):
+        _test_version(self.ci)
 
-    # test with auto sync
-    ci.set_auto_sync(True)
-    _test_client_api(ci, protocol)
+    def test_client_get_server_defs(self):
+        _test_client_get_server_defs(self.ci, self.protocol)
+
+    def test_client_new_log(self):
+        _test_client_new_log(self.ci)
+
+    def test_client_clear_log(self):
+        _test_client_clear_log(self.ci)
+
+    def test_client_log_msg(self):
+        _test_client_log_msg(self.ci)
+
+    def test_client_restart_server(self):
+        _test_client_restart_server(self.ci)
+
+    def test_client_halt_server(self):
+        _test_client_halt_server(self.ci)
+
+    def test_client_shutdown_server(self):
+        _test_client_shutdown_server(self.ci)
+
+    def test_client_load_in_memory_defs(self):
+        _test_client_load_in_memory_defs(self.ci, self.protocol)
+
+    def test_client_load_from_disk(self):
+        _test_client_load_from_disk(self.ci, self.protocol)
+
+    def test_client_checkpt(self):
+        _test_client_checkpt(self.ci, self.protocol)
+
+    def test_client_restore_from_checkpt(self):
+        _test_client_restore_from_checkpt(self.ci, self.protocol)
+
+    def test_client_reload_wl_file(self):
+        _test_client_reload_wl_file(self.ci)
+
+    def test_client_run(self):
+        _test_client_run(self.ci, self.protocol)
+
+    def test_client_run_with_multiple_paths(self):
+        _test_client_run_with_multiple_paths(self.ci, self.protocol)
+
+    def test_client_requeue(self):
+        _test_client_requeue(self.ci, self.protocol)
+
+    def test_client_requeue_with_multiple_paths(self):
+        _test_client_requeue_with_multiple_paths(self.ci, self.protocol)
+
+    def test_client_free_dep(self):
+        _test_client_free_dep(self.ci, self.protocol)
+
+    def test_client_suites(self):
+        _test_client_suites(self.ci, self.protocol)
+
+    def test_client_ch_with_drops_handles(self):
+        _test_client_ch_with_drops_handles(self.ci, self.protocol)
+
+    def test_client_ch_suites(self):
+        _test_client_ch_suites(self.ci)
+
+    def test_client_ch_register(self):
+        _test_client_ch_register(self.ci)
+
+    def test_client_ch_drop(self):
+        _test_client_ch_drop(self.ci)
+
+    def test_client_ch_drop_user(self):
+        _test_client_ch_drop_user(self.ci)
+
+    def test_client_ch_add(self):
+        _test_client_ch_add(self.ci)
+
+    def test_client_ch_auto_add(self):
+        _test_client_ch_auto_add(self.ci)
+
+    def test_client_ch_remove(self):
+        _test_client_ch_remove(self.ci)
+
+    def test_client_get_file(self):
+        _test_client_get_file(self.ci, self.protocol)
+
+    def test_client_alter_sort(self):
+        _test_client_alter_sort(self.ci, self.protocol)
+
+    def test_client_alter_sort_defs(self):
+        _test_client_alter_sort_defs(self.ci, self.protocol)
+
+    def test_client_alter_add(self):
+        _test_client_alter_add(self.ci, self.protocol)
+
+    def test_client_alter_delete(self):
+        _test_client_alter_delete(self.ci, self.protocol)
+
+    def test_client_alter_change(self):
+        _test_client_alter_change(self.ci, self.protocol)
+
+    def test_client_alter_flag(self):
+        _test_client_alter_flag(self.ci, self.protocol)
+
+    def test_client_force(self):
+        _test_client_force(self.ci, self.protocol)
+
+    @pytest.mark.parametrize("on_disk", [False, True], ids=["in_memory", "on_disk"])
+    def test_client_replace(self, on_disk):
+        _test_client_replace(self.ci, on_disk, self.protocol)
+
+    def test_node_replace(self):
+        _test_node_replace(self.ci)
+
+    def test_client_suspend(self):
+        _test_client_suspend(self.ci, self.protocol)
+
+    def test_client_suspend_multiple_paths(self):
+        _test_client_suspend_multiple_paths(self.ci, self.protocol)
+
+    def test_client_resume(self):
+        _test_client_resume(self.ci, self.protocol)
+
+    def test_client_resume_multiple_paths(self):
+        _test_client_resume_multiple_paths(self.ci, self.protocol)
+
+    def test_client_delete_node(self):
+        _test_client_delete_node(self.ci, self.protocol)
+
+    def test_client_delete_node_multiple_paths(self):
+        _test_client_delete_node_multiple_paths(self.ci, self.protocol)
+
+    def test_client_archive_and_restore(self):
+        _test_client_archive_and_restore(self.ci, self.protocol)
+
+    def test_client_check(self):
+        _test_client_check(self.ci)
+
+    def test_client_check_defstatus(self):
+        _test_client_check_defstatus(self.ci, self.protocol)
+
+    def test_client_stats(self):
+        _test_client_stats(self.ci)
+
+    def test_client_stats_with_stdout(self):
+        _test_client_stats_with_stdout(self.ci)
+
+    def test_client_stats_without_stdout(self):
+        _test_client_stats_without_stdout(self.ci)
+
+    def test_client_stats_reset(self):
+        _test_client_stats_reset(self.ci)
+
+    def test_client_debug_server_on_off(self):
+        _test_client_debug_server_on_off(self.ci)
+
+    def test_ECFLOW_189(self):
+        _test_ECFLOW_189(self.ci, self.protocol)
+
+    def test_ECFLOW_199(self):
+        _test_ECFLOW_199(self.ci, self.protocol)
+
+    def test_ECFLOW_1761(self):
+        _test_ECFLOW_1761(self.ci)
