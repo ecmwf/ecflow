@@ -8,19 +8,8 @@
 # nor does it submit to any jurisdiction.
 #
 
-import ecflow as ecf
+# Test dependencies for the ecFlow Python bindings.
+# Install with:
+#     python -m pip install -r requirements-test.txt
 
-
-def test_create_generic_with_basic_parameters():
-    generic = ecf.Generic("name", [])
-
-    assert generic.name() == "name"
-    assert generic.values == []
-    assert generic.empty() is False
-
-
-def test_identify_an_empty_generic():
-    task = ecf.Task("t")
-    generic = task.find_generic("nonexisting")
-
-    assert generic.empty() is True
+pytest >= 8.0

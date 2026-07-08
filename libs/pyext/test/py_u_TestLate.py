@@ -8,77 +8,97 @@
 # nor does it submit to any jurisdiction.
 #
 
-from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
-    Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
-    JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
-    Repeat, RepeatDate, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
-    Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
-    VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
-import unittest
-import sys
-import os
+import pytest
+
+from ecflow import Late, TimeSlot
 
 
-class TestLate(unittest.TestCase):
-    def setUp(self):
-        late = Late()
-        late.submitted(TimeSlot(20, 10))
-        late.active(TimeSlot(20, 10))
-        late.complete(TimeSlot(20, 10), True)
-        self.late = late
-        # print("setUp ",str(self.late))
-
-        late = Late()
-        late.submitted(10, 10)
-        late.active(10, 10)
-        late.complete(10, 10, False)
-        self.late1 = late
-
-        late = Late()
-        late.submitted(10, 10)
-        self.late2 = late
-
-        late = Late()
-        late.active(10, 10)
-        self.late3 = late
-
-        late = Late()
-        late.complete(10, 12, False)
-        self.late4 = late
-
-    def test_pass(self):
-        late = Late(submitted='20:10', active='20:10', complete='+20:10')
-        # print("test_pass",str(late))
-        self.assertEqual(self.late, late, "late shoud be the same:\n" + str(self.late) + "\n" + str(late))
-
-        late = Late(submitted='10:10', active='10:10', complete='10:10')
-        self.assertEqual(self.late1, late, "late shoud be the same:\n" + str(self.late1) + "\n" + str(late))
-
-        late = Late(submitted='10:10')
-        self.assertEqual(self.late2, late, "late shoud be the same:\n" + str(self.late2) + "\n" + str(late))
-
-        late = Late(active='10:10')
-        self.assertEqual(self.late3, late, "late shoud be the same:\n" + str(self.late3) + "\n" + str(late))
-
-        late = Late(complete='10:12')
-        self.assertEqual(self.late4, late, "late shoud be the same:\n" + str(self.late4) + "\n" + str(late))
-
-    def test_fail(self):
-        self.assertNotEqual(self.late, self.late1, "Late should not be equal")
-
-        with self.assertRaises(RuntimeError):
-            late = Late("");  # no keyword arguments
-
-        with self.assertRaises(RuntimeError):
-            late = Late(submittedd='20:10', active='20:10', complete='+20:10')  # miss-spelt keyword
-
-        with self.assertRaises(RuntimeError):
-            late = Late(submitted='20:10', activee='20:10', complete='+20:10')  # miss-spelt keyword
-
-        with self.assertRaises(RuntimeError):
-            late = Late(submitted='20:10', active='20:10', completee='+20:10')  # miss-spelt keyword
+@pytest.fixture
+def late_full():
+    late = Late()
+    late.submitted(TimeSlot(20, 10))
+    late.active(TimeSlot(20, 10))
+    late.complete(TimeSlot(20, 10), True)
+    return late
 
 
-if __name__ == "__main__":
-    unittest.main()
-    print("All Tests pass")
+@pytest.fixture
+def late_complete_non_relative():
+    late = Late()
+    late.submitted(10, 10)
+    late.active(10, 10)
+    late.complete(10, 10, False)
+    return late
+
+
+@pytest.fixture
+def late_submitted_only():
+    late = Late()
+    late.submitted(10, 10)
+    return late
+
+
+@pytest.fixture
+def late_active_only():
+    late = Late()
+    late.active(10, 10)
+    return late
+
+
+@pytest.fixture
+def late_complete_only():
+    late = Late()
+    late.complete(10, 12, False)
+    return late
+
+
+def test_late_constructor_with_all_keywords(late_full, late_complete_non_relative):
+    assert late_full == Late(
+        submitted="20:10", active="20:10", complete="+20:10"
+    ), "late should be the same:\n" + str(late_full)
+
+    assert late_complete_non_relative == Late(
+        submitted="10:10", active="10:10", complete="10:10"
+    ), "late should be the same:\n" + str(late_complete_non_relative)
+
+
+def test_late_constructor_with_submitted_only(late_submitted_only):
+    assert late_submitted_only == Late(
+        submitted="10:10"
+    ), "late should be the same:\n" + str(late_submitted_only)
+
+
+def test_late_constructor_with_active_only(late_active_only):
+    assert late_active_only == Late(active="10:10"), "late should be the same:\n" + str(
+        late_active_only
+    )
+
+
+def test_late_constructor_with_complete_only(late_complete_only):
+    assert late_complete_only == Late(
+        complete="10:12"
+    ), "late should be the same:\n" + str(late_complete_only)
+
+
+def test_late_instances_are_not_equal(late_full, late_complete_non_relative):
+    assert late_full != late_complete_non_relative, "Late should not be equal"
+
+
+def test_late_with_no_arguments_raises():
+    with pytest.raises(RuntimeError):
+        Late("")  # no keyword arguments
+
+
+def test_late_with_misspelt_submitted_keyword_raises():
+    with pytest.raises(RuntimeError):
+        Late(submittedd="20:10", active="20:10", complete="+20:10")  # misspelt keyword
+
+
+def test_late_with_misspelt_active_keyword_raises():
+    with pytest.raises(RuntimeError):
+        Late(submitted="20:10", activee="20:10", complete="+20:10")  # misspelt keyword
+
+
+def test_late_with_misspelt_complete_keyword_raises():
+    with pytest.raises(RuntimeError):
+        Late(submitted="20:10", active="20:10", completee="+20:10")  # misspelt keyword
