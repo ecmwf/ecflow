@@ -102,10 +102,6 @@ public:
         cmd_request.set_cmd(theCmd);
 
         BOOST_CHECK_THROW(cmd_request.handleRequest(&server), std::runtime_error);
-
-        //		STC_Cmd_ptr result = cmd_request.handleRequest(&server);
-        //		BOOST_CHECK_MESSAGE( !result->ok(), "ClientToServerRequest " << cmd_request << " was expected to
-        // fail \n");
     }
 
     static void test_state(node_ptr n, NState::State expected) {
