@@ -8,6 +8,8 @@
 # nor does it submit to any jurisdiction.
 #
 
+import pytest
+
 from ecflow import (
     Autocancel,
     ChildCmdType,
@@ -581,6 +583,12 @@ class TestFamilyAdd:
     def test_add_task(self):
         s = Family("a").add(Task("a").add(Edit(a="b")))
         assert len(s) == 1, "Expected 1 child to be added"
+
+
+class TestDefstatus:
+    def test_illegal_defstatus(self):
+        with pytest.raises(RuntimeError):
+            Defstatus("fred")
 
 
 class TestEdit:
