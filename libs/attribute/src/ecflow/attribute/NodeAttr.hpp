@@ -15,8 +15,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/operators.hpp>
-
 namespace cereal {
 class access;
 }
@@ -24,7 +22,7 @@ class access;
 ////////////////////////////////////////////////////////////////////////////////////////
 // Class Label:
 // Use compiler , generated destructor, assignment,  copy constructor
-class Label : public boost::equality_comparable<Label> {
+class Label {
 public:
     Label() = default;
 
@@ -40,22 +38,12 @@ public:
     // The state_change_no is never reset. Must be incremented if it can affect equality
     unsigned int state_change_no() const { return state_change_no_; }
 
-    // 2 kinds of equality, structure and state
     friend bool operator==(const Label& lhs, const Label& rhs) {
-        if (lhs.n_ != rhs.n_) {
-            // std::cout << "lhs.n_ '" << lhs.n_ << "' != rhs.n_ '" << rhs.n_ << "'\n";
-            return false;
-        }
-        if (lhs.new_v_ != rhs.new_v_) {
-            // std::cout << "lhs.new_v_ '" << lhs.new_v_ << "' != rhs.new_v_ '" << rhs.new_v_ << "'\n";
-            return false;
-        }
-        if (lhs.v_ != rhs.v_) {
-            // std::cout << "lhs.v_ '" << lhs.v_ << "' != rhs.v_ '" << rhs.v_ << "'\n";
-            return false;
-        }
-        return true;
+        return lhs.n_ == rhs.n_ && lhs.v_ == rhs.v_ && lhs.new_v_ == rhs.new_v_;
     }
+
+    friend bool operator!=(const Label& lhs, const Label& rhs) { return !(lhs == rhs); }
+
     bool operator<(const Label& rhs) const { return n_ < rhs.name(); }
 
     std::string toString() const;
