@@ -76,9 +76,9 @@ struct converter_traits<const char*, std::string>
     inline static auto convert(const char* v) { return std::string{v}; }
 };
 
-// Specialisation avoiding lexical_cast overhead for numeric types to string.
+// Specialisation avoiding lexical_cast overhead for integral types to string.
 template <typename From>
-struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is_floating_point_v<From>, std::string>>
+struct converter_traits<From, std::enable_if_t<std::is_integral_v<From>, std::string>>
 {
     inline static auto convert(From&& v) { return std::to_string(v); }
 };
@@ -90,7 +90,7 @@ struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is
 ///
 /// Delegates to converter_traits, which uses boost::lexical_cast by default,
 /// with specialisations avoiding unnecessary conversions for char, C-string,
-/// and numeric-to-string cases.
+/// and integral-to-string cases.
 ///
 /// @tparam To    The target type to convert to.
 /// @tparam From  The source type to convert from.
