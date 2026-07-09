@@ -38,12 +38,10 @@ inline static auto try_lexical_convert(From&& v) {
     }
 }
 
-} // namespace detail
-
 template <typename From, typename To>
 struct converter_traits
 {
-    inline static auto convert(From&& v) { return detail::try_lexical_convert<To>(std::forward<From>(v)); }
+    inline static auto convert(From&& v) { return try_lexical_convert<To>(std::forward<From>(v)); }
 };
 
 template <>
@@ -64,10 +62,12 @@ struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is
     inline static auto convert(From&& v) { return std::to_string(v); }
 };
 
+} // namespace detail
+
 template <typename To, typename From>
 inline auto convert_to(From&& v) {
     using namespace ecf::detail;
-    return converter_traits<From, To>::convert(std::forward<From>(v));
+    return detail::converter_traits<From, To>::convert(std::forward<From>(v));
 }
 
 } // namespace ecf

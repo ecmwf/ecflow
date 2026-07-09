@@ -974,7 +974,7 @@ BOOST_AUTO_TEST_CASE(change_value) {
         BOOST_CHECK_MESSAGE(rep.valid(), "expected valid at start ");
 
         while (rep.valid()) {
-            rep2.change(boost::lexical_cast<std::string>(rep.value()));
+            rep2.change(ecf::convert_to<std::string>(rep.value()));
             BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),
                                 "expected same value, but found " << rep.value() << "  " << rep2.value());
             rep.increment();
@@ -986,7 +986,7 @@ BOOST_AUTO_TEST_CASE(change_value) {
         BOOST_CHECK_MESSAGE(rep.valid(), "expected valid at start ");
 
         while (rep.valid()) {
-            rep2.change(boost::lexical_cast<std::string>(rep.value()));
+            rep2.change(ecf::convert_to<std::string>(rep.value()));
             BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),
                                 "expected same value, but found " << rep.value() << "  " << rep2.value());
             rep.increment();
@@ -1312,14 +1312,14 @@ BOOST_AUTO_TEST_CASE(convert_xref_to_boost_date) {
     ECF_NAME_THIS_TEST();
 
     auto check_date = [](int start, int end, int delta) {
-        auto bdate = boost::gregorian::from_undelimited_string(boost::lexical_cast<std::string>(start));
+        auto bdate = boost::gregorian::from_undelimited_string(ecf::convert_to<std::string>(start));
 
         Repeat rep(RepeatDate("YMD", start, end, delta));
         Repeat rep2(RepeatDate("YMD", start, end, delta));
         while (rep.valid()) {
 
             // xref repeat date with boost date, essentially checking bdate with rep
-            std::string str_value = boost::lexical_cast<std::string>(rep.value());
+            std::string str_value = ecf::convert_to<std::string>(rep.value());
             auto date2            = boost::gregorian::from_undelimited_string(str_value);
             BOOST_CHECK_MESSAGE(bdate == date2, "expected same value, but found " << bdate << "  " << date2);
 

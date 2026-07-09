@@ -15,9 +15,8 @@
 #include <iomanip>
 #include <sstream>
 
-#include <boost/lexical_cast.hpp>
-
-#include "Message.hpp"
+#include "ecflow/core/Converter.hpp"
+#include "ecflow/core/Message.hpp"
 #include "ecflow/core/Serialization.hpp"
 
 namespace ecf {
@@ -171,7 +170,7 @@ DurationOut parse_duration(const std::string& d) {
     // Convert head (if any) to duration
     auto value = FirstDuration(0);
     if (!head.empty()) {
-        value = FirstDuration(boost::lexical_cast<int>(head.c_str()));
+        value = FirstDuration(ecf::convert_to<int>(head.c_str()));
     }
     DurationOut out = std::chrono::duration_cast<DurationOut>(value);
 

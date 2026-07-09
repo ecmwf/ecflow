@@ -1514,7 +1514,7 @@ struct Writer<RepeatDateTimeList, Stream>
         output << item.name();
         for (const auto& instant : item.values()) {
             output << " \"";
-            output << boost::lexical_cast<std::string>(instant);
+            output << ecf::convert_to<std::string>(instant);
             output << "\"";
         }
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>() && (item.index_or_value() != 0)) {
@@ -1543,16 +1543,16 @@ struct Writer<RepeatDateTime, Stream>
         output << "repeat datetime ";
         output << item.name();
         output << " ";
-        output << boost::lexical_cast<std::string>(item.start_instant());
+        output << ecf::convert_to<std::string>(item.start_instant());
         output << " ";
-        output << boost::lexical_cast<std::string>(item.end_instant());
+        output << ecf::convert_to<std::string>(item.end_instant());
         output << " ";
-        output << boost::lexical_cast<std::string>(item.step_duration());
+        output << ecf::convert_to<std::string>(item.step_duration());
 
         if (ctx.style.is_not_one_of<PrintStyle::DEFS, PrintStyle::NOTHING>() &&
             (item.value_instant() != item.start_instant())) {
             output << " # ";
-            output << boost::lexical_cast<std::string>(item.value_instant());
+            output << ecf::convert_to<std::string>(item.value_instant());
         }
     }
 };

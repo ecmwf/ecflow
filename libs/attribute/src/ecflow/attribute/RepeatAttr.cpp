@@ -522,13 +522,13 @@ RepeatDateTime::RepeatDateTime(const std::string& variable, Instant start, Insta
                                          << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
 
-    auto theStart = boost::lexical_cast<std::string>(start);
+    auto theStart = ecf::convert_to<std::string>(start);
     if (theStart.size() != 15) {
         throw std::runtime_error(
             MESSAGE("Invalid Repeat datetime: The start is not a valid date+time. Please use yyyymmddTMMHHSS format."
                     << "repeat " << variable << " " << start << " " << end << " " << delta));
     }
-    auto theEnd = boost::lexical_cast<std::string>(end);
+    auto theEnd = ecf::convert_to<std::string>(end);
     if (theEnd.size() != 15) {
         throw std::runtime_error(
             MESSAGE("Invalid Repeat datetime: The end is not a valid date+time. Please use yyyymmddTHHMMSS format."
@@ -711,24 +711,22 @@ bool RepeatDateTime::operator==(const RepeatDateTime& rhs) const {
 }
 
 std::string RepeatDateTime::valueAsString() const {
-    /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
     try {
         long value      = last_valid_value();
         Instant instant = coerce_from_seconds_into_instant(value);
-        return boost::lexical_cast<std::string>(instant);
+        return ecf::convert_to<std::string>(instant);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (ecf::bad_conversion&) {
         LOG_ASSERT(false, "RepeatDateTime::valueAsString(): could not convert value " << value_ << " to a string");
     }
     return {};
 }
 
 std::string RepeatDateTime::value_as_string(int index) const {
-    /// will throw a boost::bad_lexical_cast& if value is not convertible to a string
     try {
-        return boost::lexical_cast<std::string>(index);
+        return ecf::convert_to<std::string>(index);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (ecf::bad_conversion&) {
     }
     return {};
 }
@@ -737,9 +735,9 @@ std::string RepeatDateTime::next_value_as_string() const {
     Instant next = coerce_from_seconds_into_instant(last_valid_value()) + delta_;
 
     try {
-        return boost::lexical_cast<std::string>(valid_value(next));
+        return ecf::convert_to<std::string>(valid_value(next));
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (ecf::bad_conversion&) {
     }
     return {};
 }
@@ -748,9 +746,9 @@ std::string RepeatDateTime::prev_value_as_string() const {
     Instant previous = coerce_from_seconds_into_instant(last_valid_value()) - delta_;
 
     try {
-        return boost::lexical_cast<std::string>(valid_value(previous));
+        return ecf::convert_to<std::string>(valid_value(previous));
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (ecf::bad_conversion&) {
     }
     return {};
 }
@@ -1149,7 +1147,7 @@ RepeatDateTimeList::RepeatDateTimeList(const std::string& variable, const std::v
     }
 
     for (const Instant& i : list_) {
-        auto ts = boost::lexical_cast<std::string>(i);
+        auto ts = ecf::convert_to<std::string>(i);
         if (ts.size() != 15) {
             throw std::runtime_error(
                 MESSAGE("Invalid Repeat datetimelist : " << variable << " the datetime " << ts
@@ -1330,9 +1328,9 @@ std::string RepeatDateTimeList::valueAsString() const {
         index = static_cast<int>(list_.size() - 1);
     }
     try {
-        return boost::lexical_cast<std::string>(list_[index]);
+        return ecf::convert_to<std::string>(list_[index]);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (ecf::bad_conversion&) {
     }
     return {};
 }
@@ -1348,9 +1346,9 @@ std::string RepeatDateTimeList::value_as_string(int index) const {
         index = static_cast<int>(list_.size() - 1);
     }
     try {
-        return boost::lexical_cast<std::string>(list_[index]);
+        return ecf::convert_to<std::string>(list_[index]);
     }
-    catch (boost::bad_lexical_cast&) {
+    catch (ecf::bad_conversion&) {
     }
     return {};
 }

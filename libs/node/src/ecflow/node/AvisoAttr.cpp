@@ -225,9 +225,9 @@ void AvisoAttr::start() const {
 
     std::uint32_t polling;
     try {
-        polling = boost::lexical_cast<std::uint32_t>(aviso_polling);
+        polling = ecf::convert_to<std::uint32_t>(aviso_polling);
     }
-    catch (boost::bad_lexical_cast& e) {
+    catch (ecf::bad_conversion&) {
         THROW_RUNTIME(
             Message("AvisoAttr: failed to convert polling; expected an integer, but found: ", aviso_polling).str());
     }

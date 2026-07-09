@@ -247,9 +247,9 @@ void MirrorAttr::start_controller() {
 
         std::uint32_t polling_value;
         try {
-            polling_value = boost::lexical_cast<std::uint32_t>(polling);
+            polling_value = ecf::convert_to<std::uint32_t>(polling);
         }
-        catch (boost::bad_lexical_cast& e) {
+        catch (ecf::bad_conversion& e) {
             // Update the 'local' state change number
             state_change_no_ = Ecf::incr_state_change_no();
 
