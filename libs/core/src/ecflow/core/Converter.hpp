@@ -18,16 +18,33 @@
 
 namespace ecf {
 
+///
+/// @brief Exception thrown when a value fails to convert between types via convert_to.
+///
+/// @see convert_to
+///
 struct bad_conversion : public std::runtime_error
 {
+    ///
+    /// @brief Constructs from a plain C-string error message.
+    ///
+    /// @param[in] m Description of the conversion failure.
+    ///
     explicit bad_conversion(const char* m)
         : std::runtime_error(m) {}
+
+    ///
+    /// @brief Constructs from a std::string error message.
+    ///
+    /// @param[in] m Description of the conversion failure.
+    ///
     explicit bad_conversion(const std::string& m)
         : std::runtime_error(m) {}
 };
 
 namespace detail {
 
+// Attempts boost::lexical_cast<To>(v), rethrowing any failure as bad_conversion.
 template <typename To, typename From>
 inline static auto try_lexical_convert(From&& v) {
     try {
@@ -38,24 +55,28 @@ inline static auto try_lexical_convert(From&& v) {
     }
 }
 
+// Default conversion strategy: delegates to try_lexical_convert.
 template <typename From, typename To>
 struct converter_traits
 {
     inline static auto convert(From&& v) { return try_lexical_convert<To>(std::forward<From>(v)); }
 };
 
+// Specialisation avoiding lexical_cast overhead for a single character to string.
 template <>
 struct converter_traits<char, std::string>
 {
     inline static auto convert(char v) { return std::string{v}; }
 };
 
+// Specialisation avoiding lexical_cast overhead for a C-string to string.
 template <>
 struct converter_traits<const char*, std::string>
 {
     inline static auto convert(const char* v) { return std::string{v}; }
 };
 
+// Specialisation avoiding lexical_cast overhead for numeric types to string.
 template <typename From>
 struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is_floating_point_v<From>, std::string>>
 {
@@ -64,6 +85,19 @@ struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is
 
 } // namespace detail
 
+///
+/// @brief Converts a value of type @p From to a value of type @p To.
+///
+/// Delegates to converter_traits, which uses boost::lexical_cast by default,
+/// with specialisations avoiding unnecessary conversions for char, C-string,
+/// and numeric-to-string cases.
+///
+/// @tparam To    The target type to convert to.
+/// @tparam From  The source type to convert from.
+/// @param[in] v  The value to convert.
+/// @return The value of @p v converted to type @p To.
+/// @throws bad_conversion if @p v cannot be converted to @p To.
+///
 template <typename To, typename From>
 inline auto convert_to(From&& v) {
     using namespace ecf::detail;
