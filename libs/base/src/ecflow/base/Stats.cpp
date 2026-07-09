@@ -256,7 +256,6 @@ void Stats::update_for_serialisation() {
     double request = 0.0;
     double seconds = 0.0;
     for (auto [r /* Request */, d /* Duration */] : ecf::collections::reversed(request_vec_)) {
-
         count++;
         request += r;
         seconds += d;

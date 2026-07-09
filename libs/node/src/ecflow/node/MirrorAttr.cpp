@@ -12,6 +12,7 @@
 
 #include <sstream>
 
+#include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Overload.hpp"
@@ -249,7 +250,7 @@ void MirrorAttr::start_controller() {
         try {
             polling_value = ecf::convert_to<std::uint32_t>(polling);
         }
-        catch (ecf::bad_conversion& e) {
+        catch (ecf::bad_conversion&) {
             // Update the 'local' state change number
             state_change_no_ = Ecf::incr_state_change_no();
 

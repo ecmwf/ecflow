@@ -100,7 +100,6 @@ struct converter_traits<From, std::enable_if<std::is_integral_v<From> || std::is
 ///
 template <typename To, typename From>
 inline auto convert_to(From&& v) {
-    using namespace ecf::detail;
     return detail::converter_traits<From, To>::convert(std::forward<From>(v));
 }
 

@@ -12,6 +12,7 @@
 
 #include <sstream>
 
+#include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Message.hpp"
 #include "ecflow/core/Overload.hpp"
