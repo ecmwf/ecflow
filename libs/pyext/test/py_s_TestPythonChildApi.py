@@ -12,26 +12,19 @@
 
 import time
 import os
-import pwd
 import sys  # determine python version
-from datetime import datetime
 import shutil  # used to remove directory tree
 
 import pytest
 
 from ecflow import (
     Defs,
-    Clock,
     DState,
     Event,
     Style,
     State,
     PrintStyle,
     File,
-    Client,
-    SState,
-    File,
-    debug_build,
 )
 import ecflow_test_util as Test
 

@@ -17,11 +17,7 @@ hooks should only be added here when they are genuinely shared across many
 files.
 """
 
-import pathlib
-import sys
-
-import pytest
-
+import pytest # to ensure pytest is available
 
 def pytest_configure(config):
     """Ensure ecflow is importable before any test is collected."""

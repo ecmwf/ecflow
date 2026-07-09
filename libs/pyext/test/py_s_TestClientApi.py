@@ -13,7 +13,6 @@
 import time
 import os
 import pwd
-import select
 import sys
 import threading
 from datetime import datetime
@@ -43,7 +42,6 @@ from ecflow import (
     CheckPt,
     Cron,
     Late,
-    debug_build,
     Flag,
     FlagType,
 )

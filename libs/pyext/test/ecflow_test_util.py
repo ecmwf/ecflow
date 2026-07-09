@@ -8,7 +8,6 @@
 # nor does it submit to any jurisdiction.
 #
 
-from platform import python_version
 from socket import gethostname
 import os, sys, fnmatch
 import time
