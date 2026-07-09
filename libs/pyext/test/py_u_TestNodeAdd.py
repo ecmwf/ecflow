@@ -116,7 +116,7 @@ class Test_dunder_lshift:
             len(list(suite))
         )
 
-        assert suite.t4.get_trigger() == None, "Trigger not as expected: " + str(
+        assert suite.t4.get_trigger() is None, "Trigger not as expected: " + str(
             suite.t4.get_trigger()
         )
         assert (
@@ -134,7 +134,7 @@ class Test_dunder_lshift:
             len(list(fam))
         )
 
-        assert fam.t4.get_trigger() == None, "Trigger not as expected: " + str(
+        assert fam.t4.get_trigger() is None, "Trigger not as expected: " + str(
             fam.t4.get_trigger()
         )
         assert (
@@ -161,7 +161,7 @@ class Test_dunder_lshift:
             len(list(suite))
         )
 
-        assert suite.t4.get_trigger() == None, "Trigger not as expected: " + str(
+        assert suite.t4.get_trigger() is None, "Trigger not as expected: " + str(
             suite.t4.get_trigger()
         )
         assert (

@@ -240,13 +240,13 @@ class TestClientConstruction:
         assert _can_set_host_port(ci, "host", 4444), "Expected no errors"
         assert _can_set_combined_host_port(ci, "host:4444"), "Expected no errors"
         assert _can_set_combined_host_port(ci, "host@4444"), "Expected no errors"
-        assert _can_set_host_port(ci, "", "") == False, "Expected errors"
-        assert _can_set_host_port(ci, "host", "") == False, "Expected errors"
-        assert _can_set_host_port(ci, "host", "host") == False, "Expected errors"
-        assert _can_set_combined_host_port(ci, "host:host") == False, "Expected errors"
-        assert _can_set_combined_host_port(ci, "3141:host") == False, "Expected errors"
-        assert _can_set_combined_host_port(ci, "3141@host") == False, "Expected errors"
-        assert _can_set_combined_host_port(ci, "3141@") == False, "Expected errors"
+        assert not _can_set_host_port(ci, "", ""), "Expected errors"
+        assert not _can_set_host_port(ci, "host", ""), "Expected errors"
+        assert not _can_set_host_port(ci, "host", "host"), "Expected errors"
+        assert not _can_set_combined_host_port(ci, "host:host"), "Expected errors"
+        assert not _can_set_combined_host_port(ci, "3141:host"), "Expected errors"
+        assert not _can_set_combined_host_port(ci, "3141@host"), "Expected errors"
+        assert not _can_set_combined_host_port(ci, "3141@"), "Expected errors"
 
         assert _can_construct_client_with_host_port(
             "host", "3141"
@@ -255,18 +255,16 @@ class TestClientConstruction:
         assert _can_construct_client_with_combined_host_port(
             "host:4444"
         ), "Expected no errors"
-        assert _can_construct_client_with_host_port("", "") == False, "Expected errors"
-        assert (
-            _can_construct_client_with_host_port("host", "") == False
+        assert not _can_construct_client_with_host_port("", ""), "Expected errors"
+        assert not _can_construct_client_with_host_port("host", ""), "Expected errors"
+        assert not _can_construct_client_with_host_port(
+            "host", "host"
         ), "Expected errors"
-        assert (
-            _can_construct_client_with_host_port("host", "host") == False
+        assert not _can_construct_client_with_combined_host_port(
+            "host:host"
         ), "Expected errors"
-        assert (
-            _can_construct_client_with_combined_host_port("host:host") == False
-        ), "Expected errors"
-        assert (
-            _can_construct_client_with_combined_host_port("3141:host") == False
+        assert not _can_construct_client_with_combined_host_port(
+            "3141:host"
         ), "Expected errors"
 
 
@@ -480,8 +478,8 @@ class TestClientApi:
         assert os.path.exists(
             Test.checkpt_file_path(port)
         ), "Expected check pt file to exist after ci.checkpt()"
-        assert (
-            os.path.exists(Test.backup_checkpt_file_path(port)) == False
+        assert not os.path.exists(
+            Test.backup_checkpt_file_path(port)
         ), "Expected back up check pt file to *NOT* exist"
 
         self.ci.checkpt()  # second check pt should cause backup check pt to be written
@@ -1927,9 +1925,9 @@ class TestClientApi:
         sync_local(self.ci)
         task_t1 = self.ci.get_defs().find_abs_node(t1)
         event = task_t1.find_event("event")
-        assert (
-            event.value() == True
-        ), "Expected alter of event to be set but found " + str(event.value())
+        assert event.value(), "Expected alter of event to be set but found " + str(
+            event.value()
+        )
         res = self.ci.query("event", task_t1.get_abs_node_path(), "event")
         assert res == "set", "Expected alter of event to be 'set' but found " + res
 
@@ -2129,12 +2127,10 @@ class TestClientApi:
                 for event in task.events:
                     event_fnd = True
                     if ev_state == "set":
-                        assert event.value() == True, " Expected event value to be set"
+                        assert event.value(), " Expected event value to be set"
                     else:
-                        assert (
-                            event.value() == False
-                        ), " Expected event value to be clear"
-                assert event_fnd == True, " Expected event to be found"
+                        assert not event.value(), " Expected event value to be clear"
+                assert event_fnd, " Expected event to be found"
 
         event_path_list = [
             "/test_client_force/f1/t1:event",
@@ -2150,12 +2146,10 @@ class TestClientApi:
                 for event in task.events:
                     event_fnd = True
                     if ev_state == "set":
-                        assert event.value() == True, " Expected event value to be set"
+                        assert event.value(), " Expected event value to be set"
                     else:
-                        assert (
-                            event.value() == False
-                        ), " Expected event value to be clear"
-                assert event_fnd == True, " Expected event to be found"
+                        assert not event.value(), " Expected event value to be clear"
+                assert event_fnd, " Expected event to be found"
 
     @pytest.mark.parametrize("on_disk", [False, True], ids=["in_memory", "on_disk"])
     def test_client_replace(self, on_disk):
@@ -2405,7 +2399,7 @@ class TestClientApi:
         self.ci.resume("/test_client_resume")
         sync_local(self.ci)
         suite = self.ci.get_defs().find_suite("test_client_resume")
-        assert suite.is_suspended() == False, "Expected to find suite resumed"
+        assert not suite.is_suspended(), "Expected to find suite resumed"
 
     def test_client_resume_multiple_paths(self):
         print_test(self.ci, "test_client_resume_multiple_paths")
@@ -2443,8 +2437,8 @@ class TestClientApi:
         task_t2 = self.ci.get_defs().find_abs_node(
             "/test_client_resume_multiple_paths/f1/t2"
         )
-        assert task_t1.is_suspended() == False, "Expected to find task t1 to be resumed"
-        assert task_t2.is_suspended() == False, "Expected to find task t2 to be resumed"
+        assert not task_t1.is_suspended(), "Expected to find task t1 to be resumed"
+        assert not task_t2.is_suspended(), "Expected to find task t2 to be resumed"
 
     def test_client_delete_node(self):
         print_test(self.ci, "test_client_delete_node")

@@ -28,7 +28,7 @@ def _test_repeat_arithmetic(repeat_to_add, repeat_to_add2):
 
     # Initial value of repeat is 20090101 hence trigger should fail to evaluate
     assert (
-        t2.evaluate_trigger() is False
+        not t2.evaluate_trigger()
     ), "Expected trigger to evaluate. 20090101 >= 20100601"
 
     # Check end of month - 1
@@ -62,7 +62,7 @@ def _test_repeat_datetime_arithmetic(repeat_to_add, repeat_to_add2):
 
     # Initial value of repeat is 20090101 hence trigger should fail to evaluate
     assert (
-        t2.evaluate_trigger() is False
+        not t2.evaluate_trigger()
     ), "Expected trigger to evaluate. 20090101T000000 >= 20100601T000000"
 
     # Check end of month - 1 day

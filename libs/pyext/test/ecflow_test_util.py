@@ -142,7 +142,6 @@ def clean_up_data(port):
         print("   Remove OK")
     except:
         print("   Remove Failed")
-        pass
 
 
 class Protocol(Enum):
@@ -158,7 +157,6 @@ class EcfPortLock(object):
     def __init__(self, protocol):
         print("   EcfPortLock:__init__")
         self._protocol = protocol
-        pass
 
     def at_time(self):
         return datetime.datetime.fromtimestamp(time.time()).strftime("%H:%M:%S")
@@ -173,7 +171,7 @@ class EcfPortLock(object):
         port = seed_port
         while 1:
             # port must be free for at least 15 seconds
-            if self._timed_free_port(port, 3) == True:
+            if self._timed_free_port(port, 3):
                 print(
                     "   *FOUND* free server port " + str(port) + " : " + self.at_time()
                 )
@@ -193,7 +191,7 @@ class EcfPortLock(object):
     def _timed_free_port(self, port, wait_time=10):
         count = 0
         while count < wait_time:
-            if self._free_port(port) == True:
+            if self._free_port(port):
                 count = count + 1
                 time.sleep(1)
             else:
@@ -431,7 +429,6 @@ class MockFile:
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
         os.remove(self.name)
-        pass
 
     def __str__(self):
         return f"Test.MockFile({self.name}, {self.content})"
