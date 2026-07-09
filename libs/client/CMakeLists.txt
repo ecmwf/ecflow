@@ -53,16 +53,16 @@ add_subdirectory(test/harness)
 set(test_srcs
   # Sources
   test/TestClient_main.cpp # test entry point
-  test/TestClientOptions.cpp #
-  test/TestClientInterface.cpp #
-  test/TestClientConfigurations.cpp #
-  test/TestClientEnvironment.cpp #
-  test/TestClientRetry.cpp #
-  test/TestHostsFile.cpp #
-  test/TestInitAddVariables.cpp #
-  test/TestLifeCycle.cpp #
-  test/TestJobGenOnly.cpp #
-  test/TestRtt.cpp #
+  test/TestClientOptions.cpp
+  test/TestClientInterface.cpp
+  test/TestClientConfigurations.cpp
+  test/TestClientEnvironment.cpp
+  test/TestClientRetry.cpp
+  test/TestHostsFile.cpp
+  test/TestInitAddVariables.cpp
+  test/TestLifeCycle.cpp
+  test/TestJobGenOnly.cpp
+  test/TestRtt.cpp
   test/TestUrlCmd.cpp
 )
 
@@ -88,10 +88,10 @@ ecbuild_add_test(
   TEST_DEPENDS
     u_base
   CONDITION
-    ENABLE_SERVER # AND ENABLE_TESTS
+    ENABLE_TESTS
 )
 target_clangformat(u_client
-  CONDITION ENABLE_SERVER # AND ENABLE_TESTS
+  CONDITION ENABLE_TESTS
 )
 
 # ================================================================================                         

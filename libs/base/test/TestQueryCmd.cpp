@@ -46,7 +46,7 @@ const std::string k_label_name = "name";
 const std::string k_limit_name = "limit_x";
 
 ///
-/// Builds the Defs fixture shared by all tests in this file:
+/// @brief Builds the Defs fixture shared by all tests in this file.
 ///
 ///  suite suite
 ///     limit limit_x 12
@@ -113,7 +113,7 @@ static std::string invoke(Defs& defs, const Cmd_ptr& cmd) {
 ///
 /// @brief Invokes a QueryCmd on the given `defs`
 ///
-/// This is a onvenience wrapper over `invoke()`, for the common case of submitting a QueryCmd.
+/// This is a convenience wrapper over `invoke()`, for the common case of submitting a QueryCmd.
 /// `path_to_task`
 /// defaults to the task used throughout these tests as the (fictitious) caller of the query; it is only
 /// relevant for logging and has no bearing on the query result.
@@ -123,7 +123,7 @@ static std::string invoke(Defs& defs, const Cmd_ptr& cmd) {
 /// @param path_to_attribute the path to the node whose attribute is being queried
 /// @param attribute the name of the attribute being queried (empty for state and dstate)
 /// @param path_to_task the path to the task that is invoking the query (for logging only)
-/// @return the text-based reply, when command handling is sucessful; otherwise, empty string.
+/// @return the text-based reply, when command handling is successful; otherwise, empty string.
 /// @throws std::runtime_error or whatever the command handling throws when the command fails
 ///
 static std::string invoke_query(Defs& defs,
