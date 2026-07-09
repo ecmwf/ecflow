@@ -1326,7 +1326,7 @@ BOOST_AUTO_TEST_CASE(test_performance_convert_int_to_string, *boost::unit_test::
     //
     // The goal of this test is to investigate the fastest mechanism to convert from string to int, by comparing:
     //  - ostream = 0.97
-    //  - lexical_cast = 0.45
+    //  - convert_to = 0.45
     //
 
     const int the_size = 1000000;

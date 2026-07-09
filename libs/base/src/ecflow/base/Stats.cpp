@@ -15,8 +15,7 @@
 #include <sstream>
 #include <string>
 
-#include <boost/range/adaptors.hpp>
-
+#include "ecflow/core/Collections.hpp"
 #include "ecflow/core/SState.hpp"
 
 Stats::Stats() = default;
@@ -256,10 +255,10 @@ void Stats::update_for_serialisation() {
     int count      = 0;
     double request = 0.0;
     double seconds = 0.0;
-    for (const auto& entry : boost::adaptors::reverse(request_vec_)) {
+    for (auto [r /* Request */, d /* Duration */] : ecf::collections::reversed(request_vec_)) {
         count++;
-        request += entry.first;
-        seconds += entry.second;
+        request += r;
+        seconds += d;
         double request_per_second = request / seconds;
 
         switch (count) {

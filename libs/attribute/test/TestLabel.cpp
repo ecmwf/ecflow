@@ -80,6 +80,28 @@ BOOST_AUTO_TEST_CASE(test_label_parsing) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_label_equality) {
+    ECF_NAME_THIS_TEST();
+
+    Label a("name", "value", "new_value");
+    Label same("name", "value", "new_value");
+    Label different_name("other", "value", "new_value");
+    Label different_value("name", "other", "new_value");
+    Label different_new_value("name", "value", "other");
+
+    BOOST_CHECK(a == same);
+    BOOST_CHECK(!(a != same));
+
+    BOOST_CHECK(a != different_name);
+    BOOST_CHECK(!(a == different_name));
+
+    BOOST_CHECK(a != different_value);
+    BOOST_CHECK(!(a == different_value));
+
+    BOOST_CHECK(a != different_new_value);
+    BOOST_CHECK(!(a == different_new_value));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
