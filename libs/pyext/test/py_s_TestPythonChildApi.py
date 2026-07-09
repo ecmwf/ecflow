@@ -114,8 +114,27 @@ def wait_for_suite_to_complete(ci, suite_name):
     ci.log_msg("Looped " + str(count) + " times")
 
 
-def _test_python_child_api(ci, protocol):
+@pytest.fixture(
+    params=[Test.Protocol.CUSTOM, Test.Protocol.HTTP], ids=["custom", "http"]
+)
+def protocol(request):
+    return request.param
 
+
+@pytest.fixture
+def server(protocol):
+    with Test.Server(protocol) as ctx:
+        yield ctx[0], ctx[1]
+
+
+def test_python_child_api(server):
+    ci, protocol = server
+    server_version = ci.server_version()
+    print("Running ecflow server version " + server_version)
+    print("Running ecflow client version " + ci.version())
+    assert ci.version() == server_version, "Client version not same as server version"
+
+    PrintStyle.set_style(Style.STATE)  # show node state
     suite_name = "test_python_child_api"
     host = ci.get_host()
     port = ci.get_port()
@@ -202,7 +221,7 @@ with Client() as ci:
     file = family_dir + "/t3.ecf"
     contents = f"""
 %include <head.py>
-    
+
 with Client() as ci:
     print('   Running t3.ecf')
 """
@@ -213,9 +232,8 @@ with Client() as ci:
     file = family_dir + "/t4.ecf"
     contents = """
 %include <head.py>
-    
-with Client() as ci:
 
+with Client() as ci:
     print('   Running t4.ecf')
 """
     open(file, "w").write(contents)
@@ -241,27 +259,3 @@ with Client() as ci:
     if not Test.debugging():
         print(" Test OK: removing directory ", test_home)
         shutil.rmtree(test_home, ignore_errors=True)
-
-
-@pytest.fixture(
-    params=[Test.Protocol.CUSTOM, Test.Protocol.HTTP], ids=["custom", "http"]
-)
-def protocol(request):
-    return request.param
-
-
-@pytest.fixture
-def server(protocol):
-    with Test.Server(protocol) as ctx:
-        yield ctx[0], ctx[1]
-
-
-def test_python_child_api(server):
-    ci, protocol = server
-    server_version = ci.server_version()
-    print("Running ecflow server version " + server_version)
-    print("Running ecflow client version " + ci.version())
-    assert ci.version() == server_version, "Client version not same as server version"
-
-    PrintStyle.set_style(Style.STATE)  # show node state
-    _test_python_child_api(ci, protocol)
