@@ -512,7 +512,6 @@ private:
     mutable boost::posix_time::time_duration rtt_; // record latency for each cmd.
     mutable boost::posix_time::ptime start_time_;  // Used for time out and measuring latency
 
-    bool gui_{false};
     bool on_error_throw_exception_{true};
     bool auto_sync_{false};
     bool test_{false};          // used in testing only

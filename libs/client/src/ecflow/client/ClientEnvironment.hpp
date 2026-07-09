@@ -321,7 +321,6 @@ private:
     bool debug_{false};          // For live debug, enabled by env variable ECF_CLIENT_DEBUG or set by option -d|--debug
     bool under_test_{false};     // Used in testing client interface
     bool host_file_read_{false}; // to ensure we read host file only once
-    bool gui_{false};
 
     /// The option read from the command line.
     friend class ClientOptions;

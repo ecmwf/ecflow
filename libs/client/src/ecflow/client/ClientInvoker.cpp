@@ -128,8 +128,7 @@ ClientInvoker::ClientInvoker(const std::string& host_port)
 
 ClientInvoker::ClientInvoker(bool gui, const std::string& host, const std::string& port)
     : clientEnv_(gui, host, port),
-      retry_connection_period_(RETRY_CONNECTION_PERIOD),
-      gui_(gui) {
+      retry_connection_period_(RETRY_CONNECTION_PERIOD) {
     if (clientEnv_.debug()) {
         std::cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
     }
