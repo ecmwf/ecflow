@@ -757,22 +757,22 @@ std::string Suite::find_node_path(const std::string& type, const std::string& no
 // check the variable names. i.e. we know they are valid
 SuiteGenVariables::SuiteGenVariables(const Suite* s)
     : suite_(s),
-      genvar_suite_("SUITE", "", false),
-      genvar_dirname_("ECF_DIRNAME", "", false),
-      genvar_basename_("ECF_BASENAME", "", false),
-      genvar_ecf_time_("ECF_TIME", "", false),
-      genvar_time_("TIME", "", false),
-      genvar_yyyy_("YYYY", "", false),
-      genvar_dow_("DOW", "", false),
-      genvar_doy_("DOY", "", false),
-      genvar_date_("DATE", "", false),
-      genvar_day_("DAY", "", false),
-      genvar_dd_("DD", "", false),
-      genvar_mm_("MM", "", false),
-      genvar_month_("MONTH", "", false),
-      genvar_ecf_date_("ECF_DATE", "", false),
-      genvar_ecf_clock_("ECF_CLOCK", "", false),
-      genvar_ecf_julian_("ECF_JULIAN", "", false),
+      genvar_suite_(Variable("SUITE", "")),
+      genvar_dirname_(Variable("ECF_DIRNAME", "")),
+      genvar_basename_(Variable("ECF_BASENAME", "")),
+      genvar_ecf_time_(Variable("ECF_TIME", "")),
+      genvar_time_(Variable("TIME", "")),
+      genvar_yyyy_(Variable("YYYY", "")),
+      genvar_dow_(Variable("DOW", "")),
+      genvar_doy_(Variable("DOY", "")),
+      genvar_date_(Variable("DATE", "")),
+      genvar_day_(Variable("DAY", "")),
+      genvar_dd_(Variable("DD", "")),
+      genvar_mm_(Variable("MM", "")),
+      genvar_month_(Variable("MONTH", "")),
+      genvar_ecf_date_(Variable("ECF_DATE", "")),
+      genvar_ecf_clock_(Variable("ECF_CLOCK", "")),
+      genvar_ecf_julian_(Variable("ECF_JULIAN", "")),
       force_update_(false) {
 }
 
@@ -804,7 +804,7 @@ void SuiteGenVariables::update_generated_variables() const {
     // The following generated variable need only be updated if NULL or if day changed
     // Under: HYBRID the day will never change, hence a one time update
     // **********************************************************************
-    if (suite_->cal_.dayChanged() || genvar_yyyy_.theValue().empty() || force_update_) {
+    if (suite_->cal_.dayChanged() || genvar_yyyy_.value().empty() || force_update_) {
 
         force_update_ = false;
         genvar_yyyy_.set_value(ecf::convert_to<std::string>(suite_->cal_.year()));
@@ -821,15 +821,12 @@ void SuiteGenVariables::update_generated_variables() const {
 
         std::array day_name = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
         genvar_day_.set_value(day_name[suite_->cal_.day_of_week()]);
-        // cout << "genvar_day_ = " << genvar_day_.theValue() << "\n";
 
         snprintf(buffer.data(), buffer.size(), "%02d", suite_->cal_.day_of_month());
         genvar_dd_.set_value(buffer.data());
-        // cout << "genvar_dd_ = " << genvar_dd_.theValue() << "\n";
 
         snprintf(buffer.data(), buffer.size(), "%02d", suite_->cal_.month());
         genvar_mm_.set_value(buffer.data());
-        // cout << "genvar_mm_ = " << genvar_mm_.theValue() << "\n";
 
         std::array month_name = {"january",
                                  "february",
@@ -846,7 +843,6 @@ void SuiteGenVariables::update_generated_variables() const {
 
         auto month_idx = suite_->cal_.month() - 1;
         genvar_month_.set_value(month_name[month_idx]);
-        // cout << "genvar_month_ = " << genvar_month_.theValue() << "\n";
 
         snprintf(buffer.data(),
                  buffer.size(),
@@ -855,7 +851,6 @@ void SuiteGenVariables::update_generated_variables() const {
                  suite_->cal_.month(),
                  suite_->cal_.day_of_month());
         genvar_ecf_date_.set_value(buffer.data());
-        // cout << "genvar_ecf_date_ = " << genvar_ecf_date_.theValue() << "\n";
 
         snprintf(buffer.data(),
                  buffer.size(),
@@ -865,7 +860,6 @@ void SuiteGenVariables::update_generated_variables() const {
                  suite_->cal_.day_of_week(),
                  suite_->cal_.day_of_year());
         genvar_ecf_clock_.set_value(buffer.data());
-        // cout << "genvar_ecf_clock_ = " << genvar_ecf_clock_.theValue() << "\n";
 
         genvar_ecf_julian_.set_value(ecf::convert_to<std::string>(suite_->cal_.suiteTime().date().julian_day()));
     }

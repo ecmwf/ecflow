@@ -130,14 +130,14 @@ bool Node::findParentUserVariableValue(const std::string& name, std::string& the
 const std::string& Node::find_parent_user_variable_value(const std::string& name) const {
     const Variable& var = findVariable(name);
     if (!var.empty()) {
-        return var.theValue();
+        return var.value();
     }
 
     Node* theParent = parent();
     while (theParent) {
         const Variable& pvar = theParent->findVariable(name);
         if (!pvar.empty()) {
-            return pvar.theValue();
+            return pvar.value();
         }
         theParent = theParent->parent();
     }
@@ -185,7 +185,7 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
     std::string ret;
     const Variable& var = findVariable(name);
     if (!var.empty()) {
-        ret = var.theValue();
+        ret = var.value();
         variableSubstitution(ret);
         return ret;
     }
@@ -194,7 +194,7 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
     while (theParent) {
         const Variable& pvar = theParent->findVariable(name);
         if (!pvar.empty()) {
-            ret = pvar.theValue();
+            ret = pvar.value();
             variableSubstitution(ret);
             return ret;
         }
@@ -205,7 +205,7 @@ std::string Node::find_parent_variable_sub_value(const std::string& name) const 
     Defs* the_defs = defs();
     if (the_defs) {
         const Variable& pvar = the_defs->server_state().findVariable(name);
-        ret                  = pvar.theValue();
+        ret                  = pvar.value();
         the_defs->variableSubstitution(ret);
         return ret;
     }
@@ -244,14 +244,14 @@ bool Node::findVariableValue(const std::string& name, std::string& returnedValue
         return false;
     }
 
-    returnedValue = found->theValue();
+    returnedValue = found->value();
     return true;
 }
 
 bool Node::findGenVariableValue(const std::string& name, std::string& returnedValue) const {
     const Variable& genVar = findGenVariable(name);
     if (!genVar.empty()) {
-        returnedValue = genVar.theValue();
+        returnedValue = genVar.value();
         return true;
     }
     return false;
@@ -437,7 +437,7 @@ int Node::findExprVariableValue(const std::string& name) const {
 
     const Variable& variable = findVariable(name);
     if (!variable.empty()) {
-        return variable.value();
+        return variable.value<int>();
     }
 
     const Repeat& repeat = findRepeat(name);
@@ -458,7 +458,7 @@ int Node::findExprVariableValue(const std::string& name) const {
 
     const Variable& gen_variable = findGenVariable(name);
     if (!gen_variable.empty()) {
-        return gen_variable.value();
+        return gen_variable.value<int>();
     }
 
     limit_ptr limit = find_limit(name);
@@ -487,7 +487,7 @@ int Node::findExprVariableValueAndPlus(const std::string& name, int val) const {
 
     const Variable& variable = findVariable(name);
     if (!variable.empty()) {
-        return (variable.value() + val);
+        return (variable.value<int>() + val);
     }
 
     const Repeat& repeat = findRepeat(name);
@@ -507,7 +507,7 @@ int Node::findExprVariableValueAndPlus(const std::string& name, int val) const {
 
     const Variable& gen_variable = findGenVariable(name);
     if (!gen_variable.empty()) {
-        return (gen_variable.value() + val);
+        return (gen_variable.value<int>() + val);
     }
 
     limit_ptr limit = find_limit(name);
@@ -536,7 +536,7 @@ int Node::findExprVariableValueAndMinus(const std::string& name, int val) const 
 
     const Variable& variable = findVariable(name);
     if (!variable.empty()) {
-        return (variable.value() - val);
+        return (variable.value<int>() - val);
     }
 
     const Repeat& repeat = findRepeat(name);
@@ -555,7 +555,7 @@ int Node::findExprVariableValueAndMinus(const std::string& name, int val) const 
 
     const Variable& gen_variable = findGenVariable(name);
     if (!gen_variable.empty()) {
-        return (gen_variable.value() - val);
+        return (gen_variable.value<int>() - val);
     }
 
     limit_ptr limit = find_limit(name);
@@ -585,7 +585,7 @@ int Node::findExprVariableValueAndType(const std::string& name, std::string& var
     const Variable& variable = findVariable(name);
     if (!variable.empty()) {
         varType = "user-variable";
-        return variable.value();
+        return variable.value<int>();
     }
     const Repeat& repeat = findRepeat(name);
     if (!repeat.empty()) {
@@ -595,7 +595,7 @@ int Node::findExprVariableValueAndType(const std::string& name, std::string& var
     const Variable& gen_variable = findGenVariable(name);
     if (!gen_variable.empty()) {
         varType = "gen-variable";
-        return gen_variable.value();
+        return gen_variable.value<int>();
     }
     limit_ptr limit = find_limit(name);
     if (limit.get()) {
@@ -625,7 +625,7 @@ void Node::findExprVariableAndPrint(const std::string& name, std::ostream& os) c
     }
     const Variable& variable = findVariable(name);
     if (!variable.empty()) {
-        os << "USER-VARIABLE value(" << variable.value() << ")";
+        os << "USER-VARIABLE value(" << variable.value<int>() << ")";
         return;
     }
     const Repeat& repeat = findRepeat(name);
@@ -635,7 +635,7 @@ void Node::findExprVariableAndPrint(const std::string& name, std::ostream& os) c
     }
     const Variable& gen_variable = findGenVariable(name);
     if (!gen_variable.empty()) {
-        os << "GEN-VARIABLE value(" << gen_variable.value() << ")";
+        os << "GEN-VARIABLE value(" << gen_variable.value<int>() << ")";
         return;
     }
     limit_ptr limit = find_limit(name);

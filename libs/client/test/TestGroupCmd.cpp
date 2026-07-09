@@ -97,8 +97,8 @@ BOOST_AUTO_TEST_CASE(test_client_group_lifecyle) {
         const std::vector<Variable>& variables = suites[0]->variables();
         BOOST_REQUIRE_MESSAGE(variables.size() == expected_var,
                               "Expected " << expected_var << " variables but found " << variables.size());
-        BOOST_REQUIRE_MESSAGE(variables[expected_var - 1].theValue() == "'space s'",
-                              "Expected 'space s' but found " << variables[expected_var - 1].theValue());
+        BOOST_REQUIRE_MESSAGE(variables[expected_var - 1].value() == "'space s'",
+                              "Expected 'space s' but found " << variables[expected_var - 1].value());
     }
 
     // Now go through and simulate client request to change Node tree state.

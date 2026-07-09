@@ -159,10 +159,10 @@ const std::string& VariableModelData::value(int index) const {
     }
 
     if (!isGenVar(index)) {
-        return vars_.at(index).theValue();
+        return vars_.at(index).value();
     }
     else {
-        return genVars_.at(index - vars_.size()).theValue();
+        return genVars_.at(index - vars_.size()).value();
     }
 
     return defaultStr;
@@ -177,13 +177,13 @@ const std::string& VariableModelData::value(const std::string& n, bool& hasIt) c
     for (const auto& var : vars_) {
         if (var.name() == n) {
             hasIt = true;
-            return var.theValue();
+            return var.value();
         }
     }
     for (const auto& genVar : genVars_) {
         if (genVar.name() == n) {
             hasIt = true;
-            return genVar.theValue();
+            return genVar.value();
         }
     }
 
@@ -429,11 +429,11 @@ bool VariableModelData::update(const std::vector<Variable>& v, const std::vector
 #ifdef UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " new list of variables:";
     for (const auto& i : v) {
-        UiLog().dbg() << "  " << i.name() << "=" << i.theValue();
+        UiLog().dbg() << "  " << i.name() << "=" << i.value();
     }
     UiLog().dbg() << "   new list of generated variables:";
     for (const auto& i : vg) {
-        UiLog().dbg() << "  " << i.name() << "=" << i.theValue();
+        UiLog().dbg() << "  " << i.name() << "=" << i.value();
     }
 #endif
 
@@ -456,10 +456,10 @@ bool VariableModelData::update(const std::vector<Variable>& v, const std::vector
         UI_ASSERT(vg.size() == genVars_.size(), "vg.size()=" << vg.size() << " genVars_.size()=" << genVars_.size());
 
         for (std::size_t i = 0; i < vars_.size(); i++) {
-            if (vars_[i].name() != v[i].name() || vars_[i].theValue() != v[i].theValue()) {
+            if (vars_[i].name() != v[i].name() || vars_[i].value() != v[i].value()) {
 #ifdef UI_VARIABLEMODELDATA_DEBUG
                 UiLog().dbg() << " variable changed! name: " << vars_[i].name() << " -> " << v[i].name()
-                              << " value: " << vars_[i].theValue() << " -> " << v[i].theValue();
+                              << " value: " << vars_[i].value() << " -> " << v[i].value();
 #endif
                 changed = true;
                 break;
@@ -468,10 +468,10 @@ bool VariableModelData::update(const std::vector<Variable>& v, const std::vector
 
         if (changed == false) {
             for (std::size_t i = 0; i < genVars_.size(); i++) {
-                if (genVars_[i].name() != vg[i].name() || genVars_[i].theValue() != vg[i].theValue()) {
+                if (genVars_[i].name() != vg[i].name() || genVars_[i].value() != vg[i].value()) {
 #ifdef UI_VARIABLEMODELDATA_DEBUG
                     UiLog().dbg() << " generated variable changed! name: " << genVars_[i].name() << " -> "
-                                  << vg[i].name() << " value: " << genVars_[i].theValue() << " -> " << vg[i].theValue();
+                                  << vg[i].name() << " value: " << genVars_[i].value() << " -> " << vg[i].value();
 #endif
                     changed = true;
                     break;

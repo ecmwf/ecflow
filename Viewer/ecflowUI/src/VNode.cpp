@@ -509,7 +509,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
 
     const Variable& var = node_->findVariable(key);
     if (!var.empty()) {
-        val = var.theValue();
+        val = var.value();
         if (substitute) {
             node_->variableSubstitution(val);
         }
@@ -517,7 +517,7 @@ std::string VNode::findVariable(const std::string& key, bool substitute) const {
     }
     const Variable& gvar = node_->findGenVariable(key);
     if (!gvar.empty()) {
-        val = gvar.theValue();
+        val = gvar.value();
         if (substitute) {
             node_->variableSubstitution(val);
         }
@@ -1271,7 +1271,7 @@ std::string VServer::genVariable(const std::string& key) const {
 
     for (const auto& genVar : cache_.genVars_) {
         if (genVar.name() == key) {
-            val = genVar.theValue();
+            val = genVar.value();
         }
     }
 
@@ -1311,7 +1311,7 @@ std::string VServer::findVariable(const std::string& key, bool substitute) const
     // Search user variables first
     for (const auto& var : cache_.vars_) {
         if (var.name() == key) {
-            val = var.theValue();
+            val = var.value();
             if (substitute) {
                 substituteVariableValue(val);
             }
@@ -1323,7 +1323,7 @@ std::string VServer::findVariable(const std::string& key, bool substitute) const
     // Then search server variables
     for (const auto& genVar : cache_.genVars_) {
         if (genVar.name() == key) {
-            val = genVar.theValue();
+            val = genVar.value();
             if (substitute) {
                 substituteVariableValue(val);
             }

@@ -80,7 +80,7 @@ static bool kill_cmd(bool kill_task) {
         else {
             suite = theDefs.add_suite("test_kill_suite");
         }
-        suite->addVariable(Variable("ECF_TRIES", "1")); // do not try again
+        suite->addVariable(Variable::new_variable("ECF_TRIES", "1")); // do not try again
         family_ptr fam = suite->add_family("family");
         task_ptr task  = fam->add_task("t0");
         task->addMeter(Meter("meter", 0, 200, 100)); // Make sure it run long enough, to receive kill, on slow systems

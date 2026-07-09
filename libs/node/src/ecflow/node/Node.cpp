@@ -1888,9 +1888,8 @@ bool Node::operator==(const Node& rhs) const {
 #ifdef DEBUG
             if (Ecf::debug_equality()) {
                 std::cout << "Node::operator==  (!(vars_[i] == rhs.vars_[i] )) " << debugNodePath() << "\n";
-                std::cout << "     vars_[i] name = '" << vars_[i].name() << "' value = '" << vars_[i].theValue()
-                          << "'\n";
-                std::cout << " rhs.vars_[i] name = '" << rhs.vars_[i].name() << "' value = '" << rhs.vars_[i].theValue()
+                std::cout << "     vars_[i] name = '" << vars_[i].name() << "' value = '" << vars_[i].value() << "'\n";
+                std::cout << " rhs.vars_[i] name = '" << rhs.vars_[i].name() << "' value = '" << rhs.vars_[i].value()
                           << "'\n";
             }
 #endif

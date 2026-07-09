@@ -241,7 +241,7 @@ defs_ptr Defs_add_variable_int(defs_ptr self, const std::string& name, int value
 /// @return The definitions (for method chaining).
 ///
 defs_ptr Defs_add_variable_variable(defs_ptr self, const Variable& var) {
-    self->server_state().add_or_update_user_variables(var.name(), var.theValue());
+    self->server_state().add_or_update_user_variables(var.name(), var.value());
     return self;
 }
 
@@ -354,7 +354,7 @@ py::object Defs_add(defs_ptr self, const py::handle& arg) {
 
         const std::vector<Variable>& vec = edit.variables();
         for (const auto& i : vec) {
-            self->server_state().add_or_update_user_variables(i.name(), i.theValue());
+            self->server_state().add_or_update_user_variables(i.name(), i.value());
         }
     }
     else if (auto found = py_extract<py::list>(arg); found) {
@@ -367,7 +367,7 @@ py::object Defs_add(defs_ptr self, const py::handle& arg) {
     }
     else if (auto found = py_extract<Variable>(arg); found) {
         Variable var = found.value();
-        self->server_state().add_or_update_user_variables(var.name(), var.theValue());
+        self->server_state().add_or_update_user_variables(var.name(), var.value());
     }
     else {
         throw std::runtime_error("ExportDefs::add : Unknown type");

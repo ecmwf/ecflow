@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(test_migration_restore) {
     do_restore<AutoArchiveAttr>(file_name + "AutoArchiveAttr", AutoArchiveAttr(100));
     do_restore<AutoArchiveAttr>(file_name + "AutoArchiveAttr_1", AutoArchiveAttr(TimeSlot(10, 12), true));
     do_restore<Label>(file_name + "Label", label);
-    do_restore<Variable>(file_name + "Variable", Variable("var_name", "var_value"));
+    do_restore<Variable>(file_name + "Variable", Variable::new_variable("var_name", "var_value"));
     do_restore<Event>(file_name + "Event_1", Event(1));
     do_restore<Event>(file_name + "Event_2", Event(std::string("event")));
     do_restore<Event>(file_name + "Event_3", Event(1, std::string("event"), true));

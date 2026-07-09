@@ -90,7 +90,7 @@ void py_dict_to_str_vec(const py::dict& dict, std::vector<Variable>& vec) {
             throw std::runtime_error("PythonUtil::dict_to_str_vec: value not convertible to string or integer");
         }
 
-        vec.emplace_back(first, second);
+        vec.push_back(Variable::new_variable(first, second));
     }
 }
 

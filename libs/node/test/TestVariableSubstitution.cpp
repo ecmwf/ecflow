@@ -35,16 +35,16 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution) {
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
     {
-        s->addVariable(Variable("AVI", "avi"));
-        s->addVariable(Variable("BAHRA", "bahra"));
-        s->addVariable(Variable("LOWER", "10"));
-        s->addVariable(Variable("PATH", "/fred/bill/joe"));
-        s->addVariable(Variable("EMPTY_VARIABLE", ""));
-        s->addVariable(Variable("fred", "%bill%"));
-        s->addVariable(Variable("bill", "%fred%"));
-        s->addVariable(Variable("hello", "%hello%"));
-        s->addVariable(Variable("mary", "%jane%"));
-        s->addVariable(Variable("jane", "10"));
+        s->addVariable(Variable::new_variable("AVI", "avi"));
+        s->addVariable(Variable::new_variable("BAHRA", "bahra"));
+        s->addVariable(Variable::new_variable("LOWER", "10"));
+        s->addVariable(Variable::new_variable("PATH", "/fred/bill/joe"));
+        s->addVariable(Variable::new_variable("EMPTY_VARIABLE", ""));
+        s->addVariable(Variable::new_variable("fred", "%bill%"));
+        s->addVariable(Variable::new_variable("bill", "%fred%"));
+        s->addVariable(Variable::new_variable("hello", "%hello%"));
+        s->addVariable(Variable::new_variable("mary", "%jane%"));
+        s->addVariable(Variable::new_variable("jane", "10"));
     }
 
     // See page 31, section 5.1 variable inheritance, of SMS users guide
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_variable_substitution_double_micro) {
     BOOST_CHECK_MESSAGE(s->variableSubstitution(cmd), "substitution failed");
     BOOST_CHECK_MESSAGE(cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
-    s->addVariable(Variable("HOUR", "hammer time"));
+    s->addVariable(Variable::new_variable("HOUR", "hammer time"));
     cmd      = "printf %%02d %HOUR:00%";
     expected = "printf %02d hammer time";
     BOOST_CHECK_MESSAGE(s->variableSubstitution(cmd), "substitution failed");
@@ -211,29 +211,32 @@ BOOST_AUTO_TEST_CASE(test_user_variable_substitution) {
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
     {
-        s->addVariable(Variable("AVI", "avi"));
-        s->addVariable(Variable("BAHRA", "bahra"));
-        s->addVariable(Variable("LOWER", "10"));
-        s->addVariable(Variable("PATH", "/fred/bill/joe"));
-        s->addVariable(Variable("EMPTY_VARIABLE", ""));
-        s->addVariable(Variable("fred", "%bill%"));
-        s->addVariable(Variable("bill", "%fred%"));
-        s->addVariable(Variable("hello", "%hello%"));
-        s->addVariable(Variable("mary", "%jane%"));
-        s->addVariable(Variable("jane", "10"));
+        std::vector<std::pair<std::string, std::string>> pairs = {{"AVI", "avi"},
+                                                                  {"BAHRA", "bahra"},
+                                                                  {"LOWER", "10"},
+                                                                  {"PATH", "/fred/bill/joe"},
+                                                                  {"EMPTY_VARIABLE", ""},
+                                                                  {"fred", "%bill%"},
+                                                                  {"bill", "%fred%"},
+                                                                  {"hello", "%hello%"},
+                                                                  {"mary", "%jane%"},
+                                                                  {"jane", "10"}};
+
+        for (auto& [name, value] : pairs) {
+            s->addVariable(Variable::new_variable(name, value));
+        }
     }
 
-    NameValueMap user_variables;
-    user_variables.insert(std::make_pair(std::string("AVI"), std::string("_avi")));
-    user_variables.insert(std::make_pair(std::string("BAHRA"), std::string("_bahra")));
-    user_variables.insert(std::make_pair(std::string("LOWER"), std::string("_10")));
-    user_variables.insert(std::make_pair(std::string("PATH"), std::string("_/fred/bill/joe")));
-    user_variables.insert(std::make_pair(std::string("EMPTY_VARIABLE"), std::string("_")));
-    user_variables.insert(std::make_pair(std::string("fred"), std::string("%bill%")));
-    user_variables.insert(std::make_pair(std::string("bill"), std::string("%fred%")));
-    user_variables.insert(std::make_pair(std::string("hello"), std::string("%hello%")));
-    user_variables.insert(std::make_pair(std::string("mary"), std::string("%jane%")));
-    user_variables.insert(std::make_pair(std::string("jane"), std::string("_10")));
+    NameValueMap user_variables = {{"AVI", "_avi"},
+                                   {"BAHRA", "_bahra"},
+                                   {"LOWER", "_10"},
+                                   {"PATH", "_/fred/bill/joe"},
+                                   {"EMPTY_VARIABLE", "_"},
+                                   {"fred", "%bill%"},
+                                   {"bill", "%fred%"},
+                                   {"hello", "%hello%"},
+                                   {"mary", "%jane%"},
+                                   {"jane", "_10"}};
 
     // See page 31, section 5.1 variable inheritance, of SMS users guide
     std::string cmd      = "%AVI%-%BAHRA%-%LOWER%-%AVI%";
@@ -351,7 +354,7 @@ BOOST_AUTO_TEST_CASE(test_user_variable_substitution_1) {
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
-    s->addVariable(Variable("AVI", "avi"));
+    s->addVariable(Variable::new_variable("AVI", "avi"));
 
     NameValueMap user_variables;
     user_variables.insert(std::make_pair(std::string("AVI:goblly gook"), std::string("avtar")));
@@ -456,18 +459,18 @@ BOOST_AUTO_TEST_CASE(test_generated_variable_substitution) {
 
     Defs defs;
     suite_ptr s = defs.add_suite("suite");
-    s->addVariable(Variable("PATH", "/fred/bill/joe"));
-    s->addVariable(Variable("ECF_HOME", "/ecf_home"));
+    s->addVariable(Variable::new_variable("PATH", "/fred/bill/joe"));
+    s->addVariable(Variable::new_variable("ECF_HOME", "/ecf_home"));
     family_ptr f = s->add_family("f");
     task_ptr t   = f->add_task("t");
-    t->addVariable(Variable("ECF_OUT", "%PATH%"));
+    t->addVariable(Variable::new_variable("ECF_OUT", "%PATH%"));
     family_ptr f1 = s->add_family("f1");
-    f1->addVariable(Variable("PATH2", "/fred/bill/joe2"));
+    f1->addVariable(Variable::new_variable("PATH2", "/fred/bill/joe2"));
     task_ptr t1 = f1->add_task("t1");
-    t1->addVariable(Variable("ECF_OUT", "%PATH2%"));
+    t1->addVariable(Variable::new_variable("ECF_OUT", "%PATH2%"));
     task_ptr t2 = f1->add_task("t2");
-    t2->addVariable(Variable("ECF_JOBOUT", "ECFLOW-999"));
-    t2->addVariable(Variable("ECF_JOB", "ECFLOW-999"));
+    t2->addVariable(Variable::new_variable("ECF_JOBOUT", "ECFLOW-999"));
+    t2->addVariable(Variable::new_variable("ECF_JOB", "ECFLOW-999"));
 
     // begin_all
     defs.beginAll();

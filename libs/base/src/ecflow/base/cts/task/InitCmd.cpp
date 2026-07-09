@@ -36,7 +36,7 @@ void InitCmd::print(std::string& os) const {
             os += " ";
             os += var_to_add.name();
             os += "=";
-            os += var_to_add.theValue();
+            os += var_to_add.value();
         }
     }
 }
@@ -140,7 +140,7 @@ void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
                     throw std::runtime_error(
                         "Could not parse variable provided to --add; Expected  var1=value1 var2=value2 but found " + v);
                 }
-                variable_vec.emplace_back(tokens[0], tokens[1]);
+                variable_vec.push_back(Variable::new_variable(tokens[0], tokens[1]));
             }
         }
     }

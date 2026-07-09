@@ -205,7 +205,7 @@ populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_
                                            "",
                                            "/suiteName")));
 
-    std::vector<Variable> to_add{Variable("name", "value"), Variable("name2", "value")};
+    std::vector<Variable> to_add{Variable::new_variable("name", "value"), Variable::new_variable("name2", "value")};
     std::vector<std::string> to_del{"name", "name2"};
     cmd_vec.push_back(Cmd_ptr(new InitCmd("suiteName/familyName/taskName",
                                           Submittable::DUMMY_JOBS_PASSWORD(),

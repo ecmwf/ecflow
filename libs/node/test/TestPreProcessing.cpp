@@ -125,9 +125,9 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
     Defs theDefs;
     {
         suite_ptr suite = theDefs.add_suite("suite");
-        suite->addVariable(Variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
-        suite->addVariable(Variable(ecf::environment::ECF_OUT, "$ECF_HOME"));
-        suite->addVariable(Variable("SLEEPTIME", "10"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_INCLUDE, "$ECF_HOME/includes"));
+        suite->addVariable(Variable::new_variable(ecf::environment::ECF_OUT, "$ECF_HOME"));
+        suite->addVariable(Variable::new_variable("SLEEPTIME", "10"));
         family_ptr fam = suite->add_family("family");
 
         // for operations auto discover the variables used in the header files and give
@@ -138,7 +138,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass) {
         autoDiscoverVariables(ecf_home + "/includes", discoveredVariables);
         for (const std::string& var : discoveredVariables) {
             // 			cerr << "autoDiscoverVariables = " << var << "\n";
-            suite->addVariable(Variable(var, "gobblygook"));
+            suite->addVariable(Variable::new_variable(var, "gobblygook"));
         }
 
         // std::cout << "\nIn directory: " << full_path.directory_string() << "\n\n";

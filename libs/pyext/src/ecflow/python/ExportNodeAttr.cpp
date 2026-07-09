@@ -803,9 +803,11 @@ void export_NodeAttr(py::module& m) {
 
     py::class_<Variable>(m, "Variable", py::dynamic_attr(), NodeAttrDoc::variable_doc())
 
-        .def(py::init<std::string, std::string>())
+        .def(py::init(
+            [](const std::string name, const std::string value) { return Variable::new_variable(name, value); }))
         .def(py::init([](const std::string name, const py::int_& value) {
-            return Variable(name, std::to_string(value.cast<int64_t>()));
+            auto v = std::to_string(value.cast<int64_t>());
+            return Variable::new_variable(name, v);
         }))
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
@@ -813,7 +815,11 @@ void export_NodeAttr(py::module& m) {
         .def("__str__", &Variable::toString)
         .def("__copy__", pyutil_copy_object<Variable>)
         .def("name", &Variable::name, py::return_value_policy::reference, "Return the variable name as string")
-        .def("value", &Variable::theValue, py::return_value_policy::reference, "Return the variable value as a string")
+        .def(
+            "value",
+            [](const Variable& self) -> const std::string& { return self.value(); },
+            py::return_value_policy::reference,
+            "Return the variable value as a string")
         .def("empty",
              &Variable::empty,
              "Return true if the variable is empty. Used when returning a Null variable, from a find");

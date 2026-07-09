@@ -213,7 +213,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                 }
 
                 const Variable& ecf_jobout_gen_var = submittable->findGenVariable(ecf::environment::ECF_JOBOUT);
-                if (!File::open(ecf_jobout_gen_var.theValue(), fileContents)) {
+                if (!File::open(ecf_jobout_gen_var.value(), fileContents)) {
 
                     // If that fails as a backup, look under ECF_HOME/ECF_NAME.ECF_TRYNO,   ECFLOW-177 preserve old SMS
                     // behaviour
@@ -223,11 +223,11 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                     ecfhome_jobout += ".";
                     ecfhome_jobout += submittable->tryNo();
 
-                    if (ecfhome_jobout != ecf_jobout_gen_var.theValue()) {
+                    if (ecfhome_jobout != ecf_jobout_gen_var.value()) {
                         // Implies ECF_OUT was specified, hence *ALSO* look in ECF_HOME/ECF_NAME.ECF_TRYNO
                         if (!File::open(ecfhome_jobout, fileContents)) {
                             ss << "Failed to open the job-out (ECF_JOBOUT=ECF_OUT/ECF_NAME.ECF_TRYNO='"
-                               << ecf_jobout_gen_var.theValue() << "') ";
+                               << ecf_jobout_gen_var.value() << "') ";
                             ss << "*AND* (ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO='" << ecfhome_jobout << "')";
                             ss << " for task " << pathToNode_ << " (" << strerror(errno) << ")";
                             throw std::runtime_error(ss.str());
@@ -236,7 +236,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
                     else {
                         // ECF_OUT *not* specified implies ECF_JOBOUT = ECF_HOME/ECF_NAME.ECF_TRYNO
                         ss << "Failed to open the job-out(ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO='"
-                           << ecf_jobout_gen_var.theValue() << "') ";
+                           << ecf_jobout_gen_var.value() << "') ";
                         ss << " for task " << pathToNode_ << " (" << strerror(errno) << ")";
                         throw std::runtime_error(ss.str());
                     }

@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(test_why_limit) {
         std::string suiteName   = "test_why_limit";
         std::string pathToLimit = "/" + suiteName;
         suite_ptr suite         = theDefs.add_suite(suiteName);
-        suite->addVariable(Variable("ECF_TRIES", "1"));
+        suite->addVariable(Variable::new_variable("ECF_TRIES", "1"));
         suite->addLimit(Limit("disk", 50));
 
         family_ptr fam = suite->add_family("family");
@@ -469,7 +469,7 @@ BOOST_AUTO_TEST_CASE(test_why_user_var) {
         suite_ptr suite = Suite::create("test_why_user_var");
         family_ptr fam  = Family::create("family");
         task_ptr t1     = Task::create("t1");
-        suite->addVariable(Variable("user_var", "10"));
+        suite->addVariable(Variable::new_variable("user_var", "10"));
         t1->add_trigger("/test_why_user_var:user_var eq 100");
         fam->addTask(t1);
         suite->addFamily(fam);

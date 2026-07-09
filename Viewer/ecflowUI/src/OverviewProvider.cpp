@@ -183,14 +183,14 @@ void OverviewProvider::serverInfo(VInfoServer* info, std::stringstream& f) {
     std::vector<Variable> gvar;
     snode->genVariables(gvar);
     for (auto it = gvar.begin(); it != gvar.end(); ++it) {
-        f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+        f << inc << "# edit " << (*it).name() << " '" << (*it).value() << "'\n";
     }
 
     // Variables
     std::vector<Variable> var;
     snode->variables(var);
     for (auto it = var.begin(); it != var.end(); ++it) {
-        f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+        f << inc << "edit " << (*it).name() << " '" << (*it).value() << "'\n";
     }
 
     // Print children
@@ -289,14 +289,14 @@ void OverviewProvider::nodeInfo(VInfoNode* info, std::stringstream& f) {
     std::vector<Variable> gvar;
     node->genVariables(gvar);
     for (auto it = gvar.begin(); it != gvar.end(); ++it) {
-        f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+        f << inc << "# edit " << (*it).name() << " '" << (*it).value() << "'\n";
     }
 
     // Variables
     std::vector<Variable> var;
     node->variables(var);
     for (auto it = var.begin(); it != var.end(); ++it) {
-        f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+        f << inc << "edit " << (*it).name() << " '" << (*it).value() << "'\n";
     }
 
     // Other attributes
