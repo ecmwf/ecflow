@@ -94,6 +94,7 @@ def test_suite_construction_and_variables():
     suite.add_variable("ECF_URL", "publications/manuals/sms")
     suite.add_limit(Limit("limitName", 10))
     suite.add_limit("limitName_2", 10)
+    assert not suite.begun(), "Suite should not have begun"
 
     clock = Clock(1, 1, 2010, False)
     clock.set_gain(1, 10, True)

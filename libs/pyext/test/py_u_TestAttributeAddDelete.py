@@ -135,7 +135,7 @@ def test_suite_variable_add_delete_and_sort():
     suite.add_variable({})
     assert len(list(suite.variables)) == 0
 
-    with pytest.raises((TypeError, RuntimeError)):
+    with pytest.raises(RuntimeError):
         suite.add_variable(
             {"name": "fred", "name2": 14, "name3": list("123"), "name4": 12}
         )
@@ -558,6 +558,13 @@ def test_task_autocancel_variants():
     t5 = ecflow.Task("t5")
     t5.add_autocancel(ecflow.Autocancel(1, 10, True))
     assert t5.get_autocancel() is not None
+
+
+def test_family_autocancel_variants():
+    f5 = ecflow.Family("f5")
+    assert f5.get_autocancel() is None
+    f5.add_autocancel(ecflow.Autocancel(1, 10, True))  # hour,minutes,relative
+    assert f5.get_autocancel() is not None
 
 
 def test_family_autoarchive_variants():

@@ -103,3 +103,32 @@ def test_auto_add_extern_for_task_inlimit_with_suite_path(defs):
     suite.add_family("f3").add_task("t1").add_inlimit("hpcd", "/obs/limits")
     suite.add_family("f4").add_task("t2").add_inlimit("c1a", "/limits")
     _expect_check_fails_then_passes(defs)
+
+
+def test_auto_add_extern_incrementally_across_multiple_check_cycles(defs):
+    """Repeatedly call check()/auto_add_externs(True) on the same, growing Defs,
+    to verify auto_add_externs behaves correctly across multiple incremental
+    invocations rather than just once against a fully pre-built Defs."""
+    suite = defs.add_suite("ext")
+
+    f1 = suite.add_family("f1")
+    f1.add_task("t").add_trigger("/a/b/c/d == complete")
+    _expect_check_fails_then_passes(defs)
+    f1.add_task("t1").add_trigger("/a/b/c/d/e:event == set")
+    _expect_check_fails_then_passes(defs)
+    f1.add_task("t2").add_trigger("/a/b/c/d/x:event")
+    _expect_check_fails_then_passes(defs)
+    f1.add_task("t3").add_trigger("/a/b/c/d/y:meter le 30")
+    _expect_check_fails_then_passes(defs)
+    f1.add_task("t4").add_trigger("/a/b/c/d/z<flag>late")
+    _expect_check_fails_then_passes(defs)
+
+    f2 = suite.add_family("f2")
+    f2.add_inlimit("hpcd", "limits")
+    _expect_check_fails_then_passes(defs)
+    f2.add_task("t").add_inlimit("sg1", "/suiteName")
+    _expect_check_fails_then_passes(defs)
+    f2.add_task("t1").add_inlimit("hpcd", "/obs/limits")
+    _expect_check_fails_then_passes(defs)
+    f2.add_task("t2").add_inlimit("c1a", "/limits")
+    _expect_check_fails_then_passes(defs)

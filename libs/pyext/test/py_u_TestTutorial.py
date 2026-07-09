@@ -61,12 +61,16 @@ def _compile_tutorial_text(text):
 
 
 def _remove_tutorial_artifacts():
-    for pattern in ("test_tutorial_def_*.def", "py_u_test_tutorial_*.def"):
-        for path in pathlib.Path.cwd().glob(pattern):
-            try:
-                path.unlink()
-            except OSError:
-                pass
+    # Scoped to the current process's own artifacts only (names embed os.getpid()),
+    # so concurrent invocations from the same working directory don't delete each
+    # other's in-progress files.
+    pid = os.getpid()
+    for pattern in (f"test_tutorial_def_{pid}.def", f"py_u_test_tutorial_{pid}.def"):
+        path = pathlib.Path.cwd() / pattern
+        try:
+            path.unlink()
+        except OSError:
+            pass
 
 
 def do_tear_down():
