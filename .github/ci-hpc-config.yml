@@ -12,6 +12,7 @@ build:
     - -DENABLE_ALL_TESTS=ON
   ctest_options:
     - -L nightly
+  requirements: libs/pyext/test/requirements-test.txt
 
 gnu-15.2.0:
   build:
@@ -42,6 +43,7 @@ gnu-15.2.0:
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
+    requirements: libs/pyext/test/requirements-test.txt
 
 gnu-14.2.0:
   build:
@@ -75,6 +77,7 @@ gnu-14.2.0:
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
+    requirements: libs/pyext/test/requirements-test.txt
 
 gnu-12.2.0:
   build:
@@ -103,6 +106,7 @@ gnu-12.2.0:
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
+    requirements: libs/pyext/test/requirements-test.txt
 
 gnu-8.5.0:
   build:
@@ -131,6 +135,7 @@ gnu-8.5.0:
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
+    requirements: libs/pyext/test/requirements-test.txt
 
 intel-2025.3.1:
   build:
@@ -161,6 +166,7 @@ intel-2025.3.1:
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
+    requirements: libs/pyext/test/requirements-test.txt
 
 intel-2025.0.1:
   build:
@@ -194,6 +200,7 @@ intel-2025.0.1:
     ctest_options:
       # disable s_http* tests
       - -L nightly -E '(s_http)'
+    requirements: libs/pyext/test/requirements-test.txt
 
 intel-2021.4.0:
   build:
@@ -222,6 +229,7 @@ intel-2021.4.0:
       # Note: Python 3.10.10-01, provides Pybind11 2.10.3.
     ctest_options:
       - -L nightly -E '(py3_|s_http)'
+    requirements: libs/pyext/test/requirements-test.txt
 
 nvidia-24.11:
   build:
@@ -254,6 +262,7 @@ nvidia-24.11:
     ctest_options:
       # disable all tests
       - --version
+    requirements: libs/pyext/test/requirements-test.txt
 
 nvidia-22.11:
   build:
@@ -282,6 +291,7 @@ nvidia-22.11:
     ctest_options: 
       # disable all tests
       - --version
+    requirements: libs/pyext/test/requirements-test.txt
 
 aocc-4.0.0:
   build:
@@ -310,3 +320,4 @@ aocc-4.0.0:
     ctest_options:
       # disable all tests
       - --version
+    requirements: libs/pyext/test/requirements-test.txt
