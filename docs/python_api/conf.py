@@ -19,8 +19,18 @@ import sys
 sys.path.insert(0, os.path.abspath("."))
 sys.path.append(os.path.abspath("./_ext"))
 
-build_path = "/Users/cgr/build/ecflow/debug/Pyext/python3"
-sys.path.insert(0, build_path)
+#
+# The ecflow module (built by the pyext component) must be importable for the docstring
+# extraction to work; the CMake ecflow_docs target provides its location via PYTHONPATH.
+#
+try:
+    import ecflow
+except ImportError as e:
+    raise RuntimeError(
+        "Unable to import the ecflow module, needed for docstring extraction. "
+        "Set PYTHONPATH to the pyext build directory "
+        "(e.g. <build>/libs/pyext/python3), or use the ecflow_docs CMake target."
+    ) from e
 
 # -- Project information -----------------------------------------------------
 
