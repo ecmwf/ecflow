@@ -152,7 +152,7 @@ namespace detail {
 
 template <typename STREAM>
 void render_expression(Expression* e, const Node& node, STREAM& stream) {
-    auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
+    auto ctx = ecf::FormatContext::make_for(PrintStyle::DEFS);
 
     ecf::Indent l1(ctx);
 

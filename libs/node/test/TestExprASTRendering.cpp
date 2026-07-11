@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(test_expression_ast_rendering) {
     t2->add_trigger("t1 eq complete");
 
     {
-        auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
+        auto ctx = ecf::FormatContext::make_for(PrintStyle::DEFS);
         auto ast = t2->triggerAst();
         std::string actual;
         ecf::write_t(actual, *ast, ctx);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_expression_ast_rendering) {
     t3->add_trigger("t1:meter > 51");
 
     {
-        auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
+        auto ctx = ecf::FormatContext::make_for(PrintStyle::DEFS);
         auto ast = t3->triggerAst();
         std::string actual;
         ecf::write_t(actual, *ast, ctx);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_expression_ast_rendering) {
     t4->add_trigger("t1:meter > 51 AND (t1 eq complete OR t2 eq complete) AND (t3 eq complete)");
 
     {
-        auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
+        auto ctx = ecf::FormatContext::make_for(PrintStyle::DEFS);
         auto ast = t4->triggerAst();
         std::string actual;
         ecf::write_t(actual, *ast, ctx);
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_expression_ast_rendering) {
     t5->add_trigger("t2 eq complete AND :YMD le t1:YMD");
 
     {
-        auto ctx = ecf::Context::make_for(PrintStyle::DEFS);
+        auto ctx = ecf::FormatContext::make_for(PrintStyle::DEFS);
         auto ast = t5->triggerAst();
         std::string actual;
         ecf::write_t(actual, *ast, ctx);

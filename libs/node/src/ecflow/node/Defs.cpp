@@ -1294,7 +1294,7 @@ void Defs::write_to_string(std::string& os, PrintStyle::Type_t p_style) const {
         os.reserve(4096);
     }
 
-    auto ctx = ecf::Context::make_for(p_style);
+    auto ctx = ecf::FormatContext::make_for(p_style);
     ecf::write_t(os, *this, ctx);
 
     // Store the size of the output, for future use
