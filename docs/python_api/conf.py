@@ -43,6 +43,11 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# The docstrings reference glossary terms (:term:) and labels (:ref:) that are only
+# defined in the main documentation; this extraction-only project cannot resolve them,
+# so silence just those categories. Genuine reST errors (category "docutils") still show.
+suppress_warnings = ["ref.term", "ref.ref"]
+
 # The suffix of source filenames.
 source_suffix = ".rst"
 

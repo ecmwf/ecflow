@@ -86,19 +86,11 @@ add_custom_command(
           ${CMAKE_CURRENT_BINARY_DIR}/python_api/_build
   COMMAND
     #
-    # Copy the glossary and categories lists to the binary directory, to be used by python_api.py script
+    # Copy the categories list to the binary directory, to be used by python_api.py script
     #
     ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/python_api/glossary.yaml
         ${CMAKE_CURRENT_SOURCE_DIR}/python_api/categories.yaml
         ${CMAKE_CURRENT_BINARY_DIR}/python_api
-  COMMAND
-    #
-    # Apply a correction to the generated reference files
-    #
-    #  * Corrects `<ref>`_ in the docstrings to valid reStructuredText references `:ref:`<ref>`
-    #
-    ${CMAKE_CURRENT_SOURCE_DIR}/python_api/reference.fix.py
   COMMAND
     #
     # Generate the Python API Reference index file, based on the reference files list
