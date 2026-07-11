@@ -59,6 +59,7 @@ exclude_patterns = [
     ".DS_Store",
     "python_api_old",
     "build_python_api",
+    "python_api/index.rst"
 ]
 
 # The suffix of source filenames.
