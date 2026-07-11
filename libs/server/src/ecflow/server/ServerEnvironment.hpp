@@ -170,26 +170,6 @@ public:
     /// If errors arise the exist user still stay in affect
     bool reloadWhiteListFile(std::string& errorMsg);
 
-    /// There are several kinds of authentification:
-    ///     a/ None
-    ///     b/ List mode.   ASCII file based on ECF_LISTS is defined
-    ///     c/ Secure mode. binary file based ECF_PASSWD is defined
-    /// At the moment we will only implement options a/ and b/
-    //
-    /// Returns true if the given user has access to the server, false otherwise
-    // bool authenticateReadAccess(const std::string& user, bool custom_user, const std::string& passwd) const;
-    // bool authenticateReadAccess(const std::string& user,
-    //                             bool custom_user,
-    //                             const std::string& passwd,
-    //                             const std::string& path) const;
-    // bool authenticateReadAccess(const std::string& user,
-    //                             bool custom_user,
-    //                             const std::string& passwd,
-    //                             const std::vector<std::string>& paths) const;
-    // bool authenticateWriteAccess(const std::string& user) const;
-    // bool authenticateWriteAccess(const std::string& user, const std::string& path) const;
-    // bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) const;
-
     ecf::AuthenticationService& authentication() { return authentication_service_; }
     const ecf::AuthenticationService& authentication() const { return authentication_service_; }
 
