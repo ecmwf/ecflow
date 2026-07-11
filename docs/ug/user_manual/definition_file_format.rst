@@ -1610,10 +1610,77 @@ This attribute specifies how the server should react to a *zombie* job
 The full behavioural semantics of each action (i.e. what the server does exactly to handle the *zombie*)
 belong to a separate zombie-handling operations guide.
 
+.. _ch-example:
+
+Definition File Example
+=======================
+
+The following presents a compact example of a definition file (``.def``) exercising a
+representative cross-section of the grammar above.
+
+.. code-block:: shell
+
+    #5.14.0
+    extern /operations/limits:disk_io
+
+    suite forecast_pipeline
+
+      edit ECF_HOME '/home/msops/ecflow_home'
+      edit ECF_INCLUDE '/home/msops/include'
+      edit STREAM 'oper'
+      limit concurrent_runs 4
+      inlimit concurrent_runs
+      autoarchive +24:00
+
+      clock real 1.1.2026
+
+      family acquisition
+        inlimit /operations/limits:disk_io 2
+        time 00:15
+
+        task fetch_observations
+          label status ""
+          meter progress 0 100 100
+
+        task fetch_boundary_conditions
+          trigger fetch_observations == complete
+          event 1 data_ready
+
+      endfamily
+
+      family forecast
+        trigger acquisition == complete
+        repeat integer MEMBER 1 50 1
+
+        task run_member
+          late -s +00:15 -a 06:00 -c +04:00
+          inlimit concurrent_runs
+          autocancel +48:00
+
+      endfamily
+
+      family dissemination
+        trigger forecast == complete
+
+        task publish
+          aviso --name publish_ready --listener '{ "event": "mars", "request": { "class": "od", "stream": "oper", "step": [0,6,12] } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --polling %ECF_AVISO_POLLING%
+
+      endfamily
+
+    endsuite
+    # enddef
+
+..
+
+   Both _grammar and _ch-grammar are included here for cross-reference convenience.
+   While _grammar is used across the documentation to refer to the grammar section,
+   _ch-grammar inside this document itself.
+
+.. _grammar:
 .. _ch-grammar:
 
-Grammar Appendix
-================
+Definition File Grammar
+=======================
 
 The formal grammar of a definition file is as follows.
 
@@ -1721,66 +1788,6 @@ The formal grammar of a definition file is as follows.
     ymd             : 8-digit integer (yyyymmdd)
     instant         : ymd >> "T" >> two_int >> two_int >> two_int
     duration        : integer >> ":" >> two_int >> ":" >> two_int
-
-.. _ch-example:
-
-Definition File Example
-=======================
-
-The following presents a compact example of a definition file (``.def``) exercising a
-representative cross-section of the grammar above.
-
-.. code-block:: shell
-
-    #5.14.0
-    extern /operations/limits:disk_io
-
-    suite forecast_pipeline
-
-      edit ECF_HOME '/home/msops/ecflow_home'
-      edit ECF_INCLUDE '/home/msops/include'
-      edit STREAM 'oper'
-      limit concurrent_runs 4
-      inlimit concurrent_runs
-      autoarchive +24:00
-
-      clock real 1.1.2026
-
-      family acquisition
-        inlimit /operations/limits:disk_io 2
-        time 00:15
-
-        task fetch_observations
-          label status ""
-          meter progress 0 100 100
-
-        task fetch_boundary_conditions
-          trigger fetch_observations == complete
-          event 1 data_ready
-
-      endfamily
-
-      family forecast
-        trigger acquisition == complete
-        repeat integer MEMBER 1 50 1
-
-        task run_member
-          late -s +00:15 -a 06:00 -c +04:00
-          inlimit concurrent_runs
-          autocancel +48:00
-
-      endfamily
-
-      family dissemination
-        trigger forecast == complete
-
-        task publish
-          aviso --name publish_ready --listener '{ "event": "mars", "request": { "class": "od", "stream": "oper", "step": [0,6,12] } }' --url %ECF_AVISO_URL% --schema %ECF_AVISO_SCHEMA% --polling %ECF_AVISO_POLLING%
-
-      endfamily
-
-    endsuite
-    # enddef
 
 .. _ch-runtime-state:
 
