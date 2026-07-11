@@ -2322,6 +2322,14 @@ private:
 /* *** Write entry point **************************************************** */
 /* ************************************************************************** */
 
+///
+/// @brief Write an item to a buffer, using the specified context
+///
+/// @tparam T the type of item to write
+/// @param buffer the buffer to write to
+/// @param item the item to write
+/// @param ctx the context for writing
+///
 template <typename T>
 inline void write_t(std::string& buffer, const T& item, FormatContext& ctx) {
     buffer.reserve(1024 * 4); // Should be using a sensible default size for the buffer
@@ -2329,6 +2337,15 @@ inline void write_t(std::string& buffer, const T& item, FormatContext& ctx) {
     implementation::Writer<T, stringstreambuf>::write(output, item, ctx);
 }
 
+///
+/// @brief Write an item to a stream, using the specified context
+///
+/// @tparam Stream the type of the output stream
+/// @tparam T the type of item to write
+/// @param output the output stream to write to
+/// @param item the item to write
+/// @param ctx the context for writing
+///
 template <typename Stream, typename T>
 inline void write_t(Stream& output, const T& item, FormatContext& ctx) {
     std::string buffer;
@@ -2336,6 +2353,14 @@ inline void write_t(Stream& output, const T& item, FormatContext& ctx) {
     output << buffer;
 }
 
+///
+/// @brief Convert an item to a string, using the specified context
+///
+/// @tparam T the type of item to write
+/// @param item the item to write
+/// @param ctx the context for writing
+/// @return the item as a string
+///
 template <typename T>
 inline std::string as_string(const T& item, FormatContext& ctx) {
     std::string buffer;
@@ -2347,6 +2372,14 @@ inline std::string as_string(const T& item, FormatContext& ctx) {
 /* *** Write entry point (with PrintStyle) ********************************** */
 /* ************************************************************************** */
 
+///
+/// @brief Write an expression to a buffer, using the specified PrintStyle and type of the expression
+///
+/// @param buffer the buffer to write to
+/// @param item the expression to write
+/// @param style the print style to use
+/// @param type the type of expression (either "trigger" or "complete")
+///
 inline void write_t(std::string& buffer, const Expression& item, PrintStyle::Type_t style, const std::string& type) {
     buffer.reserve(1024 * 4); // Should be using a sensible default size for the buffer
     stringstreambuf output{buffer};
@@ -2354,6 +2387,14 @@ inline void write_t(std::string& buffer, const Expression& item, PrintStyle::Typ
     implementation::Writer<Expression, stringstreambuf>::write(output, item, ctx, type);
 }
 
+///
+/// @brief Write an item to a buffer, using the specified PrintStyle
+///
+/// @tparam T the type of item to write
+/// @param buffer the buffer to write to
+/// @param item the item to write
+/// @param style the print style to use
+///
 template <typename T>
 inline void write_t(std::string& buffer, const T& item, PrintStyle::Type_t style) {
     buffer.reserve(1024 * 4); // Should be using a sensible default size for the buffer
@@ -2362,6 +2403,15 @@ inline void write_t(std::string& buffer, const T& item, PrintStyle::Type_t style
     implementation::Writer<T, stringstreambuf>::write(output, item, ctx);
 }
 
+///
+/// @brief Write an item to an output stream, using the specified PrintStyle
+///
+/// @tparam Stream the type of the output stream
+/// @tparam T the type of item to write
+/// @param output the output stream
+/// @param item the item to write
+/// @param style the print style to use
+///
 template <typename Stream, typename T>
 inline void write_t(Stream& output, const T& item, PrintStyle::Type_t style) {
     std::string buffer;
@@ -2369,6 +2419,14 @@ inline void write_t(Stream& output, const T& item, PrintStyle::Type_t style) {
     output << buffer;
 }
 
+///
+/// @brief Convert an item to a string, using the specified PrintStyle
+///
+/// @tparam T the type of item to convert
+/// @param item the item to convert
+/// @param style the print style to use
+/// @return the item as a string
+///
 template <typename T>
 inline std::string as_string(const T& item, PrintStyle::Type_t style) {
     std::string buffer;
