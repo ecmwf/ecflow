@@ -29,6 +29,18 @@ pass over this directory. The Python packages needed by the Sphinx build are lis
 in `requirements.txt` (also used by readthedocs.io, see `.readthedocs.yml` at the
 repository root).
 
+For local documentation work, `sphinx-autobuild` is convenient because it rebuilds
+and refreshes the rendered pages automatically while you edit. It is intentionally
+not part of `requirements.txt`, so readthedocs does not install it. Install it only
+in your local environment when needed:
+
+```bash
+python3 -m pip install sphinx-autobuild
+```
+
+This is especially useful during iterative documentation updates, where repeated
+local Sphinx rebuilds would otherwise be manual.
+
 ## Generated reference pages are committed on purpose
 
 Parts of the reference documentation are **generated files committed as if they were

@@ -258,10 +258,10 @@ Definition — the root, implicit
 -------------------------------
 
 The *Definition* represents the whole file. Think of it as the root node that holds zero-or-more ``extern``
-declarations and one-or-more suites. It has no explicit opening/closing keyword — it *is* everything in the file.
+declarations and zero-or-more suites. It has no explicit opening/closing keyword — it *is* everything in the file.
 
 When generating ``STATE``/``MIGRATE``/``NET`` output, it also carries a :ref:`state-header` header, server variables,
-and optionally ``history`` lines, all before the first suite.
+and optionally ``history`` lines, all before any suites.
 
 .. _node-suite:
 
@@ -1670,11 +1670,9 @@ representative cross-section of the grammar above.
     endsuite
     # enddef
 
-..
-
-   Both _grammar and _ch-grammar are included here for cross-reference convenience.
+.. Both _grammar and _ch-grammar are included here for cross-reference convenience.
    While _grammar is used across the documentation to refer to the grammar section,
-   _ch-grammar inside this document itself.
+   _ch-grammar is used inside this document itself.
 
 .. _grammar:
 .. _ch-grammar:
@@ -1703,7 +1701,7 @@ The formal grammar of a definition file is as follows.
 
 .. code-block:: text
 
-    defs            : *( extern | nextline ) >> +suite >> EOF
+    defs            : *( extern | nextline ) >> *suite >> EOF
     extern          : "extern" >> absolutepath >> !( ":" >> identifier )
     suite           : "suite" >> node_name >> *node_attr >> clock_block >> *( family | task ) >> "endsuite"
     family          : "family" >> node_name >> *node_attr >> *( family | task ) >> "endfamily"
@@ -1739,7 +1737,7 @@ The formal grammar of a definition file is as follows.
     meter           : "meter" >> identifier >> integer >> integer >> !unsigned_int
     event           : "event" >> ( eventnumber >> !eventname | eventname ) >> !"set"
     late            : "late" >> late_option >> !late_option >> !late_option
-    late_option     : ("-s" >> "+" >> hh_mm) | ("-a" >> hh_mm) | ("-c" >> !"+" >> hh_mm)
+    late_option     : ("-s" >> !"+" >> hh_mm) | ("-a" >> hh_mm) | ("-c" >> !"+" >> hh_mm)
     defstatus       : "defstatus" >> dstate
     autocancel      : "autocancel" >> ( ("+" >> hh_mm) | hh_mm | unsigned_int )
     autoarchive     : "autoarchive" >> ( ("+" >> hh_mm) | hh_mm | unsigned_int ) >> !"-i"
@@ -1767,7 +1765,7 @@ The formal grammar of a definition file is as follows.
     timeseries      : hh_mm | ( hh_mm >> hh_mm >> hh_mm )
     hh_mm           : two_int >> ":" >> two_int
     node_name       : (alnum|"_") >> *(alnum|"_"|".")
-    identifier      : (alnum|"_") >> *(alnum|"_")
+    identifier      : (alnum|"_") >> *(alnum|"_"|".")
     nodePath        : absolutepath | dotpath | dotdotpath
     absolutepath    : "/" >> identifier >> *( "/" >> identifier )
     dotpath         : "." >> +( "/" >> identifier )

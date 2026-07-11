@@ -5,5 +5,4 @@ setuptools>=51.0.0
 sphinx-rtd-theme>=3.0.0
 sphinx-tabs>=3.4.0
 sphinx-copybutton>=0.5.0
-sphinx-autobuild
-pyyaml
+pyyaml>=6.0

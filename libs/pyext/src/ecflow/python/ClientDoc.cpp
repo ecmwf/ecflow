@@ -1616,7 +1616,7 @@ const char* ClientDoc::delete_all() {
 
 const char* ClientDoc::enable_ssl() {
     return "Enable secure communication between client and server.\n\n"
-           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -1628,7 +1628,7 @@ const char* ClientDoc::enable_ssl() {
 
 const char* ClientDoc::disable_ssl() {
     return "Disable secure communication between client and server.\n\n"
-           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"
@@ -1640,7 +1640,7 @@ const char* ClientDoc::disable_ssl() {
 
 const char* ClientDoc::get_certificate() {
     return "Retrieves the full path to the secure communication certificate currently used by the client.\n\n"
-           "See `ecflow.Client`_ initialisation for details regarding secure communication configuration.\n"
+           "See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.\n"
            "\nUsage:\n\n"
            ".. code-block:: python\n\n"
            "   try:\n"

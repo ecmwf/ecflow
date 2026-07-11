@@ -979,7 +979,7 @@ Usage:
 
 Disable secure communication between client and server.
 
-See `ecflow.Client`_ initialisation for details regarding secure communication configuration.
+See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.
 
 Usage:
 
@@ -1038,7 +1038,7 @@ Enable HTTPS communication
 
 Enable secure communication between client and server.
 
-See `ecflow.Client`_ initialisation for details regarding secure communication configuration.
+See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.
 
 Usage:
 
@@ -1328,7 +1328,7 @@ Usage:
 
 Retrieves the full path to the secure communication certificate currently used by the client.
 
-See `ecflow.Client`_ initialisation for details regarding secure communication configuration.
+See :py:class:`ecflow.Client` initialisation for details regarding secure communication configuration.
 
 Usage:
 

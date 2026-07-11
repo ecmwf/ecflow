@@ -136,13 +136,18 @@ def class_lines(name, cls):
 def generate():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     for name in sorted(dir(ecflow)):
+        # Intentionally skip module-level functions for now. The only current
+        # public lowercase member is debug_build(), which we do not publish in
+        # the generated reference yet.
         if name.startswith("_") or not name[0].isupper():
             continue
         cls = getattr(ecflow, name)
-        assert isinstance(cls, type), f"unexpected non-class module member: {name}"
+        if not isinstance(cls, type):
+            raise SystemExit(f"extract_api.py: unexpected non-class module member: {name}")
         lines = class_lines(name, cls)
         content = "\n".join(lines) + ("\n" if not lines[-1] else "\n\n")
         (OUTPUT_DIR / f"{name}.rst").write_text(content)
 
 
-generate()
+if __name__ == "__main__":
+    generate()

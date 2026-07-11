@@ -839,7 +839,7 @@ const char* NodeAttrDoc::clock_doc() {
 
 const char* NodeAttrDoc::aviso_doc() {
     return "An :term:`aviso` attribute, assigned to a :term:`node`, represents an external trigger holding the node "
-           "queued until"
+           "queued until "
            "an Aviso notification matching the attribute configuration is detected.\n"
            "\n"
            "Although :term:`aviso` attributes can be set at any level (Suite, Family, Task), it only makes sense to "
