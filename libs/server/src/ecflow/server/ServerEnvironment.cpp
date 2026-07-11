@@ -424,66 +424,6 @@ bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const {
     return false;
 }
 
-// bool ServerEnvironment::authenticateReadAccess(const std::string& user,
-//                                                bool custom_user,
-//                                                const std::string& passwd) const {
-//     if (!custom_user) {
-//         if (!passwd_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//     else {
-//         if (!passwd_custom_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//
-//     // if *NO* users specified then all users are valid
-//     return white_list_file_.verify_read_access(user);
-// }
-
-// bool ServerEnvironment::authenticateReadAccess(const std::string& user,
-//                                                bool custom_user,
-//                                                const std::string& passwd,
-//                                                const std::string& path) const {
-//     if (!custom_user) {
-//         if (!passwd_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//     else {
-//         if (!passwd_custom_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//
-//     return white_list_file_.verify_read_access(user, path);
-// }
-//
-// bool ServerEnvironment::authenticateReadAccess(const std::string& user,
-//                                                bool custom_user,
-//                                                const std::string& passwd,
-//                                                const std::vector<std::string>& paths) const {
-//     if (!custom_user) {
-//         if (!passwd_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//     else {
-//         if (!passwd_custom_file_.authenticate(user, passwd))
-//             return false;
-//     }
-//
-//     return white_list_file_.verify_read_access(user, paths);
-// }
-//
-// bool ServerEnvironment::authenticateWriteAccess(const std::string& user) const {
-//     // if *NO* users specified then all users have write access
-//     return white_list_file_.verify_write_access(user);
-// }
-// bool ServerEnvironment::authenticateWriteAccess(const std::string& user, const std::string& path) const {
-//     return white_list_file_.verify_write_access(user, path);
-// }
-// bool ServerEnvironment::authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) const
-// {
-//     return white_list_file_.verify_write_access(user, paths);
-// }
-
 // ============================================================================================
 // Privates:
 // ============================================================================================
