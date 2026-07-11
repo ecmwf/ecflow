@@ -1,7 +1,7 @@
 .. _user_manual:
 
-Using ecFlow
-//////////////////
+User Manual
+///////////
 
 .. toctree::
    :maxdepth: 1
