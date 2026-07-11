@@ -8,16 +8,13 @@
  * nor does it submit to any jurisdiction.
  */
 
-#define BOOST_TEST_MODULE Test_Base
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
-#include "MockServer.hpp"
-#include "ecflow/base/Algorithms.hpp"
 #include "ecflow/node/Family.hpp"
-#include "ecflow/server/BaseServer.hpp"
+#include "ecflow/node/NodePathAlgorithms.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
-BOOST_AUTO_TEST_SUITE(U_Base)
+BOOST_AUTO_TEST_SUITE(U_Node)
 
 BOOST_AUTO_TEST_SUITE(T_Path)
 
@@ -109,6 +106,59 @@ BOOST_AUTO_TEST_CASE(test_can_visit_defs) {
     BOOST_CHECK_EQUAL(visitor.collected[1], "node: suite");
     BOOST_CHECK_EQUAL(visitor.collected[2], "node: family");
     BOOST_CHECK_EQUAL(visitor.collected[3], "node: task");
+}
+
+BOOST_AUTO_TEST_CASE(test_visit_root_path_only_visits_defs) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    defs.add_suite("suite");
+
+    struct Visitor
+    {
+        void handle(const Defs& defs) { collected.push_back("defs"); }
+        void handle(const Node& s) { collected.push_back("node: " + s.name()); }
+        void not_found() { not_found_called = true; }
+
+        std::vector<std::string> collected;
+        bool not_found_called = false;
+    };
+
+    auto path = ecf::Path::make("/").value();
+    Visitor visitor;
+    ecf::visit(defs, path, visitor);
+
+    // An empty (root) path visits only the definitions, and no node
+    BOOST_CHECK_EQUAL(visitor.collected.size(), 1ul);
+    BOOST_CHECK_EQUAL(visitor.collected[0], "defs");
+    BOOST_CHECK(!visitor.not_found_called);
+}
+
+BOOST_AUTO_TEST_CASE(test_visit_unresolved_token_calls_not_found) {
+    ECF_NAME_THIS_TEST();
+
+    Defs defs;
+    defs.add_suite("suite");
+
+    struct Visitor
+    {
+        void handle(const Defs& defs) { collected.push_back("defs"); }
+        void handle(const Node& s) { collected.push_back("node: " + s.name()); }
+        void not_found() { not_found_called = true; }
+
+        std::vector<std::string> collected;
+        bool not_found_called = false;
+    };
+
+    auto path = ecf::Path::make("/suite/missing").value();
+    Visitor visitor;
+    ecf::visit(defs, path, visitor);
+
+    // Traversal stops at the first unresolved token, invoking not_found()
+    BOOST_CHECK(visitor.not_found_called);
+    BOOST_CHECK_EQUAL(visitor.collected.size(), 2ul);
+    BOOST_CHECK_EQUAL(visitor.collected[0], "defs");
+    BOOST_CHECK_EQUAL(visitor.collected[1], "node: suite");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // T_Algorithms

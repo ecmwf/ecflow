@@ -8,26 +8,26 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_base_Algorithms_hpp
-#define ecflow_base_Algorithms_hpp
+#ifndef ecflow_node_NodePathAlgorithms_hpp
+#define ecflow_node_NodePathAlgorithms_hpp
 
 #include <string>
+#include <vector>
 
-#include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/core/Result.hpp"
+#include "ecflow/core/Str.hpp"
 #include "ecflow/node/Defs.hpp"
 
 namespace ecf {
 
 ///
-/// Represents a path in the server's hierarchy
+/// @brief Represents a valid path in the server's node hierarchy.
 ///
-/// A path object is always represents a valid path (even if it does not exist).
-///
-/// A path with 0 tokens represents the root of the hierarchy (represented by a slash, "/").
+/// A path always represents a valid path, even if the referenced node does not exist.
 /// A path with N tokens represents a path from the root to a node.
-///
 /// Multiple consecutive separators (i.e. slashes, "/") are treated as a single slash.
+///
+/// @invariant empty() is true exactly for the root path ("/").
 ///
 struct Path
 {
@@ -73,6 +73,18 @@ private:
     std::vector<std::string> tokens_;
 };
 
+///
+/// @brief Visits the definitions and each node along the given path, in order.
+///
+/// The predicate's handle(const Defs&) is invoked first, followed by handle(const Node&) for
+/// each node along @p path. Traversal stops early, invoking not_found(), when a token does not
+/// resolve to an existing node. An empty path visits only the definitions.
+///
+/// @tparam PREDICATE Visitor exposing handle(const Defs&), handle(const Node&) and not_found().
+/// @param[in] defs The definitions tree to traverse.
+/// @param[in] path The path from the root; an empty path visits only @p defs.
+/// @param[in,out] predicate The visitor invoked for each visited element.
+///
 template <typename PREDICATE>
 void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
 
@@ -104,4 +116,4 @@ void visit(const Defs& defs, const Path& path, PREDICATE& predicate) {
 
 } // namespace ecf
 
-#endif // ecflow_base_Algorithms_hpp
+#endif // ecflow_node_NodePathAlgorithms_hpp

@@ -11,9 +11,9 @@
 #include "ecflow/server/AuthorisationService.hpp"
 
 #include "ecflow/base/AbstractServer.hpp"
-#include "ecflow/base/Algorithms.hpp"
 #include "ecflow/core/Overload.hpp"
 #include "ecflow/core/WhiteListFile.hpp"
+#include "ecflow/node/NodePathAlgorithms.hpp"
 
 namespace ecf {
 
