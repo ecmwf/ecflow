@@ -56,3 +56,14 @@ div.rightside {
 .mediumturquoise {
     color: mediumturquoise;
 }
+
+
+div.admonition.implementation {
+    background-color: #f5f5f5;
+    border-left: 4px solid #bdbdbd;
+}
+
+div.admonition.implementation > .admonition-title {
+    background-color: #e0e0e0;
+    color: #424242;
+}

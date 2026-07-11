@@ -65,40 +65,24 @@ add_custom_command(
     #
     # Clear the reference binary directory to avoid stale files
     #
-    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/python_api/rst/*
-  COMMAND
-    #
-    # Clear the documentation build directory to avoid stale files
-    #
-    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/python_api/_build
+    ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/python_api/reference/*
   COMMAND
     #
     # Generate the Python API documentation
     #
-    #  * Sphinx is driven by the .../python_api/conf.py file
-    #  * The API documentation generation is driven by the .../python_api/index.rst file
-    #  * The API documentation is based on the docstrings in the Python module (using sphinx.ext.autodoc)
+    #  * The API documentation is based on the docstrings in the Python module,
+    #    extracted by introspection using the extract_api.py script
     #  * The API documentation .../python_api/reference/*.rst files are created in the binary directory
     #
     ${CMAKE_COMMAND} -E env "PYTHONPATH=${ECFLOW_PYTHONPATH}"
-        ${SPHINX_EXECUTABLE} -M html
-          ${CMAKE_CURRENT_SOURCE_DIR}/python_api
-          ${CMAKE_CURRENT_BINARY_DIR}/python_api/_build
+        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/python_api/extract_api.py
   COMMAND
     #
-    # Copy the glossary and categories lists to the binary directory, to be used by python_api.py script
+    # Copy the categories list to the binary directory, to be used by python_api.py script
     #
     ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/python_api/glossary.yaml
         ${CMAKE_CURRENT_SOURCE_DIR}/python_api/categories.yaml
         ${CMAKE_CURRENT_BINARY_DIR}/python_api
-  COMMAND
-    #
-    # Apply a correction to the generated reference files
-    #
-    #  * Corrects `<ref>`_ in the docstrings to valid reStructuredText references `:ref:`<ref>`
-    #
-    ${CMAKE_CURRENT_SOURCE_DIR}/python_api/reference.fix.py
   COMMAND
     #
     # Generate the Python API Reference index file, based on the reference files list

@@ -743,11 +743,11 @@ void export_NodeAttr(py::module& m) {
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
         .def("empty", &ZombieAttr::empty, "Return true if the attribute is empty")
-        .def("zombie_type", &ZombieAttr::zombie_type, "Returns the `zombie type`_")
+        .def("zombie_type", &ZombieAttr::zombie_type, "Returns the :term:`zombie type`")
         .def("user_action", &ZombieAttr::action, "The automated action to invoke, when zombies arise")
         .def("zombie_lifetime",
              &ZombieAttr::zombie_lifetime,
-             "Returns the lifetime in seconds of `zombie`_ in the server")
+             "Returns the lifetime in seconds of :term:`zombie` in the server")
         .def_property_readonly("child_cmds",
                                &ZombieAttr::child_cmds,
                                "The list of child commands. If empty action applies to all child cmds");
@@ -832,8 +832,11 @@ void export_NodeAttr(py::module& m) {
         .def(py::self < py::self)
         .def("__str__", &Label::toString)
         .def("__copy__", pyutil_copy_object<Label>)
-        .def("name", &Label::name, py::return_value_policy::reference, "Return the `label`_ name as string")
-        .def("value", &Label::value, py::return_value_policy::reference, "Return the original `label`_ value as string")
+        .def("name", &Label::name, py::return_value_policy::reference, "Return the :term:`label` name as string")
+        .def("value",
+             &Label::value,
+             py::return_value_policy::reference,
+             "Return the original :term:`label` value as string")
         .def("new_value", &Label::new_value, py::return_value_policy::reference, "Return the new label value as string")
         .def(
             "empty", &Label::empty, "Return true if the Label is empty. Used when returning a NULL Label, from a find");
@@ -846,9 +849,9 @@ void export_NodeAttr(py::module& m) {
         .def(py::self < py::self)
         .def("__str__", &Limit::toString)
         .def("__copy__", pyutil_copy_object<Limit>)
-        .def("name", &Limit::name, py::return_value_policy::reference, "Return the `limit`_ name as string")
-        .def("value", &Limit::value, "The `limit`_ token value as an integer")
-        .def("limit", &Limit::theLimit, "The max value of the `limit`_ as an integer")
+        .def("name", &Limit::name, py::return_value_policy::reference, "Return the :term:`limit` name as string")
+        .def("value", &Limit::value, "The :term:`limit` token value as an integer")
+        .def("limit", &Limit::theLimit, "The max value of the :term:`limit` as an integer")
         .def("increment", &Limit::increment, "used for test only")
         .def("decrement", &Limit::decrement, "used for test only")
         .def("node_paths", &Limit_node_paths, "List of nodes(paths) that have consumed a limit");
@@ -866,7 +869,7 @@ void export_NodeAttr(py::module& m) {
         .def(py::self < py::self)
         .def("__str__", &InLimit::toString)
         .def("__copy__", pyutil_copy_object<InLimit>)
-        .def("name", &InLimit::name, py::return_value_policy::reference, "Return the `inlimit`_ name as string")
+        .def("name", &InLimit::name, py::return_value_policy::reference, "Return the :term:`inlimit` name as string")
         .def("path_to_node",
              &InLimit::pathToNode,
              py::return_value_policy::reference,
@@ -1049,34 +1052,36 @@ void export_NodeAttr(py::module& m) {
         .def(py::init(&LateAttr_make))
         .def("submitted",
              &ecf::LateAttr::addSubmitted,
-             "submitted(TimeSlot):The time node can stay `submitted`_. Submitted is always relative. If the node "
+             "submitted(TimeSlot):The time node can stay :term:`submitted`. Submitted is always relative. If the node "
              "stays\n"
-             "submitted longer than the time specified, the `late`_ flag is set\n")
+             "submitted longer than the time specified, the :term:`late` flag is set\n")
         .def("submitted",
              &ecf::LateAttr::add_submitted,
              "submitted(hour,minute) The time node can stay submitted. Submitted is always relative. If the node "
              "stays\n"
              "submitted longer than the time specified, the late flag is set\n")
-        .def("active",
-             &ecf::LateAttr::add_active,
-             "active(hour,minute): The time the node must become `active`_. If the node is still `queued`_ or "
-             "`submitted`_\n"
-             "by the time specified, the late flag is set")
+        .def(
+            "active",
+            &ecf::LateAttr::add_active,
+            "active(hour,minute): The time the node must become :term:`active`. If the node is still :term:`queued` or "
+            ":term:`submitted`\n"
+            "by the time specified, the late flag is set")
         .def("active",
              &ecf::LateAttr::addActive,
-             "active(TimeSlot):The time the node must become `active`_. If the node is still `queued`_ or "
-             "`submitted`_\n"
+             "active(TimeSlot):The time the node must become :term:`active`. If the node is still :term:`queued` or "
+             ":term:`submitted`\n"
              "by the time specified, the late flag is set")
-        .def("complete",
-             &ecf::LateAttr::add_complete,
-             "complete(hour,minute):The time the node must become `complete`_. If relative, time is taken from the "
-             "time\n"
-             "the node became `active`_, otherwise node must be `complete`_ by the time given")
+        .def(
+            "complete",
+            &ecf::LateAttr::add_complete,
+            "complete(hour,minute):The time the node must become :term:`complete`. If relative, time is taken from the "
+            "time\n"
+            "the node became :term:`active`, otherwise node must be :term:`complete` by the time given")
         .def("complete",
              &ecf::LateAttr::addComplete,
-             "complete(TimeSlot): The time the node must become `complete`_. If relative, time is taken from the "
+             "complete(TimeSlot): The time the node must become :term:`complete`. If relative, time is taken from the "
              "time\n"
-             "the node became `active`_, otherwise node must be `complete`_ by the time given")
+             "the node became :term:`active`, otherwise node must be :term:`complete` by the time given")
         .def(py::self == py::self)
         .def("__hash__", &py_hash)
         .def("__str__", &ecf::LateAttr::toString)
@@ -1295,7 +1300,10 @@ void export_NodeAttr(py::module& m) {
         .def("__hash__", &py_hash)
         .def("__str__", &RepeatEnumerated::toString)
         .def("__copy__", pyutil_copy_object<RepeatEnumerated>)
-        .def("name", &RepeatEnumerated::name, py::return_value_policy::reference, "Return the name of the `repeat`_.")
+        .def("name",
+             &RepeatEnumerated::name,
+             py::return_value_policy::reference,
+             "Return the name of the :term:`repeat`.")
         .def("start", &RepeatEnumerated::start)
         .def("end", &RepeatEnumerated::end)
         .def("step", &RepeatEnumerated::step)
@@ -1318,7 +1326,7 @@ void export_NodeAttr(py::module& m) {
         .def("__hash__", &py_hash)
         .def("__str__", &RepeatString::toString)
         .def("__copy__", pyutil_copy_object<RepeatString>)
-        .def("name", &RepeatString::name, py::return_value_policy::reference, "Return the name of the `repeat`_.")
+        .def("name", &RepeatString::name, py::return_value_policy::reference, "Return the name of the :term:`repeat`.")
         .def("start", &RepeatString::start)
         .def("end", &RepeatString::end)
         .def("step", &RepeatString::step)
@@ -1359,7 +1367,7 @@ void export_NodeAttr(py::module& m) {
         .def("name",
              &Repeat::name,
              py::return_value_policy::reference,
-             "The `repeat`_ name, can be referenced in `trigger`_ expressions")
+             "The :term:`repeat` name, can be referenced in :term:`trigger` expressions")
         .def("start", &Repeat::start, "The start value of the repeat, as an integer")
         .def("end", &Repeat::end, "The last value of the repeat, as an integer")
         .def("step", &Repeat::step, "The increment for the repeat, as an integer")

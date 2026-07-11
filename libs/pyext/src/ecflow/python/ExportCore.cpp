@@ -105,10 +105,11 @@ void export_Core(py::module& m) {
         .def_static("set_style", &PrintStyleHolder::setStyle, "Set the style, static method");
 
     constexpr const char* checkpt_mode_docs =
-        "CheckPt is enum that is used to control check pointing in the `ecflow_server`_\n\n"
+        "CheckPt is enum that is used to control check pointing in the :term:`ecflow_server`\n\n"
         "- NEVER  : Switches of check pointing\n"
-        "- ON_TIME: `check point`_ file is saved periodically, specified by checkPtInterval. This is the default.\n"
-        "- ALWAYS : `check point`_ file is saved after any state change, *not* recommended for large definitions\n"
+        "- ON_TIME: :term:`check point` file is saved periodically, specified by checkPtInterval. This is the "
+        "default.\n"
+        "- ALWAYS : :term:`check point` file is saved after any state change, *not* recommended for large definitions\n"
         "- UNDEFINED : None of the the above, used to provide default argument\n";
 
     py::enum_<ecf::CheckPt::Mode>(m, "CheckPt", checkpt_mode_docs)
@@ -136,18 +137,21 @@ void export_Core(py::module& m) {
                     "Set debug level. debug_level > 0 will disable some warning messages");
 
     constexpr const char* nstate_state_docs =
-        "Each `node`_ can have a status, which reflects the life cycle of a node.\n\n"
+        "Each :term:`node` can have a status, which reflects the life cycle of a node.\n\n"
         "It varies as follows:\n\n"
-        "- When the definition file is loaded into the `ecflow_server`_ the `task`_ status is `unknown`_\n"
-        "- After begin command the `task`_ s are either `queued`_, `complete`_, `aborted`_ or `suspended`_ ,\n"
-        "  a suspended task means that the task is really `queued`_ but it must be resumed by\n"
-        "  the user first before it can be `submitted`_. See :py:class:`ecflow.DState`\n"
-        "- Once the `dependencies`_ are resolved a task is submitted and placed into the `submitted`_ state,\n"
-        "  however if the submission fails, the task is placed in a `aborted`_ state.\n"
-        "- On a successful submission the task is placed into the `active`_ state\n"
+        "- When the definition file is loaded into the :term:`ecflow_server` the :term:`task` status is "
+        ":term:`unknown`\n"
+        "- After begin command the :term:`task` s are either :term:`queued`, :term:`complete`, :term:`aborted` or "
+        ":term:`suspended` ,\n"
+        "  a suspended task means that the task is really :term:`queued` but it must be resumed by\n"
+        "  the user first before it can be :term:`submitted`. See :py:class:`ecflow.DState`\n"
+        "- Once the :term:`dependencies` are resolved a task is submitted and placed into the :term:`submitted` "
+        "state,\n"
+        "  however if the submission fails, the task is placed in a :term:`aborted` state.\n"
+        "- On a successful submission the task is placed into the :term:`active` state\n"
         "- Before a job ends, it may send other message to the server such as:\n"
-        "  Set an `event`_, Change a `meter`_, Change a `label`_, send a message to log file\n\n"
-        "Jobs end by becoming either `complete`_ or `aborted`_";
+        "  Set an :term:`event`, Change a :term:`meter`, Change a :term:`label`, send a message to log file\n\n"
+        "Jobs end by becoming either :term:`complete` or :term:`aborted`";
 
     py::enum_<NState::State>(m, "State", nstate_state_docs)
 
@@ -163,9 +167,9 @@ void export_Core(py::module& m) {
     constexpr const char* dstate_docs = "A DState is like a ecflow.State, except for the addition of SUSPENDED\n\n"
                                         "Suspended stops job generation, and hence is an attribute of a Node.\n"
                                         "DState can be used for setting the default state of node when it is\n"
-                                        "begun or re queued. DState is used for defining `defstatus`_.\n"
+                                        "begun or re queued. DState is used for defining :term:`defstatus`.\n"
                                         "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.Defstatus`\n"
-                                        "The default state of a `node`_ is `queued`_.\n"
+                                        "The default state of a :term:`node` is :term:`queued`.\n"
                                         "\nUsage::\n\n"
                                         "   task = ecflow.Task('t1')\n"
                                         "   task.add_defstatus(ecflow.DState.complete)"
@@ -186,10 +190,11 @@ void export_Core(py::module& m) {
 
     py_finalize_enum(m, "DState");
 
-    constexpr const char* defstatus_docs = "A `node`_ can be set with a default status other the `queued`_\n\n"
-                                           "The default state of a `node`_ is `queued`_.\n"
-                                           "This defines the state to take at 'begin' or 're-queue' time\n"
-                                           "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.DState`\n";
+    constexpr const char* defstatus_docs =
+        "A :term:`node` can be set with a default status other the :term:`queued`\n\n"
+        "The default state of a :term:`node` is :term:`queued`.\n"
+        "This defines the state to take at 'begin' or 're-queue' time\n"
+        "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.DState`\n";
 
     py::class_<Defstatus>(m, "Defstatus", py::dynamic_attr(), defstatus_docs)
 
@@ -198,8 +203,8 @@ void export_Core(py::module& m) {
         .def("state", &Defstatus::state)
         .def("__str__", &Defstatus::to_string);
 
-    constexpr const char* sstate_state_docs = "A SState holds the `ecflow_server`_ state\n\n"
-                                              "See `server states`_";
+    constexpr const char* sstate_state_docs = "A SState holds the :term:`ecflow_server` state\n\n"
+                                              "See :term:`server states`";
 
     py::enum_<SState::State>(m, "SState", sstate_state_docs)
 
@@ -233,7 +238,7 @@ void export_Core(py::module& m) {
 
     constexpr const char* timeseries_docs =
         "A TimeSeries can hold a single time slot or a series.\n\n"
-        "Time series can be created relative to the `suite`_ start or start of a repeating node.\n"
+        "Time series can be created relative to the :term:`suite` start or start of a repeating node.\n"
         "A Time series can be used as argument to the :py:class:`ecflow.Time`, :py:class:`ecflow.Today` and "
         ":py:class:`ecflow.Cron` attributes of a node.\n"
         "If a time the job takes to complete is longer than the interval, a 'slot' is missed\n"
