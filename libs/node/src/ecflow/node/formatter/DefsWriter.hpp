@@ -38,7 +38,7 @@ struct Style
     Style(PrintStyle::Type_t s)
         : selected_(s) {}
 
-    PrintStyle::Type_t selected() { return selected_; }
+    PrintStyle::Type_t selected() const { return selected_; }
 
     template <PrintStyle::Type_t... Args>
     bool is_one_of() const {
