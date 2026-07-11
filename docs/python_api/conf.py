@@ -41,7 +41,13 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+#
+# This project only drives the docstring extraction, from the master index.rst file;
+# its HTML output is discarded. The previously generated python_api.rst and reference/*
+# files must not be parsed here: at this point the reference/* files have been cleared
+# for regeneration, so the python_api.rst toctree refers to documents that do not exist yet.
+#
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "python_api.rst", "reference"]
 
 # The docstrings reference glossary terms (:term:) and labels (:ref:) that are only
 # defined in the main documentation; this extraction-only project cannot resolve them,
