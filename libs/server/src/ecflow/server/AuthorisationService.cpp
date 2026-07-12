@@ -108,10 +108,10 @@ bool AuthorisationService::allows(const Identity& identity,
                         [&allowed, &identity, &paths, &permission](const WhiteListRules& rules) {
                             // Apply white list rules
                             if (permission == "read") {
-                                allowed = rules.file_.verify_read_access(identity.username(), paths);
+                                allowed = rules.file_.verify_read_access(identity.username().value(), paths);
                             }
                             else if (permission == "write") {
-                                allowed = rules.file_.verify_write_access(identity.username(), paths);
+                                allowed = rules.file_.verify_write_access(identity.username().value(), paths);
                             }
                             else {
                                 allowed = false;
@@ -145,7 +145,7 @@ bool AuthorisationService::allows(const Identity& identity,
                                 if (v.permissions.is_empty()) {
                                     allowed = true;
                                 }
-                                else if (v.permissions.allows(identity.username())) {
+                                else if (v.permissions.allows(identity.username().value())) {
                                     allowed = true;
                                 }
                                 else {

@@ -54,6 +54,7 @@ set(test_srcs
   test/TestFile.cpp
   test/TestFilesystem.cpp
   test/TestGetUserDetails.cpp
+  test/TestIdentity.cpp
   test/TestLog.cpp
   test/TestMessage.cpp
   test/TestMigration.cpp
