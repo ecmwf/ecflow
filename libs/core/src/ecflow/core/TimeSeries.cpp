@@ -230,7 +230,7 @@ void TimeSeries::requeue(const ecf::Calendar& c, bool reset_next_time_slot) {
 
     // the nextTimeSlot_ needs to be set to a multiple of incr
     // However the nextTimeSlot_ cannot just be incremented by incr
-    // since we can't assume that a task completes within the given time slots,
+    // since we cannot assume that a task completes within the given time slots,
     // hence, increments to NEXT TIME SLOT larger than calendar time.
     // time 10::00 20:00 01:00
     //                       --------------------------------------------------------nextTimeSlot_ must greater than
@@ -838,7 +838,7 @@ ecf::TimeSeries TimeSeries::create(size_t& index, const std::vector<std::string>
     int startMin  = -1;
 
     // cron 10:00 20:00 01:00
-    // index is on 10:00, ie index should have value of 1 in this case
+    // index is on 10:00, i.e., index should have value of 1 in this case
     std::string startStr = lineTokens[index];
     bool relative        = false;
     if (startStr[0] == '+') {

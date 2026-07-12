@@ -40,7 +40,7 @@ using namespace ecf;
 // being a zombie. The test below create a list of user Zombies.
 //   In the cases where these test fail
 //   The dump of zombies shows that only One call was made.(i.e the initial creation of the Zombie)
-//   and that the proces-id is not defined.
+//   and that the process-id is not defined.
 //   This implies that at test start, that not all process were started.
 //   ??Note sure why?? This can be seen by enabling debug in TaskCmds which
 //   shows that the Task INIT command was never received ???
@@ -519,7 +519,7 @@ create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::s
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation(suite_name + ".def"),
                           1 /*timeout*/,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     // Wait for a single task to reach state submitted or active, before creating zombies
     waitForTaskStates(SINGLE, NState::SUBMITTED, NState::ACTIVE, timeout);
@@ -552,7 +552,7 @@ create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::s
         /// Begin with force, Should create user zombies. WILL only catch those task that are submitted
         /// It may well be that job submission, may only get a subset, others, which come for submission *later*
         /// on will be ECF zombies.
-        /// Note: If we wait for SUMBITTED, then we get the case, where we have two task jobs
+        /// Note: If we wait for SUBMITTED, then we get the case, where we have two task jobs
         ///       with same password, BUT different process id ??????
         ///       i.e The begin has regenerate the job file, so we get job started twice.
         ///       This should be trapped by the server, as Task should be active
@@ -721,7 +721,7 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation) {
         remove_stale_zombies();
     }
 
-    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was recieved
+    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was received
     check_expected_no_of_zombies(0);
 
     std::cout << timer.duration() << "s\n";
@@ -753,7 +753,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fob) {
     // Fobing does *NOT* alter node tree state, however COMPLETE should auto delete the zombie
     // Hence after this command, the number of fobed zombies may *NOT* be the same
     // as the number of tasks. Since the fobed zombies are auto deleted when a complete
-    // child command is recieved.
+    // child command is received.
     int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::FOB, NUM_OF_TASKS, timeout);
     BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0, "*error* Expected some fobed zombies but found none ?");
 
@@ -762,7 +762,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_delete_fob) {
         remove_stale_zombies(); // see notes above
     }
 
-    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was recieved
+    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was received
     check_expected_no_of_zombies(0);
 
     std::cout << timer.duration() << "s\n";
@@ -823,7 +823,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_begin) {
 
     /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
     /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
-    /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
+    /// Previously we had tried again, but fix for ECFLOW-1216, means we now do not try again,hence allow abort
     BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL, NState::COMPLETE, NState::ABORTED, timeout),
                           "*error* Expected non-zombie tasks to complete or abort");
 
@@ -844,7 +844,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_begin) {
         remove_stale_zombies(); // see notes above
     }
 
-    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was recieved
+    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was received
     check_expected_no_of_zombies(0);
 
     std::cout << timer.duration() << "s\n";
@@ -888,7 +888,7 @@ BOOST_AUTO_TEST_CASE(test_zombies_attr) {
         remove_stale_zombies(); // see notes above
     }
 
-    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was recieved
+    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was received
     check_expected_no_of_zombies(0);
 
     std::cout << timer.duration() << "s\n";
@@ -921,7 +921,7 @@ BOOST_AUTO_TEST_CASE(test_user_zombies_for_adopt) {
     check_at_least_one_zombie();
 
     /// Adopt all the zombies. This will UNBLOCK the child commands allowing them to finish
-    /// This test below fail on AIX, its too fast , task's may already be adopted and hence don't fail
+    /// This test below fail on AIX, its too fast , task's may already be adopted and hence do not fail
     int no_of_adopted_zombied = ZombieUtil::do_zombie_user_action(ZombieCtrlAction::ADOPT, NUM_OF_TASKS, timeout);
     if (ecf_debug_enabled) {
         std::cout << "   found " << no_of_adopted_zombied << " zombies for adoption\n";
@@ -1189,7 +1189,7 @@ BOOST_AUTO_TEST_CASE(test_zombie_kill) {
             TestFixture::client().zombieGet();
             std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
             for (const Zombie& z : zombies) {
-                if (z.block()) { // something went wrong, fob so don't leave process hanging
+                if (z.block()) { // something went wrong, fob so do not leave process hanging
                     TestFixture::client().zombieFob(z);
                     task_became_blocked = true;
                     std::cout << "Zombies blocking ?? " << z << "\n";

@@ -255,7 +255,7 @@ Cmd_ptr ClientOptions::parse(const CommandLine& cl, ClientEnvironment* env) cons
     if (!cmdRegistry_.parse(client_request, vm, env)) {
 
         // The arguments did *NOT* match with any of the registered command.
-        // Hence, if arguments don't match help, debug or version it's an error
+        // Hence, if arguments do not match help, debug or version it is an error
         // Note: we did *NOT* check for a NULL client_request since *NOT* all
         //       requests need to create it. Some commands are client specific.
         //       For example:

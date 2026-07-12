@@ -131,7 +131,7 @@ STC_Cmd_ptr LoadDefsCmd::doHandleRequest(AbstractServer* as) const {
         ensure_all_mirrors_are_valid(*defs.get(), as->hostPort().first, as->hostPort().second);
 
         // After the updateDefs, defs will be left with NO suites.
-        // Can't really used defs after this point
+        // Cannot really used defs after this point
         // *NOTE* Externs are not persisted. Hence calling check() will report
         // all errors, references are not resolved.
         as->updateDefs(defs, force_);
@@ -236,7 +236,7 @@ Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename,
     std::shared_ptr<LoadDefsCmd> load_cmd =
         std::make_shared<LoadDefsCmd>(defs_filename, force, check_only, print, stats, clientEnv->env());
 
-    // Don't send to server if checking, i.e cmd not set
+    // Do not send to server if checking, i.e cmd not set
     if (check_only || stats || print) {
         return Cmd_ptr();
     }

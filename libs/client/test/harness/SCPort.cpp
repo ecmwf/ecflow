@@ -20,7 +20,7 @@
 
 namespace ecf {
 
-// init the globals. Note we dont use 3141, so that in the case where we already
+// init the globals. Note we do not use 3141, so that in the case where we already
 // have a remote/local server started external to the test, it does not clash
 // Also debug and release version use different port numbers to avoid clashes, if both tests run at same time
 
@@ -104,7 +104,7 @@ bool SCPort::is_free_port(int port, bool debug) {
     //    a/ Server does not exist : <FREE> port
     //    b/ Address in use        : <BUSY> port on existing server
     // Using server_version() but then get error messages
-    // ******** Until this is done we can't implement port hopping **********
+    // ******** Until this is done we cannot implement port hopping **********
 
     if (debug) {
         std::cout << "  ClientInvoker::is_free_port: checking port " << port << "\n";
@@ -159,7 +159,7 @@ std::string SCPort::find_free_port(int seed_port_number, bool debug) {
     //    a/ Server does not exist : <FREE> port
     //    b/ Address in use        : <BUSY> port on existing server
     // Using server_version() but then get error messages
-    // ******** Until this is done we can't implement port hopping **********
+    // ******** Until this is done we cannot implement port hopping **********
 
     if (debug) {
         std::cout << "  ClientInvoker::find_free_port: starting with port " << seed_port_number << "\n";
@@ -223,7 +223,7 @@ std::string SCPort::find_available_port(const std::string& port) {
     // We try to ensure the port is available by attempting to contact the server to confirm that the lock has been
     // performed.
 
-    // (1) Search for port that isn't locked (i.e. for which there is no `.lock` file)
+    // (1) Search for port that is not locked (i.e. for which there is no `.lock` file)
     for (int selected_port = EcfPortLock::try_next_port_lock(current_port, true); /* always advance */;
          selected_port     = EcfPortLock::try_next_port_lock(selected_port, true)) {
         if (SCPort::is_free_port(selected_port, true)) {

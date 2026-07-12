@@ -269,7 +269,7 @@ void time_load_and_downloads(ClientInvoker& theClient,
                     theClient.set_auto_sync(true);
                     DurationTimer duration_timer;
                     theClient.force(
-                        paths, "queued"); // can't use aborted again, as it already aborted, and hence will be ignored
+                        paths, "queued"); // cannot use aborted again, as it already aborted, and hence will be ignored
                     std::cout << duration_timer.elapsed_seconds() << " : auto-sync :  force(queued)" << std::endl;
                     BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < force_threshold_s,
                                         "regression force(" << duration_timer.elapsed_seconds()

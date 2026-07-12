@@ -53,7 +53,7 @@ std::string UrlCmd::getUrl() const {
 }
 
 void UrlCmd::execute() const {
-    // invoke as a system command, we don't use System::instance()
+    // invoke as a system command, we do not use System::instance()
     // since this is on the client side. hence no need manage the spawned process
     system(getUrl().c_str());
 }

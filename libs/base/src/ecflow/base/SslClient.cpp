@@ -88,7 +88,7 @@ void SslClient::start(endpoints_iterator_t endpoints_iterator) {
     // Start the connect actor.
     start_connect(endpoints_iterator);
 
-    // Start the deadline actor. You will note that we're not setting any
+    // Start the deadline actor. You will note that we are not setting any
     // particular deadline here. Instead, the connect and input actors will
     // update the deadline prior to each asynchronous operation.
     deadline_.async_wait([this](const boost::system::error_code&) { check_deadline(); });

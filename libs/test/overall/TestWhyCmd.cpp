@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_why_date) {
         family_ptr fam  = Family::create("family");
         task_ptr task   = Task::create("t1");
 
-        // Don't use hybrid for date dependency as that will force node to complete if date is not the same
+        // Do not use hybrid for date dependency as that will force node to complete if date is not the same
         auto today = Calendar::second_clock_time();
         ClockAttr clockAttr(today, false);
         suite->addClock(clockAttr);

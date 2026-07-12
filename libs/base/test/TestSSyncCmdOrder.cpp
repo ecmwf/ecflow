@@ -186,7 +186,7 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
     }
 
     {
-        /// Don't call, data model function directly, since Ecf::server_ is false. *here*
+        /// Do not call, data model function directly, since Ecf::server_ is false. *here*
         /// The suite should stay the same, only suite d's family should change
         TestHelper::invokeRequest(theDefs.get(), Cmd_ptr(new OrderNodeCmd("/d/d", NOrder::ALPHA)));
         auto names = ecf::algorithm::transform_to_vector(theDefs->suites(), to_name);

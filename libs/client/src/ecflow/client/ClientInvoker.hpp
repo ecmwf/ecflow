@@ -257,7 +257,7 @@ public:
     int getDefs() const;
     int loadDefs(const std::string& filePath,
                  bool force      = false, /* true means overwrite suite of same name */
-                 bool check_only = false, /* client side only, true means don't send to server, just check only */
+                 bool check_only = false, /* client side only, true means do not send to server, just check only */
                  bool print      = false, /* client side only, print the defs */
                  bool stats      = false  /* client side only, print the defs statistics */
     ) const;

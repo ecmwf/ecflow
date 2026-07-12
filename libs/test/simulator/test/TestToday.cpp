@@ -25,7 +25,7 @@
 using namespace ecf;
 
 /// Simulate definition files that are created on then fly. This allows us to create
-/// tests with todays date/time this speeds up the testr, we can also validate
+/// tests with todays date/time this speeds up the test, we can also validate
 /// Defs file, to check for correctness
 
 BOOST_AUTO_TEST_SUITE(S_Simulator)

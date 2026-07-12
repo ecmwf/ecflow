@@ -802,7 +802,7 @@ void CtsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
             Gnuplot gnuplot(log_file, ac->host(), ac->port());
             gnuplot.show_server_load();
 
-            return; // Don't create command, since with log file, it is client specific only
+            return; // Do not create command, since with log file, it is client specific only
         }
     }
     cmd = std::make_shared<CtsCmd>(api_);

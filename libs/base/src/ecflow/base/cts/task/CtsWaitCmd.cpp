@@ -79,7 +79,7 @@ STC_Cmd_ptr CtsWaitCmd::doHandleRequest(AbstractServer* as) const {
     // The complete expression have been parsed and we have created the abstract syntax tree
     // We now need CHECK the AST for path nodes, event and meter. repeats,etc.
     // *** This will also set the Node pointers ***
-    // If the expression references paths that don't exist throw an error
+    // If the expression references paths that do not exist throw an error
     // This can be captured in the ecf script, which should then abort the task
     // Otherwise we will end up blocking indefinitely
     std::unique_ptr<AstTop> ast =

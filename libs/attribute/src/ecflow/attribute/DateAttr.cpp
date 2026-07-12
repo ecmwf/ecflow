@@ -157,7 +157,7 @@ bool DateAttr::is_free(const ecf::Calendar& calendar) const {
 }
 
 bool DateAttr::checkForRequeue(const ecf::Calendar& calendar) const {
-    // if calendar is hybrid, we can't re-queue
+    // if calendar is hybrid, we cannot re-queue
     if (calendar.hybrid()) {
         return false;
     }

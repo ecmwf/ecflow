@@ -213,7 +213,7 @@ private:
     /**
      * @brief The latest revision received from Aviso
      *
-     * This is a 'marker' of the lastest revision processed, and is used to avoid receiving repeated notifications.
+     * This is a 'marker' of the latest revision processed, and is used to avoid receiving repeated notifications.
      **/
     mutable revision_t revision_;
 

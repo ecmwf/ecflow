@@ -55,7 +55,8 @@ Instant Instant::parse(const std::string& value) {
     if (ss.fail()) {
         throw std::runtime_error("Unable to parse invalid instant value: " + value);
     }
-    // Extra validation of the parsed values (n.b. parsing doesn't ensure number of days is in agreement with the month)
+    // Extra validation of the parsed values (n.b. parsing does not ensure number of days is in agreement with the
+    // month)
     if (!is_valid_days_of_month(tm.tm_mday, tm.tm_mon, tm.tm_year + 1900)) {
         throw std::runtime_error("Detected invalid number of days for instant value: " + value);
     }

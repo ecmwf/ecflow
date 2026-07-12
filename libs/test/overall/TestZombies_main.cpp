@@ -15,6 +15,6 @@
 
 // Global test fixture.
 //
-// Note: Due to boost deficiency this can't be easily accessed, so TestFixture makes use of global data.
+// Note: Due to boost deficiency this cannot be easily accessed, so TestFixture makes use of global data.
 //
 BOOST_GLOBAL_FIXTURE(TestFixture);

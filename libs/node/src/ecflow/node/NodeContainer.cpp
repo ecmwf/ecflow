@@ -137,7 +137,7 @@ void NodeContainer::requeue(Requeue_args& args) {
         args.clear_suspended_in_child_nodes_++;
     }
 
-    // If the node `default status` == COMPLETE, we don't log the change of state when re-queueing the descendants.
+    // If the node `default status` == COMPLETE, we do not log the change of state when re-queueing the descendants.
     // Without this optimization, all children would change state to QUEUED, and eventually change back to COMPLETE.
     // This avoids flooding the log with unnecessary messages regarding several thousand children
     // (e.g. as it happens in operations). See ECFLOW-1239 for details.
@@ -486,7 +486,7 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam) {
 #endif
 
     // cout << "NodeContainer::resolveDependencies " << absNodePath() << endl;
-    //  Don't evaluate children unless parent is free. BOMB out early for this case.
+    //  Do not evaluate children unless parent is free. BOMB out early for this case.
     //  Note:: Task::resolveDependencies() will check inLimit up front. *** THIS CHECKS UP THE HIERARCHY ***
     //  Note:: Node::resolveDependencies() may have forced family node to complete, should have
     //         returned false in this case, to stop any job submission
@@ -511,7 +511,7 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam) {
     }
 
     for (const auto& n : nodes_) {
-        // Note: we don't bomb out early here. Since a later child could be free e.g. f1/ty or t4
+        // Note: we do not bomb out early here. Since a later child could be free e.g. f1/ty or t4
         // child t1 holding
         // child t2 holding
         // child f1 free

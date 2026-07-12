@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_parse_fail) {
                           ServerTestHarness::testDataDefsLocation("test_wait_cmd_parse_fail.def"),
                           taskEcfFileMap,
                           1 /*timeout*/,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     // wait for family1 and family2 to complete
     std::vector<std::pair<std::string, NState::State>> path_state_vec;
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
     DurationTimer timer;
 
     // This time we add a wait expression that should fail
-    // because the paths referenced in the expression don't exist
+    // because the paths referenced in the expression do not exist
     Defs theDefs;
     create_defs(theDefs, "test_wait_cmd_non_existant_paths");
 
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(test_wait_cmd_non_existant_paths) {
                           ServerTestHarness::testDataDefsLocation("test_wait_cmd_non_existant_paths.def"),
                           taskEcfFileMap,
                           1 /*timeout*/,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     // wait for family1 and family2 to complete
     std::vector<std::pair<std::string, NState::State>> path_state_vec;

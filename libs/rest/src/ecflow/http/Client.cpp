@@ -22,7 +22,7 @@
 #endif
 
 // For token based authentication, this user account
-// needs to have full access to server as it's acting
+// needs to have full access to server as it is acting
 // in lieu of the actual user
 
 namespace ecf::http {

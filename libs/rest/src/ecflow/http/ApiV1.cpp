@@ -49,7 +49,7 @@ void set_allowed_methods(httplib::Response& response, const std::string& methods
 void handle_exception(const std::exception& e, const httplib::Request& request, httplib::Response& response) {
     // Try to guess a bit more suitable return values
     // based on client output
-    // TODO: should this actually be done? eg. do the status codes *only*
+    // TODO: should this actually be done? e.g., do the status codes *only*
     // reflect the API functionality or also the application (ecflow) server?
     // if user requests an ecflow script and the script does not exists, should
     // 404 be returned (even if the rest api path was correct)?
@@ -172,7 +172,7 @@ ojson filter_json(const ojson& j, const httplib::Request& r) {
     };
 
     // special case: filter is .[INDEX], means that we return the
-    // correct array element from root json element assuming it's an array
+    // correct array element from root json element assuming it is an array
     if (path_elems.size() == 1 && path_elems[0][0] == '[' && path_elems[0][path_elems[0].size() - 1] == ']') {
         const auto [key, index] = get_array_info(path_elems[0]);
         (void)key; // Note: suppress unused variable warning

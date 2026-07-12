@@ -169,7 +169,7 @@ int System::sys(System::CmdType cmd_type,
         execl("/bin/sh", "sh", "-c", cmdToSpawn.c_str(), (char*)nullptr);
         /*
          *  Maybe the file protection failed (no executable bit set)
-         *  or the shell couldn't be found. Look at man execve(2).
+         *  or the shell could not be found. Look at man execve(2).
          */
         _exit(127);
     }
@@ -381,7 +381,7 @@ void System::died(const std::string& absNodePath, CmdType cmd_type, const std::s
     ecf::log(Log::ERR, reason);
 
     /// If the Path is empty, then this could be something *OTHER THAN* job submission
-    /// Typically testing, don't assert
+    /// Typically testing, do not assert
     if (absNodePath.empty()) {
         return;
     }

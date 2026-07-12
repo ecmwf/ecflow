@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_cron_time_series) {
         // Initialise clock with todays date and time, then create a cron attribute
         // with a time series, so that task runs 3 times
 
-        // Note: we don't use:
+        // Note: we do not use:
         //    auto theLocalTime = Calendar::second_clock_time();
         // Because this can fail with:
         //    Test:: ...test_cron_time_series unknown location(0): fatal error in

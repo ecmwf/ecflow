@@ -70,14 +70,14 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
 
     std::vector<Submittable*> tasks;
 
-    // If no suite name begin all suites, else begin the the specific suite
+    // If no suite name begin all suites, else begin the specific suite
     if (suiteName_.empty()) {
 
         const auto& suites = defs->suites();
         if (!force_) {
             size_t size = suites.size();
             for (size_t s = 0; s < size; s++) {
-                /// check_suite_can_begin will throw if suite can't begin
+                /// check_suite_can_begin will throw if suite cannot begin
                 defs->check_suite_can_begin(suites[s]);
             }
         }
@@ -98,7 +98,7 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
                 MESSAGE("BeginCmd::doHandleRequest:  Begin failed as suite '" << suiteName_ << "' is not loaded.\n"));
         }
 
-        /// check_suite_can_begin will throw if suite can't begin
+        /// check_suite_can_begin will throw if suite cannot begin
         if (!force_) {
             defs->check_suite_can_begin(suite);
         }

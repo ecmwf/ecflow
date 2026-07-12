@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(test_file_backwardSearch) {
                               << nodePath);
         if (!theFile.empty()) {
             filesFound++;
-            fs::remove(theFile); // remove it so we don't find it again.
+            fs::remove(theFile); // remove it so we do not find it again.
         }
     }
     // Expect the following files to be found:
@@ -302,7 +302,7 @@ BOOST_AUTO_TEST_CASE(test_file_forwardSearch) {
                               << nodePath);
         if (!theFile.empty()) {
             filesFound++;
-            fs::remove(theFile); // *remove* so we don't find it again
+            fs::remove(theFile); // *remove* so we do not find it again
         }
     }
     BOOST_CHECK_MESSAGE(filesFound == 6, " expect to find 6 files but found " << filesFound);

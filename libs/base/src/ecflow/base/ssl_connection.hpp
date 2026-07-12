@@ -155,7 +155,7 @@ private:
             std::size_t inbound_data_size = 0;
             if (!(is >> std::hex >> inbound_data_size)) {
 
-                // Header doesn't seem to be valid. Inform the caller.
+                // Header does not seem to be valid. Inform the caller.
                 std::string err = "ssl_connection::handle_read_header: invalid header : " +
                                   std::string(inbound_header_.data(), inbound_header_.size());
                 log_error(err.c_str());

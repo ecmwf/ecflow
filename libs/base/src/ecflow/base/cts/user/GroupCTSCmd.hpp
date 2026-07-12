@@ -13,7 +13,7 @@
 
 #include "ecflow/base/cts/user/UserCmd.hpp"
 
-// The group command allows a series of commands to be be executed:
+// The group command allows a series of commands to be executed:
 //
 // Client---(GroupCTSCmd)---->Server-----(GroupSTCCmd | StcCmd(OK) | Error )--->client:
 //

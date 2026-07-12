@@ -22,7 +22,7 @@ bool Extract::pathAndName(const std::string& token, std::string& path, std::stri
     size_t colonPos = token.find_first_of(':');
     if (colonPos == std::string::npos) {
         if (token[0] == '/') {
-            path = token; // token of the form /a/b/c, ie no name
+            path = token; // token of the form /a/b/c, i.e., no name
         }
         else {
             name = token;

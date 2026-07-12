@@ -143,7 +143,7 @@ SState::State Defs_get_server_state(defs_ptr self) {
 /// @return The added suite.
 ///
 suite_ptr Defs_add_suite(defs_ptr self, suite_ptr s) {
-    // Since we don't pass in a child pos, the nodes are added to the end
+    // Since we do not pass in a child pos, the nodes are added to the end
     self->addSuite(s);
     return s;
 }

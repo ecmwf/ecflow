@@ -484,7 +484,7 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
             // pathToFileOrDir is of form: /tmp/fred/sms.job
             //   we should only create directories for /tmp/fred
             if (thePath.back().find(".") != std::string::npos) {
-                // assume the last token represents a file, hence don't create a directory
+                // assume the last token represents a file, hence do not create a directory
 #ifdef INTEL_DEBUG_ME
                 std::cout << "   last file " << thePath.back() << " has a *dot* ignoring " << std::endl;
 #endif
@@ -515,7 +515,7 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir) {
 #endif
 
             if (pathToFileOrDir.find(".") != std::string::npos) {
-                // assume represents a file, hence don't create a directory fred.job1
+                // assume represents a file, hence do not create a directory fred.job1
 #ifdef INTEL_DEBUG_ME
                 std::cout << "   assuming " << pathToFileOrDir
                           << " is a file, found a dot, returning without creating dir " << std::endl;

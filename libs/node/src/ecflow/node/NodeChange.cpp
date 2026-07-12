@@ -319,7 +319,7 @@ void Node::change_time(const std::string& old, const std::string& new_time) {
     TimeAttr old_attr(TimeSeries::create(old));      // can throw if parse fails
     TimeAttr new_attr(TimeSeries::create(new_time)); // can throw if parse fails
 
-    // Don't use '==' since that compares additional state like free_
+    // Do not use '==' since that compares additional state like free_
     auto found = ecf::algorithm::find_by(times_, [&](const auto& item) { return item.structureEquals(old_attr); });
 
     if (found == std::end(times_)) {
@@ -334,7 +334,7 @@ void Node::change_today(const std::string& old, const std::string& new_time) {
     TodayAttr old_attr(TimeSeries::create(old));      // can throw if parse fails
     TodayAttr new_attr(TimeSeries::create(new_time)); // can throw if parse fails
 
-    // Don't use '==' since that compares additional state like free_
+    // Do not use '==' since that compares additional state like free_
     auto found = ecf::algorithm::find_by(todays_, [&](const auto& item) { return item.structureEquals(old_attr); });
 
     if (found == std::end(todays_)) {

@@ -24,7 +24,7 @@
 /// Act as stand in for a server since Request require at least a AbstractServer
 class MockServer : public AbstractServer {
 public:
-    // For the MockServer don't delete the Defs. since we past in a fixture defs
+    // For the MockServer do not delete the Defs. since we past in a fixture defs
     struct null_deleter
     {
         void operator()(void const*) const {}

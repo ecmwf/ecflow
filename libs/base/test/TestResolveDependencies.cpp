@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_resolve_dependencies) {
     //*******************************************************************************
     // Resolve dependencies.
     //   task t
-    //     meter step 0 240 120       EXPECTED to be sumbitted
+    //     meter step 0 240 120       EXPECTED to be submitted
     //
     //   task tt
     //     complete t:step ge 120     Expected to HOLD, since we ain't done nothing yet
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_after_delete) {
     // begin. This will reset all attributes
     defs.beginAll();
 
-    // setup attrbutes in suite1 so that evalaution will succeed in suite 2
+    // setup attributes in suite1 so that evaluation will succeed in suite 2
     // *** this must be in its own scope otherwise the shared_ptr will keep the node alive
     {
         node_ptr t1 = defs.findAbsNode("/suite1/f/t1");
@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(test_trigger_after_delete) {
         // cout << defs;
     }
 
-    // evalate the triggers in suite2
+    // evaluate the triggers in suite2
     {
         node_ptr suite2   = defs.findAbsNode("/suite2");
         auto suite2_tasks = ecf::get_all_tasks(*suite2);

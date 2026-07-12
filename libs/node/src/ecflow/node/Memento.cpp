@@ -34,7 +34,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const {
     if (!node.get()) {
         if (absNodePath_ != ecf::string_constants::root_path) {
 
-            // add more context, about what's suites are in the client defs.
+            // add more context, about what is suites are in the client defs.
             std::string error_msg = "CompoundMemento::incremental_sync: could not find path ";
             error_msg += absNodePath_;
             error_msg += "\nClient has the following suites: ";
@@ -53,7 +53,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const {
         //
         for (memento_ptr m : vec_) {
             m->do_incremental_defs_sync(
-                client_def.get(), aspects_, true /* collect aspects only, don't make any changes*/);
+                client_def.get(), aspects_, true /* collect aspects only, do not make any changes*/);
         }
         size_t aspect_size = aspects_.size();
         client_def->notify_start(aspects_);
@@ -92,18 +92,19 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const {
             cout << "   " << typeid(*(m.get())).name() << "\n";
 #endif
             if (task) {
-                m->do_incremental_task_sync(task, aspects_, true /* collect aspects only, don't make any changes*/);
+                m->do_incremental_task_sync(task, aspects_, true /* collect aspects only, do not make any changes*/);
             }
             else if (alias) {
-                m->do_incremental_alias_sync(alias, aspects_, true /* collect aspects only, don't make any changes*/);
+                m->do_incremental_alias_sync(alias, aspects_, true /* collect aspects only, do not make any changes*/);
             }
             else if (suite) {
-                m->do_incremental_suite_sync(suite, aspects_, true /* collect aspects only, don't make any changes*/);
+                m->do_incremental_suite_sync(suite, aspects_, true /* collect aspects only, do not make any changes*/);
             }
             else if (family) {
-                m->do_incremental_family_sync(family, aspects_, true /* collect aspects only, don't make any changes*/);
+                m->do_incremental_family_sync(
+                    family, aspects_, true /* collect aspects only, do not make any changes*/);
             }
-            m->do_incremental_node_sync(node.get(), aspects_, true /* collect aspects only, don't make any changes*/);
+            m->do_incremental_node_sync(node.get(), aspects_, true /* collect aspects only, do not make any changes*/);
         }
         size_t aspect_size = aspects_.size();
         node->notify_start(aspects_);

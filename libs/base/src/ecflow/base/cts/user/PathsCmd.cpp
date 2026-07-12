@@ -303,7 +303,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                 throw std::runtime_error("No paths specified for archive");
             }
 
-            // make sure paths don't overlap, Should not find same path up the hierarchy, which is also in paths_
+            // make sure paths do not overlap, Should not find same path up the hierarchy, which is also in paths_
             std::vector<NodeContainer*> containers_to_archive;
             containers_to_archive.reserve(paths_.size());
             for (const auto& path : paths_) {
@@ -324,7 +324,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
                     std::string abs_node_path = parent->absNodePath();
                     if (find(paths_.begin(), paths_.end(), abs_node_path) != paths_.end()) {
                         unique = false;
-                        break; // parent also in paths, so don't archive child
+                        break; // parent also in paths, so do not archive child
                     }
                     parent = parent->parent();
                 }

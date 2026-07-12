@@ -48,7 +48,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
 
     // Create a list of allowable commands for a group. i.e excludes help, group
     boost::program_options::options_description desc("Allowed group options");
-    CtsCmdRegistry cmdRegistry(false /* don't add group option */);
+    CtsCmdRegistry cmdRegistry(false /* do not add group option */);
     cmdRegistry.addCmdOptions(desc);
 
     std::string subCmd;
@@ -66,7 +66,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
         // handle case like: alter add variable FRED "fre d ddy" /suite
         // If we have quote marks, then treat as one string,
         // by replacing spaces with /b, then replacing back after the split
-        // This can only handle one level of quotes  hence can't cope with "fred \"joe fred\"
+        // This can only handle one level of quotes  hence cannot cope with "fred \"joe fred\"
         bool start_quote     = false;
         bool replaced_spaces = false;
         for (char& i : subCmd) {
@@ -108,7 +108,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries, AbstractClientEnv* client
             subCmdArgs.erase(subCmdArgs.begin() + 1); // remove, since we have added to first
         }
 
-        /// Hack because we *can't* create program option with vector of strings, which can be empty
+        /// Hack because we *cannot* create program option with vector of strings, which can be empty
         /// Hence if command is just show, add a dummy arg.
         // if (aCmd == "show")  subCmdArgs.push_back("<dummy_arg>");
 

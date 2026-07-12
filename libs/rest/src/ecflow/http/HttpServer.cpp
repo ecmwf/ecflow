@@ -91,7 +91,7 @@ void HttpServer::parse_args(int argc, char** argv) const {
         // This assumes that the backend runs on the same machine as the REST API and thus the
         // communication is always done via HTTP (and never over HTTPS)
         //
-        // In case the backend become accessbile HTTPS, we would need another option --https to specify the protocol
+        // In case the backend become accessible HTTPS, we would need another option --https to specify the protocol
         //
         const std::string selected{ecf::Enumerate<ecf::Protocol>::to_string(ecf::Protocol::Http).value()};
         opts.host_protocol = selected;
@@ -184,7 +184,7 @@ void apply_listeners(httplib::Server& http_server) {
         // Usually no need to modify response fields -- they should be configured now, as
         // error handler is called *after* httplib finds out that status is >= 400
         //
-        // Exception is when errorhandler is called so that it doesn't go through the
+        // Exception is when errorhandler is called so that it does not go through the
         // registered endpoints
 
         if (res.body.empty()) {

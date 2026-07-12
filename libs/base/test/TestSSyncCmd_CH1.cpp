@@ -170,7 +170,7 @@ void test_sync_scaffold(defs_change_cmd the_defs_change_command, const std::stri
         // * Note we expect client defs to fail invariant checking when doing a full sync with handles
         // * Under real server this should be ok since, we fix up the defs ptr, during serialisation
 
-        // * note. We can't really compare server and client defs, since when we sync with
+        // * note. We cannot really compare server and client defs, since when we sync with
         // * with handles, we only return a sub set of the suites, in our handle
 
         // DO a sync again. hence we should expect no changes

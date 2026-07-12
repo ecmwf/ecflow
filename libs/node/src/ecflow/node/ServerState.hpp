@@ -23,7 +23,7 @@
 /// The server variables could have been added/deleted or changed, hence these
 /// variables are serialised, also:  it has proved useful i.e for
 ///    a/ Client to visualise the server environment during a call like -group="get; show state"
-///    b/ Allows the test code to update environment. ie. use ECF_CLIENT
+///    b/ Allows the test code to update environment. i.e., use ECF_CLIENT
 ////      allows us to replace smsinit, smscomplete,etc, with the ECF client exe
 //
 // Note The default state here is RUNNING while in the server the default state is HALTED
@@ -83,7 +83,7 @@ public:
     bool variable_exists(const std::string& name) const;
 
     /// find all %VAR% and replaces with variable values, returns false on the
-    /// first variable that can't be found, cmd will be left half processed.
+    /// first variable that cannot be found, cmd will be left half processed.
     /// Will search for ECF_MICRO, if not found assumes % as the micro char
     bool variableSubstitution(std::string& cmd) const;
 

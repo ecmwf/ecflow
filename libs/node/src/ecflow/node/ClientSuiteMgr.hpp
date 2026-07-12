@@ -70,7 +70,7 @@ public:
     /// When nodes are added/deleted we use the modify_change_no_, in this case
     /// the whole defs is returned. Both integers are returned back to the client
     /// so that, the client then sends the integers back to server, so we can determine
-    /// what's changed.
+    /// what is changed.
     void collateChanges(unsigned int client_handle, DefsDelta&) const;
 
     // Only return the defs state and suites that the client has registered in the client handle

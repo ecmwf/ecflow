@@ -348,7 +348,7 @@ void Node::requeue(Requeue_args& args) {
 #ifdef DEBUG_REQUEUE
     LOG(Log::DBG, "      Node::requeue() " << absNodePath() << " resetRepeats = " << args.resetRepeats_);
 #endif
-    // Note: we don't reset verify attributes as they record state stat's
+    // Note: we do not reset verify attributes as they record state stat's
 
     if (!mirrors_.empty()) {
         // In case mirror attributes are available, the node state becomes UNKNOWN
@@ -517,7 +517,7 @@ void Node::handle_migration(const ecf::Calendar& c) {
 }
 
 void Node::requeue_time_attrs() {
-    // Note: we *don't* mark hybrid time dependencies as complete.
+    // Note: we *do not* mark hybrid time dependencies as complete.
     //       i.e. since this is called during alter command, it could be that
     //        the task is in a submitted or active state.
     do_requeue_time_attrs(true /*reset_next_time_slot*/, true /*reset_relative_duration*/, Requeue_args::FULL);
@@ -682,7 +682,7 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
                 // next day. In the case where we have a parent repeat we need to clear the flag, otherwise the
                 // task/family with time based attribute would wait for next day.
                 Node::Requeue_args args(Node::Requeue_args::REPEAT_INCREMENT,
-                                        false /* don't reset repeats */,
+                                        false /* do not reset repeats */,
                                         clear_suspended_in_child_nodes,
                                         true /* reset_next_time_slot */,
                                         true /* reset relative duration */);
@@ -709,10 +709,10 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
             }
 
             Node::Requeue_args args(Node::Requeue_args::TIME,
-                                    false /* don't reset repeats */,
+                                    false /* do not reset repeats */,
                                     clear_suspended_in_child_nodes,
                                     reset_next_time_slot,
-                                    false /*  don't reset relative duration */);
+                                    false /*  do not reset relative duration */);
             requeue(args); // time +00:01 00:07 00:03 # here task re-queued many times, relative time must be preserved.
             set_most_significant_state_up_node_tree();
             return;
@@ -730,7 +730,7 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree() {
         theParentNode->requeueOrSetMostSignificantStateUpNodeTree();
     }
     else {
-        // No parent, hence next level is the root, ie the Defs
+        // No parent, hence next level is the root, i.e., the Defs
         // Reflect the status of all the suite's
         // **** This should not recurse down, just reflect status of suites
         defs()->set_most_significant_state();
@@ -755,7 +755,7 @@ void Node::set_most_significant_state_up_node_tree() {
         theParentNode->set_most_significant_state_up_node_tree();
     }
     else {
-        // No parent, hence next level is the root, ie the Defs
+        // No parent, hence next level is the root, i.e., the Defs
         // Reflect the status of all the suite's
         // **** This should not recurse down, just reflect status of suites
         defs()->set_most_significant_state();
@@ -913,7 +913,7 @@ bool Node::evaluateComplete() const {
             //            However if we have another child that is active,submitted forcing family to complete will
             //            cause zombies Another child could be a family which could be aborted.
             // if computedState state is:
-            //    NState::ABORTED   -> don't complete if any of the children are aborted  -> ECFLOW-247
+            //    NState::ABORTED   -> do not complete if any of the children are aborted  -> ECFLOW-247
             //                         This can hide active/submitted nodes, as abort has higher priority, could cause
             //                         zombies
             //    NState::ACTIVE    -> can cause zombies
@@ -1022,7 +1022,7 @@ void Node::setStateOnly(NState::State newState,
                         const std::string& additional_info_to_log,
                         bool do_log_state_changes) {
     if (st_.first.state() == newState) {
-        return; // if old and new state the same don't do anything
+        return; // if old and new state the same do not do anything
     }
 
     Suite* theSuite          = suite();
@@ -1037,7 +1037,7 @@ void Node::setStateOnly(NState::State newState,
     // greater than time taken for state change from submit->active->complete
     // There by speeding up the test where we generate .ecf
 
-    // Ignore this during simulation, ie defs()->server().jobSubmissionInterval() = 0; for simulation
+    // Ignore this during simulation, i.e., defs()->server().jobSubmissionInterval() = 0; for simulation
     int jobSubmissionInterval = theSuite->defs()->server().jobSubmissionInterval();
     if (isSubmittable() && jobSubmissionInterval != 0 && jobSubmissionInterval < 60) {
 
@@ -1048,7 +1048,7 @@ void Node::setStateOnly(NState::State newState,
 
             // Under HYBRID we can go from UNKNOWN->COMPLETE, missing out SUBMITTED
             // hence: submit_to_complete_duration_ is never initialised
-            // ie when we have a,date,cron dependency that relies on a day change
+            // i.e., when we have a,date,cron dependency that relies on a day change
 
             time_duration td = (Calendar::second_clock_time() - submit_to_complete_duration_);
             // cout << debugNodePath() << " submit->active->complete time = " << td.total_seconds()  << " seconds.\n";
@@ -1438,7 +1438,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
                 cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
             }
             else {
-                // Can't find in user variables, or node variable, hence can't go any further
+                // Cannot find in user variables, or node variable, hence cannot go any further
                 return false;
             }
         }
@@ -1517,7 +1517,7 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
                 // %VAR:fred% --->  name("VAR:fred") value(theFoundVariable.value())
                 used_variables.insert(std::make_pair(percentVar, varValue));
 
-                // replace the "%VAR:fred --f%" with variable value, so that we don't process it again
+                // replace the "%VAR:fred --f%" with variable value, so that we do not process it again
                 cmd.replace(firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue);
             }
             else {
@@ -1722,7 +1722,7 @@ void Node::add_comment_char(std::string& ret, bool& added_comment_char) const {
 void Node::write_state(std::string& ret, bool& added_comment_char) const {
     // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
     //             multiple statement on a single line i.e. `task a; task b;`
-    // If attribute correspond to the defaults don't write then out
+    // If attribute correspond to the defaults do not write then out
     if (state() != NState::UNKNOWN) {
         add_comment_char(ret, added_comment_char);
         ret += " state:";
@@ -1896,7 +1896,7 @@ bool Node::operator==(const Node& rhs) const {
             return false;
         }
     }
-    // We don't compare `genvar` as this is only used in server environment
+    // We do not compare `genvar` as this is only used in server environment
 
     if (!(inLimitMgr_ == rhs.inLimitMgr_)) {
 #ifdef DEBUG
@@ -2629,7 +2629,7 @@ void Node::notify_delete() {
     }
 
     /// Check to make sure that the Observer called detach
-    /// We cannot call detach ourselves, since the the client needs to
+    /// We cannot call detach ourselves, since the client needs to
     /// call detach in the case where the graphical tree is destroyed by user
     /// In this case the Subject/Node is being deleted.
     assert(observers_.empty());
@@ -2739,7 +2739,7 @@ bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const {
     if (auto_cancel_ && state() == NState::COMPLETE) {
         if (auto_cancel_->isFree(calendar, get_state().second)) {
 
-            /// *Only* delete this node if we don't create zombies
+            /// *Only* delete this node if we do not create zombies
             /// anywhere for our children
             auto tasks = ecf::get_all_tasks(*this);
             for (auto task : tasks) {
@@ -2757,7 +2757,7 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const {
     if (auto_archive_ && !isSuspended() && !isParentSuspended()) {
         if (auto_archive_->isFree(calendar, get_state())) {
 
-            /// *Only* archive this node if we don't create zombies anywhere for our children
+            /// *Only* archive this node if we do not create zombies anywhere for our children
             /// The most significant state could be ABORTED in family, but we could still have active tasks.
             auto tasks = ecf::get_all_tasks(*this);
             for (auto task : tasks) {

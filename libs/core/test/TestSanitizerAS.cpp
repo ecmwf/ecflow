@@ -23,7 +23,7 @@ static bool is_sanitizer_available() {
      * The implementation to skip a test is currently to short-circuit into early termination.
      * A better approach would be to use the boost::unit_test::precondition() decorator to skip the test based on
      * a runtime condition.
-     * Unfortunatelly this approach does not work when using Boost 1.66 @ Rocky 8.6.
+     * Unfortunately this approach does not work when using Boost 1.66 @ Rocky 8.6.
      */
 
     bool is_available = ecf::environment::has("ECF_TEST_SANITIZER_AS");

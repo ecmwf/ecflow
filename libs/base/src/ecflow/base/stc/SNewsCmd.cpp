@@ -105,7 +105,7 @@ void SNewsCmd::init(unsigned int client_handle, // a reference to a set of suite
     // Handle used: Determine the max modify and state change no, for suites in our handle
     // =============================================================================================
 
-    /// *** If we can't find the handle, then it may be that the server died ?
+    /// *** If we cannot find the handle, then it may be that the server died ?
     /// *** It is up to the client to do a full sync *including* re-registering suites
     ClientSuiteMgr& client_suite_mgr = as->defs()->client_suite_mgr();
     if (!client_suite_mgr.valid_handle(client_handle)) {

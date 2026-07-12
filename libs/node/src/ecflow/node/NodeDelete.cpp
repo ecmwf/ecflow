@@ -68,7 +68,7 @@ void Node::deleteToday(const std::string& name) {
 }
 
 void Node::delete_today(const ecf::TodayAttr& attr) {
-    // Don't use '==' since that compares additional state like free_
+    // Do not use '==' since that compares additional state like free_
     auto found = ecf::algorithm::find_by(todays_, [&](const auto& item) { return item.structureEquals(attr); });
 
     if (found == std::end(todays_)) {
@@ -98,7 +98,7 @@ void Node::deleteDate(const std::string& name) {
 }
 
 void Node::delete_date(const DateAttr& attr) {
-    // Don't use '==' since that compares additional state like free_
+    // Do not use '==' since that compares additional state like free_
     auto found = ecf::algorithm::find_by(dates_, [&](const auto& item) { return item.structureEquals(attr); });
 
     if (found == std::end(dates_)) {
@@ -127,7 +127,7 @@ void Node::deleteDay(const std::string& name) {
 }
 
 void Node::delete_day(const DayAttr& attr) {
-    // Don't use '==' since that compares additional state like free_
+    // Do not use '==' since that compares additional state like free_
     auto found = ecf::algorithm::find_by(days_, [&](const auto& item) { return item.structureEquals(attr); });
 
     if (found == std::end(days_)) {
@@ -156,7 +156,7 @@ void Node::deleteCron(const std::string& name) {
 }
 
 void Node::delete_cron(const ecf::CronAttr& attr) {
-    // Don't use '==' since that compares additional state like free_
+    // Do not use '==' since that compares additional state like free_
     auto found = ecf::algorithm::find_by(crons_, [&](const auto& item) { return item.structureEquals(attr); });
 
     if (found == std::end(crons_)) {

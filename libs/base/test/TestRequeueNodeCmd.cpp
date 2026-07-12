@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE(test_reque_with_repeat_and_defstatus_complete) {
 
     the_defs->beginAll();
 
-    // Create a log file with a unique name, to avoid problems when running in paralle
+    // Create a log file with a unique name, to avoid problems when running in parallel
     // This test relies on log file contents to be flushed.
     std::string log_file = "libs/base/test/test_reque_with_repeat_and_defstatus_complete_";
     log_file += Pid::getpid(); // can throw
@@ -360,7 +360,7 @@ BOOST_AUTO_TEST_CASE(test_reque_with_repeat_and_defstatus_complete) {
     Log::create(log_file);
 
     // Re-queue the family. In past we queued all nodes, then set to complete
-    // We still do this, but we now longer LOG the setting the the queued state
+    // We still do this, but we now longer LOG the setting the queued state
     // Hence in the log file we only expected to see nodes in the complete state
     // See: ECFLOW-1239. When dealing with thousands of nodes, this was causing performance problems
     TestHelper::invokeRequest(the_defs.get(), Cmd_ptr(new RequeueNodeCmd(f1->absNodePath())));

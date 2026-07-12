@@ -54,7 +54,7 @@ public:
     [[nodiscard]] bool check_preconditions(AbstractServer* server, STC_Cmd_ptr& reply) const override;
 
 protected:
-    /// Overridden to do nothing since Task based commands don't need _user_ based authentication
+    /// Overridden to do nothing since Task based commands do not need _user_ based authentication
     void setup_user_authentification(const std::string& /*user*/, const std::string& /*passwd*/) override {}
     bool setup_user_authentification(AbstractClientEnv&) override { return true; }
     void setup_user_authentification() override {}

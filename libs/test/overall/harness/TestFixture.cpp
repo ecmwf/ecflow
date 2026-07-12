@@ -360,7 +360,7 @@ std::string TestFixture::theClientExePath() {
 
 void TestFixture::clearLog() {
 
-    // Can't remove log on remote server, just clear the log file
+    // Cannot remove log on remote server, just clear the log file
     client().clearLog();
 }
 

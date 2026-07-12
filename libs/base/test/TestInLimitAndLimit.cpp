@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE(test_limit_references_after_delete) {
     //	   endfamily
     //	endsuite
     //
-    // In this test case we will delete the suiteLimits, and then test to ensure the the in-limits
+    // In this test case we will delete the suiteLimits, and then test to ensure the in-limits
     // in suite have been reset.
     Defs defs;
     {

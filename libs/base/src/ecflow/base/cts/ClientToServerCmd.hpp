@@ -74,7 +74,7 @@ public:
      *  any command specific 'work'. Each command class overrides to check required preconditions.
      *
      *  Note: This mechanism is important for TaskCmds, which use the precondition check
-     *  to detect/handle the presense of Zombie tasks
+     *  to detect/handle the presence of Zombie tasks
      *
      *  @param server the server executing the command
      *  @param reply the reply to be sent the client in case preconditions are invalid
@@ -131,7 +131,7 @@ public:
 
     /// This Must be called for client->server commands.As this is required
     /// for authentication. *However* task based commands have their own authentication
-    /// mechanism, and don't need setup_user_authentification().
+    /// mechanism, and do not need setup_user_authentification().
     virtual void setup_user_authentification(const std::string& user, const std::string& passwd) = 0; // Used by PlugCmd
     virtual bool setup_user_authentification(AbstractClientEnv&) = 0; // set user and passwd
     virtual void setup_user_authentification()                   = 0; // if user empty setup.
@@ -174,8 +174,8 @@ public:
     /// 3. GroupCTSCmd propagates this to the next command (CSyncCmd)
     /// 4. CSyncCmd stores the handle and uses it to sync only the relevant suites
     ///
-    /// This function is const because it's called from const member functions (doHandleRequest).
-    /// It doesn't modify the command's observable state, only propagates information or updates
+    /// This function is const because it is called from const member functions (doHandleRequest).
+    /// It does not modify the command's observable state, only propagates information or updates
     /// internal synchronisation state (via mutable members in derived classes).
     ///
     /// @param client_handle The client handle to set. Use 0 for global scope (all suites),

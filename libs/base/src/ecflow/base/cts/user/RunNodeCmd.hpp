@@ -55,7 +55,7 @@ private:
 private:
     std::vector<std::string> paths_;
     bool force_{false};
-    bool test_{false}; // only for test, hence we don't serialise this
+    bool test_{false}; // only for test, hence we do not serialise this
 
     friend class cereal::access;
     template <class Archive>

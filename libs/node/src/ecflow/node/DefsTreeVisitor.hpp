@@ -121,7 +121,7 @@ private:
         }
 
         // Important!
-        // If this point is reached, then some kind of Node isn't being properly handled.
+        // If this point is reached, then some kind of Node is not being properly handled.
         panic();
     }
 

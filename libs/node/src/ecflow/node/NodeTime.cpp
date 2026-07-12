@@ -149,7 +149,7 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
     }
     else {
 
-        // If *BEFORE* midnight we have FREE day/date and submitted or active jobs, don't clear the day/dates
+        // If *BEFORE* midnight we have FREE day/date and submitted or active jobs, do not clear the day/dates
         // i.e. take:
         //    family f1
         //       day monday
@@ -191,7 +191,7 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
 #endif
             if (free_date || free_day) {
                 // See if we have any complete submitted or active children,
-                // if so DON'T clear day/date at midnight. hence day/date will *STAY* *FREE*
+                // if so DO NOT clear day/date at midnight. hence day/date will *STAY* *FREE*
                 // Allow following tasks to complete
                 std::vector<node_ptr> all_children;
                 allChildren(all_children);
@@ -455,7 +455,7 @@ bool Node::testTimeDependenciesForRequeue() {
             day.set_expired();
         }
         else {
-            // If any day matches calendar day or is in the past, then expire it, so we don't run again on that day.
+            // If any day matches calendar day or is in the past, then expire it, so we do not run again on that day.
             // Must be done BEFORE checkForRequeue
             //   task t1
             //      time 09:00    # time attribute get considered before day/date, allowing multiple re-queues on the
@@ -673,7 +673,7 @@ bool Node::timeDependenciesFree() const {
         return true;
     }
 
-    // if we have a holding day/date don't consider other time attributes
+    // if we have a holding day/date do not consider other time attributes
     const Calendar& calendar = suite()->calendar();
     if (holding_day_or_date(calendar)) {
         return false;
@@ -950,7 +950,7 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
 }
 
 void Node::get_max_simulation_duration(boost::posix_time::time_duration& duration) const {
-    // don't override a higher value of duration
+    // do not override a higher value of duration
     if ((!times_.empty() || !todays_.empty()) && duration < boost::posix_time::hours(24)) {
         duration = boost::posix_time::hours(24); // day
     }

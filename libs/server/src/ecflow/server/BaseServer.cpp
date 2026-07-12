@@ -126,7 +126,7 @@ void BaseServer::handle_terminate() {
 
 bool BaseServer::load_check_pt_file_on_startup() {
     // On start up we want different behaviour.
-    // If check pt file exists and we can't load then we want to exit
+    // If check pt file exists and we cannot load then we want to exit
     // This avoids the server from overwriting the check point file
     // Which may be from a different version. let the user handle it.
     LogToCout logToCout;
@@ -334,7 +334,7 @@ void BaseServer::shutdown() {
         std::cout << "   BaseServer::shutdown. Stop Scheduling new jobs only" << std::endl;
     }
 
-    // Stop server from creating new jobs. Don't stop the checkPtSaver_ since
+    // Stop server from creating new jobs. Do not stop the checkPtSaver_ since
     // the jobs communication with server can still change state. Which we want
     // to check point.
     traverser_.stop();

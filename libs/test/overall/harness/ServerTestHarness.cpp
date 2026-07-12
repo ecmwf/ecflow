@@ -210,7 +210,7 @@ bool verify_attribute_verification() {
     // In  version 4.0.1: We changed the way families changed states. i.e families will now change to state complete
     // before being requeued. See ECFLOW-96 Families with loops(cron/repeat) should log complete
     // This meant that when we run the migration tests, i.e new client with old server (with new test)
-    // It would fail some the test, during verify attribute verification. ie. where we count the number of times
+    // It would fail some the test, during verify attribute verification. i.e., where we count the number of times
     // a node completes. To enable these tests to still run, we will disable verify attribute verification
     return true;
 }

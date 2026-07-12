@@ -217,7 +217,7 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as) {
     //
     // **** Although we create a new defs, we use the same suites. This presents
     // **** a problem with the suites defs() pointer. To avoid corrupting the server defs
-    // **** we set the suite defs ptr to the the real server defs.
+    // **** we set the suite defs ptr to the real server defs.
     // **** --> The defs serialisation will setup the suite defs pointers. <---
     // **** An alternative would be to clone the entire suites, since this can have
     // **** hundreds of tasks. It would be very expensive.

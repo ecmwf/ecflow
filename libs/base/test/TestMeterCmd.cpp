@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_meter_cmd) {
         defs.addSuite(s);
     }
 
-    // Meter which doesn't exist should be silently ignore
+    // Meter which does not exist should be silently ignore
     int meter_value = 10;
     TestHelper::invokeRequest(&defs,
                               Cmd_ptr(new MeterCmd(suite_f_t1,

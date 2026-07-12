@@ -323,7 +323,7 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const {
     // Note: if this correspond to a leaf node, like a task. Then it may not be
     // sufficient to just check in limits at this level  *BUT*
     // Node::top_down_why() and Node::bottom_up_why() will traverse the hierarchy
-    // so we don't need to replicate it here.
+    // so we do not need to replicate it here.
 
 #ifdef DEBUG_WHY
     std::cout << "InLimitMgr::why " << node_->debugNodePath() << " top_down:" << top_down << "\n";

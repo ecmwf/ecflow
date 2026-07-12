@@ -26,7 +26,7 @@
 using namespace ecf;
 
 /// Simulate definition files that are created on then fly. This allows us to create
-/// tests with todays date/time this speeds up the testr, we can also validate
+/// tests with todays date/time this speeds up the test, we can also validate
 /// Defs file, to check for correctness
 
 BOOST_AUTO_TEST_SUITE(S_Simulator)
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(test_time_series) {
     //   endfamily
     // endsuite
 
-    // Initialise real clock on a Moday, such that task should _only_ run
+    // Initialise real clock on a Monday, such that task should _only_ run
     // on Monday since we are using a hybrid clock
     Defs theDefs;
     {
@@ -216,9 +216,9 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates) {
     Defs theDefs;
     {
         // Initialise clock with todays date  then create a time attribute + minutes
-        // Note: we don't use:
+        // Note: we do not use:
         //    auto theLocalTime = Calendar::second_clock_time();
-        // because if run at late we can end up with illegal for the hour, ie. > 24
+        // because if run at late we can end up with illegal for the hour, i.e., > 24
 
         auto todaysDate     = boost::gregorian::date(2009, 2, 10);
         auto theLocalTime   = boost::posix_time::ptime(todaysDate, boost::posix_time::hours(3));
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_times_and_dates_hybrid) {
     //   family family
     //     task t1
     //       date  <today date>
-    //       date  <tomrrows date>
+    //       date  <tomorrows date>
     //       time <start>
     //       time <start>
     //   endfamily

@@ -164,7 +164,7 @@ public:
 
     /// Scan the trigger and complete expressions, and automatically add extern's
     /// i.e where the node paths, and references, to event, meters, edit and repeat variables,
-    /// don't exist, in this defs.
+    /// do not exist, in this defs.
     void auto_add_externs(bool remove_existing_externs_first = true);
 
     /// Flag the chosen suite, so that it can resolve dependencies. This also
@@ -216,7 +216,7 @@ public:
     /// @brief Check if the given path + attribute is listed as an extern.
     ///
     /// When the attribute is empty, the function simply checks if the node itself is listed as an extern;
-    /// othersise, the function checks if the the attribute of the node (in the form of '<nodePath>:<externObj>')
+    /// otherwise, the function checks if the attribute of the node (in the form of '<nodePath>:<externObj>')
     /// is listed as an extern.
     ///
     /// @param pathToNode The path to the node
@@ -253,7 +253,7 @@ public:
     const ServerState& server_state() const { return server_; }
 
     /// find all %VAR% and replaces with variable values, returns false on the
-    /// first variable that can't be found, cmd will be left half processed.
+    /// first variable that cannot be found, cmd will be left half processed.
     /// Will search for ECF_MICRO, if not found assumes % as the micro char
     bool variableSubstitution(std::string& cmd) const { return server_.variableSubstitution(cmd); }
 

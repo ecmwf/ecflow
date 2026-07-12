@@ -784,7 +784,7 @@ public:
     [[nodiscard]] Port create() const {
         // define location to store 'lock' files
         // 1) by default, use project build directory
-        // 2) overriden by ECF_PORT_LOCK_DIR environment variable
+        // 2) overridden by ECF_PORT_LOCK_DIR environment variable
         fs::path lock_dir = CMAKE_ECFLOW_SOURCE_DIR();
         if (const char* env = std::getenv("ECF_PORT_LOCK_DIR")) {
             lock_dir = env;
@@ -792,7 +792,7 @@ public:
 
         return std::visit(
             [&lock_dir](auto&& strategy) {
-                // attemp to lock port (i.e. create the lock file)
+                // attempt to lock port (i.e. create the lock file)
                 using Strategy = std::decay_t<decltype(strategy)>;
                 if (auto found = Strategy::attempt_to_lock_port(lock_dir, strategy.base_port); found.has_value()) {
                     auto port_ = found.value().first;

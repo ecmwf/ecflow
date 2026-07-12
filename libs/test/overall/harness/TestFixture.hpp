@@ -18,8 +18,8 @@
 /// We will use $SCRATCH as this is accessible by both client and server.
 /// This means copying over the test data
 ///
-/// When TestFixture is GLOBAL, then we can't seem to call any of the
-/// BOOST_REQUIRE_MESSAGE() macro in constructor/descructor as this causes a crash
+/// When TestFixture is GLOBAL, then we cannot seem to call any of the
+/// BOOST_REQUIRE_MESSAGE() macro in constructor/destructor as this causes a crash
 /// i.e order of initialisation issues
 ///
 
@@ -40,7 +40,7 @@ struct TestFixture
     // Constructor will invoke the server, destructor will kill the server
     // Since this class is static, the constructor/destructor cannot call
     // any of BOOST MACRO, since the unit test will not be there.
-    // When running across platforms will will assume server is already running
+    // When running across platforms will assume server is already running
     explicit TestFixture(const std::string& project_test_dir /* Test or view */);
     TestFixture();
     ~TestFixture();

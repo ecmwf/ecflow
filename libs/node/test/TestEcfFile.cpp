@@ -1559,7 +1559,7 @@ BOOST_AUTO_TEST_CASE(test_script_override_ecf_micro) {
 BOOST_AUTO_TEST_CASE(test_mistyped_ecf_micro) {
     ECF_NAME_THIS_TEST();
 
-    // same test as above, but we have mistyped ecf_micro. Make sure we don't ignore this.
+    // same test as above, but we have mistyped ecf_micro. Make sure we do not ignore this.
     std::string ecf_file;
     ecf_file += "$simple$\n";
     ecf_file += "$ecf_micro &\n"; // ecfmicro has been mistyped

@@ -65,7 +65,7 @@ public:
     // for python interface
     std::string toString() const;
 
-    // ECFLOW-518, we can't use:
+    // ECFLOW-518, we cannot use:
     //    std::set<std::string>::const_iterator paths_begin() const { return paths_.begin();}
     //    std::set<std::string>::const_iterator paths_end() const { return paths_.end();}
     // because boost python does not support std::set<std::string> out of the box

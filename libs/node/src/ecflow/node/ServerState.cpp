@@ -375,7 +375,7 @@ bool ServerState::variableSubstitution(std::string& cmd) const {
                 }
             }
             else {
-                // No Colon, Can't find in user variables, or node variable, hence can't go any further
+                // No Colon, Cannot find in user variables, or node variable, hence cannot go any further
                 return false;
             }
         }

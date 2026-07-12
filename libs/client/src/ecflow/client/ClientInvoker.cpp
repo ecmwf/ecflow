@@ -320,8 +320,8 @@ int ClientInvoker::invoke(const CommandLine& cl) const {
         return 0;
     } // success
 
-    // Clear error message. For test. Don't keep previous error.
-    // i.e. if next test passes when it shouldn't the wrong message is output
+    // Clear error message. For test. Do not keep previous error.
+    // i.e. if next test passes when it should not the wrong message is output
     server_reply_.get_error_msg().clear();
 
     Cmd_ptr cts_cmd;
@@ -418,13 +418,13 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const {
     }
 
     try {
-        /// report this message at least once. So client has a clue what's going on
+        /// report this message at least once. So client has a clue what is going on
         bool report_block_client_on_home_server  = false;
         bool report_block_client_server_halted   = false;
         bool report_block_client_zombie_detected = false;
         // We do not want to loop over the sms host list indefinitely hence we use a timer.
         // The timeout period is supplied via ClientEnvironment
-        bool never_polled = true; // don't wait for the first host only subsequent ones
+        bool never_polled = true; // do not wait for the first host only subsequent ones
 
         while (true) {
             // for each host try connecting several times. To compensate for network glitches.
@@ -853,7 +853,7 @@ int ClientInvoker::getDefs() const {
 
 int ClientInvoker::loadDefs(const std::string& filePath,
                             bool force,      /* true means overwrite suite of same name */
-                            bool check_only, /* client side, true means don't send to server, just check only */
+                            bool check_only, /* client side, true means do not send to server, just check only */
                             bool print,      /* client side, print the defs */
                             bool stats       /* client side, print the defs statistics */
 ) const {
@@ -1797,8 +1797,8 @@ int ClientInvoker::load_in_memory_defs(const defs_ptr& clientDefs, bool force) c
     }
 
     // Client defs  has been created in memory.
-    // warn about naff expression and unresolved in-limit references to Limit's
-    // Don't allow defs to be loaded into server, with trigger parser errors.
+    // warn about naff expression and unresolved in-limit references to Limit is
+    // Do not allow defs to be loaded into server, with trigger parser errors.
     std::string warningMsg;
     if (!clientDefs->check(server_reply_.get_error_msg(), warningMsg)) {
         if (on_error_throw_exception_) {

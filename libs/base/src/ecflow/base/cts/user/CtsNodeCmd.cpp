@@ -199,7 +199,7 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const {
                 // with migrate we need to get edit history.
                 return PreAllocatedReply::defs_cmd(as, (api_ == MIGRATE)); // if true, save edit history
             }
-            // however request for a particular node, thats not there, treated as an error
+            // however a request for a particular node that is not there is treated as an error
             node_ptr theNodeToReturn = find_node(defs, absNodePath_);
             return PreAllocatedReply::node_cmd(as, theNodeToReturn);
         }

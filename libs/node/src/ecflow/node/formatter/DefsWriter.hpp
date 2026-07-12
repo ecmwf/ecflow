@@ -1971,7 +1971,7 @@ struct Writer<Node, Stream>
         // taken from Node::print(std::string& os) const
 
         Writer<DState::State, Stream>::write(output, item.defStatus(), ctx);
-        // Notice: if item.defStatus() != DState::default_state(), the above doesn't generate any output line
+        // Notice: if item.defStatus() != DState::default_state(), the above does not generate any output line
 
         if (auto late = item.get_late(); late) {
             Writer<LateAttr, Stream>::write(output, *late, ctx);
@@ -2017,7 +2017,7 @@ struct Writer<Node, Stream>
         }
 
         Writer<Repeat, Stream>::write(output, item.repeat(), ctx);
-        // Notice: if repeat.empty(), the above doesn't generate any output line
+        // Notice: if repeat.empty(), the above does not generate any output line
 
         for (const auto& v : item.variables()) {
             Writer<Variable, Stream>::write(output, v, ctx);
@@ -2230,7 +2230,7 @@ private:
         // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
         //             multiple statement on a single line i.e.
         //                 task a; task b;
-        // *IMPORTANT* make sure name are unique, i.e. can't have state: and server_state:
+        // *IMPORTANT* make sure name are unique, i.e. cannot have state: and server_state:
         // Otherwise read_state() will mess up
         output << "defs_state ";
         output << PrintStyle::to_string(ctx.style.selected());

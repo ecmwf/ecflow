@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_alias) {
     //    style(PrintStyle::STATE); std::cout << *defs;
     // #endif
 
-    // TEST ORDERING:: Create another alias, but don't run it.
+    // TEST ORDERING:: Create another alias, but do not run it.
     // =============================================================================
     result = TestFixture::client().edit_script_submit(
         task_a->absNodePath(), used_variables, script_lines, true /*create alias*/, false /*run alias*/);

@@ -763,7 +763,7 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
     if (i->value.id() == ExpressionGrammer::node_name_ID) {
 
         std::string thevalue(i->value.begin(), i->value.end());
-        ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(thevalue); // do not know why we get leading/trailing spaces
         LOG_ASSERT(!thevalue.empty(), "");
         return new AstNode(thevalue);
     }
@@ -778,8 +778,8 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
 
         std::string nodePath(theNodePathIter->value.begin(), theNodePathIter->value.end());
         std::string name(theNameIter->value.begin(), theNameIter->value.end());
-        ecf::algorithm::trim(nodePath); // don't know why we get leading/trailing spaces
-        ecf::algorithm::trim(name);     // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(nodePath); // do not know why we get leading/trailing spaces
+        ecf::algorithm::trim(name);     // do not know why we get leading/trailing spaces
         return new AstVariable(nodePath, name);
     }
     else if (i->value.id() == ExpressionGrammer::parent_variable_ID) {
@@ -788,35 +788,35 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
         auto the_variable_t = i->children.begin() + 1;
 
         std::string the_variable(the_variable_t->value.begin(), the_variable_t->value.end());
-        ecf::algorithm::trim(the_variable); // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(the_variable); // do not know why we get leading/trailing spaces
         LOG_ASSERT(!the_variable.empty(), "");
         return new AstParentVariable(the_variable);
     }
     else if (i->value.id() == ExpressionGrammer::dot_dot_path_ID) {
 
         std::string thevalue(i->value.begin(), i->value.end());
-        ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(thevalue); // do not know why we get leading/trailing spaces
         LOG_ASSERT(!thevalue.empty(), "");
         return new AstNode(thevalue);
     }
     if (i->value.id() == ExpressionGrammer::absolute_path_ID) {
 
         std::string thevalue(i->value.begin(), i->value.end());
-        ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(thevalue); // do not know why we get leading/trailing spaces
         LOG_ASSERT(!thevalue.empty(), "");
         return new AstNode(thevalue);
     }
     else if (i->value.id() == ExpressionGrammer::dot_path_ID) {
 
         std::string thevalue(i->value.begin(), i->value.end());
-        ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(thevalue); // do not know why we get leading/trailing spaces
         LOG_ASSERT(!thevalue.empty(), "");
         return new AstNode(thevalue);
     }
     else if (i->value.id() == ExpressionGrammer::event_state_ID) {
 
         std::string thevalue(i->value.begin(), i->value.end());
-        ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(thevalue); // do not know why we get leading/trailing spaces
         if (thevalue == Event::SET()) {
             return new AstEventState(true);
         }
@@ -832,7 +832,7 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
     else if (i->value.id() == ExpressionGrammer::integer_ID) {
 
         std::string thevalue(i->value.begin(), i->value.end());
-        ecf::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(thevalue); // do not know why we get leading/trailing spaces
         auto theInt = ecf::convert_to<int>(thevalue);
         return new AstInteger(theInt);
     }
@@ -876,8 +876,8 @@ Ast* createAst(const tree_iter_t& i, const std::map<parser_id, std::string>& rul
 
         std::string nodePath(theNodePathIter->value.begin(), theNodePathIter->value.end());
         std::string flag(theFlagIter->value.begin(), theFlagIter->value.end());
-        ecf::algorithm::trim(nodePath); // don't know why we get leading/trailing spaces
-        ecf::algorithm::trim(flag);     // don't know why we get leading/trailing spaces
+        ecf::algorithm::trim(nodePath); // do not know why we get leading/trailing spaces
+        ecf::algorithm::trim(flag);     // do not know why we get leading/trailing spaces
 
         return new AstFlag(nodePath, ecf::Flag::string_to_flag_type(flag));
     }

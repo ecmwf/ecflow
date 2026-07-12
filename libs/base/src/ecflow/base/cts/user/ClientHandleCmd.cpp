@@ -26,7 +26,7 @@ using namespace ecf;
 
 /// *****************************************************************************
 /// Note: The Client Handle commands, change the server,
-///       However the changes cant really be considered as incremental
+///       However the changes cannot really be considered as incremental
 ///       Hence for all handle command, we will do a FULL SYNC
 ///       Relying on the modify_change_no is to CRUDE, as it affects all handles
 ///       Instead we will use a simple flag to indicate that a FULL sync is required

@@ -148,7 +148,7 @@ public:
     static constexpr const char* designation = "ecFlow server";
 
     static ecf::test::scaffold::Process launch(const hostname_t& host, port_t port) {
-        // Just for precaution, in case a previous run didn't clean up...
+        // Just for precaution, in case a previous run did not clean up...
         cleanup(host, port);
 
         std::string invoke_command = ecf::File::find_ecf_server_path();

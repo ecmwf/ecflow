@@ -358,7 +358,7 @@ private:
                 else {
                     Task* lastAddedTask = nodeStack_top()->isTask();
                     if (lastAddedTask) {
-                        // Pop the node, since tasks don't always have end task
+                        // Pop the node, since tasks do not always have end task
                         popNode();
                         addFamily(line, lineTokens);
                     }
@@ -368,7 +368,7 @@ private:
     }
 
     void popFamily() const {
-        // Compensate for the fact that Task don't have endtask, hence when we pop for a
+        // Compensate for the fact that Task do not have endtask, hence when we pop for a
         // family, the top should be a suite/family
         if (nodeStack_top()->isTask()) {
             nodeStack().pop(); // pop the task
@@ -382,7 +382,7 @@ private:
 
 //================================================================================
 
-// See ECFLOW-106, and SUP-1198, why we don't allow time,today,date,day ate the suite level.
+// See ECFLOW-106, and SUP-1198, why we do not allow time,today,date,day ate the suite level.
 class SuiteParser : public Parser {
 public:
     explicit SuiteParser(DefsStructureParser* p)

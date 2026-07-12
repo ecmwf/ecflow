@@ -37,7 +37,7 @@ public:
         : BasicServer(io, s) {}
     ~TestServer() override = default;
 
-    // abort server if check pt files exist, but can't be loaded
+    // abort server if check pt files exist, but cannot be loaded
     //   bool load_check_pt_file_on_startup();
     //   void loadCheckPtFile();
     //   bool restore_from_checkpt(const std::string& filename, bool& failed);

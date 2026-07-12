@@ -37,7 +37,7 @@
 ///               To work around this the job file has been updated to add ECF_RID=$$
 ///
 ///   IMPORTANT:: For command line interface we just have the task path.
-///               i,e we don't want to expose password, and user will not easily
+///               i,e we do not want to expose password, and user will not easily
 ///               know the process or remote id. Hence, we will make do with the
 ///               task path. We just find the first zombie, and act up on it
 ///

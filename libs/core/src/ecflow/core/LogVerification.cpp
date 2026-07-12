@@ -102,7 +102,7 @@ bool LogVerification::compareNodeStates(const std::string& logfile,
             if (i < lines.size() && i < goldenLines.size()) {
 
                 if (lines[i] != goldenLines[i]) {
-                    // Please note that we can't do an exact comparison for certain state changes:
+                    // Please note that we cannot do an exact comparison for certain state changes:
                     //   - submitted --> active
                     //   - active    --> complete
                     // Since this can be OS/scheduler dependent and hence order dependent

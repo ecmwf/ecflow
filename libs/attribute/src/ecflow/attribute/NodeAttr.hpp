@@ -76,8 +76,8 @@ private:
 // events with the number 007 are the same as 7.
 // Use compiler , generated destructor, assignment, copy constructor
 //
-// Don't use -1, to represent that no number was specified, as on
-// AIX portable binary archive can't cope with this
+// Do not use -1, to represent that no number was specified, as on
+// AIX portable binary archive cannot cope with this
 // use std::numeric_limits<int>::max()
 class Event {
 public:
@@ -131,7 +131,7 @@ private:
 
 // Class Meter:
 // Use compiler , generated destructor, assignment, copy constructor
-// For this class we don't check the value member for the equality functionality
+// For this class we do not check the value member for the equality functionality
 // Can have negative min/max however max >= min, and color change should be in the
 // range min-max
 class Meter {

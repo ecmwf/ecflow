@@ -1426,7 +1426,7 @@ void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theA
             else {
                 // ECFLOW-480 take into account label values that is a path, adding quotes around the value does not
                 // help: Note boost program options will remove the quotes around the value
-                //      hence it's difficult to say what is an option and what is a path.
+                //      hence it is difficult to say what is an option and what is a path.
                 //      However since we expect 4(change,label,<label_name>,<label_value>) options, work around the
                 //      problem
                 if (options.size() == 3 && paths.size() > 1) {
@@ -1609,7 +1609,7 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,
             try {
                 int day, month, year;
                 DateAttr::getDate(name, day, month, year);
-                DateAttr::checkDate(day, month, year, false /* for clocks, we don't allow wild carding */);
+                DateAttr::checkDate(day, month, year, false /* for clocks, we do not allow wild carding */);
             }
             catch (std::exception& e) {
                 throw std::runtime_error(

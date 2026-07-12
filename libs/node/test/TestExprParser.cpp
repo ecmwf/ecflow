@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic) {
     // This must be nicely formatted, i.e. AST is nicely space formatted otherwise it will fail the test
     // This test ENSURES that the AST matches the expression. (i.e. by getting AST to print the expression)
     // Note: we can use NOT,eq,ne,le,ge or brackets
-    //       we can't use a:event_name  ==> a:event_name == set
+    //       we cannot use a:event_name  ==> a:event_name == set
     std::vector expressions = {
         "a == complete"s,
         "a != complete"s,
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(test_expression_parser_basic_with_braces) {
     // This must be nicely formatted, i.e. AST is nicely space formatted otherwise it will fail the test
     // This test ENSURES that the AST matches the expression. (i.e. by getting AST to print the expression)
     // Note: we can use NOT,eq,ne,le,ge,
-    //       we can't use a:event_name  ==> a:event_name == set
+    //       we cannot use a:event_name  ==> a:event_name == set
     std::vector expressions = {
         "((a == complete) and (b == complete))"s,
         "(((a == complete) or (b == complete)) and (c == complete))"s,
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(test_parser_good_expressions) {
     exprMap[":YMD + 1 == 1"]                = std::make_pair(AstEqual::stype(), true);
 
     //
-    // Notice: in the following trigger expressions, when a variable is refered (e.g. :VAR), it is evaluated to 0.
+    // Notice: in the following trigger expressions, when a variable is referred (e.g. :VAR), it is evaluated to 0.
     // In this case, because of the DateTime instant nature of the comparison, value 0 represents 19700101T000000.
     //
 
@@ -926,7 +926,7 @@ BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
                                "(a = complete and b = complete or c = complete)"s,
                                "(a erro complete and b == complete) or nodepath:eventname"s,
                                "(a == complete and b == complete or (a == complete and b == complete)"s,
-                               // triggers that don't make sense in the operational suites
+                               // triggers that do not make sense in the operational suites
                                "../../../legA/fc/pf/01 eq complete eq complete"s,
                                "/mofc/mon/hind/14/back == complete or %s:DOW ne 5"s, // ECFLOW-888
                                ":VAR eq 20001332T257890"s};

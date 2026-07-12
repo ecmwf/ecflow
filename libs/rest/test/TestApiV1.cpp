@@ -242,7 +242,7 @@ struct SetupTest
     }
     void setup() {
         // This needs to be initialized in setup() instead
-        // of constructor... really don't know why
+        // of constructor... really do not know why
         srv = start_ecflow_server();
         start_api_server();
         printf("======= TESTS STARTING ========\n");

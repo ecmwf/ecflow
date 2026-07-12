@@ -39,7 +39,7 @@ public:
         ECF,            // two init commands, or aborted and complete, and received any other child command
         ECF_PID,        // pid miss-match, but password matches,  -> same job submitted twice |
         ECF_PASSWD,     // password miss-match, but pid matches   -> WTF, user edited ECF_PASS in job file ?
-        ECF_PID_PASSWD, // pid and password missmatch             -> Job re-queued and submitted again
+        ECF_PID_PASSWD, // pid and password mismatch             -> Job re-queued and submitted again
         PATH,           // zombie, because path to task does not exist in the server
         NOT_SET
     };

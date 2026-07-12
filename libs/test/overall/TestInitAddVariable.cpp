@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_init_add_variable) {
     //   edit INIT_ADD_VARIABLES --add "NAME1=1" "NAME2=2"
     //   edit COMPLETE_DEL_VARIABLES --remove NAME1 NAME2
     //   family family
-    //     task t1     # can't place trigger on t1, otherwise we have dead lock. Variables added at ACTIVE, but trigger
+    //     task t1     # cannot place trigger on t1, otherwise we have dead lock. Variables added at ACTIVE, but trigger
     //     expression resolved at QUEUE time task t2
     //       trigger t1:NAME1 == 1 and t1:NAME2 == 2
     //   endfamily

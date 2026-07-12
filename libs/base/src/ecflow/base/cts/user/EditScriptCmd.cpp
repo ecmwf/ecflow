@@ -140,7 +140,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const {
             // This way at job submission we use the latest/correct value, which is in-sync with JOB OUTPUT
             // Note: Otherwise the job output will not be in sync
             //
-            // Custom handling of ECF_PORT,ECF_HOST,ECF_NAME do not show these variables, these veriables
+            // Custom handling of ECF_PORT,ECF_HOST,ECF_NAME do not show these variables, these variables
             // including ECF_PASS appear in the script. If the user accidentally edits them,
             // Child communication with the server will be broken. Hence not shown
             //
@@ -453,7 +453,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
             }
 
             if (edit_type == EditScriptCmd::SUBMIT) {
-                cmd = std::make_shared<EditScriptCmd>(path_to_task, used_variables_as_vec); // SUMBIT
+                cmd = std::make_shared<EditScriptCmd>(path_to_task, used_variables_as_vec); // SUBMIT
                 return;
             }
 

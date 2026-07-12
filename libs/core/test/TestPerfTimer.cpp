@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_perf_with_chrono) {
 
     [[maybe_unused]] auto t = ecf::FunctionPerformanceTimer<>::duration(func, 100000);
 
-    // This does not work, ie calling func with no arguments ?? with our hacked invoke, wait till c++ 17
+    // This does not work, i.e., calling func with no arguments ?? with our hacked invoke, wait till c++ 17
     // auto t0= perf_timer<std::chrono::nanoseconds>::duration(func);
 
     [[maybe_unused]] auto t1 = ecf::FunctionPerformanceTimer<std::chrono::nanoseconds>::duration(func, 10);

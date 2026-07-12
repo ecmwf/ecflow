@@ -19,7 +19,7 @@
 ///    a/ Set complete
 ///    b/ Runs and then completes
 ///
-/// For a *single* time slot we can't requeue.
+/// For a *single* time slot we cannot requeue.
 /// Hence, we checkForRequeue that takes as parameters max/min time slots, so we **treat**
 /// Multiple single slot as a series.
 ///

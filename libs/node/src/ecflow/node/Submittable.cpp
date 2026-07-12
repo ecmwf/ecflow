@@ -186,7 +186,7 @@ bool Submittable::calendarChanged(const ecf::Calendar& c,
 }
 
 void Submittable::write_state(std::string& ret, bool& added_comment_char) const {
-    // *IMPORTANT* we *CAN'T* use ';' character, since is used in the parser, when we have
+    // *IMPORTANT* we *CANNOT* use ';' character, since is used in the parser, when we have
     //             multiple statement on a single line i.e.
     //                 `task a; task b;`
     if (!paswd_.empty() && paswd_ != Submittable::DUMMY_JOBS_PASSWORD()) {
@@ -271,7 +271,7 @@ bool Submittable::operator==(const Submittable& rhs) const {
                       << debugNodePath() << "\n";
             std::cout << "Submittable::operator==  state(" << NState::toString(state()) << ")  rhs.state("
                       << NState::toString(rhs.state()) << ") \n";
-            // No point dumping out change numbers, since we don't persist them, hence values will always be zero on
+            // No point dumping out change numbers, since we do not persist them, hence values will always be zero on
             // client side.
         }
 #endif
@@ -976,7 +976,7 @@ void Submittable::update_limits() {
         // For all other states, this task should NOT be consuming a limit token.
         // During interactive use a Submittable may get re-queued. In case its consuming
         // a limit token, we decrement the limit. If we are NOT consuming
-        // a token, it's still *SAFE* to call decrementInLimit
+        // a token, it is still *SAFE* to call decrementInLimit
         decrementInLimit(limitSet); // will recurse up
     }
 }

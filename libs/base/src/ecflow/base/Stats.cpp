@@ -217,7 +217,7 @@ void Stats::update_stats(int poll_interval) {
 
     // To avoid excessive memory usage, we store only a limited number of:
     //  - requests per poll period
-    // Since we're polling every 60 seconds, sample cover the last hour
+    // Since we are polling every 60 seconds, sample cover the last hour
     if (request_vec_.size() > 60) {
         request_vec_.pop_front();
     }

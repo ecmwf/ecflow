@@ -171,7 +171,7 @@ GenericAttr GenericAttr_make(const std::string& name, const py::list& list) {
 void LateAttr_extract_from_kwargs(std::shared_ptr<ecf::LateAttr> late, const py::kwargs& kwargs) {
 
     for (const auto& entry : kwargs) {
-        // 1. Extract the keywork argument name
+        // 1. Extract the keyword argument name
         std::string first;
         if (auto found = py_extract<std::string>(entry.first); found) {
             first = found.value();

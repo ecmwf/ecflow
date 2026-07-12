@@ -40,7 +40,7 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const {
             return PreAllocatedReply::error_cmd(make_rejection_message(result.reason(), cmd_->identity()));
         }
 
-        // Perform Autorisation (i.e. access rules) control
+        // Perform Authorisation (i.e. access rules) control
         if (auto result = ecf::is_authorised(*cmd_, *as); result.ok()) {
             return cmd_->handleRequest(as);
         }

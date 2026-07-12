@@ -1378,7 +1378,7 @@ bool Defs::restore_from_string(const std::string& str, std::string& errorMsg, st
     clear();
 
     // Do *NOT* Reset the state and modify numbers
-    // As we we need this numbers for Syncing between client<->Server
+    // As we need this numbers for Syncing between client<->Server
     DefsStructureParser parser(this, str, false /* not used*/);
     bool ret = parser.doParse(errorMsg, warningMsg);
     return ret;
@@ -1625,7 +1625,7 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
     }
     else {
 
-        // small scale changes over the suites in our handle, determine what's changed,
+        // small scale changes over the suites in our handle, determine what is changed,
         // relative to each node and attributes client_state_change_no.
         //   *IF* node/attribute change no > client_state_change_no
         //   *THEN*
@@ -1856,7 +1856,7 @@ void Defs::notify_delete() {
     }
 
     /// Check to make sure that the Observer called detach
-    /// We cannot call detach ourselves, since the the client needs to
+    /// We cannot call detach ourselves, since the client needs to
     /// call detach in the case where the graphical tree is destroyed by user
     /// In this case the Subject/Node is being deleted.
     assert(observers_.empty());

@@ -68,7 +68,7 @@ bool CheckPtCmd::isWrite() const {
 }
 
 bool CheckPtCmd::is_mutable() const {
-    // if save to takes to long, the the late flag is set. Even when command is read only
+    // if save takes too long, the late flag is set. Even when command is read only
     // Also if writing to checkpoint fails we set: ecf::Flag::CHECKPT_ERROR
     // Likewise writing to the log file can also fail, hence we set: ecf::Flag::LOG_ERROR, when manually check pointing
     // Even when command is read only ?

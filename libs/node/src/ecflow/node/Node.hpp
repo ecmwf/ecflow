@@ -87,7 +87,7 @@ public:
      * Creates a clone of the object.
      *
      * This allows to, polymorphically (i.e. regardless of using a pointer to a base class), to create a copy
-     * of the the node based on the actual object type.
+     * of the node based on the actual object type.
      *
      * It is important to note that the cloned object will not be a sibbling of the original object.
      * This essentially means that all parts of the clone object will be the same, except for the parent pointer which
@@ -255,7 +255,7 @@ public:
     virtual void setRepeatToLastValueHierarchically() { setRepeatToLastValue(); }
 
     /// find all %VAR% and replaces with variable values, returns false on the
-    /// first variable that can't be found, cmd will be left half processed.
+    /// first variable that cannot be found, cmd will be left half processed.
     /// Will search for ECF_MICRO, if not found assumes % as the micro char
     bool variableSubstitution(std::string& cmd) const;
 
@@ -326,7 +326,7 @@ public:
     ///	  *** Node is free of repeat, and time dependencies,
     /// 	** Every time we set the state on a nodecontainer, we call handleStateChange
     /// 	** This by default works out the most significant state of the children
-    /// 	** ie. the computed state. Hence setting the state on Suite/Family is really
+    /// 	** i.e., the computed state. Hence setting the state on Suite/Family is really
     /// 	** meaningless, since it will always be the computed state.
     void set_state(NState::State s, bool force = false, const std::string& additional_info_to_log = "");
     virtual void set_state_hierarchically(NState::State s, bool force) { set_state(s, force); }
@@ -413,7 +413,7 @@ public:
     ///
     /// @brief Retrieves the path of the node's parent.
     ///
-    /// If the node doesn't have a parent the dirname is empty (i.e. "");
+    /// If the node does not have a parent the dirname is empty (i.e. "");
     /// otherwise it is the absolute path to the parent node (e.g. "/path/to/parent").
     ///
     /// This allows to compose the absolute path to the node by appending:
@@ -589,7 +589,7 @@ public:
     void delete_zombie(const ecf::Child::ZombieType);
     void deleteVariable(const std::string& name); // if name not found throw, if name empty delete all variables
     void
-    delete_variable_no_error(const std::string& name); // if variable not found don't error, if name empty do nothing
+    delete_variable_no_error(const std::string& name); // if variable not found do not error, if name empty do nothing
     void deleteEvent(const std::string& name);
     void deleteMeter(const std::string& name);
     void deleteLabel(const std::string& name);
@@ -671,7 +671,7 @@ public:
     void set_memento(const FlagMemento*, std::vector<ecf::Aspect::Type>& aspects, bool f);
 
     // Find functions: ============================================================
-    // Will search for a node by name(ie not a path) first on siblings, then on a parent
+    // Will search for a node by name(i.e., not a path) first on siblings, then on a parent
     // then up the node tree, will stop at the suite .
     virtual node_ptr find_node_up_the_tree(const std::string& name) const = 0;
 
@@ -695,7 +695,7 @@ public:
     /// *** hence we return true if variable is found, and false otherwise
     bool findParentUserVariableValue(const std::string& name, std::string& theValue) const;
 
-    /// This function should be used, when we don't care about the distinctions between
+    /// This function should be used, when we do not care about the distinctions between
     /// a variable that exist but has a empty value, and variable not found.(still return empty string)
     /// Useful when we want to return by reference
     const std::string& find_parent_user_variable_value(const std::string& name) const;
@@ -795,7 +795,7 @@ public:
     /// called at the end of state change function
     /// ** Every time we set the state on a nodecontainer, we call handleStateChange
     /// ** This by default works out the most significant state of the children
-    /// ** ie. the computed state. Hence setting the state on Suite/Family is really
+    /// ** i.e., the computed state. Hence setting the state on Suite/Family is really
     /// ** meaningless, since it will always be the computed state.
     /// ** For Aliases we only update the limits, and do not bubble up state changes
     virtual void handleStateChange() = 0; // can end up changing state
@@ -822,7 +822,7 @@ protected:
     /// returns std::numeric_limits<std::size_t>::max() if child not found
     virtual size_t child_position(const Node*) const = 0;
 
-    /// The set_state_only() requires a correctly formed tree, ie since it needs suite()/calendar
+    /// The set_state_only() requires a correctly formed tree, i.e., since it needs suite()/calendar
     /// to initialise the duration. We need a way set the state directly. For initialization
     void set_state_only(NState::State s) { st_.first.setState(s); }
 

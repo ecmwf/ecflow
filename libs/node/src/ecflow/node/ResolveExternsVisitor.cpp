@@ -81,7 +81,7 @@ void AstResolveExternVisitor::visitNode(AstNode* astNode) {
 
     astNode->setParentNode(triggerNode_);
 
-    // See if can reference the path, on the AstNode, if we can't, it should be added as an extern
+    // See if can reference the path, on the AstNode, if we cannot, it should be added as an extern
     std::string errorMsg;
     Node* node = astNode->referencedNode(errorMsg);
     if (!node) {
@@ -95,7 +95,7 @@ void AstResolveExternVisitor::visitVariable(AstVariable* astVar) {
 
     astVar->setParentNode(triggerNode_);
 
-    // See if can reference the path, on the AstVariable, if we can't, it should be added as an extern
+    // See if can reference the path, on the AstVariable, if we cannot, it should be added as an extern
     std::string errorMsg;
     Node* theReferencedNode = astVar->referencedNode(errorMsg);
     if (!theReferencedNode) {
@@ -110,7 +110,7 @@ void AstResolveExternVisitor::visitVariable(AstVariable* astVar) {
         return;
     }
 
-    // Can't find name, in event, meter, user variable, repeat, generated variable, add as extern
+    // Cannot find name, in event, meter, user variable, repeat, generated variable, add as extern
     addExtern(astVar->nodePath(), astVar->name());
 }
 
@@ -130,7 +130,7 @@ void AstResolveExternVisitor::visitFlag(AstFlag* astVar) {
 
     astVar->setParentNode(triggerNode_);
 
-    // See if can reference the path, on the AstFlag, if we can't, it should be added as an extern
+    // See if can reference the path, on the AstFlag, if we cannot, it should be added as an extern
     std::string errorMsg;
     Node* theReferencedNode = astVar->referencedNode(errorMsg);
     if (!theReferencedNode) {

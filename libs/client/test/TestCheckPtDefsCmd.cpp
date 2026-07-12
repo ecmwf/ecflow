@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_restore_from_check_pt_using_new_server) {
     ECF_NAME_THIS_TEST();
 
     // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
-    // the test will will invalid. hence ignore.
+    // the test will be invalid. hence ignore.
     if (!ClientEnvironment::hostSpecified().empty()) {
         std::cout << "Ignoring test when ECF_HOST specified\n";
         return;
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(test_check_pt_edit_history) {
     ECF_NAME_THIS_TEST();
 
     // This test relies on a NEW server invocation. Hence if ECF_HOST/remote server is used
-    // the test will will invalid. hence ignore.
+    // the test will be invalid. hence ignore.
     if (!ClientEnvironment::hostSpecified().empty()) {
         std::cout << "Ignoring test when ECF_HOST specified\n";
         return;

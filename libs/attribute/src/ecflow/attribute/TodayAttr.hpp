@@ -59,7 +59,7 @@
 ///    a/ Set complete
 ///    b/ Runs and then completes
 ///
-/// For a *single* time slot we can't requeue.
+/// For a *single* time slot we cannot requeue.
 /// ****However we could have a set of time slots *****
 ///
 ///                                               isFree:ffffffffffffffff

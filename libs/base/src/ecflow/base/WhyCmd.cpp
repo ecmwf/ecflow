@@ -41,7 +41,7 @@ std::string WhyCmd::why() const {
         defs_->top_down_why(theReasonWhy);
     }
 
-    // Don't add /n on very last item
+    // Do not add /n on very last item
     std::string reason;
     for (size_t i = 0; i < theReasonWhy.size(); ++i) {
         reason += theReasonWhy[i];

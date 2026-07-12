@@ -100,7 +100,7 @@ void MirrorAttr::mirror() {
 
     start_controller();
     if (!controller_) {
-        return; // Can't continue without a running controller...
+        return; // Cannot continue without a running controller...
     }
 
     // Task associated with Attribute is free when any notification is found

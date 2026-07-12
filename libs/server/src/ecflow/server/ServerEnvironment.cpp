@@ -318,7 +318,7 @@ bool ServerEnvironment::valid(std::string& errorMsg) const {
     }
 
     /// read in the ecf white list file that specifies valid users and their access rights
-    /// If the file can't be opened returns false and an error message and false;
+    /// If the file cannot be opened returns false and an error message and false;
     /// Automatically add server admin(user) with write access, as this will allow admin reload
     return load_whitelist_file(errorMsg);
 }

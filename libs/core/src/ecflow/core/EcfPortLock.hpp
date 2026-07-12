@@ -156,7 +156,7 @@ public:
         }
 
         // 2. TCP socket check
-        // This ensures the port is free, by actually trying to binding to it (and immediatelly releasing it).
+        // This ensures the port is free, by actually trying to binding to it (and immediately releasing it).
         if (!is_tcp_port_free(port)) {
             if (debug) {
                 std::cout << "  EcfPortLock::is_free(" << port << ") returning FALSE (TCP port occupied)\n ";

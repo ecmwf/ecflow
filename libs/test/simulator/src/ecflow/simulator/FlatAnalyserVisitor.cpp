@@ -46,7 +46,7 @@ void FlatAnalyserVisitor::visitNodeContainer(NodeContainer* nc) {
 
     bool traverseChildren = analyse(nc);
 
-    // Don't traverse children if the parent is holding on trigger/complete expression
+    // Do not traverse children if the parent is holding on trigger/complete expression
     if (traverseChildren) {
         for (auto node : nc->children()) {
             node->acceptVisitTraversor(*this);
@@ -90,7 +90,7 @@ bool FlatAnalyserVisitor::analyse(Node* node) {
         }
 
         /// Note a complete expression that does not evaluate, does *NOT* hold the node
-        /// It merly sets node to complete.
+        /// It merely sets node to complete.
         if (node->completeAst() && !node->evaluateComplete()) {
             ss_ << l1;
             ss_ << "holding on complete expression '";

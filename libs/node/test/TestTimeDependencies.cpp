@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(test_impossible_day_combination) {
     //  clock real 4.8.2019 # sunday
     //  family f1
     //    day monday
-    //    task t1        # task should never run, can't be Sunday/Monday at same time.
+    //    task t1        # task should never run, cannot be Sunday/Monday at same time.
     //      day tuesday
     //      time 10:00
     Defs defs;
@@ -446,7 +446,7 @@ BOOST_AUTO_TEST_CASE(test_impossible_date_combination) {
     // suite s1
     //  family f1
     //    date 5.8.2019   # monday
-    //    task t1         # task should never run, can't be Sunday/Monday at same time.
+    //    task t1         # task should never run, cannot be Sunday/Monday at same time.
     //      date 6.8.2019 # tuesday
     //      time 10:00
     Defs defs;

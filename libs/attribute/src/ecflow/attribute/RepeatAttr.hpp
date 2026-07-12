@@ -467,7 +467,7 @@ public:
     ///
     /// @brief Retrieve the current value
     ///
-    /// @return the current value fomratted as a yyyymmddTHHMMSS string, or "" if out of bounds.
+    /// @return the current value formatted as a yyyymmddTHHMMSS string, or "" if out of bounds.
     ///
     std::string current_value() const override {
         return currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size())
@@ -748,7 +748,7 @@ private:
 ///     then number of repeats is deterministic
 ///     However if the end-date is less than suite clock this should be reported as error
 ///   o Currently under the hybrid clock the date is not updated, this raises
-///     a whole-lot of issues. (We don't want a separate calendar, just for this).
+///     a whole-lot of issues. (We do not want a separate calendar, just for this).
 ///   o If there is _no_ suite clock, then we must use the current day
 ///     now the number of repeats  varies, and if end-date is less than the current
 ///     day we need to report an error

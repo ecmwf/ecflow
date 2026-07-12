@@ -96,7 +96,7 @@ static bool kill_cmd(bool kill_task) {
     // *******************************************************************
     // Important: The following will *not* work:
     //    theDefs.set_server().add_or_update_variables("ECF_TRIES","1");                     // Override ECF_TRIES so
-    //    don't try to restart aborted jobs theDefs.set_server().add_or_update_variables("ECF_KILL_CMD","kill -15
+    //    do not try to restart aborted jobs theDefs.set_server().add_or_update_variables("ECF_KILL_CMD","kill -15
     //    %ECF_RID%"); // Provide a mechanism to kill the running job
     // Since calling the begin command in the server,
     // will update the defs with the server environment, and hence overriding
@@ -105,7 +105,7 @@ static bool kill_cmd(bool kill_task) {
 
     // The test harness will create corresponding directory structure & default ecf file
     ServerTestHarness serverTestHarness;
-    serverTestHarness.run(theDefs, defs_location, 1 /*timeout*/, false /* don't wait for test to finish */);
+    serverTestHarness.run(theDefs, defs_location, 1 /*timeout*/, false /* do not wait for test to finish */);
 
     // cout << "test_kill_cmd Waiting for task to become active\n";
     TestFixture::client().set_throw_on_error(false);

@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_handle) {
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation("test_handle.def"),
                           1 /*timeout*/,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     std::vector<std::string> suites_s0_s1_s2;
     suites_s0_s1_s2.push_back("s0");
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_handle) {
         BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),
                             "Expected a full_sync() after registering");
 
-        // add additional suites & check suites were added to our handle. Sync_local should returna full_sync()
+        // add additional suites & check suites were added to our handle. Sync_local should return a full_sync()
         std::vector<std::string> added_suites;
         added_suites.push_back("s3");
         added_suites.push_back("s4");
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(test_handle_sync) {
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation("test_handle_sync.def"),
                           1 /*timeout*/,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     std::vector<std::string> suites_s0_s1_s2;
     suites_s0_s1_s2.push_back("s0");
@@ -358,7 +358,7 @@ BOOST_AUTO_TEST_CASE(test_handle_add_remove_add) {
     serverTestHarness.run(*theDefs,
                           ServerTestHarness::testDataDefsLocation("test_handle_sync.def"),
                           1 /*timeout*/,
-                          false /* don't wait for test to finish */);
+                          false /* do not wait for test to finish */);
 
     TestFixture::client().set_throw_on_error(true);
     std::vector<std::string> suites_s0_s1_s2;

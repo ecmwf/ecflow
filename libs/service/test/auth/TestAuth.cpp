@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(throw_exceptions_when_unable_to_parse_credentials) {
 BOOST_AUTO_TEST_CASE(can_return_error_when_invalid_content_found) {
     using namespace ecf::service::auth;
 
-    // Doesn't provide neither 'key' nor 'username'+'password'
+    // Does not provide neither 'key' nor 'username'+'password'
     std::string content = R"(
         {
             "url": "http://address:1234",
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(can_return_error_when_invalid_content_found) {
 BOOST_AUTO_TEST_CASE(can_load_credentials_with_key) {
     using namespace ecf::service::auth;
 
-    // Doesn't provide neither 'key' nor 'username'+'password'
+    // Does not provide neither 'key' nor 'username'+'password'
     std::string content = R"(
         {
             "url": "http://address:1234",
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(can_load_credentials_with_key) {
 BOOST_AUTO_TEST_CASE(can_load_credentials_with_username_and_password) {
     using namespace ecf::service::auth;
 
-    // Doesn't provide neither 'key' nor 'username'+'password'
+    // Does not provide neither 'key' nor 'username'+'password'
     std::string content = R"(
         {
             "url": "http://address:1234",
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(can_load_credentials_with_username_and_password) {
 BOOST_AUTO_TEST_CASE(can_load_credentials_with_key_and_username_and_password) {
     using namespace ecf::service::auth;
 
-    // Doesn't provide neither 'key' nor 'username'+'password'
+    // Does not provide neither 'key' nor 'username'+'password'
     std::string content = R"(
         {
             "url": "http://address:1234",
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(can_load_credentials_with_key_and_username_and_password) {
 BOOST_AUTO_TEST_CASE(can_handle_invalid_credentials_with_array_type) {
     using namespace ecf::service::auth;
 
-    // Doesn't provide neither 'key' nor 'username'+'password'
+    // Does not provide neither 'key' nor 'username'+'password'
     std::string content = R"(
         {
             "url": "http://address:1234",
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(can_handle_invalid_credentials_with_array_type) {
 BOOST_AUTO_TEST_CASE(can_handle_invalid_credentials_with_object_type) {
     using namespace ecf::service::auth;
 
-    // Doesn't provide neither 'key' nor 'username'+'password'
+    // Does not provide neither 'key' nor 'username'+'password'
     std::string content = R"(
         {
             "url": "http://address:1234",
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(can_load_credentials_from_file) {
     using namespace ecf::test;
     using namespace ecf::service::auth;
 
-    // Doesn't provide neither 'key' nor 'username'+'password'
+    // Does not provide neither 'key' nor 'username'+'password'
     std::string content = R"(
         {
             "url": "http://address:1234",

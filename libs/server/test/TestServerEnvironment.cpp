@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(test_server_environment_log_file) {
 BOOST_AUTO_TEST_CASE(test_server_config_file) {
     ECF_NAME_THIS_TEST();
 
-    // Regression test to make sure the server environment variable don't get removed
+    // Regression test to make sure the server environment variable do not get removed
 
     std::vector<std::string> args = {"ServerEnvironment"};
     ServerEnvironment serverEnv(args, File::test_data("Server/server_environment.cfg", "Server"));
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(test_server_config_file) {
 BOOST_AUTO_TEST_CASE(test_server_environment_variables) {
     ECF_NAME_THIS_TEST();
 
-    // Regression test to make sure the server environment variable don't get removed
+    // Regression test to make sure the server environment variable do not get removed
 
     std::vector<std::string> args = {"ServerEnvironment", "--port=3144"};
     ServerEnvironment serverEnv(args);

@@ -241,7 +241,7 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,
 alias_ptr Task::add_alias_only() {
     std::vector<std::string> empty_user_file_contents;
     NameValueVec empty_user_variables;
-    return add_alias(empty_user_file_contents, empty_user_variables, false /* don't create directory or .usr file*/);
+    return add_alias(empty_user_file_contents, empty_user_variables, false /* do not create directory or .usr file*/);
 }
 
 alias_ptr Task::add_alias(const std::string& name) {
@@ -381,7 +381,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
     // Due to trigger and complete evaluations. Hence low cost state checks first
 
     // Do state checking for tasks only. Note: container nodes inherit the most significant state
-    // from the children, hence we can't use the same same algorithm for containers nodes and leaf
+    // from the children, hence we cannot use the same same algorithm for containers nodes and leaf
     // nodes like task.
     NState::State task_state = state();
     if (task_state == NState::COMPLETE || task_state == NState::ACTIVE || task_state == NState::SUBMITTED ||
@@ -512,7 +512,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam) {
     }
     else {
         // *************************************************************************************
-        // Debug/test path only... Enabled for testing when we don't want to create/spawn jobs
+        // Debug/test path only... Enabled for testing when we do not want to create/spawn jobs
         // ** Simulate ** job submission as closely as possible. For testing
         // *************************************************************************************
         jobsParam.push_back_submittable(this);
@@ -573,13 +573,13 @@ bool Task::doDeleteChild(Node* child) {
 }
 
 bool Task::addChild(const node_ptr&, size_t) {
-    // Only used during PLUG: aliases can't be plugged.
+    // Only used during PLUG: aliases cannot be plugged.
     LOG_ASSERT(false, "");
     return false;
 }
 
 bool Task::isAddChildOk(Node*, std::string& errorMsg) const {
-    // Only used during PLUG: aliases can't be plugged.
+    // Only used during PLUG: aliases cannot be plugged.
     errorMsg += "Cannot add children to a task node.";
     return false;
 }

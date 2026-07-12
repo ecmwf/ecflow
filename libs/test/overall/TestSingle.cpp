@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_stress) {
     serverTestHarness.run(theDefs,
                           ServerTestHarness::testDataDefsLocation(test_name + ".def"),
                           120 /*timeout ignored*/,
-                          false /*don't wait for test completion */);
+                          false /*do not wait for test completion */);
 
     std::cout << "Timing test for " << run_test_for_n_seconds << "... seconds  no_of_tasks_to_run "
               << no_of_tasks_to_run << std::endl;

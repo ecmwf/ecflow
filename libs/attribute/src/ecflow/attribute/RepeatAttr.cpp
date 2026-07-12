@@ -586,7 +586,7 @@ void RepeatDateTime::update_repeat_genvar_value() const {
     if (valid()) {
         try {
             auto dt = boost::posix_time::from_iso_string(date_as_string);
-            // Using boost posix_time/gregorian, since C++17 still doesn't include calendar types.
+            // Using boost posix_time/gregorian, since C++17 still does not include calendar types.
 
             auto d = dt.date();
 

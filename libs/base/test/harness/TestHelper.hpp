@@ -19,7 +19,7 @@
 #include "ecflow/base/stc/ServerToClientCmd.hpp"
 #include "ecflow/node/Node.hpp"
 
-// defines statics utility functions used by more than one test
+// defines static utility functions used by more than one test
 class TestHelper {
 public:
     static std::string invokeRequest(Defs* defs, Cmd_ptr theCmd, bool check_change_numbers = true) {

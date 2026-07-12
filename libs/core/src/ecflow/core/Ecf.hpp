@@ -103,7 +103,7 @@ private:
     static atomic_counter_t modify_change_no_;
 };
 
-/// Make sure the Ecf number don't change
+/// Make sure the Ecf number do not change
 class EcfPreserveChangeNo {
 public:
     EcfPreserveChangeNo();

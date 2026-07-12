@@ -385,7 +385,7 @@ const Repeat& Node::findRepeat(const std::string& name) const {
 }
 
 bool Node::findExprVariable(const std::string& name) {
-    // if event found return true; also, mark this event so simulator know it's used in a trigger
+    // if event found return true; also, mark this event so simulator know it is used in a trigger
     if (set_event_used_in_trigger(name)) {
         return true;
     }
@@ -814,7 +814,7 @@ Node::findReferencedNode(const std::string& nodePath, const std::string& extern_
 #endif
 
         if (!res.get()) {
-            // Let's see if it is in an extern Node. Externs can have absolute and relative paths.
+            // Let us see if it is in an extern Node. Externs can have absolute and relative paths.
             // In this case, it will be a relative path, and thus there is no point trying to see if suite is loaded
             if (theDefs->find_extern(nodePath, extern_obj)) {
                 // =================================================================
