@@ -11,20 +11,20 @@ services:
       - ./revproxy/cfgs/nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:
       inner:
-        ipv4_address: 172.42.0.2
+        ipv4_address: 172.30.0.2
 
   authotron:
     hostname: authotron
-    image: eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.5
+    image: eccr.ecmwf.int/auth-o-tron/auth-o-tron:0.2.8
     ports:
       - "8080:8080"
     volumes:
       - ./authotron/config.yaml:/app/config.yaml
     networks:
       inner:
-        ipv4_address: 172.42.0.3
+        ipv4_address: 172.30.0.3
 
-  ecflow-server:
+  ecflow:
     platform: linux/amd64
     hostname: ecflow-server
     image: eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
@@ -32,14 +32,17 @@ services:
       - "8888:8888"
       - "8889:8889"
     volumes:
-      - ./ecflow/deploy/workspace:/workspace
+      - ${WORKSPACE_DIR:-./ecflow/workspace}:${WORKSPACE_DIR:-/workspace}
+    working_dir: ${WORKSPACE_DIR:-/workspace}
+    environment:
+      - ECFLOW_WORKSPACE_DIR=${WORKSPACE_DIR:-/workspace}
     networks:
       inner:
-        ipv4_address: 172.42.0.4
+        ipv4_address: 172.30.0.4
 
 networks:
   inner:
     name: inner
     ipam:
       config:
-        - subnet: 172.42.0.0/16
+        - subnet: 172.30.0.0/16
