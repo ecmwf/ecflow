@@ -22,12 +22,19 @@ ECFLOW_REST_PORT=${ECFLOW_REST_PORT:-8889}
 # Launch ecFlow 'Main' Server
 
 ECF_HOST=${ECFLOW_SERVER_HOST}
+export ECF_HOST
 ECF_PORT=${ECFLOW_SERVER_PORT}
+export ECF_PORT
 ECF_HOME=${ECFLOW_WORKSPACE_DIR}
+export ECF_HOME
 ECF_LOG=${ECF_HOST}.${ECF_PORT}.ecf.log
+export ECF_LOG
 ECF_CHECK=${ECF_HOST}.${ECF_PORT}.ecf.check
+export ECF_CHECK
 ECF_CHECKOLD=${ECF_HOST}.${ECF_PORT}.ecf.check.b
+export ECF_CHECKOLD
 ECF_OUT=${ECF_HOST}.${ECF_PORT}.ecf.out
+export ECF_OUT
 
 nohup ${ECFLOW_INSTALL_DIR}/bin/ecflow_server \
       -d \
@@ -41,6 +48,7 @@ sleep 1 # Give the server a moment to actually start waiting for connections
 # Launch ecFlow REST API server
 
 ECF_REST_OUT=${ECF_HOST}.${ECFLOW_REST_PORT}.rest.out
+export ECF_REST_OUT
 
 nohup /usr/local/bin/ecflow_http \
       --http \
