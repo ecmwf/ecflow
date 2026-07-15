@@ -140,7 +140,7 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: ecflow-debian-package
-          path: ecflow/releng/ecflow-deploy
+          path: ecflow/releng/dockit/ecflow-server
 
       - name: Log in to Harbor
         uses: docker/login-action@v3
@@ -158,8 +158,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
-          file: ecflow/releng/ecflow-deploy/Dockerfile
-          context: ecflow/releng/ecflow-deploy
+          file: ecflow/releng/dockit/ecflow-server/Dockerfile
+          context: ecflow/releng/dockit/ecflow-server
           build-args: |
             ECFLOW_VERSION=${{ needs.package.outputs.version }}
             ECFLOW_PACKAGE=ecflow-${{ needs.package.outputs.version }}-Linux_x86_64.deb
