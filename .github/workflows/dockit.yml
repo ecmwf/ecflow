@@ -13,7 +13,6 @@ jobs:
 
     outputs:
       timestamp: ${{ steps.timestamp.outputs.timestamp }}
-      preset: ${{ steps.timestamp.outputs.preset }}
       jobs: ${{ steps.timestamp.outputs.jobs }}
 
     steps:
@@ -21,12 +20,13 @@ jobs:
         id: timestamp
         run: |
           echo "timestamp=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
-          echo "preset=linux.gcc.serveronly.relwithdebinfo" >> $GITHUB_OUTPUT
           echo "jobs=4" >> $GITHUB_OUTPUT
 
-  # Create the ecflow package
+  #
+  # Create the ecflow package, per image variant
+  #
   package:
-    name: package
+    name: package (${{ matrix.image }})
     needs: bootstrap
     if: ${{ !github.event.pull_request.head.repo.fork && github.event.action != 'labeled' || github.event.label.name == 'approved-for-docker' }}
 
@@ -37,6 +37,21 @@ jobs:
       options: --user root
 
     timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        preset:
+          - linux.gcc.serveronly.relwithdebinfo
+          - linux.gcc.all.relwithdebinfo
+        include:
+          - preset: linux.gcc.serveronly.relwithdebinfo
+            image: ecflow-serveronly-dev
+            context: ecflow-server
+          - preset: linux.gcc.all.relwithdebinfo
+            image: ecflow-all-dev
+            context: ecflow-all
 
     outputs:
       version: ${{ steps.vars.outputs.version }}
@@ -88,14 +103,14 @@ jobs:
         id: configure-ecflow
         run: |
           cd ${GITHUB_WORKSPACE}/ecflow
-          cmake --preset ${{ needs.bootstrap.outputs.preset }} \
+          cmake --preset ${{ matrix.preset }} \
                 -DCUSTOM_DEBIAN_PACKAGE_VERSION=${{ steps.vars.outputs.version }}
 
       - name: Build ecflow
         run: |
           cd ${GITHUB_WORKSPACE}/ecflow
           cmake --build \
-                --preset ${{ needs.bootstrap.outputs.preset }} \
+                --preset ${{ matrix.preset }} \
                 --jobs ${{ needs.bootstrap.outputs.jobs }} \
                 --target all
 
@@ -103,32 +118,49 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/ecflow
           cmake --build \
-                --preset ${{ needs.bootstrap.outputs.preset }} \
+                --preset ${{ matrix.preset }} \
                 --target package
 
       - name: Upload ecflow debian package
         uses: actions/upload-artifact@v7
         with:
-          name: ecflow-debian-package
-          path: ecflow/.deploy/build/${{ needs.bootstrap.outputs.preset }}/ecflow-*.deb
+          name: ecflow-debian-package-${{ matrix.image }}
+          path: ecflow/.deploy/build/${{ matrix.preset }}/ecflow-*.deb
           if-no-files-found: error
 
 #      - name: Test ecflow
 #        run: |
 #          cd ${{ github.workspace }}/ecflow
-#          ctest --preset  ${{ needs.bootstrap.outputs.preset }} \
+#          ctest --preset  ${{ matrix.preset }} \
 #                --jobs ${{ needs.bootstrap.outputs.jobs }} \
 #                --output-on-failure \
 #                -L nightly
 
-  # Create ecflow docker image
+  #
+  # Create the ecflow docker image
+  #
   dockerize:
-    name: dockerize
+    name: dockerize (${{ matrix.image }})
     needs: [ bootstrap, package ]
 
     runs-on: ubuntu-latest
 
     timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        preset:
+          - linux.gcc.serveronly.relwithdebinfo
+          - linux.gcc.all.relwithdebinfo
+        include:
+          - preset: linux.gcc.serveronly.relwithdebinfo
+            image: ecflow-serveronly-dev
+            context: ecflow-server
+          - preset: linux.gcc.all.relwithdebinfo
+            image: ecflow-all-dev
+            context: ecflow-all
 
     steps:
       - name: Checkout 'ecflow'
@@ -139,8 +171,8 @@ jobs:
       - name: Download ecflow debian package
         uses: actions/download-artifact@v7
         with:
-          name: ecflow-debian-package
-          path: ecflow/releng/dockit/ecflow-server
+          name: ecflow-debian-package-${{ matrix.image }}
+          path: ecflow/releng/dockit/${{ matrix.context }}
 
       - name: Log in to Harbor
         uses: docker/login-action@v3
@@ -158,16 +190,16 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
-          file: ecflow/releng/dockit/ecflow-server/Dockerfile
-          context: ecflow/releng/dockit/ecflow-server
+          file: ecflow/releng/dockit/${{ matrix.context }}/Dockerfile
+          context: ecflow/releng/dockit/${{ matrix.context }}
           build-args: |
             ECFLOW_VERSION=${{ needs.package.outputs.version }}
             ECFLOW_PACKAGE=ecflow-${{ needs.package.outputs.version }}-Linux_x86_64.deb
           platforms: linux/amd64
           push: true
           tags: |
-            eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
-            eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:${{ needs.package.outputs.version }}_${{ needs.bootstrap.outputs.timestamp }}
+            eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}:latest
+            eccr.ecmwf.int/ecflow-dev-environments/${{ matrix.image }}:${{ needs.package.outputs.version }}_${{ needs.bootstrap.outputs.timestamp }}
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
             org.opencontainers.image.revision=${{ github.sha }}
