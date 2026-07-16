@@ -95,7 +95,7 @@ public:
         pendingTimeOut, autoScrollLines;
     bool readOnly, cursorVisible, blockScrollBarUpdate, updateScrollBarPageStepPending, inMouseEvent;
     QBasicTimer autoScrollTimer, cursorBlinkTimer;
-    QAction* actions[TextPagerEdit::SelectAllAction];
+    QAction* actions[TextPagerEdit::ActionCount];
     TextPagerSection* sectionPressed;
     TextPagerCursor textCursor, dragOverrideCursor;
     QBasicTimer tripleClickTimer;

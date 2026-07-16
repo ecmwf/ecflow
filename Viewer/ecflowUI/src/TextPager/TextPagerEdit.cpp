@@ -15,6 +15,7 @@
 #include "TextPagerEdit.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 #include <QGuiApplication>
@@ -72,9 +73,11 @@ TextPagerEdit::TextPagerEdit(QWidget* parent)
     };
 
     std::array shortcuts = {shortcuts_t{tr("Copy"), SLOT(copy()), QKeySequence::Copy},
-                            shortcuts_t{tr("Select All"), SLOT(selectAll()), QKeySequence::SelectAll},
-                            shortcuts_t{QString(), nullptr, QKeySequence::UnknownKey}};
-    for (int i = 0; shortcuts[i].member; ++i) {
+                            shortcuts_t{tr("Select All"), SLOT(selectAll()), QKeySequence::SelectAll}};
+    static_assert(std::tuple_size_v<decltype(shortcuts)> == TextPagerEdit::ActionCount,
+                  "shortcuts must hold exactly one entry per ActionType");
+
+    for (std::size_t i = 0; i < shortcuts.size(); ++i) {
         d->actions[i] = new QAction(shortcuts[i].text, this);
         d->actions[i]->setShortcutContext(Qt::WidgetShortcut);
         d->actions[i]->setShortcut(QKeySequence(shortcuts[i].key));
