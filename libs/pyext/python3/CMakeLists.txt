@@ -68,14 +68,40 @@ set_target_properties(ecflow3
 # with 'No module named pytest'.
 execute_process(
   COMMAND ${Python3_EXECUTABLE} -c "import pytest"
-  RESULT_VARIABLE _ecflow_have_pytest
+  RESULT_VARIABLE _ECFLOW_HAVE_PYTEST
   OUTPUT_QUIET ERROR_QUIET)
-if( NOT _ecflow_have_pytest EQUAL 0 )
+if( NOT _ECFLOW_HAVE_PYTEST EQUAL 0 )
   message( WARNING
     "pytest was not found for ${Python3_EXECUTABLE}; the python tests "
     "(py3_u_* and py3_s_*) will fail to run. Install it with:\n"
     "    ${Python3_EXECUTABLE} -m pip install -r "
     "${CMAKE_CURRENT_SOURCE_DIR}/../test/requirements-test.txt" )
+endif()
+
+#
+# When using some HPC toolchains, the dynamic linker for ecflow resolves and loads the platform default libstdc++ first,
+# instead of the one that ecflow.so was built against. This leads to symbol version mismatches, and the python tests
+# fail with errors like:
+#
+#   /lib64/libstdc++.so.6: error: version lookup error: version `GLIBCXX_3.4.32' not found
+#     (required by /path/to/ecflow/build/libs/pyext/python3/ecflow.so) (fatal)
+#
+# ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH allows a runtime library directory to be prepended to LD_LIBRARY_PATH, so that
+# the correct libstdc++.so.6 is used by the python tests.
+#
+set(ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH "" CACHE STRING
+  "Colon-separated directories prepended to LD_LIBRARY_PATH when running the python tests")
+
+set( _ECFLOW_PYEXT_ENVIRONMENT
+  "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH}"
+  "PYTHONPATH=${ECFLOW_PYTHONPATH}"
+)
+if( ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH )
+  if( DEFINED ENV{LD_LIBRARY_PATH} AND NOT "$ENV{LD_LIBRARY_PATH}" STREQUAL "" )
+    list( APPEND _ECFLOW_PYEXT_ENVIRONMENT "LD_LIBRARY_PATH=${ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH}:$ENV{LD_LIBRARY_PATH}" )
+  else()
+    list( APPEND _ECFLOW_PYEXT_ENVIRONMENT "LD_LIBRARY_PATH=${ECFLOW_PYEXT_TEST_LD_LIBRARY_PATH}" )
+  endif()
 endif()
 
 foreach( test ${u_tests} )
@@ -88,7 +114,7 @@ foreach( test ${u_tests} )
     ARGS
       -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py -v
     ENVIRONMENT
-      "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH};PYTHONPATH=${ECFLOW_PYTHONPATH}"
+      ${_ECFLOW_PYEXT_ENVIRONMENT}
     TEST_DEPENDS
       u_base
   )
@@ -96,6 +122,11 @@ endforeach()
 
 
 if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
+
+  #
+  # Python integration tests run the ecflow server, and thus use ECF_SSL_DIR to find the generated SSL certificates.
+  #
+  list( APPEND _ECFLOW_PYEXT_ENVIRONMENT "ECF_SSL_DIR=${CMAKE_CURRENT_BINARY_DIR}/" )
 
   foreach( test ${s_tests} )
     ecbuild_add_test(
@@ -107,7 +138,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
       ARGS
         -m pytest ${CMAKE_CURRENT_SOURCE_DIR}/../test/py_${test}.py -v
       ENVIRONMENT
-        "PATH=${Python3_EXECUTABLE_DIR}:$ENV{PATH};PYTHONPATH=${ECFLOW_PYTHONPATH};ECF_SSL_DIR=${CMAKE_CURRENT_BINARY_DIR}/"
+        ${_ECFLOW_PYEXT_ENVIRONMENT}
       TEST_DEPENDS
         u_base
     )

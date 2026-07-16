@@ -37,6 +37,7 @@ gnu-15.2.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.13.13-01/lib64/libpython3.13.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.13.13-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+        -DECFLOW_PYEXT_TEST_LD_LIBRARY_PATH=/usr/local/apps/gcc/15.2.0/lib64
       # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
     ctest_options:
       # disable s_http* tests
@@ -65,6 +66,7 @@ gnu-14.2.0:
         -DPython3_LIBRARIES=/usr/local/apps/python3/3.12.9-01/lib64/libpython3.12.so
         -DPython3_LIBRARY_DIRS=/usr/local/apps/python3/3.12.9-01/lib64
         -DCMAKE_PREFIX_PATH=/usr/local/apps/python3/3.13.13-01/lib/python3.13/site-packages/pybind11/share/cmake/pybind11
+        -DECFLOW_PYEXT_TEST_LD_LIBRARY_PATH=/usr/local/apps/gcc/14.2.0/lib64
       # Note: Python 3.13.13-01, provides Pybind11 3.0.4.
       #
       # Important:
