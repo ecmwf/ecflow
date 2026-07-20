@@ -122,6 +122,22 @@ if (HAVE_EXPORT_COMPILE_COMMANDS)
 endif ()
 
 # =========================================================================================
+# Support for ASIO select 'fallback' reactor
+# =========================================================================================
+
+if( ENABLE_ASIO_SELECT_REACTOR )
+  #
+  # The three current alternatives, on Linux, for ASIO reactor are:
+  #  - epoll (by default)
+  #  - io_uring (when requested explicitly)
+  #  - select (fallback).
+  #
+  # This macro forces the use of the Boost.Asio 'select' fallback reactor.
+  #
+  add_compile_definitions( BOOST_ASIO_DISABLE_EPOLL )
+endif()
+
+# =========================================================================================
 # Support for std::filesystem
 # =========================================================================================
 

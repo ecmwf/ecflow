@@ -79,6 +79,21 @@ option( ENABLE_UDP                 "Enable UDP server"                          
 option( ENABLE_DOCS                "Enable Documentation"                                OFF )
 option( ENABLE_DEBIAN_PACKAGE      "Enable Debian Package"                               OFF )
 
+#
+# On macOS, Boost.ASIO, by default, uses kqueue -- which is correctly intercepted by proxychains.
+#
+# On Linux, Boost.ASIO, by default, uses the epoll reactor.
+# This means that the TCP/IP client, driven by Boost's async_* calls, uses the epoll_* API.
+# Since proxychains only intercepts the select/connect API, the epoll_* calls are simply ignored.
+#
+# The option below allows to force the use of the Boost.Asio 'select' fallback reactor,
+# and thus allows the use with proxychains.
+#
+# This is useful to enable running ecflow_client/ecFlowUI in a Linux container, while using
+# proxychains to reach a SOCKS proxy and contact a remote host via an 'ssh -N -D' tunnel.
+#
+option( ENABLE_ASIO_SELECT_REACTOR "Use the Boost.Asio 'select' fallback reactor"        OFF )
+
 # =========================================================================================
 # Sanity check options
 # =========================================================================================
@@ -134,6 +149,11 @@ if(ENABLE_UDP AND NOT ENABLE_SERVER)
   set(ENABLE_UDP OFF)
 endif()
 
+# Only in Linux do we support the Boost.Asio 'select' fallback reactor
+if( ENABLE_ASIO_SELECT_REACTOR AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" )
+  ecbuild_critical( "ENABLE_ASIO_SELECT_REACTOR is only supported on Linux" )
+endif()
+
 ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
 ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
@@ -145,6 +165,7 @@ ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries
 ecbuild_info( "ENABLE_HTTP                : ${ENABLE_HTTP}" )
 ecbuild_info( "ENABLE_HTTP_COMPRESSION    : ${ENABLE_HTTP_COMPRESSION}" )
 ecbuild_info( "ENABLE_UDP                 : ${ENABLE_UDP}" )
+ecbuild_info( "ENABLE_ASIO_SELECT_REACTOR : ${ENABLE_ASIO_SELECT_REACTOR}" )
 
 
 if (ENABLE_UI)
