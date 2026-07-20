@@ -14,3 +14,4 @@ documentation index; each note is reachable only through its direct link.
    :maxdepth: 1
 
    multi_tenant_reference_environment
+   commands
