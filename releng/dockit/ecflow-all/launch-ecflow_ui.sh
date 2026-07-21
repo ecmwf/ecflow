@@ -4,6 +4,41 @@ set -e
 set -u
 set -o pipefail
 
+#
+# Allow to, by default, run ecflow_ui as a specific (host) user instead of root.
+# This can be opted out of by setting ECF_UI_NO_PROXYCHAINS, which will skip all proxychains setup and run ecflow_ui straight away, under the optional privilege drop.
+#
+# When ECF_RUN_UID is set, a matching group/passwd entry is created and privileges are dropped to
+# it (via setpriv) before ecflow_ui is exec'd, so that ecflow's get_login_name() -- which is just
+# getpwuid(getuid())->pw_name, ignoring $USER/$LOGNAME -- reports that user, mirroring how the
+# client identifies the user on the host. root is retained until the final exec because writing
+# /etc/proxychains4.conf below requires it. ECF_RUN_USER is required when ECF_RUN_UID is set;
+# ECF_RUN_GID defaults to ECF_RUN_UID.
+#
+run_as_user_prefix=()
+if [ -n "${ECF_RUN_UID:-}" ]; then
+    run_as_user="${ECF_RUN_USER:?launch-ecflow_ui.sh: ECF_RUN_USER must be set when ECF_RUN_UID is set}"
+    run_as_gid="${ECF_RUN_GID:-${ECF_RUN_UID}}"
+    if ! getent group "${run_as_gid}" >/dev/null; then
+        echo "${run_as_user}:x:${run_as_gid}:" >> /etc/group
+    fi
+    if ! getent passwd "${ECF_RUN_UID}" >/dev/null; then
+        echo "${run_as_user}:x:${ECF_RUN_UID}:${run_as_gid}::/home/${run_as_user}:/bin/sh" >> /etc/passwd
+    fi
+    install -d -o "${ECF_RUN_UID}" -g "${run_as_gid}" "/home/${run_as_user}"
+    # The ecflow_ui wrapper uses these for its temp/log paths; setpriv does not set them.
+    export HOME="/home/${run_as_user}" USER="${run_as_user}" LOGNAME="${run_as_user}"
+    run_as_user_prefix=(setpriv --reuid "${ECF_RUN_UID}" --regid "${run_as_gid}" --init-groups)
+fi
+
+#
+# When proxychains is not wanted (direct connections, i.e. --proxychains=off), skip all proxychains
+# setup and run ecflow_ui straight away, under the optional privilege drop.
+#
+if [ -n "${ECF_UI_NO_PROXYCHAINS:-}" ]; then
+    exec "${run_as_user_prefix[@]}" /usr/local/bin/ecflow_ui "$@"
+fi
+
 # Resolve the SOCKS5 proxy host (the SSH tunnel opened on the Docker host) to a literal IP address.
 # proxychains-ng refuses a non-numeric address for the first proxy in a chain, since that hop is
 # dialled directly, before any tunnel exists through which a hostname could be resolved remotely.
@@ -12,7 +47,11 @@ set -o pipefail
 PROXY_HOST=${PROXY_HOST:-host.docker.internal}
 PROXY_PORT=${PROXY_PORT:-9050}
 
-PROXY_HOST_IP=$(getent hosts "${PROXY_HOST}" | awk '{ print $1; exit }')
+# Force IPv4 resolution: 'getent hosts' may return an IPv6 address first (recent Docker Desktop
+# hands back e.g. fdc4:...::254 for host.docker.internal), but the proxychains SOCKS proxy line and
+# the /24 'localnet' exclusion computed below both assume a dotted-quad IPv4 address - an IPv6
+# result yields a malformed 'localnet ...' line and proxychains aborts with "localnet address error".
+PROXY_HOST_IP=$(getent ahostsv4 "${PROXY_HOST}" | awk '{ print $1; exit }')
 if [ -z "${PROXY_HOST_IP}" ]; then
     echo "launch-ecflow_ui.sh: could not resolve ${PROXY_HOST} to an IP address" >&2
     exit 1
@@ -46,4 +85,4 @@ if [ -n "${DISPLAY:-}" ]; then
     export DISPLAY="${PROXY_HOST_IP}:${DISPLAY#*:}"
 fi
 
-exec proxychains4 -f /etc/proxychains4.conf /usr/local/bin/ecflow_ui "$@"
+exec "${run_as_user_prefix[@]}" proxychains4 -f /etc/proxychains4.conf /usr/local/bin/ecflow_ui "$@"

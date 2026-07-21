@@ -19,9 +19,30 @@ CFG_DIR="${HOME}/.ecflow_ui_v5"
 IMAGE="eccr.ecmwf.int/ecflow-dev-environments/ecflow-all-dev:latest"
 PLATFORM="linux/amd64"
 PROXYCHAINS="off"
-# An ECF_AUTHTOKENS already set in the environment this script runs in is equivalent to passing
+#
+# When ECF_AUTHTOKENS is set in the environment this script runs, it is equivalent to passing
 # --authtokens with that value; the flag, if also given, takes precedence over it.
+#
 AUTHTOKENS="${ECF_AUTHTOKENS:-}"
+#
+# Optional override for the host the container's entrypoint (launch-ecflow_ui.sh) uses as its SOCKS
+# proxy / X11 / localnet address. Empty means: let the entrypoint resolve host.docker.internal
+# itself (it forces IPv4). Set it (e.g. --proxy-host 192.168.65.254) to pin that address, for
+# instance against an older image whose entrypoint still resolves an IPv6 address.
+#
+PROXY_HOST="${PROXY_HOST:-}"
+#
+# By default the container mirrors the invoking host user (same name/uid/gid): the launcher
+# recreates that account inside the container and drops privileges to it, so ecflow reports the same
+# login user as on the host (its get_login_name() is getpwuid(getuid())). --run-as-root keeps root.
+#
+RUN_AS_ROOT="false"
+#
+# Optional path to a host launcher script to mount over the image's baked-in entrypoint
+# (launch-ecflow_ui.sh), so launcher fixes take effect without rebuilding the image.
+# Empty means: use the launcher baked into the container as-is.
+#
+HOST_LAUNCHER=""
 
 usage() {
     cat <<'EOF'
@@ -42,19 +63,43 @@ Options:
                            the calling environment is used as the default for this option, so
                            having it exported is equivalent to passing --authtokens explicitly;
                            an explicit --authtokens overrides it.
+      --proxy-host HOST   Override the address the container's entrypoint uses for its SOCKS proxy
+                           and X11/localnet exclusion, exposed as PROXY_HOST (default: unset, i.e.
+                           the entrypoint resolves host.docker.internal itself, forcing IPv4). A
+                           PROXY_HOST set in the calling environment is used as the default. Pin it
+                           (e.g. 192.168.65.254) against an older image whose entrypoint still
+                           resolves an IPv6 address and fails with "localnet address error".
+      --run-as-root       Run the container as root instead of mirroring the invoking host user.
+                           By default the host user's name/uid/gid are recreated inside the
+                           container and ecflow_ui runs as that user, so ecflow reports the same
+                           login user (getpwuid(getuid())) as on the host.
+      --host-launcher FILE
+                           Mount FILE (a host launcher script) over the image's baked-in entrypoint
+                           launch-ecflow_ui.sh, so launcher fixes take effect without rebuilding the
+                           image. Default: unset, i.e. the launcher baked into the container is used.
   -h, --help               Show this help and exit
 
 Prerequisites (macOS):
   - An X server (e.g. XQuartz) running, with 'xhost +' applied (this script also applies it).
   - If --proxychains=on, an SSH SOCKS tunnel bound to more than loopback, left open in another
     terminal:
-        ssh -g -D 9050 user@hpc-gateway
+        ssh [-v] -g -C -N -D 9050 user@hpc-gateway
+          -v for verbose output
+          -g to allow remote hosts to connect (n.b. the container acts as a remote host)
+          -C for compression
+          -N to not run a command
+          -D 9050 to open a SOCKS tunnel on port 9050 (the port baked into the image's entrypoint).
+
+Notes:
+  - With --host-launcher FILE, FILE is mounted over the image's entrypoint (both proxychains modes),
+    allowing to customise the launcher without rebuilding the image.
 
 Examples:
   ./docker_ecflow_ui.sh
   ./docker_ecflow_ui.sh --proxychains=on
   ./docker_ecflow_ui.sh -c ~/cfg/ecflow_ui -i ecflow-all-dev:2026.1
   ./docker_ecflow_ui.sh --authtokens ~/.ecflow_server.tokens
+  ./docker_ecflow_ui.sh --host-launcher ./ecflow-all/launch-ecflow_ui.sh
   ECF_AUTHTOKENS=~/.ecflow_server.tokens ./docker_ecflow_ui.sh
   curl -fsSL <url>/docker_ecflow_ui.sh | bash -s -- --proxychains=on
 EOF
@@ -98,6 +143,25 @@ while [ $# -gt 0 ]; do
             AUTHTOKENS="${1#*=}"
             shift
             ;;
+        --proxy-host)
+            PROXY_HOST="$2"
+            shift 2
+            ;;
+        --proxy-host=*)
+            PROXY_HOST="${1#*=}"
+            shift
+            ;;
+        --run-as-root)
+            RUN_AS_ROOT="true"
+            ;;
+        --host-launcher)
+            HOST_LAUNCHER="$2"
+            shift 2
+            ;;
+        --host-launcher=*)
+            HOST_LAUNCHER="${1#*=}"
+            shift
+            ;;
         -h|--help)
             usage
             exit 0
@@ -132,11 +196,11 @@ else
     echo "docker_ecflow_ui.sh: warning: 'xhost' not found; skipping X11 access control setup" >&2
 fi
 
-# proxychains=off bypasses the image's own ENTRYPOINT (launch-ecflow_ui.sh, which always sets up
-# proxychains4) and runs ecflow_ui directly instead.
-# Built as a single array, always with at least one element, rather than splicing in a separate
-# (possibly empty) array of --entrypoint args: bash 3.2 (macOS's default /bin/bash) raises
-# "unbound variable" under `set -u` when expanding "${arr[@]}" on a genuinely empty array.
+#
+# The image's ENTRYPOINT (launch-ecflow_ui.sh) is used in both modes. proxychains=off disables the
+# proxychains setup via the environment rather than replacing the entrypoint, so the launcher can
+# still recreate the run-as-user account and drop privileges.
+#
 DOCKER_ARGS=(
     --rm
     -P
@@ -145,7 +209,36 @@ DOCKER_ARGS=(
     -v "${CFG_DIR}:${CFG_DIR}"
 )
 if [ "${PROXYCHAINS}" = "off" ]; then
-    DOCKER_ARGS+=(--entrypoint /usr/local/bin/ecflow_ui)
+    DOCKER_ARGS+=(-e ECF_UI_NO_PROXYCHAINS=1)
+fi
+
+#
+# Setup the host user inside the container (default), so that ecflow reports the same login user
+# as on the host. The launcher recreates this account and drops privileges to it.
+#   --run-as-root skips this and leaves the container as root.
+#
+if [ "${RUN_AS_ROOT}" = "false" ]; then
+    DOCKER_ARGS+=(
+        -e "ECF_RUN_USER=$(id -un)"
+        -e "ECF_RUN_UID=$(id -u)"
+        -e "ECF_RUN_GID=$(id -g)"
+    )
+fi
+
+#
+# When --host-launcher FILE is given, override the image's baked-in entrypoint (launch-ecflow_ui.sh)
+# with FILE, so launcher fixes take effect without rebuilding the image. The launcher is the
+# entrypoint in both proxychains modes. When unset, the launcher baked into the container is used.
+#
+if [ -n "${HOST_LAUNCHER}" ]; then
+    if [ ! -f "${HOST_LAUNCHER}" ]; then
+        echo "docker_ecflow_ui.sh: --host-launcher file '${HOST_LAUNCHER}' does not exist" >&2
+        exit 1
+    fi
+    HOST_LAUNCHER_DIR=$(cd "$(dirname "${HOST_LAUNCHER}")" && pwd)
+    HOST_LAUNCHER="${HOST_LAUNCHER_DIR}/$(basename "${HOST_LAUNCHER}")"
+    echo "docker_ecflow_ui.sh: using host launcher (overriding image entrypoint): ${HOST_LAUNCHER}" >&2
+    DOCKER_ARGS+=(-v "${HOST_LAUNCHER}:/opt/local/bin/launch-ecflow_ui.sh:ro")
 fi
 
 if [ -n "${AUTHTOKENS}" ]; then
@@ -158,6 +251,12 @@ if [ -n "${AUTHTOKENS}" ]; then
     # Mounted read-only, at the same path inside the container as on the host, so ECF_AUTHTOKENS
     # can be set to that one path without needing to translate it.
     DOCKER_ARGS+=(-v "${AUTHTOKENS}:${AUTHTOKENS}:ro" -e "ECF_AUTHTOKENS=${AUTHTOKENS}")
+fi
+
+# Only passed when set, so the container's entrypoint keeps resolving host.docker.internal (IPv4)
+# by default; an explicit --proxy-host pins PROXY_HOST instead.
+if [ -n "${PROXY_HOST}" ]; then
+    DOCKER_ARGS+=(-e "PROXY_HOST=${PROXY_HOST}")
 fi
 
 # No -i/-t: ecflow_ui is a GUI app driven over X11, not an interactive TTY program, and dropping
