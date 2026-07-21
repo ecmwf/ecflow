@@ -8,80 +8,123 @@
 # nor does it submit to any jurisdiction.
 #
 
-# This test ensures the creation of Defs objects and their components works as expected.
-
 import os
+
 import ecflow
+import pytest
 
-print(ecflow.__doc__)
-print(ecflow.Defs.__doc__)
+from ecflow import (
+    Suite,
+    Family,
+    Task,
+    Defs,
+    Clock,
+    DState,
+    PartExpression,
+    Variable,
+    Limit,
+    InLimit,
+    Date,
+    Day,
+    Days,
+    Event,
+    Meter,
+    Label,
+    Autocancel,
+    TimeSlot,
+    TimeSeries,
+    Style,
+    State,
+    RepeatString,
+    RepeatDate,
+    RepeatDateTime,
+    RepeatInteger,
+    RepeatDay,
+    RepeatEnumerated,
+    Verify,
+    PrintStyle,
+    Time,
+    Today,
+    Late,
+    Cron,
+)
 
-from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Variable, Limit, InLimit, \
-    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
-    RepeatString, RepeatDate, RepeatDateTime, RepeatInteger, RepeatDay, RepeatEnumerated, \
-    Verify, PrintStyle, Time, Today, Late, Cron, Client, debug_build, Ecf
-import ecflow_test_util as Test
 
-if __name__ == "__main__":
-
-    Test.print_test_start(os.path.basename(__file__))
-
+def test_node_type_isinstance_relationships():
     suite = Suite("s1")
-    assert (isinstance(suite, ecflow.Suite)), "Expected suite"
-    assert (not isinstance(suite, ecflow.Family)), "Expected suite"
-    assert (not isinstance(suite, ecflow.Task)), "Expected suite"
+    assert isinstance(suite, ecflow.Suite)
+    assert not isinstance(suite, ecflow.Family)
+    assert not isinstance(suite, ecflow.Task)
 
     family = Family("f1")
-    assert (isinstance(family, ecflow.Family)), "Expected Family"
-    assert (not isinstance(family, ecflow.Suite)), "Expected Family"
-    assert (not isinstance(family, ecflow.Task)), "Expected Family"
-    suite.add_family(family)
+    assert isinstance(family, ecflow.Family)
+    assert not isinstance(family, ecflow.Suite)
+    assert not isinstance(family, ecflow.Task)
 
     task = Task("f1")
-    assert (isinstance(task, ecflow.Task)), "Expected Task"
-    assert (not isinstance(task, ecflow.Suite)), "Expected Task"
-    assert (not isinstance(task, ecflow.Family)), "Expected Task"
-    family.add_task(task)
+    assert isinstance(task, ecflow.Task)
+    assert not isinstance(task, ecflow.Suite)
+    assert not isinstance(task, ecflow.Family)
 
+
+def test_empty_defs_are_equal_and_default_state_unknown():
     defs = Defs()
     defs2 = Defs()
-    assert defs == defs2, "Empty defs should be equal"
+    assert defs == defs2
+    assert defs.get_state() == ecflow.State.unknown
 
-    assert defs.get_state() == ecflow.State.unknown, "Expected default state to be unknown"
-    defs.add_suite(suite);  # add existing suite to defs
 
-    suite = defs.add_suite("s2");
+def test_defs_change_after_adding_suite():
+    defs = Defs()
+    defs2 = Defs()
+    suite = Suite("s1")
+    suite.add_family(Family("f1")).add_task(Task("f1"))
+    defs.add_suite(suite)
+    assert defs != defs2
+
+
+def test_suite_construction_and_variables():
+    defs = Defs()
+    suite = defs.add_suite("s2")
     suite.add_variable(Variable("ECF_HOME", "/tmp/"))
-    suite.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
+    suite.add_variable(
+        "ECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%"
+    )
     suite.add_variable("ECF_URL_BASE", "http://www.ecmwf.int")
     suite.add_variable("ECF_URL", "publications/manuals/sms")
     suite.add_limit(Limit("limitName", 10))
     suite.add_limit("limitName_2", 10)
-    assert suite.begun() == False, "Suite should not have begun"
+    assert not suite.begun(), "Suite should not have begun"
 
-    clock = Clock(1, 1, 2010, False);
-    clock.set_gain(1, 10, True);
-    suite.add_clock(clock);
+    clock = Clock(1, 1, 2010, False)
+    clock.set_gain(1, 10, True)
+    suite.add_clock(clock)
 
-    assert defs != defs2, "Defs should no longer compare as they are different"
 
-    defs.add_extern("/path/to/task");
-    defs.add_extern("/fred/bill:event_name");
+def test_defs_externs():
+    defs = Defs()
+    defs.add_extern("/path/to/task")
+    defs.add_extern("/fred/bill:event_name")
+    assert len(list(defs.externs)) == 2
 
-    family = suite.add_family("f1")
-    family.add_defstatus(DState.active);
 
+def test_task_with_trigger_complete_autocancel():
+    family = Family("f1")
+    family.add_defstatus(DState.active)
     task = family.add_task("t1")
     task.add_trigger("t2 == active")
     task.add_complete("t2 == complete")
-    task.add_autocancel(Autocancel(3));
+    task.add_autocancel(Autocancel(3))
 
+
+def test_task_with_part_triggers_and_time_attributes():
+    family = Family("f1")
     task2 = family.add_task("t2")
-    task2.add_defstatus(DState.complete);
+    task2.add_defstatus(DState.complete)
     task2.add_part_trigger(PartExpression("t1 == complete"))
-    task2.add_part_trigger(PartExpression("t1 == active", True))  # for long and/or expressions, subsequent expr must be and/or
+    task2.add_part_trigger(PartExpression("t1 == active", True))
     task2.add_part_complete(PartExpression("t1 == complete"))
-    task2.add_part_complete(PartExpression("t1 == active", False))  # for long and/or expressions, subsequent expr must be and/or
+    task2.add_part_complete(PartExpression("t1 == active", False))
     task2.add_label(Label("labelname", "label1"))
     task2.add_label("labelname2", "label1")
     task2.add_inlimit(InLimit("limitName", "/s1/f1", 2))
@@ -107,7 +150,7 @@ if __name__ == "__main__":
     start = TimeSlot(0, 0)
     finish = TimeSlot(23, 0)
     incr = TimeSlot(0, 30)
-    ts = TimeSeries(start, finish, incr, True);
+    ts = TimeSeries(start, finish, incr, True)
     task2.add_today(Today(ts))
 
     task2.add_time(20, 10)
@@ -127,11 +170,17 @@ if __name__ == "__main__":
     cron.set_days_of_month([1, 2, 3, 4, 5, 6])
     cron.set_months([1, 2, 3, 4, 5, 6])
     cron.set_time_series(ts)
-    task2.add_cron(cron);
+    task2.add_cron(cron)
+
+
+def test_various_repeat_types():
+    defs = Defs()
+    suite = defs.add_suite("s1")
+    family = suite.add_family("f1")
 
     task3 = family.add_task("t3")
     task3.add_repeat(RepeatDate("testDate", 20100111, 20100115, 2))
-    task3.add_defstatus(DState.queued);
+    task3.add_defstatus(DState.queued)
     task3.add_verify(Verify(State.complete, 1))
     task3.add_autocancel(Autocancel(20, 10, False))
     task3.add_label(Label("label_name", "label_value"))
@@ -140,96 +189,110 @@ if __name__ == "__main__":
     task3_1.add_repeat(RepeatDate("testDate", 20100111, 20100115))
 
     task3_2 = family.add_task("t3_2")
-    task3_2.add_repeat(RepeatDateTime("testDateTime", "20100111T000000", "20100115T000000"))
+    task3_2.add_repeat(
+        RepeatDateTime("testDateTime", "20100111T000000", "20100115T000000")
+    )
 
     task4 = family.add_task("t4")
     task4.add_repeat(RepeatInteger("testInteger", 0, 100, 2))
-    task4.add_defstatus(DState.aborted);
+    task4.add_defstatus(DState.aborted)
 
     task4_1 = family.add_task("t4_1")
     task4_1.add_repeat(RepeatInteger("testInteger", 0, 100))
 
     task5 = family.add_task("t5")
     task5.add_repeat(RepeatEnumerated("testInteger", ["red", "green", "blue"]))
-    task5.add_defstatus(DState.submitted);
+    task5.add_defstatus(DState.submitted)
 
     task6 = family.add_task("t6")
     task6.add_repeat(RepeatString("test_string", ["a", "b", "c"]))
-    task6.add_defstatus(DState.suspended);
+    task6.add_defstatus(DState.suspended)
 
     task7 = family.add_task("t7")
     task7.add_repeat(RepeatDay(2))
-    task7.add_defstatus(DState.active);
+    task7.add_defstatus(DState.active)
 
     task8 = family.add_task("t8")
     task8.add_repeat(RepeatDay())
-    print("task8.get_try_no()    :string:", task8.get_try_no())
-    print("task8.get_int_try_no():int   :", task8.get_int_try_no())
+    assert task8.get_try_no() == "0"
+    assert task8.get_int_try_no() == 0
+    assert task8.get_defs() is not None
 
-    the_defs = task8.get_defs()
 
-    # Test find      
-    assert defs.find_suite("s1") is not None, "Expected to find suite of name s1"
-    assert defs.find_suite("sffff1") is None, "Should not be able to find suite of name sfffff1"
+def test_defs_find_suite():
+    defs = Defs()
+    suite = Suite("s1")
+    defs.add_suite(suite)
+    assert defs.find_suite("s1") is not None
+    assert defs.find_suite("sffff1") is None
 
-    # save the defs file as a check point file and restore it again
-    checkpt_file = "py_u_TestDefs.check"
-    defs_file = "py_u_TestDefs.def"
-    if debug_build():
-        checkpt_file = "py_u_TestDefs_debug.check"
-        defs_file = "py_u_TestDefs_debug.def"
-    defs.save_as_checkpt(checkpt_file);
 
+def test_save_and_restore_defs(tmp_path):
+    defs = Defs()
+    suite = Suite("s1")
+    suite.add_family(Family("f1")).add_task(Task("t1"))
+    defs.add_suite(suite)
+    defs.add_extern("/path/to/task")
+    defs.add_extern("/fred/bill:event_name")
+
+    checkpt_file = str(tmp_path / "py_u_TestDefs.check")
+    defs_file = str(tmp_path / "py_u_TestDefs.def")
+
+    defs.save_as_checkpt(checkpt_file)
     restored_checkpt_defs = Defs()
     restored_checkpt_defs.restore_from_checkpt(checkpt_file)
 
-    print("Save and restore as Defs ******************************************************")
-    defs.save_as_defs(defs_file)  # default is to save as DEFS
-    restored_from_defs = Defs(defs_file)  # restore the defs
+    defs.save_as_defs(defs_file)
+    restored_from_defs = Defs(defs_file)
 
     defs.save_as_defs(defs_file, Style.DEFS)
-    restored_from_defs = Defs(defs_file)  # restore the defs
+    restored_from_defs = Defs(defs_file)
 
-    print("Save and restore using STATE ******************************************************")
     defs.save_as_defs(defs_file, Style.STATE)
-    restored_from_defs = Defs(defs_file)  # restore the defs
+    restored_from_defs = Defs(defs_file)
 
-    print("Save and restore using MIGRATE ******************************************************")
     defs.save_as_defs(defs_file, Style.MIGRATE)
-    restored_from_defs = Defs(defs_file)  # restore the defs
-    assert restored_checkpt_defs == restored_from_defs, "File should be the same"
+    restored_from_defs = Defs(defs_file)
 
-    print("Print in DEFS style ******************************************************")
+    assert restored_checkpt_defs == restored_from_defs
+
+
+def test_print_styles():
+    defs = Defs()
+    suite = Suite("s1")
+    suite.add_family(Family("f1")).add_task(Task("t1"))
+    defs.add_suite(suite)
+    defs_file = "tmp_def_for_print.def"
+    defs.save_as_defs(defs_file, Style.MIGRATE)
+    restored_from_defs = Defs(defs_file)
+    try:
+        os.remove(defs_file)
+    except OSError:
+        pass
+
     PrintStyle.set_style(Style.DEFS)
     the_string = str(restored_from_defs)
-    assert the_string.find("defs_state") == -1, "Print in DEFS style failed"
-    print(the_string)
+    assert "defs_state" not in the_string
 
-    print("Print in STATE style *****************************************************")
     PrintStyle.set_style(Style.STATE)
     the_string = str(restored_from_defs)
-    assert the_string.find("defs_state STATE") != -1, "Print in STATE style failed"
-    print(the_string)
+    assert "defs_state STATE" in the_string
 
-    print("Print in MIGRATE style *****************************************************")
-    PrintStyle.set_style(Style.MIGRATE)
-    the_string = str(restored_from_defs)
-    assert the_string.find("defs_state MIGRATE") != -1, "Print in MIGRATE style failed"
-    print(the_string)
-
-    # Comment this out if you want to see what the file looked like
-    os.remove(checkpt_file)
-    os.remove(defs_file)
-
-    # Test job creation failure
-    msg = defs.check_job_creation()
-    assert len(msg) != 0, "Expected job creation to fail"
-
-    expected_exeption = False;
     try:
-        defs.check_job_creation(throw_on_error=True)
-    except RuntimeError as e:
-        expected_exeption = True
-    assert expected_exeption, "expected exception"
+        PrintStyle.set_style(Style.MIGRATE)
+        the_string = str(restored_from_defs)
+        assert "defs_state MIGRATE" in the_string
+    finally:
+        PrintStyle.set_style(Style.DEFS)
 
-    print("All tests pass")
+
+def test_job_creation_failure():
+    defs = Defs()
+    suite = Suite("s1")
+    suite.add_family(Family("f1")).add_task(Task("t1"))
+    defs.add_suite(suite)
+    msg = defs.check_job_creation()
+    assert len(msg) != 0
+
+    with pytest.raises(RuntimeError):
+        defs.check_job_creation(throw_on_error=True)

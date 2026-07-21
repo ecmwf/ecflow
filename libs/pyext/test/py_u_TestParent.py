@@ -8,46 +8,28 @@
 # nor does it submit to any jurisdiction.
 #
 
-from ecflow import Suite, Family, Task, Defs, Client, debug_build
-import ecflow_test_util as Test
-import os
+import pytest
+
+from ecflow import Suite, Family, Task, Defs
 
 
-def absNodePath(node):
-    """ Given a node return its absolute node path. """
-    """ Example of using get_parent()               """
-    name_list = []
-    name_list.append(node.name())
-    parent = node.get_parent();
+def _abs_node_path(node):
+    """Given a node return its absolute node path by walking parents."""
+    name_list = [node.name()]
+    parent = node.get_parent()
     while parent:
         name_list.append(parent.name())
         parent = parent.get_parent()
 
     name_list.reverse()
-    ret = ""
-    for name in name_list:
-        ret = ret + "/"
-        ret = ret + name
-    return ret
+    return "/" + "/".join(name_list)
 
 
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
-
-    suite = Suite("s1");
+@pytest.fixture
+def populated_definition():
+    suite = Suite("s1")
     family = Family("f1")
     task = Task("t1")
-
-    assert not suite.get_parent(), "Suite parent is always NULL"
-    assert not family.get_parent(), "Expect no parent"
-    assert not task.get_parent(), "Expect no parent"
-
-    print("suite.get_defs() = " + str(suite.get_defs()))
-    print("family.get_defs() = " + str(family.get_defs()))
-    print("task.get_defs() = " + str(task.get_defs()))
-    assert not suite.get_defs(), "Expected no defs, since suite not added to defs yet"
-    assert not family.get_defs(), "Expected no defs"
-    assert not task.get_defs(), "Expected no defs"
 
     suite.add_family(family)
     family.add_task(task)
@@ -59,15 +41,39 @@ if __name__ == "__main__":
     family2.add_task(t1)
 
     defs = Defs()
-    defs.add_suite(suite);
+    defs.add_suite(suite)
+    return suite, family, family2, task, t1
 
-    print(absNodePath(t1))
-    print(absNodePath(family2))
-    print(absNodePath(family))
-    print(absNodePath(suite))
 
-    assert t1.get_abs_node_path() == absNodePath(t1), "Expected " + t1.get_abs_node_path() + " but got " + absNodePath(t1)
-    assert family2.get_abs_node_path() == absNodePath(family2), "Expected " + family2.get_abs_node_path() + " but got " + absNodePath(family2)
-    assert family.get_abs_node_path() == absNodePath(family), "Expected " + family.get_abs_node_path() + " but got " + absNodePath(family)
-    assert suite.get_abs_node_path() == absNodePath(suite), "Expected " + family.get_abs_node_path() + " but got " + absNodePath(suite)
-    print("All Tests pass")
+def test_unattached_nodes_have_no_parent_or_defs():
+    suite = Suite("s1")
+    family = Family("f1")
+    task = Task("t1")
+
+    assert not suite.get_parent(), "Suite parent is always NULL"
+    assert not family.get_parent(), "Expect no parent"
+    assert not task.get_parent(), "Expect no parent"
+
+    assert not suite.get_defs(), "Expected no defs, since suite not added to defs yet"
+    assert not family.get_defs(), "Expected no defs"
+    assert not task.get_defs(), "Expected no defs"
+
+
+def test_attached_node_paths(populated_definition):
+    suite, family, family2, task, t1 = populated_definition
+
+    assert t1.get_abs_node_path() == _abs_node_path(t1), (
+        "Expected " + t1.get_abs_node_path() + " but got " + _abs_node_path(t1)
+    )
+    assert family2.get_abs_node_path() == _abs_node_path(family2), (
+        "Expected "
+        + family2.get_abs_node_path()
+        + " but got "
+        + _abs_node_path(family2)
+    )
+    assert family.get_abs_node_path() == _abs_node_path(family), (
+        "Expected " + family.get_abs_node_path() + " but got " + _abs_node_path(family)
+    )
+    assert suite.get_abs_node_path() == _abs_node_path(suite), (
+        "Expected " + family.get_abs_node_path() + " but got " + _abs_node_path(suite)
+    )

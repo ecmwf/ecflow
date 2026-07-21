@@ -8,12 +8,11 @@
 # nor does it submit to any jurisdiction.
 #
 
-import unittest
-
 import ecflow as ecf
+import pytest
 
 
-class TestClient(unittest.TestCase):
+class TestClient:
     """Tests for py::class_<ClientInvoker, ...> as exposed in ExportClient.cpp.
 
     The class is registered under the Python name ``Client``.
@@ -82,32 +81,32 @@ class TestClient(unittest.TestCase):
     def test_default_constructor_gives_localhost_3141(self):
         """Client() defaults to localhost:3141."""
         ci = ecf.Client()
-        self.assertEqual(ci.get_host(), "localhost")
-        self.assertEqual(ci.get_port(), "3141")
+        assert ci.get_host() == "localhost"
+        assert ci.get_port() == "3141"
 
     def test_constructor_host_colon_port_string(self):
         """Client('host:port') parses both components correctly."""
         ci = ecf.Client("myhost:4444")
-        self.assertEqual(ci.get_host(), "myhost")
-        self.assertEqual(ci.get_port(), "4444")
+        assert ci.get_host() == "myhost"
+        assert ci.get_port() == "4444"
 
     def test_constructor_host_at_port_string(self):
         """Client('host@port') is also a valid combined form."""
         ci = ecf.Client("myhost@5555")
-        self.assertEqual(ci.get_host(), "myhost")
-        self.assertEqual(ci.get_port(), "5555")
+        assert ci.get_host() == "myhost"
+        assert ci.get_port() == "5555"
 
     def test_constructor_separate_host_and_port_strings(self):
         """Client(host, port_str) sets host and port individually."""
         ci = ecf.Client("srv1", "6000")
-        self.assertEqual(ci.get_host(), "srv1")
-        self.assertEqual(ci.get_port(), "6000")
+        assert ci.get_host() == "srv1"
+        assert ci.get_port() == "6000"
 
     def test_constructor_separate_host_and_port_int(self):
         """Client(host, port_int) accepts an integer port and converts it."""
         ci = ecf.Client("srv2", 7777)
-        self.assertEqual(ci.get_host(), "srv2")
-        self.assertEqual(ci.get_port(), "7777")
+        assert ci.get_host() == "srv2"
+        assert ci.get_port() == "7777"
 
     # ------------------------------------------------------------------
     # get_host / get_port
@@ -116,12 +115,12 @@ class TestClient(unittest.TestCase):
     def test_get_host_returns_str(self):
         """get_host() always returns a Python str."""
         ci = ecf.Client()
-        self.assertIsInstance(ci.get_host(), str)
+        assert isinstance(ci.get_host(), str)
 
     def test_get_port_returns_str(self):
         """get_port() always returns a Python str."""
         ci = ecf.Client()
-        self.assertIsInstance(ci.get_port(), str)
+        assert isinstance(ci.get_port(), str)
 
     # ------------------------------------------------------------------
     # set_host_port — three overloads
@@ -131,71 +130,71 @@ class TestClient(unittest.TestCase):
         """set_host_port(host, port_str) sets host and port."""
         ci = ecf.Client()
         ci.set_host_port("testhost", "4242")
-        self.assertEqual(ci.get_host(), "testhost")
-        self.assertEqual(ci.get_port(), "4242")
+        assert ci.get_host() == "testhost"
+        assert ci.get_port() == "4242"
 
     def test_set_host_port_str_int_overload(self):
         """set_host_port(host, port_int) accepts an integer port."""
         ci = ecf.Client()
         ci.set_host_port("inthost", 9999)
-        self.assertEqual(ci.get_host(), "inthost")
-        self.assertEqual(ci.get_port(), "9999")
+        assert ci.get_host() == "inthost"
+        assert ci.get_port() == "9999"
 
     def test_set_host_port_colon_combined_string(self):
         """set_host_port('host:port') parses both components from one string."""
         ci = ecf.Client()
         ci.set_host_port("combined:3333")
-        self.assertEqual(ci.get_host(), "combined")
-        self.assertEqual(ci.get_port(), "3333")
+        assert ci.get_host() == "combined"
+        assert ci.get_port() == "3333"
 
     def test_set_host_port_at_combined_string(self):
         """set_host_port('host@port') is the alternative combined form."""
         ci = ecf.Client()
         ci.set_host_port("athost@2222")
-        self.assertEqual(ci.get_host(), "athost")
-        self.assertEqual(ci.get_port(), "2222")
+        assert ci.get_host() == "athost"
+        assert ci.get_port() == "2222"
 
     def test_set_host_port_replaces_previous_values(self):
         """A second set_host_port call overwrites the first."""
         ci = ecf.Client("first", "100")
         ci.set_host_port("second", "200")
-        self.assertEqual(ci.get_host(), "second")
-        self.assertEqual(ci.get_port(), "200")
+        assert ci.get_host() == "second"
+        assert ci.get_port() == "200"
 
     def test_set_host_port_empty_host_raises(self):
         """set_host_port('', port) raises RuntimeError for an empty host."""
         ci = ecf.Client()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ci.set_host_port("", "3141")
 
     def test_set_host_port_empty_port_raises(self):
         """set_host_port(host, '') raises RuntimeError for an empty port."""
         ci = ecf.Client()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ci.set_host_port("myhost", "")
 
     def test_set_host_port_non_numeric_port_raises(self):
         """set_host_port(host, 'notaport') raises RuntimeError for a non-numeric port."""
         ci = ecf.Client()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ci.set_host_port("myhost", "notaport")
 
     def test_set_host_port_no_separator_raises(self):
         """set_host_port('hostonly') raises RuntimeError when no ':' or '@' separator."""
         ci = ecf.Client()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ci.set_host_port("hostonly")
 
     def test_set_host_port_colon_only_host_raises(self):
         """set_host_port(':3141') raises RuntimeError for an empty host component."""
         ci = ecf.Client()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ci.set_host_port(":3141")
 
     def test_set_host_port_colon_only_port_raises(self):
         """set_host_port('host:') raises RuntimeError for an empty port component."""
         ci = ecf.Client()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ci.set_host_port("host:")
 
     # ------------------------------------------------------------------
@@ -206,19 +205,19 @@ class TestClient(unittest.TestCase):
         """version() returns a non-empty string (e.g. '5.14.0')."""
         ci = ecf.Client()
         v = ci.version()
-        self.assertIsInstance(v, str)
-        self.assertGreater(len(v), 0)
+        assert isinstance(v, str)
+        assert len(v) > 0
 
     def test_version_is_idempotent(self):
         """Repeated calls to version() return the same value."""
         ci = ecf.Client()
-        self.assertEqual(ci.version(), ci.version())
+        assert ci.version() == ci.version()
 
     def test_version_matches_across_instances(self):
         """Two independent Client instances report the same library version."""
         ci1 = ecf.Client()
         ci2 = ecf.Client()
-        self.assertEqual(ci1.version(), ci2.version())
+        assert ci1.version() == ci2.version()
 
     # ------------------------------------------------------------------
     # set_user_name
@@ -274,33 +273,33 @@ class TestClient(unittest.TestCase):
     def test_auto_sync_disabled_by_default(self):
         """is_auto_sync_enabled() returns False for a freshly constructed Client."""
         ci = ecf.Client()
-        self.assertFalse(ci.is_auto_sync_enabled())
+        assert not ci.is_auto_sync_enabled()
 
     def test_set_auto_sync_true_enables_it(self):
         """set_auto_sync(True) makes is_auto_sync_enabled() return True."""
         ci = ecf.Client()
         ci.set_auto_sync(True)
-        self.assertTrue(ci.is_auto_sync_enabled())
+        assert ci.is_auto_sync_enabled()
 
     def test_set_auto_sync_false_disables_it(self):
         """set_auto_sync(False) makes is_auto_sync_enabled() return False."""
         ci = ecf.Client()
         ci.set_auto_sync(True)
         ci.set_auto_sync(False)
-        self.assertFalse(ci.is_auto_sync_enabled())
+        assert not ci.is_auto_sync_enabled()
 
     def test_set_auto_sync_toggle(self):
         """is_auto_sync_enabled() reflects each toggle of set_auto_sync."""
         ci = ecf.Client()
         for expected in [True, False, True, False]:
             ci.set_auto_sync(expected)
-            self.assertEqual(ci.is_auto_sync_enabled(), expected)
+            assert ci.is_auto_sync_enabled() == expected
 
     def test_is_auto_sync_enabled_returns_bool(self):
         """is_auto_sync_enabled() always returns a Python bool (or int-subclass)."""
         ci = ecf.Client()
         result = ci.is_auto_sync_enabled()
-        self.assertIsInstance(result, (bool, int))
+        assert isinstance(result, (bool, int))
 
     # ------------------------------------------------------------------
     # get_defs
@@ -309,7 +308,7 @@ class TestClient(unittest.TestCase):
     def test_get_defs_returns_none_before_sync(self):
         """get_defs() returns None for a freshly constructed Client (no sync done)."""
         ci = ecf.Client()
-        self.assertIsNone(ci.get_defs())
+        assert ci.get_defs() is None
 
     # ------------------------------------------------------------------
     # reset
@@ -324,13 +323,13 @@ class TestClient(unittest.TestCase):
         """get_defs() remains None after reset() (nothing to clear, still None)."""
         ci = ecf.Client()
         ci.reset()
-        self.assertIsNone(ci.get_defs())
+        assert ci.get_defs() is None
 
     def test_reset_clears_handle(self):
         """ch_handle() is 0 after reset(), just as it was at construction."""
         ci = ecf.Client()
         ci.reset()
-        self.assertEqual(ci.ch_handle(), 0)
+        assert ci.ch_handle() == 0
 
     # ------------------------------------------------------------------
     # in_sync
@@ -339,12 +338,12 @@ class TestClient(unittest.TestCase):
     def test_in_sync_returns_false_before_sync(self):
         """in_sync() returns False for a freshly constructed Client."""
         ci = ecf.Client()
-        self.assertFalse(ci.in_sync())
+        assert not ci.in_sync()
 
     def test_in_sync_returns_bool(self):
         """in_sync() returns a Python bool (or int-subclass)."""
         ci = ecf.Client()
-        self.assertIsInstance(ci.in_sync(), (bool, int))
+        assert isinstance(ci.in_sync(), (bool, int))
 
     # ------------------------------------------------------------------
     # ch_handle
@@ -353,12 +352,12 @@ class TestClient(unittest.TestCase):
     def test_ch_handle_is_zero_by_default(self):
         """ch_handle() returns 0 before any ch_register call."""
         ci = ecf.Client()
-        self.assertEqual(ci.ch_handle(), 0)
+        assert ci.ch_handle() == 0
 
     def test_ch_handle_returns_int(self):
         """ch_handle() always returns a Python int."""
         ci = ecf.Client()
-        self.assertIsInstance(ci.ch_handle(), int)
+        assert isinstance(ci.ch_handle(), int)
 
     # ------------------------------------------------------------------
     # wait_for_server_reply
@@ -368,13 +367,13 @@ class TestClient(unittest.TestCase):
         """wait_for_server_reply(0), without a running server, times out (almost) immediately and returns False."""
         ci = ecf.Client("supercalifragilisticexpialidocious", "50000")
         result = ci.wait_for_server_reply(0)
-        self.assertFalse(result)
+        assert not result
 
     def test_wait_for_server_reply_returns_bool(self):
         """wait_for_server_reply() always returns a Python bool (or int-subclass)."""
         ci = ecf.Client()
         result = ci.wait_for_server_reply(0)
-        self.assertIsInstance(result, (bool, int))
+        assert isinstance(result, (bool, int))
 
     # ------------------------------------------------------------------
     # changed_node_paths
@@ -384,7 +383,7 @@ class TestClient(unittest.TestCase):
         """Iterating changed_node_paths before any sync yields no items."""
         ci = ecf.Client()
         paths = list(ci.changed_node_paths)
-        self.assertEqual(paths, [])
+        assert paths == []
 
     # ------------------------------------------------------------------
     # debug
@@ -393,7 +392,7 @@ class TestClient(unittest.TestCase):
     def test_debug_true_does_not_raise(self):
         """debug(True) enables verbose output; must not raise."""
         ci = ecf.Client()
-        ci.debug(True)   # must not raise
+        ci.debug(True)  # must not raise
         ci.debug(False)  # restore to silent
 
     def test_debug_false_does_not_raise(self):
@@ -535,14 +534,14 @@ class TestClient(unittest.TestCase):
         """__enter__ returns the Client itself (not a proxy or wrapper)."""
         ci = ecf.Client()
         with ci as ctx:
-            self.assertIs(ctx, ci)
+            assert ctx is ci
 
     def test_context_manager_inline_construction_enters_self(self):
         """'with Client() as c' binds the freshly created Client."""
         with ecf.Client() as c:
-            self.assertIsInstance(c, ecf.Client)
+            assert isinstance(c, ecf.Client)
             # The instance is functional inside the block.
-            self.assertIsInstance(c.version(), str)
+            assert isinstance(c.version(), str)
 
     def test_context_manager_exit_returns_false(self):
         """__exit__ returns False so that exceptions propagate out of the block."""
@@ -556,7 +555,7 @@ class TestClient(unittest.TestCase):
                 raise _Sentinel("propagated")
         except _Sentinel:
             caught_outside = True
-        self.assertTrue(caught_outside)
+        assert caught_outside
 
     def test_context_manager_clean_exit_does_not_raise(self):
         """The with-block exits cleanly (no exception) without error."""
@@ -570,31 +569,31 @@ class TestClient(unittest.TestCase):
     def test_client_is_hashable(self):
         """Client instances are hashable; hash() returns an int."""
         ci = ecf.Client()
-        self.assertIsInstance(hash(ci), int)
+        assert isinstance(hash(ci), int)
 
     def test_client_can_be_inserted_in_set(self):
         """Client is hashable, so instances can be stored in a Python set."""
         ci = ecf.Client()
         s = {ci}
-        self.assertIn(ci, s)
+        assert ci in s
 
     def test_client_can_be_used_as_dict_key(self):
         """Client is hashable, so instances can be used as dictionary keys."""
         ci = ecf.Client()
         d = {ci: "value"}
-        self.assertEqual(d[ci], "value")
+        assert d[ci] == "value"
 
     def test_two_clients_have_different_hashes(self):
         """Two independently created Clients have different identity-based hashes."""
         ci1 = ecf.Client()
         ci2 = ecf.Client()
-        self.assertIsNot(ci1, ci2)
-        self.assertNotEqual(hash(ci1), hash(ci2))
+        assert ci1 is not ci2
+        assert hash(ci1) != hash(ci2)
 
     def test_same_client_has_stable_hash(self):
         """hash() of the same Client object returns the same value on repeated calls."""
         ci = ecf.Client()
-        self.assertEqual(hash(ci), hash(ci))
+        assert hash(ci) == hash(ci)
 
     # ------------------------------------------------------------------
     # __eq__ / __ne__ — identity-based (noncopyable type)
@@ -603,28 +602,28 @@ class TestClient(unittest.TestCase):
     def test_eq_same_object_is_true(self):
         """A Client compares equal to itself."""
         ci = ecf.Client()
-        self.assertTrue(ci == ci)
+        assert ci == ci
 
     def test_eq_two_distinct_clients_is_false(self):
         """Two distinct Client objects with the same configuration are not equal
         (identity semantics — noncopyable C++ object)."""
         ci1 = ecf.Client()
         ci2 = ecf.Client()
-        self.assertFalse(ci1 == ci2)
+        assert not ci1 == ci2
 
     def test_ne_same_object_is_false(self):
         """A Client is not not-equal to itself."""
         ci = ecf.Client()
-        self.assertFalse(ci != ci)
+        assert not ci != ci
 
     def test_ne_two_distinct_clients_is_true(self):
         """Two distinct Client objects are not-equal under identity semantics."""
         ci1 = ecf.Client()
         ci2 = ecf.Client()
-        self.assertTrue(ci1 != ci2)
+        assert ci1 != ci2
 
 
-class TestWhyCmd(unittest.TestCase):
+class TestWhyCmd:
     """Tests for py::class_<WhyCmd, boost::noncopyable> as exposed in ExportClient.cpp.
 
     Exposed API
@@ -689,12 +688,12 @@ class TestWhyCmd(unittest.TestCase):
     def test_construct_with_nonexistent_path_raises(self):
         """WhyCmd(defs, '/no/such/node') raises RuntimeError."""
         defs = self._make_defs_with_task()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.WhyCmd(defs, "/no/such/node")
 
     def test_construct_with_null_defs_raises(self):
         """WhyCmd(None, path) raises RuntimeError because the defs pointer is null."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.WhyCmd(None, "/s/f/t")
 
     # ------------------------------------------------------------------
@@ -705,35 +704,35 @@ class TestWhyCmd(unittest.TestCase):
         """why() always returns a Python str."""
         defs = self._make_defs_with_task()
         cmd = ecf.WhyCmd(defs, "/s/f/t")
-        self.assertIsInstance(cmd.why(), str)
+        assert isinstance(cmd.why(), str)
 
     def test_why_returns_non_empty_string(self):
         """why() returns a non-empty explanatory string (nodes not yet begun)."""
         defs = self._make_defs_with_task()
         cmd = ecf.WhyCmd(defs, "/s/f/t")
         result = cmd.why()
-        self.assertGreater(len(result), 0)
+        assert len(result) > 0
 
     def test_why_is_idempotent(self):
         """Calling why() twice returns the same result."""
         defs = self._make_defs_with_task()
         cmd = ecf.WhyCmd(defs, "/s/f/t")
-        self.assertEqual(cmd.why(), cmd.why())
+        assert cmd.why() == cmd.why()
 
     def test_why_on_suite_path(self):
         """why() is callable when WhyCmd was constructed with a suite path."""
         defs = self._make_defs_with_task()
         cmd = ecf.WhyCmd(defs, "/s")
         result = cmd.why()
-        self.assertIsInstance(result, str)
+        assert isinstance(result, str)
 
     def test_why_on_empty_path_returns_root_analysis(self):
         """why() on a WhyCmd constructed with an empty path returns root analysis."""
         defs = self._make_defs_with_task()
         cmd = ecf.WhyCmd(defs, "")
         result = cmd.why()
-        self.assertIsInstance(result, str)
-        self.assertGreater(len(result), 0)
+        assert isinstance(result, str)
+        assert len(result) > 0
 
     # ------------------------------------------------------------------
     # __hash__ — identity-based (noncopyable boost.python type)
@@ -743,24 +742,24 @@ class TestWhyCmd(unittest.TestCase):
         """WhyCmd instances are hashable; hash() returns an int."""
         defs = self._make_defs_with_task()
         cmd = ecf.WhyCmd(defs, "/s/f/t")
-        self.assertIsInstance(hash(cmd), int)
+        assert isinstance(hash(cmd), int)
 
     def test_why_cmd_can_be_inserted_in_set(self):
         """WhyCmd is hashable, so instances can be stored in a Python set."""
         defs = self._make_defs_with_task()
         cmd = ecf.WhyCmd(defs, "/s/f/t")
         s = {cmd}
-        self.assertIn(cmd, s)
+        assert cmd in s
 
     def test_two_why_cmds_have_different_hashes(self):
         """Two independently created WhyCmd objects have different identity hashes."""
         defs = self._make_defs_with_task()
         cmd1 = ecf.WhyCmd(defs, "/s/f/t")
         cmd2 = ecf.WhyCmd(defs, "/s/f/t")
-        self.assertNotEqual(hash(cmd1), hash(cmd2))
+        assert hash(cmd1) != hash(cmd2)
 
 
-class TestUrlCmd(unittest.TestCase):
+class TestUrlCmd:
     """Tests for py::class_<UrlCmd, boost::noncopyable> as exposed in ExportClient.cpp.
 
     Exposed API
@@ -833,18 +832,18 @@ class TestUrlCmd(unittest.TestCase):
     def test_construct_with_empty_path_raises(self):
         """UrlCmd(defs, '') raises RuntimeError for an empty node path."""
         defs = self._make_minimal_defs()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.UrlCmd(defs, "")
 
     def test_construct_with_nonexistent_path_raises(self):
         """UrlCmd(defs, '/no/such/node') raises RuntimeError."""
         defs = self._make_minimal_defs()
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.UrlCmd(defs, "/no/such/node")
 
     def test_construct_with_null_defs_raises(self):
         """UrlCmd(None, path) raises RuntimeError because the defs pointer is null."""
-        with self.assertRaises(RuntimeError):
+        with pytest.raises(RuntimeError):
             ecf.UrlCmd(None, "/s/f/t")
 
     # ------------------------------------------------------------------
@@ -856,7 +855,7 @@ class TestUrlCmd(unittest.TestCase):
         defs = self._make_minimal_defs()
         cmd = ecf.UrlCmd(defs, "/s/f/t")
         result = cmd.execute()
-        self.assertIsNone(result)
+        assert result is None
 
     # ------------------------------------------------------------------
     # __hash__ — identity-based (noncopyable boost.python type)
@@ -866,22 +865,18 @@ class TestUrlCmd(unittest.TestCase):
         """UrlCmd instances are hashable; hash() returns an int."""
         defs = self._make_minimal_defs()
         cmd = ecf.UrlCmd(defs, "/s/f/t")
-        self.assertIsInstance(hash(cmd), int)
+        assert isinstance(hash(cmd), int)
 
     def test_url_cmd_can_be_inserted_in_set(self):
         """UrlCmd is hashable, so instances can be stored in a Python set."""
         defs = self._make_minimal_defs()
         cmd = ecf.UrlCmd(defs, "/s/f/t")
         s = {cmd}
-        self.assertIn(cmd, s)
+        assert cmd in s
 
     def test_two_url_cmds_have_different_hashes(self):
         """Two independently created UrlCmd objects have different identity hashes."""
         defs = self._make_minimal_defs()
         cmd1 = ecf.UrlCmd(defs, "/s/f/t")
         cmd2 = ecf.UrlCmd(defs, "/s/f/t")
-        self.assertNotEqual(hash(cmd1), hash(cmd2))
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+        assert hash(cmd1) != hash(cmd2)

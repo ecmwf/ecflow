@@ -8,18 +8,12 @@
 # nor does it submit to any jurisdiction.
 #
 
-import os
-import ecflow
 import copy
-from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Variable, Limit, InLimit, \
-    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
-    RepeatString, RepeatDate, RepeatInteger, RepeatDay, RepeatEnumerated, \
-    Verify, PrintStyle, Time, Today, Late, Cron, Client, debug_build
-import ecflow_test_util as Test
 
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
+from ecflow import Defs
 
+
+def test_remove_nodes_from_definition():
     defs = Defs()
     s0 = defs.add_suite("s0")
     s1 = defs.add_suite("s1")
@@ -49,8 +43,7 @@ if __name__ == "__main__":
     node_vec = defs.get_all_nodes()
     assert len(node_vec) == 0, "Expected 0 suites only, but found " + str(len(node_vec))
 
-    # =========================================================
-    defs2 = Defs();
+    defs2 = Defs()
     defs2.add_suite(s0_remove)
     s = defs2.add_suite(s1_remove)  # s1_remove is returned as s
     f = s.add_family(f1_remove)  # f1_remove is returned as f

@@ -31,112 +31,111 @@ file are expected to pass.
 """
 
 import ecflow as ecf
-import unittest
 
 
-class TestTrigger(unittest.TestCase):
+class TestTrigger:
     """Trigger is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Trigger supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Trigger("a == b")
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Trigger instance."""
         obj = ecf.Trigger("a == b")
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestComplete(unittest.TestCase):
+class TestComplete:
     """Complete is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Complete supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Complete("a == b")
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Complete instance."""
         obj = ecf.Complete("a == b")
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestPartExpression(unittest.TestCase):
+class TestPartExpression:
     """PartExpression is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """PartExpression supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.PartExpression("a == b")
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a PartExpression instance."""
         obj = ecf.PartExpression("a == b")
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestExpression(unittest.TestCase):
+class TestExpression:
     """Expression is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Expression supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Expression("a == b")
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from an Expression instance."""
         obj = ecf.Expression("a == b")
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestFlagType(unittest.TestCase):
+class TestFlagType:
     """FlagType is a py::enum_ bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """FlagType supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.FlagType.force_abort
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a FlagType member."""
         obj = ecf.FlagType.force_abort
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestFlag(unittest.TestCase):
+class TestFlag:
     """Flag is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Flag supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Flag()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Flag instance."""
         obj = ecf.Flag()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestFlagTypeVec(unittest.TestCase):
+class TestFlagTypeVec:
     """FlagTypeVec is a py::bind_vector type WITHOUT py::dynamic_attr().
 
     Expected to FAIL until the binding adds dynamic-attribute support.
@@ -146,34 +145,34 @@ class TestFlagTypeVec(unittest.TestCase):
         """FlagTypeVec should support setting arbitrary Python attributes."""
         obj = ecf.FlagTypeVec()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute should be deletable from a FlagTypeVec instance."""
         obj = ecf.FlagTypeVec()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestJobCreationCtrl(unittest.TestCase):
+class TestJobCreationCtrl:
     """JobCreationCtrl is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """JobCreationCtrl supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.JobCreationCtrl()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a JobCreationCtrl instance."""
         obj = ecf.JobCreationCtrl()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestZombieType(unittest.TestCase):
+class TestZombieType:
     """ZombieType is a py::enum_ WITHOUT py::dynamic_attr().
 
     Expected to FAIL until the binding adds dynamic-attribute support.
@@ -183,17 +182,17 @@ class TestZombieType(unittest.TestCase):
         """ZombieType should support setting arbitrary Python attributes."""
         obj = ecf.ZombieType.ecf
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute should be deletable from a ZombieType member."""
         obj = ecf.ZombieType.ecf
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestZombieUserActionType(unittest.TestCase):
+class TestZombieUserActionType:
     """ZombieUserActionType is a py::enum_ WITHOUT py::dynamic_attr().
 
     Expected to FAIL until the binding adds dynamic-attribute support.
@@ -203,17 +202,17 @@ class TestZombieUserActionType(unittest.TestCase):
         """ZombieUserActionType should support setting arbitrary Python attributes."""
         obj = ecf.ZombieUserActionType.fob
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute should be deletable from a ZombieUserActionType member."""
         obj = ecf.ZombieUserActionType.fob
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestChildCmdType(unittest.TestCase):
+class TestChildCmdType:
     """ChildCmdType is a py::enum_ WITHOUT py::dynamic_attr().
 
     Expected to FAIL until the binding adds dynamic-attribute support.
@@ -223,17 +222,17 @@ class TestChildCmdType(unittest.TestCase):
         """ChildCmdType should support setting arbitrary Python attributes."""
         obj = ecf.ChildCmdType.init
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute should be deletable from a ChildCmdType member."""
         obj = ecf.ChildCmdType.init
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestAttrType(unittest.TestCase):
+class TestAttrType:
     """AttrType is a py::enum_ WITHOUT py::dynamic_attr().
 
     Expected to FAIL until the binding adds dynamic-attribute support.
@@ -243,34 +242,34 @@ class TestAttrType(unittest.TestCase):
         """AttrType should support setting arbitrary Python attributes."""
         obj = ecf.AttrType.event
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute should be deletable from an AttrType member."""
         obj = ecf.AttrType.event
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestZombieAttr(unittest.TestCase):
+class TestZombieAttr:
     """ZombieAttr is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """ZombieAttr supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.ZombieAttr(ecf.ZombieType.ecf, [], ecf.ZombieUserActionType.fob)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a ZombieAttr instance."""
         obj = ecf.ZombieAttr(ecf.ZombieType.ecf, [], ecf.ZombieUserActionType.fob)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestZombieVec(unittest.TestCase):
+class TestZombieVec:
     """ZombieVec is a py::bind_vector type WITHOUT py::dynamic_attr().
 
     Expected to FAIL until the binding adds dynamic-attribute support.
@@ -280,34 +279,34 @@ class TestZombieVec(unittest.TestCase):
         """ZombieVec should support setting arbitrary Python attributes."""
         obj = ecf.ZombieVec()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute should be deletable from a ZombieVec instance."""
         obj = ecf.ZombieVec()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestZombie(unittest.TestCase):
+class TestZombie:
     """Zombie is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Zombie supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Zombie()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Zombie instance."""
         obj = ecf.Zombie()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestVariable(unittest.TestCase):
+class TestVariable:
     """Variable is bound with py::dynamic_attr(); arbitrary attributes are allowed.
 
     (Moved here from py_u_TestExportNodeAttr.py.)
@@ -317,17 +316,17 @@ class TestVariable(unittest.TestCase):
         """Variable supports setting arbitrary Python attributes (py::dynamic_attr())."""
         v = ecf.Variable("VAR", "val")
         v.my_custom = "sentinel"
-        self.assertEqual(v.my_custom, "sentinel")
+        assert v.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Variable instance."""
         v = ecf.Variable("VAR", "val")
         v.tag = 99
         del v.tag
-        self.assertFalse(hasattr(v, "tag"))
+        assert not hasattr(v, "tag")
 
 
-class TestVariableList(unittest.TestCase):
+class TestVariableList:
     """VariableList is a py::bind_vector type WITHOUT py::dynamic_attr().
 
     Expected to FAIL until the binding adds dynamic-attribute support.
@@ -337,153 +336,153 @@ class TestVariableList(unittest.TestCase):
         """VariableList should support setting arbitrary Python attributes."""
         obj = ecf.VariableList()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute should be deletable from a VariableList instance."""
         obj = ecf.VariableList()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestLabel(unittest.TestCase):
+class TestLabel:
     """Label is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Label supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Label("MY_LABEL", "hello")
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Label instance."""
         obj = ecf.Label("MY_LABEL", "hello")
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestLimit(unittest.TestCase):
+class TestLimit:
     """Limit is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Limit supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Limit("MY_LIMIT", 10)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Limit instance."""
         obj = ecf.Limit("MY_LIMIT", 10)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestInLimit(unittest.TestCase):
+class TestInLimit:
     """InLimit is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """InLimit supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.InLimit("my_limit")
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from an InLimit instance."""
         obj = ecf.InLimit("my_limit")
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestEvent(unittest.TestCase):
+class TestEvent:
     """Event is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Event supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Event(1)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from an Event instance."""
         obj = ecf.Event(1)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestMeter(unittest.TestCase):
+class TestMeter:
     """Meter is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Meter supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Meter("my_meter", 0, 100)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Meter instance."""
         obj = ecf.Meter("my_meter", 0, 100)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestQueue(unittest.TestCase):
+class TestQueue:
     """Queue is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Queue supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Queue("my_queue", ["step1", "step2"])
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Queue instance."""
         obj = ecf.Queue("my_queue", ["step1", "step2"])
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestGeneric(unittest.TestCase):
+class TestGeneric:
     """Generic is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Generic supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Generic("my_generic", ["val1", "val2"])
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Generic instance."""
         obj = ecf.Generic("my_generic", ["val1", "val2"])
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestDate(unittest.TestCase):
+class TestDate:
     """Date is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Date supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Date(15, 6, 2024)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Date instance."""
         obj = ecf.Date(15, 6, 2024)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestDays(unittest.TestCase):
+class TestDays:
     """Days is a py::enum_ WITHOUT py::dynamic_attr().
 
     Expected to FAIL until the binding adds dynamic-attribute support.
@@ -493,372 +492,368 @@ class TestDays(unittest.TestCase):
         """Days should support setting arbitrary Python attributes."""
         obj = ecf.Days.monday
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute should be deletable from a Days member."""
         obj = ecf.Days.monday
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestDay(unittest.TestCase):
+class TestDay:
     """Day is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Day supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Day(ecf.Days.monday)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Day instance."""
         obj = ecf.Day(ecf.Days.monday)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestTime(unittest.TestCase):
+class TestTime:
     """Time is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Time supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Time(ecf.TimeSlot(12, 30))
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Time instance."""
         obj = ecf.Time(ecf.TimeSlot(12, 30))
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestToday(unittest.TestCase):
+class TestToday:
     """Today is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Today supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Today(ecf.TimeSlot(10, 0))
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Today instance."""
         obj = ecf.Today(ecf.TimeSlot(10, 0))
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestLate(unittest.TestCase):
+class TestLate:
     """Late is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Late supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Late()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Late instance."""
         obj = ecf.Late()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestAutocancel(unittest.TestCase):
+class TestAutocancel:
     """Autocancel is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Autocancel supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Autocancel(1, 30, True)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from an Autocancel instance."""
         obj = ecf.Autocancel(1, 30, True)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestAutoarchive(unittest.TestCase):
+class TestAutoarchive:
     """Autoarchive is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Autoarchive supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Autoarchive(1, 30, True, False)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from an Autoarchive instance."""
         obj = ecf.Autoarchive(1, 30, True, False)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestAutorestore(unittest.TestCase):
+class TestAutorestore:
     """Autorestore is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Autorestore supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Autorestore(["/suite/family"])
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from an Autorestore instance."""
         obj = ecf.Autorestore(["/suite/family"])
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeatDate(unittest.TestCase):
+class TestRepeatDate:
     """RepeatDate is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """RepeatDate supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.RepeatDate("YMD", 20100101, 20100110)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a RepeatDate instance."""
         obj = ecf.RepeatDate("YMD", 20100101, 20100110)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeatDateTime(unittest.TestCase):
+class TestRepeatDateTime:
     """RepeatDateTime is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """RepeatDateTime supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.RepeatDateTime("DT", "20100101T000000", "20100110T000000")
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a RepeatDateTime instance."""
         obj = ecf.RepeatDateTime("DT", "20100101T000000", "20100110T000000")
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeatDateList(unittest.TestCase):
+class TestRepeatDateList:
     """RepeatDateList is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """RepeatDateList supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.RepeatDateList("DL", [20100101])
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a RepeatDateList instance."""
         obj = ecf.RepeatDateList("DL", [20100101])
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeatDateTimeList(unittest.TestCase):
+class TestRepeatDateTimeList:
     """RepeatDateTimeList is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """RepeatDateTimeList supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.RepeatDateTimeList("DTL", ["20100101T000000"])
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a RepeatDateTimeList instance."""
         obj = ecf.RepeatDateTimeList("DTL", ["20100101T000000"])
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeatInteger(unittest.TestCase):
+class TestRepeatInteger:
     """RepeatInteger is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """RepeatInteger supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.RepeatInteger("VAR", 0, 10)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a RepeatInteger instance."""
         obj = ecf.RepeatInteger("VAR", 0, 10)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeatEnumerated(unittest.TestCase):
+class TestRepeatEnumerated:
     """RepeatEnumerated is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """RepeatEnumerated supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.RepeatEnumerated("COLOR", ["red"])
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a RepeatEnumerated instance."""
         obj = ecf.RepeatEnumerated("COLOR", ["red"])
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeatString(unittest.TestCase):
+class TestRepeatString:
     """RepeatString is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """RepeatString supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.RepeatString("LABEL", ["only"])
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a RepeatString instance."""
         obj = ecf.RepeatString("LABEL", ["only"])
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeatDay(unittest.TestCase):
+class TestRepeatDay:
     """RepeatDay is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """RepeatDay supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.RepeatDay()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a RepeatDay instance."""
         obj = ecf.RepeatDay()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestRepeat(unittest.TestCase):
+class TestRepeat:
     """Repeat is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Repeat supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Repeat(1)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Repeat instance."""
         obj = ecf.Repeat(1)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestCron(unittest.TestCase):
+class TestCron:
     """Cron is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Cron supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Cron()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Cron instance."""
         obj = ecf.Cron()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestVerify(unittest.TestCase):
+class TestVerify:
     """Verify is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Verify supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Verify(ecf.State.complete, 3)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Verify instance."""
         obj = ecf.Verify(ecf.State.complete, 3)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestClock(unittest.TestCase):
+class TestClock:
     """Clock is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """Clock supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.Clock(1, 3, 2024)
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a Clock instance."""
         obj = ecf.Clock(1, 3, 2024)
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestAvisoAttr(unittest.TestCase):
+class TestAvisoAttr:
     """AvisoAttr is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """AvisoAttr supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.AvisoAttr()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from an AvisoAttr instance."""
         obj = ecf.AvisoAttr()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
+        assert not hasattr(obj, "tag")
 
 
-class TestMirrorAttr(unittest.TestCase):
+class TestMirrorAttr:
     """MirrorAttr is bound with py::dynamic_attr(); arbitrary attributes are allowed."""
 
     def test_supports_dynamic_attribute(self):
         """MirrorAttr supports setting arbitrary Python attributes (py::dynamic_attr())."""
         obj = ecf.MirrorAttr()
         obj.my_custom = "sentinel"
-        self.assertEqual(obj.my_custom, "sentinel")
+        assert obj.my_custom == "sentinel"
 
     def test_dynamic_attribute_deletion(self):
         """A dynamic attribute can be deleted from a MirrorAttr instance."""
         obj = ecf.MirrorAttr()
         obj.tag = 99
         del obj.tag
-        self.assertFalse(hasattr(obj, "tag"))
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+        assert not hasattr(obj, "tag")

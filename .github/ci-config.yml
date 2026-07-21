@@ -20,3 +20,9 @@ dependencies: |
 dependency_branch: develop
 
 parallelism_factor: 8
+
+python_requirements: libs/pyext/test/requirements-test.txt
+
+overrides:
+  rocky-8.6:
+    python_version: "3.11"
