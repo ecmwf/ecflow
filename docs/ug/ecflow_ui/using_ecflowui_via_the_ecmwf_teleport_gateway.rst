@@ -52,6 +52,14 @@ Applications which want to use dynamic port forwarding must speak SOCKS
 protocol. ecFlowUI can be SOCKS-ified using a third party tool called
 `proxychains <https://github.com/rofl0r/proxychains-ng>`__.
 
+.. important::
+
+    This is only possible in macOS platforms.
+
+    Unfortunately, Linux platforms are *not* supported, because proxychains
+    does not intercept the ``epoll_*`` system calls used by ecflow clients
+    to communicate with the ecflow servers.
+
 Installing proxychains
 ~~~~~~~~~~~~~~~~~~~~~~
 
