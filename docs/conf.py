@@ -84,6 +84,8 @@ html_static_path = ["_static"]
 
 html_css_files = ["css/custom_style.css"]
 
+html_js_files = ["js/grammar_terminals.js"]
+
 html_logo = ""
 
 highlight_language = "none"

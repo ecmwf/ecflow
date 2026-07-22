@@ -940,6 +940,57 @@ BOOST_AUTO_TEST_CASE(test_parser_bad_expressions) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_parser_with_attached_tokens) {
+    ECF_NAME_THIS_TEST();
+
+    // ECFLOW-2112:
+    // A word operator (and/or/eq/ne/ge/gt/le/lt) must be a token in its own right, i.e. surrounded by
+    // whitespace/brackets. When it is "attached"/glued to an adjacent operand it forms a single identifier
+    // (e.g. 'completeand', '515and', 'andb') which silently changes the meaning of the expression.
+    // These expressions must be rejected by the parser.
+
+    using namespace std::string_literals;
+    std::vector expressions = {
+        // ---- The exact malformed expressions observed in operational checkpoints (ECFLOW-2112) ----
+        ":TIME ge 515and :ECF_DATE gt :YMD"s,
+        ":TIME ge 1115and :ECF_DATE gt :YMD"s,
+        "input eq completeand ( ( ../lag:YMD + 5) ge ../prep:YMD)"s,
+
+        // ---- 'and' attached to the preceding operand ----
+        "a == completeand b == complete"s, // node state glued to 'and'
+        "a eq completeand b eq complete"s, // word operators + state glued to 'and'
+        "1 == 1and 2 == 2"s,               // integer glued to 'and'
+        "a:value == 10and b:value == 20"s, // integer glued to 'and'
+
+        // ---- 'and' attached to the following operand ----
+        "a == complete andb == complete"s, // 'and' glued to node
+        "a == complete and2 == 2"s,        // 'and' glued to integer
+
+        // ---- 'or' attached to an operand ----
+        "a == completeor b == complete"s, // node state glued to 'or'
+        "a == complete orb == complete"s, // 'or' glued to node
+        "1 == 1or 2 == 2"s,               // integer glued to 'or'
+
+        // ---- word comparison operators glued to an operand ----
+        "aeq complete"s,                      // 'eq' glued to left operand
+        "a eqcomplete"s,                      // 'eq' glued to right operand
+        ":TIME ge515 and :ECF_DATE gt :YMD"s, // 'ge' glued to integer
+        "a ne completeand b == complete"s,    // 'ne'/state glued to 'and'
+
+        // ---- symbolic '==' interacting with a glued word operator ----
+        "a == completeand"s,                  // trailing glued 'and' after equality
+        "a == b == completeor c == complete"s // 'or' glued to state after chained '=='
+    };
+
+    for (const auto& expression : expressions) {
+
+        ExprParser theExprParser(expression);
+        std::string error;
+        auto actual = theExprParser.doParse(error);
+        BOOST_CHECK_MESSAGE(!actual, expression << " expected to fail (ECFLOW-2112 attached tokens)");
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

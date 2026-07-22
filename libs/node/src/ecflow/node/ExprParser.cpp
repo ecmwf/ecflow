@@ -57,6 +57,23 @@ using namespace boost::spirit;
 using namespace phoenix;
 using namespace BOOST_SPIRIT_CLASSIC_NS;
 
+// ECFLOW-2112:
+// A keyword/word-operator token (and/or/eq/ne/ge/gt/le/lt, a node state, an event state, a flag name, an
+// integer or a datetime) must be a complete token: it must NOT be immediately followed by a character that
+// could continue an identifier. Otherwise 'glued' tokens such as 'completeand', '515and', 'andb' or
+// 'and../ret' would be silently (mis)parsed as two separate tokens, which silently changes the meaning of the
+// expression.
+//
+// The identifier-continuation characters are those allowed inside a name (letter, digit, '_' or '.') -- the
+// '.' is included because a name may contain it (e.g. '4dvar') and a relative path begins with it, so a
+// keyword glued to a following '.'/path (e.g. 'and./12') must also be rejected.
+//
+// WORD_BOUNDARY is a zero-width negative-lookahead assertion (it consumes no input) that fails when the next
+// character is an identifier-continuation character. It MUST be used inline, inside a lexeme/leaf/token
+// directive (never via a separate rule<>), so that the phrase-level whitespace skipper is not re-enabled and
+// the assertion is evaluated at the exact character immediately following the token.
+#define WORD_BOUNDARY (~epsilon_p(alnum_p | ch_p('_') | ch_p('.')))
+
 /////////////////////////////////////////////////////////////////////////////
 using treematch_t = tree_match<const char*>;
 using tree_iter_t = treematch_t::tree_iterator;
@@ -224,7 +241,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
             // Integer is distinct from task/family names that are integers, since nodes with integer
             // names that occur in trigger/complete expression must have path ./0 ./1
-            integer   = leaf_node_d[uint_p];
+            integer   = leaf_node_d[uint_p >> WORD_BOUNDARY];
             plus      = root_node_d[str_p("+")];
             minus     = root_node_d[str_p("-")];
             divide    = root_node_d[str_p("/")];
@@ -233,19 +250,19 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
             operators = plus | minus | divide | multiply | modulo;
 
             equal_1             = root_node_d[str_p("==")];
-            equal_2             = root_node_d[str_p("eq")];
+            equal_2             = lexeme_d[root_node_d[str_p("eq")] >> WORD_BOUNDARY];
             not_equal_1         = root_node_d[str_p("!=")];
-            not_equal_2         = root_node_d[str_p("ne")];
+            not_equal_2         = lexeme_d[root_node_d[str_p("ne")] >> WORD_BOUNDARY];
             equality_comparible = equal_1 | equal_2 | not_equal_2 | not_equal_1;
 
             greater_equals_1 = root_node_d[str_p(">=")];
-            greater_equals_2 = root_node_d[str_p("ge")];
+            greater_equals_2 = lexeme_d[root_node_d[str_p("ge")] >> WORD_BOUNDARY];
             less_equals_1    = root_node_d[str_p("<=")];
-            less_equals_2    = root_node_d[str_p("le")];
+            less_equals_2    = lexeme_d[root_node_d[str_p("le")] >> WORD_BOUNDARY];
             less_than_1      = root_node_d[str_p("<")];
-            less_than_2      = root_node_d[str_p("lt")];
+            less_than_2      = lexeme_d[root_node_d[str_p("lt")] >> WORD_BOUNDARY];
             greater_than_1   = root_node_d[str_p(">")];
-            greater_than_2   = root_node_d[str_p("gt")];
+            greater_than_2   = lexeme_d[root_node_d[str_p("gt")] >> WORD_BOUNDARY];
             // Prioritise to most common first, to speed up parsing
             less_than_comparable = greater_equals_2 | less_equals_2 | greater_than_2 | less_than_2 | greater_equals_1 |
                                    less_equals_1 | less_than_1 | greater_than_1;
@@ -255,28 +272,34 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
             not3_r = root_node_d[str_p("!")];
             not_r  = not1_r | not3_r | not2_r;
 
-            and_r  = root_node_d[str_p("and")] || root_node_d[str_p("&&")] || root_node_d[str_p("AND")];
-            or_r   = root_node_d[str_p("or")] || root_node_d[str_p("||")] || root_node_d[str_p("OR")];
+            and_r = lexeme_d[root_node_d[str_p("and")] >> WORD_BOUNDARY] || root_node_d[str_p("&&")] ||
+                    lexeme_d[root_node_d[str_p("AND")] >> WORD_BOUNDARY];
+            or_r = lexeme_d[root_node_d[str_p("or")] >> WORD_BOUNDARY] || root_node_d[str_p("||")] ||
+                   lexeme_d[root_node_d[str_p("OR")] >> WORD_BOUNDARY];
             and_or = and_r | or_r;
 
-            event_state = leaf_node_d[str_p("set")] || leaf_node_d[str_p("clear")];
+            event_state = leaf_node_d[str_p("set") >> WORD_BOUNDARY] || leaf_node_d[str_p("clear") >> WORD_BOUNDARY];
 
-            node_state_unknown   = root_node_d[str_p("unknown")];
-            node_state_complete  = root_node_d[str_p("complete")];
-            node_state_queued    = root_node_d[str_p("queued")];
-            node_state_submitted = root_node_d[str_p("submitted")];
-            node_state_active    = root_node_d[str_p("active")];
-            node_state_aborted   = root_node_d[str_p("aborted")];
+            node_state_unknown   = lexeme_d[root_node_d[str_p("unknown")] >> WORD_BOUNDARY];
+            node_state_complete  = lexeme_d[root_node_d[str_p("complete")] >> WORD_BOUNDARY];
+            node_state_queued    = lexeme_d[root_node_d[str_p("queued")] >> WORD_BOUNDARY];
+            node_state_submitted = lexeme_d[root_node_d[str_p("submitted")] >> WORD_BOUNDARY];
+            node_state_active    = lexeme_d[root_node_d[str_p("active")] >> WORD_BOUNDARY];
+            node_state_aborted   = lexeme_d[root_node_d[str_p("aborted")] >> WORD_BOUNDARY];
             nodestate            = node_state_complete | node_state_aborted | node_state_queued | node_state_active |
                         node_state_submitted | node_state_unknown;
 
-            flag_late     = root_node_d[str_p("late")];
-            flag_zombie   = root_node_d[str_p("zombie")];
-            flag_archived = root_node_d[str_p("archived")];
+            flag_late     = lexeme_d[root_node_d[str_p("late")] >> WORD_BOUNDARY];
+            flag_zombie   = lexeme_d[root_node_d[str_p("zombie")] >> WORD_BOUNDARY];
+            flag_archived = lexeme_d[root_node_d[str_p("archived")] >> WORD_BOUNDARY];
             flag          = flag_late | flag_zombie | flag_archived;
 
-            variable            = leaf_node_d[nodename];
-            basic_variable_path = nodepath >> discard_node_d[ch_p(':')] >> variable;
+            variable = leaf_node_d[nodename];
+            // ECFLOW-2112: a variable path must be a contiguous token, i.e. no whitespace is allowed around the
+            // ':' separator (a legitimate variable path is always written as 'node:VAR'). This prevents a glued
+            // token such as '515and' (a valid node name, like '4dvar') from being combined with a following
+            // ' :VAR' to (mis)parse '<number>and :VAR' as a variable reference.
+            basic_variable_path = lexeme_d[nodepath >> discard_node_d[ch_p(':')] >> variable];
             parent_variable =
                 ch_p(':') >> variable; // if we discard_node, then we get just 'variable' and NOT parent_variable
 
@@ -288,7 +311,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
                 str_p("cal::date_to_julian") >> discard_node_d[ch_p('(')] >> cal_argument >> discard_node_d[ch_p(')')];
             cal_julian_to_date =
                 str_p("cal::julian_to_date") >> discard_node_d[ch_p('(')] >> cal_argument >> discard_node_d[ch_p(')')];
-            datetime = leaf_node_d[lexeme_d[repeat_p(8)[digit_p] >> 'T' >> repeat_p(6)[digit_p]]];
+            datetime = leaf_node_d[lexeme_d[repeat_p(8)[digit_p] >> 'T' >> repeat_p(6)[digit_p] >> WORD_BOUNDARY]];
 
             calc_factor = datetime | integer | basic_variable_path |
                           discard_node_d[ch_p('(')] >> calc_expression >> discard_node_d[ch_p(')')] | flag_path |
@@ -355,6 +378,10 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         rule<ScannerT> const& start() const { return expression; }
     };
 };
+
+// WORD_BOUNDARY is only needed by the grammar definition above; undefine it so the
+// macro does not leak into the rest of this translation unit.
+#undef WORD_BOUNDARY
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,670 @@
+#!/usr/bin/env python3
+#
+# Copyright 2009- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#
+
+"""
+
+This script extracts a *golden corpus* of trigger/complete expressions from provided
+ecFlow definition (``.def``) and checkpoint (``.check``) files.
+
+Responsibilities of this script:
+
+  1. Extract every ``trigger``/``complete`` expression from the input files.
+
+  2. Textually combine multi-part expressions (``-a`` / ``-o`` continuation
+     lines) into a single expression, reproducing the server's left-associative
+     fold (see ``Expression::createAST`` in the C++ sources).
+
+  3. Deduplicate by *AST structure* (not by literal text): two expressions that
+     differ only in their operand *values* (node paths, attribute names,
+     integers, datetimes, states, events, flags) collapse to a single entry,
+     while any difference in operators / grouping / keyword spelling is kept.
+
+  4. Emit a JSON corpus whose ``valid_expressions`` carry an ``expression`` (and
+     a null ``expected`` slot).
+
+  5. As a final step, automatically derive ``invalid_expressions`` candidates by
+     applying structure-breaking mutations to the valid corpus; the recording step
+     enforces rejection of those the parser refuses and moves any it accepts into
+     ``valid_expressions`` (a mutation may coincidentally yield a valid expression).
+
+Usage:
+    extract_expressions --in <file> [--in <file> ...] --out <corpus.json>
+
+"""
+
+import argparse
+import datetime
+import json
+import os
+import re
+import sys
+
+#
+# Line-level extraction
+#
+
+# A trigger/complete attribute line. Captures the type, the optional -a/-o modifier
+# and the remainder (the expression, possibly followed by a trailing '# comment').
+_ATTR_RE = re.compile(r"^\s*(trigger|complete)\b(.*)$")
+_MODIFIER_RE = re.compile(r"^\s*(-[ao])\b\s*(.*)$")
+
+
+def _strip_comment(expr: str) -> str:
+    """
+    Remove any trailing ' # comment' (definition-file style) from an expression.
+
+    The '#' is not part of the expression grammar (node/attribute names only use
+    word characters and '.'), so the first '#' preceded by whitespace, or a '#'
+    at the start, safely delimits a comment.
+    """
+    # A '#' that starts a comment is either at the beginning or preceded by ws.
+    m = re.search(r"(?:^|\s)#", expr)
+    if m:
+        expr = expr[: m.start()]
+    return expr.strip()
+
+
+def _iter_expression_parts(path: str):
+    """
+    Yield (kind, modifier, expression, origin) tuples for each attribute line.
+
+    ``kind`` is 'trigger' or 'complete'; ``modifier`` is None (FIRST), 'and' or 'or'.
+    """
+    with open(path, encoding="latin-1") as file:
+        for lineno, raw in enumerate(file, start=1):
+            line = raw.rstrip("\n")
+            m = _ATTR_RE.match(line)
+            if not m:
+                continue
+            kind = m.group(1)
+            rest = m.group(2)
+
+            # The keyword must be followed by whitespace (attribute line), otherwise
+            # this is something else (e.g. a node/edit whose text starts differently).
+            if rest and not rest[0].isspace():
+                continue
+
+            modifier = None
+            mod_match = _MODIFIER_RE.match(rest)
+            if mod_match:
+                modifier = "and" if mod_match.group(1) == "-a" else "or"
+                rest = mod_match.group(2)
+
+            expr = _strip_comment(rest)
+            if not expr:
+                continue
+            origin = "{}:{}".format(os.path.basename(path), lineno)
+            yield kind, modifier, expr, origin
+
+
+def _combine(parts):
+    """
+    Combine multi-part expression fragments into one string.
+
+    Reproduces ``Expression::createAST``: a strict left-associative fold where the
+    accumulated expression is the LEFT child and the new part is the RIGHT child,
+    the operator being chosen by the *new* part's modifier. Each fragment and the
+    running accumulator are parenthesised so the parsed AST matches the server's
+    combined AST regardless of operator precedence.
+
+    ``parts`` is a list of (modifier, expression); the first must be FIRST (None).
+    """
+    combined = None
+    for modifier, expr in parts:
+        if combined is None:
+            combined = "({})".format(expr)
+        else:
+            op = modifier if modifier else "and"  # defensive: a stray FIRST becomes AND
+            combined = "({} {} ({}))".format(combined, op, expr)
+    return combined
+
+
+def extract_from_file(path: str):
+    """
+    Return a list of (expression, origin) from a single .def/.check file.
+    """
+    results = []
+
+    # Group contiguous parts of the same kind. In DEFS output every part of a
+    # node's trigger/complete is written consecutively, so a FIRST part starts a
+    # fresh group and following -a/-o parts extend it.
+    current_kind = None
+    current_parts = []
+    current_origin = None
+
+    def flush():
+        if current_parts:
+            combined = _combine(current_parts)
+            if combined is not None:
+                results.append((combined, current_origin))
+
+    for kind, modifier, expr, origin in _iter_expression_parts(path):
+        if modifier is None:
+            # A new FIRST part: close any open group and start a new one.
+            flush()
+            current_kind = kind
+            current_parts = [(None, expr)]
+            current_origin = origin
+        else:
+            # Continuation (-a/-o). Attach to the open group of the same kind;
+            # if there is none (unexpected), start one treating it as FIRST.
+            if current_parts and current_kind == kind:
+                current_parts.append((modifier, expr))
+            else:
+                flush()
+                current_kind = kind
+                current_parts = [(None, expr)]
+                current_origin = origin
+    flush()
+    return results
+
+
+def coverage_expressions():
+    """
+    Yield (expression, origin) for the embedded coverage expressions.
+    """
+
+    #
+    # A list of handcrafted upplementary expressions covering specific grammar features.
+    #
+    # Some grammar features, notably ``YYYYMMDDThhmmss`` datetime instants and a multi-part
+    # -a/-o combination, were found to be missing in real suites.
+    #
+    # To ensure they are conveniently test, they are embedded here -- rather than supplied
+    # via an external definition file -- so the generated corpus is self-contained. Each item
+    # is a list of (modifier, expression) parts, combined exactly like a multi-line trigger
+    # (see _combine).
+    #
+
+    _COVERAGE_PARTS = [
+        [(None, ":YYYYMMDDThhmmss == 20230101T000000")],
+        [(None, ":YYYYMMDDThhmmss >= 20230101T000000")],
+        [(None, ":YYYYMMDDThhmmss <= 20230101T000000")],
+        [(None, ":YYYYMMDDThhmmss + 3 <= 19700101T000000")],
+        [(None, ":YYYYMMDDThhmmss <= 19700101T000000 + 3")],
+        [(None, ":YYYYMMDDThhmmss >= 19700101T000000 + 3")],
+        [(None, "(:YYYYMMDDThhmmss + 1) == (19700101T000000 + 1)")],
+        [(None, "20240101T060000 == :when")],
+        [(None, ":VARIABLE == 19700101T123456 and b == complete")],
+        [(None, "a == complete"), ("and", "b == complete"), ("or", "c == complete")],
+    ]
+
+    for parts in _COVERAGE_PARTS:
+        combined = _combine(parts)
+        if combined is not None:
+            yield combined, "coverage"
+
+
+#
+# Structural signature (AST-shape proxy) for deduplication
+#
+
+_STATES = {"complete", "aborted", "queued", "submitted", "active", "unknown"}
+_EVENTS = {"set", "clear"}
+_FLAGNAMES = {"late", "zombie", "archived"}
+_WORD_OPS = {"and", "AND", "or", "OR", "not", "eq", "ne", "lt", "le", "gt", "ge"}
+_CAL_FUNCS = ("cal::date_to_julian", "cal::julian_to_date")
+
+_NAME_CHARS = set(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_."
+)
+_DATETIME_RE = re.compile(r"^\d{8}T\d{6}$")
+_INT_RE = re.compile(r"^\d+$")
+
+
+def _tokenize(expr: str):
+    """Return a list of (kind, text) tokens.
+
+    kinds: NAME, INT, DATETIME, STATE, EVENT, FLAGNAME, WORDOP, CALD, CALJ,
+           FLAG ('<flag>'), SLASH, COLON, LPAREN, RPAREN, OP (symbolic operator).
+    """
+    tokens = []
+    i = 0
+    n = len(expr)
+    while i < n:
+        c = expr[i]
+        if c.isspace():
+            i += 1
+            continue
+
+        # Calendar functions (must be checked before generic name scanning).
+        matched_cal = False
+        for func in _CAL_FUNCS:
+            if expr.startswith(func, i):
+                tokens.append(("CALD" if func.endswith("date_to_julian") else "CALJ", func))
+                i += len(func)
+                matched_cal = True
+                break
+        if matched_cal:
+            continue
+
+        # Flag delimiter.
+        if expr.startswith("<flag>", i):
+            tokens.append(("FLAG", "<flag>"))
+            i += len("<flag>")
+            continue
+
+        # Name-shaped run (letters, digits, '_', '.'): integers, datetimes,
+        # states, events, keywords and generic names all take this shape.
+        if c in _NAME_CHARS:
+            j = i
+            while j < n and expr[j] in _NAME_CHARS:
+                j += 1
+            text = expr[i:j]
+            i = j
+            if _DATETIME_RE.match(text):
+                kind = "DATETIME"
+            elif _INT_RE.match(text):
+                kind = "INT"
+            elif text in _STATES:
+                kind = "STATE"
+            elif text in _EVENTS:
+                kind = "EVENT"
+            elif text in _WORD_OPS:
+                kind = "WORDOP"
+            elif text in _FLAGNAMES:
+                kind = "FLAGNAME"
+            else:
+                kind = "NAME"
+            tokens.append((kind, text))
+            continue
+
+        # Two-character symbolic operators.
+        two = expr[i: i + 2]
+        if two in ("==", "!=", ">=", "<=", "&&", "||"):
+            tokens.append(("OP", two))
+            i += 2
+            continue
+
+        if c == "/":
+            tokens.append(("SLASH", c))
+            i += 1
+            continue
+        if c == ":":
+            tokens.append(("COLON", c))
+            i += 1
+            continue
+        if c == "(":
+            tokens.append(("LPAREN", c))
+            i += 1
+            continue
+        if c == ")":
+            tokens.append(("RPAREN", c))
+            i += 1
+            continue
+        if c in "<>+-*%":
+            tokens.append(("OP", c))
+            i += 1
+            continue
+
+        # Anything else (unexpected): keep verbatim so distinct inputs stay distinct.
+        tokens.append(("OTHER", c))
+        i += 1
+    return tokens
+
+
+# Token kinds that can form part of a path/operand run.
+_PATHISH = {"NAME", "INT", "DATETIME"}
+
+
+def signature(expr: str) -> str:
+    """
+    Return a structural signature abstracting operand *values*.
+
+    Since the goal is to support deduplication by comparing signatures:
+     - the operands are collapsed to placeholders (<node>, <attr>, <pattr>,
+       <int>, <datetime>, <state>, <event>, <flag>)
+     - operators are preserved verbatim
+     - parentheses are preserved verbatim
+     - keyword spellings are preserved verbatim
+     - calendar-function identities are preserved verbatim
+
+    Examples:
+     a) '/path/a == complete' and '/other/b == queued' share the signature '<node> == <state>'
+     b) 'a == b' and 'a eq b' do not share the same signature.
+    """
+    tokens = _tokenize(expr)
+    out = []
+    i = 0
+    n = len(tokens)
+    while i < n:
+        kind, text = tokens[i]
+
+        # Try to consume a path/operand run starting here.
+        if kind in _PATHISH or kind == "SLASH":
+            j = i
+            run = []
+            while j < n and tokens[j][0] in _PATHISH | {"SLASH"}:
+                run.append(tokens[j])
+                j += 1
+
+            has_slash = any(t[0] == "SLASH" for t in run)
+
+            # attribute:  <path> : <name>
+            if j + 1 < n and tokens[j][0] == "COLON" and tokens[j + 1][0] in ("NAME", "STATE", "EVENT", "WORDOP",
+                                                                              "FLAGNAME", "INT"):
+                out.append("<attr>")
+                i = j + 2
+                continue
+            # flag_ref:  <path> <flag> <flagname>
+            if j + 1 < n and tokens[j][0] == "FLAG" and tokens[j + 1][0] == "FLAGNAME":
+                out.append("<flag>")
+                i = j + 2
+                continue
+            # bare integer literal (single INT token, not a path)
+            if len(run) == 1 and run[0][0] == "INT":
+                out.append("<int>")
+                i = j
+                continue
+            # bare datetime literal
+            if len(run) == 1 and run[0][0] == "DATETIME":
+                out.append("<datetime>")
+                i = j
+                continue
+            # otherwise a node path (bare name, relative/absolute path)
+            out.append("<node>")
+            i = j
+            continue
+
+        # root-path flag_ref:  '/' <flag> <flagname>   (e.g. '/<flag>late')
+        if kind == "SLASH" and i + 2 < n and tokens[i + 1][0] == "FLAG":
+            out.append("<flag>")
+            i += 3
+            continue
+
+        # parent attribute:  ':' <name>
+        if kind == "COLON" and i + 1 < n and tokens[i + 1][0] in ("NAME", "STATE", "EVENT", "WORDOP", "FLAGNAME"):
+            out.append("<pattr>")
+            i += 2
+            continue
+
+        if kind == "DATETIME":
+            out.append("<datetime>")
+            i += 1
+            continue
+        if kind == "INT":
+            out.append("<int>")
+            i += 1
+            continue
+        if kind == "STATE":
+            out.append("<state>")
+            i += 1
+            continue
+        if kind == "EVENT":
+            out.append("<event>")
+            i += 1
+            continue
+
+        # Operators, parentheses, keyword spellings, cal:: functions: verbatim.
+        out.append(text)
+        i += 1
+
+    return " ".join(out)
+
+
+#
+# Invalid-expression generation
+#
+
+#
+# Rejection candidates are *automatically* generated from the valid corpus by applying
+# deterministic, structure-breaking mutations.
+#
+# A mutation is designed to yield an expression the grammar cannot accept (unbalanced brackets,
+# dangling or leading operators, stray tokens, an illegal relational-against-state comparison, ...).
+#
+# Because a mutation is not *guaranteed* to break every input, the candidates are only proposals.
+#
+# The C++ recording step (ECF_GOLDEN_CORPUS=1) parses each one with the current parser and keeps
+# only those actually rejected, so the committed rejection corpus is always verified against the
+# real parser.
+#
+
+_STATE_WORDS = "|".join(sorted(_STATES))
+_EQ_STATE_RE = re.compile(r"\s(==|eq|!=|ne)\s+(" + _STATE_WORDS + r")\b")
+
+#
+# Word-form operators/keywords must be whitespace-separated from name-shaped tokens (states and node/attribute names).
+#
+# Removing that separation makes the lexer read a single, longer :token:`name` (greedy longest-match),
+# so the keyword disappears and the expression is rejected.
+#
+# These regexes glue an operand and a word-form operator together on the left (``node eq`` -> ``nodeeq``)
+# or on the right (``eq complete`` -> ``eqcomplete``, ``complete and`` -> ``completeand``).
+#
+_WORD_OP_ALT = "and|not|AND|eq|ne|lt|le|gt|ge|or|OR"
+_GLUE_LEFT_RE = re.compile(r"([\w.])[ \t]+(" + _WORD_OP_ALT + r")\b")
+_GLUE_RIGHT_RE = re.compile(r"\b(" + _WORD_OP_ALT + r")[ \t]+([\w.])")
+
+
+def _mutations(expr):
+    """Yield (mutation, mutated_expression) proposals derived from a valid expression."""
+    yield "unbalanced_open", "(" + expr
+    yield "unbalanced_close", expr + ")"
+    yield "drop_open_bracket", expr.replace("(", "", 1) if "(" in expr else None
+    yield "dangling_and", expr + " and"
+    yield "dangling_or", expr + " or"
+    yield "dangling_eq", expr + " =="
+    yield "dangling_plus", expr + " +"
+    yield "leading_and", "and " + expr
+    yield "leading_eq", "== " + expr
+    yield "double_eq", expr.replace(" == ", " == == ", 1) if " == " in expr else None
+    yield "garbage_token", expr + " @"
+    yield "trailing_state", expr + " complete"
+    yield "trailing_token", expr + " zz"
+    # Relational operator against a node/event state is illegal (e.g. 'a < complete').
+    yield "relational_state", _EQ_STATE_RE.sub(r" < \2", expr, count=1) if _EQ_STATE_RE.search(expr) else None
+    # Word-form operator glued to an adjacent operand (missing mandatory whitespace).
+    yield "glue_operand_operator", _GLUE_LEFT_RE.sub(r"\1\2", expr, count=1) if _GLUE_LEFT_RE.search(expr) else None
+    yield "glue_operator_operand", _GLUE_RIGHT_RE.sub(r"\1\2", expr, count=1) if _GLUE_RIGHT_RE.search(expr) else None
+
+
+def build_rejections(valid_expressions, max_per_mutation=50):
+    """
+    Return a deduplicated list of invalid-expression candidates.
+
+    Candidates are generated from the given valid expressions.
+
+    Duplicates (by AST structural signature) are collapsed and each mutation
+    kind is capped at ``max_per_mutation`` distinct shapes, so the set stays small
+    yet diverse across both malformations and underlying structures.
+    """
+    seen = set()
+    per_mutation = {}
+    order = []
+    for expr in valid_expressions:
+        for mutation, candidate in _mutations(expr):
+            if not candidate or candidate == expr:
+                continue
+            if per_mutation.get(mutation, 0) >= max_per_mutation:
+                continue
+            try:
+                sig = "REJ:" + signature(candidate)
+            except Exception:  # pragma: no cover - defensive
+                sig = "REJ-RAW:" + candidate
+            if sig in seen:
+                continue
+            seen.add(sig)
+            per_mutation[mutation] = per_mutation.get(mutation, 0) + 1
+            order.append({"expression": candidate, "mutation": mutation})
+    return order
+
+
+#
+# Name anonymisation
+#
+# Real definitions expose node and variable names that can reveal internal host/server/release identifiers.
+#
+# To keep the corpus safe to publish, every identifier is rewritten to a generic placeholder,consistently
+# within each expression:
+#   - node-path *segment* names -> '/suite/family/task/nodeN' (path structure preserved);
+#   - attribute/parent-variable names (the identifier after ':') -> 'attribN'.
+#
+# The following are preserved (structural or literal, never an identifier):
+#   - integers,
+#   - datetimes,
+#   - node/event states,
+#   - flags,
+#   - operators,
+#   - keywords,
+#   - the 'cal::' function names
+#   - the '<flag>' literal,
+#   - plus, the path shape itself (depth, absolute '/', relative './'/'../').
+#
+# Only identifier strings change, so the parsed AST keeps the same structure while
+# carrying no revealing names.
+#
+
+_CAL_NAMES = {"cal", "date_to_julian", "julian_to_date"}
+# 'flag' is the literal inside the '<flag>' flag-reference delimiter and must be kept.
+_KEEP_WORDS = _STATES | _EVENTS | _FLAGNAMES | _WORD_OPS | _CAL_NAMES | {"flag"}
+_NAME_TOKEN_RE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.]*")
+_GENERIC_NAMES = ("suite", "family", "task")
+
+
+def _generic_name(index):
+    if index < len(_GENERIC_NAMES):
+        return _GENERIC_NAMES[index]
+    return "node{}".format(index + 1)
+
+
+def anonymise(expression):
+    """Rewrite node-path and attribute names to generic placeholders (see header)."""
+    path_map = {}
+    attr_map = {}
+
+    def repl(match):
+        token = match.group()
+        start = match.start()
+        prev = expression[start - 1] if start > 0 else ""
+        # Literals and keywords are never identifiers: keep them verbatim.
+        if _INT_RE.match(token) or _DATETIME_RE.match(token) or token in _KEEP_WORDS:
+            return token
+        # A name right after ':' is an attribute / parent-variable name.
+        if prev == ":":
+            return attr_map.setdefault(token, "attrib{}".format(len(attr_map) + 1))
+        # Otherwise it is a node-path segment name.
+        return path_map.setdefault(token, _generic_name(len(path_map)))
+
+    return _NAME_TOKEN_RE.sub(repl, expression)
+
+
+#
+# Driver
+#
+
+
+def build_corpus(inputs, checkpoint_origin=None):
+    seen = {}
+    order = []
+    total = 0
+
+    def consume(expression, origin):
+        nonlocal total
+        expression = anonymise(expression)
+        total += 1
+        try:
+            sig = signature(expression)
+        except Exception as exc:  # pragma: no cover - defensive
+            sys.stderr.write(
+                "warning: could not compute signature for {!r}: {}\n".format(expression, exc)
+            )
+            sig = "RAW:" + expression
+        if sig in seen:
+            return
+        seen[sig] = expression
+        order.append((expression, sig, origin))
+
+    # Embedded coverage expressions first, so they become the representatives for the
+    # grammar features they exercise.
+    for expression, origin in coverage_expressions():
+        consume(expression, origin)
+
+    for path in inputs:
+        for expression, origin in extract_from_file(path):
+            consume(expression, origin)
+
+    entries = [
+        {"expression": expression, "expected": None}
+        for (expression, sig, origin) in order
+    ]
+
+    rejections = build_rejections(expression for (expression, sig, origin) in order)
+
+    metadata = {
+        "generated": datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat(),
+        "generator": "extract_expressions",
+        "extracted": total,
+        "unique": len(entries),
+        "rejection_candidates": len(rejections),
+    }
+    if checkpoint_origin:
+        metadata["checkpoint_origin"] = checkpoint_origin
+
+    return {
+        "metadata": metadata,
+        "valid_expressions": entries,
+        "invalid_expressions": rejections,
+    }
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(
+        description="Extract a golden corpus of trigger/complete expressions."
+    )
+    parser.add_argument(
+        "--in",
+        dest="inputs",
+        action="append",
+        required=True,
+        metavar="FILE",
+        help="input .def or .check file (repeatable)",
+    )
+    parser.add_argument(
+        "--out",
+        dest="output",
+        required=True,
+        metavar="FILE",
+        help="output corpus JSON file",
+    )
+    parser.add_argument(
+        "--checkpoint-origin",
+        dest="checkpoint_origin",
+        default=None,
+        help="optional label recording where the checkpoints came from",
+    )
+    args = parser.parse_args(argv)
+
+    missing = [p for p in args.inputs if not os.path.isfile(p)]
+    if missing:
+        parser.error("input file(s) not found: " + ", ".join(missing))
+
+    corpus = build_corpus(args.inputs, args.checkpoint_origin)
+
+    with open(args.output, "w", encoding="utf-8") as handle:
+        json.dump(corpus, handle, indent=2, ensure_ascii=False)
+        handle.write("\n")
+
+    sys.stderr.write(
+        "extracted {} expression(s), {} unique structure(s), {} rejection candidate(s) -> {}\n".format(
+            corpus["metadata"]["extracted"],
+            corpus["metadata"]["unique"],
+            corpus["metadata"]["rejection_candidates"],
+            args.output,
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

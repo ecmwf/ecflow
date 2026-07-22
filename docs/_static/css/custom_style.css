@@ -67,3 +67,26 @@ div.admonition.implementation > .admonition-title {
     background-color: #e0e0e0;
     color: #424242;
 }
+
+/* Grammar (productionlist) blocks are rendered as a bare <pre> and can contain
+   long lines; keep them within the content area by scrolling horizontally
+   instead of overflowing past the right-hand border.
+   The `grammar-pre` class is added by _static/js/grammar_terminals.js to the
+   productionlist blocks only, so these rules do not affect other <pre> blocks. */
+.rst-content pre.grammar-pre {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre;
+    /* Match the size/metrics of code (highlight/literal) blocks: a bare <pre>
+       (as produced by productionlist) otherwise renders at 1em, much larger. */
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", Courier, monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Terminal (quoted) symbols in the grammar productionlist blocks, wrapped by
+   _static/js/grammar_terminals.js, are coloured blue to distinguish them from
+   the non-terminals. */
+.rst-content pre.grammar-pre .grammar-terminal {
+    color: #1565c0;
+}
