@@ -1,12 +1,22 @@
-:orphan:
+.. _ecflow_command_protocol:
 
-.. _tn_commands:
+Command internals
+*****************
 
-ecFlow commands
-***************
+.. warning::
 
-This technical note is a reference for the commands understood by the ecFlow server. It provides
-a per-command reference generated directly from the source, so that the description of each command,
+   This is an internal **developer reference**, intended for developers and integrators working on
+   the ecFlow client/server protocol itself, not for end users driving ``ecflow_client``.
+
+   It documents the **native client/server serialization** (the on-the-wire request and reply
+   payloads) alongside the C++ command classes that implement each command. Unlike the
+   :ref:`command line interface <ecflow_cli>` reference, this page is **not auto-generated** from
+   ``ecflow_client``; it is maintained by hand and may lag behind the current implementation. Treat
+   the payloads and class references as illustrative of a particular server version rather than a
+   stable, guaranteed contract.
+
+This page is a reference for the commands understood by the ecFlow server. It provides
+a per-command reference, so that the description of each command,
 its options, and its wire representation stay consistent with the implementation.
 
 Introduction
@@ -195,6 +205,8 @@ Task commands
    * - `QueueCmd`_
      - Request or update a step of a queue.
 
+.. _proto_AbortCmd:
+
 AbortCmd
 ~~~~~~~~
 
@@ -309,6 +321,8 @@ The zombie handling is the same as for ``InitCmd``.
                 }
               }
             }
+
+.. _proto_CompleteCmd:
 
 CompleteCmd
 ~~~~~~~~~~~
@@ -456,6 +470,8 @@ variables as the job finishes. The zombie handling is the same as for ``InitCmd`
               }
             }
 
+.. _proto_CtsWaitCmd:
+
 CtsWaitCmd
 ~~~~~~~~~~
 
@@ -582,6 +598,8 @@ synchronisation on the state of other nodes.
                 }
               }
             }
+
+.. _proto_EventCmd:
 
 EventCmd
 ~~~~~~~~
@@ -732,6 +750,8 @@ complete without error); this can be overridden with zombie attributes.
                 }
               }
             }
+
+.. _proto_InitCmd:
 
 InitCmd
 ~~~~~~~
@@ -885,6 +905,8 @@ zombie attributes, and the blocking period is bounded by ``ECF_TIMEOUT``.
               }
             }
 
+.. _proto_LabelCmd:
+
 LabelCmd
 ~~~~~~~~
 
@@ -997,6 +1019,8 @@ zombie action is to *fob*.
               }
             }
 
+.. _proto_MeterCmd:
+
 MeterCmd
 ~~~~~~~~
 
@@ -1106,6 +1130,8 @@ zombie action is to *fob*.
                 }
               }
             }
+
+.. _proto_QueueCmd:
 
 QueueCmd
 ~~~~~~~~
@@ -1381,6 +1407,8 @@ largest. The commands below are listed alphabetically.
      - Select the client print style (client-side).
    * - `ZombieCmd`_
      - Resolve zombies (fob, fail, adopt, remove, block, kill).
+
+.. _proto_AlterCmd:
 
 AlterCmd
 ~~~~~~~~
@@ -1779,6 +1807,8 @@ carried by ``flag_type_``, and ``flag_`` selects set (``true``) versus clear (``
               }
             }
 
+.. _proto_BeginCmd:
+
 BeginCmd
 ~~~~~~~~
 
@@ -1887,6 +1917,8 @@ starts. The ``force`` flag is stored in ``force_``; the request below is for ``-
               }
             }
 
+.. _proto_CFileCmd:
+
 CFileCmd
 ~~~~~~~~
 
@@ -1993,6 +2025,8 @@ the line limit by ``max_lines_``. The reply is always a string.
                 }
               }
             }
+
+.. _proto_CheckPtCmd:
 
 CheckPtCmd
 ~~~~~~~~~~
@@ -2124,6 +2158,8 @@ save-time alarm. Called with no argument it checkpoints immediately.
                 }
               }
             }
+
+.. _proto_ClientHandleCmd:
 
 ClientHandleCmd
 ~~~~~~~~~~~~~~~
@@ -2354,6 +2390,8 @@ track a chosen subset of suites and receive only their changes. The operation is
         ``--ch_suites`` returns a string listing of the handles; the remaining actions return the
         generic ``StcCmd`` reply with ``api_`` equal to ``0``.
 
+.. _proto_CSyncCmd:
+
 CSyncCmd
 ~~~~~~~~
 
@@ -2499,6 +2537,8 @@ rather than typed by an operator. The mode is carried by ``api_``:
         ``SNewsCmd`` (for ``--news``). These carry the incremental changes, or the full serialized
         definition, needed to bring the client up to date; their payload is unbounded and is not
         reproduced here.
+
+.. _proto_CtsCmd:
 
 CtsCmd
 ~~~~~~
@@ -3052,6 +3092,8 @@ return a string or a structured reply, as noted in the table:
               }
             }
 
+.. _proto_CtsNodeCmd:
+
 CtsNodeCmd
 ~~~~~~~~~~
 
@@ -3293,6 +3335,8 @@ target by ``absNodePath_``:
         and ``--get_state`` return a ``DefsCmd`` whose payload embeds the serialized definition or
         node subtree; it is omitted here because its size is unbounded.
 
+.. _proto_DeleteCmd:
+
 DeleteCmd
 ~~~~~~~~~
 
@@ -3400,6 +3444,8 @@ Removes nodes from the server. The paths are carried in ``paths_`` and the ``for
                 }
               }
             }
+
+.. _proto_EditScriptCmd:
 
 EditScriptCmd
 ~~~~~~~~~~~~~
@@ -3535,6 +3581,8 @@ underlies the "edit script" workflow in ``ecflow_ui``.
         ``edit`` and ``pre_process`` return an ``SStringCmd`` whose ``str_`` field holds the script;
         the ``submit`` variants return the generic ``StcCmd`` reply with ``api_`` equal to ``0``.
 
+.. _proto_ForceCmd:
+
 ForceCmd
 ~~~~~~~~
 
@@ -3667,6 +3715,8 @@ holds the requested state or event, and ``recursive_`` / ``setRepeatToLastValue_
               }
             }
 
+.. _proto_FreeDepCmd:
+
 FreeDepCmd
 ~~~~~~~~~~
 
@@ -3783,6 +3833,8 @@ flags select which dependency kinds are freed.
               }
             }
 
+.. _proto_GroupCTSCmd:
+
 GroupCTSCmd
 ~~~~~~~~~~~
 
@@ -3887,6 +3939,8 @@ group originated on the command line.
 
         The reply is a ``GroupSTCCmd`` bundling the reply of each member command in order; its shape
         depends on the members and is not reproduced here.
+
+.. _proto_LoadDefsCmd:
 
 LoadDefsCmd
 ~~~~~~~~~~~
@@ -3999,6 +4053,8 @@ serialized definition and can be large; it is truncated below.
                 }
               }
             }
+
+.. _proto_LogCmd:
 
 LogCmd
 ~~~~~~
@@ -4134,6 +4190,8 @@ and ``new`` return the generic reply.
         ``clear``, ``flush`` and ``new`` return the generic ``StcCmd`` reply with ``api_`` equal to
         ``0``.
 
+.. _proto_LogMessageCmd:
+
 LogMessageCmd
 ~~~~~~~~~~~~~
 
@@ -4228,6 +4286,8 @@ Writes an arbitrary message into the server log file, useful for annotating oper
               }
             }
 
+.. _proto_MoveCmd:
+
 MoveCmd
 ~~~~~~~
 
@@ -4253,6 +4313,8 @@ its own: it is generated by ``PlugCmd`` and by drag-and-drop in ``ecflow_ui``. T
 field embeds the serialized subtree, so the payload is unbounded; its structure mirrors the other
 user commands, with the base-class ``cl_host_`` and ``user_`` followed by the fields above. The reply
 is the generic ``StcCmd`` success reply with ``api_`` equal to ``0``.
+
+.. _proto_OrderNodeCmd:
 
 OrderNodeCmd
 ~~~~~~~~~~~~
@@ -4372,6 +4434,8 @@ attributes, evaluation order. The ordering is carried by ``option_``.
                 }
               }
             }
+
+.. _proto_PathsCmd:
 
 PathsCmd
 ~~~~~~~~
@@ -4708,6 +4772,8 @@ targets by ``paths_``:
               }
             }
 
+.. _proto_PlugCmd:
+
 PlugCmd
 ~~~~~~~
 
@@ -4816,6 +4882,8 @@ Moves a node subtree to a new parent, possibly on a different server. Internally
                 }
               }
             }
+
+.. _proto_QueryCmd:
 
 QueryCmd
 ~~~~~~~~
@@ -4967,6 +5035,8 @@ inside scripts to branch on a node's state.
               }
             }
 
+.. _proto_ReplaceNodeCmd:
+
 ReplaceNodeCmd
 ~~~~~~~~~~~~~~
 
@@ -5056,6 +5126,8 @@ Verbatim ``ecflow_client --replace`` output (the common environment-variable foo
    Usage:
      --replace=/suite/f1/t1 /tmp/client.def  parent      # Add/replace node tree /suite/f1/t1
      --replace=/suite/f1/t1 /tmp/client.def  false force # replace t1 even if its active or submitted
+
+.. _proto_RequeueNodeCmd:
 
 RequeueNodeCmd
 ~~~~~~~~~~~~~~
@@ -5166,6 +5238,8 @@ Requeues nodes so that they may run again. ``option_`` encodes the modifier (``0
                 }
               }
             }
+
+.. _proto_RunNodeCmd:
 
 RunNodeCmd
 ~~~~~~~~~~
@@ -5284,6 +5358,8 @@ ignored.
               }
             }
 
+.. _proto_ServerVersionCmd:
+
 ServerVersionCmd
 ~~~~~~~~~~~~~~~~
 
@@ -5377,6 +5453,8 @@ payload holds only the base-class ``cl_host_`` and ``user_``.
                 }
               }
             }
+
+.. _proto_ShowCmd:
 
 ShowCmd
 ~~~~~~~
@@ -5503,6 +5581,8 @@ not part of the serialized payload, so the request carries only the base-class `
                 }
               }
             }
+
+.. _proto_ZombieCmd:
 
 ZombieCmd
 ~~~~~~~~~

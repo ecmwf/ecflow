@@ -42,6 +42,14 @@ add_custom_command(
     ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_BINARY_DIR}/client_api/index.rst
       ${CMAKE_CURRENT_SOURCE_DIR}/client_api
+  COMMAND
+    ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_BINARY_DIR}/client_api/cli_commands.rst
+      ${CMAKE_CURRENT_SOURCE_DIR}/client_api
+  COMMAND
+    ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_BINARY_DIR}/client_api/cli_options.rst
+      ${CMAKE_CURRENT_SOURCE_DIR}/client_api
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/client_api
   USES_TERMINAL
   DEPENDS ecflow_client
@@ -122,5 +130,6 @@ add_custom_command(
   DEPENDS
     ecflow_client_docs
     ecflow_python_docs
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/command_internals.rst
 )
 add_custom_target(ecflow_docs DEPENDS generate_ecflow_docs)
