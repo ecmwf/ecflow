@@ -13,5 +13,4 @@ documentation index; each note is reachable only through its direct link.
 .. toctree::
    :maxdepth: 1
 
-   multi_tenant_reference_environment
    commands

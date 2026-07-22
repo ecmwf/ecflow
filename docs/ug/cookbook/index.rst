@@ -42,3 +42,10 @@ This cookbook will provide real examples of using the ecFlow :ref:`python_api`.
    how_to_trigger_a_task_based_on_aviso_notification
    how_to_use_ecFlow_with_http
    how_to_setup_ecFlow_with_https_authentication
+
+**Experimental Recipes**
+
+.. toctree::
+   :maxdepth: 1
+
+   multi_tenant_reference_environment

@@ -1,12 +1,19 @@
-:orphan:
-
-.. _tn_multi_tenant_reference_environment:
+.. _multi_tenant_reference_environment:
 
 Multi-Tenant Reference Environment
 **********************************
 
+.. warning::
+
+   This recipe is **experimental** and a **work in progress**.
+
+   It describes an internal, development-oriented reference deployment of the multi-tenant ecFlow
+   server, which is not yet ready for production use. The stack, the commands, and the configuration
+   shown here may change at any time. Treat it as a starting point for experimentation rather than a
+   supported deployment procedure.
+
 This note documents the deployment of the multi-tenant reference stack. This environment is currently
-deployed on the machine ``ecfg-mamb-1``, and is composed of:
+deployed on a host referred to below as ``<host>``, and is composed of:
 
  - a reverse proxy (nginx) that redirects HTTP to HTTPS and terminates TLS, granting access to the
    ecFlow server behind an ``auth-o-tron`` authentication service;
@@ -34,7 +41,7 @@ is described in ``releng/imachination/INSTRUCTIONS.md``.
 The concept of running ecFlow behind an authenticating reverse proxy is described more generally in
 :ref:`how_to_setup_ecflow_with_https_authentication`.
 
-This note considers the specific case of ``ecfg-mamb-1`` because it has neither Docker Compose nor
+This note considers the specific case of ``<host>`` because it has neither Docker Compose nor
 ``podman-compose`` available, so the stack was deployed with individual ``podman`` commands instead,
 and those commands ended up differing from ``releng/imachination/compose.yaml`` in a few respects,
 detailed below.
@@ -42,14 +49,14 @@ detailed below.
 Deployment environment
 ======================
 
-``ecfg-mamb-1`` runs:
+``<host>`` runs:
 
 - **Operating system**: Debian GNU/Linux 11 (bullseye), kernel ``6.1.0-0.deb11.50-amd64``.
 
 - **Resources**: 2 virtual CPUs, approximately 2 GiB of RAM, approximately 1 GiB of swap.
 
 - **Storage**: separate LVM volumes for ``/``, ``/tmp``, ``/var``, ``/opt`` and ``/var/log`` (a few
-  GiB each), plus a large NFS-mounted ``/home/mamb``.
+  GiB each), plus a large NFS-mounted ``/home/<user>``.
 
 - **Container runtime**: rootless Podman 3.0.1.
 
@@ -57,13 +64,13 @@ Deployment environment
   the stack is deployed with plain ``podman run``/``podman network`` commands rather than a single
   Compose invocation.
 
-- **User**: containers are run rootless, as user ``mamb``.
+- **User**: containers are run rootless, as user ``<user>``.
 
   On this host the unprivileged port range starts at 1024 (the kernel default), so this user cannot bind
   ports below 1024 directly; this is the reason the reverse proxy publishes remapped host ports instead
   of the conventional 80/443, as described below.
 
-- **Workspace**: the ecFlow server's ``ECF_HOME`` is ``/home/mamb/ecfg-mamb-1``, bind-mounted into
+- **Workspace**: the ecFlow server's ``ECF_HOME`` is ``/home/<user>/<host>``, bind-mounted into
   the ``ecflow-server`` container.
 
   This directory contains ``server_environment.cfg``, checkpoint and log files, and a ``secrets`` subdirectory.
@@ -163,7 +170,7 @@ Detailed deployment procedure
 =============================
 
 The commands below are the exact invocations of ``podman`` used to create the three running
-containers on ``ecfg-mamb-1``. Run them from ``releng/imachination/`` unless noted otherwise.
+containers on ``<host>``. Run them from ``releng/imachination/`` unless noted otherwise.
 
 * Create the shared network:
 
@@ -205,8 +212,8 @@ containers on ``ecfg-mamb-1``. Run them from ``releng/imachination/`` unless not
        --network inner --ip 172.30.0.4 \
        --platform linux/amd64 \
        -p 8888:8888 -p 8889:8889 \
-       -v /home/mamb/ecfg-mamb-1:/home/mamb/ecfg-mamb-1 \
-       -e ECFLOW_WORKSPACE_DIR=/home/mamb/ecfg-mamb-1 \
+       -v /home/<user>/<host>:/home/<user>/<host> \
+       -e ECFLOW_WORKSPACE_DIR=/home/<user>/<host> \
        eccr.ecmwf.int/ecflow-dev-environments/ecflow-serveronly-dev:latest
 
 * Verify deployment:
@@ -221,7 +228,7 @@ proxy (the ``-k`` option is required because the certificate is self-signed):
 .. code-block:: shell
 
    BASIC_TOKEN=$(echo -n 'admin:somesecret' | base64)
-   curl -k -X GET -H "Authorization: Basic ${BASIC_TOKEN}" https://ecfg-mamb-1:3141/v1/ecflow
+   curl -k -X GET -H "Authorization: Basic ${BASIC_TOKEN}" https://<host>:3141/v1/ecflow
 
 * Tear down the stack
 
@@ -247,7 +254,7 @@ proxy (the ``-k`` option is required because the certificate is self-signed):
     - ``authotron`` publishes and listens on port ``8081`` instead of ``8080``, leaving host port 8080
       available for ``revproxy``'s HTTP listener.
 
-    - ``revproxy/cfgs/nginx/default.conf`` was adjusted on ``ecfg-mamb-1`` in three places relative to the
+    - ``revproxy/cfgs/nginx/default.conf`` was adjusted on ``<host>`` in three places relative to the
       committed file:
 
       - the ``listen`` directives were changed from 80/443 to 8080/8443, matching the remapped ports
@@ -264,7 +271,7 @@ proxy (the ``-k`` option is required because the certificate is self-signed):
         macOS/Windows-specific feature that does not exist in Linux.
 
     - ``ecflow-server``'s workspace is bind-mounted at the same absolute path on both sides
-      (``/home/mamb/ecfg-mamb-1``), rather than at the example's relative ``ecflow/workspace`` path, so
+      (``/home/<user>/<host>``), rather than at the example's relative ``ecflow/workspace`` path, so
       that the mount survives independently of the git checkout.
 
 
