@@ -308,7 +308,32 @@ void Documentation::show_help(std::ostream& os) const {
 }
 
 void Documentation::show_list_options(std::ostream& os) const {
-    os << descriptions_ << "\n";
+    // The options are shown using a very plain list of all the options, with their description.
+
+    os << "\n  Client options:\n\n    " << ecf::Version::description() << "\n\n";
+
+    for (const auto& option : descriptions_.options()) {
+        std::string description;
+        if (std::optional<std::string> text = ecf::HelpCatalog::description_for(option->long_name())) {
+            description = *text;
+        }
+        else {
+            description = "No description was found for this option.\n"
+                          "Please report this issue to the development team.";
+        }
+
+        os << "    --" << option->long_name() << "\n\n";
+
+        std::vector<std::string> lines;
+        ecf::algorithm::split_fields_at(lines, description, "\n");
+        for (const auto& line : lines) {
+            if (!line.empty()) {
+                os << "        " << line;
+            }
+            os << "\n";
+        }
+        os << "\n";
+    }
 }
 
 template <typename PREDICATE>
