@@ -47,17 +47,23 @@
       "items": { "$ref": "#/$defs/description_block" }
     },
     "argument": {
+      "description": "Structured, best-effort metadata alongside the verbatim argN prose kept in the command's own description; the source's argN convention is inconsistent per-command (some omit type, some omit a separate description line, one uses a union type), so type and description are not always present, and type is free text rather than a closed set.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "type", "optional", "description"],
+      "required": ["name", "optional"],
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "type": {
-          "description": "Matches the source's 'argN = (optional) type(name)' convention, e.g. string(reason).",
-          "enum": ["string", "int", "any"]
+          "description": "Free text matching whatever the source literally shows in parentheses, e.g. string, int, any, or a union such as 'string | int'. Absent when the source shows no type at all.",
+          "type": "string",
+          "minLength": 1
         },
         "optional": { "type": "boolean" },
-        "description": { "type": "string", "minLength": 1 }
+        "description": {
+          "description": "Absent when the source gives no separate elaboration beyond the name/value itself.",
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "command": {

@@ -15,8 +15,9 @@
       "implementation": "AbortCmd",
       "summary": "Mark task as aborted. For use in the '.ecf' script file *only*",
       "description": [
-        "Mark task as aborted. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables",
-        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT."
+        "Mark task as aborted. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1 = (optional) string(reason)\n         Optionally provide a reason why the abort was raised",
+        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT.",
+        "Usage:\n  ecflow_client --abort=reasonX"
       ],
       "arguments": [
         {
@@ -36,12 +37,12 @@
       "summary": "Mark task as complete. For use in the '.ecf' script file *only*",
       "description": [
         "Mark task as complete. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables",
-        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT.\nThe init command allows variables to be added, and complete command\nallows for them to be removed."
+        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT.\nThe init command allows variables to be added, and complete command\nallows for them to be removed.\n  arg1(--remove)(optional) = a list of variables to removed from this task",
+        "Usage:\n  ecflow_client --complete\n  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
       ],
       "arguments": [
         {
           "name": "remove",
-          "type": "any",
           "optional": true,
           "description": "a list of variables to removed from this task"
         }
@@ -58,8 +59,9 @@
       "implementation": "InitCmd",
       "summary": "Mark task as started(active). For use in the '.ecf' script file *only*",
       "description": [
-        "Mark task as started(active). For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables.",
-        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT."
+        "Mark task as started(active). For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables.\n  arg1(string)         = process_or_remote_id The process id of the job or remote_id\n                         Using remote id allows the jobs to be killed\n  arg2(--add)(optional)= add/update variables as name value pairs",
+        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT.",
+        "Usage:\n  ecflow_client --init=$$\n  ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
       ],
       "arguments": [
         {
@@ -70,7 +72,6 @@
         },
         {
           "name": "add",
-          "type": "any",
           "optional": true,
           "description": "add/update variables as name value pairs"
         }
