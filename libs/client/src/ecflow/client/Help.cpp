@@ -160,7 +160,7 @@ private:
             return "option  ";
         }
         else if (CommandFilter::is_task_command(name)) {
-            return "child   ";
+            return "task    ";
         }
         else if (CommandFilter::is_user_command(name)) {
             return "user    ";
@@ -176,7 +176,7 @@ private:
 
 void Documentation::show(std::ostream& os, const std::string& topic) const {
     // WARNING!!
-    //   This assumes that there are no user/child commands named: 'summary', 'all', 'child', 'user'
+    //   This assumes that there are no user/task commands named: 'summary', 'all', 'task', 'user'
     //
 
     if (topic.empty()) {
@@ -188,8 +188,8 @@ void Documentation::show(std::ostream& os, const std::string& topic) const {
     else if (topic == "summary") {
         show_all_commands_summary(os, "\nEcflow client commands:\n");
     }
-    else if (topic == "child") {
-        show_task_commands_summary(os, "\nEcflow child client commands:\n");
+    else if (topic == "task") {
+        show_task_commands_summary(os, "\nEcflow task client commands:\n");
     }
     else if (topic == "user") {
         show_user_commands_summary(os, "\nEcflow user client commands:\n");
@@ -210,7 +210,7 @@ void Documentation::show_help(std::ostream& os) const {
     os << "Try:\n\n";
     os << "   " << Ecf::CLIENT_NAME() << " --help=all       # List all commands, verbosely\n";
     os << "   " << Ecf::CLIENT_NAME() << " --help=summary   # One line summary of all commands\n";
-    os << "   " << Ecf::CLIENT_NAME() << " --help=child     # One line summary of child commands\n";
+    os << "   " << Ecf::CLIENT_NAME() << " --help=task      # One line summary of task commands\n";
     os << "   " << Ecf::CLIENT_NAME() << " --help=user      # One line summary of user command\n";
     os << "   " << Ecf::CLIENT_NAME() << " --help=<cmd>     # Detailed help on each command\n\n";
 
