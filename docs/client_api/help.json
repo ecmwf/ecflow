@@ -159,6 +159,66 @@
         }
       ],
       "usage": ["ecflow_client --meter=my_meter 20"]
+    },
+    {
+      "name": "queue",
+      "kind": "task",
+      "visibility": "public",
+      "implementation": "QueueCmd",
+      "summary": "QueueCmd. For use in the '.ecf' script file *only*",
+      "description": [
+        "QueueCmd. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1(string) = queue-name:\n  arg2(string) = action: [active | aborted | complete | no_of_aborted | reset ]\n     active: returns the first queued/aborted step, the return string is the queue value from the definition\n     no_of_aborted: returns number of aborted steps as a string, i.e 10\n     reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors\n  arg3(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)\n                This is only valid for complete and aborted steps\n  arg4(string) = path: (optional). The path where the queue is defined.\n                 By default we search for the queue up the node tree.",
+        "If this task command is a zombie, then the default action will be to *block*,\nThe default can be overridden by using zombie attributes.If the path to the queue is not defined, then this command will\nsearch for the queue up the node hierarchy. If no queue found, command fails",
+        "Usage:\nstep=\"\"\nQNAME=\"my_queue_name\"\nwhile [1 == 1 ] ; do\n   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps processed\n   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active\n   if [[ $step == \"<NULL>\" ]] ; then\n        break;\n   fi\n   ...\n   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed\ndone",
+        "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }"
+      ],
+      "arguments": [
+        {
+          "name": "queue-name",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "optional": false,
+          "description": "[active | aborted | complete | no_of_aborted | reset ]\nactive: returns the first queued/aborted step, the return string is the queue value from the definition\nno_of_aborted: returns number of aborted steps as a string, i.e 10\nreset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors"
+        },
+        {
+          "name": "step",
+          "type": "string",
+          "optional": false,
+          "description": "value returned from step=$(ecflow_client --queue=queue_name active)\nThis is only valid for complete and aborted steps"
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "optional": true,
+          "description": "(optional). The path where the queue is defined.\nBy default we search for the queue up the node tree."
+        }
+      ],
+      "usage": [
+        "step=\"\"\nQNAME=\"my_queue_name\"\nwhile [1 == 1 ] ; do\n   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps processed\n   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active\n   if [[ $step == \"<NULL>\" ]] ; then\n        break;\n   fi\n   ...\n   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed\ndone\n\ntrap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }"
+      ]
+    },
+    {
+      "name": "wait",
+      "kind": "task",
+      "visibility": "public",
+      "implementation": "CtsWaitCmd",
+      "summary": "Evaluates an expression, and block while the expression is false.",
+      "description": [
+        "Evaluates an expression, and block while the expression is false.\nFor use in the '.ecf' file *only*, hence the context is supplied via environment variables\n  arg1 = string(expression)",
+        "Usage:\n  ecflow_client --wait=\"/suite/taskx == complete\""
+      ],
+      "arguments": [
+        {
+          "name": "expression",
+          "type": "string",
+          "optional": false
+        }
+      ],
+      "usage": ["ecflow_client --wait=\"/suite/taskx == complete\""]
     }
   ],
   "options": [
