@@ -19,4 +19,25 @@ const nlohmann::json& HelpCatalog::manifest() {
     return instance;
 }
 
+const nlohmann::json* HelpCatalog::find_command(const std::string& name) {
+    return find_by_name(manifest().at("commands"), name);
+}
+
+const nlohmann::json* HelpCatalog::find_option(const std::string& name) {
+    return find_by_name(manifest().at("options"), name);
+}
+
+const nlohmann::json* HelpCatalog::find_topic(const std::string& name) {
+    return find_by_name(manifest().at("topics"), name);
+}
+
+const nlohmann::json* HelpCatalog::find_by_name(const nlohmann::json& array, const std::string& name) {
+    for (const auto& entry : array) {
+        if (entry.at("name") == name) {
+            return &entry;
+        }
+    }
+    return nullptr;
+}
+
 } // namespace ecf

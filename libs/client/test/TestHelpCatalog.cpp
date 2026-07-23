@@ -64,6 +64,36 @@ BOOST_AUTO_TEST_CASE(test_manifest_is_parsed_once_and_cached) {
     BOOST_CHECK_EQUAL(&first, &second);
 }
 
+BOOST_AUTO_TEST_CASE(test_find_command_by_exact_name) {
+    ECF_NAME_THIS_TEST();
+
+    const nlohmann::json* found = ecf::HelpCatalog::find_command("abort");
+    BOOST_REQUIRE(found != nullptr);
+    BOOST_CHECK_EQUAL(found->at("implementation").get<std::string>(), "AbortCmd");
+
+    BOOST_CHECK(ecf::HelpCatalog::find_command("no-such-command") == nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(test_find_option_by_exact_name) {
+    ECF_NAME_THIS_TEST();
+
+    const nlohmann::json* found = ecf::HelpCatalog::find_option("host");
+    BOOST_REQUIRE(found != nullptr);
+    BOOST_CHECK_EQUAL(found->at("kind").get<std::string>(), "global-option");
+
+    BOOST_CHECK(ecf::HelpCatalog::find_option("no-such-option") == nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(test_find_topic_by_exact_name) {
+    ECF_NAME_THIS_TEST();
+
+    const nlohmann::json* found = ecf::HelpCatalog::find_topic("summary");
+    BOOST_REQUIRE(found != nullptr);
+    BOOST_CHECK(found->contains("summary"));
+
+    BOOST_CHECK(ecf::HelpCatalog::find_topic("no-such-topic") == nullptr);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

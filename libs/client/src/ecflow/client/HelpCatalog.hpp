@@ -11,6 +11,8 @@
 #ifndef ecflow_client_HelpCatalog_HPP
 #define ecflow_client_HelpCatalog_HPP
 
+#include <string>
+
 #include <nlohmann/json.hpp>
 
 namespace ecf {
@@ -39,6 +41,36 @@ public:
     /// @throws nlohmann::json::parse_error if the embedded manifest is malformed.
     ///
     static const nlohmann::json& manifest();
+
+    ///
+    /// @brief Finds a command entry by exact name.
+    ///
+    /// @param name Exact command name to look up, e.g. "abort".
+    /// @return Pointer to the matching manifest entry, valid for the remaining lifetime
+    ///         of the process, or nullptr if no command has this name.
+    ///
+    static const nlohmann::json* find_command(const std::string& name);
+
+    ///
+    /// @brief Finds an option entry by exact name.
+    ///
+    /// @param name Exact option name to look up, e.g. "host".
+    /// @return Pointer to the matching manifest entry, valid for the remaining lifetime
+    ///         of the process, or nullptr if no option has this name.
+    ///
+    static const nlohmann::json* find_option(const std::string& name);
+
+    ///
+    /// @brief Finds a topic entry by exact name.
+    ///
+    /// @param name Exact topic name to look up, e.g. "summary".
+    /// @return Pointer to the matching manifest entry, valid for the remaining lifetime
+    ///         of the process, or nullptr if no topic has this name.
+    ///
+    static const nlohmann::json* find_topic(const std::string& name);
+
+private:
+    static const nlohmann::json* find_by_name(const nlohmann::json& array, const std::string& name);
 };
 
 } // namespace ecf
