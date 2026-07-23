@@ -54,8 +54,7 @@ add_custom_command(
   COMMAND
     ${CMAKE_COMMAND} -E rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/client_api/api/*
   COMMAND
-    ${CMAKE_COMMAND} -E env "PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH}"
-        ${CMAKE_CURRENT_SOURCE_DIR}/client_api/build.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/build.py
   COMMAND
     ${CMAKE_COMMAND} -E copy_directory
       ${CMAKE_CURRENT_BINARY_DIR}/client_api/api
@@ -74,7 +73,11 @@ add_custom_command(
       ${CMAKE_CURRENT_SOURCE_DIR}/client_api
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/client_api
   USES_TERMINAL
-  DEPENDS ecflow_client
+  DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/build.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/help.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/help.schema.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/validate_help_manifest.py
 )
 add_custom_target(ecflow_client_docs DEPENDS generate_ecflow_client_docs ecflow_client_help_validate)
 
