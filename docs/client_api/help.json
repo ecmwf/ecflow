@@ -27,6 +27,58 @@
         }
       ],
       "usage": ["ecflow_client --abort=reasonX"]
+    },
+    {
+      "name": "complete",
+      "kind": "task",
+      "visibility": "public",
+      "implementation": "CompleteCmd",
+      "summary": "Mark task as complete. For use in the '.ecf' script file *only*",
+      "description": [
+        "Mark task as complete. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables",
+        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT.\nThe init command allows variables to be added, and complete command\nallows for them to be removed."
+      ],
+      "arguments": [
+        {
+          "name": "remove",
+          "type": "any",
+          "optional": true,
+          "description": "a list of variables to removed from this task"
+        }
+      ],
+      "usage": [
+        "ecflow_client --complete",
+        "ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
+      ]
+    },
+    {
+      "name": "init",
+      "kind": "task",
+      "visibility": "public",
+      "implementation": "InitCmd",
+      "summary": "Mark task as started(active). For use in the '.ecf' script file *only*",
+      "description": [
+        "Mark task as started(active). For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables.",
+        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT."
+      ],
+      "arguments": [
+        {
+          "name": "process_or_remote_id",
+          "type": "string",
+          "optional": false,
+          "description": "The process id of the job or remote_id\nUsing remote id allows the jobs to be killed"
+        },
+        {
+          "name": "add",
+          "type": "any",
+          "optional": true,
+          "description": "add/update variables as name value pairs"
+        }
+      ],
+      "usage": [
+        "ecflow_client --init=$$",
+        "ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
+      ]
     }
   ],
   "options": [
