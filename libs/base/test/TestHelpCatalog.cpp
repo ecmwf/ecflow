@@ -10,14 +10,14 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "ecflow/client/HelpCatalog.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/test/scaffold/Naming.hpp"
 
 ///
 /// \brief Tests ecf::HelpCatalog's lazy access to the embedded CLI help manifest
 ///
 
-BOOST_AUTO_TEST_SUITE(S_Client)
+BOOST_AUTO_TEST_SUITE(U_Base)
 
 BOOST_AUTO_TEST_SUITE(T_HelpCatalog)
 
@@ -92,6 +92,34 @@ BOOST_AUTO_TEST_CASE(test_find_topic_by_exact_name) {
     BOOST_CHECK(found->contains("summary"));
 
     BOOST_CHECK(ecf::HelpCatalog::find_topic("no-such-topic") == nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(test_summary_for_command_and_option) {
+    ECF_NAME_THIS_TEST();
+
+    std::optional<std::string> command_summary = ecf::HelpCatalog::summary_for("abort");
+    BOOST_REQUIRE(command_summary.has_value());
+    BOOST_CHECK_EQUAL(*command_summary, ecf::HelpCatalog::find_command("abort")->at("summary").get<std::string>());
+
+    std::optional<std::string> option_summary = ecf::HelpCatalog::summary_for("host");
+    BOOST_REQUIRE(option_summary.has_value());
+    BOOST_CHECK_EQUAL(*option_summary, ecf::HelpCatalog::find_option("host")->at("summary").get<std::string>());
+
+    BOOST_CHECK(!ecf::HelpCatalog::summary_for("no-such-name").has_value());
+}
+
+BOOST_AUTO_TEST_CASE(test_description_for_command_and_option) {
+    ECF_NAME_THIS_TEST();
+
+    std::optional<std::string> command_description = ecf::HelpCatalog::description_for("abort");
+    BOOST_REQUIRE(command_description.has_value());
+    BOOST_CHECK(!command_description->empty());
+
+    std::optional<std::string> option_description = ecf::HelpCatalog::description_for("host");
+    BOOST_REQUIRE(option_description.has_value());
+    BOOST_CHECK(!option_description->empty());
+
+    BOOST_CHECK(!ecf::HelpCatalog::description_for("no-such-name").has_value());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

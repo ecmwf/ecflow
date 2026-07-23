@@ -8,9 +8,10 @@
  * nor does it submit to any jurisdiction.
  */
 
-#ifndef ecflow_client_HelpCatalog_HPP
-#define ecflow_client_HelpCatalog_HPP
+#ifndef ecflow_base_HelpCatalog_HPP
+#define ecflow_base_HelpCatalog_HPP
 
+#include <optional>
 #include <string>
 
 #include <nlohmann/json.hpp>
@@ -69,10 +70,40 @@ public:
     ///
     static const nlohmann::json* find_topic(const std::string& name);
 
+    ///
+    /// @brief Returns the one-line summary registered for a command or option.
+    ///
+    /// Checks commands first, then options, matching @ref find_command and
+    /// @ref find_option order. Returned by value so that callers never need to
+    /// see the underlying nlohmann::json representation.
+    ///
+    /// @param name Exact command or option name to look up, e.g. "abort".
+    /// @return The entry's "summary" field, or std::nullopt if @p name matches
+    ///         neither a command nor an option in the manifest.
+    ///
+    static std::optional<std::string> summary_for(const std::string& name);
+
+    ///
+    /// @brief Returns the full description text registered for a command or option.
+    ///
+    /// Checks commands first, then options, matching @ref find_command and
+    /// @ref find_option order. The entry's "description" blocks are joined the
+    /// same way the paragraphs were originally separated in the C++ source: a
+    /// blank line between blocks. A verbatim block (e.g. CtsCmd's ASCII-art
+    /// tables) is reproduced as-is, without a paragraph-break interpretation of
+    /// its own embedded newlines.
+    ///
+    /// @param name Exact command or option name to look up, e.g. "abort".
+    /// @return The reconstructed description text, or std::nullopt if @p name
+    ///         matches neither a command nor an option in the manifest.
+    ///
+    static std::optional<std::string> description_for(const std::string& name);
+
 private:
     static const nlohmann::json* find_by_name(const nlohmann::json& array, const std::string& name);
+    static const nlohmann::json* entry_for(const std::string& name);
 };
 
 } // namespace ecf
 
-#endif /* ecflow_client_HelpCatalog_HPP */
+#endif /* ecflow_base_HelpCatalog_HPP */

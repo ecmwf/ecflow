@@ -24,7 +24,7 @@ configure_file(
 #
 set(ecflow_client_help_manifest ${ecflow_SOURCE_DIR}/docs/client_api/help.json)
 set(ecflow_client_help_generated_header
-    ${CMAKE_BINARY_DIR}/generated/src/ecflow/client/generated_client_help.hpp)
+    ${CMAKE_BINARY_DIR}/generated/src/ecflow/base/generated_client_help.hpp)
 add_custom_command(
   OUTPUT ${ecflow_client_help_generated_header}
   COMMAND ${CMAKE_COMMAND}
@@ -85,7 +85,9 @@ set(srcs
   base/src/ecflow/base/ClientToServerRequest.hpp
   base/src/ecflow/base/Cmd.hpp
   base/src/ecflow/base/Connection.hpp
+  ${ecflow_client_help_generated_header}
   base/src/ecflow/base/Gnuplot.hpp
+  base/src/ecflow/base/HelpCatalog.hpp
   base/src/ecflow/base/HttpClient.hpp
   base/src/ecflow/base/Identification.hpp
   $<$<BOOL:${OPENSSL_FOUND}>:base/src/ecflow/base/Openssl.hpp>
@@ -166,6 +168,7 @@ set(srcs
   base/src/ecflow/base/ClientToServerRequest.cpp
   base/src/ecflow/base/Connection.cpp
   base/src/ecflow/base/Gnuplot.cpp
+  base/src/ecflow/base/HelpCatalog.cpp
   base/src/ecflow/base/HttpClient.cpp
   base/src/ecflow/base/Identification.cpp
   base/src/ecflow/base/ServerReply.cpp
@@ -239,13 +242,11 @@ set(srcs
   base/src/ecflow/base/stc/ZombieGetCmd.cpp
 
   # Client -- Headers
-  ${ecflow_client_help_generated_header}
   client/src/ecflow/client/ClientCmdCache.hpp
   client/src/ecflow/client/ClientEnvironment.hpp
   client/src/ecflow/client/ClientInvoker.hpp
   client/src/ecflow/client/ClientOptions.hpp
   client/src/ecflow/client/Help.hpp
-  client/src/ecflow/client/HelpCatalog.hpp
   client/src/ecflow/client/HostsFile.hpp
   client/src/ecflow/client/Rtt.hpp
   client/src/ecflow/client/UrlCmd.hpp
@@ -255,7 +256,6 @@ set(srcs
   client/src/ecflow/client/ClientEnvironment.cpp
   client/src/ecflow/client/ClientInvoker.cpp
   client/src/ecflow/client/Help.cpp
-  client/src/ecflow/client/HelpCatalog.cpp
   client/src/ecflow/client/HostsFile.cpp
   client/src/ecflow/client/Rtt.cpp
   client/src/ecflow/client/ClientOptions.cpp

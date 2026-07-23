@@ -8,9 +8,9 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "ecflow/client/HelpCatalog.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 
-#include "ecflow/client/generated_client_help.hpp"
+#include "ecflow/base/generated_client_help.hpp"
 
 namespace ecf {
 
@@ -31,6 +31,34 @@ const nlohmann::json* HelpCatalog::find_topic(const std::string& name) {
     return find_by_name(manifest().at("topics"), name);
 }
 
+std::optional<std::string> HelpCatalog::summary_for(const std::string& name) {
+    if (const nlohmann::json* entry = entry_for(name)) {
+        return entry->at("summary").get<std::string>();
+    }
+    return std::nullopt;
+}
+
+std::optional<std::string> HelpCatalog::description_for(const std::string& name) {
+    const nlohmann::json* entry = entry_for(name);
+    if (!entry) {
+        return std::nullopt;
+    }
+
+    std::string text;
+    for (const auto& block : entry->at("description")) {
+        if (!text.empty()) {
+            text += "\n\n";
+        }
+        if (block.is_string()) {
+            text += block.get<std::string>();
+        }
+        else if (block.is_object() && block.contains("verbatim")) {
+            text += block.at("verbatim").get<std::string>();
+        }
+    }
+    return text;
+}
+
 const nlohmann::json* HelpCatalog::find_by_name(const nlohmann::json& array, const std::string& name) {
     for (const auto& entry : array) {
         if (entry.at("name") == name) {
@@ -38,6 +66,13 @@ const nlohmann::json* HelpCatalog::find_by_name(const nlohmann::json& array, con
         }
     }
     return nullptr;
+}
+
+const nlohmann::json* HelpCatalog::entry_for(const std::string& name) {
+    if (const nlohmann::json* command = find_command(name)) {
+        return command;
+    }
+    return find_option(name);
 }
 
 } // namespace ecf

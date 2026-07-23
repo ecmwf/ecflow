@@ -53,13 +53,13 @@ file(WRITE "${OUTPUT}" "/*
  * DO NOT EDIT DIRECTLY.
  */
 
-#ifndef ecflow_client_generated_client_help_HPP
-#define ecflow_client_generated_client_help_HPP
+#ifndef ecflow_base_generated_client_help_HPP
+#define ecflow_base_generated_client_help_HPP
 
 #include <string_view>
 
 inline constexpr std::string_view client_help_json = R\"ecflow_help(
 ${manifest_content})ecflow_help\";
 
-#endif /* ecflow_client_generated_client_help_HPP */
+#endif /* ecflow_base_generated_client_help_HPP */
 ")

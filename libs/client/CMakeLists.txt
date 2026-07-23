@@ -58,7 +58,6 @@ set(test_srcs
   test/TestClientConfigurations.cpp
   test/TestClientEnvironment.cpp
   test/TestClientRetry.cpp
-  test/TestHelpCatalog.cpp
   test/TestHostsFile.cpp
   test/TestInitAddVariables.cpp
   test/TestLifeCycle.cpp
