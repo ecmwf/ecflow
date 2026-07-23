@@ -23,6 +23,28 @@ else()
 endif()
 
 #
+# Validate the ecFlow CLI help manifest
+#
+# This is the single source of ecflow_client CLI help metadata, eventually consumed
+# both by the C++ client (embedded at build time) and by this documentation build.
+# Validation fails fast on an invalid manifest, before Sphinx or the (future)
+# manifest-driven build.py consume it.
+#
+
+add_custom_command(
+  OUTPUT validate_ecflow_client_help_manifest
+  COMMAND
+    ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/client_api/validate_help_manifest.py
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/client_api
+  USES_TERMINAL
+  DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/help.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/help.schema.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/client_api/validate_help_manifest.py
+)
+add_custom_target(ecflow_client_help_validate DEPENDS validate_ecflow_client_help_manifest)
+
+#
 # (Re-)generate ecFlow CLI documentation
 #
 
@@ -54,7 +76,7 @@ add_custom_command(
   USES_TERMINAL
   DEPENDS ecflow_client
 )
-add_custom_target(ecflow_client_docs DEPENDS generate_ecflow_client_docs)
+add_custom_target(ecflow_client_docs DEPENDS generate_ecflow_client_docs ecflow_client_help_validate)
 
 
 #

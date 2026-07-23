@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ecflow.readthedocs.io/schemas/help-manifest.json",
+  "title": "ecflow_client help manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "topics", "commands", "options", "environment_variables"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "topics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/topic" }
+    },
+    "commands": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/command" }
+    },
+    "options": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/option" }
+    },
+    "environment_variables": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/environment_variable" }
+    }
+  },
+  "$defs": {
+    "description_block": {
+      "description": "A paragraph of prose, or a preformatted block reproduced verbatim (e.g. CtsCmd's ASCII-art tables).",
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["verbatim"],
+          "properties": {
+            "verbatim": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "description": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/description_block" }
+    },
+    "argument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "optional", "description"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "optional": { "type": "boolean" },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "visibility", "implementation", "summary", "description", "usage"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": {
+          "description": "Task and user are the only two command kinds; there is no third 'child' category.",
+          "enum": ["task", "user"]
+        },
+        "visibility": {
+          "description": "public: usable standalone; group-only: usable only inside --group (e.g. why, show); internal: never registered in CtsCmdRegistry (e.g. MoveCmd).",
+          "enum": ["public", "group-only", "internal"]
+        },
+        "implementation": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "description": { "$ref": "#/$defs/description" },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/argument" }
+        },
+        "usage": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "summary", "description"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": {
+          "description": "global-option: registered once, applies regardless of command; command-option: registered locally by one command.",
+          "enum": ["global-option", "command-option"]
+        },
+        "command": {
+          "description": "Required, and only meaningful, when kind is command-option: names the single owning command.",
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": { "type": "string", "minLength": 1 },
+        "description": { "$ref": "#/$defs/description" },
+        "requires": {
+          "description": "Build-feature flag gating this option, e.g. ECF_OPENSSL.",
+          "type": "string",
+          "minLength": 1
+        },
+        "pairs_with": {
+          "description": "Name of another option that must be supplied alongside this one; the reference must be symmetric.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "if": {
+        "properties": { "kind": { "const": "command-option" } }
+      },
+      "then": {
+        "required": ["command"]
+      },
+      "else": {
+        "not": { "required": ["command"] }
+      }
+    },
+    "environment_variable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "required", "applies_to", "description"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "type": { "enum": ["string", "int", "any"] },
+        "required": { "enum": ["mandatory", "optional"] },
+        "applies_to": {
+          "description": "both: every command; task: task commands only, in addition to the both entries.",
+          "enum": ["both", "task"]
+        },
+        "requires": {
+          "description": "Build-feature flag gating this variable, e.g. ECF_OPENSSL.",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "topic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "summary"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
