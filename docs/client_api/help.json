@@ -53,6 +53,16 @@
       ]
     },
     {
+      "name": "checkJobGenOnly",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsNodeCmd",
+      "summary": "Test hierarchical Job generation only, for chosen Node.",
+      "description": [
+        "Test hierarchical Job generation only, for chosen Node.\nThe jobs are generated independent of the dependencies\nThis will generate the jobs *only*, i.e. no job submission. Used for checking job generation only\n  arg = node path | arg = NULL\n     If no node path specified generates for all Tasks in the definition. For Test only"
+      ]
+    },
+    {
       "name": "complete",
       "kind": "task",
       "visibility": "public",
@@ -140,6 +150,26 @@
       "description": ["Force dependency evaluation. Used for DEBUG only."]
     },
     {
+      "name": "get",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsNodeCmd",
+      "summary": "Get the suite definition or node tree in form that is re-parse able",
+      "description": [
+        "Get the suite definition or node tree in form that is re-parse able\nGet all suite node tree's from the server and write to standard out.\nThe output is parse-able, and can be used to re-load the definition\n  arg = NULL | arg = node path\nUsage:\n  --get     # gets the definition from the server,and writes to standard out\n  --get=/s1 # gets the suite from the server,and writes to standard out"
+      ]
+    },
+    {
+      "name": "get_state",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsNodeCmd",
+      "summary": "Get state data. For the whole suite definition or individual nodes.",
+      "description": [
+        "Get state data. For the whole suite definition or individual nodes.\nThis will include event, meter, node state, trigger and time state.\nThe output is written to standard out.\n  arg = NULL | arg = node path\nUsage:\n  --get_state     # gets the definition from the server,and writes to standard out\n  --get_state=/s1 # gets the suite from the server,and writes to standard out"
+      ]
+    },
+    {
       "name": "halt",
       "kind": "user",
       "visibility": "public",
@@ -176,6 +206,16 @@
       "usage": [
         "ecflow_client --init=$$",
         "ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
+      ]
+    },
+    {
+      "name": "job_gen",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsNodeCmd",
+      "summary": "Job submission for chosen Node *based* on dependencies.",
+      "description": [
+        "Job submission for chosen Node *based* on dependencies.\nThe server traverses the node tree every 60 seconds, and if the dependencies are free\ndoes job generation and submission. Sometimes the user may free time/date dependencies\nto avoid waiting for the server poll, this commands allows early job generation\n  arg = node path | arg = NULL\n     If no node path specified generates for full definition."
       ]
     },
     {
@@ -236,6 +276,18 @@
         }
       ],
       "usage": ["ecflow_client --meter=my_meter 20"]
+    },
+    {
+      "name": "migrate",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsNodeCmd",
+      "summary": "Used to print state of the definition returned from the server to standard output.",
+      "description": [
+        "Used to print state of the definition returned from the server to standard output.\nThe node state is shown in the comments.\nThis is the format used in the check point file, but with indentation.\nSince this is essentially the defs format with state in the comments,it allows the definition to be migrated to future version of ecflow.\nThe output includes edit history but excludes externs.\nWhen the definition is reloaded *NO* checking is done.",
+        "The following shows a summary of the features associated with each choice:\n                       --get  --get_state  --migrate\nAuto generate externs    Yes    Yes          No\nChecking on reload       Yes    Yes          No\nEdit History             No     No           Yes\nShow trigger AST         No     Yes          No",
+        "Usage:\n    --migrate         # show all suites\n    --migrate=/s1     # show state for suite s1\n"
+      ]
     },
     {
       "name": "news",
