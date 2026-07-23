@@ -53,6 +53,36 @@
       ]
     },
     {
+      "name": "event",
+      "kind": "task",
+      "visibility": "public",
+      "implementation": "EventCmd",
+      "summary": "Change event. For use in the '.ecf' script file *only*",
+      "description": [
+        "Change event. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1(string | int)     = event-name",
+        "  arg2(string)(optional) = [ set | clear] default value is set",
+        "If this task command is a zombie, then the default action will be to *fob*,\ni.e allow the ecflow client command to complete without an error\nThe default can be overridden by using zombie attributes.",
+        "Usage:\n  ecflow_client --event=ev       # set the event, default since event initial value is clear\n  ecflow_client --event=ev set   # set the event, explicit\n  ecflow_client --event=ev clear # clear the event, use when event initial value is set"
+      ],
+      "arguments": [
+        {
+          "name": "event-name",
+          "type": "string | int",
+          "optional": false
+        },
+        {
+          "name": "[ set | clear] default value is set",
+          "type": "string",
+          "optional": true
+        }
+      ],
+      "usage": [
+        "ecflow_client --event=ev       # set the event, default since event initial value is clear",
+        "ecflow_client --event=ev set   # set the event, explicit",
+        "ecflow_client --event=ev clear # clear the event, use when event initial value is set"
+      ]
+    },
+    {
       "name": "init",
       "kind": "task",
       "visibility": "public",
@@ -80,6 +110,55 @@
         "ecflow_client --init=$$",
         "ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
       ]
+    },
+    {
+      "name": "label",
+      "kind": "task",
+      "visibility": "public",
+      "implementation": "LabelCmd",
+      "summary": "Change Label. For use in the '.ecf' script file *only*",
+      "description": [
+        "Change Label. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1 = label-name\n  arg2 = The new label value\n         The labels values can be single or multi-line(space separated quoted strings)",
+        "If this task command is a zombie, then the default action will be to *fob*,\ni.e allow the ecflow client command to complete without an error\nThe default can be overridden by using zombie attributes.",
+        "Usage:\n  ecflow_client --label=progressed merlin"
+      ],
+      "arguments": [
+        {
+          "name": "label-name",
+          "optional": false
+        },
+        {
+          "name": "The new label value",
+          "optional": false,
+          "description": "The labels values can be single or multi-line(space separated quoted strings)"
+        }
+      ],
+      "usage": ["ecflow_client --label=progressed merlin"]
+    },
+    {
+      "name": "meter",
+      "kind": "task",
+      "visibility": "public",
+      "implementation": "MeterCmd",
+      "summary": "Change meter. For use in the '.ecf' script file *only*",
+      "description": [
+        "Change meter. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1(string) = meter-name\n  arg2(int)    = the new meter value",
+        "If this task command is a zombie, then the default action will be to *fob*,\ni.e allow the ecflow client command to complete without an error\nThe default can be overridden by using zombie attributes.",
+        "Usage:\n  ecflow_client --meter=my_meter 20"
+      ],
+      "arguments": [
+        {
+          "name": "meter-name",
+          "type": "string",
+          "optional": false
+        },
+        {
+          "name": "the new meter value",
+          "type": "int",
+          "optional": false
+        }
+      ],
+      "usage": ["ecflow_client --meter=my_meter 20"]
     }
   ],
   "options": [
