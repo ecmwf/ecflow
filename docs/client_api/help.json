@@ -1064,6 +1064,22 @@
       "description": [
         "Enables the display of client environment settings and execution details.\nHas the same effect as setting environment variable ECF_DEBUG_CLIENT."
       ]
+    },
+    {
+      "name": "add",
+      "kind": "command-option",
+      "command": "init",
+      "summary": "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.",
+      "description": [
+        "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command."
+      ]
+    },
+    {
+      "name": "remove",
+      "kind": "command-option",
+      "command": "complete",
+      "summary": "remove variables i.e name name2",
+      "description": ["remove variables i.e name name2"]
     }
   ],
   "environment_variables": [
