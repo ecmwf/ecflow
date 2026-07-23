@@ -97,6 +97,16 @@ public:
     ///
     static std::optional<std::string> description_for(const std::string& name);
 
+    ///
+    /// @brief Placeholder text for a command or option with no manifest entry.
+    ///
+    /// Rendered in place of a description whenever @ref summary_for or
+    /// @ref description_for returns std::nullopt, instead of falling back to a
+    /// second, independent copy of the text (e.g. a C++ literal that could drift
+    /// from the manifest).
+    ///
+    static const std::string not_provided;
+
 private:
     static const nlohmann::json* find_by_name(const nlohmann::json& array, const std::string& name);
     static const nlohmann::json* entry_for(const std::string& name);

@@ -112,7 +112,7 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             throw std::runtime_error(
                 MESSAGE("QueryCmd: no attribute specified: query type: "
                         << query_type << " path+attribute: " << path_and_name << "\n"
-                        << HelpCatalog::description_for("query").value_or("Description not provided for this option")));
+                        << HelpCatalog::description_for("query").value_or(HelpCatalog::not_provided)));
         }
     }
     else if (query_type == "trigger") {
@@ -128,7 +128,7 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         if (attribute.empty()) {
             throw std::runtime_error(
                 MESSAGE("QueryCmd: no attribute specified: query type: trigger\n"
-                        << HelpCatalog::description_for("query").value_or("Description not provided for this option")));
+                        << HelpCatalog::description_for("query").value_or(HelpCatalog::not_provided)));
         }
     }
     else if (query_type == "state" || query_type == "dstate") {

@@ -229,14 +229,13 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem* item, bool showFull
         );
 
     if (od) {
-        std::string summary =
-            ecf::HelpCatalog::summary_for(od->long_name()).value_or("Description not provided for this option");
-        QString text = qCommand + QString(": ");
+        std::string summary = ecf::HelpCatalog::summary_for(od->long_name()).value_or(ecf::HelpCatalog::not_provided);
+        QString text        = qCommand + QString(": ");
         commandHelpLabel_->setText(text + QString::fromStdString(summary));
 
         if (showFullHelp) {
             std::string description =
-                ecf::HelpCatalog::description_for(od->long_name()).value_or("Description not provided for this option");
+                ecf::HelpCatalog::description_for(od->long_name()).value_or(ecf::HelpCatalog::not_provided);
             commandManPage_->setText(qCommand + "\n\n" + QString::fromStdString(description));
         }
     }

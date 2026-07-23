@@ -352,9 +352,9 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     }
 
     if (args.size() < 2) {
-        throw std::runtime_error(MESSAGE(
-            "EditScriptCmd:At least 2 arguments required:\n"
-            << HelpCatalog::description_for("edit_script").value_or("Description not provided for this option")));
+        throw std::runtime_error(
+            MESSAGE("EditScriptCmd:At least 2 arguments required:\n"
+                    << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided)));
     }
 
     std::string path_to_task          = args[0];
@@ -398,7 +398,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
             }
             ss << edit_types[i];
         }
-        ss << "]\n" << HelpCatalog::description_for("edit_script").value_or("Description not provided for this option");
+        ss << "]\n" << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided);
         throw std::runtime_error(ss.str());
     }
 
@@ -408,9 +408,9 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
             return;
         }
         else {
-            throw std::runtime_error(MESSAGE(
-                "When two arguments specified, the second argument must be one of [ edit | pre_process ]\n"
-                << HelpCatalog::description_for("edit_script").value_or("Description not provided for this option")));
+            throw std::runtime_error(
+                MESSAGE("When two arguments specified, the second argument must be one of [ edit | pre_process ]\n"
+                        << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided)));
         }
     }
 
@@ -425,9 +425,9 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
         }
     }
     if ((create_alias || !run_alias) && edit_type != EditScriptCmd::SUBMIT_USER_FILE) {
-        throw std::runtime_error(MESSAGE(
-            "The create_alias option is only valid when the second argument is 'submit_file' \n"
-            << HelpCatalog::description_for("edit_script").value_or("Description not provided for this option")));
+        throw std::runtime_error(
+            MESSAGE("The create_alias option is only valid when the second argument is 'submit_file' \n"
+                    << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided)));
     }
 
     if (args.size() >= 3 && args.size() <= 5) {
@@ -471,7 +471,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
 
     throw std::runtime_error(
         MESSAGE("Wrong number of arguments specified\n"
-                << HelpCatalog::description_for("edit_script").value_or("Description not provided for this option")));
+                << HelpCatalog::description_for("edit_script").value_or(HelpCatalog::not_provided)));
 }
 
 std::ostream& operator<<(std::ostream& os, const EditScriptCmd& c) {

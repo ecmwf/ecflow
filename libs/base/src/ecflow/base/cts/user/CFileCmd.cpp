@@ -356,10 +356,10 @@ void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     }
 
     if (args.size() < 1) {
-        throw std::runtime_error(MESSAGE(
-            "CFileCmd: At least one arguments expected for File. Found "
-            << args.size() << "\n"
-            << HelpCatalog::description_for("file").value_or("Description not provided for this option") << "\n"));
+        throw std::runtime_error(MESSAGE("CFileCmd: At least one arguments expected for File. Found "
+                                         << args.size() << "\n"
+                                         << HelpCatalog::description_for("file").value_or(HelpCatalog::not_provided)
+                                         << "\n"));
     }
 
     std::string pathToNode = args[0];

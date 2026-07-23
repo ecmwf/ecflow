@@ -299,9 +299,8 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
         return;
     }
 
-    throw std::runtime_error(
-        MESSAGE("LogCmd: The arguments have not been specified correctly\n"
-                << HelpCatalog::description_for("log").value_or("Description not provided for this option")));
+    throw std::runtime_error(MESSAGE("LogCmd: The arguments have not been specified correctly\n"
+                                     << HelpCatalog::description_for("log").value_or(HelpCatalog::not_provided)));
 }
 
 std::ostream& operator<<(std::ostream& os, const LogCmd& c) {

@@ -144,13 +144,12 @@ static int parse_check_pt_interval(const std::string& the_arg) {
         throw std::runtime_error(
             MESSAGE("check_pt: Illegal argument("
                     << the_arg << "), expected [ never | on_time | on_time:<integer> | always | <integer>]\n"
-                    << HelpCatalog::description_for("check_pt").value_or("Description not provided for this option")));
+                    << HelpCatalog::description_for("check_pt").value_or(HelpCatalog::not_provided)));
     }
     if (check_pt_interval <= 0) {
-        throw std::runtime_error(
-            MESSAGE("check_pt: interval("
-                    << check_pt_interval << ") must be greater than zero :\n"
-                    << HelpCatalog::description_for("check_pt").value_or("Description not provided for this option")));
+        throw std::runtime_error(MESSAGE(
+            "check_pt: interval(" << check_pt_interval << ") must be greater than zero :\n"
+                                  << HelpCatalog::description_for("check_pt").value_or(HelpCatalog::not_provided)));
     }
     return check_pt_interval;
 }
@@ -166,13 +165,12 @@ static int parse_check_pt_alarm_time(const std::string& the_arg, int colon_pos) 
         throw std::runtime_error(MESSAGE(
             "check_pt: Illegal argument("
             << the_arg << "), expected [ never | on_time | on_time:<integer> | alarm::integer> | always | <integer>]\n"
-            << HelpCatalog::description_for("check_pt").value_or("Description not provided for this option")));
+            << HelpCatalog::description_for("check_pt").value_or(HelpCatalog::not_provided)));
     }
     if (check_pt_alarm_time <= 0) {
-        throw std::runtime_error(
-            MESSAGE("check_pt: alarm time("
-                    << check_pt_alarm_time << ") must be greater than zero :\n"
-                    << HelpCatalog::description_for("check_pt").value_or("Description not provided for this option")));
+        throw std::runtime_error(MESSAGE(
+            "check_pt: alarm time(" << check_pt_alarm_time << ") must be greater than zero :\n"
+                                    << HelpCatalog::description_for("check_pt").value_or(HelpCatalog::not_provided)));
     }
     return check_pt_alarm_time;
 }
@@ -217,8 +215,7 @@ void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
                         "check_pt: Illegal argument("
                         << the_arg
                         << "), expected [ never | on_time | on_time:<integer> | alarm:<integer> | always | <integer>]\n"
-                        << HelpCatalog::description_for("check_pt")
-                               .value_or("Description not provided for this option")));
+                        << HelpCatalog::description_for("check_pt").value_or(HelpCatalog::not_provided)));
                 }
                 check_pt_interval = parse_check_pt_interval(interval);
             }

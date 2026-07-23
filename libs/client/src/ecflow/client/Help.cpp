@@ -378,7 +378,7 @@ void Documentation::show_summary(std::ostream& os, PREDICATE select) const {
             first_line = *summary;
         }
         else {
-            first_line = "Description not provided for this option";
+            first_line = ecf::HelpCatalog::not_provided;
         }
 
         os << "  " << std::left << std::setw(max_width) << name << " ";
@@ -427,7 +427,7 @@ void Documentation::show_command_help(std::ostream& os, const std::string& comma
             os << *text << "\n\n";
         }
         else {
-            os << "Description not provided for this option" << "\n\n";
+            os << ecf::HelpCatalog::not_provided << "\n\n";
         }
         if (!CommandFilter::is_option(od->long_name())) {
             os << client_env_description;
