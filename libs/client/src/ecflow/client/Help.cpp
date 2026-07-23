@@ -51,120 +51,31 @@ private:
         known_options{"add", "debug", "host", "password", "port", "rid", "ssl", "user", "http", "https"};
 };
 
-struct EnvironmentOptionDocs
-{
-    std::string kind; // "option", "task", "both"
-    std::string name;
-    std::string type;
-    std::string required;
-    std::string description;
-};
-
-std::vector<EnvironmentOptionDocs> known_env_options = {
-    // clang-format off
-    {
-        "both",
-        "ECF_HOST",
-        "string",
-        "mandatory*",
-        "The main server hostname; default value is 'localhost'"
-    },
-    {
-        "both",
-        "ECF_PORT",
-        "int",
-        "mandatory*",
-        "The main server port; default value is '3141'"
-    },
-#ifdef ECF_OPENSSL
-    {
-        "both",
-        "ECF_SSL",
-        "any",
-        "optional*",
-        "Enable secure communication between client and server."
-    },
-#endif
-    {
-        "both",
-        "ECF_HOSTFILE",
-        "string",
-        "optional",
-        "File that lists alternate hosts to try, if connection to main host fails"
-    },
-    {
-        "both",
-        "ECF_HOSTFILE_POLICY",
-        "string",
-        "optional",
-        "The policy ('task' or 'all') to define which commands consider using alternate hosts."
-    },
-    {
-        "task",
-        "ECF_NAME",
-        "string",
-        "mandatory", "Full path name to the task"
-    },
-    {
-        "task",
-        "ECF_PASS",
-        "string",
-        "mandatory",
-        "The job password (defined by the server, and used to authenticate client requests)"
-    },
-    {
-        "task",
-        "ECF_TRYNO",
-        "int",
-        "mandatory",
-        "The run number of the job (defined by the server, and used in job/output file name generation."
-    },
-    {
-        "task",
-        "ECF_RID",
-        "string",
-        "mandatory",
-        "The process identifier. Supports identifying zombies and automated killing of running jobs"
-    },
-    {
-        "task",
-        "ECF_TIMEOUT",
-        "int",
-        "optional",
-        "Maximum time in *seconds* for client to deliver message to main server; default is 24 hours"
-    },
-    {
-        "task",
-        "ECF_DENIED",
-        "any",
-        "optional",
-        "Allows task to exit with an error, upon connection failure, thus avoids ECF_TIMEOUTs wait."
-    },
-    {
-        "task",
-        "NO_ECF",
-        "any",
-        "optional",
-        "If set, ecflow_client exits immediately with success; useful to test the scripts without a server"
+std::string format_env_var(const nlohmann::json& var) {
+    std::string required = var.at("required").get<std::string>();
+    if (var.contains("overridable_by")) {
+        required += "*";
     }
-    // clang-format on
-};
 
-auto make_client_env_description() -> auto {
+    std::string line = "  ";
+    line += var.at("name").get<std::string>();
+    line += " <";
+    line += var.at("type").get<std::string>();
+    line += "> [";
+    line += required;
+    line += "]\n    ";
+    line += var.at("description").get<std::string>();
+    line += "\n";
+    return line;
+}
+
+std::string make_client_env_description() {
     std::string help;
     help += "The client considers, for both user and child commands, the following environment variables:\n\n";
 
-    for (const auto& o : known_env_options) {
-        if (o.kind == "both") {
-            help += "  ";
-            help += o.name;
-            help += " <";
-            help += o.type;
-            help += "> [";
-            help += o.required;
-            help += "]\n    ";
-            help += o.description;
-            help += "\n";
+    for (const auto& var : ecf::HelpCatalog::manifest().at("environment_variables")) {
+        if (var.at("applies_to").get<std::string>() == "both") {
+            help += format_env_var(var);
         }
     }
 
@@ -175,21 +86,13 @@ auto make_client_env_description() -> auto {
     return help;
 }
 
-auto make_task_env_description() -> auto {
+std::string make_task_env_description() {
     std::string help;
     help += "The following environment variables are used specifically by child commands:\n\n";
 
-    for (const auto& o : known_env_options) {
-        if (o.kind == "task") {
-            help += "  ";
-            help += o.name;
-            help += " <";
-            help += o.type;
-            help += "> [";
-            help += o.required;
-            help += "]\n    ";
-            help += o.description;
-            help += "\n";
+    for (const auto& var : ecf::HelpCatalog::manifest().at("environment_variables")) {
+        if (var.at("applies_to").get<std::string>() == "task") {
+            help += format_env_var(var);
         }
     }
 
@@ -198,9 +101,18 @@ auto make_task_env_description() -> auto {
     return help;
 }
 
-std::string client_env_description = make_client_env_description();
+// Lazily built and cached, matching HelpCatalog::manifest()'s own lazy parse: ecflow_client is
+// invoked by a task potentially thousands of times over a suite run, and only a small fraction
+// of those invocations ever request help, so this must not force a JSON parse on every one.
+const std::string& client_env_description() {
+    static const std::string instance = make_client_env_description();
+    return instance;
+}
 
-std::string client_task_env_description = make_task_env_description();
+const std::string& client_task_env_description() {
+    static const std::string instance = make_task_env_description();
+    return instance;
+}
 
 int get_options_max_width(const Help::descriptions_t& options) {
     size_t vec_size  = options.size();
@@ -430,10 +342,10 @@ void Documentation::show_command_help(std::ostream& os, const std::string& comma
             os << ecf::HelpCatalog::not_provided << "\n\n";
         }
         if (!CommandFilter::is_option(od->long_name())) {
-            os << client_env_description;
+            os << client_env_description();
             if (ecf::Child::valid_child_cmd(od->long_name())) {
                 os << "\n";
-                os << client_task_env_description;
+                os << client_task_env_description();
             }
         }
     }
