@@ -360,6 +360,16 @@
       ]
     },
     {
+      "name": "group",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "GroupCTSCmd",
+      "summary": "Allows a series of ';' separated commands to be grouped and executed as one.",
+      "description": [
+        "Allows a series of ';' separated commands to be grouped and executed as one.\nSome commands like halt, shutdown and terminate will prompt the user. To bypass the prompt\nprovide 'yes' as an additional parameter. See example below.\n  arg = string\nUsage:\n   --group=\"halt=yes; reloadwsfile; restart;\"\n                                 # halt server,bypass the confirmation prompt,\n                                 # reload white list file, restart server\n   --group=\"get; show\"           # get server defs, and write to standard output\n   --group=\"get=/s1; show state\" # get suite 's1', and write state to standard output"
+      ]
+    },
+    {
       "name": "halt",
       "kind": "user",
       "visibility": "public",
