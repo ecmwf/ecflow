@@ -165,25 +165,25 @@ void RunNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
     if (paths.empty()) {
-        throw std::runtime_error(
-            MESSAGE("RunNodeCmd: No paths specified. Paths must begin with a leading '/' character\n"
-                    << HelpCatalog::description_for("run").value_or(RunNodeCmd::desc()) << "\n"));
+        throw std::runtime_error(MESSAGE(
+            "RunNodeCmd: No paths specified. Paths must begin with a leading '/' character\n"
+            << HelpCatalog::description_for("run").value_or("Description not provided for this option") << "\n"));
     }
 
     bool force = false;
     if (!options.empty()) {
         if (options.size() != 1) {
-            throw std::runtime_error(MESSAGE("RunNodeCmd: Invalid arguments. Expected a single optional 'force'\n"
-                                             << HelpCatalog::description_for("run").value_or(RunNodeCmd::desc())
-                                             << "\n"));
+            throw std::runtime_error(MESSAGE(
+                "RunNodeCmd: Invalid arguments. Expected a single optional 'force'\n"
+                << HelpCatalog::description_for("run").value_or("Description not provided for this option") << "\n"));
         }
         if (options[0].find("force") != std::string::npos) {
             force = true;
         }
         else {
-            throw std::runtime_error(MESSAGE("RunNodeCmd: Expected force <path(s)>\n"
-                                             << HelpCatalog::description_for("run").value_or(RunNodeCmd::desc())
-                                             << "\n"));
+            throw std::runtime_error(MESSAGE(
+                "RunNodeCmd: Expected force <path(s)>\n"
+                << HelpCatalog::description_for("run").value_or("Description not provided for this option") << "\n"));
         }
     }
     cmd = std::make_shared<RunNodeCmd>(paths, force);

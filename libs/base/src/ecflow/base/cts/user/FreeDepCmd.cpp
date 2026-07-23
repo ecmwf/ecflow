@@ -146,18 +146,18 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     }
 
     if (args.size() < 1) {
-        throw std::runtime_error(MESSAGE("FreeDepCmd: At least one arguments expected for Free dependencies. Found "
-                                         << args.size() << "\n"
-                                         << HelpCatalog::description_for("free-dep").value_or(FreeDepCmd::desc())
-                                         << "\n"));
+        throw std::runtime_error(MESSAGE(
+            "FreeDepCmd: At least one arguments expected for Free dependencies. Found "
+            << args.size() << "\n"
+            << HelpCatalog::description_for("free-dep").value_or("Description not provided for this option") << "\n"));
     }
 
     std::vector<std::string> options, paths;
     split_args_to_options_and_paths(args, options, paths); // relative order is still preserved
     if (paths.empty()) {
-        throw std::runtime_error(
-            MESSAGE("FreeDepCmd: No paths specified. Paths must begin with a leading '/' character\n"
-                    << HelpCatalog::description_for("free-dep").value_or(FreeDepCmd::desc()) << "\n"));
+        throw std::runtime_error(MESSAGE(
+            "FreeDepCmd: No paths specified. Paths must begin with a leading '/' character\n"
+            << HelpCatalog::description_for("free-dep").value_or("Description not provided for this option") << "\n"));
     }
 
     bool trigger    = options.empty(); // If no options default to freeing trigger dependencies
@@ -179,10 +179,11 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
             time = true;
         }
         else {
-            throw std::runtime_error(MESSAGE("FreeDepCmd: Invalid argument("
-                                             << options[i] << ")\n"
-                                             << HelpCatalog::description_for("free-dep").value_or(FreeDepCmd::desc())
-                                             << "\n"));
+            throw std::runtime_error(
+                MESSAGE("FreeDepCmd: Invalid argument("
+                        << options[i] << ")\n"
+                        << HelpCatalog::description_for("free-dep").value_or("Description not provided for this option")
+                        << "\n"));
         }
     }
     assert(trigger || all || date || time); // at least one must be true

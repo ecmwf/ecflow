@@ -46,7 +46,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
     if (defs_filename_.empty()) {
         throw std::runtime_error(
             MESSAGE("LoadDefsCmd::LoadDefsCmd: The pathname to the definition file must be provided\n"
-                    << HelpCatalog::description_for("load").value_or(LoadDefsCmd::desc())));
+                    << HelpCatalog::description_for("load").value_or("Description not provided for this option")));
     }
 
     defs_ptr defs = Defs::create();

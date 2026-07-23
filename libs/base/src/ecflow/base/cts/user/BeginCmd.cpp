@@ -182,10 +182,10 @@ void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             force = true;
         }
         else {
-            throw std::runtime_error(MESSAGE("BeginCmd: Expect zero, one or 2 arguments, but found "
-                                             << lineTokens.size() << " arguments\n"
-                                             << HelpCatalog::description_for("begin").value_or(BeginCmd::desc())
-                                             << "\n"));
+            throw std::runtime_error(MESSAGE(
+                "BeginCmd: Expect zero, one or 2 arguments, but found "
+                << lineTokens.size() << " arguments\n"
+                << HelpCatalog::description_for("begin").value_or("Description not provided for this option") << "\n"));
         }
     }
 

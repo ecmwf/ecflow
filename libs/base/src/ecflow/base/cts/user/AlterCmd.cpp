@@ -811,7 +811,8 @@ AlterCmd::Add_attr_type AlterCmd::get_add_attr_type(const std::string& attr_type
             }
             ss << valid[i];
         }
-        ss << "] but found " << attr_type << "\n" << HelpCatalog::description_for("alter").value_or(AlterCmd::desc());
+        ss << "] but found " << attr_type << "\n"
+           << HelpCatalog::description_for("alter").value_or("Description not provided for this option");
         throw std::runtime_error(ss.str());
     }
     return theAttrType;
@@ -1064,7 +1065,8 @@ AlterCmd::Delete_attr_type AlterCmd::get_delete_attr_type(const std::string& att
             }
             ss << valid[i];
         }
-        ss << "] but found " << attr_type << "\n" << HelpCatalog::description_for("alter").value_or(AlterCmd::desc());
+        ss << "] but found " << attr_type << "\n"
+           << HelpCatalog::description_for("alter").value_or("Description not provided for this option");
         throw std::runtime_error(ss.str());
     }
     return theAttrType;
@@ -1295,7 +1297,7 @@ AlterCmd::Change_attr_type AlterCmd::get_change_attr_type(const std::string& att
             }
             ss << valid[i];
         }
-        ss << "]\n" << HelpCatalog::description_for("alter").value_or(AlterCmd::desc());
+        ss << "]\n" << HelpCatalog::description_for("alter").value_or("Description not provided for this option");
         throw std::runtime_error(ss.str());
     }
     return theAttrType;
@@ -1761,7 +1763,7 @@ ecf::Flag::Type AlterCmd::get_flag_type(const std::string& flag_type) const {
             }
             ss << valid[i];
         }
-        ss << "]\n" << HelpCatalog::description_for("alter").value_or(AlterCmd::desc());
+        ss << "]\n" << HelpCatalog::description_for("alter").value_or("Description not provided for this option");
         throw std::runtime_error(ss.str());
     }
     return theFlagType;
@@ -1791,7 +1793,8 @@ void AlterCmd::check_sort_attr_type(const std::string& attr_type) const {
             }
             ss << valid[i];
         }
-        ss << "] but found " << attr_type << "\n" << HelpCatalog::description_for("alter").value_or(AlterCmd::desc());
+        ss << "] but found " << attr_type << "\n"
+           << HelpCatalog::description_for("alter").value_or("Description not provided for this option");
         throw std::runtime_error(ss.str());
     }
 }
@@ -1814,9 +1817,10 @@ void AlterCmd::create_sort_attributes(Cmd_ptr& cmd,
     std::string value;
     if (options.size() == 3) {
         if (options[2] != "recursive") {
-            throw std::runtime_error(MESSAGE("AlterCmd: sort: Expected third argument to be 'recursive' but found '"
-                                             << options[2] << "\n"
-                                             << HelpCatalog::description_for("alter").value_or(AlterCmd::desc())));
+            throw std::runtime_error(
+                MESSAGE("AlterCmd: sort: Expected third argument to be 'recursive' but found '"
+                        << options[2] << "\n"
+                        << HelpCatalog::description_for("alter").value_or("Description not provided for this option")));
         }
         value = "recursive";
     }

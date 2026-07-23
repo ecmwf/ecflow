@@ -304,9 +304,10 @@ void PlugCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
     }
 
     if (args.size() != 2) {
-        throw std::runtime_error(MESSAGE("PlugCmd: Two arguments are expected, found "
-                                         << args.size() << "\n"
-                                         << HelpCatalog::description_for("plug").value_or(PlugCmd::desc()) << "\n"));
+        throw std::runtime_error(MESSAGE(
+            "PlugCmd: Two arguments are expected, found "
+            << args.size() << "\n"
+            << HelpCatalog::description_for("plug").value_or("Description not provided for this option") << "\n"));
     }
 
     std::string sourceNode = args[0];
