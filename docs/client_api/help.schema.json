@@ -29,18 +29,9 @@
   },
   "$defs": {
     "description_block": {
-      "description": "A paragraph of prose, or a preformatted block reproduced verbatim (e.g. CtsCmd's ASCII-art tables).",
-      "oneOf": [
-        { "type": "string", "minLength": 1 },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["verbatim"],
-          "properties": {
-            "verbatim": { "type": "string", "minLength": 1 }
-          }
-        }
-      ]
+      "description": "A paragraph of prose. Joined with the next block by a blank line; this reproduces preformatted content (e.g. CtsCmd's ASCII-art tables) byte-for-byte too, since any blank lines within such a block round-trip through the same join, without needing a distinct verbatim representation.",
+      "type": "string",
+      "minLength": 1
     },
     "description": {
       "type": "array",

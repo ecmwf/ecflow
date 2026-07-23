@@ -89,9 +89,7 @@ public:
     /// Checks commands first, then options, matching @ref find_command and
     /// @ref find_option order. The entry's "description" blocks are joined the
     /// same way the paragraphs were originally separated in the C++ source: a
-    /// blank line between blocks. A verbatim block (e.g. CtsCmd's ASCII-art
-    /// tables) is reproduced as-is, without a paragraph-break interpretation of
-    /// its own embedded newlines.
+    /// blank line between blocks. This reproduces preformatted content as is.
     ///
     /// @param name Exact command or option name to look up, e.g. "abort".
     /// @return The reconstructed description text, or std::nullopt if @p name

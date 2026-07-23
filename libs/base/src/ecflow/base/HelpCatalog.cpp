@@ -49,12 +49,7 @@ std::optional<std::string> HelpCatalog::description_for(const std::string& name)
         if (!text.empty()) {
             text += "\n\n";
         }
-        if (block.is_string()) {
-            text += block.get<std::string>();
-        }
-        else if (block.is_object() && block.contains("verbatim")) {
-            text += block.at("verbatim").get<std::string>();
-        }
+        text += block.get<std::string>();
     }
     return text;
 }
