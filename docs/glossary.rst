@@ -135,44 +135,7 @@ Glossary
       .. code-block:: shell
 
          ecflow_client --load=<check_point_file> print check_only
-      
-   child command
-      Child (or Task) commands are called from within the :term:`ecf script` files. The table also includes the default action (from version 4.0.4) if the child command is part of a zombie. 'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
 
-      .. list-table:: 
-         :header-rows: 1
-         
-         * - Child (or Task) Command
-           - Description
-           - Zombie (default action)
-         * - :ref:`ecflow_client --init <init_cli>`
-           - Sets the :term:`task` to the :term:`active` :term:`status`
-           - block
-         * - :ref:`ecflow_client --wait <wait_cli>`
-           - Wait for a expression to evaluate
-           - block
-         * - :ref:`ecflow_client --queue <queue_cli>`
-           - Update :term:`queue` step in server
-           - block
-         * - :ref:`ecflow_client --abort <abort_cli>`
-           - Sets the :term:`task` to the :term:`aborted` :term:`status`
-           - block
-         * - :ref:`ecflow_client --complete <complete_cli>`
-           - Sets the :term:`task` to the :term:`complete` :term:`status`
-           - block 
-         * - :ref:`ecflow_client --event <event_cli>`
-           - Set an :term:`event`
-           - fob
-         * - :ref:`ecflow_client --meter <meter_cli>`
-           - Change a :term:`meter`
-           - fob
-         * - :ref:`ecflow_client --label <label_cli>`
-           - Change a :term:`label`
-           - fob
-
-      The following environment variables must be set for the child commands. ECF_HOST, :term:`ECF_NAME` , :term:`ECF_PASS` and ECF_RID. See :term:`ecflow_client`.
-       
-      
    clock
       A clock is an attribute of a :term:`suite`. 
       
@@ -2003,7 +1966,45 @@ Glossary
            - :py:class:`ecflow.Task`
          * - :ref:`grammar`
            - :token:`task`
-            
+
+   task command
+      Task commands (sometimes called Child commands) are executed within the :term:`ecf script` files.
+      The table also includes the default action (from version 4.0.4) if the task command is part of a zombie.
+      'block' means the job will be held by the :term:`ecflow_client` command. Until time out, or manual/automatic intervention.
+
+      .. list-table::
+         :header-rows: 1
+
+         * - Task Command
+           - Description
+           - Zombie (default action)
+         * - :ref:`ecflow_client --init <init_cli>`
+           - Sets the :term:`task` to the :term:`active` :term:`status`
+           - block
+         * - :ref:`ecflow_client --wait <wait_cli>`
+           - Wait for a expression to evaluate
+           - block
+         * - :ref:`ecflow_client --queue <queue_cli>`
+           - Update :term:`queue` step in server
+           - block
+         * - :ref:`ecflow_client --abort <abort_cli>`
+           - Sets the :term:`task` to the :term:`aborted` :term:`status`
+           - block
+         * - :ref:`ecflow_client --complete <complete_cli>`
+           - Sets the :term:`task` to the :term:`complete` :term:`status`
+           - block
+         * - :ref:`ecflow_client --event <event_cli>`
+           - Set an :term:`event`
+           - fob
+         * - :ref:`ecflow_client --meter <meter_cli>`
+           - Change a :term:`meter`
+           - fob
+         * - :ref:`ecflow_client --label <label_cli>`
+           - Change a :term:`label`
+           - fob
+
+      The following environment variables must be set for the task commands. ECF_HOST, :term:`ECF_NAME` , :term:`ECF_PASS` and ECF_RID. See :term:`ecflow_client`.
+
    time
       This defines a time dependency for a node. 
       

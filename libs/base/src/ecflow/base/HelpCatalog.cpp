@@ -14,7 +14,7 @@
 
 namespace ecf {
 
-const std::string HelpCatalog::not_provided = "Description not provided for this option";
+const std::string HelpCatalog::not_provided = "No description available";
 
 const nlohmann::json& HelpCatalog::manifest() {
     static const nlohmann::json instance = nlohmann::json::parse(client_help_json);
