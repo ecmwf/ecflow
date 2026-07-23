@@ -15,6 +15,7 @@
 #include "CustomCommandHandler.hpp"
 #include "NodeExpression.hpp"
 #include "NodeQueryResult.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Str.hpp"
 
@@ -228,16 +229,15 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem* item, bool showFull
         );
 
     if (od) {
-        // get the description, but only take the first line
-        std::vector<std::string> lines;
-        ecf::algorithm::split_at(lines, od->description(), "\n");
-        if (!lines.empty()) {
-            QString text = qCommand + QString(": ");
-            commandHelpLabel_->setText(text + QString::fromStdString(lines[0]));
-        }
+        std::string summary =
+            ecf::HelpCatalog::summary_for(od->long_name()).value_or("Description not provided for this option");
+        QString text = qCommand + QString(": ");
+        commandHelpLabel_->setText(text + QString::fromStdString(summary));
 
         if (showFullHelp) {
-            commandManPage_->setText(qCommand + "\n\n" + QString::fromStdString(od->description()));
+            std::string description =
+                ecf::HelpCatalog::description_for(od->long_name()).value_or("Description not provided for this option");
+            commandManPage_->setText(qCommand + "\n\n" + QString::fromStdString(description));
         }
     }
     else {

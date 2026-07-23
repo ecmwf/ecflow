@@ -378,12 +378,7 @@ void Documentation::show_summary(std::ostream& os, PREDICATE select) const {
             first_line = *summary;
         }
         else {
-            std::vector<std::string> lines;
-            ecf::algorithm::split_at(lines, option->description(), "\n");
-            if (lines.empty()) {
-                continue;
-            }
-            first_line = lines[0];
+            first_line = "Description not provided for this option";
         }
 
         os << "  " << std::left << std::setw(max_width) << name << " ";
@@ -432,7 +427,7 @@ void Documentation::show_command_help(std::ostream& os, const std::string& comma
             os << *text << "\n\n";
         }
         else {
-            os << od->description() << "\n\n";
+            os << "Description not provided for this option" << "\n\n";
         }
         if (!CommandFilter::is_option(od->long_name())) {
             os << client_env_description;
