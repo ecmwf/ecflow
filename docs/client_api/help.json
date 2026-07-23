@@ -76,6 +76,22 @@
       ]
     },
     {
+      "name": "debug_server_off",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Disables debug output from the server",
+      "description": ["Disables debug output from the server"]
+    },
+    {
+      "name": "debug_server_on",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Enables debug output from the server",
+      "description": ["Enables debug output from the server"]
+    },
+    {
       "name": "edit_history",
       "kind": "user",
       "visibility": "public",
@@ -113,6 +129,24 @@
         "ecflow_client --event=ev       # set the event, default since event initial value is clear",
         "ecflow_client --event=ev set   # set the event, explicit",
         "ecflow_client --event=ev clear # clear the event, use when event initial value is set"
+      ]
+    },
+    {
+      "name": "force-dep-eval",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Force dependency evaluation. Used for DEBUG only.",
+      "description": ["Force dependency evaluation. Used for DEBUG only."]
+    },
+    {
+      "name": "halt",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Stop server communication with jobs, and new job scheduling.",
+      "description": [
+        "Stop server communication with jobs, and new job scheduling.\nAlso stops automatic check pointing\n  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.\n  --halt=yes\nThe following table shows server behaviour in the different states.\n|----------------------------------------------------------------------------------|\n| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n|--------------|--------------|--------------|---------------|---------------------|\n|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n|      HALTED  |    yes       |      no      |      no       |      no             |\n|--------------|--------------|--------------|---------------|---------------------|"
       ]
     },
     {
@@ -214,6 +248,16 @@
       ]
     },
     {
+      "name": "ping",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Check if server is running on given host/port. Result reported to standard output.",
+      "description": [
+        "Check if server is running on given host/port. Result reported to standard output.\nUsage:\n  --ping --host=mach --port=3144  # Check if server alive on host mach & port 3144\n  --ping --host=fred              # Check if server alive on host fred and port ECF_PORT,\n                                  # otherwise default port of 3141\n  --ping                          # Check if server alive by using environment variables\n                                  # ECF_HOST and ECF_PORT\nIf ECF_HOST not defined uses 'localhost', if ECF_PORT not defined assumes 3141"
+      ]
+    },
+    {
       "name": "queue",
       "kind": "task",
       "visibility": "public",
@@ -255,13 +299,77 @@
       ]
     },
     {
-      "name": "resume",
+      "name": "reloadcustompasswdfile",
       "kind": "user",
       "visibility": "public",
-      "implementation": "PathsCmd",
-      "summary": "Resume the given node. This allows job generation for the given node, or any child node.",
+      "implementation": "CtsCmd",
+      "summary": "Reload the server custom password file.",
       "description": [
-        "Resume the given node. This allows job generation for the given node, or any child node.\nUsage::\n   --resume=/s1/f1/t1   # resume task s1/f1/t1\n   --resume=/s1 /s2     # resume suites /s1 and /s2\n"
+        "Reload the server custom password file.",
+        "The custom password file (authentication) is used by the server to authenticate a 'user' by\nverifying if the password provided by the user matches the one held by the server. This\nparticular file is used for authentication of users that explicitly specify the user name\n(either via the environment variable ECF_USER or the --user option).",
+        "This mechanism should be used when most users use the machine login name, but a few users\nspecify their own user name, in which case the password must also be explicitly provided.",
+        "The file path is specified as the ECF_CUSTOM_PASSWD environment variable, both for the\nclient and server, and is loaded only by the server on *startup*. This means that the file\ncontents can be updated (i.e., add/remove users), but the file location cannot change during\nthe server execution.",
+        "The server automatically loads the password file content as part of the startup procedure.",
+        "The ECF_CUSTOM_PASSWD environment variable is used to specify the password file location,\nconsidering that\n - On the server the default file name is <host>.<port>.ecf.custom_passwd\n - On the client the default file name is ecf.custom_passwd",
+        "The format of the file is same for client and server:",
+        "\n4.5.0\n# comment\n<user> <host> <port> <passwd> # comment",
+        "The following is an example",
+        "4.5.0 # the version\nfred machine1 3142 xxyyyd\nfred machine2 3133 xxyyyd # comment\nbill machine2 3133 xxyggyyd",
+        "Notice that the same user may appear multiple times (associated with different host/port).\nThis allows the client to use the same password file to contact multiple servers.",
+        "For the password authentication to work, ensure the following:\n - The password is defined for the client and server\n - On the server, add at least the server administrator to the password file\n   Note: If an empty password file (i.e., containing just the version) is used,\n         no user is allowed access.\n - On the client, the password file should be readable only by the 'user' itself",
+        "Usage:\n --reloadcustompasswdfile"
+      ]
+    },
+    {
+      "name": "reloadpasswdfile",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Reload the server password file.",
+      "description": [
+        "Reload the server password file.",
+        "The password file (authentication) is used by the server to authenticate a 'user' by\nverifying if the password provided by the user matches the one held by the server.\nThe password file is also used on the client to automatically load the password for the\n'user' when connecting to the server.",
+        "When the server is configured to use a password file, then ALL users must have a password.",
+        "The file path is specified as the ECF_PASSWD environment variable, both for the client and\nserver, and is loaded only by the server on *startup*. This means that the file contents\ncan be updated (i.e., add/remove users), but the file location cannot change during the\nserver execution.",
+        "The server automatically loads the password file content as part of the startup procedure.",
+        "The ECF_PASSWD environment variable is used to specify the password file location,\nconsidering that\n - On the server, the default file name is <host>.<port>.ecf.passwd\n - On the client, the default file name is ecf.passwd",
+        "The format of the file is same for client and server:",
+        "\n4.5.0\n# comment\n<user> <host> <port> <passwd> # comment",
+        "The following is an example",
+        "4.5.0 # the version\nfred machine1 3142 xxyyyd\nfred machine2 3133 xxyyyd # comment\nbill machine2 3133 xxyggyyd",
+        "\nNotice that the same user may appear multiple times (associated with different host/port).\nThis allows the client to use the same password file to contact multiple servers.",
+        "For the password authentication to work, ensure the following:\n - The password is defined for the client and server\n - On the server, add at least the server administrator to the password file\n   Note: If an empty password file (i.e., containing just the version) is used,\n         no user is allowed access.\n - On the client, the password file should be readable only by the 'user' itself",
+        "Usage:\n --reloadpasswdfile"
+      ]
+    },
+    {
+      "name": "reloadwsfile",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Reload the white list file.",
+      "description": [
+        "Reload the white list file.",
+        "The white list file (authorisation) is used to verify if a 'user' is allowed to perform a\nspecific command.",
+        "The file path is specified as the ECF_LISTS variable, and loaded only once by the server\n(on *startup*). This means that the file contents can be updated, but the file location\ncannot change during the server execution.",
+        "The ECF_LISTS variable can be used as follows:\n  - if ECF_LISTS is not specified, or if it is specified with value `ecf.lists`,\n    then the server will use the value `<host>.<port>.ecf.lists`\n  - if ECF_LISTS is specified to be a path, such as /var/tmp/ecf.lists,\n    then the server will use this path to reload the white list file",
+        "The server automatically loads the white list file content as part of the startup procedure,\nconsidering that if the file is not present or is empty (i.e., just contains the version\nnumber) then all users have read/write access.",
+        "The reload operation will fail if file does not exist or if the content is invalid.",
+        "Expected format for this file is:",
+        "\n# all characters after the first # in a line are considered comments and are discarded\n# empty lines are also discarded",
+        "4.4.14  # the version number is mandatory, even if no users are specified\n# Users with read/write access\nuser1\nuser2   # comment\n*       # use this form if you want all users to have read/write access",
+        "# Users with read  access, must have - before user name\n-user3  # comment\n-user4\n-*      # use this form if you want all users to have read access",
+        "\nUsage:\n --reloadwsfile"
+      ]
+    },
+    {
+      "name": "restart",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Start job scheduling, communication with jobs, and respond to all requests.",
+      "description": [
+        "Start job scheduling, communication with jobs, and respond to all requests.\nThe following table shows server behaviour in the different states.\n|----------------------------------------------------------------------------------|\n| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n|--------------|--------------|--------------|---------------|---------------------|\n|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n|      HALTED  |    yes       |      no      |      no       |      no             |\n|--------------|--------------|--------------|---------------|---------------------|"
       ]
     },
     {
@@ -278,6 +386,76 @@
       ]
     },
     {
+      "name": "restore_from_checkpt",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Ask the server to load the definition from an check pt file.",
+      "description": [
+        "Ask the server to load the definition from an check pt file.\nThe server must be halted and the definition in the server must be deleted\nfirst, otherwise an error is returned"
+      ]
+    },
+    {
+      "name": "resume",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "PathsCmd",
+      "summary": "Resume the given node. This allows job generation for the given node, or any child node.",
+      "description": [
+        "Resume the given node. This allows job generation for the given node, or any child node.\nUsage::\n   --resume=/s1/f1/t1   # resume task s1/f1/t1\n   --resume=/s1 /s2     # resume suites /s1 and /s2\n"
+      ]
+    },
+    {
+      "name": "server_load",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Generates gnuplot files that show the server load graphically.",
+      "description": [
+        "Generates gnuplot files that show the server load graphically.\nThis is done by parsing the log file. If no log file is provided,\nthen the log file path is obtained from the server. If the returned\nlog file path is not accessible an error is returned\nThis command produces a three files in the CWD.\n    o <host>.<port>.gnuplot.dat\n    o <host>.<port>.gnuplot.script\n    o <host>.<port>.png",
+        "The generated script can be manually changed, to see different rendering\neffects. i.e. just run 'gnuplot <host>.<port>.gnuplot.script'",
+        "  arg1 = <optional> path to log file",
+        "If the path to log file is known, it is *preferable* to use this,\nrather than requesting the log path from the server.",
+        "Usage:\n   --server_load=/path/to_log_file  # Parses log and generate gnuplot files\n   --server_load                    # Log file path is requested from server\n                                    # which is then used to generate gnuplot files\n                                    # *AVOID* if log file path is accessible",
+        "Now use any png viewer to see the output i.e",
+        "> display   <host>.<port>.png\n> feh       <host>.<port>.png\n> eog       <host>.<port>.png\n> xdg-open  <host>.<port>.png\n> w3m       <host>.<port>.png\n"
+      ]
+    },
+    {
+      "name": "shutdown",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Stop server from scheduling new jobs.",
+      "description": [
+        "Stop server from scheduling new jobs.\n  arg1 = yes(optional) # use to bypass confirmation prompt,i.e\n  --shutdown=yes\nThe following table shows server behaviour in the different states.\n|----------------------------------------------------------------------------------|\n| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n|--------------|--------------|--------------|---------------|---------------------|\n|     RUNNING  |    yes       |      yes     |      yes      |      yes            |\n|    SHUTDOWN  |    yes       |      yes     |      no       |      yes            |\n|      HALTED  |    yes       |      no      |      no       |      no             |\n|--------------|--------------|--------------|---------------|---------------------|"
+      ]
+    },
+    {
+      "name": "stats",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Returns the server statistics as a string.",
+      "description": ["Returns the server statistics as a string."]
+    },
+    {
+      "name": "stats_reset",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Resets the server statistics.",
+      "description": ["Resets the server statistics."]
+    },
+    {
+      "name": "stats_server",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Returns the server statistics as a struct and string. For test use only.",
+      "description": ["Returns the server statistics as a struct and string. For test use only."]
+    },
+    {
       "name": "status",
       "kind": "user",
       "visibility": "public",
@@ -286,6 +464,14 @@
       "description": [
         "Shows the status of a job associated with a task, in %ECF_JOB%.stat file\nIf a family or suite is selected, will invoke status command hierarchically.\nStatus uses the ECF_STATUS_CMD variable. After variable substitution it is invoked as a command.\nThe command should be written in such a way that the output is written to %ECF_JOB%.stat\nThis will allow the output of status command to be shown by the --file command\ni.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::\nIf the process id cannot be found on the remote system, then the status command can also\narrange for the task to be aborted\nThe status command can fail for the following reasons:\n - ECF_STATUS_CMD not found\n - variable substitution fails\n - state is active but it can't find process id, i.e. ECF_RID\n - the status command does not exit cleanly\nWhen this happens a flag is set, STATUSCMD_FAILED, which is visible in the GUI\nUsage::\n   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat\n   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
       ]
+    },
+    {
+      "name": "suites",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Returns the list of suites, in the order defined in the server.",
+      "description": ["Returns the list of suites, in the order defined in the server."]
     },
     {
       "name": "suspend",
@@ -328,6 +514,16 @@
       ]
     },
     {
+      "name": "terminate",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Terminate the server.",
+      "description": [
+        "Terminate the server.\n  arg1 = yes(optional) # use to bypass confirmation prompt.i.e\n  --terminate=yes"
+      ]
+    },
+    {
       "name": "wait",
       "kind": "task",
       "visibility": "public",
@@ -345,6 +541,16 @@
         }
       ],
       "usage": ["ecflow_client --wait=\"/suite/taskx == complete\""]
+    },
+    {
+      "name": "zombie_get",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CtsCmd",
+      "summary": "Returns the list of zombies from the server.",
+      "description": [
+        "Returns the list of zombies from the server.\nResults reported to standard output."
+      ]
     },
     {
       "name": "zombie_adopt",
