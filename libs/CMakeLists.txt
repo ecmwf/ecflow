@@ -245,6 +245,7 @@ set(srcs
   client/src/ecflow/client/ClientInvoker.hpp
   client/src/ecflow/client/ClientOptions.hpp
   client/src/ecflow/client/Help.hpp
+  client/src/ecflow/client/HelpCatalog.hpp
   client/src/ecflow/client/HostsFile.hpp
   client/src/ecflow/client/Rtt.hpp
   client/src/ecflow/client/UrlCmd.hpp
@@ -254,6 +255,7 @@ set(srcs
   client/src/ecflow/client/ClientEnvironment.cpp
   client/src/ecflow/client/ClientInvoker.cpp
   client/src/ecflow/client/Help.cpp
+  client/src/ecflow/client/HelpCatalog.cpp
   client/src/ecflow/client/HostsFile.cpp
   client/src/ecflow/client/Rtt.cpp
   client/src/ecflow/client/ClientOptions.cpp
