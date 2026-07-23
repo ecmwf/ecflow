@@ -69,7 +69,7 @@
     "command": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "kind", "visibility", "implementation", "summary", "description", "usage"],
+      "required": ["name", "kind", "visibility", "implementation", "summary", "description"],
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "kind": {
@@ -88,6 +88,7 @@
           "items": { "$ref": "#/$defs/argument" }
         },
         "usage": {
+          "description": "Absent when the source has no documented invocation example (e.g. no 'Usage:' text in desc()).",
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "minItems": 1

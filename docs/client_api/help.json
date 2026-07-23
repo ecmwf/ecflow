@@ -161,6 +161,16 @@
       "usage": ["ecflow_client --meter=my_meter 20"]
     },
     {
+      "name": "news",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CSyncCmd",
+      "summary": "Returns true if state of server definition changed.",
+      "description": [
+        "Returns true if state of server definition changed.\n*Important* for use with c++/python interface only.\nRequires Given a client handle, change and modify number determine if server changed since last call\nThis relies on user calling sync after news to update the locally stored modify and change numbers.\nThese numbers are then used in the next call to news."
+      ]
+    },
+    {
       "name": "queue",
       "kind": "task",
       "visibility": "public",
@@ -199,6 +209,36 @@
       ],
       "usage": [
         "step=\"\"\nQNAME=\"my_queue_name\"\nwhile [1 == 1 ] ; do\n   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps processed\n   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active\n   if [[ $step == \"<NULL>\" ]] ; then\n        break;\n   fi\n   ...\n   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed\ndone\n\ntrap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }"
+      ]
+    },
+    {
+      "name": "sync",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CSyncCmd",
+      "summary": "Incrementally synchronise the local definition with the one in the server.",
+      "description": [
+        "Incrementally synchronise the local definition with the one in the server.\n*Important* for use with c++/python interface only.\nPreference should be given to this method as only the changes are returned.\nThis reduces the network bandwidth required to keep in sync with the server\nRequires a client handle, change and modify number, to get the incremental changes from server.\nThe change in server state is then and merged with the client definition."
+      ]
+    },
+    {
+      "name": "sync_clock",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CSyncCmd",
+      "summary": "Incrementally synchronise the local definition with the one in the server.",
+      "description": [
+        "Incrementally synchronise the local definition with the one in the server.\n*Important* for use with c++/python interface only.\nSame as sync, but will *always* sync with suite clock if it has changed.\nPreference should be given to this method as only the changes are returned.\nThis reduces the network bandwidth required to keep in sync with the server\nRequires a client handle, change and modify number, to get the incremental changes from server.\nThe change in server state is then and merged with the client definition."
+      ]
+    },
+    {
+      "name": "sync_full",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CSyncCmd",
+      "summary": "Returns the full definition from the server.",
+      "description": [
+        "Returns the full definition from the server.\n*Important* for use with c++/python interface only.\nRequires a client_handle. The returned definition is stored on the client."
       ]
     },
     {
