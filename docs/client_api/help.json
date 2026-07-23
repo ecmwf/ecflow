@@ -2,6 +2,100 @@
   "schema_version": 1,
   "topics": [],
   "commands": [],
-  "options": [],
+  "options": [
+    {
+      "name": "host",
+      "kind": "global-option",
+      "summary": "When specified overrides the environment variable ECF_HOST and default host: 'localhost'",
+      "description": [
+        "When specified overrides the environment variable ECF_HOST and default host: 'localhost'"
+      ]
+    },
+    {
+      "name": "port",
+      "kind": "global-option",
+      "summary": "When specified overrides the environment variable ECF_PORT and default port: '3141'",
+      "description": [
+        "When specified overrides the environment variable ECF_PORT and default port: '3141'"
+      ]
+    },
+    {
+      "name": "user",
+      "kind": "global-option",
+      "summary": "Specifies the user name used to contact the server. Must be used in combination with option --password.",
+      "description": [
+        "Specifies the user name used to contact the server. Must be used in combination with option --password."
+      ],
+      "pairs_with": "password"
+    },
+    {
+      "name": "password",
+      "kind": "global-option",
+      "summary": "Specifies the password used to contact the server. Must be used in combination with option --user.",
+      "description": [
+        "Specifies the password used to contact the server. Must be used in combination with option --user."
+      ],
+      "pairs_with": "user"
+    },
+    {
+      "name": "rid",
+      "kind": "global-option",
+      "summary": "When specified overrides the environment variable ECF_RID. Can only be used for task commands.",
+      "description": [
+        "When specified overrides the environment variable ECF_RID. Can only be used for task commands."
+      ]
+    },
+    {
+      "name": "ssl",
+      "kind": "global-option",
+      "requires": "ECF_OPENSSL",
+      "summary": "Enables the use of SSL when contacting the server.",
+      "description": [
+        "Enables the use of SSL when contacting the server.",
+        "When specified overrides the environment variable ECF_SSL."
+      ]
+    },
+    {
+      "name": "http",
+      "kind": "global-option",
+      "summary": "Enables communication over HTTP between client/server.",
+      "description": [
+        "Enables communication over HTTP between client/server."
+      ]
+    },
+    {
+      "name": "https",
+      "kind": "global-option",
+      "summary": "Enables communication over HTTPS between client/server.",
+      "description": [
+        "Enables communication over HTTPS between client/server."
+      ]
+    },
+    {
+      "name": "help",
+      "kind": "global-option",
+      "summary": "Produce help message",
+      "description": [
+        "Produce help message"
+      ]
+    },
+    {
+      "name": "version",
+      "kind": "global-option",
+      "summary": "Show ecflow client version number, and version of the boost library used",
+      "description": [
+        "Show ecflow client version number, and version of the boost library used"
+      ]
+    },
+    {
+      "name": "debug",
+      "kind": "global-option",
+      "summary": "Enables the display of client environment settings and execution details.",
+      "description": [
+        "Enables the display of client environment settings and execution details.",
+        "Has the same effect as setting environment variable ECF_DEBUG_CLIENT."
+      ]
+    }
+  ],
   "environment_variables": []
 }
