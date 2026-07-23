@@ -58,7 +58,17 @@ file(WRITE "${OUTPUT}" "/*
 
 #include <string_view>
 
-inline constexpr std::string_view client_help_json = R\"ecflow_help(
+/*
+ * Workaround for EDG-based compilers (e.g. NVidia) that complain about
+ * constexpr value exceeding the maximum allowed size.
+ */
+#if defined(__EDG__)
+#define ECFLOW_HELP_CONSTEXPR const
+#else
+#define ECFLOW_HELP_CONSTEXPR constexpr
+#endif
+
+inline ECFLOW_HELP_CONSTEXPR std::string_view client_help_json = R\"ecflow_help(
 ${manifest_content})ecflow_help\";
 
 #endif /* ecflow_base_generated_client_help_HPP */
