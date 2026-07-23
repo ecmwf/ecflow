@@ -1,6 +1,12 @@
 {
   "schema_version": 1,
-  "topics": [],
+  "topics": [
+    { "name": "all", "summary": "List all commands, verbosely" },
+    { "name": "summary", "summary": "One line summary of all commands" },
+    { "name": "task", "summary": "One line summary of task commands" },
+    { "name": "user", "summary": "One line summary of user command" },
+    { "name": "option", "summary": "One line summary of options" }
+  ],
   "commands": [],
   "options": [
     {
