@@ -49,9 +49,13 @@
     "argument": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "optional", "description"],
+      "required": ["name", "type", "optional", "description"],
       "properties": {
         "name": { "type": "string", "minLength": 1 },
+        "type": {
+          "description": "Matches the source's 'argN = (optional) type(name)' convention, e.g. string(reason).",
+          "enum": ["string", "int", "any"]
+        },
         "optional": { "type": "boolean" },
         "description": { "type": "string", "minLength": 1 }
       }

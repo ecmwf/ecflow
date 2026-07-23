@@ -7,7 +7,28 @@
     { "name": "user", "summary": "One line summary of user command" },
     { "name": "option", "summary": "One line summary of options" }
   ],
-  "commands": [],
+  "commands": [
+    {
+      "name": "abort",
+      "kind": "task",
+      "visibility": "public",
+      "implementation": "AbortCmd",
+      "summary": "Mark task as aborted. For use in the '.ecf' script file *only*",
+      "description": [
+        "Mark task as aborted. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables",
+        "If this task command is a zombie, then the default action will be to *block*.\nThe default can be overridden by using zombie attributes.\nOtherwise the blocking period is defined by ECF_TIMEOUT."
+      ],
+      "arguments": [
+        {
+          "name": "reason",
+          "type": "string",
+          "optional": true,
+          "description": "Optionally provide a reason why the abort was raised"
+        }
+      ],
+      "usage": ["ecflow_client --abort=reasonX"]
+    }
+  ],
   "options": [
     {
       "name": "host",
