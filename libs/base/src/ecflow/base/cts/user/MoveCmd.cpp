@@ -195,9 +195,6 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const {
 const char* MoveCmd::arg() {
     return "move";
 }
-const char* MoveCmd::desc() {
-    return "The move command is an internal cmd, Called by the plug cmd. Does not appear on public api.";
-}
 
 void MoveCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(MoveCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

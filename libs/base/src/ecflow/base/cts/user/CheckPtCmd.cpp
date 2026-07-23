@@ -93,43 +93,6 @@ STC_Cmd_ptr CheckPtCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::ok_cmd();
 }
 
-static const char* arg_desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-
-    return "Forces the definition file in the server to be written to disk *or* allow mode,\n"
-           "interval and alarm to be changed.\n"
-           "Whenever the check pt file is written to disk, it is measured.\n"
-           "If the time to save to disk is greater than the default of 30 seconds,\n"
-           "then an alarm is raised. This can be seen in the GUI as a late flag on the server.\n"
-           "Once the late flag has been set it will need to manually cleared in the GUI\n"
-           "or by using --alter functionality\n"
-           "Note excessive save times can interfere with job scheduling.\n"
-           "The alarm threshold can be changed. See below.\n"
-           "   arg1 = (optional) mode [ never | on_time | on_time:<integer> | always | <integer>]\n"
-           "     never     : Never check point the definition in the server\n"
-           "     on_time   : Turn on automatic check pointing at interval stored on server\n"
-           "     on_time<integer> : Turn on automatic check point, with the specified interval in seconds\n"
-           "     alarm<integer>   : Modify the alarm notification time for check pt saving to disk\n"
-           "     always    : Check point at any change in node tree, *NOT* recommended for large definitions\n"
-           "     <integer> : This specifies the interval in seconds when server should automatically check pt.\n"
-           "                 This will only take effect of mode is on_time/CHECK_ON_TIME\n"
-           "                 Should ideally be a value greater than 60 seconds, default is 120 seconds\n"
-           "Usage:\n"
-           "  --check_pt\n"
-           "    Immediately check point the definition held in the server\n"
-           "  --check_pt=never\n"
-           "    Switch off check pointing\n"
-           "  --check_pt=on_time\n"
-           "    Start automatic check pointing at the interval stored in the server\n"
-           "  --check_pt=180\n"
-           "    Change the check pt interval to 180 seconds\n"
-           "  --check_pt=on_time:90\n"
-           "    Change mode and interval, to automatic check pointing every 90 seconds\n"
-           "  --check_pt=alarm:35\n"
-           "    Change the alarm time for check pt saves. i.e if saving the check pt takes longer than 35 seconds\n"
-           "    set the late flag on the server.";
-}
-
 void CheckPtCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(CtsApi::checkPtDefsArg(),
                        boost::program_options::value<std::string>()->implicit_value(std::string{}));

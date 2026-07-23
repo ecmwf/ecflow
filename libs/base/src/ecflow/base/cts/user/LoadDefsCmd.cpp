@@ -164,24 +164,6 @@ void LoadDefsCmd::print_only(std::string& os) const {
 const char* LoadDefsCmd::arg() {
     return CtsApi::loadDefsArg();
 }
-const char* LoadDefsCmd::desc() {
-    return "Check and load definition or checkpoint file into server.\n"
-           "The loaded definition will be checked for valid trigger and complete expressions,\n"
-           "additionally in-limit references to limits will be validated.\n"
-           "If the server already has the 'suites' of the same name, then a error message is issued.\n"
-           "The suite's can be overwritten if the force option is used.\n"
-           "To just check the definition and not send to server, use 'check_only'\n"
-           "This command can also be used to load a checkpoint file into the server\n"
-           "  arg1 = path to the definition file or checkpoint file\n"
-           "  arg2 = (optional) [ force | check_only | print | stats ]  # default = false for all\n"
-           "Usage:\n"
-           "--load=/my/home/exotic.def               # will error if suites of same name exists\n"
-           "--load=/my/home/exotic.def force         # overwrite suite's of same name in the server\n"
-           "--load=/my/home/exotic.def check_only    # Just check, don't send to server\n"
-           "--load=/my/home/exotic.def stats         # Show defs statistics, don't send to server\n"
-           "--load=host1.3141.check                  # Load checkpoint file to the server\n"
-           "--load=host1.3141.check print            # print definition to standard out in defs format\n";
-}
 
 void LoadDefsCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(LoadDefsCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

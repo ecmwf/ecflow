@@ -100,17 +100,6 @@ STC_Cmd_ptr MeterCmd::doHandleRequest(AbstractServer* as) const {
 const char* MeterCmd::arg() {
     return TaskApi::meterArg();
 }
-const char* MeterCmd::desc() {
-    return "Change meter. For use in the '.ecf' script file *only*\n"
-           "Hence the context is supplied via environment variables\n"
-           "  arg1(string) = meter-name\n"
-           "  arg2(int)    = the new meter value\n\n"
-           "If this child command is a zombie, then the default action will be to *fob*,\n"
-           "i.e allow the ecflow client command to complete without an error\n"
-           "The default can be overridden by using zombie attributes.\n\n"
-           "Usage:\n"
-           "  ecflow_client --meter=my_meter 20";
-}
 
 void MeterCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(MeterCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

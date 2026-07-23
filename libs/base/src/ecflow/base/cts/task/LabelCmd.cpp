@@ -83,18 +83,6 @@ STC_Cmd_ptr LabelCmd::doHandleRequest(AbstractServer* as) const {
 const char* LabelCmd::arg() {
     return TaskApi::labelArg();
 }
-const char* LabelCmd::desc() {
-    return "Change Label. For use in the '.ecf' script file *only*\n"
-           "Hence the context is supplied via environment variables\n"
-           "  arg1 = label-name\n"
-           "  arg2 = The new label value\n"
-           "         The labels values can be single or multi-line(space separated quoted strings)\n\n"
-           "If this child command is a zombie, then the default action will be to *fob*,\n"
-           "i.e allow the ecflow client command to complete without an error\n"
-           "The default can be overridden by using zombie attributes.\n\n"
-           "Usage:\n"
-           "  ecflow_client --label=progressed merlin";
-}
 
 void LabelCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(LabelCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

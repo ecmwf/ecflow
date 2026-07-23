@@ -209,37 +209,6 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const {
 const char* ForceCmd::arg() {
     return CtsApi::forceArg();
 }
-const char* ForceCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Force a node to a given state, or set its event.\n"
-           "When a task is set to complete, it may be automatically re-queued if it has\n"
-           "multiple future time dependencies. However each time we force a complete it will\n"
-           "expire any time based attribute on that node. When the last time based attribute\n"
-           "expires, the node will stay in a complete state.\n"
-           "This behaviour allow Repeat values to be incremented interactively.\n"
-           "A repeat attribute is incremented when all the child nodes are complete\n"
-           "in this case the child nodes are automatically re-queued.\n"
-           "  arg1 = [ unknown | complete | queued | submitted | active | aborted | clear | set ]\n"
-           "  arg2 = (optional) recursive\n"
-           "         Applies state to node and recursively to all its children\n"
-           "  arg3 = (optional) full\n"
-           "         Set repeat variables to last value, only works in conjunction\n"
-           "         with recursive option\n"
-           "  arg4 = path_to_node or path_to_node:<event>: paths must begin with '/'\n"
-           "Usage:\n"
-           "  --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete\n"
-           "  --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task\n"
-           "  --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1\n"
-           "Effect:\n"
-           "  Consider the effect of forcing complete when the current time is at 09:00\n"
-           "  suite s1\n"
-           "     task t1; time 12:00             # will complete straight away\n"
-           "     task t2; time 10:00 13:00 01:00 # will complete on fourth attempt\n\n"
-           "  --force=complete /s1/t1 /s1/t2\n"
-           "  When we have a time range(i.e as shown with task t2), it is re-queued and the\n"
-           "  next time slot is incremented for each complete, until it expires, and the task completes.\n"
-           "  Use the Why command, to show next run time (i.e. next time slot)";
-}
 
 void ForceCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(ForceCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

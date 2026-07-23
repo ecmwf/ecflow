@@ -103,13 +103,6 @@ STC_Cmd_ptr CtsWaitCmd::doHandleRequest(AbstractServer* as) const {
 const char* CtsWaitCmd::arg() {
     return TaskApi::waitArg();
 }
-const char* CtsWaitCmd::desc() {
-    return "Evaluates an expression, and block while the expression is false.\n"
-           "For use in the '.ecf' file *only*, hence the context is supplied via environment variables\n"
-           "  arg1 = string(expression)\n\n"
-           "Usage:\n"
-           "  ecflow_client --wait=\"/suite/taskx == complete\"";
-}
 
 void CtsWaitCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(CtsWaitCmd::arg(), boost::program_options::value<std::string>());

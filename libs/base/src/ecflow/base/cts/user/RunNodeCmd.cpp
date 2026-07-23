@@ -126,31 +126,6 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const {
 const char* RunNodeCmd::arg() {
     return CtsApi::runArg();
 }
-const char* RunNodeCmd::desc() {
-    return "Ignore triggers, limits, time or date dependencies, just run the Task.\n"
-           "When a job completes, it may be automatically re-queued if it has a cron\n"
-           "or multiple time dependencies. If we have multiple time based attributes,\n"
-           "then each run, will expire the time.\n"
-           "When we run before the time, we want to avoid re-running the task then\n"
-           "a flag is set, so that it is not automatically re-queued.\n"
-           "A repeat attribute is incremented when all the child nodes are complete\n"
-           "in this case the child nodes are automatically re-queued.\n"
-           "Hence this command can be aid, in allowing a Repeat attribute to be incremented\n"
-           "  arg1 = (optional)force\n"
-           "         Forcibly run, even if there are nodes that are active or submitted\n"
-           "         This can result in zombie creation\n"
-           "  arg2 = node path(s). The paths must begin with a leading '/' character.\n"
-           "         If the path is /suite/family will recursively run all tasks\n"
-           "         When providing multiple paths avoid running the same task twice\n"
-           "Example:\n"
-           "  --run=/suite/t1                    # run task t1\n"
-           "Effect:\n"
-           "     task t1; time 12:00             # will complete if run manually\n"
-           "     task t2; time 10:00 13:00 01:00 # will run 4 times before completing\n"
-           " When we have a time range(i.e as shown with task t2), then next time slot\n"
-           " is incremented for each run, until it expires, and the task completes.\n"
-           " Use the Why command, to show next run time (i.e. next time slot)";
-}
 
 void RunNodeCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(RunNodeCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

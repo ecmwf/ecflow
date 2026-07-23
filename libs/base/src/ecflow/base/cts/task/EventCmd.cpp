@@ -87,19 +87,6 @@ STC_Cmd_ptr EventCmd::doHandleRequest(AbstractServer* as) const {
 const char* EventCmd::arg() {
     return TaskApi::eventArg();
 }
-const char* EventCmd::desc() {
-    return "Change event. For use in the '.ecf' script file *only*\n"
-           "Hence the context is supplied via environment variables\n"
-           "  arg1(string | int)     = event-name\n\n"
-           "  arg2(string)(optional) = [ set | clear] default value is set\n\n"
-           "If this child command is a zombie, then the default action will be to *fob*,\n"
-           "i.e allow the ecflow client command to complete without an error\n"
-           "The default can be overridden by using zombie attributes.\n\n"
-           "Usage:\n"
-           "  ecflow_client --event=ev       # set the event, default since event initial value is clear\n"
-           "  ecflow_client --event=ev set   # set the event, explicit\n"
-           "  ecflow_client --event=ev clear # clear the event, use when event initial value is set\n";
-}
 
 void EventCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(EventCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

@@ -186,38 +186,6 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const {
 const char* LogCmd::arg() {
     return "log";
 }
-const char* LogCmd::desc() {
-    return "Get,clear,flush or create a new log file.\n"
-           "The user must ensure that a valid path is specified.\n"
-           "Specifying '--log=get' with a large number of lines from the server,\n"
-           "can consume a lot of **memory**. The log file can be a very large file,\n"
-           "hence we use a default of 100 lines, optionally the number of lines can be specified.\n"
-           " arg1 = [ get | clear | flush | new | path ]\n"
-           "  get -   Outputs the log file to standard out.\n"
-           "          defaults to return the last 100 lines\n"
-           "          The second argument can specify how many lines to return\n"
-           "  clear - Clear the log file of its contents.\n"
-           "  flush - Flush and close the log file. (only temporary) next time\n"
-           "          server writes to log, it will be opened again. Hence it best\n"
-           "          to halt the server first\n"
-           "  new -   Flush and close the existing log file, and start using the\n"
-           "          the path defined for ECF_LOG. By changing this variable\n"
-           "          a new log file path can be used\n"
-           "          Alternatively an explicit path can also be provided\n"
-           "          in which case ECF_LOG is also updated\n"
-           "  path -  Returns the path name to the existing log file\n"
-           " arg2 = [ new_path | optional last n lines ]\n"
-           "         if get specified can specify lines to get. Value must be convertible to an integer\n"
-           "         Otherwise if arg1 is 'new' then the second argument must be a path\n"
-           "Usage:\n"
-           "  --log=get                        # Write the last 100 lines of the log file to standard out\n"
-           "  --log=get 200                    # Write the last 200 lines of the log file to standard out\n"
-           "  --log=clear                      # Clear the log file. The log is now empty\n"
-           "  --log=flush                      # Flush and close log file, next request will re-open log file\n"
-           "  --log=new /path/to/new/log/file  # Close and flush log file, and create a new log file, updates ECF_LOG\n"
-           "  --log=new                        # Close and flush log file, and create a new log file using ECF_LOG "
-           "variable\n";
-}
 
 void LogCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(LogCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

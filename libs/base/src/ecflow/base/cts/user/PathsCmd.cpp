@@ -464,29 +464,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const {
 //     return do_authenticate(as, cmd, paths_);
 // }
 
-static const char* get_check_desc() {
-    return "Checks the expression and limits in the server. Will also check trigger references.\n"
-           "Trigger expressions that reference paths that don't exist, will be reported as errors.\n"
-           "(Note: On the client side unresolved paths in trigger expressions must\n"
-           "have an associated 'extern' specified)\n"
-           "  arg = [ _all_ | / | list of node paths ]\n"
-           "Usage:\n"
-           "  --check=_all_           # Checks all the suites\n"
-           "  --check=/               # Checks all the suites\n"
-           "  --check=/s1 /s2/f1/t1   # Check suite /s1 and task t1";
-}
-
-static const char* get_kill_desc() {
-    return "Kills the job associated with the node.\n"
-           "If a family or suite is selected, will kill hierarchically.\n"
-           "Kill uses the ECF_KILL_CMD variable. After variable substitution it is invoked as a command.\n"
-           "The command should be written in such a way that the output is written to %ECF_JOB%.kill\n"
-           "as this allow the --file command to report the output: .e.e.\n"
-           " /home/ma/emos/bin/ecfkill %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1::\n"
-           "Usage::\n"
-           "   --kill=/s1/f1/t1 /s1/f2/t2 # kill the jobs for tasks t1 and t2\n"
-           "   --file=/s1/f1/t1 kill      # write to standard out the '.kill' file for task /s1/f1/t1";
-}
 const char* get_status_desc() {
     return "Shows the status of a job associated with a task, in %ECF_JOB%.stat file\n"
            "If a family or suite is selected, will invoke status command hierarchically.\n"

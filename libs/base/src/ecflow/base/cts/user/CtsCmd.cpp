@@ -442,34 +442,6 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const {
     return PreAllocatedReply::ok_cmd();
 }
 
-static const char* server_load_desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Generates gnuplot files that show the server load graphically.\n"
-           "This is done by parsing the log file. If no log file is provided,\n"
-           "then the log file path is obtained from the server. If the returned\n"
-           "log file path is not accessible an error is returned\n"
-           "This command produces a three files in the CWD.\n"
-           "    o <host>.<port>.gnuplot.dat\n"
-           "    o <host>.<port>.gnuplot.script\n"
-           "    o <host>.<port>.png\n\n"
-           "The generated script can be manually changed, to see different rendering\n"
-           "effects. i.e. just run 'gnuplot <host>.<port>.gnuplot.script'\n\n"
-           "  arg1 = <optional> path to log file\n\n"
-           "If the path to log file is known, it is *preferable* to use this,\n"
-           "rather than requesting the log path from the server.\n\n"
-           "Usage:\n"
-           "   --server_load=/path/to_log_file  # Parses log and generate gnuplot files\n"
-           "   --server_load                    # Log file path is requested from server\n"
-           "                                    # which is then used to generate gnuplot files\n"
-           "                                    # *AVOID* if log file path is accessible\n\n"
-           "Now use any png viewer to see the output i.e\n\n"
-           "> display   <host>.<port>.png\n"
-           "> feh       <host>.<port>.png\n"
-           "> eog       <host>.<port>.png\n"
-           "> xdg-open  <host>.<port>.png\n"
-           "> w3m       <host>.<port>.png\n";
-}
-
 void CtsCmd::addOption(boost::program_options::options_description& desc) const {
     switch (api_) {
         case CtsCmd::GET_ZOMBIES: {

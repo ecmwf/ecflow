@@ -98,17 +98,6 @@ STC_Cmd_ptr AbortCmd::doHandleRequest(AbstractServer* as) const {
 const char* AbortCmd::arg() {
     return TaskApi::abortArg();
 }
-const char* AbortCmd::desc() {
-    return "Mark task as aborted. For use in the '.ecf' script file *only*\n"
-           "Hence the context is supplied via environment variables\n"
-           "  arg1 = (optional) string(reason)\n"
-           "         Optionally provide a reason why the abort was raised\n\n"
-           "If this child command is a zombie, then the default action will be to *block*.\n"
-           "The default can be overridden by using zombie attributes.\n"
-           "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
-           "Usage:\n"
-           "  ecflow_client --abort=reasonX";
-}
 
 void AbortCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(AbortCmd::arg(), boost::program_options::value<std::string>()->implicit_value(std::string{}));

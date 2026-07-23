@@ -274,23 +274,6 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const {
 const char* PlugCmd::arg() {
     return CtsApi::plugArg();
 }
-const char* PlugCmd::desc() {
-    return "Plug command is used to move nodes.\n"
-           "The destination node can be on another server In which case the destination\n"
-           "path should be of the form '<host>:<port>/suite/family/task\n"
-           "  arg1 = path to source node\n"
-           "  arg2 = path to the destination node\n"
-           "This command can fail because:\n"
-           "- Source node is in a 'active' or 'submitted' state\n"
-           "- Another user already has an lock\n"
-           "- source/destination paths do not exist on the corresponding servers\n"
-           "- If the destination node path is empty, i.e. only host:port is specified,\n"
-           "  then the source node must correspond to a suite.\n"
-           "- If the source node is added as a child, then its name must be unique\n"
-           "  amongst its peers\n"
-           "Usage:\n"
-           "  --plug=/suite macX:3141  # move the suite to ecFlow server on host(macX) and port(3141)";
-}
 
 void PlugCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(PlugCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

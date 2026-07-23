@@ -127,22 +127,6 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const {
 const char* BeginCmd::arg() {
     return CtsApi::beginArg();
 }
-const char* BeginCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Begin playing the definition in the server.\n"
-           "Expects zero or a single quoted string.\n"
-           "  arg1 = suite-name | Nothing | force\n"
-           "         play the chosen suite, if no arg specified, play all suites, in the definition\n"
-           "         force means reset the begin status on the suites and bypass checks.\n"
-           "         This is only required if suite-name is provide as the first argument\n"
-           "         Using force can cause the creation of zombies\n"
-           "Usage:\n"
-           "--begin                     # will begin all suites\n"
-           "--begin=\"--force\"         # reset and then begin all suites, bypassing any checks. Note: string must be "
-           "quoted\n"
-           "--begin=\"mySuite\"         # begin playing suite of name 'mySuite'\n"
-           "--begin=\"mySuite --force\" # reset and begin playing suite 'mySuite', bypass check";
-}
 
 void BeginCmd::addOption(boost::program_options::options_description& desc) const {
     // allow options like

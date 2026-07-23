@@ -64,8 +64,7 @@ public:
     void add_edit_history(Defs*) const override;
 
 private:
-    static const char* arg();  // used for argument parsing
-    static const char* desc(); // The description of the argument as provided to user
+    static const char* arg(); // used for argument parsing
 
     void setup_user_authentification(const std::string& user, const std::string& passwd) override;
     bool setup_user_authentification(AbstractClientEnv&) override;

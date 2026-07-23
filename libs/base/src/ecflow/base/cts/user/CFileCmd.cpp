@@ -334,16 +334,6 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const {
 const char* CFileCmd::arg() {
     return CtsApi::fileArg();
 }
-const char* CFileCmd::desc() {
-    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-    return "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]\n"
-           "By default will return the script.\n"
-           "  arg1 = path to node\n"
-           "  arg2 = (optional) [ script<default> | job | jobout | manual | kill | stat ]\n"
-           "         kill will attempt to return output of ECF_KILL_CMD, i.e the file %ECF_JOB%.kill\n"
-           "         stat will attempt to return output of ECF_STATUS_CMD, i.e the file %ECF_JOB%.stat\n"
-           "  arg3 = (optional) max_lines = 10000 <default>";
-}
 
 void CFileCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(CFileCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());

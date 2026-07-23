@@ -56,12 +56,6 @@ STC_Cmd_ptr LogMessageCmd::doHandleRequest(AbstractServer* as) const {
 const char* LogMessageCmd::arg() {
     return CtsApi::logMsgArg();
 }
-const char* LogMessageCmd::desc() {
-    return "Writes the input string to the log file.\n"
-           "  arg1 = string\n"
-           "Usage:\n"
-           "  --msg=\"place me in the log file\"";
-}
 
 void LogMessageCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(LogMessageCmd::arg(), boost::program_options::value<std::string>());
