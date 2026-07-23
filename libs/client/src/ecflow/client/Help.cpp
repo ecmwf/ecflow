@@ -71,7 +71,7 @@ std::string format_env_var(const nlohmann::json& var) {
 
 std::string make_client_env_description() {
     std::string help;
-    help += "The client considers, for both user and child commands, the following environment variables:\n\n";
+    help += "The client considers, for both user and task commands, the following environment variables:\n\n";
 
     for (const auto& var : ecf::HelpCatalog::manifest().at("environment_variables")) {
         if (var.at("applies_to").get<std::string>() == "both") {
@@ -88,7 +88,7 @@ std::string make_client_env_description() {
 
 std::string make_task_env_description() {
     std::string help;
-    help += "The following environment variables are used specifically by child commands:\n\n";
+    help += "The following environment variables are used specifically by task commands:\n\n";
 
     for (const auto& var : ecf::HelpCatalog::manifest().at("environment_variables")) {
         if (var.at("applies_to").get<std::string>() == "task") {

@@ -180,7 +180,7 @@ def format_env_var(var):
 
 
 def render_client_env_description(env_vars):
-    txt = "The client considers, for both user and child commands, the following environment variables:\n\n"
+    txt = "The client considers, for both user and task commands, the following environment variables:\n\n"
     for var in env_vars:
         if var["applies_to"] == "both":
             txt += format_env_var(var)
@@ -193,7 +193,7 @@ def render_client_env_description(env_vars):
 
 
 def render_task_env_description(env_vars):
-    txt = "The following environment variables are used specifically by child commands:\n\n"
+    txt = "The following environment variables are used specifically by task commands:\n\n"
     for var in env_vars:
         if var["applies_to"] == "task":
             txt += format_env_var(var)
