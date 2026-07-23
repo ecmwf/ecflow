@@ -43,6 +43,74 @@
       ]
     },
     {
+      "name": "ch_add",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ClientHandleCmd",
+      "summary": "Add a set of suites, to an existing handle.",
+      "description": [
+        "Add a set of suites, to an existing handle.\n   arg1 = handle(integer)  # The handle must be an integer that is > 0\n   arg2 = names            # should be a list of suite names, names not in the definition are ignored\nUsage:\n   --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10\nAn error is returned if the handle had not previously been registered\nThe handle is created with --ch_register command\nTo list all suites and handles use --ch_suites"
+      ]
+    },
+    {
+      "name": "ch_auto_add",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ClientHandleCmd",
+      "summary": "Change an existing handle so that new suites can be added automatically.",
+      "description": [
+        "Change an existing handle so that new suites can be added automatically.\n   arg1 = handle(integer)  # The handle must be an integer that is > 0\n   arg2 = true | false     # true means add new suites to my list, when they are created\nUsage:\n --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it\n --ch_auto_add=10 false    # modify handle 10 so that no new suites are added\nThe handle is created with --ch_register command\nTo list all suites and handles use --ch_suites"
+      ]
+    },
+    {
+      "name": "ch_drop",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ClientHandleCmd",
+      "summary": "Drop/de-register the client handle.",
+      "description": [
+        "Drop/de-register the client handle.\nUn-used handle should be dropped otherwise they will stay, in the server.\n   arg1 = handle(integer)  # The handle must be an integer that is > 0\nUsage:\n   --ch_drop=10            # drop the client handle 10\nAn error is returned if the handle had not previously been registered\nThe handle stored on the local client is set to zero\nTo list all suites and handles use --ch_suites"
+      ]
+    },
+    {
+      "name": "ch_drop_user",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ClientHandleCmd",
+      "summary": "Drop/de-register all handles associated with the given user.",
+      "description": [
+        "Drop/de-register all handles associated with the given user.\nIf no user provided will drop for current user. Client must ensure un-used handle are dropped\notherwise they will stay, in the server.\n   arg1 = user           # The user to be drooped, if left empty drop current user \nUsage:\n   --ch_drop_user=ma0    # drop all handles associated with user ma0\n   --ch_drop_user        # drop all handles associated with current user\nAn error is returned if no registered handles\nTo list all suites and handles use --ch_suites"
+      ]
+    },
+    {
+      "name": "ch_register",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ClientHandleCmd",
+      "summary": "Register interest in a set of suites.",
+      "description": [
+        "Register interest in a set of suites.\nIf a definition has lots of suites, but the client. is only interested in a small subset,\nThen using this command can reduce network bandwidth and synchronisation will be quicker.\nThis command will create a client handle, which must be used for any other changes.\nThe newly created handle can be shown with the --ch_suites command\nDeleted suites will stay registered, and must be explicitly removed/dropped.\nNote: Suites can be registered before they are loaded into the server\nThis command affects news() and sync() commands\n   arg1 = true | false           # true means add new suites to my list, when they are created\n   arg2 = names                  # should be a list of suite names, names not in the definition are ignored\nUsage:\n   --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites\n   --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only\n   --ch_register=false           # register handle, suites will be added later on\n   --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any new suites\n                                 # The client handle as the first argument is typically used by GUI/python                                 # When the client handle is no zero, then it is dropped first\nTo list all suites and handles use --ch_suites"
+      ]
+    },
+    {
+      "name": "ch_rem",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ClientHandleCmd",
+      "summary": "Remove a set of suites, from an existing handle.",
+      "description": [
+        "Remove a set of suites, from an existing handle.\n   arg1 = handle(integer)   # The handle must be an integer that is > 0\n   arg2 = names             # should be a list of suite names, names not in the definition are ignored\nUsage:\n   --ch_rem=10 s2 s3 s4     # remove suites s2 s3,s4 from handle 10\nThe handle is created with --ch_register command\nTo list all suites and handles use --ch_suites"
+      ]
+    },
+    {
+      "name": "ch_suites",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ClientHandleCmd",
+      "summary": "Shows all the client handles, and the suites they reference",
+      "description": ["Shows all the client handles, and the suites they reference"]
+    },
+    {
       "name": "check",
       "kind": "user",
       "visibility": "public",
