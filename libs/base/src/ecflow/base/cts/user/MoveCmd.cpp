@@ -200,8 +200,7 @@ const char* MoveCmd::desc() {
 }
 
 void MoveCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        MoveCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), MoveCmd::desc());
+    desc.add_options()(MoveCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void MoveCmd::create(Cmd_ptr&, boost::program_options::variables_map&, AbstractClientEnv*) const {

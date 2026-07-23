@@ -733,7 +733,7 @@ void AlterCmd::addOption(boost::program_options::options_description& desc) cons
     // po::value<std::vector<std::string>>()->multitoken()). However, because of the special handling
     // necessary to allow positional values, such as "--help", a custom `style_parser` is used
     // instead when parsing the CLI options -- see ClientOptions for details.
-    desc.add_options()(AlterCmd::arg(), boost::program_options::value<std::vector<std::string>>(), AlterCmd::desc());
+    desc.add_options()(AlterCmd::arg(), boost::program_options::value<std::vector<std::string>>());
 }
 void AlterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[arg()].as<std::vector<std::string>>();

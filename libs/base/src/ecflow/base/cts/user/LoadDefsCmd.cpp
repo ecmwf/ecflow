@@ -184,9 +184,7 @@ const char* LoadDefsCmd::desc() {
 }
 
 void LoadDefsCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(LoadDefsCmd::arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       LoadDefsCmd::desc());
+    desc.add_options()(LoadDefsCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void LoadDefsCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

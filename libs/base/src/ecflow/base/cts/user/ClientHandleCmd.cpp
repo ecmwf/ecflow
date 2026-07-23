@@ -262,109 +262,42 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 
     switch (api_) {
         case ClientHandleCmd::REGISTER: {
-            desc.add_options()(
-                CtsApi::ch_register_arg(),
-                boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                "Register interest in a set of suites.\n"
-                "If a definition has lots of suites, but the client. is only interested in a small subset,\n"
-                "Then using this command can reduce network bandwidth and synchronisation will be quicker.\n"
-                "This command will create a client handle, which must be used for any other changes.\n"
-                "The newly created handle can be shown with the --ch_suites command\n"
-                "Deleted suites will stay registered, and must be explicitly removed/dropped.\n"
-                "Note: Suites can be registered before they are loaded into the server\n"
-                "This command affects news() and sync() commands\n"
-                "   arg1 = true | false           # true means add new suites to my list, when they are created\n"
-                "   arg2 = names                  # should be a list of suite names, names not in the definition are "
-                "ignored\n"
-                "Usage:\n"
-                "   --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites\n"
-                "   --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only\n"
-                "   --ch_register=false           # register handle, suites will be added later on\n"
-                "   --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any "
-                "new suites\n"
-                "                                 # The client handle as the first argument is typically used by "
-                "GUI/python"
-                "                                 # When the client handle is no zero, then it is dropped first\n"
-                "To list all suites and handles use --ch_suites");
+            desc.add_options()(CtsApi::ch_register_arg(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
 
         case ClientHandleCmd::DROP: {
-            desc.add_options()(CtsApi::ch_drop_arg(),
-                               boost::program_options::value<int>(),
-                               "Drop/de-register the client handle.\n"
-                               "Un-used handle should be dropped otherwise they will stay, in the server.\n"
-                               "   arg1 = handle(integer)  # The handle must be an integer that is > 0\n"
-                               "Usage:\n"
-                               "   --ch_drop=10            # drop the client handle 10\n"
-                               "An error is returned if the handle had not previously been registered\n"
-                               "The handle stored on the local client is set to zero\n"
-                               "To list all suites and handles use --ch_suites");
+            desc.add_options()(CtsApi::ch_drop_arg(), boost::program_options::value<int>());
             break;
         }
 
         case ClientHandleCmd::DROP_USER: {
-            desc.add_options()(
-                CtsApi::ch_drop_user_arg(),
-                boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                "Drop/de-register all handles associated with the given user.\n"
-                "If no user provided will drop for current user. Client must ensure un-used handle are dropped\n"
-                "otherwise they will stay, in the server.\n"
-                "   arg1 = user           # The user to be drooped, if left empty drop current user \n"
-                "Usage:\n"
-                "   --ch_drop_user=ma0    # drop all handles associated with user ma0\n"
-                "   --ch_drop_user        # drop all handles associated with current user\n"
-                "An error is returned if no registered handles\n"
-                "To list all suites and handles use --ch_suites");
+            desc.add_options()(CtsApi::ch_drop_user_arg(),
+                               boost::program_options::value<std::string>()->implicit_value(std::string{}));
             break;
         }
 
         case ClientHandleCmd::ADD: {
             desc.add_options()(CtsApi::ch_add_arg(),
-                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                               "Add a set of suites, to an existing handle.\n"
-                               "   arg1 = handle(integer)  # The handle must be an integer that is > 0\n"
-                               "   arg2 = names            # should be a list of suite names, names not in the "
-                               "definition are ignored\n"
-                               "Usage:\n"
-                               "   --ch_add=10 s2 s3 s4    # add suites s2 s3,s4 to  handle 10\n"
-                               "An error is returned if the handle had not previously been registered\n"
-                               "The handle is created with --ch_register command\n"
-                               "To list all suites and handles use --ch_suites");
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
 
         case ClientHandleCmd::REMOVE: {
             desc.add_options()(CtsApi::ch_remove_arg(),
-                               boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                               "Remove a set of suites, from an existing handle.\n"
-                               "   arg1 = handle(integer)   # The handle must be an integer that is > 0\n"
-                               "   arg2 = names             # should be a list of suite names, names not in the "
-                               "definition are ignored\n"
-                               "Usage:\n"
-                               "   --ch_rem=10 s2 s3 s4     # remove suites s2 s3,s4 from handle 10\n"
-                               "The handle is created with --ch_register command\n"
-                               "To list all suites and handles use --ch_suites");
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
 
         case ClientHandleCmd::AUTO_ADD: {
-            desc.add_options()(
-                CtsApi::ch_auto_add_arg(),
-                boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                "Change an existing handle so that new suites can be added automatically.\n"
-                "   arg1 = handle(integer)  # The handle must be an integer that is > 0\n"
-                "   arg2 = true | false     # true means add new suites to my list, when they are created\n"
-                "Usage:\n"
-                " --ch_auto_add=10 true     # modify handle 10 so that new suites, get added automatically to it\n"
-                " --ch_auto_add=10 false    # modify handle 10 so that no new suites are added\n"
-                "The handle is created with --ch_register command\n"
-                "To list all suites and handles use --ch_suites");
+            desc.add_options()(CtsApi::ch_auto_add_arg(),
+                               boost::program_options::value<std::vector<std::string>>()->multitoken());
             break;
         }
 
         case ClientHandleCmd::SUITES: {
-            desc.add_options()(CtsApi::ch_suites_arg(), "Shows all the client handles, and the suites they reference");
+            desc.add_options()(CtsApi::ch_suites_arg(), "");
             break;
         }
         default:

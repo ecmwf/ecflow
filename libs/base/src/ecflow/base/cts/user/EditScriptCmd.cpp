@@ -341,9 +341,7 @@ const char* EditScriptCmd::desc() {
 }
 
 void EditScriptCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(EditScriptCmd::arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       EditScriptCmd::desc());
+    desc.add_options()(EditScriptCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {

@@ -181,8 +181,7 @@ static const char* delete_node_desc() {
 
 void DeleteCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(CtsApi::delete_node_arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       delete_node_desc());
+                       boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void DeleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {

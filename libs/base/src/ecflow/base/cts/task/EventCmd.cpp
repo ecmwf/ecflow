@@ -102,8 +102,7 @@ const char* EventCmd::desc() {
 }
 
 void EventCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        EventCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), EventCmd::desc());
+    desc.add_options()(EventCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void EventCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     auto args = vm[arg()].as<std::vector<std::string>>();

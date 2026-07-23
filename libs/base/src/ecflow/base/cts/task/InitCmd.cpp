@@ -95,10 +95,8 @@ const char* InitCmd::desc() {
 }
 
 void InitCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(InitCmd::arg(), boost::program_options::value<std::string>(), InitCmd::desc())(
-        "add",
-        boost::program_options::value<std::vector<std::string>>()->multitoken(),
-        "Add variables e.g. name1=value1 name2=value2. Can only be used in combination with --init command.");
+    desc.add_options()(InitCmd::arg(), boost::program_options::value<std::string>())(
+        "add", boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void InitCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

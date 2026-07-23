@@ -97,10 +97,8 @@ const char* CompleteCmd::desc() {
 }
 
 void CompleteCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CompleteCmd::arg(),
-                       CompleteCmd::desc())("remove",
-                                            boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                                            "remove variables i.e name name2");
+    desc.add_options()(CompleteCmd::arg(), "")("remove",
+                                               boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void CompleteCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     if (clientEnv->debug()) {

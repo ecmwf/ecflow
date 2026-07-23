@@ -346,8 +346,7 @@ const char* CFileCmd::desc() {
 }
 
 void CFileCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        CFileCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), CFileCmd::desc());
+    desc.add_options()(CFileCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[arg()].as<std::vector<std::string>>();

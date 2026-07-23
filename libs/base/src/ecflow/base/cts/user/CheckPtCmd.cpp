@@ -132,8 +132,7 @@ static const char* arg_desc() {
 
 void CheckPtCmd::addOption(boost::program_options::options_description& desc) const {
     desc.add_options()(CtsApi::checkPtDefsArg(),
-                       boost::program_options::value<std::string>()->implicit_value(std::string{}),
-                       arg_desc());
+                       boost::program_options::value<std::string>()->implicit_value(std::string{}));
 }
 
 static int parse_check_pt_interval(const std::string& the_arg) {

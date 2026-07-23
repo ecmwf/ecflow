@@ -220,8 +220,7 @@ const char* LogCmd::desc() {
 }
 
 void LogCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        LogCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), LogCmd::desc());
+    desc.add_options()(LogCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {

@@ -113,8 +113,7 @@ const char* MeterCmd::desc() {
 }
 
 void MeterCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        MeterCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), MeterCmd::desc());
+    desc.add_options()(MeterCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void MeterCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {
     auto args = vm[arg()].as<std::vector<std::string>>();

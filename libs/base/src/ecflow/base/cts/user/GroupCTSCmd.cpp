@@ -400,7 +400,7 @@ const char* GroupCTSCmd::desc() {
 }
 
 void GroupCTSCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(GroupCTSCmd::arg(), boost::program_options::value<std::string>(), GroupCTSCmd::desc());
+    desc.add_options()(GroupCTSCmd::arg(), boost::program_options::value<std::string>());
 }
 
 void GroupCTSCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

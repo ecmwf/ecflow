@@ -61,7 +61,7 @@ static const char* arg_desc() {
 }
 
 void ServerVersionCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(CtsApi::server_version_arg(), arg_desc());
+    desc.add_options()(CtsApi::server_version_arg(), "");
 }
 
 void ServerVersionCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ace) const {

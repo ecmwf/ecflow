@@ -594,44 +594,35 @@ void PathsCmd::addOption(boost::program_options::options_description& desc) cons
 
     switch (api_) {
         case PathsCmd::CHECK: {
-            desc.add_options()(
-                CtsApi::check_arg(), po::value<std::vector<std::string>>()->multitoken(), get_check_desc());
+            desc.add_options()(CtsApi::check_arg(), po::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case PathsCmd::SUSPEND: {
-            desc.add_options()(
-                CtsApi::suspend_arg(), po::value<std::vector<std::string>>()->multitoken(), suspend_desc());
+            desc.add_options()(CtsApi::suspend_arg(), po::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case PathsCmd::RESUME: {
-            desc.add_options()(
-                CtsApi::resume_arg(), po::value<std::vector<std::string>>()->multitoken(), resume_desc());
+            desc.add_options()(CtsApi::resume_arg(), po::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case PathsCmd::KILL: {
-            desc.add_options()(
-                CtsApi::kill_arg(), po::value<std::vector<std::string>>()->multitoken(), get_kill_desc());
+            desc.add_options()(CtsApi::kill_arg(), po::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case PathsCmd::STATUS: {
-            desc.add_options()(
-                CtsApi::statusArg(), po::value<std::vector<std::string>>()->multitoken(), get_status_desc());
+            desc.add_options()(CtsApi::statusArg(), po::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case PathsCmd::EDIT_HISTORY: {
-            desc.add_options()(CtsApi::edit_history_arg(),
-                               po::value<std::vector<std::string>>()->multitoken(),
-                               get_edit_history_desc());
+            desc.add_options()(CtsApi::edit_history_arg(), po::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case PathsCmd::ARCHIVE: {
-            desc.add_options()(
-                CtsApi::archive_arg(), po::value<std::vector<std::string>>()->multitoken(), archive_desc());
+            desc.add_options()(CtsApi::archive_arg(), po::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case PathsCmd::RESTORE: {
-            desc.add_options()(
-                CtsApi::restore_arg(), po::value<std::vector<std::string>>()->multitoken(), restore_desc());
+            desc.add_options()(CtsApi::restore_arg(), po::value<std::vector<std::string>>()->multitoken());
             break;
         }
         case PathsCmd::NO_CMD:

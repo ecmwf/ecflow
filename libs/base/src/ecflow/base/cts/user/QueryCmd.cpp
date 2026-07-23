@@ -72,8 +72,7 @@ ecf::authorisation_t QueryCmd::authorise(AbstractServer& server) const {
 }
 
 void QueryCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(
-        QueryCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken(), QueryCmd::desc());
+    desc.add_options()(QueryCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 
 void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* clientEnv) const {

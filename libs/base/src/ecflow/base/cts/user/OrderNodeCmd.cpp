@@ -102,9 +102,7 @@ const char* OrderNodeCmd::desc() {
 }
 
 void OrderNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(OrderNodeCmd::arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       OrderNodeCmd::desc());
+    desc.add_options()(OrderNodeCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void OrderNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, AbstractClientEnv* ac) const {
     auto args = vm[OrderNodeCmd::arg()].as<std::vector<std::string>>();

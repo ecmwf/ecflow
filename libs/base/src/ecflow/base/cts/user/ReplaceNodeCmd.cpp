@@ -211,9 +211,7 @@ const char* ReplaceNodeCmd::desc() {
 }
 
 void ReplaceNodeCmd::addOption(boost::program_options::options_description& desc) const {
-    desc.add_options()(ReplaceNodeCmd::arg(),
-                       boost::program_options::value<std::vector<std::string>>()->multitoken(),
-                       ReplaceNodeCmd::desc());
+    desc.add_options()(ReplaceNodeCmd::arg(), boost::program_options::value<std::vector<std::string>>()->multitoken());
 }
 void ReplaceNodeCmd::create(Cmd_ptr& cmd,
                             boost::program_options::variables_map& vm,
