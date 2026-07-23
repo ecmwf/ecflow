@@ -103,5 +103,94 @@
       ]
     }
   ],
-  "environment_variables": []
+  "environment_variables": [
+    {
+      "name": "ECF_HOST",
+      "type": "string",
+      "required": "mandatory",
+      "applies_to": "both",
+      "overridable_by": "host",
+      "description": "The main server hostname; default value is 'localhost'"
+    },
+    {
+      "name": "ECF_PORT",
+      "type": "int",
+      "required": "mandatory",
+      "applies_to": "both",
+      "overridable_by": "port",
+      "description": "The main server port; default value is '3141'"
+    },
+    {
+      "name": "ECF_SSL",
+      "type": "any",
+      "required": "optional",
+      "applies_to": "both",
+      "requires": "ECF_OPENSSL",
+      "overridable_by": "ssl",
+      "description": "Enable secure communication between client and server."
+    },
+    {
+      "name": "ECF_HOSTFILE",
+      "type": "string",
+      "required": "optional",
+      "applies_to": "both",
+      "description": "File that lists alternate hosts to try, if connection to main host fails"
+    },
+    {
+      "name": "ECF_HOSTFILE_POLICY",
+      "type": "string",
+      "required": "optional",
+      "applies_to": "both",
+      "description": "The policy ('task' or 'all') to define which commands consider using alternate hosts."
+    },
+    {
+      "name": "ECF_NAME",
+      "type": "string",
+      "required": "mandatory",
+      "applies_to": "task",
+      "description": "Full path name to the task"
+    },
+    {
+      "name": "ECF_PASS",
+      "type": "string",
+      "required": "mandatory",
+      "applies_to": "task",
+      "description": "The job password (defined by the server, and used to authenticate client requests)"
+    },
+    {
+      "name": "ECF_TRYNO",
+      "type": "int",
+      "required": "mandatory",
+      "applies_to": "task",
+      "description": "The run number of the job (defined by the server, and used in job/output file name generation."
+    },
+    {
+      "name": "ECF_RID",
+      "type": "string",
+      "required": "mandatory",
+      "applies_to": "task",
+      "description": "The process identifier. Supports identifying zombies and automated killing of running jobs"
+    },
+    {
+      "name": "ECF_TIMEOUT",
+      "type": "int",
+      "required": "optional",
+      "applies_to": "task",
+      "description": "Maximum time in *seconds* for client to deliver message to main server; default is 24 hours"
+    },
+    {
+      "name": "ECF_DENIED",
+      "type": "any",
+      "required": "optional",
+      "applies_to": "task",
+      "description": "Allows task to exit with an error, upon connection failure, thus avoids ECF_TIMEOUTs wait."
+    },
+    {
+      "name": "NO_ECF",
+      "type": "any",
+      "required": "optional",
+      "applies_to": "task",
+      "description": "If set, ecflow_client exits immediately with success; useful to test the scripts without a server"
+    }
+  ]
 }

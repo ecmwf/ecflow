@@ -139,6 +139,11 @@
           "type": "string",
           "minLength": 1
         },
+        "overridable_by": {
+          "description": "Name of the global-option whose value can substitute for this variable (e.g. ECF_HOST is overridable_by host). Today's Help.cpp marks exactly these as mandatory*/optional*; absence means no CLI override exists.",
+          "type": "string",
+          "minLength": 1
+        },
         "description": { "type": "string", "minLength": 1 }
       }
     },

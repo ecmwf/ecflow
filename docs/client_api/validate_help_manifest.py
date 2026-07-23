@@ -71,6 +71,16 @@ def check_cross_references(manifest):
         elif pairs_with.get(partner) != name:
             problems.append(f"option '{name}' pairs_with '{partner}', which does not pair back")
 
+    global_options = {
+        option["name"] for option in manifest.get("options", []) if option.get("kind") == "global-option"
+    }
+    for variable in manifest.get("environment_variables", []):
+        overridable_by = variable.get("overridable_by")
+        if overridable_by is not None and overridable_by not in global_options:
+            problems.append(
+                f"environment variable '{variable['name']}' overridable_by unknown global-option '{overridable_by}'"
+            )
+
     return problems
 
 
