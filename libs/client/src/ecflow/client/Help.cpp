@@ -12,6 +12,7 @@
 
 #include <iomanip>
 
+#include "ecflow/client/HelpCatalog.hpp"
 #include "ecflow/core/Child.hpp"
 #include "ecflow/core/Ecf.hpp"
 #include "ecflow/core/Str.hpp"
@@ -215,6 +216,53 @@ void sort_options_by_long_name(Help::descriptions_t& options) {
         options.begin(), options.end(), [](const auto& a, const auto& b) { return a->long_name() < b->long_name(); });
 }
 
+///
+/// @brief Finds the help manifest entry registered under the given name.
+///
+/// Checks commands first, then options, since the two arrays are searched
+/// with the same lookup key.
+///
+/// @param[in] name Long name of the command or option to look up.
+/// @return Pointer to the matching manifest entry, or nullptr if @p name is
+///         not yet migrated onto the manifest, in which case the caller
+///         falls back to the free-form Boost description registered for
+///         that name.
+///
+const nlohmann::json* catalog_entry_for(const std::string& name) {
+    if (const nlohmann::json* command = ecf::HelpCatalog::find_command(name)) {
+        return command;
+    }
+    return ecf::HelpCatalog::find_option(name);
+}
+
+///
+/// @brief Joins a manifest entry's description blocks into a single string.
+///
+/// Blocks are joined the same way the paragraphs were originally separated
+/// in the C++ source: a blank line between blocks. A verbatim block (e.g.
+/// CtsCmd's ASCII-art tables) is reproduced as-is, without a paragraph-break
+/// interpretation of its own embedded newlines.
+///
+/// @param[in] entry Manifest entry (command or option) holding a
+///                  "description" array of string or verbatim blocks.
+/// @return The reconstructed description text.
+///
+std::string catalog_description_text(const nlohmann::json& entry) {
+    std::string text;
+    for (const auto& block : entry.at("description")) {
+        if (!text.empty()) {
+            text += "\n\n";
+        }
+        if (block.is_string()) {
+            text += block.get<std::string>();
+        }
+        else if (block.is_object() && block.contains("verbatim")) {
+            text += block.at("verbatim").get<std::string>();
+        }
+    }
+    return text;
+}
+
 class Documentation {
 public:
     using descriptions_t = boost::program_options::options_description;
@@ -344,14 +392,24 @@ void Documentation::show_summary(std::ostream& os, PREDICATE select) const {
 
     int max_width = get_options_max_width(options);
     for (const auto& option : options) {
-        std::vector<std::string> lines;
-        ecf::algorithm::split_at(lines, option->description(), "\n");
-        if (!lines.empty()) {
-            std::string name = option->long_name();
-            os << "  " << std::left << std::setw(max_width) << name << " ";
-            os << Documentation::get_name_kind(name);
-            os << lines[0] << "\n";
+        std::string name = option->long_name();
+
+        std::string first_line;
+        if (const nlohmann::json* entry = catalog_entry_for(name)) {
+            first_line = entry->at("summary").get<std::string>();
         }
+        else {
+            std::vector<std::string> lines;
+            ecf::algorithm::split_at(lines, option->description(), "\n");
+            if (lines.empty()) {
+                continue;
+            }
+            first_line = lines[0];
+        }
+
+        os << "  " << std::left << std::setw(max_width) << name << " ";
+        os << Documentation::get_name_kind(name);
+        os << first_line << "\n";
     }
     os << "\n";
 }
@@ -391,7 +449,12 @@ void Documentation::show_command_help(std::ostream& os, const std::string& comma
             os << "-";
         }
         os << "\n\n";
-        os << od->description() << "\n\n";
+        if (const nlohmann::json* entry = catalog_entry_for(od->long_name())) {
+            os << catalog_description_text(*entry) << "\n\n";
+        }
+        else {
+            os << od->description() << "\n\n";
+        }
         if (!CommandFilter::is_option(od->long_name())) {
             os << client_env_description;
             if (ecf::Child::valid_child_cmd(od->long_name())) {

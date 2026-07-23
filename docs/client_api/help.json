@@ -62,7 +62,7 @@
         "Change event. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1(string | int)     = event-name",
         "  arg2(string)(optional) = [ set | clear] default value is set",
         "If this task command is a zombie, then the default action will be to *fob*,\ni.e allow the ecflow client command to complete without an error\nThe default can be overridden by using zombie attributes.",
-        "Usage:\n  ecflow_client --event=ev       # set the event, default since event initial value is clear\n  ecflow_client --event=ev set   # set the event, explicit\n  ecflow_client --event=ev clear # clear the event, use when event initial value is set"
+        "Usage:\n  ecflow_client --event=ev       # set the event, default since event initial value is clear\n  ecflow_client --event=ev set   # set the event, explicit\n  ecflow_client --event=ev clear # clear the event, use when event initial value is set\n"
       ],
       "arguments": [
         {
@@ -170,7 +170,7 @@
         "QueueCmd. For use in the '.ecf' script file *only*\nHence the context is supplied via environment variables\n  arg1(string) = queue-name:\n  arg2(string) = action: [active | aborted | complete | no_of_aborted | reset ]\n     active: returns the first queued/aborted step, the return string is the queue value from the definition\n     no_of_aborted: returns number of aborted steps as a string, i.e 10\n     reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors\n  arg3(string) = step: value returned from step=$(ecflow_client --queue=queue_name active)\n                This is only valid for complete and aborted steps\n  arg4(string) = path: (optional). The path where the queue is defined.\n                 By default we search for the queue up the node tree.",
         "If this task command is a zombie, then the default action will be to *block*,\nThe default can be overridden by using zombie attributes.If the path to the queue is not defined, then this command will\nsearch for the queue up the node hierarchy. If no queue found, command fails",
         "Usage:\nstep=\"\"\nQNAME=\"my_queue_name\"\nwhile [1 == 1 ] ; do\n   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps processed\n   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active\n   if [[ $step == \"<NULL>\" ]] ; then\n        break;\n   fi\n   ...\n   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed\ndone",
-        "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }"
+        "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }\n"
       ],
       "arguments": [
         {
@@ -270,8 +270,7 @@
       "requires": "ECF_OPENSSL",
       "summary": "Enables the use of SSL when contacting the server.",
       "description": [
-        "Enables the use of SSL when contacting the server.",
-        "When specified overrides the environment variable ECF_SSL."
+        "Enables the use of SSL when contacting the server.\nWhen specified overrides the environment variable ECF_SSL."
       ]
     },
     {
@@ -279,7 +278,7 @@
       "kind": "global-option",
       "summary": "Enables communication over HTTP between client/server.",
       "description": [
-        "Enables communication over HTTP between client/server."
+        "Enables communication over HTTP between client/server.\n"
       ]
     },
     {
@@ -287,7 +286,7 @@
       "kind": "global-option",
       "summary": "Enables communication over HTTPS between client/server.",
       "description": [
-        "Enables communication over HTTPS between client/server."
+        "Enables communication over HTTPS between client/server.\n"
       ]
     },
     {
@@ -311,8 +310,7 @@
       "kind": "global-option",
       "summary": "Enables the display of client environment settings and execution details.",
       "description": [
-        "Enables the display of client environment settings and execution details.",
-        "Has the same effect as setting environment variable ECF_DEBUG_CLIENT."
+        "Enables the display of client environment settings and execution details.\nHas the same effect as setting environment variable ECF_DEBUG_CLIENT."
       ]
     }
   ],
