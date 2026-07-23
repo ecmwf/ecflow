@@ -510,6 +510,16 @@
       ]
     },
     {
+      "name": "move",
+      "kind": "user",
+      "visibility": "internal",
+      "implementation": "MoveCmd",
+      "summary": "The move command is an internal cmd, Called by the plug cmd. Does not appear on public api.",
+      "description": [
+        "The move command is an internal cmd, Called by the plug cmd. Does not appear on public api."
+      ]
+    },
+    {
       "name": "msg",
       "kind": "user",
       "visibility": "public",
