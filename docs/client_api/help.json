@@ -259,6 +259,66 @@
         }
       ],
       "usage": ["ecflow_client --wait=\"/suite/taskx == complete\""]
+    },
+    {
+      "name": "zombie_adopt",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ZombieCmd",
+      "summary": "Locates the task in the servers list of zombies, and sets to adopt.",
+      "description": [
+        "Locates the task in the servers list of zombies, and sets to adopt.\nNext time a child command (init,event,meter,label,abort,complete,wait queue) communicates with the server, the password on the zombie is adopted by the task.\nThis is only allowed if the process id matches, otherwise an error is issued.\nThe zombie reference stored in the server is then deleted.\n  args = list of task paths, at least one expected\n  --zombie_adopt=/path/to/task  /path/to/task2"
+      ]
+    },
+    {
+      "name": "zombie_block",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ZombieCmd",
+      "summary": "Locates the task in the servers list of zombies, and sets flags to block it.",
+      "description": [
+        "Locates the task in the servers list of zombies, and sets flags to block it.\nThis is default behaviour of the child commands(init,abort,complete,wait,queue)\nwhen the server cannot match the passwords. Each child commands will continue\nattempting to connect to the server for 24 hours, and will then return an error.\nThe connection timeout can be configured with environment ECF_TIMEOUT\n  args = list of task paths, at least one expected\n  --zombie_block=/path/to/task  /path/to/task2"
+      ]
+    },
+    {
+      "name": "zombie_fail",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ZombieCmd",
+      "summary": "Locates the task in the servers list of zombies, and sets to fail.",
+      "description": [
+        "Locates the task in the servers list of zombies, and sets to fail.\nNext time a child command (init,event,meter,label,abort,complete) which matches zombie, communicates with the server, will be set to fail.\nDepending on the job setup this may force a abort, the abort will also fail.\nHence job structure should use 'set -e' in the error trapping functions to prevent\ninfinite recursion.\nThe references to the zombie in the server is automatically deleted after 1 hour\n  args = list of task paths, at least one expected\n  --zombie_fail=/path/to/task  /path/to/task2"
+      ]
+    },
+    {
+      "name": "zombie_fob",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ZombieCmd",
+      "summary": "Locates the task in the servers list of zombies, and sets to fob.",
+      "description": [
+        "Locates the task in the servers list of zombies, and sets to fob.\nThis default behaviour of the child commands(label,event,meter) is to fob\nNext time the child commands (init,event,meter,label,abort,complete,wait,queue) communicate\nwith the server, they will complete successfully (but without updating the node tree)\nallowing the job to finish.\nThe references to the zombie in the server is automatically deleted after 1 hour\n  args = list of task paths, at least one expected\n  --zombie_fob=/path/to/task1 /path/to/task2"
+      ]
+    },
+    {
+      "name": "zombie_kill",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ZombieCmd",
+      "summary": "Locates the task in the servers list of zombies, and sets flags to kill",
+      "description": [
+        "Locates the task in the servers list of zombies, and sets flags to kill\nThe kill is done using ECF_KILL_CMD, but using the process_id from the zombie\nThe job is allowed to continue until the kill is received\nCan only kill zombies that have an associated Task, hence path zombies\nmust be killed manually.\n  arg = list of task paths, at least one expected\n  --zombie_kill=/path/to/task  /path/to/task2"
+      ]
+    },
+    {
+      "name": "zombie_remove",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ZombieCmd",
+      "summary": "Locates the task in the servers list of zombies, and removes it.",
+      "description": [
+        "Locates the task in the servers list of zombies, and removes it.\nSince a job typically has many child commands (i.e init, complete, event, meter, label, wait, queue)\nthe zombie may reappear\n  args = list of task paths, at least one expected\n  --zombie_remove=/path/to/task  /path/to/task2"
+      ]
     }
   ],
   "options": [
