@@ -43,6 +43,16 @@
       ]
     },
     {
+      "name": "begin",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "BeginCmd",
+      "summary": "Begin playing the definition in the server.",
+      "description": [
+        "Begin playing the definition in the server.\nExpects zero or a single quoted string.\n  arg1 = suite-name | Nothing | force\n         play the chosen suite, if no arg specified, play all suites, in the definition\n         force means reset the begin status on the suites and bypass checks.\n         This is only required if suite-name is provide as the first argument\n         Using force can cause the creation of zombies\nUsage:\n--begin                     # will begin all suites\n--begin=\"--force\"         # reset and then begin all suites, bypassing any checks. Note: string must be quoted\n--begin=\"mySuite\"         # begin playing suite of name 'mySuite'\n--begin=\"mySuite --force\" # reset and begin playing suite 'mySuite', bypass check"
+      ]
+    },
+    {
       "name": "ch_add",
       "kind": "user",
       "visibility": "public",
@@ -131,6 +141,16 @@
       ]
     },
     {
+      "name": "check_pt",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CheckPtCmd",
+      "summary": "Forces the definition file in the server to be written to disk *or* allow mode,",
+      "description": [
+        "Forces the definition file in the server to be written to disk *or* allow mode,\ninterval and alarm to be changed.\nWhenever the check pt file is written to disk, it is measured.\nIf the time to save to disk is greater than the default of 30 seconds,\nthen an alarm is raised. This can be seen in the GUI as a late flag on the server.\nOnce the late flag has been set it will need to manually cleared in the GUI\nor by using --alter functionality\nNote excessive save times can interfere with job scheduling.\nThe alarm threshold can be changed. See below.\n   arg1 = (optional) mode [ never | on_time | on_time:<integer> | always | <integer>]\n     never     : Never check point the definition in the server\n     on_time   : Turn on automatic check pointing at interval stored on server\n     on_time<integer> : Turn on automatic check point, with the specified interval in seconds\n     alarm<integer>   : Modify the alarm notification time for check pt saving to disk\n     always    : Check point at any change in node tree, *NOT* recommended for large definitions\n     <integer> : This specifies the interval in seconds when server should automatically check pt.\n                 This will only take effect of mode is on_time/CHECK_ON_TIME\n                 Should ideally be a value greater than 60 seconds, default is 120 seconds\nUsage:\n  --check_pt\n    Immediately check point the definition held in the server\n  --check_pt=never\n    Switch off check pointing\n  --check_pt=on_time\n    Start automatic check pointing at the interval stored in the server\n  --check_pt=180\n    Change the check pt interval to 180 seconds\n  --check_pt=on_time:90\n    Change mode and interval, to automatic check pointing every 90 seconds\n  --check_pt=alarm:35\n    Change the alarm time for check pt saves. i.e if saving the check pt takes longer than 35 seconds\n    set the late flag on the server."
+      ]
+    },
+    {
       "name": "complete",
       "kind": "task",
       "visibility": "public",
@@ -170,6 +190,16 @@
       "description": ["Enables debug output from the server"]
     },
     {
+      "name": "delete",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "DeleteCmd",
+      "summary": "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.",
+      "description": [
+        "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.\n  arg1 = [ force | yes ](optional)  # Use this parameter to bypass checks, i.e. for active or submitted tasks\n  arg2 = yes(optional)              # Use 'yes' to bypass the confirmation prompt\n  arg3 = node paths | _all_         # _all_ means delete all suites\n                                    # node paths must start with a leading '/'\nUsage:\n  --delete=_all_                    # Delete all suites in server. Use with care.\n  --delete=/suite/f1/t1             # Delete node at /suite/f1/t1. This will prompt\n  --delete=force /suite/f1/t1       # Delete node at /suite/f1/t1 even if active or submitted\n  --delete=force yes /s1 /s2        # Delete suites s1,s2 even if active or submitted, bypassing prompt"
+      ]
+    },
+    {
       "name": "edit_history",
       "kind": "user",
       "visibility": "public",
@@ -177,6 +207,21 @@
       "summary": "Returns the edit history associated with a Node.",
       "description": [
         "Returns the edit history associated with a Node.\nCan also be used to clear the edit history.\nUsage::\n   --edit_history=/s1/f1/t1  # return history of changes for the given node\n   --edit_history=clear      # clear/purge *ALL* edit history from all nodes.\n"
+      ]
+    },
+    {
+      "name": "edit_script",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "EditScriptCmd",
+      "summary": "Allows user to edit, pre-process and submit the script.",
+      "description": [
+        "Allows user to edit, pre-process and submit the script.\nWill allow pre-processing of arbitrary file with 'pre_process_file' option\n arg1 = path to task  # The path to the task/alias\n arg2 = [ edit | pre_process | submit | pre_process_file | submit_file ]\n    edit : will return the script file to standard out. The script will\n           include used variables enclosed between %comment/%end at the\n           start of the file\n    pre_process: Will return the script file to standard out.The script will\n                 include used variables enclosed between %comment/%end at the\n                 start of the file and with all %include expanded\n    submit: Will extract the used variables from the supplied file, i.e\n            between the %comment/%end and use these them to generate the\n            job using the ecf file accessible from the server\n    pre_process_file: Will pre process the user supplied file.\n                      Will expand includes,variable substitution,\n                      remove manual & comment sections.\n    submit_file: Like submit, but the supplied file, is submitted by the server\n                 The last 2 options allow complete freedom to debug the script file\n arg3 = [ path_to_script_file ]\n          needed for option [  pre_process_file | submit_file ]\n arg4 = create_alias (optional) default value is false, for use with 'submit_file' option\n arg5 = no_run (optional) default value is false, i.e immediately run the alias\n        is no_run is specified the alias in only created\nUsage:\n--edit_script=/path/to/task edit > script_file\n   server returns script with the used variables to standard out\n   The user can choose to edit this file",
+        "--edit_script=/path/to/task pre_process > pre_processed_script_file\n  server will pre process the ecf file accessible from the server\n  (i.e expand all %includes) and return the file to standard out",
+        "--edit_script=/path/to/task submit script_file\n  Will extract the used variables in the 'script_file' and will uses these\n  variables during variable substitution of the ecf file accessible by the\n  server. This is then submitted as a job",
+        "--edit_script=/path/to/task pre_process_file file_to_pre_process\n  The server will pre-process the user supplied file and return the contents\n  to standard out. This pre-processing is the same as job file processing,\n  but on a arbitrary file",
+        "--edit_script=/path/to/task submit_file file_to_submit\n  Will extract the used variables in the 'file_to_submit' and will uses these\n  variables during variable substitution, the file is then submitted for job\n  generation by the server",
+        "--edit_script=/path/to/task submit_file file_to_submit create_alias\n  Like the the previous example but will create and run as an alias"
       ]
     },
     {
@@ -210,12 +255,43 @@
       ]
     },
     {
+      "name": "file",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "CFileCmd",
+      "summary": "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]",
+      "description": [
+        "Return the chosen file. Select from [ script<default> | job | jobout | manual | kill | stat ]\nBy default will return the script.\n  arg1 = path to node\n  arg2 = (optional) [ script<default> | job | jobout | manual | kill | stat ]\n         kill will attempt to return output of ECF_KILL_CMD, i.e the file %ECF_JOB%.kill\n         stat will attempt to return output of ECF_STATUS_CMD, i.e the file %ECF_JOB%.stat\n  arg3 = (optional) max_lines = 10000 <default>"
+      ]
+    },
+    {
+      "name": "force",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ForceCmd",
+      "summary": "Force a node to a given state, or set its event.",
+      "description": [
+        "Force a node to a given state, or set its event.\nWhen a task is set to complete, it may be automatically re-queued if it has\nmultiple future time dependencies. However each time we force a complete it will\nexpire any time based attribute on that node. When the last time based attribute\nexpires, the node will stay in a complete state.\nThis behaviour allow Repeat values to be incremented interactively.\nA repeat attribute is incremented when all the child nodes are complete\nin this case the child nodes are automatically re-queued.\n  arg1 = [ unknown | complete | queued | submitted | active | aborted | clear | set ]\n  arg2 = (optional) recursive\n         Applies state to node and recursively to all its children\n  arg3 = (optional) full\n         Set repeat variables to last value, only works in conjunction\n         with recursive option\n  arg4 = path_to_node or path_to_node:<event>: paths must begin with '/'\nUsage:\n  --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete\n  --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task\n  --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1\nEffect:\n  Consider the effect of forcing complete when the current time is at 09:00\n  suite s1\n     task t1; time 12:00             # will complete straight away\n     task t2; time 10:00 13:00 01:00 # will complete on fourth attempt",
+        "  --force=complete /s1/t1 /s1/t2\n  When we have a time range(i.e as shown with task t2), it is re-queued and the\n  next time slot is incremented for each complete, until it expires, and the task completes.\n  Use the Why command, to show next run time (i.e. next time slot)"
+      ]
+    },
+    {
       "name": "force-dep-eval",
       "kind": "user",
       "visibility": "public",
       "implementation": "CtsCmd",
       "summary": "Force dependency evaluation. Used for DEBUG only.",
       "description": ["Force dependency evaluation. Used for DEBUG only."]
+    },
+    {
+      "name": "free-dep",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "FreeDepCmd",
+      "summary": "Free dependencies for a node. Defaults to triggers",
+      "description": [
+        "Free dependencies for a node. Defaults to triggers\nAfter freeing the time related dependencies (i.e time,today,cron)\nthe next time slot will be missed.\n  arg1 = (optional) trigger\n  arg2 = (optional) all\n         Free trigger, date and all time dependencies\n  arg3 = (optional) date\n         Free date dependencies\n  arg4 = (optional) time\n         Free all time dependencies i.e time, day, today, cron\n  arg5 = List of paths. At least one required. Must start with a leading '/'\nUsage:\n  --free-dep=/s1/t1 /s2/t2   # free trigger dependencies for task's t1,t2\n  --free-dep=all /s1/f1/t1   # free all dependencies of /s1/f1/t1\n  --free-dep=date /s1/f1     # free holding date dependencies of /s1/f1"
+      ]
     },
     {
       "name": "get",
@@ -321,6 +397,26 @@
       "usage": ["ecflow_client --label=progressed merlin"]
     },
     {
+      "name": "load",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "LoadDefsCmd",
+      "summary": "Check and load definition or checkpoint file into server.",
+      "description": [
+        "Check and load definition or checkpoint file into server.\nThe loaded definition will be checked for valid trigger and complete expressions,\nadditionally in-limit references to limits will be validated.\nIf the server already has the 'suites' of the same name, then a error message is issued.\nThe suite's can be overwritten if the force option is used.\nTo just check the definition and not send to server, use 'check_only'\nThis command can also be used to load a checkpoint file into the server\n  arg1 = path to the definition file or checkpoint file\n  arg2 = (optional) [ force | check_only | print | stats ]  # default = false for all\nUsage:\n--load=/my/home/exotic.def               # will error if suites of same name exists\n--load=/my/home/exotic.def force         # overwrite suite's of same name in the server\n--load=/my/home/exotic.def check_only    # Just check, don't send to server\n--load=/my/home/exotic.def stats         # Show defs statistics, don't send to server\n--load=host1.3141.check                  # Load checkpoint file to the server\n--load=host1.3141.check print            # print definition to standard out in defs format\n"
+      ]
+    },
+    {
+      "name": "log",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "LogCmd",
+      "summary": "Get,clear,flush or create a new log file.",
+      "description": [
+        "Get,clear,flush or create a new log file.\nThe user must ensure that a valid path is specified.\nSpecifying '--log=get' with a large number of lines from the server,\ncan consume a lot of **memory**. The log file can be a very large file,\nhence we use a default of 100 lines, optionally the number of lines can be specified.\n arg1 = [ get | clear | flush | new | path ]\n  get -   Outputs the log file to standard out.\n          defaults to return the last 100 lines\n          The second argument can specify how many lines to return\n  clear - Clear the log file of its contents.\n  flush - Flush and close the log file. (only temporary) next time\n          server writes to log, it will be opened again. Hence it best\n          to halt the server first\n  new -   Flush and close the existing log file, and start using the\n          the path defined for ECF_LOG. By changing this variable\n          a new log file path can be used\n          Alternatively an explicit path can also be provided\n          in which case ECF_LOG is also updated\n  path -  Returns the path name to the existing log file\n arg2 = [ new_path | optional last n lines ]\n         if get specified can specify lines to get. Value must be convertible to an integer\n         Otherwise if arg1 is 'new' then the second argument must be a path\nUsage:\n  --log=get                        # Write the last 100 lines of the log file to standard out\n  --log=get 200                    # Write the last 200 lines of the log file to standard out\n  --log=clear                      # Clear the log file. The log is now empty\n  --log=flush                      # Flush and close log file, next request will re-open log file\n  --log=new /path/to/new/log/file  # Close and flush log file, and create a new log file, updates ECF_LOG\n  --log=new                        # Close and flush log file, and create a new log file using ECF_LOG variable\n"
+      ]
+    },
+    {
       "name": "meter",
       "kind": "task",
       "visibility": "public",
@@ -358,6 +454,16 @@
       ]
     },
     {
+      "name": "msg",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "LogMessageCmd",
+      "summary": "Writes the input string to the log file.",
+      "description": [
+        "Writes the input string to the log file.\n  arg1 = string\nUsage:\n  --msg=\"place me in the log file\""
+      ]
+    },
+    {
       "name": "news",
       "kind": "user",
       "visibility": "public",
@@ -365,6 +471,19 @@
       "summary": "Returns true if state of server definition changed.",
       "description": [
         "Returns true if state of server definition changed.\n*Important* for use with c++/python interface only.\nRequires Given a client handle, change and modify number determine if server changed since last call\nThis relies on user calling sync after news to update the locally stored modify and change numbers.\nThese numbers are then used in the next call to news."
+      ]
+    },
+    {
+      "name": "order",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "OrderNodeCmd",
+      "summary": "Re-orders the nodes held by the server",
+      "description": [
+        "Re-orders the nodes held by the server\n  arg1 = node path\n  arg2 = [ top | bottom | alpha | order | up | down | runtime]\nIt should be noted that in the absence of triggers and time/date dependencies,\nthe tasks are submitted in order.\nThis changes the order and hence affects the submission order::",
+        "   o top     raises the node within its parent, so that it is first\n   o bottom  lowers the node within its parent, so that it is last\n   o alpha   Arranges for all the peers of selected note to be sorted alphabetically (case-insensitive)\n   o order   Arranges for all the peers of selected note to be sorted in reverse alphabet(case-insensitive)\n   o up      Moves the selected node up one place amongst its peers\n   o down    Moves the selected node down one place amongst its peers",
+        "   o runtime Orders the nodes according to state change runtime\n             for families by accumulated runtime of its children\n             useful to submit the task that take longer earlier",
+        "This command can fail because:\n- The node path does not exist in the server\n- The order_type is not does not match one of arg2\nUsage:\n  --order=/suite/f1 top  # move node f1 to the top"
       ]
     },
     {
@@ -483,6 +602,29 @@
       ]
     },
     {
+      "name": "replace",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ReplaceNodeCmd",
+      "summary": "Replaces a node in the server, with the given path",
+      "description": [
+        "Replaces a node in the server, with the given path\nCan also be used to add nodes in the server\n  arg1 = path to node\n         must exist in the client defs(arg2). This is also the node we want to\n         replace in the server\n  arg2 = path to client definition file\n         provides the definition of the new node\n  arg3 = (optional) [ parent | false ] (default = parent)\n         create parent families or suite as needed, when arg1 does not\n         exist in the server\n  arg4 = (optional) force (default = false) \n         Force the replacement even if it causes zombies to be created\nReplace can fail if:\n- The node path(arg1) does not exist in the provided client definition(arg2)\n- The client definition(arg2) must be free of errors\n- If the third argument is not provided, then node path(arg1) must exist in the server\n- Nodes to be replaced are in active/submitted state, in which case arg4(force) can be used",
+        "Replace will preserve the suspended status, if this is not required please re-queue first\nAfter replace is done, we check trigger expressions. These are reported to standard output.\nIt is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.\nPlease note, you can use --check to check trigger expression and limits in the server.\nFor more information use --help check.",
+        "Usage:\n  --replace=/suite/f1/t1 /tmp/client.def  parent      # Add/replace node tree /suite/f1/t1\n  --replace=/suite/f1/t1 /tmp/client.def  false force # replace t1 even if its active or submitted"
+      ]
+    },
+    {
+      "name": "requeue",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "RequeueNodeCmd",
+      "summary": "Re queues the specified node(s)",
+      "description": [
+        "Re queues the specified node(s)\n  If any child of the specified node(s) is in a suspended state, this state is cleared\nRepeats are reset to their starting values, relative time attributes are reset.\n  arg1 = (optional) [ abort | force ]\n         abort  = re-queue only aborted tasks below node\n         force  = Force the re-queueing even if there are nodes that are active or submitted\n         <null> = Checks if any tasks are in submitted or active states below the node\n                  if so does nothing. Otherwise re-queues the node.\n  arg2 = list of node paths. The node paths must begin with a leading '/' character",
+        "Usage:\n  --requeue=abort /suite/f1  # re-queue all aborted tasks of /suite/f1\n  --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.\n  --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'"
+      ]
+    },
+    {
       "name": "restart",
       "kind": "user",
       "visibility": "public",
@@ -526,6 +668,16 @@
       ]
     },
     {
+      "name": "run",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "RunNodeCmd",
+      "summary": "Ignore triggers, limits, time or date dependencies, just run the Task.",
+      "description": [
+        "Ignore triggers, limits, time or date dependencies, just run the Task.\nWhen a job completes, it may be automatically re-queued if it has a cron\nor multiple time dependencies. If we have multiple time based attributes,\nthen each run, will expire the time.\nWhen we run before the time, we want to avoid re-running the task then\na flag is set, so that it is not automatically re-queued.\nA repeat attribute is incremented when all the child nodes are complete\nin this case the child nodes are automatically re-queued.\nHence this command can be aid, in allowing a Repeat attribute to be incremented\n  arg1 = (optional)force\n         Forcibly run, even if there are nodes that are active or submitted\n         This can result in zombie creation\n  arg2 = node path(s). The paths must begin with a leading '/' character.\n         If the path is /suite/family will recursively run all tasks\n         When providing multiple paths avoid running the same task twice\nExample:\n  --run=/suite/t1                    # run task t1\nEffect:\n     task t1; time 12:00             # will complete if run manually\n     task t2; time 10:00 13:00 01:00 # will run 4 times before completing\n When we have a time range(i.e as shown with task t2), then next time slot\n is incremented for each run, until it expires, and the task completes.\n Use the Why command, to show next run time (i.e. next time slot)"
+      ]
+    },
+    {
       "name": "server_load",
       "kind": "user",
       "visibility": "public",
@@ -539,6 +691,16 @@
         "Usage:\n   --server_load=/path/to_log_file  # Parses log and generate gnuplot files\n   --server_load                    # Log file path is requested from server\n                                    # which is then used to generate gnuplot files\n                                    # *AVOID* if log file path is accessible",
         "Now use any png viewer to see the output i.e",
         "> display   <host>.<port>.png\n> feh       <host>.<port>.png\n> eog       <host>.<port>.png\n> xdg-open  <host>.<port>.png\n> w3m       <host>.<port>.png\n"
+      ]
+    },
+    {
+      "name": "server_version",
+      "kind": "user",
+      "visibility": "public",
+      "implementation": "ServerVersionCmd",
+      "summary": "Returns the version number of the server",
+      "description": [
+        "Returns the version number of the server\nUsage:\n  --server_version\n    Writes the version to standard output\n"
       ]
     },
     {
