@@ -17,6 +17,7 @@
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
 #include "ecflow/base/Client.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/cts/user/MoveCmd.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
@@ -304,8 +305,9 @@ void PlugCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Ab
     }
 
     if (args.size() != 2) {
-        throw std::runtime_error(MESSAGE("PlugCmd: Two arguments are expected, found " << args.size() << "\n"
-                                                                                       << PlugCmd::desc() << "\n"));
+        throw std::runtime_error(MESSAGE("PlugCmd: Two arguments are expected, found "
+                                         << args.size() << "\n"
+                                         << HelpCatalog::description_for("plug").value_or(PlugCmd::desc()) << "\n"));
     }
 
     std::string sourceNode = args[0];

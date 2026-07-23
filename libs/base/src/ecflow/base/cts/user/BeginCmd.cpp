@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Str.hpp"
 #include "ecflow/node/NodeAlgorithms.hpp"
@@ -184,7 +185,8 @@ void BeginCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         else {
             throw std::runtime_error(MESSAGE("BeginCmd: Expect zero, one or 2 arguments, but found "
                                              << lineTokens.size() << " arguments\n"
-                                             << BeginCmd::desc() << "\n"));
+                                             << HelpCatalog::description_for("begin").value_or(BeginCmd::desc())
+                                             << "\n"));
         }
     }
 

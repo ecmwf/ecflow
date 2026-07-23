@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Filesystem.hpp"
@@ -45,7 +46,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename,
     if (defs_filename_.empty()) {
         throw std::runtime_error(
             MESSAGE("LoadDefsCmd::LoadDefsCmd: The pathname to the definition file must be provided\n"
-                    << LoadDefsCmd::desc()));
+                    << HelpCatalog::description_for("load").value_or(LoadDefsCmd::desc())));
     }
 
     defs_ptr defs = Defs::create();

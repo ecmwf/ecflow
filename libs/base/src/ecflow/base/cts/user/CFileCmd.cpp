@@ -17,6 +17,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -358,7 +359,7 @@ void CFileCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     if (args.size() < 1) {
         throw std::runtime_error(MESSAGE("CFileCmd: At least one arguments expected for File. Found "
                                          << args.size() << "\n"
-                                         << CFileCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("file").value_or(CFileCmd::desc()) << "\n"));
     }
 
     std::string pathToNode = args[0];

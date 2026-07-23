@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Log.hpp"
 #include "ecflow/node/Node.hpp"
@@ -148,7 +149,8 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     if (args.size() < 1) {
         throw std::runtime_error(MESSAGE("FreeDepCmd: At least one arguments expected for Free dependencies. Found "
                                          << args.size() << "\n"
-                                         << FreeDepCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("free-dep").value_or(FreeDepCmd::desc())
+                                         << "\n"));
     }
 
     std::vector<std::string> options, paths;
@@ -156,7 +158,7 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     if (paths.empty()) {
         throw std::runtime_error(
             MESSAGE("FreeDepCmd: No paths specified. Paths must begin with a leading '/' character\n"
-                    << FreeDepCmd::desc() << "\n"));
+                    << HelpCatalog::description_for("free-dep").value_or(FreeDepCmd::desc()) << "\n"));
     }
 
     bool trigger    = options.empty(); // If no options default to freeing trigger dependencies
@@ -178,8 +180,10 @@ void FreeDepCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
             time = true;
         }
         else {
-            throw std::runtime_error(MESSAGE("FreeDepCmd: Invalid argument(" << options[i] << ")\n"
-                                                                             << FreeDepCmd::desc() << "\n"));
+            throw std::runtime_error(MESSAGE("FreeDepCmd: Invalid argument("
+                                             << options[i] << ")\n"
+                                             << HelpCatalog::description_for("free-dep").value_or(FreeDepCmd::desc())
+                                             << "\n"));
         }
     }
     assert(trigger || all || date || time); // at least one must be true

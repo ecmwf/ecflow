@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/core/Converter.hpp"
 #include "ecflow/core/Extract.hpp"
@@ -254,7 +255,7 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
     if (args.size() < 2) {
         throw std::runtime_error(MESSAGE("ForceCmd: At least two arguments expected for Force. Found "
                                          << args.size() << "\n"
-                                         << ForceCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("force").value_or(ForceCmd::desc()) << "\n"));
     }
 
     std::vector<std::string> options, paths;
@@ -262,13 +263,13 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         args, options, paths, true /*treat_colon_in_path_as_path*/); // relative order is still preserved
     if (paths.empty()) {
         throw std::runtime_error(MESSAGE("ForceCmd: No paths specified. Paths must begin with a leading '/' character\n"
-                                         << ForceCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("force").value_or(ForceCmd::desc()) << "\n"));
     }
     if (options.empty()) {
         throw std::runtime_error(
             MESSAGE("ForceCmd: Invalid argument list. Expected of:\n"
                     << "[ unknown | complete | queued | submitted | active | aborted | clear | set]\n"
-                    << ForceCmd::desc() << "\n"));
+                    << HelpCatalog::description_for("force").value_or(ForceCmd::desc()) << "\n"));
     }
 
     bool is_valid_state       = false;
@@ -293,7 +294,9 @@ void ForceCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
             stateOrEvent         = options[i];
         }
         else {
-            throw std::runtime_error(MESSAGE("ForceCmd: Invalid argument \n" << ForceCmd::desc() << "\n"));
+            throw std::runtime_error(MESSAGE("ForceCmd: Invalid argument \n"
+                                             << HelpCatalog::description_for("force").value_or(ForceCmd::desc())
+                                             << "\n"));
         }
     }
 

@@ -17,6 +17,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -111,7 +112,7 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         if (attribute.empty()) {
             throw std::runtime_error(MESSAGE("QueryCmd: no attribute specified: query type: "
                                              << query_type << " path+attribute: " << path_and_name << "\n"
-                                             << QueryCmd::desc()));
+                                             << HelpCatalog::description_for("query").value_or(QueryCmd::desc())));
         }
     }
     else if (query_type == "trigger") {
@@ -126,7 +127,7 @@ void QueryCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, A
         }
         if (attribute.empty()) {
             throw std::runtime_error(MESSAGE("QueryCmd: no attribute specified: query type: trigger\n"
-                                             << QueryCmd::desc()));
+                                             << HelpCatalog::description_for("query").value_or(QueryCmd::desc())));
         }
     }
     else if (query_type == "state" || query_type == "dstate") {

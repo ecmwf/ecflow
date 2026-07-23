@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/File.hpp"
@@ -353,7 +354,9 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     }
 
     if (args.size() < 2) {
-        throw std::runtime_error(MESSAGE("EditScriptCmd:At least 2 arguments required:\n" << EditScriptCmd::desc()));
+        throw std::runtime_error(
+            MESSAGE("EditScriptCmd:At least 2 arguments required:\n"
+                    << HelpCatalog::description_for("edit_script").value_or(EditScriptCmd::desc())));
     }
 
     std::string path_to_task          = args[0];
@@ -397,7 +400,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
             }
             ss << edit_types[i];
         }
-        ss << "]\n" << EditScriptCmd::desc();
+        ss << "]\n" << HelpCatalog::description_for("edit_script").value_or(EditScriptCmd::desc());
         throw std::runtime_error(ss.str());
     }
 
@@ -409,7 +412,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
         else {
             throw std::runtime_error(
                 MESSAGE("When two arguments specified, the second argument must be one of [ edit | pre_process ]\n"
-                        << EditScriptCmd::desc()));
+                        << HelpCatalog::description_for("edit_script").value_or(EditScriptCmd::desc())));
         }
     }
 
@@ -426,7 +429,7 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
     if ((create_alias || !run_alias) && edit_type != EditScriptCmd::SUBMIT_USER_FILE) {
         throw std::runtime_error(
             MESSAGE("The create_alias option is only valid when the second argument is 'submit_file' \n"
-                    << EditScriptCmd::desc()));
+                    << HelpCatalog::description_for("edit_script").value_or(EditScriptCmd::desc())));
     }
 
     if (args.size() >= 3 && args.size() <= 5) {
@@ -468,7 +471,8 @@ void EditScriptCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& 
         }
     }
 
-    throw std::runtime_error(MESSAGE("Wrong number of arguments specified\n" << EditScriptCmd::desc()));
+    throw std::runtime_error(MESSAGE("Wrong number of arguments specified\n"
+                                     << HelpCatalog::description_for("edit_script").value_or(EditScriptCmd::desc())));
 }
 
 std::ostream& operator<<(std::ostream& os, const EditScriptCmd& c) {

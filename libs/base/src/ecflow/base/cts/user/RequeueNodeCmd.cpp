@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -228,7 +229,7 @@ void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map&
         throw std::runtime_error(MESSAGE(
             "RequeueNodeCmd: No paths specified. At least one path expected. Paths must begin with a leading '/' "
             "character\n"
-            << RequeueNodeCmd::desc() << "\n"));
+            << HelpCatalog::description_for("requeue").value_or(RequeueNodeCmd::desc()) << "\n"));
     }
 
     RequeueNodeCmd::Option option = RequeueNodeCmd::NO_OPTION;
@@ -248,12 +249,14 @@ void RequeueNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map&
         }
         else {
             throw std::runtime_error(MESSAGE("RequeueNodeCmd: RequeueNodeCmd: Expected : [force | abort ] paths.\n"
-                                             << RequeueNodeCmd::desc() << "\n"));
+                                             << HelpCatalog::description_for("requeue").value_or(RequeueNodeCmd::desc())
+                                             << "\n"));
         }
     }
     if (options.size() > 1) {
         throw std::runtime_error(MESSAGE("RequeueNodeCmd: Expected only a single option i.e [ force | abort ]\n"
-                                         << RequeueNodeCmd::desc() << "\n"));
+                                         << HelpCatalog::description_for("requeue").value_or(RequeueNodeCmd::desc())
+                                         << "\n"));
     }
 
     cmd = std::make_shared<RequeueNodeCmd>(paths, option);

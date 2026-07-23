@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -299,7 +300,8 @@ void LogCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm, Abs
         return;
     }
 
-    throw std::runtime_error(MESSAGE("LogCmd: The arguments have not been specified correctly\n" << LogCmd::desc()));
+    throw std::runtime_error(MESSAGE("LogCmd: The arguments have not been specified correctly\n"
+                                     << HelpCatalog::description_for("log").value_or(LogCmd::desc())));
 }
 
 std::ostream& operator<<(std::ostream& os, const LogCmd& c) {

@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Converter.hpp"
@@ -144,11 +145,12 @@ static int parse_check_pt_interval(const std::string& the_arg) {
         throw std::runtime_error(MESSAGE("check_pt: Illegal argument("
                                          << the_arg
                                          << "), expected [ never | on_time | on_time:<integer> | always | <integer>]\n"
-                                         << arg_desc()));
+                                         << HelpCatalog::description_for("check_pt").value_or(arg_desc())));
     }
     if (check_pt_interval <= 0) {
-        throw std::runtime_error(MESSAGE("check_pt: interval(" << check_pt_interval << ") must be greater than zero :\n"
-                                                               << arg_desc()));
+        throw std::runtime_error(MESSAGE("check_pt: interval("
+                                         << check_pt_interval << ") must be greater than zero :\n"
+                                         << HelpCatalog::description_for("check_pt").value_or(arg_desc())));
     }
     return check_pt_interval;
 }
@@ -164,12 +166,12 @@ static int parse_check_pt_alarm_time(const std::string& the_arg, int colon_pos) 
         throw std::runtime_error(MESSAGE(
             "check_pt: Illegal argument("
             << the_arg << "), expected [ never | on_time | on_time:<integer> | alarm::integer> | always | <integer>]\n"
-            << arg_desc()));
+            << HelpCatalog::description_for("check_pt").value_or(arg_desc())));
     }
     if (check_pt_alarm_time <= 0) {
-        throw std::runtime_error(MESSAGE("check_pt: alarm time(" << check_pt_alarm_time
-                                                                 << ") must be greater than zero :\n"
-                                                                 << arg_desc()));
+        throw std::runtime_error(MESSAGE("check_pt: alarm time("
+                                         << check_pt_alarm_time << ") must be greater than zero :\n"
+                                         << HelpCatalog::description_for("check_pt").value_or(arg_desc())));
     }
     return check_pt_alarm_time;
 }
@@ -214,7 +216,7 @@ void CheckPtCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
                         "check_pt: Illegal argument("
                         << the_arg
                         << "), expected [ never | on_time | on_time:<integer> | alarm:<integer> | always | <integer>]\n"
-                        << arg_desc()));
+                        << HelpCatalog::description_for("check_pt").value_or(arg_desc())));
                 }
                 check_pt_interval = parse_check_pt_interval(interval);
             }

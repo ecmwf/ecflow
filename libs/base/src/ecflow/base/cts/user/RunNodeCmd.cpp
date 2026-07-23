@@ -16,6 +16,7 @@
 #include "ecflow/base/AbstractServer.hpp"
 #include "ecflow/base/AuthenticationDetails.hpp"
 #include "ecflow/base/AuthorisationDetails.hpp"
+#include "ecflow/base/HelpCatalog.hpp"
 #include "ecflow/base/cts/user/CtsApi.hpp"
 #include "ecflow/base/stc/PreAllocatedReply.hpp"
 #include "ecflow/core/Log.hpp"
@@ -167,20 +168,23 @@ void RunNodeCmd::create(Cmd_ptr& cmd, boost::program_options::variables_map& vm,
     if (paths.empty()) {
         throw std::runtime_error(
             MESSAGE("RunNodeCmd: No paths specified. Paths must begin with a leading '/' character\n"
-                    << RunNodeCmd::desc() << "\n"));
+                    << HelpCatalog::description_for("run").value_or(RunNodeCmd::desc()) << "\n"));
     }
 
     bool force = false;
     if (!options.empty()) {
         if (options.size() != 1) {
             throw std::runtime_error(MESSAGE("RunNodeCmd: Invalid arguments. Expected a single optional 'force'\n"
-                                             << RunNodeCmd::desc() << "\n"));
+                                             << HelpCatalog::description_for("run").value_or(RunNodeCmd::desc())
+                                             << "\n"));
         }
         if (options[0].find("force") != std::string::npos) {
             force = true;
         }
         else {
-            throw std::runtime_error(MESSAGE("RunNodeCmd: Expected force <path(s)>\n" << RunNodeCmd::desc() << "\n"));
+            throw std::runtime_error(MESSAGE("RunNodeCmd: Expected force <path(s)>\n"
+                                             << HelpCatalog::description_for("run").value_or(RunNodeCmd::desc())
+                                             << "\n"));
         }
     }
     cmd = std::make_shared<RunNodeCmd>(paths, force);
